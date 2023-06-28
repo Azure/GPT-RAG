@@ -1,8 +1,17 @@
 # gpt on your data
 
-## Architecture Overview
+## General Architecture Overview
 
 <img src="media/oyd-rag.png" alt="imagem" width="1024">
+
+
+## Zero Trust Architecture Overview
+
+<img src="media/RAG-Zero-Trust-Architecture.jpg" alt="imagem" width="1024">
+
+
+
+
 
 ## Main components
 
