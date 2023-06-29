@@ -7,7 +7,7 @@
 
 ## Zero Trust Architecture Overview
 
-<img src="media/RAG-Zero-Trust-Architecture.jpg" alt="imagem" width="1024">
+<img src="media/GPT-Rag-Architecture-Zero-Trust.png" alt="imagem" width="1024">
 
 
 
