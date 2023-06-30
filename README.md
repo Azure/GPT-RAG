@@ -1,4 +1,4 @@
-# gpt on your data
+# GPT on Your Data
 
 ## General Architecture Overview
 
