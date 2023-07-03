@@ -22,6 +22,10 @@
 3) [App UX](https://github.com/Azure/gpt-rag-frontend)
 
 
+## References
+
+* [Introducing Azure OpenAI Service On Your Data in Public Preview]([https://techcrunch.com/2021/11/03/github-gets-a-new-ceo/](https://techcommunity.microsoft.com/t5/ai-cognitive-services-blog/introducing-azure-openai-service-on-your-data-in-public-preview/ba-p/3847000))
+
 ## Contributing 
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
