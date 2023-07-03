@@ -24,7 +24,7 @@
 
 ## References
 
-* [Introducing Azure OpenAI Service On Your Data in Public Preview]([https://techcommunity.microsoft.com/t5/ai-cognitive-services-blog/introducing-azure-openai-service-on-your-data-in-public-preview/ba-p/3847000)]
+* [Introducing Azure OpenAI Service On Your Data in Public Preview](https://techcommunity.microsoft.com/t5/ai-cognitive-services-blog/introducing-azure-openai-service-on-your-data-in-public-preview/ba-p/3847000)
 
 ## Contributing 
 
