@@ -5,13 +5,14 @@
 <img src="media/oyd-rag.png" alt="imagem" width="1024">
 
 
-## Zero Trust Architecture Overview
-
-<img src="media/GPT-Rag-Architecture-Zero-Trust.png" alt="imagem" width="1024">
-
 ## A Simple Retrieval-Augmented Generation Model
 
 <img src="media/RAG.png" alt="imagem" width="1024">
+
+
+## Zero Trust Architecture Overview
+
+<img src="media/GPT-Rag-Architecture-Zero-Trust.png" alt="imagem" width="1024">
 
 
 
