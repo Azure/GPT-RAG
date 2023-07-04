@@ -42,6 +42,10 @@
 
 * [Check Your Facts and Try Again: Improving Large Language Models with External Knowledge and Automated Feedback](https://www.microsoft.com/en-us/research/group/deep-learning-group/articles/check-your-facts-and-try-again-improving-large-language-models-with-external-knowledge-and-automated-feedback/)
 
+* [Microsoft Guidance Validation and Robustness of responses](https://lnkd.in/ggeSQmsV)
+
+
+
 
 ## Contributing 
 
