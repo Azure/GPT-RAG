@@ -24,6 +24,61 @@
 
 3) [App UX](https://github.com/Azure/gpt-rag-frontend)
 
+## Prerequisites
+
+- [Azure Developer CLI](https://aka.ms/azure-dev/install)
+
+## Deploy
+
+1) Create a new folder and switch to it in the terminal.
+2) Run `azd auth login` (if you did not run this before).
+3) If did not clone the repo already, run `azd init -t azure/gpt-rag`.
+4) There are 2 options how you can set the name of the resources created on Azure:
+
+  - Pick the name for each resource at `infra/main.parameters.json`. Add a key and value for each of the next keys within the `parameters` map:
+  ```json
+    "resourceGroupName": {
+      "value": "name-for-the-resource-group"
+    },
+    "keyVaultName": {
+      "value": "name-for-key-vault"
+    },
+    "azureFunctionsServicePlanName":{
+      "value": "name-for-service-plan"
+    },
+    "orchestratorFunctionsName":{
+      "value": "name-for-orchestrator-function"
+    },
+    "dataIngestionFunctionsName":{
+      "value": "name-for-data-ingestion-function"
+    },
+    "searchServiceName": {
+      "value": "name-for-search-service"
+    }
+    "openAiServiceName": {
+      "value": "name-for-open-ai-service"
+    }
+  ```
+
+-   Alternately, you can set the name of each resource and save it within the azd-environment. Add the `infra` and `parameters` fields within the `config.json` file, next to the azd .env file. For example `.azure/azd-env-name/config.json`.
+
+```json
+  "infra": {
+    "parameters": {
+      "azureFunctionsServicePlanName": "the-plan",
+      "dataIngestionFunctionsName": "data-ingest-func",
+      "keyVaultName": "vv-kv-vh2",
+      "openAiServiceName": "ai-s-r",
+      "orchestratorFunctionsName": "o-fun",
+      "resourceGroupName": "viva-rg",
+      "searchServiceName": "sea"
+    }
+  }
+```
+
+5) Run `azd up`.
+
+* For the target location, the regions that currently support the models used in this sample are **East US** or **South Central US**. For an up-to-date list of regions and models, check [here](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/concepts/models)
 
 ## References
 
