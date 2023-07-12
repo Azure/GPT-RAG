@@ -21,9 +21,6 @@ param searchServiceSkuName string = 'standard'
 
 param openAiServiceName string
 param openAiSkuName string = 'S0' 
-param gptDeploymentName string = ''
-param gptDeploymentCapacity int = 30
-param gptModelName string = 'text-davinci-003'
 param chatGptDeploymentName string = ''
 param chatGptDeploymentCapacity int = 30
 param chatGptModelName string = 'gpt-35-turbo'
@@ -32,7 +29,6 @@ param chatGptModelName string = 'gpt-35-turbo'
 param principalId string = ''
 
 var tags = { 'azd-env-name': environmentName }
-var gptDeployment = empty(gptDeploymentName) ? 'davinci' : gptDeploymentName
 var chatGptDeployment = empty(chatGptDeploymentName) ? 'chat' : chatGptDeploymentName
 
 // Organize resources in a resource group
@@ -132,20 +128,11 @@ module openAi 'core/ai/cognitiveservices.bicep' = {
     }
     deployments: [
       {
-        name: gptDeployment
-        model: {
-          format: 'OpenAI'
-          name: gptModelName
-          version: '1'
-        }
-        capacity: gptDeploymentCapacity
-      }
-      {
         name: chatGptDeployment
         model: {
           format: 'OpenAI'
           name: chatGptModelName
-          version: '0301'
+          version: '0613'
         }
         capacity: chatGptDeploymentCapacity
       }
@@ -177,7 +164,6 @@ output AZURE_TENANT_ID string = tenant().tenantId
 output AZURE_RESOURCE_GROUP string = resourceGroup.name
 
 output AZURE_OPENAI_SERVICE string = openAi.outputs.name
-output AZURE_OPENAI_GPT_DEPLOYMENT string = gptDeployment
 output AZURE_OPENAI_CHATGPT_DEPLOYMENT string = chatGptDeployment
 
 output AZURE_SEARCH_SERVICE string = searchService.outputs.name
