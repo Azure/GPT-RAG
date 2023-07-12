@@ -23,7 +23,7 @@ param openAiServiceName string
 param openAiSkuName string = 'S0' 
 param chatGptDeploymentName string = ''
 param chatGptDeploymentCapacity int = 30
-param chatGptModelName string = 'gpt-35-turbo'
+param chatGptModelName string = 'gpt-35-turbo-16k'
 
 @description('Id of the user or app to assign application roles')
 param principalId string = ''
