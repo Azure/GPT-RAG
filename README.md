@@ -22,7 +22,7 @@
 
 2) [Orchestrator](https://github.com/Azure/gpt-rag-orchestrator)
 
-3) [App FrontEnd](https://github.com/Azure/gpt-rag-frontend)
+3) [App Front-End](https://github.com/Azure/gpt-rag-frontend)
 
 ## Prerequisites
 
