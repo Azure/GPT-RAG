@@ -20,7 +20,7 @@
 
 ## Zero Trust Architecture Overview
 
-<img src="media/GTP-RAG_35.png" alt="imagem" width="1024">
+<img src="media/GPT-RAG_35.png" alt="imagem" width="1024">
 
 
 
