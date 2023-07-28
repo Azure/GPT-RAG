@@ -1,5 +1,13 @@
 # GPT on Your Data
 
+## Main components
+
+1) [Data ingestion](https://github.com/Azure/gpt-rag-ingestion)
+
+2) [Orchestrator](https://github.com/Azure/gpt-rag-orchestrator)
+
+3) [App Front-End](https://github.com/Azure/gpt-rag-frontend)
+
 ## General Architecture Overview
 
 <img src="media/oyd-rag.png" alt="imagem" width="1024">
@@ -12,17 +20,9 @@
 
 ## Zero Trust Architecture Overview
 
-<img src="media/GTP35.png" alt="imagem" width="1024">
+<img src="media/GTP-RAG_35.png" alt="imagem" width="1024">
 
 
-
-## Main components
-
-1) [Data ingestion](https://github.com/Azure/gpt-rag-ingestion)
-
-2) [Orchestrator](https://github.com/Azure/gpt-rag-orchestrator)
-
-3) [App Front-End](https://github.com/Azure/gpt-rag-frontend)
 
 ## Prerequisites
 
