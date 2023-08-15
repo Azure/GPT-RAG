@@ -203,7 +203,7 @@ module orchestrator './core/host/functions.bicep' = {
     appServicePlanId: appServicePlan.outputs.id
     appName: orchestratorFunctionAppName
     location: location
-    appInsightsInstrumentationKey: appInsights.outputs.instrumentationKey
+    appInsightsConnectionString: appInsights.outputs.connectionString
     tags: tags
     alwaysOn: true
     allowedOrigins: [ '*' ]    
@@ -330,7 +330,7 @@ module dataIngestion './core/host/functions.bicep' = {
     appServicePlanId: appServicePlan.outputs.id
     appName: dataIngestionFunctionAppName
     location: location
-    appInsightsInstrumentationKey: appInsights.outputs.instrumentationKey
+    appInsightsConnectionString: appInsights.outputs.connectionString
     tags: tags
     alwaysOn: true
     allowedOrigins: [ '*' ]    

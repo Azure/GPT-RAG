@@ -2,7 +2,7 @@ param appName string
 param keyVaultName string = ''
 param appServicePlanId string
 param appSettings array
-param appInsightsInstrumentationKey string
+param appInsightsConnectionString string
 param tags object = {}
 param allowedOrigins array = []
 param  alwaysOn bool = true
@@ -74,8 +74,8 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
           value: '~4'
         }
         {
-          name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
-          value: appInsightsInstrumentationKey
+          name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+          value: appInsightsConnectionString
         }
         {
           name: 'FUNCTIONS_WORKER_RUNTIME'
