@@ -205,6 +205,7 @@ module orchestrator './core/host/functions.bicep' = {
     appName: orchestratorFunctionAppName
     location: location
     appInsightsConnectionString: appInsights.outputs.connectionString
+    appInsightsInstrumentationKey: appInsights.outputs.instrumentationKey
     tags: tags
     alwaysOn: true
     functionAppScaleLimit: 2
@@ -335,6 +336,7 @@ module dataIngestion './core/host/functions.bicep' = {
     appName: dataIngestionFunctionAppName
     location: location
     appInsightsConnectionString: appInsights.outputs.connectionString
+    appInsightsInstrumentationKey: appInsights.outputs.instrumentationKey
     tags: tags
     alwaysOn: true
     allowedOrigins: [ '*' ]

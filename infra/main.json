@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.20.4.51522",
-      "templateHash": "10910512290770002922"
+      "templateHash": "7380612054951796662"
     }
   },
   "parameters": {
@@ -546,6 +546,9 @@
           },
           "allowBlobPublicAccess": {
             "value": true
+          },
+          "publicNetworkAccess": {
+            "value": "Enabled"
           },
           "containers": {
             "value": [
@@ -1205,6 +1208,9 @@
           "appInsightsConnectionString": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'appinsights'), '2022-09-01').outputs.connectionString.value]"
           },
+          "appInsightsInstrumentationKey": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'appinsights'), '2022-09-01').outputs.instrumentationKey.value]"
+          },
           "tags": {
             "value": "[variables('tags')]"
           },
@@ -1293,7 +1299,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.20.4.51522",
-              "templateHash": "149912775392362856"
+              "templateHash": "1508492178895891766"
             }
           },
           "parameters": {
@@ -1311,6 +1317,9 @@
               "type": "array"
             },
             "appInsightsConnectionString": {
+              "type": "string"
+            },
+            "appInsightsInstrumentationKey": {
               "type": "string"
             },
             "tags": {
@@ -1449,7 +1458,7 @@
                   "use32BitWorkerProcess": "[parameters('use32BitWorkerProcess')]",
                   "functionAppScaleLimit": "[parameters('functionAppScaleLimit')]",
                   "healthCheckPath": "[parameters('healthCheckPath')]",
-                  "appSettings": "[concat(parameters('appSettings'), createArray(createObject('name', 'AzureWebJobsStorage', 'value', format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', variables('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2022-05-01').keys[0].value)), createObject('name', 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING', 'value', format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', variables('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2022-05-01').keys[0].value)), createObject('name', 'WEBSITE_CONTENTSHARE', 'value', toLower(variables('functionAppName'))), createObject('name', 'FUNCTIONS_EXTENSION_VERSION', 'value', '~4'), createObject('name', 'APPLICATIONINSIGHTS_CONNECTION_STRING', 'value', parameters('appInsightsConnectionString')), createObject('name', 'FUNCTIONS_WORKER_RUNTIME', 'value', variables('functionWorkerRuntime')), createObject('name', 'AZURE_KEY_VAULT_ENDPOINT', 'value', reference(resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName')), '2022-07-01').vaultUri)))]",
+                  "appSettings": "[concat(parameters('appSettings'), createArray(createObject('name', 'AzureWebJobsStorage', 'value', format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', variables('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2022-05-01').keys[0].value)), createObject('name', 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING', 'value', format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', variables('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2022-05-01').keys[0].value)), createObject('name', 'WEBSITE_CONTENTSHARE', 'value', toLower(variables('functionAppName'))), createObject('name', 'FUNCTIONS_EXTENSION_VERSION', 'value', '~4'), createObject('name', 'APPLICATIONINSIGHTS_CONNECTION_STRING', 'value', parameters('appInsightsConnectionString')), createObject('name', 'APPINSIGHTS_INSTRUMENTATIONKEY', 'value', parameters('appInsightsInstrumentationKey')), createObject('name', 'FUNCTIONS_WORKER_RUNTIME', 'value', variables('functionWorkerRuntime')), createObject('name', 'AZURE_KEY_VAULT_ENDPOINT', 'value', reference(resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName')), '2022-07-01').vaultUri)))]",
                   "cors": {
                     "allowedOrigins": "[union(createArray('https://portal.azure.com', 'https://ms.portal.azure.com'), parameters('allowedOrigins'))]"
                   }
@@ -1983,6 +1992,9 @@
           "appInsightsConnectionString": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'appinsights'), '2022-09-01').outputs.connectionString.value]"
           },
+          "appInsightsInstrumentationKey": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'appinsights'), '2022-09-01').outputs.instrumentationKey.value]"
+          },
           "tags": {
             "value": "[variables('tags')]"
           },
@@ -2079,7 +2091,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.20.4.51522",
-              "templateHash": "149912775392362856"
+              "templateHash": "1508492178895891766"
             }
           },
           "parameters": {
@@ -2097,6 +2109,9 @@
               "type": "array"
             },
             "appInsightsConnectionString": {
+              "type": "string"
+            },
+            "appInsightsInstrumentationKey": {
               "type": "string"
             },
             "tags": {
@@ -2235,7 +2250,7 @@
                   "use32BitWorkerProcess": "[parameters('use32BitWorkerProcess')]",
                   "functionAppScaleLimit": "[parameters('functionAppScaleLimit')]",
                   "healthCheckPath": "[parameters('healthCheckPath')]",
-                  "appSettings": "[concat(parameters('appSettings'), createArray(createObject('name', 'AzureWebJobsStorage', 'value', format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', variables('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2022-05-01').keys[0].value)), createObject('name', 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING', 'value', format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', variables('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2022-05-01').keys[0].value)), createObject('name', 'WEBSITE_CONTENTSHARE', 'value', toLower(variables('functionAppName'))), createObject('name', 'FUNCTIONS_EXTENSION_VERSION', 'value', '~4'), createObject('name', 'APPLICATIONINSIGHTS_CONNECTION_STRING', 'value', parameters('appInsightsConnectionString')), createObject('name', 'FUNCTIONS_WORKER_RUNTIME', 'value', variables('functionWorkerRuntime')), createObject('name', 'AZURE_KEY_VAULT_ENDPOINT', 'value', reference(resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName')), '2022-07-01').vaultUri)))]",
+                  "appSettings": "[concat(parameters('appSettings'), createArray(createObject('name', 'AzureWebJobsStorage', 'value', format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', variables('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2022-05-01').keys[0].value)), createObject('name', 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING', 'value', format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', variables('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2022-05-01').keys[0].value)), createObject('name', 'WEBSITE_CONTENTSHARE', 'value', toLower(variables('functionAppName'))), createObject('name', 'FUNCTIONS_EXTENSION_VERSION', 'value', '~4'), createObject('name', 'APPLICATIONINSIGHTS_CONNECTION_STRING', 'value', parameters('appInsightsConnectionString')), createObject('name', 'APPINSIGHTS_INSTRUMENTATIONKEY', 'value', parameters('appInsightsInstrumentationKey')), createObject('name', 'FUNCTIONS_WORKER_RUNTIME', 'value', variables('functionWorkerRuntime')), createObject('name', 'AZURE_KEY_VAULT_ENDPOINT', 'value', reference(resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName')), '2022-07-01').vaultUri)))]",
                   "cors": {
                     "allowedOrigins": "[union(createArray('https://portal.azure.com', 'https://ms.portal.azure.com'), parameters('allowedOrigins'))]"
                   }
