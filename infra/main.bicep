@@ -206,6 +206,9 @@ module orchestrator './core/host/functions.bicep' = {
     appInsightsConnectionString: appInsights.outputs.connectionString
     tags: tags
     alwaysOn: true
+    functionAppScaleLimit: 2
+    numberOfWorkers: 2
+    minimumElasticInstanceCount: 1
     allowedOrigins: [ '*' ]    
     appSettings:[
       {
@@ -333,7 +336,10 @@ module dataIngestion './core/host/functions.bicep' = {
     appInsightsConnectionString: appInsights.outputs.connectionString
     tags: tags
     alwaysOn: true
-    allowedOrigins: [ '*' ]    
+    allowedOrigins: [ '*' ]
+    functionAppScaleLimit: 1
+    minimumElasticInstanceCount: 1
+    numberOfWorkers: 1  
     appSettings:[
       {
         name: 'AZURE_KEY_VAULT_NAME'

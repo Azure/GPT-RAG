@@ -5,7 +5,20 @@ param appSettings array
 param appInsightsConnectionString string
 param tags object = {}
 param allowedOrigins array = []
-param  alwaysOn bool = true
+param alwaysOn bool = true
+param appCommandLine string = ''
+param clientAffinityEnabled bool = false
+param kind string = 'functionapp,linux'
+param enableOryxBuild bool = contains(kind, 'linux')
+param functionAppScaleLimit int = -1
+param minimumElasticInstanceCount int = -1
+param numberOfWorkers int = -1
+param runtimeName string =  'python'
+param runtimeVersion string = '3.10'
+param scmDoBuildDuringDeployment bool = false
+param use32BitWorkerProcess bool = false
+param healthCheckPath string = ''
+var runtimeNameAndVersion = '${runtimeName}|${runtimeVersion}'
 
 @description('Storage Account type')
 @allowed([
@@ -45,7 +58,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
 resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
   name: functionAppName
   location: location
-  kind: 'functionapp'
+  kind: kind
   tags: tags
   identity: {
     type: 'SystemAssigned'
@@ -53,9 +66,19 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
   properties: {
     serverFarmId: appServicePlanId
     // serverFarmId: hostingPlan.id
+    clientAffinityEnabled: clientAffinityEnabled
+    httpsOnly: true
     siteConfig: {
-      linuxFxVersion: 'python|3.10'
+      linuxFxVersion: runtimeNameAndVersion      
       alwaysOn: alwaysOn
+      ftpsState: 'FtpsOnly'
+      minTlsVersion: '1.2'
+      appCommandLine: appCommandLine
+      numberOfWorkers: numberOfWorkers
+      minimumElasticInstanceCount: minimumElasticInstanceCount
+      use32BitWorkerProcess: use32BitWorkerProcess      
+      functionAppScaleLimit: functionAppScaleLimit
+      healthCheckPath: healthCheckPath
       appSettings: concat(appSettings,[
         {
           name: 'AzureWebJobsStorage'
@@ -83,16 +106,21 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
         }
         {
           name: 'AZURE_KEY_VAULT_ENDPOINT'
-          value: !empty(keyVaultName) ? keyVault.properties.vaultUri : ''
-        }        
+          value: keyVault.properties.vaultUri
+        }
+        // {
+        //   name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
+        //   value: string(scmDoBuildDuringDeployment)
+        // }
+        // {
+        //   name: 'ENABLE_ORYX_BUILD'
+        //   value: string(enableOryxBuild)
+        // }        
       ])
-      ftpsState: 'FtpsOnly'
-      minTlsVersion: '1.2'
       cors: {
         allowedOrigins: union([ 'https://portal.azure.com', 'https://ms.portal.azure.com' ], allowedOrigins)
       }      
     }
-    httpsOnly: true
   }
 }
 
