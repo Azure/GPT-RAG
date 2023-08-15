@@ -139,6 +139,7 @@ module storage './core/storage/storage-account.bicep' = {
     location: location
     tags: tags
     allowBlobPublicAccess: true
+    publicNetworkAccess: 'Enabled'
     containers: [{name:containerName, publicAccess: 'Blob'}, {name:chunksContainerName}]
   }  
 }
