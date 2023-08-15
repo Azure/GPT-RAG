@@ -18,7 +18,7 @@ Components:
 
 ## Zero Trust Architecture Overview
 
-<img src="media/GPT-RAG_35.png" alt="imagem" width="1024">
+<img src="Architecture-Diagram/Architecture-Diagram-GPT-RAG.png" alt="imagem" width="1024">
 
 <!-- ## Prerequisites
 
