@@ -205,6 +205,7 @@ module orchestrator './core/host/functions.bicep' = {
     location: location
     appInsightsInstrumentationKey: appInsights.outputs.instrumentationKey
     tags: tags
+    alwaysOn: true
     allowedOrigins: [ '*' ]    
     appSettings:[
       {
@@ -331,6 +332,7 @@ module dataIngestion './core/host/functions.bicep' = {
     location: location
     appInsightsInstrumentationKey: appInsights.outputs.instrumentationKey
     tags: tags
+    alwaysOn: true
     allowedOrigins: [ '*' ]    
     appSettings:[
       {

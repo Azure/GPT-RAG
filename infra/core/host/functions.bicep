@@ -5,6 +5,7 @@ param appSettings array
 param appInsightsInstrumentationKey string
 param tags object = {}
 param allowedOrigins array = []
+param  alwaysOn bool = true
 
 @description('Storage Account type')
 @allowed([
@@ -54,6 +55,7 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
     // serverFarmId: hostingPlan.id
     siteConfig: {
       linuxFxVersion: 'python|3.10'
+      alwaysOn: alwaysOn
       appSettings: concat(appSettings,[
         {
           name: 'AzureWebJobsStorage'
