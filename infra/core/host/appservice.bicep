@@ -6,7 +6,6 @@ param tags object = {}
 param applicationInsightsName string = ''
 param appServicePlanId string
 param keyVaultName string = ''
-param managedIdentity bool = !empty(keyVaultName)
 
 // Runtime Properties
 @allowed([
@@ -60,9 +59,9 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
     clientAffinityEnabled: clientAffinityEnabled
     httpsOnly: true
   }
-
-  identity: { type: managedIdentity ? 'SystemAssigned' : 'None' }
-
+  identity: {
+    type: 'SystemAssigned'
+  }
   resource configLogs 'config' = {
     name: 'logs'
     properties: {
@@ -75,7 +74,6 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
 
   resource basicPublishingCredentialsPoliciesFtp 'basicPublishingCredentialsPolicies' = {
     name: 'ftp'
-    location: location
     properties: {
       allow: false
     }
@@ -83,7 +81,6 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
 
   resource basicPublishingCredentialsPoliciesScm 'basicPublishingCredentialsPolicies' = {
     name: 'scm'
-    location: location
     properties: {
       allow: false
     }
@@ -112,6 +109,7 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing
   name: applicationInsightsName
 }
 
-output identityPrincipalId string = managedIdentity ? appService.identity.principalId : ''
+output identityPrincipalId string = appService.identity.principalId
 output name string = appService.name
 output uri string = 'https://${appService.properties.defaultHostName}'
+// output key string = listKeys(appService.id, appService.apiVersion).default

@@ -1,41 +1,159 @@
 targetScope = 'subscription'
 
+// TEMPLATE PARAMETERS (change as needed to customize your deployment)
+
+@description('Name of the resource group where all resources will be created')
+param resourceGroupName string
+
+@description('Random id to generate sufix for resources names. Do not change it.')
+// param servicesNameSufix string = substring(uniqueString(subscription().id), 0, 5)
+param guidValue string = newGuid()
+output guidOutput string = guidValue
+var servicesNameSufix = substring(uniqueString(guidValue), 0, 5)
+
 @minLength(1)
 @maxLength(64)
-@description('Name of the the azd environment. azd uses this name to find resources from azure.')
-param environmentName string
+@description('Environment name used as a tag for all resources.')
+param environmentName string = 'dev'
+
+//language settings
+@description('Language used when orchestrator needs send error messages to the UX.')
+@allowed(['pt', 'es', 'en'])
+param orchestratorMessagesLanguage string = 'en'
+@description('Analyzer language used by Azure search to analyze indexes text content.')
+@allowed(['pt-Br.microsoft', 'es.microsoft', 'ar.microsoft', 'bn.microsoft', 'bg.microsoft', 'ca.microsoft', 'zh-Hans.microsoft', 'zh-Hant.microsoft', 'hr.microsoft', 'cs.microsoft', 'da.microsoft', 'nl.microsoft', 'en.microsoft', 'et.microsoft', 'fi.microsoft', 'fr.microsoft', 'de.microsoft', 'el.microsoft', 'gu.microsoft', 'he.microsoft', 'hi.microsoft', 'hu.microsoft', 'is.microsoft', 'id.microsoft', 'it.microsoft', 'ja.microsoft', 'kn.microsoft', 'ko.microsoft', 'lv.microsoft', 'lt.microsoft', 'ml.microsoft', 'ms.microsoft', 'mr.microsoft', 'nb.microsoft', 'pl.microsoft', 'pt-Pt.microsoft', 'pa.microsoft', 'ro.microsoft', 'ru.microsoft', 'sr-cyrillic.microsoft', 'sr-latin.microsoft', 'sk.microsoft', 'sl.microsoft', 'sv.microsoft', 'ta.microsoft', 'te.microsoft', 'th.microsoft', 'tr.microsoft', 'uk.microsoft', 'ur.microsoft', 'vi.microsoft' ])
+param searchAnalyzerName string = 'en.microsoft'
+@description('Search language, only valid when semantic reranking is used.')
+@allowed(['pt', 'es', 'en'])
+param searchServiceLanguage string = 'en'
+@description('Language used for speech recognition in the frontend.')
+@allowed(['pt-BR', 'af-ZA', 'am-ET', 'ar-AE', 'ar-BH', 'ar-DZ', 'ar-EG', 'ar-IL', 'ar-IQ', 'ar-JO', 'ar-KW', 'ar-LB', 'ar-LY', 'ar-MA', 'ar-OM', 'ar-PS', 'ar-QA', 'ar-SA', 'ar-SY', 'ar-TN', 'ar-YE', 'az-AZ', 'bg-BG', 'bn-IN', 'bs-BA', 'ca-ES', 'cs-CZ', 'cy-GB', 'da-DK', 'de-AT', 'de-CH', 'de-DE', 'el-GR', 'en-AU', 'en-CA', 'en-GB', 'en-GH', 'en-HK', 'en-IE', 'en-IN', 'en-KE', 'en-NG', 'en-NZ', 'en-PH', 'en-SG', 'en-TZ', 'en-US', 'en-ZA', 'es-AR', 'es-BO', 'es-CL', 'es-CO', 'es-CR', 'es-CU', 'es-DO', 'es-EC', 'es-ES', 'es-GQ', 'es-GT', 'es-HN', 'es-MX', 'es-NI', 'es-PA', 'es-PE', 'es-PR', 'es-PY', 'es-SV', 'es-US', 'es-UY', 'es-VE', 'et-EE', 'eu-ES', 'fa-IR', 'fi-FI', 'fil-PH', 'fr-BE', 'fr-CA', 'fr-CH', 'fr-FR', 'ga-IE', 'gl-ES', 'gu-IN', 'he-IL', 'hi-IN', 'hr-HR', 'hu-HU', 'hy-AM', 'id-ID', 'is-IS', 'it-CH', 'it-IT', 'ja-JP', 'jv-ID', 'ka-GE', 'kk-KZ', 'km-KH', 'kn-IN', 'ko-KR', 'lo-LA', 'lt-LT', 'lv-LV', 'mk-MK', 'ml-IN', 'mn-MN', 'mr-IN', 'ms-MY', 'mt-MT', 'my-MM', 'nb-NO', 'ne-NP', 'nl-BE', 'nl-NL', 'pl-PL', 'ps-AF', 'pt-PT', 'ro-RO', 'ru-RU', 'si-LK', 'sk-SK', 'sl-SI', 'so-SO', 'sq-AL', 'sr-RS', 'sv-SE', 'sw-KE', 'sw-TZ', 'ta-IN', 'te-IN', 'th-TH', 'tr-TR', 'uk-UA', 'uz-UZ', 'vi-VN', 'wuu-CN', 'yue-CN', 'zh-CN', 'zh-CN-shandong', 'zh-CN-sichuan', 'zh-HK', 'zh-TW', 'zu-ZA' ])
+param speechRecognitionLanguage string = 'en-US'
+@description('Language used for speech synthesis in the frontend.')
+@allowed(['pt-BR', 'es-ES', 'es-MX','ar-EG', 'ar-SA', 'ca-ES', 'cs-CZ', 'da-DK', 'de-AT', 'de-CH', 'de-DE', 'en-AU', 'en-CA', 'en-GB', 'en-HK', 'en-IE', 'en-IN', 'en-US', 'es-ES', 'es-MX', 'fi-FI', 'fr-BE', 'fr-CA', 'fr-CH', 'fr-FR', 'hi-IN', 'hu-HU', 'id-ID', 'it-IT', 'ja-JP', 'ko-KR', 'nb-NO', 'nl-BE', 'nl-NL', 'pl-PL', 'pt-PT', 'ru-RU', 'sv-SE', 'th-TH', 'tr-TR', 'zh-CN', 'zh-HK', 'zh-TW'])
+param speechSynthesisLanguage string = 'en-US'
+@description('Voice used for speech synthesis in the frontend.')
+@allowed([ 'pt-BR-FranciscaNeural', 'es-MX-BeatrizNeural', 'en-US-RyanMultilingualNeural', 'de-DE-AmalaNeural', 'fr-FR-DeniseNeural'])
+param speechSynthesisVoiceName string = 'en-US-RyanMultilingualNeural'
+
+// openai
+@description('GPT model used to answer user questions. Don\'t forget to check region availability.')
+@allowed([ 'gpt-35-turbo-16k', 'gpt-4', 'gpt-4-32k' ])
+param chatGptModelName string = 'gpt-35-turbo-16k'
+@description('GPT model version.')
+@allowed([ '0613' ])
+param chatGptModelVersion string = '0613'
+@description('GPT model deployment name.')
+param chatGptDeploymentName string = 'chat'
+@description('GPT model tokens per Minute Rate Limit (thousands). Default quota per model and region: gpt-4: 20; gpt-4-32: 60; All others: 240.')
+@minValue(1)
+@maxValue(20)
+param chatGptDeploymentCapacity int = 2
+@description('Embeddings model used to generate vector embeddings. Don\'t forget to check region availability.')
+@allowed([ 'text-embedding-ada-002' ])
+param embeddingsModelName string = 'text-embedding-ada-002'
+@description('Embeddings model version.')
+@allowed([ '2' ])
+param embeddingsModelVersion string = '2'
+@description('Embeddings model deployment name.')
+param embeddingsDeploymentName string = 'text-embedding-ada-002'
+@description('Embeddings model tokens per Minute Rate Limit (thousands). Default quota per model and region: 240')
+@minValue(1)
+@maxValue(240)
+param embeddingsDeploymentCapacity int = 10
+@description('Azure OpenAI API version.')
+@allowed([ '2023-05-15', '2023-06-01-preview'])
+param openaiApiVersion string = '2023-05-15'
+
+// search
+@description('Orchestrator supports the following retrieval approaches: hybrid(term + vector search), semantic(hybrid + semantic reranking) or use oyd feature of Azure OpenAI.')
+@allowed([ 'hybrid', 'hybrid_with_semantic', 'oyd' ])
+param retrievalApproach string = 'hybrid'
+var searchServiceSkuName = 'standard'
+@description('Search index name.')
+var searchIndex = 'ragindex'
+@allowed([ '2023-07-01-Preview' ])
+param searchApiVersion string = '2023-07-01-Preview'
+@description('Frequency of search reindexing. PT5M (5 min), PT1H (1 hour), P1D (1 day).')
+@allowed(['PT5M', 'PT1H', 'P1D'])
+param searchIndexInterval string = 'PT1H'
+
+// chunking
+@description('The number of tokens in each chunk.')
+param chunkNumTokens string = '2048'
+@description('The minimum chunk size below which chunks will be filtered.')
+param chunkMinSize string = '100'
+@description('The number of tokens to overlap between chunks.')
+param chunkTokenOverlap string = '100'
+
+// storage
+@description('Name of the container where source documents will be stored.')
+param storageContaineraName string = 'documents'
 
 @minLength(1)
-@description('Primary location for all resources')
-param location string
+@description('Primary location for all resources. No need to change since deployment() function will get the resource group location.')
+// param location string = 'eastus'
+param location string = deployment().location
+@description('(optional) Id of the user or app to assign keyvault access. Keep it none if you don\'t want add any principal.')
+param principalId string = 'none'
 
-param resourceGroupName string
-param keyVaultName string
+// TEMPLATE VARs (at first you won't need to worry about it)
 
-param azureFunctionsServicePlanName string
-param orchestratorFunctionsName string
-param dataIngestionFunctionsName string
+var dbAccountName = 'dbgpt0${servicesNameSufix}'
+var dbDatabaseName = 'db0${servicesNameSufix}'
+var keyVaultName = 'kv0${servicesNameSufix}'
+var storageAccountName = 'strag0${servicesNameSufix}'
+var speechServiceName = 'speech0${servicesNameSufix}'
+var formRecognizerServiceName = 'fr0${servicesNameSufix}'
+var azureAppServicePlanName = 'plan0${servicesNameSufix}'
+var appInsightsName = 'appins0${servicesNameSufix}'
+var azureAppServiceName = 'webgpt0${servicesNameSufix}'
+var orchestratorFunctionAppName = 'fnorc0${servicesNameSufix}'
+var dataIngestionFunctionAppName = 'fning0${servicesNameSufix}'
+var searchServiceName = 'search0${servicesNameSufix}'
+var openAiServiceName = 'oai0${servicesNameSufix}'
 
-param searchServiceName string
-param searchServiceSkuName string = 'standard'
-
-param openAiServiceName string
-param openAiSkuName string = 'S0' 
-param chatGptDeploymentName string = ''
-param chatGptDeploymentCapacity int = 30
-param chatGptModelName string = 'gpt-35-turbo-16k'
-
-@description('Id of the user or app to assign application roles')
-param principalId string = ''
-
+var orchestratorEndpoint = 'https://${orchestratorFunctionAppName}.azurewebsites.net/api/orc'
 var tags = { 'azd-env-name': environmentName }
-var chatGptDeployment = empty(chatGptDeploymentName) ? 'chat' : chatGptDeploymentName
+var principalIdvar = (principalId != 'none') ? principalId : ''
+
+// MAIN
 
 // Organize resources in a resource group
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: resourceGroupName
   location: location
   tags: tags
+}
+
+// storage
+
+var containerName = storageContaineraName
+var chunksContainerName = '${containerName}-chunks'
+
+module storage './core/storage/storage-account.bicep' = {
+  name: 'storage'
+  scope: resourceGroup
+  params: {
+    name: storageAccountName
+    location: location
+    tags: tags
+    allowBlobPublicAccess: true
+    containers: [{name:containerName, publicAccess: 'Blob'}, {name:chunksContainerName}]
+  }  
+}
+
+// Database
+module cosmosAccount './core/db/cosmos.bicep' = {
+  name: 'account'
+  scope: resourceGroup
+  params: {
+    accountName: dbAccountName
+    location: location
+    containerName: 'conversations'
+    databaseName: dbDatabaseName
+    tags: tags    
+  }
 }
 
 // Store secrets in a keyvault
@@ -46,16 +164,16 @@ module keyVault './core/security/keyvault.bicep' = {
     name: keyVaultName
     location: location
     tags: tags
-    principalId: principalId
+    principalId: principalIdvar
   }
 }
 
 // Create an App Service Plan
-module appServicePlan 'core/host/appserviceplan.bicep' = {
+module appServicePlan './core/host/appserviceplan.bicep' = {
   name: 'appserviceplan'
   scope: resourceGroup
   params: {
-    name: azureFunctionsServicePlanName
+    name: azureAppServicePlanName
     location: location
     tags: tags
     sku: {
@@ -66,20 +184,98 @@ module appServicePlan 'core/host/appserviceplan.bicep' = {
   }
 }
 
+// app insights
+module appInsights './core/host/appinsights.bicep' = {
+  name: 'appinsights'
+  scope: resourceGroup
+  params: {
+    applicationInsightsName: appInsightsName
+    appInsightsLocation: location
+  }
+}
+
 // orchestrator
-module orchestrator './app/orchestrator.bicep' = {
+module orchestrator './core/host/functions.bicep' = {
   name: 'orchestrator'
   scope: resourceGroup
   params: {
-    name: orchestratorFunctionsName
-    location: location
-    tags: tags
     keyVaultName: keyVault.outputs.name
     appServicePlanId: appServicePlan.outputs.id
-    allowedOrigins: [ '*' ]
-    // storageAccountName: '<placeholder>'
+    appName: orchestratorFunctionAppName
+    location: location
+    appInsightsInstrumentationKey: appInsights.outputs.instrumentationKey
+    tags: tags
+    allowedOrigins: [ '*' ]    
+    appSettings:[
+      {
+        name: 'AZURE_DB_ID'
+        value: dbAccountName
+      }
+      {
+        name: 'AZURE_KEY_VAULT_NAME'
+        value: keyVault.outputs.name
+      }      
+      {
+        name: 'AZURE_SEARCH_SERVICE'
+        value: searchServiceName
+      }
+      {
+        name: 'AZURE_SEARCH_INDEX'
+        value: searchIndex
+      }
+      {
+        name: 'AZURE_SEARCH_APPROACH'
+        value: retrievalApproach
+      }
+      {
+        name: 'AZURE_SEARCH_SEMANTIC_SEARCH_LANGUAGE'
+        value: searchServiceLanguage
+      }      
+      {
+        name: 'AZURE_SEARCH_API_VERSION'
+        value: searchApiVersion
+      }
+      {
+        name: 'AZURE_OPENAI_RESOURCE'
+        value: openAiServiceName
+      }
+      {
+        name: 'AZURE_OPENAI_CHATGPT_MODEL'
+        value: chatGptModelName
+      }      
+      {
+        name: 'AZURE_OPENAI_CHATGPT_DEPLOYMENT'
+        value: chatGptDeploymentName
+      }
+      {
+        name: 'AZURE_OPENAI_EMBEDDING_MODEL'
+        value: embeddingsModelName
+      }      
+      {
+        name: 'AZURE_OPENAI_EMBEDDING_DEPLOYMENT'
+        value: embeddingsDeploymentName
+      }
+      {
+        name: 'AZURE_OPENAI_STREAM'
+        value: false
+      }
+      {
+        name: 'ORCHESTRATOR_MESSAGES_LANGUAGE'
+        value: orchestratorMessagesLanguage
+      }      
+    ]  
   }
 }
+
+// module delay './core/delay.bicep' = {
+//   name: 'delay'
+//   scope: resourceGroup
+//   params: {
+//     location: orchestrator.outputs.location
+//     sleepSeconds: 360
+//   }
+// }
+
 
 // Give the orchestrator access to KeyVault
 module orchestratorKeyVaultAccess './core/security/keyvault-access.bicep' = {
@@ -87,32 +283,159 @@ module orchestratorKeyVaultAccess './core/security/keyvault-access.bicep' = {
   scope: resourceGroup
   params: {
     keyVaultName: keyVault.outputs.name
-    principalId: orchestrator.outputs.ORCHESTRATOR_IDENTITY_PRINCIPAL_ID
+    principalId: orchestrator.outputs.identityPrincipalId
   }
 }
 
-// data ingestion
-module dataIngestion './app/data-ingestion.bicep' = {
+module appService  'core/host/appservice.bicep'  = {
+  name: 'frontend'
+  scope: resourceGroup
+  params: {
+    name: azureAppServiceName
+    applicationInsightsName: appInsightsName
+    appCommandLine: 'python ./app.py'
+    location: location
+    tags: tags
+    appServicePlanId: appServicePlan.outputs.id
+    runtimeName: 'python'
+    runtimeVersion: '3.10'
+    scmDoBuildDuringDeployment: true
+    appSettings: {
+      AZURE_KEY_VAULT_NAME: keyVault.outputs.name
+      ORCHESTRATOR_ENDPOINT: orchestratorEndpoint
+      SPEECH_REGION: location
+      SPEECH_RECOGNITION_LANGUAGE: speechRecognitionLanguage
+      SPEECH_SYNTHESIS_LANGUAGE: speechSynthesisLanguage
+      SPEECH_SYNTHESIS_VOICE_NAME: speechSynthesisVoiceName
+    }     
+  }
+}
+
+// Give the App Service access to KeyVault
+module appsericeKeyVaultAccess './core/security/keyvault-access.bicep' = {
+  name: 'appservice-keyvault-access'
+  scope: resourceGroup
+  params: {
+    keyVaultName: keyVault.outputs.name
+    principalId: appService.outputs.identityPrincipalId
+  }
+}
+
+module dataIngestion './core/host/functions.bicep' = {
   name: 'dataIngestion'
   scope: resourceGroup
   params: {
-    name: dataIngestionFunctionsName
-    location: location
-    tags: tags
     keyVaultName: keyVault.outputs.name
     appServicePlanId: appServicePlan.outputs.id
-    allowedOrigins: [ '*' ]
-    //storageAccountName: '<placeholder>'
+    appName: dataIngestionFunctionAppName
+    location: location
+    appInsightsInstrumentationKey: appInsights.outputs.instrumentationKey
+    tags: tags
+    allowedOrigins: [ '*' ]    
+    appSettings:[
+      {
+        name: 'AZURE_KEY_VAULT_NAME'
+        value: keyVault.outputs.name
+      }
+      {      
+        name: 'FUNCTION_APP_NAME'
+        value: dataIngestionFunctionAppName
+      }
+      {
+        name: 'SEARCH_SERVICE'
+        value: searchServiceName
+      }
+      {
+        name: 'SEARCH_ANALYZER_NAME'
+        value: searchAnalyzerName
+      }
+      {
+        name: 'SEARCH_API_VERSION'
+        value: searchApiVersion
+      }
+      {
+        name: 'SEARCH_INDEX_INTERVAL'
+        value: searchIndexInterval
+      }
+      {
+        name: 'STORAGE_CONTAINER'
+        value: containerName
+      }
+      {
+        name: 'STORAGE_CONTAINER_CHUNKS'
+        value: chunksContainerName
+      }
+      {
+        name: 'AZURE_FORMREC_SERVICE'
+        value: formRecognizerServiceName
+      }
+      {
+        name: 'AZURE_OPENAI_API_VERSION'
+        value: openaiApiVersion
+      }
+      {
+        name: 'AZURE_SEARCH_APPROACH'
+        value: retrievalApproach
+      }
+      {
+        name: 'AZURE_OPENAI_SERVICE_NAME'
+        value: openAiServiceName
+      }
+      {
+        name: 'AZURE_OPENAI_EMBEDDING_DEPLOYMENT'
+        value: embeddingsDeploymentName
+      }
+      {
+        name: 'NUM_TOKENS'
+        value: chunkNumTokens
+      }
+      {
+        name: 'MIN_CHUNK_SIZE'
+        value: chunkMinSize
+      }
+      {
+        name: 'TOKEN_OVERLAP'
+        value: chunkTokenOverlap
+      }      
+    ]  
   }
 }
 
-// Give the orchestrator access to KeyVault
+// Give the data ingestion access to KeyVault
 module dataIngestionKeyVaultAccess './core/security/keyvault-access.bicep' = {
   name: 'data-ingestion-keyvault-access'
   scope: resourceGroup
   params: {
     keyVaultName: keyVault.outputs.name
-    principalId: dataIngestion.outputs.DATA_INGESTION_IDENTITY_PRINCIPAL_ID
+    principalId: dataIngestion.outputs.identityPrincipalId
+  }
+}
+
+module formRecognizer 'core/ai/cognitiveservices.bicep' = {
+  name: 'FormRecognizer'
+  scope: resourceGroup
+  params: {
+    name: formRecognizerServiceName
+    location: location
+    kind: 'FormRecognizer'
+    tags: tags
+    sku: {
+      name: 'S0'
+    }
+  }
+}
+
+module speechServices 'core/ai/cognitiveservices.bicep' = {
+  name: 'SpeechServices'
+  scope: resourceGroup
+  params: {
+    name: speechServiceName
+    location: location
+    kind: 'SpeechServices'
+    tags: tags
+    sku: {
+      name: 'S0'
+    }
   }
 }
 
@@ -124,18 +447,26 @@ module openAi 'core/ai/cognitiveservices.bicep' = {
     location: location
     tags: tags
     sku: {
-      name: openAiSkuName
-    }
+      name: 'S0' 
+    }    
     deployments: [
       {
-        name: chatGptDeployment
+        name: chatGptDeploymentName
         model: {
           format: 'OpenAI'
           name: chatGptModelName
-          version: '0613'
+          version: chatGptModelVersion
         }
         capacity: chatGptDeploymentCapacity
-      }
+      },{
+        name: embeddingsDeploymentName
+        model: {
+          format: 'OpenAI'
+          name: embeddingsModelName
+          version: embeddingsModelVersion
+        }
+        capacity: embeddingsDeploymentCapacity
+      }      
     ]
   }
 }
@@ -159,11 +490,46 @@ module searchService 'core/search/search-services.bicep' = {
   }
 }
 
-output AZURE_LOCATION string = location
-output AZURE_TENANT_ID string = tenant().tenantId
-output AZURE_RESOURCE_GROUP string = resourceGroup.name
 
-output AZURE_OPENAI_SERVICE string = openAi.outputs.name
-output AZURE_OPENAI_CHATGPT_DEPLOYMENT string = chatGptDeployment
 
-output AZURE_SEARCH_SERVICE string = searchService.outputs.name
+module keyVaultSecret './core/security/keyvault-secrets.bicep' = {
+  name: 'keyvaultsecrets'
+  scope: resourceGroup
+  params: {
+    keyVaultName: keyVault.outputs.name
+    secretValues: {
+      // orchestratorFunctionKey: {
+      //   name: 'orchestratorKey'
+      //   value: orchestrator.outputs.hostKey
+      // }
+      // ingestionFunctionKey: {
+      //   name: 'ingestionKey'
+      //   value: ingestion.outputs.hostKey
+      // }      
+      azureSearchKey: {
+        name: 'azureSearchKey'
+        value: searchService.outputs.apiKey
+      }
+      formRecKey: {
+        name: 'formRecKey'
+        value: formRecognizer.outputs.apiKey
+      }
+      speechKey: {
+        name: 'speechKey'
+        value: speechServices.outputs.apiKey
+      }            
+      azureOpenAIKey: {
+        name: 'azureOpenAIKey'
+        value: openAi.outputs.apiKey
+      }
+      azureDBkey: {
+        name: 'azureDBkey'
+        value: cosmosAccount.outputs.azureDBkey
+      }
+      storageConnectionString: {
+        name: 'storageConnectionString'
+        value: 'DefaultEndpointsProtocol=https;AccountName=${storage.outputs.name};AccountKey=${storage.outputs.storageKey};EndpointSuffix=core.windows.net'
+      }
+    }
+  }
+}

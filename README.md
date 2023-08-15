@@ -1,84 +1,69 @@
 # GPT on Your Data
 
-## Main components
+Reference implementation of the Retrieval-Augmented Generation (RAG) pattern. 
 
-1) [Data ingestion](https://github.com/Azure/gpt-rag-ingestion)
-
-2) [Orchestrator](https://github.com/Azure/gpt-rag-orchestrator)
-
-3) [App Front-End](https://github.com/Azure/gpt-rag-frontend)
-
-## General Architecture Overview
+## Architecture Overview
 
 <img src="media/oyd-rag.png" alt="imagem" width="1024">
 
+Components: 
+
+[1 Data ingestion](https://github.com/Azure/gpt-rag-ingestion) ;
+[2 Orchestrator](https://github.com/Azure/gpt-rag-orchestrator) ;
+[3 App Front-End](https://github.com/Azure/gpt-rag-frontend)
 
 ## A Simple Retrieval-Augmented Generation Model
 
 <img src="media/RAG.png" alt="imagem" width="1024">
 
-
 ## Zero Trust Architecture Overview
 
 <img src="media/GPT-RAG_35.png" alt="imagem" width="1024">
 
+<!-- ## Prerequisites
 
-
-## Prerequisites
-
-- [Azure Developer CLI](https://aka.ms/azure-dev/install)
+- [Azure Developer CLI](https://aka.ms/azure-dev/install) -->
 
 ## Deploy
 
-1) Create a new folder and switch to it in the terminal.
-2) Run `azd auth login` (if you did not run this before).
-3) If did not clone the repo already, run `azd init -t azure/gpt-rag`.
-4) There are 2 options how you can set the name of the resources created on Azure:
+To deploy this solution you just need to execute the next four steps:
 
-  - Pick the name for each resource at `infra/main.parameters.json`. Add a key and value for each of the next keys within the `parameters` map:
-  ```json
-    "resourceGroupName": {
-      "value": "name-for-the-resource-group"
-    },
-    "keyVaultName": {
-      "value": "name-for-key-vault"
-    },
-    "azureFunctionsServicePlanName":{
-      "value": "name-for-service-plan"
-    },
-    "orchestratorFunctionsName":{
-      "value": "name-for-orchestrator-function"
-    },
-    "dataIngestionFunctionsName":{
-      "value": "name-for-data-ingestion-function"
-    },
-    "searchServiceName": {
-      "value": "name-for-search-service"
-    }
-    "openAiServiceName": {
-      "value": "name-for-open-ai-service"
-    }
-  ```
+**1) Provision required Azure services**
 
--   Alternately, you can set the name of each resource and save it within the azd-environment. Add the `infra` and `parameters` fields within the `config.json` file, next to the azd .env file. For example `.azure/azd-env-name/config.json`.
+You can do it by clicking on the following button
 
-```json
-  "infra": {
-    "parameters": {
-      "azureFunctionsServicePlanName": "the-plan",
-      "dataIngestionFunctionsName": "data-ingest-func",
-      "keyVaultName": "vv-kv-vh2",
-      "openAiServiceName": "ai-s-r",
-      "orchestratorFunctionsName": "o-fun",
-      "resourceGroupName": "viva-rg",
-      "searchServiceName": "sea"
-    }
-  }
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fazure%2Fgpt-rag%2Fmain%2Finfra%2Fmain.json)
+
+or by installing [Azure Developer CLI (azd)](https://aka.ms/azure-dev/install) and executing the following lines in terminal
+
+```
+azd auth login
+azd init -t azure/gpt-rag
+azd up
 ```
 
-5) Run `azd up`.
+\* Important: when selecting the target location check [here](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/concepts/models) the regions that currently support the Azure OpenAI models you want to use.
 
-* For the target location, the regions that currently support the models used in this sample are **East US** or **South Central US**. For an up-to-date list of regions and models, check [here](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/concepts/models)
+**2) Ingestion Component**
+
+Use [Data ingestion](https://github.com/Azure/gpt-rag-ingestion) repo template to create your data ingestion git repo and execute the steps in its **Deploy** section.
+
+**3) Orchestrator Component**
+
+Use [Orchestrator](https://github.com/Azure/gpt-rag-orchestrator) repo template to create your orchestrator git repo and execute the steps in its **Deploy** section.
+
+**4) Front-end Component**
+
+Use [App Front-end](https://github.com/Azure/gpt-rag-frontend) repo template to create your own frontend git repo and execute the steps in its **Deploy** section.
+
+<!-- ## Main components
+
+1) [Data ingestion](https://github.com/Azure/gpt-rag-ingestion)
+
+2) [Orchestrator](https://github.com/Azure/gpt-rag-orchestrator)
+
+3) [App Front-End](https://github.com/Azure/gpt-rag-frontend) -->
+
 
 ## References
 

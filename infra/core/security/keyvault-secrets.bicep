@@ -1,17 +1,17 @@
-param name string
 param tags object = {}
 param keyVaultName string
 param contentType string = 'string'
-@description('The value of the secret. storage access, but do not hard code any secrets in your templates')
-@secure()
-param secretValue string
 
 param enabled bool = true
 param exp int = 0
 param nbf int = 0
 
-resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
-  name: name
+@description('The value of the secret. storage access, but do not hard code any secrets in your templates')
+@secure()
+param secretValues object = {}
+
+resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' =  [for secret in items(secretValues): {
+  name: secret.value.name
   tags: tags
   parent: keyVault
   properties: {
@@ -21,9 +21,9 @@ resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
       nbf: nbf
     }
     contentType: contentType
-    value: secretValue
+    value: secret.value.value
   }
-}
+}]
 
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
   name: keyVaultName
