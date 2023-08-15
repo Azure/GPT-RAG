@@ -286,7 +286,7 @@ module orchestratorKeyVaultAccess './core/security/keyvault-access.bicep' = {
     keyVaultName: keyVault.outputs.name
     principalId: orchestrator.outputs.identityPrincipalId
   }
-}
+} 
 
 module appService  'core/host/appservice.bicep'  = {
   name: 'frontend'
