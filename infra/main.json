@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.20.4.51522",
-      "templateHash": "3131162614864858096"
+      "templateHash": "10910512290770002922"
     }
   },
   "parameters": {
@@ -1139,7 +1139,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.20.4.51522",
-              "templateHash": "573375327353350305"
+              "templateHash": "4860770571659784824"
             }
           },
           "parameters": {
@@ -1167,6 +1167,10 @@
             "instrumentationKey": {
               "type": "string",
               "value": "[reference(resourceId('Microsoft.Insights/components', parameters('applicationInsightsName')), '2020-02-02').InstrumentationKey]"
+            },
+            "connectionString": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Insights/components', parameters('applicationInsightsName')), '2020-02-02').ConnectionString]"
             }
           }
         }
@@ -1198,11 +1202,23 @@
           "location": {
             "value": "[parameters('location')]"
           },
-          "appInsightsInstrumentationKey": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'appinsights'), '2022-09-01').outputs.instrumentationKey.value]"
+          "appInsightsConnectionString": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'appinsights'), '2022-09-01').outputs.connectionString.value]"
           },
           "tags": {
             "value": "[variables('tags')]"
+          },
+          "alwaysOn": {
+            "value": true
+          },
+          "functionAppScaleLimit": {
+            "value": 2
+          },
+          "numberOfWorkers": {
+            "value": 2
+          },
+          "minimumElasticInstanceCount": {
+            "value": 1
           },
           "allowedOrigins": {
             "value": [
@@ -1277,7 +1293,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.20.4.51522",
-              "templateHash": "380779657344508196"
+              "templateHash": "149912775392362856"
             }
           },
           "parameters": {
@@ -1294,7 +1310,7 @@
             "appSettings": {
               "type": "array"
             },
-            "appInsightsInstrumentationKey": {
+            "appInsightsConnectionString": {
               "type": "string"
             },
             "tags": {
@@ -1304,6 +1320,58 @@
             "allowedOrigins": {
               "type": "array",
               "defaultValue": []
+            },
+            "alwaysOn": {
+              "type": "bool",
+              "defaultValue": true
+            },
+            "appCommandLine": {
+              "type": "string",
+              "defaultValue": ""
+            },
+            "clientAffinityEnabled": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "kind": {
+              "type": "string",
+              "defaultValue": "functionapp,linux"
+            },
+            "enableOryxBuild": {
+              "type": "bool",
+              "defaultValue": "[contains(parameters('kind'), 'linux')]"
+            },
+            "functionAppScaleLimit": {
+              "type": "int",
+              "defaultValue": -1
+            },
+            "minimumElasticInstanceCount": {
+              "type": "int",
+              "defaultValue": -1
+            },
+            "numberOfWorkers": {
+              "type": "int",
+              "defaultValue": -1
+            },
+            "runtimeName": {
+              "type": "string",
+              "defaultValue": "python"
+            },
+            "runtimeVersion": {
+              "type": "string",
+              "defaultValue": "3.10"
+            },
+            "scmDoBuildDuringDeployment": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "use32BitWorkerProcess": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "healthCheckPath": {
+              "type": "string",
+              "defaultValue": ""
             },
             "storageAccountType": {
               "type": "string",
@@ -1336,6 +1404,7 @@
             }
           },
           "variables": {
+            "runtimeNameAndVersion": "[format('{0}|{1}', parameters('runtimeName'), parameters('runtimeVersion'))]",
             "functionAppName": "[parameters('appName')]",
             "storageAccountName": "[format('{0}storage', parameters('appName'))]",
             "functionWorkerRuntime": "[parameters('runtime')]"
@@ -1360,23 +1429,31 @@
               "apiVersion": "2021-03-01",
               "name": "[variables('functionAppName')]",
               "location": "[parameters('location')]",
-              "kind": "functionapp",
+              "kind": "[parameters('kind')]",
               "tags": "[parameters('tags')]",
               "identity": {
                 "type": "SystemAssigned"
               },
               "properties": {
                 "serverFarmId": "[parameters('appServicePlanId')]",
+                "clientAffinityEnabled": "[parameters('clientAffinityEnabled')]",
+                "httpsOnly": true,
                 "siteConfig": {
-                  "linuxFxVersion": "python|3.10",
-                  "appSettings": "[concat(parameters('appSettings'), createArray(createObject('name', 'AzureWebJobsStorage', 'value', format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', variables('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2022-05-01').keys[0].value)), createObject('name', 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING', 'value', format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', variables('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2022-05-01').keys[0].value)), createObject('name', 'WEBSITE_CONTENTSHARE', 'value', toLower(variables('functionAppName'))), createObject('name', 'FUNCTIONS_EXTENSION_VERSION', 'value', '~4'), createObject('name', 'APPINSIGHTS_INSTRUMENTATIONKEY', 'value', parameters('appInsightsInstrumentationKey')), createObject('name', 'FUNCTIONS_WORKER_RUNTIME', 'value', variables('functionWorkerRuntime')), createObject('name', 'AZURE_KEY_VAULT_ENDPOINT', 'value', if(not(empty(parameters('keyVaultName'))), reference(resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName')), '2022-07-01').vaultUri, ''))))]",
+                  "linuxFxVersion": "[variables('runtimeNameAndVersion')]",
+                  "alwaysOn": "[parameters('alwaysOn')]",
                   "ftpsState": "FtpsOnly",
                   "minTlsVersion": "1.2",
+                  "appCommandLine": "[parameters('appCommandLine')]",
+                  "numberOfWorkers": "[parameters('numberOfWorkers')]",
+                  "minimumElasticInstanceCount": "[parameters('minimumElasticInstanceCount')]",
+                  "use32BitWorkerProcess": "[parameters('use32BitWorkerProcess')]",
+                  "functionAppScaleLimit": "[parameters('functionAppScaleLimit')]",
+                  "healthCheckPath": "[parameters('healthCheckPath')]",
+                  "appSettings": "[concat(parameters('appSettings'), createArray(createObject('name', 'AzureWebJobsStorage', 'value', format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', variables('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2022-05-01').keys[0].value)), createObject('name', 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING', 'value', format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', variables('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2022-05-01').keys[0].value)), createObject('name', 'WEBSITE_CONTENTSHARE', 'value', toLower(variables('functionAppName'))), createObject('name', 'FUNCTIONS_EXTENSION_VERSION', 'value', '~4'), createObject('name', 'APPLICATIONINSIGHTS_CONNECTION_STRING', 'value', parameters('appInsightsConnectionString')), createObject('name', 'FUNCTIONS_WORKER_RUNTIME', 'value', variables('functionWorkerRuntime')), createObject('name', 'AZURE_KEY_VAULT_ENDPOINT', 'value', reference(resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName')), '2022-07-01').vaultUri)))]",
                   "cors": {
                     "allowedOrigins": "[union(createArray('https://portal.azure.com', 'https://ms.portal.azure.com'), parameters('allowedOrigins'))]"
                   }
-                },
-                "httpsOnly": true
+                }
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
@@ -1903,16 +1980,28 @@
           "location": {
             "value": "[parameters('location')]"
           },
-          "appInsightsInstrumentationKey": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'appinsights'), '2022-09-01').outputs.instrumentationKey.value]"
+          "appInsightsConnectionString": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'appinsights'), '2022-09-01').outputs.connectionString.value]"
           },
           "tags": {
             "value": "[variables('tags')]"
+          },
+          "alwaysOn": {
+            "value": true
           },
           "allowedOrigins": {
             "value": [
               "*"
             ]
+          },
+          "functionAppScaleLimit": {
+            "value": 1
+          },
+          "minimumElasticInstanceCount": {
+            "value": 1
+          },
+          "numberOfWorkers": {
+            "value": 1
           },
           "appSettings": {
             "value": [
@@ -1990,7 +2079,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.20.4.51522",
-              "templateHash": "380779657344508196"
+              "templateHash": "149912775392362856"
             }
           },
           "parameters": {
@@ -2007,7 +2096,7 @@
             "appSettings": {
               "type": "array"
             },
-            "appInsightsInstrumentationKey": {
+            "appInsightsConnectionString": {
               "type": "string"
             },
             "tags": {
@@ -2017,6 +2106,58 @@
             "allowedOrigins": {
               "type": "array",
               "defaultValue": []
+            },
+            "alwaysOn": {
+              "type": "bool",
+              "defaultValue": true
+            },
+            "appCommandLine": {
+              "type": "string",
+              "defaultValue": ""
+            },
+            "clientAffinityEnabled": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "kind": {
+              "type": "string",
+              "defaultValue": "functionapp,linux"
+            },
+            "enableOryxBuild": {
+              "type": "bool",
+              "defaultValue": "[contains(parameters('kind'), 'linux')]"
+            },
+            "functionAppScaleLimit": {
+              "type": "int",
+              "defaultValue": -1
+            },
+            "minimumElasticInstanceCount": {
+              "type": "int",
+              "defaultValue": -1
+            },
+            "numberOfWorkers": {
+              "type": "int",
+              "defaultValue": -1
+            },
+            "runtimeName": {
+              "type": "string",
+              "defaultValue": "python"
+            },
+            "runtimeVersion": {
+              "type": "string",
+              "defaultValue": "3.10"
+            },
+            "scmDoBuildDuringDeployment": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "use32BitWorkerProcess": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "healthCheckPath": {
+              "type": "string",
+              "defaultValue": ""
             },
             "storageAccountType": {
               "type": "string",
@@ -2049,6 +2190,7 @@
             }
           },
           "variables": {
+            "runtimeNameAndVersion": "[format('{0}|{1}', parameters('runtimeName'), parameters('runtimeVersion'))]",
             "functionAppName": "[parameters('appName')]",
             "storageAccountName": "[format('{0}storage', parameters('appName'))]",
             "functionWorkerRuntime": "[parameters('runtime')]"
@@ -2073,23 +2215,31 @@
               "apiVersion": "2021-03-01",
               "name": "[variables('functionAppName')]",
               "location": "[parameters('location')]",
-              "kind": "functionapp",
+              "kind": "[parameters('kind')]",
               "tags": "[parameters('tags')]",
               "identity": {
                 "type": "SystemAssigned"
               },
               "properties": {
                 "serverFarmId": "[parameters('appServicePlanId')]",
+                "clientAffinityEnabled": "[parameters('clientAffinityEnabled')]",
+                "httpsOnly": true,
                 "siteConfig": {
-                  "linuxFxVersion": "python|3.10",
-                  "appSettings": "[concat(parameters('appSettings'), createArray(createObject('name', 'AzureWebJobsStorage', 'value', format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', variables('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2022-05-01').keys[0].value)), createObject('name', 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING', 'value', format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', variables('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2022-05-01').keys[0].value)), createObject('name', 'WEBSITE_CONTENTSHARE', 'value', toLower(variables('functionAppName'))), createObject('name', 'FUNCTIONS_EXTENSION_VERSION', 'value', '~4'), createObject('name', 'APPINSIGHTS_INSTRUMENTATIONKEY', 'value', parameters('appInsightsInstrumentationKey')), createObject('name', 'FUNCTIONS_WORKER_RUNTIME', 'value', variables('functionWorkerRuntime')), createObject('name', 'AZURE_KEY_VAULT_ENDPOINT', 'value', if(not(empty(parameters('keyVaultName'))), reference(resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName')), '2022-07-01').vaultUri, ''))))]",
+                  "linuxFxVersion": "[variables('runtimeNameAndVersion')]",
+                  "alwaysOn": "[parameters('alwaysOn')]",
                   "ftpsState": "FtpsOnly",
                   "minTlsVersion": "1.2",
+                  "appCommandLine": "[parameters('appCommandLine')]",
+                  "numberOfWorkers": "[parameters('numberOfWorkers')]",
+                  "minimumElasticInstanceCount": "[parameters('minimumElasticInstanceCount')]",
+                  "use32BitWorkerProcess": "[parameters('use32BitWorkerProcess')]",
+                  "functionAppScaleLimit": "[parameters('functionAppScaleLimit')]",
+                  "healthCheckPath": "[parameters('healthCheckPath')]",
+                  "appSettings": "[concat(parameters('appSettings'), createArray(createObject('name', 'AzureWebJobsStorage', 'value', format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', variables('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2022-05-01').keys[0].value)), createObject('name', 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING', 'value', format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', variables('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2022-05-01').keys[0].value)), createObject('name', 'WEBSITE_CONTENTSHARE', 'value', toLower(variables('functionAppName'))), createObject('name', 'FUNCTIONS_EXTENSION_VERSION', 'value', '~4'), createObject('name', 'APPLICATIONINSIGHTS_CONNECTION_STRING', 'value', parameters('appInsightsConnectionString')), createObject('name', 'FUNCTIONS_WORKER_RUNTIME', 'value', variables('functionWorkerRuntime')), createObject('name', 'AZURE_KEY_VAULT_ENDPOINT', 'value', reference(resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName')), '2022-07-01').vaultUri)))]",
                   "cors": {
                     "allowedOrigins": "[union(createArray('https://portal.azure.com', 'https://ms.portal.azure.com'), parameters('allowedOrigins'))]"
                   }
-                },
-                "httpsOnly": true
+                }
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
