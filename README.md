@@ -2,7 +2,7 @@
 
 Reference implementation of the Retrieval-Augmented Generation (RAG) pattern. 
 
-##Components: 
+## Components: 
 
 [1 Data ingestion](https://github.com/Azure/gpt-rag-ingestion) ;
 [2 Orchestrator](https://github.com/Azure/gpt-rag-orchestrator) ;
