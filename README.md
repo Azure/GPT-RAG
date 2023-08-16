@@ -2,15 +2,16 @@
 
 Reference implementation of the Retrieval-Augmented Generation (RAG) pattern. 
 
-## Architecture Overview
-
-<img src="media/oyd-rag.png" alt="imagem" width="1024">
-
-Components: 
+##Components: 
 
 [1 Data ingestion](https://github.com/Azure/gpt-rag-ingestion) ;
 [2 Orchestrator](https://github.com/Azure/gpt-rag-orchestrator) ;
 [3 App Front-End](https://github.com/Azure/gpt-rag-frontend)
+
+
+## Architecture Overview
+
+<img src="media/oyd-rag.png" alt="imagem" width="1024">
 
 ## A Simple Retrieval-Augmented Generation Model
 
