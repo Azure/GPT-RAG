@@ -75,7 +75,7 @@ Use [App Front-end](https://github.com/Azure/gpt-rag-frontend) repo template to 
 
 ## Governance
 
-* [Governance Model](https://share.mindmanager.com/#publish/6vWY3obJ2CmeItbWc1JjWoPxWozzDqPGBK-SaAkZ)
+* [Governance Model](https://share.mindmanager.com/#publish/9ogrdWqzmAzZB6ilgURohV4lj1LriKjOWc0w_u2U)
 
 ## Technical References
 
