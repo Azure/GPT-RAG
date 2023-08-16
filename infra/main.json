@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.20.4.51522",
-      "templateHash": "570056483759990600"
+      "templateHash": "3320451757485893003"
     }
   },
   "parameters": {
@@ -418,10 +418,10 @@
     },
     "retrievalApproach": {
       "type": "string",
-      "defaultValue": "hybrid",
+      "defaultValue": "semantic",
       "allowedValues": [
         "hybrid",
-        "hybrid_with_semantic",
+        "semantic",
         "oyd"
       ],
       "metadata": {
@@ -583,7 +583,6 @@
     }
   },
   "variables": {
-    "servicesNameSufix": "[substring(uniqueString(parameters('guidValue')), 0, 5)]",
     "searchServiceSkuName": "standard",
     "searchIndex": "ragindex",
     "orchestratorEndpoint": "[format('https://{0}.azurewebsites.net/api/orc', parameters('orchestratorFunctionAppName'))]",
