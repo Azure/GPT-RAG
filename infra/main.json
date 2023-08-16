@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.20.4.51522",
-      "templateHash": "7380612054951796662"
+      "templateHash": "570056483759990600"
     }
   },
   "parameters": {
@@ -468,7 +468,7 @@
         "description": "The number of tokens to overlap between chunks."
       }
     },
-    "storageContaineraName": {
+    "storageContainerName": {
       "type": "string",
       "defaultValue": "documents",
       "metadata": {
@@ -489,31 +489,109 @@
       "metadata": {
         "description": "(optional) Id of the user or app to assign keyvault access. Keep it none if you don't want add any principal."
       }
+    },
+    "dbAccountName": {
+      "type": "string",
+      "defaultValue": "[format('dbgpt0{0}', substring(uniqueString(parameters('guidValue')), 0, 5))]",
+      "metadata": {
+        "description": "Cosmos DB Account Name. Use your own name convention or leave as it is to generate a random name."
+      }
+    },
+    "dbDatabaseName": {
+      "type": "string",
+      "defaultValue": "[format('db0{0}', substring(uniqueString(parameters('guidValue')), 0, 5))]",
+      "metadata": {
+        "description": "Cosmos DB Database Name. Use your own name convention or leave as it is to generate a random name."
+      }
+    },
+    "keyVaultName": {
+      "type": "string",
+      "defaultValue": "[format('kv0{0}', substring(uniqueString(parameters('guidValue')), 0, 5))]",
+      "metadata": {
+        "description": "Key Vault Name. Use your own name convention or leave as it is to generate a random name."
+      }
+    },
+    "storageAccountName": {
+      "type": "string",
+      "defaultValue": "[format('strag0{0}', substring(uniqueString(parameters('guidValue')), 0, 5))]",
+      "metadata": {
+        "description": "Storage Account Name. Use your own name convention or leave as it is to generate a random name."
+      }
+    },
+    "speechServiceName": {
+      "type": "string",
+      "defaultValue": "[format('speech0{0}', substring(uniqueString(parameters('guidValue')), 0, 5))]",
+      "metadata": {
+        "description": "Speech Account Name. Use your own name convention or leave as it is to generate a random name."
+      }
+    },
+    "formRecognizerServiceName": {
+      "type": "string",
+      "defaultValue": "[format('fr0{0}', substring(uniqueString(parameters('guidValue')), 0, 5))]",
+      "metadata": {
+        "description": "Document Intelligence Account Name. Use your own name convention or leave as it is to generate a random name."
+      }
+    },
+    "azureAppServicePlanName": {
+      "type": "string",
+      "defaultValue": "[format('appplan0{0}', substring(uniqueString(parameters('guidValue')), 0, 5))]",
+      "metadata": {
+        "description": "App Service Plan Name. Use your own name convention or leave as it is to generate a random name."
+      }
+    },
+    "appInsightsName": {
+      "type": "string",
+      "defaultValue": "[format('appins0{0}', substring(uniqueString(parameters('guidValue')), 0, 5))]",
+      "metadata": {
+        "description": "App Insights Name. Use your own name convention or leave as it is to generate a random name."
+      }
+    },
+    "azureAppServiceName": {
+      "type": "string",
+      "defaultValue": "[format('webgpt0{0}', substring(uniqueString(parameters('guidValue')), 0, 5))]",
+      "metadata": {
+        "description": "Front-end App Service Name. Use your own name convention or leave as it is to generate a random name."
+      }
+    },
+    "orchestratorFunctionAppName": {
+      "type": "string",
+      "defaultValue": "[format('fnorchestrator0{0}', substring(uniqueString(parameters('guidValue')), 0, 5))]",
+      "metadata": {
+        "description": "Orchestrator Function Name. Use your own name convention or leave as it is to generate a random name."
+      }
+    },
+    "dataIngestionFunctionAppName": {
+      "type": "string",
+      "defaultValue": "[format('fningestion0{0}', substring(uniqueString(parameters('guidValue')), 0, 5))]",
+      "metadata": {
+        "description": "Data Ingestion Function Name. Use your own name convention or leave as it is to generate a random name."
+      }
+    },
+    "searchServiceName": {
+      "type": "string",
+      "defaultValue": "[format('search0{0}', substring(uniqueString(parameters('guidValue')), 0, 5))]",
+      "metadata": {
+        "description": "Search Service Name. Use your own name convention or leave as it is to generate a random name."
+      }
+    },
+    "openAiServiceName": {
+      "type": "string",
+      "defaultValue": "[format('oai0{0}', substring(uniqueString(parameters('guidValue')), 0, 5))]",
+      "metadata": {
+        "description": "OpenAI Service Name. Use your own name convention or leave as it is to generate a random name."
+      }
     }
   },
   "variables": {
     "servicesNameSufix": "[substring(uniqueString(parameters('guidValue')), 0, 5)]",
     "searchServiceSkuName": "standard",
     "searchIndex": "ragindex",
-    "dbAccountName": "[format('dbgpt0{0}', variables('servicesNameSufix'))]",
-    "dbDatabaseName": "[format('db0{0}', variables('servicesNameSufix'))]",
-    "keyVaultName": "[format('kv0{0}', variables('servicesNameSufix'))]",
-    "storageAccountName": "[format('strag0{0}', variables('servicesNameSufix'))]",
-    "speechServiceName": "[format('speech0{0}', variables('servicesNameSufix'))]",
-    "formRecognizerServiceName": "[format('fr0{0}', variables('servicesNameSufix'))]",
-    "azureAppServicePlanName": "[format('plan0{0}', variables('servicesNameSufix'))]",
-    "appInsightsName": "[format('appins0{0}', variables('servicesNameSufix'))]",
-    "azureAppServiceName": "[format('webgpt0{0}', variables('servicesNameSufix'))]",
-    "orchestratorFunctionAppName": "[format('fnorc0{0}', variables('servicesNameSufix'))]",
-    "dataIngestionFunctionAppName": "[format('fning0{0}', variables('servicesNameSufix'))]",
-    "searchServiceName": "[format('search0{0}', variables('servicesNameSufix'))]",
-    "openAiServiceName": "[format('oai0{0}', variables('servicesNameSufix'))]",
-    "orchestratorEndpoint": "[format('https://{0}.azurewebsites.net/api/orc', variables('orchestratorFunctionAppName'))]",
+    "orchestratorEndpoint": "[format('https://{0}.azurewebsites.net/api/orc', parameters('orchestratorFunctionAppName'))]",
     "tags": {
       "azd-env-name": "[parameters('environmentName')]"
     },
     "principalIdvar": "[if(not(equals(parameters('principalId'), 'none')), parameters('principalId'), '')]",
-    "containerName": "[parameters('storageContaineraName')]",
+    "containerName": "[parameters('storageContainerName')]",
     "chunksContainerName": "[format('{0}-chunks', variables('containerName'))]"
   },
   "resources": [
@@ -536,7 +614,7 @@
         "mode": "Incremental",
         "parameters": {
           "name": {
-            "value": "[variables('storageAccountName')]"
+            "value": "[parameters('storageAccountName')]"
           },
           "location": {
             "value": "[parameters('location')]"
@@ -733,7 +811,7 @@
         "mode": "Incremental",
         "parameters": {
           "accountName": {
-            "value": "[variables('dbAccountName')]"
+            "value": "[parameters('dbAccountName')]"
           },
           "location": {
             "value": "[parameters('location')]"
@@ -742,7 +820,7 @@
             "value": "conversations"
           },
           "databaseName": {
-            "value": "[variables('dbDatabaseName')]"
+            "value": "[parameters('dbDatabaseName')]"
           },
           "tags": {
             "value": "[variables('tags')]"
@@ -951,7 +1029,7 @@
         "mode": "Incremental",
         "parameters": {
           "name": {
-            "value": "[variables('keyVaultName')]"
+            "value": "[parameters('keyVaultName')]"
           },
           "location": {
             "value": "[parameters('location')]"
@@ -1035,7 +1113,7 @@
         "mode": "Incremental",
         "parameters": {
           "name": {
-            "value": "[variables('azureAppServicePlanName')]"
+            "value": "[parameters('azureAppServicePlanName')]"
           },
           "location": {
             "value": "[parameters('location')]"
@@ -1129,7 +1207,7 @@
         "mode": "Incremental",
         "parameters": {
           "applicationInsightsName": {
-            "value": "[variables('appInsightsName')]"
+            "value": "[parameters('appInsightsName')]"
           },
           "appInsightsLocation": {
             "value": "[parameters('location')]"
@@ -1200,7 +1278,7 @@
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'appserviceplan'), '2022-09-01').outputs.id.value]"
           },
           "appName": {
-            "value": "[variables('orchestratorFunctionAppName')]"
+            "value": "[parameters('orchestratorFunctionAppName')]"
           },
           "location": {
             "value": "[parameters('location')]"
@@ -1235,7 +1313,7 @@
             "value": [
               {
                 "name": "AZURE_DB_ID",
-                "value": "[variables('dbAccountName')]"
+                "value": "[parameters('dbAccountName')]"
               },
               {
                 "name": "AZURE_KEY_VAULT_NAME",
@@ -1243,7 +1321,7 @@
               },
               {
                 "name": "AZURE_SEARCH_SERVICE",
-                "value": "[variables('searchServiceName')]"
+                "value": "[parameters('searchServiceName')]"
               },
               {
                 "name": "AZURE_SEARCH_INDEX",
@@ -1263,7 +1341,7 @@
               },
               {
                 "name": "AZURE_OPENAI_RESOURCE",
-                "value": "[variables('openAiServiceName')]"
+                "value": "[parameters('openAiServiceName')]"
               },
               {
                 "name": "AZURE_OPENAI_CHATGPT_MODEL",
@@ -1581,10 +1659,10 @@
         "mode": "Incremental",
         "parameters": {
           "name": {
-            "value": "[variables('azureAppServiceName')]"
+            "value": "[parameters('azureAppServiceName')]"
           },
           "applicationInsightsName": {
-            "value": "[variables('appInsightsName')]"
+            "value": "[parameters('appInsightsName')]"
           },
           "appCommandLine": {
             "value": "python ./app.py"
@@ -1984,7 +2062,7 @@
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'appserviceplan'), '2022-09-01').outputs.id.value]"
           },
           "appName": {
-            "value": "[variables('dataIngestionFunctionAppName')]"
+            "value": "[parameters('dataIngestionFunctionAppName')]"
           },
           "location": {
             "value": "[parameters('location')]"
@@ -2023,11 +2101,15 @@
               },
               {
                 "name": "FUNCTION_APP_NAME",
-                "value": "[variables('dataIngestionFunctionAppName')]"
+                "value": "[parameters('dataIngestionFunctionAppName')]"
               },
               {
                 "name": "SEARCH_SERVICE",
-                "value": "[variables('searchServiceName')]"
+                "value": "[parameters('searchServiceName')]"
+              },
+              {
+                "name": "SEARCH_INDEX_NAME",
+                "value": "[variables('searchIndex')]"
               },
               {
                 "name": "SEARCH_ANALYZER_NAME",
@@ -2042,6 +2124,10 @@
                 "value": "[parameters('searchIndexInterval')]"
               },
               {
+                "name": "STORAGE_ACCOUNT_NAME",
+                "value": "[parameters('storageAccountName')]"
+              },
+              {
                 "name": "STORAGE_CONTAINER",
                 "value": "[variables('containerName')]"
               },
@@ -2051,7 +2137,7 @@
               },
               {
                 "name": "AZURE_FORMREC_SERVICE",
-                "value": "[variables('formRecognizerServiceName')]"
+                "value": "[parameters('formRecognizerServiceName')]"
               },
               {
                 "name": "AZURE_OPENAI_API_VERSION",
@@ -2063,7 +2149,7 @@
               },
               {
                 "name": "AZURE_OPENAI_SERVICE_NAME",
-                "value": "[variables('openAiServiceName')]"
+                "value": "[parameters('openAiServiceName')]"
               },
               {
                 "name": "AZURE_OPENAI_EMBEDDING_DEPLOYMENT",
@@ -2373,7 +2459,7 @@
         "mode": "Incremental",
         "parameters": {
           "name": {
-            "value": "[variables('formRecognizerServiceName')]"
+            "value": "[parameters('formRecognizerServiceName')]"
           },
           "location": {
             "value": "[parameters('location')]"
@@ -2508,7 +2594,7 @@
         "mode": "Incremental",
         "parameters": {
           "name": {
-            "value": "[variables('speechServiceName')]"
+            "value": "[parameters('speechServiceName')]"
           },
           "location": {
             "value": "[parameters('location')]"
@@ -2643,7 +2729,7 @@
         "mode": "Incremental",
         "parameters": {
           "name": {
-            "value": "[variables('openAiServiceName')]"
+            "value": "[parameters('openAiServiceName')]"
           },
           "location": {
             "value": "[parameters('location')]"
@@ -2797,7 +2883,7 @@
         "mode": "Incremental",
         "parameters": {
           "name": {
-            "value": "[variables('searchServiceName')]"
+            "value": "[parameters('searchServiceName')]"
           },
           "location": {
             "value": "[parameters('location')]"

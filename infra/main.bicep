@@ -9,7 +9,6 @@ param resourceGroupName string
 // param servicesNameSufix string = substring(uniqueString(subscription().id), 0, 5)
 param guidValue string = newGuid()
 output guidOutput string = guidValue
-var servicesNameSufix = substring(uniqueString(guidValue), 0, 5)
 
 @minLength(1)
 @maxLength(64)
@@ -67,8 +66,8 @@ param openaiApiVersion string = '2023-05-15'
 
 // search
 @description('Orchestrator supports the following retrieval approaches: hybrid(term + vector search), semantic(hybrid + semantic reranking) or use oyd feature of Azure OpenAI.')
-@allowed([ 'hybrid', 'hybrid_with_semantic', 'oyd' ])
-param retrievalApproach string = 'hybrid'
+@allowed([ 'hybrid', 'semantic', 'oyd' ])
+param retrievalApproach string = 'semantic'
 var searchServiceSkuName = 'standard'
 @description('Search index name.')
 var searchIndex = 'ragindex'
@@ -88,7 +87,7 @@ param chunkTokenOverlap string = '100'
 
 // storage
 @description('Name of the container where source documents will be stored.')
-param storageContaineraName string = 'documents'
+param storageContainerName string = 'documents'
 
 @minLength(1)
 @description('Primary location for all resources. No need to change since deployment() function will get the resource group location.')
@@ -97,21 +96,33 @@ param location string = deployment().location
 @description('(optional) Id of the user or app to assign keyvault access. Keep it none if you don\'t want add any principal.')
 param principalId string = 'none'
 
-// TEMPLATE VARs (at first you won't need to worry about it)
-
-var dbAccountName = 'dbgpt0${servicesNameSufix}'
-var dbDatabaseName = 'db0${servicesNameSufix}'
-var keyVaultName = 'kv0${servicesNameSufix}'
-var storageAccountName = 'strag0${servicesNameSufix}'
-var speechServiceName = 'speech0${servicesNameSufix}'
-var formRecognizerServiceName = 'fr0${servicesNameSufix}'
-var azureAppServicePlanName = 'plan0${servicesNameSufix}'
-var appInsightsName = 'appins0${servicesNameSufix}'
-var azureAppServiceName = 'webgpt0${servicesNameSufix}'
-var orchestratorFunctionAppName = 'fnorc0${servicesNameSufix}'
-var dataIngestionFunctionAppName = 'fning0${servicesNameSufix}'
-var searchServiceName = 'search0${servicesNameSufix}'
-var openAiServiceName = 'oai0${servicesNameSufix}'
+// Nombres de los servicios
+@description('Cosmos DB Account Name. Use your own name convention or leave as it is to generate a random name.')
+param dbAccountName string = 'dbgpt0${substring(uniqueString(guidValue), 0, 5)}'
+@description('Cosmos DB Database Name. Use your own name convention or leave as it is to generate a random name.')
+param dbDatabaseName string = 'db0${substring(uniqueString(guidValue), 0, 5)}'
+@description('Key Vault Name. Use your own name convention or leave as it is to generate a random name.')
+param keyVaultName string = 'kv0${substring(uniqueString(guidValue), 0, 5)}'
+@description('Storage Account Name. Use your own name convention or leave as it is to generate a random name.')
+param storageAccountName string = 'strag0${substring(uniqueString(guidValue), 0, 5)}'
+@description('Speech Account Name. Use your own name convention or leave as it is to generate a random name.')
+param speechServiceName string = 'speech0${substring(uniqueString(guidValue), 0, 5)}'
+@description('Document Intelligence Account Name. Use your own name convention or leave as it is to generate a random name.')
+param formRecognizerServiceName string = 'fr0${substring(uniqueString(guidValue), 0, 5)}'
+@description('App Service Plan Name. Use your own name convention or leave as it is to generate a random name.')
+param azureAppServicePlanName string = 'appplan0${substring(uniqueString(guidValue), 0, 5)}'
+@description('App Insights Name. Use your own name convention or leave as it is to generate a random name.')
+param appInsightsName string = 'appins0${substring(uniqueString(guidValue), 0, 5)}'
+@description('Front-end App Service Name. Use your own name convention or leave as it is to generate a random name.')
+param azureAppServiceName string = 'webgpt0${substring(uniqueString(guidValue), 0, 5)}'
+@description('Orchestrator Function Name. Use your own name convention or leave as it is to generate a random name.')
+param orchestratorFunctionAppName string = 'fnorchestrator0${substring(uniqueString(guidValue), 0, 5)}'
+@description('Data Ingestion Function Name. Use your own name convention or leave as it is to generate a random name.')
+param dataIngestionFunctionAppName string = 'fningestion0${substring(uniqueString(guidValue), 0, 5)}'
+@description('Search Service Name. Use your own name convention or leave as it is to generate a random name.')
+param searchServiceName string = 'search0${substring(uniqueString(guidValue), 0, 5)}'
+@description('OpenAI Service Name. Use your own name convention or leave as it is to generate a random name.')
+param openAiServiceName string = 'oai0${substring(uniqueString(guidValue), 0, 5)}'
 
 var orchestratorEndpoint = 'https://${orchestratorFunctionAppName}.azurewebsites.net/api/orc'
 var tags = { 'azd-env-name': environmentName }
@@ -128,7 +139,7 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
 
 // storage
 
-var containerName = storageContaineraName
+var containerName = storageContainerName
 var chunksContainerName = '${containerName}-chunks'
 
 module storage './core/storage/storage-account.bicep' = {
@@ -357,6 +368,10 @@ module dataIngestion './core/host/functions.bicep' = {
         value: searchServiceName
       }
       {
+        name: 'SEARCH_INDEX_NAME'
+        value: searchIndex
+      } 
+      {
         name: 'SEARCH_ANALYZER_NAME'
         value: searchAnalyzerName
       }
@@ -367,6 +382,10 @@ module dataIngestion './core/host/functions.bicep' = {
       {
         name: 'SEARCH_INDEX_INTERVAL'
         value: searchIndexInterval
+      }
+      {
+        name: 'STORAGE_ACCOUNT_NAME'
+        value: storageAccountName
       }
       {
         name: 'STORAGE_CONTAINER'
