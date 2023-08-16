@@ -40,7 +40,7 @@ param runtime string = 'python'
 
 var functionAppName = appName
 // var hostingPlanName = appName
-var storageAccountName = '${appName}storage'
+var storageAccountName = '${appName}st'
 var functionWorkerRuntime = runtime
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {

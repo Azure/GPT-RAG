@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.20.4.51522",
-      "templateHash": "3320451757485893003"
+      "templateHash": "2985813125404138591"
     }
   },
   "parameters": {
@@ -555,14 +555,14 @@
     },
     "orchestratorFunctionAppName": {
       "type": "string",
-      "defaultValue": "[format('fnorchestrator0{0}', substring(uniqueString(parameters('guidValue')), 0, 5))]",
+      "defaultValue": "[format('fnorch0{0}', substring(uniqueString(parameters('guidValue')), 0, 5))]",
       "metadata": {
         "description": "Orchestrator Function Name. Use your own name convention or leave as it is to generate a random name."
       }
     },
     "dataIngestionFunctionAppName": {
       "type": "string",
-      "defaultValue": "[format('fningestion0{0}', substring(uniqueString(parameters('guidValue')), 0, 5))]",
+      "defaultValue": "[format('fninges0{0}', substring(uniqueString(parameters('guidValue')), 0, 5))]",
       "metadata": {
         "description": "Data Ingestion Function Name. Use your own name convention or leave as it is to generate a random name."
       }
@@ -1376,7 +1376,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.20.4.51522",
-              "templateHash": "1508492178895891766"
+              "templateHash": "10476375387023806163"
             }
           },
           "parameters": {
@@ -1492,7 +1492,7 @@
           "variables": {
             "runtimeNameAndVersion": "[format('{0}|{1}', parameters('runtimeName'), parameters('runtimeVersion'))]",
             "functionAppName": "[parameters('appName')]",
-            "storageAccountName": "[format('{0}storage', parameters('appName'))]",
+            "storageAccountName": "[format('{0}st', parameters('appName'))]",
             "functionWorkerRuntime": "[parameters('runtime')]"
           },
           "resources": [
@@ -2176,7 +2176,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.20.4.51522",
-              "templateHash": "1508492178895891766"
+              "templateHash": "10476375387023806163"
             }
           },
           "parameters": {
@@ -2292,7 +2292,7 @@
           "variables": {
             "runtimeNameAndVersion": "[format('{0}|{1}', parameters('runtimeName'), parameters('runtimeVersion'))]",
             "functionAppName": "[parameters('appName')]",
-            "storageAccountName": "[format('{0}storage', parameters('appName'))]",
+            "storageAccountName": "[format('{0}st', parameters('appName'))]",
             "functionWorkerRuntime": "[parameters('runtime')]"
           },
           "resources": [

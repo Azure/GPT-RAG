@@ -116,9 +116,9 @@ param appInsightsName string = 'appins0${substring(uniqueString(guidValue), 0, 5
 @description('Front-end App Service Name. Use your own name convention or leave as it is to generate a random name.')
 param azureAppServiceName string = 'webgpt0${substring(uniqueString(guidValue), 0, 5)}'
 @description('Orchestrator Function Name. Use your own name convention or leave as it is to generate a random name.')
-param orchestratorFunctionAppName string = 'fnorchestrator0${substring(uniqueString(guidValue), 0, 5)}'
+param orchestratorFunctionAppName string = 'fnorch0${substring(uniqueString(guidValue), 0, 5)}'
 @description('Data Ingestion Function Name. Use your own name convention or leave as it is to generate a random name.')
-param dataIngestionFunctionAppName string = 'fningestion0${substring(uniqueString(guidValue), 0, 5)}'
+param dataIngestionFunctionAppName string = 'fninges0${substring(uniqueString(guidValue), 0, 5)}'
 @description('Search Service Name. Use your own name convention or leave as it is to generate a random name.')
 param searchServiceName string = 'search0${substring(uniqueString(guidValue), 0, 5)}'
 @description('OpenAI Service Name. Use your own name convention or leave as it is to generate a random name.')
