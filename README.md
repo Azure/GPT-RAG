@@ -67,8 +67,17 @@ Use [App Front-end](https://github.com/Azure/gpt-rag-frontend) repo template to 
 
 3) [App Front-End](https://github.com/Azure/gpt-rag-frontend) -->
 
+## Project-Addons
 
-## References
+# Pricing Estimation
+
+* [Pricing Model](https://github.com/Azure/GPT-RAG/wiki/GPT%E2%80%90RAG-%E2%80%90-Pricing-Model)
+
+# Governance
+
+* [Governance Model](https://share.mindmanager.com/#publish/6vWY3obJ2CmeItbWc1JjWoPxWozzDqPGBK-SaAkZ)
+
+## Technical References
 
 * [Get started with the Cloud Adoption Framework](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/get-started/index)
 
