@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.20.4.51522",
-      "templateHash": "2985813125404138591"
+      "templateHash": "15276635921316555767"
     }
   },
   "parameters": {
@@ -586,6 +586,7 @@
     "searchServiceSkuName": "standard",
     "searchIndex": "ragindex",
     "orchestratorEndpoint": "[format('https://{0}.azurewebsites.net/api/orc', parameters('orchestratorFunctionAppName'))]",
+    "orchestratorUri": "[format('https://{0}.azurewebsites.net', parameters('orchestratorFunctionAppName'))]",
     "tags": {
       "azd-env-name": "[parameters('environmentName')]"
     },
@@ -1122,7 +1123,7 @@
           },
           "sku": {
             "value": {
-              "name": "B1",
+              "name": "P0v3",
               "capacity": 1
             }
           },
@@ -1365,6 +1366,14 @@
               {
                 "name": "ORCHESTRATOR_MESSAGES_LANGUAGE",
                 "value": "[parameters('orchestratorMessagesLanguage')]"
+              },
+              {
+                "name": "AzureWebJobsSecretStorageType",
+                "value": "keyvault"
+              },
+              {
+                "name": "AzureWebJobsSecretStorageKeyVaultUri",
+                "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'keyvault'), '2022-09-01').outputs.name.value]"
               }
             ]
           }
@@ -1598,7 +1607,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.20.4.51522",
-              "templateHash": "17984077568717030385"
+              "templateHash": "3803553015850634651"
             }
           },
           "parameters": {
@@ -1614,7 +1623,9 @@
               "defaultValue": {
                 "secrets": [
                   "get",
-                  "list"
+                  "list",
+                  "set",
+                  "delete"
                 ]
               }
             },
@@ -1688,6 +1699,7 @@
             "value": {
               "AZURE_KEY_VAULT_NAME": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'keyvault'), '2022-09-01').outputs.name.value]",
               "ORCHESTRATOR_ENDPOINT": "[variables('orchestratorEndpoint')]",
+              "ORCHESTRATOR_URI": "[variables('orchestratorUri')]",
               "SPEECH_REGION": "[parameters('location')]",
               "SPEECH_RECOGNITION_LANGUAGE": "[parameters('speechRecognitionLanguage')]",
               "SPEECH_SYNTHESIS_LANGUAGE": "[parameters('speechSynthesisLanguage')]",
@@ -1995,7 +2007,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.20.4.51522",
-              "templateHash": "17984077568717030385"
+              "templateHash": "3803553015850634651"
             }
           },
           "parameters": {
@@ -2011,7 +2023,9 @@
               "defaultValue": {
                 "secrets": [
                   "get",
-                  "list"
+                  "list",
+                  "set",
+                  "delete"
                 ]
               }
             },
@@ -2040,6 +2054,63 @@
       "dependsOn": [
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'frontend')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'keyvault')]",
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('resourceGroupName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "appservice-function-access",
+      "resourceGroup": "[parameters('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "functionAppName": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'orchestrator'), '2022-09-01').outputs.name.value]"
+          },
+          "principalId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'frontend'), '2022-09-01').outputs.identityPrincipalId.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.20.4.51522",
+              "templateHash": "2814899444645310522"
+            }
+          },
+          "parameters": {
+            "principalId": {
+              "type": "string"
+            },
+            "functionAppName": {
+              "type": "string"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2020-04-01-preview",
+              "scope": "[format('Microsoft.Web/sites/{0}', parameters('functionAppName'))]",
+              "name": "[guid(resourceId('Microsoft.Web/sites', parameters('functionAppName')), parameters('principalId'), 'Contributor')]",
+              "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
+                "principalId": "[parameters('principalId')]",
+                "principalType": "ServicePrincipal"
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'frontend')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'orchestrator')]",
         "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('resourceGroupName'))]"
       ]
     },
@@ -2398,7 +2469,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.20.4.51522",
-              "templateHash": "17984077568717030385"
+              "templateHash": "3803553015850634651"
             }
           },
           "parameters": {
@@ -2414,7 +2485,9 @@
               "defaultValue": {
                 "secrets": [
                   "get",
-                  "list"
+                  "list",
+                  "set",
+                  "delete"
                 ]
               }
             },
