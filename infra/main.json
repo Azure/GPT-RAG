@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.20.4.51522",
-      "templateHash": "2160870566314093906"
+      "templateHash": "546712715581365019"
     }
   },
   "parameters": {
@@ -1696,15 +1696,40 @@
             "value": true
           },
           "appSettings": {
-            "value": {
-              "AZURE_KEY_VAULT_NAME": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'keyvault'), '2022-09-01').outputs.name.value]",
-              "ORCHESTRATOR_ENDPOINT": "[variables('orchestratorEndpoint')]",
-              "ORCHESTRATOR_URI": "[variables('orchestratorUri')]",
-              "SPEECH_REGION": "[parameters('location')]",
-              "SPEECH_RECOGNITION_LANGUAGE": "[parameters('speechRecognitionLanguage')]",
-              "SPEECH_SYNTHESIS_LANGUAGE": "[parameters('speechSynthesisLanguage')]",
-              "SPEECH_SYNTHESIS_VOICE_NAME": "[parameters('speechSynthesisVoiceName')]"
-            }
+            "value": [
+              {
+                "name": "SPEECH_SYNTHESIS_VOICE_NAME",
+                "value": "[parameters('speechSynthesisVoiceName')]"
+              },
+              {
+                "name": "SPEECH_SYNTHESIS_LANGUAGE",
+                "value": "[parameters('speechSynthesisLanguage')]"
+              },
+              {
+                "name": "SPEECH_RECOGNITION_LANGUAGE",
+                "value": "[parameters('speechRecognitionLanguage')]"
+              },
+              {
+                "name": "SPEECH_REGION",
+                "value": "[parameters('location')]"
+              },
+              {
+                "name": "ORCHESTRATOR_URI",
+                "value": "[variables('orchestratorUri')]"
+              },
+              {
+                "name": "ORCHESTRATOR_ENDPOINT",
+                "value": "[variables('orchestratorEndpoint')]"
+              },
+              {
+                "name": "AZURE_KEY_VAULT_ENDPOINT",
+                "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'keyvault'), '2022-09-01').outputs.endpoint.value]"
+              },
+              {
+                "name": "AZURE_KEY_VAULT_NAME",
+                "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'keyvault'), '2022-09-01').outputs.name.value]"
+              }
+            ]
           }
         },
         "template": {
@@ -1714,7 +1739,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.20.4.51522",
-              "templateHash": "725369990120753746"
+              "templateHash": "619815086402850578"
             }
           },
           "parameters": {
@@ -1735,10 +1760,6 @@
             },
             "appServicePlanId": {
               "type": "string"
-            },
-            "keyVaultName": {
-              "type": "string",
-              "defaultValue": ""
             },
             "runtimeName": {
               "type": "string",
@@ -1777,8 +1798,8 @@
               "defaultValue": ""
             },
             "appSettings": {
-              "type": "object",
-              "defaultValue": {}
+              "type": "array",
+              "defaultValue": []
             },
             "clientAffinityEnabled": {
               "type": "bool",
@@ -1892,6 +1913,7 @@
                   "use32BitWorkerProcess": "[parameters('use32BitWorkerProcess')]",
                   "functionAppScaleLimit": "[if(not(equals(parameters('functionAppScaleLimit'), -1)), parameters('functionAppScaleLimit'), null())]",
                   "healthCheckPath": "[parameters('healthCheckPath')]",
+                  "appSettings": "[concat(parameters('appSettings'), createArray(createObject('name', 'SCM_DO_BUILD_DURING_DEPLOYMENT', 'value', string(parameters('scmDoBuildDuringDeployment'))), createObject('name', 'ENABLE_ORYX_BUILD', 'value', string(parameters('enableOryxBuild'))), createObject('name', 'APPLICATIONINSIGHTS_CONNECTION_STRING', 'value', reference(resourceId('Microsoft.Insights/components', parameters('applicationInsightsName')), '2020-02-02').ConnectionString)))]",
                   "cors": {
                     "allowedOrigins": "[union(createArray('https://portal.azure.com', 'https://ms.portal.azure.com'), parameters('allowedOrigins'))]"
                   }
@@ -1902,62 +1924,6 @@
               "identity": {
                 "type": "SystemAssigned"
               }
-            },
-            {
-              "condition": "[not(empty(parameters('appSettings')))]",
-              "type": "Microsoft.Resources/deployments",
-              "apiVersion": "2022-09-01",
-              "name": "[format('{0}-appSettings', parameters('name'))]",
-              "properties": {
-                "expressionEvaluationOptions": {
-                  "scope": "inner"
-                },
-                "mode": "Incremental",
-                "parameters": {
-                  "name": {
-                    "value": "[parameters('name')]"
-                  },
-                  "appSettings": {
-                    "value": "[union(parameters('appSettings'), createObject('SCM_DO_BUILD_DURING_DEPLOYMENT', string(parameters('scmDoBuildDuringDeployment')), 'ENABLE_ORYX_BUILD', string(parameters('enableOryxBuild'))), if(not(empty(parameters('applicationInsightsName'))), createObject('APPLICATIONINSIGHTS_CONNECTION_STRING', reference(resourceId('Microsoft.Insights/components', parameters('applicationInsightsName')), '2020-02-02').ConnectionString), createObject()), if(not(empty(parameters('keyVaultName'))), createObject('AZURE_KEY_VAULT_ENDPOINT', reference(resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName')), '2022-07-01').vaultUri), createObject()))]"
-                  }
-                },
-                "template": {
-                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-                  "contentVersion": "1.0.0.0",
-                  "metadata": {
-                    "_generator": {
-                      "name": "bicep",
-                      "version": "0.20.4.51522",
-                      "templateHash": "11740630938050557031"
-                    }
-                  },
-                  "parameters": {
-                    "name": {
-                      "type": "string",
-                      "metadata": {
-                        "description": "The name of the app service resource within the current resource group scope"
-                      }
-                    },
-                    "appSettings": {
-                      "type": "object",
-                      "metadata": {
-                        "description": "The app settings to be applied to the app service"
-                      }
-                    }
-                  },
-                  "resources": [
-                    {
-                      "type": "Microsoft.Web/sites/config",
-                      "apiVersion": "2022-03-01",
-                      "name": "[format('{0}/{1}', parameters('name'), 'appsettings')]",
-                      "properties": "[parameters('appSettings')]"
-                    }
-                  ]
-                }
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Web/sites', parameters('name'))]"
-              ]
             }
           ],
           "outputs": {

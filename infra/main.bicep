@@ -326,15 +326,40 @@ module appService  'core/host/appservice.bicep'  = {
     runtimeName: 'python'
     runtimeVersion: '3.10'
     scmDoBuildDuringDeployment: true
-    appSettings: {
-      AZURE_KEY_VAULT_NAME: keyVault.outputs.name
-      ORCHESTRATOR_ENDPOINT: orchestratorEndpoint
-      ORCHESTRATOR_URI: orchestratorUri
-      SPEECH_REGION: location
-      SPEECH_RECOGNITION_LANGUAGE: speechRecognitionLanguage
-      SPEECH_SYNTHESIS_LANGUAGE: speechSynthesisLanguage
-      SPEECH_SYNTHESIS_VOICE_NAME: speechSynthesisVoiceName
-    }     
+    appSettings: [
+      {
+        name: 'SPEECH_SYNTHESIS_VOICE_NAME'
+        value: speechSynthesisVoiceName
+      }
+      {
+        name: 'SPEECH_SYNTHESIS_LANGUAGE'
+        value: speechSynthesisLanguage
+      }      
+      {
+        name: 'SPEECH_RECOGNITION_LANGUAGE'
+        value: speechRecognitionLanguage
+      }
+      {
+        name: 'SPEECH_REGION'
+        value: location
+      }
+      {
+        name: 'ORCHESTRATOR_URI'
+        value: orchestratorUri
+      }
+      {
+        name: 'ORCHESTRATOR_ENDPOINT'
+        value: orchestratorEndpoint
+      }
+      {
+        name: 'AZURE_KEY_VAULT_ENDPOINT'
+        value: keyVault.outputs.endpoint
+      }
+      {
+        name: 'AZURE_KEY_VAULT_NAME'
+        value: keyVault.outputs.name
+      }                              
+    ]
   }
 }
 
@@ -349,7 +374,7 @@ module appsericeKeyVaultAccess './core/security/keyvault-access.bicep' = {
 }
 
 // Give the App Service access to Orchestrator Function
-module appsericeOrchestratorAccess './core/host/functions-access.bicep' = {
+module appserviceOrchestratorAccess './core/host/functions-access.bicep' = {
   name: 'appservice-function-access'
   scope: resourceGroup
   params: {

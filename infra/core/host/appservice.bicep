@@ -5,7 +5,6 @@ param tags object = {}
 // Reference Properties
 param applicationInsightsName string = ''
 param appServicePlanId string
-param keyVaultName string = ''
 
 // Runtime Properties
 @allowed([
@@ -22,7 +21,7 @@ param kind string = 'app,linux'
 param allowedOrigins array = []
 param alwaysOn bool = true
 param appCommandLine string = ''
-param appSettings object = {}
+param appSettings array = []
 param clientAffinityEnabled bool = false
 param enableOryxBuild bool = contains(kind, 'linux')
 param functionAppScaleLimit int = -1
@@ -52,6 +51,20 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
       use32BitWorkerProcess: use32BitWorkerProcess
       functionAppScaleLimit: functionAppScaleLimit != -1 ? functionAppScaleLimit : null
       healthCheckPath: healthCheckPath
+      appSettings: concat(appSettings,[
+        {
+          name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
+          value: string(scmDoBuildDuringDeployment)
+        }  
+        {
+          name: 'ENABLE_ORYX_BUILD'
+          value: string(enableOryxBuild)
+        }  
+        {
+          name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+          value: applicationInsights.properties.ConnectionString
+        }    
+      ])      
       cors: {
         allowedOrigins: union([ 'https://portal.azure.com', 'https://ms.portal.azure.com' ], allowedOrigins)
       }
@@ -85,24 +98,6 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
       allow: false
     }
   }
-}
-
-module config 'appservice-appsettings.bicep' = if (!empty(appSettings)) {
-  name: '${name}-appSettings'
-  params: {
-    name: appService.name
-    appSettings: union(appSettings,
-      {
-        SCM_DO_BUILD_DURING_DEPLOYMENT: string(scmDoBuildDuringDeployment)
-        ENABLE_ORYX_BUILD: string(enableOryxBuild)
-      },
-      !empty(applicationInsightsName) ? { APPLICATIONINSIGHTS_CONNECTION_STRING: applicationInsights.properties.ConnectionString } : {},
-      !empty(keyVaultName) ? { AZURE_KEY_VAULT_ENDPOINT: keyVault.properties.vaultUri } : {})
-  }
-}
-
-resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = if (!(empty(keyVaultName))) {
-  name: keyVaultName
 }
 
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing = if (!empty(applicationInsightsName)) {
