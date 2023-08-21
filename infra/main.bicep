@@ -125,6 +125,7 @@ param searchServiceName string = 'search0${substring(uniqueString(guidValue), 0,
 param openAiServiceName string = 'oai0${substring(uniqueString(guidValue), 0, 5)}'
 
 var orchestratorEndpoint = 'https://${orchestratorFunctionAppName}.azurewebsites.net/api/orc'
+var orchestratorUri = 'https://${orchestratorFunctionAppName}.azurewebsites.net'
 var tags = { 'azd-env-name': environmentName }
 var principalIdvar = (principalId != 'none') ? principalId : ''
 
@@ -189,7 +190,7 @@ module appServicePlan './core/host/appserviceplan.bicep' = {
     location: location
     tags: tags
     sku: {
-      name: 'B1'
+      name: 'P0v3'
       capacity: 1
     }
     kind: 'linux'
@@ -279,7 +280,15 @@ module orchestrator './core/host/functions.bicep' = {
       {
         name: 'ORCHESTRATOR_MESSAGES_LANGUAGE'
         value: orchestratorMessagesLanguage
-      }      
+      }
+      {
+        name: 'AzureWebJobsSecretStorageType'
+        value: 'keyvault'
+      }   
+      {
+        name: 'AzureWebJobsSecretStorageKeyVaultUri'
+        value: keyVault.outputs.name
+      }                  
     ]  
   }
 }
@@ -320,6 +329,7 @@ module appService  'core/host/appservice.bicep'  = {
     appSettings: {
       AZURE_KEY_VAULT_NAME: keyVault.outputs.name
       ORCHESTRATOR_ENDPOINT: orchestratorEndpoint
+      ORCHESTRATOR_URI: orchestratorUri
       SPEECH_REGION: location
       SPEECH_RECOGNITION_LANGUAGE: speechRecognitionLanguage
       SPEECH_SYNTHESIS_LANGUAGE: speechSynthesisLanguage
@@ -334,6 +344,16 @@ module appsericeKeyVaultAccess './core/security/keyvault-access.bicep' = {
   scope: resourceGroup
   params: {
     keyVaultName: keyVault.outputs.name
+    principalId: appService.outputs.identityPrincipalId
+  }
+}
+
+// Give the App Service access to Orchestrator Function
+module appsericeOrchestratorAccess './core/host/functions-access.bicep' = {
+  name: 'appservice-function-access'
+  scope: resourceGroup
+  params: {
+    functionAppName: orchestrator.outputs.name
     principalId: appService.outputs.identityPrincipalId
   }
 }
