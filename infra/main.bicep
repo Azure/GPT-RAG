@@ -287,7 +287,7 @@ module orchestrator './core/host/functions.bicep' = {
       }   
       {
         name: 'AzureWebJobsSecretStorageKeyVaultUri'
-        value: keyVault.outputs.name
+        value: keyVault.outputs.endpoint
       }                  
     ]  
   }
