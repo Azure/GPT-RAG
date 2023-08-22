@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.20.4.51522",
-      "templateHash": "546712715581365019"
+      "templateHash": "3508805226092541700"
     }
   },
   "parameters": {
@@ -632,7 +632,7 @@
             "value": [
               {
                 "name": "[variables('containerName')]",
-                "publicAccess": "Blob"
+                "publicAccess": "Container"
               },
               {
                 "name": "[variables('chunksContainerName')]"
