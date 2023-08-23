@@ -2,16 +2,16 @@
     "customizations": {
         "codespaces": {
             "repositories": {
-                "https://codespaces.new/Azure/GPT-RAG": {
+                "Azure/GPT-RAG": {
                     "permissions": "read-all"
                 },
-                "https://codespaces.new/Azure/gpt-rag-ingestion": {
+                "Azure/gpt-rag-ingestion": {
                     "permissions": "read-all"
                 },
-                "https://codespaces.new/Azure/gpt-rag-orchestrator": {
+                "Azure/gpt-rag-orchestrator": {
                     "permissions": "read-all"
                 },
-                "https://codespaces.new/Azure/gpt-rag-frontend": {
+                "Azure/gpt-rag-frontend": {
                     "permissions": "read-all"
                 }    
             }
