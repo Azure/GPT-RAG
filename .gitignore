@@ -1,2 +1,3 @@
 .azure
 local/
+infra/main.bicep

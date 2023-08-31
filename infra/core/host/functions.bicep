@@ -149,3 +149,4 @@ output name string = functionApp.name
 output uri string = 'https://${functionApp.properties.defaultHostName}'
 output location string = functionApp.location
 // output hostKey string = listKeys('${functionApp.id}/host/default', functionApp.apiVersion).functionKeys.default
+output id string = functionApp.id

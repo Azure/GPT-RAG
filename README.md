@@ -29,11 +29,11 @@ Reference implementation of the Retrieval-Augmented Generation (RAG) pattern.
 
 ## Deploy
 
-To deploy this solution you just need to execute the next four steps:
+To deploy this solution you just need to execute the next steps:
 
 **1) Provision required Azure services**
 
-You can do it by clicking on the following button
+**1.1) Option 1: With public network**
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fazure%2Fgpt-rag%2Fmain%2Finfra%2Fmain.json)
 
@@ -45,7 +45,15 @@ azd init -t azure/gpt-rag
 azd up
 ```
 
-\* Important: when selecting the target location check [here](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/concepts/models) the regions that currently support the Azure OpenAI models you want to use.
+**1.2) Option 2: With network isolation (private endpoints)**
+
+```
+azd auth login
+azd init --template azure/gpt-rag --branch network-isolation
+azd up
+```
+
+Important: when selecting the target location check [here](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/concepts/models) the regions that currently support the Azure OpenAI models you want to use.
 
 **2) Ingestion Component**
 

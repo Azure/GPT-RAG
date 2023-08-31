@@ -1,6 +1,9 @@
 @description('Cosmos DB account name, max length 44 characters, lowercase')
 param accountName string
 
+@description('Enable/disable public network access for the Cosmos DB account.')
+param publicNetworkAccess string = 'Disabled' 
+
 @description('Location for the Cosmos DB account.')
 param location string = resourceGroup().location
 
@@ -77,6 +80,7 @@ resource account 'Microsoft.DocumentDB/databaseAccounts@2022-05-15' = {
     locations: locations
     databaseAccountOfferType: 'Standard'
     enableAutomaticFailover: systemManagedFailover
+    publicNetworkAccess: publicNetworkAccess
   }
 }
 
@@ -121,3 +125,4 @@ resource container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/container
 }
 
 output azureDBkey string = account.listKeys().primaryMasterKey
+output id string = account.id
