@@ -1,7 +1,6 @@
 param location string
 param name string
 param tags object = {}
-param vnetName string 
 param subnetName string
 param bastionsubnetName string
 
@@ -17,7 +16,6 @@ resource bastionsubnet 'Microsoft.Network/virtualNetworks/subnets@2021-02-01' ex
   name: bastionsubnetName
 }
 
-
 resource bastionPublicIp 'Microsoft.Network/publicIPAddresses@2020-05-01' = {
   name: 'testvmPublicIp'
   location: location
@@ -26,6 +24,25 @@ resource bastionPublicIp 'Microsoft.Network/publicIPAddresses@2020-05-01' = {
   }
   properties: {
     publicIPAllocationMethod: 'Static'
+  }
+}
+
+resource nic 'Microsoft.Network/networkInterfaces@2020-06-01' = {
+  name: 'testvmNic'
+  location: location
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'ipconfig1'
+        properties: {
+          privateIPAddressVersion: 'IPv4'
+          privateIPAllocationMethod: 'Dynamic'
+          subnet: {
+            id: subnet.id
+          }  
+        }
+      }
+    ]
   }
 }
 
@@ -50,32 +67,11 @@ resource bastion 'Microsoft.Network/bastionHosts@2020-05-01' = {
   }
 }
 
-resource nic 'Microsoft.Network/networkInterfaces@2020-06-01' = {
-  name: 'testvmNic'
-  location: location
-  properties: {
-    ipConfigurations: [
-      {
-        name: 'ipconfig1'
-        properties: {
-          privateIPAddressVersion: 'IPv4'
-          privateIPAllocationMethod: 'Dynamic'
-          subnet: {
-            id: subnet.id
-          }  
-        }
-      }
-    ]
-  }
-}
 
 resource virtualMachine 'Microsoft.Compute/virtualMachines@2021-03-01' = {
   name: name
   location: location
   tags: tags
-  dependsOn: [
-    nic
-  ]
   properties: {
     hardwareProfile: {
       vmSize: 'Standard_B2s'

@@ -35,9 +35,11 @@ To deploy this solution you just need to execute the next steps:
 
 **1.1) Option 1: With public network**
 
+You can do it by clicking on the following button
+
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fazure%2Fgpt-rag%2Fmain%2Finfra%2Fmain.json)
 
-or by installing [Azure Developer CLI (azd)](https://aka.ms/azure-dev/install) and executing the following lines in terminal
+or by using [Azure Developer CLI (azd)](https://aka.ms/azure-dev/install) executing the following lines in terminal
 
 ```
 azd auth login
@@ -46,6 +48,12 @@ azd up
 ```
 
 **1.2) Option 2: With network isolation (private endpoints)**
+
+You can do it by clicking on the following button
+
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fazure%2Fgpt-rag%2Fnetwork-isolation%2Finfra%2Fmain.json)
+
+or by using [Azure Developer CLI (azd)](https://aka.ms/azure-dev/install) executing the following lines in terminal
 
 ```
 azd auth login

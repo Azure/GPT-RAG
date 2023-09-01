@@ -15,6 +15,20 @@ output guidOutput string = guidValue
 @description('Environment name used as a tag for all resources.')
 param environmentName string = 'dev'
 
+//network
+
+@description('Network isolation? If yes it will create the private endpoints.')
+@allowed([true, false])
+param networkIsolation bool = true
+
+@description('Create bastion and vm to test the solution when choosing network isolation?')
+@allowed([true, false])
+param createBastion bool = true
+
+@description('Create point to site VPN when choosing network isolation?')
+@allowed([true, false])
+param createVPN bool = true
+
 //language settings
 @description('Language used when orchestrator needs send error messages to the UX.')
 @allowed(['pt', 'es', 'en'])
@@ -34,7 +48,6 @@ param speechSynthesisLanguage string = 'en-US'
 @description('Voice used for speech synthesis in the frontend.')
 @allowed([ 'pt-BR-FranciscaNeural', 'es-MX-BeatrizNeural', 'en-US-RyanMultilingualNeural', 'de-DE-AmalaNeural', 'fr-FR-DeniseNeural'])
 param speechSynthesisVoiceName string = 'en-US-RyanMultilingualNeural'
-
 
 // openai
 @description('GPT model used to answer user questions. Don\'t forget to check region availability.')
@@ -133,6 +146,7 @@ var principalIdvar = (principalId != 'none') ? principalId : ''
 // main
 
 // resource group
+
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: resourceGroupName
   location: location
@@ -141,7 +155,7 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
 
 // networking
 
-module vnet './core/network/vnet.bicep' = {
+module vnet './core/network/vnet.bicep' = if (networkIsolation) {
   name: 'vnet'
   scope: resourceGroup
   params: {
@@ -152,7 +166,7 @@ module vnet './core/network/vnet.bicep' = {
   }
 }
 
-module aisubnet './core/network/subnet.bicep' = {
+module aisubnet './core/network/subnet.bicep' = if (networkIsolation) {
   name: 'aisubnet'
   scope: resourceGroup
   params: {
@@ -162,7 +176,7 @@ module aisubnet './core/network/subnet.bicep' = {
   }
 }
 
-module bastionsubnet './core/network/subnet.bicep' = {
+module bastionsubnet './core/network/subnet.bicep' = if (networkIsolation && createBastion) {
   name: 'bastionsubnet'
   scope: resourceGroup
   params: {
@@ -172,18 +186,40 @@ module bastionsubnet './core/network/subnet.bicep' = {
   }
 }
 
-// module testvm './core/vm/vm.bicep' = {
-//   name: 'testvm'
+// module gatewaysubnet './core/network/subnet.bicep' = if (networkIsolation && createVPN) {
+//   name: 'gatewaySubnet'
 //   scope: resourceGroup
 //   params: {
-//     location: location
-//     name:'testvm${substring(uniqueString(guidValue), 0, 5)}'
-//     tags: tags
-//     vnetName: vnet.outputs.name
-//     subnetName: aisubnet.outputs.name
-//     bastionsubnetName: bastionsubnet.outputs.name    
+//     vnetName: bastionsubnet.outputs.vnetName
+//     subnetName: 'gatewaySubnet'
+//     addressPrefix: '10.0.3.0/24'
 //   }
 // }
+
+// module vpnGateway './core/network/gateway.bicep' = if (networkIsolation && createVPN) {
+//   name: 'vpnGateway'
+//   scope: resourceGroup
+//   params: {
+//    location: location
+//    subnetName: gatewaysubnet.outputs.name
+//    gatewayName: 'vpngateway'
+//    vpnClientAddressPoolPrefix: '10.0.3.0/24'
+//    tags: tags
+//   }
+// }
+
+module testvm './core/vm/vm.bicep' = if (networkIsolation && createBastion) {
+  name: 'testvm'
+  scope: resourceGroup
+  params: {
+    location: location
+    name:'testvm${substring(uniqueString(guidValue), 0, 5)}'
+    tags: tags
+    subnetName: aisubnet.outputs.name
+    bastionsubnetName: bastionsubnet.outputs.name    
+  }
+}
+
 
 // storage
 
@@ -198,12 +234,12 @@ module storage './core/storage/storage-account.bicep' = {
     location: location
     tags: tags
     allowBlobPublicAccess: false
-    publicNetworkAccess: 'Disabled'
-    containers: [{name:containerName, publicAccess: 'None'}, {name:chunksContainerName}]
+    publicNetworkAccess: networkIsolation?'Disabled':'Enabled'
+    containers: [{name:containerName, publicAccess: networkIsolation?'None':'Container'}, {name:chunksContainerName}]
   }  
 }
 
-module storagepe './core/network/private-endpoint.bicep' = {
+module storagepe './core/network/private-endpoint.bicep' = if (networkIsolation) {
   name: 'storagepe'
   scope: resourceGroup
   params: {
@@ -216,7 +252,7 @@ module storagepe './core/network/private-endpoint.bicep' = {
   }
 }
 
-module storagedns './core/network/private-dns.bicep' = {
+module storagedns './core/network/private-dns.bicep' = if (networkIsolation) {
   name: 'storagedns'
   scope: resourceGroup
   params: {
@@ -233,6 +269,7 @@ module cosmosAccount './core/db/cosmos.bicep' = {
   scope: resourceGroup
   params: {
     accountName: dbAccountName
+    publicNetworkAccess: networkIsolation?'Disabled':'Enabled'
     location: location
     containerName: 'conversations'
     databaseName: dbDatabaseName
@@ -240,7 +277,7 @@ module cosmosAccount './core/db/cosmos.bicep' = {
   }
 }
 
-module cosmospe './core/network/private-endpoint.bicep' = {
+module cosmospe './core/network/private-endpoint.bicep' = if (networkIsolation) {
   name: 'cosmospe'
   scope: resourceGroup
   params: {
@@ -253,7 +290,7 @@ module cosmospe './core/network/private-endpoint.bicep' = {
   }
 }
 
-module cosmosdns './core/network/private-dns.bicep' = {
+module cosmosdns './core/network/private-dns.bicep' = if (networkIsolation) {
   name: 'cosmosdns'
   scope: resourceGroup
   params: {
@@ -271,12 +308,13 @@ module keyVault './core/security/keyvault.bicep' = {
   params: {
     name: keyVaultName
     location: location
+    publicNetworkAccess: networkIsolation?'Disabled':'Enabled'
     tags: tags
     principalId: principalIdvar
   }
 }
 
-module keyvaultpe './core/network/private-endpoint.bicep' = {
+module keyvaultpe './core/network/private-endpoint.bicep' = if (networkIsolation) {
   name: 'keyvaultpe'
   scope: resourceGroup
   params: {
@@ -289,7 +327,7 @@ module keyvaultpe './core/network/private-endpoint.bicep' = {
   }
 }
 
-module keyvaultdns './core/network/private-dns.bicep' = {
+module keyvaultdns './core/network/private-dns.bicep' = if (networkIsolation) {
   name: 'keyvaultdns'
   scope: resourceGroup
   params: {
@@ -413,7 +451,7 @@ module orchestrator './core/host/functions.bicep' = {
   }
 }
 
-module orchestratorPe './core/network/private-endpoint.bicep' = {
+module orchestratorPe './core/network/private-endpoint.bicep' = if (networkIsolation) {
   name: 'orchestratorPe'
   scope: resourceGroup
   params: {
@@ -426,7 +464,7 @@ module orchestratorPe './core/network/private-endpoint.bicep' = {
   }
 }
 
-module orchestratordns './core/network/private-dns.bicep' = {
+module orchestratordns './core/network/private-dns.bicep' = if (networkIsolation) {
   name: 'orchestratordns'
   scope: resourceGroup
   params: {
@@ -497,7 +535,7 @@ module appService  'core/host/appservice.bicep'  = {
   }
 }
 
-module frontendPe './core/network/private-endpoint.bicep' = {
+module frontendPe './core/network/private-endpoint.bicep' = if (networkIsolation) {
   name: 'frontendPe'
   scope: resourceGroup
   params: {
@@ -510,7 +548,7 @@ module frontendPe './core/network/private-endpoint.bicep' = {
   }
 }
 
-module frontenddns './core/network/private-dns.bicep' = {
+module frontenddns './core/network/private-dns.bicep' = if (networkIsolation) {
   name: 'frontenddns'
   scope: resourceGroup
   params: {
@@ -648,7 +686,7 @@ module dataIngestionKeyVaultAccess './core/security/keyvault-access.bicep' = {
   }
 }
 
-module ingestionPe './core/network/private-endpoint.bicep' = {
+module ingestionPe './core/network/private-endpoint.bicep' = if (networkIsolation) {
   name: 'ingestionPe'
   scope: resourceGroup
   params: {
@@ -661,7 +699,7 @@ module ingestionPe './core/network/private-endpoint.bicep' = {
   }
 }
 
-module ingestiondns './core/network/private-dns.bicep' = {
+module ingestiondns './core/network/private-dns.bicep' = if (networkIsolation) {
   name: 'ingestiondns'
   scope: resourceGroup
   params: {
@@ -678,6 +716,7 @@ module cognitiveServices 'core/ai/cognitiveservices.bicep' = {
   params: {
     name: cognitiveServiceName
     location: location
+    publicNetworkAccess: networkIsolation?'Disabled':'Enabled'
     kind: 'CognitiveServices'
     tags: tags
     sku: {
@@ -686,7 +725,7 @@ module cognitiveServices 'core/ai/cognitiveservices.bicep' = {
   }
 }
 
-module cognitiveServicesPe './core/network/private-endpoint.bicep' = {
+module cognitiveServicesPe './core/network/private-endpoint.bicep' = if (networkIsolation) {
   name: 'cognitiveServicesPe'
   scope: resourceGroup
   params: {
@@ -699,7 +738,7 @@ module cognitiveServicesPe './core/network/private-endpoint.bicep' = {
   }
 }
 
-module cognitiveservicesdns './core/network/private-dns.bicep' = {
+module cognitiveservicesdns './core/network/private-dns.bicep' = if (networkIsolation) {
   name: 'cognitiveservicesdns'
   scope: resourceGroup
   params: {
@@ -716,6 +755,7 @@ module openAi 'core/ai/cognitiveservices.bicep' = {
   params: {
     name: openAiServiceName
     location: location
+    publicNetworkAccess: networkIsolation?'Disabled':'Enabled'
     tags: tags
     sku: {
       name: 'S0' 
@@ -742,7 +782,7 @@ module openAi 'core/ai/cognitiveservices.bicep' = {
   }
 }
 
-module openAiPe './core/network/private-endpoint.bicep' = {
+module openAiPe './core/network/private-endpoint.bicep' = if (networkIsolation) {
   name: 'openAiPe'
   scope: resourceGroup
   params: {
@@ -755,7 +795,7 @@ module openAiPe './core/network/private-endpoint.bicep' = {
   }
 }
 
-module openaidns './core/network/private-dns.bicep' = {
+module openaidns './core/network/private-dns.bicep' = if (networkIsolation) {
   name: 'openaidns'
   scope: resourceGroup
   params: {
@@ -772,6 +812,7 @@ module searchService 'core/search/search-services.bicep' = {
   params: {
     name: searchServiceName
     location: location
+    publicNetworkAccess: networkIsolation?'Disabled':'Enabled'
     tags: tags
     authOptions: {
       aadOrApiKey: {
@@ -785,7 +826,7 @@ module searchService 'core/search/search-services.bicep' = {
   }
 }
 
-module searchPe './core/network/private-endpoint.bicep' = {
+module searchPe './core/network/private-endpoint.bicep' = if (networkIsolation) {
   name: 'searchPe'
   scope: resourceGroup
   params: {
@@ -798,7 +839,7 @@ module searchPe './core/network/private-endpoint.bicep' = {
   }
 }
 
-module searchdns './core/network/private-dns.bicep' = {
+module searchdns './core/network/private-dns.bicep' = if (networkIsolation) {
   name: 'searchdns'
   scope: resourceGroup
   params: {
@@ -847,11 +888,11 @@ module keyVaultSecret './core/security/keyvault-secrets.bicep' = {
 
 
 
-// module delay './core/delay.bicep' = {
-//   name: 'delay'
-//   scope: resourceGroup
-//   params: {
-//     location: orchestrator.outputs.location
-//     sleepSeconds: 360
-//   }
-// }
+module delay './core/delay.bicep' = {
+  name: 'delay'
+  scope: resourceGroup
+  params: {
+    location: orchestrator.outputs.location
+    sleepSeconds: 360
+  }
+}
