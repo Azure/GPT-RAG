@@ -25,9 +25,12 @@ param networkIsolation bool = true
 @allowed([true, false])
 param createBastion bool = true
 
-@description('Create point to site VPN when choosing network isolation?')
-@allowed([true, false])
-param createVPN bool = true
+@description('Test vm gpt user password. Use strong password with letters and numbers. Needed only when choosing network isolation and create bastion option. If not you can leave it blank.')
+@secure()
+param vmUserPassword string
+
+@description('Test vm gpt user name. Needed only when choosing network isolation and create bastion option. If not you can leave it blank.')
+param vmUserName string = 'gptrag'
 
 //language settings
 @description('Language used when orchestrator needs send error messages to the UX.')
@@ -135,7 +138,7 @@ param dataIngestionFunctionAppName string = 'fninges0${substring(uniqueString(gu
 param searchServiceName string = 'search0${substring(uniqueString(guidValue), 0, 5)}'
 @description('OpenAI Service Name. Use your own name convention or leave as it is to generate a random name.')
 param openAiServiceName string = 'oai0${substring(uniqueString(guidValue), 0, 5)}'
-@description('Virtual network name. Use your own name convention or leave as it is to generate a random name.')
+@description('Virtual network name if using network isolation. Use your own name convention or leave as it is to generate a random name.')
 param vnetName string = 'aivnet0${substring(uniqueString(guidValue), 0, 5)}'
 
 var orchestratorEndpoint = 'https://${orchestratorFunctionAppName}.azurewebsites.net/api/orc'
@@ -156,57 +159,13 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
 // networking
 
 module vnet './core/network/vnet.bicep' = if (networkIsolation) {
-  name: 'vnet'
+  name: vnetName
   scope: resourceGroup
   params: {
     name: vnetName
     location: location
-    tags: tags
-    addressPrefix:'10.0.0.0/16'
   }
 }
-
-module aisubnet './core/network/subnet.bicep' = if (networkIsolation) {
-  name: 'aisubnet'
-  scope: resourceGroup
-  params: {
-    vnetName: vnet.outputs.name
-    subnetName: 'aisubnet'
-    addressPrefix: '10.0.1.0/24'
-  }
-}
-
-module bastionsubnet './core/network/subnet.bicep' = if (networkIsolation && createBastion) {
-  name: 'bastionsubnet'
-  scope: resourceGroup
-  params: {
-    vnetName: aisubnet.outputs.vnetName
-    subnetName: 'bastionsubnet'
-    addressPrefix: '10.0.2.0/24'
-  }
-}
-
-// module gatewaysubnet './core/network/subnet.bicep' = if (networkIsolation && createVPN) {
-//   name: 'gatewaySubnet'
-//   scope: resourceGroup
-//   params: {
-//     vnetName: bastionsubnet.outputs.vnetName
-//     subnetName: 'gatewaySubnet'
-//     addressPrefix: '10.0.3.0/24'
-//   }
-// }
-
-// module vpnGateway './core/network/gateway.bicep' = if (networkIsolation && createVPN) {
-//   name: 'vpnGateway'
-//   scope: resourceGroup
-//   params: {
-//    location: location
-//    subnetName: gatewaysubnet.outputs.name
-//    gatewayName: 'vpngateway'
-//    vpnClientAddressPoolPrefix: '10.0.3.0/24'
-//    tags: tags
-//   }
-// }
 
 module testvm './core/vm/vm.bicep' = if (networkIsolation && createBastion) {
   name: 'testvm'
@@ -215,11 +174,12 @@ module testvm './core/vm/vm.bicep' = if (networkIsolation && createBastion) {
     location: location
     name:'testvm${substring(uniqueString(guidValue), 0, 5)}'
     tags: tags
-    subnetName: aisubnet.outputs.name
-    bastionsubnetName: bastionsubnet.outputs.name    
+    aiSubId: vnet.outputs.aiSubId
+    bastionSubId: vnet.outputs.bastionSubId
+    vmUserPassword: vmUserPassword
+    vmUserName: vmUserName
   }
 }
-
 
 // storage
 
@@ -246,7 +206,7 @@ module storagepe './core/network/private-endpoint.bicep' = if (networkIsolation)
     location: location
     name:'stragpe0${substring(uniqueString(guidValue), 0, 5)}'
     tags: tags
-    subnetId: aisubnet.outputs.id
+    subnetId: vnet.outputs.aiSubId
     serviceId: storage.outputs.id
     groupIds: ['blob']
   }
@@ -284,7 +244,7 @@ module cosmospe './core/network/private-endpoint.bicep' = if (networkIsolation) 
     location: location
     name: 'dbgptpe0${substring(uniqueString(guidValue), 0, 5)}'
     tags: tags
-    subnetId: aisubnet.outputs.id
+    subnetId: vnet.outputs.aiSubId
     serviceId: cosmosAccount.outputs.id
     groupIds: ['Sql']
   }
@@ -321,7 +281,7 @@ module keyvaultpe './core/network/private-endpoint.bicep' = if (networkIsolation
     location: location
     name:'kvpe0${substring(uniqueString(guidValue), 0, 5)}'
     tags: tags
-    subnetId: aisubnet.outputs.id
+    subnetId: vnet.outputs.aiSubId
     serviceId: keyVault.outputs.id
     groupIds: ['Vault']
   }
@@ -371,6 +331,7 @@ module orchestrator './core/host/functions.bicep' = {
   scope: resourceGroup
   params: {
     keyVaultName: keyVault.outputs.name
+    storageAccountName: '${storageAccountName}orc'
     appServicePlanId: appServicePlan.outputs.id
     appName: orchestratorFunctionAppName
     location: location
@@ -458,7 +419,7 @@ module orchestratorPe './core/network/private-endpoint.bicep' = if (networkIsola
     location: location
     name: 'orchestratorPe${substring(uniqueString(guidValue), 0, 5)}'
     tags: tags
-    subnetId: aisubnet.outputs.id
+    subnetId: vnet.outputs.aiSubId
     serviceId: orchestrator.outputs.id
     groupIds: ['sites']
   }
@@ -542,7 +503,7 @@ module frontendPe './core/network/private-endpoint.bicep' = if (networkIsolation
     location: location
     name: 'frontendPe${substring(uniqueString(guidValue), 0, 5)}'
     tags: tags
-    subnetId: aisubnet.outputs.id
+    subnetId: vnet.outputs.aiSubId
     serviceId: appService.outputs.id
     groupIds: ['sites']
   }
@@ -585,6 +546,7 @@ module dataIngestion './core/host/functions.bicep' = {
   params: {
     keyVaultName: keyVault.outputs.name
     appServicePlanId: appServicePlan.outputs.id
+    storageAccountName: '${storageAccountName}ing'
     appName: dataIngestionFunctionAppName
     location: location
     appInsightsConnectionString: appInsights.outputs.connectionString
@@ -693,7 +655,7 @@ module ingestionPe './core/network/private-endpoint.bicep' = if (networkIsolatio
     location: location
     name: 'ingestionPe${substring(uniqueString(guidValue), 0, 5)}'
     tags: tags
-    subnetId: aisubnet.outputs.id
+    subnetId: vnet.outputs.aiSubId
     serviceId: dataIngestion.outputs.id
     groupIds: ['sites']
   }
@@ -732,7 +694,7 @@ module cognitiveServicesPe './core/network/private-endpoint.bicep' = if (network
     location: location
     name: 'cognitiveServicesPe${substring(uniqueString(guidValue), 0, 5)}'
     tags: tags
-    subnetId: aisubnet.outputs.id
+    subnetId: vnet.outputs.aiSubId
     serviceId: cognitiveServices.outputs.id
     groupIds: ['account']
   }
@@ -789,7 +751,7 @@ module openAiPe './core/network/private-endpoint.bicep' = if (networkIsolation) 
     location: location
     name: 'openAiPe${substring(uniqueString(guidValue), 0, 5)}'
     tags: tags
-    subnetId: aisubnet.outputs.id
+    subnetId: vnet.outputs.aiSubId
     serviceId: openAi.outputs.id
     groupIds: ['account']
   }
@@ -833,7 +795,7 @@ module searchPe './core/network/private-endpoint.bicep' = if (networkIsolation) 
     location: location
     name: 'searchPe${substring(uniqueString(guidValue), 0, 5)}'
     tags: tags
-    subnetId: aisubnet.outputs.id
+    subnetId: vnet.outputs.aiSubId
     serviceId: searchService.outputs.id
     groupIds: ['searchService']
   }
@@ -888,11 +850,16 @@ module keyVaultSecret './core/security/keyvault-secrets.bicep' = {
 
 
 
-module delay './core/delay.bicep' = {
-  name: 'delay'
-  scope: resourceGroup
-  params: {
-    location: orchestrator.outputs.location
-    sleepSeconds: 360
-  }
-}
+
+
+
+//  not in use
+
+// module delay './core/delay.bicep' = {
+//   name: 'delay'
+//   scope: resourceGroup
+//   params: {
+//     location: orchestrator.outputs.location
+//     sleepSeconds: 360
+//   }
+// }

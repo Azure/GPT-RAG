@@ -1,23 +1,19 @@
 param location string
 param name string
 param tags object = {}
-param subnetName string
-param bastionsubnetName string
+param aiSubId string
+param bastionSubId string
+@secure()
+param vmUserPassword string
+param vmUserName string
 
-// resource vnet 'Microsoft.Network/virtualNetworks@2021-02-01' existing = {
-//   name: vnetName
-// }
-
-resource subnet 'Microsoft.Network/virtualNetworks/subnets@2021-02-01' existing = {
-  name: subnetName
-}
-
-resource bastionsubnet 'Microsoft.Network/virtualNetworks/subnets@2021-02-01' existing = {
-  name: bastionsubnetName
-}
+var publicIpName = '${name}PublicIp'
+var nicName = '${name}Nic'
+var diskName = '${name}Disk'
+var bastionName = '${name}Bastion'
 
 resource bastionPublicIp 'Microsoft.Network/publicIPAddresses@2020-05-01' = {
-  name: 'testvmPublicIp'
+  name: publicIpName
   location: location
   sku: {
     name: 'Standard'
@@ -28,7 +24,7 @@ resource bastionPublicIp 'Microsoft.Network/publicIPAddresses@2020-05-01' = {
 }
 
 resource nic 'Microsoft.Network/networkInterfaces@2020-06-01' = {
-  name: 'testvmNic'
+  name: nicName
   location: location
   properties: {
     ipConfigurations: [
@@ -38,35 +34,13 @@ resource nic 'Microsoft.Network/networkInterfaces@2020-06-01' = {
           privateIPAddressVersion: 'IPv4'
           privateIPAllocationMethod: 'Dynamic'
           subnet: {
-            id: subnet.id
+            id: aiSubId
           }  
         }
       }
     ]
   }
 }
-
-resource bastion 'Microsoft.Network/bastionHosts@2020-05-01' = {
-  name: 'testvmBastion'
-  location: location
-  properties: {
-    ipConfigurations: [
-      {
-        name: 'ipconfig1'
-        properties: {
-          privateIPAllocationMethod: 'Dynamic'
-          subnet: {
-            id: bastionsubnet.id 
-          }
-          publicIPAddress: {
-            id: bastionPublicIp.id // use a public IP address for the bastion
-          }
-        }
-      }
-    ]
-  }
-}
-
 
 resource virtualMachine 'Microsoft.Compute/virtualMachines@2021-03-01' = {
   name: name
@@ -84,14 +58,14 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2021-03-01' = {
         version: 'latest'
       }
       osDisk: {
-        name: 'testvmDisk'
+        name: diskName
         createOption: 'FromImage'
       }
     }
     osProfile: {
-      computerName: 'testvm'
-      adminUsername: 'gptrag'
-      adminPassword: 'P@ssw0rd123456'
+      computerName: 'gptragvm'
+      adminUsername: vmUserName
+      adminPassword: vmUserPassword
     }
     networkProfile: {
       networkInterfaces: [
@@ -100,5 +74,26 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2021-03-01' = {
         }
       ]
     }
+  }
+}
+
+resource bastion 'Microsoft.Network/bastionHosts@2020-05-01' = {
+  name: bastionName
+  location: location
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'ipconfig1'
+        properties: {
+          privateIPAllocationMethod: 'Dynamic'
+          subnet: {
+            id: bastionSubId
+          }
+          publicIPAddress: {
+            id: bastionPublicIp.id // use a public IP address for the bastion
+          }
+        }
+      }
+    ]
   }
 }
