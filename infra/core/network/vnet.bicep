@@ -9,12 +9,16 @@ var subnets = [
     name: 'ai-subnet'
     properties: {
       addressPrefix:'10.0.1.0/24'
+      privateEndpointNetworkPolicies: 'Enabled'
+      privateLinkServiceNetworkPolicies: 'Enabled'      
     }
   }
   {
     name: 'AzureBastionSubnet'
     properties: {
       addressPrefix:'10.0.2.0/24'
+      privateEndpointNetworkPolicies: 'Enabled'
+      privateLinkServiceNetworkPolicies: 'Enabled'      
     }
   }
 ]

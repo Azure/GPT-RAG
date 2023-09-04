@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.20.4.51522",
-      "templateHash": "2420176847800529836"
+      "templateHash": "6094405784914274566"
     }
   },
   "parameters": {
@@ -663,7 +663,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.20.4.51522",
-              "templateHash": "1491810561139600725"
+              "templateHash": "12066752281651117466"
             }
           },
           "parameters": {
@@ -684,13 +684,17 @@
               {
                 "name": "ai-subnet",
                 "properties": {
-                  "addressPrefix": "10.0.1.0/24"
+                  "addressPrefix": "10.0.1.0/24",
+                  "privateEndpointNetworkPolicies": "Enabled",
+                  "privateLinkServiceNetworkPolicies": "Enabled"
                 }
               },
               {
                 "name": "AzureBastionSubnet",
                 "properties": {
-                  "addressPrefix": "10.0.2.0/24"
+                  "addressPrefix": "10.0.2.0/24",
+                  "privateEndpointNetworkPolicies": "Enabled",
+                  "privateLinkServiceNetworkPolicies": "Enabled"
                 }
               }
             ]
@@ -795,7 +799,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.20.4.51522",
-              "templateHash": "12643171341725492514"
+              "templateHash": "10197330680175870926"
             }
           },
           "parameters": {
@@ -820,13 +824,37 @@
             },
             "vmUserName": {
               "type": "string"
+            },
+            "authenticationType": {
+              "type": "string",
+              "defaultValue": "password"
             }
           },
           "variables": {
+            "osDiskType": "StandardSSD_LRS",
+            "vmSize": {
+              "CPU-4GB": "Standard_B2s",
+              "CPU-7GB": "Standard_D2s_v3",
+              "CPU-8GB": "Standard_D2s_v3",
+              "CPU-14GB": "Standard_D4s_v3",
+              "CPU-16GB": "Standard_D4s_v3",
+              "GPU-56GB": "Standard_NC6_Promo"
+            },
             "publicIpName": "[format('{0}PublicIp', parameters('name'))]",
             "nicName": "[format('{0}Nic', parameters('name'))]",
             "diskName": "[format('{0}Disk', parameters('name'))]",
-            "bastionName": "[format('{0}Bastion', parameters('name'))]"
+            "bastionName": "[format('{0}Bastion', parameters('name'))]",
+            "linuxConfiguration": {
+              "disablePasswordAuthentication": true,
+              "ssh": {
+                "publicKeys": [
+                  {
+                    "path": "[format('/home/{0}/.ssh/authorized_keys', parameters('vmUserName'))]",
+                    "keyData": "[parameters('vmUserPassword')]"
+                  }
+                ]
+              }
+            }
           },
           "resources": [
             {
@@ -869,24 +897,28 @@
               "tags": "[parameters('tags')]",
               "properties": {
                 "hardwareProfile": {
-                  "vmSize": "Standard_B2s"
+                  "vmSize": "[variables('vmSize')['CPU-4GB']]"
                 },
                 "storageProfile": {
                   "imageReference": {
-                    "publisher": "MicrosoftWindowsServer",
-                    "offer": "WindowsServer",
-                    "sku": "2019-Datacenter",
+                    "publisher": "microsoft-dsvm",
+                    "offer": "ubuntu-1804",
+                    "sku": "1804-gen2",
                     "version": "latest"
                   },
                   "osDisk": {
                     "name": "[variables('diskName')]",
-                    "createOption": "FromImage"
+                    "createOption": "FromImage",
+                    "managedDisk": {
+                      "storageAccountType": "[variables('osDiskType')]"
+                    }
                   }
                 },
                 "osProfile": {
                   "computerName": "gptragvm",
                   "adminUsername": "[parameters('vmUserName')]",
-                  "adminPassword": "[parameters('vmUserPassword')]"
+                  "adminPassword": "[parameters('vmUserPassword')]",
+                  "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]"
                 },
                 "networkProfile": {
                   "networkInterfaces": [

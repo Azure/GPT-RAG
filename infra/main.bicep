@@ -167,11 +167,12 @@ module vnet './core/network/vnet.bicep' = if (networkIsolation) {
   }
 }
 
-module testvm './core/vm/vm.bicep' = if (networkIsolation && createBastion) {
+module testvm './core/vm/dsvm.bicep' = if (networkIsolation && createBastion) {
   name: 'testvm'
   scope: resourceGroup
   params: {
     location: location
+    resourceGroupName: resourceGroupName
     name:'testvm${substring(uniqueString(guidValue), 0, 5)}'
     tags: tags
     aiSubId: vnet.outputs.aiSubId
