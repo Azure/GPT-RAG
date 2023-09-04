@@ -19,7 +19,7 @@ param environmentName string = 'dev'
 
 @description('Network isolation? If yes it will create the private endpoints.')
 @allowed([true, false])
-param networkIsolation bool = true
+param networkIsolation bool = false
 
 @description('Create bastion and vm to test the solution when choosing network isolation?')
 @allowed([true, false])
