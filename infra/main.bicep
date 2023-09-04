@@ -19,13 +19,15 @@ param environmentName string = 'dev'
 
 @description('Network isolation? If yes it will create the private endpoints.')
 @allowed([true, false])
-param networkIsolation bool = false
+param networkIsolation bool = true
 
 @description('Create bastion and vm to test the solution when choosing network isolation?')
 @allowed([true, false])
 param createBastion bool = true
 
-@description('Test vm gpt user password. Use strong password with letters and numbers. Needed only when choosing network isolation and create bastion option. If not you can leave it blank.')
+@minLength(6)
+@maxLength(72)
+@description('Test vm gpt user password. Use strong password with letters and numbers. Needed only when choosing network isolation and create bastion option. If not creating with network isolation you can write anything. Password must be between 6-72 characters long and must satisfy at least 3 of password complexity requirements from the following: 1-Contains an uppercase character, 2-Contains a lowercase character, 3-Contains a numeric digit, 4-Contains a special character, 5- Control characters are not allowed.')
 @secure()
 param vmUserPassword string
 
