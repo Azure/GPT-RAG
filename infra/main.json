@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.20.4.51522",
-      "templateHash": "6094405784914274566"
+      "templateHash": "9884746581786738440"
     }
   },
   "parameters": {
@@ -33,7 +33,7 @@
     },
     "networkIsolation": {
       "type": "bool",
-      "defaultValue": true,
+      "defaultValue": false,
       "allowedValues": [
         true,
         false
@@ -773,6 +773,9 @@
           "location": {
             "value": "[parameters('location')]"
           },
+          "resourceGroupName": {
+            "value": "[parameters('resourceGroupName')]"
+          },
           "name": {
             "value": "[format('testvm{0}', substring(uniqueString(parameters('guidValue')), 0, 5))]"
           },
@@ -799,7 +802,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.20.4.51522",
-              "templateHash": "10197330680175870926"
+              "templateHash": "17687220016229607656"
             }
           },
           "parameters": {
@@ -817,6 +820,9 @@
               "type": "string"
             },
             "bastionSubId": {
+              "type": "string"
+            },
+            "resourceGroupName": {
               "type": "string"
             },
             "vmUserPassword": {
@@ -895,6 +901,9 @@
               "name": "[parameters('name')]",
               "location": "[parameters('location')]",
               "tags": "[parameters('tags')]",
+              "identity": {
+                "type": "SystemAssigned"
+              },
               "properties": {
                 "hardwareProfile": {
                   "vmSize": "[variables('vmSize')['CPU-4GB']]"
@@ -956,8 +965,26 @@
               "dependsOn": [
                 "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpName'))]"
               ]
+            },
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2020-04-01-preview",
+              "name": "[guid(parameters('resourceGroupName'), 'Contributor')]",
+              "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
+                "principalId": "[reference(resourceId('Microsoft.Compute/virtualMachines', parameters('name')), '2021-03-01', 'full').identity.principalId]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('name'))]"
+              ]
             }
-          ]
+          ],
+          "outputs": {
+            "vmPrincipalId": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Compute/virtualMachines', parameters('name')), '2021-03-01', 'full').identity.principalId]"
+            }
+          }
         }
       },
       "dependsOn": [
