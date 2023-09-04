@@ -15,6 +15,23 @@ output guidOutput string = guidValue
 @description('Environment name used as a tag for all resources.')
 param environmentName string = 'dev'
 
+//network
+
+@description('Network isolation? If yes it will create the private endpoints.')
+@allowed([true, false])
+param networkIsolation bool = true
+
+@description('Create bastion and vm to test the solution when choosing network isolation?')
+@allowed([true, false])
+param createBastion bool = true
+
+@description('Test vm gpt user password. Use strong password with letters and numbers. Needed only when choosing network isolation and create bastion option. If not you can leave it blank.')
+@secure()
+param vmUserPassword string
+
+@description('Test vm gpt user name. Needed only when choosing network isolation and create bastion option. If not you can leave it blank.')
+param vmUserName string = 'gptrag'
+
 //language settings
 @description('Language used when orchestrator needs send error messages to the UX.')
 @allowed(['pt', 'es', 'en'])
@@ -83,7 +100,7 @@ param chunkNumTokens string = '2048'
 @description('The minimum chunk size below which chunks will be filtered.')
 param chunkMinSize string = '100'
 @description('The number of tokens to overlap between chunks.')
-param chunkTokenOverlap string = '100'
+param chunkTokenOverlap string = '200'
 
 // storage
 @description('Name of the container where source documents will be stored.')
@@ -96,7 +113,7 @@ param location string = deployment().location
 @description('(optional) Id of the user or app to assign keyvault access. Keep it none if you don\'t want add any principal.')
 param principalId string = 'none'
 
-// Nombres de los servicios
+// Service names
 @description('Cosmos DB Account Name. Use your own name convention or leave as it is to generate a random name.')
 param dbAccountName string = 'dbgpt0${substring(uniqueString(guidValue), 0, 5)}'
 @description('Cosmos DB Database Name. Use your own name convention or leave as it is to generate a random name.')
@@ -105,10 +122,8 @@ param dbDatabaseName string = 'db0${substring(uniqueString(guidValue), 0, 5)}'
 param keyVaultName string = 'kv0${substring(uniqueString(guidValue), 0, 5)}'
 @description('Storage Account Name. Use your own name convention or leave as it is to generate a random name.')
 param storageAccountName string = 'strag0${substring(uniqueString(guidValue), 0, 5)}'
-@description('Speech Account Name. Use your own name convention or leave as it is to generate a random name.')
-param speechServiceName string = 'speech0${substring(uniqueString(guidValue), 0, 5)}'
-@description('Document Intelligence Account Name. Use your own name convention or leave as it is to generate a random name.')
-param formRecognizerServiceName string = 'fr0${substring(uniqueString(guidValue), 0, 5)}'
+@description('Cognitive services multi-service name. Use your own name convention or leave as it is to generate a random name.')
+param cognitiveServiceName string = 'cs0${substring(uniqueString(guidValue), 0, 5)}'
 @description('App Service Plan Name. Use your own name convention or leave as it is to generate a random name.')
 param azureAppServicePlanName string = 'appplan0${substring(uniqueString(guidValue), 0, 5)}'
 @description('App Insights Name. Use your own name convention or leave as it is to generate a random name.')
@@ -123,19 +138,48 @@ param dataIngestionFunctionAppName string = 'fninges0${substring(uniqueString(gu
 param searchServiceName string = 'search0${substring(uniqueString(guidValue), 0, 5)}'
 @description('OpenAI Service Name. Use your own name convention or leave as it is to generate a random name.')
 param openAiServiceName string = 'oai0${substring(uniqueString(guidValue), 0, 5)}'
+@description('Virtual network name if using network isolation. Use your own name convention or leave as it is to generate a random name.')
+param vnetName string = 'aivnet0${substring(uniqueString(guidValue), 0, 5)}'
 
 var orchestratorEndpoint = 'https://${orchestratorFunctionAppName}.azurewebsites.net/api/orc'
 var orchestratorUri = 'https://${orchestratorFunctionAppName}.azurewebsites.net'
 var tags = { 'azd-env-name': environmentName }
 var principalIdvar = (principalId != 'none') ? principalId : ''
 
-// MAIN
+// main
 
-// Organize resources in a resource group
+// resource group
+
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: resourceGroupName
   location: location
   tags: tags
+}
+
+// networking
+
+module vnet './core/network/vnet.bicep' = if (networkIsolation) {
+  name: vnetName
+  scope: resourceGroup
+  params: {
+    name: vnetName
+    location: location
+  }
+}
+
+module testvm './core/vm/dsvm.bicep' = if (networkIsolation && createBastion) {
+  name: 'testvm'
+  scope: resourceGroup
+  params: {
+    location: location
+    resourceGroupName: resourceGroupName
+    name:'testvm${substring(uniqueString(guidValue), 0, 5)}'
+    tags: tags
+    aiSubId: vnet.outputs.aiSubId
+    bastionSubId: vnet.outputs.bastionSubId
+    vmUserPassword: vmUserPassword
+    vmUserName: vmUserName
+  }
 }
 
 // storage
@@ -150,22 +194,71 @@ module storage './core/storage/storage-account.bicep' = {
     name: storageAccountName
     location: location
     tags: tags
-    allowBlobPublicAccess: true
-    publicNetworkAccess: 'Enabled'
-    containers: [{name:containerName, publicAccess: 'Container'}, {name:chunksContainerName}]
+    allowBlobPublicAccess: false
+    publicNetworkAccess: networkIsolation?'Disabled':'Enabled'
+    containers: [{name:containerName, publicAccess: networkIsolation?'None':'Container'}, {name:chunksContainerName}]
   }  
+}
+
+module storagepe './core/network/private-endpoint.bicep' = if (networkIsolation) {
+  name: 'storagepe'
+  scope: resourceGroup
+  params: {
+    location: location
+    name:'stragpe0${substring(uniqueString(guidValue), 0, 5)}'
+    tags: tags
+    subnetId: vnet.outputs.aiSubId
+    serviceId: storage.outputs.id
+    groupIds: ['blob']
+  }
+}
+
+module storagedns './core/network/private-dns.bicep' = if (networkIsolation) {
+  name: 'storagedns'
+  scope: resourceGroup
+  params: {
+    dnsZoneName: '${storageAccountName}.privatelink.blob.core.windows.net'
+    tags: tags
+    virtualNetworkName: vnet.outputs.name
+    privateEndpointName: storagepe.outputs.name
+  }
 }
 
 // Database
 module cosmosAccount './core/db/cosmos.bicep' = {
-  name: 'account'
+  name: 'cosmosaccount'
   scope: resourceGroup
   params: {
     accountName: dbAccountName
+    publicNetworkAccess: networkIsolation?'Disabled':'Enabled'
     location: location
     containerName: 'conversations'
     databaseName: dbDatabaseName
     tags: tags    
+  }
+}
+
+module cosmospe './core/network/private-endpoint.bicep' = if (networkIsolation) {
+  name: 'cosmospe'
+  scope: resourceGroup
+  params: {
+    location: location
+    name: 'dbgptpe0${substring(uniqueString(guidValue), 0, 5)}'
+    tags: tags
+    subnetId: vnet.outputs.aiSubId
+    serviceId: cosmosAccount.outputs.id
+    groupIds: ['Sql']
+  }
+}
+
+module cosmosdns './core/network/private-dns.bicep' = if (networkIsolation) {
+  name: 'cosmosdns'
+  scope: resourceGroup
+  params: {
+    dnsZoneName: '${dbAccountName}.privatelink.documents.azure.com'
+    tags: tags
+    virtualNetworkName: vnet.outputs.name
+    privateEndpointName: cosmospe.outputs.name
   }
 }
 
@@ -176,8 +269,33 @@ module keyVault './core/security/keyvault.bicep' = {
   params: {
     name: keyVaultName
     location: location
+    publicNetworkAccess: networkIsolation?'Disabled':'Enabled'
     tags: tags
     principalId: principalIdvar
+  }
+}
+
+module keyvaultpe './core/network/private-endpoint.bicep' = if (networkIsolation) {
+  name: 'keyvaultpe'
+  scope: resourceGroup
+  params: {
+    location: location
+    name:'kvpe0${substring(uniqueString(guidValue), 0, 5)}'
+    tags: tags
+    subnetId: vnet.outputs.aiSubId
+    serviceId: keyVault.outputs.id
+    groupIds: ['Vault']
+  }
+}
+
+module keyvaultdns './core/network/private-dns.bicep' = if (networkIsolation) {
+  name: 'keyvaultdns'
+  scope: resourceGroup
+  params: {
+    dnsZoneName: '${dbAccountName}.privatelink.vaultcore.azure.net'
+    tags: tags
+    virtualNetworkName: vnet.outputs.name
+    privateEndpointName: keyvaultpe.outputs.name
   }
 }
 
@@ -207,12 +325,14 @@ module appInsights './core/host/appinsights.bicep' = {
   }
 }
 
+
 // orchestrator
 module orchestrator './core/host/functions.bicep' = {
   name: 'orchestrator'
   scope: resourceGroup
   params: {
     keyVaultName: keyVault.outputs.name
+    storageAccountName: '${storageAccountName}orc'
     appServicePlanId: appServicePlan.outputs.id
     appName: orchestratorFunctionAppName
     location: location
@@ -293,15 +413,29 @@ module orchestrator './core/host/functions.bicep' = {
   }
 }
 
-// module delay './core/delay.bicep' = {
-//   name: 'delay'
-//   scope: resourceGroup
-//   params: {
-//     location: orchestrator.outputs.location
-//     sleepSeconds: 360
-//   }
-// }
+module orchestratorPe './core/network/private-endpoint.bicep' = if (networkIsolation) {
+  name: 'orchestratorPe'
+  scope: resourceGroup
+  params: {
+    location: location
+    name: 'orchestratorPe${substring(uniqueString(guidValue), 0, 5)}'
+    tags: tags
+    subnetId: vnet.outputs.aiSubId
+    serviceId: orchestrator.outputs.id
+    groupIds: ['sites']
+  }
+}
 
+module orchestratordns './core/network/private-dns.bicep' = if (networkIsolation) {
+  name: 'orchestratordns'
+  scope: resourceGroup
+  params: {
+    dnsZoneName: '${orchestratorFunctionAppName}.privatelink.azurewebsites.net'
+    tags: tags
+    virtualNetworkName: vnet.outputs.name
+    privateEndpointName: orchestratorPe.outputs.name
+  }
+}
 
 // Give the orchestrator access to KeyVault
 module orchestratorKeyVaultAccess './core/security/keyvault-access.bicep' = {
@@ -363,6 +497,30 @@ module appService  'core/host/appservice.bicep'  = {
   }
 }
 
+module frontendPe './core/network/private-endpoint.bicep' = if (networkIsolation) {
+  name: 'frontendPe'
+  scope: resourceGroup
+  params: {
+    location: location
+    name: 'frontendPe${substring(uniqueString(guidValue), 0, 5)}'
+    tags: tags
+    subnetId: vnet.outputs.aiSubId
+    serviceId: appService.outputs.id
+    groupIds: ['sites']
+  }
+}
+
+module frontenddns './core/network/private-dns.bicep' = if (networkIsolation) {
+  name: 'frontenddns'
+  scope: resourceGroup
+  params: {
+    dnsZoneName: '${azureAppServiceName}.privatelink.azurewebsites.net'
+    tags: tags
+    virtualNetworkName: vnet.outputs.name
+    privateEndpointName: frontendPe.outputs.name
+  }
+}
+
 // Give the App Service access to KeyVault
 module appsericeKeyVaultAccess './core/security/keyvault-access.bicep' = {
   name: 'appservice-keyvault-access'
@@ -389,6 +547,7 @@ module dataIngestion './core/host/functions.bicep' = {
   params: {
     keyVaultName: keyVault.outputs.name
     appServicePlanId: appServicePlan.outputs.id
+    storageAccountName: '${storageAccountName}ing'
     appName: dataIngestionFunctionAppName
     location: location
     appInsightsConnectionString: appInsights.outputs.connectionString
@@ -442,7 +601,7 @@ module dataIngestion './core/host/functions.bicep' = {
       }
       {
         name: 'AZURE_FORMREC_SERVICE'
-        value: formRecognizerServiceName
+        value: cognitiveServiceName
       }
       {
         name: 'AZURE_OPENAI_API_VERSION'
@@ -471,7 +630,11 @@ module dataIngestion './core/host/functions.bicep' = {
       {
         name: 'TOKEN_OVERLAP'
         value: chunkTokenOverlap
-      }      
+      }
+      {
+        name: 'AzureWebJobsFeatureFlags'
+        value: 'EnableWorkerIndexing'
+      }
     ]  
   }
 }
@@ -486,31 +649,66 @@ module dataIngestionKeyVaultAccess './core/security/keyvault-access.bicep' = {
   }
 }
 
-module formRecognizer 'core/ai/cognitiveservices.bicep' = {
-  name: 'FormRecognizer'
+module ingestionPe './core/network/private-endpoint.bicep' = if (networkIsolation) {
+  name: 'ingestionPe'
   scope: resourceGroup
   params: {
-    name: formRecognizerServiceName
     location: location
-    kind: 'FormRecognizer'
+    name: 'ingestionPe${substring(uniqueString(guidValue), 0, 5)}'
     tags: tags
-    sku: {
-      name: 'S0'
-    }
+    subnetId: vnet.outputs.aiSubId
+    serviceId: dataIngestion.outputs.id
+    groupIds: ['sites']
   }
 }
 
-module speechServices 'core/ai/cognitiveservices.bicep' = {
-  name: 'SpeechServices'
+module ingestiondns './core/network/private-dns.bicep' = if (networkIsolation) {
+  name: 'ingestiondns'
   scope: resourceGroup
   params: {
-    name: speechServiceName
+    dnsZoneName: '${dataIngestionFunctionAppName}.privatelink.azurewebsites.net'
+    tags: tags
+    virtualNetworkName: vnet.outputs.name
+    privateEndpointName: ingestionPe.outputs.name
+  }
+}
+
+module cognitiveServices 'core/ai/cognitiveservices.bicep' = {
+  name: 'CognitiveServices'
+  scope: resourceGroup
+  params: {
+    name: cognitiveServiceName
     location: location
-    kind: 'SpeechServices'
+    publicNetworkAccess: networkIsolation?'Disabled':'Enabled'
+    kind: 'CognitiveServices'
     tags: tags
     sku: {
       name: 'S0'
-    }
+    }    
+  }
+}
+
+module cognitiveServicesPe './core/network/private-endpoint.bicep' = if (networkIsolation) {
+  name: 'cognitiveServicesPe'
+  scope: resourceGroup
+  params: {
+    location: location
+    name: 'cognitiveServicesPe${substring(uniqueString(guidValue), 0, 5)}'
+    tags: tags
+    subnetId: vnet.outputs.aiSubId
+    serviceId: cognitiveServices.outputs.id
+    groupIds: ['account']
+  }
+}
+
+module cognitiveservicesdns './core/network/private-dns.bicep' = if (networkIsolation) {
+  name: 'cognitiveservicesdns'
+  scope: resourceGroup
+  params: {
+    dnsZoneName: '${cognitiveServiceName}.privatelink.cognitiveservices.azure.com'
+    tags: tags
+    virtualNetworkName: vnet.outputs.name
+    privateEndpointName: cognitiveServicesPe.outputs.name
   }
 }
 
@@ -520,6 +718,7 @@ module openAi 'core/ai/cognitiveservices.bicep' = {
   params: {
     name: openAiServiceName
     location: location
+    publicNetworkAccess: networkIsolation?'Disabled':'Enabled'
     tags: tags
     sku: {
       name: 'S0' 
@@ -546,12 +745,37 @@ module openAi 'core/ai/cognitiveservices.bicep' = {
   }
 }
 
+module openAiPe './core/network/private-endpoint.bicep' = if (networkIsolation) {
+  name: 'openAiPe'
+  scope: resourceGroup
+  params: {
+    location: location
+    name: 'openAiPe${substring(uniqueString(guidValue), 0, 5)}'
+    tags: tags
+    subnetId: vnet.outputs.aiSubId
+    serviceId: openAi.outputs.id
+    groupIds: ['account']
+  }
+}
+
+module openaidns './core/network/private-dns.bicep' = if (networkIsolation) {
+  name: 'openaidns'
+  scope: resourceGroup
+  params: {
+    dnsZoneName: '${openAiServiceName}.privatelink.openai.azure.com'
+    tags: tags
+    virtualNetworkName: vnet.outputs.name
+    privateEndpointName: openAiPe.outputs.name
+  }
+}
+
 module searchService 'core/search/search-services.bicep' = {
   name: 'search-service'
   scope: resourceGroup
   params: {
     name: searchServiceName
     location: location
+    publicNetworkAccess: networkIsolation?'Disabled':'Enabled'
     tags: tags
     authOptions: {
       aadOrApiKey: {
@@ -565,7 +789,29 @@ module searchService 'core/search/search-services.bicep' = {
   }
 }
 
+module searchPe './core/network/private-endpoint.bicep' = if (networkIsolation) {
+  name: 'searchPe'
+  scope: resourceGroup
+  params: {
+    location: location
+    name: 'searchPe${substring(uniqueString(guidValue), 0, 5)}'
+    tags: tags
+    subnetId: vnet.outputs.aiSubId
+    serviceId: searchService.outputs.id
+    groupIds: ['searchService']
+  }
+}
 
+module searchdns './core/network/private-dns.bicep' = if (networkIsolation) {
+  name: 'searchdns'
+  scope: resourceGroup
+  params: {
+    dnsZoneName: '${searchServiceName}.privatelink.search.windows.us'
+    tags: tags
+    virtualNetworkName: vnet.outputs.name
+    privateEndpointName: searchPe.outputs.name
+  }
+}
 
 module keyVaultSecret './core/security/keyvault-secrets.bicep' = {
   name: 'keyvaultsecrets'
@@ -573,25 +819,17 @@ module keyVaultSecret './core/security/keyvault-secrets.bicep' = {
   params: {
     keyVaultName: keyVault.outputs.name
     secretValues: {
-      // orchestratorFunctionKey: {
-      //   name: 'orchestratorKey'
-      //   value: orchestrator.outputs.hostKey
-      // }
-      // ingestionFunctionKey: {
-      //   name: 'ingestionKey'
-      //   value: ingestion.outputs.hostKey
-      // }      
       azureSearchKey: {
         name: 'azureSearchKey'
         value: searchService.outputs.apiKey
       }
       formRecKey: {
         name: 'formRecKey'
-        value: formRecognizer.outputs.apiKey
+        value: cognitiveServices.outputs.apiKey
       }
       speechKey: {
         name: 'speechKey'
-        value: speechServices.outputs.apiKey
+        value: cognitiveServices.outputs.apiKey
       }            
       azureOpenAIKey: {
         name: 'azureOpenAIKey'
@@ -608,3 +846,21 @@ module keyVaultSecret './core/security/keyvault-secrets.bicep' = {
     }
   }
 }
+
+
+
+
+
+
+
+
+//  not in use
+
+// module delay './core/delay.bicep' = {
+//   name: 'delay'
+//   scope: resourceGroup
+//   params: {
+//     location: orchestrator.outputs.location
+//     sleepSeconds: 360
+//   }
+// }

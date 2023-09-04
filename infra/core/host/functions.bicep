@@ -1,5 +1,6 @@
 param appName string
 param keyVaultName string = ''
+param storageAccountName string
 param appServicePlanId string
 param appSettings array
 param appInsightsConnectionString string
@@ -10,13 +11,11 @@ param alwaysOn bool = true
 param appCommandLine string = ''
 param clientAffinityEnabled bool = false
 param kind string = 'functionapp,linux'
-param enableOryxBuild bool = contains(kind, 'linux')
 param functionAppScaleLimit int = -1
 param minimumElasticInstanceCount int = -1
 param numberOfWorkers int = -1
 param runtimeName string =  'python'
 param runtimeVersion string = '3.10'
-param scmDoBuildDuringDeployment bool = false
 param use32BitWorkerProcess bool = false
 param healthCheckPath string = ''
 var runtimeNameAndVersion = '${runtimeName}|${runtimeVersion}'
@@ -39,8 +38,6 @@ param location string = resourceGroup().location
 param runtime string = 'python'
 
 var functionAppName = appName
-// var hostingPlanName = appName
-var storageAccountName = '${appName}st'
 var functionWorkerRuntime = runtime
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
@@ -149,3 +146,4 @@ output name string = functionApp.name
 output uri string = 'https://${functionApp.properties.defaultHostName}'
 output location string = functionApp.location
 // output hostKey string = listKeys('${functionApp.id}/host/default', functionApp.apiVersion).functionKeys.default
+output id string = functionApp.id

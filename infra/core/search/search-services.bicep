@@ -1,7 +1,7 @@
 param name string
 param location string = resourceGroup().location
 param tags object = {}
-
+param publicNetworkAccess string
 param sku object = {
   name: 'standard'
 }
@@ -29,7 +29,7 @@ resource search 'Microsoft.Search/searchServices@2021-04-01-preview' = {
       ipRules: []
     }
     partitionCount: 1
-    publicNetworkAccess: 'Enabled'
+    publicNetworkAccess: publicNetworkAccess
     replicaCount: 1
     semanticSearch: semanticSearch
   }

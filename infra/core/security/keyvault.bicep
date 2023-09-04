@@ -1,6 +1,7 @@
 param name string
 param location string = resourceGroup().location
 param tags object = {}
+param publicNetworkAccess string
 
 param principalId string = ''
 
@@ -11,6 +12,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
   properties: {
     tenantId: subscription().tenantId
     sku: { family: 'A', name: 'standard' }
+    publicNetworkAccess: publicNetworkAccess
     accessPolicies: !empty(principalId) ? [
       {
         objectId: principalId
@@ -23,3 +25,4 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
 
 output endpoint string = keyVault.properties.vaultUri
 output name string = keyVault.name
+output id string = keyVault.id
