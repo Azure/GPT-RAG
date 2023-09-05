@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.20.4.51522",
-      "templateHash": "12699876872721763925"
+      "templateHash": "11930220377173903582"
     }
   },
   "parameters": {
@@ -778,9 +778,7 @@
           "tags": {
             "value": "[variables('tags')]"
           },
-          "virtualNetworkName": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.name.value]"
-          }
+          "virtualNetworkName": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.name.value), createObject('value', ''))]"
         },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
@@ -864,9 +862,7 @@
           "tags": {
             "value": "[variables('tags')]"
           },
-          "virtualNetworkName": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.name.value]"
-          }
+          "virtualNetworkName": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.name.value), createObject('value', ''))]"
         },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
@@ -950,9 +946,7 @@
           "tags": {
             "value": "[variables('tags')]"
           },
-          "virtualNetworkName": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.name.value]"
-          }
+          "virtualNetworkName": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.name.value), createObject('value', ''))]"
         },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
@@ -1036,9 +1030,7 @@
           "tags": {
             "value": "[variables('tags')]"
           },
-          "virtualNetworkName": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.name.value]"
-          }
+          "virtualNetworkName": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.name.value), createObject('value', ''))]"
         },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
@@ -1122,9 +1114,7 @@
           "tags": {
             "value": "[variables('tags')]"
           },
-          "virtualNetworkName": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.name.value]"
-          }
+          "virtualNetworkName": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.name.value), createObject('value', ''))]"
         },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
@@ -1208,9 +1198,7 @@
           "tags": {
             "value": "[variables('tags')]"
           },
-          "virtualNetworkName": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.name.value]"
-          }
+          "virtualNetworkName": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.name.value), createObject('value', ''))]"
         },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
@@ -1294,9 +1282,7 @@
           "tags": {
             "value": "[variables('tags')]"
           },
-          "virtualNetworkName": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.name.value]"
-          }
+          "virtualNetworkName": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.name.value), createObject('value', ''))]"
         },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
@@ -1386,12 +1372,8 @@
           "tags": {
             "value": "[variables('tags')]"
           },
-          "aiSubId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.aiSubId.value]"
-          },
-          "bastionSubId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.bastionSubId.value]"
-          },
+          "aiSubId": "[if(and(parameters('networkIsolation'), parameters('createBastion')), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.aiSubId.value), createObject('value', ''))]",
+          "bastionSubId": "[if(and(parameters('networkIsolation'), parameters('createBastion')), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.bastionSubId.value), createObject('value', ''))]",
           "vmUserPassword": {
             "value": "[parameters('vmUserPassword')]"
           },
@@ -1616,9 +1598,7 @@
           "tags": {
             "value": "[variables('tags')]"
           },
-          "allowBlobPublicAccess": {
-            "value": false
-          },
+          "allowBlobPublicAccess": "[if(parameters('networkIsolation'), createObject('value', false()), createObject('value', true()))]",
           "publicNetworkAccess": "[if(parameters('networkIsolation'), createObject('value', 'Disabled'), createObject('value', 'Enabled'))]",
           "containers": {
             "value": [
@@ -1816,20 +1796,14 @@
           "tags": {
             "value": "[variables('tags')]"
           },
-          "subnetId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.aiSubId.value]"
-          },
-          "serviceId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'storage'), '2022-09-01').outputs.id.value]"
-          },
+          "subnetId": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.aiSubId.value), createObject('value', ''))]",
+          "serviceId": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'storage'), '2022-09-01').outputs.id.value), createObject('value', ''))]",
           "groupIds": {
             "value": [
               "blob"
             ]
           },
-          "dnsZoneId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'blob-dnzones'), '2022-09-01').outputs.id.value]"
-          }
+          "dnsZoneId": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'blob-dnzones'), '2022-09-01').outputs.id.value), createObject('value', ''))]"
         },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
@@ -2174,20 +2148,14 @@
           "tags": {
             "value": "[variables('tags')]"
           },
-          "subnetId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.aiSubId.value]"
-          },
-          "serviceId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'cosmosaccount'), '2022-09-01').outputs.id.value]"
-          },
+          "subnetId": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.aiSubId.value), createObject('value', ''))]",
+          "serviceId": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'cosmosaccount'), '2022-09-01').outputs.id.value), createObject('value', ''))]",
           "groupIds": {
             "value": [
               "Sql"
             ]
           },
-          "dnsZoneId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'documents-dnzones'), '2022-09-01').outputs.id.value]"
-          }
+          "dnsZoneId": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'documents-dnzones'), '2022-09-01').outputs.id.value), createObject('value', ''))]"
         },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
@@ -2394,20 +2362,14 @@
           "tags": {
             "value": "[variables('tags')]"
           },
-          "subnetId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.aiSubId.value]"
-          },
-          "serviceId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'keyvault'), '2022-09-01').outputs.id.value]"
-          },
+          "subnetId": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.aiSubId.value), createObject('value', ''))]",
+          "serviceId": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'keyvault'), '2022-09-01').outputs.id.value), createObject('value', ''))]",
           "groupIds": {
             "value": [
               "Vault"
             ]
           },
-          "dnsZoneId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'vault-dnzones'), '2022-09-01').outputs.id.value]"
-          }
+          "dnsZoneId": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'vault-dnzones'), '2022-09-01').outputs.id.value), createObject('value', ''))]"
         },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
@@ -3007,20 +2969,14 @@
           "tags": {
             "value": "[variables('tags')]"
           },
-          "subnetId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.aiSubId.value]"
-          },
-          "serviceId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'orchestrator'), '2022-09-01').outputs.id.value]"
-          },
+          "subnetId": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.aiSubId.value), createObject('value', ''))]",
+          "serviceId": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'orchestrator'), '2022-09-01').outputs.id.value), createObject('value', ''))]",
           "groupIds": {
             "value": [
               "sites"
             ]
           },
-          "dnsZoneId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'websites-dnzones'), '2022-09-01').outputs.id.value]"
-          }
+          "dnsZoneId": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'websites-dnzones'), '2022-09-01').outputs.id.value), createObject('value', ''))]"
         },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
@@ -3504,20 +3460,14 @@
           "tags": {
             "value": "[variables('tags')]"
           },
-          "subnetId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.aiSubId.value]"
-          },
-          "serviceId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'frontend'), '2022-09-01').outputs.id.value]"
-          },
+          "subnetId": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.aiSubId.value), createObject('value', ''))]",
+          "serviceId": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'frontend'), '2022-09-01').outputs.id.value), createObject('value', ''))]",
           "groupIds": {
             "value": [
               "sites"
             ]
           },
-          "dnsZoneId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'websites-dnzones'), '2022-09-01').outputs.id.value]"
-          }
+          "dnsZoneId": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'websites-dnzones'), '2022-09-01').outputs.id.value), createObject('value', ''))]"
         },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
@@ -4173,20 +4123,14 @@
           "tags": {
             "value": "[variables('tags')]"
           },
-          "subnetId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.aiSubId.value]"
-          },
-          "serviceId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'dataIngestion'), '2022-09-01').outputs.id.value]"
-          },
+          "subnetId": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.aiSubId.value), createObject('value', ''))]",
+          "serviceId": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'dataIngestion'), '2022-09-01').outputs.id.value), createObject('value', ''))]",
           "groupIds": {
             "value": [
               "sites"
             ]
           },
-          "dnsZoneId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'websites-dnzones'), '2022-09-01').outputs.id.value]"
-          }
+          "dnsZoneId": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'websites-dnzones'), '2022-09-01').outputs.id.value), createObject('value', ''))]"
         },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
@@ -4436,20 +4380,14 @@
           "tags": {
             "value": "[variables('tags')]"
           },
-          "subnetId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.aiSubId.value]"
-          },
-          "serviceId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'CognitiveServices'), '2022-09-01').outputs.id.value]"
-          },
+          "subnetId": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.aiSubId.value), createObject('value', ''))]",
+          "serviceId": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'CognitiveServices'), '2022-09-01').outputs.id.value), createObject('value', ''))]",
           "groupIds": {
             "value": [
               "account"
             ]
           },
-          "dnsZoneId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'cognitiveservices-dnzones'), '2022-09-01').outputs.id.value]"
-          }
+          "dnsZoneId": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'cognitiveservices-dnzones'), '2022-09-01').outputs.id.value), createObject('value', ''))]"
         },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
@@ -4718,20 +4656,14 @@
           "tags": {
             "value": "[variables('tags')]"
           },
-          "subnetId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.aiSubId.value]"
-          },
-          "serviceId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'openai'), '2022-09-01').outputs.id.value]"
-          },
+          "subnetId": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.aiSubId.value), createObject('value', ''))]",
+          "serviceId": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'openai'), '2022-09-01').outputs.id.value), createObject('value', ''))]",
           "groupIds": {
             "value": [
               "account"
             ]
           },
-          "dnsZoneId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'openai-dnzones'), '2022-09-01').outputs.id.value]"
-          }
+          "dnsZoneId": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'openai-dnzones'), '2022-09-01').outputs.id.value), createObject('value', ''))]"
         },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
@@ -4976,20 +4908,14 @@
           "tags": {
             "value": "[variables('tags')]"
           },
-          "subnetId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.aiSubId.value]"
-          },
-          "serviceId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'search-service'), '2022-09-01').outputs.id.value]"
-          },
+          "subnetId": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.aiSubId.value), createObject('value', ''))]",
+          "serviceId": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'search-service'), '2022-09-01').outputs.id.value), createObject('value', ''))]",
           "groupIds": {
             "value": [
               "searchService"
             ]
           },
-          "dnsZoneId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'searchs-dnzones'), '2022-09-01').outputs.id.value]"
-          }
+          "dnsZoneId": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'searchs-dnzones'), '2022-09-01').outputs.id.value), createObject('value', ''))]"
         },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
