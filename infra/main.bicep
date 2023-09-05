@@ -177,7 +177,7 @@ module blobDnsZone './core/network/private-dns-zones.bicep' = if (networkIsolati
   params: {
     dnsZoneName: 'privatelink.blob.core.windows.net' 
     tags: tags
-    virtualNetworkName: vnet.outputs.name
+    virtualNetworkName: networkIsolation?vnet.outputs.name:''
   }
 }
 
@@ -187,7 +187,7 @@ module documentsDnsZone './core/network/private-dns-zones.bicep' = if (networkIs
   params: {
     dnsZoneName: 'privatelink.documents.azure.com' 
     tags: tags
-    virtualNetworkName: vnet.outputs.name
+    virtualNetworkName: networkIsolation?vnet.outputs.name:''
   }
 }
 
@@ -197,7 +197,7 @@ module vaultDnsZone './core/network/private-dns-zones.bicep' = if (networkIsolat
   params: {
     dnsZoneName: 'privatelink.vaultcore.azure.net' 
     tags: tags
-    virtualNetworkName: vnet.outputs.name
+    virtualNetworkName: networkIsolation?vnet.outputs.name:''
   }
 }
 
@@ -207,19 +207,9 @@ module websitesDnsZone './core/network/private-dns-zones.bicep' = if (networkIso
   params: {
     dnsZoneName: 'privatelink.azurewebsites.net' 
     tags: tags
-    virtualNetworkName: vnet.outputs.name    
+    virtualNetworkName: networkIsolation?vnet.outputs.name:''    
   }
 }
-
-// module websitesScmDnsZone './core/network/private-dns-zones.bicep' = if (networkIsolation) {
-//   name: 'websitesscm-dnzones'
-//   scope: resourceGroup
-//   params: {
-//     dnsZoneName: 'scm.privatelink.azurewebsites.net' 
-//     tags: tags
-//     virtualNetworkName: vnet.outputs.name  
-//   }
-// }
 
 module cognitiveservicesDnsZone './core/network/private-dns-zones.bicep' = if (networkIsolation) {
   name: 'cognitiveservices-dnzones'
@@ -227,7 +217,7 @@ module cognitiveservicesDnsZone './core/network/private-dns-zones.bicep' = if (n
   params: {
     dnsZoneName: 'privatelink.cognitiveservices.azure.com' 
     tags: tags
-    virtualNetworkName: vnet.outputs.name
+    virtualNetworkName: networkIsolation?vnet.outputs.name:''
   }
 }
 
@@ -237,7 +227,7 @@ module openaiDnsZone './core/network/private-dns-zones.bicep' = if (networkIsola
   params: {
     dnsZoneName: 'privatelink.openai.azure.com' 
     tags: tags
-    virtualNetworkName: vnet.outputs.name
+    virtualNetworkName: networkIsolation?vnet.outputs.name:''
   }
 }
 
@@ -247,7 +237,7 @@ module searchDnsZone './core/network/private-dns-zones.bicep' = if (networkIsola
   params: {
     dnsZoneName: 'privatelink.search.windows.us' 
     tags: tags
-    virtualNetworkName: vnet.outputs.name
+    virtualNetworkName: networkIsolation?vnet.outputs.name:''
   }
 }
 
@@ -261,8 +251,8 @@ module testvm './core/vm/dsvm.bicep' = if (networkIsolation && createBastion) {
     resourceGroupName: resourceGroupName
     name:'testvm${substring(uniqueString(guidValue), 0, 5)}'
     tags: tags
-    aiSubId: vnet.outputs.aiSubId
-    bastionSubId: vnet.outputs.bastionSubId
+    aiSubId: (networkIsolation && createBastion)?vnet.outputs.aiSubId:''
+    bastionSubId: (networkIsolation && createBastion)?vnet.outputs.bastionSubId:''
     vmUserPassword: vmUserPassword
     vmUserName: vmUserName
   }
@@ -280,7 +270,7 @@ module storage './core/storage/storage-account.bicep' = {
     name: storageAccountName
     location: location
     tags: tags
-    allowBlobPublicAccess: false
+    allowBlobPublicAccess: networkIsolation?false:true
     publicNetworkAccess: networkIsolation?'Disabled':'Enabled'
     containers: [{name:containerName, publicAccess: networkIsolation?'None':'Container'}, {name:chunksContainerName}]
   }  
@@ -293,10 +283,10 @@ module storagepe './core/network/private-endpoint.bicep' = if (networkIsolation)
     location: location
     name:'stragpe0${substring(uniqueString(guidValue), 0, 5)}'
     tags: tags
-    subnetId: vnet.outputs.aiSubId
-    serviceId: storage.outputs.id
+    subnetId: networkIsolation?vnet.outputs.aiSubId:''
+    serviceId: networkIsolation?storage.outputs.id:''
     groupIds: ['blob']
-    dnsZoneId: blobDnsZone.outputs.id
+    dnsZoneId: networkIsolation?blobDnsZone.outputs.id:''
   }
 }
 
@@ -321,10 +311,10 @@ module cosmospe './core/network/private-endpoint.bicep' = if (networkIsolation) 
     location: location
     name: 'dbgptpe0${substring(uniqueString(guidValue), 0, 5)}'
     tags: tags
-    subnetId: vnet.outputs.aiSubId
-    serviceId: cosmosAccount.outputs.id
+    subnetId: networkIsolation?vnet.outputs.aiSubId:''
+    serviceId: networkIsolation?cosmosAccount.outputs.id:''
     groupIds: ['Sql']
-    dnsZoneId: documentsDnsZone.outputs.id
+    dnsZoneId: networkIsolation?documentsDnsZone.outputs.id:''
   }
 }
 
@@ -348,10 +338,10 @@ module keyvaultpe './core/network/private-endpoint.bicep' = if (networkIsolation
     location: location
     name:'kvpe0${substring(uniqueString(guidValue), 0, 5)}'
     tags: tags
-    subnetId: vnet.outputs.aiSubId
-    serviceId: keyVault.outputs.id
+    subnetId: networkIsolation?vnet.outputs.aiSubId:''
+    serviceId:networkIsolation? keyVault.outputs.id:''
     groupIds: ['Vault']
-    dnsZoneId: vaultDnsZone.outputs.id
+    dnsZoneId: networkIsolation?vaultDnsZone.outputs.id:''
   }
 }
 
@@ -477,10 +467,10 @@ module orchestratorPe './core/network/private-endpoint.bicep' = if (networkIsola
     location: location
     name: 'orchestratorPe${substring(uniqueString(guidValue), 0, 5)}'
     tags: tags
-    subnetId: vnet.outputs.aiSubId
-    serviceId: orchestrator.outputs.id
+    subnetId: networkIsolation?vnet.outputs.aiSubId:''
+    serviceId: networkIsolation?orchestrator.outputs.id:''
     groupIds: ['sites']
-    dnsZoneId: websitesDnsZone.outputs.id
+    dnsZoneId: networkIsolation?websitesDnsZone.outputs.id:''
   }
 }
 
@@ -551,10 +541,10 @@ module frontendPe './core/network/private-endpoint.bicep' = if (networkIsolation
     location: location
     name: 'frontendPe${substring(uniqueString(guidValue), 0, 5)}'
     tags: tags
-    subnetId: vnet.outputs.aiSubId
-    serviceId: appService.outputs.id
+    subnetId: networkIsolation?vnet.outputs.aiSubId:''
+    serviceId: networkIsolation?appService.outputs.id:''
     groupIds: ['sites']
-    dnsZoneId: websitesDnsZone.outputs.id
+    dnsZoneId: networkIsolation?websitesDnsZone.outputs.id:''
   }
 }
 
@@ -693,10 +683,10 @@ module ingestionPe './core/network/private-endpoint.bicep' = if (networkIsolatio
     location: location
     name: 'ingestionPe${substring(uniqueString(guidValue), 0, 5)}'
     tags: tags
-    subnetId: vnet.outputs.aiSubId
-    serviceId: dataIngestion.outputs.id
+    subnetId: networkIsolation?vnet.outputs.aiSubId:''
+    serviceId: networkIsolation?dataIngestion.outputs.id:''
     groupIds: ['sites']
-    dnsZoneId: websitesDnsZone.outputs.id
+    dnsZoneId: networkIsolation?websitesDnsZone.outputs.id:''
   }
 }
 
@@ -722,10 +712,10 @@ module cognitiveServicesPe './core/network/private-endpoint.bicep' = if (network
     location: location
     name: 'cognitiveServicesPe${substring(uniqueString(guidValue), 0, 5)}'
     tags: tags
-    subnetId: vnet.outputs.aiSubId
-    serviceId: cognitiveServices.outputs.id
+    subnetId: networkIsolation?vnet.outputs.aiSubId:''
+    serviceId: networkIsolation?cognitiveServices.outputs.id:''
     groupIds: ['account']
-    dnsZoneId: cognitiveservicesDnsZone.outputs.id
+    dnsZoneId: networkIsolation?cognitiveservicesDnsZone.outputs.id:''
   }
 }
 
@@ -770,10 +760,10 @@ module openAiPe './core/network/private-endpoint.bicep' = if (networkIsolation) 
     location: location
     name: 'openAiPe${substring(uniqueString(guidValue), 0, 5)}'
     tags: tags
-    subnetId: vnet.outputs.aiSubId
-    serviceId: openAi.outputs.id
+    subnetId: networkIsolation?vnet.outputs.aiSubId:''
+    serviceId: networkIsolation?openAi.outputs.id:''
     groupIds: ['account']
-    dnsZoneId: openaiDnsZone.outputs.id
+    dnsZoneId: networkIsolation?openaiDnsZone.outputs.id:''
   }
 }
 
@@ -804,10 +794,10 @@ module searchPe './core/network/private-endpoint.bicep' = if (networkIsolation) 
     location: location
     name: 'searchPe${substring(uniqueString(guidValue), 0, 5)}'
     tags: tags
-    subnetId: vnet.outputs.aiSubId
-    serviceId: searchService.outputs.id
+    subnetId: networkIsolation?vnet.outputs.aiSubId:''
+    serviceId: networkIsolation?searchService.outputs.id:''
     groupIds: ['searchService']
-    dnsZoneId: searchDnsZone.outputs.id
+    dnsZoneId: networkIsolation?searchDnsZone.outputs.id:''
   }
 }
 
@@ -844,9 +834,6 @@ module keyVaultSecret './core/security/keyvault-secrets.bicep' = {
     }
   }
 }
-
-
-
 
 
 
