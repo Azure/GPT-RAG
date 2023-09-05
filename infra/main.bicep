@@ -19,7 +19,7 @@ param environmentName string = 'dev'
 
 @description('Network isolation? If yes it will create the private endpoints.')
 @allowed([true, false])
-param networkIsolation bool = false
+param networkIsolation bool = true
 
 @description('Create bastion and vm to test the solution when choosing network isolation?')
 @allowed([true, false])
@@ -167,6 +167,90 @@ module vnet './core/network/vnet.bicep' = if (networkIsolation) {
   }
 }
 
+// DNSs Zones
+
+module blobDnsZone './core/network/private-dns-zones.bicep' = if (networkIsolation) {
+  name: 'blob-dnzones'
+  scope: resourceGroup
+  params: {
+    dnsZoneName: 'privatelink.blob.core.windows.net' 
+    tags: tags
+    virtualNetworkName: vnet.outputs.name
+  }
+}
+
+module documentsDnsZone './core/network/private-dns-zones.bicep' = if (networkIsolation) {
+  name: 'documents-dnzones'
+  scope: resourceGroup
+  params: {
+    dnsZoneName: 'privatelink.documents.azure.com' 
+    tags: tags
+    virtualNetworkName: vnet.outputs.name
+  }
+}
+
+module vaultDnsZone './core/network/private-dns-zones.bicep' = if (networkIsolation) {
+  name: 'vault-dnzones'
+  scope: resourceGroup
+  params: {
+    dnsZoneName: 'privatelink.vaultcore.azure.net' 
+    tags: tags
+    virtualNetworkName: vnet.outputs.name
+  }
+}
+
+module websitesDnsZone './core/network/private-dns-zones.bicep' = if (networkIsolation) {
+  name: 'websites-dnzones'
+  scope: resourceGroup
+  params: {
+    dnsZoneName: 'privatelink.azurewebsites.net' 
+    tags: tags
+    virtualNetworkName: vnet.outputs.name    
+  }
+}
+
+// module websitesScmDnsZone './core/network/private-dns-zones.bicep' = if (networkIsolation) {
+//   name: 'websitesscm-dnzones'
+//   scope: resourceGroup
+//   params: {
+//     dnsZoneName: 'scm.privatelink.azurewebsites.net' 
+//     tags: tags
+//     virtualNetworkName: vnet.outputs.name  
+//   }
+// }
+
+module cognitiveservicesDnsZone './core/network/private-dns-zones.bicep' = if (networkIsolation) {
+  name: 'cognitiveservices-dnzones'
+  scope: resourceGroup
+  params: {
+    dnsZoneName: 'privatelink.cognitiveservices.azure.com' 
+    tags: tags
+    virtualNetworkName: vnet.outputs.name
+  }
+}
+
+module openaiDnsZone './core/network/private-dns-zones.bicep' = if (networkIsolation) {
+  name: 'openai-dnzones'
+  scope: resourceGroup
+  params: {
+    dnsZoneName: 'privatelink.openai.azure.com' 
+    tags: tags
+    virtualNetworkName: vnet.outputs.name
+  }
+}
+
+module searchDnsZone './core/network/private-dns-zones.bicep' = if (networkIsolation) {
+  name: 'searchs-dnzones'
+  scope: resourceGroup
+  params: {
+    dnsZoneName: 'privatelink.search.windows.us' 
+    tags: tags
+    virtualNetworkName: vnet.outputs.name
+  }
+}
+
+// VMs
+
 module testvm './core/vm/dsvm.bicep' = if (networkIsolation && createBastion) {
   name: 'testvm'
   scope: resourceGroup
@@ -210,17 +294,7 @@ module storagepe './core/network/private-endpoint.bicep' = if (networkIsolation)
     subnetId: vnet.outputs.aiSubId
     serviceId: storage.outputs.id
     groupIds: ['blob']
-  }
-}
-
-module storagedns './core/network/private-dns.bicep' = if (networkIsolation) {
-  name: 'storagedns'
-  scope: resourceGroup
-  params: {
-    dnsZoneName: '${storageAccountName}.privatelink.blob.core.windows.net'
-    tags: tags
-    virtualNetworkName: vnet.outputs.name
-    privateEndpointName: storagepe.outputs.name
+    dnsZoneId: blobDnsZone.outputs.id
   }
 }
 
@@ -248,17 +322,7 @@ module cosmospe './core/network/private-endpoint.bicep' = if (networkIsolation) 
     subnetId: vnet.outputs.aiSubId
     serviceId: cosmosAccount.outputs.id
     groupIds: ['Sql']
-  }
-}
-
-module cosmosdns './core/network/private-dns.bicep' = if (networkIsolation) {
-  name: 'cosmosdns'
-  scope: resourceGroup
-  params: {
-    dnsZoneName: '${dbAccountName}.privatelink.documents.azure.com'
-    tags: tags
-    virtualNetworkName: vnet.outputs.name
-    privateEndpointName: cosmospe.outputs.name
+    dnsZoneId: documentsDnsZone.outputs.id
   }
 }
 
@@ -285,19 +349,10 @@ module keyvaultpe './core/network/private-endpoint.bicep' = if (networkIsolation
     subnetId: vnet.outputs.aiSubId
     serviceId: keyVault.outputs.id
     groupIds: ['Vault']
+    dnsZoneId: vaultDnsZone.outputs.id
   }
 }
 
-module keyvaultdns './core/network/private-dns.bicep' = if (networkIsolation) {
-  name: 'keyvaultdns'
-  scope: resourceGroup
-  params: {
-    dnsZoneName: '${dbAccountName}.privatelink.vaultcore.azure.net'
-    tags: tags
-    virtualNetworkName: vnet.outputs.name
-    privateEndpointName: keyvaultpe.outputs.name
-  }
-}
 
 // Create an App Service Plan
 module appServicePlan './core/host/appserviceplan.bicep' = {
@@ -423,17 +478,7 @@ module orchestratorPe './core/network/private-endpoint.bicep' = if (networkIsola
     subnetId: vnet.outputs.aiSubId
     serviceId: orchestrator.outputs.id
     groupIds: ['sites']
-  }
-}
-
-module orchestratordns './core/network/private-dns.bicep' = if (networkIsolation) {
-  name: 'orchestratordns'
-  scope: resourceGroup
-  params: {
-    dnsZoneName: '${orchestratorFunctionAppName}.privatelink.azurewebsites.net'
-    tags: tags
-    virtualNetworkName: vnet.outputs.name
-    privateEndpointName: orchestratorPe.outputs.name
+    dnsZoneId: websitesDnsZone.outputs.id
   }
 }
 
@@ -507,17 +552,7 @@ module frontendPe './core/network/private-endpoint.bicep' = if (networkIsolation
     subnetId: vnet.outputs.aiSubId
     serviceId: appService.outputs.id
     groupIds: ['sites']
-  }
-}
-
-module frontenddns './core/network/private-dns.bicep' = if (networkIsolation) {
-  name: 'frontenddns'
-  scope: resourceGroup
-  params: {
-    dnsZoneName: '${azureAppServiceName}.privatelink.azurewebsites.net'
-    tags: tags
-    virtualNetworkName: vnet.outputs.name
-    privateEndpointName: frontendPe.outputs.name
+    dnsZoneId: websitesDnsZone.outputs.id
   }
 }
 
@@ -659,17 +694,7 @@ module ingestionPe './core/network/private-endpoint.bicep' = if (networkIsolatio
     subnetId: vnet.outputs.aiSubId
     serviceId: dataIngestion.outputs.id
     groupIds: ['sites']
-  }
-}
-
-module ingestiondns './core/network/private-dns.bicep' = if (networkIsolation) {
-  name: 'ingestiondns'
-  scope: resourceGroup
-  params: {
-    dnsZoneName: '${dataIngestionFunctionAppName}.privatelink.azurewebsites.net'
-    tags: tags
-    virtualNetworkName: vnet.outputs.name
-    privateEndpointName: ingestionPe.outputs.name
+    dnsZoneId: websitesDnsZone.outputs.id
   }
 }
 
@@ -698,19 +723,10 @@ module cognitiveServicesPe './core/network/private-endpoint.bicep' = if (network
     subnetId: vnet.outputs.aiSubId
     serviceId: cognitiveServices.outputs.id
     groupIds: ['account']
+    dnsZoneId: cognitiveservicesDnsZone.outputs.id
   }
 }
 
-module cognitiveservicesdns './core/network/private-dns.bicep' = if (networkIsolation) {
-  name: 'cognitiveservicesdns'
-  scope: resourceGroup
-  params: {
-    dnsZoneName: '${cognitiveServiceName}.privatelink.cognitiveservices.azure.com'
-    tags: tags
-    virtualNetworkName: vnet.outputs.name
-    privateEndpointName: cognitiveServicesPe.outputs.name
-  }
-}
 
 module openAi 'core/ai/cognitiveservices.bicep' = {
   name: 'openai'
@@ -755,17 +771,7 @@ module openAiPe './core/network/private-endpoint.bicep' = if (networkIsolation) 
     subnetId: vnet.outputs.aiSubId
     serviceId: openAi.outputs.id
     groupIds: ['account']
-  }
-}
-
-module openaidns './core/network/private-dns.bicep' = if (networkIsolation) {
-  name: 'openaidns'
-  scope: resourceGroup
-  params: {
-    dnsZoneName: '${openAiServiceName}.privatelink.openai.azure.com'
-    tags: tags
-    virtualNetworkName: vnet.outputs.name
-    privateEndpointName: openAiPe.outputs.name
+    dnsZoneId: openaiDnsZone.outputs.id
   }
 }
 
@@ -799,17 +805,7 @@ module searchPe './core/network/private-endpoint.bicep' = if (networkIsolation) 
     subnetId: vnet.outputs.aiSubId
     serviceId: searchService.outputs.id
     groupIds: ['searchService']
-  }
-}
-
-module searchdns './core/network/private-dns.bicep' = if (networkIsolation) {
-  name: 'searchdns'
-  scope: resourceGroup
-  params: {
-    dnsZoneName: '${searchServiceName}.privatelink.search.windows.us'
-    tags: tags
-    virtualNetworkName: vnet.outputs.name
-    privateEndpointName: searchPe.outputs.name
+    dnsZoneId: searchDnsZone.outputs.id
   }
 }
 

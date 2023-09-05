@@ -4,6 +4,7 @@ param tags object = {}
 param serviceId string
 param subnetId string
 param groupIds array = []
+param dnsZoneId string
 
 resource privateEndpoint 'Microsoft.Network/privateEndpoints@2021-02-01' = {
   name: name
@@ -22,6 +23,21 @@ resource privateEndpoint 'Microsoft.Network/privateEndpoints@2021-02-01' = {
         }
       }
     ]    
+  }
+}
+
+resource privateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2020-06-01' = {
+  parent: privateEndpoint
+  name: '${name}-group'
+  properties:{
+    privateDnsZoneConfigs:[
+      {
+        name:'config1'
+        properties:{
+          privateDnsZoneId: dnsZoneId
+        }
+      }
+    ]
   }
 }
 
