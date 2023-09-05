@@ -1,7 +1,6 @@
 param dnsZoneName string
 param virtualNetworkName string
 param tags object = {}
-// param cnames array
 
 resource vnet 'Microsoft.Network/virtualNetworks@2020-06-01' existing = {
   name: virtualNetworkName
@@ -15,16 +14,6 @@ resource dnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
     vnet
   ]
 }
-
-// resource cnameRecord 'Microsoft.Network/privateDnsZones/CNAME@2020-06-01' = [for cname in cnames: {
-//   name: '${cname}dnsRecordName'
-//   parent: dnsZone
-//   properties: {
-//     cnameRecord: {
-//       cname: '${cname}.${dnsZoneName}'
-//     }
-//   }
-// }]
 
 resource privateDnsZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
   name: '${virtualNetworkName}-dnslink'
