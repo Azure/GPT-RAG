@@ -837,13 +837,13 @@ module keyVaultSecret './core/security/keyvault-secrets.bicep' = {
 
 
 
-// //  not in use
+//  not in use
 
-// // module delay './core/delay.bicep' = {
-// //   name: 'delay'
-// //   scope: resourceGroup
-// //   params: {
-// //     location: orchestrator.outputs.location
-// //     sleepSeconds: 360
-// //   }
-// // }
+// module delay './core/delay.bicep' = {
+//   name: 'delay'
+//   scope: resourceGroup
+//   params: {
+//     location: orchestrator.outputs.location
+//     sleepSeconds: 360
+//   }
+// }
