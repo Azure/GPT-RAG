@@ -80,8 +80,8 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2021-03-01' = {
     storageProfile: {
       imageReference: {
         publisher: 'microsoft-dsvm'
-        offer: 'ubuntu-1804'
-        sku: '1804-gen2'
+        offer: 'ubuntu-2004'
+        sku: '2004-gen2'
         version: 'latest'
       }
       osDisk: {

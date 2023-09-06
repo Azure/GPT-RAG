@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.20.4.51522",
-      "templateHash": "11930220377173903582"
+      "templateHash": "10953736268714632778"
     }
   },
   "parameters": {
@@ -1388,7 +1388,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.20.4.51522",
-              "templateHash": "17687220016229607656"
+              "templateHash": "1351166895596581254"
             }
           },
           "parameters": {
@@ -1497,8 +1497,8 @@
                 "storageProfile": {
                   "imageReference": {
                     "publisher": "microsoft-dsvm",
-                    "offer": "ubuntu-1804",
-                    "sku": "1804-gen2",
+                    "offer": "ubuntu-2004",
+                    "sku": "2004-gen2",
                     "version": "latest"
                   },
                   "osDisk": {
