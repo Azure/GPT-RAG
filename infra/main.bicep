@@ -835,10 +835,6 @@ module keyVaultSecret './core/security/keyvault-secrets.bicep' = {
   }
 }
 
-
-
-
-
 //  not in use
 
 // module delay './core/delay.bicep' = {
