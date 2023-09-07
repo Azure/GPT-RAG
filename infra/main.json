@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.20.4.51522",
-      "templateHash": "10953736268714632778"
+      "templateHash": "7068780632802559826"
     }
   },
   "parameters": {
@@ -455,14 +455,26 @@
     },
     "retrievalApproach": {
       "type": "string",
-      "defaultValue": "semantic",
+      "defaultValue": "hybrid",
       "allowedValues": [
+        "term",
+        "vector",
         "hybrid",
-        "semantic",
         "oyd"
       ],
       "metadata": {
-        "description": "Orchestrator supports the following retrieval approaches: hybrid(term + vector search), semantic(hybrid + semantic reranking) or use oyd feature of Azure OpenAI."
+        "description": "Orchestrator supports the following retrieval approaches: term, vector, hybrid(term + vector search), or use oyd feature of Azure OpenAI."
+      }
+    },
+    "useSemanticReranking": {
+      "type": "bool",
+      "defaultValue": true,
+      "allowedValues": [
+        true,
+        false
+      ],
+      "metadata": {
+        "description": "Use semantic reranking on top of search results?."
       }
     },
     "searchApiVersion": {
@@ -620,7 +632,7 @@
     }
   },
   "variables": {
-    "searchServiceSkuName": "standard",
+    "searchServiceSkuName": "[if(parameters('networkIsolation'), 'standard2', 'standard')]",
     "searchIndex": "ragindex",
     "orchestratorEndpoint": "[format('https://{0}.azurewebsites.net/api/orc', parameters('orchestratorFunctionAppName'))]",
     "orchestratorUri": "[format('https://{0}.azurewebsites.net', parameters('orchestratorFunctionAppName'))]",
@@ -656,6 +668,15 @@
           },
           "location": {
             "value": "[parameters('location')]"
+          },
+          "tags": {
+            "value": "[variables('tags')]"
+          },
+          "appServicePlanId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'appserviceplan'), '2022-09-01').outputs.id.value]"
+          },
+          "appServicePlanName": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'appserviceplan'), '2022-09-01').outputs.name.value]"
           }
         },
         "template": {
@@ -665,7 +686,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.20.4.51522",
-              "templateHash": "12066752281651117466"
+              "templateHash": "6675469069669284591"
             }
           },
           "parameters": {
@@ -678,6 +699,12 @@
             "tags": {
               "type": "object",
               "defaultValue": {}
+            },
+            "appServicePlanName": {
+              "type": "string"
+            },
+            "appServicePlanId": {
+              "type": "string"
             }
           },
           "variables": {
@@ -697,6 +724,23 @@
                   "addressPrefix": "10.0.2.0/24",
                   "privateEndpointNetworkPolicies": "Enabled",
                   "privateLinkServiceNetworkPolicies": "Enabled"
+                }
+              },
+              {
+                "name": "app-int-subnet",
+                "properties": {
+                  "addressPrefix": "10.0.3.0/24",
+                  "privateEndpointNetworkPolicies": "Enabled",
+                  "privateLinkServiceNetworkPolicies": "Enabled",
+                  "delegations": [
+                    {
+                      "id": "[parameters('appServicePlanId')]",
+                      "name": "[parameters('appServicePlanName')]",
+                      "properties": {
+                        "serviceName": "Microsoft.Web/serverFarms"
+                      }
+                    }
+                  ]
                 }
               }
             ]
@@ -719,14 +763,6 @@
             }
           ],
           "outputs": {
-            "id": {
-              "type": "string",
-              "value": "[resourceId('Microsoft.Network/virtualNetworks', parameters('name'))]"
-            },
-            "name": {
-              "type": "string",
-              "value": "[parameters('name')]"
-            },
             "subnets": {
               "type": "array",
               "copy": {
@@ -745,6 +781,14 @@
                 }
               }
             },
+            "id": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/virtualNetworks', parameters('name'))]"
+            },
+            "name": {
+              "type": "string",
+              "value": "[parameters('name')]"
+            },
             "aiSubId": {
               "type": "string",
               "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('name')), '2021-02-01').subnets[0].id]"
@@ -752,11 +796,16 @@
             "bastionSubId": {
               "type": "string",
               "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('name')), '2021-02-01').subnets[1].id]"
+            },
+            "appIntSubId": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('name')), '2021-02-01').subnets[2].id]"
             }
           }
         }
       },
       "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'appserviceplan')]",
         "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('resourceGroupName'))]"
       ]
     },
@@ -1388,7 +1437,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.20.4.51522",
-              "templateHash": "1351166895596581254"
+              "templateHash": "10582051925552475449"
             }
           },
           "parameters": {
@@ -1497,8 +1546,8 @@
                 "storageProfile": {
                   "imageReference": {
                     "publisher": "microsoft-dsvm",
-                    "offer": "ubuntu-2004",
-                    "sku": "2004-gen2",
+                    "offer": "dsvm-win-2019",
+                    "sku": "winserver-2019",
                     "version": "latest"
                   },
                   "osDisk": {
@@ -2636,6 +2685,8 @@
         },
         "mode": "Incremental",
         "parameters": {
+          "subnetId": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.appIntSubId.value), createObject('value', ''))]",
+          "vnetName": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.name.value), createObject('value', ''))]",
           "keyVaultName": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'keyvault'), '2022-09-01').outputs.name.value]"
           },
@@ -2700,6 +2751,10 @@
                 "value": "[parameters('retrievalApproach')]"
               },
               {
+                "name": "AZURE_SEARCH_USE_SEMANTIC",
+                "value": "[parameters('useSemanticReranking')]"
+              },
+              {
                 "name": "AZURE_SEARCH_SEMANTIC_SEARCH_LANGUAGE",
                 "value": "[parameters('searchServiceLanguage')]"
               },
@@ -2753,7 +2808,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.20.4.51522",
-              "templateHash": "15776917939175483361"
+              "templateHash": "630786388779328340"
             }
           },
           "parameters": {
@@ -2831,6 +2886,12 @@
               "type": "string",
               "defaultValue": ""
             },
+            "vnetName": {
+              "type": "string"
+            },
+            "subnetId": {
+              "type": "string"
+            },
             "storageAccountType": {
               "type": "string",
               "defaultValue": "Standard_LRS",
@@ -2894,8 +2955,10 @@
               "properties": {
                 "serverFarmId": "[parameters('appServicePlanId')]",
                 "clientAffinityEnabled": "[parameters('clientAffinityEnabled')]",
+                "virtualNetworkSubnetId": "[parameters('subnetId')]",
                 "httpsOnly": true,
                 "siteConfig": {
+                  "vnetName": "[parameters('vnetName')]",
                   "linuxFxVersion": "[variables('runtimeNameAndVersion')]",
                   "alwaysOn": "[parameters('alwaysOn')]",
                   "ftpsState": "FtpsOnly",
@@ -2945,7 +3008,8 @@
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'appinsights')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'appserviceplan')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'keyvault')]",
-        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('resourceGroupName'))]"
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('resourceGroupName'))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName'))]"
       ]
     },
     {
@@ -3161,6 +3225,8 @@
           "applicationInsightsName": {
             "value": "[parameters('appInsightsName')]"
           },
+          "subnetId": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.appIntSubId.value), createObject('value', ''))]",
+          "vnetName": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.name.value), createObject('value', ''))]",
           "appCommandLine": {
             "value": "python ./app.py"
           },
@@ -3182,6 +3248,7 @@
           "scmDoBuildDuringDeployment": {
             "value": true
           },
+          "basicPublishingCredentials": "[if(parameters('networkIsolation'), createObject('value', true()), createObject('value', false()))]",
           "appSettings": {
             "value": [
               {
@@ -3226,7 +3293,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.20.4.51522",
-              "templateHash": "1578119593791864214"
+              "templateHash": "135787650036401430"
             }
           },
           "parameters": {
@@ -3327,6 +3394,16 @@
             "healthCheckPath": {
               "type": "string",
               "defaultValue": ""
+            },
+            "basicPublishingCredentials": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "vnetName": {
+              "type": "string"
+            },
+            "subnetId": {
+              "type": "string"
             }
           },
           "resources": [
@@ -3363,7 +3440,7 @@
               "apiVersion": "2022-03-01",
               "name": "[format('{0}/{1}', parameters('name'), 'ftp')]",
               "properties": {
-                "allow": false
+                "allow": "[parameters('basicPublishingCredentials')]"
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Web/sites', parameters('name'))]"
@@ -3374,7 +3451,7 @@
               "apiVersion": "2022-03-01",
               "name": "[format('{0}/{1}', parameters('name'), 'scm')]",
               "properties": {
-                "allow": false
+                "allow": "[parameters('basicPublishingCredentials')]"
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Web/sites', parameters('name'))]"
@@ -3389,7 +3466,10 @@
               "kind": "[parameters('kind')]",
               "properties": {
                 "serverFarmId": "[parameters('appServicePlanId')]",
+                "virtualNetworkSubnetId": "[parameters('subnetId')]",
+                "vnetRouteAllEnabled": true,
                 "siteConfig": {
+                  "vnetName": "[parameters('vnetName')]",
                   "linuxFxVersion": "[parameters('linuxFxVersion')]",
                   "alwaysOn": "[parameters('alwaysOn')]",
                   "ftpsState": "[parameters('ftpsState')]",
@@ -3436,7 +3516,8 @@
       "dependsOn": [
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'appserviceplan')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'keyvault')]",
-        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('resourceGroupName'))]"
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('resourceGroupName'))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName'))]"
       ]
     },
     {
@@ -3709,6 +3790,8 @@
           "appServicePlanId": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'appserviceplan'), '2022-09-01').outputs.id.value]"
           },
+          "subnetId": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.appIntSubId.value), createObject('value', ''))]",
+          "vnetName": "[if(parameters('networkIsolation'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.name.value), createObject('value', ''))]",
           "storageAccountName": {
             "value": "[format('{0}ing', parameters('storageAccountName'))]"
           },
@@ -3832,7 +3915,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.20.4.51522",
-              "templateHash": "15776917939175483361"
+              "templateHash": "630786388779328340"
             }
           },
           "parameters": {
@@ -3910,6 +3993,12 @@
               "type": "string",
               "defaultValue": ""
             },
+            "vnetName": {
+              "type": "string"
+            },
+            "subnetId": {
+              "type": "string"
+            },
             "storageAccountType": {
               "type": "string",
               "defaultValue": "Standard_LRS",
@@ -3973,8 +4062,10 @@
               "properties": {
                 "serverFarmId": "[parameters('appServicePlanId')]",
                 "clientAffinityEnabled": "[parameters('clientAffinityEnabled')]",
+                "virtualNetworkSubnetId": "[parameters('subnetId')]",
                 "httpsOnly": true,
                 "siteConfig": {
+                  "vnetName": "[parameters('vnetName')]",
                   "linuxFxVersion": "[variables('runtimeNameAndVersion')]",
                   "alwaysOn": "[parameters('alwaysOn')]",
                   "ftpsState": "FtpsOnly",
@@ -4024,7 +4115,8 @@
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'appinsights')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'appserviceplan')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'keyvault')]",
-        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('resourceGroupName'))]"
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('resourceGroupName'))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName'))]"
       ]
     },
     {
@@ -4885,6 +4977,146 @@
       },
       "dependsOn": [
         "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('resourceGroupName'))]"
+      ]
+    },
+    {
+      "condition": "[parameters('networkIsolation')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "searchWebAppPrivatelink",
+      "resourceGroup": "[parameters('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[format('{0}-webapplink', parameters('searchServiceName'))]"
+          },
+          "searchName": {
+            "value": "[parameters('searchServiceName')]"
+          },
+          "resourceId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'frontend'), '2022-09-01').outputs.id.value]"
+          },
+          "groupId": {
+            "value": "sites"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.20.4.51522",
+              "templateHash": "10926077393172553511"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string"
+            },
+            "searchName": {
+              "type": "string"
+            },
+            "resourceId": {
+              "type": "string"
+            },
+            "groupId": {
+              "type": "string"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Search/searchServices/sharedPrivateLinkResources",
+              "apiVersion": "2021-04-01-preview",
+              "name": "[format('{0}/{1}', parameters('searchName'), parameters('name'))]",
+              "properties": {
+                "groupId": "[parameters('groupId')]",
+                "status": "Approved",
+                "provisioningState": "Succeeded",
+                "requestMessage": "shared private link approval message",
+                "privateLinkResourceId": "[parameters('resourceId')]"
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'frontend')]",
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('resourceGroupName'))]"
+      ]
+    },
+    {
+      "condition": "[parameters('networkIsolation')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "searchStoragePrivatelink",
+      "resourceGroup": "[parameters('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[format('{0}-storagelink', parameters('searchServiceName'))]"
+          },
+          "searchName": {
+            "value": "[parameters('searchServiceName')]"
+          },
+          "resourceId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'storage'), '2022-09-01').outputs.id.value]"
+          },
+          "groupId": {
+            "value": "blob"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.20.4.51522",
+              "templateHash": "10926077393172553511"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string"
+            },
+            "searchName": {
+              "type": "string"
+            },
+            "resourceId": {
+              "type": "string"
+            },
+            "groupId": {
+              "type": "string"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Search/searchServices/sharedPrivateLinkResources",
+              "apiVersion": "2021-04-01-preview",
+              "name": "[format('{0}/{1}', parameters('searchName'), parameters('name'))]",
+              "properties": {
+                "groupId": "[parameters('groupId')]",
+                "status": "Approved",
+                "provisioningState": "Succeeded",
+                "requestMessage": "shared private link approval message",
+                "privateLinkResourceId": "[parameters('resourceId')]"
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('resourceGroupName'))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'storage')]"
       ]
     },
     {
