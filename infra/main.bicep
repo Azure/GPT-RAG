@@ -165,7 +165,7 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
 
 // networking
 
-module vnet './core/network/vnet.bicep' = if (networkIsolation) {
+module vnet './core/network/vnet.bicep' = {
   name: vnetName
   scope: resourceGroup
   params: {
@@ -384,8 +384,8 @@ module orchestrator './core/host/functions.bicep' = {
   name: 'orchestrator'
   scope: resourceGroup
   params: {
-    subnetId: networkIsolation?vnet.outputs.appIntSubId:''
-    vnetName: networkIsolation?vnet.outputs.name:''    
+    subnetId: vnet.outputs.appIntSubId
+    vnetName: vnet.outputs.name  
     keyVaultName: keyVault.outputs.name
     storageAccountName: '${storageAccountName}orc'
     appServicePlanId: appServicePlan.outputs.id
@@ -502,8 +502,8 @@ module frontEnd  'core/host/appservice.bicep'  = {
   params: {
     name: azureAppServiceName
     applicationInsightsName: appInsightsName
-    subnetId: networkIsolation?vnet.outputs.appIntSubId:''
-    vnetName: networkIsolation?vnet.outputs.name:''
+    subnetId: vnet.outputs.appIntSubId
+    vnetName: vnet.outputs.name
     appCommandLine: 'python ./app.py'
     location: location
     tags: tags
@@ -589,8 +589,8 @@ module dataIngestion './core/host/functions.bicep' = {
   params: {
     keyVaultName: keyVault.outputs.name
     appServicePlanId: appServicePlan.outputs.id
-    subnetId: networkIsolation?vnet.outputs.appIntSubId:''
-    vnetName: networkIsolation?vnet.outputs.name:''
+    subnetId: vnet.outputs.appIntSubId
+    vnetName: vnet.outputs.name
     storageAccountName: '${storageAccountName}ing'
     appName: dataIngestionFunctionAppName
     location: location
@@ -873,6 +873,12 @@ module keyVaultSecret './core/security/keyvault-secrets.bicep' = {
     }
   }
 }
+
+
+
+
+
+
 
 //  not in use
 
