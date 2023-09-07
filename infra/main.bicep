@@ -84,10 +84,15 @@ param embeddingsDeploymentCapacity int = 10
 param openaiApiVersion string = '2023-05-15'
 
 // search
-@description('Orchestrator supports the following retrieval approaches: hybrid(term + vector search), semantic(hybrid + semantic reranking) or use oyd feature of Azure OpenAI.')
-@allowed([ 'hybrid', 'semantic', 'oyd' ])
-param retrievalApproach string = 'semantic'
-var searchServiceSkuName = 'standard'
+@description('Orchestrator supports the following retrieval approaches: term, vector, hybrid(term + vector search), or use oyd feature of Azure OpenAI.')
+@allowed(['term', 'vector', 'hybrid', 'oyd' ])
+param retrievalApproach string = 'hybrid'
+@description('Use semantic reranking on top of search results?.')
+@allowed([true, false])
+param useSemanticReranking bool = true
+
+
+var searchServiceSkuName = networkIsolation?'standard2':'standard'
 @description('Search index name.')
 var searchIndex = 'ragindex'
 @allowed([ '2023-07-01-Preview' ])
@@ -166,6 +171,9 @@ module vnet './core/network/vnet.bicep' = if (networkIsolation) {
   params: {
     name: vnetName
     location: location
+    tags: tags
+    appServicePlanId: appServicePlan.outputs.id
+    appServicePlanName: appServicePlan.outputs.name
   }
 }
 
@@ -345,7 +353,6 @@ module keyvaultpe './core/network/private-endpoint.bicep' = if (networkIsolation
   }
 }
 
-
 // Create an App Service Plan
 module appServicePlan './core/host/appserviceplan.bicep' = {
   name: 'appserviceplan'
@@ -372,12 +379,13 @@ module appInsights './core/host/appinsights.bicep' = {
   }
 }
 
-
 // orchestrator
 module orchestrator './core/host/functions.bicep' = {
   name: 'orchestrator'
   scope: resourceGroup
   params: {
+    subnetId: networkIsolation?vnet.outputs.appIntSubId:''
+    vnetName: networkIsolation?vnet.outputs.name:''    
     keyVaultName: keyVault.outputs.name
     storageAccountName: '${storageAccountName}orc'
     appServicePlanId: appServicePlan.outputs.id
@@ -412,6 +420,10 @@ module orchestrator './core/host/functions.bicep' = {
         name: 'AZURE_SEARCH_APPROACH'
         value: retrievalApproach
       }
+      {
+        name: 'AZURE_SEARCH_USE_SEMANTIC'
+        value: useSemanticReranking
+      }      
       {
         name: 'AZURE_SEARCH_SEMANTIC_SEARCH_LANGUAGE'
         value: searchServiceLanguage
@@ -484,12 +496,14 @@ module orchestratorKeyVaultAccess './core/security/keyvault-access.bicep' = {
   }
 } 
 
-module appService  'core/host/appservice.bicep'  = {
+module frontEnd  'core/host/appservice.bicep'  = {
   name: 'frontend'
   scope: resourceGroup
   params: {
     name: azureAppServiceName
     applicationInsightsName: appInsightsName
+    subnetId: networkIsolation?vnet.outputs.appIntSubId:''
+    vnetName: networkIsolation?vnet.outputs.name:''
     appCommandLine: 'python ./app.py'
     location: location
     tags: tags
@@ -497,6 +511,7 @@ module appService  'core/host/appservice.bicep'  = {
     runtimeName: 'python'
     runtimeVersion: '3.10'
     scmDoBuildDuringDeployment: true
+    basicPublishingCredentials: networkIsolation?true:false
     appSettings: [
       {
         name: 'SPEECH_SYNTHESIS_VOICE_NAME'
@@ -542,7 +557,7 @@ module frontendPe './core/network/private-endpoint.bicep' = if (networkIsolation
     name: 'frontendPe${substring(uniqueString(guidValue), 0, 5)}'
     tags: tags
     subnetId: networkIsolation?vnet.outputs.aiSubId:''
-    serviceId: networkIsolation?appService.outputs.id:''
+    serviceId: networkIsolation?frontEnd.outputs.id:''
     groupIds: ['sites']
     dnsZoneId: networkIsolation?websitesDnsZone.outputs.id:''
   }
@@ -554,7 +569,7 @@ module appsericeKeyVaultAccess './core/security/keyvault-access.bicep' = {
   scope: resourceGroup
   params: {
     keyVaultName: keyVault.outputs.name
-    principalId: appService.outputs.identityPrincipalId
+    principalId: frontEnd.outputs.identityPrincipalId
   }
 }
 
@@ -564,7 +579,7 @@ module appserviceOrchestratorAccess './core/host/functions-access.bicep' = {
   scope: resourceGroup
   params: {
     functionAppName: orchestrator.outputs.name
-    principalId: appService.outputs.identityPrincipalId
+    principalId: frontEnd.outputs.identityPrincipalId
   }
 }
 
@@ -574,6 +589,8 @@ module dataIngestion './core/host/functions.bicep' = {
   params: {
     keyVaultName: keyVault.outputs.name
     appServicePlanId: appServicePlan.outputs.id
+    subnetId: networkIsolation?vnet.outputs.appIntSubId:''
+    vnetName: networkIsolation?vnet.outputs.name:''
     storageAccountName: '${storageAccountName}ing'
     appName: dataIngestionFunctionAppName
     location: location
@@ -784,6 +801,28 @@ module searchService 'core/search/search-services.bicep' = {
       name: searchServiceSkuName
     }
     semanticSearch: 'free'
+  }
+}
+
+module searchWebAppPrivatelink 'core/search/search-private-link.bicep' = if (networkIsolation) {
+  name: 'searchWebAppPrivatelink'
+  scope: resourceGroup
+  params: {
+   name: '${searchServiceName}-webapplink'
+   searchName: searchServiceName
+   resourceId: frontEnd.outputs.id
+    groupId: 'sites'
+  }
+}
+
+module searchStoragePrivatelink 'core/search/search-private-link.bicep' = if (networkIsolation) {
+  name: 'searchStoragePrivatelink'
+  scope: resourceGroup
+  params: {
+   name: '${searchServiceName}-storagelink'
+   searchName: searchServiceName
+   resourceId: storage.outputs.id
+   groupId: 'blob'
   }
 }
 

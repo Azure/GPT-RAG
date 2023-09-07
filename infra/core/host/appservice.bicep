@@ -32,6 +32,9 @@ param scmDoBuildDuringDeployment bool = false
 param use32BitWorkerProcess bool = false
 param ftpsState string = 'FtpsOnly'
 param healthCheckPath string = ''
+param basicPublishingCredentials bool = false
+param vnetName string
+param subnetId string
 
 resource appService 'Microsoft.Web/sites@2022-03-01' = {
   name: name
@@ -40,7 +43,10 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
   kind: kind
   properties: {
     serverFarmId: appServicePlanId
+    virtualNetworkSubnetId: subnetId
+    vnetRouteAllEnabled: true
     siteConfig: {
+      vnetName: vnetName
       linuxFxVersion: linuxFxVersion
       alwaysOn: alwaysOn
       ftpsState: ftpsState
@@ -88,14 +94,14 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
   resource basicPublishingCredentialsPoliciesFtp 'basicPublishingCredentialsPolicies' = {
     name: 'ftp'
     properties: {
-      allow: false
+      allow: basicPublishingCredentials
     }
   }
 
   resource basicPublishingCredentialsPoliciesScm 'basicPublishingCredentialsPolicies' = {
     name: 'scm'
     properties: {
-      allow: false
+      allow: basicPublishingCredentials
     }
   }
 }

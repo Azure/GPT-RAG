@@ -19,6 +19,8 @@ param runtimeVersion string = '3.10'
 param use32BitWorkerProcess bool = false
 param healthCheckPath string = ''
 var runtimeNameAndVersion = '${runtimeName}|${runtimeVersion}'
+param vnetName string
+param subnetId string
 
 @description('Storage Account type')
 @allowed([
@@ -65,8 +67,10 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
     serverFarmId: appServicePlanId
     // serverFarmId: hostingPlan.id
     clientAffinityEnabled: clientAffinityEnabled
+    virtualNetworkSubnetId: subnetId
     httpsOnly: true
     siteConfig: {
+      vnetName: vnetName
       linuxFxVersion: runtimeNameAndVersion      
       alwaysOn: alwaysOn
       ftpsState: 'FtpsOnly'
@@ -129,6 +133,8 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = if (!(empty(keyVaultName))) {
  name: keyVaultName
 }
+
+
 
 // param waitSeconds int =  240
 // module delayDeployment 'br/public:deployment-scripts/wait:1.1.1' = {
