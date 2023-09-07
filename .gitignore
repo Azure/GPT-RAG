@@ -1,3 +1,5 @@
 .azure
+.devcontainer
+.github
+.azdo
 local/
-infra/main.bicep
