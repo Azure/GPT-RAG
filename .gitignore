@@ -1,3 +1,4 @@
 .azure
+.devcontainer
+.github
 local/
-infra/main.bicep
