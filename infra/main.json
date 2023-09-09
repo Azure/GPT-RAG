@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.20.4.51522",
-      "templateHash": "16519061727738372060"
+      "templateHash": "14040637442147461038"
     }
   },
   "parameters": {
@@ -3913,6 +3913,10 @@
                 "value": "[parameters('chunkTokenOverlap')]"
               },
               {
+                "name": "NETWORK_ISOLATION",
+                "value": "[parameters('networkIsolation')]"
+              },
+              {
                 "name": "AzureWebJobsFeatureFlags",
                 "value": "EnableWorkerIndexing"
               }
@@ -4994,76 +4998,6 @@
       "condition": "[parameters('networkIsolation')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
-      "name": "searchWebAppPrivatelink",
-      "resourceGroup": "[parameters('resourceGroupName')]",
-      "properties": {
-        "expressionEvaluationOptions": {
-          "scope": "inner"
-        },
-        "mode": "Incremental",
-        "parameters": {
-          "name": {
-            "value": "[format('{0}-webapplink', parameters('searchServiceName'))]"
-          },
-          "searchName": {
-            "value": "[parameters('searchServiceName')]"
-          },
-          "resourceId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'frontend'), '2022-09-01').outputs.id.value]"
-          },
-          "groupId": {
-            "value": "sites"
-          }
-        },
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "metadata": {
-            "_generator": {
-              "name": "bicep",
-              "version": "0.20.4.51522",
-              "templateHash": "10926077393172553511"
-            }
-          },
-          "parameters": {
-            "name": {
-              "type": "string"
-            },
-            "searchName": {
-              "type": "string"
-            },
-            "resourceId": {
-              "type": "string"
-            },
-            "groupId": {
-              "type": "string"
-            }
-          },
-          "resources": [
-            {
-              "type": "Microsoft.Search/searchServices/sharedPrivateLinkResources",
-              "apiVersion": "2021-04-01-preview",
-              "name": "[format('{0}/{1}', parameters('searchName'), parameters('name'))]",
-              "properties": {
-                "groupId": "[parameters('groupId')]",
-                "status": "Approved",
-                "provisioningState": "Succeeded",
-                "requestMessage": "shared private link approval message",
-                "privateLinkResourceId": "[parameters('resourceId')]"
-              }
-            }
-          ]
-        }
-      },
-      "dependsOn": [
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'frontend')]",
-        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('resourceGroupName'))]"
-      ]
-    },
-    {
-      "condition": "[parameters('networkIsolation')]",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
       "name": "searchStoragePrivatelink",
       "resourceGroup": "[parameters('resourceGroupName')]",
       "properties": {
@@ -5092,7 +5026,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.20.4.51522",
-              "templateHash": "10926077393172553511"
+              "templateHash": "7257648183788547170"
             }
           },
           "parameters": {
@@ -5118,16 +5052,106 @@
                 "groupId": "[parameters('groupId')]",
                 "status": "Approved",
                 "provisioningState": "Succeeded",
-                "requestMessage": "shared private link approval message",
+                "requestMessage": "automatically created by the system",
                 "privateLinkResourceId": "[parameters('resourceId')]"
               }
             }
-          ]
+          ],
+          "outputs": {
+            "name": {
+              "type": "string",
+              "value": "[parameters('name')]"
+            },
+            "id": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Search/searchServices/sharedPrivateLinkResources', parameters('searchName'), parameters('name'))]"
+            }
+          }
         }
       },
       "dependsOn": [
         "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('resourceGroupName'))]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'storage')]"
+      ]
+    },
+    {
+      "condition": "[parameters('networkIsolation')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "searchWebAppPrivatelink",
+      "resourceGroup": "[parameters('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[format('{0}-webapplink', parameters('searchServiceName'))]"
+          },
+          "searchName": {
+            "value": "[parameters('searchServiceName')]"
+          },
+          "resourceId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'frontend'), '2022-09-01').outputs.id.value]"
+          },
+          "groupId": {
+            "value": "sites"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.20.4.51522",
+              "templateHash": "7257648183788547170"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string"
+            },
+            "searchName": {
+              "type": "string"
+            },
+            "resourceId": {
+              "type": "string"
+            },
+            "groupId": {
+              "type": "string"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Search/searchServices/sharedPrivateLinkResources",
+              "apiVersion": "2021-04-01-preview",
+              "name": "[format('{0}/{1}', parameters('searchName'), parameters('name'))]",
+              "properties": {
+                "groupId": "[parameters('groupId')]",
+                "status": "Approved",
+                "provisioningState": "Succeeded",
+                "requestMessage": "automatically created by the system",
+                "privateLinkResourceId": "[parameters('resourceId')]"
+              }
+            }
+          ],
+          "outputs": {
+            "name": {
+              "type": "string",
+              "value": "[parameters('name')]"
+            },
+            "id": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Search/searchServices/sharedPrivateLinkResources', parameters('searchName'), parameters('name'))]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'frontend')]",
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('resourceGroupName'))]"
       ]
     },
     {

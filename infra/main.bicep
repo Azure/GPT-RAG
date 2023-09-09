@@ -19,7 +19,7 @@ param environmentName string = 'dev'
 
 @description('Network isolation? If yes it will create the private endpoints.')
 @allowed([true, false])
-param networkIsolation bool = true
+param networkIsolation bool = false
 
 @description('Create bastion and vm to test the solution when choosing network isolation?')
 @allowed([true, false])
@@ -297,6 +297,7 @@ module storagepe './core/network/private-endpoint.bicep' = if (networkIsolation)
     dnsZoneId: networkIsolation?blobDnsZone.outputs.id:''
   }
 }
+
 
 // Database
 module cosmosAccount './core/db/cosmos.bicep' = {
@@ -676,6 +677,10 @@ module dataIngestion './core/host/functions.bicep' = {
         value: chunkTokenOverlap
       }
       {
+        name: 'NETWORK_ISOLATION'
+        value: networkIsolation
+      }   
+      {
         name: 'AzureWebJobsFeatureFlags'
         value: 'EnableWorkerIndexing'
       }
@@ -804,17 +809,6 @@ module searchService 'core/search/search-services.bicep' = {
   }
 }
 
-module searchWebAppPrivatelink 'core/search/search-private-link.bicep' = if (networkIsolation) {
-  name: 'searchWebAppPrivatelink'
-  scope: resourceGroup
-  params: {
-   name: '${searchServiceName}-webapplink'
-   searchName: searchServiceName
-   resourceId: frontEnd.outputs.id
-    groupId: 'sites'
-  }
-}
-
 module searchStoragePrivatelink 'core/search/search-private-link.bicep' = if (networkIsolation) {
   name: 'searchStoragePrivatelink'
   scope: resourceGroup
@@ -823,6 +817,17 @@ module searchStoragePrivatelink 'core/search/search-private-link.bicep' = if (ne
    searchName: searchServiceName
    resourceId: storage.outputs.id
    groupId: 'blob'
+  }
+}
+
+module searchWebAppPrivatelink 'core/search/search-private-link.bicep' = if (networkIsolation) {
+  name: 'searchWebAppPrivatelink'
+  scope: resourceGroup
+  params: {
+   name: '${searchServiceName}-webapplink'
+   searchName: searchServiceName
+   resourceId: frontEnd.outputs.id
+    groupId: 'sites'
   }
 }
 
@@ -873,6 +878,9 @@ module keyVaultSecret './core/security/keyvault-secrets.bicep' = {
     }
   }
 }
+
+
+
 
 
 

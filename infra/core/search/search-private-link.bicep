@@ -14,7 +14,11 @@ resource sharedPrivateLinkResources 'Microsoft.Search/searchServices/sharedPriva
       groupId: groupId
       status: 'Approved'
       provisioningState: 'Succeeded'
-      requestMessage: 'shared private link approval message'
+      requestMessage: 'automatically created by the system'
       privateLinkResourceId: resourceId
+      
   }
 }
+
+output name string = sharedPrivateLinkResources.name
+output id string = sharedPrivateLinkResources.id
