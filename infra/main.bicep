@@ -16,7 +16,6 @@ output guidOutput string = guidValue
 param environmentName string = 'dev'
 
 //network
-
 @description('Network isolation? If yes it will create the private endpoints.')
 @allowed([true, false])
 param networkIsolation bool = false
@@ -545,7 +544,11 @@ module frontEnd  'core/host/appservice.bicep'  = {
       {
         name: 'AZURE_KEY_VAULT_NAME'
         value: keyVault.outputs.name
-      }                              
+      }
+      {
+        name: 'STORAGE_ACCOUNT'
+        value: storageAccountName
+      } 
     ]
   }
 }
