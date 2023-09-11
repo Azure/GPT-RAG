@@ -36,22 +36,22 @@ param vmUserName string = 'gptrag'
 //language settings
 @description('Language used when orchestrator needs send error messages to the UX.')
 @allowed(['pt', 'es', 'en'])
-param orchestratorMessagesLanguage string = 'en'
+param orchestratorMessagesLanguage string = 'es'
 @description('Analyzer language used by Azure search to analyze indexes text content.')
 @allowed(['pt-Br.microsoft', 'es.microsoft', 'ar.microsoft', 'bn.microsoft', 'bg.microsoft', 'ca.microsoft', 'zh-Hans.microsoft', 'zh-Hant.microsoft', 'hr.microsoft', 'cs.microsoft', 'da.microsoft', 'nl.microsoft', 'en.microsoft', 'et.microsoft', 'fi.microsoft', 'fr.microsoft', 'de.microsoft', 'el.microsoft', 'gu.microsoft', 'he.microsoft', 'hi.microsoft', 'hu.microsoft', 'is.microsoft', 'id.microsoft', 'it.microsoft', 'ja.microsoft', 'kn.microsoft', 'ko.microsoft', 'lv.microsoft', 'lt.microsoft', 'ml.microsoft', 'ms.microsoft', 'mr.microsoft', 'nb.microsoft', 'pl.microsoft', 'pt-Pt.microsoft', 'pa.microsoft', 'ro.microsoft', 'ru.microsoft', 'sr-cyrillic.microsoft', 'sr-latin.microsoft', 'sk.microsoft', 'sl.microsoft', 'sv.microsoft', 'ta.microsoft', 'te.microsoft', 'th.microsoft', 'tr.microsoft', 'uk.microsoft', 'ur.microsoft', 'vi.microsoft' ])
-param searchAnalyzerName string = 'en.microsoft'
+param searchAnalyzerName string = 'es.microsoft'
 @description('Search language, only valid when semantic reranking is used.')
 @allowed(['pt', 'es', 'en'])
-param searchServiceLanguage string = 'en'
+param searchServiceLanguage string = 'es'
 @description('Language used for speech recognition in the frontend.')
 @allowed(['pt-BR', 'af-ZA', 'am-ET', 'ar-AE', 'ar-BH', 'ar-DZ', 'ar-EG', 'ar-IL', 'ar-IQ', 'ar-JO', 'ar-KW', 'ar-LB', 'ar-LY', 'ar-MA', 'ar-OM', 'ar-PS', 'ar-QA', 'ar-SA', 'ar-SY', 'ar-TN', 'ar-YE', 'az-AZ', 'bg-BG', 'bn-IN', 'bs-BA', 'ca-ES', 'cs-CZ', 'cy-GB', 'da-DK', 'de-AT', 'de-CH', 'de-DE', 'el-GR', 'en-AU', 'en-CA', 'en-GB', 'en-GH', 'en-HK', 'en-IE', 'en-IN', 'en-KE', 'en-NG', 'en-NZ', 'en-PH', 'en-SG', 'en-TZ', 'en-US', 'en-ZA', 'es-AR', 'es-BO', 'es-CL', 'es-CO', 'es-CR', 'es-CU', 'es-DO', 'es-EC', 'es-ES', 'es-GQ', 'es-GT', 'es-HN', 'es-MX', 'es-NI', 'es-PA', 'es-PE', 'es-PR', 'es-PY', 'es-SV', 'es-US', 'es-UY', 'es-VE', 'et-EE', 'eu-ES', 'fa-IR', 'fi-FI', 'fil-PH', 'fr-BE', 'fr-CA', 'fr-CH', 'fr-FR', 'ga-IE', 'gl-ES', 'gu-IN', 'he-IL', 'hi-IN', 'hr-HR', 'hu-HU', 'hy-AM', 'id-ID', 'is-IS', 'it-CH', 'it-IT', 'ja-JP', 'jv-ID', 'ka-GE', 'kk-KZ', 'km-KH', 'kn-IN', 'ko-KR', 'lo-LA', 'lt-LT', 'lv-LV', 'mk-MK', 'ml-IN', 'mn-MN', 'mr-IN', 'ms-MY', 'mt-MT', 'my-MM', 'nb-NO', 'ne-NP', 'nl-BE', 'nl-NL', 'pl-PL', 'ps-AF', 'pt-PT', 'ro-RO', 'ru-RU', 'si-LK', 'sk-SK', 'sl-SI', 'so-SO', 'sq-AL', 'sr-RS', 'sv-SE', 'sw-KE', 'sw-TZ', 'ta-IN', 'te-IN', 'th-TH', 'tr-TR', 'uk-UA', 'uz-UZ', 'vi-VN', 'wuu-CN', 'yue-CN', 'zh-CN', 'zh-CN-shandong', 'zh-CN-sichuan', 'zh-HK', 'zh-TW', 'zu-ZA' ])
-param speechRecognitionLanguage string = 'en-US'
+param speechRecognitionLanguage string = 'es-ES'
 @description('Language used for speech synthesis in the frontend.')
 @allowed(['pt-BR', 'es-ES', 'es-MX','ar-EG', 'ar-SA', 'ca-ES', 'cs-CZ', 'da-DK', 'de-AT', 'de-CH', 'de-DE', 'en-AU', 'en-CA', 'en-GB', 'en-HK', 'en-IE', 'en-IN', 'en-US', 'es-ES', 'es-MX', 'fi-FI', 'fr-BE', 'fr-CA', 'fr-CH', 'fr-FR', 'hi-IN', 'hu-HU', 'id-ID', 'it-IT', 'ja-JP', 'ko-KR', 'nb-NO', 'nl-BE', 'nl-NL', 'pl-PL', 'pt-PT', 'ru-RU', 'sv-SE', 'th-TH', 'tr-TR', 'zh-CN', 'zh-HK', 'zh-TW'])
-param speechSynthesisLanguage string = 'en-US'
+param speechSynthesisLanguage string = 'es-ES'
 @description('Voice used for speech synthesis in the frontend.')
 @allowed([ 'pt-BR-FranciscaNeural', 'es-MX-BeatrizNeural', 'en-US-RyanMultilingualNeural', 'de-DE-AmalaNeural', 'fr-FR-DeniseNeural'])
-param speechSynthesisVoiceName string = 'en-US-RyanMultilingualNeural'
+param speechSynthesisVoiceName string = 'es-MX-BeatrizNeural'
 
 // openai
 @description('GPT model used to answer user questions. Don\'t forget to check region availability.')
