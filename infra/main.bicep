@@ -90,7 +90,6 @@ param retrievalApproach string = 'hybrid'
 @allowed([true, false])
 param useSemanticReranking bool = true
 
-
 var searchServiceSkuName = networkIsolation?'standard2':'standard'
 @description('Search index name.')
 var searchIndex = 'ragindex'
@@ -385,7 +384,8 @@ module orchestrator './core/host/functions.bicep' = {
   scope: resourceGroup
   params: {
     subnetId: vnet.outputs.appIntSubId
-    vnetName: vnet.outputs.name  
+    vnetName: vnet.outputs.name
+    networkIsolation: networkIsolation
     keyVaultName: keyVault.outputs.name
     storageAccountName: '${storageAccountName}orc'
     appServicePlanId: appServicePlan.outputs.id
@@ -595,6 +595,7 @@ module dataIngestion './core/host/functions.bicep' = {
     appServicePlanId: appServicePlan.outputs.id
     subnetId: vnet.outputs.appIntSubId
     vnetName: vnet.outputs.name
+    networkIsolation: networkIsolation
     storageAccountName: '${storageAccountName}ing'
     appName: dataIngestionFunctionAppName
     location: location

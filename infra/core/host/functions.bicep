@@ -21,6 +21,7 @@ param healthCheckPath string = ''
 var runtimeNameAndVersion = '${runtimeName}|${runtimeVersion}'
 param vnetName string
 param subnetId string
+param networkIsolation bool
 
 @description('Storage Account type')
 @allowed([
@@ -50,6 +51,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   }
   kind: 'Storage'
   properties: {
+    allowBlobPublicAccess: networkIsolation?false:true    
     supportsHttpsTrafficOnly: true
     defaultToOAuthAuthentication: true
   }

@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.20.4.51522",
-      "templateHash": "7880110295975341311"
+      "templateHash": "16279458102180028601"
     }
   },
   "parameters": {
@@ -2692,6 +2692,9 @@
           "vnetName": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.name.value]"
           },
+          "networkIsolation": {
+            "value": "[parameters('networkIsolation')]"
+          },
           "keyVaultName": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'keyvault'), '2022-09-01').outputs.name.value]"
           },
@@ -2813,7 +2816,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.20.4.51522",
-              "templateHash": "630786388779328340"
+              "templateHash": "10360215084466172240"
             }
           },
           "parameters": {
@@ -2897,6 +2900,9 @@
             "subnetId": {
               "type": "string"
             },
+            "networkIsolation": {
+              "type": "bool"
+            },
             "storageAccountType": {
               "type": "string",
               "defaultValue": "Standard_LRS",
@@ -2943,6 +2949,7 @@
               },
               "kind": "Storage",
               "properties": {
+                "allowBlobPublicAccess": "[if(parameters('networkIsolation'), false(), true())]",
                 "supportsHttpsTrafficOnly": true,
                 "defaultToOAuthAuthentication": true
               }
@@ -3809,6 +3816,9 @@
           "vnetName": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.name.value]"
           },
+          "networkIsolation": {
+            "value": "[parameters('networkIsolation')]"
+          },
           "storageAccountName": {
             "value": "[format('{0}ing', parameters('storageAccountName'))]"
           },
@@ -3936,7 +3946,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.20.4.51522",
-              "templateHash": "630786388779328340"
+              "templateHash": "10360215084466172240"
             }
           },
           "parameters": {
@@ -4020,6 +4030,9 @@
             "subnetId": {
               "type": "string"
             },
+            "networkIsolation": {
+              "type": "bool"
+            },
             "storageAccountType": {
               "type": "string",
               "defaultValue": "Standard_LRS",
@@ -4066,6 +4079,7 @@
               },
               "kind": "Storage",
               "properties": {
+                "allowBlobPublicAccess": "[if(parameters('networkIsolation'), false(), true())]",
                 "supportsHttpsTrafficOnly": true,
                 "defaultToOAuthAuthentication": true
               }
