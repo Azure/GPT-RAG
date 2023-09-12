@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.20.4.51522",
-      "templateHash": "1634882869653613834"
+      "templateHash": "1402983809318755852"
     }
   },
   "parameters": {
@@ -70,7 +70,7 @@
     },
     "orchestratorMessagesLanguage": {
       "type": "string",
-      "defaultValue": "en",
+      "defaultValue": "es",
       "allowedValues": [
         "pt",
         "es",
@@ -82,7 +82,7 @@
     },
     "searchAnalyzerName": {
       "type": "string",
-      "defaultValue": "en.microsoft",
+      "defaultValue": "es.microsoft",
       "allowedValues": [
         "pt-Br.microsoft",
         "es.microsoft",
@@ -142,7 +142,7 @@
     },
     "searchServiceLanguage": {
       "type": "string",
-      "defaultValue": "en",
+      "defaultValue": "es",
       "allowedValues": [
         "pt",
         "es",
@@ -154,7 +154,7 @@
     },
     "speechRecognitionLanguage": {
       "type": "string",
-      "defaultValue": "en-US",
+      "defaultValue": "es-ES",
       "allowedValues": [
         "pt-BR",
         "af-ZA",
@@ -304,7 +304,7 @@
     },
     "speechSynthesisLanguage": {
       "type": "string",
-      "defaultValue": "en-US",
+      "defaultValue": "es-ES",
       "allowedValues": [
         "pt-BR",
         "es-ES",
@@ -356,7 +356,7 @@
     },
     "speechSynthesisVoiceName": {
       "type": "string",
-      "defaultValue": "en-US-RyanMultilingualNeural",
+      "defaultValue": "es-MX-BeatrizNeural",
       "allowedValues": [
         "pt-BR-FranciscaNeural",
         "es-MX-BeatrizNeural",
@@ -2328,7 +2328,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.20.4.51522",
-              "templateHash": "13056395064778607702"
+              "templateHash": "5020417426593253220"
             }
           },
           "parameters": {
@@ -2364,6 +2364,7 @@
                   "family": "A",
                   "name": "standard"
                 },
+                "enableSoftDelete": true,
                 "publicNetworkAccess": "[parameters('publicNetworkAccess')]",
                 "accessPolicies": "[if(not(empty(parameters('principalId'))), createArray(createObject('objectId', parameters('principalId'), 'permissions', createObject('secrets', createArray('get', 'list')), 'tenantId', subscription().tenantId)), createArray())]"
               }
