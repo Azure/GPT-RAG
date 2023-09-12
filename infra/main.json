@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.20.4.51522",
-      "templateHash": "1402983809318755852"
+      "templateHash": "7880110295975341311"
     }
   },
   "parameters": {
@@ -2328,7 +2328,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.20.4.51522",
-              "templateHash": "5020417426593253220"
+              "templateHash": "14581765345783953231"
             }
           },
           "parameters": {
@@ -2366,6 +2366,7 @@
                 },
                 "enableSoftDelete": true,
                 "publicNetworkAccess": "[parameters('publicNetworkAccess')]",
+                "enablePurgeProtection": true,
                 "accessPolicies": "[if(not(empty(parameters('principalId'))), createArray(createObject('objectId', parameters('principalId'), 'permissions', createObject('secrets', createArray('get', 'list')), 'tenantId', subscription().tenantId)), createArray())]"
               }
             }
