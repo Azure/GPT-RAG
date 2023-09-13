@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.20.4.51522",
-      "templateHash": "16279458102180028601"
+      "templateHash": "1976338371279947895"
     }
   },
   "parameters": {
@@ -2780,6 +2780,10 @@
               },
               {
                 "name": "AZURE_OPENAI_CHATGPT_DEPLOYMENT",
+                "value": "[parameters('chatGptDeploymentName')]"
+              },
+              {
+                "name": "AZURE_OPENAI_CHATGPT_MONITORING_DEPLOYMENT",
                 "value": "[parameters('chatGptDeploymentName')]"
               },
               {
