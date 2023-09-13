@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.20.4.51522",
-      "templateHash": "1976338371279947895"
+      "templateHash": "17039068429900900480"
     }
   },
   "parameters": {
@@ -453,6 +453,17 @@
         "description": "Azure OpenAI API version."
       }
     },
+    "chatGptLlmMonitoring": {
+      "type": "bool",
+      "defaultValue": true,
+      "allowedValues": [
+        true,
+        false
+      ],
+      "metadata": {
+        "description": "Enables LLM monitoring to generate conversation metrics."
+      }
+    },
     "retrievalApproach": {
       "type": "string",
       "defaultValue": "hybrid",
@@ -632,6 +643,7 @@
     }
   },
   "variables": {
+    "chatGptMonitoringDeploymentName": "[parameters('chatGptDeploymentName')]",
     "searchServiceSkuName": "[if(parameters('networkIsolation'), 'standard2', 'standard')]",
     "searchIndex": "ragindex",
     "orchestratorEndpoint": "[format('https://{0}.azurewebsites.net/api/orc', parameters('orchestratorFunctionAppName'))]",
@@ -2783,8 +2795,12 @@
                 "value": "[parameters('chatGptDeploymentName')]"
               },
               {
+                "name": "AZURE_OPENAI_CHATGPT_LLM_MONITORING",
+                "value": "[parameters('chatGptLlmMonitoring')]"
+              },
+              {
                 "name": "AZURE_OPENAI_CHATGPT_MONITORING_DEPLOYMENT",
-                "value": "[parameters('chatGptDeploymentName')]"
+                "value": "[variables('chatGptMonitoringDeploymentName')]"
               },
               {
                 "name": "AZURE_OPENAI_EMBEDDING_MODEL",

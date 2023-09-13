@@ -62,6 +62,7 @@ param chatGptModelName string = 'gpt-35-turbo-16k'
 param chatGptModelVersion string = '0613'
 @description('GPT model deployment name.')
 param chatGptDeploymentName string = 'chat'
+var chatGptMonitoringDeploymentName = chatGptDeploymentName // can be changed manually after the provisioning to a different deployment name
 @description('GPT model tokens per Minute Rate Limit (thousands). Default quota per model and region: gpt-4: 20; gpt-4-32: 60; All others: 240.')
 @minValue(1)
 @maxValue(20)
@@ -81,6 +82,9 @@ param embeddingsDeploymentCapacity int = 10
 @description('Azure OpenAI API version.')
 @allowed([ '2023-05-15', '2023-06-01-preview'])
 param openaiApiVersion string = '2023-05-15'
+@description('Enables LLM monitoring to generate conversation metrics.')
+@allowed([true, false])
+param chatGptLlmMonitoring bool = true
 
 // search
 @description('Orchestrator supports the following retrieval approaches: term, vector, hybrid(term + vector search), or use oyd feature of Azure OpenAI.')
@@ -445,9 +449,13 @@ module orchestrator './core/host/functions.bicep' = {
         value: chatGptDeploymentName
       }
       {
+        name: 'AZURE_OPENAI_CHATGPT_LLM_MONITORING'
+        value: chatGptLlmMonitoring
+      }
+      {
         name: 'AZURE_OPENAI_CHATGPT_MONITORING_DEPLOYMENT'
-        value: chatGptDeploymentName
-      }          
+        value: chatGptMonitoringDeploymentName
+      }               
       {
         name: 'AZURE_OPENAI_EMBEDDING_MODEL'
         value: embeddingsModelName
