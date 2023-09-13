@@ -445,6 +445,10 @@ module orchestrator './core/host/functions.bicep' = {
         value: chatGptDeploymentName
       }
       {
+        name: 'AZURE_OPENAI_CHATGPT_MONITORING_DEPLOYMENT'
+        value: chatGptDeploymentName
+      }      
+      {
         name: 'AZURE_OPENAI_EMBEDDING_MODEL'
         value: embeddingsModelName
       }      
