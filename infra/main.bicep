@@ -479,7 +479,11 @@ module orchestrator './core/host/functions.bicep' = {
       {
         name: 'AzureWebJobsSecretStorageKeyVaultUri'
         value: keyVault.outputs.endpoint
-      }                  
+      }
+      {
+        name: 'LOGLEVEL'
+        value: 'INFO'
+      }                         
     ]  
   }
 }
@@ -560,6 +564,10 @@ module frontEnd  'core/host/appservice.bicep'  = {
       {
         name: 'STORAGE_ACCOUNT'
         value: storageAccountName
+      } 
+      {
+        name: 'LOGLEVEL'
+        value: 'INFO'
       } 
     ]
   }
@@ -700,6 +708,10 @@ module dataIngestion './core/host/functions.bicep' = {
         name: 'AzureWebJobsFeatureFlags'
         value: 'EnableWorkerIndexing'
       }
+      {
+        name: 'LOGLEVEL'
+        value: 'INFO'
+      }       
     ]  
   }
 }

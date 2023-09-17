@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.20.4.51522",
-      "templateHash": "13861815503171561004"
+      "templateHash": "6507208846176270157"
     }
   },
   "parameters": {
@@ -2825,6 +2825,10 @@
               {
                 "name": "AzureWebJobsSecretStorageKeyVaultUri",
                 "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'keyvault'), '2022-09-01').outputs.endpoint.value]"
+              },
+              {
+                "name": "LOGLEVEL",
+                "value": "INFO"
               }
             ]
           }
@@ -3322,6 +3326,10 @@
               {
                 "name": "STORAGE_ACCOUNT",
                 "value": "[parameters('storageAccountName')]"
+              },
+              {
+                "name": "LOGLEVEL",
+                "value": "INFO"
               }
             ]
           }
@@ -3955,6 +3963,10 @@
               {
                 "name": "AzureWebJobsFeatureFlags",
                 "value": "EnableWorkerIndexing"
+              },
+              {
+                "name": "LOGLEVEL",
+                "value": "INFO"
               }
             ]
           }
