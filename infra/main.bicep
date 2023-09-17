@@ -245,7 +245,7 @@ module searchDnsZone './core/network/private-dns-zones.bicep' = if (networkIsola
   name: 'searchs-dnzones'
   scope: resourceGroup
   params: {
-    dnsZoneName: 'privatelink.search.windows.us' 
+    dnsZoneName: 'privatelink.search.windows.net' 
     tags: tags
     virtualNetworkName: networkIsolation?vnet.outputs.name:''
   }

@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.20.4.51522",
-      "templateHash": "17039068429900900480"
+      "templateHash": "13861815503171561004"
     }
   },
   "parameters": {
@@ -1337,7 +1337,7 @@
         "mode": "Incremental",
         "parameters": {
           "dnsZoneName": {
-            "value": "privatelink.search.windows.us"
+            "value": "privatelink.search.windows.net"
           },
           "tags": {
             "value": "[variables('tags')]"
