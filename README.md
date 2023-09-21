@@ -16,11 +16,11 @@ Reference implementation of the Retrieval-Augmented Generation (RAG) pattern.
 [3 App Front-End](https://github.com/Azure/gpt-rag-frontend)
 
 
-## Architecture Overview
+## Architecture Deep Dive
 
 <img src="media/RAG3.png" alt="imagem" width="1024">
 
-## Zero Trust Architecture Overview
+## Architecture Overview
 
 <img src="Architecture-Diagram/Architecture-Diagram-GPT-RAG.png" alt="imagem" width="1024">
 
