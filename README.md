@@ -1,9 +1,9 @@
 # Why RAG?
-<img src="media/RAG1.png" alt="imagem" width="1024">
+<img src="media/RAG1.png" alt="Why RAG?" width="1024">
 
 ## Retrieval-Augmented Generation (RAG) pattern
 
-<img src="media/RAG2.png" alt="imagem" width="1024">
+<img src="media/RAG2.png" alt="Retrieval-Augmented Generation (RAG) pattern" width="1024">
 
 Reference implementation of the Retrieval-Augmented Generation (RAG) pattern. 
 
@@ -18,11 +18,11 @@ Reference implementation of the Retrieval-Augmented Generation (RAG) pattern.
 
 ## Architecture Deep Dive
 
-<img src="media/RAG3.png" alt="imagem" width="1024">
+<img src="media/RAG3.png" alt="Architecture Deep Dive" width="1024">
 
 ## Architecture Overview
 
-<img src="Architecture-Diagram/Architecture-Diagram-GPT-RAG.png" alt="imagem" width="1024">
+<img src="Architecture-Diagram/Architecture-Diagram-GPT-RAG.png" alt="Architecture Overview" width="1024">
 
 <!-- ## Prerequisites
 
