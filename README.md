@@ -18,7 +18,7 @@ Reference implementation of the Retrieval-Augmented Generation (RAG) pattern.
 
 ## Architecture Overview
 
-<img src="media/oyd-rag.png" alt="imagem" width="1024">
+<img src="media/RAG3.png" alt="imagem" width="1024">
 
 ## Zero Trust Architecture Overview
 
