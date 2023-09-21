@@ -1,4 +1,4 @@
-![image](https://github.com/Azure/GPT-RAG/assets/46355540/fc96d2f3-ae1a-4e10-9df6-63128ba32b11)# Why RAG?
+# Why RAG?
 <img src="media/RAG1.PNG" alt="Why RAG?" width="1024">
 
 ## Retrieval-Augmented Generation (RAG) pattern
