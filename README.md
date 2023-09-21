@@ -1,4 +1,9 @@
-# GPT on Your Data
+# Why RAG?
+<img src="media/RAG1.png" alt="imagem" width="1024">
+
+## Retrieval-Augmented Generation (RAG) pattern
+
+<img src="media/RAG2.png" alt="imagem" width="1024">
 
 Reference implementation of the Retrieval-Augmented Generation (RAG) pattern. 
 
@@ -14,10 +19,6 @@ Reference implementation of the Retrieval-Augmented Generation (RAG) pattern.
 ## Architecture Overview
 
 <img src="media/oyd-rag.png" alt="imagem" width="1024">
-
-## A Simple Retrieval-Augmented Generation Model
-
-<img src="media/RAG.png" alt="imagem" width="1024">
 
 ## Zero Trust Architecture Overview
 
