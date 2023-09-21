@@ -1,4 +1,4 @@
-# Why RAG?
+![image](https://github.com/Azure/GPT-RAG/assets/46355540/fc96d2f3-ae1a-4e10-9df6-63128ba32b11)# Why RAG?
 <img src="media/RAG1.PNG" alt="Why RAG?" width="1024">
 
 ## Retrieval-Augmented Generation (RAG) pattern
@@ -66,7 +66,7 @@ azd up
 
 Important: when selecting the target location check [here](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/concepts/models) the regions that currently support the Azure OpenAI models you want to use.
 
-**2) Ingestion Component**
+**2) Ingestion Component** 
 
 Use [Data ingestion](https://github.com/Azure/gpt-rag-ingestion) repo template to create your data ingestion git repo and execute the steps in its **Deploy** section.
 
@@ -84,7 +84,7 @@ Use [App Front-end](https://github.com/Azure/gpt-rag-frontend) repo template to 
 
 2) [Orchestrator](https://github.com/Azure/gpt-rag-orchestrator)
 
-3) [App Front-End](https://github.com/Azure/gpt-rag-frontend) -->
+3) [App Front-End](https://github.com/Azure/gpt-rag-frontend) Built with Azure App Services and the Backend for Front-End pattern, offers a smooth and scalable user interface -->
 
 # Project-Addons
 
