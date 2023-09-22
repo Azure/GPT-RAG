@@ -8,7 +8,7 @@
 
 Reference implementation of the Retrieval-Augmented Generation (RAG) pattern. 
 
-## Architecture Overview
+## GPT-RAG Architecture Overview
 
 <img src="Architecture-Diagram/Architecture-Diagram-GPT-RAG.png" alt="Architecture Overview" width="1024">
 
