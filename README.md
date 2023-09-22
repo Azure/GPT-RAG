@@ -33,7 +33,7 @@ AI Workloads:
 
 <img src="media/RAG3.PNG" alt="Architecture Deep Dive" width="1024">
 
-## Components: 
+## Building Blocks: 
 
 [1 Data ingestion](https://github.com/Azure/gpt-rag-ingestion) Optimizes data preparation for Azure OpenAI
 
