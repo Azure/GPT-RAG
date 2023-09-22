@@ -1,4 +1,5 @@
 # Why to start with Retrieval-Augmented Generation (RAG) pattern?
+
 <img src="media/RAG1.PNG" alt="Why RAG?" width="1024">
 
 # What is a Retrieval-Augmented Generation (RAG) pattern?
@@ -39,12 +40,11 @@ Reference implementation of the Retrieval-Augmented Generation (RAG) pattern.
 
 3 [App Front-End](https://github.com/Azure/gpt-rag-frontend) Built with Azure App Services and the Backend for Front-End pattern, offers a smooth and scalable user interface
 
-
 <!-- ## Prerequisites
 
 - [Azure Developer CLI](https://aka.ms/azure-dev/install) -->
 
-## Deploy
+## How to Deploy GPT-RAG
 
 To deploy this solution you just need to execute the next steps:
 
