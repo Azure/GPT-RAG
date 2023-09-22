@@ -7,13 +7,13 @@
 
 Reference implementation of the Retrieval-Augmented Generation (RAG) pattern. 
 
-## Architecture Deep Dive
-
-<img src="media/RAG3.PNG" alt="Architecture Deep Dive" width="1024">
-
 ## Architecture Overview
 
 <img src="Architecture-Diagram/Architecture-Diagram-GPT-RAG.png" alt="Architecture Overview" width="1024">
+
+## Architecture Deep Dive
+
+<img src="media/RAG3.PNG" alt="Architecture Deep Dive" width="1024">
 
 ## Components: 
 
