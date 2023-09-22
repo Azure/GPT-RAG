@@ -1,7 +1,7 @@
-# Why RAG?
+# Why to start with Retrieval-Augmented Generation (RAG) pattern?
 <img src="media/RAG1.PNG" alt="Why RAG?" width="1024">
 
-## Retrieval-Augmented Generation (RAG) pattern
+## What is a Retrieval-Augmented Generation (RAG) pattern?
 
 <img src="media/RAG2.PNG" alt="Retrieval-Augmented Generation (RAG) pattern" width="1024">
 
