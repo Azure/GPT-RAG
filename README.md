@@ -7,15 +7,6 @@
 
 Reference implementation of the Retrieval-Augmented Generation (RAG) pattern. 
 
-## Components: 
-
-[1 Data ingestion](https://github.com/Azure/gpt-rag-ingestion) Optimizes data preparation for Azure OpenAI
-
-[2 Orchestrator](https://github.com/Azure/gpt-rag-orchestrator) The system's dynamic backbone ensuring scalability and a consistent user experience
-
-[3 App Front-End](https://github.com/Azure/gpt-rag-frontend) Built with Azure App Services and the Backend for Front-End pattern, offers a smooth and scalable user interface
-
-
 ## Architecture Deep Dive
 
 <img src="media/RAG3.PNG" alt="Architecture Deep Dive" width="1024">
@@ -23,6 +14,14 @@ Reference implementation of the Retrieval-Augmented Generation (RAG) pattern.
 ## Architecture Overview
 
 <img src="Architecture-Diagram/Architecture-Diagram-GPT-RAG.png" alt="Architecture Overview" width="1024">
+
+## Components: 
+
+[1 Data ingestion](https://github.com/Azure/gpt-rag-ingestion) Optimizes data preparation for Azure OpenAI
+
+[2 Orchestrator](https://github.com/Azure/gpt-rag-orchestrator) The system's dynamic backbone ensuring scalability and a consistent user experience
+
+[3 App Front-End](https://github.com/Azure/gpt-rag-frontend) Built with Azure App Services and the Backend for Front-End pattern, offers a smooth and scalable user interface
 
 Connectivity Components:
 
