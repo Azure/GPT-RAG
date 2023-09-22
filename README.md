@@ -1,12 +1,12 @@
-# Why to start with Retrieval-Augmented Generation (RAG) pattern?
-
-<img src="media/RAG1.PNG" alt="Why RAG?" width="1024">
-
-# What is a Retrieval-Augmented Generation (RAG) pattern?
+# What is a RAG pattern?
 
 <img src="media/RAG2.PNG" alt="Retrieval-Augmented Generation (RAG) pattern" width="1024">
 
 Reference implementation of the Retrieval-Augmented Generation (RAG) pattern. 
+
+# Why to start with RAG pattern?
+
+<img src="media/RAG1.PNG" alt="Why RAG?" width="1024">
 
 ## GPT-RAG Architecture Overview
 
