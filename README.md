@@ -11,14 +11,14 @@ Reference implementation of the Retrieval-Augmented Generation (RAG) pattern.
 
 <img src="Architecture-Diagram/Architecture-Diagram-GPT-RAG.png" alt="Architecture Overview" width="1024">
 
-### Connectivity Components:
+### **Connectivity Components:
 
 - Azure Virtual Network (vnet) to Secure Data Flow (Isolated, Internal inbound & outbound connections).
 - Azure Front Door (LB L7) + Web Application Firewall (WAF) to Secure Internet Facing Components.
 - Bastion (RDP/SSH over TLS), secure remote desktop access solution for VMs in the virtual network.
 - Jumpbox, a secure jump host to access VMs in private subnets.
 
-### AI Workloads: 
+### **AI Workloads: 
 
 - Azure Open AI, a managed AI service for running advanced language models like GPT-4.
 - Private DNS Zones for name resolution within the virtual network and between VNets.
@@ -33,11 +33,11 @@ Reference implementation of the Retrieval-Augmented Generation (RAG) pattern.
 
 <img src="media/RAG3.PNG" alt="Architecture Deep Dive" width="1024">
 
-###1 [Data ingestion](https://github.com/Azure/gpt-rag-ingestion) Optimizes data preparation for Azure OpenAI
+1 [Data ingestion](https://github.com/Azure/gpt-rag-ingestion) Optimizes data preparation for Azure OpenAI
 
-###2 [Orchestrator](https://github.com/Azure/gpt-rag-orchestrator) The system's dynamic backbone ensuring scalability and a consistent user experience
+2 [Orchestrator](https://github.com/Azure/gpt-rag-orchestrator) The system's dynamic backbone ensuring scalability and a consistent user experience
 
-###3 [App Front-End](https://github.com/Azure/gpt-rag-frontend) Built with Azure App Services and the Backend for Front-End pattern, offers a smooth and scalable user interface
+3 [App Front-End](https://github.com/Azure/gpt-rag-frontend) Built with Azure App Services and the Backend for Front-End pattern, offers a smooth and scalable user interface
 
 
 <!-- ## Prerequisites
