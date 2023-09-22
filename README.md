@@ -33,8 +33,6 @@ AI Workloads:
 
 <img src="media/RAG3.PNG" alt="Architecture Deep Dive" width="1024">
 
-## Building Blocks: 
-
 [1 Data ingestion](https://github.com/Azure/gpt-rag-ingestion) Optimizes data preparation for Azure OpenAI
 
 [2 Orchestrator](https://github.com/Azure/gpt-rag-orchestrator) The system's dynamic backbone ensuring scalability and a consistent user experience
