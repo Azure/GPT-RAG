@@ -726,6 +726,16 @@ module dataIngestionKeyVaultAccess './core/security/keyvault-access.bicep' = {
   }
 }
 
+// Give the data ingestion access to blob storage
+module dataIngestionBlobStorageAccess './core/security/blobstorage-access.bicep' = {
+  name: 'data-ingestion-blobstorage-access'
+  scope: resourceGroup
+  params: {
+    storageAccountName: storage.outputs.name
+    principalId: dataIngestion.outputs.identityPrincipalId
+  }
+}
+
 module ingestionPe './core/network/private-endpoint.bicep' = if (networkIsolation) {
   name: 'ingestionPe'
   scope: resourceGroup
@@ -848,13 +858,13 @@ module searchStoragePrivatelink 'core/search/search-private-link.bicep' = if (ne
   }
 }
 
-module searchWebAppPrivatelink 'core/search/search-private-link.bicep' = if (networkIsolation) {
-  name: 'searchWebAppPrivatelink'
+module searchFuncAppPrivatelink 'core/search/search-private-link.bicep' = if (networkIsolation) {
+  name: 'searchFuncAppPrivatelink'
   scope: resourceGroup
   params: {
-   name: '${searchServiceName}-webapplink'
+   name: '${searchServiceName}-funcapplink'
    searchName: searchServiceName
-   resourceId: frontEnd.outputs.id
+   resourceId: dataIngestion.outputs.id
     groupId: 'sites'
   }
 }
