@@ -6,6 +6,10 @@
 
 **3** [App Front-End](https://github.com/Azure/gpt-rag-frontend)
 
+# GPT-RAG - Explanation (Spanish)
+
+https://www.youtube.com/watch?v=ICsf4yirieA&list=PLWWBZaul8Ahyw8Wdhk0yk1oAfGDMMFulK&index=4
+
 # What is a RAG pattern?
 
 <img src="media/RAG2.PNG" alt="Retrieval-Augmented Generation (RAG) pattern" width="1024">
