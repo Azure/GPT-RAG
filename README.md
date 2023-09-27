@@ -6,7 +6,7 @@
 
 **3** [App Front-End](https://github.com/Azure/gpt-rag-frontend)
 
-# Video GPT-RAG+Prompt Engineering+Fine Tune+Train (Spanish)
+# Video GPT-RAG+Prompt Engineering+Finetuning+Train (Spanish)
 
 [![Alt text](https://img.youtube.com/vi/ICsf4yirieA/0.jpg)](https://www.youtube.com/watch?v=ICsf4yirieA)
 
