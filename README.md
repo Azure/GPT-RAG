@@ -8,7 +8,7 @@
 
 # Video GPT-RAG+Prompt Engineering+Fine Tune+Train (Spanish)
 
-[![Alt text](https://img.youtube.com/vi/ICsf4yirieA/0.jpg)](https://www.youtube.com/watch?v=ICsf4yirieA)
+[![Alt text](https://img.youtube.com/vi/ICsf4yirieA/0.jpg)]([https://www.youtube.com/watch?v=ICsf4yirieA](https://youtu.be/ICsf4yirieA?si=V7JiKaKmrPH8kY4p&t=415))
 
 # What is a RAG pattern?
 
