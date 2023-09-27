@@ -8,7 +8,7 @@
 
 # GPT-RAG - Explanation (Spanish)
 
-https://www.youtube.com/watch?v=ICsf4yirieA
+[![Alt text](https://img.youtube.com/vi/ICsf4yirieA/0.jpg)](https://www.youtube.com/watch?v=ICsf4yirieA)
 
 # What is a RAG pattern?
 
