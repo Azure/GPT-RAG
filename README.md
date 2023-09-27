@@ -108,6 +108,8 @@ Use [App Front-end](https://github.com/Azure/gpt-rag-frontend) repo template to 
 
 ## Technical References
 
+* [RAG vs Fine Tune](https://towardsdatascience.com/rag-vs-finetuning-which-is-the-best-tool-to-boost-your-llm-application-94654b1eaba7)
+
 * [Get started with the Cloud Adoption Framework](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/get-started/index)
 
 * [What is an Azure landing zone?](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/landing-zone/index)
