@@ -108,15 +108,17 @@ Use [App Front-end](https://github.com/Azure/gpt-rag-frontend) repo template to 
 
 ## Technical References
 
-* [RAG vs Finetuning](https://towardsdatascience.com/rag-vs-finetuning-which-is-the-best-tool-to-boost-your-llm-application-94654b1eaba7)
-
 * [Get started with the Cloud Adoption Framework](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/get-started/index)
 
 * [What is an Azure landing zone?](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/landing-zone/index)
 
+* [Azure OpenAI Service](https://learn.microsoft.com/azure/cognitive-services/openai/overview)
+
 * [Azure Cognitive Search](https://learn.microsoft.com/azure/search/search-what-is-azure-search)
 
-* [Azure OpenAI Service](https://learn.microsoft.com/azure/cognitive-services/openai/overview)
+* [Retrieval Augmented Generation (RAG) Paper](https://arxiv.org/abs/2005.11401)
+
+* [Retrieval Augmented Generation (RAG) in Azure Cognitive Search](https://learn.microsoft.com/en-us/azure/search/retrieval-augmented-generation-overview)
 
 * [Revolutionize your Enterprise Data with ChatGPT: Next-gen Apps w/ Azure OpenAI and Cognitive Search](https://aka.ms/entgptsearchblog)
   
@@ -127,6 +129,8 @@ Use [App Front-end](https://github.com/Azure/gpt-rag-frontend) repo template to 
 * [Check Your Facts and Try Again: Improving Large Language Models with External Knowledge and Automated Feedback](https://www.microsoft.com/en-us/research/group/deep-learning-group/articles/check-your-facts-and-try-again-improving-large-language-models-with-external-knowledge-and-automated-feedback/)
 
 * [Microsoft Guidance Validation and Robustness of responses](https://lnkd.in/ggeSQmsV)
+
+*  [RAG vs Finetuning](https://towardsdatascience.com/rag-vs-finetuning-which-is-the-best-tool-to-boost-your-llm-application-94654b1eaba7)
 
 
 
