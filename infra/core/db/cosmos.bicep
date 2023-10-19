@@ -94,7 +94,7 @@ resource database 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2022-05-15
   }
 }
 
-resource container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
+resource conversationsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
   parent: database
   name: containerName
   properties: {
@@ -124,5 +124,31 @@ resource container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/container
   }
 }
 
+resource modelsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
+  parent: database
+  name: 'models'
+  properties: {
+    resource: {
+      id: 'models'
+      partitionKey: {
+        paths: [
+          '/id'
+        ]
+        kind: 'Hash'
+      }
+      indexingPolicy: {
+        indexingMode: 'none'
+        automatic: false
+      }
+    }
+    options: {
+      autoscaleSettings: {
+        maxThroughput: autoscaleMaxThroughput
+      }
+    }
+  }
+}
+
 output azureDBkey string = account.listKeys().primaryMasterKey
 output id string = account.id
+output name string = account.name

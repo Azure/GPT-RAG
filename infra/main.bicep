@@ -18,7 +18,7 @@ param environmentName string = 'dev'
 //network
 @description('Network isolation? If yes it will create the private endpoints.')
 @allowed([true, false])
-param networkIsolation bool = false
+param networkIsolation bool = true
 
 @description('Create bastion and vm to test the solution when choosing network isolation?')
 @allowed([true, false])
@@ -28,7 +28,7 @@ param createBastion bool = true
 @maxLength(72)
 @description('Test vm gpt user password. Use strong password with letters and numbers. Needed only when choosing network isolation and create bastion option. If not creating with network isolation you can write anything. Password must be between 6-72 characters long and must satisfy at least 3 of password complexity requirements from the following: 1-Contains an uppercase character, 2-Contains a lowercase character, 3-Contains a numeric digit, 4-Contains a special character, 5- Control characters are not allowed.')
 @secure()
-param vmUserPassword string
+param vmUserInitialPassword string
 
 @description('Test vm gpt user name. Needed only when choosing network isolation and create bastion option. If not you can leave it blank.')
 param vmUserName string = 'gptrag'
@@ -263,7 +263,7 @@ module testvm './core/vm/dsvm.bicep' = if (networkIsolation && createBastion) {
     tags: tags
     aiSubId: (networkIsolation && createBastion)?vnet.outputs.aiSubId:''
     bastionSubId: (networkIsolation && createBastion)?vnet.outputs.bastionSubId:''
-    vmUserPassword: vmUserPassword
+    vmUserPassword: vmUserInitialPassword
     vmUserName: vmUserName
   }
 }
@@ -511,6 +511,27 @@ module orchestratorKeyVaultAccess './core/security/keyvault-access.bicep' = {
     principalId: orchestrator.outputs.identityPrincipalId
   }
 } 
+
+// Give the orchestrator access to Cosmos
+module orchestratorCosmosAccess './core/security/cosmos-access.bicep' = {
+  name: 'orchestrator-cosmos-access'
+  scope: resourceGroup
+  params: {
+    principalId: orchestrator.outputs.identityPrincipalId
+    accountName: cosmosAccount.outputs.name
+  }
+} 
+
+// Give the orchestrator access to AOAI
+module orchestratorOaiAccess './core/security/openai-access.bicep' = {
+  name: 'orchestrator-openai-access'
+  scope: resourceGroup
+  params: {
+    principalId: orchestrator.outputs.identityPrincipalId
+    openaiAccountName: openAi.outputs.name
+  }
+} 
+
 
 module frontEnd  'core/host/appservice.bicep'  = {
   name: 'frontend'
