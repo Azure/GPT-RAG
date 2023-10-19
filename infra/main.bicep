@@ -18,7 +18,7 @@ param environmentName string = 'dev'
 //network
 @description('Network isolation? If yes it will create the private endpoints.')
 @allowed([true, false])
-param networkIsolation bool = true
+param networkIsolation bool = false
 
 @description('Create bastion and vm to test the solution when choosing network isolation?')
 @allowed([true, false])
@@ -62,7 +62,6 @@ param chatGptModelName string = 'gpt-35-turbo-16k'
 param chatGptModelVersion string = '0613'
 @description('GPT model deployment name.')
 param chatGptDeploymentName string = 'chat'
-var chatGptMonitoringDeploymentName = chatGptDeploymentName // can be changed manually after the provisioning to a different deployment name
 @description('GPT model tokens per Minute Rate Limit (thousands). Default quota per model and region: gpt-4: 20; gpt-4-32: 60; All others: 240.')
 @minValue(1)
 @maxValue(20)
@@ -453,8 +452,8 @@ module orchestrator './core/host/functions.bicep' = {
         value: chatGptLlmMonitoring
       }
       {
-        name: 'AZURE_OPENAI_CHATGPT_MONITORING_DEPLOYMENT'
-        value: chatGptMonitoringDeploymentName
+        name: 'AZURE_OPENAI_LOAD_BALANCING'
+        value: 'true'
       }               
       {
         name: 'AZURE_OPENAI_EMBEDDING_MODEL'
