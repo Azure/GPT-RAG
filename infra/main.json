@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.20.4.51522",
-      "templateHash": "12150446297917636493"
+      "templateHash": "15877027435765521903"
     }
   },
   "parameters": {
@@ -33,7 +33,7 @@
     },
     "networkIsolation": {
       "type": "bool",
-      "defaultValue": false,
+      "defaultValue": true,
       "allowedValues": [
         true,
         false
@@ -53,7 +53,7 @@
         "description": "Create bastion and vm to test the solution when choosing network isolation?"
       }
     },
-    "vmUserPassword": {
+    "vmUserInitialPassword": {
       "type": "securestring",
       "minLength": 6,
       "maxLength": 72,
@@ -1435,7 +1435,7 @@
           "aiSubId": "[if(and(parameters('networkIsolation'), parameters('createBastion')), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.aiSubId.value), createObject('value', ''))]",
           "bastionSubId": "[if(and(parameters('networkIsolation'), parameters('createBastion')), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', parameters('vnetName')), '2022-09-01').outputs.bastionSubId.value), createObject('value', ''))]",
           "vmUserPassword": {
-            "value": "[parameters('vmUserPassword')]"
+            "value": "[parameters('vmUserInitialPassword')]"
           },
           "vmUserName": {
             "value": "[parameters('vmUserName')]"
@@ -1991,7 +1991,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.20.4.51522",
-              "templateHash": "14405196072231703396"
+              "templateHash": "13762987316097948391"
             }
           },
           "parameters": {
@@ -2169,6 +2169,34 @@
               "dependsOn": [
                 "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', toLower(parameters('accountName')), parameters('databaseName'))]"
               ]
+            },
+            {
+              "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+              "apiVersion": "2022-05-15",
+              "name": "[format('{0}/{1}/{2}', toLower(parameters('accountName')), parameters('databaseName'), 'models')]",
+              "properties": {
+                "resource": {
+                  "id": "models",
+                  "partitionKey": {
+                    "paths": [
+                      "/id"
+                    ],
+                    "kind": "Hash"
+                  },
+                  "indexingPolicy": {
+                    "indexingMode": "none",
+                    "automatic": false
+                  }
+                },
+                "options": {
+                  "autoscaleSettings": {
+                    "maxThroughput": "[parameters('autoscaleMaxThroughput')]"
+                  }
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', toLower(parameters('accountName')), parameters('databaseName'))]"
+              ]
             }
           ],
           "outputs": {
@@ -2179,6 +2207,10 @@
             "id": {
               "type": "string",
               "value": "[resourceId('Microsoft.DocumentDB/databaseAccounts', toLower(parameters('accountName')))]"
+            },
+            "name": {
+              "type": "string",
+              "value": "[toLower(parameters('accountName'))]"
             }
           }
         }
@@ -3240,6 +3272,120 @@
       },
       "dependsOn": [
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'keyvault')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'orchestrator')]",
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('resourceGroupName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "orchestrator-cosmos-access",
+      "resourceGroup": "[parameters('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "principalId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'orchestrator'), '2022-09-01').outputs.identityPrincipalId.value]"
+          },
+          "accountName": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'cosmosaccount'), '2022-09-01').outputs.name.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.20.4.51522",
+              "templateHash": "11701342765925935368"
+            }
+          },
+          "parameters": {
+            "principalId": {
+              "type": "string"
+            },
+            "accountName": {
+              "type": "string"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2020-04-01-preview",
+              "scope": "[format('Microsoft.DocumentDB/databaseAccounts/{0}', toLower(parameters('accountName')))]",
+              "name": "[guid(resourceGroup().id, resourceId('Microsoft.DocumentDB/databaseAccounts', toLower(parameters('accountName'))), parameters('principalId'))]",
+              "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '5bd9cd88-fe45-4216-938b-f97437e15450')]",
+                "principalId": "[parameters('principalId')]",
+                "principalType": "ServicePrincipal"
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'cosmosaccount')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'orchestrator')]",
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('resourceGroupName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "orchestrator-openai-access",
+      "resourceGroup": "[parameters('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "principalId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'orchestrator'), '2022-09-01').outputs.identityPrincipalId.value]"
+          },
+          "openaiAccountName": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'openai'), '2022-09-01').outputs.name.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.20.4.51522",
+              "templateHash": "4966917178404139250"
+            }
+          },
+          "parameters": {
+            "openaiAccountName": {
+              "type": "string"
+            },
+            "principalId": {
+              "type": "string"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2020-04-01-preview",
+              "scope": "[format('Microsoft.CognitiveServices/accounts/{0}', parameters('openaiAccountName'))]",
+              "name": "[guid(resourceGroup().id, resourceId('Microsoft.CognitiveServices/accounts', parameters('openaiAccountName')), parameters('principalId'))]",
+              "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd')]",
+                "principalId": "[parameters('principalId')]",
+                "principalType": "ServicePrincipal"
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'openai')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'orchestrator')]",
         "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('resourceGroupName'))]"
       ]
