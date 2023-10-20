@@ -453,7 +453,7 @@ module orchestrator './core/host/functions.bicep' = {
       }
       {
         name: 'AZURE_OPENAI_LOAD_BALANCING'
-        value: 'true'
+        value: false
       }               
       {
         name: 'AZURE_OPENAI_EMBEDDING_MODEL'
@@ -470,10 +470,6 @@ module orchestrator './core/host/functions.bicep' = {
       {
         name: 'ORCHESTRATOR_MESSAGES_LANGUAGE'
         value: orchestratorMessagesLanguage
-      }
-      {
-        name: 'AZURE_OPENAI_LOAD_BALANCING'
-        value: true
       }
       {
         name: 'AzureWebJobsSecretStorageType'

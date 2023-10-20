@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.20.4.51522",
-      "templateHash": "6459940106546317028"
+      "templateHash": "11206087602698988844"
     }
   },
   "parameters": {
@@ -2831,7 +2831,7 @@
               },
               {
                 "name": "AZURE_OPENAI_LOAD_BALANCING",
-                "value": "true"
+                "value": false
               },
               {
                 "name": "AZURE_OPENAI_EMBEDDING_MODEL",
@@ -2848,10 +2848,6 @@
               {
                 "name": "ORCHESTRATOR_MESSAGES_LANGUAGE",
                 "value": "[parameters('orchestratorMessagesLanguage')]"
-              },
-              {
-                "name": "AZURE_OPENAI_LOAD_BALANCING",
-                "value": true
               },
               {
                 "name": "AzureWebJobsSecretStorageType",
