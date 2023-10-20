@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.20.4.51522",
-      "templateHash": "11206087602698988844"
+      "templateHash": "1874443974124992013"
     }
   },
   "parameters": {
@@ -2786,6 +2786,10 @@
                 "value": "[parameters('dbAccountName')]"
               },
               {
+                "name": "AZURE_DB_NAME",
+                "value": "[parameters('dbDatabaseName')]"
+              },
+              {
                 "name": "AZURE_KEY_VAULT_NAME",
                 "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'keyvault'), '2022-09-01').outputs.name.value]"
               },
@@ -3300,7 +3304,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.20.4.51522",
-              "templateHash": "11701342765925935368"
+              "templateHash": "12688184835358884350"
             }
           },
           "parameters": {
@@ -3313,14 +3317,13 @@
           },
           "resources": [
             {
-              "type": "Microsoft.Authorization/roleAssignments",
-              "apiVersion": "2020-04-01-preview",
-              "scope": "[format('Microsoft.DocumentDB/databaseAccounts/{0}', toLower(parameters('accountName')))]",
-              "name": "[guid(resourceGroup().id, resourceId('Microsoft.DocumentDB/databaseAccounts', toLower(parameters('accountName'))), parameters('principalId'))]",
+              "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments",
+              "apiVersion": "2023-04-15",
+              "name": "[format('{0}/{1}', toLower(parameters('accountName')), guid(resourceGroup().id, resourceId('Microsoft.DocumentDB/databaseAccounts', toLower(parameters('accountName'))), parameters('principalId')))]",
               "properties": {
-                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '5bd9cd88-fe45-4216-938b-f97437e15450')]",
+                "roleDefinitionId": "[format('/{0}/resourceGroups/{1}/providers/Microsoft.DocumentDB/databaseAccounts/{2}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002', subscription().id, resourceGroup().name, toLower(parameters('accountName')))]",
                 "principalId": "[parameters('principalId')]",
-                "principalType": "ServicePrincipal"
+                "scope": "[resourceId('Microsoft.DocumentDB/databaseAccounts', toLower(parameters('accountName')))]"
               }
             }
           ]

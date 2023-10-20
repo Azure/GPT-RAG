@@ -408,6 +408,10 @@ module orchestrator './core/host/functions.bicep' = {
         value: dbAccountName
       }
       {
+        name: 'AZURE_DB_NAME'
+        value: dbDatabaseName
+      }      
+      {
         name: 'AZURE_KEY_VAULT_NAME'
         value: keyVault.outputs.name
       }      
