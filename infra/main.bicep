@@ -472,6 +472,10 @@ module orchestrator './core/host/functions.bicep' = {
         value: orchestratorMessagesLanguage
       }
       {
+        name: 'AZURE_OPENAI_LOAD_BALANCING'
+        value: true
+      }
+      {
         name: 'AzureWebJobsSecretStorageType'
         value: 'keyvault'
       }   

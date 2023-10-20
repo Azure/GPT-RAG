@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.20.4.51522",
-      "templateHash": "15877027435765521903"
+      "templateHash": "6459940106546317028"
     }
   },
   "parameters": {
@@ -33,7 +33,7 @@
     },
     "networkIsolation": {
       "type": "bool",
-      "defaultValue": true,
+      "defaultValue": false,
       "allowedValues": [
         true,
         false
@@ -643,7 +643,6 @@
     }
   },
   "variables": {
-    "chatGptMonitoringDeploymentName": "[parameters('chatGptDeploymentName')]",
     "searchServiceSkuName": "[if(parameters('networkIsolation'), 'standard2', 'standard')]",
     "searchIndex": "ragindex",
     "orchestratorEndpoint": "[format('https://{0}.azurewebsites.net/api/orc', parameters('orchestratorFunctionAppName'))]",
@@ -2831,8 +2830,8 @@
                 "value": "[parameters('chatGptLlmMonitoring')]"
               },
               {
-                "name": "AZURE_OPENAI_CHATGPT_MONITORING_DEPLOYMENT",
-                "value": "[variables('chatGptMonitoringDeploymentName')]"
+                "name": "AZURE_OPENAI_LOAD_BALANCING",
+                "value": "true"
               },
               {
                 "name": "AZURE_OPENAI_EMBEDDING_MODEL",
@@ -2849,6 +2848,10 @@
               {
                 "name": "ORCHESTRATOR_MESSAGES_LANGUAGE",
                 "value": "[parameters('orchestratorMessagesLanguage')]"
+              },
+              {
+                "name": "AZURE_OPENAI_LOAD_BALANCING",
+                "value": true
               },
               {
                 "name": "AzureWebJobsSecretStorageType",
