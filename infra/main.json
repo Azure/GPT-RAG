@@ -2168,6 +2168,33 @@
               "dependsOn": [
                 "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', toLower(parameters('accountName')), parameters('databaseName'))]"
               ]
+            },{
+              "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+              "apiVersion": "2022-05-15",
+              "name": "[format('{0}/{1}/{2}', toLower(parameters('accountName')), parameters('databaseName'), 'models')]",
+              "properties": {
+                "resource": {
+                  "id": "models",
+                  "partitionKey": {
+                    "paths": [
+                      "/id"
+                    ],
+                    "kind": "Hash"
+                  },
+                  "indexingPolicy": {
+                    "indexingMode": "none",
+                    "automatic": false
+                  }
+                },
+                "options": {
+                  "autoscaleSettings": {
+                    "maxThroughput": "[parameters('autoscaleMaxThroughput')]"
+                  }
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', toLower(parameters('accountName')), parameters('databaseName'))]"
+              ]
             },
             {
               "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
@@ -2175,7 +2202,7 @@
               "name": "[format('{0}/{1}/{2}', toLower(parameters('accountName')), parameters('databaseName'), 'models')]",
               "properties": {
                 "resource": {
-                  "id": "models",
+                  "id": "guardrails",
                   "partitionKey": {
                     "paths": [
                       "/id"
