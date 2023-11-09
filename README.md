@@ -40,7 +40,7 @@ Reference implementation of the Retrieval-Augmented Generation (RAG) pattern.
 
 - Azure Open AI, a managed AI service for running advanced language models like GPT-4.
 - Private DNS Zones for name resolution within the virtual network and between VNets.
-- Cosmos DB, a globally distributed, multi-model database service to support AI applications.
+- Cosmos DB, a globally distributed, multi-model database service to support AI applications with Analytical Storage enabled for future usage.
 - Web applications in Azure Web App.
 - Azure AI services for building intelligent applications.
 - High Availability & Disaster Recovery Ready Solution.
