@@ -112,6 +112,7 @@ resource conversationsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDataba
         ]
         kind: 'Hash'
       }
+      analyticalStorageTtl: analyticalStoreTTL
       indexingPolicy: {
         indexingMode: 'consistent'
         includedPaths: [
