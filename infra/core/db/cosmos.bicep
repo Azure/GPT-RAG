@@ -143,6 +143,7 @@ resource modelsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/con
         ]
         kind: 'Hash'
       }
+      analyticalStorageTtl: analyticalStoreTTL
       indexingPolicy: {
         indexingMode: 'none'
         automatic: false
