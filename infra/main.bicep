@@ -93,7 +93,7 @@ param retrievalApproach string = 'hybrid'
 @allowed([true, false])
 param useSemanticReranking bool = true
 
-var searchServiceSkuName = networkIsolation?'standard2':'standard'
+var searchServiceSkuName = networkIsolation?'standard':'standard'
 @description('Search index name.')
 var searchIndex = 'ragindex'
 @allowed([ '2023-07-01-Preview' ])
