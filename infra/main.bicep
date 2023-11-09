@@ -18,7 +18,7 @@ param environmentName string = 'dev'
 //network
 @description('Network isolation? If yes it will create the private endpoints.')
 @allowed([true, false])
-param networkIsolation bool
+param networkIsolation bool = false
 
 @description('Create bastion and vm to test the solution when choosing network isolation?')
 @allowed([true, false])
@@ -93,7 +93,7 @@ param retrievalApproach string = 'hybrid'
 @allowed([true, false])
 param useSemanticReranking bool = true
 
-var searchServiceSkuName = networkIsolation?'standard':'standard'
+var searchServiceSkuName = networkIsolation?'standard2':'standard'
 @description('Search index name.')
 var searchIndex = 'ragindex'
 @allowed([ '2023-07-01-Preview' ])
