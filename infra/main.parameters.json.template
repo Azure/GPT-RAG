@@ -1,0 +1,84 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "resourceGroupName": {
+      "value": "<resourceGroupName>"
+    },
+    "guidValue": {
+      "value": "<guidValue>"
+    },
+    "environmentName": {
+      "value": "dev"
+    },
+    "networkIsolation": {
+      "value": false
+    },
+    "createBastion": {
+      "value": true
+    },
+    "vmUserInitialPassword": {
+      "value": "<vmUserInitialPassword>"
+    },
+    "vmUserName": {
+      "value": "gptrag"
+    },
+    "orchestratorMessagesLanguage": {
+      "value": "es"
+    },
+    "searchAnalyzerName": {
+      "value": "es.microsoft"
+    },
+    "searchServiceLanguage": {
+      "value": "es"
+    },
+    "speechRecognitionLanguage": {
+      "value": "es-ES"
+    },
+    "speechSynthesisLanguage": {
+      "value": "es-ES"
+    },
+    "speechSynthesisVoiceName": {
+      "value": "es-MX-BeatrizNeural"
+    },
+    "dbAccountName": {
+      "value": "[format('dbgpt0{0}', substring(uniqueString(parameters('guidValue')), 0, 5))]"
+    },
+    "dbDatabaseName": {
+      "value": "[format('db0{0}', substring(uniqueString(parameters('guidValue')), 0, 5))]"
+    },
+    "keyVaultName": {
+      "value": "[format('kv0{0}', substring(uniqueString(parameters('guidValue')), 0, 5))]"
+    },
+    "storageAccountName": {
+      "value": "[format('strag0{0}', substring(uniqueString(parameters('guidValue')), 0, 5))]"
+    },
+    "cognitiveServiceName": {
+      "value": "[format('cogsvc0{0}', substring(uniqueString(parameters('guidValue')), 0, 5))]"
+    },
+    "azureAppServicePlanName": {
+      "value": "[format('asp0{0}', substring(uniqueString(parameters('guidValue')), 0, 5))]"
+    },
+    "appInsightsName": {
+      "value": "[format('ai0{0}', substring(uniqueString(parameters('guidValue')), 0, 5))]"
+    },
+    "azureAppServiceName": {
+      "value": "[format('appsvc0{0}', substring(uniqueString(parameters('guidValue')), 0, 5))]"
+    },
+    "orchestratorFunctionAppName": {
+      "value": "[format('orchfunc0{0}', substring(uniqueString(parameters('guidValue')), 0, 5))]"
+    },
+    "dataIngestionFunctionAppName": {
+      "value": "[format('datafunc0{0}', substring(uniqueString(parameters('guidValue')), 0, 5))]"
+    },
+    "searchServiceName": {
+      "value": "[format('ss0{0}', substring(uniqueString(parameters('guidValue')), 0, 5))]"
+    },
+    "openAIServiceName": {
+      "value": "[format('oais0{0}', substring(uniqueString(parameters('guidValue')), 0, 5))]"
+    },
+    "vnetName": {
+      "value": "[format('vnet0{0}', substring(uniqueString(parameters('guidValue')), 0, 5))]"
+    }
+  }
+}
