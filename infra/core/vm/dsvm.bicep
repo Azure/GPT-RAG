@@ -8,6 +8,8 @@ param resourceGroupName string
 param vmUserPassword string
 param vmUserName string
 param authenticationType string = 'password' //'sshPublicKey'
+param vmUserPasswordKey string
+param keyVaultName string
 
 var osDiskType = 'StandardSSD_LRS'
 var vmSize = {
@@ -138,5 +140,17 @@ resource roleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-prev
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b24988ac-6180-42a0-ab88-20f7382dd24c')
     principalId: virtualMachine.identity.principalId
+  }
+}
+
+resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
+  name: keyVaultName
+}
+
+resource vmUserPasswordSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  parent: keyVault
+  name: vmUserPasswordKey
+  properties: {
+    value: vmUserPassword
   }
 }
