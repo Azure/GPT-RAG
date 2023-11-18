@@ -1,6 +1,84 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {
-      }
-  } 
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentName": {
+      "value": "${AZURE_ENV_NAME}"
+    },
+    "location": {
+      "value": "${AZURE_LOCATION}"
+    },
+    "principalId": {
+      "value": "${AZURE_PRINCIPAL_ID}"
+    },
+    "resourceGroupName": {
+      "value": "${AZURE_RESOURCE_GROUP_NAME}"
+    },
+    "networkIsolation": {
+      "value": "${AZURE_NETWORK_ISOLATION}"
+    },
+    "vmUserInitialPassword": {
+      "value": "$(secretOrRandomPassword ${AZURE_KEY_VAULT_NAME} vmUserInitialPassword)"
+    },
+    "vmUserName": {
+      "value": "gptrag"
+    },
+    "orchestratorMessagesLanguage": {
+      "value": "es"
+    },
+    "searchAnalyzerName": {
+      "value": "es.microsoft"
+    },
+    "searchServiceLanguage": {
+      "value": "es"
+    },
+    "speechRecognitionLanguage": {
+      "value": "es-ES"
+    },
+    "speechSynthesisLanguage": {
+      "value": "es-ES"
+    },
+    "speechSynthesisVoiceName": {
+      "value": "es-MX-BeatrizNeural"
+    },
+    "dbAccountName": {
+      "value": "${AZURE_DB_ACCOUNT_NAME}"
+    },
+    "dbDatabaseName": {
+      "value": "${AZURE_DB_DATABASE_NAME}"
+    },
+    "keyVaultName": {
+      "value": "${AZURE_KEY_VAULT_NAME}"
+    },
+    "storageAccountName": {
+      "value": "${AZURE_STORAGE_ACCOUNT_NAME}"
+    },
+    "cognitiveServiceName": {
+      "value": "${AZURE_COGNITIVE_SERVICE_NAME}"
+    },
+    "azureAppServicePlanName": {
+      "value": "${AZURE_AZURE_APP_SERVICE_PLAN_NAME}"
+    },
+    "appInsightsName": {
+      "value": "${AZURE_APP_INSIGHTS_NAME}"
+    },
+    "azureAppServiceName": {
+      "value": "${AZURE_APP_SERVICE_NAME}"
+    },
+    "orchestratorFunctionAppName": {
+      "value": "${AZURE_ORCHESTRATOR_FUNCTION_APP_NAME}"
+    },
+    "dataIngestionFunctionAppName": {
+      "value": "${AZURE_DATA_INGESTION_FUNCTION_APP_NAME}"
+    },
+    "searchServiceName": {
+      "value": "${AZURE_SEARCH_SERVICE_NAME}"
+    },
+    "openAIServiceName": {
+      "value": "${AZURE_OPEN_AI_SERVICE_NAME}"
+    },
+    "vnetName": {
+      "value": "${AZURE_VNET_NAME}"
+    }
+  }
+}
