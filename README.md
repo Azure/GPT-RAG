@@ -93,7 +93,7 @@ azd env set parameter value
 The VM Password will automatically stored in Azure Keyvault, in order to login to the VM in Zero Trust infrastructure in Bastion only Select to use password from Keyvault.
 
 ## Option #2
-Provision required Azure services**
+Provision required Azure services
 
 You can do it by clicking on the following button
 
