@@ -70,16 +70,20 @@ using [Azure Developer CLI (azd)](https://aka.ms/azure-dev/install) executing th
 ## Option #1
 This option will give you the posibility to avoid any rebuild of Infrastructure in case that new components are added:
 
-This will Login and download the Infrastructure Repository.
+This will Login:
 ```
 azd auth login
+```
+Download the Repository:
+```
 azd init -t azure/gpt-rag
 ```
+
 In case that you need Zero Trust Implementation run also the following command:
 ```
 azd env set AZURE_NETWORK_ISOLATION true
 ```
-Run the following command to build the infrastructure
+Start Building the infrastructure:
 ```
 azd up
 ```
