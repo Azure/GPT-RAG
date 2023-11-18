@@ -65,15 +65,9 @@ Reference implementation of the Retrieval-Augmented Generation (RAG) pattern.
 
 To deploy this solution you just need to execute the next steps:
 
-**1) Provision required Azure services**
+using [Azure Developer CLI (azd)](https://aka.ms/azure-dev/install) executing the following lines in terminal
 
-You can do it by clicking on the following button
-
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fazure%2Fgpt-rag%2Fmain%2Finfra%2Fmain.json)
-
-or by using [Azure Developer CLI (azd)](https://aka.ms/azure-dev/install) executing the following lines in terminal
-
-**2) This option will give you the posibility to avoid any rebuild of Infrastructure in case that new components are added:**
+**1) This option will give you the posibility to avoid any rebuild of Infrastructure in case that new components are added:**
 
 This will Login and download the Infrastructure Repository.
 ```
@@ -90,6 +84,15 @@ azd up
 ```
 If you need to change Components names or any parameter in the main.parameter.json use the following command:
 azd env set parameter value
+
+
+
+**2) Provision required Azure services**
+
+You can do it by clicking on the following button
+
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fazure%2Fgpt-rag%2Fmain%2Finfra%2Fmain.json)
+
 
 Important: when selecting the target location check [here](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/concepts/models) the regions that currently support the Azure OpenAI models you want to use.
 
