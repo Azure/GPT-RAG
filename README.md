@@ -73,7 +73,7 @@ You can do it by clicking on the following button
 
 or by using [Azure Developer CLI (azd)](https://aka.ms/azure-dev/install) executing the following lines in terminal
 
-** This option will give you the posibility to avoid any rebuild of Infrastructure in case that new components are added:
+**2) This option will give you the posibility to avoid any rebuild of Infrastructure in case that new components are added:**
 
 This will Login and download the Infrastructure Repository.
 ```
