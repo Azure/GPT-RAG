@@ -15,10 +15,7 @@
       "value": "${AZURE_RESOURCE_GROUP_NAME}"
     },
     "networkIsolation": {
-      "value": false
-    },
-    "createBastion": {
-      "value": true
+      "value": "${AZURE_NETWORK_ISOLATION}"
     },
     "vmUserInitialPassword": {
       "value": "$(secretOrRandomPassword ${AZURE_KEY_VAULT_NAME} vmUserInitialPassword)"
