@@ -61,13 +61,14 @@ Reference implementation of the Retrieval-Augmented Generation (RAG) pattern.
 
 - [Azure Developer CLI](https://aka.ms/azure-dev/install) -->
 
-## How to Deploy GPT-RAG
+# How to Deploy GPT-RAG
 
 To deploy this solution you just need to execute the next steps:
 
 using [Azure Developer CLI (azd)](https://aka.ms/azure-dev/install) executing the following lines in terminal
 
-**1) This option will give you the posibility to avoid any rebuild of Infrastructure in case that new components are added:**
+## Option #1
+This option will give you the posibility to avoid any rebuild of Infrastructure in case that new components are added:**
 
 This will Login and download the Infrastructure Repository.
 ```
@@ -85,9 +86,8 @@ azd up
 If you need to change Components names or any parameter in the main.parameter.json use the following command:
 azd env set parameter value
 
-
-
-**2) Provision required Azure services**
+## Option #2
+Provision required Azure services**
 
 You can do it by clicking on the following button
 
