@@ -86,6 +86,8 @@ azd up
 If you need to change Components names or any parameter in the main.parameter.json use the following command:
 azd env set parameter value
 
+The VM Password will automatically stored in Azure Keyvault, in order to login to the VM in Zero Trust infrastructure in Bastion only Select to use password from Keyvault.
+
 ## Option #2
 Provision required Azure services**
 
