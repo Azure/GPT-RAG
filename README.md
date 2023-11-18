@@ -68,7 +68,7 @@ To deploy this solution you just need to execute the next steps:
 using [Azure Developer CLI (azd)](https://aka.ms/azure-dev/install) executing the following lines in terminal
 
 ## Option #1
-This option will give you the posibility to avoid any rebuild of Infrastructure in case that new components are added:**
+This option will give you the posibility to avoid any rebuild of Infrastructure in case that new components are added:
 
 This will Login and download the Infrastructure Repository.
 ```
