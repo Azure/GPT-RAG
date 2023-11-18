@@ -67,8 +67,8 @@ param speechSynthesisVoiceName string
 
 // openai
 @description('GPT model used to answer user questions. Don\'t forget to check region availability.')
-@allowed([ 'gpt-35-turbo-16k', 'gpt-4', 'gpt-4-32k' ])
-param chatGptModelName string = 'gpt-35-turbo-16k'
+@allowed([ 'gpt-35-turbo', 'gpt-4', 'gpt-4-32k' ])
+param chatGptModelName string = 'gpt-35-turbo'
 @description('GPT model version.')
 @allowed([ '0613' ])
 param chatGptModelVersion string = '0613'
@@ -77,7 +77,7 @@ param chatGptDeploymentName string = 'chat'
 @description('GPT model tokens per Minute Rate Limit (thousands). Default quota per model and region: gpt-4: 20; gpt-4-32: 60; All others: 240.')
 @minValue(1)
 @maxValue(20)
-param chatGptDeploymentCapacity int = 2
+param chatGptDeploymentCapacity int = 20
 @description('Embeddings model used to generate vector embeddings. Don\'t forget to check region availability.')
 @allowed([ 'text-embedding-ada-002' ])
 param embeddingsModelName string = 'text-embedding-ada-002'
@@ -89,7 +89,7 @@ param embeddingsDeploymentName string = 'text-embedding-ada-002'
 @description('Embeddings model tokens per Minute Rate Limit (thousands). Default quota per model and region: 240')
 @minValue(1)
 @maxValue(240)
-param embeddingsDeploymentCapacity int = 10
+param embeddingsDeploymentCapacity int = 30
 @description('Azure OpenAI API version.')
 @allowed([ '2023-05-15', '2023-06-01-preview'])
 param openaiApiVersion string = '2023-05-15'
@@ -844,7 +844,10 @@ module openAi 'core/ai/cognitiveservices.bicep' = {
           name: chatGptModelName
           version: chatGptModelVersion
         }
-        capacity: chatGptDeploymentCapacity
+        sku: {
+          name: 'Standard'
+          capacity: chatGptDeploymentCapacity
+        }
       },{
         name: embeddingsDeploymentName
         model: {
