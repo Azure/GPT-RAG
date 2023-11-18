@@ -89,7 +89,7 @@ param embeddingsDeploymentName string = 'text-embedding-ada-002'
 @description('Embeddings model tokens per Minute Rate Limit (thousands). Default quota per model and region: 240')
 @minValue(1)
 @maxValue(240)
-param embeddingsDeploymentCapacity int = 30
+param embeddingsDeploymentCapacity int = 1
 @description('Azure OpenAI API version.')
 @allowed([ '2023-05-15', '2023-06-01-preview'])
 param openaiApiVersion string = '2023-05-15'
@@ -316,7 +316,7 @@ module storagepe './core/network/private-endpoint.bicep' = if (networkIsolation)
     subnetId: vnet.outputs.aiSubId
     serviceId: storage.outputs.id
     groupIds: ['blob']
-    dnsZoneId: blobDnsZone.outputs.id
+    dnsZoneId: networkIsolation?blobDnsZone.outputs.id:''
   }
 }
 
@@ -345,7 +345,7 @@ module cosmospe './core/network/private-endpoint.bicep' = if (networkIsolation) 
     subnetId: vnet.outputs.aiSubId
     serviceId: cosmosAccount.outputs.id
     groupIds: ['Sql']
-    dnsZoneId: documentsDnsZone.outputs.id
+    dnsZoneId: networkIsolation?documentsDnsZone.outputs.id:''
   }
 }
 
@@ -372,7 +372,7 @@ module keyvaultpe './core/network/private-endpoint.bicep' = if (networkIsolation
     subnetId: vnet.outputs.aiSubId
     serviceId: keyVault.outputs.id
     groupIds: ['Vault']
-    dnsZoneId: vaultDnsZone.outputs.id
+    dnsZoneId: networkIsolation?vaultDnsZone.outputs.id:''
   }
 }
 
@@ -522,7 +522,7 @@ module orchestratorPe './core/network/private-endpoint.bicep' = if (networkIsola
     subnetId: vnet.outputs.aiSubId
     serviceId: orchestrator.outputs.id
     groupIds: ['sites']
-    dnsZoneId: websitesDnsZone.outputs.id
+    dnsZoneId: networkIsolation?websitesDnsZone.outputs.id:''
   }
 }
 
@@ -628,7 +628,7 @@ module frontendPe './core/network/private-endpoint.bicep' = if (networkIsolation
     subnetId: vnet.outputs.aiSubId
     serviceId: frontEnd.outputs.id
     groupIds: ['sites']
-    dnsZoneId: websitesDnsZone.outputs.id
+    dnsZoneId: networkIsolation?websitesDnsZone.outputs.id:''
   }
 }
 
@@ -791,7 +791,7 @@ module ingestionPe './core/network/private-endpoint.bicep' = if (networkIsolatio
     subnetId: vnet.outputs.aiSubId
     serviceId: dataIngestion.outputs.id
     groupIds: ['sites']
-    dnsZoneId: websitesDnsZone.outputs.id
+    dnsZoneId: networkIsolation?websitesDnsZone.outputs.id:''
   }
 }
 
@@ -820,7 +820,7 @@ module cognitiveServicesPe './core/network/private-endpoint.bicep' = if (network
     subnetId: vnet.outputs.aiSubId
     serviceId: cognitiveServices.outputs.id
     groupIds: ['account']
-    dnsZoneId: cognitiveservicesDnsZone.outputs.id
+    dnsZoneId: networkIsolation?cognitiveservicesDnsZone.outputs.id:''
   }
 }
 
@@ -848,14 +848,18 @@ module openAi 'core/ai/cognitiveservices.bicep' = {
           name: 'Standard'
           capacity: chatGptDeploymentCapacity
         }
-      },{
+      }
+      {
         name: embeddingsDeploymentName
         model: {
           format: 'OpenAI'
           name: embeddingsModelName
           version: embeddingsModelVersion
         }
-        capacity: embeddingsDeploymentCapacity
+        sku: {
+          name: 'Standard'
+          capacity: embeddingsDeploymentCapacity
+        }
       }      
     ]
   }
@@ -871,7 +875,7 @@ module openAiPe './core/network/private-endpoint.bicep' = if (networkIsolation) 
     subnetId: vnet.outputs.aiSubId
     serviceId: openAi.outputs.id
     groupIds: ['account']
-    dnsZoneId: openaiDnsZone.outputs.id
+    dnsZoneId: networkIsolation?openaiDnsZone.outputs.id:''
   }
 }
 
@@ -927,7 +931,7 @@ module searchPe './core/network/private-endpoint.bicep' = if (networkIsolation) 
     subnetId: vnet.outputs.aiSubId
     serviceId: searchService.outputs.id
     groupIds: ['searchService']
-    dnsZoneId: searchDnsZone.outputs.id
+    dnsZoneId: networkIsolation?searchDnsZone.outputs.id:''
   }
 }
 
