@@ -20,6 +20,8 @@ Reference implementation of the Retrieval-Augmented Generation (RAG) pattern.
 
 <img src="media/RAG1.PNG" alt="Why RAG?" width="1024">
 
+# GPT-RAG Infrastructure Models
+
 ## GPT-RAG / Simple Architecture (NoSecure) Architecture Overview
 
 <img src="Architecture-Diagram/GPT-RAG-NoSecure.png" alt="Architecture Overview" width="1024">
