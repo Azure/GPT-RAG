@@ -63,7 +63,7 @@ Reference implementation of the Retrieval-Augmented Generation (RAG) pattern.
 
 - [Azure Developer CLI](https://aka.ms/azure-dev/install) -->
 
-# Deploy GPT-RAG Infrastructure
+# Deploy GPT-RAG Infrastructure (STEP #1)
 
 To deploy this solution you just need to execute the next steps:
 
@@ -104,7 +104,9 @@ You can do it by clicking on the following button
 
 Important: when selecting the target location check [here](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/concepts/models) the regions that currently support the Azure OpenAI models you want to use.
 
-# Deploy GPT-RAG Components Steps
+# Deploy GPT-RAG Components (Step #2)
+
+We must deploy the three components in each of the App Service & Functions created using the following procedure:
 
 **1) Data Ingestion & Search Configuration Deployment**
 
