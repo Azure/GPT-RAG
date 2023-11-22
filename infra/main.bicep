@@ -269,22 +269,25 @@ module searchDnsZone './core/network/private-dns-zones.bicep' = if (networkIsola
 }
 
 // VMs
+var ztVmName = 'testvm${resourceToken}'
+var bastionKvName = 'bastionkv${resourceToken}'
+var vmKeyVaultSecName = 'vmUserInitialPassword'
 
 module testvm './core/vm/dsvm.bicep' = if (networkIsolation) {
   name: 'testvm'
   scope: resourceGroup
   params: {
     location: location
-    resourceGroupName: resourceGroupName
-    name:'testvm${resourceToken}'
+    name: ztVmName
     tags: tags
     aiSubId: vnet.outputs.aiSubId
     bastionSubId: vnet.outputs.bastionSubId
     vmUserPassword: vmUserInitialPassword
     vmUserName: vmUserName
-    keyVaultName: keyVault.outputs.name
+    keyVaultName: bastionKvName
     // this is the named of the secret to store the vm password in keyvault. It matches what is used on main.parameters.json
-    vmUserPasswordKey: 'vmUserInitialPassword'
+    vmUserPasswordKey: vmKeyVaultSecName
+    principalId: principalId
   }
 }
 
@@ -971,3 +974,8 @@ module keyVaultSecret './core/security/keyvault-secrets.bicep' = {
 
 // AZURE_KEY_VAULT_NAME is used in main.parameters.json to keep the vm password
 output AZURE_KEY_VAULT_NAME string = keyVault.outputs.name
+output AZURE_ZERO_TRUST string = networkIsolation ? 'TRUE' : 'FALSE'
+output AZURE_VM_NAME string = networkIsolation ? ztVmName : ''
+output AZURE_VM_USERNAME string = networkIsolation ? vmUserName : ''
+output AZURE_VM_KV_NAME string = networkIsolation ? bastionKvName : ''
+output AZURE_VM_KV_SEC_NAME string = networkIsolation ? vmKeyVaultSecName : ''

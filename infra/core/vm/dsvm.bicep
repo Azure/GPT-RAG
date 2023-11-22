@@ -3,13 +3,14 @@ param name string
 param tags object = {}
 param aiSubId string
 param bastionSubId string
-param resourceGroupName string
 @secure()
 param vmUserPassword string
 param vmUserName string
 param authenticationType string = 'password' //'sshPublicKey'
+@secure()
 param vmUserPasswordKey string
 param keyVaultName string
+param principalId string
 
 var osDiskType = 'StandardSSD_LRS'
 var vmSize = {
@@ -112,9 +113,12 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2021-03-01' = {
 
 output vmPrincipalId string = virtualMachine.identity.principalId
 
-resource bastion 'Microsoft.Network/bastionHosts@2020-05-01' = {
+resource cy 'Microsoft.Network/bastionHosts@2023-04-01' = {
   name: bastionName
   location: location
+  sku: {
+    name: 'Standard'
+  }
   properties: {
     ipConfigurations: [
       {
@@ -134,8 +138,8 @@ resource bastion 'Microsoft.Network/bastionHosts@2020-05-01' = {
 }
 
 
-resource roleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
-  name: guid(resourceGroupName, 'Contributor')
+resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(subscription().id, resourceGroup().id, 'Contributor')
   scope: resourceGroup()
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b24988ac-6180-42a0-ab88-20f7382dd24c')
@@ -143,8 +147,23 @@ resource roleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-prev
   }
 }
 
-resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
+// Using key vault to store the password.
+// Not using the application key vault as it is set with no public network access for zero trust, but Bastion need the public network access
+// to pul the secret from the key vault.
+resource keyVault 'Microsoft.KeyVault/vaults@2021-06-01-preview' = {
   name: keyVaultName
+  location: location
+  tags: tags
+  properties: {
+    sku: {
+      name: 'standard'
+      family: 'A'
+    }
+    tenantId: subscription().tenantId
+    accessPolicies: [
+    ]
+    enableRbacAuthorization: true
+  }
 }
 
 resource vmUserPasswordSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
@@ -152,5 +171,15 @@ resource vmUserPasswordSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
   name: vmUserPasswordKey
   properties: {
     value: vmUserPassword
+  }
+}
+
+resource KeyVaultAccessRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(subscription().id, resourceGroup().id, principalId, keyVault.id, 'Secret Reader')
+  scope: keyVault
+  properties: {
+    principalId: principalId
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')
+    principalType: 'User'
   }
 }

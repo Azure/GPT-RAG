@@ -18,7 +18,7 @@
       "value": "${AZURE_NETWORK_ISOLATION}"
     },
     "vmUserInitialPassword": {
-      "value": "$(secretOrRandomPassword ${AZURE_KEY_VAULT_NAME} vmUserInitialPassword)"
+      "value": "$(secretOrRandomPassword ${AZURE_VM_KV_NAME} vmUserInitialPassword)"
     },
     "vmUserName": {
       "value": "gptrag"
