@@ -3,3 +3,18 @@
 name: azure-gpt-rag
 metadata:
   template: azure-gpt-rag
+hooks:
+  preprovision:
+    windows:
+      run: scripts/zeroTrustHeadsUp.ps1
+      interactive: true
+    posix:
+      run: scripts/zeroTrustHeadsUp.sh
+      interactive: true
+  postprovision:
+    posix:
+      run: scripts/postprovision.sh
+      interactive: true
+    windows:
+      run: scripts/postprovision.ps1
+      interactive: true
