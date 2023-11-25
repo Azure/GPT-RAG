@@ -69,40 +69,107 @@ To deploy this solution you just need to execute the next steps:
 
 using [Azure Developer CLI (azd)](https://aka.ms/azure-dev/install) executing the following lines in terminal
 
-## Option #1 (Recommended)
-This option will give you the posibility to avoid any rebuild of Infrastructure in case that new components are added:
-
-This will Login:
-```
-azd auth login
-```
 Download the Repository:
-```
+
+```sh
 azd init -t azure/gpt-rag
 ```
 
-In case that you need Zero Trust Implementation run also the following command:
-```
+## Configuration
+
+Before starting your infrastructure deployment, you can configure:
+- Deploying `Zero Trust Implementation`.
+- Defining the name for each resource.
+- Provide a list of tags to apply to all resources.
+
+### Zero Trust Implementation
+
+For deploying the zero trust implementation, run:
+
+```sh
 azd env set AZURE_NETWORK_ISOLATION true
 ```
-Start Building the infrastructure:
+
+Notes:
+- Once deployment is completed, you need to use the Virtual Machine with the Bastion connection (created as part of zero trust deployment) to continue deploying data ingestion, orchestrator and the front-end app. 
+- At the end of deployment, you will se a note about the name of the created Key Vault and the name of the secret to use for logging in with bastion to the VM.
+
+### Defining resources names
+
+By default, `azd` will automatically generate a unique name for each resource. The unique name is created based on the azd-environment name, the subscription name and the location. However, you can also manually define the name for each resource using the mapping from [main.parameters.json](https://github.com/Azure/GPT-RAG/blob/main/infra/main.parameters.json). Each resource name has a direct mapping to an environment variable, for example:
+
+
+```json
+"storageAccountName": {
+    "value": "${AZURE_STORAGE_ACCOUNT_NAME}"
+},
 ```
+
+This mapping means you can set `AZURE_STORAGE_ACCOUNT_NAME` to define the name for the storage account, by running the command:
+
+```
+azd env set AZURE_STORAGE_ACCOUNT_NAME <yourResourceNameHere>
+```
+
+> By using the azd-environment to set the mappings, you can define the resources names per environment.
+
+> Note: If you work in multiple devices, you can leverage the azd's feature for [remote environment](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/remote-environments-support). It will allow you to keep your environment saved in Azure Storage and restore it from your devices.
+
+### Adding tags for all resources
+
+The [main.parameters.json](https://github.com/Azure/GPT-RAG/blob/main/infra/main.parameters.json) contains an empty object where you can define tags to apply to all your resources. Look for the entry:
+
+```json
+"deploymentTags":{
+    "value": {}
+}
+```
+
+Define your tags as `"key":value`, for example:
+
+```json
+"deploymentTags":{
+    "value": {
+        "business-unit": "foo",
+        "cost-center": "bar",
+    }
+}
+```
+
+While you are defining your deployment tags, you can create your own environment mappings (in case you want to set different tag's values per environment). For example:
+
+Creating your own azd-env mapping:
+```json
+"deploymentTags":{
+    "value": {
+        "business-unit": "${MY_DEPLOYMENT_BUSINESS_UNIT}",
+        "cost-center": "${COST_CENTER}",
+    }
+}
+```
+
+Then, define the values for your environment:
+```sh
+azd env set MY_DEPLOYMENT_BUSINESS_UNIT foo
+azd env set COST_CENTER bar
+```
+
+> Note: Since the input parameter is an object, azd won't prompt the user for a value if the env-var is not set (how it happens when the input argument is a string). The values would be resolved and applied as empty strings when missing.
+
+## Deployment
+
+This will Login:
+
+```sh
+azd auth login
+
+```
+
+Start Building the infrastructure:
+
+```sh
 azd up
 ```
-If you need to change Components names or any parameter in the main.parameter.json use the following command:
-azd env set parameter value
-
-The VM Password will automatically stored in Azure Keyvault, in order to login to the VM in Zero Trust infrastructure in Bastion only Select to use password from Keyvault.
-
-## Option #2
-Provision required Azure services
-
-You can do it by clicking on the following button
-
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fazure%2Fgpt-rag%2Fmain%2Finfra%2Fmain.json)
-
-
-Important: when selecting the target location check [here](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/concepts/models) the regions that currently support the Azure OpenAI models you want to use.
 
 # Deploy GPT-RAG Components (Step #2)
 

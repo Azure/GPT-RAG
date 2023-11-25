@@ -25,7 +25,13 @@ param resourceGroupName string = ''
 // resourceToken is a unique hash based on the subcription id, environment name and location. The hash is used to generate unique names for resources.
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
 // default required tags for azd deployment
-var tags = { 'azd-env-name': environmentName }
+var azdTags = { 'azd-env-name': environmentName }
+
+@description('Key-value pairs of tags to assign to all resources. The default azd tags are automatically added.')
+param deploymentTags object
+
+// Merge azdTags and deploymentTags
+var tags = union(azdTags, deploymentTags)
 
 //network
 @description('Network isolation? If yes it will create the private endpoints.')
@@ -669,12 +675,12 @@ module dataIngestion './core/host/functions.bicep' = {
     location: location
     appInsightsConnectionString: appInsights.outputs.connectionString
     appInsightsInstrumentationKey: appInsights.outputs.instrumentationKey
-    tags: tags
+    tags: union(tags, { 'azd-service-name': 'dataIngest' })
     alwaysOn: true
     allowedOrigins: [ '*' ]
     functionAppScaleLimit: 1
     minimumElasticInstanceCount: 1
-    numberOfWorkers: 1  
+    numberOfWorkers: 1
     appSettings:[
       {
         name: 'AZURE_KEY_VAULT_NAME'
@@ -979,3 +985,5 @@ output AZURE_VM_NAME string = networkIsolation ? ztVmName : ''
 output AZURE_VM_USERNAME string = networkIsolation ? vmUserName : ''
 output AZURE_VM_KV_NAME string = networkIsolation ? bastionKvName : ''
 output AZURE_VM_KV_SEC_NAME string = networkIsolation ? vmKeyVaultSecName : ''
+output AZURE_DATA_INGEST_FUNC_NAME string = dataIngestionFunctionAppName
+output AZURE_DATA_INGEST_FUNC_RG string = resourceGroup.name
