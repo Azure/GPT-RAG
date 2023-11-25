@@ -6,7 +6,7 @@ YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-if [ "$AZURE_ZERO_TRUST" = "false" ]; then
+if [ "$AZURE_ZERO_TRUST" = "FALSE" ]; then
     exit 0
 fi
 

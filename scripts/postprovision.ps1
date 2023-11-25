@@ -2,7 +2,7 @@ $YELLOW = [ConsoleColor]::Yellow
 $BLUE = [ConsoleColor]::Blue
 $NC = [ConsoleColor]::White
 
-if ($env:AZURE_ZERO_TRUST -eq "false") {
+if ($env:AZURE_ZERO_TRUST -eq "FALSE") {
     exit 0
 }
 
