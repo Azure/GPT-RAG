@@ -79,6 +79,9 @@
     },
     "vnetName": {
       "value": "${AZURE_VNET_NAME}"
+    },
+    "deploymentTags":{
+      "value": {}
     }
   }
 }

@@ -25,7 +25,13 @@ param resourceGroupName string = ''
 // resourceToken is a unique hash based on the subcription id, environment name and location. The hash is used to generate unique names for resources.
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
 // default required tags for azd deployment
-var tags = { 'azd-env-name': environmentName }
+var azdTags = { 'azd-env-name': environmentName }
+
+@description('Key-value pairs of tags to assign to all resources. The default azd tags are automatically added.')
+param deploymentTags object
+
+// Merge azdTags and deploymentTags
+var tags = union(azdTags, deploymentTags)
 
 //network
 @description('Network isolation? If yes it will create the private endpoints.')
