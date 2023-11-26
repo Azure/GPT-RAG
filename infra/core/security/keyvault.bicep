@@ -3,6 +3,11 @@ param location string = resourceGroup().location
 param tags object = {}
 param publicNetworkAccess string
 
+@secure()
+param vmUserPasswordKey string
+@secure()
+param vmUserPassword string
+
 param principalId string = ''
 
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
@@ -22,6 +27,24 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
         tenantId: subscription().tenantId
       }
     ] : []
+  }
+}
+
+resource vmUserPasswordSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (publicNetworkAccess == 'Enabled') {
+  parent: keyVault
+  name: vmUserPasswordKey
+  properties: {
+    value: vmUserPassword
+  }
+}
+
+resource KeyVaultAccessRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (publicNetworkAccess == 'Enabled') {
+  name: guid(subscription().id, resourceGroup().id, principalId, keyVault.id, 'Secret Reader')
+  scope: keyVault
+  properties: {
+    principalId: principalId
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')
+    principalType: 'User'
   }
 }
 
