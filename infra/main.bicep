@@ -368,6 +368,9 @@ module keyVault './core/security/keyvault.bicep' = {
     publicNetworkAccess: networkIsolation?'Disabled':'Enabled'
     tags: tags
     principalId: principalId
+    // this is the named of the secret to store the vm password in keyvault. It matches what is used on main.parameters.json
+    vmUserPasswordKey: vmKeyVaultSecName
+    vmUserPassword: vmUserInitialPassword
   }
 }
 
@@ -983,7 +986,7 @@ output AZURE_KEY_VAULT_NAME string = keyVault.outputs.name
 output AZURE_ZERO_TRUST string = networkIsolation ? 'TRUE' : 'FALSE'
 output AZURE_VM_NAME string = networkIsolation ? ztVmName : ''
 output AZURE_VM_USERNAME string = networkIsolation ? vmUserName : ''
-output AZURE_VM_KV_NAME string = networkIsolation ? bastionKvName : ''
+output AZURE_VM_KV_NAME string = networkIsolation ? bastionKvName : keyVault.outputs.name
 output AZURE_VM_KV_SEC_NAME string = networkIsolation ? vmKeyVaultSecName : ''
 output AZURE_DATA_INGEST_FUNC_NAME string = dataIngestionFunctionAppName
 output AZURE_DATA_INGEST_FUNC_RG string = resourceGroup.name

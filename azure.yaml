@@ -3,7 +3,24 @@
 name: azure-gpt-rag
 metadata:
   template: azure-gpt-rag
+services:
+  dataIngest:
+    # project is temporally pulled fro its repo during deployment.
+    project: ./.azure/gpt-rag-ingestion
+    language: python
+    host: function
+    hooks:
+      postdeploy:
+        posix:
+          # this path is relative to ./.azure/gpt-rag-ingestion
+          run: scripts/postdeploy.sh
+          interactive: false
 hooks:
+  # Components are pulled from their own repo for deployment but are not persisted to this repo.
+  prepackage:
+    posix:
+      run: scripts/fetchComponents.sh
+      interactive: false
   preprovision:
     windows:
       run: scripts/zeroTrustHeadsUp.ps1
@@ -18,3 +35,7 @@ hooks:
     windows:
       run: scripts/postprovision.ps1
       interactive: true
+  postdeploy:
+    posix:
+      run: scripts/cleanComponents.sh
+      interactive: false
