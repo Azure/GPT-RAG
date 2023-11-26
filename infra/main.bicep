@@ -429,7 +429,7 @@ module orchestrator './core/host/functions.bicep' = {
     location: location
     appInsightsConnectionString: appInsights.outputs.connectionString
     appInsightsInstrumentationKey: appInsights.outputs.instrumentationKey
-    tags: tags
+    tags: union(tags, { 'azd-service-name': 'orchestrator' })
     alwaysOn: true
     functionAppScaleLimit: 2
     numberOfWorkers: 2
@@ -579,7 +579,7 @@ module frontEnd  'core/host/appservice.bicep'  = {
     vnetName: vnet.outputs.name
     appCommandLine: 'python ./app.py'
     location: location
-    tags: tags
+    tags: union(tags, { 'azd-service-name': 'frontend' })
     appServicePlanId: appServicePlan.outputs.id
     runtimeName: 'python'
     runtimeVersion: '3.10'
@@ -990,3 +990,4 @@ output AZURE_VM_KV_NAME string = networkIsolation ? bastionKvName : keyVault.out
 output AZURE_VM_KV_SEC_NAME string = networkIsolation ? vmKeyVaultSecName : ''
 output AZURE_DATA_INGEST_FUNC_NAME string = dataIngestionFunctionAppName
 output AZURE_DATA_INGEST_FUNC_RG string = resourceGroup.name
+output AZURE_ORCHESTRATOR_FUNC_NAME string = orchestratorFunctionAppName

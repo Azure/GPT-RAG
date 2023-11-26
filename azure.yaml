@@ -15,6 +15,27 @@ services:
           # this path is relative to ./.azure/gpt-rag-ingestion
           run: scripts/postdeploy.sh
           interactive: false
+  orchestrator:
+    project: ./.azure/gpt-rag-orchestrator
+    language: python
+    host: function
+  frontend:
+    # backend is python and frontend is Vite app. The frontend is built with Vite settings to output into the backend's static folder.
+    project: ./.azure/gpt-rag-frontend/backend
+    language: python
+    host: appservice
+    hooks:
+      prepackage:
+        windows:
+          shell: pwsh
+          run:  cd ../frontend;npm install;npm run build
+          interactive: false
+          continueOnError: false
+        posix:
+          shell: sh
+          run:  cd ../frontend;npm install;npm run build
+          interactive: false
+          continueOnError: false
 hooks:
   # Components are pulled from their own repo for deployment but are not persisted to this repo.
   prepackage:
