@@ -15,6 +15,10 @@ services:
           # this path is relative to ./.azure/gpt-rag-ingestion
           run: scripts/postdeploy.sh
           interactive: false
+        windows:
+          # this path is relative to ./.azure/gpt-rag-ingestion
+          run: scripts/postdeploy.ps1
+          interactive: false          
   orchestrator:
     project: ./.azure/gpt-rag-orchestrator
     language: python
@@ -42,6 +46,9 @@ hooks:
     posix:
       run: scripts/fetchComponents.sh
       interactive: false
+    windows:
+      run: scripts/fetchComponents.ps1
+      interactive: false      
   preprovision:
     windows:
       run: scripts/zeroTrustHeadsUp.ps1
@@ -59,4 +66,7 @@ hooks:
   postdeploy:
     posix:
       run: scripts/cleanComponents.sh
+      interactive: false
+    windows:
+      run: scripts/cleanComponents.ps1
       interactive: false
