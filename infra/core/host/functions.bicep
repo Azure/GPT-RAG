@@ -22,6 +22,8 @@ var runtimeNameAndVersion = '${runtimeName}|${runtimeVersion}'
 param vnetName string
 param subnetId string
 param networkIsolation bool
+// when not provided, function key is not persisted on KeyVault
+param persistFunctionKeyToKeyVaultWithSecretName string = ''
 
 @description('Storage Account type')
 @allowed([
@@ -57,7 +59,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   }
 }
 
-resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
+resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
   name: functionAppName
   location: location
   kind: kind
@@ -67,13 +69,12 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
   }
   properties: {
     serverFarmId: appServicePlanId
-    // serverFarmId: hostingPlan.id
     clientAffinityEnabled: clientAffinityEnabled
     virtualNetworkSubnetId: subnetId
     httpsOnly: true
     siteConfig: {
       vnetName: vnetName
-      linuxFxVersion: runtimeNameAndVersion      
+      linuxFxVersion: runtimeNameAndVersion
       alwaysOn: alwaysOn
       ftpsState: 'FtpsOnly'
       minTlsVersion: '1.2'
@@ -116,14 +117,6 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
           name: 'AZURE_KEY_VAULT_ENDPOINT'
           value: keyVault.properties.vaultUri
         }
-        // {
-        //   name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
-        //   value: string(scmDoBuildDuringDeployment)
-        // }
-        // {
-        //   name: 'ENABLE_ORYX_BUILD'
-        //   value: string(enableOryxBuild)
-        // }        
       ])
       cors: {
         allowedOrigins: union([ 'https://portal.azure.com', 'https://ms.portal.azure.com' ], allowedOrigins)
@@ -136,22 +129,21 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = if (!(empty(
  name: keyVaultName
 }
 
-
-
-// param waitSeconds int =  240
-// module delayDeployment 'br/public:deployment-scripts/wait:1.1.1' = {
-//   name: 'delayDeployment'
-//   params: {
-//     waitSeconds: waitSeconds
-//     location: location
-//   }
-// }
-
-// output hostKey string = functionAppHost.listKeys().functionKeys.default
+module keyVaultFuncSecret '../security/keyvault-secrets.bicep' = if (!(empty(persistFunctionKeyToKeyVaultWithSecretName))){
+  name: 'persiste-function-key-to-keyvault'
+  params: {
+    keyVaultName: keyVaultName
+    secretValues: {
+      persistFunctionKey: {
+        name: persistFunctionKeyToKeyVaultWithSecretName
+        value: listkeys('${functionApp.id}/host/default', functionApp.apiVersion).functionKeys.default
+      }
+    }
+  }
+}
 
 output identityPrincipalId string = functionApp.identity.principalId
 output name string = functionApp.name
 output uri string = 'https://${functionApp.properties.defaultHostName}'
 output location string = functionApp.location
-// output hostKey string = listKeys('${functionApp.id}/host/default', functionApp.apiVersion).functionKeys.default
 output id string = functionApp.id
