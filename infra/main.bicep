@@ -73,11 +73,11 @@ param speechSynthesisVoiceName string
 
 // openai
 @description('GPT model used to answer user questions. Don\'t forget to check region availability.')
-@allowed([ 'gpt-35-turbo', 'gpt-4', 'gpt-4-32k' ])
-param chatGptModelName string = 'gpt-35-turbo'
+@allowed([ 'gpt-35-turbo','gpt-35-turbo-16k', 'gpt-4', 'gpt-4-32k' ])
+param chatGptModelName string
 @description('GPT model version.')
-@allowed([ '0613' ])
-param chatGptModelVersion string = '0613'
+@allowed([ '0613', '1106-Preview' ])
+param chatGptModelVersion string
 @description('GPT model deployment name.')
 param chatGptDeploymentName string = 'chat'
 @description('GPT model tokens per Minute Rate Limit (thousands). Default quota per model and region: gpt-4: 20; gpt-4-32: 60; All others: 240.')
@@ -136,44 +136,44 @@ param storageContainerName string = 'documents'
 // The name for each service can be set from environment variables which are mapped in main.parameters.json.
 // Then no maping to specific name is defined, a unique name is generated for each service based on the resourceToken created above.
 @description('Cosmos DB Account Name. Use your own name convention or leave as it is to generate a random name.')
-param defaultDbAccountName string = ''
-var dbAccountName = !empty(defaultDbAccountName) ? defaultDbAccountName : 'dbgpt0-${resourceToken}'
+param azureDbAccountName string = ''
+var dbAccountName = !empty(azureDbAccountName) ? azureDbAccountName : 'dbgpt0-${resourceToken}'
 @description('Cosmos DB Database Name. Use your own name convention or leave as it is to generate a random name.')
-param defaultDbDatabaseName string = ''
-var dbDatabaseName = !empty(defaultDbDatabaseName) ? defaultDbDatabaseName : 'db0-${resourceToken}'
+param azureDbDatabaseName string = ''
+var dbDatabaseName = !empty(azureDbDatabaseName) ? azureDbDatabaseName : 'db0-${resourceToken}'
 @description('Key Vault Name. Use your own name convention or leave as it is to generate a random name.')
-param defaultKeyVaultName string = ''
-var keyVaultName = !empty(defaultKeyVaultName) ? defaultKeyVaultName : 'kv0-${resourceToken}'
+param azureKeyVaultName string = ''
+var keyVaultName = !empty(azureKeyVaultName) ? azureKeyVaultName : 'kv0-${resourceToken}'
 @description('Storage Account Name. Use your own name convention or leave as it is to generate a random name.')
-param defaultStorageAccountName string = ''
-var storageAccountName = !empty(defaultStorageAccountName) ? defaultStorageAccountName : 'strag0${resourceToken}'
+param azureStorageAccountName string = ''
+var storageAccountName = !empty(azureStorageAccountName) ? azureStorageAccountName : 'strag0${resourceToken}'
 @description('Cognitive services multi-service name. Use your own name convention or leave as it is to generate a random name.')
-param defaultCognitiveServiceName string = ''
-var cognitiveServiceName = !empty(defaultCognitiveServiceName) ? defaultCognitiveServiceName : 'cs0-${resourceToken}'
+param azureCognitiveServiceName string = ''
+var cognitiveServiceName = !empty(azureCognitiveServiceName) ? azureCognitiveServiceName : 'cs0-${resourceToken}'
 @description('App Service Plan Name. Use your own name convention or leave as it is to generate a random name.')
-param defaultAzureAppServicePlanName string = ''
-var azureAppServicePlanName = !empty(defaultAzureAppServicePlanName) ? defaultAzureAppServicePlanName : 'appplan0-${resourceToken}'
+param azureAppServicePlanName string = ''
+var appServicePlanName = !empty(azureAppServicePlanName) ? azureAppServicePlanName : 'appplan0-${resourceToken}'
 @description('App Insights Name. Use your own name convention or leave as it is to generate a random name.')
-param defaultAppInsightsName string = ''
-var appInsightsName = !empty(defaultAppInsightsName) ? defaultAppInsightsName : 'appins0-${resourceToken}'
+param azureAppInsightsName string = ''
+var appInsightsName = !empty(azureAppInsightsName) ? azureAppInsightsName : 'appins0-${resourceToken}'
 @description('Front-end App Service Name. Use your own name convention or leave as it is to generate a random name.')
-param defaultAzureAppServiceName string = ''
-var azureAppServiceName = !empty(defaultAzureAppServiceName) ? defaultAzureAppServiceName : 'webgpt0-${resourceToken}'
+param azureAppServiceName string = ''
+var appServiceName = !empty(azureAppServiceName) ? azureAppServiceName : 'webgpt0-${resourceToken}'
 @description('Orchestrator Function Name. Use your own name convention or leave as it is to generate a random name.')
-param defaultOrchestratorFunctionAppName string = ''
-var orchestratorFunctionAppName = !empty(defaultOrchestratorFunctionAppName) ? defaultOrchestratorFunctionAppName : 'fnorch0-${resourceToken}'
+param azureOrchestratorFunctionAppName string = ''
+var orchestratorFunctionAppName = !empty(azureOrchestratorFunctionAppName) ? azureOrchestratorFunctionAppName : 'fnorch0-${resourceToken}'
 @description('Data Ingestion Function Name. Use your own name convention or leave as it is to generate a random name.')
-param defaultDataIngestionFunctionAppName string = ''
-var dataIngestionFunctionAppName = !empty(defaultDataIngestionFunctionAppName) ? defaultDataIngestionFunctionAppName : 'fninges0-${resourceToken}'
+param azureDataIngestionFunctionAppName string = ''
+var dataIngestionFunctionAppName = !empty(azureDataIngestionFunctionAppName) ? azureDataIngestionFunctionAppName : 'fninges0-${resourceToken}'
 @description('Search Service Name. Use your own name convention or leave as it is to generate a random name.')
-param defaultSearchServiceName string = ''
-var searchServiceName = !empty(defaultSearchServiceName) ? defaultSearchServiceName : 'search0-${resourceToken}'
+param azureSearchServiceName string = ''
+var searchServiceName = !empty(azureSearchServiceName) ? azureSearchServiceName : 'search0-${resourceToken}'
 @description('OpenAI Service Name. Use your own name convention or leave as it is to generate a random name.')
-param defaultOpenAiServiceName string = ''
-var openAiServiceName = !empty(defaultOpenAiServiceName) ? defaultOpenAiServiceName : 'oai0-${resourceToken}'
+param azureOpenAiServiceName string = ''
+var openAiServiceName = !empty(azureOpenAiServiceName) ? azureOpenAiServiceName : 'oai0-${resourceToken}'
 @description('Virtual network name if using network isolation. Use your own name convention or leave as it is to generate a random name.')
-param defaultVnetName string = ''
-var vnetName = !empty(defaultVnetName) ? defaultVnetName : 'aivnet0-${resourceToken}'
+param azureVnetName string = ''
+var vnetName = !empty(azureVnetName) ? azureVnetName : 'aivnet0-${resourceToken}'
 
 var orchestratorEndpoint = 'https://${orchestratorFunctionAppName}.azurewebsites.net/api/orc'
 var orchestratorUri = 'https://${orchestratorFunctionAppName}.azurewebsites.net'
@@ -393,7 +393,7 @@ module appServicePlan './core/host/appserviceplan.bicep' = {
   name: 'appserviceplan'
   scope: resourceGroup
   params: {
-    name: azureAppServicePlanName
+    name: appServicePlanName
     location: location
     tags: tags
     sku: {
@@ -510,6 +510,14 @@ module orchestrator './core/host/functions.bicep' = {
         value: orchestratorMessagesLanguage
       }
       {
+        name: 'ENABLE_ORYX_BUILD'
+        value: 'true'
+      }
+      {
+        name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
+        value: 'true'
+      }
+      {
         name: 'LOGLEVEL'
         value: 'INFO'
       }                         
@@ -566,7 +574,7 @@ module frontEnd  'core/host/appservice.bicep'  = {
   name: 'frontend'
   scope: resourceGroup
   params: {
-    name: azureAppServiceName
+    name: appServiceName
     applicationInsightsName: appInsightsName
     subnetId: vnet.outputs.appIntSubId
     vnetName: vnet.outputs.name
@@ -753,6 +761,14 @@ module dataIngestion './core/host/functions.bicep' = {
       {
         name: 'NETWORK_ISOLATION'
         value: networkIsolation
+      }
+      {
+        name: 'ENABLE_ORYX_BUILD'
+        value: 'true'
+      }
+      {
+        name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
+        value: 'true'
       }   
       {
         name: 'AzureWebJobsFeatureFlags'
