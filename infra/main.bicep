@@ -423,6 +423,7 @@ module orchestrator './core/host/functions.bicep' = {
     vnetName: vnet.outputs.name
     networkIsolation: networkIsolation
     keyVaultName: keyVault.outputs.name
+    persistFunctionKeyToKeyVaultWithSecretName: 'orchestrator-host--functionKey'
     storageAccountName: '${storageAccountName}orc'
     appServicePlanId: appServicePlan.outputs.id
     appName: orchestratorFunctionAppName
@@ -507,14 +508,6 @@ module orchestrator './core/host/functions.bicep' = {
       {
         name: 'ORCHESTRATOR_MESSAGES_LANGUAGE'
         value: orchestratorMessagesLanguage
-      }
-      {
-        name: 'AzureWebJobsSecretStorageType'
-        value: 'keyvault'
-      }   
-      {
-        name: 'AzureWebJobsSecretStorageKeyVaultUri'
-        value: keyVault.outputs.endpoint
       }
       {
         name: 'LOGLEVEL'
