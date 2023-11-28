@@ -23,6 +23,12 @@
     "vmUserName": {
       "value": "gptrag"
     },
+    "chatGptModelName": {
+      "value": "gpt-4"
+    },
+    "chatGptModelVersion": {
+      "value": "1106-Preview"
+    },
     "orchestratorMessagesLanguage": {
       "value": "es"
     },
@@ -41,43 +47,43 @@
     "speechSynthesisVoiceName": {
       "value": "es-MX-BeatrizNeural"
     },
-    "dbAccountName": {
+    "azureDbAccountName": {
       "value": "${AZURE_DB_ACCOUNT_NAME}"
     },
-    "dbDatabaseName": {
+    "azureDbDatabaseName": {
       "value": "${AZURE_DB_DATABASE_NAME}"
     },
-    "keyVaultName": {
+    "azureKeyVaultName": {
       "value": "${AZURE_KEY_VAULT_NAME}"
     },
-    "storageAccountName": {
+    "azureStorageAccountName": {
       "value": "${AZURE_STORAGE_ACCOUNT_NAME}"
     },
-    "cognitiveServiceName": {
+    "azureCognitiveServiceName": {
       "value": "${AZURE_COGNITIVE_SERVICE_NAME}"
     },
     "azureAppServicePlanName": {
-      "value": "${AZURE_AZURE_APP_SERVICE_PLAN_NAME}"
+      "value": "${AZURE_APP_SERVICE_PLAN_NAME}"
     },
-    "appInsightsName": {
+    "azureAppInsightsName": {
       "value": "${AZURE_APP_INSIGHTS_NAME}"
     },
     "azureAppServiceName": {
       "value": "${AZURE_APP_SERVICE_NAME}"
     },
-    "orchestratorFunctionAppName": {
+    "azureOrchestratorFunctionAppName": {
       "value": "${AZURE_ORCHESTRATOR_FUNCTION_APP_NAME}"
     },
-    "dataIngestionFunctionAppName": {
+    "azureDataIngestionFunctionAppName": {
       "value": "${AZURE_DATA_INGESTION_FUNCTION_APP_NAME}"
     },
-    "searchServiceName": {
+    "azureSearchServiceName": {
       "value": "${AZURE_SEARCH_SERVICE_NAME}"
     },
-    "openAIServiceName": {
+    "azureOpenAIServiceName": {
       "value": "${AZURE_OPEN_AI_SERVICE_NAME}"
     },
-    "vnetName": {
+    "azureVnetName": {
       "value": "${AZURE_VNET_NAME}"
     },
     "deploymentTags":{
