@@ -24,10 +24,10 @@
       "value": "gptrag"
     },
     "chatGptModelName": {
-      "value": "gpt-4"
+      "value": "gpt-35-turbo-16k"
     },
     "chatGptModelVersion": {
-      "value": "1106-Preview"
+      "value": "0613"
     },
     "orchestratorMessagesLanguage": {
       "value": "es"
