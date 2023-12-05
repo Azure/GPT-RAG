@@ -423,7 +423,6 @@ module orchestrator './core/host/functions.bicep' = {
     vnetName: vnet.outputs.name
     networkIsolation: networkIsolation
     keyVaultName: keyVault.outputs.name
-    persistFunctionKeyToKeyVaultWithSecretName: 'orchestrator-host--functionKey'
     storageAccountName: '${storageAccountName}orc'
     appServicePlanId: appServicePlan.outputs.id
     appName: orchestratorFunctionAppName
@@ -998,6 +997,7 @@ output AZURE_VM_KV_NAME string = networkIsolation ? bastionKvName : keyVault.out
 output AZURE_VM_KV_SEC_NAME string = networkIsolation ? vmKeyVaultSecName : ''
 output AZURE_DATA_INGEST_FUNC_NAME string = dataIngestionFunctionAppName
 output AZURE_DATA_INGEST_FUNC_RG string = resourceGroup.name
+output AZURE_ORCHESTRATOR_FUNC_RG string = resourceGroup.name
 output AZURE_ORCHESTRATOR_FUNC_NAME string = orchestratorFunctionAppName
 
 // Set input params as outputs to persist the selection

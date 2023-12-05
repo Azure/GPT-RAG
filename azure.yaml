@@ -23,6 +23,16 @@ services:
     project: ./.azure/gpt-rag-orchestrator
     language: python
     host: function
+    hooks:
+      postdeploy:
+        posix:
+          # this path is relative to ./.azure/gpt-rag-orchestrator
+          run: scripts/postdeploy.sh
+          interactive: false
+        windows:
+          # this path is relative to ./.azure/gpt-rag-orchestrator
+          run: scripts/postdeploy.ps1
+          interactive: false          
   frontend:
     # backend is python and frontend is Vite app. The frontend is built with Vite settings to output into the backend's static folder.
     project: ./.azure/gpt-rag-frontend/backend
