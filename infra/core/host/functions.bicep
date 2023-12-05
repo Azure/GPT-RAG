@@ -22,8 +22,6 @@ var runtimeNameAndVersion = '${runtimeName}|${runtimeVersion}'
 param vnetName string
 param subnetId string
 param networkIsolation bool
-// when not provided, function key is not persisted on KeyVault
-param persistFunctionKeyToKeyVaultWithSecretName string = ''
 
 @description('Storage Account type')
 @allowed([
@@ -127,19 +125,6 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
 
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = if (!(empty(keyVaultName))) {
  name: keyVaultName
-}
-
-module keyVaultFuncSecret '../security/keyvault-secrets.bicep' = if (!(empty(persistFunctionKeyToKeyVaultWithSecretName))){
-  name: 'persiste-function-key-to-keyvault'
-  params: {
-    keyVaultName: keyVaultName
-    secretValues: {
-      persistFunctionKey: {
-        name: persistFunctionKeyToKeyVaultWithSecretName
-        value: listkeys('${functionApp.id}/host/default', functionApp.apiVersion).functionKeys.default
-      }
-    }
-  }
 }
 
 output identityPrincipalId string = functionApp.identity.principalId
