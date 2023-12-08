@@ -97,8 +97,8 @@ param embeddingsDeploymentName string = 'text-embedding-ada-002'
 @maxValue(240)
 param embeddingsDeploymentCapacity int = 1
 @description('Azure OpenAI API version.')
-@allowed([ '2023-05-15', '2023-06-01-preview'])
-param openaiApiVersion string = '2023-05-15'
+@allowed([ '2023-05-15', '2023-06-01-preview', '2023-08-01-preview'])
+param openaiApiVersion string
 @description('Enables LLM monitoring to generate conversation metrics.')
 @allowed([true, false])
 param chatGptLlmMonitoring bool = true
