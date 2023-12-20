@@ -76,10 +76,10 @@ hooks:
   predeploy:
     posix:
       run: scripts/preDeploy.sh
-      interactive: false
+      interactive: true
     windows:
       run: scripts/preDeploy.ps1
-      interactive: false
+      interactive: true
   postdeploy:
     posix:
       run: scripts/cleanComponents.sh

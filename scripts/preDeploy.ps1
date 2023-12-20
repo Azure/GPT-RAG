@@ -4,7 +4,7 @@ if ($env:AZURE_ZERO_TRUST -eq "TRUE") {
 
     # Check if the confirmation is positive
     if ($confirmation -ne "Y" -and $confirmation -ne "y" -and $confirmation) {
-        exit 0
+        exit 1
     }
-    exit 1
+    exit 0
 }
