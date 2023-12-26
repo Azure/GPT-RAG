@@ -73,6 +73,13 @@ hooks:
     windows:
       run: scripts/postprovision.ps1
       interactive: true
+  predeploy:
+    posix:
+      run: scripts/preDeploy.sh
+      interactive: true
+    windows:
+      run: scripts/preDeploy.ps1
+      interactive: true
   postdeploy:
     posix:
       run: scripts/cleanComponents.sh
