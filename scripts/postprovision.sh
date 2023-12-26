@@ -10,7 +10,7 @@ if [ "$AZURE_ZERO_TRUST" = "FALSE" ]; then
     exit 0
 fi
 
-echo "For accesing the ${YELLOW}Zero Trust infrastructure${NC}, from the Azure Portal:"
+echo "For accessing the ${YELLOW}Zero Trust infrastructure${NC}, from the Azure Portal:"
 echo "Virtual Machine: ${BLUE}$AZURE_VM_NAME${NC}"
 echo "Select connect using Bastion with:"
 echo "  username: $AZURE_VM_USERNAME"
