@@ -48,6 +48,10 @@ param autoscaleMaxThroughput int = 1000
 @maxValue(2147483647)
 param analyticalStoreTTL int = -1
 
+param secretName string = 'azureDBkey'
+
+param keyVaultName string
+
 var consistencyPolicy = {
   Eventual: {
     defaultConsistencyLevel: 'Eventual'
@@ -157,6 +161,25 @@ resource modelsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/con
   }
 }
 
-output azureDBkey string = account.listKeys().primaryMasterKey
+resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
+  name: keyVaultName
+}
+
+resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' =  {
+  name: secretName
+  tags: tags
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
+      exp: 0
+      nbf: 0
+    }
+    contentType: 'string'
+    value: account.listKeys().primaryMasterKey
+  }
+}
+
+
 output id string = account.id
 output name string = account.name

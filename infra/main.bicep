@@ -312,6 +312,8 @@ module storage './core/storage/storage-account.bicep' = {
     allowBlobPublicAccess: networkIsolation?false:true
     publicNetworkAccess: networkIsolation?'Disabled':'Enabled'
     containers: [{name:containerName, publicAccess: networkIsolation?'None':'Container'}, {name:chunksContainerName}]
+    keyVaultName: keyVault.outputs.name
+    secretName: 'storageConnectionString'
   }  
 }
 
@@ -340,7 +342,9 @@ module cosmosAccount './core/db/cosmos.bicep' = {
     location: location
     containerName: 'conversations'
     databaseName: dbDatabaseName
-    tags: tags    
+    tags: tags
+    secretName: 'azureDBkey'
+    keyVaultName: keyVault.outputs.name    
   }
 }
 
@@ -830,7 +834,12 @@ module cognitiveServices 'core/ai/cognitiveservices.bicep' = {
     tags: tags
     sku: {
       name: 'S0'
-    }    
+    }
+    secretsNames: { 
+      secretName01: 'formRecKey' 
+      secretName02: 'speechKey'
+    }
+    keyVaultName: keyVault.outputs.name
   }
 }
 
@@ -859,7 +868,11 @@ module openAi 'core/ai/cognitiveservices.bicep' = {
     tags: tags
     sku: {
       name: 'S0' 
-    }    
+    }
+    secretsNames: { 
+      secretName01: 'azureOpenAIKey'
+    }
+    keyVaultName: keyVault.outputs.name    
     deployments: [
       {
         name: chatGptDeploymentName
@@ -909,6 +922,8 @@ module searchService 'core/search/search-services.bicep' = {
   params: {
     name: searchServiceName
     location: location
+    secretName: 'azureSearchKey'
+    keyVaultName: keyVault.outputs.name
     publicNetworkAccess: networkIsolation?'Disabled':'Enabled'
     tags: tags
     authOptions: {
@@ -959,40 +974,6 @@ module searchPe './core/network/private-endpoint.bicep' = if (networkIsolation) 
   }
 }
 
-module keyVaultSecret './core/security/keyvault-secrets.bicep' = {
-  name: 'keyvaultsecrets'
-  scope: resourceGroup
-  params: {
-    keyVaultName: keyVault.outputs.name
-    secretValues: {
-      azureSearchKey: {
-        name: 'azureSearchKey'
-        value: searchService.outputs.apiKey
-      }
-      formRecKey: {
-        name: 'formRecKey'
-        value: cognitiveServices.outputs.apiKey
-      }
-      speechKey: {
-        name: 'speechKey'
-        value: cognitiveServices.outputs.apiKey
-      }            
-      azureOpenAIKey: {
-        name: 'azureOpenAIKey'
-        value: openAi.outputs.apiKey
-      }
-      azureDBkey: {
-        name: 'azureDBkey'
-        value: cosmosAccount.outputs.azureDBkey
-      }
-      storageConnectionString: {
-        name: 'storageConnectionString'
-        value: 'DefaultEndpointsProtocol=https;AccountName=${storage.outputs.name};AccountKey=${storage.outputs.storageKey};EndpointSuffix=core.windows.net'
-      }
-    }
-  }
-}
-
 output AZURE_KEY_VAULT_NAME string = keyVault.outputs.name
 output AZURE_ZERO_TRUST string = networkIsolation ? 'TRUE' : 'FALSE'
 output AZURE_VM_NAME string = networkIsolation ? ztVmName : ''
@@ -1007,6 +988,7 @@ output AZURE_ORCHESTRATOR_FUNC_NAME string = orchestratorFunctionAppName
 // Set input params as outputs to persist the selection
 // This strategy would allow to re-construct the .env file from a deployment object on azure by using env-name, sub and location.
 // Without this, any custom selection would be lost when running `azd env refresh` from another machine.
+
 output AZURE_RESOURCE_GROUP_NAME string = resourceGroupName
 output AZURE_NETWORK_ISOLATION bool = networkIsolation
 output AZURE_DB_ACCOUNT_NAME string = azureDbAccountName
