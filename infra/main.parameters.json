@@ -48,7 +48,7 @@
       "value": "en-US"
     },
     "speechSynthesisVoiceName": {
-      "value": "en-US-JennyNeural"
+      "value": "en-US-RyanMultilingualNeural"
     },
     "azureDbAccountName": {
       "value": "${AZURE_DB_ACCOUNT_NAME}"
