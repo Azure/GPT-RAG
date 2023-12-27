@@ -36,22 +36,19 @@
       "value": "2023-08-01-preview"
     },
     "orchestratorMessagesLanguage": {
-      "value": "es"
+      "value": "en"
     },
     "searchAnalyzerName": {
-      "value": "es.microsoft"
-    },
-    "searchServiceLanguage": {
-      "value": "es"
+      "value": "standard"
     },
     "speechRecognitionLanguage": {
-      "value": "es-ES"
+      "value": "en-US"
     },
     "speechSynthesisLanguage": {
-      "value": "es-ES"
+      "value": "en-US"
     },
     "speechSynthesisVoiceName": {
-      "value": "es-MX-BeatrizNeural"
+      "value": "en-US-JennyNeural"
     },
     "azureDbAccountName": {
       "value": "${AZURE_DB_ACCOUNT_NAME}"
