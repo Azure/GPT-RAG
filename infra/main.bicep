@@ -110,15 +110,17 @@ param retrievalApproach string = 'hybrid'
 @description('Use semantic reranking on top of search results?.')
 @allowed([true, false])
 param useSemanticReranking bool = true
-
 var searchServiceSkuName = networkIsolation?'standard2':'standard'
 @description('Search index name.')
 var searchIndex = 'ragindex'
-@allowed([ '2023-07-01-Preview' ])
-param searchApiVersion string = '2023-07-01-Preview'
+@allowed([ '2023-10-01-Preview' ])
+param searchApiVersion string = '2023-10-01-Preview'
 @description('Frequency of search reindexing. PT5M (5 min), PT1H (1 hour), P1D (1 day).')
 @allowed(['PT5M', 'PT1H', 'P1D'])
 param searchIndexInterval string = 'PT1H'
+@description('Use Search Service Managed Identity to Connect to data ingestion function?')
+@allowed([true, false])
+param azureSearchUseMIS bool = false
 
 // chunking
 @description('The number of tokens in each chunk.')
@@ -982,6 +984,7 @@ output AZURE_VM_KV_NAME string = networkIsolation ? bastionKvName : keyVault.out
 output AZURE_VM_KV_SEC_NAME string = networkIsolation ? vmKeyVaultSecName : ''
 output AZURE_DATA_INGEST_FUNC_NAME string = dataIngestionFunctionAppName
 output AZURE_DATA_INGEST_FUNC_RG string = resourceGroup.name
+output AZURE_SEARCH_APP_ID string = searchService.outputs.principalId
 output AZURE_ORCHESTRATOR_FUNC_RG string = resourceGroup.name
 output AZURE_ORCHESTRATOR_FUNC_NAME string = orchestratorFunctionAppName
 
@@ -1003,3 +1006,5 @@ output AZURE_DATA_INGESTION_FUNCTION_APP_NAME string = azureDataIngestionFunctio
 output AZURE_SEARCH_SERVICE_NAME string = azureSearchServiceName
 output AZURE_OPEN_AI_SERVICE_NAME string = azureOpenAiServiceName
 output AZURE_VNET_NAME string = azureVnetName
+
+output AZURE_SEARCH_USE_MIS2 bool = azureSearchUseMIS

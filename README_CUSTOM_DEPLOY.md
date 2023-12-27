@@ -18,6 +18,28 @@ Notes:
 - Once deployment is completed, you need to use the Virtual Machine with the Bastion connection (created as part of zero trust deployment) to continue deploying data ingestion, orchestrator and the front-end app. 
 - At the end of deployment, you will se a note about the name of the created Key Vault and the name of the secret to use for logging in with bastion to the VM.
 
+#### AI Search: accessing the data ingest function using a Managed Identity
+
+The AI Search indexer uses a skillset with a custom web app skill implemented by the data ingestion Azure Function for chunking. By default, AI Search connects with the Azure Function using its API key.
+
+If you prefer to use a managed identity for the connection, you can do so by setting AZURE_SEARCH_USE_MIS variable. 
+
+```sh
+azd env set AZURE_SEARCH_USE_MIS true
+```
+
+After setting this variable, you need to deploy again using the azd up command. 
+
+```sh
+azd up
+```
+
+Notes:
+
+- In order for the data ingestion function to be accessed with a managed identity, it needs to be configured to use Microsoft Entra Sign-in, as indicated [in this link](https://learn.microsoft.com/en-us/azure/app-service/configure-authentication-provider-aad).
+
+
+
 #### Configuring language settings
 
 The language settings of the components are by default in Spanish. For example, the AI Search service uses an analyzer called ‘es.microsoft’ to process and index the text during the query execution.

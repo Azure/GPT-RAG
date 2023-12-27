@@ -23,6 +23,9 @@
     "vmUserName": {
       "value": "gptrag"
     },
+    "azureSearchUseMIS": {
+      "value": "${AZURE_SEARCH_USE_MIS}"
+    },    
     "chatGptModelName": {
       "value": "gpt-35-turbo-16k"
     },
