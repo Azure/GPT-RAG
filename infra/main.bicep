@@ -977,7 +977,7 @@ output AZURE_VM_KV_NAME string = networkIsolation ? bastionKvName : keyVault.out
 output AZURE_VM_KV_SEC_NAME string = networkIsolation ? vmKeyVaultSecName : ''
 output AZURE_DATA_INGEST_FUNC_NAME string = dataIngestionFunctionAppName
 output AZURE_DATA_INGEST_FUNC_RG string = resourceGroup.name
-output AZURE_SEARCH_APP_ID string = searchService.outputs.principalId
+output AZURE_SEARCH_PRINCIPAL_ID string = searchService.outputs.principalId
 output AZURE_ORCHESTRATOR_FUNC_RG string = resourceGroup.name
 output AZURE_ORCHESTRATOR_FUNC_NAME string = orchestratorFunctionAppName
 
