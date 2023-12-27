@@ -58,5 +58,6 @@ resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' =  {
 }
 
 output id string = search.id
+output principalId string = search.identity.principalId
 output endpoint string = 'https://${name}.search.windows.net/'
 output name string = search.name
