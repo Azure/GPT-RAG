@@ -22,9 +22,7 @@ Notes:
 
 #### Configuring language settings
 
-The default language settings for most components are set to English. 
-  
-You can set your preferred language by specifying the parameters in the [main.parameters.json](infra/main.parameters.json) file. Be aware that the permissible values for each parameter are listed in the [main.bicep](infra/main.bicep) file.  
+The default language settings for most components are set to English. You can set your preferred language by specifying the parameters in the [main.parameters.json](infra/main.parameters.json) file. Be aware that the permissible values for each parameter are listed in the [main.bicep](infra/main.bicep) file.  
    
 Parameters description:  
    
@@ -32,11 +30,11 @@ Parameters description:
    
 - searchAnalyzerName: An analyzer is an integral part of the full-text search engine, responsible for text processing strings during both indexing and query execution stages. The default configuration uses the standard language agnostic analyzer, but you can change it if you want to optimize your deployment for a specific language. Here's a [List of supported language analyzers](https://learn.microsoft.com/en-us/azure/search/index-add-language-analyzers#supported-language-analyzers).  
    
-- speechRecognitionLanguage: The language used to transcribe user voice in the frontend UI. [List of supported languages](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support?tabs=stt#supported-languages) (Speech to text tab).  
+- speechRecognitionLanguage: The language used to transcribe user voice in the frontend UI. [List of supported languages](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support?tabs=stt#supported-languages).  
    
-- speechSynthesisLanguage: The language used for speech synthesis in the frontend. [List of supported languages](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support?tabs=tts#supported-languages) (Text to speech tab, Locale column).  
+- speechSynthesisLanguage: The language used for speech synthesis in the frontend. [List of supported languages](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support?tabs=tts#supported-languages).  
    
-- speechSynthesisVoiceName: The voice used for speech synthesis in the frontend. [List of supported languages](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support?tabs=tts#supported-languages) (Text to speech tab, Text to speech voices column).
+- speechSynthesisVoiceName: The voice used for speech synthesis in the frontend. [List of supported languages](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support?tabs=tts#supported-languages).
 
 #### Defining resources names
 
