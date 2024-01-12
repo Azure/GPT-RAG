@@ -92,7 +92,7 @@ param embeddingsDeploymentName string = 'text-embedding-ada-002'
 @description('Embeddings model tokens per Minute Rate Limit (thousands). Default quota per model and region: 240')
 @minValue(1)
 @maxValue(240)
-param embeddingsDeploymentCapacity int = 1
+param embeddingsDeploymentCapacity int = 20
 @description('Azure OpenAI API version.')
 @allowed([ '2023-05-15', '2023-06-01-preview', '2023-08-01-preview'])
 param openaiApiVersion string
