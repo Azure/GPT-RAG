@@ -2,23 +2,10 @@
 
 On this page, you will find some options to configure your deployment:
 
-- [Deploying `Zero Trust Implementation`](#zero-trust-implementation).
 - [Configuring language settings](#configuring-language-settings).
 - [Defining the name for each resource](#defining-resources-names).
 - [Provide a list of tags to apply to all resources](#adding-tags-for-all-resources).
 - [Accessing the data ingest function using a Managed Identity](#accessing-the-data-ingest-function-from-ai-search-using-a-managed-identity).
-
-#### Zero Trust Implementation
-
-For deploying the zero trust implementation, run:
-
-```sh
-azd env set AZURE_NETWORK_ISOLATION true
-```
-
-Notes:
-- Once deployment is completed, you need to use the Virtual Machine with the Bastion connection (created as part of zero trust deployment) to continue deploying data ingestion, orchestrator and the front-end app. 
-- At the end of deployment, you will se a note about the name of the created Key Vault and the name of the secret to use for logging in with bastion to the VM.
 
 #### Configuring language settings
 

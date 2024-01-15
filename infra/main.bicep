@@ -299,7 +299,6 @@ module testvm './core/vm/dsvm.bicep' = if (networkIsolation) {
 // storage
 
 var containerName = storageContainerName
-var chunksContainerName = '${containerName}-chunks'
 
 module storage './core/storage/storage-account.bicep' = {
   name: 'storage'
@@ -310,7 +309,7 @@ module storage './core/storage/storage-account.bicep' = {
     tags: tags
     allowBlobPublicAccess: networkIsolation?false:true
     publicNetworkAccess: networkIsolation?'Disabled':'Enabled'
-    containers: [{name:containerName, publicAccess: networkIsolation?'None':'Container'}, {name:chunksContainerName}]
+    containers: [{name:containerName, publicAccess: networkIsolation?'None':'Container'}]
     keyVaultName: keyVault.outputs.name
     secretName: 'storageConnectionString'
   }  
@@ -723,10 +722,6 @@ module dataIngestion './core/host/functions.bicep' = {
       {
         name: 'STORAGE_CONTAINER'
         value: containerName
-      }
-      {
-        name: 'STORAGE_CONTAINER_CHUNKS'
-        value: chunksContainerName
       }
       {
         name: 'AZURE_FORMREC_SERVICE'
