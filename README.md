@@ -10,21 +10,21 @@ The **Enterprise RAG** Solution Accelerator (GPT-RAG) offers a robust architectu
 
 * [App Front-End](https://github.com/Azure/gpt-rag-frontend) Built with Azure App Services and the Backend for Front-End pattern, offers a smooth and scalable user interface.
 
-* [Teams-BOT](https://github.com/Azure/gpt-rag-bot) Constructed using Azure BOT Services, this platform enables users to engage with the Orchestrator seamlessly through the Microsoft Teams interface
+* [Teams-BOT](https://github.com/Azure/gpt-rag-bot) Constructed using Azure BOT Services, this platform enables users to engage with the Orchestrator seamlessly through the Microsoft Teams interface.
 
-## Concepts & Architecture
-
-*  [Enterprise RAG +Prompt Engineering+Finetuning+Train (Video in Spanish)](https://www.youtube.com/watch?v=ICsf4yirieA)
-
-<a href="https://www.youtube.com/watch?v=ICsf4yirieA"><img src="https://img.youtube.com/vi/ICsf4yirieA/0.jpg" alt="Alt text" width="480"/></a>
+## Concepts
 
 * [RAG Pattern: What and Why?](README_RAG.md)
 
 * [Solution Architecture Overview](README_ARCHITECTURE.md)
 
-![Architecture Overview](Architecture-Diagram/GPT-RAG-ZeroTrust.png)
+<!-- ![Architecture Overview](Architecture-Diagram/GPT-RAG-ZeroTrust.png) -->
 
-## Deployment Instructions
+*  [Enterprise RAG +Prompt Engineering+Finetuning+Train (Video in Spanish)](https://www.youtube.com/watch?v=ICsf4yirieA)
+
+<!-- <a href="https://www.youtube.com/watch?v=ICsf4yirieA"><img src="https://img.youtube.com/vi/ICsf4yirieA/0.jpg" alt="Alt text" width="480"/></a> -->
+
+## Getting Started
 
 To deploy Enterprise RAG and get your solution up and running, you will use **azd**, **Python**, **Git**, **Node.js 16+**, and **PowerShell 7** (only if you are using Windows).
 
@@ -34,7 +34,8 @@ Pre-reqs links:
  - Git: [Download Git](https://git-scm.com/downloads)
  - Node.js 16+ [windows/mac](https://nodejs.dev/en/download/)  [linux/wsl](https://nodejs.dev/en/download/package-manager/)
  - Python 3.10: [Download Python](https://www.python.org/downloads/release/python-31011/)
- 
+
+### Basic Installation
 
 After installing the pre-requirements you just need to execute the next four steps using [Azure Developer CLI (azd)](https://aka.ms/azure-dev/install) in a terminal:
 
@@ -61,13 +62,34 @@ azd up
 
 Upload your documents to the documents folder in the storage account which name starts with strag.
 
-Notes:
-   
-- For a rapid deployment using the default settings, just adhere to the previously outlined instructions.
-   
-- For a customized deployment, refer to the [Custom Deployment](README_CUSTOM_DEPLOY.md) section to understand the customization options before executing the previously mentioned steps.
+### Zero trust installation
+
+To deploy the zero trust implementation, follow the same steps. However, before executing the ```azd up``` command, make sure to run the following line:
+
+```sh
+azd env set AZURE_NETWORK_ISOLATION true
+```
+
+Once deployment is completed, you need to use the Virtual Machine with the Bastion connection (created as part of zero trust deployment) to continue deploying data ingestion, orchestrator and the front-end app.
+
+Login to the created VM then reproduce the following commands:  
+
+```
+azd init -t azure/gpt-rag
+azd auth login  
+azd env refresh
+azd deploy  
+```
+
+> Note: when running the ```azd init ...``` and ```azd env refresh```, use the same environment name, subscription, and region used in the initial provisioning of the infrastructure.
+
+Refer to the [Custom Deployment](README_CUSTOM_DEPLOY.md) section to understand the customization options before executing the previously mentioned steps.
 
 ## Additional Resources
+
+### Troubleshooting
+
+Look at the [Troubleshooting](TROUBLESHOOTING.md) page in case you face some error in the deployment process.
 
 ### Pricing Estimation
 

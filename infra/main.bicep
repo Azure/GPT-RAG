@@ -92,7 +92,7 @@ param embeddingsDeploymentName string = 'text-embedding-ada-002'
 @description('Embeddings model tokens per Minute Rate Limit (thousands). Default quota per model and region: 240')
 @minValue(1)
 @maxValue(240)
-param embeddingsDeploymentCapacity int = 1
+param embeddingsDeploymentCapacity int = 20
 @description('Azure OpenAI API version.')
 @allowed([ '2023-05-15', '2023-06-01-preview', '2023-08-01-preview'])
 param openaiApiVersion string
@@ -299,7 +299,6 @@ module testvm './core/vm/dsvm.bicep' = if (networkIsolation) {
 // storage
 
 var containerName = storageContainerName
-var chunksContainerName = '${containerName}-chunks'
 
 module storage './core/storage/storage-account.bicep' = {
   name: 'storage'
@@ -310,7 +309,7 @@ module storage './core/storage/storage-account.bicep' = {
     tags: tags
     allowBlobPublicAccess: networkIsolation?false:true
     publicNetworkAccess: networkIsolation?'Disabled':'Enabled'
-    containers: [{name:containerName, publicAccess: networkIsolation?'None':'Container'}, {name:chunksContainerName}]
+    containers: [{name:containerName, publicAccess: networkIsolation?'None':'Container'}]
     keyVaultName: keyVault.outputs.name
     secretName: 'storageConnectionString'
   }  
@@ -723,10 +722,6 @@ module dataIngestion './core/host/functions.bicep' = {
       {
         name: 'STORAGE_CONTAINER'
         value: containerName
-      }
-      {
-        name: 'STORAGE_CONTAINER_CHUNKS'
-        value: chunksContainerName
       }
       {
         name: 'AZURE_FORMREC_SERVICE'

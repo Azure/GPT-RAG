@@ -7,7 +7,7 @@ if [ "$AZURE_ZERO_TRUST" = "TRUE" ]; then
 
     # Check if the confirmation is positive
     if [ "$confirmation" != "Y" ] && [ "$confirmation" != "y" ] && [ -n "$confirmation" ]; then
-        exit 0
+        exit 1
     fi
-    exit 1
+    exit 0
 fi
