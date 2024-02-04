@@ -3,11 +3,10 @@ page_type: sample
 languages:
 - azdeveloper
 - powershell
-- shell
 - bicep
 products:
 - azure
-- azure-openai-service
+- azure-openai
 - azure-cognitive-search
 urlFragment: GPT-RAG
 name: Multi-repo ChatGPT and Enterprise data with Azure OpenAI and Cognitive Search
