@@ -19,6 +19,10 @@ The **RAG pattern** enables businesses to use the reasoning capabilities of LLMs
 
 The **Enterprise RAG** Solution Accelerator (GPT-RAG) offers a robust architecture tailored for enterprise-grade deployment of the RAG pattern. It ensures grounded responses and is built on Zero-trust security and Responsible AI, ensuring availability, scalability, and auditability. Ideal for organizations transitioning from exploration and PoC stages to full-scale production and MVPs.
 
+## Enterprise RAG Community
+
+* [Discord Channel](https://discord.gg/hPwV3RfR) Enterprise RAG - Connected Community
+
 ## Components
 
 * [Data ingestion](https://github.com/Azure/gpt-rag-ingestion) Optimizes data preparation for Azure OpenAI.
