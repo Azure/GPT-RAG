@@ -73,7 +73,7 @@ param speechSynthesisVoiceName string
 @allowed([ 'gpt-35-turbo','gpt-35-turbo-16k', 'gpt-4', 'gpt-4-32k' ])
 param chatGptModelName string
 @description('GPT model version.')
-@allowed([ '0613', '1106-Preview' ])
+@allowed([ '0613', '1106', '1106-Preview', '0125-preview'])
 param chatGptModelVersion string
 @description('GPT model deployment name.')
 param chatGptDeploymentName string = 'chat'
@@ -94,11 +94,14 @@ param embeddingsDeploymentName string = 'text-embedding-ada-002'
 @maxValue(240)
 param embeddingsDeploymentCapacity int = 20
 @description('Azure OpenAI API version.')
-@allowed([ '2023-05-15', '2023-06-01-preview', '2023-08-01-preview'])
+@allowed([ '2023-05-15', '2024-02-15-preview'])
 param openaiApiVersion string
 @description('Enables LLM monitoring to generate conversation metrics.')
 @allowed([true, false])
 param chatGptLlmMonitoring bool = true
+
+//docint
+var docintApiVersion = (location == 'eastus' || location == 'westus2' || location == 'westeurope') ? '2023-10-31-preview' : '2023-07-31'
 
 // search
 @description('Orchestrator supports the following retrieval approaches: term, vector, hybrid(term + vector search), or use oyd feature of Azure OpenAI.')
@@ -687,6 +690,10 @@ module dataIngestion './core/host/functions.bicep' = {
     minimumElasticInstanceCount: 1
     numberOfWorkers: 1
     appSettings:[
+      {
+        name: 'DOCINT_API_VERSION'
+        value: docintApiVersion
+      }
       {
         name: 'AZURE_KEY_VAULT_NAME'
         value: keyVault.outputs.name
