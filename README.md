@@ -85,26 +85,79 @@ Upload your documents to the documents folder in the storage account which name 
 
 ### Zero trust installation
 
-To deploy the zero trust implementation, follow the same steps. However, before executing the ```azd up``` command, make sure to run the following line:
+To deploy the zero trust implementation, follow the same steps, but with the following additional steps.  
+   
+**1** Before executing the ```azd up``` command, make sure to run the following line:  
+   
+```sh  
+azd env set AZURE_NETWORK_ISOLATION true  
+```  
+ 
+**2** Download the Repository:
 
 ```sh
-azd env set AZURE_NETWORK_ISOLATION true
-```
-
-Once deployment is completed, you need to use the Virtual Machine with the Bastion connection (created as part of zero trust deployment) to continue deploying data ingestion, orchestrator and the front-end app.
-
-Login to the created VM then reproduce the following commands:  
-
-```
 azd init -t azure/gpt-rag
-azd auth login  
-azd env refresh
-azd deploy  
 ```
 
-> Note: when running the ```azd init ...``` and ```azd env refresh```, use the same environment name, subscription, and region used in the initial provisioning of the infrastructure.
+**3** Login to Azure:
 
-Refer to the [Custom Deployment](README_CUSTOM_DEPLOY.md) section to understand the customization options before executing the previously mentioned steps.
+```sh
+azd auth login
+
+```
+
+**4** Start Building the infrastructure and components deployment:
+
+```sh
+azd up
+```
+  
+After the infrastructure is provisioned and before starting the deployment of the components, you will be asked the following question:  
+   
+>> Zero Trust Infrastructure enabled. Confirm you are using a connection where resources are reachable (like VM+Bastion)? [Y/n]:  
+   
+Initially, you will not be connected to the same vnet where the resources can be accessed, so answer `n`.
+
+**5** Next, you will use the Virtual Machine with the Bastion connection (created during step 4) to continue the deployment.  
+   
+Log into the created VM with the user **gptrag** and authenticate with the password stored in the keyvault, similar to the figure below:  
+
+<BR>   
+<img src="media/keyvault-login.png" alt="Keyvault Login" width="512">
+   
+**6**  Upon accessing Windows, install [Powershell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4#installing-the-msi-package), as the other prerequisites are already installed on the VM.  
+   
+**7** Open the command prompt and run the following command to update azd to the latest version:  
+   
+```  
+choco upgrade azd  
+```  
+   
+After updating azd, simply close and reopen the terminal.  
+   
+**8** Create a new directory, for example, `gptrag` then enter the created directory.  
+   
+```  
+mkdir gptrag  
+cd gptrag  
+```  
+To finalize the procedure, execute the subsequent commands in the command prompt to successfully complete the deployment:
+
+```  
+azd init -t azure/gpt-rag  
+azd auth login   
+azd env refresh  
+azd package  
+azd deploy  
+```  
+   
+> Note: when running the ```azd init ...``` and ```azd env refresh```, use the same environment name, subscription, and region used in the initial provisioning of the infrastructure.  
+   
+Done! Zero trust deployment is completed.
+
+## Additional Customizations
+
+Refer to the [Custom Deployment](README_CUSTOM_DEPLOY.md) section to learn about additional customization options you can make.
 
 ## Additional Resources
 
