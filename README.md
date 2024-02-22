@@ -114,7 +114,7 @@ azd up
   
 After the infrastructure is provisioned and before starting the deployment of the components, you will be asked the following question:  
    
->> Zero Trust Infrastructure enabled. Confirm you are using a connection where resources are reachable (like VM+Bastion)? [Y/n]:  
+> Zero Trust Infrastructure enabled. Confirm you are using a connection where resources are reachable (like VM+Bastion)? [Y/n]:  
    
 Initially, you will not be connected to the same vnet where the resources can be accessed, so answer `n`.
 
@@ -123,7 +123,7 @@ Initially, you will not be connected to the same vnet where the resources can be
 Log into the created VM with the user **gptrag** and authenticate with the password stored in the keyvault, similar to the figure below:  
 
 <BR>   
-<img src="media/keyvault-login.png" alt="Keyvault Login" width="512">
+<img src="media/keyvault-login.png" alt="Keyvault Login" width="1024">
    
 **6**  Upon accessing Windows, install [Powershell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4#installing-the-msi-package), as the other prerequisites are already installed on the VM.  
    
