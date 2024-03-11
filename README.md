@@ -81,7 +81,7 @@ azd up
 
 **4** Add source documents to object storage
 
-Upload your documents to the documents folder in the storage account which name starts with strag.
+Upload your documents to the documents folder in the storage account which name starts with strag (Default storage account as shown in the sample image)
 
 ### Zero trust installation
 
