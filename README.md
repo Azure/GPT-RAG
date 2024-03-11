@@ -55,6 +55,9 @@ Pre-reqs links:
  - Git: [Download Git](https://git-scm.com/downloads)
  - Node.js 16+ [windows/mac](https://nodejs.dev/en/download/)  [linux/wsl](https://nodejs.dev/en/download/package-manager/)
  - Python 3.10: [Download Python](https://www.python.org/downloads/release/python-31011/)
+ - Initiate an [Azure AI service creation](https://portal.azure.com/#create/Microsoft.CognitiveServicesAllInOne) and agree to the Responsible AI terms (If you have not created an Azure AI service resource before) 
+
+
 
 ### Basic Installation
 
@@ -81,7 +84,11 @@ azd up
 
 **4** Add source documents to object storage
 
-Upload your documents to the documents folder in the storage account which name starts with strag.
+Upload your documents to the 'documents' folder located in the storage account. The name of this account should start with 'strag'. This is the default storage account, as shown in the sample image below.
+
+
+ ![storage_sample](media/storage_sample.png)
+
 
 ### Zero trust installation
 
