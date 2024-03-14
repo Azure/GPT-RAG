@@ -1,0 +1,20 @@
+displayName: Test_Name
+testPlan: loadtest.jmx
+description: ''
+engineInstances: 1
+testId: 75bdee6f-adda-43ad-949f-ac5908dfc2c3
+testType: JMX
+splitAllCSVs: False
+configurationFiles:
+- dataset.csv
+failureCriteria:
+- HTTP Request: p95(response_time_ms) < 10000
+- HTTP Request: p95(latency) < 10000
+secrets:
+- name: loadtestSecret
+  value: <secret identifier> (example-https://kv0-qabcjo73ax3bw.vault.azure.net/secrets/orche-host--functionKey/c743100e6dc99a68a6a5d34f76786ab9)
+properties:
+  userPropertyFile: user.properties
+autoStop:
+  errorPercentage: 90
+  timeWindow: 60
