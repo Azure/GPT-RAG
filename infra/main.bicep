@@ -310,7 +310,6 @@ module storage './core/storage/storage-account.bicep' = {
     name: storageAccountName
     location: location
     tags: tags
-    allowBlobPublicAccess: networkIsolation?false:true
     publicNetworkAccess: networkIsolation?'Disabled':'Enabled'
     containers: [{name:containerName, publicAccess: networkIsolation?'None':'Container'}]
     keyVaultName: keyVault.outputs.name
@@ -655,6 +654,16 @@ module appsericeKeyVaultAccess './core/security/keyvault-access.bicep' = {
   scope: resourceGroup
   params: {
     keyVaultName: keyVault.outputs.name
+    principalId: frontEnd.outputs.identityPrincipalId
+  }
+}
+
+// Give the App Service access to Storage Account
+module appserviceStorageAccountAccess './core/security/blobstorage-access.bicep' = {
+  name: 'appservice-blobstorage-access'
+  scope: resourceGroup
+  params: {
+    storageAccountName: storage.outputs.name
     principalId: frontEnd.outputs.identityPrincipalId
   }
 }
