@@ -1,0 +1,20 @@
+displayName: Test_March
+testPlan: loadtest.jmx
+description: ''
+engineInstances: 2
+testId: 75bdee6f-adda-43ad-949f-ac5908dfc2c3
+testType: JMX
+splitAllCSVs: False
+configurationFiles:
+- dataset.csv
+failureCriteria:
+- HTTP Request: p95(response_time_ms) < 10000
+- HTTP Request: p95(latency) < 10000
+secrets:
+- name: loadtestSecret
+  value: https://kv0-qbjhjo73ax3bw.vault.azure.net/secrets/orchestrator-host--functionKey/c743100e6dc54a68a3a5d34c76786ab9
+properties:
+  userPropertyFile: user.properties
+autoStop:
+  errorPercentage: 90
+  timeWindow: 60
