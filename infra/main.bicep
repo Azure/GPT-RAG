@@ -183,9 +183,9 @@ var orchestratorUri = 'https://${orchestratorFunctionAppName}.azurewebsites.net'
 // main
 
 // resource group
-
+var azureResourceGroupName = !empty(resourceGroupName) ? resourceGroupName : 'rg-${environmentName}'
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
-  name: !empty(resourceGroupName) ? resourceGroupName : 'rg-${environmentName}'
+  name: azureResourceGroupName
   location: location
   tags: tags
 }
@@ -995,12 +995,11 @@ output AZURE_ORCHESTRATOR_FUNC_NAME string = orchestratorFunctionAppName
 // Set input params as outputs to persist the selection
 // This strategy would allow to re-construct the .env file from a deployment object on azure by using env-name, sub and location.
 // Without this, any custom selection would be lost when running `azd env refresh` from another machine.
-
-output AZURE_RESOURCE_GROUP_NAME string = resourceGroupName
+output AZURE_RESOURCE_GROUP_NAME string = azureResourceGroupName
 output AZURE_NETWORK_ISOLATION bool = networkIsolation
 output AZURE_DB_ACCOUNT_NAME string = azureDbAccountName
 output AZURE_DB_DATABASE_NAME string = azureDbDatabaseName
-output AZURE_STORAGE_ACCOUNT_NAME string = azureStorageAccountName
+output AZURE_STORAGE_ACCOUNT_NAME string = storageAccountName
 output AZURE_COGNITIVE_SERVICE_NAME string = azureCognitiveServiceName
 output AZURE_APP_SERVICE_PLAN_NAME string = azureAppServicePlanName
 output AZURE_APP_INSIGHTS_NAME string = azureAppInsightsName
