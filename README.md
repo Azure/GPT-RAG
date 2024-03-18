@@ -38,7 +38,7 @@ The **Enterprise RAG** Solution Accelerator (GPT-RAG) offers a robust architectu
 
 * [Solution Architecture Overview](README_ARCHITECTURE.md)
 
-<!-- ![Architecture Overview](Architecture-Diagram/GPT-RAG-ZeroTrust.png) -->
+<!-- ![Architecture Overview](media/GPT-RAG-ZeroTrust.png) -->
 
 *  [Enterprise RAG +Prompt Engineering+Finetuning+Train (Video in Spanish)](https://www.youtube.com/watch?v=ICsf4yirieA)
 

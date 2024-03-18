@@ -51,7 +51,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   }
   kind: 'Storage'
   properties: {
-    allowBlobPublicAccess: networkIsolation?false:true    
+    allowBlobPublicAccess: false // Disable anonymous access 
     supportsHttpsTrafficOnly: true
     defaultToOAuthAuthentication: true
   }

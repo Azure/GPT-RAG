@@ -113,8 +113,10 @@ param useSemanticReranking bool = true
 var searchServiceSkuName = networkIsolation?'standard2':'standard'
 @description('Search index name.')
 var searchIndex = 'ragindex'
-@allowed([ '2023-11-01' ])
-param searchApiVersion string = '2023-11-01'
+@allowed([ '2023-11-01', '2023-10-01-Preview' ])
+// Requires version 2023-10-01-Preview or higher for indexProjections and MIS authResourceId.
+param searchApiVersion string = '2023-10-01-Preview'
+
 @description('Frequency of search reindexing. PT5M (5 min), PT1H (1 hour), P1D (1 day).')
 @allowed(['PT5M', 'PT1H', 'P1D'])
 param searchIndexInterval string = 'PT1H'
@@ -311,9 +313,14 @@ module storage './core/storage/storage-account.bicep' = {
     location: location
     tags: tags
     publicNetworkAccess: networkIsolation?'Disabled':'Enabled'
-    containers: [{name:containerName, publicAccess: networkIsolation?'None':'Container'}]
+    allowBlobPublicAccess: false // Disable anonymous access
+    containers: [{name:containerName, publicAccess: 'None'}]
     keyVaultName: keyVault.outputs.name
     secretName: 'storageConnectionString'
+    deleteRetentionPolicy: {
+      enabled: true
+      days: 7
+    }
   }  
 }
 

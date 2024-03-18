@@ -4,7 +4,7 @@ param tags object = {}
 
 @allowed([ 'Hot', 'Cool', 'Premium' ])
 param accessTier string = 'Hot'
-param allowBlobPublicAccess bool = true // Public access will be disabled post provision
+param allowBlobPublicAccess bool = false
 param allowCrossTenantReplication bool = true
 param allowSharedKeyAccess bool = true
 param defaultToOAuthAuthentication bool = false
