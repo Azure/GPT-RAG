@@ -113,8 +113,10 @@ param useSemanticReranking bool = true
 var searchServiceSkuName = networkIsolation?'standard2':'standard'
 @description('Search index name.')
 var searchIndex = 'ragindex'
-@allowed([ '2023-11-01' ])
-param searchApiVersion string = '2023-11-01'
+@allowed([ '2023-11-01', '2023-10-01-Preview' ])
+// Requires version 2023-10-01-Preview or higher for indexProjections and MIS authResourceId.
+param searchApiVersion string = '2023-10-01-Preview'
+
 @description('Frequency of search reindexing. PT5M (5 min), PT1H (1 hour), P1D (1 day).')
 @allowed(['PT5M', 'PT1H', 'P1D'])
 param searchIndexInterval string = 'PT1H'
@@ -183,9 +185,9 @@ var orchestratorUri = 'https://${orchestratorFunctionAppName}.azurewebsites.net'
 // main
 
 // resource group
-
+var azureResourceGroupName = !empty(resourceGroupName) ? resourceGroupName : 'rg-${environmentName}'
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
-  name: !empty(resourceGroupName) ? resourceGroupName : 'rg-${environmentName}'
+  name: azureResourceGroupName
   location: location
   tags: tags
 }
@@ -310,11 +312,15 @@ module storage './core/storage/storage-account.bicep' = {
     name: storageAccountName
     location: location
     tags: tags
-    allowBlobPublicAccess: networkIsolation?false:true
     publicNetworkAccess: networkIsolation?'Disabled':'Enabled'
-    containers: [{name:containerName, publicAccess: networkIsolation?'None':'Container'}]
+    allowBlobPublicAccess: false // Disable anonymous access
+    containers: [{name:containerName, publicAccess: 'None'}]
     keyVaultName: keyVault.outputs.name
     secretName: 'storageConnectionString'
+    deleteRetentionPolicy: {
+      enabled: true
+      days: 7
+    }
   }  
 }
 
@@ -659,6 +665,16 @@ module appsericeKeyVaultAccess './core/security/keyvault-access.bicep' = {
   }
 }
 
+// Give the App Service access to Storage Account
+module appserviceStorageAccountAccess './core/security/blobstorage-access.bicep' = {
+  name: 'appservice-blobstorage-access'
+  scope: resourceGroup
+  params: {
+    storageAccountName: storage.outputs.name
+    principalId: frontEnd.outputs.identityPrincipalId
+  }
+}
+
 // Give the App Service access to Orchestrator Function
 module appserviceOrchestratorAccess './core/host/functions-access.bicep' = {
   name: 'appservice-function-access'
@@ -986,12 +1002,11 @@ output AZURE_ORCHESTRATOR_FUNC_NAME string = orchestratorFunctionAppName
 // Set input params as outputs to persist the selection
 // This strategy would allow to re-construct the .env file from a deployment object on azure by using env-name, sub and location.
 // Without this, any custom selection would be lost when running `azd env refresh` from another machine.
-
-output AZURE_RESOURCE_GROUP_NAME string = resourceGroupName
+output AZURE_RESOURCE_GROUP_NAME string = azureResourceGroupName
 output AZURE_NETWORK_ISOLATION bool = networkIsolation
 output AZURE_DB_ACCOUNT_NAME string = azureDbAccountName
 output AZURE_DB_DATABASE_NAME string = azureDbDatabaseName
-output AZURE_STORAGE_ACCOUNT_NAME string = azureStorageAccountName
+output AZURE_STORAGE_ACCOUNT_NAME string = storageAccountName
 output AZURE_COGNITIVE_SERVICE_NAME string = azureCognitiveServiceName
 output AZURE_APP_SERVICE_PLAN_NAME string = azureAppServicePlanName
 output AZURE_APP_INSIGHTS_NAME string = azureAppInsightsName

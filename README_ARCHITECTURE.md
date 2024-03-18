@@ -4,12 +4,12 @@ This section provides information about the GPT-RAG infrastructure models. It in
 
 ### GPT-RAG / Simple Architecture (NoSecure) Architecture Overview
 
-<img src="Architecture-Diagram/GPT-RAG-NoSecure.png" alt="Architecture Overview" width="1024">
+<img src="media/GPT-RAG-NoSecure.png" alt="Architecture Overview" width="1024">
 
 
 ### GPT-RAG / Zero Trust Architecture Overview
 
-<img src="Architecture-Diagram/GPT-RAG-ZeroTrust.png" alt="Architecture Overview" width="1024">
+<img src="media/GPT-RAG-ZeroTrust.png" alt="Architecture Overview" width="1024">
 
 **Connectivity Components:**
 

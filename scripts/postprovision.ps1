@@ -2,6 +2,12 @@ $YELLOW = [ConsoleColor]::Yellow
 $BLUE = [ConsoleColor]::Blue
 $NC = [ConsoleColor]::White
 
+$storageAccountName = $env:AZURE_STORAGE_ACCOUNT_NAME
+$resourceGroupName = $env:AZURE_RESOURCE_GROUP_NAME
+
+# Disable public access to storage account blob containers (commmented to be done during provisioning)
+# az storage account update --name $storageAccountName --resource-group $resourceGroupName --allow-blob-public-access false
+
 if ($env:AZURE_ZERO_TRUST -eq "FALSE") {
     exit 0
 }
