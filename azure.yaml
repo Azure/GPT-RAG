@@ -6,36 +6,36 @@ metadata:
 services:
   dataIngest:
     # project is temporally pulled fro its repo during deployment.
-    project: ./.azure/gpt-rag-ingestion
+    project: ./.salesfactory/gpt-rag-ingestion
     language: python
     host: function
     hooks:
       postdeploy:
         posix:
-          # this path is relative to ./.azure/gpt-rag-ingestion
+          # this path is relative to ./.salesfactory/gpt-rag-ingestion
           run: scripts/postdeploy.sh
           interactive: false
         windows:
-          # this path is relative to ./.azure/gpt-rag-ingestion
+          # this path is relative to ./.salesfactory/gpt-rag-ingestion
           run: scripts/postdeploy.ps1
           interactive: false          
   orchestrator:
-    project: ./.azure/gpt-rag-orchestrator
+    project: ./.salesfactory/gpt-rag-orchestrator
     language: python
     host: function
     hooks:
       postdeploy:
         posix:
-          # this path is relative to ./.azure/gpt-rag-orchestrator
+          # this path is relative to ./.salesfactory/gpt-rag-orchestrator
           run: scripts/postdeploy.sh
           interactive: false
         windows:
-          # this path is relative to ./.azure/gpt-rag-orchestrator
+          # this path is relative to ./.salesfactory/gpt-rag-orchestrator
           run: scripts/postdeploy.ps1
           interactive: false          
   frontend:
     # backend is python and frontend is Vite app. The frontend is built with Vite settings to output into the backend's static folder.
-    project: ./.azure/gpt-rag-frontend/backend
+    project: ./.salesfactory/gpt-rag-frontend/backend
     language: python
     host: appservice
     hooks:

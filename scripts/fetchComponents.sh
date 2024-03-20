@@ -1,25 +1,25 @@
 #!/bin/sh
 
-# Delete the gpt-rag-ingestion folder from .azure if it exists
-if [ -d ./.azure/gpt-rag-ingestion ]; then
-    rm -rf ./.azure/gpt-rag-ingestion
+# Delete the gpt-rag-ingestion folder from .salesfactory if it exists
+if [ -d ./.salesfactory/gpt-rag-ingestion ]; then
+    rm -rf ./.salesfactory/gpt-rag-ingestion
 fi
 
-# Clone the repository into the .azure folder
-git clone https://github.com/Azure/gpt-rag-ingestion ./.azure/gpt-rag-ingestion
+# Clone the repository into the .salesfactory folder
+git clone https://github.com/Salesfactory/gpt-rag-ingestion ./.salesfactory/gpt-rag-ingestion
 
-# Delete the gpt-rag-orchestrator folder from .azure if it exists
-if [ -d ./.azure/gpt-rag-orchestrator ]; then
-    rm -rf ./.azure/gpt-rag-orchestrator
+# Delete the gpt-rag-orchestrator folder from .salesfactory if it exists
+if [ -d ./.salesfactory/gpt-rag-orchestrator ]; then
+    rm -rf ./.salesfactory/gpt-rag-orchestrator
 fi
 
-# Clone the repository into the .azure folder
-git clone https://github.com/Azure/gpt-rag-orchestrator ./.azure/gpt-rag-orchestrator
+# Clone the repository into the .salesfactory folder
+git clone https://github.com/Salesfactory/gpt-rag-orchestrator ./.salesfactory/gpt-rag-orchestrator
 
-# Delete the gpt-rag-frontend folder from .azure if it exists
-if [ -d ./.azure/gpt-rag-frontend ]; then
-    rm -rf ./.azure/gpt-rag-frontend
+# Delete the gpt-rag-frontend folder from .salesfactory if it exists
+if [ -d ./.salesfactory/gpt-rag-frontend ]; then
+    rm -rf ./.salesfactory/gpt-rag-frontend
 fi
 
-# Clone the repository into the .azure folder
-git clone https://github.com/Azure/gpt-rag-frontend ./.azure/gpt-rag-frontend
+# Clone the repository into the .salesfactory folder
+git clone https://github.com/Salesfactory/gpt-rag-frontend ./.salesfactory/gpt-rag-frontend
