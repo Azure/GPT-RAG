@@ -89,6 +89,9 @@ Upload your documents to the 'documents' folder located in the storage account. 
  ![storage_sample](media/storage_sample.png)
 
 
+**5** Architecture Deployed:
+![Architecture Standard]([media/GPT-RAG-NoSecure.png.png])
+
 ### Zero trust installation
 
 To deploy the zero trust implementation, follow the same steps, but with the following additional steps.  
