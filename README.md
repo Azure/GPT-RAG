@@ -164,6 +164,9 @@ azd deploy
    
 Done! Zero trust deployment is completed.
 
+**9** Zero Trust Architecture:
+ ![Zero Trust Architecture](media/GPT-RAG-ZeroTrust.png)
+
 ## Additional Customizations
 
 Refer to the [Custom Deployment](README_CUSTOM_DEPLOY.md) section to learn about additional customization options you can make.
