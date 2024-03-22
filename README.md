@@ -90,7 +90,7 @@ Upload your documents to the 'documents' folder located in the storage account. 
 
 
 **5** Architecture Deployed:
- ![Architecture](media/GPT-RAG-NoSecure.png.png)
+ ![Standard Architecture](media/GPT-RAG-NoSecure.png)
 
 ### Zero trust installation
 
