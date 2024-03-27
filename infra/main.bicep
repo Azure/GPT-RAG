@@ -68,6 +68,14 @@ param speechSynthesisLanguage string
 @allowed([ 'pt-BR-FranciscaNeural', 'es-MX-BeatrizNeural', 'en-US-RyanMultilingualNeural', 'de-DE-AmalaNeural', 'fr-FR-DeniseNeural'])
 param speechSynthesisVoiceName string
 
+//python runtime version
+@description('Python runtime version in function apps')
+@allowed(['3.10', '3.11'])
+param funcAppRuntimeVersion string = '3.11'
+@description('Python runtime version in app service')
+@allowed(['3.10', '3.11', '3.12'])
+param appServiceRuntimeVersion string = '3.12'
+
 // openai
 @description('GPT model used to answer user questions. Don\'t forget to check region availability.')
 @allowed([ 'gpt-35-turbo','gpt-35-turbo-16k', 'gpt-4', 'gpt-4-32k' ])
@@ -444,6 +452,8 @@ module orchestrator './core/host/functions.bicep' = {
     alwaysOn: true
     functionAppScaleLimit: 2
     numberOfWorkers: 2
+    runtimeName: 'python'
+    runtimeVersion: funcAppRuntimeVersion
     minimumElasticInstanceCount: 1
     allowedOrigins: [ '*' ]    
     appSettings:[
@@ -593,7 +603,7 @@ module frontEnd  'core/host/appservice.bicep'  = {
     tags: union(tags, { 'azd-service-name': 'frontend' })
     appServicePlanId: appServicePlan.outputs.id
     runtimeName: 'python'
-    runtimeVersion: '3.10'
+    runtimeVersion: appServiceRuntimeVersion
     scmDoBuildDuringDeployment: true
     basicPublishingCredentials: networkIsolation?true:false
     appSettings: [
@@ -705,6 +715,8 @@ module dataIngestion './core/host/functions.bicep' = {
     functionAppScaleLimit: 1
     minimumElasticInstanceCount: 1
     numberOfWorkers: 1
+    runtimeName: 'python'
+    runtimeVersion: funcAppRuntimeVersion
     appSettings:[
       {
         name: 'DOCINT_API_VERSION'
