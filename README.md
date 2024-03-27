@@ -20,7 +20,7 @@ The **Enterprise RAG** Solution Accelerator (GPT-RAG) offers a robust architectu
 
 ## Enterprise RAG Community
 
-* [Discord Channel](https://discord.gg/hPwV3RfR) Enterprise RAG - Connected Community
+* [Discord Channel](https://discord.gg/28VMVKawgk) Enterprise RAG - Connected Community
 
 ## Components
 
