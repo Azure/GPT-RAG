@@ -1015,6 +1015,8 @@ output AZURE_ORCHESTRATOR_FUNC_NAME string = orchestratorFunctionAppName
 // This strategy would allow to re-construct the .env file from a deployment object on azure by using env-name, sub and location.
 // Without this, any custom selection would be lost when running `azd env refresh` from another machine.
 output AZURE_RESOURCE_GROUP_NAME string = azureResourceGroupName
+output AZURE_SUBSCRIPTION_ID string = subscription().subscriptionId
+output AZURE_TENANT_ID string = tenant().tenantId
 output AZURE_NETWORK_ISOLATION bool = networkIsolation
 output AZURE_DB_ACCOUNT_NAME string = azureDbAccountName
 output AZURE_DB_DATABASE_NAME string = azureDbDatabaseName
@@ -1026,7 +1028,8 @@ output AZURE_APP_SERVICE_NAME string = azureAppServiceName
 output AZURE_ORCHESTRATOR_FUNCTION_APP_NAME string = azureOrchestratorFunctionAppName
 output AZURE_DATA_INGESTION_FUNCTION_APP_NAME string = azureDataIngestionFunctionAppName
 output AZURE_SEARCH_SERVICE_NAME string = azureSearchServiceName
-output AZURE_OPEN_AI_SERVICE_NAME string = azureOpenAiServiceName
+output AZURE_OPEN_AI_SERVICE_NAME string = openAiServiceName
+output AZURE_OPEN_AI_MODEL_NAME string = chatGptDeploymentName
 output AZURE_VNET_NAME string = azureVnetName
 
 output AZURE_SEARCH_USE_MIS bool = azureSearchUseMIS
