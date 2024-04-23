@@ -2,6 +2,8 @@ $YELLOW = [ConsoleColor]::Yellow
 $BLUE = [ConsoleColor]::Blue
 $NC = [ConsoleColor]::White
 
+Write-Host "RAI Script: Setting up AOAI content filter"
+
 $resourceGroupName = $env:AZURE_RESOURCE_GROUP_NAME
 $subscriptionId = $env:AZURE_SUBSCRIPTION_ID
 $tenantId = $env:AZURE_TENANT_ID
