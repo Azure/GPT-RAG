@@ -123,11 +123,14 @@ Use [Orchestrator](https://github.com/Azure/gpt-rag-orchestrator) repo template 
 Use [App Front-end](https://github.com/Azure/gpt-rag-frontend) repo template to create your own frontend git repo and execute the steps in its **Deploy** section.
 
 ### Configuring AOAI content filters
+- [Overview of Responsible AI practices for AOAI models](https://learn.microsoft.com/en-us/legal/cognitive-services/openai/overview?context=%2Fazure%2Fai-services%2Fopenai%2Fcontext%2Fcontext)
+- [AOAI Content filtering categories](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/content-filter?tabs=warning%2Cpython-new#content-filtering-categories)
+- [Apply for unrestricted content filters via this form](https://customervoice.microsoft.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbR7en2Ais5pxKtso_Pz4b1_xUMlBQNkZMR0lFRldORTdVQzQ0TEI5Q1ExOSQlQCN0PWcu)
 
 Azd automatically creates content filters profile with default severity threshold *(Medium)* for all content harms categories *(Hate, Violence, Sexual, Self-Harm)* and assignes it to provisioned AOAI model through post deployment script. However, if you want to customize them to be more or less restrictive, you can make changes to [raipolicies.json](scripts/raipolicies/raipolicies.json) file.
 
+**Example**: Changing filters threshold for violence (prompt) and self-harm (completion) categories
 ```json
-...
     {
         "name": "violence",
         "blocking": true,
@@ -135,20 +138,18 @@ Azd automatically creates content filters profile with default severity threshol
         "allowedContentLevel": "high",
         "source": "prompt"
     },
-    ...
     {
         "name": "selfharm",
         "blocking": true,
         "enabled": true,
         "allowedContentLevel": "low",
         "source": "completion"
-    },
-...
+    }
 ```
 
-Content filters also support additional safety models *(Jailbreak, Material Protection for Text or Code)* that can be run on top of the main content filters (these models are optional).
-Turned off by default.
+(Optional) Content filters also support additional safety models *(Jailbreak, Material Protection for Text or Code)* that can be run on top of the main content filters.
 
+**Example**: Enabling Jailbreak and Text Material protection
 ```json
 {
     

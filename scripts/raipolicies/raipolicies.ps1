@@ -10,6 +10,13 @@ param (
 Write-Host "RAI Script: Setting up AOAI content filter"
 
 $token = (Get-AzAccessToken -TenantId $tenantId).Token
+
+if ([string]::IsNullOrWhiteSpace($token)) {
+    Write-Host "Please manually sign-in to Azure account"
+    Connect-AzAccount
+    $token = (Get-AzAccessToken -TenantId $tenantId).Token
+}
+
 $headers = @{
     Authorization  = "Bearer $token"
     "Content-Type" = "application/json"
