@@ -68,6 +68,14 @@ param speechSynthesisLanguage string
 @allowed([ 'pt-BR-FranciscaNeural', 'es-MX-BeatrizNeural', 'en-US-RyanMultilingualNeural', 'de-DE-AmalaNeural', 'fr-FR-DeniseNeural'])
 param speechSynthesisVoiceName string
 
+//python runtime version
+@description('Python runtime version in function apps')
+@allowed(['3.10', '3.11'])
+param funcAppRuntimeVersion string = '3.11'
+@description('Python runtime version in app service')
+@allowed(['3.10', '3.11', '3.12'])
+param appServiceRuntimeVersion string = '3.12'
+
 // openai
 @description('GPT model used to answer user questions. Don\'t forget to check region availability.')
 @allowed([ 'gpt-35-turbo','gpt-35-turbo-16k', 'gpt-4', 'gpt-4-32k' ])
@@ -444,6 +452,8 @@ module orchestrator './core/host/functions.bicep' = {
     alwaysOn: true
     functionAppScaleLimit: 2
     numberOfWorkers: 2
+    runtimeName: 'python'
+    runtimeVersion: funcAppRuntimeVersion
     minimumElasticInstanceCount: 1
     allowedOrigins: [ '*' ]    
     appSettings:[
@@ -593,7 +603,7 @@ module frontEnd  'core/host/appservice.bicep'  = {
     tags: union(tags, { 'azd-service-name': 'frontend' })
     appServicePlanId: appServicePlan.outputs.id
     runtimeName: 'python'
-    runtimeVersion: '3.10'
+    runtimeVersion: appServiceRuntimeVersion
     scmDoBuildDuringDeployment: true
     basicPublishingCredentials: networkIsolation?true:false
     appSettings: [
@@ -705,6 +715,8 @@ module dataIngestion './core/host/functions.bicep' = {
     functionAppScaleLimit: 1
     minimumElasticInstanceCount: 1
     numberOfWorkers: 1
+    runtimeName: 'python'
+    runtimeVersion: funcAppRuntimeVersion
     appSettings:[
       {
         name: 'DOCINT_API_VERSION'
@@ -1003,6 +1015,8 @@ output AZURE_ORCHESTRATOR_FUNC_NAME string = orchestratorFunctionAppName
 // This strategy would allow to re-construct the .env file from a deployment object on azure by using env-name, sub and location.
 // Without this, any custom selection would be lost when running `azd env refresh` from another machine.
 output AZURE_RESOURCE_GROUP_NAME string = azureResourceGroupName
+output AZURE_SUBSCRIPTION_ID string = subscription().subscriptionId
+output AZURE_TENANT_ID string = tenant().tenantId
 output AZURE_NETWORK_ISOLATION bool = networkIsolation
 output AZURE_DB_ACCOUNT_NAME string = azureDbAccountName
 output AZURE_DB_DATABASE_NAME string = azureDbDatabaseName
@@ -1014,7 +1028,8 @@ output AZURE_APP_SERVICE_NAME string = azureAppServiceName
 output AZURE_ORCHESTRATOR_FUNCTION_APP_NAME string = azureOrchestratorFunctionAppName
 output AZURE_DATA_INGESTION_FUNCTION_APP_NAME string = azureDataIngestionFunctionAppName
 output AZURE_SEARCH_SERVICE_NAME string = azureSearchServiceName
-output AZURE_OPEN_AI_SERVICE_NAME string = azureOpenAiServiceName
+output AZURE_OPEN_AI_SERVICE_NAME string = openAiServiceName
+output AZURE_OPEN_AI_MODEL_NAME string = chatGptDeploymentName
 output AZURE_VNET_NAME string = azureVnetName
 
 output AZURE_SEARCH_USE_MIS bool = azureSearchUseMIS

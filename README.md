@@ -20,7 +20,7 @@ The **Enterprise RAG** Solution Accelerator (GPT-RAG) offers a robust architectu
 
 ## Enterprise RAG Community
 
-* [Discord Channel](https://discord.gg/hPwV3RfR) Enterprise RAG - Connected Community
+* [Discord Channel](https://discord.gg/28VMVKawgk) Enterprise RAG - Connected Community
 
 ## Components
 
@@ -53,7 +53,7 @@ Pre-reqs links:
  - Powershell (Windows only): [Powershell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4#installing-the-msi-package)
  - Git: [Download Git](https://git-scm.com/downloads)
  - Node.js 16+ [windows/mac](https://nodejs.dev/en/download/)  [linux/wsl](https://nodejs.dev/en/download/package-manager/)
- - Python 3.10: [Download Python](https://www.python.org/downloads/release/python-31011/)
+ - Python 3.11: [Download Python](https://www.python.org/downloads/release/python-3118/)
  - Initiate an [Azure AI service creation](https://portal.azure.com/#create/Microsoft.CognitiveServicesAllInOne) and agree to the Responsible AI terms (If you have not created an Azure AI service resource before) 
 
 
@@ -88,6 +88,9 @@ Upload your documents to the 'documents' folder located in the storage account. 
 
  ![storage_sample](media/storage_sample.png)
 
+
+**5** Standard Architecture:
+ ![Standard Architecture](media/GPT-RAG-NoSecure.png)
 
 ### Zero trust installation
 
@@ -160,6 +163,12 @@ azd deploy
 > Note: when running the ```azd init ...``` and ```azd env refresh```, use the same environment name, subscription, and region used in the initial provisioning of the infrastructure.  
    
 Done! Zero trust deployment is completed.
+
+**9** Zero Trust Architecture:
+ ![Zero Trust Architecture](media/GPT-RAG-ZeroTrust.png)
+
+**10** Zero Trust Multi Project Scale:
+ ![Zero Trust Multi Project Scale](media/GPT-RAG-SCALE-MultiProject.jpeg)
 
 ## Additional Customizations
 
