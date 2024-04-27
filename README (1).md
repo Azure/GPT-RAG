@@ -40,10 +40,8 @@ To deploy Enterprise RAG and get your solution up and running, you will use **az
 
 ### Installation Types
 
-<details>
-
-<summary>Basic Installation</summary>
-
+{% tabs %}
+{% tab title="Basic Installation" %}
 After installing the pre-requirements, you just need to execute the next four steps using [Azure Developer CLI (azd)](https://aka.ms/azure-dev/install) in a terminal:
 
 **1** Download the Repository:
@@ -73,13 +71,9 @@ Upload your documents to the 'documents' folder located in the storage account. 
 **5** Standard Architecture:
 
 &#x20;![Standard Architecture](media/GPT-RAG-NoSecure.png)
+{% endtab %}
 
-</details>
-
-<details>
-
-<summary>Zero Trust Installation</summary>
-
+{% tab title="Zero Trust" %}
 To deploy the zero trust implementation, follow the same steps, but with the following additional steps.
 
 **1** Download the Repository
@@ -154,22 +148,18 @@ Done! Zero trust deployment is completed.
 **9** Zero Trust Architecture:&#x20;
 
 ![Zero Trust Architecture](media/GPT-RAG-ZeroTrust.png)
+{% endtab %}
 
-</details>
-
-<details>
-
-<summary>Multi Project Scale Installation (Coming Soon)</summary>
-
+{% tab title="Zero Trust Multi Project Scale" %}
 Multi Project Architecture
 
 ![](<.gitbook/assets/image (2).png>)
-
-</details>
+{% endtab %}
+{% endtabs %}
 
 ### Additional Customizations
 
-Consult the [Custom Deployment section](README\_CUSTOM\_DEPLOY.md) for detailed instructions on personalizing installations, including the modification of names, tags, and policies to align with company specific standards.
+Consult the [Custom Deployment section](README\_CUSTOM\_DEPLOY.md) for detailed instructions on personalizing installations, including the modification of names, tags, and Responsable AI policies to align with company specific standards.
 
 ### Additional Resources
 
