@@ -25,11 +25,11 @@ The **Enterprise RAG** Solution Accelerator (GPT-RAG) offers a robust architectu
 * [Solution Architecture Overview](README\_ARCHITECTURE.md)
 * [Enterprise RAG +Prompt Engineering+Finetuning+Train (Video in Spanish)](https://www.youtube.com/watch?v=ICsf4yirieA)
 
-### Getting Started
+## Getting Started
 
 To deploy Enterprise RAG and get your solution up and running, you will use **azd**, **Python**, **Git**, **Node.js 16+**, and **PowerShell 7** (only if you are using Windows).
 
-#### Prerequisites links:
+### Prerequisites links:
 
 * Azure Developer CLI: [Download azd for Windows](https://github.com/Azure/azure-dev/releases/download/azure-dev-cli\_1.8.1/azd-windows-amd64.msi), [Other OS's](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd).
 * Powershell (Windows only): [Powershell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4#installing-the-msi-package)
@@ -38,7 +38,7 @@ To deploy Enterprise RAG and get your solution up and running, you will use **az
 * Python 3.11: [Download Python](https://www.python.org/downloads/release/python-3118/)
 * Initiate an [Azure AI service creation](https://portal.azure.com/#create/Microsoft.CognitiveServicesAllInOne) and agree to the Responsible AI terms (If you have not created an Azure AI service resource before)
 
-#### Installation Types
+### Installation Types
 
 <details>
 
