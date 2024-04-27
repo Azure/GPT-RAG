@@ -1,3 +1,17 @@
+---
+layout:
+  title:
+    visible: true
+  description:
+    visible: true
+  tableOfContents:
+    visible: true
+  outline:
+    visible: true
+  pagination:
+    visible: false
+---
+
 # README
 
 The **RAG pattern** enables businesses to use the reasoning capabilities of LLMs, using their existing models to process and generate responses based on new data. RAG facilitates periodic data updates without the need for fine-tuning, thereby streamlining the integration of LLMs into businesses.
@@ -15,7 +29,7 @@ The **Enterprise RAG** Solution Accelerator (GPT-RAG) offers a robust architectu
 * [App Front-End](https://github.com/Azure/gpt-rag-frontend) Built with Azure App Services and the Backend for Front-End pattern, offers a smooth and scalable user interface.
 * [Teams-BOT](https://github.com/Azure/gpt-rag-bot) Constructed using Azure BOT Services, this platform enables users to engage with the Orchestrator seamlessly through the Microsoft Teams interface.
 
-### GPT-RAG Integration HUB
+#### GPT-RAG Integration HUB
 
 * [SQL Integration](https://github.com/Azure/gpt-rag-int-sql) Connect the GPT-RAG Infrastructure to SQL using NL2SQL (Coming Soon).
 
@@ -37,6 +51,8 @@ To deploy Enterprise RAG and get your solution up and running, you will use **az
 * Node.js 16+ [windows/mac](https://nodejs.dev/en/download/) [linux/wsl](https://nodejs.dev/en/download/package-manager/)
 * Python 3.11: [Download Python](https://www.python.org/downloads/release/python-3118/)
 * Initiate an [Azure AI service creation](https://portal.azure.com/#create/Microsoft.CognitiveServicesAllInOne) and agree to the Responsible AI terms (If you have not created an Azure AI service resource before)
+
+
 
 ### Installation Types
 
@@ -166,6 +182,8 @@ Multi Project Architecture
 ![](<.gitbook/assets/image (2).png>)
 
 </details>
+
+
 
 ### Additional Customizations
 
