@@ -42,7 +42,7 @@ To deploy Enterprise RAG and get your solution up and running, you will use **az
 
 <details>
 
-<summary>Basic Installation</summary>
+<summary><strong>Basic Installation</strong></summary>
 
 After installing the pre-requirements, you just need to execute the next four steps using [Azure Developer CLI (azd)](https://aka.ms/azure-dev/install) in a terminal:
 
@@ -78,7 +78,7 @@ Upload your documents to the 'documents' folder located in the storage account. 
 
 <details>
 
-<summary>Zero Trust Installation</summary>
+<summary><strong>Zero Trust Installation</strong></summary>
 
 To deploy the zero trust implementation, follow the same steps, but with the following additional steps.
 
@@ -159,7 +159,7 @@ Done! Zero trust deployment is completed.
 
 <details>
 
-<summary>Zero Trust Multi Project Scale Installation</summary>
+<summary><strong>Zero Trust Multi Project Scale Installation</strong></summary>
 
 Multi Project Architecture
 
