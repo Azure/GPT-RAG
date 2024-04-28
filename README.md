@@ -34,9 +34,9 @@ The **Enterprise RAG** Solution Accelerator (GPT-RAG) offers a robust architectu
 
 ## Concepts
 
-* [RAG Pattern: What and Why?](README_RAG.md)
+* [RAG Pattern: What and Why?](docs/README_RAG.md)
 
-* [Solution Architecture Overview](README_ARCHITECTURE.md)
+* [Solution Architecture Overview](docs/README_ARCHITECTURE.md)
 
 <!-- ![Architecture Overview](media/GPT-RAG-ZeroTrust.png) -->
 
@@ -48,19 +48,21 @@ The **Enterprise RAG** Solution Accelerator (GPT-RAG) offers a robust architectu
 
 To deploy Enterprise RAG and get your solution up and running, you will use **azd**, **Python**, **Git**, **Node.js 16+**, and **PowerShell 7** (only if you are using Windows).
 
-Pre-reqs links:
- - Azure Developer CLI: [Download azd for Windows](https://azdrelease.azureedge.net/azd/standalone/release/1.5.0/azd-windows-amd64.msi), [Other OS's](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd).
+**Pre-reqs**
+
+- Azure Developer CLI: [Download azd for Windows](https://azdrelease.azureedge.net/azd/standalone/release/1.5.0/azd-windows-amd64.msi), [Other OS's](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd).
  - Powershell (Windows only): [Powershell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4#installing-the-msi-package)
  - Git: [Download Git](https://git-scm.com/downloads)
  - Node.js 16+ [windows/mac](https://nodejs.dev/en/download/)  [linux/wsl](https://nodejs.dev/en/download/package-manager/)
  - Python 3.11: [Download Python](https://www.python.org/downloads/release/python-3118/)
- - Initiate an [Azure AI service creation](https://portal.azure.com/#create/Microsoft.CognitiveServicesAllInOne) and agree to the Responsible AI terms (If you have not created an Azure AI service resource before) 
+ - Initiate an [Azure AI service creation](https://portal.azure.com/#create/Microsoft.CognitiveServicesAllInOne) and agree to the Responsible AI terms **
+
+** If you have not created an Azure AI service resource in the subscrption before
 
 
+### Simple Installation
 
-### Basic Installation
-
-After installing the pre-requirements you just need to execute the next four steps using [Azure Developer CLI (azd)](https://aka.ms/azure-dev/install) in a terminal:
+For quick demos or Proof of Concept (PoC) without network isolation, the procedure is quite simple: install the prerequisites and follow these four steps using [Azure Developer CLI (azd)](https://aka.ms/azure-dev/install) in a terminal:
 
 **1** Download the Repository:
 
@@ -86,28 +88,28 @@ azd up
 Upload your documents to the 'documents' folder located in the storage account. The name of this account should start with 'strag'. This is the default storage account, as shown in the sample image below.
 
 
- ![storage_sample](media/storage_sample.png)
+ ![storage_sample](media/readme-storage_sample.png)
 
 
-**5** Standard Architecture:
- ![Standard Architecture](media/GPT-RAG-NoSecure.png)
+**Simple Architecture**
+ ![Simple Architecture](media/architecture-GPT-RAG-Basic.png)
 
 ### Zero trust installation
 
 To deploy the zero trust implementation, follow the same steps, but with the following additional steps.  
    
-**1** Before executing the ```azd up``` command, make sure to run the following line:  
-   
-```sh  
-azd env set AZURE_NETWORK_ISOLATION true  
-```  
- 
-**2** Download the Repository:
+**1** Download the Repository
 
 ```sh
 azd init -t azure/gpt-rag
 ```
 
+**2** Enable network isolation
+   
+```sh  
+azd env set AZURE_NETWORK_ISOLATION true  
+```  
+ 
 **3** Login to Azure:
 
 ```sh
@@ -144,11 +146,11 @@ choco upgrade azd
    
 After updating azd, simply close and reopen the terminal.  
    
-**8** Create a new directory, for example, `gptrag` then enter the created directory.  
+**8** Create a new directory, for example, `deploy` then enter the created directory.  
    
 ```  
-mkdir gptrag  
-cd gptrag  
+mkdir deploy  
+cd deploy  
 ```  
 To finalize the procedure, execute the subsequent commands in the command prompt to successfully complete the deployment:
 
@@ -164,21 +166,25 @@ azd deploy
    
 Done! Zero trust deployment is completed.
 
-**9** Zero Trust Architecture:
- ![Zero Trust Architecture](media/GPT-RAG-ZeroTrust.png)
+**Zero Trust Architecture**
+ ![Zero Trust Architecture](media/architecture-GPT-RAG-ZeroTrust.png)
 
-**10** Zero Trust Multi Project Scale:
- ![Zero Trust Multi Project Scale](media/GPT-RAG-SCALE-MultiProject.jpeg)
+**Zero Trust Multi Project Scale**
+ ![Zero Trust Multi Project Scale](media/architecture-GPT-RAG-SCALE-MultiProject.jpeg)
 
 ## Additional Customizations
 
-Refer to the [Custom Deployment](README_CUSTOM_DEPLOY.md) section to learn about additional customization options you can make.
+Refer to the [Custom Deployment](docs/README_CUSTOM_DEPLOY.md) section to learn about additional customization options you can make.
 
 ## Additional Resources
 
 ### Troubleshooting
 
-Look at the [Troubleshooting](TROUBLESHOOTING.md) page in case you face some error in the deployment process.
+Look at the [Troubleshooting](docs/TROUBLESHOOTING.md) page in case you face some error in the deployment process.
+
+### Evaluating
+
+[How to test the orchestrator performance?](docs/PERFTEST.md)
 
 ### Pricing Estimation
 
@@ -188,7 +194,7 @@ Look at the [Troubleshooting](TROUBLESHOOTING.md) page in case you face some err
 
 * [Governance Model](https://share.mindmanager.com/#publish/9ogrdWqzmAzZB6ilgURohV4lj1LriKjOWc0w_u2U)
 
-## Contributing 
+## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
 Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us

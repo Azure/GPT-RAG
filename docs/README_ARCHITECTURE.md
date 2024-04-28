@@ -1,15 +1,16 @@
-This section provides information about the GPT-RAG infrastructure models. It includes an overview of the GPT-RAG/Simple Architecture (NoSecure) and GPT-RAG/Zero Trust architectures. The connectivity components and AI workloads involved in each architecture are described. Additionally, there is an architecture deep dive section that explains the data ingestion, orchestrator, and app front-end components of the system. There are also technical references related to the Architecture.
+This section provides information about the GPT-RAG infrastructure models. It includes an overview of the GPT-RAG/Simple Architecture and GPT-RAG/Zero Trust architectures. The connectivity components and AI workloads involved in each architecture are described. Additionally, there is an architecture deep dive section that explains the data ingestion, orchestrator, and app front-end components of the system. There are also technical references related to the Architecture.
 
 ## GPT-RAG Infrastructure Models
 
-### GPT-RAG / Simple Architecture (NoSecure) Architecture Overview
+### Simple Architecture Overview
 
-<img src="media/GPT-RAG-NoSecure.png" alt="Architecture Overview" width="1024">
+TODO: Fix this diagram
 
+<img src="../media/GPT-RAG-Basic.png" alt="Architecture Overview" width="1024">
 
-### GPT-RAG / Zero Trust Architecture Overview
+### Zero Trust Architecture Overview
 
-<img src="media/GPT-RAG-ZeroTrust.png" alt="Architecture Overview" width="1024">
+<img src="../media/GPT-RAG-ZeroTrust.png" alt="Architecture Overview" width="1024">
 
 **Connectivity Components:**
 
@@ -31,7 +32,7 @@ This section provides information about the GPT-RAG infrastructure models. It in
 
 ### Architecture Deep Dive
 
-<img src="media/RAG3.PNG" alt="Architecture Deep Dive" width="1024">
+<img src="../media/RAG3.PNG" alt="Architecture Deep Dive" width="1024">
 
 **1** [Data ingestion](https://github.com/Azure/gpt-rag-ingestion) Optimizes data preparation for Azure OpenAI
 
