@@ -1,0 +1,26 @@
+name: Load Testing
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check for ENV_NAME and AZURE_CREDENTIALS
+      run: |
+        if [ -z "${{ secrets.ENV_NAME }}" ] || [ -z "${{ secrets.AZURE_CREDENTIALS }}" ]; then
+          echo "ENV_NAME or AZURE_CREDENTIALS is not set in the repo settings. Please set them and try again."
+          exit 1
+        else
+          echo "ENV_NAME is set to ${{ secrets.ENV_NAME }}"
+        fi
+
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
