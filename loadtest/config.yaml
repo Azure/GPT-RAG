@@ -1,0 +1,19 @@
+displayName: Test_Name
+testPlan: loadtest.jmx
+description: ''
+engineInstances: 1
+testId: rzv57w6bdxevi-load-test
+testType: JMX
+splitAllCSVs: False
+configurationFiles:
+- dataset.csv
+failureCriteria:
+- HTTP Request: p95(response_time_ms) > 10000
+secrets:
+- name: functionKey
+  value: https://kv0-rzv57w6bdxevi.vault.azure.net/secrets/orchestrator-host--functionKey
+properties:
+  userPropertyFile: user.properties
+autoStop:
+  errorPercentage: 90
+  timeWindow: 60

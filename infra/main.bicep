@@ -186,6 +186,10 @@ var openAiServiceName = !empty(azureOpenAiServiceName) ? azureOpenAiServiceName 
 @description('Virtual network name if using network isolation. Use your own name convention or leave as it is to generate a random name.')
 param azureVnetName string = ''
 var vnetName = !empty(azureVnetName) ? azureVnetName : 'aivnet0-${resourceToken}'
+@description('Load testing resource name.')
+param azureLoadTestingName string = ''
+var loadtestingName = !empty(azureLoadTestingName) ? azureLoadTestingName : 'loadtest0-${resourceToken}'
+
 
 var orchestratorEndpoint = 'https://${orchestratorFunctionAppName}.azurewebsites.net/api/orc'
 var orchestratorUri = 'https://${orchestratorFunctionAppName}.azurewebsites.net'
@@ -998,6 +1002,29 @@ module searchPe './core/network/private-endpoint.bicep' = if (networkIsolation) 
     dnsZoneId: networkIsolation?searchDnsZone.outputs.id:''
   }
 }
+
+
+// loadtesting
+
+module loadtesting './core/loadtesting/loadtesting.bicep' = {
+  name: loadtestingName
+  scope: resourceGroup
+  params: {
+    name: loadtestingName
+    location: location
+    tags: tags
+  }
+}
+
+// Give loadtesting access to KeyVault
+module loadtestingKeyVaultAccess './core/security/keyvault-access.bicep' = {
+  name: 'loadtesting-keyvault-access'
+  scope: resourceGroup
+  params: {
+    keyVaultName: keyVault.outputs.name
+    principalId: loadtesting.outputs.id
+  }
+} 
 
 output AZURE_KEY_VAULT_NAME string = keyVault.outputs.name
 output AZURE_ZERO_TRUST string = networkIsolation ? 'TRUE' : 'FALSE'
