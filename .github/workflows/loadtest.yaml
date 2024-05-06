@@ -26,4 +26,9 @@ jobs:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
     - name: Install azd
-      uses: Azure/setup-azd@v1.0.0        
+      uses: Azure/setup-azd@v1.0.0
+
+    - name: Login to Azure Developer CLI
+      run: |
+        AZURE_CREDENTIALS=${{ secrets.AZURE_CREDENTIALS }}
+        azd login --service-principal --client-id $AZURE_CREDENTIALS.clientId --client-secret $AZURE_CREDENTIALS.clientSecret --tenant-id $AZURE_CREDENTIALS.tenantId
