@@ -30,5 +30,8 @@ jobs:
 
     - name: Login to Azure Developer CLI
       run: |
-        AZURE_CREDENTIALS=${{ secrets.AZURE_CREDENTIALS }}
-        azd login --service-principal --client-id $AZURE_CREDENTIALS.clientId --client-secret $AZURE_CREDENTIALS.clientSecret --tenant-id $AZURE_CREDENTIALS.tenantId
+        AZURE_CREDENTIALS=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .)
+        CLIENT_ID=$(echo $AZURE_CREDENTIALS | jq -r .clientId)
+        CLIENT_SECRET=$(echo $AZURE_CREDENTIALS | jq -r .clientSecret)
+        TENANT_ID=$(echo $AZURE_CREDENTIALS | jq -r .tenantId)
+        azd login --service-principal --client-id $CLIENT_ID --client-secret $CLIENT_SECRET --tenant-id $TENANT_ID        
