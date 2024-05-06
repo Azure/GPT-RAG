@@ -10,11 +10,11 @@ jobs:
     steps:
     - name: Check for ENV_NAME and AZURE_CREDENTIALS
       run: |
-        if [ -z "${{ env.AZD_ENV }}" ] || [ -z "${{ secrets.AZURE_CREDENTIALS }}" ]; then
+        if [ -z "${{ vars.AZD_ENV }}" ] || [ -z "${{ secrets.AZURE_CREDENTIALS }}" ]; then
           echo "AZD_ENV or AZURE_CREDENTIALS is not set in the repo settings. Please set them and try again."
           exit 1
         else
-          echo "AZD_ENV is set to ${{ env.AZD_ENV }}"
+          echo "AZD_ENV is set to ${{ vars.AZD_ENV }}"
         fi
 
     - name: Checkout code
