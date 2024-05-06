@@ -10,11 +10,11 @@ jobs:
     steps:
     - name: Check for ENV_NAME and AZURE_CREDENTIALS
       run: |
-        if [ -z "${{ vars.AZD_ENV }}" ] || [ -z "${{ secrets.AZURE_CREDENTIALS }}" ]; then
-          echo "AZD_ENV or AZURE_CREDENTIALS is not set in the repo settings. Please set them and try again."
+        if [ -z "${{ vars.ENV_NAME }}" ] || [ -z "${{ secrets.AZURE_CREDENTIALS }}" ]; then
+          echo "ENV_NAME or AZURE_CREDENTIALS is not set in the repo settings. Please set them and try again."
           exit 1
         else
-          echo "AZD_ENV is set to ${{ vars.AZD_ENV }}"
+          echo "ENV_NAME is set to ${{ vars.ENV_NAME }}"
         fi
 
     - name: Checkout code
@@ -28,10 +28,23 @@ jobs:
     - name: Install azd
       uses: Azure/setup-azd@v1.0.0
 
-    - name: Login to Azure Developer CLI
+    - name: Get env variables from Azure Developer CLI environment
       run: |
+        echo "Logging to  AZD..."
         AZURE_CREDENTIALS=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .)
         CLIENT_ID=$(echo $AZURE_CREDENTIALS | jq -r .clientId)
         CLIENT_SECRET=$(echo $AZURE_CREDENTIALS | jq -r .clientSecret)
         TENANT_ID=$(echo $AZURE_CREDENTIALS | jq -r .tenantId)
-        azd login --service-principal --client-id $CLIENT_ID --client-secret $CLIENT_SECRET --tenant-id $TENANT_ID        
+        azd login --client-id $CLIENT_ID --client-secret $CLIENT_SECRET --tenant-id $TENANT_ID
+        echo "Getting environment variables from AZD ${{ vars.ENV_NAME }} environment..."
+        export RESOURCE_GROUP_NAME=$(azd env get-values -e ${{ vars.ENV_NAME }} | grep AZURE_RESOURCE_GROUP_NAME | cut -d'=' -f2 | tr -d '"')
+        echo "RESOURCE_GROUP_NAME=$RESOURCE_GROUP_NAME" >> $GITHUB_ENV
+        echo "RESOURCE_GROUP_NAME=$RESOURCE_GROUP_NAME"        
+        export KEY_VAULT_NAME=$(azd env get-values -e ${{ vars.ENV_NAME }} | grep AZURE_KEY_VAULT_NAME | cut -d'=' -f2 | tr -d '"')
+        echo "KEY_VAULT_NAME=$KEY_VAULT_NAME" >> $GITHUB_ENV
+        echo "KEY_VAULT_NAME=$KEY_VAULT_NAME"
+        export ORCHESTRATOR_FUNC_NAME=$(azd env get-values -e ${{ vars.ENV_NAME }} | grep AZURE_ORCHESTRATOR_FUNC_NAME | cut -d'=' -f2 | tr -d '"')
+        echo "ORCHESTRATOR_FUNC_NAME=$ORCHESTRATOR_FUNC_NAME" >> $GITHUB_ENV
+        echo "ORCHESTRATOR_FUNC_NAME=$ORCHESTRATOR_FUNC_NAME"
+
+        

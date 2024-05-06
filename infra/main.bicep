@@ -171,6 +171,9 @@ var appInsightsName = !empty(azureAppInsightsName) ? azureAppInsightsName : 'app
 @description('Front-end App Service Name. Use your own name convention or leave as it is to generate a random name.')
 param azureAppServiceName string = ''
 var appServiceName = !empty(azureAppServiceName) ? azureAppServiceName : 'webgpt0-${resourceToken}'
+@description('Load testing resource name. Use your own name convention or leave as it is to generate a random name.')
+param azureLoadTestingName string = ''
+var loadtestingName = !empty(azureLoadTestingName) ? azureLoadTestingName : 'loadtest0-${resourceToken}'
 @description('Orchestrator Function Name. Use your own name convention or leave as it is to generate a random name.')
 param azureOrchestratorFunctionAppName string = ''
 var orchestratorFunctionAppName = !empty(azureOrchestratorFunctionAppName) ? azureOrchestratorFunctionAppName : 'fnorch0-${resourceToken}'
@@ -186,10 +189,6 @@ var openAiServiceName = !empty(azureOpenAiServiceName) ? azureOpenAiServiceName 
 @description('Virtual network name if using network isolation. Use your own name convention or leave as it is to generate a random name.')
 param azureVnetName string = ''
 var vnetName = !empty(azureVnetName) ? azureVnetName : 'aivnet0-${resourceToken}'
-@description('Load testing resource name.')
-param azureLoadTestingName string = ''
-var loadtestingName = !empty(azureLoadTestingName) ? azureLoadTestingName : 'loadtest0-${resourceToken}'
-
 
 var orchestratorEndpoint = 'https://${orchestratorFunctionAppName}.azurewebsites.net/api/orc'
 var orchestratorUri = 'https://${orchestratorFunctionAppName}.azurewebsites.net'
@@ -1026,34 +1025,36 @@ module loadtestingKeyVaultAccess './core/security/keyvault-access.bicep' = {
   }
 } 
 
-output AZURE_KEY_VAULT_NAME string = keyVault.outputs.name
-output AZURE_ZERO_TRUST string = networkIsolation ? 'TRUE' : 'FALSE'
-output AZURE_VM_NAME string = networkIsolation ? ztVmName : ''
-output AZURE_VM_USERNAME string = networkIsolation ? vmUserName : ''
-output AZURE_VM_KV_NAME string = networkIsolation ? bastionKvName : keyVault.outputs.name
-output AZURE_VM_KV_SEC_NAME string = networkIsolation ? vmKeyVaultSecName : ''
+// Set some environment variables as outputs to be used by post provisioned/deployment and CI/CD scripts
 output AZURE_DATA_INGEST_FUNC_NAME string = dataIngestionFunctionAppName
 output AZURE_DATA_INGEST_FUNC_RG string = resourceGroup.name
-output AZURE_SEARCH_PRINCIPAL_ID string = searchService.outputs.principalId
-output AZURE_ORCHESTRATOR_FUNC_RG string = resourceGroup.name
+output AZURE_KEY_VAULT_NAME string = keyVault.outputs.name
+output AZURE_LOAD_TESTING_SERVICE_NAME string = loadtesting.outputs.name
 output AZURE_ORCHESTRATOR_FUNC_NAME string = orchestratorFunctionAppName
+output AZURE_ORCHESTRATOR_FUNC_RG string = resourceGroup.name
+output AZURE_SEARCH_PRINCIPAL_ID string = searchService.outputs.principalId
+output AZURE_STORAGE_ACCOUNT_NAME string = storageAccountName
+output AZURE_VM_KV_NAME string = networkIsolation ? bastionKvName : keyVault.outputs.name
+output AZURE_VM_KV_SEC_NAME string = networkIsolation ? vmKeyVaultSecName : ''
+output AZURE_VM_NAME string = networkIsolation ? ztVmName : ''
+output AZURE_VM_USERNAME string = networkIsolation ? vmUserName : ''
+output AZURE_ZERO_TRUST string = networkIsolation ? 'TRUE' : 'FALSE'
 
 // Set input params as outputs to persist the selection
 // This strategy would allow to re-construct the .env file from a deployment object on azure by using env-name, sub and location.
 // Without this, any custom selection would be lost when running `azd env refresh` from another machine.
-output AZURE_RESOURCE_GROUP_NAME string = azureResourceGroupName
-output AZURE_NETWORK_ISOLATION bool = networkIsolation
-output AZURE_DB_ACCOUNT_NAME string = azureDbAccountName
-output AZURE_DB_DATABASE_NAME string = azureDbDatabaseName
-output AZURE_STORAGE_ACCOUNT_NAME string = storageAccountName
-output AZURE_COGNITIVE_SERVICE_NAME string = azureCognitiveServiceName
-output AZURE_APP_SERVICE_PLAN_NAME string = azureAppServicePlanName
 output AZURE_APP_INSIGHTS_NAME string = azureAppInsightsName
 output AZURE_APP_SERVICE_NAME string = azureAppServiceName
-output AZURE_ORCHESTRATOR_FUNCTION_APP_NAME string = azureOrchestratorFunctionAppName
+output AZURE_APP_SERVICE_PLAN_NAME string = azureAppServicePlanName
+output AZURE_COGNITIVE_SERVICE_NAME string = azureCognitiveServiceName
 output AZURE_DATA_INGESTION_FUNCTION_APP_NAME string = azureDataIngestionFunctionAppName
-output AZURE_SEARCH_SERVICE_NAME string = azureSearchServiceName
+output AZURE_DB_ACCOUNT_NAME string = azureDbAccountName
+output AZURE_DB_DATABASE_NAME string = azureDbDatabaseName
+output AZURE_NETWORK_ISOLATION bool = networkIsolation
+output AZURE_LOAD_TESTING_NAME string = azureLoadTestingName
 output AZURE_OPEN_AI_SERVICE_NAME string = azureOpenAiServiceName
-output AZURE_VNET_NAME string = azureVnetName
-
+output AZURE_ORCHESTRATOR_FUNCTION_APP_NAME string = azureOrchestratorFunctionAppName
+output AZURE_RESOURCE_GROUP_NAME string = azureResourceGroupName
+output AZURE_SEARCH_SERVICE_NAME string = azureSearchServiceName
 output AZURE_SEARCH_USE_MIS bool = azureSearchUseMIS
+output AZURE_VNET_NAME string = azureVnetName

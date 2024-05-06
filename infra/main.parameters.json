@@ -74,6 +74,9 @@
     "azureAppServiceName": {
       "value": "${AZURE_APP_SERVICE_NAME}"
     },
+    "azureLoadTestingName": {
+      "value": "${AZURE_LOAD_TESTING_NAME}"
+    },
     "azureOrchestratorFunctionAppName": {
       "value": "${AZURE_ORCHESTRATOR_FUNCTION_APP_NAME}"
     },
