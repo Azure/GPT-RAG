@@ -31,11 +31,11 @@ jobs:
     - name: Login to Azure Developer CLI
       run: |
         echo "Logging to AZD..."
-        AZURE_CREDENTIALS=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .)
+        export AZURE_CREDENTIALS=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .)
         CLIENT_ID=$(echo $AZURE_CREDENTIALS | jq -r .clientId)
         CLIENT_SECRET=$(echo $AZURE_CREDENTIALS | jq -r .clientSecret)
         TENANT_ID=$(echo $AZURE_CREDENTIALS | jq -r .tenantId)
-        azd login --client-id $CLIENT_ID --client-secret $CLIENT_SECRET --tenant-id $TENANT_ID
+        azd auth login --client-id $CLIENT_ID --client-secret $CLIENT_SECRET --tenant-id $TENANT_ID
 
     - name: Setting environment variables
       run: |
