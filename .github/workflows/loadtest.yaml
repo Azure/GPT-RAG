@@ -77,14 +77,3 @@ jobs:
         loadTestConfigFile: 'loadtest/config.yaml'
         loadTestResource: ${{ env.LOAD_TESTING_SERVICE_NAME }}
         resourceGroup: ${{ env.RESOURCE_GROUP_NAME }}
-
-    - name: Add app components to load testing
-      run: |
-          echo "Adding an app component"
-          az load test app-component add --load-test-resource "/subscriptions/${{ env.SUBSCRIPTION_ID }}/resourceGroups/${{ env.RESOURCE_GROUP_NAME }}/providers/Microsoft.LoadTest/accounts/${{ env.LOAD_TESTING_SERVICE_NAME }}" --test-id gptrag-load-test --app-component-id "/subscriptions/${{ env.SUBSCRIPTION_ID }}/resourceGroups/${{ env.RESOURCE_GROUP_NAME }}/providers/Microsoft.Web/sites/${{ env.ORCHESTRATOR_FUNC_NAME }}" --app-component-type "Microsoft.Web/sites" --app-component-name "${{ env.ORCHESTRATOR_FUNC_NAME }}"
-          # echo "Adding an OpenAI Service app component"
-          # az load test app-component add --load-test-resource "/subscriptions/${{ env.SUBSCRIPTION_ID }}/resourceGroups/${{ env.RESOURCE_GROUP_NAME }}/providers/Microsoft.LoadTest/accounts/${{ env.LOAD_TESTING_SERVICE_NAME }}" --test-id gptrag-load-test --app-component-id "/subscriptions/${{ env.SUBSCRIPTION_ID }}/resourceGroups/${{ env.RESOURCE_GROUP_NAME }}/providers/Microsoft.CognitiveServices/accounts/${{ env.AZURE_OPENAI_SERVICE_NAME }}" --app-component-type "Microsoft.CognitiveServices/accounts" --app-component-name "${{ env.AZURE_OPENAI_SERVICE_NAME }}"
-
-
-
-          
