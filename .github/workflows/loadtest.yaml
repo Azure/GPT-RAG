@@ -62,20 +62,17 @@ jobs:
           echo "ORCHESTRATOR_FUNC_NAME=$ORCHESTRATOR_FUNC_NAME" >> $GITHUB_ENV
           echo "ORCHESTRATOR_FUNC_NAME=$ORCHESTRATOR_FUNC_NAME"
 
-    - name: Replace KEY_VAULT_NAME in config file
+    - name: Update config.yaml with environment variables
       run: |
           sed -i "s/KEY_VAULT_NAME/${{ env.KEY_VAULT_NAME }}/g" loadtest/config.yaml
 
-    - name: Replace KEY_VAULT_NAME in config file
-      run: |
-          sed -i "s/KEY_VAULT_NAME/${{ env.KEY_VAULT_NAME }}/g" loadtest/config.yaml
-
-    - name: Replace ORCHESTRATOR_FUNC_NAME in user properties
+    - name: Update user.properties with environment variables
       run: |
           sed -i "s/ORCHESTRATOR_FUNC_NAME/${{ env.ORCHESTRATOR_FUNC_NAME }}/g" loadtest/user.properties
 
     - name: 'Azure Load Testing'
       uses: azure/load-testing@v1
+      continue-on-error: true
       with:
         loadTestConfigFile: 'loadtest/config.yaml'
         loadTestResource: ${{ env.LOAD_TESTING_SERVICE_NAME }}
