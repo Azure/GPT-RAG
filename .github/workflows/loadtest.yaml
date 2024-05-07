@@ -31,7 +31,7 @@ jobs:
     - name: Login to Azure Developer CLI
       run: |
         echo "Logging to AZD..."
-        export AZURE_CREDENTIALS=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .)
+        AZURE_CREDENTIALS=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .)
         CLIENT_ID=$(echo $AZURE_CREDENTIALS | jq -r .clientId)
         CLIENT_SECRET=$(echo $AZURE_CREDENTIALS | jq -r .clientSecret)
         TENANT_ID=$(echo $AZURE_CREDENTIALS | jq -r .tenantId)
@@ -39,7 +39,8 @@ jobs:
 
     - name: Setting environment variables
       run: |
-          export SUBSCRIPTION_ID=$(echo $AZURE_CREDENTIALS | jq -r .subscriptionId)
+          AZURE_CREDENTIALS=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .)
+          SUBSCRIPTION_ID=$(echo $AZURE_CREDENTIALS | jq -r .subscriptionId)
           echo "SUBSCRIPTION_ID=$SUBSCRIPTION_ID" >> $GITHUB_ENV
           echo "SUBSCRIPTION_ID=$SUBSCRIPTION_ID"  
           export LOCATION=$(az group show --name rg-${{ vars.ENV_NAME }} --query location --output tsv)
