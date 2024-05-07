@@ -1030,6 +1030,7 @@ output AZURE_DATA_INGEST_FUNC_NAME string = dataIngestionFunctionAppName
 output AZURE_DATA_INGEST_FUNC_RG string = resourceGroup.name
 output AZURE_KEY_VAULT_NAME string = keyVault.outputs.name
 output AZURE_LOAD_TESTING_SERVICE_NAME string = loadtesting.outputs.name
+output AZURE_OPENAI_SERVICE_NAME string = openAi.outputs.name
 output AZURE_ORCHESTRATOR_FUNC_NAME string = orchestratorFunctionAppName
 output AZURE_ORCHESTRATOR_FUNC_RG string = resourceGroup.name
 output AZURE_SEARCH_PRINCIPAL_ID string = searchService.outputs.principalId
