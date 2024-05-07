@@ -37,7 +37,7 @@ jobs:
         TENANT_ID=$(echo $AZURE_CREDENTIALS | jq -r .tenantId)
         azd auth login --client-id $CLIENT_ID --client-secret $CLIENT_SECRET --tenant-id $TENANT_ID
 
-    - name: Setting environment variables
+    - name: Get environment variables from AZD CLI
       run: |
           AZURE_CREDENTIALS=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .)
           SUBSCRIPTION_ID=$(echo $AZURE_CREDENTIALS | jq -r .subscriptionId)
@@ -61,6 +61,18 @@ jobs:
           export ORCHESTRATOR_FUNC_NAME=$(azd env get-values -e ${{ vars.ENV_NAME }} | grep AZURE_ORCHESTRATOR_FUNC_NAME | cut -d'=' -f2 | tr -d '"')
           echo "ORCHESTRATOR_FUNC_NAME=$ORCHESTRATOR_FUNC_NAME" >> $GITHUB_ENV
           echo "ORCHESTRATOR_FUNC_NAME=$ORCHESTRATOR_FUNC_NAME"
+
+    - name: Replace KEY_VAULT_NAME in config file
+      run: |
+          sed -i "s/KEY_VAULT_NAME/${{ env.KEY_VAULT_NAME }}/g" loadtest/config.yaml
+
+    - name: Replace KEY_VAULT_NAME in config file
+      run: |
+          sed -i "s/KEY_VAULT_NAME/${{ env.KEY_VAULT_NAME }}/g" loadtest/config.yaml
+
+    - name: Replace ORCHESTRATOR_FUNC_NAME in user properties
+      run: |
+          sed -i "s/ORCHESTRATOR_FUNC_NAME/${{ env.ORCHESTRATOR_FUNC_NAME }}/g" loadtest/user.properties
 
     - name: 'Azure Load Testing'
       uses: azure/load-testing@v1
