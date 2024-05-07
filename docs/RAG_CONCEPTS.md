@@ -2,14 +2,13 @@ This section provides information about the Retrieval-Augmented Generation (RAG)
 
 ## What is a RAG pattern?
 
-<img src="../media/RAG2.PNG" alt="Retrieval-Augmented Generation (RAG) pattern" width="1024">
+<img src="../media/ragconcepts-RAG2.PNG" alt="Retrieval-Augmented Generation (RAG) pattern" width="1024">
 
 Reference implementation of the Retrieval-Augmented Generation (RAG) pattern. 
 
 ## Why to start with RAG pattern?
 
-<img src="../media/RAG1.PNG" alt="Why RAG?" width="1024">
-
+<img src="../media/ragconcepts-RAG1.PNG" alt="Why RAG?" width="1024">
 
 ### Technical References
 

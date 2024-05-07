@@ -30,13 +30,13 @@ The **Enterprise RAG** Solution Accelerator (GPT-RAG) offers a robust architectu
 
 * [App Front-End](https://github.com/Azure/gpt-rag-frontend) Built with Azure App Services and the Backend for Front-End pattern, offers a smooth and scalable user interface.
 
-* [Teams-BOT](https://github.com/Azure/gpt-rag-bot) Constructed using Azure BOT Services, this platform enables users to engage with the Orchestrator seamlessly through the Microsoft Teams interface.
+<!-- * [Teams-BOT](https://github.com/Azure/gpt-rag-bot) Constructed using Azure BOT Services, this platform enables users to engage with the Orchestrator seamlessly through the Microsoft Teams interface. -->
 
 ## Concepts
 
-* [RAG Pattern: What and Why?](docs/README_RAG.md)
+* [RAG Pattern: What and Why?](docs/RAG_CONCEPTS.md)
 
-* [Solution Architecture Overview](docs/README_ARCHITECTURE.md)
+* [Solution Architecture Overview](docs/ARCHITECTURE.md)
 
 <!-- ![Architecture Overview](media/GPT-RAG-ZeroTrust.png) -->
 
@@ -59,10 +59,13 @@ To deploy Enterprise RAG and get your solution up and running, you will use **az
 
 ** If you have not created an Azure AI service resource in the subscrption before
 
+### Basic Architecture
 
-### Simple Installation
+For quick demos or Proof of Concept (PoC) without network isolation, you can deploy the accelerator with the basic architecture.
 
-For quick demos or Proof of Concept (PoC) without network isolation, the procedure is quite simple: install the prerequisites and follow these four steps using [Azure Developer CLI (azd)](https://aka.ms/azure-dev/install) in a terminal:
+![Simple Architecture](media/architecture-GPT-RAG-Basic.png)
+
+The deployment procedure is quite simple, just install the prerequisites and follow these four steps using [Azure Developer CLI (azd)](https://aka.ms/azure-dev/install) in a terminal:
 
 **1** Download the Repository:
 
@@ -90,13 +93,13 @@ Upload your documents to the 'documents' folder located in the storage account. 
 
  ![storage_sample](media/readme-storage_sample.png)
 
+### Zero Trust Architecture
 
-**Simple Architecture**
- ![Simple Architecture](media/architecture-GPT-RAG-Basic.png)
+For more secure and isolated deployments, you can opt for the Zero Trust architecture. This architecture is ideal for production environments where network isolation and stringent security measures are highly valued.
 
-### Zero trust installation
+ ![Zero Trust Architecture](media/architecture-GPT-RAG-ZeroTrust.png)
 
-To deploy the zero trust implementation, follow the same steps, but with the following additional steps.  
+Deploying the Zero Trust architecture follows a similar procedure to the Basic Architecture deployment, but includes some additional steps. Refer to the instructions below for a detailed guide on deploying this option: 
    
 **1** Download the Repository
 
@@ -134,7 +137,7 @@ Initially, you will not be connected to the same vnet where the resources can be
 Log into the created VM with the user **gptrag** and authenticate with the password stored in the keyvault, similar to the figure below:  
 
 <BR>   
-<img src="media/keyvault-login.png" alt="Keyvault Login" width="1024">
+<img src="media/readme-keyvault-login.png" alt="Keyvault Login" width="1024">
    
 **6**  Upon accessing Windows, install [Powershell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4#installing-the-msi-package), as the other prerequisites are already installed on the VM.  
    
@@ -166,15 +169,9 @@ azd deploy
    
 Done! Zero trust deployment is completed.
 
-**Zero Trust Architecture**
- ![Zero Trust Architecture](media/architecture-GPT-RAG-ZeroTrust.png)
-
-**Zero Trust Multi Project Scale**
- ![Zero Trust Multi Project Scale](media/architecture-GPT-RAG-SCALE-MultiProject.jpeg)
-
 ## Additional Customizations
 
-Refer to the [Custom Deployment](docs/README_CUSTOM_DEPLOY.md) section to learn about additional customization options you can make.
+Refer to the [Custom Deployment](docs/CUSTOMIZATIONS.md) section to learn about additional customization options you can make.
 
 ## Additional Resources
 
@@ -184,7 +181,7 @@ Look at the [Troubleshooting](docs/TROUBLESHOOTING.md) page in case you face som
 
 ### Evaluating
 
-[How to test the orchestrator performance?](docs/PERFTEST.md)
+* [How to test the orchestrator performance?](docs/PERFTEST.md)
 
 ### Pricing Estimation
 

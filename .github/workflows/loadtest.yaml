@@ -72,7 +72,6 @@ jobs:
 
     - name: 'Azure Load Testing'
       uses: azure/load-testing@v1
-      continue-on-error: true
       with:
         loadTestConfigFile: 'loadtest/config.yaml'
         loadTestResource: ${{ env.LOAD_TESTING_SERVICE_NAME }}
