@@ -10,7 +10,7 @@ On this page, you will find some options to configure your deployment:
 
 #### Configuring language settings
 
-The default language settings for most components are set to English. You can set your preferred language by specifying the parameters in the [main.parameters.json](infra/main.parameters.json) file. Be aware that the permissible values for each parameter are listed in the [main.bicep](infra/main.bicep) file.  
+The default language settings for most components are set to English. You can set your preferred language by specifying the parameters in the [main.parameters.json](../infra/main.parameters.json) file. Be aware that the permissible values for each parameter are listed in the [main.bicep](../infra/main.bicep) file.  
    
 Parameters description:  
    
@@ -26,7 +26,7 @@ Parameters description:
 
 #### Defining resources names
 
-By default, `azd` will automatically generate a unique name for each resource. The unique name is created based on the azd-environment name, the subscription name and the location. However, you can also manually define the name for each resource using the mapping from [main.parameters.json](https://github.com/Azure/GPT-RAG/blob/main/infra/main.parameters.json). Each resource name has a direct mapping to an environment variable, for example:
+By default, `azd` will automatically generate a unique name for each resource. The unique name is created based on the azd-environment name, the subscription name and the location. However, you can also manually define the name for each resource using the mapping from [main.parameters.json](../infra/main.parameters.json). Each resource name has a direct mapping to an environment variable, for example:
 
 
 ```json
@@ -47,7 +47,7 @@ azd env set AZURE_STORAGE_ACCOUNT_NAME <yourResourceNameHere>
 
 #### Adding tags for all resources
 
-The [main.parameters.json](https://github.com/Azure/GPT-RAG/blob/main/infra/main.parameters.json) contains an empty object where you can define tags to apply to all your resources. Look for the entry:
+The [main.parameters.json](../infra/main.parameters.json) contains an empty object where you can define tags to apply to all your resources. Look for the entry:
 
 ```json
 "deploymentTags":{
