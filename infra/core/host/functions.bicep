@@ -14,8 +14,8 @@ param kind string = 'functionapp,linux'
 param functionAppScaleLimit int = -1
 param minimumElasticInstanceCount int = -1
 param numberOfWorkers int = -1
-param runtimeName string =  'python'
-param runtimeVersion string = '3.10'
+param runtimeName string
+param runtimeVersion string
 param use32BitWorkerProcess bool = false
 param healthCheckPath string = ''
 var runtimeNameAndVersion = '${runtimeName}|${runtimeVersion}'
