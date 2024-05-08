@@ -30,7 +30,7 @@ Now let's take a look at an example of an application architecture where you hav
 
 **Retrieval Augmented Generation** (RAG) is an architectural pattern frequently used in the development of Large Language Model (LLM) Applications, such as ChatGPT. Before making a call to the LLM to generate content, this architecture includes a retrieval step, which is crucial in providing grounding data. The [Enterprise RAG architecture](https://aka.ms/gpt-rag) offers a practical example of the RAG pattern implemented in an enterprise setting. In the [How-To Guides](#how-to-guides) section, you will see an example of how to perform load testing on an LLM application based on the RAG pattern.
 
-![Architecture Overview](../media/perftest-GPT-RAG-Basic.png)
+![Architecture Overview](../media/perftest-GPT-RAG-Basic-communication.png)
 <p align="center"><i>Example of communication between the components of an LLM App based on the RAG pattern.</i></p>
 
 > Note: To simplify the diagram, we did not represent the return messages.
@@ -328,11 +328,29 @@ The benchmarking tool works by creating traffic patterns that mirror the expecte
 
 This type of test is especially beneficial for Provisioned-Managed deployments. By adjusting the number of provisioned throughput units (PTUs) deployed, you can optimize your solution's design. Based on the analysis, you might need to revise the number of PTU deployments or even consider a hybrid architecture with PTU and Pay-as-you-go deployments, using load balancing between two or more deployments.
 
-You can configure the benchmarking tool to optimize your load testing experience with several adjustable parameters. The `retry` parameter allows you to set the retry strategy for requests, offering options such as "none" or "exponential", which can be crucial for handling API request failures effectively. The `clients` parameter enables you to specify the number of parallel clients that will send requests simultaneously, providing a way to simulate varying levels of user interaction.
+###### Test Parameters
 
-With the `rate` parameter, you can control the frequency of requests in Requests Per Minute (RPM), allowing for detailed management of test intensity. The `shape-profile` parameter, with options like "balanced", "context", or "generation", adjusts the request characteristics based on the number of context and generated tokens, enabling precise testing scenarios that reflect different usage patterns. These parameters collectively help in tailoring the load testing to reflect real-world usage as closely as possible, ensuring your application performs well under expected conditions.
+You can configure the benchmarking tool to optimize your load testing experience with several adjustable parameters:
 
-The `aggregation-window` parameter plays a critical role in how statistics are collected during a benchmarking run. It defines the duration, in seconds, for which the data aggregation window spans. Before the test hits the aggregation-window duration, all stats are computed over a flexible window, equivalent to the elapsed time. This ensures accurate RPM/TPM stats even if the test ends early due to hitting the request limit.
+ With the `rate` parameter, you can control the frequency of requests in Requests Per Minute (RPM), allowing for detailed management of test intensity.
+
+The `clients` parameter enables you to specify the number of parallel clients that will send requests simultaneously, providing a way to simulate varying levels of user interaction.
+
+The `shape-profile` parameter, with options like "balanced", "context", "custom" or "generation", adjusts the request characteristics based on the number of context and generated tokens, enabling precise testing scenarios that reflect different usage patterns. 
+
+When shape-profile is set to "custom", two additional parameters come into play: context-token and max-tokens. The `context-token` parameter allows you to specify the number of context tokens in the request, while `max-tokens` allows you to specify the maximum number of tokens that can be generated in the response. 
+
+The `aggregation-window` parameter defines the duration, in seconds, for which the data aggregation window spans. Before the test hits the aggregation-window duration, all stats are computed over a flexible window, equivalent to the elapsed time. This ensures accurate RPM/TPM stats even if the test ends early due to hitting the request limit.
+
+###### Retry Strategy
+
+The `retry` parameter allows you to set the retry strategy for requests, offering options such as "none" or "exponential", which can be crucial for handling API request failures effectively. When setting up a retry strategy for Azure OpenAI benchmarking, it's crucial to select an approach that carefully balances resource capacity to avoid skewing latency statistics. 
+
+When running a test with retry=none, throttled requests are immediately retried with a reset start time, and latency metrics only reflect the final successful attempt, o que pode nao representar a experiencia do usuario final . Use this setting for workloads within resource limits without throttling or to assess how many requests need redirecting to a backup during peak loads that surpass the primary resource’s capacity.
+
+ Conversely, with retry=exponential, failed or throttled requests are retried with exponential backoff, up to 60 seconds. This approach, recommended when no backup resources are deployed, measures the total time from the first failed attempt to the successful completion, thus capturing the full potential wait time an end-user might experience. This method is ideal for understanding the impacts of throttling and retries on total request latency, especially in scenarios like chat applications where response times are critical.
+
+###### Sample Scenario
 
 In the following example, taken from the tool's documentation, the benchmarking tool tests a traffic pattern that sends requests to the gpt-4 deployment in the 'myaccount' Azure OpenAI resource at a rate of 60 requests per minute, with the retry set to exponential. The default traffic shape is used, where each request contains 1000 context tokens, and the maximum response size is limited to 500 tokens.
 ```
@@ -359,11 +377,6 @@ When you run the test, you will obtain average and 95th percentile metrics from 
 |`e2e`| End to end request time.|
 |`util`| Azure OpenAI deployment utilization percentage as reported by the service.|
 
-##### Retry Strategy
-
-When setting up a retry strategy for Azure OpenAI benchmarking, it's crucial to select an approach that carefully balances resource capacity to avoid skewing latency statistics. The OpenAI library version 1.0 or greater incorporates a default retry logic that attempts to reconnect up to two times for certain errors, such as connection issues, request timeouts, conflicts, rate limits, and server errors, using a brief exponential backoff.
-
-To accurately measure the responsiveness of a resource under normal operating conditions, avoid pushing it to the point of throttling. Running tests with the `retry=none` setting ensures that throttled requests are immediately retried with a reset start time. This approach separates the impact of retries from the time measurements displayed in the tool output. Consequently, the latency metrics generated will only represent the duration of the final successful request, excluding the total time spent on retries. Using 'retry=none' provides a true reflection of the resource's capacity to handle requests without throttling. You can still monitor the Azure OpenAI service responses generating error 429 to estimate the percentage of requests that may require redirection to a backup during peak loads.
 
 ##### Monitoring AOAI Resource
 
@@ -392,7 +405,7 @@ Now that you understand the concepts for conducting performance tests, you can r
 
 - [LLM RAG application testing with Azure Load Testing](LOAD_TESTING.md).
 
-- [Model deployment testing with AOAI Benchmarking Tool](AOAI_BENCH_TOOL.md).
+- [Model deployment testing with AOAI Benchmarking Tool](https://github.com/microsoft/llmops-workshop/labs/performance/AOAI_BENCH_TOOL.md).
 
 <!--  references:
 https://www.microsoft.com/en-us/research/group/experimentation-platform-exp/articles/how-to-evaluate-llms-a-complete-metric-framework/ 

@@ -37,7 +37,7 @@ jobs:
         TENANT_ID=$(echo $AZURE_CREDENTIALS | jq -r .tenantId)
         azd auth login --client-id $CLIENT_ID --client-secret $CLIENT_SECRET --tenant-id $TENANT_ID
 
-    - name: Get environment variables from AZD CLI
+    - name: Get environment variables from AZD
       run: |
           AZURE_CREDENTIALS=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .)
           SUBSCRIPTION_ID=$(echo $AZURE_CREDENTIALS | jq -r .subscriptionId)
@@ -62,11 +62,11 @@ jobs:
           echo "ORCHESTRATOR_FUNC_NAME=$ORCHESTRATOR_FUNC_NAME" >> $GITHUB_ENV
           echo "ORCHESTRATOR_FUNC_NAME=$ORCHESTRATOR_FUNC_NAME"
 
-    - name: Update config.yaml with environment variables
+    - name: Update config.yaml
       run: |
           sed -i "s/KEY_VAULT_NAME/${{ env.KEY_VAULT_NAME }}/g" loadtest/config.yaml
 
-    - name: Update user.properties with environment variables
+    - name: Update user.properties
       run: |
           sed -i "s/ORCHESTRATOR_FUNC_NAME/${{ env.ORCHESTRATOR_FUNC_NAME }}/g" loadtest/user.properties
 

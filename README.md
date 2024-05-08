@@ -46,7 +46,7 @@ The **Enterprise RAG** Solution Accelerator (GPT-RAG) offers a robust architectu
 
 ## Getting Started
 
-To deploy Enterprise RAG and get your solution up and running, you will use **azd**, **Python**, **Git**, **Node.js 16+**, and **PowerShell 7** (only if you are using Windows).
+This guide will walk you through the deployment of Enterprise RAG. Before you begin, ensure you have the necessary tools and services installed as listed in the **Pre-reqs** section.
 
 **Pre-reqs**
 
@@ -63,7 +63,7 @@ To deploy Enterprise RAG and get your solution up and running, you will use **az
 
 For quick demos or Proof of Concept (PoC) without network isolation, you can deploy the accelerator with the basic architecture.
 
-![Simple Architecture](media/architecture-GPT-RAG-Basic.png)
+![Basic Architecture](media/architecture-GPT-RAG-Basic.png)
 
 The deployment procedure is quite simple, just install the prerequisites and follow these four steps using [Azure Developer CLI (azd)](https://aka.ms/azure-dev/install) in a terminal:
 
@@ -181,7 +181,7 @@ Look at the [Troubleshooting](docs/TROUBLESHOOTING.md) page in case you face som
 
 ### Evaluating
 
-* [How to test the orchestrator performance?](docs/PERFTEST.md)
+* [Performance Testing](docs/PERFTEST.md)
 
 ### Pricing Estimation
 
