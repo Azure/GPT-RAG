@@ -32,9 +32,10 @@ The **Enterprise RAG** Solution Accelerator (GPT-RAG) offers a robust architectu
 
 <!-- * [Teams-BOT](https://github.com/Azure/gpt-rag-bot) Constructed using Azure BOT Services, this platform enables users to engage with the Orchestrator seamlessly through the Microsoft Teams interface. -->
 
-
+<!-- 
+Removing temporarily while not finished
 ## GPT-RAG Integration HUB
-* [SQL Integration](https://github.com/Azure/gpt-rag-int-sql) Connect the GPT-RAG Infrastructure to SQL using NL2SQL.
+* [SQL Integration](https://github.com/Azure/gpt-rag-int-sql) Connect the GPT-RAG Infrastructure to SQL using NL2SQL. -->
 
 
 ## Concepts
