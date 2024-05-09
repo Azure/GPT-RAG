@@ -1034,7 +1034,7 @@ output AZURE_OPENAI_SERVICE_NAME string = openAi.outputs.name
 output AZURE_ORCHESTRATOR_FUNC_NAME string = orchestratorFunctionAppName
 output AZURE_ORCHESTRATOR_FUNC_RG string = resourceGroup.name
 output AZURE_SEARCH_PRINCIPAL_ID string = searchService.outputs.principalId
-output AZURE_STORAGE_ACCOUNT_NAME string = storageAccountName
+
 output AZURE_VM_KV_NAME string = networkIsolation ? bastionKvName : keyVault.outputs.name
 output AZURE_VM_KV_SEC_NAME string = networkIsolation ? vmKeyVaultSecName : ''
 output AZURE_VM_NAME string = networkIsolation ? ztVmName : ''
@@ -1051,20 +1051,16 @@ output AZURE_NETWORK_ISOLATION bool = networkIsolation
 output AZURE_DB_ACCOUNT_NAME string = azureDbAccountName
 output AZURE_DB_DATABASE_NAME string = azureDbDatabaseName
 output AZURE_STORAGE_ACCOUNT_NAME string = storageAccountName
-output AZURE_COGNITIVE_SERVICE_NAME string = azureCognitiveServiceName
-output AZURE_APP_SERVICE_PLAN_NAME string = azureAppServicePlanName
+
+
 output AZURE_APP_INSIGHTS_NAME string = azureAppInsightsName
 output AZURE_APP_SERVICE_NAME string = azureAppServiceName
 output AZURE_APP_SERVICE_PLAN_NAME string = azureAppServicePlanName
 output AZURE_COGNITIVE_SERVICE_NAME string = azureCognitiveServiceName
 output AZURE_DATA_INGESTION_FUNCTION_APP_NAME string = azureDataIngestionFunctionAppName
-output AZURE_DB_ACCOUNT_NAME string = azureDbAccountName
-output AZURE_DB_DATABASE_NAME string = azureDbDatabaseName
-output AZURE_NETWORK_ISOLATION bool = networkIsolation
 output AZURE_LOAD_TESTING_NAME string = azureLoadTestingName
 output AZURE_OPEN_AI_SERVICE_NAME string = openAiServiceName
 output AZURE_ORCHESTRATOR_FUNCTION_APP_NAME string = azureOrchestratorFunctionAppName
-output AZURE_RESOURCE_GROUP_NAME string = azureResourceGroupName
 output AZURE_SEARCH_SERVICE_NAME string = azureSearchServiceName
 output AZURE_SEARCH_USE_MIS bool = azureSearchUseMIS
 output AZURE_OPEN_AI_MODEL_NAME string = chatGptDeploymentName
