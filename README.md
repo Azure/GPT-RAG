@@ -189,9 +189,9 @@ Look at the [Troubleshooting](docs/TROUBLESHOOTING.md) page in case you face som
 
 * [Performance Testing](docs/PERFTEST.md)
 
-### Conversation Queries
+### Querying Conversation History
 
-* [How to Query and Analyze Conversations](docs/QUERYING_CONVERSATIONS.md).
+* [How to Query and Analyze Conversations](docs/QUERYING_CONVERSATIONS.md)
 
 ### Pricing Estimation
 
