@@ -1044,15 +1044,10 @@ output AZURE_ZERO_TRUST string = networkIsolation ? 'TRUE' : 'FALSE'
 // Set input params as outputs to persist the selection
 // This strategy would allow to re-construct the .env file from a deployment object on azure by using env-name, sub and location.
 // Without this, any custom selection would be lost when running `azd env refresh` from another machine.
-output AZURE_RESOURCE_GROUP_NAME string = azureResourceGroupName
+
 output AZURE_SUBSCRIPTION_ID string = subscription().subscriptionId
 output AZURE_TENANT_ID string = tenant().tenantId
-output AZURE_NETWORK_ISOLATION bool = networkIsolation
-output AZURE_DB_ACCOUNT_NAME string = azureDbAccountName
-output AZURE_DB_DATABASE_NAME string = azureDbDatabaseName
-output AZURE_STORAGE_ACCOUNT_NAME string = storageAccountName
-output AZURE_COGNITIVE_SERVICE_NAME string = azureCognitiveServiceName
-output AZURE_APP_SERVICE_PLAN_NAME string = azureAppServicePlanName
+
 output AZURE_APP_INSIGHTS_NAME string = azureAppInsightsName
 output AZURE_APP_SERVICE_NAME string = azureAppServiceName
 output AZURE_APP_SERVICE_PLAN_NAME string = azureAppServicePlanName
