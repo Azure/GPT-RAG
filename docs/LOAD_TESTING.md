@@ -38,7 +38,7 @@ Before you can execute the load test, there are a few pre-requisites that you ne
 
 1. **Azure Subscription**: Please ensure that you have an active Azure subscription.
 
-2. **Enterprise RAG Deployment**: It's necessary to have the Enterprise RAG Solution Accelerator deployed. This deployment also provisions an Azure Load Testing resource, which is essential for conducting the load test. If this hasn't been done yet, please refer to the [Getting Started](https://github.com/Azure/gpt-rag/README.md#getting-started) section. This provides a step-by-step guide on how to deploy the basic architecture of the accelerator.
+2. **Enterprise RAG Deployment**: It's necessary to have the Enterprise RAG Solution Accelerator deployed. This deployment also provisions an Azure Load Testing resource, which is essential for conducting the load test. If this hasn't been done yet, please refer to the [Getting Started](../README.md#getting-started) section. This provides a step-by-step guide on how to deploy the basic architecture of the accelerator.
 
 3. **GPT-RAG Repository**: Please ensure you have a personal copy of the GPT-RAG repository in your GitHub account. You can accomplish this by either forking the [original repository](https://aka.ms/gpt-rag) or creating a new repository using the ["Use this template"](https://github.com/new?template_name=GPT-RAG&template_owner=Azure) option.
 
