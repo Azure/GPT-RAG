@@ -189,6 +189,10 @@ Look at the [Troubleshooting](docs/TROUBLESHOOTING.md) page in case you face som
 
 * [Performance Testing](docs/PERFTEST.md)
 
+### Conversation Queries
+
+* [How to Query and Analyze Conversations](docs/QUERYING_CONVERSATIONS.md).
+
 ### Pricing Estimation
 
 * [Pricing Model](https://github.com/Azure/GPT-RAG/wiki/GPT%E2%80%90RAG-%E2%80%90-Pricing-Model)
