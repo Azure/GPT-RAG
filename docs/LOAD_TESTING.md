@@ -58,7 +58,7 @@ To set up the load test, please follow these steps:
 
 3. **Create an ENV_NAME variable**: The last step is to create a variable named ENV_NAME in the GitHub **loadtest** environment. This variable should hold the same value as the name of the environment in Azure Developer CLI (AZD) that you used when deploying the application. By doing this, you ensure that the load test targets the correct instance of your application, and that there's consistency between the environments used for deployment and load testing.
 
-After completing these steps, your GitHub repo **loadtest** environment should look similar to the image below. Note that in my case, the environment name used in Azure DevOps (AZD) is 'gptrag':
+After completing these steps, your GitHub repo **loadtest** environment should look similar to the image below. Note that in my case, the environment name used in Azure Developer Client (AZD) is 'gptrag':
 
 ![GitHub Environment](../media/perftest-github-var-secrets.png)
 
