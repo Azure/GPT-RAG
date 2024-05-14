@@ -1,4 +1,4 @@
-This section provides more information about the GPT-RAG architecture. It includes an overview of the GPT-RAG/Basic Architecture and GPT-RAG/Zero Trust architectures. The connectivity components and AI workloads involved in each architecture are described. Additionally, there is an architecture deep dive section that explains the data ingestion, orchestrator, and app front-end components of the system. There are also technical references related to the Architecture.
+This page provides a comprehensive overview of the GPT-RAG architecture, including the Basic and Zero Trust deployment options. It details the connectivity components and AI services. The document also includes diagrams to illustrate the architecture and communication flow, and provides technical references for further understanding.
 
 ## Enterprise RAG (GPT-RAG) Architecture
 
@@ -14,43 +14,97 @@ The Zero Trust Architecture is designed for deployments that require a higher le
 
  ![Zero Trust Architecture](../media/architecture-GPT-RAG-ZeroTrust.png)
 
-**Connectivity Components:**
+This architecture guarantees secure, isolated, and efficient communication among the components, adhering to a zero-trust model. The following Azure services are incorporated into this Zero Trust architecture.
 
-- Azure Virtual Network (vnet) to Secure Data Flow (Isolated, Internal inbound & outbound connections).
-- Azure Front Door (LB L7) + Web Application Firewall (WAF) to Secure Internet Facing Components.
-- Bastion (RDP/SSH over TLS), secure remote desktop access solution for VMs in the virtual network.
-- Jumpbox, a secure jump host to access VMs in private subnets.
+#### Azure Connectivity Components
 
-**AI Workloads:** 
+- **Azure Virtual Network (VNet)**: a logical isolation of the Azure cloud dedicated to your subscription. It provides a secure environment to deploy Azure resources, such as virtual machines (VMs) and services.
+  
+- **Private Endpoints**: network interfaces that connect you privately and securely to Azure services via a private link, enhancing security by avoiding exposure to the public internet.
 
-- Azure Open AI, a managed AI service for running advanced language models like GPT-4.
-- Private DNS Zones for name resolution within the virtual network and between VNets.
-- Cosmos DB, a globally distributed, multi-model database service to support AI applications with Analytical Storage enabled for future usage.
-- Web applications in Azure Web App.
-- Azure AI services for building intelligent applications.
-- High Availability & Disaster Recovery Ready Solution.
-- Audit Logs, Monitoring & Observability (App Insight)
-- Continuous Operational Improvement
+- **Azure Bastion**: a fully managed service that provides secure and seamless RDP and SSH access to virtual machines directly through the Azure portal. It allows secure management of VMs without exposing them to the public internet.
+
+- **DNS Private Zones**: a DNS service for managing and resolving domain names in a private VNet. It facilitates name resolution for resources within the VNet, enabling easier management and access.
+
+- **ExpressRoute**: provides a private connection between your on-premises networks and Microsoft Azure datacenters. It ensures a more reliable and secure connection compared to typical internet connections.
+
+- **VPN Connections**: enables the creation of secure tunnels to connect on-premises networks to Azure VNets. It provides secure communication between on-premises infrastructure and Azure resources.
+
+#### AI Services
+
+- **Azure AI Search**: a powerful cloud search service that helps with the Retrieval part of RAG by indexing and querying large datasets, featuring vector search capabilities.
+
+- **Azure OpenAI**: provides access to powerful language models used to generate vector embeddings and responses for users.
+
+#### Backend Services
+
+- **Azure Key Vault**: a cloud service for securely storing and accessing secrets, such as API keys and passwords. It enhances security by centralizing the storage of application secrets, reducing the risk of exposure.
+
+- **Azure Cosmos DB**: a fully managed NoSQL database service designed to provide high availability and low latency for globally distributed applications. It is used to store conversation history and metadata.
+
+- **Azure App Service**: a fully managed platform for building, deploying, and scaling web apps. It hosts the web applications and APIs that are part of the overall GPT-RAG architecture.
+
+#### Operational Services
+
+- **Data Science VM**: a specially configured VM in Azure that comes pre-installed with popular data science tools. It is used to set up and access the solution in an isolated network environment.
+
+- **Log Analytics Workspaces**: a centralized repository for collecting and analyzing log data from various sources. It enables monitoring, diagnosing, and gaining insights into the system's operations.
+
+- **Application Insights**: a feature of Azure Monitor that provides application performance management (APM) and monitoring capabilities. It tracks and monitors the performance and usage of applications.
+
+- **Network Watcher**: a network performance monitoring, diagnostic, and analytics service in Azure. It helps monitor and diagnose network issues, ensuring the reliability of the network.
+
+- **Diagnostic Settings**: enables the collection of diagnostic data such as logs and metrics from Azure resources. It facilitates the monitoring and troubleshooting of resources.
+
+- **Policy and Role Assignment**: tools for defining and enforcing organizational policies and assigning roles to users and groups. They ensure compliance and proper access control within the Azure environment.
+
+#### Communication Flow
+
+This section provides a diagram that depicts the interaction flow among the components within the GPT-RAG architecture in an inbound scenario.
+
+ ![Zero Trust Architecture](../media/architecture-GPT-RAG-Inbound.png)
+
+The sequence of steps for the communication to happen is as follows:
+
+1. **User Interaction**:
+   - The user initiates a request from their device to the application.
+
+2. **FrontDoor and WAF**:
+   - The request first goes to Azure FrontDoor, which provides global routing and load balancing. It directs traffic to the appropriate backend service.
+   - Web Application Firewall (WAF): The request passes through the Web Application Firewall for security checks and threat protection.
+
+3. **App Service (Frontend)**:
+   - The secured request from the WAF is routed to the App Service running the application's frontend through its private endpoint, ensuring that the App Service is accessible only within the Virtual Network (VNet).
+
+4. **Orchestrator (App Function)**:
+   - The frontend Web App communicates with the Orchestrator, which is an Azure Function within the same App Service Plan. The Orchestrator is also accessed via a private endpoint within the VNet.
+
+5. **Database Access**:
+   - The Orchestrator needs to access the database to retrieve the conversation history. It connects to the database within the `database-subnet` via a private endpoint.
+
+6. **Azure OpenAI (Vector Embedding)**:
+   - After obtaining the conversation history, the Orchestrator requests Azure OpenAI to create the vector embedding from the user's question. This communication occurs through a private endpoint within the `ai-subnet`.
+
+7. **Key Vault (API Key)**:
+   - The Orchestrator then needs the AI Search API key. It accesses the Azure Key Vault through another private endpoint within the `ai-subnet` to securely retrieve the key.
+
+8. **AI Search (Document Retrieval)**:
+   - With the API key, the Orchestrator makes a request to the AI Search service to obtain relevant documents. This service is also accessed via a private endpoint in the `ai-subnet`.
+
+9. **Azure OpenAI (Response Generation)**:
+   - Finally, the Orchestrator uses the retrieved documents and sends them to Azure OpenAI to generate the response. This communication happens through the same private endpoint used earlier within the `ai-subnet`.
+
+10. **Response Back to User**:
+    - The generated response is sent back to the frontend Web App.
+    - The App Service then delivers the response to the user through the FrontDoor.
+
+> The diagram emphasizes inbound communication and component interactions. The return path in step 10, being straightforward, is omitted for clarity.
 
 ### Zero Trust Architecture - Multi Project
 
 The Multi-Project Architecture is an idea that facilitates the reuse of common components across different projects. This concept is aimed at enhancing efficiency and consistency, while also fostering a modular approach to system design. It is especially beneficial for larger organizations managing multiple projects, as it enables streamlined operations and minimizes the need for redundant resources.
 
  ![Zero Trust Multi Project Scale](../media/architecture-GPT-RAG-SCALE-MultiProject.jpeg)
-
-<!-- 
-
-Commenting out this section temporarily, as the content has become outdated.
-
-### Architecture Deep Dive
-
-<img src="../media/architecture-RAG3.PNG" alt="Architecture Deep Dive" width="1024">
-
-**1** [Data ingestion](https://github.com/Azure/gpt-rag-ingestion) Optimizes data preparation for Azure OpenAI
-
-**2** [Orchestrator](https://github.com/Azure/gpt-rag-orchestrator) The system's dynamic backbone ensuring scalability and a consistent user experience
-
-**3** [App Front-End](https://github.com/Azure/gpt-rag-frontend) Built with Azure App Services and the Backend for Front-End pattern, offers a smooth and scalable user interface -->
 
 ### Technical References
 
@@ -60,6 +114,6 @@ Commenting out this section temporarily, as the content has become outdated.
 
 * [Azure OpenAI Service](https://learn.microsoft.com/azure/cognitive-services/openai/overview)
 
-* [Azure Cognitive Search](https://learn.microsoft.com/azure/search/search-what-is-azure-search)
+* [Azure AI Search](https://learn.microsoft.com/azure/search/search-what-is-azure-search)
 
-* [Check Your Facts and Try Again: Improving Large Language Models with External Knowledge and Automated Feedback](https://www.microsoft.com/en-us/research/group/deep-learning-group/articles/check-your-facts-and-try-again-improving-large-language-models-with-external-knowledge-and-automated-feedback/)
+* [Enhancing LLMs with Knowledge and Feedback](https://www.microsoft.com/en-us/research/group/deep-learning-group/articles/check-your-facts-and-try-again-improving-large-language-models-with-external-knowledge-and-automated-feedback/)
