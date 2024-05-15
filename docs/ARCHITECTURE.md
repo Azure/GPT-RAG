@@ -18,6 +18,10 @@ This architecture guarantees secure, isolated, and efficient communication among
 
 #### Azure Connectivity Components
 
+- **Front Door**: A scalable and secure entry point for fast delivery of your global applications. It ensures high availability and performance for your applications.
+
+- **Web Application Firewall (WAF)**: Provides centralized protection of your web applications from common threats and vulnerabilities. It helps secure your applications against threats and attacks.
+
 - **Azure Virtual Network (VNet)**: a logical isolation of the Azure cloud dedicated to your subscription. It provides a secure environment to deploy Azure resources, such as virtual machines (VMs) and services.
   
 - **Private Endpoints**: network interfaces that connect you privately and securely to Azure services via a private link, enhancing security by avoiding exposure to the public internet.
@@ -58,6 +62,8 @@ This architecture guarantees secure, isolated, and efficient communication among
 
 - **Policy and Role Assignment**: tools for defining and enforcing organizational policies and assigning roles to users and groups. They ensure compliance and proper access control within the Azure environment.
 
+> Note: Front Door and Web Application Firewall (WAF) are not automatically provisioned with the provided Bicep templates. They need to be configured manually.
+
 #### Communication Flow
 
 This section provides a diagram that depicts the interaction flow among the components within the GPT-RAG architecture in an inbound scenario.
@@ -66,37 +72,25 @@ This section provides a diagram that depicts the interaction flow among the comp
 
 The sequence of steps for the communication to happen is as follows:
 
-1. **User Interaction**:
-   - The user initiates a request from their device to the application.
+1. **User Interaction**: The user initiates a request from their device to the application.
 
-2. **FrontDoor and WAF**:
-   - The request first goes to Azure FrontDoor, which provides global routing and load balancing. It directs traffic to the appropriate backend service.
-   - Web Application Firewall (WAF): The request passes through the Web Application Firewall for security checks and threat protection.
+2. **FrontDoor and WAF**: The request first goes to Azure FrontDoor, which provides global routing and load balancing. It directs traffic to the appropriate backend service. The request then passes through the Web Application Firewall for security checks and threat protection.
 
-3. **App Service (Frontend)**:
-   - The secured request from the WAF is routed to the App Service running the application's frontend through its private endpoint, ensuring that the App Service is accessible only within the Virtual Network (VNet).
+3. **App Service (Frontend)**: The secured request from the WAF is routed to the App Service running the application's frontend through its private endpoint, ensuring that the App Service is accessible only within the Virtual Network (VNet).
 
-4. **Orchestrator (App Function)**:
-   - The frontend Web App communicates with the Orchestrator, which is an Azure Function within the same App Service Plan. The Orchestrator is also accessed via a private endpoint within the VNet.
+4. **Orchestrator (App Function)**: The frontend Web App communicates with the Orchestrator, which is an Azure Function within the same App Service Plan. The Orchestrator is also accessed via a private endpoint within the VNet.
 
-5. **Database Access**:
-   - The Orchestrator needs to access the database to retrieve the conversation history. It connects to the database within the `database-subnet` via a private endpoint.
+5. **Database Access**: The Orchestrator needs to access the database to retrieve the conversation history. It connects to the database within the `database-subnet` via a private endpoint.
 
-6. **Azure OpenAI (Vector Embedding)**:
-   - After obtaining the conversation history, the Orchestrator requests Azure OpenAI to create the vector embedding from the user's question. This communication occurs through a private endpoint within the `ai-subnet`.
+6. **Azure OpenAI (Vector Embedding)**: After obtaining the conversation history, the Orchestrator requests Azure OpenAI to create the vector embedding from the user's question. This communication occurs through a private endpoint within the `ai-subnet`.
 
-7. **Key Vault (API Key)**:
-   - The Orchestrator then needs the AI Search API key. It accesses the Azure Key Vault through another private endpoint within the `ai-subnet` to securely retrieve the key.
+7. **Key Vault (API Key)**: The Orchestrator then needs the AI Search API key. It accesses the Azure Key Vault through another private endpoint within the `ai-subnet` to securely retrieve the key.
 
-8. **AI Search (Document Retrieval)**:
-   - With the API key, the Orchestrator makes a request to the AI Search service to obtain relevant documents. This service is also accessed via a private endpoint in the `ai-subnet`.
+8. **AI Search (Document Retrieval)**: With the API key, the Orchestrator makes a request to the AI Search service to obtain relevant documents. This service is also accessed via a private endpoint in the `ai-subnet`.
 
-9. **Azure OpenAI (Response Generation)**:
-   - Finally, the Orchestrator uses the retrieved documents and sends them to Azure OpenAI to generate the response. This communication happens through the same private endpoint used earlier within the `ai-subnet`.
+9. **Azure OpenAI (Response Generation)**: Finally, the Orchestrator uses the retrieved documents and sends them to Azure OpenAI to generate the response. This communication happens through the same private endpoint used earlier within the `ai-subnet`.
 
-10. **Response Back to User**:
-    - The generated response is sent back to the frontend Web App.
-    - The App Service then delivers the response to the user through the FrontDoor.
+10. **Response Back to User**: The generated response is sent back to the frontend Web App. The App Service then delivers the response to the user through the FrontDoor.
 
 > The diagram emphasizes inbound communication and component interactions. The return path in step 10, being straightforward, is omitted for clarity.
 

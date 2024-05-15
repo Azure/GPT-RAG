@@ -86,8 +86,8 @@
     "azureSearchServiceName": {
       "value": "${AZURE_SEARCH_SERVICE_NAME}"
     },
-    "azureOpenAIServiceName": {
-      "value": "${AZURE_OPEN_AI_SERVICE_NAME}"
+    "azureOpenaiServiceName": {
+      "value": "${AZURE_OPENAI_SERVICE_NAME}"
     },
     "azureVnetName": {
       "value": "${AZURE_VNET_NAME}"
