@@ -2,6 +2,10 @@ This page provides a comprehensive overview of the GPT-RAG architecture, includi
 
 ## Enterprise RAG (GPT-RAG) Architecture
 
+The GPT-RAG, also known as the Enterprise RAG, is a model implementation of the RAG pattern, utilizing Azure Services like Azure OpenAI, AI Search, and Azure App Service. It offers two deployment options: Basic, ideal for quick demonstrations and proof-of-concepts, and Zero Trust, which provides a setup more in line with enterprise-level security needs and responsible AI principles.
+
+The operation of GPT-RAG begins with user interaction on the frontend web app. From there, the orchestration flow is managed by an orchestrator that oversees the various stages of orchestration and retrieval to produce a response. The orchestrator evaluates the context and intent to ascertain if the query falls within the system's scope. If it does, the system employs vector search, backed by an AI search index that regularly indexes data from a storage account, to fetch pertinent information. This information is then leveraged to formulate an answer. If the answer is substantiated and complies with Responsible AI guidelines, a response is crafted and sent back to the frontend.
+
 ### Basic Architecture
 
 The Basic Architecture is an ideal choice for quick demonstrations or Proof of Concept (PoC) scenarios where network isolation is not a primary concern. This model allows for a swift deployment of the accelerator, providing a straightforward and efficient way to test its capabilities.
@@ -10,11 +14,11 @@ The Basic Architecture is an ideal choice for quick demonstrations or Proof of C
 
 ### Zero Trust Architecture
 
-The Zero Trust Architecture is designed for deployments that require a higher level of security and network isolation. This model is particularly suitable for production environments where stringent security measures are paramount. It ensures that every request is authenticated and authorized, thereby significantly reducing the risk of internal threats.
+The Zero Trust Architecture is designed for deployments that require a higher level of security and network isolation. This model is particularly suitable for production environments where stringent security measures are paramount. It ensures that every request is authenticated and authorized, thereby significantly reducing the risk of internal threats. This architecture guarantees secure, isolated, and efficient communication among the components, adhering to a zero-trust model.
 
  ![Zero Trust Architecture](../media/architecture-GPT-RAG-ZeroTrust.png)
 
-This architecture guarantees secure, isolated, and efficient communication among the components, adhering to a zero-trust model. The following Azure services are incorporated into this Zero Trust architecture.
+The following Azure services are incorporated into this Zero Trust architecture.
 
 #### Azure Connectivity Components
 
@@ -64,9 +68,9 @@ This architecture guarantees secure, isolated, and efficient communication among
 
 > Note: Front Door and Web Application Firewall (WAF) are not automatically provisioned with the provided Bicep templates. They need to be configured manually.
 
-#### Communication Flow
+#### Conversation Flow with the Zero Trust Architecture
 
-This section provides a diagram that depicts the interaction flow among the components within the GPT-RAG architecture in an inbound scenario.
+In a conversation flow with the Enterprise RAG using Zero Trust Architecture, each step is tightly secured to ensure safe communication. The user request originates from their device and passes through Azure Front Door for global routing and security checks via the Web Application Firewall. It then reaches the application's frontend, hosted on an App Service through a private endpoint within the VNet, ensuring limited access. The frontend communicates with an Orchestrator Azure Function, also within the VNet, which interacts with the database, Azure OpenAI for vector embeddings, and the Azure Key Vault for API keys—all through private endpoints within designated subnets. The Orchestrator retrieves documents from the AI Search service and uses Azure OpenAI to generate a response, maintaining secure, private communication throughout. The response is then routed back to the user through the same secure path, ensuring the protection and integrity of the data flow. Azure Front Door and WAF are not provisioned by the solution's Bicep templates but can be added later after the solution deployment.
 
  ![Zero Trust Architecture](../media/architecture-GPT-RAG-Inbound.png)
 
