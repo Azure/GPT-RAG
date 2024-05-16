@@ -63,7 +63,9 @@ This guide will walk you through the deployment of Enterprise RAG. Before you be
  - Python 3.11: [Download Python](https://www.python.org/downloads/release/python-3118/)
  - Initiate an [Azure AI service creation](https://portal.azure.com/#create/Microsoft.CognitiveServicesAllInOne) and agree to the Responsible AI terms **
 
-** If you have not created an Azure AI service resource in the subscrption before
+** If you have not created an Azure AI service resource in the subscription before
+
+**Note:** If you implement the Zero-trust architecture described below, you will only need Node.js and Python for the second part of the procedure, which you will carry out on the VM created during the deployment process of this architecture.
 
 ### Basic Architecture
 
@@ -129,14 +131,8 @@ azd auth login
 **4** Start Building the infrastructure and components deployment:
 
 ```sh
-azd up
+azd provision
 ```
-  
-After the infrastructure is provisioned and before starting the deployment of the components, you will be asked the following question:  
-   
-> Zero Trust Infrastructure enabled. Confirm you are using a connection where resources are reachable (like VM+Bastion)? [Y/n]:  
-   
-Initially, you will not be connected to the same vnet where the resources can be accessed, so answer `n`.
 
 **5** Next, you will use the Virtual Machine with the Bastion connection (created during step 4) to continue the deployment.  
    

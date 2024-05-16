@@ -12,8 +12,8 @@ $tenantId = $env:AZURE_TENANT_ID
 # az storage account update --name $storageAccountName --resource-group $resourceGroupName --allow-blob-public-access false
 
 # Creating a new RAI policy and attaching to deployed OpenAI model.
-$aoaiResourceName = $env:AZURE_OPEN_AI_SERVICE_NAME
-$aoaiModelName = $env:AZURE_OPEN_AI_MODEL_NAME
+$aoaiResourceName = $env:AZURE_OPENAI_SERVICE_NAME
+$aoaiModelName = $env:AZURE_OPENAI_MODEL_NAME
 
 # RAI script: AOAI content filters
 $RAIscript = Join-Path -Path $PSScriptRoot -ChildPath 'raipolicies\raipolicies.ps1'

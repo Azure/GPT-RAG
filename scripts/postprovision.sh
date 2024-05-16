@@ -13,12 +13,12 @@ subscriptionId="$AZURE_SUBSCRIPTION_ID"
 tenantId="$AZURE_TENANT_ID"
 
 # Creating a new RAI policy and attaching to deployed OpenAI model.
-aoaiResourceName="$AZURE_OPEN_AI_SERVICE_NAME"
-aoaiModelName="$AZURE_OPEN_AI_MODEL_NAME"
+aoaiResourceName="$AZURE_OPENAI_SERVICE_NAME"
+aoaiModelName="$AZURE_OPENAI_MODEL_NAME"
 
 # RAI script: AOAI content filters
-(cd $PWD/raipolicies &&
- ./raiPolicies.sh $tenantId $subscriptionId $resourceGroupName $aoaiResourceName $aoaiModelName "MainRAIpolicy")
+(cd $PWD/scripts/raipolicies &&
+ ./raipolicies.sh $tenantId $subscriptionId $resourceGroupName $aoaiResourceName $aoaiModelName "MainRAIpolicy")
 
 if [ "$AZURE_ZERO_TRUST" = "FALSE" ]; then
     exit 0

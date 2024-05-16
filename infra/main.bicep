@@ -184,8 +184,8 @@ var dataIngestionFunctionAppName = !empty(azureDataIngestionFunctionAppName) ? a
 param azureSearchServiceName string = ''
 var searchServiceName = !empty(azureSearchServiceName) ? azureSearchServiceName : 'search0-${resourceToken}'
 @description('OpenAI Service Name. Use your own name convention or leave as it is to generate a random name.')
-param azureOpenAiServiceName string = ''
-var openAiServiceName = !empty(azureOpenAiServiceName) ? azureOpenAiServiceName : 'oai0-${resourceToken}'
+param azureOpenaiServiceName string = ''
+var openAiServiceName = !empty(azureOpenaiServiceName) ? azureOpenaiServiceName : 'oai0-${resourceToken}'
 @description('Virtual network name if using network isolation. Use your own name convention or leave as it is to generate a random name.')
 param azureVnetName string = ''
 var vnetName = !empty(azureVnetName) ? azureVnetName : 'aivnet0-${resourceToken}'
@@ -1031,6 +1031,7 @@ output AZURE_DATA_INGEST_FUNC_RG string = resourceGroup.name
 output AZURE_KEY_VAULT_NAME string = keyVault.outputs.name
 output AZURE_LOAD_TESTING_SERVICE_NAME string = loadtesting.outputs.name
 output AZURE_OPENAI_SERVICE_NAME string = openAi.outputs.name
+output AZURE_OPENAI_MODEL_NAME string = chatGptDeploymentName
 output AZURE_ORCHESTRATOR_FUNC_NAME string = orchestratorFunctionAppName
 output AZURE_ORCHESTRATOR_FUNC_RG string = resourceGroup.name
 output AZURE_SEARCH_PRINCIPAL_ID string = searchService.outputs.principalId
@@ -1052,16 +1053,13 @@ output AZURE_DB_ACCOUNT_NAME string = azureDbAccountName
 output AZURE_DB_DATABASE_NAME string = azureDbDatabaseName
 output AZURE_STORAGE_ACCOUNT_NAME string = storageAccountName
 
-
 output AZURE_APP_INSIGHTS_NAME string = azureAppInsightsName
 output AZURE_APP_SERVICE_NAME string = azureAppServiceName
 output AZURE_APP_SERVICE_PLAN_NAME string = azureAppServicePlanName
 output AZURE_COGNITIVE_SERVICE_NAME string = azureCognitiveServiceName
 output AZURE_DATA_INGESTION_FUNCTION_APP_NAME string = azureDataIngestionFunctionAppName
 output AZURE_LOAD_TESTING_NAME string = azureLoadTestingName
-output AZURE_OPEN_AI_SERVICE_NAME string = openAiServiceName
 output AZURE_ORCHESTRATOR_FUNCTION_APP_NAME string = azureOrchestratorFunctionAppName
 output AZURE_SEARCH_SERVICE_NAME string = azureSearchServiceName
 output AZURE_SEARCH_USE_MIS bool = azureSearchUseMIS
-output AZURE_OPEN_AI_MODEL_NAME string = chatGptDeploymentName
 output AZURE_VNET_NAME string = azureVnetName

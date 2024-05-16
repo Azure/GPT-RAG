@@ -78,7 +78,7 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2021-03-01' = {
   }
   properties: {
     hardwareProfile: {
-      vmSize: vmSize['CPU-8GB']
+      vmSize: vmSize['CPU-16GB']
     }
     storageProfile: {
       imageReference: {
