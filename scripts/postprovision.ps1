@@ -2,8 +2,6 @@ $YELLOW = [ConsoleColor]::Yellow
 $BLUE = [ConsoleColor]::Blue
 $NC = [ConsoleColor]::White
 
-Write-Host "RAI Script: Setting up AOAI content filter"
-
 $resourceGroupName = $env:AZURE_RESOURCE_GROUP_NAME
 $subscriptionId = $env:AZURE_SUBSCRIPTION_ID
 $tenantId = $env:AZURE_TENANT_ID
@@ -16,8 +14,8 @@ $aoaiResourceName = $env:AZURE_OPEN_AI_SERVICE_NAME
 $aoaiModelName = $env:AZURE_OPEN_AI_MODEL_NAME
 
 # RAI script: AOAI content filters
-$RAIscript = Join-Path -Path $PSScriptRoot -ChildPath 'raipolicies\raipolicies.ps1'
-& $RAIscript -Tenant $tenantId -Subscription $subscriptionId -ResourceGroup $resourceGroupName -AoaiResourceName $aoaiResourceName -AoaiModelName $aoaiModelName -RaiPolicyName 'MainRAIpolicy'
+$RAIscript = Join-Path -Path $PSScriptRoot -ChildPath 'rai\raipolicies.ps1'
+& $RAIscript -Tenant $tenantId -Subscription $subscriptionId -ResourceGroup $resourceGroupName -AoaiResourceName $aoaiResourceName -AoaiModelName $aoaiModelName -RaiPolicyName 'MainRAIpolicy' -RaiBlocklistName 'MainBlockListPolicy'
 
 if ($env:AZURE_ZERO_TRUST -eq "FALSE") {
     exit 0
