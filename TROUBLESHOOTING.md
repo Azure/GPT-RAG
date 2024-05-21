@@ -1,15 +1,16 @@
 ### Troubleshooting  
    
-**Powershell 7+ is not installed** (Windows only)
+**Powershell 7+ with AZ module are not installed** (Windows only)
    
 *Symptoms:*  
    
-ERROR: failed running pre hooks: 'prepackage' hook failed with exit code: '1', Path: 'scripts\fetchComponents.ps1'. : exit code: 1, stdout: , stderr: 'pwsh' is not recognized as an internal or external command,  
+ERROR: failed running pre/post hooks: 'prepackage' hook failed with exit code: '1', Path: 'scripts\fetchComponents.ps1'. : exit code: 1, stdout: , stderr: 'pwsh' is not recognized as an internal or external command,  
 operable program or batch file.  
    
 *Cause:*
    
-You do not have the correct Powershell version. You need to install the appropriate version of PowerShell on the machine that azd up is running on.  
+You do not have the correct Powershell version. You need to install the appropriate version of PowerShell on the machine that azd up is running on.\
+You do not have [AZ PowerShell module](https://learn.microsoft.com/en-us/powershell/azure/what-is-azure-powershell?view=azps-11.6.0#the-az-powershell-module) installed. You need to install AZ PowerShell module on the machine `Install-Module -Name Az -Repository PSGallery -Force` that azd up is running on .
    
 **Azure OpenAI model is not available in the selected region.**
    
