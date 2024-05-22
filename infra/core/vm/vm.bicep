@@ -16,7 +16,7 @@ resource bastionPublicIp 'Microsoft.Network/publicIPAddresses@2020-05-01' = {
   name: publicIpName
   location: location
   sku: {
-    name: 'Standard'
+    name: 'Basic'
   }
   properties: {
     publicIPAllocationMethod: 'Static'
@@ -48,7 +48,7 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2021-03-01' = {
   tags: tags
   properties: {
     hardwareProfile: {
-      vmSize: 'Standard_D4s_v3'
+      vmSize: 'Standard_A1_v2'
     }
     storageProfile: {
       imageReference: {
