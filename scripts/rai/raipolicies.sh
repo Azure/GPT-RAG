@@ -25,13 +25,10 @@ baseURI="https://management.azure.com/subscriptions/$Subscription/resourceGroups
 # Creating a blocklist for AOAI account
 filePath="$PWD/raiblocklist.json"
 blocklistJson=$(cat "$filePath" | sed "s/{{BlocklistName}}/$RaiBlocklistName/g")
-
-blocklistName=$(echo "$blocklistJson" | grep -oP '"blocklistname":"\K[^"]+')
-blocklistItems=$(echo "$blocklistJson" | grep -oP '"blocklistItems":\[\K.*\]' | sed 's/},{/\n/g')
+blocklistName=$(echo "$blocklistJson" | awk -F'"' '/blocklistname/ {print $4}')
 
 blocklistDescription="$blocklistName blocklist policy"
 blocklistBody="{\"properties\": {\"description\": \"$blocklistDescription\"}}"
-
 blocklistURI="$baseURI/raiBlocklists/$blocklistName?api-version=2023-10-01-preview"
 curl -s -X PUT -H "${headers[0]}" -H "${headers[1]}" -o /dev/null -d "$blocklistBody" "$blocklistURI"
 
@@ -41,19 +38,28 @@ blocklistItemsURI="$baseURI/raiBlocklists/$blocklistName/raiBlocklistItems/${blo
 # - This covers scenario where blocklist items get updated in existing deployment
 while true; do
     response=$(curl -s -X DELETE -H "${headers[0]}" -H "${headers[1]}" -o /dev/null -w "%{http_code}" "$blocklistItemsURI")
-
     if [[ "$response" != 2* ]]; then
         break
     fi
 done
 
-# Add items into blocklist
-for item in $blocklistItems; do
-    pattern=$(echo $item | grep -oP '"pattern":"\K[^"]+')
-    isRegex=$(echo $item | grep -oP '"isRegex":\K[^"]+')
+# Extract blocklistItems content using awk and sed
+blocklistItems=$(echo "$blocklistJson" | awk '/"blocklistItems": \[/,/\]/' | sed '1d;$d')
+
+# Extract individual patterns and isRegex values
+patterns=$(echo "$blocklistItems" | grep '"pattern":' | sed 's/.*"pattern": "\(.*\)".*/\1/')
+isRegexes=$(echo "$blocklistItems" | grep '"isRegex":' | sed 's/.*"isRegex": \(.*\)/\1/')
+
+# Convert strings to arrays
+IFS=$'\n' patternsArray=($patterns)
+IFS=$'\n' isRegexesArray=($isRegexes)
+
+# Loop through each item and add it to blocklist
+for i in "${!patternsArray[@]}"; do
+    pattern=${patternsArray[$i]}
+    isRegex=${isRegexesArray[$i]}
 
     blocklistItemsBody="{\"properties\": {\"pattern\": \"$pattern\", \"isRegex\": $isRegex}}"
-
     curl -s -X PUT -H "${headers[0]}" -H "${headers[1]}" -o /dev/null -d "$blocklistItemsBody" "$blocklistItemsURI"
 done
 
@@ -66,7 +72,6 @@ curl -s -X PUT -H "${headers[0]}" -H "${headers[1]}" -d "$policyBody" -o /dev/nu
 # Get deployed AOAI model profile
 modelURI="$baseURI/deployments/$AoaiModelName?api-version=2023-10-01-preview"
 modelDeployments=$(curl -s -H "${headers[0]}" "$modelURI")
-echo ""; echo ""; "Model Deployments: $modelDeployments"
 
 # Extract the model object
 while read -r line; do
@@ -76,7 +81,6 @@ while read -r line; do
     fi
 done <<< "$modelDeployments"
 
-# echo ""; echo ""; echo "Model: $model"
 modelSkuName=$(echo "$model" | grep -oP '"sku":\{"name":"\K[^"]+')
 modelSkuCapacity=$(echo "$model" | grep -oP '"sku":\{"name":"[^"]+","capacity":\K\d+')
 modelFormat=$(echo "$model" | grep -oP '"model":\{"format":"\K[^"]+')
