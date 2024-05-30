@@ -79,6 +79,18 @@
                 "enabled": false
             }
         ],
+        "promptBlocklists" : [
+            {
+                "blocking": true,
+                "blocklistName": "{{BlocklistName}}"
+            }
+        ],
+        "completionBlocklists" : [
+            {
+                "blocking": true,
+                "blocklistName": "{{BlocklistName}}"
+            }
+        ],
         "mode": "default"
     }
 }
