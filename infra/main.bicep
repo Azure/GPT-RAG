@@ -537,6 +537,26 @@ module orchestrator './core/host/functions.bicep' = {
         value: 'true'
       }
       {
+        name: 'BING_SEARCH_TOP_K'
+        value: '3'
+      }
+      {
+        name: 'BING_RETRIEVAL'
+        value: 'false'
+      }
+      {
+        name: 'SQL_RETRIEVAL'
+        value: 'false'
+      }
+      {
+        name: 'SQL_SEARCH_TOP_K'
+        value: '3'
+      }
+      {
+        name: 'RETRIEVAL_PRIORITY'
+        value: 'search'
+      }
+      {
         name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
         value: 'true'
       }
