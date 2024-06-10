@@ -19,9 +19,10 @@ param runtimeVersion string
 param use32BitWorkerProcess bool = false
 param healthCheckPath string = ''
 var runtimeNameAndVersion = '${runtimeName}|${runtimeVersion}'
+param networkIsolation bool
 param vnetName string
 param subnetId string
-param networkIsolation bool
+
 
 @description('Storage Account type')
 @allowed([
@@ -68,10 +69,10 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
   properties: {
     serverFarmId: appServicePlanId
     clientAffinityEnabled: clientAffinityEnabled
-    virtualNetworkSubnetId: subnetId
+    virtualNetworkSubnetId: networkIsolation?subnetId:null
     httpsOnly: true
     siteConfig: {
-      vnetName: vnetName
+      vnetName: networkIsolation?vnetName:null
       linuxFxVersion: runtimeNameAndVersion
       alwaysOn: alwaysOn
       ftpsState: 'FtpsOnly'

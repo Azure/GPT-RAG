@@ -13,6 +13,10 @@ echo "RAI Script: Setting up AOAI content filters & blocklist"
 
 # Get access token
 token=$(az account get-access-token --tenant "$Tenant" --query accessToken --output tsv)
+if [ -z "$token" ]; then
+  echo "No access token found. Please follow the instructon below to log in to your Azure account."
+  az login --use-device-code
+fi
 
 # Set headers
 headers=(
