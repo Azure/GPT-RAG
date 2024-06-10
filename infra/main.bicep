@@ -537,6 +537,46 @@ module orchestrator './core/host/functions.bicep' = {
         value: 'true'
       }
       {
+        name: 'BING_SEARCH_TOP_K'
+        value: '3'
+      }
+      {
+        name: 'BING_RETRIEVAL'
+        value: 'false'
+      }
+      {
+        name: 'BING_SEARCH_MAX_TOKENS'
+        value: '1000'
+      }
+      {
+        name: 'SQL_RETRIEVAL'
+        value: 'false'
+      }
+      {
+        name: 'SQL_TOP_K'
+        value: '3'
+      }
+      {
+        name: 'SQL_MAX_TOKENS'
+        value: '1000'
+      }
+      {
+        name: 'TERADATA_TOP_K'
+        value: '3'
+      }
+      {
+        name: 'TERADATA_RETRIEVAL'
+        value: 'false'
+      }
+      {
+        name: 'TERADATA_MAX_TOKENS'
+        value: '1000'
+      }
+      {
+        name: 'RETRIEVAL_PRIORITY'
+        value: 'search'
+      }
+      {
         name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
         value: 'true'
       }
