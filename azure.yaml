@@ -61,10 +61,10 @@ hooks:
       interactive: false      
   preprovision:
     windows:
-      run: scripts/zeroTrustHeadsUp.ps1
+      run: scripts/preprovision.ps1
       interactive: true
     posix:
-      run: scripts/zeroTrustHeadsUp.sh
+      run: scripts/preprovision.sh
       interactive: true
   postprovision:
     posix:

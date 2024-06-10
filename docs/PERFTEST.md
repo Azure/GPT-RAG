@@ -1,6 +1,9 @@
 # Performance Testing
 
-When developing Language Model (LLM) applications, a significant amount of time is invested in development and evaluation to ensure high-quality, reliable, and safe user responses. However, the effectiveness of an LLM application's user experience is also determined by the response speed. To learn more about performance testing, please follow this [Performance Evaluation](./PERFTEST_CONCEPTS.md) where we describe the concepts, tools, and techniques used ahead.
+When developing Language Model (LLM) applications, a significant amount of time is invested in development and evaluation to ensure high-quality, reliable, and safe user responses. However, the effectiveness of an LLM application's user experience is also determined by the response speed. 
+
+
+To learn more about performance testing, please take a look at this blog post [Load Testing RAG based Generative AI Applications](https://techcommunity.microsoft.com/t5/ai-azure-ai-services-blog/load-testing-rag-based-generative-ai-applications/ba-p/4086993) where we describe the concepts, tools, and techniques used ahead.
 
 **How do I execute the load tests?**
 

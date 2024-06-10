@@ -1,13 +1,15 @@
-# The AI-Integration-HUB
+# AI Integration HUB
 
-Leverages the power of various external data sources to enhance its capabilities. Currently, we have integrated the following products:
+Leverages the power of various external data sources to enhance its capabilities. 
+
+Currently, we have integrated the following sources:
 
 + Search AI
 + Bing Custom Services
 + SQL Service
 + Teradata
 
-The AI-Integration-HUB enhances GPT-RAG by integrating various external data sources:
+The AI Integration HUB enhances GPT-RAG by integrating various external data sources:
 
  - Search AI: Enables access to vast online databases, providing precise and up-to-date information.
 

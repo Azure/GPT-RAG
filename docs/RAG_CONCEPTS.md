@@ -14,11 +14,11 @@ Reference implementation of the Retrieval-Augmented Generation (RAG) pattern.
 
 * [Retrieval Augmented Generation (RAG) Paper](https://arxiv.org/abs/2005.11401)
 
-* [Retrieval Augmented Generation (RAG) in Azure Cognitive Search](https://learn.microsoft.com/en-us/azure/search/retrieval-augmented-generation-overview)
+* [Retrieval Augmented Generation (RAG) in Azure AI Search](https://learn.microsoft.com/en-us/azure/search/retrieval-augmented-generation-overview)
 
 * [Build and maintain your company Copilot with Azure ML and GPT-4](https://www.youtube.com/watch?si=B2tjsq4z4R7rksEw&v=2meEvuWAyXs)
 
-* [Revolutionize your Enterprise Data with ChatGPT: Next-gen Apps w/ Azure OpenAI and Cognitive Search](https://aka.ms/entgptsearchblog)
+* [Revolutionize your Enterprise Data with ChatGPT: Next-gen Apps w/ Azure OpenAI and AI Search](https://aka.ms/entgptsearchblog)
   
 * [Introducing Azure OpenAI Service On Your Data in Public Preview](https://techcommunity.microsoft.com/t5/ai-cognitive-services-blog/introducing-azure-openai-service-on-your-data-in-public-preview/ba-p/3847000)
   

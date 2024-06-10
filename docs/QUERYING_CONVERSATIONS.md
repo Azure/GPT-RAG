@@ -1,4 +1,4 @@
-### Querying Conversations from CosmosDB
+# Querying Conversations from CosmosDB
 
 This page provides you with SQL queries to extract specific information about conversations stored in CosmosDB. 
 

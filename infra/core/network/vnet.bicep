@@ -1,73 +1,97 @@
+param vnetName string
 param location string
-param name string
-param tags object = {}
-param appServicePlanName string
+param vnetAddress string = '10.0.0.0/16'
+param aiSubnetName string
+param appIntSubnetName string
+param appServicesSubnetName string
+param databaseSubnetName string
+param bastionSubnetName string
+param aiSubnetPrefix string = '10.0.1.0/24'
+param appIntSubnetPrefix string = '10.0.2.0/24'
+param appServicesSubnetPrefix string = '10.0.3.0/24'
+param databaseSubnetPrefix string = '10.0.4.0/24'
+param bastionSubnetPrefix string = '10.0.5.0/24'
 param appServicePlanId string
+param appServicePlanName string
+param tags object = {}
+param vnetReuse bool
+param existingVnetResourceGroupName string
+param existingVnetName string
 
-var addressPrefix = '10.0.0.0/16'
 
-var subnets = [
-  {
-    name: 'ai-subnet'
-    properties: {
-      addressPrefix:'10.0.1.0/24'
-      privateEndpointNetworkPolicies: 'Enabled'
-      privateLinkServiceNetworkPolicies: 'Enabled'      
-    }
-  }
-  {
-    name: 'AzureBastionSubnet'
-    properties: {
-      addressPrefix:'10.0.2.0/24'
-      privateEndpointNetworkPolicies: 'Enabled'
-      privateLinkServiceNetworkPolicies: 'Enabled'      
-    }
-  }
-  {
-    name: 'app-int-subnet'
-    properties: {
-      addressPrefix:'10.0.3.0/24'
-      privateEndpointNetworkPolicies: 'Enabled'
-      privateLinkServiceNetworkPolicies: 'Enabled'
-      delegations: [
-        {
-          id: appServicePlanId
-          name: appServicePlanName
-          properties: {
-            serviceName: 'Microsoft.Web/serverFarms'
-          }
-        }
-      ]   
-    }
-  }  
-]
+resource existingVnet 'Microsoft.Network/virtualNetworks@2020-06-01' existing  = if (vnetReuse) {
+  scope: resourceGroup(existingVnetResourceGroupName)
+  name: existingVnetName
+}
 
-resource vnet 'Microsoft.Network/virtualNetworks@2021-02-01' = {
-  name: name
+resource newVnet 'Microsoft.Network/virtualNetworks@2020-11-01' = if (!vnetReuse) {
+  name: vnetName
   location: location
   tags: tags
   properties: {
     addressSpace: {
       addressPrefixes: [
-        addressPrefix
+        vnetAddress
       ]
     }
-    subnets: subnets
+    subnets: [
+      {
+        name: aiSubnetName
+        properties: {
+          addressPrefix: aiSubnetPrefix
+          privateEndpointNetworkPolicies: 'Enabled'
+          privateLinkServiceNetworkPolicies: 'Enabled'
+        }
+      }
+      {
+        name: appServicesSubnetName
+        properties: {
+          addressPrefix: appServicesSubnetPrefix
+          privateEndpointNetworkPolicies: 'Enabled'
+          privateLinkServiceNetworkPolicies: 'Enabled'
+        }
+      }
+      {
+        name: databaseSubnetName
+        properties: {
+          addressPrefix: databaseSubnetPrefix
+          privateEndpointNetworkPolicies: 'Enabled'
+          privateLinkServiceNetworkPolicies: 'Enabled'
+        }
+      }
+      {
+        name: bastionSubnetName
+        properties: {
+          addressPrefix: bastionSubnetPrefix
+          privateEndpointNetworkPolicies: 'Enabled'
+          privateLinkServiceNetworkPolicies: 'Enabled'
+        }
+      }
+      {
+        name: appIntSubnetName
+        properties: {
+          addressPrefix: appIntSubnetPrefix
+          privateEndpointNetworkPolicies: 'Enabled'
+          privateLinkServiceNetworkPolicies: 'Enabled'
+          delegations: [
+            {
+              id: appServicePlanId
+              name: appServicePlanName
+              properties: {
+                serviceName: 'Microsoft.Web/serverFarms'
+              }
+            }
+          ]
+        }
+      }
+    ]
   }
 }
 
-output subnets array = [for (name, i) in subnets :{
-  subnets : vnet.properties.subnets[i]
-}]
-
-output subnetids array = [for (name, i) in subnets :{
-  subnets : vnet.properties.subnets[i].id
-}]
-
-
-output id string = vnet.id
-output name string = vnet.name
-
-output aiSubId string = vnet.properties.subnets[0].id
-output bastionSubId string = vnet.properties.subnets[1].id
-output appIntSubId string = vnet.properties.subnets[2].id
+output name string = vnetReuse?existingVnet.name:newVnet.name
+output id string = vnetReuse?existingVnet.id:newVnet.id
+output aiSubId string = vnetReuse?resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', existingVnetName, aiSubnetName):newVnet.properties.subnets[0].id
+output appServicesSubId string = vnetReuse?resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', existingVnetName, appServicesSubnetName):newVnet.properties.subnets[1].id
+output databaseSubId string = vnetReuse?resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', existingVnetName, databaseSubnetName):newVnet.properties.subnets[2].id
+output bastionSubId string = vnetReuse?resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', existingVnetName, bastionSubnetName):newVnet.properties.subnets[3].id
+output appIntSubId string = vnetReuse?resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', existingVnetName, appIntSubnetName):newVnet.properties.subnets[4].id

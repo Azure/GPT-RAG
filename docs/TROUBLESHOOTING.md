@@ -1,4 +1,4 @@
-### Troubleshooting  
+# Troubleshooting  
    
 **Powershell 7+ is not installed** (Windows only)
    

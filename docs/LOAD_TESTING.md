@@ -38,9 +38,15 @@ Before you can execute the load test, there are a few pre-requisites that you ne
 
 1. **Azure Subscription**: Please ensure that you have an active Azure subscription.
 
-2. **Enterprise RAG Deployment**: It's necessary to have the Enterprise RAG Solution Accelerator deployed. This deployment also provisions an Azure Load Testing resource, which is essential for conducting the load test. If this hasn't been done yet, please refer to the [Getting Started](../README.md#getting-started) section. This provides a step-by-step guide on how to deploy the basic architecture of the accelerator.
+2. **Enterprise RAG Deployment**: It's necessary to have the Enterprise RAG Solution Accelerator deployed with an Azure Load Testing resource, which is essential for conducting the load test. If this hasn't been done yet, please refer to the [Getting Started](../README.md#getting-started) section to deploy the basic architecture of the accelerator.
 
-3. **GPT-RAG Repository**: Please ensure you have a personal copy of the GPT-RAG repository in your GitHub account. You can accomplish this by either forking the [original repository](https://aka.ms/gpt-rag) or creating a new repository using the ["Use this template"](https://github.com/new?template_name=GPT-RAG&template_owner=Azure) option.
+**Note:** The load testing resource is not provisioned by default. Therefore, before running `azd provision` or `azd up` as described in the Getting Started session, make sure you run the following command:
+
+```sh
+azd env set AZURE_PROVISION_LOAD_TESTING=true
+```
+
+3. **GPT-RAG Repository**: Make sure you have your own copy of the GPT-RAG repository in your GitHub account. You can do this by either forking the [original repository](https://aka.ms/gpt-rag) or creating a new repository using the ["Use this template"](https://github.com/new?template_name=GPT-RAG&template_owner=Azure) link. This is a crucial step for setting up the GitHub workflow to execute performance tests in your Azure environment.
 
 Once you have these pre-requisites in place, you are ready to proceed with the load testing.
 

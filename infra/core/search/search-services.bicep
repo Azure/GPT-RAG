@@ -1,5 +1,10 @@
 param name string
 param location string = resourceGroup().location
+
+param aiSearchReuse bool
+param existingAiSearchResourceGroupName string
+param existingAiSearchName string
+
 param tags object = {}
 param publicNetworkAccess string
 param sku object = {
@@ -11,7 +16,13 @@ param keyVaultName string
 param authOptions object = {}
 param semanticSearch string = 'free'
 
-resource search 'Microsoft.Search/searchServices@2021-04-01-preview' = {
+
+resource existingSearch 'Microsoft.Search/searchServices@2021-04-01-preview' existing  = if (aiSearchReuse) {
+  scope: resourceGroup(existingAiSearchResourceGroupName)
+  name: existingAiSearchName
+}
+
+resource newSearch 'Microsoft.Search/searchServices@2021-04-01-preview' = if (!aiSearchReuse) {
   name: name
   location: location
   tags: tags
@@ -53,11 +64,11 @@ resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' =  {
       nbf: 0
     }
     contentType: 'string'
-    value: search.listAdminKeys().primaryKey
+    value: aiSearchReuse ? existingSearch.listAdminKeys().primaryKey : newSearch.listAdminKeys().primaryKey    
   }
 }
 
-output id string = search.id
-output principalId string = search.identity.principalId
-output endpoint string = 'https://${name}.search.windows.net/'
-output name string = search.name
+output id string = aiSearchReuse ? existingSearch.id: newSearch.id
+output name string = aiSearchReuse ? existingSearch.name: newSearch.name
+output principalId string = aiSearchReuse ? existingSearch.identity.principalId: newSearch.identity.principalId
+output endpoint string = 'https://${aiSearchReuse ? existingSearch.name: newSearch.name}.search.windows.net/'

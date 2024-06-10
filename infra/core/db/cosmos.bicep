@@ -7,6 +7,12 @@ param publicNetworkAccess string = 'Disabled'
 @description('Location for the Cosmos DB account.')
 param location string = resourceGroup().location
 
+param cosmosDbReuse bool
+param existingCosmosDbResourceGroupName string
+param existingCosmosDbAccountName string
+param conversationContainerName string
+param modelsContainerName string  
+
 param tags object = {}
 
 @description('The default consistency level of the Cosmos DB account.')
@@ -34,9 +40,6 @@ param systemManagedFailover bool = true
 
 @description('The name for the database')
 param databaseName string
-
-@description('The name for the container')
-param containerName string
 
 @description('Maximum autoscale throughput for the container')
 @minValue(1000)
@@ -79,7 +82,12 @@ var locations = [
   }
 ]
 
-resource account 'Microsoft.DocumentDB/databaseAccounts@2022-05-15' = {
+resource existingAccount 'Microsoft.DocumentDB/databaseAccounts@2022-05-15' existing  = if (cosmosDbReuse) {
+  scope: resourceGroup(existingCosmosDbResourceGroupName)
+  name: existingCosmosDbAccountName
+}
+
+resource newAccount 'Microsoft.DocumentDB/databaseAccounts@2022-05-15' = if (!cosmosDbReuse) {
   name: toLower(accountName)
   kind: 'GlobalDocumentDB'
   location: location
@@ -94,8 +102,8 @@ resource account 'Microsoft.DocumentDB/databaseAccounts@2022-05-15' = {
   }
 }
 
-resource database 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2022-05-15' = {
-  parent: account
+resource database 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2022-05-15' = if (!cosmosDbReuse) {
+  parent: newAccount
   name: databaseName
   properties: {
     resource: {
@@ -104,12 +112,12 @@ resource database 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2022-05-15
   }
 }
 
-resource conversationsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
+resource conversationsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = if (!cosmosDbReuse) {
   parent: database
-  name: containerName
+  name: conversationContainerName
   properties: {
     resource: {
-      id: containerName
+      id: conversationContainerName
       partitionKey: {
         paths: [
           '/id'
@@ -135,12 +143,12 @@ resource conversationsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDataba
   }
 }
 
-resource modelsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
+resource modelsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = if (!cosmosDbReuse) {
   parent: database
-  name: 'models'
+  name: modelsContainerName
   properties: {
     resource: {
-      id: 'models'
+      id: modelsContainerName
       partitionKey: {
         paths: [
           '/id'
@@ -176,10 +184,10 @@ resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' =  {
       nbf: 0
     }
     contentType: 'string'
-    value: account.listKeys().primaryMasterKey
+    value: cosmosDbReuse ? existingAccount.listKeys().primaryMasterKey : newAccount.listKeys().primaryMasterKey
   }
 }
 
 
-output id string = account.id
-output name string = account.name
+output id string =  cosmosDbReuse ? existingAccount.id : newAccount.id
+output name string =  cosmosDbReuse ? existingAccount.name : newAccount.name

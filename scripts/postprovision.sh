@@ -12,7 +12,7 @@ tenantId="$AZURE_TENANT_ID"
 
 # Creating a new RAI policy and attaching to deployed OpenAI model.
 aoaiResourceName="$AZURE_OPENAI_SERVICE_NAME"
-aoaiModelName="$AZURE_OPENAI_MODEL_NAME"
+aoaiModelName="$AZURE_CHAT_GPT_DEPLOYMENT_NAME"
 
 # RAI script: AOAI content filters
 (cd $PWD/scripts/rai &&
@@ -26,4 +26,4 @@ echo "For accessing the ${YELLOW}Zero Trust infrastructure${NC}, from the Azure 
 echo "Virtual Machine: ${BLUE}$AZURE_VM_NAME${NC}"
 echo "Select connect using Bastion with:"
 echo "  username: $AZURE_VM_USERNAME"
-echo "  Key Vault/Secret: ${BLUE}$AZURE_VM_KV_NAME${NC}/${BLUE}$AZURE_VM_KV_SEC_NAME${NC}"
+echo "  Key Vault/Secret: ${BLUE}$AZURE_BASTION_KV_NAME${NC}/${BLUE}$AZURE_VM_KV_SEC_NAME${NC}"

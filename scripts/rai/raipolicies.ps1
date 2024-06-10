@@ -18,13 +18,21 @@ if (-not $InstalledModules.Name -contains $AZModule) {
     Install-Module -Name $AZModule -Force
 }
 
-$token = (Get-AzAccessToken -TenantId $tenantId).Token
+Try{
+    $token = (Get-AzAccessToken -TenantId $tenantId).Token
 
-if ([string]::IsNullOrWhiteSpace($token)) {
+    if ([string]::IsNullOrWhiteSpace($token)) {
+        Write-Host "Please manually sign-in to Azure account"
+        Connect-AzAccount
+        $token = (Get-AzAccessToken -TenantId $tenantId).Token
+    }
+
+} Catch {
     Write-Host "Please manually sign-in to Azure account"
     Connect-AzAccount
     $token = (Get-AzAccessToken -TenantId $tenantId).Token
 }
+
 
 $headers = @{
     Authorization  = "Bearer $token"

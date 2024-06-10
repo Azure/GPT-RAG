@@ -1,7 +1,7 @@
 param location string
 param name string
 param tags object = {}
-param aiSubId string
+param subnetId string
 param bastionSubId string
 @secure()
 param vmUserPassword string
@@ -12,7 +12,6 @@ param vmUserPasswordKey string
 param keyVaultName string
 param principalId string
 
-var osDiskType = 'StandardSSD_LRS'
 var vmSize = {
   'CPU-4GB': 'Standard_B2s'
   'CPU-7GB': 'Standard_D2s_v3'
@@ -60,14 +59,13 @@ resource nic 'Microsoft.Network/networkInterfaces@2020-06-01' = {
           privateIPAddressVersion: 'IPv4'
           privateIPAllocationMethod: 'Dynamic'
           subnet: {
-            id: aiSubId
+            id: subnetId
           }  
         }
       }
     ]
   }
 }
-
 
 resource virtualMachine 'Microsoft.Compute/virtualMachines@2021-03-01' = {
   name: name
@@ -90,10 +88,7 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2021-03-01' = {
       osDisk: {
         name: diskName
         createOption: 'FromImage'
-        managedDisk: {
-          storageAccountType: osDiskType
-        }
-      }      
+      }
     }
     osProfile: {
       computerName: 'gptragvm'
@@ -180,6 +175,6 @@ resource KeyVaultAccessRole 'Microsoft.Authorization/roleAssignments@2022-04-01'
   properties: {
     principalId: principalId
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')
-    principalType: 'User'
+    // principalType: 'User'
   }
 }

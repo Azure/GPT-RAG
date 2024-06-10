@@ -1,53 +1,36 @@
-### Custom deployment
+# Custom deployment
 
 On this page, you will find some options to configure your deployment:
 
-- [Configuring language settings](#configuring-language-settings).
-- [Defining the name for each resource](#defining-resources-names).
-- [Provide a list of tags to apply to all resources](#adding-tags-for-all-resources).
-- [Accessing the data ingest function using a Managed Identity](#accessing-the-data-ingest-function-from-ai-search-using-a-managed-identity).
-- [Configuring AOAI content filters](#configuring-aoai-content-filters).
+- [Configuring Language settings](#configuring-language-settings)
+- [Configuring AOAI content filters](#configuring-aoai-content-filters)
+- [Setting Custom Names for Resources](#defining-resources-names)
+- [Applying Tags to All Resources](#adding-tags-for-all-resources)
+- [Bringing Your Own Resources](#bring-your-own-resources)
+- [Accessing Data Ingest function using AI Search Managed Identity](#accessing-the-data-ingest-function-from-ai-search-using-a-managed-identity)
+- [Extending Enteprise RAG components](#extending-solution-components)
 
-#### Configuring language settings
+**Note on Environment Variables**
 
-The default language settings for most components are set to English. You can set your preferred language by specifying the parameters in the [main.parameters.json](../infra/main.parameters.json) file. Be aware that the permissible values for each parameter are listed in the [main.bicep](../infra/main.bicep) file.  
-   
-Parameters description:  
-   
-- orchestratorMessagesLanguage: The language used for orchestrator error messages, such as 'en' or 'es'. To view the currently supported error message languages, you can visit [this link](https://github.com/Azure/gpt-rag-orchestrator/tree/main/orc/messages).  
-   
-- searchAnalyzerName: An analyzer is an integral part of the full-text search engine, responsible for text processing strings during both indexing and query execution stages. The default configuration uses the standard language agnostic analyzer, but you can change it if you want to optimize your deployment for a specific language. Here's a [List of supported language analyzers](https://learn.microsoft.com/en-us/azure/search/index-add-language-analyzers#supported-language-analyzers).  
-   
-- speechRecognitionLanguage: The language used to transcribe user voice in the frontend UI. [List of supported languages](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support?tabs=stt#supported-languages).  
-   
-- speechSynthesisLanguage: The language used for speech synthesis in the frontend. [List of supported languages](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support?tabs=tts#supported-languages).  
-   
-- speechSynthesisVoiceName: The voice used for speech synthesis in the frontend. [List of supported languages](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support?tabs=tts#supported-languages).
+Most of the customizations described on this page involve the use of environment variables. Therefore, it's worth noting the following about using `azd` environment variables:
+- By utilizing the `azd env` to set [environment variables](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/manage-environment-variables), you can specify resource names for each environment.
+- If you work across multiple devices, you can take advantage of `azd`'s support for [remote environments](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/remote-environments-support). This feature allows you to save your environment settings in Azure Storage and restore them on any device.
 
-#### Defining resources names
+## Configuring Language Settings
 
-By default, `azd` will automatically generate a unique name for each resource. The unique name is created based on the azd-environment name, the subscription name and the location. However, you can also manually define the name for each resource using the mapping from [main.parameters.json](../infra/main.parameters.json). Each resource name has a direct mapping to an environment variable, for example:
+Enterprise RAG leverages Large Language Models (LLMs) and supports multiple languages by default. However, it provides parameters to fine-tune the language settings across its three main components. For detailed instructions, refer to [Configuring Language Settings](CUSTOMIZATIONS_LANGUAGE.md).
 
+## Configuring AOAI content filters
 
-```json
-"azureStorageAccountName": {
-    "value": "${AZURE_STORAGE_ACCOUNT_NAME}"
-},
-```
+Provisioning an Azure OpenAI resource with `azd` automatically creates a content filtering profile with a default severity threshold (Medium) for all content harm categories (Hate, Violence, Sexual, Self-Harm) and assigns it to the provisioned Azure OpenAI model through a post-deployment script. If you wish to customize these settings to be more or less restrictive, please refer to the [Customize Content Filtering Policies](CUSTOMIZATIONS_CONTENT_FILTERING.md) page.
 
-This mapping means you can set `AZURE_STORAGE_ACCOUNT_NAME` to define the name for the storage account, by running the command:
+## Defining resources names
 
-```
-azd env set AZURE_STORAGE_ACCOUNT_NAME <yourResourceNameHere>
-```
+By default, `azd` will automatically generate a unique name for each resource. The unique name is created based on the azd-environment name, the subscription name and the location. However, you can also manually define the name for each resource as described in [Customizing resources names](CUSTOMIZATIONS_RESOURCE_NAMES.md).
 
-> By using the azd-environment to set the mappings, you can define the resources names per environment.
+## Adding tags for all resources
 
-> Note: If you work in multiple devices, you can leverage the azd's feature for [remote environment](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/remote-environments-support). It will allow you to keep your environment saved in Azure Storage and restore it from your devices.
-
-#### Adding tags for all resources
-
-The [main.parameters.json](../infra/main.parameters.json) contains an empty object where you can define tags to apply to all your resources. Look for the entry:
+The [main.parameters.json](../infra/main.parameters.json) contains an empty object where you can define tags to apply to all your resources before you run `azd up` or `azd provision`. Look for the entry:
 
 ```json
 "deploymentTags":{
@@ -86,11 +69,15 @@ azd env set COST_CENTER bar
 
 > Note: Since the input parameter is an object, azd won't prompt the user for a value if the env-var is not set (how it happens when the input argument is a string). The values would be resolved and applied as empty strings when missing.
 
-#### Accessing the data ingest function from AI Search using a Managed Identity
+## Bring Your Own Resources
 
-The AI Search indexer uses a skillset with a custom web app skill implemented by the data ingestion Azure Function for chunking. By default, AI Search connects with the Azure Function using its API key.
+In some cases, you may want to use one or more pre-existing resources in your subscription instead of creating new ones. Our Bicep template allows you to do this. For detailed instructions on how this can be achieved, please take a look at the [Bring Your Own Resources](CUSTOMIZATIONS_BYOR.md) page.
 
-If you prefer to use a managed identity for the connection, you can do so by setting AZURE_SEARCH_USE_MIS variable. 
+## Accessing the data ingest function from AI Search using a Managed Identity
+
+In the AI Search indexing process, a skillset incorporates a custom web app skill. This skill is powered by the data ingestion Azure Function, which is responsible for chunking the data. By default, the AI Search service establishes a connection with the Azure Function via an API key.
+
+However, for enhanced security and simplified credentials management, you have the option to utilize a managed identity for this connection. To switch to using a managed identity, simply set the environment variable `AZURE_SEARCH_USE_MIS` to `true`.
 
 ```sh
 azd env set AZURE_SEARCH_USE_MIS true
@@ -102,90 +89,49 @@ After setting this variable, you need to deploy again using the azd up command.
 azd up
 ```
 
-Notes:
+> **Important**: In order for the data ingestion function to be accessed with a managed identity, it needs to be configured to use Microsoft Entra Sign-in, as indicated [in this link](https://learn.microsoft.com/en-us/azure/app-service/configure-authentication-provider-aad).
 
-- In order for the data ingestion function to be accessed with a managed identity, it needs to be configured to use Microsoft Entra Sign-in, as indicated [in this link](https://learn.microsoft.com/en-us/azure/app-service/configure-authentication-provider-aad).
+## Extending solution components
 
-### Customizing solution components
+Azd automatically provisions the infrastructure and deploys the three components. However, you may want to change and customize parts of the code to meet a specific requirement.
 
-Azd automatically provisions the infrastructure and deploys the three components. However, if you want to manually deploy and customize them, you can follow the deployment instructions for each component.
+A simple customization within the orchestrator component involves updating the [bot description](https://github.com/Azure/gpt-rag-orchestrator/blob/main/orc/bot_description.prompt). This adjustment can help in more accurately defining the bot's scope for the orchestrator.
 
-**1) Data Ingestion & Search Configuration Deployment**
+That said, if you want to manually deploy and customize the components, you can follow the deployment instructions for each component:
 
-Use [Data ingestion](https://github.com/Azure/gpt-rag-ingestion) repo template to create your data ingestion git repo and execute the steps in its **Deploy** section.
+**1) Data Ingestion Component**
+
+Fork or copy the original [Data ingestion](https://github.com/Azure/gpt-rag-ingestion) repo template to create your data ingestion git repo and follow the steps in its **What if I want to redeploy just the ingestion component?** section to learn how to redeploy the component.
+
+If you want to run the component locally, which is interesting for testing your modifications before deploying, check out the **Running Locally with VS Code** section in the component's repository.
 
 **2) Orchestrator Component**
 
-Use [Orchestrator](https://github.com/Azure/gpt-rag-orchestrator) repo template to create your orchestrator git repo and execute the steps in its **Deploy** section.
+Fork or copy the original [Orchestrator](https://github.com/Azure/gpt-rag-orchestrator) repo template to create your orchestrator git repo and follow the steps in its **Cloud Deployment** section to learn how to redeploy the component.
+
+If you want to run the component locally, which is interesting for testing your modifications before deploying, check out the **Running Locally with VS Code** section in the component's repository.
 
 **3) Front-end Component**
 
-Use [App Front-end](https://github.com/Azure/gpt-rag-frontend) repo template to create your own frontend git repo and execute the steps in its **Deploy** section.
+Fork or copy the original [App Front-end](https://github.com/Azure/gpt-rag-frontend) repo template to create your own frontend git repo and follow the steps in its **Deploy (quickstart)** section to learn how to redeploy the component.
 
-### Configuring AOAI content filters
-- [Overview of Responsible AI practices for AOAI models](https://learn.microsoft.com/en-us/legal/cognitive-services/openai/overview?context=%2Fazure%2Fai-services%2Fopenai%2Fcontext%2Fcontext)
-- [AOAI Content filtering categories](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/content-filter?tabs=warning%2Cpython-new#content-filtering-categories)
-- [Apply for unrestricted content filters via this form](https://customervoice.microsoft.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbR7en2Ais5pxKtso_Pz4b1_xUMlBQNkZMR0lFRldORTdVQzQ0TEI5Q1ExOSQlQCN0PWcu)
+If you want to run the component locally, which is interesting for testing your modifications before deploying, check out the **Test locally** section in the component's repository.
 
-Azd automatically creates content filters profile with default severity threshold *(Medium)* for all content harms categories *(Hate, Violence, Sexual, Self-Harm)* and assignes it to provisioned AOAI model through post deployment script. However, if you want to customize them to be more or less restrictive, you can make changes to [raipolicies.json](scripts/raipolicies/raipolicies.json) file.
+**(Optional) Integrate custom component repo to the main gpt-rag**
 
-**Example**: Changing filters threshold for violence (prompt) and self-harm (completion) categories
-```json
-    {
-        "name": "violence",
-        "blocking": true,
-        "enabled": true,
-        "allowedContentLevel": "high",
-        "source": "prompt"
-    },
-    {
-        "name": "selfharm",
-        "blocking": true,
-        "enabled": true,
-        "allowedContentLevel": "low",
-        "source": "completion"
-    }
-```
+Customizing the components of your project allows for a tailored experience, but `gpt-rag` solution repository won't automatically detect your custom component repos.
 
-(Optional) Content filters also support additional safety models *(Jailbreak, Material Protection for Text or Code)* that can be run on top of the main content filters.
+Integrating your custom component repository with the gpt-rag project enhances workflow efficiency, allowing you to directly use azd commands like `azd up` and `azd deploy` within the gpt-rag repository.
 
-**Example**: Enabling Jailbreak and Text Material protection
-```json
-{
-    
-    "name": "jailbreak",
-    "blocking": true,
-    "source": "prompt",
-    "enabled": true
-},
-{
-    "name": "protected_material_text",
-    "blocking": true,
-    "source": "completion",
-    "enabled": true
-},
-{
-    "name": "protected_material_code",
-    "blocking": false,
-    "source": "completion",
-    "enabled": false
-}
-```
+To achieve this integration, simply follow these steps:
 
-Then, follow regular installation & deployment process.
+1. **Create Your Own `gpt-rag` Repository**: Start by forking or copying the original `gpt-rag` repository. This will be the foundation for integrating your custom components.
 
->Note: You need to make changes in raipolicies.json file before executting ```azd up``` command, if you want to provision and deploy all in once.
+2. **Point to Your Custom Component Repositories**:
+   - Navigate to the `scripts` folder within your newly created `gpt-rag` repository.
+   - Open and edit the  `fetchComponents.ps1` and `fetchComponents.sh` scripts.
+   - Adjust these scripts to reference your custom component repositories, replacing the original repository links.
 
-In order you update content filters policies for already deployed model, run the following command.
-
-```sh
-azd provision
-```
-
-<!-- ## Main components
-
-1) [Data ingestion](https://github.com/Azure/gpt-rag-ingestion)
-
-2) [Orchestrator](https://github.com/Azure/gpt-rag-orchestrator)
-
-3) [App Front-End](https://github.com/Azure/gpt-rag-frontend) Built with Azure App Services and the Backend for Front-End pattern, offers a smooth and scalable user interface -->
+3. **Initialize Your Customized Setup**:
+   - With your `gpt-rag` repository scripts pointing to your component repositories, initialize the environment.
+   - Run the `azd init -t <owner>/<repository>` using your own github org and repository.

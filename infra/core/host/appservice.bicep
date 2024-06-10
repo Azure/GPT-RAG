@@ -33,20 +33,21 @@ param use32BitWorkerProcess bool = false
 param ftpsState string = 'FtpsOnly'
 param healthCheckPath string = ''
 param basicPublishingCredentials bool = false
-param vnetName string
-param subnetId string
+param networkIsolation bool
+param vnetName string = ''
+param subnetId string = ''
 
-resource appService 'Microsoft.Web/sites@2022-03-01' = {
+resource appService 'Microsoft.Web/sites@2022-09-01' = {
   name: name
   location: location
   tags: tags
   kind: kind
   properties: {
     serverFarmId: appServicePlanId
-    virtualNetworkSubnetId: subnetId
+    virtualNetworkSubnetId: networkIsolation?subnetId:null
     vnetRouteAllEnabled: true
     siteConfig: {
-      vnetName: vnetName
+      vnetName: networkIsolation?vnetName:null
       linuxFxVersion: linuxFxVersion
       alwaysOn: alwaysOn
       ftpsState: ftpsState
