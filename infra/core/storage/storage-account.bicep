@@ -2,7 +2,6 @@ param name string
 param location string = resourceGroup().location
 param tags object = {}
 param existingStorageResourceGroupName string
-param existingStorageName string
 param storageReuse bool
 
 @allowed([ 'Hot', 'Cool', 'Premium' ])
@@ -26,7 +25,7 @@ param containers array = []
 
 resource existingStorage 'Microsoft.Storage/storageAccounts@2022-05-01' existing  = if (storageReuse) {
   scope: resourceGroup(existingStorageResourceGroupName)
-  name: existingStorageName
+  name: name
 }
 
 resource newStorage 'Microsoft.Storage/storageAccounts@2022-05-01' = if (!storageReuse) {

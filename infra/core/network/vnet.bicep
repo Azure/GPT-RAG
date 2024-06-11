@@ -16,12 +16,11 @@ param appServicePlanName string
 param tags object = {}
 param vnetReuse bool
 param existingVnetResourceGroupName string
-param existingVnetName string
 
 
 resource existingVnet 'Microsoft.Network/virtualNetworks@2020-06-01' existing  = if (vnetReuse) {
   scope: resourceGroup(existingVnetResourceGroupName)
-  name: existingVnetName
+  name: vnetName
 }
 
 resource newVnet 'Microsoft.Network/virtualNetworks@2020-11-01' = if (!vnetReuse) {
@@ -90,8 +89,8 @@ resource newVnet 'Microsoft.Network/virtualNetworks@2020-11-01' = if (!vnetReuse
 
 output name string = vnetReuse?existingVnet.name:newVnet.name
 output id string = vnetReuse?existingVnet.id:newVnet.id
-output aiSubId string = vnetReuse?resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', existingVnetName, aiSubnetName):newVnet.properties.subnets[0].id
-output appServicesSubId string = vnetReuse?resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', existingVnetName, appServicesSubnetName):newVnet.properties.subnets[1].id
-output databaseSubId string = vnetReuse?resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', existingVnetName, databaseSubnetName):newVnet.properties.subnets[2].id
-output bastionSubId string = vnetReuse?resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', existingVnetName, bastionSubnetName):newVnet.properties.subnets[3].id
-output appIntSubId string = vnetReuse?resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', existingVnetName, appIntSubnetName):newVnet.properties.subnets[4].id
+output aiSubId string = vnetReuse?resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, aiSubnetName):newVnet.properties.subnets[0].id
+output appServicesSubId string = vnetReuse?resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, appServicesSubnetName):newVnet.properties.subnets[1].id
+output databaseSubId string = vnetReuse?resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, databaseSubnetName):newVnet.properties.subnets[2].id
+output bastionSubId string = vnetReuse?resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, bastionSubnetName):newVnet.properties.subnets[3].id
+output appIntSubId string = vnetReuse?resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, appIntSubnetName):newVnet.properties.subnets[4].id

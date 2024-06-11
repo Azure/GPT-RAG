@@ -3,7 +3,6 @@ param location string = resourceGroup().location
 
 param aiSearchReuse bool
 param existingAiSearchResourceGroupName string
-param existingAiSearchName string
 
 param tags object = {}
 param publicNetworkAccess string
@@ -19,7 +18,7 @@ param semanticSearch string = 'free'
 
 resource existingSearch 'Microsoft.Search/searchServices@2021-04-01-preview' existing  = if (aiSearchReuse) {
   scope: resourceGroup(existingAiSearchResourceGroupName)
-  name: existingAiSearchName
+  name: name
 }
 
 resource newSearch 'Microsoft.Search/searchServices@2021-04-01-preview' = if (!aiSearchReuse) {

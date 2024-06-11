@@ -82,10 +82,13 @@
       },
       "vmUserInitialPassword": {
         "value": "$(secretOrRandomPassword ${AZURE_VM_KV_NAME} vmUserInitialPassword)"
-      },
+      },      
       "vmUserName": {
         "value": "${AZURE_VM_USER_NAME}"
       },
+      "keyVaultName": {
+        "value": "${AZURE_KEY_VAULT_NAME}"
+      },      
       "searchUseMIS": {
         "value": "${AZURE_SEARCH_USE_MIS}"
       },
@@ -139,9 +142,6 @@
       },
       "dbDatabaseName": {
         "value": "${AZURE_DB_DATABASE_NAME}"
-      },
-      "keyVaultName": {
-        "value": "${AZURE_KEY_VAULT_NAME}"
       },
       "storageAccountName": {
         "value": "${AZURE_STORAGE_ACCOUNT_NAME}"
@@ -222,9 +222,9 @@
           "appInsightsReuse": "${APP_INSIGHTS_REUSE}",
           "existingAppInsightsResourceGroupName": "${APP_INSIGHTS_RESOURCE_GROUP_NAME}",
           "existingAppInsightsName": "${APP_INSIGHTS_NAME}",
-          "appServerPlanReuse": "${APP_SERVER_PLAN_REUSE}",
-          "existingAppServerPlanResourceGroupName": "${APP_SERVER_PLAN_RESOURCE_GROUP_NAME}",
-          "existingAppServerPlanName": "${APP_SERVER_PLAN_NAME}",
+          "appServicePlanReuse": "${APP_SERVICE_PLAN_REUSE}",
+          "existingAppServicePlanResourceGroupName": "${APP_SERVICE_PLAN_RESOURCE_GROUP_NAME}",
+          "existingAppServicePlanName": "${APP_SERVICE_PLAN_NAME}",
           "aiSearchReuse": "${AI_SEARCH_REUSE}",
           "existingAiSearchResourceGroupName": "${AI_SEARCH_RESOURCE_GROUP_NAME}",
           "existingAiSearchName": "${AI_SEARCH_NAME}",

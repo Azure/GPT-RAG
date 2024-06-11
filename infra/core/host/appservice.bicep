@@ -39,12 +39,11 @@ param vnetName string = ''
 param subnetId string = ''
 
 param appServiceReuse bool
-param existingAppServiceName string
 param existingAppServiceNameResourceGroupName string    
 
 resource existingAppService 'Microsoft.Web/sites@2022-09-01' existing = if (appServiceReuse) {
   scope: resourceGroup(existingAppServiceNameResourceGroupName)
-  name: existingAppServiceName
+  name: name
 }
 
 resource newAppService 'Microsoft.Web/sites@2022-09-01' = if (!appServiceReuse) {

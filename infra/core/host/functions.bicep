@@ -25,7 +25,6 @@ param subnetId string
 
 param functionAppReuse bool
 param existingFunctionAppResourceGroupName string
-param existingFunctionAppName string
 
 param functionAppStorageReuse bool
 param existingFunctionAppStorageName string
@@ -76,7 +75,7 @@ var _storageAccountName= functionAppStorageReuse ? existingStorageAccount.name :
 
 resource existingFunctionApp 'Microsoft.Web/sites@2022-09-01' existing  = if (functionAppReuse) {
   scope: resourceGroup(existingFunctionAppResourceGroupName)
-  name: existingFunctionAppName
+  name: functionAppName
 }
 
 resource newFunctionApp 'Microsoft.Web/sites@2022-09-01' = if (!functionAppReuse) {

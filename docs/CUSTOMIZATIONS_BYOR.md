@@ -21,7 +21,7 @@ The table below outlines the environment variables associated with each resource
 |-----------------------------------|---------------------------------------------------------------------------------------------------------|
 | AOAI                              | `AOAI_REUSE`, `AOAI_RESOURCE_GROUP_NAME`, `AOAI_NAME`                                                   |
 | Application Insights              | `APP_INSIGHTS_REUSE`, `APP_INSIGHTS_RESOURCE_GROUP_NAME`, `APP_INSIGHTS_NAME`                           |
-| App Service Plan                  | `APP_SERVER_PLAN_REUSE`, `APP_SERVER_PLAN_RESOURCE_GROUP_NAME`, `APP_SERVER_PLAN_NAME`                  |
+| App Service Plan                  | `APP_SERVICE_PLAN_REUSE`, `APP_SERVICE_PLAN_RESOURCE_GROUP_NAME`, `APP_SERVICE_PLAN_NAME`                  |
 | AI Search                         | `AI_SEARCH_REUSE`, `AI_SEARCH_RESOURCE_GROUP_NAME`, `AI_SEARCH_NAME`                                     |
 | AI Services                       | `AI_SERVICES_REUSE`, `AI_SERVICES_RESOURCE_GROUP_NAME`, `AI_SERVICES_NAME`                               |
 | Cosmos DB                         | `COSMOS_DB_REUSE`, `COSMOS_DB_RESOURCE_GROUP_NAME`, `COSMOS_DB_ACCOUNT_NAME`, `COSMOS_DB_DATABASE_NAME`  |
