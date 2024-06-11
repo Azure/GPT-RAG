@@ -80,6 +80,8 @@ In addition to specifying the AI Search service name and resource group as menti
 
 Azure Function Apps, such as Orchestrator and Data Ingestion, should have managed identities enabled, as should the App Service.
 
+You should also add the environment variables accordingly, take a look at the [main.bicep](../infra/main.bicep) to learn about the environment variables used by each function app and the app service.
+
 ### Azure OpenAI
 
 When reusing an Azure OpenAI resource, it's essential to first specify both the OpenAI resource name and its resource group, as outlined in the [General Instructions](#general-instructions).

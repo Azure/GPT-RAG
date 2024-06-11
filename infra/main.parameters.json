@@ -241,7 +241,7 @@
           "existingOrchestratorFunctionAppStorageName": "${ORCHESTRATOR_FUNCTION_APP_STORAGE_NAME}",
           "existingOrchestratorFunctionAppStorageResourceGroupName": "${ORCHESTRATOR_FUNCTION_APP_STORAGE_RESOURCE_GROUP_NAME}",
           "dataIngestionFunctionAppStorageReuse": "${DATA_INGESTION_FUNCTION_APP_STORAGE_REUSE}",
-          "existingDataIngestionFunctionAppStorageName": "${DATA_INGESTION_FUNCTION_APP_STORAGE_REUSE}",
+          "existingDataIngestionFunctionAppStorageName": "${DATA_INGESTION_FUNCTION_APP_STORAGE_NAME}",
           "existingDataIngestionFunctionAppStorageResourceGroupName": "${DATA_INGESTION_FUNCTION_APP_STORAGE_RESOURCE_GROUP_NAME}",
           "aiServicesReuse": "${AI_SERVICES_REUSE}",
           "existingAiServicesResourceGroupName": "${AI_SERVICES_RESOURCE_GROUP_NAME}",
