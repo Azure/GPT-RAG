@@ -82,6 +82,10 @@ Azure Function Apps, such as Orchestrator and Data Ingestion, should have manage
 
 You should also add the environment variables accordingly, take a look at the [main.bicep](../infra/main.bicep) to learn about the environment variables used by each function app and the app service.
 
+All function apps and app services should have the following tag: `azd-env-name : your-azd-env-name`.
+
+The Orchestrator function app, Data ingestion function app, and the App Service should have respectively the following tags: `azd-service-name : orchestrator`, `azd-service-name : dataIngest`, and `azd-service-name : frontend`.
+
 ### Azure OpenAI
 
 When reusing an Azure OpenAI resource, it's essential to first specify both the OpenAI resource name and its resource group, as outlined in the [General Instructions](#general-instructions).
