@@ -231,7 +231,7 @@
           "orchestratorFunctionAppReuse": "${ORCHESTRATOR_FUNCTION_APP_REUSE}",
           "existingOrchestratorFunctionAppResourceGroupName": "${ORCHESTRATOR_FUNCTION_APP_RESOURCE_GROUP_NAME}",
           "existingOrchestratorFunctionAppName": "${ORCHESTRATOR_FUNCTION_APP_NAME}",
-          "dataIngestionFunctionAppReuse": "${INGESTION_FUNCTION_APP_REUSE}",
+          "dataIngestionFunctionAppReuse": "${DATA_INGESTION_FUNCTION_APP_REUSE}",
           "existingDataIngestionFunctionAppResourceGroupName": "${DATA_INGESTION_FUNCTION_APP_RESOURCE_GROUP_NAME}",
           "existingDataIngestionFunctionAppName": "${DATA_INGESTION_FUNCTION_APP_NAME}",
           "appServiceReuse": "${APP_SERVICE_REUSE}",
