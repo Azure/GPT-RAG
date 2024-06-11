@@ -24,6 +24,14 @@ param location string = ''
 param resourceGroupName string = ''
 var _resourceGroupName = !empty(resourceGroupName) ? resourceGroupName : 'rg-${environmentName}'
 
+// Tag settings
+// default required tags for azd deployment
+var azdTags = { 'azd-env-name': environmentName }
+
+@description('Key-value pairs of tags to assign to all resources. The default azd tags are automatically added.')
+param deploymentTags object
+var tags = union(azdTags, deploymentTags)
+
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: _resourceGroupName
   location: location
@@ -32,14 +40,6 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
 
 // unique hash based on the subcription id, environment name and location. The hash is used to generate unique names for resources.
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
-
-// Tag settings
-// default required tags for azd deployment
-var azdTags = { 'azd-env-name': environmentName }
-
-@description('Key-value pairs of tags to assign to all resources. The default azd tags are automatically added.')
-param deploymentTags object
-var tags = union(azdTags, deploymentTags)
 
 // Disable load testing?
 @description('Disable load testing? If yes it will not create load testing resource.')
