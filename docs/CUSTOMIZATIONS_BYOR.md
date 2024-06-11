@@ -121,6 +121,10 @@ If you prefer custom names, use the following variables to define your names wit
 - AZURE_DB_CONVERSATIONS_CONTAINER_NAME
 - AZURE_DB_MODELS_CONTAINER_NAME
 
+### Key Vault
+
+If you are reusing a Key Vault, the identity used to execute the AZD commands, whether it's your Entra ID user or a Service Principal, must have an Access Policy that allows `list`, `get`, and `set` operations on the secrets within this Key Vault.
+
 ### Virtual Network (Vnet)
 
 Reusing a VNet involves more than simply pre-creating an AI Services VNet and inform its name and resource group as indicated in the [General Instructions Section](#general-instructions).
