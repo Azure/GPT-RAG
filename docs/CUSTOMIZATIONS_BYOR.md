@@ -11,24 +11,28 @@ Let's delve deeper into the general process of integrating existing resources in
 - AI Services resource created in the same subscription you will deploy Enterprise RAG.
 - Gpt-rag downloaded and initialized from the official repo `azd init -t azure/gpt-rag` or from you own forked/copied git repo by using `git clone` then `azd init`.
 
-
 **General Instruction Steps**:
 
 1. Identify the resources you will reuse. For each resource to be reused, you need to set the correspondent environment variables. 
 
 The table below outlines the environment variables associated with each resource type for customization:
 
-| Resource Type                  | Environment Variables                                                                 |
-|--------------------------------|---------------------------------------------------------------------------------------|
-| AOAI                           | `AOAI_REUSE`, `AOAI_RESOURCE_GROUP_NAME`, `AOAI_NAME`                                 |
-| Application Insights           | `APP_INSIGHTS_REUSE`, `APP_INSIGHTS_RESOURCE_GROUP_NAME`, `APP_INSIGHTS_NAME`         |
-| App Service Plan               | `APP_SERVER_PLAN_REUSE`, `APP_SERVER_PLAN_RESOURCE_GROUP_NAME`, `APP_SERVER_PLAN_NAME`|
-| AI Search                      | `AI_SEARCH_REUSE`, `AI_SEARCH_RESOURCE_GROUP_NAME`, `AI_SEARCH_NAME`                 |
-| AI Services                    | `AI_SERVICES_REUSE`, `AI_SERVICES_RESOURCE_GROUP_NAME`, `AI_SERVICES_NAME`           |
-| Cosmos DB                      | `COSMOS_DB_REUSE`, `COSMOS_DB_RESOURCE_GROUP_NAME`, `COSMOS_DB_ACCOUNT_NAME`, `COSMOS_DB_DATABASE_NAME`        |
-| Key Vault                      | `KEY_VAULT_REUSE`, `KEY_VAULT_RESOURCE_GROUP_NAME`, `KEY_VAULT_NAME`                 |
-| Storage                        | `STORAGE_REUSE`, `STORAGE_RESOURCE_GROUP_NAME`, `STORAGE_NAME`                       |
-| Virtual Network (VNet)         | `VNET_REUSE`, `VNET_RESOURCE_GROUP_NAME`, `VNET_NAME`                                |
+| Resource Type                     | Environment Variables                                                                                   |
+|-----------------------------------|---------------------------------------------------------------------------------------------------------|
+| AOAI                              | `AOAI_REUSE`, `AOAI_RESOURCE_GROUP_NAME`, `AOAI_NAME`                                                   |
+| Application Insights              | `APP_INSIGHTS_REUSE`, `APP_INSIGHTS_RESOURCE_GROUP_NAME`, `APP_INSIGHTS_NAME`                           |
+| App Service Plan                  | `APP_SERVER_PLAN_REUSE`, `APP_SERVER_PLAN_RESOURCE_GROUP_NAME`, `APP_SERVER_PLAN_NAME`                  |
+| AI Search                         | `AI_SEARCH_REUSE`, `AI_SEARCH_RESOURCE_GROUP_NAME`, `AI_SEARCH_NAME`                                     |
+| AI Services                       | `AI_SERVICES_REUSE`, `AI_SERVICES_RESOURCE_GROUP_NAME`, `AI_SERVICES_NAME`                               |
+| Cosmos DB                         | `COSMOS_DB_REUSE`, `COSMOS_DB_RESOURCE_GROUP_NAME`, `COSMOS_DB_ACCOUNT_NAME`, `COSMOS_DB_DATABASE_NAME`  |
+| Key Vault                         | `KEY_VAULT_REUSE`, `KEY_VAULT_RESOURCE_GROUP_NAME`, `KEY_VAULT_NAME`                                     |
+| Storage                           | `STORAGE_REUSE`, `STORAGE_RESOURCE_GROUP_NAME`, `STORAGE_NAME`                                           |
+| Virtual Network (VNet)            | `VNET_REUSE`, `VNET_RESOURCE_GROUP_NAME`, `VNET_NAME`                                                    |
+| App Service                       | `APP_SERVICE_REUSE`, `APP_SERVICE_NAME`, `APP_SERVICE_RESOURCE_GROUP_NAME`                               |
+| Orchestrator Function App         | `ORCHESTRATOR_FUNCTION_APP_REUSE`, `ORCHESTRATOR_FUNCTION_APP_RESOURCE_GROUP_NAME`, `ORCHESTRATOR_FUNCTION_APP_NAME` |
+| Orchestrator Function App Storage | `ORCHESTRATOR_FUNCTION_APP_STORAGE_REUSE`, `ORCHESTRATOR_FUNCTION_APP_STORAGE_NAME`, `ORCHESTRATOR_FUNCTION_APP_STORAGE_RESOURCE_GROUP_NAME` |
+| Data Ingestion Function App       | `INGESTION_FUNCTION_APP_REUSE`, `DATA_INGESTION_FUNCTION_APP_RESOURCE_GROUP_NAME`, `DATA_INGESTION_FUNCTION_APP_NAME` |
+| Data Ingestion Function App Storage | `DATA_INGESTION_FUNCTION_APP_STORAGE_REUSE`, `DATA_INGESTION_FUNCTION_APP_STORAGE_NAME`, `DATA_INGESTION_FUNCTION_APP_STORAGE_RESOURCE_GROUP_NAME` |
 
 This table serves as a guide for configuring environment variables to reuse existing resources in your deployment.
 
@@ -54,12 +58,72 @@ In this example, I am reusing the AI Service `ai0-fa6zfs7v4izv6` in the resource
 
 ## Resource-Specific Configuration Guidelines
 
+### App Service Plan
+
+App Service Plan kind must be Linux.
+
+### Application Service Environment
+
+If you prefer, you can use a previously created [Application Service Environment (ASE)](https://learn.microsoft.com/en-us/azure/app-service/environment/overview) to run the function apps and the front-end web app. Just follow the instructions in the [**General Instructions**](#general-instructions) section to inform the App Service Plan, contained within your App Service Environment, that you want to reuse. The App Service Plan must be Linux-based. Since the existence of a VNet and Subnet is a prerequisite for creating an ASE, if you wish to reuse an ASE, you must also bring the VNet created for this ASE, according to the instructions in the [VNet](#virtual-network-vnet) section.
+
+### Azure AI Search
+
+In addition to specifying the AI Search service name and resource group as mentioned in the [General Instructions](#general-instructions), it's important to pay attention to the following points:
+
+- The AI Search tier must be Standard 2 (S2) or higher if you want to use a zero-trust environment.
+
+- The AI Search must have Managed Identity Enabled.
+
+- If the AI Search will be used for more than one gpt-rag project, to avoid conflicts, you should use different names for the index where retrieval is performed and the container where the documents are obtained. These two items can be configured with the variables `AZURE_STORAGE_CONTAINER_NAME` and `AZURE_SEARCH_INDEX`.
+
+### Azure Function App and App Service
+
+Azure Function Apps, such as Orchestrator and Data Ingestion, should have managed identities enabled, as should the App Service.
+
+### Azure OpenAI
+
+When reusing an Azure OpenAI resource, it's essential to first specify both the OpenAI resource name and its resource group, as outlined in the [General Instructions](#general-instructions).
+
+Additionally, the original resource must have two deployments, one for a GPT model and another for an embeddings model.
+
+Ensure the embeddings model is **text-embedding-ada-002** version 2, with the deployment named **text-embedding-ada-002**.
+
+The default GPT model is **gpt-3.5-turbo** and the default deployment name is **chat**. If you're using the pre-created service with these default settings, no further modifications are required.
+
+However, if you're using a different name for the GPT, or a different model, you'll need to set the corresponding environment variables as shown in the table below.
+
+| Item                       | Environment Variable Name               |
+|----------------------------|-----------------------------------------|
+| GPT Deployment Name        | AZURE_CHAT_GPT_DEPLOYMENT_NAME          |
+| GPT Model Name             | AZURE_CHAT_GPT_MODEL_NAME               |
+
+To set these environment variables, use the `azd env set` command as described earlier.
+
+For instance, to inform the name of the GPT deployment, you would update the `AZURE_CHAT_GPT_DEPLOYMENT_NAME` variable like this:
+`azd env set AZURE_CHAT_GPT_DEPLOYMENT_NAME=my-gpt-deployment-name`
+
+### CosmosDB
+
+In addition to specifying the CosmosDB service name, database name, and resource group as mentioned in the [General Instructions](#general-instructions), it's important to note that the reused Cosmos account should contain the following containers:
+
+- Conversations Container
+- Models Container
+
+You can create the containers with default names or use your own names. If using default names, please create them with the following names:
+
+- Conversations Container: 'conversations'
+- Models Container: 'models'
+
+If you prefer custom names, use the following variables to define your names with `azd env set` command:
+
+- AZURE_DB_CONVERSATIONS_CONTAINER_NAME
+- AZURE_DB_MODELS_CONTAINER_NAME
+
 ### Virtual Network (Vnet)
 
 Reusing a VNet involves more than simply pre-creating an AI Services VNet and inform its name and resource group as indicated in the [General Instructions Section](#general-instructions).
 
 To reuse a VNet, configure the required subnets and networking resources as detailed below.
-
 
 #### Subnets
 
@@ -68,7 +132,6 @@ To reuse a VNet, configure the required subnets and networking resources as deta
 The diagram below illustrates the AI Services VNet and its 5 subnets utilized by GPT-RAG:
 
 ![Zero Trust Architecture](../media/architecture-GPT-RAG-ZeroTrust.png)
-
 
 The simplest approach is to create subnets with predefined names: **ai-subnet**, **AzureBastionSubnet**, **app-int-subnet**, **app-services-subnet**, **database-subnet**.
 
@@ -113,54 +176,3 @@ These resources include Private Endpoints, Private DNS Links, and Search Private
 | DNS Zone            | Azure Search                   | DNS Zone for Azure Search                                    |
 | Search Private Link | Data Ingestion Function App    | AI Search Private Link for Data Ingestion Function App       |
 | Search Private Link | Storage Account                | Azure AI Search Private Link for Storage Account             |
-
-### Azure OpenAI
-
-When reusing an Azure OpenAI resource, it's essential to first specify both the OpenAI resource name and its resource group, as outlined in the [General Instructions](#general-instructions).
-
-Additionally, the original resource must have two deployments, one for a GPT model and another for an embeddings model.
-
-Ensure the embeddings model is **text-embedding-ada-002** version 2, with the deployment named **text-embedding-ada-002**.
-
-The default GPT model is **gpt-3.5-turbo** and the default deployment name is **chat**. If you're using the pre-created service with these default settings, no further modifications are required.
-
-However, if you're using a different name for the GPT, or a different model, you'll need to set the corresponding environment variables as shown in the table below.
-
-| Item                       | Environment Variable Name               |
-|----------------------------|-----------------------------------------|
-| GPT Deployment Name        | AZURE_CHAT_GPT_DEPLOYMENT_NAME          |
-| GPT Model Name             | AZURE_CHAT_GPT_MODEL_NAME               |
-
-To set these environment variables, use the `azd env set` command as described earlier.
-
-For instance, to inform the name of the GPT deployment, you would update the `AZURE_CHAT_GPT_DEPLOYMENT_NAME` variable like this:
-`azd env set AZURE_CHAT_GPT_DEPLOYMENT_NAME=my-gpt-deployment-name`
-
-### Azure AI Search
-
-In addition to specifying the AI Search service name and resource group as mentioned in the [General Instructions](#general-instructions), it's important to pay attention to the following points:
-
-- The AI Search tier must be Standard 2 (S2) or higher if you want to use a zero-trust environment.
-
-- If the AI Search will be used for more than one gpt-rag project, to avoid conflicts, you should use different names for the index where retrieval is performed and the container where the documents are obtained. These two items can be configured with the variables `AZURE_STORAGE_CONTAINER_NAME` and `AZURE_SEARCH_INDEX`.
-
-### CosmosDB
-
-In addition to specifying the CosmosDB service name, database name, and resource group as mentioned in the [General Instructions](#general-instructions), it's important to note that the reused Cosmos account should contain the following containers:
-
-- Conversations Container
-- Models Container
-
-You can create the containers with default names or use your own names. If using default names, please create them with the following names:
-
-- Conversations Container: 'conversations'
-- Models Container: 'models'
-
-If you prefer custom names, use the following variables to define your names with `azd env set` command:
-
-- AZURE_DB_CONVERSATIONS_CONTAINER_NAME
-- AZURE_DB_MODELS_CONTAINER_NAME
-
-### Application Service Environment
-
-If you prefer, you can use a previously created [Application Service Environment (ASE)](https://learn.microsoft.com/en-us/azure/app-service/environment/overview) to run the function apps and the front-end web app. Just follow the instructions in the [**General Instructions**](#general-instructions) section to inform the App Service Plan contained in you App Service Environment that you want to reuse. However, since the existence of a VNet and Subnet is a prerequisite for creating the ASE, if you want to reuse an ASE, you must also bring the VNet created for this ASE, according to the instructions in the [VNet](#virtual-network-vnet) section.

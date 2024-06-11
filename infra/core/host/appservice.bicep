@@ -4,6 +4,7 @@ param tags object = {}
 
 // Reference Properties
 param applicationInsightsName string = ''
+param applicationInsightsResourceGroupName string = ''
 param appServicePlanId string
 
 // Runtime Properties
@@ -37,7 +38,16 @@ param networkIsolation bool
 param vnetName string = ''
 param subnetId string = ''
 
-resource appService 'Microsoft.Web/sites@2022-09-01' = {
+param appServiceReuse bool
+param existingAppServiceName string
+param existingAppServiceNameResourceGroupName string    
+
+resource existingAppService 'Microsoft.Web/sites@2022-09-01' existing = if (appServiceReuse) {
+  scope: resourceGroup(existingAppServiceNameResourceGroupName)
+  name: existingAppServiceName
+}
+
+resource newAppService 'Microsoft.Web/sites@2022-09-01' = if (!appServiceReuse) {
   name: name
   location: location
   tags: tags
@@ -108,11 +118,12 @@ resource appService 'Microsoft.Web/sites@2022-09-01' = {
 }
 
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing = if (!empty(applicationInsightsName)) {
+  scope: resourceGroup(applicationInsightsResourceGroupName)
   name: applicationInsightsName
 }
 
-output identityPrincipalId string = appService.identity.principalId
-output name string = appService.name
-output uri string = 'https://${appService.properties.defaultHostName}'
-output id string = appService.id
+output identityPrincipalId string = appServiceReuse ? existingAppService.identity.principalId : newAppService.identity.principalId
+output name string = appServiceReuse ? existingAppService.name : newAppService.name
+output uri string = 'https://${appServiceReuse ? existingAppService.properties.defaultHostName : newAppService.properties.defaultHostName }'
+output id string = appServiceReuse ? existingAppService.id : newAppService.id
 // output key string = listKeys(appService.id, appService.apiVersion).default

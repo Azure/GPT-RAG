@@ -23,6 +23,13 @@ param networkIsolation bool
 param vnetName string
 param subnetId string
 
+param functionAppReuse bool
+param existingFunctionAppResourceGroupName string
+param existingFunctionAppName string
+
+param functionAppStorageReuse bool
+param existingFunctionAppStorageName string
+param existingFunctionAppStorageResourceGroupName string
 
 @description('Storage Account type')
 @allowed([
@@ -44,7 +51,12 @@ param runtime string = 'python'
 var functionAppName = appName
 var functionWorkerRuntime = runtime
 
-resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
+resource existingStorageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' existing  = if (functionAppStorageReuse) {
+  scope: resourceGroup(existingFunctionAppStorageResourceGroupName)
+  name: existingFunctionAppStorageName
+}
+
+resource newStorageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = if (!functionAppStorageReuse) {
   name: storageAccountName
   location: location
   sku: {
@@ -58,7 +70,16 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   }
 }
 
-resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
+var _storage_keys = functionAppStorageReuse ? existingStorageAccount.listKeys().keys[0].value : newStorageAccount.listKeys().keys[0].value
+var _storageAccountName= functionAppStorageReuse ? existingStorageAccount.name : newStorageAccount.name
+
+
+resource existingFunctionApp 'Microsoft.Web/sites@2022-09-01' existing  = if (functionAppReuse) {
+  scope: resourceGroup(existingFunctionAppResourceGroupName)
+  name: existingFunctionAppName
+}
+
+resource newFunctionApp 'Microsoft.Web/sites@2022-09-01' = if (!functionAppReuse) {
   name: functionAppName
   location: location
   kind: kind
@@ -86,11 +107,11 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
       appSettings: concat(appSettings,[
         {
           name: 'AzureWebJobsStorage'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${storageAccount.listKeys().keys[0].value}'
+          value: 'DefaultEndpointsProtocol=https;AccountName=${_storageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${_storage_keys}'
         }
         {
           name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${storageAccount.listKeys().keys[0].value}'
+          value: 'DefaultEndpointsProtocol=https;AccountName=${_storageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${_storage_keys}'
         }
         {
           name: 'WEBSITE_CONTENTSHARE'
@@ -128,8 +149,8 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = if (!(empty(
  name: keyVaultName
 }
 
-output identityPrincipalId string = functionApp.identity.principalId
-output name string = functionApp.name
-output uri string = 'https://${functionApp.properties.defaultHostName}'
-output location string = functionApp.location
-output id string = functionApp.id
+output identityPrincipalId string = functionAppReuse ? existingFunctionApp.identity.principalId : newFunctionApp.identity.principalId
+output name string = functionAppReuse ? existingFunctionApp.name : newFunctionApp.name
+output uri string = 'https://${functionAppReuse ? existingFunctionApp.properties.defaultHostName : newFunctionApp.properties.defaultHostName}'
+output location string = functionAppReuse ? existingFunctionApp.location : newFunctionApp.location
+output id string = functionAppReuse ? existingFunctionApp.id : newFunctionApp.id
