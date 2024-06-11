@@ -402,7 +402,7 @@ var _storageContainerName = !empty(storageContainerName) ? storageContainerName 
 
 @description('Storage Account Name. Use your own name convention or leave as it is to generate a random name.')
 param storageAccountName string = ''
-var _storageAccountName = _azureReuseConfig.storageReuse ? _azureReuseConfig.existingStorageName : !empty(storageAccountName) ? storageAccountName : 'strag0-${resourceToken}'
+var _storageAccountName = _azureReuseConfig.storageReuse ? _azureReuseConfig.existingStorageName : !empty(storageAccountName) ? storageAccountName : 'strag0${resourceToken}'
 
 // Resource name settings
 
