@@ -85,6 +85,6 @@ resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' =  {
   }
 }
 
-output name string = name
+output name string = storageReuse ? existingStorage.name : newStorage.name
 output id string = storageReuse ? existingStorage.id : newStorage.id
 output primaryEndpoints object = storageReuse ? existingStorage.properties.primaryEndpoints: newStorage.properties.primaryEndpoints
