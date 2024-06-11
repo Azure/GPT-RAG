@@ -68,7 +68,7 @@ resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' =  {
   }
 }
 
-output id string = aiSearchReuse ? existingSearch.id: newSearch.id
-output name string = aiSearchReuse ? existingSearch.name: newSearch.name
-output principalId string = aiSearchReuse ? existingSearch.identity.principalId: newSearch.identity.principalId
+output id string = aiSearchReuse ? existingSearch.id : newSearch.id
+output name string = aiSearchReuse ? existingSearch.name : newSearch.name
+output principalId string = aiSearchReuse ? existingSearch.identity.principalId : newSearch.identity.principalId
 output endpoint string = 'https://${aiSearchReuse ? existingSearch.name: newSearch.name}.search.windows.net/'

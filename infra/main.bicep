@@ -916,7 +916,8 @@ module frontEnd  'core/host/appservice.bicep'  = {
   scope: resourceGroup
   params: {
     name: _appServiceName
-    applicationInsightsName: _appInsightsName
+    applicationInsightsName: _azureReuseConfig.appInsightsReuse?_azureReuseConfig.existingAppInsightsName:_appInsightsName
+    applicationInsightsResourceGroupName: _azureReuseConfig.appInsightsReuse?_azureReuseConfig.existingAppInsightsResourceGroupName:_resourceGroupName  
     networkIsolation: _networkIsolation
     vnetName: _networkIsolation?vnet.outputs.name:''
     subnetId: _networkIsolation?vnet.outputs.appIntSubId:''

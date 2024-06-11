@@ -4,6 +4,7 @@ param tags object = {}
 
 // Reference Properties
 param applicationInsightsName string = ''
+param applicationInsightsResourceGroupName string = ''
 param appServicePlanId string
 
 // Runtime Properties
@@ -108,6 +109,7 @@ resource appService 'Microsoft.Web/sites@2022-09-01' = {
 }
 
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing = if (!empty(applicationInsightsName)) {
+  scope: resourceGroup(applicationInsightsResourceGroupName)
   name: applicationInsightsName
 }
 
