@@ -57,9 +57,9 @@ var _azureReuseConfigDefaults = {
   appInsightsReuse: false
   existingAppInsightsResourceGroupName: ''
   existingAppInsightsName: ''
-  appServerPlanReuse: false
-  existingAppServerPlanResourceGroupName: ''
-  existingAppServerPlanName: ''
+  appServicePlanReuse: false
+  existingAppServicePlanResourceGroupName: ''
+  existingAppServicePlanName: ''
   aiSearchReuse: false
   existingAiSearchResourceGroupName: ''
   existingAiSearchName: ''
@@ -107,9 +107,9 @@ var _azureReuseConfig = union(_azureReuseConfigDefaults, {
     appInsightsReuse: (empty(azureReuseConfig.appInsightsReuse) ? _azureReuseConfigDefaults.appInsightsReuse : toLower(azureReuseConfig.appInsightsReuse) == 'true')
     existingAppInsightsResourceGroupName: (empty(azureReuseConfig.existingAppInsightsResourceGroupName) ? _azureReuseConfigDefaults.existingAppInsightsResourceGroupName : azureReuseConfig.existingAppInsightsResourceGroupName)
     existingAppInsightsName: (empty(azureReuseConfig.existingAppInsightsName) ? _azureReuseConfigDefaults.existingAppInsightsName : azureReuseConfig.existingAppInsightsName)
-    appServerPlanReuse: (empty(azureReuseConfig.appServerPlanReuse) ? _azureReuseConfigDefaults.appServerPlanReuse : toLower(azureReuseConfig.appServerPlanReuse) == 'true')
-    existingAppServerPlanResourceGroupName: (empty(azureReuseConfig.existingAppServerPlanResourceGroupName) ? _azureReuseConfigDefaults.existingAppServerPlanResourceGroupName : azureReuseConfig.existingAppServerPlanResourceGroupName)
-    existingAppServerPlanName: (empty(azureReuseConfig.existingAppServerPlanName) ? _azureReuseConfigDefaults.existingAppServerPlanName : azureReuseConfig.existingAppServerPlanName)
+    appServicePlanReuse: (empty(azureReuseConfig.appServicePlanReuse) ? _azureReuseConfigDefaults.appServicePlanReuse : toLower(azureReuseConfig.appServicePlanReuse) == 'true')
+    existingAppServicePlanResourceGroupName: (empty(azureReuseConfig.existingAppServicePlanResourceGroupName) ? _azureReuseConfigDefaults.existingAppServicePlanResourceGroupName : azureReuseConfig.existingAppServicePlanResourceGroupName)
+    existingAppServicePlanName: (empty(azureReuseConfig.existingAppServicePlanName) ? _azureReuseConfigDefaults.existingAppServicePlanName : azureReuseConfig.existingAppServicePlanName)
     aiSearchReuse: (empty(azureReuseConfig.aiSearchReuse) ? _azureReuseConfigDefaults.aiSearchReuse : toLower(azureReuseConfig.aiSearchReuse) == 'true')
     existingAiSearchResourceGroupName: (empty(azureReuseConfig.existingAiSearchResourceGroupName) ? _azureReuseConfigDefaults.existingAiSearchResourceGroupName : azureReuseConfig.existingAiSearchResourceGroupName)
     existingAiSearchName: (empty(azureReuseConfig.existingAiSearchName) ? _azureReuseConfigDefaults.existingAiSearchName : azureReuseConfig.existingAiSearchName)
@@ -183,7 +183,7 @@ var _networkIsolation = networkIsolation
 
 @description('Virtual network name, you can leave as it is to generate a random name.')
 param vnetName string = ''
-var _vnetName = !empty(vnetName) ? vnetName : 'aivnet0-${resourceToken}'
+var _vnetName = _azureReuseConfig.vnetReuse ? _azureReuseConfig.existingVnetName : !empty(vnetName) ? vnetName : 'aivnet0-${resourceToken}'
 
 @description('Address space for the virtual network')
 param vnetAddress string = ''
@@ -402,75 +402,97 @@ var _storageContainerName = !empty(storageContainerName) ? storageContainerName 
 
 @description('Storage Account Name. Use your own name convention or leave as it is to generate a random name.')
 param storageAccountName string = ''
-var _storageAccountName = !empty(storageAccountName) ? storageAccountName : 'strag0${resourceToken}'
+var _storageAccountName = _azureReuseConfig.storageReuse ? _azureReuseConfig.existingStorageName : !empty(storageAccountName) ? storageAccountName : 'strag0-${resourceToken}'
 
 // Resource name settings
 
 // The name for each service can be set from environment variables which are mapped in main.parameters.json.
 // If no maping to specific name is defined, a unique name is generated for each service based on the resourceToken created above.
+
 @description('Key Vault Name. Use your own name convention or leave as it is to generate a random name.')
 param keyVaultName string = ''
-var _keyVaultName = !empty(keyVaultName) ? keyVaultName : 'kv0-${resourceToken}'
+var _keyVaultName = _azureReuseConfig.keyVaultReuse ? _azureReuseConfig.existingKeyVaultName : !empty(keyVaultName) ? keyVaultName : 'kv0-${resourceToken}'
+
+@description('OpenAI Service Name. Use your own name convention or leave as it is to generate a random name.')
+param openAiServiceName string = ''
+var _openAiServiceName = _azureReuseConfig.aoaiReuse ? _azureReuseConfig.existingAoaiName : !empty(openAiServiceName) ? openAiServiceName : 'oai0-${resourceToken}'
+
 @description('AI services multi-service name. Use your own name convention or leave as it is to generate a random name.')
 param aiServicesName string = ''
-var _aiServicesName = !empty(aiServicesName) ? aiServicesName : 'ai0-${resourceToken}'
+var _aiServicesName = _azureReuseConfig.aiServicesReuse ? _azureReuseConfig.existingAiServicesName : !empty(aiServicesName) ? aiServicesName : 'ai0-${resourceToken}'
+
 @description('App Service Plan Name. Use your own name convention or leave as it is to generate a random name.')
 param appServicePlanName string = ''
-var _appServicePlanName = !empty(appServicePlanName) ? appServicePlanName : 'appplan0-${resourceToken}'
+var _appServicePlanName = _azureReuseConfig.appServicePlanReuse ? _azureReuseConfig.existingAppServicePlanName : !empty(appServicePlanName) ? appServicePlanName : 'appplan0-${resourceToken}'
+
 @description('App Insights Name. Use your own name convention or leave as it is to generate a random name.')
 param appInsightsName string = ''
-var _appInsightsName = !empty(appInsightsName) ? appInsightsName : 'appins0-${resourceToken}'
+var _appInsightsName = _azureReuseConfig.appInsightsReuse ? _azureReuseConfig.existingAppInsightsName : !empty(appInsightsName) ? appInsightsName : 'appins0-${resourceToken}'
+
 @description('Front-end App Service Name. Use your own name convention or leave as it is to generate a random name.')
 param appServiceName string = ''
-var _appServiceName = !empty(appServiceName) ? appServiceName : 'webgpt0-${resourceToken}'
+var _appServiceName = _azureReuseConfig.appServiceReuse ? _azureReuseConfig.existingAppServiceName : !empty(appServiceName) ? appServiceName : 'webgpt0-${resourceToken}'
+
 @description('Load testing resource name. Use your own name convention or leave as it is to generate a random name.')
 param loadTestingName string = ''
 var _loadtestingName = !empty(loadTestingName) ? loadTestingName : 'loadtest0-${resourceToken}'
+
 @description('Orchestrator Function Name. Use your own name convention or leave as it is to generate a random name.')
 param orchestratorFunctionAppName string = ''
-var _orchestratorFunctionAppName = !empty(orchestratorFunctionAppName) ? orchestratorFunctionAppName : 'fnorch0-${resourceToken}'
+var _orchestratorFunctionAppName = _azureReuseConfig.orchestratorFunctionAppReuse ? _azureReuseConfig.existingOrchestratorFunctionAppName : !empty(orchestratorFunctionAppName) ? orchestratorFunctionAppName : 'fnorch0-${resourceToken}'
+
 @description('Data Ingestion Function Name. Use your own name convention or leave as it is to generate a random name.')
 param dataIngestionFunctionAppName string = ''
-var _dataIngestionFunctionAppName = !empty(dataIngestionFunctionAppName) ? dataIngestionFunctionAppName : 'fninges0-${resourceToken}'
+var _dataIngestionFunctionAppName = _azureReuseConfig.dataIngestionFunctionAppReuse ? _azureReuseConfig.existingDataIngestionFunctionAppName : !empty(dataIngestionFunctionAppName) ? dataIngestionFunctionAppName : 'fninges0-${resourceToken}'
+
 @description('Search Service Name. Use your own name convention or leave as it is to generate a random name.')
 param searchServiceName string = ''
-var _searchServiceName = !empty(searchServiceName) ? searchServiceName : 'search0-${resourceToken}'
-@description('OpenAI Service Name. Use your own name convention or leave as it is to generate a random name.')
-param openAiServiceName string = ''
-var _openAiServiceName = !empty(openAiServiceName) ? openAiServiceName : 'oai0-${resourceToken}'
+var _searchServiceName = _azureReuseConfig.aiSearchReuse ? _azureReuseConfig.existingAiSearchName : !empty(searchServiceName) ? searchServiceName : 'search0-${resourceToken}'
+
 @description('The name of the Azure Storage Account Private Endpoint. If left empty, a random name will be generated.')
 param azureStorageAccountPe string = ''
 var _azureStorageAccountPe = !empty(azureStorageAccountPe) ? azureStorageAccountPe : 'stragpe0-${resourceToken}'
+
 @description('The name of the Azure Cosmos DB Private Endpoint. If left empty, a random name will be generated.')
 param azureDbAccountPe string = ''
 var _azureDbAccountPe = !empty(azureDbAccountPe) ? azureDbAccountPe : 'dbgptpe0-${resourceToken}'
+
 @description('The name of the Azure Key Vault Private Endpoint. If left empty, a random name will be generated.')
 param azureKeyvaultPe string = ''
 var _azureKeyvaultPe = !empty(azureKeyvaultPe) ? azureKeyvaultPe : 'kvpe0-${resourceToken}'
+
 @description('The name of the Azure Orchestrator Private Endpoint. If left empty, a random name will be generated.')
 param azureOrchestratorPe string = ''
 var _azureOrchestratorPe = !empty(azureOrchestratorPe) ? azureOrchestratorPe : 'orchestratorPe-${resourceToken}'
+
 @description('The name of the Azure Frontend Private Endpoint. If left empty, a random name will be generated.')
 param azureFrontendPe string = ''
 var _azureFrontendPe = !empty(azureFrontendPe) ? azureFrontendPe : 'frontendPe-${resourceToken}'
+
 @description('The name of the Azure Data Ingestion Private Endpoint. If left empty, a random name will be generated.')
 param azureDataIngestionPe string = ''
 var _azureDataIngestionPe = !empty(azureDataIngestionPe) ? azureDataIngestionPe : 'ingestionPe-${resourceToken}'
+
 @description('The name of the Azure AI Services Private Endpoint. If left empty, a random name will be generated.')
 param azureAiServicesPe string = ''
 var _azureAiServicesPe = !empty(azureAiServicesPe) ? azureAiServicesPe : 'aiServicesPe-${resourceToken}'
+
 @description('The name of the Azure OpenAI Private Endpoint. If left empty, a random name will be generated.')
 param azureOpenAiPe string = ''
 var _azureOpenAiPe = !empty(azureOpenAiPe) ? azureOpenAiPe : 'openAiPe-${resourceToken}'
+
 @description('The name of the Azure Search Private Endpoint. If left empty, a random name will be generated.')
 param azureSearchPe string = ''
 var _azureSearchPe = !empty(azureSearchPe) ? azureSearchPe : 'searchPe-${resourceToken}'
+
 @description('The name of the VM Key Vault Secret. If left empty, a random name will be generated.')
 param vmKeyVaultSecName string = ''
 var _vmKeyVaultSecName = !empty(vmKeyVaultSecName) ? vmKeyVaultSecName : 'vmUserInitialPassword'
+
 @description('The name of the Zero Trust VM. If left empty, a random name will be generated.')
 param ztVmName string = ''
 var _ztVmName = !empty(ztVmName) ? ztVmName : 'testvm-${resourceToken}'
+
 @description('The name of the Bastion Key Vault. If left empty, a random name will be generated.')
 param bastionKvName string = ''
 var _bastionKvName = !empty(bastionKvName) ? bastionKvName : 'bastionkv-${resourceToken}'
@@ -492,7 +514,6 @@ module vnet './core/network/vnet.bicep' = if (_networkIsolation) {
     vnetName: _vnetName
     vnetReuse: _vnetReuse
     existingVnetResourceGroupName: _azureReuseConfig.existingVnetResourceGroupName
-    existingVnetName: _azureReuseConfig.existingVnetName
     tags: tags
     vnetAddress: _vnetAddress
     appServicePlanId: appServicePlan.outputs.id
@@ -607,7 +628,6 @@ module storage './core/storage/storage-account.bicep' = {
     name: _storageAccountName
     location: location
     storageReuse: _azureReuseConfig.storageReuse
-    existingStorageName: _azureReuseConfig.existingStorageName
     existingStorageResourceGroupName: _azureReuseConfig.existingAccountResourceGroupName
     tags: tags
     publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
@@ -682,7 +702,6 @@ module keyVault './core/security/keyvault.bicep' = {
     location: location
     keyVaultReuse : _azureReuseConfig.keyVaultReuse
     existingKeyVaultResourceGroupName : _azureReuseConfig.existingKeyVaultResourceGroupName
-    existingKeyVaultName : _azureReuseConfig.existingKeyVaultName
     publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
     tags: tags
     principalId: principalId
@@ -713,9 +732,8 @@ module appServicePlan './core/host/appserviceplan.bicep' =  {
   params: {
     name: _appServicePlanName
     location: location
-    appServerPlanReuse : _azureReuseConfig.appServerPlanReuse
-    existingAppServerPlanResourceGroupName : _azureReuseConfig.existingAppServerPlanResourceGroupName
-    existingAppServerPlanName : _azureReuseConfig.existingAppServerPlanName
+    appServicePlanReuse : _azureReuseConfig.appServicePlanReuse
+    existingAppServicePlanResourceGroupName : _azureReuseConfig.existingAppServicePlanResourceGroupName
     tags: tags
     sku: {
       name: 'P0v3'
@@ -734,7 +752,6 @@ module appInsights './core/host/appinsights.bicep' = {
     appInsightsLocation: location
     appInsightsReuse: _azureReuseConfig.appInsightsReuse
     existingAppInsightsResourceGroupName: _azureReuseConfig.existingAppInsightsResourceGroupName
-    existingAppInsightsName: _azureReuseConfig.existingAppInsightsName
   }
 }
 
@@ -753,7 +770,6 @@ module orchestrator './core/host/functions.bicep' = {
     location: location
     functionAppReuse: _azureReuseConfig.orchestratorFunctionAppReuse
     existingFunctionAppResourceGroupName: _azureReuseConfig.existingOrchestratorFunctionAppResourceGroupName
-    existingFunctionAppName: _azureReuseConfig.existingOrchestratorFunctionAppName
     functionAppStorageReuse: _azureReuseConfig.orchestratorFunctionAppStorageReuse
     existingFunctionAppStorageName: _azureReuseConfig.existingOrchestratorFunctionAppStorageName
     existingFunctionAppStorageResourceGroupName: _azureReuseConfig.existingOrchestratorFunctionAppStorageResourceGroupName
@@ -955,7 +971,6 @@ module frontEnd  'core/host/appservice.bicep'  = {
     applicationInsightsName: _azureReuseConfig.appInsightsReuse?_azureReuseConfig.existingAppInsightsName:_appInsightsName
     applicationInsightsResourceGroupName: _azureReuseConfig.appInsightsReuse?_azureReuseConfig.existingAppInsightsResourceGroupName:_resourceGroupName  
     appServiceReuse: _azureReuseConfig.appServiceReuse
-    existingAppServiceName: _azureReuseConfig.existingAppServiceName
     existingAppServiceNameResourceGroupName: _azureReuseConfig.existingAppServiceNameResourceGroupName
     networkIsolation: _networkIsolation
     vnetName: _networkIsolation?vnet.outputs.name:''
@@ -1070,7 +1085,6 @@ module dataIngestion './core/host/functions.bicep' = {
     location: location
     functionAppReuse: _azureReuseConfig.dataIngestionFunctionAppReuse
     existingFunctionAppResourceGroupName: _azureReuseConfig.existingDataIngestionFunctionAppResourceGroupName
-    existingFunctionAppName: _azureReuseConfig.existingDataIngestionFunctionAppName
     functionAppStorageReuse: _azureReuseConfig.dataIngestionFunctionAppStorageReuse
     existingFunctionAppStorageName: _azureReuseConfig.existingDataIngestionFunctionAppStorageName
     existingFunctionAppStorageResourceGroupName: _azureReuseConfig.existingDataIngestionFunctionAppStorageResourceGroupName
@@ -1223,7 +1237,6 @@ module aiServices 'core/ai/aiservices.bicep' = {
     location: location
     aiServicesReuse : _azureReuseConfig.aiServicesReuse
     existingAiServicesResourceGroupName : _azureReuseConfig.existingAiServicesResourceGroupName
-    existingAiServicesName : _azureReuseConfig.existingAiServicesName
     publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
     kind: 'CognitiveServices'
     tags: tags
@@ -1262,7 +1275,6 @@ module openAi 'core/ai/aiservices.bicep' = {
     location: location
     aiServicesReuse : _azureReuseConfig.aoaiReuse
     existingAiServicesResourceGroupName : _azureReuseConfig.existingAoaiResourceGroupName
-    existingAiServicesName : _azureReuseConfig.existingAoaiName
     publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
     tags: tags
     sku: {
@@ -1325,7 +1337,6 @@ module searchService 'core/search/search-services.bicep' = {
     location: location
     aiSearchReuse : _azureReuseConfig.aiSearchReuse
     existingAiSearchResourceGroupName : _azureReuseConfig.existingAiSearchResourceGroupName
-    existingAiSearchName : _azureReuseConfig.existingAiSearchName
     secretName: 'azureSearchKey'
     keyVaultName: keyVault.outputs.name
     publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
@@ -1434,9 +1445,9 @@ output AZURE_DATABASE_SUBNET_NAME string = _databaseSubnetName
 output AZURE_DATABASE_SUBNET_PREFIX string = _databaseSubnetPrefix
 output AZURE_DB_CONFIG object = azureDbConfig
 output AZURE_FRONTEND_PE string = _azureFrontendPe
+output AZURE_KV_NAME string = _keyVaultName
 output AZURE_KEY_VAULT_NAME string = _keyVaultName
 output AZURE_KEYVAULT_PE string = _azureKeyvaultPe
-output AZURE_KV_NAME string = _keyVaultName
 output AZURE_LOAD_TESTING_NAME string = _loadtestingName
 output AZURE_NETWORK_ISOLATION bool = _networkIsolation
 output AZURE_OPEN_AI_PE string = _azureOpenAiPe

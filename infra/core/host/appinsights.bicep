@@ -3,11 +3,10 @@ param appInsightsLocation string
 
 param appInsightsReuse bool
 param existingAppInsightsResourceGroupName string
-param existingAppInsightsName string
 
 resource existingApplicationInsights 'Microsoft.Insights/components@2020-02-02' existing  = if (appInsightsReuse) {
   scope: resourceGroup(existingAppInsightsResourceGroupName)
-  name: existingAppInsightsName
+  name: applicationInsightsName
 }
 
 resource newApplicationInsights 'Microsoft.Insights/components@2020-02-02' = if (!appInsightsReuse) {

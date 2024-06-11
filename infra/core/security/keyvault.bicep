@@ -5,7 +5,6 @@ param publicNetworkAccess string
 
 param keyVaultReuse bool
 param existingKeyVaultResourceGroupName string
-param existingKeyVaultName string
 
 // @secure()
 // param vmUserPasswordKey string
@@ -16,7 +15,7 @@ param principalId string = ''
 
 resource existingKeyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = if (keyVaultReuse) {
   scope: resourceGroup(existingKeyVaultResourceGroupName)
-  name: existingKeyVaultName  
+  name: name  
 }
 
 resource newKeyVault 'Microsoft.KeyVault/vaults@2022-07-01' = if (!keyVaultReuse) {

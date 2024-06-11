@@ -3,7 +3,6 @@ param location string = resourceGroup().location
 param tags object = {}
 param aiServicesReuse bool
 param existingAiServicesResourceGroupName string
-param existingAiServicesName string
 
 param secretsNames object = {}
 param keyVaultName string
@@ -18,7 +17,7 @@ param sku object = {
 
 resource existingAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' existing  = if (aiServicesReuse) {
   scope: resourceGroup(existingAiServicesResourceGroupName)
-  name: existingAiServicesName
+  name: name
 }
 
 resource newAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' = if (!aiServicesReuse) {

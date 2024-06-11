@@ -2,21 +2,20 @@ param name string
 param location string = resourceGroup().location
 param tags object = {}
 
-param appServerPlanReuse bool
-param existingAppServerPlanResourceGroupName string
-param existingAppServerPlanName string
+param appServicePlanReuse bool
+param existingAppServicePlanResourceGroupName string
 
 param kind string = ''
 param reserved bool = true
 param sku object
 
-resource existingAppServicePlan 'Microsoft.Web/serverfarms@2022-03-01' existing  = if (appServerPlanReuse) {
-  scope: resourceGroup(existingAppServerPlanResourceGroupName)
-  name: existingAppServerPlanName
+resource existingAppServicePlan 'Microsoft.Web/serverfarms@2022-03-01' existing  = if (appServicePlanReuse) {
+  scope: resourceGroup(existingAppServicePlanResourceGroupName)
+  name: name
 }
 
 
-resource newAppServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = if (!appServerPlanReuse) {
+resource newAppServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = if (!appServicePlanReuse) {
   name: name
   location: location
   tags: tags
@@ -27,5 +26,5 @@ resource newAppServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = if (!appServ
   }
 }
 
-output id string = appServerPlanReuse ? existingAppServicePlan.id: newAppServicePlan.id
-output name string = appServerPlanReuse ? existingAppServicePlan.name: newAppServicePlan.name
+output id string = appServicePlanReuse ? existingAppServicePlan.id: newAppServicePlan.id
+output name string = appServicePlanReuse ? existingAppServicePlan.name: newAppServicePlan.name
