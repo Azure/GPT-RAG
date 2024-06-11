@@ -79,6 +79,21 @@ var _azureReuseConfigDefaults = {
   vnetReuse: false
   existingVnetResourceGroupName: ''
   existingVnetName: ''
+  orchestratorFunctionAppReuse: false
+  existingOrchestratorFunctionAppResourceGroupName: ''
+  existingOrchestratorFunctionAppName: ''  
+  dataIngestionFunctionAppReuse: false
+  existingDataIngestionFunctionAppResourceGroupName: ''
+  existingDataIngestionFunctionAppName: ''  
+  appServiceReuse: false
+  existingAppServiceName: ''
+  existingAppServiceNameResourceGroupName: ''
+  orchestratorFunctionAppStorageReuse: false
+  existingOrchestratorFunctionAppStorageName: ''
+  existingOrchestratorFunctionAppStorageResourceGroupName: ''
+  dataIngestionFunctionAppStorageReuse: false
+  existingDataIngestionFunctionAppStorageName: ''
+  existingDataIngestionFunctionAppStorageResourceGroupName: ''  
 }
 
 param azureReuseConfig object = {} 
@@ -111,6 +126,21 @@ var _azureReuseConfig = union(_azureReuseConfigDefaults, {
     vnetReuse: (empty(azureReuseConfig.vnetReuse) ? _azureReuseConfigDefaults.vnetReuse : toLower(azureReuseConfig.vnetReuse) == 'true')
     existingVnetResourceGroupName: (empty(azureReuseConfig.existingVnetResourceGroupName) ? _azureReuseConfigDefaults.existingVnetResourceGroupName : azureReuseConfig.existingVnetResourceGroupName)
     existingVnetName: (empty(azureReuseConfig.existingVnetName) ? _azureReuseConfigDefaults.existingVnetName : azureReuseConfig.existingVnetName)
+    orchestratorFunctionAppReuse: (empty(azureReuseConfig.orchestratorFunctionAppReuse) ? _azureReuseConfigDefaults.orchestratorFunctionAppReuse: toLower(azureReuseConfig.orchestratorFunctionAppReuse) == 'true')
+    existingOrchestratorFunctionAppResourceGroupName: (empty(azureReuseConfig.existingOrchestratorFunctionAppResourceGroupName) ? _azureReuseConfigDefaults.existingOrchestratorFunctionAppResourceGroupName : azureReuseConfig.existingOrchestratorFunctionAppResourceGroupName)
+    existingOrchestratorFunctionAppName: (empty(azureReuseConfig.existingOrchestratorFunctionAppName) ? _azureReuseConfigDefaults.existingOrchestratorFunctionAppName : azureReuseConfig.existingOrchestratorFunctionAppName)
+    dataIngestionFunctionAppReuse: (empty(azureReuseConfig.dataIngestionFunctionAppReuse) ? _azureReuseConfigDefaults.dataIngestionFunctionAppReuse : toLower(azureReuseConfig.dataIngestionFunctionAppReuse) == 'true')
+    existingDataIngestionFunctionAppResourceGroupName: (empty(azureReuseConfig.existingDataIngestionFunctionAppResourceGroupName) ? _azureReuseConfigDefaults.existingDataIngestionFunctionAppResourceGroupName : azureReuseConfig.existingDataIngestionFunctionAppResourceGroupName)
+    existingDataIngestionFunctionAppName: (empty(azureReuseConfig.existingDataIngestionFunctionAppName) ? _azureReuseConfigDefaults.existingDataIngestionFunctionAppName : azureReuseConfig.existingDataIngestionFunctionAppName)
+    appServiceReuse: (empty(azureReuseConfig.appServiceReuse) ? _azureReuseConfigDefaults.appServiceReuse : toLower(azureReuseConfig.appServiceReuse) == 'true')
+    existingAppServiceName: (empty(azureReuseConfig.existingAppServiceName) ? _azureReuseConfigDefaults.existingAppServiceName : azureReuseConfig.existingAppServiceName)
+    existingAppServiceNameResourceGroupName: (empty(azureReuseConfig.existingAppServiceNameResourceGroupName) ? _azureReuseConfigDefaults.existingAppServiceNameResourceGroupName : azureReuseConfig.existingAppServiceNameResourceGroupName)
+    orchestratorFunctionAppStorageReuse: (empty(azureReuseConfig.orchestratorFunctionAppStorageReuse) ? _azureReuseConfigDefaults.orchestratorFunctionAppStorageReuse : toLower(azureReuseConfig.orchestratorFunctionAppStorageReuse) == 'true')
+    existingOrchestratorFunctionAppStorageName: (empty(azureReuseConfig.existingOrchestratorFunctionAppStorageName) ? _azureReuseConfigDefaults.existingOrchestratorFunctionAppStorageName : azureReuseConfig.existingOrchestratorFunctionAppStorageName)
+    existingOrchestratorFunctionAppStorageResourceGroupName: (empty(azureReuseConfig.existingOrchestratorFunctionAppStorageResourceGroupName) ? _azureReuseConfigDefaults.existingOrchestratorFunctionAppStorageResourceGroupName : azureReuseConfig.existingOrchestratorFunctionAppStorageResourceGroupName)
+    dataIngestionFunctionAppStorageReuse: (empty(azureReuseConfig.dataIngestionFunctionAppStorageReuse) ? _azureReuseConfigDefaults.dataIngestionFunctionAppStorageReuse : toLower(azureReuseConfig.dataIngestionFunctionAppStorageReuse) == 'true')
+    existingDataIngestionFunctionAppStorageName: (empty(azureReuseConfig.existingDataIngestionFunctionAppStorageName) ? _azureReuseConfigDefaults.existingDataIngestionFunctionAppStorageName : azureReuseConfig.existingDataIngestionFunctionAppStorageName)
+    existingDataIngestionFunctionAppStorageResourceGroupName: (empty(azureReuseConfig.existingDataIngestionFunctionAppStorageResourceGroupName) ? _azureReuseConfigDefaults.existingDataIngestionFunctionAppStorageResourceGroupName : azureReuseConfig.existingDataIngestionFunctionAppStorageResourceGroupName)
   }
 )
 
@@ -721,6 +751,12 @@ module orchestrator './core/host/functions.bicep' = {
     appServicePlanId: appServicePlan.outputs.id
     appName: _orchestratorFunctionAppName
     location: location
+    functionAppReuse: _azureReuseConfig.orchestratorFunctionAppReuse
+    existingFunctionAppResourceGroupName: _azureReuseConfig.existingOrchestratorFunctionAppResourceGroupName
+    existingFunctionAppName: _azureReuseConfig.existingOrchestratorFunctionAppName
+    functionAppStorageReuse: _azureReuseConfig.orchestratorFunctionAppStorageReuse
+    existingFunctionAppStorageName: _azureReuseConfig.existingOrchestratorFunctionAppStorageName
+    existingFunctionAppStorageResourceGroupName: _azureReuseConfig.existingOrchestratorFunctionAppStorageResourceGroupName
     appInsightsConnectionString: appInsights.outputs.connectionString
     appInsightsInstrumentationKey: appInsights.outputs.instrumentationKey
     tags: union(tags, { 'azd-service-name': 'orchestrator' })
@@ -918,6 +954,9 @@ module frontEnd  'core/host/appservice.bicep'  = {
     name: _appServiceName
     applicationInsightsName: _azureReuseConfig.appInsightsReuse?_azureReuseConfig.existingAppInsightsName:_appInsightsName
     applicationInsightsResourceGroupName: _azureReuseConfig.appInsightsReuse?_azureReuseConfig.existingAppInsightsResourceGroupName:_resourceGroupName  
+    appServiceReuse: _azureReuseConfig.appServiceReuse
+    existingAppServiceName: _azureReuseConfig.existingAppServiceName
+    existingAppServiceNameResourceGroupName: _azureReuseConfig.existingAppServiceNameResourceGroupName
     networkIsolation: _networkIsolation
     vnetName: _networkIsolation?vnet.outputs.name:''
     subnetId: _networkIsolation?vnet.outputs.appIntSubId:''
@@ -1029,6 +1068,12 @@ module dataIngestion './core/host/functions.bicep' = {
     storageAccountName: '${_storageAccountName}ing'
     appName: _dataIngestionFunctionAppName
     location: location
+    functionAppReuse: _azureReuseConfig.dataIngestionFunctionAppReuse
+    existingFunctionAppResourceGroupName: _azureReuseConfig.existingDataIngestionFunctionAppResourceGroupName
+    existingFunctionAppName: _azureReuseConfig.existingDataIngestionFunctionAppName
+    functionAppStorageReuse: _azureReuseConfig.dataIngestionFunctionAppStorageReuse
+    existingFunctionAppStorageName: _azureReuseConfig.existingDataIngestionFunctionAppStorageName
+    existingFunctionAppStorageResourceGroupName: _azureReuseConfig.existingDataIngestionFunctionAppStorageResourceGroupName
     appInsightsConnectionString: appInsights.outputs.connectionString
     appInsightsInstrumentationKey: appInsights.outputs.instrumentationKey
     tags: union(tags, { 'azd-service-name': 'dataIngest' })
