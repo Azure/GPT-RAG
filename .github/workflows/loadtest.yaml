@@ -55,7 +55,7 @@ jobs:
           export KEY_VAULT_NAME=$(azd env get-values -e ${{ vars.ENV_NAME }} | grep AZURE_KEY_VAULT_NAME | cut -d'=' -f2 | tr -d '"')
           echo "KEY_VAULT_NAME=$KEY_VAULT_NAME" >> $GITHUB_ENV
           echo "KEY_VAULT_NAME=$KEY_VAULT_NAME"
-          export LOAD_TESTING_SERVICE_NAME=$(azd env get-values -e ${{ vars.ENV_NAME }} | grep AZURE_LOAD_TESTING_SERVICE_NAME | cut -d'=' -f2 | tr -d '"')
+          export LOAD_TESTING_SERVICE_NAME=$(azd env get-values -e ${{ vars.ENV_NAME }} | grep AZURE_LOAD_SERVICE_NAME | cut -d'=' -f2 | tr -d '"')
           echo "LOAD_TESTING_SERVICE_NAME=$LOAD_TESTING_SERVICE_NAME" >> $GITHUB_ENV
           echo "LOAD_TESTING_SERVICE_NAME=$LOAD_TESTING_SERVICE_NAME"        
           export ORCHESTRATOR_FUNC_NAME=$(azd env get-values -e ${{ vars.ENV_NAME }} | grep AZURE_ORCHESTRATOR_FUNC_NAME | cut -d'=' -f2 | tr -d '"')
