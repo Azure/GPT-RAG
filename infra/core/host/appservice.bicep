@@ -4,6 +4,7 @@ param tags object = {}
 
 // Reference Properties
 param applicationInsightsName string = ''
+param applicationInsightsResourceGroupName string = ''
 param appServicePlanId string
 
 // Runtime Properties
@@ -33,20 +34,29 @@ param use32BitWorkerProcess bool = false
 param ftpsState string = 'FtpsOnly'
 param healthCheckPath string = ''
 param basicPublishingCredentials bool = false
-param vnetName string
-param subnetId string
+param networkIsolation bool
+param vnetName string = ''
+param subnetId string = ''
 
-resource appService 'Microsoft.Web/sites@2022-03-01' = {
+param appServiceReuse bool
+param existingAppServiceNameResourceGroupName string    
+
+resource existingAppService 'Microsoft.Web/sites@2022-09-01' existing = if (appServiceReuse) {
+  scope: resourceGroup(existingAppServiceNameResourceGroupName)
+  name: name
+}
+
+resource newAppService 'Microsoft.Web/sites@2022-09-01' = if (!appServiceReuse) {
   name: name
   location: location
   tags: tags
   kind: kind
   properties: {
     serverFarmId: appServicePlanId
-    virtualNetworkSubnetId: subnetId
+    virtualNetworkSubnetId: networkIsolation?subnetId:null
     vnetRouteAllEnabled: true
     siteConfig: {
-      vnetName: vnetName
+      vnetName: networkIsolation?vnetName:null
       linuxFxVersion: linuxFxVersion
       alwaysOn: alwaysOn
       ftpsState: ftpsState
@@ -107,11 +117,12 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
 }
 
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing = if (!empty(applicationInsightsName)) {
+  scope: resourceGroup(applicationInsightsResourceGroupName)
   name: applicationInsightsName
 }
 
-output identityPrincipalId string = appService.identity.principalId
-output name string = appService.name
-output uri string = 'https://${appService.properties.defaultHostName}'
-output id string = appService.id
+output identityPrincipalId string = appServiceReuse ? existingAppService.identity.principalId : newAppService.identity.principalId
+output name string = appServiceReuse ? existingAppService.name : newAppService.name
+output uri string = 'https://${appServiceReuse ? existingAppService.properties.defaultHostName : newAppService.properties.defaultHostName }'
+output id string = appServiceReuse ? existingAppService.id : newAppService.id
 // output key string = listKeys(appService.id, appService.apiVersion).default

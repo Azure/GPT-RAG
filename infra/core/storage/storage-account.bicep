@@ -1,6 +1,8 @@
 param name string
 param location string = resourceGroup().location
 param tags object = {}
+param existingStorageResourceGroupName string
+param storageReuse bool
 
 @allowed([ 'Hot', 'Cool', 'Premium' ])
 param accessTier string = 'Hot'
@@ -18,10 +20,15 @@ param publicNetworkAccess string = 'Disabled'
 param sku object = { name: 'Standard_LRS' }
 param secretName string = 'storageConnectionString'
 param keyVaultName string
-
 param containers array = []
 
-resource storage 'Microsoft.Storage/storageAccounts@2022-05-01' = {
+
+resource existingStorage 'Microsoft.Storage/storageAccounts@2022-05-01' existing  = if (storageReuse) {
+  scope: resourceGroup(existingStorageResourceGroupName)
+  name: name
+}
+
+resource newStorage 'Microsoft.Storage/storageAccounts@2022-05-01' = if (!storageReuse) {
   name: name
   location: location
   tags: tags
@@ -60,6 +67,8 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
   name: keyVaultName
 }
 
+var storage_keys = storageReuse ? existingStorage.listKeys().keys[0].value : newStorage.listKeys().keys[0].value
+
 resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' =  {
   name: secretName
   tags: tags
@@ -71,11 +80,10 @@ resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' =  {
       nbf: 0
     }
     contentType: 'string'
-    value: 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[0].value};EndpointSuffix=core.windows.net'
+    value: 'DefaultEndpointsProtocol=https;AccountName=${name};AccountKey=${storage_keys};EndpointSuffix=core.windows.net'
   }
 }
 
-output name string = storage.name
-output id string = storage.id
-output primaryEndpoints object = storage.properties.primaryEndpoints
-
+output name string = storageReuse ? existingStorage.name : newStorage.name
+output id string = storageReuse ? existingStorage.id : newStorage.id
+output primaryEndpoints object = storageReuse ? existingStorage.properties.primaryEndpoints: newStorage.properties.primaryEndpoints

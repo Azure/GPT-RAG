@@ -1,6 +1,8 @@
 param name string
 param location string = resourceGroup().location
 param tags object = {}
+param aiServicesReuse bool
+param existingAiServicesResourceGroupName string
 
 param secretsNames object = {}
 param keyVaultName string
@@ -13,7 +15,12 @@ param sku object = {
   name: 'S0'
 }
 
-resource account 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
+resource existingAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' existing  = if (aiServicesReuse) {
+  scope: resourceGroup(existingAiServicesResourceGroupName)
+  name: name
+}
+
+resource newAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' = if (!aiServicesReuse) {
   name: name
   location: location
   tags: tags
@@ -26,8 +33,8 @@ resource account 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
 }
 
 @batchSize(1)
-resource deployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = [for deployment in deployments: {
-  parent: account
+resource deployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = [for deployment in deployments: if (!aiServicesReuse) {
+  parent: newAccount
   name: deployment.name
   properties: {
     model: deployment.model
@@ -35,7 +42,7 @@ resource deployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01
   }
   sku: contains(deployment, 'sku') ? deployment.sku : {
     name: 'Standard'
-    capacity: 20
+    capacity: 40
   }
 }]
 
@@ -54,11 +61,10 @@ resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' =  [for s
       nbf: 0
     }
     contentType: 'string'
-    value: account.listKeys().key1
+    value:  aiServicesReuse ? existingAccount.listKeys().key1 : newAccount.listKeys().key1
   }
 }]
 
-
-output endpoint string = account.properties.endpoint
-output id string = account.id
-output name string = account.name
+output name string = aiServicesReuse? existingAccount.name : newAccount.name
+output id string = aiServicesReuse? existingAccount.id : newAccount.id
+output endpoint string = aiServicesReuse? existingAccount.properties.endpoint : newAccount.properties.endpoint

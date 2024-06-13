@@ -2,98 +2,264 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "environmentName": {
-      "value": "${AZURE_ENV_NAME}"
-    },
-    "location": {
-      "value": "${AZURE_LOCATION}"
-    },
-    "principalId": {
-      "value": "${AZURE_PRINCIPAL_ID}"
-    },
-    "resourceGroupName": {
-      "value": "${AZURE_RESOURCE_GROUP_NAME}"
-    },
-    "networkIsolation": {
-      "value": "${AZURE_NETWORK_ISOLATION}"
-    },
-    "vmUserInitialPassword": {
-      "value": "$(secretOrRandomPassword ${AZURE_VM_KV_NAME} vmUserInitialPassword)"
-    },
-    "vmUserName": {
-      "value": "gptrag"
-    },
-    "azureSearchUseMIS": {
-      "value": "${AZURE_SEARCH_USE_MIS}"
-    },    
-    "chatGptModelName": {
-      "value": "gpt-35-turbo-16k"
-    },
-    "chatGptModelVersion": {
-      "value": "0613"
-    },
-    "openaiApiVersion": {
-      "value": "2024-02-15-preview"
-    },
-    "orchestratorMessagesLanguage": {
-      "value": "en"
-    },
-    "searchAnalyzerName": {
-      "value": "standard"
-    },
-    "speechRecognitionLanguage": {
-      "value": "en-US"
-    },
-    "speechSynthesisLanguage": {
-      "value": "en-US"
-    },
-    "speechSynthesisVoiceName": {
-      "value": "en-US-RyanMultilingualNeural"
-    },
-    "azureDbAccountName": {
-      "value": "${AZURE_DB_ACCOUNT_NAME}"
-    },
-    "azureDbDatabaseName": {
-      "value": "${AZURE_DB_DATABASE_NAME}"
-    },
-    "azureKeyVaultName": {
-      "value": "${AZURE_KEY_VAULT_NAME}"
-    },
-    "azureStorageAccountName": {
-      "value": "${AZURE_STORAGE_ACCOUNT_NAME}"
-    },
-    "azureCognitiveServiceName": {
-      "value": "${AZURE_COGNITIVE_SERVICE_NAME}"
-    },
-    "azureAppServicePlanName": {
-      "value": "${AZURE_APP_SERVICE_PLAN_NAME}"
-    },
-    "azureAppInsightsName": {
-      "value": "${AZURE_APP_INSIGHTS_NAME}"
-    },
-    "azureAppServiceName": {
-      "value": "${AZURE_APP_SERVICE_NAME}"
-    },
-    "azureLoadTestingName": {
-      "value": "${AZURE_LOAD_TESTING_NAME}"
-    },
-    "azureOrchestratorFunctionAppName": {
-      "value": "${AZURE_ORCHESTRATOR_FUNCTION_APP_NAME}"
-    },
-    "azureDataIngestionFunctionAppName": {
-      "value": "${AZURE_DATA_INGESTION_FUNCTION_APP_NAME}"
-    },
-    "azureSearchServiceName": {
-      "value": "${AZURE_SEARCH_SERVICE_NAME}"
-    },
-    "azureOpenAIServiceName": {
-      "value": "${AZURE_OPEN_AI_SERVICE_NAME}"
-    },
-    "azureVnetName": {
-      "value": "${AZURE_VNET_NAME}"
-    },
-    "deploymentTags":{
-      "value": {}
-    }
+      "environmentName": {
+        "value": "${AZURE_ENV_NAME}"
+      },
+      "location": {
+        "value": "${AZURE_LOCATION}"
+      },
+      "principalId": {
+        "value": "${AZURE_PRINCIPAL_ID}"
+      },
+      "resourceGroupName": {
+        "value": "${AZURE_RESOURCE_GROUP_NAME}"
+      },
+      "networkIsolation": {
+        "value": "${AZURE_NETWORK_ISOLATION}"
+      },
+      "provisionLoadTesting": {
+        "value": "${AZURE_PROVISION_LOAD_TESTING}"
+      },    
+      "vnetName": {
+        "value": "${AZURE_VNET_NAME}"
+      },
+      "vnetAddress": {
+        "value": "${AZURE_VNET_ADDRESS}"
+      },                  
+      "chatGptDeploymentName": {
+        "value": "${AZURE_CHAT_GPT_DEPLOYMENT_NAME}"
+      },
+      "aiSubnetName": {
+          "value": "${AZURE_AI_SUBNET_NAME}"
+      },
+      "aiSubnetPrefix": {
+          "value": "${AZURE_AI_SUBNET_PREFIX}"
+      },
+      "bastionSubnetName": {
+          "value": "${AZURE_BASTION_SUBNET_NAME}"
+      },
+      "bastionSubnetPrefix": {
+          "value": "${AZURE_BASTION_SUBNET_PREFIX}"
+      },
+      "bastionKvName": {
+        "value": "${AZURE_BASTION_KV_NAME}"
+      },    
+      "chunkNumTokens": {
+        "value": "${AZURE_CHUNK_NUM_TOKENS}"
+      },
+      "chunkMinSize": {
+        "value": "${AZURE_CHUNK_MIN_SIZE}"
+      },
+      "chunkTokenOverlap": {
+        "value": "${AZURE_CHUNK_TOKEN_OVERLAP}"
+      },    
+      "appIntSubnetName": {
+          "value": "${AZURE_APP_INT_SUBNET_NAME}"
+      },
+      "appIntSubnetPrefix": {
+          "value": "${AZURE_APP_INT_SUBNET_PREFIX}"
+      },
+      "appServicesSubnetName": {
+          "value": "${AZURE_APP_SERVICES_SUBNET_NAME}"
+      },
+      "appServicesSubnetPrefix": {
+          "value": "${AZURE_APP_SERVICES_SUBNET_PREFIX}"
+      },
+      "databaseSubnetName": {
+          "value": "${AZURE_DATABASE_SUBNET_NAME}"
+      },
+      "databaseSubnetPrefix": {
+          "value": "${AZURE_DATABASE_SUBNET_PREFIX}"
+      },
+      "vmKeyVaultSecName": {
+        "value": "${AZURE_VM_KV_SEC_NAME}"
+      },
+      "ztVmName": {
+        "value": "${AZURE_VM_NAME}"
+      },
+      "deployVM": {
+        "value": "${AZURE_VM_DEPLOY_VM}"
+      },
+      "vmUserInitialPassword": {
+        "value": "$(secretOrRandomPassword ${AZURE_VM_KV_NAME} vmUserInitialPassword)"
+      },      
+      "vmUserName": {
+        "value": "${AZURE_VM_USER_NAME}"
+      },
+      "keyVaultName": {
+        "value": "${AZURE_KEY_VAULT_NAME}"
+      },      
+      "searchUseMIS": {
+        "value": "${AZURE_SEARCH_USE_MIS}"
+      },
+      "chatGptDeploymentCapacity": {
+        "value": "${AZURE_CHAT_GPT_DEPLOYMENT_CAPACITY}"
+      },
+      "chatGptModelDeploymentType": {
+        "value": "${AZURE_CHAT_GPT_DEPLOYMENT_TYPE}"
+      },
+      "chatGptModelName": {
+        "value": "${AZURE_CHAT_GPT_MODEL_NAME}"
+      },    
+      "chatGptModelVersion": {
+        "value": "${AZURE_CHAT_GPT_MODEL_VERSION}"
+      },
+      "openaiApiVersion": {
+        "value": "${AZURE_OPENAI_API_VERSION}"
+      },
+      "orchestratorMessagesLanguage": {
+        "value": "${AZURE_ORCHESTRATOR_MESSAGES_LANGUAGE}"
+      },
+      "retrievalApproach": {
+        "value": "${AZURE_RETRIEVAL_APPROACH}"
+      },
+      "searchAnalyzerName": {
+        "value": "${AZURE_SEARCH_ANALYZER_NAME}"
+      },
+      "useSemanticReranking": {
+        "value": "${AZURE_USE_SEMANTIC_RERANKING}"
+      },
+      "searchIndex": {
+        "value": "${AZURE_SEARCH_INDEX}"
+      },
+      "searchApiVersion": {
+        "value": "${AZURE_SEARCH_API_VERSION}"
+      },
+      "searchIndexInterval": {
+        "value": "${AZURE_SEARCH_INDEX_INTERVAL}"
+      },
+      "speechRecognitionLanguage": {
+        "value": "${AZURE_SPEECH_RECOGNITION_LANGUAGE}"
+      },
+      "speechSynthesisLanguage": {
+        "value": "${AZURE_SPEECH_SYNTHESIS_LANGUAGE}"
+      },
+      "speechSynthesisVoiceName": {
+        "value": "${AZURE_SPEECH_SYNTHESIS_VOICE_NAME}"
+      },
+      "dbAccountName": {
+        "value": "${AZURE_DB_ACCOUNT_NAME}"
+      },
+      "dbDatabaseName": {
+        "value": "${AZURE_DB_DATABASE_NAME}"
+      },
+      "storageAccountName": {
+        "value": "${AZURE_STORAGE_ACCOUNT_NAME}"
+      },
+      "storageContainerName": {
+        "value": "${AZURE_STORAGE_CONTAINER_NAME}"
+      },
+      "aiServicesName": {
+        "value": "${AZURE_AI_SERVICES_NAME}"
+      },
+      "appServicePlanName": {
+        "value": "${AZURE_APP_SERVICE_PLAN_NAME}"
+      },
+      "appInsightsName": {
+        "value": "${AZURE_APP_INSIGHTS_NAME}"
+      },
+      "appServiceName": {
+        "value": "${AZURE_APP_SERVICE_NAME}"
+      },
+      "loadTestingName": {
+        "value": "${AZURE_LOAD_TESTING_NAME}"
+      },
+      "orchestratorFunctionAppName": {
+        "value": "${AZURE_ORCHESTRATOR_FUNCTION_APP_NAME}"
+      },
+      "dataIngestionFunctionAppName": {
+        "value": "${AZURE_DATA_INGEST_FUNC_NAME}"
+      },
+      "searchServiceName": {
+        "value": "${AZURE_SEARCH_SERVICE_NAME}"
+      },
+      "openAiServiceName": {
+        "value": "${AZURE_OPENAI_SERVICE_NAME}"
+      },
+      "azureStorageAccountPe": {
+        "value": "${AZURE_STORAGE_ACCOUNT_PE}"
+      },
+      "azureDbAccountPe": {
+        "value": "${AZURE_DB_ACCOUNT_PE}"
+      },
+      "azureKeyvaultPe": {
+        "value": "${AZURE_KEYVAULT_PE}"
+      },
+      "azureOrchestratorPe": {
+        "value": "${AZURE_ORCHESTRATOR_PE}"
+      },
+      "azureFrontendPe": {
+        "value": "${AZURE_FRONTEND_PE}"
+      },
+      "azureDataIngestionPe": {
+        "value": "${AZURE_DATA_INGESTION_PE}"
+      },
+      "azureAiServicesPe": {
+        "value": "${AZURE_AI_SERVICES_PE}"
+      },
+      "azureOpenAiPe": {
+        "value": "${AZURE_OPEN_AI_PE}"
+      },
+      "azureSearchPe": {
+        "value": "${AZURE_SEARCH_PE}"
+      },
+      "deploymentTags":{
+        "value": {}
+      },    
+      "azureDbConfig":{
+        "value": {
+          "dbAccountName": "${AZURE_DB_ACCOUNT_NAME}",
+          "dbDatabaseName": "${AZURE_DB_DATABASE_NAME}",
+          "conversationContainerName": "${AZURE_DB_CONVERSATIONS_CONTAINER_NAME}",
+          "modelsContainerName": "${AZURE_DB_MODELS_CONTAINER_NAME}"         
+        }
+      },
+      "azureReuseConfig":{
+        "value": {
+          "aoaiReuse": "${AOAI_REUSE}",
+          "existingAoaiResourceGroupName": "${AOAI_RESOURCE_GROUP_NAME}",
+          "existingAoaiName": "${AOAI_NAME}",
+          "appInsightsReuse": "${APP_INSIGHTS_REUSE}",
+          "existingAppInsightsResourceGroupName": "${APP_INSIGHTS_RESOURCE_GROUP_NAME}",
+          "existingAppInsightsName": "${APP_INSIGHTS_NAME}",
+          "appServicePlanReuse": "${APP_SERVICE_PLAN_REUSE}",
+          "existingAppServicePlanResourceGroupName": "${APP_SERVICE_PLAN_RESOURCE_GROUP_NAME}",
+          "existingAppServicePlanName": "${APP_SERVICE_PLAN_NAME}",
+          "aiSearchReuse": "${AI_SEARCH_REUSE}",
+          "existingAiSearchResourceGroupName": "${AI_SEARCH_RESOURCE_GROUP_NAME}",
+          "existingAiSearchName": "${AI_SEARCH_NAME}",
+          "orchestratorFunctionAppReuse": "${ORCHESTRATOR_FUNCTION_APP_REUSE}",
+          "existingOrchestratorFunctionAppResourceGroupName": "${ORCHESTRATOR_FUNCTION_APP_RESOURCE_GROUP_NAME}",
+          "existingOrchestratorFunctionAppName": "${ORCHESTRATOR_FUNCTION_APP_NAME}",
+          "dataIngestionFunctionAppReuse": "${DATA_INGESTION_FUNCTION_APP_REUSE}",
+          "existingDataIngestionFunctionAppResourceGroupName": "${DATA_INGESTION_FUNCTION_APP_RESOURCE_GROUP_NAME}",
+          "existingDataIngestionFunctionAppName": "${DATA_INGESTION_FUNCTION_APP_NAME}",
+          "appServiceReuse": "${APP_SERVICE_REUSE}",
+          "existingAppServiceName": "${APP_SERVICE_NAME}",
+          "existingAppServiceNameResourceGroupName": "${APP_SERVICE_RESOURCE_GROUP_NAME}",
+          "orchestratorFunctionAppStorageReuse": "${ORCHESTRATOR_FUNCTION_APP_STORAGE_REUSE}",
+          "existingOrchestratorFunctionAppStorageName": "${ORCHESTRATOR_FUNCTION_APP_STORAGE_NAME}",
+          "existingOrchestratorFunctionAppStorageResourceGroupName": "${ORCHESTRATOR_FUNCTION_APP_STORAGE_RESOURCE_GROUP_NAME}",
+          "dataIngestionFunctionAppStorageReuse": "${DATA_INGESTION_FUNCTION_APP_STORAGE_REUSE}",
+          "existingDataIngestionFunctionAppStorageName": "${DATA_INGESTION_FUNCTION_APP_STORAGE_NAME}",
+          "existingDataIngestionFunctionAppStorageResourceGroupName": "${DATA_INGESTION_FUNCTION_APP_STORAGE_RESOURCE_GROUP_NAME}",
+          "aiServicesReuse": "${AI_SERVICES_REUSE}",
+          "existingAiServicesResourceGroupName": "${AI_SERVICES_RESOURCE_GROUP_NAME}",
+          "existingAiServicesName": "${AI_SERVICES_NAME}",
+          "cosmosDbReuse": "${COSMOS_DB_REUSE}",
+          "existingCosmosDbResourceGroupName": "${COSMOS_DB_RESOURCE_GROUP_NAME}",
+          "existingCosmosDbAccountName": "${COSMOS_DB_ACCOUNT_NAME}",
+          "existingCosmosDbDatabaseName": "${COSMOS_DB_DATABASE_NAME}",          
+          "keyVaultReuse": "${KEY_VAULT_REUSE}",
+          "existingKeyVaultResourceGroupName": "${KEY_VAULT_RESOURCE_GROUP_NAME}",
+          "existingKeyVaultName": "${KEY_VAULT_NAME}",
+          "storageReuse": "${STORAGE_REUSE}",
+          "existingAccountResourceGroupName": "${STORAGE_RESOURCE_GROUP_NAME}",
+          "existingStorageName": "${STORAGE_NAME}",
+          "vnetReuse": "${VNET_REUSE}",
+          "existingVnetResourceGroupName": "${VNET_RESOURCE_GROUP_NAME}",
+          "existingVnetName": "${VNET_NAME}"
+        }
+      }	
   }
 }

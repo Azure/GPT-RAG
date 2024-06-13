@@ -3,14 +3,22 @@ param location string = resourceGroup().location
 param tags object = {}
 param publicNetworkAccess string
 
-@secure()
-param vmUserPasswordKey string
-@secure()
-param vmUserPassword string
+param keyVaultReuse bool
+param existingKeyVaultResourceGroupName string
+
+// @secure()
+// param vmUserPasswordKey string
+// @secure()
+// param vmUserPassword string
 
 param principalId string = ''
 
-resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
+resource existingKeyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = if (keyVaultReuse) {
+  scope: resourceGroup(existingKeyVaultResourceGroupName)
+  name: name  
+}
+
+resource newKeyVault 'Microsoft.KeyVault/vaults@2022-07-01' = if (!keyVaultReuse) {
   name: name
   location: location
   tags: tags
@@ -30,24 +38,23 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
   }
 }
 
-resource vmUserPasswordSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (publicNetworkAccess == 'Enabled') {
-  parent: keyVault
-  name: vmUserPasswordKey
-  properties: {
-    value: vmUserPassword
-  }
-}
+// resource vmUserPasswordSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (publicNetworkAccess == 'Enabled') {
+//   parent: newKeyVault
+//   name: vmUserPasswordKey
+//   properties: {
+//     value: vmUserPassword
+//   }
+// }
 
-resource KeyVaultAccessRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (publicNetworkAccess == 'Enabled') {
-  name: guid(subscription().id, resourceGroup().id, principalId, keyVault.id, 'Secret Reader')
-  scope: keyVault
-  properties: {
-    principalId: principalId
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')
-    principalType: 'User'
-  }
-}
+// resource KeyVaultAccessRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (publicNetworkAccess == 'Enabled') {
+//   name: guid(subscription().id, resourceGroup().id, principalId,  keyVaultReuse ? existingKeyVault.id: newKeyVault.id, 'Secret Reader')
+//   scope: keyVaultReuse ? existingKeyVault: newKeyVault
+//   properties: {
+//     principalId: principalId
+//     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')
+//   }
+// }
 
-output endpoint string = keyVault.properties.vaultUri
-output name string = keyVault.name
-output id string = keyVault.id
+output id string = keyVaultReuse ? existingKeyVault.id: newKeyVault.id
+output name string = keyVaultReuse ? existingKeyVault.name: newKeyVault.name
+output endpoint string = keyVaultReuse ? existingKeyVault.properties.vaultUri: newKeyVault.properties.vaultUri

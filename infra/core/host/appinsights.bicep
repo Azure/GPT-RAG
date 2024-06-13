@@ -1,7 +1,15 @@
 param applicationInsightsName string
 param appInsightsLocation string
 
-resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
+param appInsightsReuse bool
+param existingAppInsightsResourceGroupName string
+
+resource existingApplicationInsights 'Microsoft.Insights/components@2020-02-02' existing  = if (appInsightsReuse) {
+  scope: resourceGroup(existingAppInsightsResourceGroupName)
+  name: applicationInsightsName
+}
+
+resource newApplicationInsights 'Microsoft.Insights/components@2020-02-02' = if (!appInsightsReuse) {
   name: applicationInsightsName
   location: appInsightsLocation
   kind: 'web'
@@ -11,7 +19,6 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
   }
 }
 
-output instrumentationKey string = applicationInsights.properties.InstrumentationKey
-output connectionString string = applicationInsights.properties.ConnectionString
-output id string = applicationInsights.id
-
+output id string = appInsightsReuse ? existingApplicationInsights.id : newApplicationInsights.id
+output instrumentationKey string = appInsightsReuse ? existingApplicationInsights.properties.InstrumentationKey : newApplicationInsights.properties.InstrumentationKey
+output connectionString string = appInsightsReuse ? existingApplicationInsights.properties.ConnectionString : newApplicationInsights.properties.ConnectionString

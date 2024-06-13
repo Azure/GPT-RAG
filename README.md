@@ -7,10 +7,10 @@ languages:
 products:
 - azure
 - azure-openai
-- azure-cognitive-search
+- azure-ai-search
 urlFragment: GPT-RAG
-name: Multi-repo ChatGPT and Enterprise data with Azure OpenAI and Cognitive Search
-description: GPT-RAG core is a Retrieval-Augmented Generation pattern running in Azure, using Azure Cognitive Search for retrieval and Azure OpenAI large language models to power ChatGPT-style and Q&A experiences.
+name: Multi-repo ChatGPT and Enterprise data with Azure OpenAI and AI Search
+description: GPT-RAG core is a Retrieval-Augmented Generation pattern running in Azure, using Azure AI Search for retrieval and Azure OpenAI large language models to power ChatGPT-style and Q&A experiences.
 -->
 <!-- YAML front-matter schema: https://review.learn.microsoft.com/en-us/help/contribute/samples/process/onboarding?branch=main#supported-metadata-fields-for-readmemd -->
 
@@ -24,11 +24,13 @@ The **Enterprise RAG** Solution Accelerator (GPT-RAG) offers a robust architectu
 
 ## Components
 
-* [Data ingestion](https://github.com/Azure/gpt-rag-ingestion) Optimizes data preparation for Azure OpenAI.
+GPT-RAG follows a modular approach, consisting of three components, each with a specific function.
 
-* [Orchestrator](https://github.com/Azure/gpt-rag-orchestrator) The system's dynamic backbone ensuring scalability and a consistent user experience.
+* [Data Ingestion](https://github.com/Azure/gpt-rag-ingestion) - Optimizes data chunking and indexing for the RAG retrieval step.
 
-* [App Front-End](https://github.com/Azure/gpt-rag-frontend) Built with Azure App Services and the Backend for Front-End pattern, offers a smooth and scalable user interface.
+* [Orchestrator](https://github.com/Azure/gpt-rag-orchestrator) - Orchestrates LLMs and knowledge bases calls to generate optimal responses for users.
+
+* [App Front-End](https://github.com/Azure/gpt-rag-frontend) - Uses the [Backend for Front-End](https://learn.microsoft.com/en-us/azure/architecture/patterns/backends-for-frontends) pattern to provide a scalable and efficient web interface.
 
 <!-- * [Teams-BOT](https://github.com/Azure/gpt-rag-bot) Constructed using Azure BOT Services, this platform enables users to engage with the Orchestrator seamlessly through the Microsoft Teams interface. -->
 
@@ -39,6 +41,8 @@ Removing temporarily while not finished
 
 
 ## Concepts
+
+If you want to learn more about the RAG Pattern and GPT-RAG architecture.
 
 * [RAG Pattern: What and Why?](docs/RAG_CONCEPTS.md)
 
@@ -52,23 +56,24 @@ Removing temporarily while not finished
 
 ## Getting Started
 
-This guide will walk you through the deployment of Enterprise RAG. Before you begin, ensure you have the necessary tools and services installed as listed in the **Pre-reqs** section.
+This guide will walk you through the deployment process of Enterprise RAG. There are two deployment options available, **Basic Architecture** and **Zero Trust Architecture**. Before beginning the deployment, please ensure you have prepared all the necessary tools and services as outlined in the **Pre-requisites** section.
 
-**Pre-reqs**
+**Pre-requisites**
 
 - Azure Developer CLI: [Download azd for Windows](https://azdrelease.azureedge.net/azd/standalone/release/1.5.0/azd-windows-amd64.msi), [Other OS's](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd).
  - Powershell 7+ with AZ module (Windows only): [Powershell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4#installing-the-msi-package), [AZ Module](https://learn.microsoft.com/en-us/powershell/azure/what-is-azure-powershell?view=azps-11.6.0#the-az-powershell-module)
  - Git: [Download Git](https://git-scm.com/downloads)
  - Node.js 16+ [windows/mac](https://nodejs.dev/en/download/)  [linux/wsl](https://nodejs.dev/en/download/package-manager/)
  - Python 3.11: [Download Python](https://www.python.org/downloads/release/python-3118/)
- - Initiate an [Azure AI service creation](https://portal.azure.com/#create/Microsoft.CognitiveServicesAllInOne) and agree to the Responsible AI terms **
+ - Initiate an [Azure AI services creation](https://portal.azure.com/#create/Microsoft.CognitiveServicesAllInOne) and agree to the Responsible AI terms **
 
-** If you have not created an Azure AI service resource in the subscrption before
+** If you have not created an Azure AI service resource in the subscription before
 
-### Basic Architecture
+**Note:** If you implement the Zero-trust architecture described below, you will only need Node.js and Python for the second part of the procedure, which you will carry out on the VM created during the deployment process of this architecture.
 
-For quick demos or Proof of Concept (PoC) without network isolation, you can deploy the accelerator with the basic architecture.
+### Basic Architecture Deployment
 
+For quick demonstrations or proof-of-concept projects without network isolation requirements, you can deploy the accelerator using its basic architecture.
 ![Basic Architecture](media/architecture-GPT-RAG-Basic.png)
 
 The deployment procedure is quite simple, just install the prerequisites and follow these four steps using [Azure Developer CLI (azd)](https://aka.ms/azure-dev/install) in a terminal:
@@ -83,7 +88,6 @@ azd init -t azure/gpt-rag
 
 ```sh
 azd auth login
-
 ```
 
 **3** Start Building the infrastructure and components deployment:
@@ -99,7 +103,7 @@ Upload your documents to the 'documents' folder located in the storage account. 
 
  ![storage_sample](media/readme-storage_sample.png)
 
-### Zero Trust Architecture
+### Zero Trust Architecture Deployment
 
 For more secure and isolated deployments, you can opt for the Zero Trust architecture. This architecture is ideal for production environments where network isolation and stringent security measures are highly valued.
 
@@ -123,20 +127,13 @@ azd env set AZURE_NETWORK_ISOLATION true
 
 ```sh
 azd auth login
-
 ```
 
 **4** Start Building the infrastructure and components deployment:
 
 ```sh
-azd up
+azd provision
 ```
-  
-After the infrastructure is provisioned and before starting the deployment of the components, you will be asked the following question:  
-   
-> Zero Trust Infrastructure enabled. Confirm you are using a connection where resources are reachable (like VM+Bastion)? [Y/n]:  
-   
-Initially, you will not be connected to the same vnet where the resources can be accessed, so answer `n`.
 
 **5** Next, you will use the Virtual Machine with the Bastion connection (created during step 4) to continue the deployment.  
    
@@ -175,9 +172,13 @@ azd deploy
    
 Done! Zero trust deployment is completed.
 
-## Additional Customizations
+## Customizing your Deployment
 
-Refer to the [Custom Deployment](docs/CUSTOMIZATIONS.md) section to learn about additional customization options you can make.
+The deployment process outlined in the Getting Started section sets up Azure resources and deploys the accelerator components with a standard configuration. For those looking to tailor the deployment more closely to their specific requirements, the [Custom Deployment](docs/CUSTOMIZATIONS.md) section offers further customization possibilities.
+
+## Integrating with Additional Data Sources
+
+If you're looking to expand your data retrieval capabilities by adding new data sources, consider integrating Bing Custom Search, SQL Server, and Teradata. For more information, refer to the [AI Integration Hub](docs/AI_INTEGRATION_HUB.md) page.
 
 ## Additional Resources
 
