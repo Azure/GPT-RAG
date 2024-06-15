@@ -109,14 +109,6 @@ resource newFunctionApp 'Microsoft.Web/sites@2022-09-01' = if (!functionAppReuse
           name: 'AzureWebJobsStorage'
           value: 'DefaultEndpointsProtocol=https;AccountName=${_storageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${_storage_keys}'
         }
-        // {
-        //   name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
-        //   value: 'DefaultEndpointsProtocol=https;AccountName=${_storageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${_storage_keys}'
-        // }
-        // {
-        //   name: 'WEBSITE_CONTENTSHARE'
-        //   value: toLower(functionAppName)
-        // }
         {
           name: 'FUNCTIONS_EXTENSION_VERSION'
           value: '~4'

@@ -76,7 +76,7 @@ In some cases, you may want to use one or more pre-existing resources in your su
 
 ## Selecting Your Components
 
-To install specific GPT-RAG components, you can adjust the installation process by setting one or more of the following variables to false, based on the components you prefer not to install:
+To install just some specific GPT-RAG components, you can adjust the installation process by setting one or more of the following variables to false, based on the components you prefer not to install:
 
 - DEPLOY_DATA_INGESTION
 - DEPLOY_FRONTEND
