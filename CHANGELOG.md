@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
  
 ## Changelog
 
+### 2024-06-15
+- **Added**: Option to install just some specific GPT-RAG components: data ingestion, orchestrator and frontend.
+
 ### 2024-06-10
 - **Added**: Optional Reuse of Pre-Created Resources: You can now optionally reuse existing resources such as VNets, Azure OpenAI instances, etc.
 - **Added**: Ability to Reuse Application Service Environment.
