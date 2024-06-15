@@ -4,6 +4,8 @@ param tags object = {}
 param aiServicesReuse bool
 param existingAiServicesResourceGroupName string
 
+param aiServicesDeploy bool
+
 param secretsNames object = {}
 param keyVaultName string
 
@@ -15,12 +17,12 @@ param sku object = {
   name: 'S0'
 }
 
-resource existingAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' existing  = if (aiServicesReuse) {
+resource existingAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' existing  = if (aiServicesReuse && aiServicesDeploy) {
   scope: resourceGroup(existingAiServicesResourceGroupName)
   name: name
 }
 
-resource newAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' = if (!aiServicesReuse) {
+resource newAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' = if (!aiServicesReuse && aiServicesDeploy) {
   name: name
   location: location
   tags: tags
@@ -33,7 +35,7 @@ resource newAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' = if (!aiS
 }
 
 @batchSize(1)
-resource deployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = [for deployment in deployments: if (!aiServicesReuse) {
+resource deployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = [for deployment in deployments: if (!aiServicesReuse && aiServicesDeploy) {
   parent: newAccount
   name: deployment.name
   properties: {
@@ -65,6 +67,6 @@ resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' =  [for s
   }
 }]
 
-output name string = aiServicesReuse? existingAccount.name : newAccount.name
-output id string = aiServicesReuse? existingAccount.id : newAccount.id
-output endpoint string = aiServicesReuse? existingAccount.properties.endpoint : newAccount.properties.endpoint
+output name string = !aiServicesDeploy ? '' : aiServicesReuse? existingAccount.name : newAccount.name
+output id string = !aiServicesDeploy ? '' : aiServicesReuse? existingAccount.id : newAccount.id
+output endpoint string = !aiServicesDeploy ? '' : aiServicesReuse? existingAccount.properties.endpoint : newAccount.properties.endpoint

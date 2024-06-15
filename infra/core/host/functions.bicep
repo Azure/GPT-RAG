@@ -24,6 +24,7 @@ param vnetName string
 param subnetId string
 
 param functionAppReuse bool
+param deployFunctionApp bool
 param existingFunctionAppResourceGroupName string
 
 param functionAppStorageReuse bool
@@ -50,12 +51,12 @@ param runtime string = 'python'
 var functionAppName = appName
 var functionWorkerRuntime = runtime
 
-resource existingStorageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' existing  = if (functionAppStorageReuse) {
+resource existingStorageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' existing  = if (functionAppStorageReuse && deployFunctionApp) {
   scope: resourceGroup(existingFunctionAppStorageResourceGroupName)
   name: existingFunctionAppStorageName
 }
 
-resource newStorageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = if (!functionAppStorageReuse) {
+resource newStorageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = if (!functionAppStorageReuse && deployFunctionApp) {
   name: storageAccountName
   location: location
   sku: {
@@ -69,16 +70,16 @@ resource newStorageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = if (
   }
 }
 
-var _storage_keys = functionAppStorageReuse ? existingStorageAccount.listKeys().keys[0].value : newStorageAccount.listKeys().keys[0].value
-var _storageAccountName= functionAppStorageReuse ? existingStorageAccount.name : newStorageAccount.name
+var _storage_keys = !deployFunctionApp ? '' : functionAppStorageReuse ? existingStorageAccount.listKeys().keys[0].value : newStorageAccount.listKeys().keys[0].value
+var _storageAccountName= !deployFunctionApp ? '' : functionAppStorageReuse ? existingStorageAccount.name : newStorageAccount.name
 
 
-resource existingFunctionApp 'Microsoft.Web/sites@2022-09-01' existing  = if (functionAppReuse) {
+resource existingFunctionApp 'Microsoft.Web/sites@2022-09-01' existing  = if (functionAppReuse && deployFunctionApp) {
   scope: resourceGroup(existingFunctionAppResourceGroupName)
   name: functionAppName
 }
 
-resource newFunctionApp 'Microsoft.Web/sites@2022-09-01' = if (!functionAppReuse) {
+resource newFunctionApp 'Microsoft.Web/sites@2022-09-01' = if (!functionAppReuse && deployFunctionApp) {
   name: functionAppName
   location: location
   kind: kind
@@ -108,14 +109,14 @@ resource newFunctionApp 'Microsoft.Web/sites@2022-09-01' = if (!functionAppReuse
           name: 'AzureWebJobsStorage'
           value: 'DefaultEndpointsProtocol=https;AccountName=${_storageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${_storage_keys}'
         }
-        {
-          name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${_storageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${_storage_keys}'
-        }
-        {
-          name: 'WEBSITE_CONTENTSHARE'
-          value: toLower(functionAppName)
-        }
+        // {
+        //   name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
+        //   value: 'DefaultEndpointsProtocol=https;AccountName=${_storageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${_storage_keys}'
+        // }
+        // {
+        //   name: 'WEBSITE_CONTENTSHARE'
+        //   value: toLower(functionAppName)
+        // }
         {
           name: 'FUNCTIONS_EXTENSION_VERSION'
           value: '~4'
@@ -148,8 +149,8 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = if (!(empty(
  name: keyVaultName
 }
 
-output identityPrincipalId string = functionAppReuse ? existingFunctionApp.identity.principalId : newFunctionApp.identity.principalId
-output name string = functionAppReuse ? existingFunctionApp.name : newFunctionApp.name
-output uri string = 'https://${functionAppReuse ? existingFunctionApp.properties.defaultHostName : newFunctionApp.properties.defaultHostName}'
-output location string = functionAppReuse ? existingFunctionApp.location : newFunctionApp.location
-output id string = functionAppReuse ? existingFunctionApp.id : newFunctionApp.id
+output identityPrincipalId string = !deployFunctionApp ? '' : functionAppReuse ? existingFunctionApp.identity.principalId : newFunctionApp.identity.principalId
+output name string = !deployFunctionApp ? '' : functionAppReuse ? existingFunctionApp.name : newFunctionApp.name
+output uri string = !deployFunctionApp ? '' : 'https://${functionAppReuse ? existingFunctionApp.properties.defaultHostName : newFunctionApp.properties.defaultHostName}'
+output location string = !deployFunctionApp ? '' : functionAppReuse ? existingFunctionApp.location : newFunctionApp.location
+output id string = !deployFunctionApp ? '' : functionAppReuse ? existingFunctionApp.id : newFunctionApp.id
