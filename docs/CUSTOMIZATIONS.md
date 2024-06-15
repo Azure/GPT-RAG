@@ -7,6 +7,7 @@ On this page, you will find some options to configure your deployment:
 - [Setting Custom Names for Resources](#defining-resources-names)
 - [Applying Tags to All Resources](#adding-tags-for-all-resources)
 - [Bringing Your Own Resources](#bring-your-own-resources)
+- [Selecting Your Components](#selecting-your-components)
 - [Accessing Data Ingest function using AI Search Managed Identity](#accessing-the-data-ingest-function-from-ai-search-using-a-managed-identity)
 - [Extending Enteprise RAG components](#extending-solution-components)
 
@@ -72,6 +73,35 @@ azd env set COST_CENTER bar
 ## Bring Your Own Resources
 
 In some cases, you may want to use one or more pre-existing resources in your subscription instead of creating new ones. Our Bicep template allows you to do this. For detailed instructions on how this can be achieved, please take a look at the [Bring Your Own Resources](CUSTOMIZATIONS_BYOR.md) page.
+
+## Selecting Your Components
+
+To install specific GPT-RAG components, you can adjust the installation process by setting one or more of the following variables to false, based on the components you prefer not to install:
+
+- DEPLOY_DATA_INGESTION
+- DEPLOY_FRONTEND
+- DEPLOY_ORCHESTRATOR
+
+After setting the variables, begin the deployment process by running `azd init` as directed in the Getting Started section on the main page. Next, execute `azd provision`. Following this, use the `azd package` and `azd deploy` commands, specifying which components to install: `dataIngest`, `orchestrator`, or `frontend`. If no components are specified, the system will attempt to package and deploy all components.
+
+For example, suppose you are only interested in the **Data ingestion** component.
+
+First, you would set the deployment of the other two components to false:
+
+```
+azd env set DEPLOY_FRONTEND false
+azd env set DEPLOY_ORCHESTRATOR false
+```
+
+Then, you proceed with the deployment procedure, as previously described.
+
+```
+azd provision
+azd package dataIngest
+azd deploy dataIngest
+```
+
+Done! you deployed only the **Data ingestion** component.
 
 ## Accessing the data ingest function from AI Search using a Managed Identity
 
