@@ -18,7 +18,7 @@ services:
         windows:
           # this path is relative to ./.azure/gpt-rag-ingestion
           run: scripts/postdeploy.ps1
-          interactive: false          
+          interactive: false
   orchestrator:
     project: ./.azure/gpt-rag-orchestrator
     language: python
