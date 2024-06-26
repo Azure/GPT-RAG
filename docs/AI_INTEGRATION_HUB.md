@@ -69,20 +69,17 @@ SQL Integration is a service that allows users to seamlessly connect and query t
 
 Currently the integration is performed by SQL User & Password. 
 
-1. **Add/Update Environment Variable**: ""RETRIEVAL_PRIORITY": "sql" in the Orchestrator Function.
-2. **Add/Update Environment Variable**: "SQL_TOP_K": "3" in the Orchestrator Function.
-3. **Add/Update Environment Variable**: "SQL_MAX_TOKENS": "1000" in the Orchestrator Function.
-4. **Add the following secrets** in the Azure Key Vault: "sqlpassword" and enter the password for the SQL Authentication.
-5. **Copy the following example in the code_orchestrator.py** in order to perform the query.
-6. **Test Connectivity** perform a GET using Postman with the following params:
-```json
-   'sql_search': sql_search,
-   'sql_server': sql_server,
-   'sql_database': sql_database,
-   'sql_table_info': sql_table_info,
-   'sql_username': sql_username,
-   'sql_top_k': sql_top_k,
-```
+1. **Add/Update Environment Variable**: "DB_RETRIEVAL": "true" in the Orchestrator Function.
+2. **Add/Update Environment Variable**: "DB_TYPE": "sql" in the Orchestrator Function.
+3. **Add/Update Environment Variable**: ""RETRIEVAL_PRIORITY": "db" in the Orchestrator Function.
+4. **Add/Update Environment Variable**: "DB_TOP_K": "3" in the Orchestrator Function.
+5. **Add/Update Environment Variable**: "DB_MAX_TOKENS": "1000" in the Orchestrator Function.
+6. **Add/Update Environment Variable**: "DB_SERVER": "{your_sql_server}" in the Orchestrator Function.
+7. **Add/Update Environment Variable**: "DB_USERNAME": "{your_sql_username}" in the Orchestrator Function.
+8. **Add/Update Environment Variable**: "DB_DATABASE": "{your_sql_database}" in the Orchestrator Function.
+9. **Add the following secrets** in the Azure Key Vault: "sqlpassword" and enter the password for the SQL Authentication.
+10. Once is done you can open the Orchestrator Log Stream from Azure Portal in order to confirm the retrieval comes from SQL.
+
 
 
 # Teradata
@@ -105,17 +102,47 @@ Integrating Azure OpenAI with Teradata allows users to seamlessly connect and qu
 This integration offers a powerful combination of advanced analytical capabilities and efficient data management, enhancing the use of artificial intelligence in decision-making and extracting valuable insights for organizations.
 
 ### **Teradata Deployment Procedure**
-1. **Add/Update Environment Variable**: ""RETRIEVAL_PRIORITY": "teradata" in the Orchestrator Function.
-2. **Add/Update Environment Variable**: "TERADATA_TOP_K": "3" in the Orchestrator Function.
-3. **Add/Update Environment Variable**: "TERADATA_MAX_TOKENS": "1000" in the Orchestrator Function.
-4. **Add the following secrets** in the Azure Key Vault: "teradatapassword" and enter the password for the Teradata Authentication.
-5. **Copy the following example in the code_orchestrator.py** in order to perform the query.
-6. **Test Connectivity** perform a GET using Postman with the following params:
-```json
-        'teradata_search': teradata_search,
-        'teradata_username': teradata_username,
-        'teradata_server': teradata_server,
-        'teradata_database': teradata_database,
-        'teradata_table_info': teradata_table_info,
-        'teradata_top_k': teradata_top_k
+1. **Add/Update Environment Variable**: "DB_RETRIEVAL": "true" in the Orchestrator Function.
+2. **Add/Update Environment Variable**: "DB_TYPE": "teradata" in the Orchestrator Function.
+3. **Add/Update Environment Variable**: ""RETRIEVAL_PRIORITY": "db" in the Orchestrator Function.
+4. **Add/Update Environment Variable**: "DB_TOP_K": "3" in the Orchestrator Function.
+5. **Add/Update Environment Variable**: "DB_MAX_TOKENS": "1000" in the Orchestrator Function.
+6. **Add/Update Environment Variable**: "DB_SERVER": "{your_teradata_server}" in the Orchestrator Function.
+7. **Add/Update Environment Variable**: "DB_USERNAME": "{your_teradata_username}" in the Orchestrator Function.
+8. **Add/Update Environment Variable**: "DB_DATABASE": "{your_teradata_database}" in the Orchestrator Function.
+9. **Add the following secrets** in the Azure Key Vault: "teradatapassword" and enter the password for the SQL Authentication.
+10. Once is done you can open the Orchestrator Log Stream from Azure Portal in order to confirm the retrieval comes from teradata.
+
+# Multiple databases
+
+To connect to more than one database, the DBRetrieval should be replicated, once per required database.
+### **Multiple databases Deployment Procedure**
+1. **Replicate DBRetrieval function**: Duplicate the “DBRetrieval” function in the orchestrator retrieval plugin. You’ll find it in the file “native_function.py” in "/orc/plugins/Retrieval".
+2. **Create Enviroment Variable**: Make a copy of the following set of variables: [DB_TYPE, DB_SERVER, DB_USERNAME, DB_DATABASE, DB_TOP_K, DB_MAX_TOKENS]. Assign them new names.
+3. **Create Secret on Key Vault**: Create a new secret on the key vault with the password to the added database.
+4. **Create File With Table Data**: Create a new file with a description of each table in the database.
+5. **Include Variables in File**: Include the New Variables in Your Code: For example: 
+```python
+DB_SERVER_2 = os.environ.get("DB_SERVER_2")
+DB_DATABASE_2 = os.environ.get("DB_DATABASE_2")
+DB_USERNAME_2 = os.environ.get("DB_USERNAME_2")
+DB_TOP_K_2 = os.environ.get("DB_TOP_K_2")
+DB_MAX_TOKENS_2 = os.environ.get("DB_MAX_TOKENS_2")
+DB_TYPE_2 = os.environ.get("DB_TYPE_2")
+```
+Then, replace the environment variables, secret and table info file only in the replicated “DBRetrieval” function with the created ones.
+
+6. **Include Replicated Function in Orchestration Code**: In the file “code_orchestration.py,” add the replicated function. For example:
+```python
+if(DB_RETRIEVAL):
+    db_function_result= await kernel.invoke(retrievalPlugin["DBRetrieval"], sk.KernelArguments(input=search_query))
+    formatted_sources = db_function_result.value[:100].replace('\n', ' ')
+    escaped_sources = escape_xml_characters(db_function_result.value)
+    db_sources=escaped_sources
+    db_function_result_2=await kernel.invoke(retrievalPlugin["DBRetrieval2"], sk.KernelArguments(input=search_query))
+    formatted_sources_2 = db_function_result_2.value[:100].replace('\n', ' ')
+    escaped_sources_2 = escape_xml_characters(db_function_result.value)
+    db_sources+=escaped_sources_2
+    logging.info(f"[code_orchest] generated DB sources: {formatted_sources + formatted_sources_2}")
+
 ```
