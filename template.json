@@ -1,0 +1,4523 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "accounts_cs0_vm2b2htvuuclm_name": {
+      "type": "String"
+    },
+    "accounts_docint_vm2b2htvuuclm_name": {
+      "type": "String"
+    },
+    "accounts_oai0_vm2b2htvuuclm_name": {
+      "type": "String"
+    },
+    "actionGroups_Application_Insights_Smart_Detection_name": {
+      "type": "String"
+    },
+    "b2cDirectories_salesfactoryai2_onmicrosoft_com_name": {
+      "type": "String"
+    },
+    "components_appins0_vm2b2htvuuclm_name": {
+      "type": "String"
+    },
+    "databaseAccounts_dbgpt0_vm2b2htvuuclm_name": {
+      "type": "String"
+    },
+    "datastores_azureml_globaldatasets_secretsType": {
+      "type": "SecureString"
+    },
+    "datastores_workspaceartifactstore_secretsType": {
+      "type": "SecureString"
+    },
+    "datastores_workspaceblobstore_secretsType": {
+      "type": "SecureString"
+    },
+    "datastores_workspacefilestore_secretsType": {
+      "type": "SecureString"
+    },
+    "datastores_workspaceworkingdirectory_secretsType": {
+      "type": "SecureString"
+    },
+    "searchServices_search0_vm2b2htvuuclm_name": {
+      "type": "String"
+    },
+    "serverfarms_appplan0_vm2b2htvuuclm_name": {
+      "type": "String"
+    },
+    "sites_fninges0_vm2b2htvuuclm_name": {
+      "type": "String"
+    },
+    "sites_fnorch0_vm2b2htvuuclm_name": {
+      "type": "String"
+    },
+    "sites_webgpt0_vm2b2htvuuclm_name": {
+      "type": "String"
+    },
+    "smartdetectoralertrules_failure_anomalies___appins0_vm2b2htvuuclm_name": {
+      "type": "String"
+    },
+    "storageAccounts_adb2auth_name": {
+      "type": "String"
+    },
+    "storageAccounts_strag0vm2b2htvuuclm_name": {
+      "type": "String"
+    },
+    "storageAccounts_strag0vm2b2htvuuclming_name": {
+      "type": "String"
+    },
+    "storageAccounts_strag0vm2b2htvuuclmorc_name": {
+      "type": "String"
+    },
+    "userAssignedIdentities_webgpt0_vm2b2htv_id_aeec_name": {
+      "type": "String"
+    },
+    "vaults_kv0_vm2b2htvuuclm_name": {
+      "type": "String"
+    },
+    "virtualNetworks_aivnet0_vm2b2htvuuclm_name": {
+      "type": "String"
+    },
+    "workspaces_MachineLearningPromptFlowTest_name": {
+      "type": "String"
+    }
+  },
+  "resources": [
+    {
+      "apiVersion": "2023-05-17-preview",
+      "location": "United States",
+      "name": "[parameters('b2cDirectories_salesfactoryai2_onmicrosoft_com_name')]",
+      "properties": {},
+      "sku": {
+        "name": "PremiumP1",
+        "tier": "A0"
+      },
+      "type": "Microsoft.AzureActiveDirectory/b2cDirectories"
+    },
+    {
+      "apiVersion": "2024-04-01-preview",
+      "kind": "CognitiveServices",
+      "location": "eastus",
+      "name": "[parameters('accounts_cs0_vm2b2htvuuclm_name')]",
+      "properties": {
+        "apiProperties": {},
+        "customSubDomainName": "[parameters('accounts_cs0_vm2b2htvuuclm_name')]",
+        "publicNetworkAccess": "Enabled"
+      },
+      "sku": {
+        "name": "S0"
+      },
+      "tags": {
+        "azd-env-name": "develop-clew"
+      },
+      "type": "Microsoft.CognitiveServices/accounts"
+    },
+    {
+      "apiVersion": "2024-04-01-preview",
+      "kind": "FormRecognizer",
+      "location": "eastus",
+      "name": "[parameters('accounts_docint_vm2b2htvuuclm_name')]",
+      "properties": {
+        "publicNetworkAccess": "Enabled"
+      },
+      "sku": {
+        "name": "S0"
+      },
+      "type": "Microsoft.CognitiveServices/accounts"
+    },
+    {
+      "apiVersion": "2024-04-01-preview",
+      "kind": "OpenAI",
+      "location": "eastus",
+      "name": "[parameters('accounts_oai0_vm2b2htvuuclm_name')]",
+      "properties": {
+        "customSubDomainName": "[parameters('accounts_oai0_vm2b2htvuuclm_name')]",
+        "publicNetworkAccess": "Enabled"
+      },
+      "sku": {
+        "name": "S0"
+      },
+      "tags": {
+        "azd-env-name": "develop-clew"
+      },
+      "type": "Microsoft.CognitiveServices/accounts"
+    },
+    {
+      "apiVersion": "2024-05-15",
+      "identity": {
+        "type": "None"
+      },
+      "kind": "GlobalDocumentDB",
+      "location": "East US",
+      "name": "[parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name')]",
+      "properties": {
+        "analyticalStorageConfiguration": {
+          "schemaType": "WellDefined"
+        },
+        "backupPolicy": {
+          "periodicModeProperties": {
+            "backupIntervalInMinutes": 240,
+            "backupRetentionIntervalInHours": 8,
+            "backupStorageRedundancy": "Geo"
+          },
+          "type": "Periodic"
+        },
+        "capabilities": [],
+        "consistencyPolicy": {
+          "defaultConsistencyLevel": "Session",
+          "maxIntervalInSeconds": 5,
+          "maxStalenessPrefix": 100
+        },
+        "cors": [],
+        "databaseAccountOfferType": "Standard",
+        "defaultIdentity": "FirstPartyIdentity",
+        "disableKeyBasedMetadataWriteAccess": false,
+        "disableLocalAuth": false,
+        "enableAnalyticalStorage": true,
+        "enableAutomaticFailover": true,
+        "enableBurstCapacity": false,
+        "enableFreeTier": false,
+        "enableMultipleWriteLocations": false,
+        "enablePartitionMerge": false,
+        "ipRules": [],
+        "isVirtualNetworkFilterEnabled": false,
+        "locations": [
+          {
+            "failoverPriority": 0,
+            "isZoneRedundant": false,
+            "locationName": "East US"
+          }
+        ],
+        "minimalTlsVersion": "Tls",
+        "networkAclBypass": "None",
+        "networkAclBypassResourceIds": [],
+        "publicNetworkAccess": "Enabled",
+        "virtualNetworkRules": []
+      },
+      "tags": {
+        "azd-env-name": "develop-clew"
+      },
+      "type": "Microsoft.DocumentDB/databaseAccounts"
+    },
+    {
+      "apiVersion": "2023-09-01-preview",
+      "location": "Global",
+      "name": "[parameters('actionGroups_Application_Insights_Smart_Detection_name')]",
+      "properties": {
+        "armRoleReceivers": [
+          {
+            "name": "Monitoring Contributor",
+            "roleId": "749f88d5-cbae-40b8-bcfc-e573ddc772fa",
+            "useCommonAlertSchema": true
+          },
+          {
+            "name": "Monitoring Reader",
+            "roleId": "43d0d8ad-25c7-4714-9337-8ba259a9fe05",
+            "useCommonAlertSchema": true
+          }
+        ],
+        "automationRunbookReceivers": [],
+        "azureAppPushReceivers": [],
+        "azureFunctionReceivers": [],
+        "emailReceivers": [],
+        "enabled": true,
+        "eventHubReceivers": [],
+        "groupShortName": "SmartDetect",
+        "itsmReceivers": [],
+        "logicAppReceivers": [],
+        "smsReceivers": [],
+        "voiceReceivers": [],
+        "webhookReceivers": []
+      },
+      "type": "microsoft.insights/actionGroups"
+    },
+    {
+      "apiVersion": "2020-02-02",
+      "kind": "web",
+      "location": "eastus",
+      "name": "[parameters('components_appins0_vm2b2htvuuclm_name')]",
+      "properties": {
+        "Application_Type": "web",
+        "IngestionMode": "ApplicationInsights",
+        "Request_Source": "rest",
+        "RetentionInDays": 90,
+        "publicNetworkAccessForIngestion": "Enabled",
+        "publicNetworkAccessForQuery": "Enabled"
+      },
+      "type": "microsoft.insights/components"
+    },
+    {
+      "apiVersion": "2023-07-01",
+      "location": "eastus",
+      "name": "[parameters('vaults_kv0_vm2b2htvuuclm_name')]",
+      "properties": {
+        "accessPolicies": [
+          {
+            "objectId": "fac79724-d3af-4316-b83f-048e2ca6c75f",
+            "permissions": {
+              "certificates": [],
+              "keys": [],
+              "secrets": [
+                "Get",
+                "List",
+                "Set"
+              ]
+            },
+            "tenantId": "a44ed764-ff89-4457-baf4-483d129eb07b"
+          },
+          {
+            "objectId": "38edc1bb-3bf9-4e2c-bf53-c55f31446ee1",
+            "permissions": {
+              "certificates": [],
+              "keys": [],
+              "secrets": [
+                "Get",
+                "List",
+                "Set",
+                "Delete"
+              ]
+            },
+            "tenantId": "a44ed764-ff89-4457-baf4-483d129eb07b"
+          },
+          {
+            "objectId": "e6391111-19bc-4c51-ade6-0834b05f6ae6",
+            "permissions": {
+              "certificates": [],
+              "keys": [],
+              "secrets": [
+                "Get",
+                "List",
+                "Set",
+                "Delete"
+              ]
+            },
+            "tenantId": "a44ed764-ff89-4457-baf4-483d129eb07b"
+          },
+          {
+            "objectId": "8e068ce8-6115-4bdd-a2bc-02c46d737a85",
+            "permissions": {
+              "certificates": [],
+              "keys": [],
+              "secrets": [
+                "Get",
+                "List",
+                "Set",
+                "Delete"
+              ]
+            },
+            "tenantId": "a44ed764-ff89-4457-baf4-483d129eb07b"
+          },
+          {
+            "objectId": "1b2f609f-e7c7-4a1b-8f4c-160cb07e2ee9",
+            "permissions": {
+              "certificates": [],
+              "keys": [],
+              "secrets": [
+                "Get",
+                "List",
+                "Set",
+                "Delete",
+                "Recover",
+                "Backup"
+              ]
+            },
+            "tenantId": "a44ed764-ff89-4457-baf4-483d129eb07b"
+          },
+          {
+            "objectId": "16166b0c-57b2-4772-bd02-eccf4b59d98e",
+            "permissions": {
+              "certificates": [],
+              "keys": [],
+              "secrets": [
+                "Get",
+                "List"
+              ]
+            },
+            "tenantId": "a44ed764-ff89-4457-baf4-483d129eb07b"
+          },
+          {
+            "objectId": "3076cda0-6b65-4c8a-bc91-378ef8879262",
+            "permissions": {
+              "certificates": [],
+              "keys": [],
+              "secrets": [
+                "Get",
+                "List",
+                "Set",
+                "Delete",
+                "Recover",
+                "Backup",
+                "Restore"
+              ]
+            },
+            "tenantId": "a44ed764-ff89-4457-baf4-483d129eb07b"
+          },
+          {
+            "objectId": "ea6f1bbb-1568-4d26-a1cd-b4f6c713c457",
+            "permissions": {
+              "certificates": [],
+              "keys": [],
+              "secrets": [
+                "get",
+                "list",
+                "set"
+              ]
+            },
+            "tenantId": "a44ed764-ff89-4457-baf4-483d129eb07b"
+          },
+          {
+            "objectId": "fe9a23dd-476e-415e-a7fe-543b1f1d12a5",
+            "permissions": {
+              "certificates": [],
+              "keys": [],
+              "secrets": [
+                "get",
+                "list",
+                "set"
+              ]
+            },
+            "tenantId": "a44ed764-ff89-4457-baf4-483d129eb07b"
+          },
+          {
+            "objectId": "87802ac9-dea6-492f-a620-5aed38f8822e",
+            "permissions": {
+              "certificates": [
+                "all"
+              ],
+              "keys": [
+                "all"
+              ],
+              "secrets": [
+                "all"
+              ],
+              "storage": []
+            },
+            "tenantId": "a44ed764-ff89-4457-baf4-483d129eb07b"
+          }
+        ],
+        "enablePurgeProtection": true,
+        "enableSoftDelete": true,
+        "enabledForDeployment": false,
+        "enabledForDiskEncryption": false,
+        "enabledForTemplateDeployment": false,
+        "provisioningState": "Succeeded",
+        "publicNetworkAccess": "Enabled",
+        "sku": {
+          "family": "A",
+          "name": "standard"
+        },
+        "softDeleteRetentionInDays": 90,
+        "tenantId": "a44ed764-ff89-4457-baf4-483d129eb07b",
+        "vaultUri": "[concat('https://', parameters('vaults_kv0_vm2b2htvuuclm_name'), '.vault.azure.net/')]"
+      },
+      "tags": {
+        "azd-env-name": "develop-clew"
+      },
+      "type": "Microsoft.KeyVault/vaults"
+    },
+    {
+      "apiVersion": "2023-07-31-preview",
+      "location": "eastus",
+      "name": "[parameters('userAssignedIdentities_webgpt0_vm2b2htv_id_aeec_name')]",
+      "type": "Microsoft.ManagedIdentity/userAssignedIdentities"
+    },
+    {
+      "apiVersion": "2023-11-01",
+      "location": "eastus",
+      "name": "[parameters('virtualNetworks_aivnet0_vm2b2htvuuclm_name')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "10.0.0.0/16"
+          ]
+        },
+        "enableDdosProtection": false,
+        "subnets": [
+          {
+            "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_aivnet0_vm2b2htvuuclm_name'), 'ai-subnet')]",
+            "name": "ai-subnet",
+            "properties": {
+              "addressPrefix": "10.0.1.0/24",
+              "delegations": [],
+              "privateEndpointNetworkPolicies": "Enabled",
+              "privateLinkServiceNetworkPolicies": "Enabled"
+            },
+            "type": "Microsoft.Network/virtualNetworks/subnets"
+          },
+          {
+            "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_aivnet0_vm2b2htvuuclm_name'), 'AzureBastionSubnet')]",
+            "name": "AzureBastionSubnet",
+            "properties": {
+              "addressPrefix": "10.0.2.0/24",
+              "delegations": [],
+              "privateEndpointNetworkPolicies": "Enabled",
+              "privateLinkServiceNetworkPolicies": "Enabled"
+            },
+            "type": "Microsoft.Network/virtualNetworks/subnets"
+          },
+          {
+            "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_aivnet0_vm2b2htvuuclm_name'), 'app-int-subnet')]",
+            "name": "app-int-subnet",
+            "properties": {
+              "addressPrefix": "10.0.3.0/24",
+              "delegations": [
+                {
+                  "id": "[concat(resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_aivnet0_vm2b2htvuuclm_name'), 'app-int-subnet'), '/delegations/appplan0-vm2b2htvuuclm')]",
+                  "name": "appplan0-vm2b2htvuuclm",
+                  "properties": {
+                    "serviceName": "Microsoft.Web/serverFarms"
+                  },
+                  "type": "Microsoft.Network/virtualNetworks/subnets/delegations"
+                }
+              ],
+              "privateEndpointNetworkPolicies": "Enabled",
+              "privateLinkServiceNetworkPolicies": "Enabled"
+            },
+            "type": "Microsoft.Network/virtualNetworks/subnets"
+          }
+        ],
+        "virtualNetworkPeerings": []
+      },
+      "tags": {
+        "azd-env-name": "develop-clew"
+      },
+      "type": "Microsoft.Network/virtualNetworks"
+    },
+    {
+      "apiVersion": "2024-03-01-preview",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "location": "East US",
+      "name": "[parameters('searchServices_search0_vm2b2htvuuclm_name')]",
+      "properties": {
+        "authOptions": {
+          "aadOrApiKey": {
+            "aadAuthFailureMode": "http401WithBearerChallenge"
+          }
+        },
+        "disableLocalAuth": false,
+        "disabledDataExfiltrationOptions": [],
+        "encryptionWithCmk": {
+          "enforcement": "Unspecified"
+        },
+        "hostingMode": "default",
+        "networkRuleSet": {
+          "bypass": "None",
+          "ipRules": []
+        },
+        "partitionCount": 1,
+        "publicNetworkAccess": "Enabled",
+        "replicaCount": 1,
+        "semanticSearch": "free"
+      },
+      "sku": {
+        "name": "standard"
+      },
+      "tags": {
+        "azd-env-name": "develop-clew"
+      },
+      "type": "Microsoft.Search/searchServices"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "kind": "StorageV2",
+      "location": "eastus",
+      "name": "[parameters('storageAccounts_adb2auth_name')]",
+      "properties": {
+        "accessTier": "Hot",
+        "allowBlobPublicAccess": true,
+        "allowCrossTenantReplication": false,
+        "allowSharedKeyAccess": true,
+        "defaultToOAuthAuthentication": false,
+        "dnsEndpointType": "Standard",
+        "encryption": {
+          "keySource": "Microsoft.Storage",
+          "requireInfrastructureEncryption": false,
+          "services": {
+            "blob": {
+              "enabled": true,
+              "keyType": "Account"
+            },
+            "file": {
+              "enabled": true,
+              "keyType": "Account"
+            }
+          }
+        },
+        "largeFileSharesState": "Enabled",
+        "minimumTlsVersion": "TLS1_2",
+        "networkAcls": {
+          "bypass": "AzureServices",
+          "defaultAction": "Allow",
+          "ipRules": [],
+          "virtualNetworkRules": []
+        },
+        "publicNetworkAccess": "Enabled",
+        "supportsHttpsTrafficOnly": true
+      },
+      "sku": {
+        "name": "Standard_RAGRS",
+        "tier": "Standard"
+      },
+      "type": "Microsoft.Storage/storageAccounts"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "kind": "StorageV2",
+      "location": "eastus",
+      "name": "[parameters('storageAccounts_strag0vm2b2htvuuclm_name')]",
+      "properties": {
+        "accessTier": "Hot",
+        "allowBlobPublicAccess": false,
+        "allowCrossTenantReplication": true,
+        "allowSharedKeyAccess": true,
+        "defaultToOAuthAuthentication": false,
+        "dnsEndpointType": "Standard",
+        "encryption": {
+          "keySource": "Microsoft.Storage",
+          "services": {
+            "blob": {
+              "enabled": true,
+              "keyType": "Account"
+            },
+            "file": {
+              "enabled": true,
+              "keyType": "Account"
+            }
+          }
+        },
+        "minimumTlsVersion": "TLS1_2",
+        "networkAcls": {
+          "bypass": "AzureServices",
+          "defaultAction": "Allow",
+          "ipRules": [],
+          "virtualNetworkRules": []
+        },
+        "publicNetworkAccess": "Enabled",
+        "supportsHttpsTrafficOnly": true
+      },
+      "sku": {
+        "name": "Standard_LRS",
+        "tier": "Standard"
+      },
+      "tags": {
+        "azd-env-name": "develop-clew"
+      },
+      "type": "Microsoft.Storage/storageAccounts"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "kind": "Storage",
+      "location": "eastus",
+      "name": "[parameters('storageAccounts_strag0vm2b2htvuuclming_name')]",
+      "properties": {
+        "allowBlobPublicAccess": false,
+        "allowCrossTenantReplication": false,
+        "defaultToOAuthAuthentication": true,
+        "encryption": {
+          "keySource": "Microsoft.Storage",
+          "services": {
+            "blob": {
+              "enabled": true,
+              "keyType": "Account"
+            },
+            "file": {
+              "enabled": true,
+              "keyType": "Account"
+            }
+          }
+        },
+        "minimumTlsVersion": "TLS1_0",
+        "networkAcls": {
+          "bypass": "AzureServices",
+          "defaultAction": "Allow",
+          "ipRules": [],
+          "virtualNetworkRules": []
+        },
+        "supportsHttpsTrafficOnly": true
+      },
+      "sku": {
+        "name": "Standard_LRS",
+        "tier": "Standard"
+      },
+      "type": "Microsoft.Storage/storageAccounts"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "kind": "Storage",
+      "location": "eastus",
+      "name": "[parameters('storageAccounts_strag0vm2b2htvuuclmorc_name')]",
+      "properties": {
+        "allowBlobPublicAccess": false,
+        "allowCrossTenantReplication": false,
+        "defaultToOAuthAuthentication": true,
+        "encryption": {
+          "keySource": "Microsoft.Storage",
+          "services": {
+            "blob": {
+              "enabled": true,
+              "keyType": "Account"
+            },
+            "file": {
+              "enabled": true,
+              "keyType": "Account"
+            }
+          }
+        },
+        "minimumTlsVersion": "TLS1_0",
+        "networkAcls": {
+          "bypass": "AzureServices",
+          "defaultAction": "Allow",
+          "ipRules": [],
+          "virtualNetworkRules": []
+        },
+        "supportsHttpsTrafficOnly": true
+      },
+      "sku": {
+        "name": "Standard_LRS",
+        "tier": "Standard"
+      },
+      "type": "Microsoft.Storage/storageAccounts"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "kind": "linux",
+      "location": "East US",
+      "name": "[parameters('serverfarms_appplan0_vm2b2htvuuclm_name')]",
+      "properties": {
+        "elasticScaleEnabled": false,
+        "hyperV": false,
+        "isSpot": false,
+        "isXenon": false,
+        "maximumElasticWorkerCount": 1,
+        "perSiteScaling": false,
+        "reserved": true,
+        "targetWorkerCount": 0,
+        "targetWorkerSizeId": 0,
+        "zoneRedundant": false
+      },
+      "sku": {
+        "capacity": 1,
+        "family": "Pv3",
+        "name": "P0v3",
+        "size": "P0v3",
+        "tier": "Premium0V3"
+      },
+      "tags": {
+        "azd-env-name": "develop-clew"
+      },
+      "type": "Microsoft.Web/serverfarms"
+    },
+    {
+      "apiVersion": "2024-04-01-preview",
+      "dependsOn": [
+        "[resourceId('Microsoft.CognitiveServices/accounts', parameters('accounts_oai0_vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('accounts_oai0_vm2b2htvuuclm_name'), '/Agent')]",
+      "properties": {
+        "currentCapacity": 10,
+        "model": {
+          "format": "OpenAI",
+          "name": "gpt-4o",
+          "version": "2024-05-13"
+        },
+        "raiPolicyName": "Microsoft.Default",
+        "versionUpgradeOption": "OnceNewDefaultVersionAvailable"
+      },
+      "sku": {
+        "capacity": 10,
+        "name": "Standard"
+      },
+      "type": "Microsoft.CognitiveServices/accounts/deployments"
+    },
+    {
+      "apiVersion": "2024-04-01-preview",
+      "dependsOn": [
+        "[resourceId('Microsoft.CognitiveServices/accounts', parameters('accounts_oai0_vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('accounts_oai0_vm2b2htvuuclm_name'), '/chat')]",
+      "properties": {
+        "currentCapacity": 20,
+        "model": {
+          "format": "OpenAI",
+          "name": "gpt-35-turbo-16k",
+          "version": "0613"
+        },
+        "versionUpgradeOption": "OnceNewDefaultVersionAvailable"
+      },
+      "sku": {
+        "capacity": 20,
+        "name": "Standard"
+      },
+      "type": "Microsoft.CognitiveServices/accounts/deployments"
+    },
+    {
+      "apiVersion": "2024-04-01-preview",
+      "dependsOn": [
+        "[resourceId('Microsoft.CognitiveServices/accounts', parameters('accounts_oai0_vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('accounts_oai0_vm2b2htvuuclm_name'), '/text-embedding-3-small')]",
+      "properties": {
+        "currentCapacity": 120,
+        "model": {
+          "format": "OpenAI",
+          "name": "text-embedding-3-small",
+          "version": "1"
+        },
+        "raiPolicyName": "Microsoft.Default",
+        "versionUpgradeOption": "OnceNewDefaultVersionAvailable"
+      },
+      "sku": {
+        "capacity": 120,
+        "name": "Standard"
+      },
+      "type": "Microsoft.CognitiveServices/accounts/deployments"
+    },
+    {
+      "apiVersion": "2024-04-01-preview",
+      "dependsOn": [
+        "[resourceId('Microsoft.CognitiveServices/accounts', parameters('accounts_oai0_vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('accounts_oai0_vm2b2htvuuclm_name'), '/text-embedding-ada-002')]",
+      "properties": {
+        "currentCapacity": 20,
+        "model": {
+          "format": "OpenAI",
+          "name": "text-embedding-ada-002",
+          "version": "2"
+        },
+        "versionUpgradeOption": "OnceNewDefaultVersionAvailable"
+      },
+      "sku": {
+        "capacity": 20,
+        "name": "Standard"
+      },
+      "type": "Microsoft.CognitiveServices/accounts/deployments"
+    },
+    {
+      "apiVersion": "2024-04-01-preview",
+      "dependsOn": [
+        "[resourceId('Microsoft.CognitiveServices/accounts', parameters('accounts_oai0_vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('accounts_oai0_vm2b2htvuuclm_name'), '/Microsoft.Default')]",
+      "properties": {
+        "contentFilters": [
+          {
+            "allowedContentLevel": "Medium",
+            "blocking": true,
+            "enabled": true,
+            "name": "Hate",
+            "source": "Prompt"
+          },
+          {
+            "allowedContentLevel": "Medium",
+            "blocking": true,
+            "enabled": true,
+            "name": "Hate",
+            "source": "Completion"
+          },
+          {
+            "allowedContentLevel": "Medium",
+            "blocking": true,
+            "enabled": true,
+            "name": "Sexual",
+            "source": "Prompt"
+          },
+          {
+            "allowedContentLevel": "Medium",
+            "blocking": true,
+            "enabled": true,
+            "name": "Sexual",
+            "source": "Completion"
+          },
+          {
+            "allowedContentLevel": "Medium",
+            "blocking": true,
+            "enabled": true,
+            "name": "Violence",
+            "source": "Prompt"
+          },
+          {
+            "allowedContentLevel": "Medium",
+            "blocking": true,
+            "enabled": true,
+            "name": "Violence",
+            "source": "Completion"
+          },
+          {
+            "allowedContentLevel": "Medium",
+            "blocking": true,
+            "enabled": true,
+            "name": "Selfharm",
+            "source": "Prompt"
+          },
+          {
+            "allowedContentLevel": "Medium",
+            "blocking": true,
+            "enabled": true,
+            "name": "Selfharm",
+            "source": "Completion"
+          }
+        ],
+        "mode": "Blocking"
+      },
+      "type": "Microsoft.CognitiveServices/accounts/raiPolicies"
+    },
+    {
+      "apiVersion": "2024-05-15",
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), '/db0-vm2b2htvuuclm')]",
+      "properties": {
+        "resource": {
+          "id": "db0-vm2b2htvuuclm"
+        }
+      },
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases"
+    },
+    {
+      "apiVersion": "2024-05-15",
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), '/00000000-0000-0000-0000-000000000001')]",
+      "properties": {
+        "assignableScopes": [
+          "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'))]"
+        ],
+        "permissions": [
+          {
+            "dataActions": [
+              "Microsoft.DocumentDB/databaseAccounts/readMetadata",
+              "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/executeQuery",
+              "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/readChangeFeed",
+              "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/read"
+            ],
+            "notDataActions": []
+          }
+        ],
+        "roleName": "Cosmos DB Built-in Data Reader",
+        "type": "BuiltInRole"
+      },
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions"
+    },
+    {
+      "apiVersion": "2024-05-15",
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), '/00000000-0000-0000-0000-000000000002')]",
+      "properties": {
+        "assignableScopes": [
+          "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'))]"
+        ],
+        "permissions": [
+          {
+            "dataActions": [
+              "Microsoft.DocumentDB/databaseAccounts/readMetadata",
+              "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/*",
+              "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/*"
+            ],
+            "notDataActions": []
+          }
+        ],
+        "roleName": "Cosmos DB Built-in Data Contributor",
+        "type": "BuiltInRole"
+      },
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions"
+    },
+    {
+      "apiVersion": "2018-05-01-preview",
+      "dependsOn": [
+        "[resourceId('microsoft.insights/components', parameters('components_appins0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[concat(parameters('components_appins0_vm2b2htvuuclm_name'), '/degradationindependencyduration')]",
+      "properties": {
+        "customEmails": [],
+        "enabled": true,
+        "ruleDefinitions": {
+          "Description": "Smart Detection rules notify you of performance anomaly issues.",
+          "DisplayName": "Degradation in dependency duration",
+          "HelpUrl": "https://docs.microsoft.com/en-us/azure/application-insights/app-insights-proactive-performance-diagnostics",
+          "IsEnabledByDefault": true,
+          "IsHidden": false,
+          "IsInPreview": false,
+          "Name": "degradationindependencyduration",
+          "SupportsEmailNotifications": true
+        },
+        "sendEmailsToSubscriptionOwners": true
+      },
+      "type": "microsoft.insights/components/ProactiveDetectionConfigs"
+    },
+    {
+      "apiVersion": "2018-05-01-preview",
+      "dependsOn": [
+        "[resourceId('microsoft.insights/components', parameters('components_appins0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[concat(parameters('components_appins0_vm2b2htvuuclm_name'), '/degradationinserverresponsetime')]",
+      "properties": {
+        "customEmails": [],
+        "enabled": true,
+        "ruleDefinitions": {
+          "Description": "Smart Detection rules notify you of performance anomaly issues.",
+          "DisplayName": "Degradation in server response time",
+          "HelpUrl": "https://docs.microsoft.com/en-us/azure/application-insights/app-insights-proactive-performance-diagnostics",
+          "IsEnabledByDefault": true,
+          "IsHidden": false,
+          "IsInPreview": false,
+          "Name": "degradationinserverresponsetime",
+          "SupportsEmailNotifications": true
+        },
+        "sendEmailsToSubscriptionOwners": true
+      },
+      "type": "microsoft.insights/components/ProactiveDetectionConfigs"
+    },
+    {
+      "apiVersion": "2018-05-01-preview",
+      "dependsOn": [
+        "[resourceId('microsoft.insights/components', parameters('components_appins0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[concat(parameters('components_appins0_vm2b2htvuuclm_name'), '/digestMailConfiguration')]",
+      "properties": {
+        "customEmails": [],
+        "enabled": true,
+        "ruleDefinitions": {
+          "Description": "This rule describes the digest mail preferences",
+          "DisplayName": "Digest Mail Configuration",
+          "HelpUrl": "www.homail.com",
+          "IsEnabledByDefault": true,
+          "IsHidden": true,
+          "IsInPreview": false,
+          "Name": "digestMailConfiguration",
+          "SupportsEmailNotifications": true
+        },
+        "sendEmailsToSubscriptionOwners": true
+      },
+      "type": "microsoft.insights/components/ProactiveDetectionConfigs"
+    },
+    {
+      "apiVersion": "2018-05-01-preview",
+      "dependsOn": [
+        "[resourceId('microsoft.insights/components', parameters('components_appins0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[concat(parameters('components_appins0_vm2b2htvuuclm_name'), '/extension_billingdatavolumedailyspikeextension')]",
+      "properties": {
+        "customEmails": [],
+        "enabled": true,
+        "ruleDefinitions": {
+          "Description": "This detection rule automatically analyzes the billing data generated by your application, and can warn you about an unusual increase in your application's billing costs",
+          "DisplayName": "Abnormal rise in daily data volume (preview)",
+          "HelpUrl": "https://github.com/Microsoft/ApplicationInsights-Home/tree/master/SmartDetection/billing-data-volume-daily-spike.md",
+          "IsEnabledByDefault": true,
+          "IsHidden": false,
+          "IsInPreview": true,
+          "Name": "extension_billingdatavolumedailyspikeextension",
+          "SupportsEmailNotifications": false
+        },
+        "sendEmailsToSubscriptionOwners": true
+      },
+      "type": "microsoft.insights/components/ProactiveDetectionConfigs"
+    },
+    {
+      "apiVersion": "2018-05-01-preview",
+      "dependsOn": [
+        "[resourceId('microsoft.insights/components', parameters('components_appins0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[concat(parameters('components_appins0_vm2b2htvuuclm_name'), '/extension_canaryextension')]",
+      "properties": {
+        "customEmails": [],
+        "enabled": true,
+        "ruleDefinitions": {
+          "Description": "Canary extension",
+          "DisplayName": "Canary extension",
+          "HelpUrl": "https://github.com/Microsoft/ApplicationInsights-Home/blob/master/SmartDetection/",
+          "IsEnabledByDefault": true,
+          "IsHidden": true,
+          "IsInPreview": true,
+          "Name": "extension_canaryextension",
+          "SupportsEmailNotifications": false
+        },
+        "sendEmailsToSubscriptionOwners": true
+      },
+      "type": "microsoft.insights/components/ProactiveDetectionConfigs"
+    },
+    {
+      "apiVersion": "2018-05-01-preview",
+      "dependsOn": [
+        "[resourceId('microsoft.insights/components', parameters('components_appins0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[concat(parameters('components_appins0_vm2b2htvuuclm_name'), '/extension_exceptionchangeextension')]",
+      "properties": {
+        "customEmails": [],
+        "enabled": true,
+        "ruleDefinitions": {
+          "Description": "This detection rule automatically analyzes the exceptions thrown in your application, and can warn you about unusual patterns in your exception telemetry.",
+          "DisplayName": "Abnormal rise in exception volume (preview)",
+          "HelpUrl": "https://github.com/Microsoft/ApplicationInsights-Home/blob/master/SmartDetection/abnormal-rise-in-exception-volume.md",
+          "IsEnabledByDefault": true,
+          "IsHidden": false,
+          "IsInPreview": true,
+          "Name": "extension_exceptionchangeextension",
+          "SupportsEmailNotifications": false
+        },
+        "sendEmailsToSubscriptionOwners": true
+      },
+      "type": "microsoft.insights/components/ProactiveDetectionConfigs"
+    },
+    {
+      "apiVersion": "2018-05-01-preview",
+      "dependsOn": [
+        "[resourceId('microsoft.insights/components', parameters('components_appins0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[concat(parameters('components_appins0_vm2b2htvuuclm_name'), '/extension_memoryleakextension')]",
+      "properties": {
+        "customEmails": [],
+        "enabled": true,
+        "ruleDefinitions": {
+          "Description": "This detection rule automatically analyzes the memory consumption of each process in your application, and can warn you about potential memory leaks or increased memory consumption.",
+          "DisplayName": "Potential memory leak detected (preview)",
+          "HelpUrl": "https://github.com/Microsoft/ApplicationInsights-Home/tree/master/SmartDetection/memory-leak.md",
+          "IsEnabledByDefault": true,
+          "IsHidden": false,
+          "IsInPreview": true,
+          "Name": "extension_memoryleakextension",
+          "SupportsEmailNotifications": false
+        },
+        "sendEmailsToSubscriptionOwners": true
+      },
+      "type": "microsoft.insights/components/ProactiveDetectionConfigs"
+    },
+    {
+      "apiVersion": "2018-05-01-preview",
+      "dependsOn": [
+        "[resourceId('microsoft.insights/components', parameters('components_appins0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[concat(parameters('components_appins0_vm2b2htvuuclm_name'), '/extension_securityextensionspackage')]",
+      "properties": {
+        "customEmails": [],
+        "enabled": true,
+        "ruleDefinitions": {
+          "Description": "This detection rule automatically analyzes the telemetry generated by your application and detects potential security issues.",
+          "DisplayName": "Potential security issue detected (preview)",
+          "HelpUrl": "https://github.com/Microsoft/ApplicationInsights-Home/blob/master/SmartDetection/application-security-detection-pack.md",
+          "IsEnabledByDefault": true,
+          "IsHidden": false,
+          "IsInPreview": true,
+          "Name": "extension_securityextensionspackage",
+          "SupportsEmailNotifications": false
+        },
+        "sendEmailsToSubscriptionOwners": true
+      },
+      "type": "microsoft.insights/components/ProactiveDetectionConfigs"
+    },
+    {
+      "apiVersion": "2018-05-01-preview",
+      "dependsOn": [
+        "[resourceId('microsoft.insights/components', parameters('components_appins0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[concat(parameters('components_appins0_vm2b2htvuuclm_name'), '/extension_traceseveritydetector')]",
+      "properties": {
+        "customEmails": [],
+        "enabled": true,
+        "ruleDefinitions": {
+          "Description": "This detection rule automatically analyzes the trace logs emitted from your application, and can warn you about unusual patterns in the severity of your trace telemetry.",
+          "DisplayName": "Degradation in trace severity ratio (preview)",
+          "HelpUrl": "https://github.com/Microsoft/ApplicationInsights-Home/blob/master/SmartDetection/degradation-in-trace-severity-ratio.md",
+          "IsEnabledByDefault": true,
+          "IsHidden": false,
+          "IsInPreview": true,
+          "Name": "extension_traceseveritydetector",
+          "SupportsEmailNotifications": false
+        },
+        "sendEmailsToSubscriptionOwners": true
+      },
+      "type": "microsoft.insights/components/ProactiveDetectionConfigs"
+    },
+    {
+      "apiVersion": "2018-05-01-preview",
+      "dependsOn": [
+        "[resourceId('microsoft.insights/components', parameters('components_appins0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[concat(parameters('components_appins0_vm2b2htvuuclm_name'), '/longdependencyduration')]",
+      "properties": {
+        "customEmails": [],
+        "enabled": true,
+        "ruleDefinitions": {
+          "Description": "Smart Detection rules notify you of performance anomaly issues.",
+          "DisplayName": "Long dependency duration",
+          "HelpUrl": "https://docs.microsoft.com/en-us/azure/application-insights/app-insights-proactive-performance-diagnostics",
+          "IsEnabledByDefault": true,
+          "IsHidden": false,
+          "IsInPreview": false,
+          "Name": "longdependencyduration",
+          "SupportsEmailNotifications": true
+        },
+        "sendEmailsToSubscriptionOwners": true
+      },
+      "type": "microsoft.insights/components/ProactiveDetectionConfigs"
+    },
+    {
+      "apiVersion": "2018-05-01-preview",
+      "dependsOn": [
+        "[resourceId('microsoft.insights/components', parameters('components_appins0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[concat(parameters('components_appins0_vm2b2htvuuclm_name'), '/migrationToAlertRulesCompleted')]",
+      "properties": {
+        "customEmails": [],
+        "enabled": false,
+        "ruleDefinitions": {
+          "Description": "A configuration that controls the migration state of Smart Detection to Smart Alerts",
+          "DisplayName": "Migration To Alert Rules Completed",
+          "HelpUrl": "https://docs.microsoft.com/en-us/azure/application-insights/app-insights-proactive-performance-diagnostics",
+          "IsEnabledByDefault": false,
+          "IsHidden": true,
+          "IsInPreview": true,
+          "Name": "migrationToAlertRulesCompleted",
+          "SupportsEmailNotifications": false
+        },
+        "sendEmailsToSubscriptionOwners": true
+      },
+      "type": "microsoft.insights/components/ProactiveDetectionConfigs"
+    },
+    {
+      "apiVersion": "2018-05-01-preview",
+      "dependsOn": [
+        "[resourceId('microsoft.insights/components', parameters('components_appins0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[concat(parameters('components_appins0_vm2b2htvuuclm_name'), '/slowpageloadtime')]",
+      "properties": {
+        "customEmails": [],
+        "enabled": true,
+        "ruleDefinitions": {
+          "Description": "Smart Detection rules notify you of performance anomaly issues.",
+          "DisplayName": "Slow page load time",
+          "HelpUrl": "https://docs.microsoft.com/en-us/azure/application-insights/app-insights-proactive-performance-diagnostics",
+          "IsEnabledByDefault": true,
+          "IsHidden": false,
+          "IsInPreview": false,
+          "Name": "slowpageloadtime",
+          "SupportsEmailNotifications": true
+        },
+        "sendEmailsToSubscriptionOwners": true
+      },
+      "type": "microsoft.insights/components/ProactiveDetectionConfigs"
+    },
+    {
+      "apiVersion": "2018-05-01-preview",
+      "dependsOn": [
+        "[resourceId('microsoft.insights/components', parameters('components_appins0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[concat(parameters('components_appins0_vm2b2htvuuclm_name'), '/slowserverresponsetime')]",
+      "properties": {
+        "customEmails": [],
+        "enabled": true,
+        "ruleDefinitions": {
+          "Description": "Smart Detection rules notify you of performance anomaly issues.",
+          "DisplayName": "Slow server response time",
+          "HelpUrl": "https://docs.microsoft.com/en-us/azure/application-insights/app-insights-proactive-performance-diagnostics",
+          "IsEnabledByDefault": true,
+          "IsHidden": false,
+          "IsInPreview": false,
+          "Name": "slowserverresponsetime",
+          "SupportsEmailNotifications": true
+        },
+        "sendEmailsToSubscriptionOwners": true
+      },
+      "type": "microsoft.insights/components/ProactiveDetectionConfigs"
+    },
+    {
+      "apiVersion": "2023-07-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('vaults_kv0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[concat(parameters('vaults_kv0_vm2b2htvuuclm_name'), '/privatelinkServiceonnection')]",
+      "properties": {
+        "privateEndpoint": {},
+        "privateLinkServiceConnectionState": {
+          "actionsRequired": "None",
+          "status": "Approved"
+        },
+        "provisioningState": "Succeeded"
+      },
+      "type": "Microsoft.KeyVault/vaults/privateEndpointConnections"
+    },
+    {
+      "apiVersion": "2023-07-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('vaults_kv0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[concat(parameters('vaults_kv0_vm2b2htvuuclm_name'), '/0aa2f521-9ce8-4737-a044-8d4e26966a55-GHlMuLrApeu5vzSZBgIx-tQ6Jvp7oKKR6LsK-WafAiw')]",
+      "properties": {
+        "attributes": {
+          "enabled": true,
+          "exp": 1777470657
+        },
+        "contentType": "application/vnd.ms-StorageAccountAccessKey"
+      },
+      "type": "Microsoft.KeyVault/vaults/secrets"
+    },
+    {
+      "apiVersion": "2023-07-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('vaults_kv0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[concat(parameters('vaults_kv0_vm2b2htvuuclm_name'), '/0aa2f521-9ce8-4737-a044-8d4e26966a55-GxOXIo4cyLe24-Y9yfExwEKseigkvBRfjs8bEoxqCAg')]",
+      "properties": {
+        "attributes": {
+          "enabled": true,
+          "exp": 1777470043
+        },
+        "contentType": "application/vnd.ms-StorageAccountAccessKey"
+      },
+      "type": "Microsoft.KeyVault/vaults/secrets"
+    },
+    {
+      "apiVersion": "2023-07-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('vaults_kv0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[concat(parameters('vaults_kv0_vm2b2htvuuclm_name'), '/0aa2f521-9ce8-4737-a044-8d4e26966a55-M-oiJv1cPI1Z-jy17NVrUflhLWMjrWAo-Jv7NI5TBSo')]",
+      "properties": {
+        "attributes": {
+          "enabled": true,
+          "exp": 1777470043
+        },
+        "contentType": "application/vnd.ms-StorageAccountAccessKey"
+      },
+      "type": "Microsoft.KeyVault/vaults/secrets"
+    },
+    {
+      "apiVersion": "2023-07-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('vaults_kv0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[concat(parameters('vaults_kv0_vm2b2htvuuclm_name'), '/0aa2f521-9ce8-4737-a044-8d4e26966a55-vfFgp44p4eNnlPiuQKUQAbENCmROLVL2oqQeQ3pQOvk')]",
+      "properties": {
+        "attributes": {
+          "enabled": true,
+          "exp": 1777470043
+        },
+        "contentType": "application/vnd.ms-StorageAccountAccessKey"
+      },
+      "type": "Microsoft.KeyVault/vaults/secrets"
+    },
+    {
+      "apiVersion": "2023-07-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('vaults_kv0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[concat(parameters('vaults_kv0_vm2b2htvuuclm_name'), '/0aa2f521-9ce8-4737-a044-8d4e26966a55-X4Pz9YC6Bg73-qHBSxamfycXrr4dT1jJL5JYEYWupPg')]",
+      "properties": {
+        "attributes": {
+          "enabled": true,
+          "exp": 1777470043
+        },
+        "contentType": "application/vnd.ms-StorageAccountAccessKey"
+      },
+      "type": "Microsoft.KeyVault/vaults/secrets"
+    },
+    {
+      "apiVersion": "2023-07-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('vaults_kv0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[concat(parameters('vaults_kv0_vm2b2htvuuclm_name'), '/azureDBkey')]",
+      "properties": {
+        "attributes": {
+          "enabled": true,
+          "exp": 0,
+          "nbf": 0
+        },
+        "contentType": "string"
+      },
+      "tags": {
+        "azd-env-name": "develop-clew"
+      },
+      "type": "Microsoft.KeyVault/vaults/secrets"
+    },
+    {
+      "apiVersion": "2023-07-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('vaults_kv0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[concat(parameters('vaults_kv0_vm2b2htvuuclm_name'), '/azureOpenAIKey')]",
+      "properties": {
+        "attributes": {
+          "enabled": true,
+          "exp": 0,
+          "nbf": 0
+        },
+        "contentType": "string"
+      },
+      "tags": {
+        "azd-env-name": "develop-clew"
+      },
+      "type": "Microsoft.KeyVault/vaults/secrets"
+    },
+    {
+      "apiVersion": "2023-07-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('vaults_kv0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[concat(parameters('vaults_kv0_vm2b2htvuuclm_name'), '/azureSearchKey')]",
+      "properties": {
+        "attributes": {
+          "enabled": true,
+          "exp": 0,
+          "nbf": 0
+        },
+        "contentType": "string"
+      },
+      "tags": {
+        "azd-env-name": "develop-clew"
+      },
+      "type": "Microsoft.KeyVault/vaults/secrets"
+    },
+    {
+      "apiVersion": "2023-07-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('vaults_kv0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[concat(parameters('vaults_kv0_vm2b2htvuuclm_name'), '/formRecKey')]",
+      "properties": {
+        "attributes": {
+          "enabled": true,
+          "exp": 0,
+          "nbf": 0
+        },
+        "contentType": "string"
+      },
+      "tags": {
+        "azd-env-name": "develop-clew"
+      },
+      "type": "Microsoft.KeyVault/vaults/secrets"
+    },
+    {
+      "apiVersion": "2023-07-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('vaults_kv0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[concat(parameters('vaults_kv0_vm2b2htvuuclm_name'), '/orchestrator-host--checkuser')]",
+      "properties": {
+        "attributes": {
+          "enabled": true
+        }
+      },
+      "type": "Microsoft.KeyVault/vaults/secrets"
+    },
+    {
+      "apiVersion": "2023-07-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('vaults_kv0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[concat(parameters('vaults_kv0_vm2b2htvuuclm_name'), '/orchestrator-host--conversations')]",
+      "properties": {
+        "attributes": {
+          "enabled": true
+        }
+      },
+      "type": "Microsoft.KeyVault/vaults/secrets"
+    },
+    {
+      "apiVersion": "2023-07-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('vaults_kv0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[concat(parameters('vaults_kv0_vm2b2htvuuclm_name'), '/orchestrator-host--feedback')]",
+      "properties": {
+        "attributes": {
+          "enabled": true,
+          "nbf": 1713287063
+        }
+      },
+      "type": "Microsoft.KeyVault/vaults/secrets"
+    },
+    {
+      "apiVersion": "2023-07-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('vaults_kv0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[concat(parameters('vaults_kv0_vm2b2htvuuclm_name'), '/orchestrator-host--functionKey')]",
+      "properties": {
+        "attributes": {
+          "enabled": true
+        }
+      },
+      "type": "Microsoft.KeyVault/vaults/secrets"
+    },
+    {
+      "apiVersion": "2023-07-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('vaults_kv0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[concat(parameters('vaults_kv0_vm2b2htvuuclm_name'), '/orchestrator-host--settings')]",
+      "properties": {
+        "attributes": {
+          "enabled": true
+        }
+      },
+      "type": "Microsoft.KeyVault/vaults/secrets"
+    },
+    {
+      "apiVersion": "2023-07-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('vaults_kv0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[concat(parameters('vaults_kv0_vm2b2htvuuclm_name'), '/orchestrator-settings--conversations')]",
+      "properties": {
+        "attributes": {
+          "enabled": true
+        }
+      },
+      "type": "Microsoft.KeyVault/vaults/secrets"
+    },
+    {
+      "apiVersion": "2023-07-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('vaults_kv0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[concat(parameters('vaults_kv0_vm2b2htvuuclm_name'), '/speechKey')]",
+      "properties": {
+        "attributes": {
+          "enabled": true,
+          "exp": 0,
+          "nbf": 0
+        },
+        "contentType": "string"
+      },
+      "tags": {
+        "azd-env-name": "develop-clew"
+      },
+      "type": "Microsoft.KeyVault/vaults/secrets"
+    },
+    {
+      "apiVersion": "2023-07-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('vaults_kv0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[concat(parameters('vaults_kv0_vm2b2htvuuclm_name'), '/storageConnectionString')]",
+      "properties": {
+        "attributes": {
+          "enabled": true,
+          "exp": 0,
+          "nbf": 0
+        },
+        "contentType": "string"
+      },
+      "tags": {
+        "azd-env-name": "develop-clew"
+      },
+      "type": "Microsoft.KeyVault/vaults/secrets"
+    },
+    {
+      "apiVersion": "2023-07-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('vaults_kv0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "eastus",
+      "name": "[concat(parameters('vaults_kv0_vm2b2htvuuclm_name'), '/vmUserInitialPassword')]",
+      "properties": {
+        "attributes": {
+          "enabled": true
+        }
+      },
+      "type": "Microsoft.KeyVault/vaults/secrets"
+    },
+    {
+      "apiVersion": "2024-04-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.MachineLearningServices/workspaces', parameters('workspaces_MachineLearningPromptFlowTest_name'))]"
+      ],
+      "name": "[concat(parameters('workspaces_MachineLearningPromptFlowTest_name'), '/azureml_globaldatasets')]",
+      "properties": {
+        "accountName": "mmstorageeastus2",
+        "containerName": "globaldatasets",
+        "credentials": {
+          "credentialsType": "Sas",
+          "secrets": {
+            "secretsType": "[parameters('datastores_azureml_globaldatasets_secretsType')]"
+          }
+        },
+        "datastoreType": "AzureBlob",
+        "endpoint": "core.windows.net",
+        "protocol": "https",
+        "serviceDataAccessAuthIdentity": "None"
+      },
+      "type": "Microsoft.MachineLearningServices/workspaces/datastores"
+    },
+    {
+      "apiVersion": "2024-04-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.MachineLearningServices/workspaces', parameters('workspaces_MachineLearningPromptFlowTest_name'))]"
+      ],
+      "name": "[concat(parameters('workspaces_MachineLearningPromptFlowTest_name'), '/workspaceartifactstore')]",
+      "properties": {
+        "accountName": "strag0vm2b2htvuuclm",
+        "containerName": "azureml",
+        "credentials": {
+          "credentialsType": "AccountKey",
+          "secrets": {
+            "secretsType": "[parameters('datastores_workspaceartifactstore_secretsType')]"
+          }
+        },
+        "datastoreType": "AzureBlob",
+        "endpoint": "core.windows.net",
+        "protocol": "https",
+        "serviceDataAccessAuthIdentity": "None"
+      },
+      "type": "Microsoft.MachineLearningServices/workspaces/datastores"
+    },
+    {
+      "apiVersion": "2024-04-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.MachineLearningServices/workspaces', parameters('workspaces_MachineLearningPromptFlowTest_name'))]"
+      ],
+      "name": "[concat(parameters('workspaces_MachineLearningPromptFlowTest_name'), '/workspaceblobstore')]",
+      "properties": {
+        "accountName": "strag0vm2b2htvuuclm",
+        "containerName": "azureml-blobstore-0aa2f521-9ce8-4737-a044-8d4e26966a55",
+        "credentials": {
+          "credentialsType": "AccountKey",
+          "secrets": {
+            "secretsType": "[parameters('datastores_workspaceblobstore_secretsType')]"
+          }
+        },
+        "datastoreType": "AzureBlob",
+        "endpoint": "core.windows.net",
+        "protocol": "https",
+        "resourceGroup": "rg-develop-clew",
+        "serviceDataAccessAuthIdentity": "WorkspaceSystemAssignedIdentity",
+        "subscriptionId": "e261fb0a-3d87-49c1-8d3c-32b2bc93b6ff"
+      },
+      "type": "Microsoft.MachineLearningServices/workspaces/datastores"
+    },
+    {
+      "apiVersion": "2024-04-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.MachineLearningServices/workspaces', parameters('workspaces_MachineLearningPromptFlowTest_name'))]"
+      ],
+      "name": "[concat(parameters('workspaces_MachineLearningPromptFlowTest_name'), '/workspacefilestore')]",
+      "properties": {
+        "accountName": "strag0vm2b2htvuuclm",
+        "credentials": {
+          "credentialsType": "AccountKey",
+          "secrets": {
+            "secretsType": "[parameters('datastores_workspacefilestore_secretsType')]"
+          }
+        },
+        "datastoreType": "AzureFile",
+        "endpoint": "core.windows.net",
+        "fileShareName": "azureml-filestore-0aa2f521-9ce8-4737-a044-8d4e26966a55",
+        "protocol": "https",
+        "serviceDataAccessAuthIdentity": "None"
+      },
+      "type": "Microsoft.MachineLearningServices/workspaces/datastores"
+    },
+    {
+      "apiVersion": "2024-04-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.MachineLearningServices/workspaces', parameters('workspaces_MachineLearningPromptFlowTest_name'))]"
+      ],
+      "name": "[concat(parameters('workspaces_MachineLearningPromptFlowTest_name'), '/workspaceworkingdirectory')]",
+      "properties": {
+        "accountName": "strag0vm2b2htvuuclm",
+        "credentials": {
+          "credentialsType": "AccountKey",
+          "secrets": {
+            "secretsType": "[parameters('datastores_workspaceworkingdirectory_secretsType')]"
+          }
+        },
+        "datastoreType": "AzureFile",
+        "endpoint": "core.windows.net",
+        "fileShareName": "code-391ff5ac-6576-460f-ba4d-7e03433c68b6",
+        "protocol": "https",
+        "serviceDataAccessAuthIdentity": "None"
+      },
+      "type": "Microsoft.MachineLearningServices/workspaces/datastores"
+    },
+    {
+      "apiVersion": "2023-11-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_aivnet0_vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('virtualNetworks_aivnet0_vm2b2htvuuclm_name'), '/ai-subnet')]",
+      "properties": {
+        "addressPrefix": "10.0.1.0/24",
+        "delegations": [],
+        "privateEndpointNetworkPolicies": "Enabled",
+        "privateLinkServiceNetworkPolicies": "Enabled"
+      },
+      "type": "Microsoft.Network/virtualNetworks/subnets"
+    },
+    {
+      "apiVersion": "2023-11-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_aivnet0_vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('virtualNetworks_aivnet0_vm2b2htvuuclm_name'), '/app-int-subnet')]",
+      "properties": {
+        "addressPrefix": "10.0.3.0/24",
+        "delegations": [
+          {
+            "id": "[concat(resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_aivnet0_vm2b2htvuuclm_name'), 'app-int-subnet'), '/delegations/appplan0-vm2b2htvuuclm')]",
+            "name": "appplan0-vm2b2htvuuclm",
+            "properties": {
+              "serviceName": "Microsoft.Web/serverFarms"
+            },
+            "type": "Microsoft.Network/virtualNetworks/subnets/delegations"
+          }
+        ],
+        "privateEndpointNetworkPolicies": "Enabled",
+        "privateLinkServiceNetworkPolicies": "Enabled"
+      },
+      "type": "Microsoft.Network/virtualNetworks/subnets"
+    },
+    {
+      "apiVersion": "2023-11-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_aivnet0_vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('virtualNetworks_aivnet0_vm2b2htvuuclm_name'), '/AzureBastionSubnet')]",
+      "properties": {
+        "addressPrefix": "10.0.2.0/24",
+        "delegations": [],
+        "privateEndpointNetworkPolicies": "Enabled",
+        "privateLinkServiceNetworkPolicies": "Enabled"
+      },
+      "type": "Microsoft.Network/virtualNetworks/subnets"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_adb2auth_name'))]"
+      ],
+      "name": "[concat(parameters('storageAccounts_adb2auth_name'), '/default')]",
+      "properties": {
+        "containerDeleteRetentionPolicy": {
+          "days": 7,
+          "enabled": true
+        },
+        "cors": {
+          "corsRules": [
+            {
+              "allowedHeaders": [
+                "*"
+              ],
+              "allowedMethods": [
+                "GET",
+                "OPTIONS"
+              ],
+              "allowedOrigins": [
+                "https://cors-test.codehappy.dev"
+              ],
+              "exposedHeaders": [
+                "*"
+              ],
+              "maxAgeInSeconds": 200
+            },
+            {
+              "allowedHeaders": [
+                "*"
+              ],
+              "allowedMethods": [
+                "GET",
+                "OPTIONS",
+                "PUT"
+              ],
+              "allowedOrigins": [
+                "https://salesfactoryai2.b2clogin.com"
+              ],
+              "exposedHeaders": [
+                "*"
+              ],
+              "maxAgeInSeconds": 200
+            }
+          ]
+        },
+        "deleteRetentionPolicy": {
+          "allowPermanentDelete": false,
+          "days": 7,
+          "enabled": true
+        }
+      },
+      "sku": {
+        "name": "Standard_RAGRS",
+        "tier": "Standard"
+      },
+      "type": "Microsoft.Storage/storageAccounts/blobServices"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_strag0vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('storageAccounts_strag0vm2b2htvuuclm_name'), '/default')]",
+      "properties": {
+        "cors": {
+          "corsRules": [
+            {
+              "allowedHeaders": [
+                "*"
+              ],
+              "allowedMethods": [
+                "GET",
+                "HEAD",
+                "PUT",
+                "DELETE",
+                "OPTIONS",
+                "POST",
+                "PATCH"
+              ],
+              "allowedOrigins": [
+                "https://mlworkspace.azure.ai",
+                "https://ml.azure.com",
+                "https://*.ml.azure.com",
+                "https://ai.azure.com",
+                "https://*.ai.azure.com"
+              ],
+              "exposedHeaders": [
+                "*"
+              ],
+              "maxAgeInSeconds": 1800
+            }
+          ]
+        },
+        "deleteRetentionPolicy": {
+          "allowPermanentDelete": false,
+          "days": 7,
+          "enabled": true
+        }
+      },
+      "sku": {
+        "name": "Standard_LRS",
+        "tier": "Standard"
+      },
+      "type": "Microsoft.Storage/storageAccounts/blobServices"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_strag0vm2b2htvuuclming_name'))]"
+      ],
+      "name": "[concat(parameters('storageAccounts_strag0vm2b2htvuuclming_name'), '/default')]",
+      "properties": {
+        "cors": {
+          "corsRules": []
+        },
+        "deleteRetentionPolicy": {
+          "allowPermanentDelete": false,
+          "enabled": false
+        }
+      },
+      "sku": {
+        "name": "Standard_LRS",
+        "tier": "Standard"
+      },
+      "type": "Microsoft.Storage/storageAccounts/blobServices"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_strag0vm2b2htvuuclmorc_name'))]"
+      ],
+      "name": "[concat(parameters('storageAccounts_strag0vm2b2htvuuclmorc_name'), '/default')]",
+      "properties": {
+        "cors": {
+          "corsRules": []
+        },
+        "deleteRetentionPolicy": {
+          "allowPermanentDelete": false,
+          "enabled": false
+        }
+      },
+      "sku": {
+        "name": "Standard_LRS",
+        "tier": "Standard"
+      },
+      "type": "Microsoft.Storage/storageAccounts/blobServices"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_adb2auth_name'))]"
+      ],
+      "name": "[concat(parameters('storageAccounts_adb2auth_name'), '/default')]",
+      "properties": {
+        "cors": {
+          "corsRules": []
+        },
+        "protocolSettings": {
+          "smb": {}
+        },
+        "shareDeleteRetentionPolicy": {
+          "days": 7,
+          "enabled": true
+        }
+      },
+      "sku": {
+        "name": "Standard_RAGRS",
+        "tier": "Standard"
+      },
+      "type": "Microsoft.Storage/storageAccounts/fileServices"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_strag0vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('storageAccounts_strag0vm2b2htvuuclm_name'), '/default')]",
+      "properties": {
+        "cors": {
+          "corsRules": [
+            {
+              "allowedHeaders": [
+                "*"
+              ],
+              "allowedMethods": [
+                "GET",
+                "HEAD",
+                "PUT",
+                "DELETE",
+                "OPTIONS",
+                "POST"
+              ],
+              "allowedOrigins": [
+                "https://mlworkspace.azure.ai",
+                "https://ml.azure.com",
+                "https://*.ml.azure.com",
+                "https://ai.azure.com",
+                "https://*.ai.azure.com"
+              ],
+              "exposedHeaders": [
+                "*"
+              ],
+              "maxAgeInSeconds": 1800
+            }
+          ]
+        },
+        "protocolSettings": {
+          "smb": {}
+        },
+        "shareDeleteRetentionPolicy": {
+          "days": 7,
+          "enabled": true
+        }
+      },
+      "sku": {
+        "name": "Standard_LRS",
+        "tier": "Standard"
+      },
+      "type": "Microsoft.Storage/storageAccounts/fileServices"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_strag0vm2b2htvuuclming_name'))]"
+      ],
+      "name": "[concat(parameters('storageAccounts_strag0vm2b2htvuuclming_name'), '/default')]",
+      "properties": {
+        "cors": {
+          "corsRules": []
+        },
+        "protocolSettings": {
+          "smb": {}
+        },
+        "shareDeleteRetentionPolicy": {
+          "days": 7,
+          "enabled": true
+        }
+      },
+      "sku": {
+        "name": "Standard_LRS",
+        "tier": "Standard"
+      },
+      "type": "Microsoft.Storage/storageAccounts/fileServices"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_strag0vm2b2htvuuclmorc_name'))]"
+      ],
+      "name": "[concat(parameters('storageAccounts_strag0vm2b2htvuuclmorc_name'), '/default')]",
+      "properties": {
+        "cors": {
+          "corsRules": []
+        },
+        "protocolSettings": {
+          "smb": {}
+        },
+        "shareDeleteRetentionPolicy": {
+          "days": 7,
+          "enabled": true
+        }
+      },
+      "sku": {
+        "name": "Standard_LRS",
+        "tier": "Standard"
+      },
+      "type": "Microsoft.Storage/storageAccounts/fileServices"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_adb2auth_name'))]"
+      ],
+      "name": "[concat(parameters('storageAccounts_adb2auth_name'), '/default')]",
+      "properties": {
+        "cors": {
+          "corsRules": []
+        }
+      },
+      "type": "Microsoft.Storage/storageAccounts/queueServices"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_strag0vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('storageAccounts_strag0vm2b2htvuuclm_name'), '/default')]",
+      "properties": {
+        "cors": {
+          "corsRules": []
+        }
+      },
+      "type": "Microsoft.Storage/storageAccounts/queueServices"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_strag0vm2b2htvuuclming_name'))]"
+      ],
+      "name": "[concat(parameters('storageAccounts_strag0vm2b2htvuuclming_name'), '/default')]",
+      "properties": {
+        "cors": {
+          "corsRules": []
+        }
+      },
+      "type": "Microsoft.Storage/storageAccounts/queueServices"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_strag0vm2b2htvuuclmorc_name'))]"
+      ],
+      "name": "[concat(parameters('storageAccounts_strag0vm2b2htvuuclmorc_name'), '/default')]",
+      "properties": {
+        "cors": {
+          "corsRules": []
+        }
+      },
+      "type": "Microsoft.Storage/storageAccounts/queueServices"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_adb2auth_name'))]"
+      ],
+      "name": "[concat(parameters('storageAccounts_adb2auth_name'), '/default')]",
+      "properties": {
+        "cors": {
+          "corsRules": []
+        }
+      },
+      "type": "Microsoft.Storage/storageAccounts/tableServices"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_strag0vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('storageAccounts_strag0vm2b2htvuuclm_name'), '/default')]",
+      "properties": {
+        "cors": {
+          "corsRules": []
+        }
+      },
+      "type": "Microsoft.Storage/storageAccounts/tableServices"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_strag0vm2b2htvuuclming_name'))]"
+      ],
+      "name": "[concat(parameters('storageAccounts_strag0vm2b2htvuuclming_name'), '/default')]",
+      "properties": {
+        "cors": {
+          "corsRules": []
+        }
+      },
+      "type": "Microsoft.Storage/storageAccounts/tableServices"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_strag0vm2b2htvuuclmorc_name'))]"
+      ],
+      "name": "[concat(parameters('storageAccounts_strag0vm2b2htvuuclmorc_name'), '/default')]",
+      "properties": {
+        "cors": {
+          "corsRules": []
+        }
+      },
+      "type": "Microsoft.Storage/storageAccounts/tableServices"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fninges0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fninges0_vm2b2htvuuclm_name'), '/ftp')]",
+      "properties": {
+        "allow": true
+      },
+      "tags": {
+        "azd-env-name": "develop-clew",
+        "azd-service-name": "dataIngest",
+        "hidden-link: /app-insights-conn-string": "InstrumentationKey=94e8c802-e65e-48b0-a002-57f7e3f02430;IngestionEndpoint=https://eastus-3.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus.livediagnostics.monitor.azure.com/;ApplicationId=8e9fb018-3160-4b09-bd9a-e8ca0a5f21ef",
+        "hidden-link: /app-insights-instrumentation-key": "94e8c802-e65e-48b0-a002-57f7e3f02430",
+        "hidden-link: /app-insights-resource-id": "/subscriptions/e261fb0a-3d87-49c1-8d3c-32b2bc93b6ff/resourceGroups/rg-develop-clew/providers/microsoft.insights/components/appins0-vm2b2htvuuclm"
+      },
+      "type": "Microsoft.Web/sites/basicPublishingCredentialsPolicies"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fnorch0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fnorch0_vm2b2htvuuclm_name'), '/ftp')]",
+      "properties": {
+        "allow": true
+      },
+      "tags": {
+        "azd-env-name": "develop-clew",
+        "azd-service-name": "orchestrator",
+        "hidden-link: /app-insights-conn-string": "InstrumentationKey=94e8c802-e65e-48b0-a002-57f7e3f02430;IngestionEndpoint=https://eastus-3.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus.livediagnostics.monitor.azure.com/;ApplicationId=8e9fb018-3160-4b09-bd9a-e8ca0a5f21ef",
+        "hidden-link: /app-insights-instrumentation-key": "94e8c802-e65e-48b0-a002-57f7e3f02430",
+        "hidden-link: /app-insights-resource-id": "/subscriptions/e261fb0a-3d87-49c1-8d3c-32b2bc93b6ff/resourceGroups/rg-develop-clew/providers/microsoft.insights/components/appins0-vm2b2htvuuclm"
+      },
+      "type": "Microsoft.Web/sites/basicPublishingCredentialsPolicies"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_webgpt0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_webgpt0_vm2b2htvuuclm_name'), '/ftp')]",
+      "properties": {
+        "allow": false
+      },
+      "tags": {
+        "azd-env-name": "develop-clew",
+        "azd-service-name": "frontend"
+      },
+      "type": "Microsoft.Web/sites/basicPublishingCredentialsPolicies"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fninges0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fninges0_vm2b2htvuuclm_name'), '/scm')]",
+      "properties": {
+        "allow": true
+      },
+      "tags": {
+        "azd-env-name": "develop-clew",
+        "azd-service-name": "dataIngest",
+        "hidden-link: /app-insights-conn-string": "InstrumentationKey=94e8c802-e65e-48b0-a002-57f7e3f02430;IngestionEndpoint=https://eastus-3.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus.livediagnostics.monitor.azure.com/;ApplicationId=8e9fb018-3160-4b09-bd9a-e8ca0a5f21ef",
+        "hidden-link: /app-insights-instrumentation-key": "94e8c802-e65e-48b0-a002-57f7e3f02430",
+        "hidden-link: /app-insights-resource-id": "/subscriptions/e261fb0a-3d87-49c1-8d3c-32b2bc93b6ff/resourceGroups/rg-develop-clew/providers/microsoft.insights/components/appins0-vm2b2htvuuclm"
+      },
+      "type": "Microsoft.Web/sites/basicPublishingCredentialsPolicies"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fnorch0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fnorch0_vm2b2htvuuclm_name'), '/scm')]",
+      "properties": {
+        "allow": true
+      },
+      "tags": {
+        "azd-env-name": "develop-clew",
+        "azd-service-name": "orchestrator",
+        "hidden-link: /app-insights-conn-string": "InstrumentationKey=94e8c802-e65e-48b0-a002-57f7e3f02430;IngestionEndpoint=https://eastus-3.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus.livediagnostics.monitor.azure.com/;ApplicationId=8e9fb018-3160-4b09-bd9a-e8ca0a5f21ef",
+        "hidden-link: /app-insights-instrumentation-key": "94e8c802-e65e-48b0-a002-57f7e3f02430",
+        "hidden-link: /app-insights-resource-id": "/subscriptions/e261fb0a-3d87-49c1-8d3c-32b2bc93b6ff/resourceGroups/rg-develop-clew/providers/microsoft.insights/components/appins0-vm2b2htvuuclm"
+      },
+      "type": "Microsoft.Web/sites/basicPublishingCredentialsPolicies"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_webgpt0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_webgpt0_vm2b2htvuuclm_name'), '/scm')]",
+      "properties": {
+        "allow": false
+      },
+      "tags": {
+        "azd-env-name": "develop-clew",
+        "azd-service-name": "frontend"
+      },
+      "type": "Microsoft.Web/sites/basicPublishingCredentialsPolicies"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fninges0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fninges0_vm2b2htvuuclm_name'), '/web')]",
+      "properties": {
+        "acrUseManagedIdentityCreds": false,
+        "alwaysOn": true,
+        "autoHealEnabled": false,
+        "azureStorageAccounts": {},
+        "cors": {
+          "allowedOrigins": [
+            "https://portal.azure.com",
+            "https://ms.portal.azure.com",
+            "*"
+          ],
+          "supportCredentials": false
+        },
+        "defaultDocuments": [
+          "Default.htm",
+          "Default.html",
+          "Default.asp",
+          "index.htm",
+          "index.html",
+          "iisstart.htm",
+          "default.aspx",
+          "index.php"
+        ],
+        "detailedErrorLoggingEnabled": false,
+        "experiments": {
+          "rampUpRules": []
+        },
+        "ftpsState": "FtpsOnly",
+        "functionAppScaleLimit": 1,
+        "functionsRuntimeScaleMonitoringEnabled": false,
+        "http20Enabled": false,
+        "httpLoggingEnabled": false,
+        "ipSecurityRestrictions": [
+          {
+            "action": "Allow",
+            "description": "Allow all access",
+            "ipAddress": "Any",
+            "name": "Allow all",
+            "priority": 2147483647
+          }
+        ],
+        "linuxFxVersion": "PYTHON|3.10",
+        "loadBalancing": "LeastRequests",
+        "localMySqlEnabled": false,
+        "logsDirectorySizeLimit": 35,
+        "managedPipelineMode": "Integrated",
+        "managedServiceIdentityId": 6019,
+        "minTlsVersion": "1.2",
+        "minimumElasticInstanceCount": 1,
+        "netFrameworkVersion": "v4.0",
+        "numberOfWorkers": 1,
+        "preWarmedInstanceCount": 0,
+        "publishingUsername": "$fninges0-vm2b2htvuuclm",
+        "remoteDebuggingEnabled": false,
+        "requestTracingEnabled": false,
+        "scmIpSecurityRestrictions": [
+          {
+            "action": "Allow",
+            "description": "Allow all access",
+            "ipAddress": "Any",
+            "name": "Allow all",
+            "priority": 2147483647
+          }
+        ],
+        "scmIpSecurityRestrictionsUseMain": false,
+        "scmMinTlsVersion": "1.2",
+        "scmType": "None",
+        "use32BitWorkerProcess": false,
+        "virtualApplications": [
+          {
+            "physicalPath": "site\\wwwroot",
+            "preloadEnabled": true,
+            "virtualPath": "/"
+          }
+        ],
+        "vnetName": "0a8c8848-3baf-4429-8eab-cbef97a3162c_app-int-subnet",
+        "vnetPrivatePortsCount": 0,
+        "vnetRouteAllEnabled": false,
+        "webSocketsEnabled": false
+      },
+      "tags": {
+        "azd-env-name": "develop-clew",
+        "azd-service-name": "dataIngest",
+        "hidden-link: /app-insights-conn-string": "InstrumentationKey=94e8c802-e65e-48b0-a002-57f7e3f02430;IngestionEndpoint=https://eastus-3.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus.livediagnostics.monitor.azure.com/;ApplicationId=8e9fb018-3160-4b09-bd9a-e8ca0a5f21ef",
+        "hidden-link: /app-insights-instrumentation-key": "94e8c802-e65e-48b0-a002-57f7e3f02430",
+        "hidden-link: /app-insights-resource-id": "/subscriptions/e261fb0a-3d87-49c1-8d3c-32b2bc93b6ff/resourceGroups/rg-develop-clew/providers/microsoft.insights/components/appins0-vm2b2htvuuclm"
+      },
+      "type": "Microsoft.Web/sites/config"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fnorch0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fnorch0_vm2b2htvuuclm_name'), '/web')]",
+      "properties": {
+        "acrUseManagedIdentityCreds": false,
+        "alwaysOn": true,
+        "autoHealEnabled": false,
+        "azureStorageAccounts": {},
+        "cors": {
+          "allowedOrigins": [
+            "https://portal.azure.com",
+            "https://ms.portal.azure.com",
+            "*"
+          ],
+          "supportCredentials": false
+        },
+        "defaultDocuments": [
+          "Default.htm",
+          "Default.html",
+          "Default.asp",
+          "index.htm",
+          "index.html",
+          "iisstart.htm",
+          "default.aspx",
+          "index.php"
+        ],
+        "detailedErrorLoggingEnabled": false,
+        "experiments": {
+          "rampUpRules": []
+        },
+        "ftpsState": "FtpsOnly",
+        "functionAppScaleLimit": 2,
+        "functionsRuntimeScaleMonitoringEnabled": false,
+        "http20Enabled": false,
+        "httpLoggingEnabled": false,
+        "ipSecurityRestrictions": [
+          {
+            "action": "Allow",
+            "description": "Allow all access",
+            "ipAddress": "Any",
+            "name": "Allow all",
+            "priority": 2147483647
+          }
+        ],
+        "linuxFxVersion": "PYTHON|3.10",
+        "loadBalancing": "LeastRequests",
+        "localMySqlEnabled": false,
+        "logsDirectorySizeLimit": 35,
+        "managedPipelineMode": "Integrated",
+        "managedServiceIdentityId": 6020,
+        "minTlsVersion": "1.2",
+        "minimumElasticInstanceCount": 1,
+        "netFrameworkVersion": "v4.0",
+        "numberOfWorkers": 2,
+        "preWarmedInstanceCount": 0,
+        "publishingUsername": "$fnorch0-vm2b2htvuuclm",
+        "remoteDebuggingEnabled": false,
+        "requestTracingEnabled": false,
+        "scmIpSecurityRestrictions": [
+          {
+            "action": "Allow",
+            "description": "Allow all access",
+            "ipAddress": "Any",
+            "name": "Allow all",
+            "priority": 2147483647
+          }
+        ],
+        "scmIpSecurityRestrictionsUseMain": false,
+        "scmMinTlsVersion": "1.2",
+        "scmType": "None",
+        "use32BitWorkerProcess": false,
+        "virtualApplications": [
+          {
+            "physicalPath": "site\\wwwroot",
+            "preloadEnabled": true,
+            "virtualPath": "/"
+          }
+        ],
+        "vnetName": "0a8c8848-3baf-4429-8eab-cbef97a3162c_app-int-subnet",
+        "vnetPrivatePortsCount": 0,
+        "vnetRouteAllEnabled": false,
+        "webSocketsEnabled": false
+      },
+      "tags": {
+        "azd-env-name": "develop-clew",
+        "azd-service-name": "orchestrator",
+        "hidden-link: /app-insights-conn-string": "InstrumentationKey=94e8c802-e65e-48b0-a002-57f7e3f02430;IngestionEndpoint=https://eastus-3.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus.livediagnostics.monitor.azure.com/;ApplicationId=8e9fb018-3160-4b09-bd9a-e8ca0a5f21ef",
+        "hidden-link: /app-insights-instrumentation-key": "94e8c802-e65e-48b0-a002-57f7e3f02430",
+        "hidden-link: /app-insights-resource-id": "/subscriptions/e261fb0a-3d87-49c1-8d3c-32b2bc93b6ff/resourceGroups/rg-develop-clew/providers/microsoft.insights/components/appins0-vm2b2htvuuclm"
+      },
+      "type": "Microsoft.Web/sites/config"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_webgpt0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_webgpt0_vm2b2htvuuclm_name'), '/web')]",
+      "properties": {
+        "acrUseManagedIdentityCreds": false,
+        "alwaysOn": true,
+        "appCommandLine": "python ./app.py",
+        "autoHealEnabled": false,
+        "azureStorageAccounts": {},
+        "cors": {
+          "allowedOrigins": [
+            "https://portal.azure.com",
+            "https://ms.portal.azure.com"
+          ],
+          "supportCredentials": false
+        },
+        "defaultDocuments": [
+          "Default.htm",
+          "Default.html",
+          "Default.asp",
+          "index.htm",
+          "index.html",
+          "iisstart.htm",
+          "default.aspx",
+          "index.php",
+          "hostingstart.html"
+        ],
+        "detailedErrorLoggingEnabled": true,
+        "elasticWebAppScaleLimit": 0,
+        "experiments": {
+          "rampUpRules": []
+        },
+        "ftpsState": "FtpsOnly",
+        "functionsRuntimeScaleMonitoringEnabled": false,
+        "http20Enabled": false,
+        "httpLoggingEnabled": true,
+        "ipSecurityRestrictions": [
+          {
+            "action": "Allow",
+            "description": "Allow all access",
+            "ipAddress": "Any",
+            "name": "Allow all",
+            "priority": 2147483647
+          }
+        ],
+        "linuxFxVersion": "PYTHON|3.10",
+        "loadBalancing": "LeastRequests",
+        "localMySqlEnabled": false,
+        "logsDirectorySizeLimit": 100,
+        "managedPipelineMode": "Integrated",
+        "managedServiceIdentityId": 6018,
+        "minTlsVersion": "1.2",
+        "minimumElasticInstanceCount": 1,
+        "netFrameworkVersion": "v4.0",
+        "numberOfWorkers": 1,
+        "preWarmedInstanceCount": 0,
+        "publishingUsername": "REDACTED",
+        "remoteDebuggingEnabled": false,
+        "requestTracingEnabled": true,
+        "requestTracingExpirationTime": "9999-12-31T23:59:00Z",
+        "scmIpSecurityRestrictions": [
+          {
+            "action": "Allow",
+            "description": "Allow all access",
+            "ipAddress": "Any",
+            "name": "Allow all",
+            "priority": 2147483647
+          }
+        ],
+        "scmIpSecurityRestrictionsUseMain": false,
+        "scmMinTlsVersion": "1.2",
+        "scmType": "None",
+        "use32BitWorkerProcess": false,
+        "virtualApplications": [
+          {
+            "physicalPath": "site\\wwwroot",
+            "preloadEnabled": true,
+            "virtualPath": "/"
+          }
+        ],
+        "vnetName": "0a8c8848-3baf-4429-8eab-cbef97a3162c_app-int-subnet",
+        "vnetPrivatePortsCount": 0,
+        "vnetRouteAllEnabled": true,
+        "webSocketsEnabled": false
+      },
+      "tags": {
+        "azd-env-name": "develop-clew",
+        "azd-service-name": "frontend"
+      },
+      "type": "Microsoft.Web/sites/config"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_webgpt0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_webgpt0_vm2b2htvuuclm_name'), '/03352d5a-f377-4045-bfad-8d28934493bf')]",
+      "properties": {
+        "active": false,
+        "author": "N/A",
+        "author_email": "N/A",
+        "deployer": "OneDeploy",
+        "end_time": "2024-07-03T03:16:49.3608253Z",
+        "message": "OneDeploy",
+        "start_time": "2024-07-03T03:16:16.7586909Z",
+        "status": 4
+      },
+      "type": "Microsoft.Web/sites/deployments"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_webgpt0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_webgpt0_vm2b2htvuuclm_name'), '/077623fd-2203-4842-ae4f-9061a544a277')]",
+      "properties": {
+        "active": false,
+        "author": "N/A",
+        "author_email": "N/A",
+        "deployer": "OneDeploy",
+        "end_time": "2024-06-28T19:32:40.969055Z",
+        "message": "OneDeploy",
+        "start_time": "2024-06-28T19:32:04.1222131Z",
+        "status": 4
+      },
+      "type": "Microsoft.Web/sites/deployments"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_webgpt0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_webgpt0_vm2b2htvuuclm_name'), '/0b044b53-e016-4477-881f-a77ad14effec')]",
+      "properties": {
+        "active": false,
+        "author": "N/A",
+        "author_email": "N/A",
+        "deployer": "OneDeploy",
+        "end_time": "2024-07-02T20:04:31.5464753Z",
+        "message": "OneDeploy",
+        "start_time": "2024-07-02T20:03:23.05775Z",
+        "status": 4
+      },
+      "type": "Microsoft.Web/sites/deployments"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fnorch0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fnorch0_vm2b2htvuuclm_name'), '/128f08d9-7ea7-4c2e-98b6-5f55e305842a')]",
+      "properties": {
+        "active": false,
+        "author": "N/A",
+        "author_email": "N/A",
+        "deployer": "Push-Deployer",
+        "end_time": "2024-06-26T19:58:11.9584758Z",
+        "message": "Created via a push deployment",
+        "start_time": "2024-06-26T19:56:56.1546357Z",
+        "status": 4
+      },
+      "type": "Microsoft.Web/sites/deployments"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fninges0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fninges0_vm2b2htvuuclm_name'), '/13c979ae-fc6f-409c-8ceb-df58d6b0f084')]",
+      "properties": {
+        "active": false,
+        "author": "N/A",
+        "author_email": "N/A",
+        "deployer": "Push-Deployer",
+        "end_time": "2024-03-22T13:18:09.1764477Z",
+        "message": "Created via a push deployment",
+        "start_time": "2024-03-22T13:16:54.891272Z",
+        "status": 4
+      },
+      "type": "Microsoft.Web/sites/deployments"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_webgpt0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_webgpt0_vm2b2htvuuclm_name'), '/1d603ccb-03b2-4cc4-bc2b-5bf034d3b6fc')]",
+      "properties": {
+        "active": false,
+        "author": "N/A",
+        "author_email": "N/A",
+        "deployer": "OneDeploy",
+        "end_time": "2024-06-27T21:25:25.9727949Z",
+        "message": "OneDeploy",
+        "start_time": "2024-06-27T21:24:26.2102569Z",
+        "status": 4
+      },
+      "type": "Microsoft.Web/sites/deployments"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fninges0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fninges0_vm2b2htvuuclm_name'), '/294c8c57-fb5d-4e5b-8494-a07793d6ed49')]",
+      "properties": {
+        "active": false,
+        "author": "N/A",
+        "author_email": "N/A",
+        "deployer": "Push-Deployer",
+        "end_time": "2024-04-24T20:07:46.4897581Z",
+        "message": "Created via a push deployment",
+        "start_time": "2024-04-24T20:06:28.0998919Z",
+        "status": 4
+      },
+      "type": "Microsoft.Web/sites/deployments"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fnorch0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fnorch0_vm2b2htvuuclm_name'), '/336f1bf5-51c4-4b90-84ae-c0105fb68af0')]",
+      "properties": {
+        "active": true,
+        "author": "N/A",
+        "author_email": "N/A",
+        "deployer": "Push-Deployer",
+        "end_time": "2024-07-03T20:31:34.7295887Z",
+        "message": "Created via a push deployment",
+        "start_time": "2024-07-03T20:30:35.8891735Z",
+        "status": 4
+      },
+      "type": "Microsoft.Web/sites/deployments"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fnorch0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fnorch0_vm2b2htvuuclm_name'), '/4355021d-4019-447a-a3aa-6719fdf74b4c')]",
+      "properties": {
+        "active": false,
+        "author": "N/A",
+        "author_email": "N/A",
+        "deployer": "Push-Deployer",
+        "end_time": "2024-06-20T13:50:41.7070152Z",
+        "message": "Created via a push deployment",
+        "start_time": "2024-06-20T13:49:39.4469892Z",
+        "status": 4
+      },
+      "type": "Microsoft.Web/sites/deployments"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fnorch0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fnorch0_vm2b2htvuuclm_name'), '/5b5a60cc-3d36-49ce-bb30-ef191df709bd')]",
+      "properties": {
+        "active": false,
+        "author": "N/A",
+        "author_email": "N/A",
+        "deployer": "Push-Deployer",
+        "end_time": "2024-07-01T12:29:27.8182544Z",
+        "message": "Created via a push deployment",
+        "start_time": "2024-07-01T12:28:25.6768138Z",
+        "status": 4
+      },
+      "type": "Microsoft.Web/sites/deployments"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fninges0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fninges0_vm2b2htvuuclm_name'), '/61e054df-005c-468b-bba7-4a38b56f42ea')]",
+      "properties": {
+        "active": false,
+        "author": "N/A",
+        "author_email": "N/A",
+        "deployer": "Push-Deployer",
+        "end_time": "2024-04-24T01:09:15.8458625Z",
+        "message": "Created via a push deployment",
+        "start_time": "2024-04-24T01:08:00.2219735Z",
+        "status": 4
+      },
+      "type": "Microsoft.Web/sites/deployments"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fnorch0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fnorch0_vm2b2htvuuclm_name'), '/6c5b44b3-ef99-4d19-9dd7-19e51547633c')]",
+      "properties": {
+        "active": false,
+        "author": "N/A",
+        "author_email": "N/A",
+        "deployer": "Push-Deployer",
+        "end_time": "2024-06-21T16:25:23.2713505Z",
+        "message": "Created via a push deployment",
+        "start_time": "2024-06-21T16:24:21.4061071Z",
+        "status": 4
+      },
+      "type": "Microsoft.Web/sites/deployments"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_webgpt0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_webgpt0_vm2b2htvuuclm_name'), '/89a7baa5-94c3-4a7e-bd48-148cc18a728d')]",
+      "properties": {
+        "active": false,
+        "author": "N/A",
+        "author_email": "N/A",
+        "deployer": "OneDeploy",
+        "end_time": "2024-07-04T13:06:37.6808253Z",
+        "message": "OneDeploy",
+        "start_time": "2024-07-04T13:05:33.1440688Z",
+        "status": 4
+      },
+      "type": "Microsoft.Web/sites/deployments"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_webgpt0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_webgpt0_vm2b2htvuuclm_name'), '/8c0cd625-c645-4f31-b733-557e320d4d40')]",
+      "properties": {
+        "active": true,
+        "author": "N/A",
+        "author_email": "N/A",
+        "deployer": "OneDeploy",
+        "end_time": "2024-07-04T13:12:46.169669Z",
+        "message": "OneDeploy",
+        "start_time": "2024-07-04T13:11:39.5482841Z",
+        "status": 4
+      },
+      "type": "Microsoft.Web/sites/deployments"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_webgpt0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_webgpt0_vm2b2htvuuclm_name'), '/96015092-cec3-403c-9703-d8c8509ed01e')]",
+      "properties": {
+        "active": false,
+        "author": "N/A",
+        "author_email": "N/A",
+        "deployer": "OneDeploy",
+        "end_time": "2024-07-03T15:07:40.6517211Z",
+        "message": "OneDeploy",
+        "start_time": "2024-07-03T15:06:28.5145832Z",
+        "status": 4
+      },
+      "type": "Microsoft.Web/sites/deployments"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fnorch0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fnorch0_vm2b2htvuuclm_name'), '/9659a57e-def6-4a65-ae4c-202028411566')]",
+      "properties": {
+        "active": false,
+        "author": "N/A",
+        "author_email": "N/A",
+        "deployer": "Push-Deployer",
+        "end_time": "2024-06-27T22:33:24.1836733Z",
+        "message": "Created via a push deployment",
+        "start_time": "2024-06-27T22:32:19.9490839Z",
+        "status": 4
+      },
+      "type": "Microsoft.Web/sites/deployments"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fninges0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fninges0_vm2b2htvuuclm_name'), '/9741437f-6ed8-4677-946e-ffcaeedc8be4')]",
+      "properties": {
+        "active": false,
+        "author": "N/A",
+        "author_email": "N/A",
+        "deployer": "Push-Deployer",
+        "end_time": "2024-04-24T17:48:18.9694468Z",
+        "message": "Created via a push deployment",
+        "start_time": "2024-04-24T17:46:56.9252945Z",
+        "status": 4
+      },
+      "type": "Microsoft.Web/sites/deployments"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fnorch0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fnorch0_vm2b2htvuuclm_name'), '/9b6b87b2-6b41-4b02-977b-1dccd2b11881')]",
+      "properties": {
+        "active": false,
+        "author": "N/A",
+        "author_email": "N/A",
+        "deployer": "Push-Deployer",
+        "end_time": "2024-07-02T19:10:08.7044036Z",
+        "message": "Created via a push deployment",
+        "start_time": "2024-07-02T19:09:05.7478787Z",
+        "status": 4
+      },
+      "type": "Microsoft.Web/sites/deployments"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_webgpt0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_webgpt0_vm2b2htvuuclm_name'), '/9f55888a-9316-4234-9e00-c2eeb3b2b8a4')]",
+      "properties": {
+        "active": false,
+        "author": "N/A",
+        "author_email": "N/A",
+        "deployer": "OneDeploy",
+        "end_time": "2024-06-27T21:14:50.6739654Z",
+        "message": "OneDeploy",
+        "start_time": "2024-06-27T21:13:47.5558332Z",
+        "status": 4
+      },
+      "type": "Microsoft.Web/sites/deployments"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fnorch0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fnorch0_vm2b2htvuuclm_name'), '/a7ca6729-cb20-4524-a67f-e9e24414f63e')]",
+      "properties": {
+        "active": false,
+        "author": "N/A",
+        "author_email": "N/A",
+        "deployer": "Push-Deployer",
+        "end_time": "2024-07-01T23:20:15.0690431Z",
+        "message": "Created via a push deployment",
+        "start_time": "2024-07-01T23:19:11.7054128Z",
+        "status": 4
+      },
+      "type": "Microsoft.Web/sites/deployments"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fninges0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fninges0_vm2b2htvuuclm_name'), '/ac848594-38e0-48c1-9ceb-b43a236b12a4')]",
+      "properties": {
+        "active": false,
+        "author": "N/A",
+        "author_email": "N/A",
+        "deployer": "Push-Deployer",
+        "end_time": "2024-04-17T14:46:27.0735291Z",
+        "message": "Created via a push deployment",
+        "start_time": "2024-04-17T14:45:09.1859413Z",
+        "status": 4
+      },
+      "type": "Microsoft.Web/sites/deployments"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fninges0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fninges0_vm2b2htvuuclm_name'), '/b3aaf851-20e4-4a92-973d-567d994a143e')]",
+      "properties": {
+        "active": true,
+        "author": "N/A",
+        "author_email": "N/A",
+        "deployer": "Push-Deployer",
+        "end_time": "2024-04-25T17:48:50.6936019Z",
+        "message": "Created via a push deployment",
+        "start_time": "2024-04-25T17:47:26.5104301Z",
+        "status": 4
+      },
+      "type": "Microsoft.Web/sites/deployments"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_webgpt0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_webgpt0_vm2b2htvuuclm_name'), '/c23ef6ff-9011-48ae-9d51-d448b9139033')]",
+      "properties": {
+        "active": false,
+        "author": "N/A",
+        "author_email": "N/A",
+        "deployer": "OneDeploy",
+        "end_time": "2024-06-28T19:36:23.7309295Z",
+        "message": "OneDeploy",
+        "start_time": "2024-06-28T19:35:50.6153039Z",
+        "status": 4
+      },
+      "type": "Microsoft.Web/sites/deployments"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fninges0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fninges0_vm2b2htvuuclm_name'), '/cb8e0a0b-c436-4dc2-8b1b-aaf9ec6ebb2a')]",
+      "properties": {
+        "active": false,
+        "author": "N/A",
+        "author_email": "N/A",
+        "deployer": "Push-Deployer",
+        "end_time": "2024-04-24T17:05:45.7953701Z",
+        "message": "Created via a push deployment",
+        "start_time": "2024-04-24T17:04:28.6186942Z",
+        "status": 4
+      },
+      "type": "Microsoft.Web/sites/deployments"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fnorch0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fnorch0_vm2b2htvuuclm_name'), '/d06466e5-e6b5-4238-af23-c1c48db2a243')]",
+      "properties": {
+        "active": false,
+        "author": "N/A",
+        "author_email": "N/A",
+        "deployer": "Push-Deployer",
+        "end_time": "2024-06-26T20:20:44.9134967Z",
+        "message": "Created via a push deployment",
+        "start_time": "2024-06-26T20:19:41.742897Z",
+        "status": 4
+      },
+      "type": "Microsoft.Web/sites/deployments"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fnorch0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fnorch0_vm2b2htvuuclm_name'), '/d2640cbd-ae80-4923-a1bf-37dc9eb2507b')]",
+      "properties": {
+        "active": false,
+        "author": "N/A",
+        "author_email": "N/A",
+        "deployer": "Push-Deployer",
+        "end_time": "2024-07-02T02:18:43.5212184Z",
+        "message": "Created via a push deployment",
+        "start_time": "2024-07-02T02:17:45.0436171Z",
+        "status": 4
+      },
+      "type": "Microsoft.Web/sites/deployments"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_webgpt0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_webgpt0_vm2b2htvuuclm_name'), '/f07958ed-7758-42f3-9913-374f1721611d')]",
+      "properties": {
+        "active": false,
+        "author": "N/A",
+        "author_email": "N/A",
+        "deployer": "OneDeploy",
+        "end_time": "2024-06-27T21:20:24.8027965Z",
+        "message": "OneDeploy",
+        "start_time": "2024-06-27T21:19:23.7827911Z",
+        "status": 4
+      },
+      "type": "Microsoft.Web/sites/deployments"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fninges0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fninges0_vm2b2htvuuclm_name'), '/ffa07bba-91fd-4cc0-a928-e16c24f5710c')]",
+      "properties": {
+        "active": false,
+        "author": "N/A",
+        "author_email": "N/A",
+        "deployer": "Push-Deployer",
+        "end_time": "2024-04-24T15:08:29.1947824Z",
+        "message": "Created via a push deployment",
+        "start_time": "2024-04-24T15:07:13.496001Z",
+        "status": 4
+      },
+      "type": "Microsoft.Web/sites/deployments"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fnorch0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fnorch0_vm2b2htvuuclm_name'), '/checkuser')]",
+      "properties": {
+        "config": {
+          "bindings": [
+            {
+              "authLevel": "function",
+              "direction": "in",
+              "methods": [
+                "get",
+                "post"
+              ],
+              "name": "req",
+              "type": "httpTrigger"
+            },
+            {
+              "direction": "out",
+              "name": "$return",
+              "type": "http"
+            }
+          ],
+          "scriptFile": "__init__.py"
+        },
+        "config_href": "https://fnorch0-vm2b2htvuuclm.azurewebsites.net/admin/vfs/home/site/wwwroot/checkuser/function.json",
+        "href": "https://fnorch0-vm2b2htvuuclm.azurewebsites.net/admin/functions/checkuser",
+        "invoke_url_template": "https://fnorch0-vm2b2htvuuclm.azurewebsites.net/api/checkuser",
+        "isDisabled": false,
+        "language": "python",
+        "script_href": "https://fnorch0-vm2b2htvuuclm.azurewebsites.net/admin/vfs/home/site/wwwroot/checkuser/__init__.py",
+        "script_root_path_href": "https://fnorch0-vm2b2htvuuclm.azurewebsites.net/admin/vfs/home/site/wwwroot/checkuser/",
+        "test_data_href": "https://fnorch0-vm2b2htvuuclm.azurewebsites.net/admin/vfs/home/data/Functions/sampledata/checkuser.dat"
+      },
+      "type": "Microsoft.Web/sites/functions"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fnorch0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fnorch0_vm2b2htvuuclm_name'), '/conversations')]",
+      "properties": {
+        "config": {
+          "bindings": [
+            {
+              "authLevel": "function",
+              "direction": "in",
+              "methods": [
+                "get",
+                "delete"
+              ],
+              "name": "req",
+              "route": "conversations/{id?}",
+              "type": "httpTrigger"
+            },
+            {
+              "direction": "out",
+              "name": "$return",
+              "type": "http"
+            }
+          ],
+          "scriptFile": "__init__.py"
+        },
+        "config_href": "https://fnorch0-vm2b2htvuuclm.azurewebsites.net/admin/vfs/home/site/wwwroot/conversations/function.json",
+        "href": "https://fnorch0-vm2b2htvuuclm.azurewebsites.net/admin/functions/conversations",
+        "invoke_url_template": "https://fnorch0-vm2b2htvuuclm.azurewebsites.net/api/conversations/{id?}",
+        "isDisabled": false,
+        "language": "python",
+        "script_href": "https://fnorch0-vm2b2htvuuclm.azurewebsites.net/admin/vfs/home/site/wwwroot/conversations/__init__.py",
+        "script_root_path_href": "https://fnorch0-vm2b2htvuuclm.azurewebsites.net/admin/vfs/home/site/wwwroot/conversations/",
+        "test_data_href": "https://fnorch0-vm2b2htvuuclm.azurewebsites.net/admin/vfs/home/data/Functions/sampledata/conversations.dat"
+      },
+      "type": "Microsoft.Web/sites/functions"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fninges0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fninges0_vm2b2htvuuclm_name'), '/document_chunking')]",
+      "properties": {
+        "config": {
+          "bindings": [
+            {
+              "authLevel": "FUNCTION",
+              "direction": "IN",
+              "name": "req",
+              "route": "document-chunking",
+              "type": "httpTrigger"
+            },
+            {
+              "direction": "OUT",
+              "name": "$return",
+              "type": "http"
+            }
+          ],
+          "entryPoint": "document_chunking",
+          "functionDirectory": "/home/site/wwwroot",
+          "language": "python",
+          "name": "document_chunking",
+          "scriptFile": "function_app.py"
+        },
+        "href": "https://fninges0-vm2b2htvuuclm.azurewebsites.net/admin/functions/document_chunking",
+        "invoke_url_template": "https://fninges0-vm2b2htvuuclm.azurewebsites.net/api/document-chunking",
+        "isDisabled": false,
+        "language": "python",
+        "script_href": "https://fninges0-vm2b2htvuuclm.azurewebsites.net/admin/vfs/home/site/wwwroot/function_app.py",
+        "test_data_href": "https://fninges0-vm2b2htvuuclm.azurewebsites.net/admin/vfs/home/data/Functions/sampledata/document_chunking.dat"
+      },
+      "type": "Microsoft.Web/sites/functions"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fnorch0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fnorch0_vm2b2htvuuclm_name'), '/feedback')]",
+      "properties": {
+        "config": {
+          "bindings": [
+            {
+              "authLevel": "function",
+              "direction": "in",
+              "methods": [
+                "get",
+                "post"
+              ],
+              "name": "req",
+              "type": "httpTrigger"
+            },
+            {
+              "direction": "out",
+              "name": "$return",
+              "type": "http"
+            }
+          ],
+          "scriptFile": "__init__.py"
+        },
+        "config_href": "https://fnorch0-vm2b2htvuuclm.azurewebsites.net/admin/vfs/home/site/wwwroot/feedback/function.json",
+        "href": "https://fnorch0-vm2b2htvuuclm.azurewebsites.net/admin/functions/feedback",
+        "invoke_url_template": "https://fnorch0-vm2b2htvuuclm.azurewebsites.net/api/feedback",
+        "isDisabled": false,
+        "language": "python",
+        "script_href": "https://fnorch0-vm2b2htvuuclm.azurewebsites.net/admin/vfs/home/site/wwwroot/feedback/__init__.py",
+        "script_root_path_href": "https://fnorch0-vm2b2htvuuclm.azurewebsites.net/admin/vfs/home/site/wwwroot/feedback/",
+        "test_data_href": "https://fnorch0-vm2b2htvuuclm.azurewebsites.net/admin/vfs/home/data/Functions/sampledata/feedback.dat"
+      },
+      "type": "Microsoft.Web/sites/functions"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fnorch0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fnorch0_vm2b2htvuuclm_name'), '/orc')]",
+      "properties": {
+        "config": {
+          "bindings": [
+            {
+              "authLevel": "function",
+              "direction": "in",
+              "methods": [
+                "get",
+                "post"
+              ],
+              "name": "req",
+              "type": "httpTrigger"
+            },
+            {
+              "direction": "out",
+              "name": "$return",
+              "type": "http"
+            }
+          ],
+          "scriptFile": "__init__.py"
+        },
+        "config_href": "https://fnorch0-vm2b2htvuuclm.azurewebsites.net/admin/vfs/home/site/wwwroot/orc/function.json",
+        "href": "https://fnorch0-vm2b2htvuuclm.azurewebsites.net/admin/functions/orc",
+        "invoke_url_template": "https://fnorch0-vm2b2htvuuclm.azurewebsites.net/api/orc",
+        "isDisabled": false,
+        "language": "python",
+        "script_href": "https://fnorch0-vm2b2htvuuclm.azurewebsites.net/admin/vfs/home/site/wwwroot/orc/__init__.py",
+        "script_root_path_href": "https://fnorch0-vm2b2htvuuclm.azurewebsites.net/admin/vfs/home/site/wwwroot/orc/",
+        "test_data_href": "https://fnorch0-vm2b2htvuuclm.azurewebsites.net/admin/vfs/home/data/Functions/sampledata/orc.dat"
+      },
+      "type": "Microsoft.Web/sites/functions"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fnorch0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fnorch0_vm2b2htvuuclm_name'), '/settings')]",
+      "properties": {
+        "config": {
+          "bindings": [
+            {
+              "authLevel": "function",
+              "direction": "in",
+              "methods": [
+                "get",
+                "post"
+              ],
+              "name": "req",
+              "type": "httpTrigger"
+            },
+            {
+              "direction": "out",
+              "name": "$return",
+              "type": "http"
+            }
+          ],
+          "scriptFile": "__init__.py"
+        },
+        "config_href": "https://fnorch0-vm2b2htvuuclm.azurewebsites.net/admin/vfs/home/site/wwwroot/settings/function.json",
+        "href": "https://fnorch0-vm2b2htvuuclm.azurewebsites.net/admin/functions/settings",
+        "invoke_url_template": "https://fnorch0-vm2b2htvuuclm.azurewebsites.net/api/settings",
+        "isDisabled": false,
+        "language": "python",
+        "script_href": "https://fnorch0-vm2b2htvuuclm.azurewebsites.net/admin/vfs/home/site/wwwroot/settings/__init__.py",
+        "script_root_path_href": "https://fnorch0-vm2b2htvuuclm.azurewebsites.net/admin/vfs/home/site/wwwroot/settings/",
+        "test_data_href": "https://fnorch0-vm2b2htvuuclm.azurewebsites.net/admin/vfs/home/data/Functions/sampledata/settings.dat"
+      },
+      "type": "Microsoft.Web/sites/functions"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fninges0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fninges0_vm2b2htvuuclm_name'), '/', parameters('sites_fninges0_vm2b2htvuuclm_name'), '.azurewebsites.net')]",
+      "properties": {
+        "hostNameType": "Verified",
+        "siteName": "fninges0-vm2b2htvuuclm"
+      },
+      "type": "Microsoft.Web/sites/hostNameBindings"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fnorch0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fnorch0_vm2b2htvuuclm_name'), '/', parameters('sites_fnorch0_vm2b2htvuuclm_name'), '.azurewebsites.net')]",
+      "properties": {
+        "hostNameType": "Verified",
+        "siteName": "fnorch0-vm2b2htvuuclm"
+      },
+      "type": "Microsoft.Web/sites/hostNameBindings"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_webgpt0_vm2b2htvuuclm_name'))]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_webgpt0_vm2b2htvuuclm_name'), '/', parameters('sites_webgpt0_vm2b2htvuuclm_name'), '.azurewebsites.net')]",
+      "properties": {
+        "hostNameType": "Verified",
+        "siteName": "webgpt0-vm2b2htvuuclm"
+      },
+      "type": "Microsoft.Web/sites/hostNameBindings"
+    },
+    {
+      "apiVersion": "2021-04-01",
+      "dependsOn": [
+        "[resourceId('microsoft.insights/components', parameters('components_appins0_vm2b2htvuuclm_name'))]",
+        "[resourceId('microsoft.insights/actionGroups', parameters('actionGroups_Application_Insights_Smart_Detection_name'))]"
+      ],
+      "location": "global",
+      "name": "[parameters('smartdetectoralertrules_failure_anomalies___appins0_vm2b2htvuuclm_name')]",
+      "properties": {
+        "actionGroups": {
+          "groupIds": [
+            "[resourceId('microsoft.insights/actionGroups', parameters('actionGroups_Application_Insights_Smart_Detection_name'))]"
+          ]
+        },
+        "description": "Failure Anomalies notifies you of an unusual rise in the rate of failed HTTP requests or dependency calls.",
+        "detector": {
+          "id": "FailureAnomaliesDetector"
+        },
+        "frequency": "PT1M",
+        "scope": [
+          "[resourceId('microsoft.insights/components', parameters('components_appins0_vm2b2htvuuclm_name'))]"
+        ],
+        "severity": "Sev3",
+        "state": "Enabled"
+      },
+      "type": "microsoft.alertsmanagement/smartdetectoralertrules"
+    },
+    {
+      "apiVersion": "2024-05-15",
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), 'db0-vm2b2htvuuclm')]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), '/db0-vm2b2htvuuclm/agentErrors')]",
+      "properties": {
+        "resource": {
+          "computedProperties": [],
+          "conflictResolutionPolicy": {
+            "conflictResolutionPath": "/_ts",
+            "mode": "LastWriterWins"
+          },
+          "defaultTtl": 86400,
+          "id": "agentErrors",
+          "indexingPolicy": {
+            "automatic": true,
+            "excludedPaths": [
+              {
+                "path": "/\"_etag\"/?"
+              }
+            ],
+            "includedPaths": [
+              {
+                "path": "/*"
+              }
+            ],
+            "indexingMode": "consistent"
+          },
+          "partitionKey": {
+            "kind": "Hash",
+            "paths": [
+              "/id"
+            ],
+            "version": 2
+          },
+          "uniqueKeyPolicy": {
+            "uniqueKeys": []
+          }
+        }
+      },
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers"
+    },
+    {
+      "apiVersion": "2024-05-15",
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), 'db0-vm2b2htvuuclm')]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), '/db0-vm2b2htvuuclm/conversations')]",
+      "properties": {
+        "resource": {
+          "analyticalStorageTtl": -1,
+          "computedProperties": [],
+          "conflictResolutionPolicy": {
+            "conflictResolutionPath": "/_ts",
+            "mode": "LastWriterWins"
+          },
+          "id": "conversations",
+          "indexingPolicy": {
+            "automatic": true,
+            "excludedPaths": [
+              {
+                "path": "/\"_etag\"/?"
+              }
+            ],
+            "includedPaths": [
+              {
+                "path": "/*"
+              }
+            ],
+            "indexingMode": "consistent"
+          },
+          "partitionKey": {
+            "kind": "Hash",
+            "paths": [
+              "/id"
+            ]
+          },
+          "uniqueKeyPolicy": {
+            "uniqueKeys": []
+          }
+        }
+      },
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers"
+    },
+    {
+      "apiVersion": "2024-05-15",
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), 'db0-vm2b2htvuuclm')]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), '/db0-vm2b2htvuuclm/feedback')]",
+      "properties": {
+        "resource": {
+          "conflictResolutionPolicy": {
+            "conflictResolutionPath": "/_ts",
+            "mode": "LastWriterWins"
+          },
+          "id": "feedback",
+          "indexingPolicy": {
+            "automatic": true,
+            "excludedPaths": [
+              {
+                "path": "/\"_etag\"/?"
+              }
+            ],
+            "includedPaths": [
+              {
+                "path": "/*"
+              }
+            ],
+            "indexingMode": "consistent"
+          },
+          "partitionKey": {
+            "kind": "Hash",
+            "paths": [
+              "/_partitionKey"
+            ]
+          }
+        }
+      },
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers"
+    },
+    {
+      "apiVersion": "2024-05-15",
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), 'db0-vm2b2htvuuclm')]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), '/db0-vm2b2htvuuclm/models')]",
+      "properties": {
+        "resource": {
+          "analyticalStorageTtl": -1,
+          "computedProperties": [],
+          "conflictResolutionPolicy": {
+            "conflictResolutionPath": "/_ts",
+            "mode": "LastWriterWins"
+          },
+          "id": "models",
+          "indexingPolicy": {
+            "automatic": false,
+            "excludedPaths": [],
+            "includedPaths": [],
+            "indexingMode": "none"
+          },
+          "partitionKey": {
+            "kind": "Hash",
+            "paths": [
+              "/id"
+            ]
+          },
+          "uniqueKeyPolicy": {
+            "uniqueKeys": []
+          }
+        }
+      },
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers"
+    },
+    {
+      "apiVersion": "2024-05-15",
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), 'db0-vm2b2htvuuclm')]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), '/db0-vm2b2htvuuclm/prompts')]",
+      "properties": {
+        "resource": {
+          "computedProperties": [],
+          "conflictResolutionPolicy": {
+            "conflictResolutionPath": "/_ts",
+            "mode": "LastWriterWins"
+          },
+          "defaultTtl": 604800,
+          "id": "prompts",
+          "indexingPolicy": {
+            "automatic": true,
+            "excludedPaths": [
+              {
+                "path": "/\"_etag\"/?"
+              }
+            ],
+            "includedPaths": [
+              {
+                "path": "/*"
+              }
+            ],
+            "indexingMode": "consistent"
+          },
+          "partitionKey": {
+            "kind": "Hash",
+            "paths": [
+              "/id"
+            ],
+            "version": 2
+          },
+          "uniqueKeyPolicy": {
+            "uniqueKeys": []
+          }
+        }
+      },
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers"
+    },
+    {
+      "apiVersion": "2024-05-15",
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), 'db0-vm2b2htvuuclm')]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), '/db0-vm2b2htvuuclm/settings')]",
+      "properties": {
+        "resource": {
+          "conflictResolutionPolicy": {
+            "conflictResolutionPath": "/_ts",
+            "mode": "LastWriterWins"
+          },
+          "id": "settings",
+          "indexingPolicy": {
+            "automatic": true,
+            "excludedPaths": [
+              {
+                "path": "/\"_etag\"/?"
+              }
+            ],
+            "includedPaths": [
+              {
+                "path": "/*"
+              }
+            ],
+            "indexingMode": "consistent"
+          },
+          "partitionKey": {
+            "kind": "Hash",
+            "paths": [
+              "/_partitionKey"
+            ]
+          }
+        }
+      },
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers"
+    },
+    {
+      "apiVersion": "2024-05-15",
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), 'db0-vm2b2htvuuclm')]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), '/db0-vm2b2htvuuclm/users')]",
+      "properties": {
+        "resource": {
+          "conflictResolutionPolicy": {
+            "conflictResolutionPath": "/_ts",
+            "mode": "LastWriterWins"
+          },
+          "id": "users",
+          "indexingPolicy": {
+            "automatic": true,
+            "excludedPaths": [
+              {
+                "path": "/\"_etag\"/?"
+              }
+            ],
+            "includedPaths": [
+              {
+                "path": "/*"
+              }
+            ],
+            "indexingMode": "consistent"
+          },
+          "partitionKey": {
+            "kind": "Hash",
+            "paths": [
+              "/id"
+            ]
+          }
+        }
+      },
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers"
+    },
+    {
+      "apiVersion": "2024-05-15",
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), 'db0-vm2b2htvuuclm')]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), '/db0-vm2b2htvuuclm/userTokens')]",
+      "properties": {
+        "resource": {
+          "computedProperties": [],
+          "conflictResolutionPolicy": {
+            "conflictResolutionPath": "/_ts",
+            "mode": "LastWriterWins"
+          },
+          "id": "userTokens",
+          "indexingPolicy": {
+            "automatic": true,
+            "excludedPaths": [
+              {
+                "path": "/\"_etag\"/?"
+              }
+            ],
+            "includedPaths": [
+              {
+                "path": "/*"
+              }
+            ],
+            "indexingMode": "consistent"
+          },
+          "partitionKey": {
+            "kind": "Hash",
+            "paths": [
+              "/id"
+            ],
+            "version": 2
+          },
+          "uniqueKeyPolicy": {
+            "uniqueKeys": []
+          }
+        }
+      },
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers"
+    },
+    {
+      "apiVersion": "2024-05-15",
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'))]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), '00000000-0000-0000-0000-000000000002')]"
+      ],
+      "name": "[concat(parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), '/11e31339-a6c7-404e-84d1-a8bf7308319b')]",
+      "properties": {
+        "principalId": "ea6f1bbb-1568-4d26-a1cd-b4f6c713c457",
+        "roleDefinitionId": "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), '00000000-0000-0000-0000-000000000002')]",
+        "scope": "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'))]"
+      },
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments"
+    },
+    {
+      "apiVersion": "2024-05-15",
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'))]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), '00000000-0000-0000-0000-000000000002')]"
+      ],
+      "name": "[concat(parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), '/3f166f54-e18b-45e5-87ce-325b5e6caf26')]",
+      "properties": {
+        "principalId": "fe9a23dd-476e-415e-a7fe-543b1f1d12a5",
+        "roleDefinitionId": "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), '00000000-0000-0000-0000-000000000002')]",
+        "scope": "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'))]"
+      },
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments"
+    },
+    {
+      "apiVersion": "2024-05-15",
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'))]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), '00000000-0000-0000-0000-000000000002')]"
+      ],
+      "name": "[concat(parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), '/42cef116-eacb-54ee-94b2-60ae0750f909')]",
+      "properties": {
+        "principalId": "e6391111-19bc-4c51-ade6-0834b05f6ae6",
+        "roleDefinitionId": "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), '00000000-0000-0000-0000-000000000002')]",
+        "scope": "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'))]"
+      },
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments"
+    },
+    {
+      "apiVersion": "2024-05-15",
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'))]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), '00000000-0000-0000-0000-000000000002')]"
+      ],
+      "name": "[concat(parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), '/5b26153d-49ef-47b2-904a-8476705b9f32')]",
+      "properties": {
+        "principalId": "1b2f609f-e7c7-4a1b-8f4c-160cb07e2ee9",
+        "roleDefinitionId": "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), '00000000-0000-0000-0000-000000000002')]",
+        "scope": "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'))]"
+      },
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments"
+    },
+    {
+      "apiVersion": "2024-04-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.MachineLearningServices/workspaces', parameters('workspaces_MachineLearningPromptFlowTest_name'))]",
+        "[resourceId('Microsoft.CognitiveServices/accounts', parameters('accounts_oai0_vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('workspaces_MachineLearningPromptFlowTest_name'), '/AzureOpenAIClew')]",
+      "properties": {
+        "authType": "AAD",
+        "category": "AzureOpenAI",
+        "isSharedToAll": false,
+        "metadata": {
+          "ApiType": "azure",
+          "ApiVersion": "2024-02-01",
+          "DeploymentApiVersion": "2023-10-01-preview",
+          "ResourceId": "[resourceId('Microsoft.CognitiveServices/accounts', parameters('accounts_oai0_vm2b2htvuuclm_name'))]",
+          "azureml.flow.connection_type": "AzureOpenAI",
+          "azureml.flow.module": "promptflow.connections"
+        },
+        "sharedUserList": [],
+        "target": "https://oai0-vm2b2htvuuclm.openai.azure.com/"
+      },
+      "type": "Microsoft.MachineLearningServices/workspaces/connections"
+    },
+    {
+      "apiVersion": "2024-04-01-preview",
+      "dependsOn": [
+        "[resourceId('Microsoft.MachineLearningServices/workspaces/connections', parameters('workspaces_MachineLearningPromptFlowTest_name'), 'AzureOpenAIClew')]",
+        "[resourceId('Microsoft.MachineLearningServices/workspaces', parameters('workspaces_MachineLearningPromptFlowTest_name'))]"
+      ],
+      "name": "[concat(parameters('workspaces_MachineLearningPromptFlowTest_name'), '/AzureOpenAIClew/Agent')]",
+      "properties": {},
+      "sku": {
+        "capacity": 10,
+        "name": "Standard"
+      },
+      "type": "Microsoft.MachineLearningServices/workspaces/connections/deployments"
+    },
+    {
+      "apiVersion": "2024-04-01-preview",
+      "dependsOn": [
+        "[resourceId('Microsoft.MachineLearningServices/workspaces/connections', parameters('workspaces_MachineLearningPromptFlowTest_name'), 'AzureOpenAIClew')]",
+        "[resourceId('Microsoft.MachineLearningServices/workspaces', parameters('workspaces_MachineLearningPromptFlowTest_name'))]"
+      ],
+      "name": "[concat(parameters('workspaces_MachineLearningPromptFlowTest_name'), '/AzureOpenAIClew/chat')]",
+      "properties": {},
+      "sku": {
+        "capacity": 20,
+        "name": "Standard"
+      },
+      "type": "Microsoft.MachineLearningServices/workspaces/connections/deployments"
+    },
+    {
+      "apiVersion": "2024-04-01-preview",
+      "dependsOn": [
+        "[resourceId('Microsoft.MachineLearningServices/workspaces/connections', parameters('workspaces_MachineLearningPromptFlowTest_name'), 'AzureOpenAIClew')]",
+        "[resourceId('Microsoft.MachineLearningServices/workspaces', parameters('workspaces_MachineLearningPromptFlowTest_name'))]"
+      ],
+      "name": "[concat(parameters('workspaces_MachineLearningPromptFlowTest_name'), '/AzureOpenAIClew/text-embedding-3-small')]",
+      "properties": {},
+      "sku": {
+        "capacity": 120,
+        "name": "Standard"
+      },
+      "type": "Microsoft.MachineLearningServices/workspaces/connections/deployments"
+    },
+    {
+      "apiVersion": "2024-04-01-preview",
+      "dependsOn": [
+        "[resourceId('Microsoft.MachineLearningServices/workspaces/connections', parameters('workspaces_MachineLearningPromptFlowTest_name'), 'AzureOpenAIClew')]",
+        "[resourceId('Microsoft.MachineLearningServices/workspaces', parameters('workspaces_MachineLearningPromptFlowTest_name'))]"
+      ],
+      "name": "[concat(parameters('workspaces_MachineLearningPromptFlowTest_name'), '/AzureOpenAIClew/text-embedding-ada-002')]",
+      "properties": {},
+      "sku": {
+        "capacity": 20,
+        "name": "Standard"
+      },
+      "type": "Microsoft.MachineLearningServices/workspaces/connections/deployments"
+    },
+    {
+      "apiVersion": "2024-04-01-preview",
+      "dependsOn": [
+        "[resourceId('Microsoft.MachineLearningServices/workspaces/connections', parameters('workspaces_MachineLearningPromptFlowTest_name'), 'AzureOpenAIClew')]",
+        "[resourceId('Microsoft.MachineLearningServices/workspaces', parameters('workspaces_MachineLearningPromptFlowTest_name'))]"
+      ],
+      "name": "[concat(parameters('workspaces_MachineLearningPromptFlowTest_name'), '/AzureOpenAIClew/Microsoft.Default')]",
+      "properties": {
+        "contentFilters": [
+          {
+            "allowedContentLevel": "Medium",
+            "blocking": true,
+            "enabled": true,
+            "name": "Hate",
+            "source": "Prompt"
+          },
+          {
+            "allowedContentLevel": "Medium",
+            "blocking": true,
+            "enabled": true,
+            "name": "Hate",
+            "source": "Completion"
+          },
+          {
+            "allowedContentLevel": "Medium",
+            "blocking": true,
+            "enabled": true,
+            "name": "Sexual",
+            "source": "Prompt"
+          },
+          {
+            "allowedContentLevel": "Medium",
+            "blocking": true,
+            "enabled": true,
+            "name": "Sexual",
+            "source": "Completion"
+          },
+          {
+            "allowedContentLevel": "Medium",
+            "blocking": true,
+            "enabled": true,
+            "name": "Violence",
+            "source": "Prompt"
+          },
+          {
+            "allowedContentLevel": "Medium",
+            "blocking": true,
+            "enabled": true,
+            "name": "Violence",
+            "source": "Completion"
+          },
+          {
+            "allowedContentLevel": "Medium",
+            "blocking": true,
+            "enabled": true,
+            "name": "Selfharm",
+            "source": "Prompt"
+          },
+          {
+            "allowedContentLevel": "Medium",
+            "blocking": true,
+            "enabled": true,
+            "name": "Selfharm",
+            "source": "Completion"
+          }
+        ],
+        "mode": "Blocking",
+        "type": "SystemManaged"
+      },
+      "type": "Microsoft.MachineLearningServices/workspaces/connections/raiPolicies"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_adb2auth_name'), 'default')]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_adb2auth_name'))]"
+      ],
+      "name": "[concat(parameters('storageAccounts_adb2auth_name'), '/default/auth')]",
+      "properties": {
+        "defaultEncryptionScope": "$account-encryption-key",
+        "denyEncryptionScopeOverride": false,
+        "immutableStorageWithVersioning": {
+          "enabled": false
+        },
+        "publicAccess": "Container"
+      },
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_strag0vm2b2htvuuclm_name'), 'default')]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_strag0vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('storageAccounts_strag0vm2b2htvuuclm_name'), '/default/azureml')]",
+      "properties": {
+        "defaultEncryptionScope": "$account-encryption-key",
+        "denyEncryptionScopeOverride": false,
+        "immutableStorageWithVersioning": {
+          "enabled": false
+        },
+        "publicAccess": "None"
+      },
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_strag0vm2b2htvuuclm_name'), 'default')]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_strag0vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('storageAccounts_strag0vm2b2htvuuclm_name'), '/default/azureml-blobstore-0aa2f521-9ce8-4737-a044-8d4e26966a55')]",
+      "properties": {
+        "defaultEncryptionScope": "$account-encryption-key",
+        "denyEncryptionScopeOverride": false,
+        "immutableStorageWithVersioning": {
+          "enabled": false
+        },
+        "publicAccess": "None"
+      },
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_strag0vm2b2htvuuclming_name'), 'default')]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_strag0vm2b2htvuuclming_name'))]"
+      ],
+      "name": "[concat(parameters('storageAccounts_strag0vm2b2htvuuclming_name'), '/default/azure-webjobs-hosts')]",
+      "properties": {
+        "defaultEncryptionScope": "$account-encryption-key",
+        "denyEncryptionScopeOverride": false,
+        "immutableStorageWithVersioning": {
+          "enabled": false
+        },
+        "publicAccess": "None"
+      },
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_strag0vm2b2htvuuclmorc_name'), 'default')]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_strag0vm2b2htvuuclmorc_name'))]"
+      ],
+      "name": "[concat(parameters('storageAccounts_strag0vm2b2htvuuclmorc_name'), '/default/azure-webjobs-hosts')]",
+      "properties": {
+        "defaultEncryptionScope": "$account-encryption-key",
+        "denyEncryptionScopeOverride": false,
+        "immutableStorageWithVersioning": {
+          "enabled": false
+        },
+        "publicAccess": "None"
+      },
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_strag0vm2b2htvuuclming_name'), 'default')]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_strag0vm2b2htvuuclming_name'))]"
+      ],
+      "name": "[concat(parameters('storageAccounts_strag0vm2b2htvuuclming_name'), '/default/azure-webjobs-secrets')]",
+      "properties": {
+        "defaultEncryptionScope": "$account-encryption-key",
+        "denyEncryptionScopeOverride": false,
+        "immutableStorageWithVersioning": {
+          "enabled": false
+        },
+        "publicAccess": "None"
+      },
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_strag0vm2b2htvuuclmorc_name'), 'default')]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_strag0vm2b2htvuuclmorc_name'))]"
+      ],
+      "name": "[concat(parameters('storageAccounts_strag0vm2b2htvuuclmorc_name'), '/default/azure-webjobs-secrets')]",
+      "properties": {
+        "defaultEncryptionScope": "$account-encryption-key",
+        "denyEncryptionScopeOverride": false,
+        "immutableStorageWithVersioning": {
+          "enabled": false
+        },
+        "publicAccess": "None"
+      },
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_strag0vm2b2htvuuclm_name'), 'default')]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_strag0vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('storageAccounts_strag0vm2b2htvuuclm_name'), '/default/documents')]",
+      "properties": {
+        "defaultEncryptionScope": "$account-encryption-key",
+        "denyEncryptionScopeOverride": false,
+        "immutableStorageWithVersioning": {
+          "enabled": false
+        },
+        "publicAccess": "None"
+      },
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_strag0vm2b2htvuuclm_name'), 'default')]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_strag0vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('storageAccounts_strag0vm2b2htvuuclm_name'), '/default/ms-az-cognitive-search-debugsession')]",
+      "properties": {
+        "defaultEncryptionScope": "$account-encryption-key",
+        "denyEncryptionScopeOverride": false,
+        "immutableStorageWithVersioning": {
+          "enabled": false
+        },
+        "publicAccess": "None"
+      },
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_strag0vm2b2htvuuclm_name'), 'default')]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_strag0vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('storageAccounts_strag0vm2b2htvuuclm_name'), '/default/revisions')]",
+      "properties": {
+        "defaultEncryptionScope": "$account-encryption-key",
+        "denyEncryptionScopeOverride": false,
+        "immutableStorageWithVersioning": {
+          "enabled": false
+        },
+        "publicAccess": "None"
+      },
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_strag0vm2b2htvuuclm_name'), 'default')]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_strag0vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('storageAccounts_strag0vm2b2htvuuclm_name'), '/default/snapshots')]",
+      "properties": {
+        "defaultEncryptionScope": "$account-encryption-key",
+        "denyEncryptionScopeOverride": false,
+        "immutableStorageWithVersioning": {
+          "enabled": false
+        },
+        "publicAccess": "None"
+      },
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_strag0vm2b2htvuuclm_name'), 'default')]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_strag0vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('storageAccounts_strag0vm2b2htvuuclm_name'), '/default/snapshotzips')]",
+      "properties": {
+        "defaultEncryptionScope": "$account-encryption-key",
+        "denyEncryptionScopeOverride": false,
+        "immutableStorageWithVersioning": {
+          "enabled": false
+        },
+        "publicAccess": "None"
+      },
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/fileServices', parameters('storageAccounts_strag0vm2b2htvuuclm_name'), 'default')]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_strag0vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('storageAccounts_strag0vm2b2htvuuclm_name'), '/default/azureml-filestore-0aa2f521-9ce8-4737-a044-8d4e26966a55')]",
+      "properties": {
+        "accessTier": "TransactionOptimized",
+        "enabledProtocols": "SMB",
+        "shareQuota": 102400
+      },
+      "type": "Microsoft.Storage/storageAccounts/fileServices/shares"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/fileServices', parameters('storageAccounts_strag0vm2b2htvuuclm_name'), 'default')]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_strag0vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('storageAccounts_strag0vm2b2htvuuclm_name'), '/default/code-391ff5ac-6576-460f-ba4d-7e03433c68b6')]",
+      "properties": {
+        "accessTier": "TransactionOptimized",
+        "enabledProtocols": "SMB",
+        "shareQuota": 102400
+      },
+      "type": "Microsoft.Storage/storageAccounts/fileServices/shares"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/fileServices', parameters('storageAccounts_strag0vm2b2htvuuclming_name'), 'default')]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_strag0vm2b2htvuuclming_name'))]"
+      ],
+      "name": "[concat(parameters('storageAccounts_strag0vm2b2htvuuclming_name'), '/default/fninges0-vm2b2htvuuclm')]",
+      "properties": {
+        "accessTier": "TransactionOptimized",
+        "enabledProtocols": "SMB",
+        "shareQuota": 102400
+      },
+      "type": "Microsoft.Storage/storageAccounts/fileServices/shares"
+    },
+    {
+      "apiVersion": "2023-05-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/fileServices', parameters('storageAccounts_strag0vm2b2htvuuclmorc_name'), 'default')]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_strag0vm2b2htvuuclmorc_name'))]"
+      ],
+      "name": "[concat(parameters('storageAccounts_strag0vm2b2htvuuclmorc_name'), '/default/fnorch0-vm2b2htvuuclm')]",
+      "properties": {
+        "accessTier": "TransactionOptimized",
+        "enabledProtocols": "SMB",
+        "shareQuota": 102400
+      },
+      "type": "Microsoft.Storage/storageAccounts/fileServices/shares"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_appplan0_vm2b2htvuuclm_name'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_aivnet0_vm2b2htvuuclm_name'), 'app-int-subnet')]"
+      ],
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "kind": "functionapp,linux",
+      "location": "East US",
+      "name": "[parameters('sites_fninges0_vm2b2htvuuclm_name')]",
+      "properties": {
+        "clientAffinityEnabled": false,
+        "clientCertEnabled": false,
+        "clientCertMode": "Required",
+        "containerSize": 1536,
+        "customDomainVerificationId": "5AEEF3403E4DA9CEBB1391C0D1E1AA623F3B4E45BA98BA883DFD0ABF1BB66526",
+        "dailyMemoryTimeQuota": 0,
+        "dnsConfiguration": {},
+        "enabled": true,
+        "hostNameSslStates": [
+          {
+            "hostType": "Standard",
+            "name": "[concat(parameters('sites_fninges0_vm2b2htvuuclm_name'), '.azurewebsites.net')]",
+            "sslState": "Disabled"
+          },
+          {
+            "hostType": "Repository",
+            "name": "[concat(parameters('sites_fninges0_vm2b2htvuuclm_name'), '.scm.azurewebsites.net')]",
+            "sslState": "Disabled"
+          }
+        ],
+        "hostNamesDisabled": false,
+        "httpsOnly": true,
+        "hyperV": false,
+        "isXenon": false,
+        "keyVaultReferenceIdentity": "SystemAssigned",
+        "redundancyMode": "None",
+        "reserved": true,
+        "scmSiteAlsoStopped": false,
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_appplan0_vm2b2htvuuclm_name'))]",
+        "siteConfig": {
+          "acrUseManagedIdentityCreds": false,
+          "alwaysOn": true,
+          "functionAppScaleLimit": 1,
+          "http20Enabled": false,
+          "linuxFxVersion": "PYTHON|3.10",
+          "minimumElasticInstanceCount": 1,
+          "numberOfWorkers": 1
+        },
+        "storageAccountRequired": false,
+        "virtualNetworkSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_aivnet0_vm2b2htvuuclm_name'), 'app-int-subnet')]",
+        "vnetBackupRestoreEnabled": false,
+        "vnetContentShareEnabled": false,
+        "vnetImagePullEnabled": false,
+        "vnetRouteAllEnabled": false
+      },
+      "tags": {
+        "azd-env-name": "develop-clew",
+        "azd-service-name": "dataIngest",
+        "hidden-link: /app-insights-conn-string": "InstrumentationKey=94e8c802-e65e-48b0-a002-57f7e3f02430;IngestionEndpoint=https://eastus-3.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus.livediagnostics.monitor.azure.com/;ApplicationId=8e9fb018-3160-4b09-bd9a-e8ca0a5f21ef",
+        "hidden-link: /app-insights-instrumentation-key": "94e8c802-e65e-48b0-a002-57f7e3f02430",
+        "hidden-link: /app-insights-resource-id": "/subscriptions/e261fb0a-3d87-49c1-8d3c-32b2bc93b6ff/resourceGroups/rg-develop-clew/providers/microsoft.insights/components/appins0-vm2b2htvuuclm"
+      },
+      "type": "Microsoft.Web/sites"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_appplan0_vm2b2htvuuclm_name'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_aivnet0_vm2b2htvuuclm_name'), 'app-int-subnet')]"
+      ],
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "kind": "functionapp,linux",
+      "location": "East US",
+      "name": "[parameters('sites_fnorch0_vm2b2htvuuclm_name')]",
+      "properties": {
+        "clientAffinityEnabled": false,
+        "clientCertEnabled": false,
+        "clientCertMode": "Required",
+        "containerSize": 1536,
+        "customDomainVerificationId": "5AEEF3403E4DA9CEBB1391C0D1E1AA623F3B4E45BA98BA883DFD0ABF1BB66526",
+        "dailyMemoryTimeQuota": 0,
+        "dnsConfiguration": {},
+        "enabled": true,
+        "hostNameSslStates": [
+          {
+            "hostType": "Standard",
+            "name": "[concat(parameters('sites_fnorch0_vm2b2htvuuclm_name'), '.azurewebsites.net')]",
+            "sslState": "Disabled"
+          },
+          {
+            "hostType": "Repository",
+            "name": "[concat(parameters('sites_fnorch0_vm2b2htvuuclm_name'), '.scm.azurewebsites.net')]",
+            "sslState": "Disabled"
+          }
+        ],
+        "hostNamesDisabled": false,
+        "httpsOnly": true,
+        "hyperV": false,
+        "isXenon": false,
+        "keyVaultReferenceIdentity": "SystemAssigned",
+        "redundancyMode": "None",
+        "reserved": true,
+        "scmSiteAlsoStopped": false,
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_appplan0_vm2b2htvuuclm_name'))]",
+        "siteConfig": {
+          "acrUseManagedIdentityCreds": false,
+          "alwaysOn": true,
+          "functionAppScaleLimit": 2,
+          "http20Enabled": false,
+          "linuxFxVersion": "PYTHON|3.10",
+          "minimumElasticInstanceCount": 1,
+          "numberOfWorkers": 2
+        },
+        "storageAccountRequired": false,
+        "virtualNetworkSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_aivnet0_vm2b2htvuuclm_name'), 'app-int-subnet')]",
+        "vnetBackupRestoreEnabled": false,
+        "vnetContentShareEnabled": false,
+        "vnetImagePullEnabled": false,
+        "vnetRouteAllEnabled": false
+      },
+      "tags": {
+        "azd-env-name": "develop-clew",
+        "azd-service-name": "orchestrator",
+        "hidden-link: /app-insights-conn-string": "InstrumentationKey=94e8c802-e65e-48b0-a002-57f7e3f02430;IngestionEndpoint=https://eastus-3.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus.livediagnostics.monitor.azure.com/;ApplicationId=8e9fb018-3160-4b09-bd9a-e8ca0a5f21ef",
+        "hidden-link: /app-insights-instrumentation-key": "94e8c802-e65e-48b0-a002-57f7e3f02430",
+        "hidden-link: /app-insights-resource-id": "/subscriptions/e261fb0a-3d87-49c1-8d3c-32b2bc93b6ff/resourceGroups/rg-develop-clew/providers/microsoft.insights/components/appins0-vm2b2htvuuclm"
+      },
+      "type": "Microsoft.Web/sites"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_appplan0_vm2b2htvuuclm_name'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_aivnet0_vm2b2htvuuclm_name'), 'app-int-subnet')]"
+      ],
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "kind": "app,linux",
+      "location": "East US",
+      "name": "[parameters('sites_webgpt0_vm2b2htvuuclm_name')]",
+      "properties": {
+        "clientAffinityEnabled": false,
+        "clientCertEnabled": false,
+        "clientCertMode": "Required",
+        "containerSize": 0,
+        "customDomainVerificationId": "5AEEF3403E4DA9CEBB1391C0D1E1AA623F3B4E45BA98BA883DFD0ABF1BB66526",
+        "dailyMemoryTimeQuota": 0,
+        "dnsConfiguration": {},
+        "enabled": true,
+        "hostNameSslStates": [
+          {
+            "hostType": "Standard",
+            "name": "[concat(parameters('sites_webgpt0_vm2b2htvuuclm_name'), '.azurewebsites.net')]",
+            "sslState": "Disabled"
+          },
+          {
+            "hostType": "Repository",
+            "name": "[concat(parameters('sites_webgpt0_vm2b2htvuuclm_name'), '.scm.azurewebsites.net')]",
+            "sslState": "Disabled"
+          }
+        ],
+        "hostNamesDisabled": false,
+        "httpsOnly": true,
+        "hyperV": false,
+        "isXenon": false,
+        "keyVaultReferenceIdentity": "SystemAssigned",
+        "redundancyMode": "None",
+        "reserved": true,
+        "scmSiteAlsoStopped": false,
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_appplan0_vm2b2htvuuclm_name'))]",
+        "siteConfig": {
+          "acrUseManagedIdentityCreds": false,
+          "alwaysOn": true,
+          "functionAppScaleLimit": 0,
+          "http20Enabled": false,
+          "linuxFxVersion": "PYTHON|3.10",
+          "minimumElasticInstanceCount": 1,
+          "numberOfWorkers": 1
+        },
+        "storageAccountRequired": false,
+        "virtualNetworkSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_aivnet0_vm2b2htvuuclm_name'), 'app-int-subnet')]",
+        "vnetBackupRestoreEnabled": false,
+        "vnetContentShareEnabled": false,
+        "vnetImagePullEnabled": false,
+        "vnetRouteAllEnabled": true
+      },
+      "tags": {
+        "azd-env-name": "develop-clew",
+        "azd-service-name": "frontend"
+      },
+      "type": "Microsoft.Web/sites"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fninges0_vm2b2htvuuclm_name'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_aivnet0_vm2b2htvuuclm_name'), 'app-int-subnet')]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fninges0_vm2b2htvuuclm_name'), '/0a8c8848-3baf-4429-8eab-cbef97a3162c_app-int-subnet')]",
+      "properties": {
+        "isSwift": true,
+        "vnetResourceId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_aivnet0_vm2b2htvuuclm_name'), 'app-int-subnet')]"
+      },
+      "type": "Microsoft.Web/sites/virtualNetworkConnections"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_fnorch0_vm2b2htvuuclm_name'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_aivnet0_vm2b2htvuuclm_name'), 'app-int-subnet')]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_fnorch0_vm2b2htvuuclm_name'), '/0a8c8848-3baf-4429-8eab-cbef97a3162c_app-int-subnet')]",
+      "properties": {
+        "isSwift": true,
+        "vnetResourceId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_aivnet0_vm2b2htvuuclm_name'), 'app-int-subnet')]"
+      },
+      "type": "Microsoft.Web/sites/virtualNetworkConnections"
+    },
+    {
+      "apiVersion": "2023-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_webgpt0_vm2b2htvuuclm_name'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_aivnet0_vm2b2htvuuclm_name'), 'app-int-subnet')]"
+      ],
+      "location": "East US",
+      "name": "[concat(parameters('sites_webgpt0_vm2b2htvuuclm_name'), '/0a8c8848-3baf-4429-8eab-cbef97a3162c_app-int-subnet')]",
+      "properties": {
+        "isSwift": true,
+        "vnetResourceId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_aivnet0_vm2b2htvuuclm_name'), 'app-int-subnet')]"
+      },
+      "type": "Microsoft.Web/sites/virtualNetworkConnections"
+    },
+    {
+      "apiVersion": "2024-05-15",
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), 'db0-vm2b2htvuuclm', 'agentErrors')]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), 'db0-vm2b2htvuuclm')]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), '/db0-vm2b2htvuuclm/agentErrors/default')]",
+      "properties": {
+        "resource": {
+          "autoscaleSettings": {
+            "maxThroughput": 4000
+          },
+          "throughput": 400
+        }
+      },
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/throughputSettings"
+    },
+    {
+      "apiVersion": "2024-05-15",
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), 'db0-vm2b2htvuuclm', 'conversations')]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), 'db0-vm2b2htvuuclm')]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), '/db0-vm2b2htvuuclm/conversations/default')]",
+      "properties": {
+        "resource": {
+          "autoscaleSettings": {
+            "maxThroughput": 1000
+          },
+          "throughput": 100
+        }
+      },
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/throughputSettings"
+    },
+    {
+      "apiVersion": "2024-05-15",
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), 'db0-vm2b2htvuuclm', 'feedback')]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), 'db0-vm2b2htvuuclm')]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), '/db0-vm2b2htvuuclm/feedback/default')]",
+      "properties": {
+        "resource": {
+          "throughput": 400
+        }
+      },
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/throughputSettings"
+    },
+    {
+      "apiVersion": "2024-05-15",
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), 'db0-vm2b2htvuuclm', 'models')]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), 'db0-vm2b2htvuuclm')]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), '/db0-vm2b2htvuuclm/models/default')]",
+      "properties": {
+        "resource": {
+          "autoscaleSettings": {
+            "maxThroughput": 1000
+          },
+          "throughput": 100
+        }
+      },
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/throughputSettings"
+    },
+    {
+      "apiVersion": "2024-05-15",
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), 'db0-vm2b2htvuuclm', 'prompts')]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), 'db0-vm2b2htvuuclm')]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), '/db0-vm2b2htvuuclm/prompts/default')]",
+      "properties": {
+        "resource": {
+          "autoscaleSettings": {
+            "maxThroughput": 4000
+          },
+          "throughput": 400
+        }
+      },
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/throughputSettings"
+    },
+    {
+      "apiVersion": "2024-05-15",
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), 'db0-vm2b2htvuuclm', 'settings')]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), 'db0-vm2b2htvuuclm')]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), '/db0-vm2b2htvuuclm/settings/default')]",
+      "properties": {
+        "resource": {
+          "throughput": 400
+        }
+      },
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/throughputSettings"
+    },
+    {
+      "apiVersion": "2024-05-15",
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), 'db0-vm2b2htvuuclm', 'users')]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), 'db0-vm2b2htvuuclm')]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), '/db0-vm2b2htvuuclm/users/default')]",
+      "properties": {
+        "resource": {
+          "throughput": 400
+        }
+      },
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/throughputSettings"
+    },
+    {
+      "apiVersion": "2024-05-15",
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), 'db0-vm2b2htvuuclm', 'userTokens')]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), 'db0-vm2b2htvuuclm')]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'))]"
+      ],
+      "name": "[concat(parameters('databaseAccounts_dbgpt0_vm2b2htvuuclm_name'), '/db0-vm2b2htvuuclm/userTokens/default')]",
+      "properties": {
+        "resource": {
+          "autoscaleSettings": {
+            "maxThroughput": 4000
+          },
+          "throughput": 400
+        }
+      },
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/throughputSettings"
+    },
+    {
+      "apiVersion": "2024-04-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_strag0vm2b2htvuuclm_name'))]",
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('vaults_kv0_vm2b2htvuuclm_name'))]",
+        "[resourceId('microsoft.insights/components', parameters('components_appins0_vm2b2htvuuclm_name'))]"
+      ],
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "kind": "Default",
+      "location": "eastus2",
+      "name": "[parameters('workspaces_MachineLearningPromptFlowTest_name')]",
+      "properties": {
+        "applicationInsights": "[resourceId('microsoft.insights/components', parameters('components_appins0_vm2b2htvuuclm_name'))]",
+        "discoveryUrl": "https://eastus2.api.azureml.ms/discovery",
+        "enableDataIsolation": false,
+        "friendlyName": "[parameters('workspaces_MachineLearningPromptFlowTest_name')]",
+        "hbiWorkspace": false,
+        "keyVault": "[resourceId('Microsoft.KeyVault/vaults', parameters('vaults_kv0_vm2b2htvuuclm_name'))]",
+        "managedNetwork": {
+          "isolationMode": "Disabled"
+        },
+        "publicNetworkAccess": "Enabled",
+        "storageAccount": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_strag0vm2b2htvuuclm_name'))]",
+        "v1LegacyMode": false
+      },
+      "sku": {
+        "name": "Basic",
+        "tier": "Basic"
+      },
+      "type": "Microsoft.MachineLearningServices/workspaces"
+    }
+  ],
+  "variables": {}
+}
