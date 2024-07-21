@@ -239,6 +239,8 @@ Update the azure-dev.yml file to call the deploy.yml file you created in the pre
 azure-dev.yml:
 
 ```
+name: Multi-Environment Build and Deploy
+
 on:
   workflow_dispatch:
   push:
