@@ -173,7 +173,7 @@ Note: The existing/unmodified credentials created by Azure Developer CLI may be 
 
 Create a new file in the .github/workflows folder called 'deploy.yml' - this file will be a largely templatized version of the existing azure-dev.yml file. azure-dev.yml will be modified later.
 
-Note: If you are using a client secret, you may use the 'Log in with Azure (Client Credentials)' task from azure-dev.yml. This example uses the 'Log in with Azure (Federated Credentials)' task.
+Note: If you are using a client secret, you will need to update the 'Log in with Azure (Federated Credentials)' task with client credentials authentication.
 
 deploy.yml:
 
