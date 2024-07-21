@@ -6,7 +6,7 @@ on:
     branches:
       # - main
       # - master
-      - dev
+      # - dev
       - none
 
 permissions:

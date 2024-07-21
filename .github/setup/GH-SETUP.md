@@ -325,5 +325,6 @@ You may edit the workflow_dispatch to suit your workflow trigger needs.
 - Provide example of how to configure naming conventions
 - Provide example of setting up self-hosted runners for network-restricted deployments
 - Consider decoupling infrastructure and app code deployments
+- Offer branching strategy guidance 
 - Update deploy.yml to only deploy service(s) which have changed (with `azd deploy <service>`) (https://github.com/MicrosoftDocs/azure-dev-docs/blob/main/articles/azure-developer-cli/reference.md#azd-deploy)
   - this would require a more complex workflow to determine which services have changed, and each service is in a separate repository
