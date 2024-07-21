@@ -54,8 +54,7 @@ jobs:
       #       AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
       #       AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
-      # TODO run AZD package?
-      - name: Package Application
+      - name: Package Services
         run: azd package --no-prompt
         env:
           AZURE_ENV_NAME: ${{ inputs.AZURE_ENV_NAME }}

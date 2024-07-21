@@ -223,6 +223,13 @@ jobs:
           AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
           AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Package Services
+        run: azd package --no-prompt
+        env:
+          AZURE_ENV_NAME: ${{ inputs.AZURE_ENV_NAME }}
+          AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
+          AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
       - name: Deploy Application
         run: azd deploy --no-prompt
         env:
