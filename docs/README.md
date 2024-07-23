@@ -7,7 +7,7 @@ languages:
 products:
 - azure
 - azure-openai
-- azure-ai-search
+- azure-cognitive-search
 urlFragment: GPT-RAG
 name: Multi-repo ChatGPT and Enterprise data with Azure OpenAI and AI Search
 description: GPT-RAG core is a Retrieval-Augmented Generation pattern running in Azure, using Azure AI Search for retrieval and Azure OpenAI large language models to power ChatGPT-style and Q&A experiences.
