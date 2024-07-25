@@ -145,7 +145,9 @@ Consider setting up deployment protection rules for each environment by going to
 
 - If using client secret authentication, you would need to set up the client secret in the Azure Portal, configure it as a secret in GitHub as an environment variable and modify the workflow to use the secret for authentication. This is not covered in this example.
 
-# 4. Reconfigure Azure Federated credentials to use newly set up GitHub environments
+# 4. [If using Federated Credentials] Reconfigure Azure Federated credentials to use newly set up GitHub environments
+
+You may skip this step if you are using client secret authentication.
 
 This is a one-time manual step in the Azure portal for each Service Principal
 
