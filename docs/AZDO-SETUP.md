@@ -129,32 +129,17 @@ az devops invoke --area distributedtask --resource environments --route-paramete
 
 ```
 
-Configure the repository and environment variables: Delete the AZURE_CLIENT_ID and AZURE_ENV_NAME variables at the repository level as they aren't needed and only represent what was set for the environment you created last. AZURE_CLIENT_ID will be reconfigured at the environment level, and AZURE_ENV_NAME will be passed as an input to the deploy job.
-
-<!-- ```bash
-gh variable delete AZURE_CLIENT_ID
-gh variable delete AZURE_ENV_NAME
-``` -->
-
-```bash
-todo
-```
-
 Set the variables at the environment level
-
-```bash
-todo
-```
-
-<!-- ```bash
-gh variable set AZURE_CLIENT_ID -b $dev_client_id -e $dev_env
-gh variable set AZURE_CLIENT_ID -b $test_client_id -e $test_env
-gh variable set AZURE_CLIENT_ID -b $prod_client_id -e $prod_env
-``` -->
 
 <!-- TODO set variables -->
 
-Consider setting up deployment protection rules for each environment by going to Settings > Environments > env-name, and setting Deployment protection rules (e.g., required reviewers)
+```bash
+todo
+```
+
+
+
+Consider setting up deployment protection rules for each environment.
 
 # 4. Modify the workflow files as needed for deployment
 
