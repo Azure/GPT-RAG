@@ -150,8 +150,7 @@ Consider setting up deployment protection rules for each environment.
     - This is the main file that triggers the deployment workflow. The environment names are passed as inputs to the deploy job, which needs to be edited to match the environment names you created.
     - You may edit the trigger to suit your pipeline trigger needs.
   - deploy-template.yml
-    - This is a template file that is used to deploy the infrastructure and services to Azure. This file needs to be edited if you are using client secret authentication.
-
+    - This is a template file that is used to deploy the infrastructure and services to Azure.
 
 # TODOs and potential improvements:
 
