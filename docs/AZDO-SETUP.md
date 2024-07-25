@@ -125,6 +125,8 @@ az devops invoke --area distributedtask --resource environments --route-paramete
 echo "{\"name\": \"$prod_env\"}" > azdoenv.json
 az devops invoke --area distributedtask --resource environments --route-parameters project=$project --api-version 7.1 --http-method POST --in-file ./azdoenv.json
 
+rm azdoenv.json # clean up
+
 ```
 
 Set up the client secrets in the Azure Portal within the Service Principals.
