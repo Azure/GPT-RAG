@@ -54,8 +54,6 @@ test_client_id='<test-sp-client-id>'
 prod_client_id='<prod-sp-client-id>'
 ```
 
-Note: If you want to manage and authenticate with a secret rather than using federated identity, you would need to create a secret for each Service Principal, store it as a secret in Azure DevOps, and modify the workflow to use the secret for authentication. This is not covered in this example. If you choose to use a client secret, you may skip step 4.
-
 ## 2. Create azd environments
 
 `cd` to the root of the repo. Create an azd environment per target environment, and configure the pipeline for each environment. Note that these environment names are reused as the GitHub environment names later.
@@ -129,6 +127,8 @@ az devops invoke --area distributedtask --resource environments --route-paramete
 
 ```
 
+Set up the client secrets in the Azure Portal within the Service Principals.
+
 Set the variables at the environment level
 
 <!-- TODO set variables -->
@@ -153,48 +153,6 @@ Consider setting up deployment protection rules for each environment.
 
 # TODOs and potential improvements:
 
-- Add a step to package the application code (in azure-dev.yml) and upload it as a GitHub artifact to do a package deploy (in deploy.yml)
-
-  - azure-dev.yml suggested addition:
-
-    ```
-    build:
-        runs-on: ubuntu-latest
-
-        steps:
-        - name: Checkout
-          uses: actions/checkout@v3
-
-        - name: Install azd
-          uses: Azure/setup-azd@v0.1.0
-
-        - name: Package (may need to package by service)
-          run: azd package --output-path ./dist/soln.zip --environment NONE --no-prompt
-          working-directory: ./
-
-        - name: Upload Package
-          uses: actions/upload-artifact@v3
-          with:
-            name: package
-            path: ./dist/soln.zip
-            if-no-files-found: error
-    ```
-
-  - deploy.yml suggested addition:
-
-    ```
-    - name: Download Package
-      uses: actions/download-artifact@v3
-
-    - name: Deploy Application
-      run: azd deploy --from-package ./package/soln.zip --no-prompt
-      env:
-        AZURE_ENV_NAME: ${{ inputs.AZURE_ENV_NAME }}
-        AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
-        AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-    ```
-
-- Provide client credential authentication example
 - Provide example of how to configure naming conventions
 - Provide example of setting up self-hosted runners for network-restricted deployments
 - Consider decoupling infrastructure and app code deployments
