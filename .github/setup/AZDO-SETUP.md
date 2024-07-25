@@ -1,32 +1,30 @@
-# Multi-Environment GitHub Setup
+# Multi-Environment Azure DevOps Setup
 
-This document outlines the steps to set up a multi-environment workflow to deploy infrastructure and services to Azure using GitHub Actions, taking the solution from proof of concept to production-ready.
+This document outlines the steps to set up a multi-environment workflow to deploy infrastructure and services to Azure using Azure Pipelines, taking the solution from proof of concept to production-ready.
 
 # Assumptions:
 
-- This example assumes you're using a GitHub organization with GitHub environments
+- This example assumes you have an Azure DevOps Organization and Project set up
 - This is a tightly coupled example, which deploys infrastructure in the same pipeline as all of the services
 - This example deploys 3 environments: dev, test, and prod
-- This example uses 'azd pipeline config', which as of writing, is in preview. This feature enables rapid GitHub workflow setup and federated identity auth configuration for enhanced security
-- All below commands are run as a one-time setup on a local machine by an admin who has access to the GitHub repo and Azure subscription
+- This example uses 'azd pipeline config', which as of writing, is in preview. This feature enables rapid Azure Pipeline setup
+- All below commands are run as a one-time setup on a local machine by an admin who has access to the Azure Repo and Azure subscription
 - This example does not cover configuring any naming conventions
 - Original remote versions of the orchestrator, frontend, and ingestion repositories are used; in a real scenario, you would fork these repositories and use your forked versions. This would require updating the repository URLs in the azure.yaml file.
 
 # Decisions required:
 
-- Whether a single or multiple Service Principals will be used for each environment
-- Whether to use federated identity or client secret for authentication
-- Decisions on which GitHub repo, Azure subscription, and Azure location to use
+- Service Principals that will be used for each environment
+- Decisions on which Azure Repo, Azure subscription, and Azure location to use
 
 # Prerequisites:
 
-- Azure CLI (https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-windows?tabs=azure-cli)
+- Azure CLI (https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-windows?tabs=azure-cli) with Azure DevOps extension (https://learn.microsoft.com/en-us/azure/devops/cli/?view=azure-devops)
 - Azure Developer CLI (https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd?tabs=winget-windows%2Cbrew-mac%2Cscript-linux&pivots=os-windows)
-- GitHub CLI (https://cli.github.com/)
-- GitHub organization with ability to provision environments (e.g., GH Enterprise)
+- Azure DevOps organization
 - Bash shell (e.g. Git Bash)
   - Note that all commands are written for bash shell
-- Personnel with Azure admin (can create Service Principals) and GitHub admin (owns repo/org) access
+- Personnel with Azure admin (can create Service Principals) and Azure DevOps admin (owns repo/org) access
 
 # Steps:
 
@@ -56,13 +54,13 @@ test_client_id='<test-sp-client-id>'
 prod_client_id='<prod-sp-client-id>'
 ```
 
-Note: If you want to manage and authenticate with a secret rather than using federated identity, you would need to create a secret for each Service Principal, store it as a secret in GitHub, and modify the workflow to use the secret for authentication. This is not covered in this example. If you choose to use a client secret, you may skip step 4.
+Note: If you want to manage and authenticate with a secret rather than using federated identity, you would need to create a secret for each Service Principal, store it as a secret in Azure DevOps, and modify the workflow to use the secret for authentication. This is not covered in this example. If you choose to use a client secret, you may skip step 4.
 
 ## 2. Create azd environments
 
 `cd` to the root of the repo. Create an azd environment per target environment, and configure the pipeline for each environment. Note that these environment names are reused as the GitHub environment names later.
 
-When running 'azd pipeline config' for each env, choose GitHub as provider, Az subscription, and Az location. When prompted to commit and push your local changes to start the configured CI pipeline, say 'N'.
+When running 'azd pipeline config' for each env, choose **Azure DevOps** as provider, Az subscription, and Az location. When prompted to commit and push your local changes to start the configured CI pipeline, say 'N'.
 
 ```bash
 dev_env='<dev-env-name>' # Example: dev
@@ -70,29 +68,28 @@ test_env='<test-env-name>' # Example: test
 prod_env='<prod-env-name>' # Example: prod
 ```
 
-Read more about azd pipeline config: https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/configure-devops-pipeline?tabs=GitHub
-
-- By default, azd pipeline config uses OpenID Connect (OIDC), called federated credentials. If you'd rather not use OIDC, run azd pipeline config --auth-type client-credentials.
+Read more about azd pipeline config: https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/configure-devops-pipeline?tabs=azdo
+- azd pipeline config in Azure DevOps currently only supports client-credentials.
 
 ### Dev
 
 ```bash
 azd env new $dev_env
-azd pipeline config --auth-type federated --principal-name $dev_principal_name
+azd pipeline config --principal-name $dev_principal_name --provider azdo
 ```
 
 ### Test
 
 ```bash
 azd env new $test_env
-azd pipeline config --auth-type federated --principal-name $test_principal_name
+azd pipeline config --principal-name $test_principal_name --provider azdo
 ```
 
 ### Prod
 
 ```bash
 azd env new $prod_env
-azd pipeline config --auth-type federated --principal-name $prod_principal_name
+azd pipeline config --auth-type federated --principal-name $prod_principal_name --provider azdo
 ```
 
 After performing the above steps, you will see corresponding files to your azd environments in the .azure folder.
@@ -105,82 +102,68 @@ You may change the default environment by running `azd env select <env-name>`, f
 azd env select $dev_env
 ```
 
-# 3. Set up GitHub Environments
+# 3. Set up Azure DevOps Environments
 
 the below paths may need to be updated if using a GH organization
 
-Set up initial variables:
+Login to Azure DevOps:
 
 ```bash
+
+az login
 org='<your-org-name>'
-repo='<your-repo-name>'
+project='<your-project-name>'
+az devops configure --defaults organization=https://dev.azure.com/$org project=$project
+
 ```
 
-Run GitHub CLI commands to create the environments:
+Run az devops CLI commands to create the environments:
 
 ```bash
-gh auth login
+echo "{\"name\": \"$dev_env\"}" > azdoenv.json
+az devops invoke --area distributedtask --resource environments --route-parameters project=$project --api-version 7.1 --http-method POST --in-file ./azdoenv.json
 
-gh api --method PUT -H "Accept: application/vnd.github+json" repos/$org/$repo/environments/$dev_env
-gh api --method PUT -H "Accept: application/vnd.github+json" repos/$org/$repo/environments/$test_env
-gh api --method PUT -H "Accept: application/vnd.github+json" repos/$org/$repo/environments/$prod_env
+echo "{\"name\": \"$test_env\"}" > azdoenv.json
+az devops invoke --area distributedtask --resource environments --route-parameters project=$project --api-version 7.1 --http-method POST --in-file ./azdoenv.json
+
+echo "{\"name\": \"$prod_env\"}" > azdoenv.json
+az devops invoke --area distributedtask --resource environments --route-parameters project=$project --api-version 7.1 --http-method POST --in-file ./azdoenv.json
+
 ```
 
 Configure the repository and environment variables: Delete the AZURE_CLIENT_ID and AZURE_ENV_NAME variables at the repository level as they aren't needed and only represent what was set for the environment you created last. AZURE_CLIENT_ID will be reconfigured at the environment level, and AZURE_ENV_NAME will be passed as an input to the deploy job.
 
-```bash
+<!-- ```bash
 gh variable delete AZURE_CLIENT_ID
 gh variable delete AZURE_ENV_NAME
+``` -->
+
+```bash
+todo
 ```
 
 Set the variables at the environment level
 
 ```bash
+todo
+```
+
+<!-- ```bash
 gh variable set AZURE_CLIENT_ID -b $dev_client_id -e $dev_env
 gh variable set AZURE_CLIENT_ID -b $test_client_id -e $test_env
 gh variable set AZURE_CLIENT_ID -b $prod_client_id -e $prod_env
-```
+``` -->
+
+<!-- TODO set variables -->
 
 Consider setting up deployment protection rules for each environment by going to Settings > Environments > env-name, and setting Deployment protection rules (e.g., required reviewers)
 
-- If using client secret authentication, you would need to set up the client secret in the Azure Portal, configure it as a secret in GitHub as an environment variable and modify the workflow to use the secret for authentication. This is not covered in this example.
+# 4. Modify the workflow files as needed for deployment
 
-# 4. Reconfigure Azure Federated credentials to use newly set up GitHub environments
-
-This is a one-time manual step in the Azure portal for each Service Principal
-
-- a) Open Azure Portal and navigate to Microsoft Entra ID
-- b) Select App Registrations
-- c) Search for the app name you used for your Dev environment
-- d) Click on Certificates & secrets
-- e) Select the Federated credentials tab
-
-If you have multiple Service Principals:
-
-- f) choose the credential that ends with '-main'
-- g) Update the 'Entity type' to 'Environment'
-- h) Edit the 'GitHub environment name' to the name of the environment you created in GitHub
-- i) choose Update
-- _Perform steps a-i for each Service Principal_
-
-If you have only one Service Principal/multiple environments using the same Service Principal:
-
-- f) choose 'Add credential'
-- g) Choose 'GitHub Actions deploying Azure resources' in the 'Federated credential scenario'
-- h) Fill in your organization and repository name
-- i) Set the 'Entity type' to 'Environment'
-- j) Set the 'GitHub environment name' to the name of the environment you created in GitHub
-- k) provide a Name in the Credential Details section, for example: org-repo-env_name-env
-- _Perform steps f-k for each environment_
-
-Note: The existing/unmodified credentials created by Azure Developer CLI may be deleted.
-
-# 5. Modify the workflow files as needed for deployment
-
-- The following files in the .github/workflows folder are used to deploy the infrastructure and services to Azure:
+- The following files in the .azdo/ folder are used to deploy the infrastructure and services to Azure:
   - azure-dev.yml
     - This is the main file that triggers the deployment workflow. The environment names are passed as inputs to the deploy job, which needs to be edited to match the environment names you created.
-    - You may edit the workflow_dispatch to suit your workflow trigger needs.
+    - You may edit the trigger to suit your pipeline trigger needs.
   - deploy-template.yml
     - This is a template file that is used to deploy the infrastructure and services to Azure. This file needs to be edited if you are using client secret authentication.
 
@@ -214,7 +197,7 @@ Note: The existing/unmodified credentials created by Azure Developer CLI may be 
             if-no-files-found: error
     ```
 
-  - deploy-template.yml suggested addition:
+  - deploy.yml suggested addition:
 
     ```
     - name: Download Package
@@ -232,6 +215,6 @@ Note: The existing/unmodified credentials created by Azure Developer CLI may be 
 - Provide example of how to configure naming conventions
 - Provide example of setting up self-hosted runners for network-restricted deployments
 - Consider decoupling infrastructure and app code deployments
-- Offer branching strategy guidance
-- Update deploy.yml to only deploy service(s) which have changed (with `azd deploy <service>`) (https://github.com/MicrosoftDocs/azure-dev-docs/blob/main/articles/azure-developer-cli/reference.md#azd-deploy)
+- Offer branching strategy guidance 
+- Update deploy.yml to only deploy service(s) which have changed (with `azd deploy <service>`)
   - this would require a more complex workflow to determine which services have changed, and each service is in a separate repository

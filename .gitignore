@@ -3,3 +3,4 @@
 .azdo
 local/
 results/
+**azdoenv.json

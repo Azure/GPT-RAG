@@ -8,8 +8,8 @@ on:
     branches:
       # - main
       # - master
-      - dev
-      # - none
+      # - dev
+      - none
 
 permissions:
   id-token: write
@@ -39,22 +39,22 @@ jobs:
   #       if-no-files-found: error
 
   deploy-dev:
-    uses: ./.github/workflows/deploy.yml
+    uses: ./.github/workflows/deploy-template.yml
     secrets: inherit
     # needs: [build]
     with:
-      AZURE_ENV_NAME: dev
+      AZURE_ENV_NAME: dev # edit this to match your environment name
 
   deploy-test:
-    uses: ./.github/workflows/deploy.yml
+    uses: ./.github/workflows/deploy-template.yml
     secrets: inherit
     needs: [deploy-dev]
     with:
-      AZURE_ENV_NAME: test
+      AZURE_ENV_NAME: test # edit this to match your environment name
 
   deploy-prod:
-    uses: ./.github/workflows/deploy.yml
+    uses: ./.github/workflows/deploy-template.yml
     secrets: inherit
     needs: [deploy-test]
     with:
-      AZURE_ENV_NAME: prod
+      AZURE_ENV_NAME: prod # edit this to match your environment name
