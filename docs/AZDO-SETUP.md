@@ -89,7 +89,7 @@ azd pipeline config --principal-name $test_principal_name --provider azdo
 
 ```bash
 azd env new $prod_env
-azd pipeline config --auth-type federated --principal-name $prod_principal_name --provider azdo
+azd pipeline config --principal-name $prod_principal_name --provider azdo
 ```
 
 After performing the above steps, you will see corresponding files to your azd environments in the .azure folder.
