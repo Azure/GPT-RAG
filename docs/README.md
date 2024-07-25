@@ -48,7 +48,7 @@ If you want to learn more about the RAG Pattern and GPT-RAG architecture.
 
 * [Solution Architecture Overview](docs/ARCHITECTURE.md)
 
-<!-- ![Architecture Overview](media/GPT-RAG-ZeroTrust.png) -->
+<!-- ![Architecture Overview](/media/GPT-RAG-ZeroTrust.png) -->
 
 *  [Enterprise RAG +Prompt Engineering+Finetuning+Train (Video in Spanish)](https://www.youtube.com/watch?v=ICsf4yirieA)
 
@@ -74,7 +74,7 @@ This guide will walk you through the deployment process of Enterprise RAG. There
 ### Basic Architecture Deployment
 
 For quick demonstrations or proof-of-concept projects without network isolation requirements, you can deploy the accelerator using its basic architecture.
-![Basic Architecture](media/architecture-GPT-RAG-Basic.png)
+![Basic Architecture](/media/architecture-GPT-RAG-Basic.png)
 
 The deployment procedure is quite simple, just install the prerequisites and follow these four steps using [Azure Developer CLI (azd)](https://aka.ms/azure-dev/install) in a terminal:
 
@@ -101,13 +101,13 @@ azd up
 Upload your documents to the 'documents' folder located in the storage account. The name of this account should start with 'strag'. This is the default storage account, as shown in the sample image below.
 
 
- ![storage_sample](media/readme-storage_sample.png)
+ ![storage_sample](/media/readme-storage_sample.png)
 
 ### Zero Trust Architecture Deployment
 
 For more secure and isolated deployments, you can opt for the Zero Trust architecture. This architecture is ideal for production environments where network isolation and stringent security measures are highly valued.
 
- ![Zero Trust Architecture](media/architecture-GPT-RAG-ZeroTrust.png)
+ ![Zero Trust Architecture](/media/architecture-GPT-RAG-ZeroTrust.png)
 
 Deploying the Zero Trust architecture follows a similar procedure to the Basic Architecture deployment, but includes some additional steps. Refer to the instructions below for a detailed guide on deploying this option: 
    
@@ -140,7 +140,7 @@ azd provision
 Log into the created VM with the user **gptrag** and authenticate with the password stored in the keyvault, similar to the figure below:  
 
 <BR>   
-<img src="media/readme-keyvault-login.png" alt="Keyvault Login" width="1024">
+<img src="/media/readme-keyvault-login.png" alt="Keyvault Login" width="1024">
    
 **6**  Upon accessing Windows, install [Powershell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4#installing-the-msi-package), as the other prerequisites are already installed on the VM.  
    
