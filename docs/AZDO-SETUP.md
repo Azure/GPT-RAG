@@ -7,7 +7,7 @@ This document outlines the steps to set up a multi-environment workflow to deplo
 - This example assumes you have an Azure DevOps Organization and Project set up
 - This is a tightly coupled example, which deploys infrastructure in the same pipeline as all of the services
 - This example deploys 3 environments: dev, test, and prod
-- This example uses 'azd pipeline config', which as of writing, is in preview. This feature enables rapid Azure Pipeline setup
+- This example uses 'azd pipeline config' (https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/configure-devops-pipeline?tabs=azdo), which as of writing, is in preview. This feature enables rapid Azure Pipeline setup
 - All below commands are run as a one-time setup on a local machine by an admin who has access to the Azure Repo and Azure subscription
 - This example does not cover configuring any naming conventions
 - Original remote versions of the orchestrator, frontend, and ingestion repositories are used; in a real scenario, you would fork these repositories and use your forked versions. This would require updating the repository URLs in the azure.yaml file.
@@ -21,6 +21,7 @@ This document outlines the steps to set up a multi-environment workflow to deplo
 
 - Azure CLI (https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-windows?tabs=azure-cli) with Azure DevOps extension (https://learn.microsoft.com/en-us/azure/devops/cli/?view=azure-devops)
 - Azure Developer CLI (https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd?tabs=winget-windows%2Cbrew-mac%2Cscript-linux&pivots=os-windows)
+- PowerShell 7
 - Azure DevOps organization
 - Bash shell (e.g. Git Bash)
   - Note that all commands are written for bash shell
@@ -28,9 +29,9 @@ This document outlines the steps to set up a multi-environment workflow to deplo
 
 # Steps:
 
-## 1. Create Service Principals for each env
+<!-- ## 1. Create Service Principals for each env -->
 
-CLI: https://learn.microsoft.com/en-us/cli/azure/azure-cli-sp-tutorial-1?tabs=bash#create-a-service-principal
+<!-- CLI: https://learn.microsoft.com/en-us/cli/azure/azure-cli-sp-tutorial-1?tabs=bash#create-a-service-principal
 
 Portal: https://learn.microsoft.com/en-us/entra/identity-platform/howto-create-service-principal-portal
 
@@ -52,13 +53,11 @@ az login
 dev_client_id='<dev-sp-client-id>'
 test_client_id='<test-sp-client-id>'
 prod_client_id='<prod-sp-client-id>'
-```
+``` -->
 
-## 2. Create azd environments
+## 1. Create azd environments & Service Principals
 
 `cd` to the root of the repo. Create an azd environment per target environment, and configure the pipeline for each environment. Note that these environment names are reused as the GitHub environment names later.
-
-When running 'azd pipeline config' for each env, choose **Azure DevOps** as provider, Az subscription, and Az location. When prompted to commit and push your local changes to start the configured CI pipeline, say 'N'.
 
 ```bash
 dev_env='<dev-env-name>' # Example: dev
@@ -67,9 +66,26 @@ prod_env='<prod-env-name>' # Example: prod
 ```
 
 Read more about azd pipeline config: https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/configure-devops-pipeline?tabs=azdo
+CLI Doc: https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/reference#azd-pipeline-config
 - azd pipeline config in Azure DevOps currently only supports client-credentials.
 
+Define the names of the Service Principals that will be used for each environment. You will need the app name in later steps.
+Note that azd pipeline config creates a new Service Principal for each environment.
+There are a variety of ways to complete the setup below, e.g., you may manually perform all steps below for additional control, you may elect to use a single Service Principal for all environments, etc.
+
+```bash
+dev_principal_name='<dev-sp-name>'
+test_principal_name='<test-sp-name>'
+prod_principal_name='<prod-sp-name>'
+```
+
+When running 'azd pipeline config' for each env, choose **Azure DevOps** as provider, Az subscription, and Az location. When prompted to commit and push your local changes to start the configured CI pipeline, say 'N'.
+
 ### Dev
+
+```bash
+az login
+```
 
 ```bash
 azd env new $dev_env
@@ -100,7 +116,7 @@ You may change the default environment by running `azd env select <env-name>`, f
 azd env select $dev_env
 ```
 
-# 3. Set up Azure DevOps Environments
+# 2. Set up Azure DevOps Environments
 
 Login to Azure DevOps:
 
@@ -131,7 +147,15 @@ rm azdoenv.json # clean up
 
 Set up the client secrets in the Azure Portal within the Service Principals.
 
-Set the variables at the environment level
+Set the variables at the environment level.
+
+Get the client IDs of the Service Principals you created. Ensure you previously ran `az login`. 
+
+```bash
+dev_client_id=$(az ad sp list --display-name $dev_principal_name --query "[].appId" --output tsv)
+test_client_id=$(az ad sp list --display-name $test_principal_name --query "[].appId" --output tsv)
+prod_client_id=$(az ad sp list --display-name $prod_principal_name --query "[].appId" --output tsv)
+```
 
 <!-- TODO set variables -->
 
@@ -143,7 +167,7 @@ todo
 
 Consider setting up deployment protection rules for each environment.
 
-# 4. Modify the workflow files as needed for deployment
+# 3. Modify the workflow files as needed for deployment
 
 - The following files in the .azdo/ folder are used to deploy the infrastructure and services to Azure:
   - azure-dev.yml
