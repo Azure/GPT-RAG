@@ -104,8 +104,6 @@ azd env select $dev_env
 
 # 3. Set up Azure DevOps Environments
 
-the below paths may need to be updated if using a GH organization
-
 Login to Azure DevOps:
 
 ```bash
