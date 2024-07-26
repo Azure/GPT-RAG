@@ -28,7 +28,7 @@ This document outlines the steps to set up a multi-environment workflow to deplo
 - GitHub organization with ability to provision environments (e.g., GH Enterprise)
 - Bash shell (e.g. Git Bash)
 - Personnel with Azure admin (can create Service Principals) and GitHub admin (owns repo/org) access
-- The code in the repository needs to exist in Azure Repos and you need to have it cloned locally. This guide may be useful if you run into issues setting up your repository: https://github.com/Azure/azure-dev/blob/main/cli/azd/docs/manual-pipeline-config.md
+- The code in the repository needs to exist in GitHub and you need to have it cloned locally. This guide may be useful if you run into issues setting up your repository: https://github.com/Azure/azure-dev/blob/main/cli/azd/docs/manual-pipeline-config.md
 
 # Steps:
 
@@ -61,7 +61,7 @@ By default, `azd pipeline config` uses OpenID Connect (OIDC), called federated c
 
 Define the names of the Service Principals that will be used for each environment. You will need the name in later steps.
 Note that `azd pipeline config` creates a new Service Principal for each environment.
-There are a variety of ways to complete the setup below, e.g., you may manually perform all steps below for additional control, you may elect to use a single Service Principal for all environments, etc.
+<!-- There are a variety of ways to complete the setup below, e.g., you may manually perform all steps below for additional control, you may elect to use a single Service Principal for all environments, etc. -->
 
 ```bash
 dev_principal_name='<dev-sp-name>'
@@ -69,7 +69,7 @@ test_principal_name='<test-sp-name>'
 prod_principal_name='<prod-sp-name>'
 ```
 
-For each below environment, when running 'azd pipeline config', choose **GitHub** as provider, Az subscription, and Az location. When prompted to commit and push your local changes to start the configured CI pipeline, say 'N'.
+For each below environment, when running `azd pipeline config` for each environment, choose **GitHub** as provider, Az subscription, and Az location. When prompted to commit and push your local changes to start the configured CI pipeline, say 'N'.
 
 Login to Azure:
 
@@ -160,7 +160,7 @@ gh variable set AZURE_CLIENT_ID -b $test_client_id -e $test_env
 gh variable set AZURE_CLIENT_ID -b $prod_client_id -e $prod_env
 ```
 
-Consider setting up deployment protection rules for each environment by going to Settings > Environments > env-name, and setting Deployment protection rules (e.g., required reviewers).
+Consider setting up deployment protection rules for each environment. (https://docs.github.com/en/actions/administering-github-actions/managing-environments-for-deployment#deployment-protection-rules)
 
 Note: If you want to manage and authenticate with a secret rather than using federated identity, you would need to create a secret for each Service Principal, store it as a secret in GitHub, and modify the workflow to use the secret for authentication. This is not covered in this example. If you choose to use a client secret, you may skip 3.
 
@@ -183,7 +183,7 @@ rm federated_id.json
 
 ```
 
-Note: The existing/unmodified credentials created by Azure Developer CLI may be deleted.
+Note: The existing/unmodified credentials created by Azure Developer CLI in the Service Principals may be deleted.
 
 # 5. Modify the workflow files as needed for deployment
 

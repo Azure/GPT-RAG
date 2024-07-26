@@ -61,7 +61,7 @@ All commands below are run in a bash shell.
 
 ## 1. Create azd environments & Service Principals
 
-`cd` to the root of the repo. Before creating environments, define the environment names. Note that these environment names are reused as the Azure DevOps environment names later.
+`cd` to the root of the repo. Before creating environments, define the environment names. Note that these environment names are reused as the Azure DevOps environment names and service connection names later.
 
 ```bash
 dev_env='<dev-env-name>' # Example: dev
@@ -70,11 +70,10 @@ prod_env='<prod-env-name>' # Example: prod
 ```
 
 Then, create an azd environment per target environment alongside a pipeline definition. In this guide, pipeline definitions are created with `azd pipeline config`. Read more about azd pipeline config: https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/configure-devops-pipeline?tabs=GitHub. CLI Doc: https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/reference#azd-pipeline-config
-- Note: `azd pipeline config` in Azure DevOps currently only supports client-credentials.
 
 Define the names of the Service Principals that will be used for each environment. You will need the name in later steps.
 Note that `azd pipeline config` creates a new Service Principal for each environment.
-There are a variety of ways to complete the setup below, e.g., you may manually perform all steps below for additional control, you may elect to use a single Service Principal for all environments, etc.
+<!-- There are a variety of ways to complete the setup below, e.g., you may manually perform all steps below for additional control, you may elect to use a single Service Principal for all environments, etc. -->
 
 ```bash
 dev_principal_name='<dev-sp-name>'
@@ -82,9 +81,13 @@ test_principal_name='<test-sp-name>'
 prod_principal_name='<prod-sp-name>'
 ```
 
-When running 'azd pipeline config' for each env, choose **Azure DevOps** as provider, Az subscription, and Az location. When prompted to commit and push your local changes to start the configured CI pipeline, say 'N'.
+Get a personal access token from Azure DevOps and set the AZURE_DEVOPS_EXT_PAT environment variable (https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=Windows#create-a-pat). Ensure the PAT has:
 
-Get a personal access token from Azure DevOps and set the AZURE_DEVOPS_EXT_PAT environment variable (https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=Windows#create-a-pat). Ensure the PAT has "Use and manage" Pipeline Resources permissions.
+- "Use and manage" Pipeline Resources permissions.
+- "Source code, repositories, pull requests, and notifications" and "Full" Code permissions.
+- "Read and manage environment" Environment permissions.
+- "Read, query, and manage" Service connections permissions.
+- "Read & execute" Build permissions.
 
 ```
 export AZURE_DEVOPS_EXT_PAT=<your-pat>
@@ -96,11 +99,38 @@ Login to Azure:
 az login
 ```
 
+When running `azd pipeline config` for each environment, choose **Azure DevOps** as provider, Az subscription, and Az location. When prompted to commit and push your local changes to start the configured CI pipeline, say 'N'.
+
+The `azd pipeline config` command will create the service principal and service connection. Note that the service connection will always be created with the name `azconnection`, so after each `azd pipeline config` command, you will need to perform 2 post-setup actions:
+
+1. Run the provided command to update the Subject identifier in the federated credential. In this example, we will be using the name of the environment.
+2. Update the service connection name to match the final section of the Subject identifier (in this example, with the name of the environment). This will be done in the Azure DevOps web app. You may get a warning when you do this - choose 'Keep as draft', then 'Finish setup', then 'Verify and save'.
+
+First, set some variables that will be used:
+
+```bash
+org='<your-org-name>'
+project='<your-repo-name>'
+issuer='https://vstoken.dev.azure.com/be306e75-95ac-461a-a54e-5fd100dbb1b8'
+audiences="api://AzureADTokenExchange"
+```
+
+Create the environments and update the federated credential for each environment:
+
 ### Dev
 
 ```bash
 azd env new $dev_env
 azd pipeline config --principal-name $dev_principal_name --provider azdo
+
+# Post setup 1: Update the subject identifier in the federated credential
+echo '{"name": "'"${org}-${project}-${dev_env}"'", "issuer": "'"${issuer}"'", "subject": "'"sc://${org}/${project}/${dev_env}"'", "description": "'"${dev_env}"' environment", "audiences": ["'"${audiences}"'"]}' > federated_id.json
+
+dev_client_id=$(az ad sp list --display-name $dev_principal_name --query "[].appId" --output tsv) # get client ID
+
+az ad app federated-credential create --id $dev_client_id --parameters ./federated_id.json
+
+# Post setup 2: Update the service connection name to match the environment name in the Azure DevOps Portal
 ```
 
 ### Test
@@ -108,6 +138,14 @@ azd pipeline config --principal-name $dev_principal_name --provider azdo
 ```bash
 azd env new $test_env
 azd pipeline config --principal-name $test_principal_name --provider azdo
+
+echo '{"name": "'"${org}-${project}-${test_env}"'", "issuer": "'"${issuer}"'", "subject": "'"sc://${org}/${project}/${test_env}"'", "description": "'"${test_env}"' environment", "audiences": ["'"${audiences}"'"]}' > federated_id.json
+
+test_client_id=$(az ad sp list --display-name $test_principal_name --query "[].appId" --output tsv) # get client ID
+
+az ad app federated-credential create --id $test_client_id --parameters ./federated_id.json
+
+# Post setup 2: Update the service connection name to match the environment name in the Azure DevOps Portal
 ```
 
 ### Prod
@@ -115,7 +153,33 @@ azd pipeline config --principal-name $test_principal_name --provider azdo
 ```bash
 azd env new $prod_env
 azd pipeline config --principal-name $prod_principal_name --provider azdo
+
+echo '{"name": "'"${org}-${project}-${prod_env}"'", "issuer": "'"${issuer}"'", "subject": "'"sc://${org}/${project}/${prod_env}"'", "description": "'"${prod_env}"' environment", "audiences": ["'"${audiences}"'"]}' > federated_id.json
+
+prod_client_id=$(az ad sp list --display-name $prod_principal_name --query "[].appId" --output tsv) # get client ID
+
+az ad app federated-credential create --id $prod_client_id --parameters ./federated_id.json
+
+# Post setup 2: Update the service connection name to match the environment name in the Azure DevOps Portal
 ```
+
+Clean up the temporaty files:
+```bash
+rm federated_id.json # clean up
+```
+
+- _Alternative approach to get the client IDs in the above steps:_
+
+  In the event that there are multiple Service Principals containing the same name, review the table of results to pull the correct ID. The command to do this is exemplified below for the dev environment.
+
+  ```bash
+  az ad sp list --display-name $dev_principal_name --query "[].{DisplayName:displayName, AppId:appId}" --output table # return results in a table format
+  dev_client_id='<guid>'
+  ```
+
+  You can also get the client IDs from the Azure Portal.
+
+Note: The existing/unmodified federated credentials created by Azure Developer CLI in the Service Principals may be deleted.
 
 After performing the above steps, you will see corresponding files to your azd environments in the `.azure` folder.
 
@@ -129,11 +193,9 @@ azd env select $dev_env
 
 # 2. Set up Azure DevOps Environments
 
-Login to Azure DevOps (ensure you previously ran `az login`):
+Login to Azure DevOps (ensure you previously ran `az login`) and configure the default organization and project:
 
 ```bash
-org='<your-org-name>'
-project='<your-project-name>'
 az devops configure --defaults organization=https://dev.azure.com/$org project=$project
 ```
 
@@ -150,37 +212,16 @@ echo "{\"name\": \"$prod_env\"}" > azdoenv.json
 az devops invoke --area distributedtask --resource environments --route-parameters project=$project --api-version 7.1 --http-method POST --in-file ./azdoenv.json
 
 rm azdoenv.json # clean up
-
-```
-
-Set up the client secrets in the Azure Portal within the Service Principals: https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app?tabs=client-secret#tabpanel_1_client-secret
-
-Get the client IDs of the Service Principals you created. Ensure you previously ran `az login`. 
-
-```bash
-dev_client_id=$(az ad sp list --display-name $dev_principal_name --query "[].appId" --output tsv)
-test_client_id=$(az ad sp list --display-name $test_principal_name --query "[].appId" --output tsv)
-prod_client_id=$(az ad sp list --display-name $prod_principal_name --query "[].appId" --output tsv)
 ```
 
 
-Set the variables at the environment level.
-
-<!-- TODO set variables -->
-
-```bash
-todo
-```
-
-
-
-Consider setting up deployment protection rules for each environment.
+Consider setting up deployment protection rules for each environment. (https://learn.microsoft.com/en-us/azure/devops/pipelines/process/approvals?view=azure-devops&tabs=check-pass)
 
 # 3. Modify the workflow files as needed for deployment
 
 - The following files in the `.azdo/pipelines` folder are used to deploy the infrastructure and services to Azure:
   - azure-dev.yml
-    - This is the main file that triggers the deployment workflow. The environment names are passed as inputs to the deploy job, which needs to be edited to match the environment names you created.
+    - This is the main file that triggers the deployment workflow. The environment names are passed as inputs to the deploy job. These environment names are defined as variables within the .yml file, **which needs to be edited to match the environment names you created.** In this example, the environment name is also used as the service connection name. If you used different names for the environment name and service connection name, you will **also need to update the service connection parameter passed in each stage**.
     - You may edit the trigger to suit your pipeline trigger needs.
   - deploy-template.yml
     - This is a template file that is used to deploy the infrastructure and services to Azure.
@@ -190,6 +231,6 @@ Consider setting up deployment protection rules for each environment.
 - Provide example of how to configure naming conventions
 - Provide example of setting up self-hosted runners for network-restricted deployments
 - Consider decoupling infrastructure and app code deployments
-- Offer branching strategy guidance 
+- Offer branching strategy guidance
 - Update deploy.yml to only deploy service(s) which have changed (with `azd deploy <service>`)
   - this would require a more complex workflow to determine which services have changed, and each service is in a separate repository

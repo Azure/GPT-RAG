@@ -1,0 +1,65 @@
+parameters:
+  - name: azureEnvName
+    type: string
+    default: "dev" # update as needed
+    displayName: "Azure Environment Name"
+  - name: serviceConnection
+    type: string
+    default: "dev" # update as needed
+    displayName: "Azure Service Connection Name"
+
+steps:
+
+  - checkout: self
+
+  # If you can't install above task in your organization, you can comment it and uncomment below task to install azd
+  - task: Bash@3
+    displayName: Install azd
+    inputs:
+      targetType: "inline"
+      script: |
+        curl -fsSL https://aka.ms/install-azd.sh | bash
+
+  - pwsh: |
+      azd config set auth.useAzCliAuth "true"
+    displayName: Configure AZD to Use AZ CLI Authentication.
+
+  - task: AzureCLI@2
+    displayName: Provision Infrastructure
+    inputs:
+      azureSubscription: ${{ parameters.serviceConnection }}
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        azd provision --no-prompt
+    env:
+      AZURE_SUBSCRIPTION_ID: $(AZURE_SUBSCRIPTION_ID)
+      AZURE_ENV_NAME: ${{ parameters.azureEnvName }}
+      AZURE_LOCATION: $(AZURE_LOCATION)
+      # AZD_INITIAL_ENVIRONMENT_CONFIG: $(secrets.AZD_INITIAL_ENVIRONMENT_CONFIG)
+
+  - task: AzureCLI@2
+    displayName: Package Services
+    inputs:
+      azureSubscription: ${{ parameters.serviceConnection }}
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        azd package --no-prompt
+    env:
+      AZURE_SUBSCRIPTION_ID: $(AZURE_SUBSCRIPTION_ID)
+      AZURE_ENV_NAME: ${{ parameters.azureEnvName }}
+      AZURE_LOCATION: $(AZURE_LOCATION)
+
+  - task: AzureCLI@2
+    displayName: Deploy Services
+    inputs:
+      azureSubscription: ${{ parameters.serviceConnection }}
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        azd deploy --no-prompt
+    env:
+      AZURE_SUBSCRIPTION_ID: $(AZURE_SUBSCRIPTION_ID)
+      AZURE_ENV_NAME: ${{ parameters.azureEnvName }}
+      AZURE_LOCATION: $(AZURE_LOCATION)

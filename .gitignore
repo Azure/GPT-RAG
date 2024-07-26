@@ -1,6 +1,5 @@
 .azure
 .devcontainer
-.azdo
 local/
 results/
 **azdoenv.json
