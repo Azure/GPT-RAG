@@ -55,9 +55,11 @@ test_client_id='<test-sp-client-id>'
 prod_client_id='<prod-sp-client-id>'
 ``` -->
 
+All commands below are run in a bash shell.
+
 ## 1. Create azd environments & Service Principals
 
-`cd` to the root of the repo. Create an azd environment per target environment, and configure the pipeline for each environment. Note that these environment names are reused as the GitHub environment names later.
+`cd` to the root of the repo. Before creating environments, define the environment names. Note that these environment names are reused as the Azure DevOps environment names later.
 
 ```bash
 dev_env='<dev-env-name>' # Example: dev
@@ -65,12 +67,11 @@ test_env='<test-env-name>' # Example: test
 prod_env='<prod-env-name>' # Example: prod
 ```
 
-Read more about azd pipeline config: https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/configure-devops-pipeline?tabs=azdo
-CLI Doc: https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/reference#azd-pipeline-config
-- azd pipeline config in Azure DevOps currently only supports client-credentials.
+Then, create an azd environment per target environment alongside a pipeline definition. In this guide, pipeline definitions are created with `azd pipeline config`. Read more about azd pipeline config: https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/configure-devops-pipeline?tabs=GitHub. CLI Doc: https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/reference#azd-pipeline-config
+- Note: `azd pipeline config` in Azure DevOps currently only supports client-credentials.
 
-Define the names of the Service Principals that will be used for each environment. You will need the app name in later steps.
-Note that azd pipeline config creates a new Service Principal for each environment.
+Define the names of the Service Principals that will be used for each environment. You will need the name in later steps.
+Note that `azd pipeline config` creates a new Service Principal for each environment.
 There are a variety of ways to complete the setup below, e.g., you may manually perform all steps below for additional control, you may elect to use a single Service Principal for all environments, etc.
 
 ```bash
@@ -80,6 +81,12 @@ prod_principal_name='<prod-sp-name>'
 ```
 
 When running 'azd pipeline config' for each env, choose **Azure DevOps** as provider, Az subscription, and Az location. When prompted to commit and push your local changes to start the configured CI pipeline, say 'N'.
+
+Login to Azure:
+
+```bash
+az login
+```
 
 ### Dev
 
@@ -106,9 +113,9 @@ azd env new $prod_env
 azd pipeline config --principal-name $prod_principal_name --provider azdo
 ```
 
-After performing the above steps, you will see corresponding files to your azd environments in the .azure folder.
+After performing the above steps, you will see corresponding files to your azd environments in the `.azure` folder.
 
-If you run 'azd env list', you will see the newly created environments.
+If you run `azd env list`, you will see the newly created environments.
 
 You may change the default environment by running `azd env select <env-name>`, for example:
 
@@ -118,15 +125,12 @@ azd env select $dev_env
 
 # 2. Set up Azure DevOps Environments
 
-Login to Azure DevOps:
+Login to Azure DevOps (ensure you previously ran `az login`):
 
 ```bash
-
-az login
 org='<your-org-name>'
 project='<your-project-name>'
 az devops configure --defaults organization=https://dev.azure.com/$org project=$project
-
 ```
 
 Run az devops CLI commands to create the environments:
@@ -145,9 +149,7 @@ rm azdoenv.json # clean up
 
 ```
 
-Set up the client secrets in the Azure Portal within the Service Principals.
-
-Set the variables at the environment level.
+Set up the client secrets in the Azure Portal within the Service Principals: https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app?tabs=client-secret#tabpanel_1_client-secret
 
 Get the client IDs of the Service Principals you created. Ensure you previously ran `az login`. 
 
@@ -156,6 +158,9 @@ dev_client_id=$(az ad sp list --display-name $dev_principal_name --query "[].app
 test_client_id=$(az ad sp list --display-name $test_principal_name --query "[].appId" --output tsv)
 prod_client_id=$(az ad sp list --display-name $prod_principal_name --query "[].appId" --output tsv)
 ```
+
+
+Set the variables at the environment level.
 
 <!-- TODO set variables -->
 

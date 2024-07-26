@@ -67,7 +67,7 @@ test_principal_name='<test-sp-name>'
 prod_principal_name='<prod-sp-name>'
 ```
 
-For each below environment, when running 'azd pipeline config', choose GitHub as provider, Az subscription, and Az location. When prompted to commit and push your local changes to start the configured CI pipeline, say 'N'.
+For each below environment, when running 'azd pipeline config', choose **GitHub** as provider, Az subscription, and Az location. When prompted to commit and push your local changes to start the configured CI pipeline, say 'N'.
 
 Login to Azure:
 
@@ -97,7 +97,7 @@ azd env new $prod_env
 azd pipeline config --auth-type federated --principal-name $prod_principal_name
 ```
 
-After performing the above steps, you will see corresponding files to your azd environments in the .azure folder.
+After performing the above steps, you will see corresponding files to your azd environments in the `.azure` folder.
 
 If you run `azd env list`, you will see the newly created environments.
 
