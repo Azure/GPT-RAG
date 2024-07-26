@@ -31,6 +31,7 @@ steps:
       scriptType: bash
       scriptLocation: inlineScript
       inlineScript: |
+        chmod -R 755 ./scripts
         azd provision --no-prompt
     env:
       AZURE_SUBSCRIPTION_ID: $(AZURE_SUBSCRIPTION_ID)
@@ -45,6 +46,7 @@ steps:
       scriptType: bash
       scriptLocation: inlineScript
       inlineScript: |
+        chmod -R 755 ./scripts
         azd package --no-prompt
     env:
       AZURE_SUBSCRIPTION_ID: $(AZURE_SUBSCRIPTION_ID)
@@ -58,6 +60,7 @@ steps:
       scriptType: bash
       scriptLocation: inlineScript
       inlineScript: |
+        chmod -R 755 ./scripts
         azd deploy --no-prompt
     env:
       AZURE_SUBSCRIPTION_ID: $(AZURE_SUBSCRIPTION_ID)
