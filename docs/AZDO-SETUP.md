@@ -21,11 +21,13 @@ This document outlines the steps to set up a multi-environment workflow to deplo
 
 - Azure CLI (https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-windows?tabs=azure-cli) with Azure DevOps extension (https://learn.microsoft.com/en-us/azure/devops/cli/?view=azure-devops)
 - Azure Developer CLI (https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd?tabs=winget-windows%2Cbrew-mac%2Cscript-linux&pivots=os-windows)
-- PowerShell 7
+- PowerShell 7 (https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell?view=powershell-7.4)
+- Git (https://git-scm.com/downloads)
 - Azure DevOps organization
 - Bash shell (e.g. Git Bash)
   - Note that all commands are written for bash shell
 - Personnel with Azure admin (can create Service Principals) and Azure DevOps admin (owns repo/org) access
+- The code in the repository needs to exist in Azure Repos and you need to have it cloned locally. This guide may be useful if you run into issues setting up your repository: https://github.com/Azure/azure-dev/blob/main/cli/azd/docs/manual-pipeline-config.md
 
 # Steps:
 
@@ -82,6 +84,12 @@ prod_principal_name='<prod-sp-name>'
 
 When running 'azd pipeline config' for each env, choose **Azure DevOps** as provider, Az subscription, and Az location. When prompted to commit and push your local changes to start the configured CI pipeline, say 'N'.
 
+Get a personal access token from Azure DevOps and set the AZURE_DEVOPS_EXT_PAT environment variable (https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=Windows#create-a-pat). Ensure the PAT has "Use and manage" Pipeline Resources permissions.
+
+```
+export AZURE_DEVOPS_EXT_PAT=<your-pat>
+```
+
 Login to Azure:
 
 ```bash
@@ -89,10 +97,6 @@ az login
 ```
 
 ### Dev
-
-```bash
-az login
-```
 
 ```bash
 azd env new $dev_env
@@ -174,7 +178,7 @@ Consider setting up deployment protection rules for each environment.
 
 # 3. Modify the workflow files as needed for deployment
 
-- The following files in the .azdo/ folder are used to deploy the infrastructure and services to Azure:
+- The following files in the `.azdo/pipelines` folder are used to deploy the infrastructure and services to Azure:
   - azure-dev.yml
     - This is the main file that triggers the deployment workflow. The environment names are passed as inputs to the deploy job, which needs to be edited to match the environment names you created.
     - You may edit the trigger to suit your pipeline trigger needs.

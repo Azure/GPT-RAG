@@ -23,10 +23,12 @@ This document outlines the steps to set up a multi-environment workflow to deplo
 - Azure CLI (https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-windows?tabs=azure-cli)
 - Azure Developer CLI (https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd?tabs=winget-windows%2Cbrew-mac%2Cscript-linux&pivots=os-windows)
 - GitHub CLI (https://cli.github.com/)
-- PowerShell 7
+- PowerShell 7 (https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell?view=powershell-7.4)
+- Git (https://git-scm.com/downloads)
 - GitHub organization with ability to provision environments (e.g., GH Enterprise)
 - Bash shell (e.g. Git Bash)
 - Personnel with Azure admin (can create Service Principals) and GitHub admin (owns repo/org) access
+- The code in the repository needs to exist in Azure Repos and you need to have it cloned locally. This guide may be useful if you run into issues setting up your repository: https://github.com/Azure/azure-dev/blob/main/cli/azd/docs/manual-pipeline-config.md
 
 # Steps:
 
@@ -185,7 +187,7 @@ Note: The existing/unmodified credentials created by Azure Developer CLI may be 
 
 # 5. Modify the workflow files as needed for deployment
 
-- The following files in the .github/workflows folder are used to deploy the infrastructure and services to Azure:
+- The following files in the `.github/workflows` folder are used to deploy the infrastructure and services to Azure:
   - `azure-dev.yml`
     - This is the main file that triggers the deployment workflow. The environment names are passed as inputs to the deploy job, **which needs to be edited to match the environment names you created**.
     - You may edit the workflow_dispatch to suit your workflow trigger needs.
