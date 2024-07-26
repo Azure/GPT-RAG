@@ -14,7 +14,7 @@ This document outlines the steps to set up a multi-environment workflow to deplo
 
 # Decisions required:
 
-- Whether a single or multiple Service Principals will be used for each environment
+- Names of Service Principals will be used, and whether to use a single or multiple Service Principals
 - Whether to use federated identity or client secret for authentication
 - Decisions on which GitHub repo, Azure subscription, and Azure location to use
 
@@ -26,42 +26,24 @@ This document outlines the steps to set up a multi-environment workflow to deplo
 - PowerShell 7
 - GitHub organization with ability to provision environments (e.g., GH Enterprise)
 - Bash shell (e.g. Git Bash)
-  - Note that all commands are written for bash shell
 - Personnel with Azure admin (can create Service Principals) and GitHub admin (owns repo/org) access
 
 # Steps:
 
-## 1. Create Service Principals for each env
+<!-- Create Service Principals for each env -->
 
 <!-- CLI: https://learn.microsoft.com/en-us/cli/azure/azure-cli-sp-tutorial-1?tabs=bash#create-a-service-principal
 
-Portal: https://learn.microsoft.com/en-us/entra/identity-platform/howto-create-service-principal-portal -->
+Portal: https://learn.microsoft.com/en-us/entra/identity-platform/howto-create-service-principal-portal
 
-<!-- Note: You will need the app name in later steps
-
-```bash
-dev_principal_name='<dev-sp-name>'
-test_principal_name='<test-sp-name>'
-prod_principal_name='<prod-sp-name>'
-``` -->
-<!-- 
-Given the name of the Service Principal, get the client ID. You will need the client ID for later steps.
-
-Login and query for the DisplayName and AppId and place the value in a variable. In the event that there are multiple Service Principals containing the same name, so you need to pull the correct ID. These can also be retrieved from the Azure portal.
-
-```bash
-az login
-# example: az ad sp list --display-name $dev_principal_name --query "[].{DisplayName:displayName, AppId:appId}" --output table
-dev_client_id='<dev-sp-client-id>'
-test_client_id='<test-sp-client-id>'
-prod_client_id='<prod-sp-client-id>'
 ``` -->
 
 
+All commands below are run in a bash shell.
 
-## 1. Create azd environments
+## 1. Create azd environments & Service Principals
 
-`cd` to the root of the repo. Create an azd environment per target environment, and configure the pipeline for each environment. Note that these environment names are reused as the GitHub environment names later.
+`cd` to the root of the repo. Before creating environments, define the environment names. Note that these environment names are reused as the GitHub environment names later.
 
 
 ```bash
@@ -70,14 +52,13 @@ test_env='<test-env-name>' # Example: test
 prod_env='<prod-env-name>' # Example: prod
 ```
 
-Read more about azd pipeline config: https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/configure-devops-pipeline?tabs=GitHub
+Then, create an azd environment per target environment alongside a pipeline definition. In this guide, pipeline definitions are created with `azd pipeline config`. Read more about azd pipeline config: https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/configure-devops-pipeline?tabs=GitHub. CLI Doc: https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/reference#azd-pipeline-config
 
-- By default, azd pipeline config uses OpenID Connect (OIDC), called federated credentials. If you'd rather not use OIDC, run azd pipeline config --auth-type client-credentials.
-Note: If you want to manage and authenticate with a secret rather than using federated identity, you would need to create a secret for each Service Principal, store it as a secret in GitHub, and modify the workflow to use the secret for authentication. This is not covered in this example. If you choose to use a client secret, you may skip step 4.
-CLI Doc: https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/reference#azd-pipeline-config
 
-Define the names of the Service Principals that will be used for each environment. You will need the app name in later steps.
-Note that azd pipeline config creates a new Service Principal for each environment.
+By default, `azd pipeline config` uses OpenID Connect (OIDC), called federated credentials. If you'd rather not use OIDC, run `azd pipeline config --auth-type client-credentials`.
+
+Define the names of the Service Principals that will be used for each environment. You will need the name in later steps.
+Note that `azd pipeline config` creates a new Service Principal for each environment.
 There are a variety of ways to complete the setup below, e.g., you may manually perform all steps below for additional control, you may elect to use a single Service Principal for all environments, etc.
 
 ```bash
@@ -86,13 +67,16 @@ test_principal_name='<test-sp-name>'
 prod_principal_name='<prod-sp-name>'
 ```
 
-When running 'azd pipeline config' for each env, choose GitHub as provider, Az subscription, and Az location. When prompted to commit and push your local changes to start the configured CI pipeline, say 'N'.
+For each below environment, when running 'azd pipeline config', choose GitHub as provider, Az subscription, and Az location. When prompted to commit and push your local changes to start the configured CI pipeline, say 'N'.
 
-### Dev
+Login to Azure:
 
 ```bash
 az login
 ```
+
+### Dev
+
 
 ```bash
 azd env new $dev_env
@@ -115,7 +99,7 @@ azd pipeline config --auth-type federated --principal-name $prod_principal_name
 
 After performing the above steps, you will see corresponding files to your azd environments in the .azure folder.
 
-If you run 'azd env list', you will see the newly created environments.
+If you run `azd env list`, you will see the newly created environments.
 
 You may change the default environment by running `azd env select <env-name>`, for example:
 
@@ -123,9 +107,7 @@ You may change the default environment by running `azd env select <env-name>`, f
 azd env select $dev_env
 ```
 
-# 3. Set up GitHub Environments
-
-the below paths may need to be updated if using a GH organization
+## 2. Set up GitHub Environments
 
 Set up initial variables:
 
@@ -159,12 +141,14 @@ test_client_id=$(az ad sp list --display-name $test_principal_name --query "[].a
 prod_client_id=$(az ad sp list --display-name $prod_principal_name --query "[].appId" --output tsv)
 ```
 
-Note:
-In the event that there are multiple SPs containing the same name, review the table of results to pull the correct ID. These can also be retrieved from the Azure portal.
-```bash
-az ad sp list --display-name $dev_principal_name --query "[].{DisplayName:displayName, AppId:appId}" --output table # return results in a table format
-dev_client_id='<guid>'
-```
+- _Alternative approach to get the client IDs:_
+
+  In the event that there are multiple SPs containing the same name, review the table of results to pull the correct ID. The command to do this is exemplified below for the dev environment._
+  ```bash
+  az ad sp list --display-name $dev_principal_name --query "[].{DisplayName:displayName, AppId:appId}" --output table # return results in a table format
+  dev_client_id='<guid>'
+  ```
+  You can also get the client IDs from the Azure Portal.
 
 Set the variables at the environment level
 
@@ -174,14 +158,14 @@ gh variable set AZURE_CLIENT_ID -b $test_client_id -e $test_env
 gh variable set AZURE_CLIENT_ID -b $prod_client_id -e $prod_env
 ```
 
-Consider setting up deployment protection rules for each environment by going to Settings > Environments > env-name, and setting Deployment protection rules (e.g., required reviewers)
+Consider setting up deployment protection rules for each environment by going to Settings > Environments > env-name, and setting Deployment protection rules (e.g., required reviewers).
 
-- If using client secret authentication, you would need to set up the client secret in the Azure Portal, configure it as a secret in GitHub as an environment variable and modify the workflow to use the secret for authentication. This is not covered in this example.
+Note: If you want to manage and authenticate with a secret rather than using federated identity, you would need to create a secret for each Service Principal, store it as a secret in GitHub, and modify the workflow to use the secret for authentication. This is not covered in this example. If you choose to use a client secret, you may skip 3.
 
 
-# 4. Configure Azure Federated credentials to use newly set up GitHub environments
+# 3. Configure Azure Federated credentials to use newly set up GitHub environments
 ```bash
-issuer="https://token.actions.githubusercontent.com/"
+issuer="https://token.actions.githubusercontent.com"
 audiences="api://AzureADTokenExchange"
 
 echo '{"name": "'"${org}-${repo}-${dev_env}"'", "issuer": "'"${issuer}"'", "subject": "repo:'"$org"'/'"$repo"':environment:'"$dev_env"'", "description": "'"${dev_env}"' environment", "audiences": ["'"${audiences}"'"]}' > federated_id.json
@@ -196,49 +180,16 @@ az ad app federated-credential create --id $prod_client_id --parameters ./federa
 rm federated_id.json
 
 ```
-<!-- # 4. [If using Federated Credentials] Reconfigure Azure Federated credentials to use newly set up GitHub environments
-
-You may skip this step if you are using client secret authentication.
-
-This is a one-time manual step in the Azure portal for each Service Principal
-
-- a) Open Azure Portal and navigate to Microsoft Entra ID
-- b) Select App Registrations
-- c) Search for the app name you used for your Dev environment
-- d) Click on Certificates & secrets
-- e) Select the Federated credentials tab
-- f) choose 'Add credential'
-- g) Choose 'GitHub Actions deploying Azure resources' in the 'Federated credential scenario'
-- h) Fill in your organization and repository name
-- i) Set the 'Entity type' to 'Environment'
-- j) Set the 'GitHub environment name' to the name of the environment you created in GitHub
-- k) provide a Name in the Credential Details section, for example: org-repo-env_name-env -->
-<!-- - f) choose the credential that ends with '-main'
-- g) Update the 'Entity type' to 'Environment'
-- h) Edit the 'GitHub environment name' to the name of the environment you created in GitHub
-- i) choose Update -->
-<!-- - _Perform steps a-i for each Service Principal_ -->
-
-<!-- If you have multiple Service Principals: -->
-<!-- If you have only one Service Principal/multiple environments using the same Service Principal:
-
-- f) choose 'Add credential'
-- g) Choose 'GitHub Actions deploying Azure resources' in the 'Federated credential scenario'
-- h) Fill in your organization and repository name
-- i) Set the 'Entity type' to 'Environment'
-- j) Set the 'GitHub environment name' to the name of the environment you created in GitHub
-- k) provide a Name in the Credential Details section, for example: org-repo-env_name-env
-- _Perform steps f-k for each environment_ -->
 
 Note: The existing/unmodified credentials created by Azure Developer CLI may be deleted.
 
 # 5. Modify the workflow files as needed for deployment
 
 - The following files in the .github/workflows folder are used to deploy the infrastructure and services to Azure:
-  - azure-dev.yml
+  - `azure-dev.yml`
     - This is the main file that triggers the deployment workflow. The environment names are passed as inputs to the deploy job, **which needs to be edited to match the environment names you created**.
     - You may edit the workflow_dispatch to suit your workflow trigger needs.
-  - deploy-template.yml
+  - `deploy-template.yml`
     - This is a template file that is used to deploy the infrastructure and services to Azure. This file needs to be edited if you are using client secret authentication.
 
 
