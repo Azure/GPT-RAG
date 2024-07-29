@@ -200,7 +200,9 @@ After environments are created, consider setting up deployment protection rules 
 
 ### Variable setup
 
-Once the pipeline YML file is committed to the repository and the environments are set up, navigate to the Pipeline in Azure DevOps, edit the pipeline, open the variables menu, and delete the `AZURE_ENV_NAME` pipeline variable from the Azure DevOps portal. This value is passed in at the environment level in the pipeline YML file. If you do not delete this variable, the pipeline will erroneously deploy to the same environment in every stage.
+Once the pipeline YML file is committed to the repository and the environments are set up, the `AZURE_ENV_NAME` pipeline variable needs to be deleted. This value is passed in at the environment level in the pipeline YML file. If you do not delete this pipeline variable, the pipeline will erroneously deploy to the same environment in every stage.
+
+To do this in the Azure DevOps portal, navigate to the pipeline, edit the pipeline, open the variables menu, and delete the `AZURE_ENV_NAME` pipeline variable.
 
 You may alternately run the below command to delete the variable; ensure you replace the pipeline ID with the correct ID. You can find the pipeline ID by navigating to the pipeline in the Azure DevOps portal and looking at the URL.
 
