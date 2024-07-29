@@ -171,7 +171,7 @@ You may change the default environment by running `azd env select <env-name>`, f
 azd env select $dev_env
 ```
 
-# 2. Set up Azure DevOps Environments
+## 2. Set up Azure DevOps Environments
 
 ### Environment setup
 
@@ -210,7 +210,7 @@ You may alternately run the below command to delete the variable; ensure you rep
 az pipelines variable delete --name 'AZURE_ENV_NAME' --pipeline-id <pipeline-id>
 ```
 
-# 3. Modify the workflow files as needed for deployment
+## 3. Modify the workflow files as needed for deployment
 
 - The following files in the `.azdo/pipelines` folder are used to deploy the infrastructure and services to Azure:
   - `azure-dev.yml`
