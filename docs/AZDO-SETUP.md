@@ -196,7 +196,8 @@ az devops invoke --area distributedtask --resource environments --route-paramete
 rm azdoenv.json # clean up temp file
 ```
 
-After environments are created, consider setting up deployment protection rules for each environment. See [this article](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/approvals?view=azure-devops&tabs=check-pass) for more.
+> [!TIP]
+> After environments are created, consider setting up deployment protection rules for each environment. See [this article](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/approvals?view=azure-devops&tabs=check-pass) for more.
 
 ### Variable setup
 
