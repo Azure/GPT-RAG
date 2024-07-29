@@ -8,7 +8,6 @@ on:
     branches:
       # - main
       # - master
-      # - dev2
       - none
 
 permissions:
