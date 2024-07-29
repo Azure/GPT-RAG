@@ -26,7 +26,7 @@ This document outlines the steps to set up a multi-environment workflow to deplo
 - [Git](https://git-scm.com/downloads)
 - Azure DevOps organization
 - Bash shell (e.g., Git Bash)
-- Personnel with Azure admin (can create Service Principals) and Azure DevOps admin (owns repo/org) access
+- Personnel with Azure admin (can create Service Principals) and Azure DevOps admin (owns repository/project) access
 - The code in the repository needs to exist in Azure Repos and you need to have it cloned locally. [This guide](https://github.com/Azure/azure-dev/blob/main/cli/azd/docs/manual-pipeline-config.md) may be useful if you run into issues setting up your repository.
 
 # Steps:
