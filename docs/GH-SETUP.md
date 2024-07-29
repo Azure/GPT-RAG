@@ -27,7 +27,7 @@ This document outlines the steps to set up a multi-environment workflow to deplo
 - [GitHub CLI](https://cli.github.com/)
 - [PowerShell 7](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell?view=powershell-7.4)
 - [Git](https://git-scm.com/downloads)
-- Bash shell (e.g. Git Bash)
+- Bash shell (e.g., Git Bash)
 - GitHub organization with ability to provision environments (e.g., GitHub Enterprise)
 - Personnel with Azure admin (can create Service Principals) and GitHub admin (owns repo/org) access
 - The code in the repository needs to exist in Azure Repos and you need to have it cloned locally. [This guide](https://github.com/Azure/azure-dev/blob/main/cli/azd/docs/manual-pipeline-config.md) may be useful if you run into issues setting up your repository.
