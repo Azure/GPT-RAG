@@ -1,0 +1,59 @@
+name: Multi-Environment Build and Deploy
+
+on:
+  workflow_dispatch:
+  push:
+    # Run when commits are pushed to mainline branch (main or master)
+    # Set this to the mainline branch you are using
+    branches:
+      # - main
+      # - master
+      - none
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  # TODO: create a build stage that packages the application
+  # build:
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #   - name: Checkout
+  #     uses: actions/checkout@v3
+
+  #   - name: Install azd
+  #     uses: Azure/setup-azd@v0.1.0
+
+  #   - name: Package Application
+  #     run: azd package web --output-path ./dist/web.zip --environment NONE --no-prompt
+  #     working-directory: ./
+
+  #   - name: Upload Package
+  #     uses: actions/upload-artifact@v3
+  #     with:
+  #       name: package
+  #       path: ./dist/web.zip
+  #       if-no-files-found: error
+
+  deploy-dev:
+    uses: ./.github/workflows/deploy-template.yml
+    secrets: inherit
+    # needs: [build]
+    with:
+      AZURE_ENV_NAME: dev2 # edit this to match your environment name
+
+  deploy-test:
+    uses: ./.github/workflows/deploy-template.yml
+    secrets: inherit
+    needs: [deploy-dev]
+    with:
+      AZURE_ENV_NAME: test2 # edit this to match your environment name
+
+  deploy-prod:
+    uses: ./.github/workflows/deploy-template.yml
+    secrets: inherit
+    needs: [deploy-test]
+    with:
+      AZURE_ENV_NAME: prod2 # edit this to match your environment name
