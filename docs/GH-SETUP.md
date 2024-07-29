@@ -6,8 +6,8 @@ This document outlines the steps to set up a multi-environment workflow to deplo
 
 - This example assumes you're using a GitHub organization with GitHub environments
 - This example deploys the infrastructure in the same pipeline as all of the services.
-- This example deploys 3 environments: dev, test, and prod. You may modify the number and names of environments as needed.
-- This example uses [`azd pipeline config`](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/configure-devops-pipeline?tabs=azdo), to rapidly set up GitHub workflows and federated identity configuration for enhanced security.
+- This example deploys three environments: dev, test, and prod. You may modify the number and names of environments as needed.
+- This example uses [`azd pipeline config`](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/configure-devops-pipeline?tabs=azdo) to rapidly set up GitHub workflows and federated identity configuration for enhanced security.
 - All below commands are run as a one-time setup on a local machine by an admin who has access to the GitHub Repository and Azure tenant.
 - This example does not cover configuring any naming conventions.
 - The original remote versions of the [orchestrator](https://github.com/Azure/gpt-rag-orchestrator), [frontend](https://github.com/Azure/gpt-rag-frontend), and [ingestion](https://github.com/Azure/gpt-rag-ingestion) repositories are used; in a real scenario, you would fork these repositories and use your forked versions. This would require updating the repository URLs in the `scripts/fetchComponents.*` files.
