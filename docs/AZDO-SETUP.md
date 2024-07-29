@@ -163,7 +163,7 @@ az ad app federated-credential create --id $prod_client_id --parameters ./federa
 # Post setup 2: Update the service connection name to match the environment name in the Azure DevOps Portal
 ```
 
-Clean up the temporaty files:
+Clean up the temporary files:
 ```bash
 rm federated_id.json # clean up
 ```
@@ -216,6 +216,8 @@ rm azdoenv.json # clean up
 
 
 Consider setting up deployment protection rules for each environment. (https://learn.microsoft.com/en-us/azure/devops/pipelines/process/approvals?view=azure-devops&tabs=check-pass)
+
+Once the pipeline YML file is committed to the repository and the environments are set up, navigate to the Pipeline in Azure DevOps, edit the pipeline, open the variables menu, and delete the AZURE_ENV_NAME pipeline variable from the Azure DevOps portal. This value is passed in at the environment level in the pipeline YML file.
 
 # 3. Modify the workflow files as needed for deployment
 

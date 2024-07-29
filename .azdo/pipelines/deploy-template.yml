@@ -1,15 +1,16 @@
 parameters:
   - name: azureEnvName
     type: string
-    default: "dev" # update as needed
+    default: "dev"
     displayName: "Azure Environment Name"
   - name: serviceConnection
     type: string
-    default: "dev" # update as needed
+    default: "dev"
     displayName: "Azure Service Connection Name"
 
 steps:
-
+  # - task: setup-azd@0
+  #   displayName: Install azd
   - checkout: self
 
   # If you can't install above task in your organization, you can comment it and uncomment below task to install azd
@@ -27,42 +28,50 @@ steps:
   - task: AzureCLI@2
     displayName: Provision Infrastructure
     inputs:
+      addSpnToEnvironment: true
       azureSubscription: ${{ parameters.serviceConnection }}
       scriptType: bash
       scriptLocation: inlineScript
       inlineScript: |
         chmod -R 755 ./scripts
+        az login --service-principal -u $servicePrincipalId --tenant $tenantId --federated-token $idToken -o none
         azd provision --no-prompt
     env:
       AZURE_SUBSCRIPTION_ID: $(AZURE_SUBSCRIPTION_ID)
       AZURE_ENV_NAME: ${{ parameters.azureEnvName }}
       AZURE_LOCATION: $(AZURE_LOCATION)
-      # AZD_INITIAL_ENVIRONMENT_CONFIG: $(secrets.AZD_INITIAL_ENVIRONMENT_CONFIG)
+      AZURE_SERVICE_CONNECTION: ${{ parameters.serviceConnection }}
 
   - task: AzureCLI@2
     displayName: Package Services
     inputs:
+      addSpnToEnvironment: true
       azureSubscription: ${{ parameters.serviceConnection }}
       scriptType: bash
       scriptLocation: inlineScript
       inlineScript: |
         chmod -R 755 ./scripts
+        az login --service-principal -u $servicePrincipalId --tenant $tenantId --federated-token $idToken -o none
         azd package --no-prompt
     env:
       AZURE_SUBSCRIPTION_ID: $(AZURE_SUBSCRIPTION_ID)
       AZURE_ENV_NAME: ${{ parameters.azureEnvName }}
       AZURE_LOCATION: $(AZURE_LOCATION)
+      AZURE_SERVICE_CONNECTION: ${{ parameters.serviceConnection }}
 
   - task: AzureCLI@2
     displayName: Deploy Services
     inputs:
+      addSpnToEnvironment: true
       azureSubscription: ${{ parameters.serviceConnection }}
       scriptType: bash
       scriptLocation: inlineScript
       inlineScript: |
         chmod -R 755 ./scripts
+        az login --service-principal -u $servicePrincipalId --tenant $tenantId --federated-token $idToken -o none
         azd deploy --no-prompt
     env:
       AZURE_SUBSCRIPTION_ID: $(AZURE_SUBSCRIPTION_ID)
       AZURE_ENV_NAME: ${{ parameters.azureEnvName }}
       AZURE_LOCATION: $(AZURE_LOCATION)
+      AZURE_SERVICE_CONNECTION: ${{ parameters.serviceConnection }}
