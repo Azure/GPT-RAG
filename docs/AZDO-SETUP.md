@@ -32,7 +32,7 @@ This document outlines the steps to set up a multi-environment workflow to deplo
 # Steps:
 
 > [!NOTE]
-> All commands below are run in a bash shell.
+> All commands below are to be run in a bash shell.
 
 ## 1. Create `azd` environments & Service Principals
 
