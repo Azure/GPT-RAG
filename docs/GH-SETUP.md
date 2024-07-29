@@ -161,7 +161,6 @@ gh variable set AZURE_CLIENT_ID -b $test_client_id -e $test_env
 gh variable set AZURE_CLIENT_ID -b $prod_client_id -e $prod_env
 ```
 
-Consider setting up deployment protection rules for each environment.
 After environments are created, consider setting up deployment protection rules for each environment. See [this article](https://docs.github.com/en/actions/administering-github-actions/managing-environments-for-deployment#deployment-protection-rules) for more.
 
 > [!NOTE]
