@@ -26,13 +26,16 @@ This document outlines the steps to set up a multi-environment workflow to deplo
 - [Git](https://git-scm.com/downloads)
 - Azure DevOps organization
 - Bash shell (e.g., Git Bash)
-- Personnel with Azure admin (can create Service Principals) and Azure DevOps admin (owns repository/project) access
-- The code in the repository needs to exist in Azure Repos and you need to have it cloned locally. [This guide](https://github.com/Azure/azure-dev/blob/main/cli/azd/docs/manual-pipeline-config.md) may be useful if you run into issues setting up your repository.
+- Personnel with the following access levels:
+  - In Azure: Either Owner role or Contributor + User Access Administrator roles within the Azure subscription, which provides the ability to create and assign roles to a Service Principal
+  - In Azure DevOps: Ability create and manage [Service Connections](https://learn.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops), contribute to repository, create and manage pipelines, and Administrator access on [Default agent pool](https://learn.microsoft.com/en-us/azure/devops/pipelines/policies/permissions?view=azure-devops#set-agent-pool-security-in-azure-pipelines)
+- The codebase needs to exist in Azure Repos and you need to have it cloned locally.
 
 # Steps:
 
 > [!NOTE]
-> All commands below are to be run in a Bash shell.
+> 1. All commands below are to be run in a Bash shell.
+> 2. This guide aims to provide automated/programmatic steps for pipeline setup where possible. Manual setup is also possible, but not covered extensively in this guide. Please read more about manual pipeline setup [here](https://github.com/Azure/azure-dev/blob/main/cli/azd/docs/manual-pipeline-config.md).
 
 ## 1. Create `azd` environments & Service Principals
 

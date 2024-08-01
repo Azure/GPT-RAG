@@ -28,14 +28,17 @@ This document outlines the steps to set up a multi-environment workflow to deplo
 - [PowerShell 7](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell?view=powershell-7.4)
 - [Git](https://git-scm.com/downloads)
 - Bash shell (e.g., Git Bash)
-- GitHub organization with ability to provision environments (e.g., GitHub Enterprise)
-- Personnel with Azure admin (can create Service Principals) and GitHub admin (owns repository/organization) access
-- The code in the repository needs to exist in Azure Repos and you need to have it cloned locally. [This guide](https://github.com/Azure/azure-dev/blob/main/cli/azd/docs/manual-pipeline-config.md) may be useful if you run into issues setting up your repository.
+- GitHub organization with the [ability to provision environments](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-deployments/managing-environments-for-deployment) (e.g., GitHub Enterprise)
+- Personnel with the following access levels:
+  - In Azure: Either Owner role or Contributor + User Access Administrator roles within the Azure subscription, which provides the ability to create and assign roles to a Service Principal
+  - In GitHub: Repository owner access, which provides the ability to create environments and variables/secrets
+- The codebase needs to exist in a GitHub repository and you need to have it cloned locally.
 
 # Steps:
 
 > [!NOTE]
-> All commands below are to be run in a Bash shell.
+> 1. All commands below are to be run in a Bash shell.
+> 2. This guide aims to provide automated/programmatic steps for pipeline setup where possible. Manual setup is also possible, but not covered extensively in this guide. Please read more about manual pipeline setup [here](https://github.com/Azure/azure-dev/blob/main/cli/azd/docs/manual-pipeline-config.md).
 
 ## 1. Create azd environments & Service Principals
 
@@ -144,7 +147,7 @@ test_client_id=$(az ad sp list --display-name $test_principal_name --query "[].a
 prod_client_id=$(az ad sp list --display-name $prod_principal_name --query "[].appId" --output tsv)
 ```
 
-> [!NOTE] 
+> [!NOTE]
 > _Alternative approach to get the client IDs in the above steps:_
 > In the event that there are multiple Service Principals containing the same name, the `az ad sp list` command executed above may not pull the correct ID. You may execute an alternate command to manually review the list of Service Principals by name and ID. The command to do this is exemplified below for the dev environment.
 >
