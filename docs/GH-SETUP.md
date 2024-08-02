@@ -64,7 +64,7 @@ prod_principal_name='<prod-sp-name>'
 
 Next, you will create an `azd` environment per target environment alongside a pipeline definition. In this guide, pipeline definitions are created with `azd pipeline config`. Read more about azd pipeline config [here](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/configure-devops-pipeline?tabs=azdo). View the CLI documentation [here](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/reference#azd-pipeline-config).
 
-For each below environment, when running `azd pipeline config` for each environment, choose **GitHub** as the provider, choose your target Azure subscription, and Azure location. When prompted to commit and push your local changes to start the configured CI pipeline, say 'N'.
+For each below environment, when running `azd pipeline config` for each environment, choose your target Azure subscription, and Azure location. When prompted to commit and push your local changes to start the configured CI pipeline, say 'N'.
 
 Login to Azure:
 
@@ -76,21 +76,21 @@ az login
 
 ```bash
 azd env new $dev_env
-azd pipeline config --auth-type federated --principal-name $dev_principal_name
+azd pipeline config --auth-type federated --principal-name $dev_principal_name --provider github
 ```
 
 #### Test
 
 ```bash
 azd env new $test_env
-azd pipeline config --auth-type federated --principal-name $test_principal_name
+azd pipeline config --auth-type federated --principal-name $test_principal_name --provider github
 ```
 
 #### Prod
 
 ```bash
 azd env new $prod_env
-azd pipeline config --auth-type federated --principal-name $prod_principal_name
+azd pipeline config --auth-type federated --principal-name $prod_principal_name --provider github
 ```
 
 > [!NOTE]

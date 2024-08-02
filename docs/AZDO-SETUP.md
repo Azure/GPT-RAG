@@ -80,7 +80,7 @@ Next, you will create an `azd` environment per target environment alongside a pi
 > 1. Run the provided command to update the Subject identifier in the federated credential. _In this example, we will be using the name of the environment._
 > 2. [Update the service connection](https://learn.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops#edit-a-service-connection) name to match the final section of the Subject identifier (in this example, with the name of the environment). This will be done in the Azure DevOps web app. You may get a warning when you do this - choose 'Keep as draft', then 'Finish setup', then 'Verify and save'.
 
-When running `azd pipeline config` for each environment, choose **Azure DevOps** as the provider, choose your target Azure subscription, and Azure location. When prompted to commit and push your local changes to start the configured CI pipeline, say 'N'.
+When running `azd pipeline config` for each environment, choose your target Azure subscription, and Azure location. When prompted to commit and push your local changes to start the configured CI pipeline, say 'N'.
 
 Login to Azure:
 
