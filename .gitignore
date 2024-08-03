@@ -4,3 +4,4 @@ local/
 results/
 **azdoenv.json
 **federated_id.json
+**service_connection.json

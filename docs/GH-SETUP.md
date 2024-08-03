@@ -64,7 +64,10 @@ prod_principal_name='<prod-sp-name>'
 
 Next, you will create an `azd` environment per target environment alongside a pipeline definition. In this guide, pipeline definitions are created with `azd pipeline config`. Read more about azd pipeline config [here](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/configure-devops-pipeline?tabs=azdo). View the CLI documentation [here](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/reference#azd-pipeline-config).
 
-For each below environment, when running `azd pipeline config` for each environment, choose your target Azure subscription, and Azure location. When prompted to commit and push your local changes to start the configured CI pipeline, say 'N'.
+For each below environment, when running `azd pipeline config` for each environment, choose your target Azure subscription and Azure location. When prompted to commit and push your local changes to start the configured CI pipeline, enter 'N'.
+
+> [!CAUTION]
+> If you choose 'Y' to commit and push your local changes, the pipeline will be triggered, and you may not have the necessary environments or variables set up yet, causing the pipeline to fail. The remaining setup steps must be completed before the pipeline will run successfully.
 
 Login to Azure:
 
@@ -156,7 +159,7 @@ prod_client_id=$(az ad sp list --display-name $prod_principal_name --query "[].a
 > dev_client_id='<guid>' # manually assign the correct client ID
 > ```
 >
-> Also note you may also get the client IDs from the Azure Portal.
+> Also note you may get the client IDs from the Azure Portal.
 
 Set these values as variables at the environment level:
 
@@ -199,8 +202,10 @@ rm federated_id.json # clean up temp file
 
 - The following files in the `.github/workflows` folder are used to deploy the infrastructure and services to Azure:
   - `azure-dev.yml`
-    - This is the main file that triggers the deployment workflow. The environment names are passed as inputs to the deploy job, **which needs to be edited to match the environment names you created**.
-    - You may edit the workflow_dispatch to suit your workflow trigger needs.
+    - This is the main file that triggers the deployment workflow. The environment names are passed as inputs to the deploy job.
+    - > [!IMPORTANT]
+      > - The environment names **need to be edited to match the environment names you created**.
+      > - The `workflow_dispatch` in this file is set to trigger on push to a branch `none`. You may modify this to trigger on a specific branch or event.
   - `deploy-template.yml`
     - This is a template file invoked by `azure-dev.yml` that is used to deploy the infrastructure and services to Azure. This file needs to be edited if you are using client secret authentication.
 

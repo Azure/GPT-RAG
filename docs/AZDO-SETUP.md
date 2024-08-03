@@ -60,96 +60,231 @@ prod_principal_name='<prod-sp-name>'
 
 Then, get a personal access token (PAT) from Azure DevOps and set the AZURE_DEVOPS_EXT_PAT environment variable. [This guide](https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=Windows#create-a-pat) describes how to create a PAT. Ensure the PAT has:
 
-- "Use and manage" Pipeline Resources permissions.
+- "Read & execute" Build permissions.
 - "Source code, repositories, pull requests, and notifications" and "Full" Code permissions.
 - "Read and manage environment" Environment permissions.
+- "Use and manage" Pipeline Resources permissions.
 - "Read, query, and manage" Service connections permissions.
-- "Read & execute" Build permissions.
+
 
 ```
 export AZURE_DEVOPS_EXT_PAT=<your-pat>
 ```
 
-### `azd` environments
+Then, get the GUID of your Azure DevOps organization. This will be used when setting the [issuer field for the federated credential](https://learn.microsoft.com/en-us/azure/devops/pipelines/release/configure-workload-identity?view=azure-devops#create-a-managed-identity) in a later step. In this example, we will retrieve the GUID through the browser, but you may also develop a more sophisticated method to retrieve the GUID using the [Azure DevOps Accounts REST API](https://learn.microsoft.com/en-us/rest/api/azure/devops/account/accounts/list?view=azure-devops-rest-7.1&tabs=HTTP) (The Accounts API requires an [OAuth 2 token](https://learn.microsoft.com/en-us/azure/devops/integrate/get-started/authentication/oauth?view=azure-devops) for authorization, setup of which is not covered in this guide).
 
-Next, you will create an `azd` environment per target environment alongside a pipeline definition. In this guide, pipeline definitions are created with `azd pipeline config`. Read more about azd pipeline config [here](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/configure-devops-pipeline?tabs=azdo). View the CLI documentation [here](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/reference#azd-pipeline-config).
+To get the GUID of your Azure DevOps organization via browser:
+1. In your browser, visit [https://app.vssps.visualstudio.com/_apis/accounts](https://app.vssps.visualstudio.com/_apis/accounts). Note that you must log into the account associated with your Azure DevOps Organization to access this page.
+2. Press Ctrl+F to open the search bar and search for your Azure DevOps organization name.
+3. The GUID will be in the `AccountId` field. Copy this GUID and set it as a variable.
 
-> [!IMPORTANT]
-> The `azd pipeline config` command will create the service principal and service connection. Note that the service connection will always be created with the name `azconnection`, so after each `azd pipeline config` command, you will need to perform 2 post-setup actions:
->
-> 1. Run the provided command to update the Subject identifier in the federated credential. _In this example, we will be using the name of the environment._
-> 2. [Update the service connection](https://learn.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops#edit-a-service-connection) name to match the final section of the Subject identifier (in this example, with the name of the environment). This will be done in the Azure DevOps web app. You may get a warning when you do this - choose 'Keep as draft', then 'Finish setup', then 'Verify and save'.
+    ```bash
+    azdo_org_guid='<your-org-guid>'
+    ```
 
-When running `azd pipeline config` for each environment, choose your target Azure subscription, and Azure location. When prompted to commit and push your local changes to start the configured CI pipeline, say 'N'.
-
-Login to Azure:
-
-```bash
-az login
-```
-
-Then, set some variables that will be used:
+Then, set some additional variables that will be used when setting up the environments, pipelines, and credentials:
 
 ```bash
 org='<your-org-name>'
 project='<your-repo-name>'
-issuer='https://vstoken.dev.azure.com/be306e75-95ac-461a-a54e-5fd100dbb1b8'
+issuer=https://vstoken.dev.azure.com/$azdo_org_guid
 audiences="api://AzureADTokenExchange"
 ```
 
-Create the environments and update the federated credential for each environment:
+### `azd` environments and Service Principal creation
 
-#### Dev
+Next, you will create an `azd` environment per target environment alongside a pipeline definition. In this guide, pipeline definitions are created with `azd pipeline config`. Read more about azd pipeline config [here](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/configure-devops-pipeline?tabs=azdo). View the CLI documentation [here](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/reference#azd-pipeline-config).
 
+
+<!-- #### Define variables -->
+
+<!-- Before setting up the environment and pipeline, you first need to define some variables: -->
+
+
+
+<!-- #### Set up environments and pipelines -->
+Login to Azure and configure the default organization and project:
+
+```bash
+az login
+az devops configure --defaults organization=https://dev.azure.com/$org project=$project
+```
+
+Next, you will create the environments, service principals, and pipelines, followed by a new federated credential and service connection for each environment. The `azd pipeline config` creates a default credential and service connection which we will not use because we need to configure environment-specific connections.
+
+When running `azd pipeline config` for each environment, enter your organization name, and choose your target Azure subscription and location. When prompted to commit and push your local changes to start the configured CI pipeline, enter 'N'.
+
+> [!CAUTION]
+> If you choose 'Y' to commit and push your local changes, the pipeline will be triggered, and you may not have the necessary environments or variables set up yet, causing the pipeline to fail. The remaining setup steps must be completed before the pipeline will run successfully.
+
+<!-- > [!IMPORTANT]
+> **Creating a distinct service connection per service principal:** The `azd pipeline config` command will create the service principal and associated service connection, and the service connection will _always_ be created with the name `azconnection`, however, in this example, a distinctly named service connection per environment is required. To fix this, after **each** `azd pipeline config` command is run, you will need to perform 2 post-setup actions to reconfigure the service principal and newly created service connection:
+>
+> ##### Post setup step #1: Create a new federated credential
+> Each section below includes a _Post setup step #1_ code snippet, wherein 3 commands are executed to create a  [federated credential with an environment-specific subject identifier](https://learn.microsoft.com/en-us/azure/devops/pipelines/release/configure-workload-identity?view=azure-devops#create-a-managed-identity) in the newly created service principal. _In this example, a `subject_identifier_suffix` variable will be used to construct the subject identifier. For the purposes of this example, this suffix will be configured as the name of the environment just created. You may use whatever value you like, but the value you choose must be also be used in the following post-setup step._
+> ##### Post setup step #2: Update the service connection name
+> [Update the service connection](https://learn.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops#edit-a-service-connection) name to be the value of the `subject_identifier_suffix` variable used in the previous step (in this example, this is the name of the environment). This will be done in the Azure DevOps web app:
+> 
+> 1. [Open your service connections](https://learn.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops#view-a-service-connection)
+> 2. Click on the `azconnection` service connection
+
+You may get a warning when you do this - choose 'Keep as draft', then 'Finish setup', then 'Verify and save'. -->
+
+##### Dev
+
+**Setup:** Set up the Dev environment, pipeline, and service principal:
 ```bash
 azd env new $dev_env
 azd pipeline config --principal-name $dev_principal_name --provider azdo
+```
 
-# Post setup 1: Update the subject identifier in the federated credential
+**Post setup step #1:** Create a new federated credential in the Dev Service Principal
+```bash
 echo '{"name": "'"${org}-${project}-${dev_env}"'", "issuer": "'"${issuer}"'", "subject": "'"sc://${org}/${project}/${dev_env}"'", "description": "'"${dev_env}"' environment", "audiences": ["'"${audiences}"'"]}' > federated_id.json
 
-dev_client_id=$(az ad sp list --display-name $dev_principal_name --query "[].appId" --output tsv) # get client ID
+dev_client_id=$(az ad sp list --display-name $dev_principal_name --query "[].appId" --output tsv)
 
 az ad app federated-credential create --id $dev_client_id --parameters ./federated_id.json
 
-# Post setup 2: Update the service connection name to match the environment name in the Azure DevOps Portal
+# delete the existing federated credential created by azd pipeline config
+federated_cred_id=$(az ad app federated-credential list --id $dev_client_id --query "[?name=='AzureDevOpsOIDC'].id" --output tsv)
+az ad app federated-credential delete --id $dev_client_id --federated-credential-id $federated_cred_id
+
+rm federated_id.json # clean up temp file
 ```
 
-#### Test
+**Post setup step #2:** Create a new service connection for the Dev environment
 
+```bash
+# First, delete the default service connection created by azd pipeline config
+service_connection_id=$(az devops service-endpoint list --query "[?name=='azconnection'].id" --output tsv)
+
+az devops service-endpoint delete --id $service_connection_id --yes
+
+# Next, configure the parameters for creating a service connection tied to the federated credential created in the previous step.
+NAME=$dev_env
+PROJECT_ID=$(az devops project show --project $project --query "id" --output tsv)
+PROJECT_NAME=$project
+SERVICE_PRINCIPAL_ID=$dev_client_id
+TENANT_ID=$(az ad sp show --id $dev_client_id --query "appOwnerOrganizationId" --output tsv)
+SUBSCRIPTION_ID=$(az account show --query "id" --output tsv)
+SUBSCRIPTION_NAME=$(az account show --query "name" --output tsv)
+
+# Populate the JSON template with the variables
+export NAME PROJECT_ID PROJECT_NAME SERVICE_PRINCIPAL_ID TENANT_ID SUBSCRIPTION_ID SUBSCRIPTION_NAME
+cat ./.azdo/pipelines/service-endpoint-config-template.json | envsubst > service_connection.json
+
+# Create the new service connection
+az devops service-endpoint create --service-endpoint-configuration ./service_connection.json
+
+# Clean up temp files
+rm service_connection.json
+```
+
+##### Test
+
+**Setup:** Set up the Test environment, pipeline, and service principal:
 ```bash
 azd env new $test_env
 azd pipeline config --principal-name $test_principal_name --provider azdo
+```
 
+**Post setup step #1:** Create a new federated credential in the Test Service Principal
+```bash
 echo '{"name": "'"${org}-${project}-${test_env}"'", "issuer": "'"${issuer}"'", "subject": "'"sc://${org}/${project}/${test_env}"'", "description": "'"${test_env}"' environment", "audiences": ["'"${audiences}"'"]}' > federated_id.json
 
-test_client_id=$(az ad sp list --display-name $test_principal_name --query "[].appId" --output tsv) # get client ID
+test_client_id=$(az ad sp list --display-name $test_principal_name --query "[].appId" --output tsv)
 
 az ad app federated-credential create --id $test_client_id --parameters ./federated_id.json
 
-# Post setup 2: Update the service connection name to match the environment name in the Azure DevOps Portal
+# delete the existing federated credential created by azd pipeline config
+federated_cred_id=$(az ad app federated-credential list --id $test_client_id --query "[?name=='AzureDevOpsOIDC'].id" --output tsv)
+az ad app federated-credential delete --id $test_client_id --federated-credential-id $federated_cred_id
+
+rm federated_id.json # clean up temp file
 ```
 
-#### Prod
+**Post setup step #2:** Create a new service connection for the Test environment
 
+```bash
+# First, delete the default service connection created by azd pipeline config
+service_connection_id=$(az devops service-endpoint list --query "[?name=='azconnection'].id" --output tsv)
+
+az devops service-endpoint delete --id $service_connection_id --yes
+
+# Next, configure the parameters for creating a service connection tied to the federated credential created in the previous step.
+NAME=$test_env
+PROJECT_ID=$(az devops project show --project $project --query "id" --output tsv)
+PROJECT_NAME=$project
+SERVICE_PRINCIPAL_ID=$test_client_id
+TENANT_ID=$(az ad sp show --id $test_client_id --query "appOwnerOrganizationId" --output tsv)
+SUBSCRIPTION_ID=$(az account show --query "id" --output tsv)
+SUBSCRIPTION_NAME=$(az account show --query "name" --output tsv)
+
+# Populate the JSON template with the variables
+export NAME PROJECT_ID PROJECT_NAME SERVICE_PRINCIPAL_ID TENANT_ID SUBSCRIPTION_ID SUBSCRIPTION_NAME
+cat ./.azdo/pipelines/service-endpoint-config-template.json | envsubst > service_connection.json
+
+# Create the new service connection
+az devops service-endpoint create --service-endpoint-configuration ./service_connection.json
+
+# Clean up temp files
+rm service_connection.json
+```
+
+##### Prod
+
+**Setup:** Set up the Prod environment, pipeline, and service principal:
 ```bash
 azd env new $prod_env
 azd pipeline config --principal-name $prod_principal_name --provider azdo
+```
 
+**Post setup step #1:** Create a new federated credential in the Prod Service Principal
+```bash
 echo '{"name": "'"${org}-${project}-${prod_env}"'", "issuer": "'"${issuer}"'", "subject": "'"sc://${org}/${project}/${prod_env}"'", "description": "'"${prod_env}"' environment", "audiences": ["'"${audiences}"'"]}' > federated_id.json
 
-prod_client_id=$(az ad sp list --display-name $prod_principal_name --query "[].appId" --output tsv) # get client ID
+prod_client_id=$(az ad sp list --display-name $prod_principal_name --query "[].appId" --output tsv)
 
 az ad app federated-credential create --id $prod_client_id --parameters ./federated_id.json
 
-# Post setup 2: Update the service connection name to match the environment name in the Azure DevOps Portal
-```
+# delete the existing federated credential created by azd pipeline config
+federated_cred_id=$(az ad app federated-credential list --id $prod_client_id --query "[?name=='AzureDevOpsOIDC'].id" --output tsv)
+az ad app federated-credential delete --id $prod_client_id --federated-credential-id $federated_cred_id
 
-Clean up the temporary files:
-
-```bash
 rm federated_id.json # clean up temp file
 ```
+
+**Post setup step #2:** Create a new service connection for the Prod environment
+
+```bash
+# First, delete the default service connection created by azd pipeline config
+service_connection_id=$(az devops service-endpoint list --query "[?name=='azconnection'].id" --output tsv)
+
+az devops service-endpoint delete --id $service_connection_id --yes
+
+# Next, configure the parameters for creating a service connection tied to the federated credential created in the previous step.
+NAME=$prod_env
+PROJECT_ID=$(az devops project show --project $project --query "id" --output tsv)
+PROJECT_NAME=$project
+SERVICE_PRINCIPAL_ID=$prod_client_id
+TENANT_ID=$(az ad sp show --id $prod_client_id --query "appOwnerOrganizationId" --output tsv)
+SUBSCRIPTION_ID=$(az account show --query "id" --output tsv)
+SUBSCRIPTION_NAME=$(az account show --query "name" --output tsv)
+
+# Populate the JSON template with the variables
+export NAME PROJECT_ID PROJECT_NAME SERVICE_PRINCIPAL_ID TENANT_ID SUBSCRIPTION_ID SUBSCRIPTION_NAME
+cat ./.azdo/pipelines/service-endpoint-config-template.json | envsubst > service_connection.json
+
+# Create the new service connection
+az devops service-endpoint create --service-endpoint-configuration ./service_connection.json
+
+# Clean up temp files
+rm service_connection.json
+```
+
+> [!NOTE]
+> The **"Post setup step #2"** actions above define several variables, populating them in a template JSON structure, found at `.azdo/pipelines/service-endpoint-config-template.json`. Read more about this approach [here](https://learn.microsoft.com/en-us/azure/devops/cli/service-endpoint?view=azure-devops#create-service-endpoint-using-configuration-file).
 
 > [!NOTE]
 > _Alternative approach to get the client IDs in the above steps:_
@@ -160,7 +295,8 @@ rm federated_id.json # clean up temp file
 > dev_client_id='<guid>' # manually assign the correct client ID
 > ```
 >
-> Also note you may also get the client IDs from the Azure Portal.
+> Also note you may get the client IDs from the Azure Portal.
+
 
 > [!NOTE]
 > The existing/unmodified federated credentials created by Azure Developer CLI in the Service Principals may be deleted.
@@ -178,12 +314,6 @@ azd env select $dev_env
 ## 2. Set up Azure DevOps Environments
 
 ### Environment setup
-
-Login to Azure DevOps (ensure you previously ran `az login`) and configure the default organization and project:
-
-```bash
-az devops configure --defaults organization=https://dev.azure.com/$org project=$project
-```
 
 Run `az devops` CLI commands to create the environments:
 
@@ -209,7 +339,7 @@ Once the pipeline YML file is committed to the repository and the environments a
 
 To do this in the Azure DevOps portal, navigate to the pipeline, edit the pipeline, open the variables menu, and delete the `AZURE_ENV_NAME` pipeline variable.
 
-You may alternately run the below command to delete the variable; ensure you replace the pipeline ID with the correct ID. You can find the pipeline ID by navigating to the pipeline in the Azure DevOps portal and looking at the URL.
+You may alternately run the below command to delete the variable; ensure you replace the pipeline ID with the correct ID. You can find the pipeline ID by navigating to the pipeline in the Azure DevOps portal and looking at the URL. This value is also printed out after running `azd pipeline config`, in the "Link to view your pipeline status".
 
 ```bash
 az pipelines variable delete --name 'AZURE_ENV_NAME' --pipeline-id <pipeline-id>
@@ -219,11 +349,15 @@ az pipelines variable delete --name 'AZURE_ENV_NAME' --pipeline-id <pipeline-id>
 
 - The following files in the `.azdo/pipelines` folder are used to deploy the infrastructure and services to Azure:
   - `azure-dev.yml`
-    - This is the main file that triggers the deployment workflow. The environment names are passed as inputs to the deploy job. These environment names are defined as variables within the .yml file, **which needs to be edited to match the environment names you created.** In this example, the environment name is also used as the service connection name. If you used different names for the environment name and service connection name, you will **also need to update the service connection parameter passed in each stage**.
-    - You may edit the trigger to suit your pipeline trigger needs.
+    - This is the main file that triggers the deployment workflow. The environment names are passed as inputs to the deploy job.
+    - > [!IMPORTANT]
+      > - The environment names are defined as variables within the .yml file, **which need to be edited to match the environment names you created.** In this example, the environment name is also used as the service connection name. If you used different names for the environment name and service connection name, you will **also need to update the service connection parameter passed in each stage**.
+      > - The `trigger` in this file is set to `none` to prevent the pipeline from running automatically. You can change this to `main` or `master` to trigger the pipeline on a push to the main branch.
   - `deploy-template.yml`
     - This is a template file invoked by `azure-dev.yml` that is used to deploy the infrastructure and services to Azure.
 
 # Additional Resources:
 
 - [Support multiple environments with `azd` (github.com)](https://github.com/jasontaylordev/todo-aspnetcore-csharp-sqlite/blob/main/OPTIONAL_FEATURES.md)
+- [Azure DevOps Services REST API Reference](https://learn.microsoft.com/en-us/rest/api/azure/devops/?view=azure-devops-rest-7.2)
+- [Azure DevOps CLI service endpoint](https://learn.microsoft.com/en-us/azure/devops/cli/service-endpoint?view=azure-devops)
