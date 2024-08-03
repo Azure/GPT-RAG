@@ -203,7 +203,7 @@ rm federated_id.json # clean up temp file
 - The following files in the `.github/workflows` folder are used to deploy the infrastructure and services to Azure:
   - `azure-dev.yml`
     - This is the main file that triggers the deployment workflow. The environment names are passed as inputs to the deploy job.
-    - > [!IMPORTANT]
+      > [!IMPORTANT]
       > - The environment names **need to be edited to match the environment names you created**.
       > - The `workflow_dispatch` in this file is set to trigger on push to a branch `none`. You may modify this to trigger on a specific branch or event.
   - `deploy-template.yml`
