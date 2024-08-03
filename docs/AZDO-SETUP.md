@@ -298,9 +298,6 @@ rm service_connection.json
 > Also note you may get the client IDs from the Azure Portal.
 
 
-> [!NOTE]
-> The existing/unmodified federated credentials created by Azure Developer CLI in the Service Principals may be deleted.
-
 After performing the above steps, you will see corresponding files to your azd environments in the `.azure` folder.
 
 If you run `azd env list`, you will see the newly created environments.
