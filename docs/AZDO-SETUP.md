@@ -95,14 +95,6 @@ audiences="api://AzureADTokenExchange"
 
 Next, you will create an `azd` environment per target environment alongside a pipeline definition. In this guide, pipeline definitions are created with `azd pipeline config`. Read more about azd pipeline config [here](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/configure-devops-pipeline?tabs=azdo). View the CLI documentation [here](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/reference#azd-pipeline-config).
 
-
-<!-- #### Define variables -->
-
-<!-- Before setting up the environment and pipeline, you first need to define some variables: -->
-
-
-
-<!-- #### Set up environments and pipelines -->
 Login to Azure and configure the default organization and project:
 
 ```bash
@@ -116,19 +108,6 @@ When running `azd pipeline config` for each environment, enter your organization
 
 > [!CAUTION]
 > If you choose 'Y' to commit and push your local changes, the pipeline will be triggered, and you may not have the necessary environments or variables set up yet, causing the pipeline to fail. The remaining setup steps must be completed before the pipeline will run successfully.
-
-<!-- > [!IMPORTANT]
-> **Creating a distinct service connection per service principal:** The `azd pipeline config` command will create the service principal and associated service connection, and the service connection will _always_ be created with the name `azconnection`, however, in this example, a distinctly named service connection per environment is required. To fix this, after **each** `azd pipeline config` command is run, you will need to perform 2 post-setup actions to reconfigure the service principal and newly created service connection:
->
-> ##### Post setup step #1: Create a new federated credential
-> Each section below includes a _Post setup step #1_ code snippet, wherein 3 commands are executed to create a  [federated credential with an environment-specific subject identifier](https://learn.microsoft.com/en-us/azure/devops/pipelines/release/configure-workload-identity?view=azure-devops#create-a-managed-identity) in the newly created service principal. _In this example, a `subject_identifier_suffix` variable will be used to construct the subject identifier. For the purposes of this example, this suffix will be configured as the name of the environment just created. You may use whatever value you like, but the value you choose must be also be used in the following post-setup step._
-> ##### Post setup step #2: Update the service connection name
-> [Update the service connection](https://learn.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops#edit-a-service-connection) name to be the value of the `subject_identifier_suffix` variable used in the previous step (in this example, this is the name of the environment). This will be done in the Azure DevOps web app:
-> 
-> 1. [Open your service connections](https://learn.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops#view-a-service-connection)
-> 2. Click on the `azconnection` service connection
-
-You may get a warning when you do this - choose 'Keep as draft', then 'Finish setup', then 'Verify and save'. -->
 
 ##### Dev
 
