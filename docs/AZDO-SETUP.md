@@ -2,6 +2,9 @@
 
 This document outlines the steps to set up a multi-environment workflow to deploy infrastructure and services to Azure using Azure Pipelines, taking the solution from proof of concept to production-ready.
 
+> [!NOTE]
+> Note that additional steps not currently covered in this guide may be required when working with the Zero Trust Architecture Deployment to handle deploying to a network-isolated environment.
+
 # Assumptions:
 
 - This example assumes you have an Azure DevOps Organization and Project already set up.
@@ -29,7 +32,6 @@ This document outlines the steps to set up a multi-environment workflow to deplo
 - Personnel with the following access levels:
   - In Azure: Either Owner role or Contributor + User Access Administrator roles within the Azure subscription, which provides the ability to create and assign roles to a Service Principal
   - In Azure DevOps: Ability create and manage [Service Connections](https://learn.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops), contribute to repository, create and manage pipelines, and Administrator access on [Default agent pool](https://learn.microsoft.com/en-us/azure/devops/pipelines/policies/permissions?view=azure-devops#set-agent-pool-security-in-azure-pipelines)
-- The codebase needs to exist in Azure Repos and you need to have it cloned locally.
 
 # Steps:
 
