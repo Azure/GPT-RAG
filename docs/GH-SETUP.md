@@ -2,6 +2,9 @@
 
 This document outlines the steps to set up a multi-environment workflow to deploy infrastructure and services to Azure using GitHub Actions, taking the solution from proof of concept to production-ready.
 
+> [!NOTE]
+> Note that additional steps not currently covered in this guide may be required when working with the Zero Trust Architecture Deployment to handle deploying to a network-isolated environment.
+
 # Assumptions:
 
 - This example assumes you're using a GitHub organization with GitHub environments
@@ -32,7 +35,6 @@ This document outlines the steps to set up a multi-environment workflow to deplo
 - Personnel with the following access levels:
   - In Azure: Either Owner role or Contributor + User Access Administrator roles within the Azure subscription, which provides the ability to create and assign roles to a Service Principal
   - In GitHub: Repository owner access, which provides the ability to create environments and variables/secrets
-- The codebase needs to exist in a GitHub repository and you need to have it cloned locally.
 
 # Steps:
 

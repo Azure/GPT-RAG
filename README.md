@@ -164,6 +164,9 @@ The deployment process outlined in the Getting Started section sets up Azure res
 
 If you're looking to expand your data retrieval capabilities by adding new data sources, consider integrating Bing Custom Search, SQL Server, and Teradata. For more information, refer to the [AI Integration Hub](docs/AI_INTEGRATION_HUB.md) page.
 
+## Multi-Environment Deployment
+Once you've successfully deployed the GPT-RAG solution as a proof of concept and you're ready to formalize the deployment using a proper CI/CD process to accelerate your deployment to production, refer to the multi-environment deployment guides for either [Azure DevOps](./docs/AZDO-SETUP.md) or [GitHub](./docs/GH-SETUP.md).
+
 ## Additional Resources
 
 ### Troubleshooting
