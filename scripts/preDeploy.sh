@@ -5,7 +5,6 @@ if [ "$AZURE_ZERO_TRUST" = "TRUE" ]; then
     echo -n "Zero Trust Infrastructe enabled. Confirm you are using a connection where resources are reachable (like VM+Bastion)? [Y/n]: "
     read confirmation
 
-    # TODO - remove/allow preconfiguration of this for automated deployments
     # Check if the confirmation is positive
     if [ "$confirmation" != "Y" ] && [ "$confirmation" != "y" ] && [ -n "$confirmation" ]; then
         exit 1

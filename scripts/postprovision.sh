@@ -22,7 +22,6 @@ if [ "$AZURE_ZERO_TRUST" = "FALSE" ]; then
     exit 0
 fi
 
-# TODO - remove/allow preconfiguration of this for automated deployments
 echo "For accessing the ${YELLOW}Zero Trust infrastructure${NC}, from the Azure Portal:"
 echo "Virtual Machine: ${BLUE}$AZURE_VM_NAME${NC}"
 echo "Select connect using Bastion with:"
