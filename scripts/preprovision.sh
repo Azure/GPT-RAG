@@ -25,7 +25,6 @@ if [ "$AZURE_NETWORK_ISOLATION" -ge 1 ] 2>/dev/null || [ "$AZURE_NETWORK_ISOLATI
     echo " - After provisioning, you need to switch to the ${GREEN}VirtualMachine & Bastion${NC} to continue deploying components."
     echo " - Infrastucture will be only reachable from within the Bastion host."
 
-    # TODO - remove/allow preconfiguration of this for automated deployments
     # Prompt for user confirmation
     echo -n "${BLUE}?${NC} Continue with Zero Trust provisioning? [Y/n]: "
     read confirmation

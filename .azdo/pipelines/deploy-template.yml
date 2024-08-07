@@ -9,11 +9,8 @@ parameters:
     displayName: "Azure Service Connection Name"
 
 steps:
-  # - task: setup-azd@0
-  #   displayName: Install azd
   - checkout: self
 
-  # If you can't install above task in your organization, you can comment it and uncomment below task to install azd
   - task: Bash@3
     displayName: Install azd
     inputs:

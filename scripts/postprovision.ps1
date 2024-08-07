@@ -18,7 +18,6 @@ if ($env:AZURE_ZERO_TRUST -eq "FALSE") {
     exit 0
 }
 
-# TODO - remove/allow preconfiguration of this for automated deployments
 Write-Host "For accessing the Zero Trust infrastructure, from the Azure Portal:"
 Write-Host "Virtual Machine: $($env:AZURE_VM_NAME)"
 Write-Host "Select connect using Bastion with:"

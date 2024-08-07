@@ -14,7 +14,6 @@ if ($env:AZURE_NETWORK_ISOLATION -match '^[1-9][0-9]*$' -or $env:AZURE_NETWORK_I
     # Prompt for user confirmation
     $confirmation = Read-Host "Continue with the script? [Y/n]: "
 
-    # TODO - remove/allow preconfiguration of this for automated deployments
     # Check if the confirmation is positive
     if ($confirmation -ne "Y" -and $confirmation -ne "y" -and $confirmation) {
         exit 1
