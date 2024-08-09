@@ -3,7 +3,7 @@
 This document outlines the steps to set up a multi-environment workflow to deploy infrastructure and services to Azure using GitHub Actions, taking the solution from proof of concept to production-ready.
 
 > [!NOTE]
-> Note that additional steps not currently covered in this guide may be required when working with the Zero Trust Architecture Deployment to handle deploying to a network-isolated environment.
+> Note that additional steps may be required when working with the Zero Trust Architecture Deployment to handle deploying to a network-isolated environment.
 
 # Assumptions:
 

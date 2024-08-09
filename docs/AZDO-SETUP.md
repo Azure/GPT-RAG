@@ -3,7 +3,7 @@
 This document outlines the steps to set up a multi-environment workflow to deploy infrastructure and services to Azure using Azure Pipelines, taking the solution from proof of concept to production-ready.
 
 > [!NOTE]
-> Note that additional steps not currently covered in this guide may be required when working with the Zero Trust Architecture Deployment to handle deploying to a network-isolated environment.
+> Note that additional steps may be required when working with the Zero Trust Architecture Deployment to handle deploying to a network-isolated environment.
 
 # Assumptions:
 
@@ -72,6 +72,9 @@ Then, get a personal access token (PAT) from Azure DevOps and set the AZURE_DEVO
 ```
 export AZURE_DEVOPS_EXT_PAT=<your-pat>
 ```
+
+> [!CAUTION]
+> Do _not_ check your PAT into source control.
 
 Then, get the GUID of your Azure DevOps organization. This will be used when setting the [issuer field for the federated credential](https://learn.microsoft.com/en-us/azure/devops/pipelines/release/configure-workload-identity?view=azure-devops#create-a-managed-identity) in a later step. In this example, we will retrieve the GUID through the browser, but you may also develop a more sophisticated method to retrieve the GUID using the [Azure DevOps Accounts REST API](https://learn.microsoft.com/en-us/rest/api/azure/devops/account/accounts/list?view=azure-devops-rest-7.1&tabs=HTTP) (The Accounts API requires an [OAuth 2 token](https://learn.microsoft.com/en-us/azure/devops/integrate/get-started/authentication/oauth?view=azure-devops) for authorization, setup of which is not covered in this guide).
 
