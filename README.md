@@ -70,8 +70,16 @@ azd init -t azure/gpt-rag
 
 **2** Login to Azure:
 
+**2.a** Azure Developer CLI:
+
 ```sh
 azd auth login
+```
+
+**2.b** Azure CLI:
+
+```sh
+az login
 ```
 
 **3** Start Building the infrastructure and components deployment:
@@ -109,8 +117,16 @@ azd env set AZURE_NETWORK_ISOLATION true
  
 **3** Login to Azure:
 
+**2.a** Azure Developer CLI:
+
 ```sh
 azd auth login
+```
+
+**2.b** Azure CLI:
+
+```sh
+az login
 ```
 
 **4** Start Building the infrastructure and components deployment:
