@@ -32,6 +32,7 @@ This document outlines the steps to set up a multi-environment workflow to deplo
 - Personnel with the following access levels:
   - In Azure: Either Owner role or Contributor + User Access Administrator roles within the Azure subscription, which provides the ability to create and assign roles to a Service Principal
   - In Azure DevOps: Ability create and manage [Service Connections](https://learn.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops), contribute to repository, create and manage pipelines, and Administrator access on [Default agent pool](https://learn.microsoft.com/en-us/azure/devops/pipelines/policies/permissions?view=azure-devops#set-agent-pool-security-in-azure-pipelines)
+- The repository/respositories are cloned to your local machine
 
 # Steps:
 
@@ -267,6 +268,9 @@ az devops service-endpoint create --service-endpoint-configuration ./service_con
 rm service_connection.json
 ```
 
+> [!TIP]
+> Verify that the variables in the above steps are set by printing them out with `echo $<env>_client_id`.
+
 > [!NOTE]
 > The **"Post setup step #2"** actions above define several variables, populating them in a template JSON structure, found at `.azdo/pipelines/service-endpoint-config-template.json`. Read more about this approach [here](https://learn.microsoft.com/en-us/azure/devops/cli/service-endpoint?view=azure-devops#create-service-endpoint-using-configuration-file).
 
@@ -326,6 +330,8 @@ You may alternately run the below command to delete the variable; ensure you rep
 az pipelines variable delete --name 'AZURE_ENV_NAME' --pipeline-id <pipeline-id>
 ```
 
+
+
 ## 3. Modify the workflow files as needed for deployment
 
 > [!IMPORTANT]
@@ -337,6 +343,10 @@ az pipelines variable delete --name 'AZURE_ENV_NAME' --pipeline-id <pipeline-id>
     - This is the main file that triggers the deployment workflow. The environment names are passed as inputs to the deploy job.
   - `deploy-template.yml`
     - This is a template file invoked by `azure-dev.yml` that is used to deploy the infrastructure and services to Azure.
+
+## 4. Customization for your Enterprise
+
+This end-to-end DevOps guide serves as a proof of concept of how to deploy your code to multiple environments and promote your code into production rapidly, just as the core RAG solution in this guide is intended to prove an end-to-end architecture with a frontend, orchestrator, and data ingestion service. In the case of both this DevOps guide and the core RAG solution, you will likely want to customize the code and workflows to fit your enterprise's specific needs. For example, you may want to add additional tests, security checks, or other steps to the workflow. You may also have a different Git branching or deployment strategy that necessitates changes to the workflows.
 
 # Additional Resources:
 

@@ -14,23 +14,29 @@ permissions:
   id-token: write
   contents: read
 
+env:
+  # edit these to match the names of your environments
+  dev_env: <dev_env_name>
+  test_env: <test_env_name>
+  prod_env: <prod_env_name>
+
 jobs:
   deploy-dev:
     uses: ./.github/workflows/deploy-template.yml
     secrets: inherit
     with:
-      AZURE_ENV_NAME: dev2 # edit this to match your environment name
+      AZURE_ENV_NAME: $dev_env
 
   deploy-test:
     uses: ./.github/workflows/deploy-template.yml
     secrets: inherit
     needs: [deploy-dev]
     with:
-      AZURE_ENV_NAME: test2 # edit this to match your environment name
+      AZURE_ENV_NAME: $test_env
 
   deploy-prod:
     uses: ./.github/workflows/deploy-template.yml
     secrets: inherit
     needs: [deploy-test]
     with:
-      AZURE_ENV_NAME: prod2 # edit this to match your environment name
+      AZURE_ENV_NAME: $prod_env
