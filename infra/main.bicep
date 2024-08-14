@@ -286,9 +286,9 @@ var _appServiceRuntimeVersion = !empty(appServiceRuntimeVersion) ? appServiceRun
 // Azure OpenAI settings
 
 @description('GPT model used to answer user questions. Don\'t forget to check region availability.')
-// @allowed([ 'gpt-35-turbo','gpt-35-turbo-16k', 'gpt-4', 'gpt-4-32k' ])
+// @allowed([ 'gpt-35-turbo','gpt-35-turbo-16k', 'gpt-4', 'gpt-4-32k', 'gpt-4o' ])
 param chatGptModelName string = ''
-var _chatGptModelName = !empty(chatGptModelName) ? chatGptModelName : 'gpt-35-turbo'
+var _chatGptModelName = !empty(chatGptModelName) ? chatGptModelName : 'gpt-4o'
 
 @description('GPT model deployment type.')
 // @allowed([ 'Standard', 'Provisioned-Managed', 'Global-Standard'])
@@ -296,9 +296,9 @@ param chatGptModelDeploymentType string = ''
 var _chatGptModelDeploymentType = !empty(chatGptModelDeploymentType) ? chatGptModelDeploymentType : 'Standard'
 
 @description('GPT model version.')
-// @allowed([ '0613', '1106', '1106-Preview', '0125-preview', 'turbo-2024-04-09'])
+// @allowed([ '0613', '1106', '1106-Preview', '0125-preview', 'turbo-2024-04-09', '2024-05-13'])
 param chatGptModelVersion string = ''
-var _chatGptModelVersion = !empty(chatGptModelVersion) ? chatGptModelVersion : '0613'
+var _chatGptModelVersion = !empty(chatGptModelVersion) ? chatGptModelVersion : '2024-05-13'
 
 @description('GPT model deployment name.')
 param chatGptDeploymentName string = ''
