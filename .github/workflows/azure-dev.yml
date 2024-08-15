@@ -33,4 +33,4 @@ jobs:
     secrets: inherit
     needs: [deploy-test]
     with:
-      AZURE_ENV_NAME: EDIT-ghprod # edit to match the name of your environmen
+      AZURE_ENV_NAME: EDIT-ghprod # edit to match the name of your environment
