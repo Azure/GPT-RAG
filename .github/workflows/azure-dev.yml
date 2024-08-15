@@ -16,9 +16,12 @@ permissions:
 
 env:
   # edit these to match the names of your environments
-  dev_env: <dev_env_name>
-  test_env: <test_env_name>
-  prod_env: <prod_env_name>
+  # dev_env: <dev_env_name>
+  # test_env: <test_env_name>
+  # prod_env: <prod_env_name>
+  dev_env: ghdev
+  test_env: ghtest
+  prod_env: ghprod
 
 jobs:
   deploy-dev:
