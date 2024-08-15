@@ -35,6 +35,7 @@ This document outlines the steps to set up a multi-environment workflow to deplo
 - Personnel with the following access levels:
   - In Azure: Either Owner role or Contributor + User Access Administrator roles within the Azure subscription, which provides the ability to create and assign roles to a Service Principal
   - In GitHub: Repository owner access, which provides the ability to create environments and variables/secrets
+- The repository/respositories are cloned to your local machine
 
 # Steps:
 
@@ -139,6 +140,9 @@ gh api --method PUT -H "Accept: application/vnd.github+json" repos/$org/$repo/en
 
 Configure the repository and environment variables: Delete the `AZURE_CLIENT_ID` and `AZURE_ENV_NAME` variables at the repository level as they aren't needed and only represent what was set for the environment you created last. `AZURE_CLIENT_ID` will be reconfigured at the environment level, and `AZURE_ENV_NAME` will be passed as an input to the deploy job.
 
+> [!IMPORTANT]
+> At a minimum, the `AZURE_CLIENT_ID` variable must be set at the environment level for each environment. If you would like to set up additional variables at the environment level, you may do so by using an approach similar to the one described in this section. For example, if you want to use a different subscription for each environment, `AZURE_SUBSCRIPTION_ID` should be deleted at the repository level and recreated at the environment level. If you want to use a different location for each environment, `AZURE_LOCATION` should be deleted at the repository level and recreated at the environment level.
+
 ```bash
 gh variable delete AZURE_CLIENT_ID
 gh variable delete AZURE_ENV_NAME
@@ -152,12 +156,15 @@ test_client_id=$(az ad sp list --display-name $test_principal_name --query "[].a
 prod_client_id=$(az ad sp list --display-name $prod_principal_name --query "[].appId" --output tsv)
 ```
 
+> [!TIP]
+> Verify that the variables are set by printing them out with `echo $<env>_client_id`.
+
 > [!NOTE]
 > _Alternative approach to get the client IDs in the above steps:_
 > In the event that there are multiple Service Principals containing the same name, the `az ad sp list` command executed above may not pull the correct ID. You may execute an alternate command to manually review the list of Service Principals by name and ID. The command to do this is exemplified below for the dev environment.
 >
 > ```bash
-> az ad sp list --display-name $dev_principal_name --query "[].{DisplayName:displayName, > AppId:appId}" --output table # return results in a table format
+> az ad sp list --display-name $dev_principal_name --query "[].{DisplayName:displayName, AppId:appId}" --output table # return results in a table format
 > dev_client_id='<guid>' # manually assign the correct client ID
 > ```
 >
@@ -172,7 +179,7 @@ gh variable set AZURE_CLIENT_ID -b $prod_client_id -e $prod_env
 ```
 
 > [!TIP]
-> After environments are created, consider setting up deployment protection rules for each environment. See [this article](https://docs.github.com/en/actions/administering-github-actions/managing-environments-for-deployment#deployment-protection-rules) for more.
+> After environments are created, set up deployment protection rules for each environment. See [this article](https://docs.github.com/en/actions/administering-github-actions/managing-environments-for-deployment#deployment-protection-rules) for more. While approvers are not always necessary on the development environment, they are crucial for all other environments.
 
 > [!NOTE]
 > If you want to manage and authenticate with a client secret rather than using federated identity, you would need to create a secret for each Service Principal, store it as an environment secret in GitHub, and modify the workflow to use the secret for authentication. This is not covered in this example. If you choose to use a client secret, you may skip 3.
@@ -203,7 +210,7 @@ rm federated_id.json # clean up temp file
 ## 4. Modify the workflow files as needed for deployment
 
 > [!IMPORTANT]
-> - The environment names in the below described `azure-dev.yml` **need to be edited to match the environment names you created**.
+> - The environment names in the below described `azure-dev.yml` **need to be edited to match the environment names you created**. In the file, these values are passed into the template as the `AZURE_ENV_NAME`, with a comment stating `edit to match the name of your environment`. _If you don't edit these values, the workflow will not work properly_.
 > - The `workflow_dispatch` in the `azure-dev.yml` file is set to trigger on push to a branch `none`. You may modify this to trigger on a specific branch or event.
 
 - The following files in the `.github/workflows` folder are used to deploy the infrastructure and services to Azure:
@@ -211,6 +218,12 @@ rm federated_id.json # clean up temp file
     - This is the main file that triggers the deployment workflow. The environment names are passed as inputs to the deploy job.
   - `deploy-template.yml`
     - This is a template file invoked by `azure-dev.yml` that is used to deploy the infrastructure and services to Azure. This file needs to be edited if you are using client secret authentication.
+
+## 5. Customization for your Enterprise
+
+This end-to-end DevOps guide serves as a proof of concept of how to deploy your code to multiple environments and promote your code into production rapidly, just as the core RAG solution in this guide is intended to prove an end-to-end architecture with a frontend, orchestrator, and data ingestion service.
+
+In the case of both this DevOps guide and the core RAG solution, you will likely want to customize the code and workflows to fit your enterprise's specific needs. For example, you may want to add additional tests, security checks, or other steps to the workflow. You may also have a different Git branching or deployment strategy that necessitates changes to the workflows. From a design perspective, you may choose to modularize the the workflows differently, or inject naming conventions or other enterprise-specific standards.
 
 # Additional Resources:
 

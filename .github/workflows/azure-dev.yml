@@ -19,18 +19,18 @@ jobs:
     uses: ./.github/workflows/deploy-template.yml
     secrets: inherit
     with:
-      AZURE_ENV_NAME: dev2 # edit this to match your environment name
+      AZURE_ENV_NAME: EDIT-dev # edit to match the name of your environment
 
   deploy-test:
     uses: ./.github/workflows/deploy-template.yml
     secrets: inherit
     needs: [deploy-dev]
     with:
-      AZURE_ENV_NAME: test2 # edit this to match your environment name
+      AZURE_ENV_NAME: EDIT-test # edit to match the name of your environment
 
   deploy-prod:
     uses: ./.github/workflows/deploy-template.yml
     secrets: inherit
     needs: [deploy-test]
     with:
-      AZURE_ENV_NAME: prod2 # edit this to match your environment name
+      AZURE_ENV_NAME: EDIT-ghprod # edit to match the name of your environment
