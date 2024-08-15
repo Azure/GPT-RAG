@@ -330,8 +330,6 @@ You may alternately run the below command to delete the variable; ensure you rep
 az pipelines variable delete --name 'AZURE_ENV_NAME' --pipeline-id <pipeline-id>
 ```
 
-
-
 ## 3. Modify the workflow files as needed for deployment
 
 > [!IMPORTANT]
