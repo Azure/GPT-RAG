@@ -8,8 +8,7 @@ on:
     branches:
       # - main
       # - master
-      # - none
-      - dev
+      - none
 
 permissions:
   id-token: write
@@ -20,18 +19,18 @@ jobs:
     uses: ./.github/workflows/deploy-template.yml
     secrets: inherit
     with:
-      AZURE_ENV_NAME: ghdev # edit to match the name of your environment
+      AZURE_ENV_NAME: EDIT-dev # edit to match the name of your environment
 
   deploy-test:
     uses: ./.github/workflows/deploy-template.yml
     secrets: inherit
     needs: [deploy-dev]
     with:
-      AZURE_ENV_NAME: ghtest # edit to match the name of your environment
+      AZURE_ENV_NAME: EDIT-test # edit to match the name of your environment
 
   deploy-prod:
     uses: ./.github/workflows/deploy-template.yml
     secrets: inherit
     needs: [deploy-test]
     with:
-      AZURE_ENV_NAME: ghprod # edit to match the name of your environmen
+      AZURE_ENV_NAME: EDIT-ghprod # edit to match the name of your environmen
