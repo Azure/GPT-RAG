@@ -269,7 +269,7 @@ rm service_connection.json
 ```
 
 > [!TIP]
-> Verify that the variables in the above steps are set by printing them out with `echo $<env>_client_id`.
+> Verify that the variables in the above steps are set by printing them out with the `echo` command.
 
 > [!NOTE]
 > The **"Post setup step #2"** actions above define several variables, populating them in a template JSON structure, found at `.azdo/pipelines/service-endpoint-config-template.json`. Read more about this approach [here](https://learn.microsoft.com/en-us/azure/devops/cli/service-endpoint?view=azure-devops#create-service-endpoint-using-configuration-file).
