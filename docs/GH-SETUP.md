@@ -210,7 +210,7 @@ rm federated_id.json # clean up temp file
 ## 4. Modify the workflow files as needed for deployment
 
 > [!IMPORTANT]
-> - The environment names in the below described `azure-dev.yml` **need to be edited to match the environment names you created**. In the file, these variables are set in the `env` block, with a comment stating `edit these to match the names of your environments`.
+> - The environment names in the below described `azure-dev.yml` **need to be edited to match the environment names you created**. In the file, these values are passed into the template as the `AZURE_ENV_NAME`, with a comment stating `edit to match the name of your environment`. _If you don't edit these values, the workflow will not work properly_.
 > - The `workflow_dispatch` in the `azure-dev.yml` file is set to trigger on push to a branch `none`. You may modify this to trigger on a specific branch or event.
 
 - The following files in the `.github/workflows` folder are used to deploy the infrastructure and services to Azure:
