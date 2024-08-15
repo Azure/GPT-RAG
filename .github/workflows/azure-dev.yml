@@ -8,7 +8,8 @@ on:
     branches:
       # - main
       # - master
-      - none
+      # - none
+      - dev
 
 permissions:
   id-token: write
