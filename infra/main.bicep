@@ -286,7 +286,7 @@ var _appServiceRuntimeVersion = !empty(appServiceRuntimeVersion) ? appServiceRun
 // Azure OpenAI settings
 
 @description('GPT model used to answer user questions. Don\'t forget to check region availability.')
-// @allowed([ 'gpt-35-turbo','gpt-35-turbo-16k', 'gpt-4', 'gpt-4-32k', 'gpt-4o' ])
+// @allowed([ 'gpt-35-turbo','gpt-35-turbo-16k', 'gpt-4', 'gpt-4-32k', 'gpt-4o', 'gpt-4o-mini' ])
 param chatGptModelName string = ''
 var _chatGptModelName = !empty(chatGptModelName) ? chatGptModelName : 'gpt-4o'
 

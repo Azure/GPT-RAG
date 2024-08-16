@@ -99,7 +99,7 @@ Upload your documents to the 'documents' folder located in the storage account. 
 
 For more secure and isolated deployments, you can opt for the Zero Trust architecture. This architecture is ideal for production environments where network isolation and stringent security measures are highly valued.
 
- ![Zero Trust Architecture](media/architecture-GPT-RAG-ZeroTrust.png)
+ ![Zero Trust Architecture](media/architecture-GPT-RAG-ZeroTrust-LZ.png)
 
 Deploying the Zero Trust architecture follows a similar procedure to the Basic Architecture deployment, but includes some additional steps. Refer to the instructions below for a detailed guide on deploying this option: 
    
