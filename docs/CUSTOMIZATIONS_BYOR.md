@@ -9,7 +9,6 @@ Let's delve deeper into the general process of integrating existing resources in
 **Pre-requisites**:
 
 - AI Services resource created in the same subscription you will deploy Enterprise RAG.
-- Gpt-rag downloaded and initialized from the official repo `azd init -t azure/gpt-rag` or from you own forked/copied git repo by using `git clone` then `azd init`.
 
 **General Instruction Steps**:
 
@@ -94,7 +93,7 @@ Additionally, the original resource must have two deployments, one for a GPT mod
 
 Ensure the embeddings model is **text-embedding-ada-002** version 2, with the deployment named **text-embedding-ada-002**.
 
-The default GPT model is **gpt-3.5-turbo** and the default deployment name is **chat**. If you're using the pre-created service with these default settings, no further modifications are required.
+The default GPT model is **gpt-4o** and the default deployment name is **chat**. If you're using the pre-created service with these default settings, no further modifications are required.
 
 However, if you're using a different name for the GPT, or a different model, you'll need to set the corresponding environment variables as shown in the table below.
 

@@ -15,7 +15,7 @@ You will also need the following permissions:
 * Role: Owner or Contributor + User Access Administrator
 * Scope: Resource group or Subscription
 
-## Resources you will create
+## Resources List
 
 Here is the complete list of resources for a standard Zero Trust deployment, including descriptions and SKUs. These defaults have been extensively tested in the automated installation. You can adjust them during manual installation to suit your needs, considering usage factors like user volume and data.
 
@@ -292,13 +292,10 @@ Gather Necessary Information:
         - Storage Account (Documents) Private Endpoint
 
 11. **Permissions**
-    - Assign permissions to the Managed Identities of various components in Azure.
+    - Assign permissions to the Managed Identities of various components in Azure. In each item, sample commands are provided to assign these roles; please use them by replacing the variables with the values specific to your environment.
 
     - **Storage Account**
-        - Assign Storage Account "Storage Blob Data Reader" role to the Managed Identities of these services:
-            - Frontend App Service
-            - Data Ingestion Function App
-        - Sample command:            
+        - Assign Storage Account "Storage Blob Data Reader" role to the Frontend App Service Managed Identity.          
         ```
         az role assignment create \
             --assignee $principalId \
@@ -306,12 +303,19 @@ Gather Necessary Information:
             --scope "/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$storageAccountName"
         ```
 
+        - Assign Storage Account "Storage Blob Data Reader" role to the Data Ingestion Function App Identity.        
+        ```
+        az role assignment create \
+            --assignee $principalId \
+            --role "Storage Blob Data Contributor" \
+            --scope "/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$storageAccountName"
+        ```
+
     - **Key Vault**
-        - Assign Key Vault "Key Vault Secrets User" role to the Managed Identities of the following Apps:
+        - Assign Key Vault "Key Vault Secrets User" role to the Identities of the following Apps:
             - Orchestrator Function App
             - Data Ingestion Function App
             - Frontend App Service
-        - Sample command:
         ```
         az role assignment create \
             --assignee $principalId \
@@ -321,7 +325,6 @@ Gather Necessary Information:
 
     - **Cosmos DB**
         - Assign Cosmos DB "Cosmos DB Built-in Data Contributor" role to Orchestrator's Managed Identity.
-        - Sample command:
         ```
         az cosmosdb sql role assignment create \
             --account-name $cosmosDbAccountName \
@@ -330,10 +333,9 @@ Gather Necessary Information:
             --scope "/" \
             --principal-id $principalId
         ```
-    
+
     - **Azure AI Search**
         - Assign AI Search "Search Index Data Reader" role to Orchestrator's Managed Identity.
-        - Sample command:
         ```    
             az role assignment create \
                 --assignee $principalId \
@@ -342,10 +344,9 @@ Gather Necessary Information:
         ```
 
     - **Azure OpenAI**
-        - Assign Azure OpenAI "Cognitive Services OpenAI User" role to the Managed Identities of the following Apps:
+        - Assign Azure OpenAI "Cognitive Services OpenAI User" role to the Identities of the following Apps:
             - Orchestrator Function App
             - Data Ingestion Function App
-        - Sample command:
         ```    
             az role assignment create \
                 --assignee $principalId \
@@ -357,7 +358,6 @@ Gather Necessary Information:
         - Assign AI Services "Cognitive Services Contributor" role to the Managed Identities of the following Apps:
             - Frontend App Service
             - Data Ingestion Function App
-        - Sample command:
         ```    
             az role assignment create \
               --assignee $principalId \
@@ -370,7 +370,6 @@ Gather Necessary Information:
             - Orchestrator Function App
             - Data Ingestion Function App
             - Frontend App Service
-        - Sample command:
         ```
             az role assignment create \
                 --assignee $principalId \
@@ -379,15 +378,16 @@ Gather Necessary Information:
         ```
 
 12. **Application Settings**
-    - The applications (orchestrator, data ingestion, and frontend web app) use information obtained from environment variables. These variables are stored as App Settings in each application. When using the automated procedure, you don't need to worry about this. However, for the manual procedure, you'll need to set these variables manually. [Click here to see an example](MANUAL_ENVIRONMENT.md) of how to set these variables using the Azure CLI. You will need to adjust the commands to correctly reflect the names of your applications and parameters.
+    - The applications (orchestrator, data ingestion, and frontend web app) use information obtained from environment variables. These variables are stored as App Settings in each application. When using the automated procedure, you don't need to worry about this. However, for the manual procedure, you'll need to set these variables manually. 
+    - [Click here to see an example](MANUAL_ENVIRONMENT.md) of how to set these variables using the Azure CLI. You will need to adjust the commands to correctly reflect the names of your applications and parameters.
 
 13. **Application Deployment**
 
-    - After provisioning all the resources and configuring the application settings, you’re ready to deploy each application.
-    - Firt clone the repositories for each application.
+    - Once resources are provisioned and settings configured, you’re ready to deploy each application.
+    - First clone the repositories for each application.
     - For the Orchestrator Function App and Data Ingestion Function App:
       - In VSCode with the [Azure Function App Extension](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurefunctions), go to the *Azure* panel, locate your Function App in the resource explorer, right-click on it, and select *Deploy*.
-    - For the App Service Frontend refer to the deployment section in the frontend repository (https://github.com/Azure/gpt-rag-frontend#deploy-quickstart) to perform the deployment.
+    - For the App Service Frontend deployment refer to the deployment section in the [frontend repo](https://github.com/Azure/gpt-rag-frontend#deploy-quickstart).
 
 14. **External Access**
     - To allow internet access to your app, permit access only from [Azure Front Door](https://learn.microsoft.com/en-us/azure/frontdoor/create-front-door-portal) to your App Service.
