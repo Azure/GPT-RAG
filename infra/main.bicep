@@ -187,7 +187,7 @@ var _vnetName = _azureReuseConfig.vnetReuse ? _azureReuseConfig.existingVnetName
 
 @description('Address space for the virtual network')
 param vnetAddress string = ''
-var _vnetAddress = !empty(vnetAddress) ? vnetAddress : '10.0.0.0/16'
+var _vnetAddress = !empty(vnetAddress) ? vnetAddress : '10.0.0.0/24'
 
 @description('Name of the AI services subnet')
 param aiSubnetName string = ''
@@ -195,7 +195,7 @@ var _aiSubnetName = !empty(aiSubnetName) ? aiSubnetName : 'ai-subnet'
 
 @description('Address prefix for the AI services subnet')
 param aiSubnetPrefix string = ''
-var _aiSubnetPrefix = !empty(aiSubnetPrefix) ? aiSubnetPrefix : '10.0.1.0/24'
+var _aiSubnetPrefix = !empty(aiSubnetPrefix) ? aiSubnetPrefix : '10.0.0.0/28'
 
 @description('Name of the Bastion subnet')
 param bastionSubnetName string = ''
@@ -203,7 +203,7 @@ var _bastionSubnetName = !empty(bastionSubnetName) ? bastionSubnetName : 'AzureB
 
 @description('Address prefix for the Bastion subnet')
 param bastionSubnetPrefix string = ''
-var _bastionSubnetPrefix = !empty(bastionSubnetPrefix) ? bastionSubnetPrefix : '10.0.2.0/24'
+var _bastionSubnetPrefix = !empty(bastionSubnetPrefix) ? bastionSubnetPrefix : '10.0.0.64/28'
 
 @description('Name of the App Integration subnet')
 param appIntSubnetName string = ''
@@ -211,7 +211,7 @@ var _appIntSubnetName = !empty(appIntSubnetName) ? appIntSubnetName : 'app-int-s
 
 @description('Address prefix for the App Integration subnet')
 param appIntSubnetPrefix string = ''
-var _appIntSubnetPrefix = !empty(appIntSubnetPrefix) ? appIntSubnetPrefix : '10.0.3.0/24'
+var _appIntSubnetPrefix = !empty(appIntSubnetPrefix) ? appIntSubnetPrefix : '10.0.0.48/28'
 
 @description('Name of the App Services subnet')
 param appServicesSubnetName string = ''
@@ -219,7 +219,7 @@ var _appServicesSubnetName = !empty(appServicesSubnetName) ? appServicesSubnetNa
 
 @description('Address prefix for the App Services subnet')
 param appServicesSubnetPrefix string = ''
-var _appServicesSubnetPrefix = !empty(appServicesSubnetPrefix) ? appServicesSubnetPrefix : '10.0.4.0/24'
+var _appServicesSubnetPrefix = !empty(appServicesSubnetPrefix) ? appServicesSubnetPrefix : '10.0.0.16/28'
 
 @description('Name of the Database subnet')
 param databaseSubnetName string = ''
@@ -227,7 +227,7 @@ var _databaseSubnetName = !empty(databaseSubnetName) ? databaseSubnetName : 'dat
 
 @description('Address prefix for the Database subnet')
 param databaseSubnetPrefix string = ''
-var _databaseSubnetPrefix = !empty(databaseSubnetPrefix) ? databaseSubnetPrefix : '10.0.5.0/24'
+var _databaseSubnetPrefix = !empty(databaseSubnetPrefix) ? databaseSubnetPrefix : '10.0.0.32/28'
 
 // flag that indicates if we're reusing a vnet
 var _vnetReuse = _azureReuseConfig.vnetReuse
@@ -286,7 +286,7 @@ var _appServiceRuntimeVersion = !empty(appServiceRuntimeVersion) ? appServiceRun
 // Azure OpenAI settings
 
 @description('GPT model used to answer user questions. Don\'t forget to check region availability.')
-// @allowed([ 'gpt-35-turbo','gpt-35-turbo-16k', 'gpt-4', 'gpt-4-32k', 'gpt-4o' ])
+// @allowed([ 'gpt-35-turbo','gpt-35-turbo-16k', 'gpt-4', 'gpt-4-32k', 'gpt-4o', 'gpt-4o-mini' ])
 param chatGptModelName string = ''
 var _chatGptModelName = !empty(chatGptModelName) ? chatGptModelName : 'gpt-4o'
 
@@ -399,6 +399,8 @@ var _chunkTokenOverlap = !empty(chunkTokenOverlap) ? chunkTokenOverlap : '200'
 @description('Name of the container where source documents will be stored.')
 param storageContainerName string = ''
 var _storageContainerName = !empty(storageContainerName) ? storageContainerName : 'documents'
+var _storageRawDataContainerName = '${_storageContainerName}raw'
+var _storageImagesContainerName = '${_storageContainerName}images'
 
 @description('Storage Account Name. Use your own name convention or leave as it is to generate a random name.')
 param storageAccountName string = ''
@@ -632,7 +634,11 @@ module storage './core/storage/storage-account.bicep' = {
     tags: tags
     publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
     allowBlobPublicAccess: false // Disable anonymous access
-    containers: [{name:_storageContainerName, publicAccess: 'None'}]
+    containers: [
+      { name: _storageContainerName, publicAccess: 'None' }
+      { name: _storageRawDataContainerName, publicAccess: 'None' }
+      { name: _storageImagesContainerName, publicAccess: 'None' }
+    ]
     keyVaultName: keyVault.outputs.name
     secretName: 'storageConnectionString'
     deleteRetentionPolicy: {
@@ -1140,6 +1146,14 @@ module dataIngestion './core/host/functions.bicep' = {
         value: _storageContainerName
       }
       {
+        name: 'STORAGE_CONTAINER_RAW'
+        value: _storageRawDataContainerName
+      }      
+      {
+        name: 'STORAGE_CONTAINER_IMAGES'
+        value: _storageImagesContainerName
+      }
+      {
         name: 'AZURE_FORMREC_SERVICE'
         value: _aiServicesName
       }
@@ -1388,7 +1402,6 @@ module searchPe './core/network/private-endpoint.bicep' = if (_networkIsolation 
     dnsZoneId: _networkIsolation?searchDnsZone.outputs.id:''
   }
 }
-
 
 // Load Testing
 

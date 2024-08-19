@@ -93,45 +93,4 @@ azd up
 
 ## Extending solution components
 
-Azd automatically provisions the infrastructure and deploys the three components. However, you may want to change and customize parts of the code to meet a specific requirement.
-
-A simple customization within the orchestrator component involves updating the [bot description](https://github.com/Azure/gpt-rag-orchestrator/blob/main/orc/bot_description.prompt). This adjustment can help in more accurately defining the bot's scope for the orchestrator.
-
-That said, if you want to manually deploy and customize the components, you can follow the deployment instructions for each component:
-
-**1) Data Ingestion Component**
-
-Fork or copy the original [Data ingestion](https://github.com/Azure/gpt-rag-ingestion) repo template to create your data ingestion git repo and follow the steps in its **What if I want to redeploy just the ingestion component?** section to learn how to redeploy the component.
-
-If you want to run the component locally, which is interesting for testing your modifications before deploying, check out the **Running Locally with VS Code** section in the component's repository.
-
-**2) Orchestrator Component**
-
-Fork or copy the original [Orchestrator](https://github.com/Azure/gpt-rag-orchestrator) repo template to create your orchestrator git repo and follow the steps in its **Cloud Deployment** section to learn how to redeploy the component.
-
-If you want to run the component locally, which is interesting for testing your modifications before deploying, check out the **Running Locally with VS Code** section in the component's repository.
-
-**3) Front-end Component**
-
-Fork or copy the original [App Front-end](https://github.com/Azure/gpt-rag-frontend) repo template to create your own frontend git repo and follow the steps in its **Deploy (quickstart)** section to learn how to redeploy the component.
-
-If you want to run the component locally, which is interesting for testing your modifications before deploying, check out the **Test locally** section in the component's repository.
-
-**(Optional) Integrate custom component repo to the main gpt-rag**
-
-Customizing the components of your project allows for a tailored experience, but `gpt-rag` solution repository won't automatically detect your custom component repos.
-
-Integrating your custom component repository with the gpt-rag project enhances workflow efficiency, allowing you to directly use azd commands like `azd up` and `azd deploy` within the gpt-rag repository.
-
-To achieve this integration, simply follow these steps:
-
-1. **Create Your Own `gpt-rag` Repository**: Start by forking or copying the original `gpt-rag` repository. This will be the foundation for integrating your custom components.
-
-2. **Point to Your Custom Component Repositories**:
-   - Navigate to the `scripts` folder within your newly created `gpt-rag` repository.
-   - Open and edit the  `fetchComponents.ps1` and `fetchComponents.sh` scripts.
-   - Adjust these scripts to reference your custom component repositories, replacing the original repository links.
-
-3. **Initialize Your Customized Setup**:
-   - With your `gpt-rag` repository scripts pointing to your component repositories, initialize the environment.
-   - Run the `azd init -t <owner>/<repository>` using your own github org and repository.
+Azd automatically provisions the infrastructure and deploys the three components. However, you may want to change and customize parts of the code to meet a specific requirement. Our Solution Accelerator allows you to do this. For detailed instructions on how this can be achieved, please take a look at the [Extending Application Components](EXTENDING_APP_COMPONENTS.md) page.
