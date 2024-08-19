@@ -1,6 +1,6 @@
-# Automated Installation for Zero Trust
+# Custom Installation for Zero Trust
 
-This guide details the automated installation of the Solution Accelerator within a Zero Trust architecture. It includes prerequisites, a comprehensive list of required resources, and a step-by-step installation process.
+This guide details the automated installation of the Solution Accelerator within a Zero Trust architecture. It leverages Bicep Infrastructure as Code (IaC) for efficient deployment and management of Azure resources. The guide includes prerequisites, a comprehensive list of required resources, and a step-by-step installation process, ensuring a streamlined setup that adheres to Zero Trust principles.
 
 **Table of Contents**
 
