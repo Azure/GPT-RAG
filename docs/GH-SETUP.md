@@ -72,10 +72,12 @@ For each below environment, when running `azd pipeline config` for each environm
 > [!CAUTION]
 > If you choose 'Y' to commit and push your local changes, the pipeline will be triggered, and you may not have the necessary environments or variables set up yet, causing the pipeline to fail. The remaining setup steps must be completed before the pipeline will run successfully.
 
-Login to Azure:
+Log into the CLI tools that will be used:
 
 ```bash
 az login
+azd auth login
+gh auth login
 ```
 
 #### Dev
@@ -129,8 +131,6 @@ repo='<your-repo-name>'
 Run GitHub CLI commands to create the environments:
 
 ```bash
-gh auth login
-
 gh api --method PUT -H "Accept: application/vnd.github+json" repos/$org/$repo/environments/$dev_env
 gh api --method PUT -H "Accept: application/vnd.github+json" repos/$org/$repo/environments/$test_env
 gh api --method PUT -H "Accept: application/vnd.github+json" repos/$org/$repo/environments/$prod_env
