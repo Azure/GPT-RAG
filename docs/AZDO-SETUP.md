@@ -101,10 +101,11 @@ audiences="api://AzureADTokenExchange"
 
 Next, you will create an `azd` environment per target environment alongside a pipeline definition. In this guide, pipeline definitions are created with `azd pipeline config`. Read more about azd pipeline config [here](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/configure-devops-pipeline?tabs=azdo). View the CLI documentation [here](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/reference#azd-pipeline-config).
 
-Login to Azure and configure the default organization and project:
+Login to Azure and `azd`, and configure the default organization and project:
 
 ```bash
 az login
+azd auth login
 az devops configure --defaults organization=https://dev.azure.com/$org project=$project
 ```
 
