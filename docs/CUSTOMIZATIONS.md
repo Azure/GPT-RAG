@@ -10,6 +10,7 @@ On this page, you will find some options to configure your deployment:
 - [Selecting Your Components](#selecting-your-components)
 - [Accessing Data Ingest function using AI Search Managed Identity](#accessing-the-data-ingest-function-from-ai-search-using-a-managed-identity)
 - [Extending Enteprise RAG components](#extending-solution-components)
+- [Filter Files with AI Search Using Security Trimming](#Filter-Files-with-AI-Search-Using-Security-Trimming)
 
 **Note on Environment Variables**
 
@@ -165,3 +166,7 @@ To achieve this integration, simply follow these steps:
 3. **Initialize Your Customized Setup**:
    - With your `gpt-rag` repository scripts pointing to your component repositories, initialize the environment.
    - Run the `azd init -t <owner>/<repository>` using your own github org and repository.
+
+## Filter Files with AI Search Using Security Trimming
+
+This customization is particularly valuable in scenarios where sensitive documents need to be accessed by specific groups or individuals within an organization. By enabling the AZURE_SEARCH_TRIMMING variable, you can ensure that AI Search returns results tailored to each user’s access (no RBAC permissions), please take a look at the [Filter Files with AI Search Using Security Trimming](CUSTOMIZATIONS_SEARCH_TRIMMING.md) page.
