@@ -399,8 +399,8 @@ var _chunkTokenOverlap = !empty(chunkTokenOverlap) ? chunkTokenOverlap : '200'
 @description('Name of the container where source documents will be stored.')
 param storageContainerName string = ''
 var _storageContainerName = !empty(storageContainerName) ? storageContainerName : 'documents'
-var _storageRawDataContainerName = '${_storageContainerName}raw'
-var _storageImagesContainerName = '${_storageContainerName}images'
+var _storageRawDataContainerName = '${_storageContainerName}-raw'
+var _storageImagesContainerName = '${_storageContainerName}-images'
 
 @description('Storage Account Name. Use your own name convention or leave as it is to generate a random name.')
 param storageAccountName string = ''

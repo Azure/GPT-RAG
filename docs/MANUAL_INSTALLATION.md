@@ -239,9 +239,9 @@ Gather Necessary Information:
    - **Storage Account**
      - Create a storage account to store documents
      - Create the following blob containers:
-        - raw_data
         - documents
-        - images
+        - documents-images
+        - documents-raw
      - Disable public access.
      - Enable soft delete for blobs.
 
