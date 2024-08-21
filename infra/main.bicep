@@ -999,6 +999,15 @@ module orchestratorOaiAccess './core/security/openai-access.bicep' = if (_deploy
   }
 } 
 
+module orchestratorSearchAccess './core/security/search-access.bicep' = if (_deployOrchestrator) {
+  name: 'orchestrator-search-access'
+  scope: resourceGroup
+  params: {
+    principalId: orchestrator.outputs.identityPrincipalId
+    searchServiceName: searchService.outputs.name
+  }
+} 
+
 // FrontEnd App
 
 module frontEnd  'core/host/appservice.bicep' = {
