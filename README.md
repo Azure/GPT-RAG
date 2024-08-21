@@ -6,7 +6,7 @@ The **Enterprise RAG** Solution Accelerator (GPT-RAG) offers a robust architectu
 
 * [Discord Channel](https://discord.gg/28VMVKawgk) Enterprise RAG - Connected Community
 
-## Components
+## Application Components
 
 GPT-RAG follows a modular approach, consisting of three components, each with a specific function.
 
@@ -23,7 +23,6 @@ Removing temporarily while not finished
 ## GPT-RAG Integration HUB
 * [SQL Integration](https://github.com/Azure/gpt-rag-int-sql) Connect the GPT-RAG Infrastructure to SQL using NL2SQL. -->
 
-
 ## Concepts
 
 If you want to learn more about the RAG Pattern and GPT-RAG architecture.
@@ -37,6 +36,25 @@ If you want to learn more about the RAG Pattern and GPT-RAG architecture.
 *  [Enterprise RAG +Prompt Engineering+Finetuning+Train (Video in Spanish)](https://www.youtube.com/watch?v=ICsf4yirieA)
 
 <!-- <a href="https://www.youtube.com/watch?v=ICsf4yirieA"><img src="https://img.youtube.com/vi/ICsf4yirieA/0.jpg" alt="Alt text" width="480"/></a> -->
+
+## Setup Guide
+
+1) **Basic Architecture Deployment:** *for quick demos with no network isolation*⚙️
+
+Learn how to **quickly set up** the basic architecture for scenarios without network isolation. [Click the link to proceed](#basic-architecture-deployment).
+
+2) **Standard Zero-Trust Architecture Deployment:** *fastest Zero-Trust deployment option*⚡
+
+Deploy the solution accelerator using the standard zero-trust architecture with pre-configured solution settings. No customization needed. [Click the link to proceed](#zero-trust-architecture-deployment).
+
+3) **Custom Zero-Trust Architecture Setup:** *most used* ⭐
+
+Explore options for customizing the deployment of the solution accelerator with a zero-trust architecture, adjusting solution settings to your needs. [Click the link to proceed](docs/AUTOMATED_INSTALLATION.md).
+
+4) **Step-by-Step Manual Setup: Zero-Trust Architecture:** *hands-on approach* 🛠️**
+
+For those who prefer complete control, follow this detailed guide to manually set up the solution accelerator with a zero-trust architecture. [Click the link to proceed](docs/MANUAL_INSTALLATION.md).
+
 
 ## Getting Started
 
@@ -53,14 +71,12 @@ This guide will walk you through the deployment process of Enterprise RAG. There
 
 ** If you have not created an Azure AI service resource in the subscription before
 
-**Note:** If you implement the Zero-trust architecture described below, you will only need Node.js and Python for the second part of the procedure, which you will carry out on the VM created during the deployment process of this architecture.
-
 ### Basic Architecture Deployment
 
 For quick demonstrations or proof-of-concept projects without network isolation requirements, you can deploy the accelerator using its basic architecture.
 ![Basic Architecture](media/architecture-GPT-RAG-Basic.png)
 
-The deployment procedure is quite simple, just install the prerequisites and follow these four steps using [Azure Developer CLI (azd)](https://aka.ms/azure-dev/install) in a terminal:
+The deployment procedure is quite simple, just install the prerequisites mentioned above and follow these four steps using [Azure Developer CLI (azd)](https://aka.ms/azure-dev/install) in a terminal:
 
 **1** Download the Repository:
 
@@ -70,8 +86,16 @@ azd init -t azure/gpt-rag
 
 **2** Login to Azure:
 
+**2.a** Azure Developer CLI:
+
 ```sh
 azd auth login
+```
+
+**2.b** Azure CLI:
+
+```sh
+az login
 ```
 
 **3** Start Building the infrastructure and components deployment:
@@ -84,17 +108,22 @@ azd up
 
 Upload your documents to the 'documents' folder located in the storage account. The name of this account should start with 'strag'. This is the default storage account, as shown in the sample image below.
 
-
  ![storage_sample](media/readme-storage_sample.png)
+
+**Done! Basic deployment is completed.**
+
+**Recommended**: [Add app authentication to your web app](https://learn.microsoft.com/en-us/azure/app-service/scenario-secure-app-authentication-app-service)
 
 ### Zero Trust Architecture Deployment
 
 For more secure and isolated deployments, you can opt for the Zero Trust architecture. This architecture is ideal for production environments where network isolation and stringent security measures are highly valued.
 
- ![Zero Trust Architecture](media/architecture-GPT-RAG-ZeroTrust.png)
+ ![Zero Trust Architecture](media/architecture-GPT-RAG-ZeroTrust-LZ.png)
 
-Deploying the Zero Trust architecture follows a similar procedure to the Basic Architecture deployment, but includes some additional steps. Refer to the instructions below for a detailed guide on deploying this option: 
-   
+Before deploying the Zero Trust architecture, make sure to review the prerequisites. It's important to note that you will only need Node.js and Python for the second part of the process, which will be carried out on the VM created during the deployment of this architecture.
+
+The deployment procedure is similar to that of the Basic Architecture, but with some additional steps. For a detailed guide on deploying this option, refer to the instructions below:
+
 **1** Download the Repository
 
 ```sh
@@ -109,8 +138,16 @@ azd env set AZURE_NETWORK_ISOLATION true
  
 **3** Login to Azure:
 
+**2.a** Azure Developer CLI:
+
 ```sh
 azd auth login
+```
+
+**2.b** Azure CLI:
+
+```sh
+az login
 ```
 
 **4** Start Building the infrastructure and components deployment:
@@ -154,40 +191,43 @@ azd deploy
    
 > Note: when running the ```azd init ...``` and ```azd env refresh```, use the same environment name, subscription, and region used in the initial provisioning of the infrastructure.  
    
-Done! Zero trust deployment is completed.
+**Done! Zero trust deployment is completed.**
 
-## Customizing your Deployment
+**Recommended**: [Add app authentication to your web app](https://learn.microsoft.com/en-us/azure/app-service/scenario-secure-app-authentication-app-service)
 
-The deployment process outlined in the Getting Started section sets up Azure resources and deploys the accelerator components with a standard configuration. For those looking to tailor the deployment more closely to their specific requirements, the [Custom Deployment](docs/CUSTOMIZATIONS.md) section offers further customization possibilities.
+## How to?
 
-## Integrating with Additional Data Sources
+### Customize Your Deployment
 
-If you're looking to expand your data retrieval capabilities by adding new data sources, consider integrating Bing Custom Search, SQL Server, and Teradata. For more information, refer to the [AI Integration Hub](docs/AI_INTEGRATION_HUB.md) page.
+The standard deployment process sets up Azure resources and deploys the accelerator components with a standard configuration. To tailor the deployment to your specific needs, follow the steps in the [Custom Deployment](docs/CUSTOMIZATIONS.md) section for further customization options.
 
-## Multi-Environment Deployment
+### Integrate with Additional Data Sources
+  
+Expand your data retrieval capabilities by integrating new data sources such as Bing Custom Search, SQL Server, and Teradata. For detailed instructions, refer to the [AI Integration Hub](docs/AI_INTEGRATION_HUB.md) page.
+
+### Multi-Environment Deployment
+
 Once you've successfully deployed the GPT-RAG solution as a proof of concept and you're ready to formalize the deployment using a proper CI/CD process to accelerate your deployment to production, refer to the multi-environment deployment guides for either [Azure DevOps](./docs/AZDO-SETUP.md) or [GitHub](./docs/GH-SETUP.md).
+ 
+### Troubleshoot Deployment Issues
 
-## Additional Resources
+If you encounter any errors during the deployment process, consult the [Troubleshooting](docs/TROUBLESHOOTING.md) page for guidance on resolving common issues.
 
-### Troubleshooting
+### Evaluate Performance
 
-Look at the [Troubleshooting](docs/TROUBLESHOOTING.md) page in case you face some error in the deployment process.
+To assess the performance of your deployment, refer to the [Performance Testing](docs/PERFTEST.md) guide for testing methodologies and best practices.
 
-### Evaluating
+### Query the Conversation History
 
-* [Performance Testing](docs/PERFTEST.md)
+Learn how to query and analyze conversation data by following the steps outlined in the [How to Query and Analyze Conversations](docs/QUERYING_CONVERSATIONS.md) document.
 
-### Querying Conversation History
+### Estimate Pricing
 
-* [How to Query and Analyze Conversations](docs/QUERYING_CONVERSATIONS.md)
+Understand the cost implications of your deployment by reviewing the [Pricing Model](https://github.com/Azure/GPT-RAG/wiki/GPT%E2%80%90RAG-%E2%80%90-Pricing-Model) for detailed pricing estimation.
 
-### Pricing Estimation
+### Manage Governance
 
-* [Pricing Model](https://github.com/Azure/GPT-RAG/wiki/GPT%E2%80%90RAG-%E2%80%90-Pricing-Model)
-
-### Governance
-
-* [Governance Model](https://share.mindmanager.com/#publish/9ogrdWqzmAzZB6ilgURohV4lj1LriKjOWc0w_u2U)
+Ensure proper governance of your deployment by following the guidelines provided in the [Governance Model](https://share.mindmanager.com/#publish/9ogrdWqzmAzZB6ilgURohV4lj1LriKjOWc0w_u2U).
 
 ## Contributing
 
