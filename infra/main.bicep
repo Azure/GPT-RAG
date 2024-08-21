@@ -257,6 +257,13 @@ var _databaseSubnetPrefix = !empty(databaseSubnetPrefix) ? databaseSubnetPrefix 
 // flag that indicates if we're reusing a vnet
 var _vnetReuse = _azureReuseConfig.vnetReuse
 
+// Search Trimming settings
+
+@description('Search Trimming? If yes it will add a variable in the orchestrator to filter files in AI Search query.')
+@allowed([true, false])
+param searchTrimming bool = false
+var _searchTrimming = searchTrimming
+
 // Database settings
 
 var _azureDbConfigDefaults = {
@@ -852,6 +859,10 @@ module orchestrator './core/host/functions.bicep' =  {
         value: _searchApiVersion
       }
       {
+        name: 'AZURE_SEARCH_TRIMMING'
+        value: _searchTrimming
+      }
+      {
         name: 'AZURE_OPENAI_RESOURCE'
         value: _openAiServiceName
       }
@@ -1155,6 +1166,10 @@ module dataIngestion './core/host/functions.bicep' = {
       {
         name: 'SEARCH_API_VERSION'
         value: _searchApiVersion
+      }
+      {
+        name: 'AZURE_SEARCH_TRIMMING'
+        value: _searchTrimming
       }
       {
         name: 'SEARCH_INDEX_INTERVAL'
@@ -1514,4 +1529,3 @@ output AZURE_VNET_ADDRESS string = _vnetAddress
 output AZURE_VNET_NAME string = _vnetName
 output AZURE_ZERO_TRUST string = _networkIsolation ? 'TRUE' : 'FALSE'
 output AZURE_SEARCH_USE_MIS bool = _azureSearchUseMIS
-

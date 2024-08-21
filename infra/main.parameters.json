@@ -17,6 +17,9 @@
       "networkIsolation": {
         "value": "${AZURE_NETWORK_ISOLATION}"
       },
+      "searchTrimming": {
+        "value": "${AZURE_SEARCH_TRIMMING}"
+      },
       "provisionLoadTesting": {
         "value": "${AZURE_PROVISION_LOAD_TESTING}"
       },    
