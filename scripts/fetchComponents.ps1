@@ -4,7 +4,7 @@ if (Test-Path -Path ".\.salesfactory\gpt-rag-ingestion") {
 }
 
 # Clone the repository into the .azure folder
-git clone https://github.com/Salesfactory/gpt-rag-ingestion .\.salesfactory\gpt-rag-ingestion
+git clone -b develop https://github.com/Salesfactory/gpt-rag-ingestion .\.salesfactory\gpt-rag-ingestion
 
 # Delete the gpt-rag-orchestrator folder from .salesfactory if it exists
 if (Test-Path -Path ".\.salesfactory\gpt-rag-orchestrator") {
@@ -12,7 +12,7 @@ if (Test-Path -Path ".\.salesfactory\gpt-rag-orchestrator") {
 }
 
 # Clone the repository into the .azure folder
-git clone https://github.com/Salesfactory/gpt-rag-orchestrator .\.salesfactory\gpt-rag-orchestrator
+git clone -b develop https://github.com/Salesfactory/gpt-rag-orchestrator .\.salesfactory\gpt-rag-orchestrator
 
 # Delete the gpt-rag-frontend folder from .salesfactory if it exists
 if (Test-Path -Path ".\.salesfactory\gpt-rag-frontend") {
@@ -20,4 +20,4 @@ if (Test-Path -Path ".\.salesfactory\gpt-rag-frontend") {
 }
 
 # Clone the repository into the .azure folder
-git clone https://github.com/Salesfactory/gpt-rag-frontend .\.salesfactory\gpt-rag-frontend
+git clone -b develop https://github.com/Salesfactory/gpt-rag-frontend .\.salesfactory\gpt-rag-frontend

@@ -2,7 +2,7 @@
 param accountName string
 
 @description('Enable/disable public network access for the Cosmos DB account.')
-param publicNetworkAccess string = 'Disabled' 
+param publicNetworkAccess string = 'Disabled'
 
 @description('Location for the Cosmos DB account.')
 param location string = resourceGroup().location
@@ -104,6 +104,43 @@ resource database 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2022-05-15
   }
 }
 
+resource agentErrorsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
+  parent: database
+  name: 'agentErrors'
+  properties: {
+    resource: {
+      defaultTtl: 86400
+      id: 'agentErrors'
+      partitionKey: {
+        paths: [
+          '/id'
+        ]
+        kind: 'Hash'
+      }
+      analyticalStorageTtl: analyticalStoreTTL
+      indexingPolicy: {
+        indexingMode: 'consistent'
+        automatic: true
+        includedPaths: [
+          {
+            path: '/*'
+          }
+        ]
+        excludedPaths: [
+          {
+            path: '/"_etag"/?'
+          }
+        ]
+      }
+    }
+    options: {
+      autoscaleSettings: {
+        maxThroughput: autoscaleMaxThroughput
+      }
+    }
+  }
+}
+
 resource conversationsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
   parent: database
   name: containerName
@@ -126,6 +163,42 @@ resource conversationsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDataba
         ]
       }
       defaultTtl: 86400
+    }
+    options: {
+      autoscaleSettings: {
+        maxThroughput: autoscaleMaxThroughput
+      }
+    }
+  }
+}
+
+resource feedbackContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
+  parent: database
+  name: 'feedback'
+  properties: {
+    resource: {
+      id: 'feedback'
+      partitionKey: {
+        paths: [
+          '/id'
+        ]
+        kind: 'Hash'
+      }
+      analyticalStorageTtl: analyticalStoreTTL
+      indexingPolicy: {
+        indexingMode: 'consistent'
+        automatic: true
+        includedPaths: [
+          {
+            path: '/*'
+          }
+        ]
+        excludedPaths: [
+          {
+            path: '/"_etag"/?'
+          }
+        ]
+      }
     }
     options: {
       autoscaleSettings: {
@@ -161,11 +234,156 @@ resource modelsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/con
   }
 }
 
+resource promptsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
+  parent: database
+  name: 'prompts'
+  properties: {
+    resource: {
+      defaultTtl: 604800
+      id: 'prompts'
+      partitionKey: {
+        paths: [
+          '/id'
+        ]
+        kind: 'Hash'
+      }
+      analyticalStorageTtl: analyticalStoreTTL
+      indexingPolicy: {
+        indexingMode: 'consistent'
+        automatic: true
+        includedPaths: [
+          {
+            path: '/*'
+          }
+        ]
+        excludedPaths: [
+          {
+            path: '/"_etag"/?'
+          }
+        ]
+      }
+    }
+    options: {
+      autoscaleSettings: {
+        maxThroughput: autoscaleMaxThroughput
+      }
+    }
+  }
+}
+
+resource settingsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
+  parent: database
+  name: 'settings'
+  properties: {
+    resource: {
+      id: 'settings'
+      partitionKey: {
+        paths: [
+          '/id'
+        ]
+        kind: 'Hash'
+      }
+      analyticalStorageTtl: analyticalStoreTTL
+      indexingPolicy: {
+        indexingMode: 'consistent'
+        automatic: true
+        includedPaths: [
+          {
+            path: '/*'
+          }
+        ]
+        excludedPaths: [
+          {
+            path: '/"_etag"/?'
+          }
+        ]
+      }
+    }
+    options: {
+      autoscaleSettings: {
+        maxThroughput: autoscaleMaxThroughput
+      }
+    }
+  }
+}
+
+resource usersContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
+  parent: database
+  name: 'users'
+  properties: {
+    resource: {
+      id: 'users'
+      partitionKey: {
+        paths: [
+          '/id'
+        ]
+        kind: 'Hash'
+      }
+      analyticalStorageTtl: analyticalStoreTTL
+      indexingPolicy: {
+        indexingMode: 'consistent'
+        automatic: true
+        includedPaths: [
+          {
+            path: '/*'
+          }
+        ]
+        excludedPaths: [
+          {
+            path: '/"_etag"/?'
+          }
+        ]
+      }
+    }
+    options: {
+      autoscaleSettings: {
+        maxThroughput: autoscaleMaxThroughput
+      }
+    }
+  }
+}
+
+resource userTokensContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
+  parent: database
+  name: 'userTokens'
+  properties: {
+    resource: {
+      id: 'userTokens'
+      partitionKey: {
+        paths: [
+          '/id'
+        ]
+        kind: 'Hash'
+      }
+      analyticalStorageTtl: analyticalStoreTTL
+      indexingPolicy: {
+        indexingMode: 'consistent'
+        automatic: true
+        includedPaths: [
+          {
+            path: '/*'
+          }
+        ]
+        excludedPaths: [
+          {
+            path: '/"_etag"/?'
+          }
+        ]
+      }
+    }
+    options: {
+      autoscaleSettings: {
+        maxThroughput: autoscaleMaxThroughput
+      }
+    }
+  }
+}
+
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
   name: keyVaultName
 }
 
-resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' =  {
+resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
   name: secretName
   tags: tags
   parent: keyVault
@@ -179,7 +397,6 @@ resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' =  {
     value: account.listKeys().primaryMasterKey
   }
 }
-
 
 output id string = account.id
 output name string = account.name
