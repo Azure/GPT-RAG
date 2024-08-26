@@ -303,7 +303,7 @@ Gather Necessary Information:
             --scope "/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$storageAccountName"
         ```
 
-        - Assign Storage Account "Storage Blob Data Reader" role to the Data Ingestion Function App Identity.        
+        - Assign Storage Account "Storage Blob Data Contributor" role to the Data Ingestion Function App Identity.        
         ```
         az role assignment create \
             --assignee $principalId \
