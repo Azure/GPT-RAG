@@ -1102,7 +1102,7 @@ module appsericeKeyVaultAccess './core/security/keyvault-access.bicep' = if (_de
   }
 }
 
-module appserviceStorageAccountAccess './core/security/blobstorage-access.bicep' = if (_deployFrontend) {
+module appserviceStorageAccountAccess './core/security/blobstorage-reader-access.bicep' = if (_deployFrontend) {
   name: 'appservice-blobstorage-access'
   scope: resourceGroup
   params: {
@@ -1264,7 +1264,7 @@ module dataIngestionKeyVaultAccess './core/security/keyvault-access.bicep' = if 
   }
 }
 
-module dataIngestionBlobStorageAccess './core/security/blobstorage-access.bicep' = if (_deployDataIngestion) {
+module dataIngestionBlobStorageAccess './core/security/blobstorage-contributor-access.bicep' = if (_deployDataIngestion) {
   name: 'data-ingestion-blobstorage-access'
   scope: resourceGroup
   params: {
