@@ -213,7 +213,6 @@ var _vnetName = _azureReuseConfig.vnetReuse ? _azureReuseConfig.existingVnetName
 @description('Address space for the virtual network')
 param vnetAddress string = ''
 var _vnetAddress = !empty(vnetAddress) ? vnetAddress : '10.0.0.0/24'
-var _vnetAddress = !empty(vnetAddress) ? vnetAddress : '10.0.0.0/24'
 
 @description('Name of the AI services subnet')
 param aiSubnetName string = ''
@@ -1181,10 +1180,6 @@ module dataIngestion './core/host/functions.bicep' = {
         value: _searchApiVersion
       }
       {
-        name: 'AZURE_SEARCH_TRIMMING'
-        value: _searchTrimming
-      }
-      {
         name: 'SEARCH_INDEX_INTERVAL'
         value: _searchIndexInterval
       }
@@ -1277,24 +1272,6 @@ module dataIngestionBlobStorageAccess './core/security/blobstorage-access.bicep'
     principalId: dataIngestion.outputs.identityPrincipalId
   }
 }
-
-module dataIngestionOaiAccess './core/security/openai-access.bicep' = {
-  name: 'dataingestion-openai-access'
-  scope: resourceGroup
-  params: {
-    principalId: dataIngestion.outputs.identityPrincipalId
-    openaiAccountName: openAi.outputs.name
-  }
-} 
-
-module dataIngestionAIAccess './core/security/aiservices-access.bicep' = {
-  name: 'dataingestion-ai-access'
-  scope: resourceGroup
-  params: {
-    principalId: dataIngestion.outputs.identityPrincipalId
-    aiAccountName: aiServices.outputs.name
-  }
-} 
 
 module dataIngestionOaiAccess './core/security/openai-access.bicep' = {
   name: 'dataingestion-openai-access'
@@ -1538,7 +1515,6 @@ output AZURE_CHAT_GPT_DEPLOYMENT_CAPACITY int = _chatGptDeploymentCapacity
 output AZURE_CHAT_GPT_DEPLOYMENT_NAME string = _chatGptDeploymentName
 output AZURE_CHAT_GPT_MODEL_NAME string = _chatGptModelName
 output AZURE_CHAT_GPT_MODEL_VERSION string = _chatGptModelVersion
-output AZURE_COMPONENT_CONFIG object = azureComponentConfig
 output AZURE_AI_SERVICES_NAME string = _aiServicesName
 output AZURE_AI_SERVICES_PE string = _azureAiServicesPe
 output AZURE_DB_ACCOUNT_PE string = _azureDbAccountPe
@@ -1586,3 +1562,4 @@ output AZURE_VNET_ADDRESS string = _vnetAddress
 output AZURE_VNET_NAME string = _vnetName
 output AZURE_ZERO_TRUST string = _networkIsolation ? 'TRUE' : 'FALSE'
 output AZURE_SEARCH_USE_MIS bool = _azureSearchUseMIS
+output AZURE_SEARCH_TRIMMING bool = _searchTrimming
