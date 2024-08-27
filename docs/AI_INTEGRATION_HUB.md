@@ -20,6 +20,25 @@ The AI Integration HUB enhances GPT-RAG by integrating various external data sou
  - Teradata: Integrates large-scale data warehousing capabilities, enhancing data retrieval and analysis.
 Integrating these sources allows for more comprehensive, contextually accurate responses tailored to user needs, leading to better decision-making, improved efficiency, and significant value addition while ensuring data security and ethical use.
 
+# MS Graph API
+
+
+
+References:
+[Microsoft Graph and app-only authentication](https://learn.microsoft.com/en-us/graph/tutorials/python-app-only)
+
+https://learn.microsoft.com/en-us/graph/tutorials/python-app-only
+
+Configure application access to online meetings or virtual events
+https://learn.microsoft.com/en-us/graph/cloud-communication-online-meeting-application-access-policy
+
+https://learn.microsoft.com/en-us/graph/tutorials/python-app-only
+https://developer.microsoft.com/en-us/graph/graph-explorer
+https://learn.microsoft.com/en-us/microsoftteams/platform/graph-api/meeting-transcripts/overview-transcripts
+https://learn.microsoft.com/en-us/graph/api/calltranscript-get?view=graph-rest-1.0&tabs=http
+https://learn.microsoft.com/en-us/graph/teams-changenotifications-callrecording-and-calltranscript
+
+https://techcommunity.microsoft.com/t5/healthcare-and-life-sciences/configuring-azure-blob-trigger-identity-based-connection/ba-p/3849291
 
 # Custom Bing Search Service
 

@@ -329,9 +329,8 @@ param embeddingsDeploymentCapacity int = 0
 var _embeddingsDeploymentCapacity = embeddingsDeploymentCapacity != 0 ? embeddingsDeploymentCapacity : 40
 
 @description('Azure OpenAI API version.')
-// @allowed([ '2023-05-15', '2024-02-15-preview'])
 param openaiApiVersion string = ''
-var _openaiApiVersion = !empty(openaiApiVersion) ? openaiApiVersion : '2024-02-15-preview'
+var _openaiApiVersion = !empty(openaiApiVersion) ? openaiApiVersion : '2024-07-01-preview'
 
 @description('Enables LLM monitoring to generate conversation metrics.')
 @allowed([true, false])
@@ -340,7 +339,7 @@ var _chatGptLlmMonitoring = chatGptLlmMonitoring != null ? chatGptLlmMonitoring 
 
 // Document intelligence settings
 
-var _docintApiVersion = (location == 'eastus' || location == 'westus2' || location == 'westeurope') ? '2024-02-29-preview' : '2023-07-31'
+var _docintApiVersion = (location == 'eastus' || location == 'westus2' || location == 'westeurope' || location == 'northcentralus') ? '2024-07-01-preview' : '2023-07-31'
 
 // AI search settings
 
@@ -399,7 +398,6 @@ var _chunkTokenOverlap = !empty(chunkTokenOverlap) ? chunkTokenOverlap : '200'
 @description('Name of the container where source documents will be stored.')
 param storageContainerName string = ''
 var _storageContainerName = !empty(storageContainerName) ? storageContainerName : 'documents'
-var _storageRawDataContainerName = '${_storageContainerName}-raw'
 var _storageImagesContainerName = '${_storageContainerName}-images'
 
 @description('Storage Account Name. Use your own name convention or leave as it is to generate a random name.')
@@ -636,7 +634,6 @@ module storage './core/storage/storage-account.bicep' = {
     allowBlobPublicAccess: false // Disable anonymous access
     containers: [
       { name: _storageContainerName, publicAccess: 'None' }
-      { name: _storageRawDataContainerName, publicAccess: 'None' }
       { name: _storageImagesContainerName, publicAccess: 'None' }
     ]
     keyVaultName: keyVault.outputs.name
@@ -1146,10 +1143,6 @@ module dataIngestion './core/host/functions.bicep' = {
         value: _storageContainerName
       }
       {
-        name: 'STORAGE_CONTAINER_RAW'
-        value: _storageRawDataContainerName
-      }      
-      {
         name: 'STORAGE_CONTAINER_IMAGES'
         value: _storageImagesContainerName
       }
@@ -1172,6 +1165,10 @@ module dataIngestion './core/host/functions.bicep' = {
       {
         name: 'AZURE_OPENAI_EMBEDDING_DEPLOYMENT'
         value: _embeddingsDeploymentName
+      }
+      {
+        name: 'AZURE_OPENAI_CHATGPT_DEPLOYMENT'
+        value: _chatGptDeploymentName
       }
       {
         name: 'NUM_TOKENS'
@@ -1226,6 +1223,24 @@ module dataIngestionBlobStorageAccess './core/security/blobstorage-access.bicep'
     principalId: dataIngestion.outputs.identityPrincipalId
   }
 }
+
+module dataIngestionOaiAccess './core/security/openai-access.bicep' = {
+  name: 'dataingestion-openai-access'
+  scope: resourceGroup
+  params: {
+    principalId: dataIngestion.outputs.identityPrincipalId
+    openaiAccountName: openAi.outputs.name
+  }
+} 
+
+module dataIngestionAIAccess './core/security/aiservices-access.bicep' = {
+  name: 'dataingestion-ai-access'
+  scope: resourceGroup
+  params: {
+    principalId: dataIngestion.outputs.identityPrincipalId
+    aiAccountName: aiServices.outputs.name
+  }
+} 
 
 module ingestionPe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'ingestionPe'
