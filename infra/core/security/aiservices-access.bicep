@@ -9,7 +9,7 @@ resource roleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-prev
   name: guid(resourceGroup().id, aiAccount.id, principalId)
   scope: aiAccount
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b59867f4-fa02-4bcb-b4b4-1d78b1766d66') // Cognitive Services User
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'a97b65f3-24c7-4388-baec-2e87135dc908') // Cognitive Services User
     principalId: principalId
     principalType: 'ServicePrincipal'
   }
