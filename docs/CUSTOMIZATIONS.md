@@ -125,3 +125,7 @@ azd up
 ## Extending solution components
 
 Azd automatically provisions the infrastructure and deploys the three components. However, you may want to change and customize parts of the code to meet a specific requirement. Our Solution Accelerator allows you to do this. For detailed instructions on how this can be achieved, please take a look at the [Extending Application Components](EXTENDING_APP_COMPONENTS.md) page.
+
+## Filter Files with AI Search Using Security Trimming
+
+This customization is particularly valuable in scenarios where sensitive documents need to be accessed by specific groups or individuals within an organization. By enabling the AZURE_SEARCH_TRIMMING variable, you can ensure that AI Search returns results tailored to each user’s access (no RBAC permissions), please take a look at the [Filter Files with AI Search Using Security Trimming](CUSTOMIZATIONS_SEARCH_TRIMMING.md) page.
