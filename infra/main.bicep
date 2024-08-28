@@ -1093,7 +1093,7 @@ module frontendPe './core/network/private-endpoint.bicep' = if (_networkIsolatio
   }
 }
 
-module appsericeKeyVaultAccess './core/security/keyvault-access.bicep' = if (_deployFrontend) {
+module appserviceKeyVaultAccess './core/security/keyvault-access.bicep' = if (_deployFrontend) {
   name: 'appservice-keyvault-access'
   scope: resourceGroup
   params: {
@@ -1119,6 +1119,15 @@ module appserviceOrchestratorAccess './core/host/functions-access.bicep' = if (_
     principalId: frontEnd.outputs.identityPrincipalId
   }
 }
+
+module appserviceAIAccess './core/security/aiservices-access.bicep' = {
+  name: 'appservice-ai-access'
+  scope: resourceGroup
+  params: {
+    principalId: frontEnd.outputs.identityPrincipalId
+    aiAccountName: aiServices.outputs.name
+  }
+} 
 
 // Data Ingestion Function App
 
