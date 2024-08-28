@@ -85,12 +85,12 @@ while read -r line; do
     fi
 done <<< "$modelDeployments"
 
-modelSkuName=$(echo "$model" | grep -oP '"sku":\{"name":"\K[^"]+')
-modelSkuCapacity=$(echo "$model" | grep -oP '"sku":\{"name":"[^"]+","capacity":\K\d+')
-modelFormat=$(echo "$model" | grep -oP '"model":\{"format":"\K[^"]+')
-modelName=$(echo "$model" | grep -oP '"model":\{"format":"[^"]+","name":"\K[^"]+')
-modelVersion=$(echo "$model" | grep -oP '"model":\{"format":"[^"]+","name":"[^"]+","version":"\K[^"]+')
-modelVUpgOps=$(echo "$model" | grep -oP '"versionUpgradeOption":"\K[^"]+')
+modelSkuName=$(echo "$model" | sed -En 's/.*"sku":\{"name":"([^"]*).*/\1/p')
+modelSkuCapacity=$(echo "$model" | sed -En 's/.*"sku":\{"name":"[^"]*","capacity":([0-9]*).*/\1/p')
+modelFormat=$(echo "$model" | sed -En 's/.*"model":\{"format":"([^"]*).*/\1/p')
+modelName=$(echo "$model" | sed -En 's/.*"model":\{"format":"[^"]*","name":"([^"]*).*/\1/p')
+modelVersion=$(echo "$model" | sed -En 's/.*"model":\{"format":"[^"]*","name":"[^"]*","version":"([^"]*).*/\1/p')
+modelVUpgOps=$(echo "$model" | sed -En 's/.*"versionUpgradeOption":"([^"]*).*/\1/p')
 
 updatedModel=$(printf '{
     "displayName": "%s",

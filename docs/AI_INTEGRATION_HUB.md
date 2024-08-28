@@ -20,7 +20,6 @@ The AI Integration HUB enhances GPT-RAG by integrating various external data sou
  - Teradata: Integrates large-scale data warehousing capabilities, enhancing data retrieval and analysis.
 Integrating these sources allows for more comprehensive, contextually accurate responses tailored to user needs, leading to better decision-making, improved efficiency, and significant value addition while ensuring data security and ethical use.
 
-
 # Custom Bing Search Service
 
 Custom Bing Search is a service provided by Microsoft that allows users to create tailored search experiences using the power of Bing's search capabilities. This service enables the customization of search results to better align with specific business needs, by focusing on specific domains, filtering out unwanted content, and ranking results based on the importance to the organization.

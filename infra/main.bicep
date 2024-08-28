@@ -220,7 +220,7 @@ var _aiSubnetName = !empty(aiSubnetName) ? aiSubnetName : 'ai-subnet'
 
 @description('Address prefix for the AI services subnet')
 param aiSubnetPrefix string = ''
-var _aiSubnetPrefix = !empty(aiSubnetPrefix) ? aiSubnetPrefix : '10.0.0.0/27'
+var _aiSubnetPrefix = !empty(aiSubnetPrefix) ? aiSubnetPrefix : '10.0.0.0/28'
 
 @description('Name of the Bastion subnet')
 param bastionSubnetName string = ''
@@ -228,7 +228,7 @@ var _bastionSubnetName = !empty(bastionSubnetName) ? bastionSubnetName : 'AzureB
 
 @description('Address prefix for the Bastion subnet')
 param bastionSubnetPrefix string = ''
-var _bastionSubnetPrefix = !empty(bastionSubnetPrefix) ? bastionSubnetPrefix : '10.0.0.32/27'
+var _bastionSubnetPrefix = !empty(bastionSubnetPrefix) ? bastionSubnetPrefix : '10.0.0.64/28'
 
 @description('Name of the App Integration subnet')
 param appIntSubnetName string = ''
@@ -236,7 +236,7 @@ var _appIntSubnetName = !empty(appIntSubnetName) ? appIntSubnetName : 'app-int-s
 
 @description('Address prefix for the App Integration subnet')
 param appIntSubnetPrefix string = ''
-var _appIntSubnetPrefix = !empty(appIntSubnetPrefix) ? appIntSubnetPrefix : '10.0.0.64/27'
+var _appIntSubnetPrefix = !empty(appIntSubnetPrefix) ? appIntSubnetPrefix : '10.0.0.48/28'
 
 @description('Name of the App Services subnet')
 param appServicesSubnetName string = ''
@@ -244,7 +244,7 @@ var _appServicesSubnetName = !empty(appServicesSubnetName) ? appServicesSubnetNa
 
 @description('Address prefix for the App Services subnet')
 param appServicesSubnetPrefix string = ''
-var _appServicesSubnetPrefix = !empty(appServicesSubnetPrefix) ? appServicesSubnetPrefix : '10.0.0.96/27'
+var _appServicesSubnetPrefix = !empty(appServicesSubnetPrefix) ? appServicesSubnetPrefix : '10.0.0.16/28'
 
 @description('Name of the Database subnet')
 param databaseSubnetName string = ''
@@ -252,7 +252,7 @@ var _databaseSubnetName = !empty(databaseSubnetName) ? databaseSubnetName : 'dat
 
 @description('Address prefix for the Database subnet')
 param databaseSubnetPrefix string = ''
-var _databaseSubnetPrefix = !empty(databaseSubnetPrefix) ? databaseSubnetPrefix : '10.0.0.128/27'
+var _databaseSubnetPrefix = !empty(databaseSubnetPrefix) ? databaseSubnetPrefix : '10.0.0.32/28'
 
 // flag that indicates if we're reusing a vnet
 var _vnetReuse = _azureReuseConfig.vnetReuse
@@ -318,9 +318,9 @@ var _appServiceRuntimeVersion = !empty(appServiceRuntimeVersion) ? appServiceRun
 // Azure OpenAI settings
 
 @description('GPT model used to answer user questions. Don\'t forget to check region availability.')
-// @allowed([ 'gpt-35-turbo','gpt-35-turbo-16k', 'gpt-4', 'gpt-4-32k' ])
+// @allowed([ 'gpt-35-turbo','gpt-35-turbo-16k', 'gpt-4', 'gpt-4-32k', 'gpt-4o', 'gpt-4o-mini' ])
 param chatGptModelName string = ''
-var _chatGptModelName = !empty(chatGptModelName) ? chatGptModelName : 'gpt-35-turbo'
+var _chatGptModelName = !empty(chatGptModelName) ? chatGptModelName : 'gpt-4o'
 
 @description('GPT model deployment type.')
 // @allowed([ 'Standard', 'Provisioned-Managed', 'Global-Standard'])
@@ -328,9 +328,9 @@ param chatGptModelDeploymentType string = ''
 var _chatGptModelDeploymentType = !empty(chatGptModelDeploymentType) ? chatGptModelDeploymentType : 'Standard'
 
 @description('GPT model version.')
-// @allowed([ '0613', '1106', '1106-Preview', '0125-preview', 'turbo-2024-04-09'])
+// @allowed([ '0613', '1106', '1106-Preview', '0125-preview', 'turbo-2024-04-09', '2024-05-13'])
 param chatGptModelVersion string = ''
-var _chatGptModelVersion = !empty(chatGptModelVersion) ? chatGptModelVersion : '0613'
+var _chatGptModelVersion = !empty(chatGptModelVersion) ? chatGptModelVersion : '2024-05-13'
 
 @description('GPT model deployment name.')
 param chatGptDeploymentName string = ''
@@ -361,9 +361,8 @@ param embeddingsDeploymentCapacity int = 0
 var _embeddingsDeploymentCapacity = embeddingsDeploymentCapacity != 0 ? embeddingsDeploymentCapacity : 40
 
 @description('Azure OpenAI API version.')
-// @allowed([ '2023-05-15', '2024-02-15-preview'])
 param openaiApiVersion string = ''
-var _openaiApiVersion = !empty(openaiApiVersion) ? openaiApiVersion : '2024-02-15-preview'
+var _openaiApiVersion = !empty(openaiApiVersion) ? openaiApiVersion : '2024-07-01-preview'
 
 @description('Enables LLM monitoring to generate conversation metrics.')
 @allowed([true, false])
@@ -372,7 +371,7 @@ var _chatGptLlmMonitoring = chatGptLlmMonitoring != null ? chatGptLlmMonitoring 
 
 // Document intelligence settings
 
-var _docintApiVersion = (location == 'eastus' || location == 'westus2' || location == 'westeurope') ? '2024-02-29-preview' : '2023-07-31'
+var _docintApiVersion = (location == 'eastus' || location == 'westus2' || location == 'westeurope' || location == 'northcentralus') ? '2024-07-01-preview' : '2023-07-31'
 
 // AI search settings
 
@@ -431,6 +430,7 @@ var _chunkTokenOverlap = !empty(chunkTokenOverlap) ? chunkTokenOverlap : '200'
 @description('Name of the container where source documents will be stored.')
 param storageContainerName string = ''
 var _storageContainerName = !empty(storageContainerName) ? storageContainerName : 'documents'
+var _storageImagesContainerName = '${_storageContainerName}-images'
 
 @description('Storage Account Name. Use your own name convention or leave as it is to generate a random name.')
 param storageAccountName string = ''
@@ -665,7 +665,10 @@ module storage './core/storage/storage-account.bicep' = {
     tags: tags
     publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
     allowBlobPublicAccess: false // Disable anonymous access
-    containers: [{name:_storageContainerName, publicAccess: 'None'}]
+    containers: [
+      { name: _storageContainerName, publicAccess: 'None' }
+      { name: _storageImagesContainerName, publicAccess: 'None' }
+    ]
     keyVaultName: keyVault.outputs.name
     secretName: 'storageConnectionString'
     deleteRetentionPolicy: {
@@ -1090,7 +1093,7 @@ module frontendPe './core/network/private-endpoint.bicep' = if (_networkIsolatio
   }
 }
 
-module appsericeKeyVaultAccess './core/security/keyvault-access.bicep' = if (_deployFrontend) {
+module appserviceKeyVaultAccess './core/security/keyvault-access.bicep' = if (_deployFrontend) {
   name: 'appservice-keyvault-access'
   scope: resourceGroup
   params: {
@@ -1099,7 +1102,7 @@ module appsericeKeyVaultAccess './core/security/keyvault-access.bicep' = if (_de
   }
 }
 
-module appserviceStorageAccountAccess './core/security/blobstorage-access.bicep' = if (_deployFrontend) {
+module appserviceStorageAccountAccess './core/security/blobstorage-reader-access.bicep' = if (_deployFrontend) {
   name: 'appservice-blobstorage-access'
   scope: resourceGroup
   params: {
@@ -1116,6 +1119,15 @@ module appserviceOrchestratorAccess './core/host/functions-access.bicep' = if (_
     principalId: frontEnd.outputs.identityPrincipalId
   }
 }
+
+module appserviceAIAccess './core/security/aiservices-access.bicep' = {
+  name: 'appservice-ai-access'
+  scope: resourceGroup
+  params: {
+    principalId: frontEnd.outputs.identityPrincipalId
+    aiAccountName: aiServices.outputs.name
+  }
+} 
 
 // Data Ingestion Function App
 
@@ -1177,10 +1189,6 @@ module dataIngestion './core/host/functions.bicep' = {
         value: _searchApiVersion
       }
       {
-        name: 'AZURE_SEARCH_TRIMMING'
-        value: _searchTrimming
-      }
-      {
         name: 'SEARCH_INDEX_INTERVAL'
         value: _searchIndexInterval
       }
@@ -1191,6 +1199,10 @@ module dataIngestion './core/host/functions.bicep' = {
       {
         name: 'STORAGE_CONTAINER'
         value: _storageContainerName
+      }
+      {
+        name: 'STORAGE_CONTAINER_IMAGES'
+        value: _storageImagesContainerName
       }
       {
         name: 'AZURE_FORMREC_SERVICE'
@@ -1211,6 +1223,10 @@ module dataIngestion './core/host/functions.bicep' = {
       {
         name: 'AZURE_OPENAI_EMBEDDING_DEPLOYMENT'
         value: _embeddingsDeploymentName
+      }
+      {
+        name: 'AZURE_OPENAI_CHATGPT_DEPLOYMENT'
+        value: _chatGptDeploymentName
       }
       {
         name: 'NUM_TOKENS'
@@ -1257,7 +1273,7 @@ module dataIngestionKeyVaultAccess './core/security/keyvault-access.bicep' = if 
   }
 }
 
-module dataIngestionBlobStorageAccess './core/security/blobstorage-access.bicep' = if (_deployDataIngestion) {
+module dataIngestionBlobStorageAccess './core/security/blobstorage-contributor-access.bicep' = if (_deployDataIngestion) {
   name: 'data-ingestion-blobstorage-access'
   scope: resourceGroup
   params: {
@@ -1265,6 +1281,24 @@ module dataIngestionBlobStorageAccess './core/security/blobstorage-access.bicep'
     principalId: dataIngestion.outputs.identityPrincipalId
   }
 }
+
+module dataIngestionOaiAccess './core/security/openai-access.bicep' = {
+  name: 'dataingestion-openai-access'
+  scope: resourceGroup
+  params: {
+    principalId: dataIngestion.outputs.identityPrincipalId
+    openaiAccountName: openAi.outputs.name
+  }
+} 
+
+module dataIngestionAIAccess './core/security/aiservices-access.bicep' = {
+  name: 'dataingestion-ai-access'
+  scope: resourceGroup
+  params: {
+    principalId: dataIngestion.outputs.identityPrincipalId
+    aiAccountName: aiServices.outputs.name
+  }
+} 
 
 module ingestionPe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse && _deployDataIngestion) {
   name: 'ingestionPe'
@@ -1490,7 +1524,6 @@ output AZURE_CHAT_GPT_DEPLOYMENT_CAPACITY int = _chatGptDeploymentCapacity
 output AZURE_CHAT_GPT_DEPLOYMENT_NAME string = _chatGptDeploymentName
 output AZURE_CHAT_GPT_MODEL_NAME string = _chatGptModelName
 output AZURE_CHAT_GPT_MODEL_VERSION string = _chatGptModelVersion
-output AZURE_COMPONENT_CONFIG object = azureComponentConfig
 output AZURE_AI_SERVICES_NAME string = _aiServicesName
 output AZURE_AI_SERVICES_PE string = _azureAiServicesPe
 output AZURE_DB_ACCOUNT_PE string = _azureDbAccountPe
@@ -1538,3 +1571,4 @@ output AZURE_VNET_ADDRESS string = _vnetAddress
 output AZURE_VNET_NAME string = _vnetName
 output AZURE_ZERO_TRUST string = _networkIsolation ? 'TRUE' : 'FALSE'
 output AZURE_SEARCH_USE_MIS bool = _azureSearchUseMIS
+output AZURE_SEARCH_TRIMMING bool = _searchTrimming
