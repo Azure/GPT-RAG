@@ -530,7 +530,6 @@ param bastionKvName string = ''
 var _bastionKvName = !empty(bastionKvName) ? bastionKvName : 'bastionkv-${resourceToken}'
 
 var _orchestratorEndpoint = 'https://${_orchestratorFunctionAppName}.azurewebsites.net/api/orc'
-var _orchestratorUri = 'https://${_orchestratorFunctionAppName}.azurewebsites.net'
 
 /////////////////////////////////////////////////////////////////////////////
 // TEMPLATE MODULES
@@ -1050,10 +1049,6 @@ module frontEnd  'core/host/appservice.bicep' = {
       {
         name: 'SPEECH_REGION'
         value: location
-      }
-      {
-        name: 'ORCHESTRATOR_URI'
-        value: _orchestratorUri
       }
       {
         name: 'ORCHESTRATOR_ENDPOINT'
