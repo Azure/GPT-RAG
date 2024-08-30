@@ -328,7 +328,7 @@ azd deploy
 
 ### Optional Next Steps
 
-**9** [Add app authentication to your web app](https://learn.microsoft.com/en-us/azure/app-service/scenario-secure-app-authentication-app-service) (recommended)
+**9** [Add app authentication](https://learn.microsoft.com/en-us/azure/app-service/scenario-secure-app-authentication-app-service). [Watch this quick tutorial](https://youtu.be/sA-an25jMB4) for step-by-step guidance.
 
 **10** Configure [Azure Front Door](https://learn.microsoft.com/en-us/azure/frontdoor/create-front-door-portal) to allow external access to your app only through Azure Front Door.
 

@@ -265,7 +265,7 @@ Gather Necessary Information:
     - **Web App (Front-end)**
         - Create a web app for the front-end.
         - Disable public access.
-        - [Add app authentication to your web app](https://learn.microsoft.com/en-us/azure/app-service/scenario-secure-app-authentication-app-service)
+        - [Add app authentication](https://learn.microsoft.com/en-us/azure/app-service/scenario-secure-app-authentication-app-service). [Watch this quick tutorial](https://youtu.be/sA-an25jMB4) for step-by-step guidance.
         
 9. **Private DNS Zones**
     - Configure private DNS zones for various services

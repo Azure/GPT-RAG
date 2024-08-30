@@ -112,7 +112,8 @@ Upload your documents to the 'documents' folder located in the storage account. 
 
 **Done! Basic deployment is completed.**
 
-**Recommended**: [Add app authentication to your web app](https://learn.microsoft.com/en-us/azure/app-service/scenario-secure-app-authentication-app-service)
+**Recommended**: [Add app authentication](https://learn.microsoft.com/en-us/azure/app-service/scenario-secure-app-authentication-app-service). [Watch this quick tutorial](https://youtu.be/sA-an25jMB4) for step-by-step guidance.
+
 
 ### Zero Trust Architecture Deployment
 
@@ -193,7 +194,7 @@ azd deploy
    
 **Done! Zero trust deployment is completed.**
 
-**Recommended**: [Add app authentication to your web app](https://learn.microsoft.com/en-us/azure/app-service/scenario-secure-app-authentication-app-service)
+**Recommended**: [Add app authentication](https://learn.microsoft.com/en-us/azure/app-service/scenario-secure-app-authentication-app-service). [Watch this quick tutorial](https://youtu.be/sA-an25jMB4) for step-by-step guidance.
 
 ## How to?
 
