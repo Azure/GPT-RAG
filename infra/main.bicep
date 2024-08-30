@@ -228,7 +228,7 @@ var _bastionSubnetName = !empty(bastionSubnetName) ? bastionSubnetName : 'AzureB
 
 @description('Address prefix for the Bastion subnet')
 param bastionSubnetPrefix string = ''
-var _bastionSubnetPrefix = !empty(bastionSubnetPrefix) ? bastionSubnetPrefix : '10.0.0.64/28'
+var _bastionSubnetPrefix = !empty(bastionSubnetPrefix) ? bastionSubnetPrefix : '10.0.0.64/26'
 
 @description('Name of the App Integration subnet')
 param appIntSubnetName string = ''
