@@ -63,7 +63,7 @@ App Service Plan kind must be Linux.
 
 ### Application Service Environment
 
-If you prefer, you can use a previously created [Application Service Environment (ASE)](https://learn.microsoft.com/en-us/azure/app-service/environment/overview) to run the function apps and the front-end web app. Just follow the instructions in the [**General Instructions**](#general-instructions) section to inform the App Service Plan, contained within your App Service Environment, that you want to reuse. The App Service Plan must be Linux-based. Since the existence of a VNet and Subnet is a prerequisite for creating an ASE, if you wish to reuse an ASE, you must also bring the VNet created for this ASE, according to the instructions in the [VNet](#virtual-network-vnet) section.
+If you want to use an existing [Application Service Environment (ASE)](https://learn.microsoft.com/en-us/azure/app-service/environment/overview) to run the function apps and the front-end web app, please note that the installation must be performed manually, as Bicep does not support this scenario. You should follow the manual procedure, ensuring that the App Service Plan within your ASE is Linux-based.
 
 ### Azure AI Search
 

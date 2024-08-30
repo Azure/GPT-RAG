@@ -228,7 +228,7 @@ var _bastionSubnetName = !empty(bastionSubnetName) ? bastionSubnetName : 'AzureB
 
 @description('Address prefix for the Bastion subnet')
 param bastionSubnetPrefix string = ''
-var _bastionSubnetPrefix = !empty(bastionSubnetPrefix) ? bastionSubnetPrefix : '10.0.0.64/28'
+var _bastionSubnetPrefix = !empty(bastionSubnetPrefix) ? bastionSubnetPrefix : '10.0.0.64/26'
 
 @description('Name of the App Integration subnet')
 param appIntSubnetName string = ''
@@ -530,7 +530,6 @@ param bastionKvName string = ''
 var _bastionKvName = !empty(bastionKvName) ? bastionKvName : 'bastionkv-${resourceToken}'
 
 var _orchestratorEndpoint = 'https://${_orchestratorFunctionAppName}.azurewebsites.net/api/orc'
-var _orchestratorUri = 'https://${_orchestratorFunctionAppName}.azurewebsites.net'
 
 /////////////////////////////////////////////////////////////////////////////
 // TEMPLATE MODULES
@@ -1052,13 +1051,21 @@ module frontEnd  'core/host/appservice.bicep' = {
         value: location
       }
       {
-        name: 'ORCHESTRATOR_URI'
-        value: _orchestratorUri
-      }
-      {
         name: 'ORCHESTRATOR_ENDPOINT'
         value: _orchestratorEndpoint
       }
+      {
+        name: 'AZURE_SUBSCRIPTION_ID'
+        value: subscription().subscriptionId
+      }
+      {
+        name: 'AZURE_RESOURCE_GROUP_NAME'
+        value: _resourceGroupName
+      }
+      {
+        name: 'AZURE_ORCHESTRATOR_FUNC_NAME'
+        value: _orchestratorFunctionAppName
+      }            
       {
         name: 'AZURE_KEY_VAULT_ENDPOINT'
         value: keyVault.outputs.endpoint
