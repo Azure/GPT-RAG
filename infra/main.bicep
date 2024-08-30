@@ -1055,6 +1055,18 @@ module frontEnd  'core/host/appservice.bicep' = {
         value: _orchestratorEndpoint
       }
       {
+        name: 'AZURE_SUBSCRIPTION_ID'
+        value: subscription().subscriptionId
+      }
+      {
+        name: 'AZURE_RESOURCE_GROUP_NAME'
+        value: _resourceGroupName
+      }
+      {
+        name: 'AZURE_ORCHESTRATOR_FUNC_NAME'
+        value: _orchestratorFunctionAppName
+      }            
+      {
         name: 'AZURE_KEY_VAULT_ENDPOINT'
         value: keyVault.outputs.endpoint
       }
