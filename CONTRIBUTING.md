@@ -6,6 +6,20 @@ This project adheres to the [Microsoft Open Source Code of Conduct](https://open
 
 Below, you'll find details on how our code update process works and instructions on how to contribute.
 
+## Contribution Guidelines
+
+Follow these guidelines to ensure smooth integration and maintain the quality of the project. Adhering to these best practices will streamline the review process and keep the codebase clean.
+
+- **Target the `insiders` Branch:** Always direct your pull request to the `insiders` branch to ensure that changes are properly integrated into the project's development workflow.
+ 
+- **Keep Pull Requests Small:** Aim to make your pull requests as focused and concise as possible. This makes it easier to review and ensures quicker integration into the codebase.
+  
+- **Associate with Prioritized Issues:** Ensure that each pull request is linked to a specific, prioritized issue in the project backlog. This helps maintain alignment with project goals and ensures that work is being done on tasks of the highest importance.
+
+- **Bugs and Documentation Corrections:** Pull requests that address bugs or correct documentation do not need to be associated with prioritized issues. These can be submitted directly to maintain the quality and accuracy of the project.
+
+- **Multi-Repo Dependencies:** If your pull request has dependencies on updates in other repositories, make sure to mention this in the pull request description. Additionally, create a corresponding pull request in the other repository to ensure synchronized updates across all related projects.
+
 ## Code Update Workflow
 
 We use a simplified version of the [Fork and Branch Workflow](https://blog.scottlowe.org/2015/01/27/using-fork-branch-git-workflow/) alongside [Git Flow](https://nvie.com/posts/a-successful-git-branching-model/). The `main` branch always contains deployment-ready code, while the `insiders` branch serves as our integration branch.
@@ -89,13 +103,4 @@ git switch insiders
 git branch -d conversation-metadata
 git push origin main
 git push --delete origin conversation-metadata
-
-## Pull Request Guidelines
-
-- **Keep Pull Requests Small:** Aim to make your pull requests as focused and concise as possible. This makes it easier to review and ensures quicker integration into the codebase.
-  
-- **Associate with Prioritized Issues:** Ensure that each pull request is linked to a specific, prioritized issue in the project backlog. This helps maintain alignment with project goals and ensures that work is being done on tasks of the highest importance.
-
-- **Bugs and Documentation Corrections:** Pull requests that address bugs or correct documentation do not need to be associated with prioritized issues. These can be submitted directly to maintain the quality and accuracy of the project.
-
-- **Multi-Repo Dependencies:** If your pull request has dependencies on updates in other repositories, make sure to mention this in the pull request description. Additionally, create a corresponding pull request in the other repository to ensure synchronized updates across all related projects.
+```
