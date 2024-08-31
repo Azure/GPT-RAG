@@ -39,14 +39,16 @@ param vnetName string = ''
 param subnetId string = ''
 
 param appServiceReuse bool
+param deployAppService bool
+
 param existingAppServiceNameResourceGroupName string    
 
-resource existingAppService 'Microsoft.Web/sites@2022-09-01' existing = if (appServiceReuse) {
+resource existingAppService 'Microsoft.Web/sites@2022-09-01' existing = if (appServiceReuse && deployAppService) {
   scope: resourceGroup(existingAppServiceNameResourceGroupName)
   name: name
 }
 
-resource newAppService 'Microsoft.Web/sites@2022-09-01' = if (!appServiceReuse) {
+resource newAppService 'Microsoft.Web/sites@2022-09-01' = if (!appServiceReuse && deployAppService) {
   name: name
   location: location
   tags: tags
@@ -121,8 +123,8 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing
   name: applicationInsightsName
 }
 
-output identityPrincipalId string = appServiceReuse ? existingAppService.identity.principalId : newAppService.identity.principalId
-output name string = appServiceReuse ? existingAppService.name : newAppService.name
-output uri string = 'https://${appServiceReuse ? existingAppService.properties.defaultHostName : newAppService.properties.defaultHostName }'
-output id string = appServiceReuse ? existingAppService.id : newAppService.id
+output identityPrincipalId string = !deployAppService ? '' : appServiceReuse ? existingAppService.identity.principalId : newAppService.identity.principalId
+output name string = !deployAppService ? '' : appServiceReuse ? existingAppService.name : newAppService.name
+output uri string = !deployAppService ? '' : 'https://${appServiceReuse ? existingAppService.properties.defaultHostName : newAppService.properties.defaultHostName }'
+output id string = !deployAppService ? '' : appServiceReuse ? existingAppService.id : newAppService.id
 // output key string = listKeys(appService.id, appService.apiVersion).default

@@ -3,6 +3,7 @@ param location string = resourceGroup().location
 param tags object = {}
 param existingStorageResourceGroupName string
 param storageReuse bool
+param deployStorageAccount bool
 
 @allowed([ 'Hot', 'Cool', 'Premium' ])
 param accessTier string = 'Hot'
@@ -23,12 +24,12 @@ param keyVaultName string
 param containers array = []
 
 
-resource existingStorage 'Microsoft.Storage/storageAccounts@2022-05-01' existing  = if (storageReuse) {
+resource existingStorage 'Microsoft.Storage/storageAccounts@2022-05-01' existing  = if (storageReuse && deployStorageAccount) {
   scope: resourceGroup(existingStorageResourceGroupName)
   name: name
 }
 
-resource newStorage 'Microsoft.Storage/storageAccounts@2022-05-01' = if (!storageReuse) {
+resource newStorage 'Microsoft.Storage/storageAccounts@2022-05-01' = if (!storageReuse && deployStorageAccount) {
   name: name
   location: location
   tags: tags
@@ -67,7 +68,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
   name: keyVaultName
 }
 
-var storage_keys = storageReuse ? existingStorage.listKeys().keys[0].value : newStorage.listKeys().keys[0].value
+var storage_keys = !deployStorageAccount ? '' : storageReuse ? existingStorage.listKeys().keys[0].value : newStorage.listKeys().keys[0].value
 
 resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' =  {
   name: secretName
@@ -84,6 +85,6 @@ resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' =  {
   }
 }
 
-output name string = storageReuse ? existingStorage.name : newStorage.name
-output id string = storageReuse ? existingStorage.id : newStorage.id
-output primaryEndpoints object = storageReuse ? existingStorage.properties.primaryEndpoints: newStorage.properties.primaryEndpoints
+output name string = !deployStorageAccount ? '' : storageReuse ? existingStorage.name : newStorage.name
+output id string = !deployStorageAccount ? '' : storageReuse ? existingStorage.id : newStorage.id
+output primaryEndpoints object = !deployStorageAccount ? {} : storageReuse ? existingStorage.properties.primaryEndpoints: newStorage.properties.primaryEndpoints

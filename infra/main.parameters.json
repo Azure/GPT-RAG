@@ -17,6 +17,9 @@
       "networkIsolation": {
         "value": "${AZURE_NETWORK_ISOLATION}"
       },
+      "searchTrimming": {
+        "value": "${AZURE_SEARCH_TRIMMING}"
+      },
       "provisionLoadTesting": {
         "value": "${AZURE_PROVISION_LOAD_TESTING}"
       },    
@@ -212,6 +215,13 @@
           "dbDatabaseName": "${AZURE_DB_DATABASE_NAME}",
           "conversationContainerName": "${AZURE_DB_CONVERSATIONS_CONTAINER_NAME}",
           "modelsContainerName": "${AZURE_DB_MODELS_CONTAINER_NAME}"         
+        }
+      },
+      "azureComponentConfig":{
+        "value": {
+          "deployDataIngestion": "${DEPLOY_DATA_INGESTION}",
+          "deployFrontend": "${DEPLOY_FRONTEND}",
+          "deployOrchestrator": "${DEPLOY_ORCHESTRATOR}"
         }
       },
       "azureReuseConfig":{
