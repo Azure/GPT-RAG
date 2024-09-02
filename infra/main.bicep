@@ -371,7 +371,7 @@ var _chatGptLlmMonitoring = chatGptLlmMonitoring != null ? chatGptLlmMonitoring 
 
 // Document intelligence settings
 
-var _docintApiVersion = (location == 'eastus' || location == 'westus2' || location == 'westeurope' || location == 'northcentralus') ? '2024-07-01-preview' : '2023-07-31'
+var _docintApiVersion = (location == 'eastus' || location == 'westus2' || location == 'westeurope' || location == 'northcentralus') ? '2024-07-31-preview' : '2023-07-31'
 
 // AI search settings
 
