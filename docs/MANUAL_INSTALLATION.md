@@ -347,7 +347,6 @@ Gather Necessary Information:
         - Assign Azure OpenAI "Cognitive Services OpenAI User" role to the Identities of the following Resources:
             - Orchestrator Function App
             - Data Ingestion Function App
-            - AI Search
         ```    
             az role assignment create \
                 --assignee $principalId \
