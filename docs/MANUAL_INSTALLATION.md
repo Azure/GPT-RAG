@@ -295,7 +295,7 @@ Gather Necessary Information:
     - Assign permissions to the Managed Identities of various components in Azure. In each item, sample commands are provided to assign these roles; please use them by replacing the variables with the values specific to your environment.
 
     - **Storage Account**
-        - Assign Storage Account "Storage Blob Data Reader" role to the Frontend App Service Managed Identity.          
+        - Assign Storage Account "Storage Blob Data Reader" role to the Frontend App Service Managed Identity.
         ```
         az role assignment create \
             --assignee $principalId \
@@ -303,7 +303,7 @@ Gather Necessary Information:
             --scope "/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$storageAccountName"
         ```
 
-        - Assign Storage Account "Storage Blob Data Contributor" role to the Data Ingestion Function App Identity.        
+        - Assign Storage Account "Storage Blob Data Contributor" role to the Data Ingestion Function App Identity.
         ```
         az role assignment create \
             --assignee $principalId \
