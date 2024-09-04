@@ -177,6 +177,49 @@ param azureOpenAiServiceName string = ''
 var openAiServiceName = !empty(azureOpenAiServiceName) ? azureOpenAiServiceName : 'oai0-${resourceToken}'
 @description('Virtual network name if using network isolation. Use your own name convention or leave as it is to generate a random name.')
 param azureVnetName string = ''
+
+
+//Web App
+@description('Stripe api key')
+param webAppStripeApiKey string = ''
+var stripeApiKey = !empty(webAppStripeApiKey) ? webAppStripeApiKey : ''
+
+@description('Stripe signing secret')
+@secure()
+param webAppStripeSigningSecret string = ''
+var stripeSigningSecret = !empty(webAppStripeSigningSecret) ? webAppStripeSigningSecret : ''
+
+@description('Csv storage container')
+param azureCsvStorageContainer string = ''
+var csvStorageContainer = !empty(azureCsvStorageContainer) ? azureCsvStorageContainer : ''
+
+@description('Email host')
+param webAppEmailHost string = ''
+var emailHost = !empty(webAppEmailHost) ? webAppEmailHost : ''
+
+@description('Email password')
+param webAppEmailPass string
+var emailPass = !empty(webAppEmailPass) ? webAppEmailPass : ''
+
+@description('Email user')
+param webAppEmailUser string = ''
+var emailUser = !empty(webAppEmailUser) ? webAppEmailUser : ''
+
+@description('Invitation link')
+param webAppInvitationLink string = ''
+var invitationLink = !empty(webAppInvitationLink) ? webAppInvitationLink : ''
+
+// Orchestrator
+@description('Azure AI Search API Key')
+param azureAiSearchApiKey string = ''
+var aiSearchApiKey = !empty(azureAiSearchApiKey) ? azureAiSearchApiKey : ''
+
+@description('Azure OpenAI API Key')
+param azureOpenAiApiKey string = ''
+var openAiApiKey = !empty(azureOpenAiApiKey) ? azureOpenAiApiKey : ''
+
+
+
 var vnetName = !empty(azureVnetName) ? azureVnetName : 'aivnet0-${resourceToken}'
 
 var orchestratorEndpoint = 'https://${orchestratorFunctionAppName}.azurewebsites.net/api/orc'
@@ -448,6 +491,70 @@ module orchestrator './core/host/functions.bicep' = {
     allowedOrigins: [ '*' ]    
     appSettings:[
       {
+        name: 'AZURE_AI_SEARCH_API_KEY'
+        value: aiSearchApiKey
+      }
+      {
+        name: 'AZURE_AI_SEARCH_INDEX_NAME'
+        value: searchIndex
+      }
+      {
+        name: 'AZURE_AI_SEARCH_SERVICE_NAME'
+        value: searchServiceName
+
+      }
+      {
+        name: 'AZURE_OPENAI_API_KEY'
+        value: openAiApiKey
+      }
+      {
+        name: 'AZURE_OPENAI_API_VERSION'
+        value: openaiApiVersion
+      }
+      {
+        name: 'AZURE_OPENAI_CHAT_DEPLOYMENT_NAME'
+        value: chatGptDeploymentName
+      }
+      {
+        name: 'AZURE_OPENAI_ENDPOINT'
+      }
+      {
+        name: 'AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG'
+      }
+      {
+        name: 'AZURE_SEARCH_TOP_K'
+      }
+      {
+        name: 'AZURE_STORAGE_ACCOUNT_URL'
+      }
+      {
+        name: 'BING_SEARCH_API_KEY'
+      }
+      {
+        name: 'BING_SEARCH_URL'
+      }
+      {
+        name: 'BING_SUBSCRIPTION_KEY'
+      }
+      {
+        name: 'LANGCHAIN_API_KEY'
+      }
+      {
+        name: 'LANGCHAIN_ENDPOINT'
+      }
+      {
+        name: 'LANGCHAIN_PROJECT'
+      }
+      {
+        name: 'LANGCHAIN_TRACING_V2'
+      }
+      {
+        name: 'STRIPE_API_KEY'
+      }
+      {
+        name: 'STRIPE_SIGNING_SECRET'
+      }
+      {
         name: 'AZURE_DB_ID'
         value: dbAccountName
       }
@@ -597,6 +704,38 @@ module frontEnd  'core/host/appservice.bicep'  = {
     scmDoBuildDuringDeployment: true
     basicPublishingCredentials: networkIsolation?true:false
     appSettings: [
+      {
+        name: 'STRIPE_API_KEY'
+        value: stripeApiKey
+      }
+      {
+        name: 'STRIPE_SIGNING_SECRET'
+        value: stripeSigningSecret
+      }
+      {
+        name: 'AZURE_CSV_STORAGE_CONTAINER'
+        value: csvStorageContainer
+      }
+      {
+        name: 'EMAIL_HOST'
+        value: emailHost
+      }
+      {
+        name: 'EMAIL_PASS'
+        value: emailPass
+      }
+      {
+        name: 'EMAIL_PORT'
+        value: '465'
+      }
+      {
+        name: 'EMAIL_USER'
+        value: emailUser
+      }
+      {
+        name: 'INVITATION_LINK'
+        value: invitationLink
+      }
       {
         name: 'SPEECH_SYNTHESIS_VOICE_NAME'
         value: speechSynthesisVoiceName
