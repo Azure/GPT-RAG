@@ -4,7 +4,7 @@ param tags object = {}
 param aiServicesReuse bool
 param existingAiServicesResourceGroupName string
 
-param aiServicesDeploy bool
+param aiServicesDeploy bool = true
 
 param secretsNames object = {}
 param keyVaultName string

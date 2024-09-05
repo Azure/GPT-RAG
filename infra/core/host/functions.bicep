@@ -24,7 +24,7 @@ param vnetName string
 param subnetId string
 
 param functionAppReuse bool
-param deployFunctionApp bool
+param deployFunctionApp bool = true
 param existingFunctionAppResourceGroupName string
 
 param functionAppStorageReuse bool

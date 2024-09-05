@@ -10,29 +10,13 @@ param (
 
 Write-Host "RAI Script: Setting up AOAI content filters & blocklist"
 
-# Check if Az.Accounts is installed for PowerShell
-$AZModule = "Az.Accounts"
-$InstalledModules = Get-InstalledModule
-if (-not $InstalledModules.Name -contains $AZModule) {
-    Write-Host "AZ.Accounts is not found. Attempting installation..."
-    Install-Module -Name $AZModule -Force
+$token = az account get-access-token --tenant "$Tenant" --query accessToken --output tsv
+
+if ([string]::IsNullOrWhiteSpace($token)) {
+    Write-Host "Failed to get access token. Please manually sign-in to Azure account"
+    az login --use-device-code
+    $token = az account get-access-token --tenant "$Tenant" --query accessToken --output tsv
 }
-
-Try{
-    $token = (Get-AzAccessToken -TenantId $tenantId).Token
-
-    if ([string]::IsNullOrWhiteSpace($token)) {
-        Write-Host "Please manually sign-in to Azure account"
-        Connect-AzAccount
-        $token = (Get-AzAccessToken -TenantId $tenantId).Token
-    }
-
-} Catch {
-    Write-Host "Please manually sign-in to Azure account"
-    Connect-AzAccount
-    $token = (Get-AzAccessToken -TenantId $tenantId).Token
-}
-
 
 $headers = @{
     Authorization  = "Bearer $token"
