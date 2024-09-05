@@ -10,16 +10,10 @@ $tenantId = $env:AZURE_TENANT_ID
 $aoaiResourceName = $env:AZURE_OPENAI_SERVICE_NAME
 $aoaiModelName = $env:AZURE_CHAT_GPT_DEPLOYMENT_NAME
 
-
-# Retrieve and parse the AZURE_COMPONENT_CONFIG environment variable
-$azureComponentConfig = Get-Content env:AZURE_COMPONENT_CONFIG | ConvertFrom-Json
-
 # Check conditions
-if (-not ($azureComponentConfig.deployDataIngestion -eq "false" -and $azureComponentConfig.deployOrchestrator -eq "false")) {
-    # RAI script: AOAI content filters
-    $RAIscript = Join-Path -Path $PSScriptRoot -ChildPath 'rai\raipolicies.ps1'
-    & $RAIscript -Tenant $tenantId -Subscription $subscriptionId -ResourceGroup $resourceGroupName -AoaiResourceName $aoaiResourceName -AoaiModelName $aoaiModelName -RaiPolicyName 'MainRAIpolicy' -RaiBlocklistName 'MainBlockListPolicy'
-}
+# RAI script: AOAI content filters
+$RAIscript = Join-Path -Path $PSScriptRoot -ChildPath 'rai\raipolicies.ps1'
+& $RAIscript -Tenant $tenantId -Subscription $subscriptionId -ResourceGroup $resourceGroupName -AoaiResourceName $aoaiResourceName -AoaiModelName $aoaiModelName -RaiPolicyName 'MainRAIpolicy' -RaiBlocklistName 'MainBlockListPolicy'
 
 if ($env:AZURE_ZERO_TRUST -eq "FALSE") {
     exit 0

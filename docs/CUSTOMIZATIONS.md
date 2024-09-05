@@ -7,7 +7,7 @@ On this page, you will find some options to configure your deployment:
 - [Setting Custom Names for Resources](#defining-resources-names)
 - [Applying Tags to All Resources](#adding-tags-for-all-resources)
 - [Bringing Your Own Resources](#bring-your-own-resources)
-- [Selecting Your Components](#selecting-your-components)
+<!-- - [Selecting Your Components](#selecting-your-components) -->
 - [Accessing Data Ingest function using AI Search Managed Identity](#accessing-the-data-ingest-function-from-ai-search-using-a-managed-identity)
 - [Extending Enteprise RAG components](#extending-solution-components)
 - [Filter Files with AI Search Using Security Trimming](#Filter-Files-with-AI-Search-Using-Security-Trimming)
@@ -75,7 +75,7 @@ azd env set COST_CENTER bar
 
 In some cases, you may want to use one or more pre-existing resources in your subscription instead of creating new ones. Our Bicep template allows you to do this. For detailed instructions on how this can be achieved, please take a look at the [Bring Your Own Resources](CUSTOMIZATIONS_BYOR.md) page.
 
-## Selecting Your Components
+<!-- ## Selecting Your Components
 
 To install just some specific GPT-RAG components, you can adjust the installation process by setting one or more of the following variables to false, based on the components you prefer not to install:
 
@@ -102,7 +102,7 @@ azd package dataIngest
 azd deploy dataIngest
 ```
 
-Done! you deployed only the **Data ingestion** component.
+Done! you deployed only the **Data ingestion** component. -->
 
 ## Accessing the data ingest function from AI Search using a Managed Identity
 

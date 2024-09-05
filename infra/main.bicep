@@ -47,31 +47,6 @@ var resourceToken = toLower(uniqueString(subscription().id, environmentName, loc
 param provisionLoadTesting bool = false
 var _provisionLoadTesting = provisionLoadTesting
 
-// Components configuration
-
-@description('Settings to configure components.')
-var _azureComponentConfigDefaults = {
-  deployDataIngestion: true
-  deployFrontend: true
-  deployOrchestrator: true    
-}
-
-param azureComponentConfig object = {} 
-var _azureComponentConfig = union(_azureComponentConfigDefaults, {
-    deployDataIngestion: (empty(azureComponentConfig.deployDataIngestion) ? _azureComponentConfigDefaults.deployDataIngestion : toLower(azureComponentConfig.deployDataIngestion) == 'true')
-    deployFrontend: (empty(azureComponentConfig.deployFrontend) ? _azureComponentConfigDefaults.deployFrontend : toLower(azureComponentConfig.deployFrontend) == 'true')
-    deployOrchestrator: (empty(azureComponentConfig.deployOrchestrator) ? _azureComponentConfigDefaults.deployOrchestrator : toLower(azureComponentConfig.deployOrchestrator) == 'true')        
-  }
-)
-
-var _deployOrchestrator = _azureComponentConfig.deployOrchestrator
-var _deployFrontend = _azureComponentConfig.deployFrontend
-var _deployDataIngestion = _azureComponentConfig.deployDataIngestion
-var _deployCosmosDb = _deployOrchestrator
-var _deployAoai = _deployDataIngestion || _deployOrchestrator
-var _deployAiSearch = _deployDataIngestion || _deployOrchestrator
-var _deployStorageAccount = _deployDataIngestion || _deployFrontend
-
 // Reuse preexisting resources settings
 
 @description('Settings to define reusable resources.')
@@ -658,7 +633,6 @@ module storage './core/storage/storage-account.bicep' = {
   params: {
     name: _storageAccountName
     location: location
-    deployStorageAccount: _deployStorageAccount
     storageReuse: _azureReuseConfig.storageReuse
     existingStorageResourceGroupName: _azureReuseConfig.existingAccountResourceGroupName
     tags: tags
@@ -677,7 +651,7 @@ module storage './core/storage/storage-account.bicep' = {
   }  
 }
 
-module storagepe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse && _deployStorageAccount) {
+module storagepe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'storagepe'
   scope: resourceGroup
   params: {
@@ -698,7 +672,6 @@ module cosmosAccount './core/db/cosmos.bicep' = {
   scope: resourceGroup
   params: {
     accountName: _azureDbConfig.dbAccountName
-    deployCosmosDb: _deployCosmosDb
     cosmosDbReuse: _azureReuseConfig.cosmosDbReuse
     existingCosmosDbResourceGroupName: _azureReuseConfig.existingCosmosDbResourceGroupName 
     existingCosmosDbAccountName: _azureReuseConfig.existingCosmosDbAccountName
@@ -713,7 +686,7 @@ module cosmosAccount './core/db/cosmos.bicep' = {
   }
 }
 
-module cosmospe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse && _deployCosmosDb) {
+module cosmospe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'cosmospe'
   scope: resourceGroup
   params: {
@@ -804,7 +777,6 @@ module orchestrator './core/host/functions.bicep' =  {
     appName: _orchestratorFunctionAppName
     location: location
     functionAppReuse: _azureReuseConfig.orchestratorFunctionAppReuse
-    deployFunctionApp: _deployOrchestrator
     existingFunctionAppResourceGroupName: _azureReuseConfig.existingOrchestratorFunctionAppResourceGroupName
     functionAppStorageReuse: _azureReuseConfig.orchestratorFunctionAppStorageReuse
     existingFunctionAppStorageName: _azureReuseConfig.existingOrchestratorFunctionAppStorageName
@@ -960,7 +932,7 @@ module orchestrator './core/host/functions.bicep' =  {
   }
 }
 
-module orchestratorPe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse && _deployOrchestrator) {
+module orchestratorPe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'orchestratorPe'
   scope: resourceGroup
   params: {
@@ -974,7 +946,7 @@ module orchestratorPe './core/network/private-endpoint.bicep' = if (_networkIsol
   }
 }
 
-module orchestratorKeyVaultAccess './core/security/keyvault-access.bicep' = if (_deployOrchestrator) {
+module orchestratorKeyVaultAccess './core/security/keyvault-access.bicep' =  {
   name: 'orchestrator-keyvault-access'
   scope: resourceGroup
   params: {
@@ -983,7 +955,7 @@ module orchestratorKeyVaultAccess './core/security/keyvault-access.bicep' = if (
   }
 } 
 
-module orchestratorCosmosAccess './core/security/cosmos-access.bicep' = if (_deployOrchestrator) {
+module orchestratorCosmosAccess './core/security/cosmos-access.bicep' =  {
   name: 'orchestrator-cosmos-access'
   scope: resourceGroup
   params: {
@@ -992,7 +964,7 @@ module orchestratorCosmosAccess './core/security/cosmos-access.bicep' = if (_dep
   }
 } 
 
-module orchestratorOaiAccess './core/security/openai-access.bicep' = if (_deployOrchestrator) {
+module orchestratorOaiAccess './core/security/openai-access.bicep' = {
   name: 'orchestrator-openai-access'
   scope: resourceGroup
   params: {
@@ -1001,7 +973,7 @@ module orchestratorOaiAccess './core/security/openai-access.bicep' = if (_deploy
   }
 } 
 
-module orchestratorSearchAccess './core/security/search-access.bicep' = if (_deployOrchestrator) {
+module orchestratorSearchAccess './core/security/search-access.bicep' = {
   name: 'orchestrator-search-access'
   scope: resourceGroup
   params: {
@@ -1020,7 +992,6 @@ module frontEnd  'core/host/appservice.bicep' = {
     applicationInsightsName: _azureReuseConfig.appInsightsReuse?_azureReuseConfig.existingAppInsightsName:_appInsightsName
     applicationInsightsResourceGroupName: _azureReuseConfig.appInsightsReuse?_azureReuseConfig.existingAppInsightsResourceGroupName:_resourceGroupName  
     appServiceReuse: _azureReuseConfig.appServiceReuse
-    deployAppService: _deployFrontend
     existingAppServiceNameResourceGroupName: _azureReuseConfig.existingAppServiceNameResourceGroupName
     networkIsolation: _networkIsolation
     vnetName: _networkIsolation?vnet.outputs.name:''
@@ -1086,7 +1057,7 @@ module frontEnd  'core/host/appservice.bicep' = {
   }
 }
 
-module frontendPe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse && _deployFrontend) {
+module frontendPe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'frontendPe'
   scope: resourceGroup
   params: {
@@ -1100,7 +1071,7 @@ module frontendPe './core/network/private-endpoint.bicep' = if (_networkIsolatio
   }
 }
 
-module appserviceKeyVaultAccess './core/security/keyvault-access.bicep' = if (_deployFrontend) {
+module appserviceKeyVaultAccess './core/security/keyvault-access.bicep' = {
   name: 'appservice-keyvault-access'
   scope: resourceGroup
   params: {
@@ -1109,7 +1080,7 @@ module appserviceKeyVaultAccess './core/security/keyvault-access.bicep' = if (_d
   }
 }
 
-module appserviceStorageAccountAccess './core/security/blobstorage-reader-access.bicep' = if (_deployFrontend) {
+module appserviceStorageAccountAccess './core/security/blobstorage-reader-access.bicep' = {
   name: 'appservice-blobstorage-access'
   scope: resourceGroup
   params: {
@@ -1118,7 +1089,7 @@ module appserviceStorageAccountAccess './core/security/blobstorage-reader-access
   }
 }
 
-module appserviceOrchestratorAccess './core/host/functions-access.bicep' = if (_deployFrontend)  {
+module appserviceOrchestratorAccess './core/host/functions-access.bicep' = {
   name: 'appservice-function-access'
   scope: resourceGroup
   params: {
@@ -1155,7 +1126,6 @@ module dataIngestion './core/host/functions.bicep' = {
     functionAppStorageReuse: _azureReuseConfig.dataIngestionFunctionAppStorageReuse
     existingFunctionAppStorageName: _azureReuseConfig.existingDataIngestionFunctionAppStorageName
     existingFunctionAppStorageResourceGroupName: _azureReuseConfig.existingDataIngestionFunctionAppStorageResourceGroupName
-    deployFunctionApp: _deployDataIngestion
     appInsightsConnectionString: appInsights.outputs.connectionString
     appInsightsInstrumentationKey: appInsights.outputs.instrumentationKey
     tags: union(tags, { 'azd-service-name': 'dataIngest' })
@@ -1271,7 +1241,7 @@ module dataIngestion './core/host/functions.bicep' = {
   }
 }
 
-module dataIngestionKeyVaultAccess './core/security/keyvault-access.bicep' = if (_deployDataIngestion) {
+module dataIngestionKeyVaultAccess './core/security/keyvault-access.bicep' = {
   name: 'data-ingestion-keyvault-access'
   scope: resourceGroup
   params: {
@@ -1280,7 +1250,7 @@ module dataIngestionKeyVaultAccess './core/security/keyvault-access.bicep' = if 
   }
 }
 
-module dataIngestionBlobStorageAccess './core/security/blobstorage-contributor-access.bicep' = if (_deployDataIngestion) {
+module dataIngestionBlobStorageAccess './core/security/blobstorage-contributor-access.bicep' = {
   name: 'data-ingestion-blobstorage-access'
   scope: resourceGroup
   params: {
@@ -1307,7 +1277,7 @@ module dataIngestionAIAccess './core/security/aiservices-access.bicep' = {
   }
 } 
 
-module ingestionPe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse && _deployDataIngestion) {
+module ingestionPe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'ingestionPe'
   scope: resourceGroup
   params: {
@@ -1370,7 +1340,6 @@ module openAi 'core/ai/aiservices.bicep' = {
     location: location
     aiServicesReuse : _azureReuseConfig.aoaiReuse
     existingAiServicesResourceGroupName : _azureReuseConfig.existingAoaiResourceGroupName
-    aiServicesDeploy: _deployAoai
     publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
     tags: tags
     sku: {
@@ -1409,7 +1378,7 @@ module openAi 'core/ai/aiservices.bicep' = {
   }
 }
 
-module openAiPe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse && _deployAoai) {
+module openAiPe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'openAiPe'
   scope: resourceGroup
   params: {
@@ -1432,7 +1401,6 @@ module searchService 'core/search/search-services.bicep' = {
     name: _searchServiceName
     location: location
     aiSearchReuse : _azureReuseConfig.aiSearchReuse
-    deployAiSearch: _deployAiSearch
     existingAiSearchResourceGroupName : _azureReuseConfig.existingAiSearchResourceGroupName
     secretName: 'azureSearchKey'
     keyVaultName: keyVault.outputs.name
@@ -1450,7 +1418,7 @@ module searchService 'core/search/search-services.bicep' = {
   }
 }
 
-module searchStoragePrivatelink 'core/search/search-private-link.bicep' = if (_networkIsolation && !_vnetReuse && _deployAiSearch) {
+module searchStoragePrivatelink 'core/search/search-private-link.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'searchStoragePrivatelink'
   scope: resourceGroup
   params: {
@@ -1461,7 +1429,7 @@ module searchStoragePrivatelink 'core/search/search-private-link.bicep' = if (_n
   }
 }
 
-module searchFuncAppPrivatelink 'core/search/search-private-link.bicep' = if (_networkIsolation && !_vnetReuse && _deployAiSearch) {
+module searchFuncAppPrivatelink 'core/search/search-private-link.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'searchFuncAppPrivatelink'
   scope: resourceGroup
   params: {
@@ -1472,7 +1440,7 @@ module searchFuncAppPrivatelink 'core/search/search-private-link.bicep' = if (_n
   }
 }
 
-module searchPe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse && _deployAiSearch) {
+module searchPe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'searchPe'
   scope: resourceGroup
   params: {

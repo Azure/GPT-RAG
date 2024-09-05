@@ -11,7 +11,7 @@ param cosmosDbReuse bool
 param existingCosmosDbResourceGroupName string
 param existingCosmosDbAccountName string
 
-param deployCosmosDb bool
+param deployCosmosDb bool = true
 
 
 param conversationContainerName string
