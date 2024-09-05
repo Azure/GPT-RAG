@@ -39,7 +39,7 @@ param vnetName string = ''
 param subnetId string = ''
 
 param appServiceReuse bool
-param deployAppService bool
+param deployAppService bool = true
 
 param existingAppServiceNameResourceGroupName string    
 
