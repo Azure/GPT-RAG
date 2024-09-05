@@ -4,7 +4,7 @@ param location string = resourceGroup().location
 param aiSearchReuse bool
 param existingAiSearchResourceGroupName string
 
-param deployAiSearch bool
+param deployAiSearch bool = true
 
 param tags object = {}
 param publicNetworkAccess string

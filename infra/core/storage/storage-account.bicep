@@ -3,7 +3,7 @@ param location string = resourceGroup().location
 param tags object = {}
 param existingStorageResourceGroupName string
 param storageReuse bool
-param deployStorageAccount bool
+param deployStorageAccount bool = true
 
 @allowed([ 'Hot', 'Cool', 'Premium' ])
 param accessTier string = 'Hot'

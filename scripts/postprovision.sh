@@ -18,11 +18,9 @@ aoaiModelName="$AZURE_CHAT_GPT_DEPLOYMENT_NAME"
 deployDataIngestion=$(echo $AZURE_COMPONENT_CONFIG | grep -o '"deployDataIngestion":"[^"]*' | grep -o '[^"]*$')
 deployOrchestrator=$(echo $AZURE_COMPONENT_CONFIG | grep -o '"deployOrchestrator":"[^"]*' | grep -o '[^"]*$')
 
-if ! ([ "$deployDataIngestion" = "false" ] && [ "$deployOrchestrator" = "false" ]); then
-    # RAI script: AOAI content filters
-    (cd $PWD/scripts/rai &&
-    ./raipolicies.sh $tenantId $subscriptionId $resourceGroupName $aoaiResourceName $aoaiModelName "MainRAIpolicy" "MainBlockListPolicy")
-fi
+# RAI script: AOAI content filters
+cd $PWD/scripts/rai
+./raipolicies.sh $tenantId $subscriptionId $resourceGroupName $aoaiResourceName $aoaiModelName "MainRAIpolicy" "MainBlockListPolicy"
 
 if [ "$AZURE_ZERO_TRUST" = "FALSE" ]; then
     exit 0

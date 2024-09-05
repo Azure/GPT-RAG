@@ -217,13 +217,6 @@
           "modelsContainerName": "${AZURE_DB_MODELS_CONTAINER_NAME}"         
         }
       },
-      "azureComponentConfig":{
-        "value": {
-          "deployDataIngestion": "${DEPLOY_DATA_INGESTION}",
-          "deployFrontend": "${DEPLOY_FRONTEND}",
-          "deployOrchestrator": "${DEPLOY_ORCHESTRATOR}"
-        }
-      },
       "azureReuseConfig":{
         "value": {
           "aoaiReuse": "${AOAI_REUSE}",
