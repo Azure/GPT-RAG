@@ -25,16 +25,13 @@ The **Enterprise RAG** Solution Accelerator (GPT-RAG) offers a robust architectu
 
 GPT-RAG follows a modular approach, consisting of three components, each with a specific function.
 
-* [Data Ingestion](https://github.com/Azure/gpt-rag-ingestion) - Optimizes data chunking and indexing for the RAG retrieval step.
+* **[Data Ingestion](https://github.com/Azure/gpt-rag-ingestion)** - Optimizes data chunking and indexing for the RAG retrieval step.
 
-* Orchestrator - Coordinates the necessary flow to retrieve information and generate a response for the user. Available in two options: [Functional](https://github.com/Azure/gpt-rag-orchestrator), based on Semantic Kernel functions, and [Agentic](https://github.com/Azure/gpt-rag-agentic), based on AutoGen agents.
-
-> [!TIP]  
-> The default is Functional. See the deployment instructions to select Agentic.
+* **Orchestrator** - Coordinates the flow to retrieve information and generate a user response. It offers two options: **[Functional](https://github.com/Azure/gpt-rag-orchestrator)**, using Semantic Kernel functions (default), and **[Agentic](https://github.com/Azure/gpt-rag-agentic)**, using AutoGen agents. See deployment instructions to switch to Agentic.
 
 This keeps it clear and brief.
 
-* [App Front-End](https://github.com/Azure/gpt-rag-frontend) - Uses the [Backend for Front-End](https://learn.microsoft.com/en-us/azure/architecture/patterns/backends-for-frontends) pattern to provide a scalable and efficient web interface.
+* **[App Front-End](https://github.com/Azure/gpt-rag-frontend)** - Uses the [Backend for Front-End](https://learn.microsoft.com/en-us/azure/architecture/patterns/backends-for-frontends) pattern to provide a scalable and efficient web interface.
 
 <!-- * [Teams-BOT](https://github.com/Azure/gpt-rag-bot) Constructed using Azure BOT Services, this platform enables users to engage with the Orchestrator seamlessly through the Microsoft Teams interface. -->
 
