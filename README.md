@@ -27,7 +27,12 @@ GPT-RAG follows a modular approach, consisting of three components, each with a 
 
 * [Data Ingestion](https://github.com/Azure/gpt-rag-ingestion) - Optimizes data chunking and indexing for the RAG retrieval step.
 
-* [Orchestrator](https://github.com/Azure/gpt-rag-orchestrator) - Orchestrates LLMs and knowledge bases calls to generate optimal responses for users.
+* Orchestrator - Coordinates the necessary flow to retrieve information and generate a response for the user. Available in two options: [Functional](https://github.com/Azure/gpt-rag-orchestrator), based on Semantic Kernel functions, and [Agentic](https://github.com/Azure/gpt-rag-agentic), based on AutoGen agents.
+
+> [!TIP]  
+> The default is Functional. See the deployment instructions to select Agentic.
+
+This keeps it clear and brief.
 
 * [App Front-End](https://github.com/Azure/gpt-rag-frontend) - Uses the [Backend for Front-End](https://learn.microsoft.com/en-us/azure/architecture/patterns/backends-for-frontends) pattern to provide a scalable and efficient web interface.
 
@@ -93,11 +98,18 @@ For quick demonstrations or proof-of-concept projects without network isolation 
 
 The deployment procedure is quite simple, just install the prerequisites mentioned above and follow these four steps using [Azure Developer CLI (azd)](https://aka.ms/azure-dev/install) in a terminal:
 
+
 **1** Download the Repository:
 
 ```sh
 azd init -t azure/gpt-rag
 ```
+
+> [!NOTE]  
+> Add the `-b agentic` parameter if you want to use the agentic options.
+> ```sh
+> azd init -t azure/gpt-rag -b agentic
+> ```
 
 **2** Login to Azure:
 
@@ -145,6 +157,12 @@ The deployment procedure is similar to that of the Basic Architecture, but with 
 ```sh
 azd init -t azure/gpt-rag
 ```
+
+> [!NOTE]  
+> Add the `-b agentic` parameter if you want to use the agentic options.
+> ```sh
+> azd init -t azure/gpt-rag -b agentic
+> ```
 
 **2** Enable network isolation
    
