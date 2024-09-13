@@ -17,8 +17,101 @@ param tags object = {}
 param vnetReuse bool
 param existingVnetResourceGroupName string
 
+// Parameters for NSG names
+param aiNsgName string = 'ai-nsg'
+param appIntNsgName string = 'appInt-nsg'
+param appServicesNsgName string = 'appServices-nsg'
+param databaseNsgName string = 'database-nsg'
+param bastionNsgName string = 'bastion-nsg'
 
-resource existingVnet 'Microsoft.Network/virtualNetworks@2020-06-01' existing  = if (vnetReuse) {
+// Network Security Groups
+resource aiNsg 'Microsoft.Network/networkSecurityGroups@2020-11-01' = {
+  name: aiNsgName
+  location: location
+  tags: tags
+  properties: {
+    securityRules: []
+  }
+}
+
+resource appIntNsg 'Microsoft.Network/networkSecurityGroups@2020-11-01' = {
+  name: appIntNsgName
+  location: location
+  tags: tags
+  properties: {
+    securityRules: []
+  }
+}
+
+resource appServicesNsg 'Microsoft.Network/networkSecurityGroups@2020-11-01' = {
+  name: appServicesNsgName
+  location: location
+  tags: tags
+  properties: {
+    securityRules: []
+  }
+}
+
+resource databaseNsg 'Microsoft.Network/networkSecurityGroups@2020-11-01' = {
+  name: databaseNsgName
+  location: location
+  tags: tags
+  properties: {
+    securityRules: []
+  }
+}
+
+resource bastionNsg 'Microsoft.Network/networkSecurityGroups@2020-11-01' = {
+  name: bastionNsgName
+  location: location
+  tags: tags
+  properties: {
+    securityRules: [
+      {
+        name: 'AllowInternetInbound443'
+        properties: {
+          priority: 100
+          protocol: 'Tcp'
+          access: 'Allow'
+          direction: 'Inbound'
+          sourceAddressPrefix: '*'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRange: '443'
+        }
+      }
+      {
+        name: 'AllowInternetOutbound443'
+        properties: {
+          priority: 200
+          protocol: 'Tcp'
+          access: 'Allow'
+          direction: 'Outbound'
+          sourceAddressPrefix: '*'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRange: '443'
+        }
+      }
+      {
+        name: 'AllowInternetOutbound3389'
+        properties: {
+          priority: 300
+          protocol: 'Tcp'
+          access: 'Allow'
+          direction: 'Outbound'
+          sourceAddressPrefix: '*'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRange: '3389'
+        }
+      }
+    ]
+  }
+}
+
+// Virtual Network and Subnets
+resource existingVnet 'Microsoft.Network/virtualNetworks@2020-06-01' existing = if (vnetReuse) {
   scope: resourceGroup(existingVnetResourceGroupName)
   name: vnetName
 }
@@ -40,6 +133,9 @@ resource newVnet 'Microsoft.Network/virtualNetworks@2020-11-01' = if (!vnetReuse
           addressPrefix: aiSubnetPrefix
           privateEndpointNetworkPolicies: 'Enabled'
           privateLinkServiceNetworkPolicies: 'Enabled'
+          networkSecurityGroup: {
+            id: aiNsg.id
+          }
         }
       }
       {
@@ -48,6 +144,9 @@ resource newVnet 'Microsoft.Network/virtualNetworks@2020-11-01' = if (!vnetReuse
           addressPrefix: appServicesSubnetPrefix
           privateEndpointNetworkPolicies: 'Enabled'
           privateLinkServiceNetworkPolicies: 'Enabled'
+          networkSecurityGroup: {
+            id: appServicesNsg.id
+          }
         }
       }
       {
@@ -56,14 +155,20 @@ resource newVnet 'Microsoft.Network/virtualNetworks@2020-11-01' = if (!vnetReuse
           addressPrefix: databaseSubnetPrefix
           privateEndpointNetworkPolicies: 'Enabled'
           privateLinkServiceNetworkPolicies: 'Enabled'
+          networkSecurityGroup: {
+            id: databaseNsg.id
+          }
         }
       }
       {
-        name: bastionSubnetName
+        name: bastionSubnetName 
         properties: {
           addressPrefix: bastionSubnetPrefix
           privateEndpointNetworkPolicies: 'Enabled'
           privateLinkServiceNetworkPolicies: 'Enabled'
+          networkSecurityGroup: {
+            id: bastionNsg.id
+          }
         }
       }
       {
@@ -81,16 +186,19 @@ resource newVnet 'Microsoft.Network/virtualNetworks@2020-11-01' = if (!vnetReuse
               }
             }
           ]
+          networkSecurityGroup: {
+            id: appIntNsg.id
+          }
         }
       }
     ]
   }
 }
 
-output name string = vnetReuse?existingVnet.name:newVnet.name
-output id string = vnetReuse?existingVnet.id:newVnet.id
-output aiSubId string = vnetReuse?resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, aiSubnetName):newVnet.properties.subnets[0].id
-output appServicesSubId string = vnetReuse?resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, appServicesSubnetName):newVnet.properties.subnets[1].id
-output databaseSubId string = vnetReuse?resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, databaseSubnetName):newVnet.properties.subnets[2].id
-output bastionSubId string = vnetReuse?resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, bastionSubnetName):newVnet.properties.subnets[3].id
-output appIntSubId string = vnetReuse?resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, appIntSubnetName):newVnet.properties.subnets[4].id
+output name string = vnetReuse ? existingVnet.name : newVnet.name
+output id string = vnetReuse ? existingVnet.id : newVnet.id
+output aiSubId string = vnetReuse ? resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, aiSubnetName) : newVnet.properties.subnets[0].id
+output appServicesSubId string = vnetReuse ? resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, appServicesSubnetName) : newVnet.properties.subnets[1].id
+output databaseSubId string = vnetReuse ? resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, databaseSubnetName) : newVnet.properties.subnets[2].id
+output bastionSubId string = vnetReuse ? resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, bastionSubnetName) : newVnet.properties.subnets[3].id
+output appIntSubId string = vnetReuse ? resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, appIntSubnetName) : newVnet.properties.subnets[4].id
