@@ -257,6 +257,12 @@ Before starting the Zero Trust architecture deployment, review the prerequisites
 azd init -t azure/gpt-rag
 ```
 
+> [!NOTE]  
+> Add the `-b agentic` parameter if you want to use the agentic version.
+> ```sh
+> azd init -t azure/gpt-rag -b agentic
+> ```
+
 **2** Enable network isolation
    
 ```sh  
@@ -324,6 +330,12 @@ azd deploy
 > [!IMPORTANT] 
 > Note: when running the ```azd init ...``` and ```azd env refresh```, use the same environment name, subscription, and region used in the initial provisioning of the infrastructure.  
    
+> [!IMPORTANT]  
+> Add the `-b agentic` parameter to azd init command if you are using the agentic option.
+> ```sh
+> azd init -t azure/gpt-rag -b agentic
+> ```
+
 **Done! Zero trust deployment is completed.**
 
 ### Optional Next Steps
