@@ -371,10 +371,10 @@ var _searchServiceSkuName = _networkIsolation?'standard2':'standard'
 param searchIndex string = ''
 var _searchIndex = !empty(searchIndex) ? searchIndex : 'ragindex'
 
-// @allowed([ '2023-11-01', '2023-10-01-Preview', '2024-05-01-preview' ])
+// @allowed([ '2024-07-01', '2023-11-01', '2023-10-01-Preview', '2024-05-01-preview' ])
 // Requires version 2023-10-01-Preview or higher for indexProjections and MIS authResourceId.
 param searchApiVersion string = ''
-var _searchApiVersion = !empty(searchApiVersion) ? searchApiVersion : '2024-05-01-preview'
+var _searchApiVersion = !empty(searchApiVersion) ? searchApiVersion : '2024-07-01'
 
 @description('Frequency of search reindexing. PT5M (5 min), PT1H (1 hour), P1D (1 day).')
 // @allowed(['PT5M', 'PT1H', 'P1D'])
