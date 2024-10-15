@@ -160,7 +160,7 @@ For instance, if your AI subnet has a custom name, specify it using the `AZURE_A
 
 #### Networking resources
 
-When reusing an existing VNet, you must configure the network resources according to your standards **after deploying GPT-RAG**.
+When reusing an existing VNet, you must configure the network resources according to your standards **before deploying GPT-RAG**.
 
 These resources include Private Endpoints, Private DNS Links, and Search Private Links:
 
