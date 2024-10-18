@@ -23,6 +23,8 @@ param networkIsolation bool
 param vnetName string
 param subnetId string
 
+param allowSharedKeyAccess bool = true
+
 param functionAppReuse bool
 param deployFunctionApp bool = true
 param existingFunctionAppResourceGroupName string
@@ -66,6 +68,7 @@ resource newStorageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = if (
   properties: {
     allowBlobPublicAccess: false // Disable anonymous access 
     supportsHttpsTrafficOnly: true
+    allowSharedKeyAccess: allowSharedKeyAccess    
     defaultToOAuthAuthentication: true
   }
 }

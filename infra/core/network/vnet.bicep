@@ -1,16 +1,16 @@
 param vnetName string
 param location string
-param vnetAddress string = '10.0.0.0/16'
 param aiSubnetName string
 param appIntSubnetName string
 param appServicesSubnetName string
 param databaseSubnetName string
 param bastionSubnetName string
-param aiSubnetPrefix string = '10.0.1.0/24'
-param appIntSubnetPrefix string = '10.0.2.0/24'
-param appServicesSubnetPrefix string = '10.0.3.0/24'
-param databaseSubnetPrefix string = '10.0.4.0/24'
-param bastionSubnetPrefix string = '10.0.5.0/24'
+param vnetAddress string = '10.0.0.0/23'
+param aiSubnetPrefix string = '10.0.0.0/26'
+param appIntSubnetPrefix string = '10.0.0.128/26'
+param appServicesSubnetPrefix string = '10.0.0.192/26'
+param databaseSubnetPrefix string = '10.0.1.0/26'
+param bastionSubnetPrefix string = '10.0.0.64/26'
 param appServicePlanId string
 param appServicePlanName string
 param tags object = {}

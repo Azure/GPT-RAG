@@ -187,7 +187,7 @@ var _vnetName = _azureReuseConfig.vnetReuse ? _azureReuseConfig.existingVnetName
 
 @description('Address space for the virtual network')
 param vnetAddress string = ''
-var _vnetAddress = !empty(vnetAddress) ? vnetAddress : '10.0.0.0/24'
+var _vnetAddress = !empty(vnetAddress) ? vnetAddress : '10.0.0.0/23'
 
 @description('Name of the AI services subnet')
 param aiSubnetName string = ''
@@ -195,7 +195,7 @@ var _aiSubnetName = !empty(aiSubnetName) ? aiSubnetName : 'ai-subnet'
 
 @description('Address prefix for the AI services subnet')
 param aiSubnetPrefix string = ''
-var _aiSubnetPrefix = !empty(aiSubnetPrefix) ? aiSubnetPrefix : '10.0.0.0/28'
+var _aiSubnetPrefix = !empty(aiSubnetPrefix) ? aiSubnetPrefix : '10.0.0.0/26'
 
 @description('Name of the Bastion subnet')
 param bastionSubnetName string = ''
@@ -211,7 +211,7 @@ var _appIntSubnetName = !empty(appIntSubnetName) ? appIntSubnetName : 'app-int-s
 
 @description('Address prefix for the App Integration subnet')
 param appIntSubnetPrefix string = ''
-var _appIntSubnetPrefix = !empty(appIntSubnetPrefix) ? appIntSubnetPrefix : '10.0.0.48/28'
+var _appIntSubnetPrefix = !empty(appIntSubnetPrefix) ? appIntSubnetPrefix : '10.0.0.128/26'
 
 @description('Name of the App Services subnet')
 param appServicesSubnetName string = ''
@@ -219,7 +219,7 @@ var _appServicesSubnetName = !empty(appServicesSubnetName) ? appServicesSubnetNa
 
 @description('Address prefix for the App Services subnet')
 param appServicesSubnetPrefix string = ''
-var _appServicesSubnetPrefix = !empty(appServicesSubnetPrefix) ? appServicesSubnetPrefix : '10.0.0.16/28'
+var _appServicesSubnetPrefix = !empty(appServicesSubnetPrefix) ? appServicesSubnetPrefix : '10.0.0.192/26'
 
 @description('Name of the Database subnet')
 param databaseSubnetName string = ''
@@ -227,7 +227,7 @@ var _databaseSubnetName = !empty(databaseSubnetName) ? databaseSubnetName : 'dat
 
 @description('Address prefix for the Database subnet')
 param databaseSubnetPrefix string = ''
-var _databaseSubnetPrefix = !empty(databaseSubnetPrefix) ? databaseSubnetPrefix : '10.0.0.32/28'
+var _databaseSubnetPrefix = !empty(databaseSubnetPrefix) ? databaseSubnetPrefix : '10.0.1.0/26'
 
 // flag that indicates if we're reusing a vnet
 var _vnetReuse = _azureReuseConfig.vnetReuse
