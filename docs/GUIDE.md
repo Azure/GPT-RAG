@@ -38,7 +38,7 @@ The **GPT-RAG Solution Accelerator** enables organizations to leverage **Generat
 
 Beyond classical **Retrieval-Augmented Generation (RAG)** capabilities, the accelerator incorporates **agents** that support sophisticated scenarios such as **NL2SQL query generation** and other context-aware data interactions. This flexibility enables advanced use cases where AI can seamlessly retrieve and interpret information, meeting diverse technical requirements.
 
-The GPT-RAG Solution Accelerator follows a **modular approach**, consisting of three components: **[Data Ingestion](https://github.com/Azure/gpt-rag-ingestion)**, **[Orchestrator](https://github.com/Azure/gpt-rag-agentic)**, and **[App Front-End](https://github.com/Azure/gpt-rag-frontend)**, which utilizes the [Backend for Front-End](https://learn.microsoft.com/en-us/azure/architecture/patterns/backends-for-frontends) pattern to provide a scalable and efficient web interface. Next, you can view the application's web UI.
+The GPT-RAG Solution Accelerator follows a **modular approach**, consisting of three components: **[Data Ingestion](https://github.com/Azure/gpt-rag-ingestion)**, **[Orchestrator](https://github.com/Azure/gpt-rag-agentic)**, and **[App Front-End](https://github.com/Azure/gpt-rag-frontend)**, which utilizes the [Backend for Front-End](https://learn.microsoft.com/en-us/azure/architecture/patterns/backends-for-frontends) pattern to provide a scalable and efficient web interface.
 
 ![Zero Trust Architecture](../media/admin-guide-homepage.png)
 <br>*GPT-RAG UI*
@@ -83,7 +83,7 @@ The diagram above illustrates the Zero Trust architecture. The **GPT-RAG Solutio
 For more information about Zero Trust architecture, see the [Enterprise RAG (GPT-RAG) Architecture](ARCHITECTURE.md) page.
 
 > [!TIP]
-> Need the Visio diagrams used in this documentation for your presentations or customizations? You can easily download them here: [Enterprise RAG](../media/visio/Enterprise%20RAG.vsdx).
+> Need the Visio diagrams used in this documentation? You can easily download them here: [Enterprise RAG](../media/visio/Enterprise%20RAG.vsdx).
 
 ## Data Ingestion
 
@@ -93,10 +93,10 @@ Data ingestion is a crucial part of the solution, enabling the system to retriev
 
 1. **Data Collection:** Documents are ingested from `documents` blob container in the GPT-RAG storage account.
 2. **Data Preprocessing:** The documents are prepared for indexing in AI Search Index, including breaking them into smaller chunks and optimizing them for efficient searchability.
-3. **Indexing for Search:** The chunks are then indexed within Azure AI Search, allowing for efficient and accurate retrieval during query processing.
+3. **Indexing for Search:** The chunks are then indexed within Azure AI Search, allowing for efficient retrieval during query processing.
 
 > [!NOTE]  
-> The data ingestion process follows a pull approach, where an Azure AI Search indexer checks blob storage every hour. A Function App preprocesses new documents, applying customized chunking strategies before indexing. The execution frequency can be configured as needed. .
+> The ingestion process uses a pull approach: an Azure AI Search indexer checks blob storage hourly, triggering a Function App to preprocess and chunk new documents for indexing. Execution frequency is configurable.
 
 For more information about the data ingestion process take a look at the [GPT-RAG ingestion](https://github.com/Azure/gpt-rag-ingestion) function app repo.
 
@@ -199,8 +199,8 @@ Before uploading documents, ensure that you have the necessary permissions in Az
    ![Selecting documents storage account](../media/admin-guide-document-upload-portal-select-storage-account.png)
    <br>*Selecting documents storage account*
 
-   > [!TIP]
-   > It is the storage account **without** the suffixes **"ing"** or **"orc"**.
+> [!TIP]
+> It is the storage account **without** the suffixes **"ing"** or **"orc"**.
 
 4. **Navigate to the Documents Container:**
    - Within the selected storage account, click on **Containers** in the left-hand menu.
@@ -260,8 +260,8 @@ Before reindexing, ensure that you have the necessary permissions:
    ![AI Search Reindexing UI](../media/admin-guide-ai-search-reindex.png)
    <br>*AI Search Indexer UI*
 
-   > [!TIP]
-   > If you wish to reindex all content, click **Reset** before running the search index.
+> [!TIP]
+> If you wish to reindex all content, click **Reset** before running the search index.
 
 # How-to: Administration
 
@@ -269,11 +269,7 @@ This section provides step-by-step guides for common administrative tasks.
 
 ## Deploying the Solution Accelerator
 
-Deploy the GPT-RAG Solution Accelerator within a Zero Trust Architecture.
-
-This setup guide will walk you through provisioning a resource group containing all the essential components for the solution to operate effectively. 
-
-The diagram below highlights the resource group and its corresponding components, marked in red, that will be provisioned during the process.
+This setup guide will walk you through provisioning a resource group containing all the essential components for the solution to operate effectively. The diagram below highlights the resource group and its corresponding components, marked in red, that will be provisioned during the process.
 
 ![Zero Trust Architecture](../media/admin-guide-architecture-scope.png)
 <br>*GPT-RAG Zero Trust Architecture*
@@ -283,10 +279,10 @@ The diagram below highlights the resource group and its corresponding components
 - Azure subscription with access to **Azure OpenAI**.
 - **Owner** or **Contributor + User Access Administrator** permission at the Subscription scope.
 - Confirm you have the required quota to provision resources in the chosen Azure region for deployment. For details on resources and SKUs, refer to the [Installation Guide](https://github.com/Azure/GPT-RAG/blob/main/docs/AUTOMATED_INSTALLATION.md#resource-list).
-- Agree to the Responsible AI terms by initiating the creation of an [Azure AI service](https://portal.azure.com/#create/Microsoft.CognitiveServicesAllInOne) resource in the portal. \*\*
+- Agree to the Responsible AI terms by initiating the creation of an [Azure AI service](https://portal.azure.com/#create/Microsoft.CognitiveServicesAllInOne) resource in the portal. 
 
 > [!NOTE]
-> \*\* This step is unnecessary if an Azure AI service resource already exists in the subscription. 
+> The last step is unnecessary if an Azure AI service resource already exists in the subscription. 
 
 ### Deployment Overview
 
@@ -365,7 +361,6 @@ For detailed instructions on setting up network resources manually, refer to the
 > [!INFO]
 > **User Connectivity:** Regardless of the network configuration approach you select, you may need to configure additional network settings to enable connectivity for external or internal users. Refer to the **Internal User Access** and **Internal User Access** sections in this guide for detailed instructions tailored to your specific access requirements.
 
-
 ### Validation
 
 - Ensure all resources are deployed successfully.
@@ -421,14 +416,14 @@ Choose the option that best fits your network setup and security requirements.
 
 ### Configuring VNet Peering
 
-Establish VNet Peering to enable secure and efficient communication between virtual networks for users connected through ExpressRoute or VPN. This setup ensures that internal users can seamlessly access the application's frontend and storage services.
+Establish VNet Peering to enable secure and efficient communication between virtual networks for users connected through ExpressRoute or VPN. This setup ensures that internal users can securely access your **App Service**, **Storage Accounts**, and **Search Service**
 
 The following diagram illustrates a scenario using VNet Peering to allow internal users to access the application, along with a DNS configuration based on Azure DNS Private Resolver. This setup ensures that devices on the private network can resolve the Private Endpoints associated with the services.
 
 ![Diagram illustrating VNet Peering](../media/admin-guide-vnet-peering-diagram.png)
 <br>*VNet Peering*
 
-To simplify, the diagram only includes the App Service frontend’s Private Endpoint and DNS configuration (azurewebsites.net). Uploading documents requires DNS setup for the Storage Account (blob.core.windows.net), and reindexing the AI Search index needs DNS configuration for the search service domain (search.windows.net).
+To simplify, the diagram only includes the App Service frontend’s Private Endpoint and DNS configuration **azurewebsites.net**. Uploading documents requires DNS setup for the Storage Account **blob.core.windows.net**, and reindexing the AI Search index needs DNS configuration for the search service domain **search.windows.net**.
 
 #### Pre-requisites
 
@@ -447,7 +442,7 @@ VNet Peering will enable connectivity with your Private Endpoint. However, to co
 
 ### Configuring Private Endpoints
 
-Implement Private Endpoints for **App Service**, **Storage Accounts**, and **Search Service** to enable secure, direct access for users connected through ExpressRoute or VPN. This setup provides an alternative to VNet Peering, allowing you to host Private Endpoints in your Connectivity subscription instead of within the GPT-RAG VNet. With this configuration, DNS resolves directly to the Private Endpoints in your Connectivity subscription, eliminating the need for VNet Peering.
+Implement Private Endpoints for your **App Service**, **Storage Accounts**, and **Search Service** to ensure secure, direct access for users connected through ExpressRoute or VPN. This setup offers an alternative to VNet Peering by allowing these Private Endpoints to reside in your Connectivity subscription. As a result, DNS will resolve directly to these Private Endpoints, eliminating the need for VNet Peering.
 
 The following diagram illustrates a scenario using Private Endpoints within your Connectivity subscription and a DNS configuration based on Azure DNS Private Resolver. This ensures that devices on the private network can resolve the Private Endpoints associated with the services.
 
@@ -625,15 +620,15 @@ Based on your authorization setup, validate access:
 
 ## Setting Up Git Repos
 
-The GPT-RAG Solution Accelerator comprises four Git repositories, each housing the code for specific application components. Whether you're using GitHub, Azure Repos in Azure DevOps, or another Git service, this section outlines the organization of the codebase and provides instructions for integrating it into your own Git repositories. You can incorporate the Solution Accelerator's code into your Git repositories either by using the repositories as templates or by forking and then creating pull requests in case you want to contribute to the Open Source project.
+The GPT-RAG Solution Accelerator comprises four Git repositories, each housing the code for specific application components. Whether you're using GitHub, Azure Repos in Azure DevOps, or another Git service, this section outlines the organization of the codebase and provides instructions for integrating it into your own Git repositories. You can incorporate the Solution Accelerator's code into your Git repositories either by using the repositories as templates or by forking and then creating pull requests in case you want to contribute to the GPT-RAG repo.
 
 ### Codebase Organization
 
 The Solution Accelerator is structured across four primary Git repositories:
 
-1. **gpt-rag**: The main repository containing Infrastructure as Code (IaC) Bicep templates and comprehensive documentation for the Solution Accelerator.
+1. **gpt-rag**: The main repository containing Infrastructure as Code (IaC) templates and comprehensive documentation for the Solution Accelerator.
 2. **gpt-rag-ingestion**: Manages the Data Ingestion component, optimizing data chunking and indexing for the Retrieval-Augmented Generation (RAG) retrieval step.
-3. **gpt-rag-agentic**: Serves as the orchestrator, coordinating the flow to retrieve information and generate user responses using Agentic and AutoGen agents.
+3. **gpt-rag-agentic**: Serves as the orchestrator, coordinating the flow to retrieve information and generate user responses using agents.
 4. **gpt-rag-frontend**: Provides the front-end application, delivering a scalable and efficient web interface for the Solution Accelerator.
 
 ### Option 1: Using Repositories as Templates (Most Common)
