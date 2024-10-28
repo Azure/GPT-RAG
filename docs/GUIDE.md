@@ -357,8 +357,9 @@ For detailed instructions on setting up network resources manually, refer to the
    - Reference your manually created VNets, subnets, private endpoints, and DNS zones in the GPT-RAG deployment configuration.
    - Ensure that all dependencies and connections are correctly established.
 
-> [!INFO]
-> User Connectivity: Regardless of the network configuration approach you select, you may need to configure additional network settings to enable connectivity for external or internal users. Refer to the **Internal User Access** and **Internal User Access** sections in this guide for detailed instructions tailored to your specific access requirements.
+
+> [!NOTE]
+> **User Connectivity:** Regardless of the network configuration approach you select, you may need to configure additional network settings to enable connectivity for external or internal users. Refer to the **Internal User Access** and **Internal User Access** sections in this guide for detailed instructions tailored to your specific access requirements.
 
 ### Validation
 
