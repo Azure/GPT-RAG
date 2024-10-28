@@ -34,7 +34,7 @@
 
 ## Overview
 
-The **GPT-RAG Solution Accelerator** enables organizations to leverage **Generative AI** for enhanced customer support, decision-making, and data-driven processes by empowering systems to handle complex inquiries using extensive datasets. Designed to provide **secure and efficient deployment**, it allows businesses to integrate AI with existing operations, making it adaptable for both simple and advanced information retrieval.
+The **GPT-RAG Solution Accelerator** enables organizations to enhance customer support, decision-making, and data-driven processes with **Generative AI**, empowering systems to handle complex inquiries across extensive datasets. It offers **secure, efficient deployment** for easy integration with existing operations, adaptable for both simple and advanced information retrieval.
 
 Beyond classical **Retrieval-Augmented Generation (RAG)** capabilities, the accelerator incorporates **agents** that support sophisticated scenarios such as **NL2SQL query generation** and other context-aware data interactions. This flexibility enables advanced use cases where AI can seamlessly retrieve and interpret information, meeting diverse technical requirements.
 
@@ -357,9 +357,8 @@ For detailed instructions on setting up network resources manually, refer to the
    - Reference your manually created VNets, subnets, private endpoints, and DNS zones in the GPT-RAG deployment configuration.
    - Ensure that all dependencies and connections are correctly established.
 
-
 > [!INFO]
-> **User Connectivity:** Regardless of the network configuration approach you select, you may need to configure additional network settings to enable connectivity for external or internal users. Refer to the **Internal User Access** and **Internal User Access** sections in this guide for detailed instructions tailored to your specific access requirements.
+> User Connectivity: Regardless of the network configuration approach you select, you may need to configure additional network settings to enable connectivity for external or internal users. Refer to the **Internal User Access** and **Internal User Access** sections in this guide for detailed instructions tailored to your specific access requirements.
 
 ### Validation
 
