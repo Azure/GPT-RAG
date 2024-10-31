@@ -17,9 +17,7 @@ The **RAG pattern** enables businesses to use the reasoning capabilities of LLMs
 
 The **Enterprise RAG** Solution Accelerator (GPT-RAG) offers a robust architecture tailored for enterprise-grade deployment of the RAG pattern. It ensures grounded responses and is built on Zero-trust security and Responsible AI, ensuring availability, scalability, and auditability. Ideal for organizations transitioning from exploration and PoC stages to full-scale production and MVPs.
 
-## Enterprise RAG Community
-
-* [Discord Channel](https://discord.gg/28VMVKawgk) Enterprise RAG - Connected Community
+✨ See our [User & Admin Guide](docs/GUIDE.md) for complete setup and usage details.
 
 ## Application Components
 
@@ -28,8 +26,6 @@ GPT-RAG follows a modular approach, consisting of three components, each with a 
 * **[Data Ingestion](https://github.com/Azure/gpt-rag-ingestion)** - Optimizes data chunking and indexing for the RAG retrieval step.
 
 * **Orchestrator** - Coordinates the flow to retrieve information and generate a user response. It offers two options: **[Functional](https://github.com/Azure/gpt-rag-orchestrator)**, using Semantic Kernel functions (default), and **[Agentic](https://github.com/Azure/gpt-rag-agentic)**, using AutoGen agents. See deployment instructions to switch to Agentic.
-
-This keeps it clear and brief.
 
 * **[App Front-End](https://github.com/Azure/gpt-rag-frontend)** - Uses the [Backend for Front-End](https://learn.microsoft.com/en-us/azure/architecture/patterns/backends-for-frontends) pattern to provide a scalable and efficient web interface.
 
@@ -52,7 +48,12 @@ If you want to learn more about the RAG Pattern and GPT-RAG architecture.
 
 *  [Enterprise RAG +Prompt Engineering+Finetuning+Train (Video in Spanish)](https://www.youtube.com/watch?v=ICsf4yirieA)
 
+<!-- ## Administration Guide
+
+For detailed instructions on managing and configuring the system, please refer to the [Administration Guide](docs/ADMINISTRATION_GUIDE.md) 📖. -->
+
 <!-- <a href="https://www.youtube.com/watch?v=ICsf4yirieA"><img src="https://img.youtube.com/vi/ICsf4yirieA/0.jpg" alt="Alt text" width="480"/></a> -->
+
 
 ## Setup Guide
 
@@ -228,6 +229,8 @@ azd deploy
 
 ## How to?
 
+This section provides quick guides for customizing, managing, and troubleshooting your deployment.
+
 ### Customize Your Deployment
 
 The standard deployment process sets up Azure resources and deploys the accelerator components with a standard configuration. To tailor the deployment to your specific needs, follow the steps in the [Custom Deployment](docs/CUSTOMIZATIONS.md) section for further customization options.
@@ -259,6 +262,10 @@ Understand the cost implications of your deployment by reviewing the [Pricing Mo
 ### Manage Governance
 
 Ensure proper governance of your deployment by following the guidelines provided in the [Governance Model](https://share.mindmanager.com/#publish/9ogrdWqzmAzZB6ilgURohV4lj1LriKjOWc0w_u2U).
+
+## Enterprise RAG Community
+
+* [Discord Channel](https://discord.gg/28VMVKawgk) Enterprise RAG - Connected Community
 
 ## Contributing
 
