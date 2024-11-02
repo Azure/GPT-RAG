@@ -25,6 +25,8 @@ This guide details the automated installation of the Solution Accelerator within
 
 You will also need **Owner** or **Contributor + User Access Administrator** permission in Subscription scope.
 
+Alternatively, you can create a [**Custom Role**](MANUAL_CUSTOM_ROLE.md).
+
 **Tools to run the setup**
 
 - [Azure CLI (az)](https://aka.ms/install-az) - to run azure cli commands.
@@ -270,8 +272,7 @@ Before starting the Zero Trust architecture deployment, review the prerequisites
 azd init -t azure/gpt-rag
 ```
 
-> [!NOTE]  
-> Add the `-b agentic` parameter if you want to use the agentic version.
+> **Note**: Add `-b agentic` if using the Agentic AutoGen-based orchestrator.
 > ```sh
 > azd init -t azure/gpt-rag -b agentic
 > ```
@@ -343,8 +344,7 @@ azd deploy
 > [!IMPORTANT] 
 > Note: when running the ```azd init ...``` and ```azd env refresh```, use the same environment name, subscription, and region used in the initial provisioning of the infrastructure.  
    
-> [!IMPORTANT]  
-> Add the `-b agentic` parameter to azd init command if you are using the agentic option.
+> **Note**: Add `-b agentic` if using the Agentic AutoGen-based orchestrator.
 > ```sh
 > azd init -t azure/gpt-rag -b agentic
 > ```
