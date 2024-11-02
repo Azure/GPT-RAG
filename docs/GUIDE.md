@@ -271,7 +271,7 @@ This section provides step-by-step guides for common administrative tasks.
 
 ## Deploying the Solution Accelerator
 
-This setup guide will walk you through provisioning a resource group containing all the essential components for the solution to operate effectively. The diagram below highlights the resource group and its corresponding components, marked in red, that will be provisioned during the process.
+This setup guide provides step-by-step instructions for provisioning a resource group with all the necessary components to ensure the solution operates efficiently. The diagram below highlights the resource group and its corresponding components, outlined in red, that will be provisioned during this process.
 
 ![Zero Trust Architecture](../media/admin-guide-architecture-scope.png)
 <br>*GPT-RAG Zero Trust Architecture*
@@ -315,7 +315,8 @@ Ensure you have the following details before starting:
 - **Azure Region**
 - **Azure Environment Name** (e.g., gpt-rag-dev, gpt-rag-poc)
 
-> **Note**: Choose a region with sufficient service quotas. Commonly tested regions include `northcentralus`, `eastus2`, `eastus`, and `westus`.
+> [!NOTE] 
+> Choose a region with sufficient service quotas. Commonly tested regions include `northcentralus`, `eastus2`, `eastus`, and `westus`.
 
 #### Identify Your Network Setup Scenario
 
@@ -333,25 +334,26 @@ Select your preferred network setup:
    | **app-int-subnet**      | 10.0.0.128/26     |
    | **AzureBastionSubnet**  | 10.0.0.64/26      |
 
-   > **Note**: Each `/26` subnet provides 59 usable IP addresses, with Azure reserving 5 addresses per subnet.
+   > [!NOTE] 
+   > Each `/26` subnet provides 59 usable IP addresses, with Azure reserving 5 addresses per subnet.
 
 2. **Automatic Setup with Custom Address Ranges**  
    If custom addressing is required, you can adjust address ranges in the configuration files to prevent overlap with existing networks.
 
-   > **Tip**  
+   > [!TIP]
    > Choose this option if you want custom addressing to avoid overlap with existing networks. This helps prevent issues with direct connections using VNet peering, VPN gateways, or ExpressRoute.
 
 3. **Manual Network Setup**  
    If you prefer to manually create the VNet, subnets, and other network resources, you can configure these outside of the Bicep templates, which will then deploy only the non-network resources.
 
-   > **Tip**  
+   > [!TIP]
    > Choose this option if deploying across subscriptions (e.g., Connectivity subscription) or if you want to adopt a network topology different from the provided architecture.
 
 #### Reusing Existing Resources
 
-To optimize your setup, you can reuse non-networking resources already deployed within the same subscription, such as Azure OpenAI, Cosmos DB, Key Vault, and Storage. If you choose to reuse any of these resources, ensure you have their names and resource group details ready.
+To optimize your setup, you can reuse non-networking resources already deployed within the same subscription, such as Azure OpenAI, Cosmos DB, and Key Vault. If you choose to reuse any of these resources, ensure you have their names and resource group details ready.
 
-> **Important**  
+> [!IMPORTANT]
 > If you’re reusing an existing Virtual Network (VNet), you must manually create all related network resources. This includes configuring subnets, private endpoints, and network interfaces as outlined in the **Manual Network Setup** scenario. In this case, the Bicep templates will not deploy network resources automatically when an existing VNet is reused.
 
 #### Resource Naming and Tagging
@@ -421,7 +423,7 @@ azd env set AZURE_BASTION_SUBNET_PREFIX 10.1.0.192/26
 
 ### 6. Customize Resource Names (Optional)
 
-To customize names, set environment variables for each resource. For example, the following command customizes the name of the Storage Account:
+To customize names, set environment variables for each resource. For example, the following command set the name of the Storage Account:
 
 ```sh
 azd env set AZURE_STORAGE_ACCOUNT_NAME <yourResourceName>
@@ -477,7 +479,7 @@ This section is intended for those who have chosen to manually create their netw
 
 ![Zero Trust Architecture](../media/admin-guide-vnet.png)
 
-We recommend following this network topology to maintain consistency with the Zero Trust architecture; however, feel free to use your own organization’s VNet and subnet standards. Below is the default addressing we use in the Bicep template as a reference:
+We recommend following this network topology to align with the Zero Trust architecture. However, you may use your organization’s VNet and subnet standards if preferred. For reference, the default addressing used in the Bicep template is shown below:
 
 | **Name**                 | **Address Range** |
 |--------------------------|-------------------|
@@ -505,7 +507,7 @@ We recommend following this network topology to maintain consistency with the Ze
   - **Azure Search**
 - Ensure they are correctly associated with the appropriate subnets.
 - Check this reference to learn how to create Private Endpoints in Azure Portal: <BR>[Create a private endpoint using the Azure portal](https://learn.microsoft.com/en-us/azure/private-link/create-private-endpoint-portal?tabs=dynamic-ip#create-a-private-endpoint)
-- When you create the private endpoint in the portal, you will also create a Private DNS Zone for name resolution for the private endpoints; ensure all the Private DNS Zones are correctly created.
+- When creating the private endpoint in the portal, a Private DNS Zone for name resolution will also be set up. Ensure that all Private DNS Zones are created correctly.
 
 ![Private DNS Zones](../media/admin-guide-private-dns.png)
 
@@ -552,7 +554,8 @@ Use this configuration for the VM:
 
 Deploy the application components by connecting through the Data Science VM with Bastion (Step 9 or manual setup in Step 10) or by directly accessing the VNet via a secure connection like ExpressRoute or VPN.
 
-If you have direct VNet access, you can deploy from your own machine, eliminating the need for a Bastion VM. Instructions for both options are below:
+> [!NOTE]
+> If you have direct VNet access, you can deploy from your own machine, eliminating the need for a Bastion VM. Instructions for both options are below.
 
 **Access VNet from Your Machine**:
 
@@ -572,6 +575,9 @@ azd deploy
 
 3. Create a new directory and initialize deployment:
 
+> [!Important]  
+> Use the same environment name, subscription, and region as initial provisioning.
+
    ```sh
    mkdir deploy
    cd deploy
@@ -582,13 +588,10 @@ azd deploy
    azd deploy
    ```
 
-> [!Important]  
-> Use the same environment name, subscription, and region as initial provisioning.
-
 🎉 **Congratulations! Your Zero Trust deployment is now complete.**
 
 > [!Note]  
-> After the initial deployment, you may choose to customize or update specific features, such as adjusting prompts, adding a logo to the frontend, testing different chunking strategies, or configuring a custom orchestration strategy like NL2SQL. For detailed guidance on these optional customizations, refer to the deployment section in each component's repository.
+> After the initial deployment, you may choose to customize or update specific features, such as adjusting prompts, adding a logo to the frontend, testing different chunking strategies, or configuring a custom orchestration strategy like NL2SQL. For detailed guidance on these optional customizations, refer to the deployment section in each component's repository. [Orchestrator](https://github.com/azure/gpt-rag-agentic), [Front-end](https://github.com/azure/gpt-rag-frontend, [Data Ingestion](https://github.com/Azure/gpt-rag-ingestion).
 
 ## Network Configuration Scenarios
 
@@ -905,10 +908,6 @@ Based on your authorization setup, validate access:
 
 > [!NOTE]
 > Use and test only the methods you have configured to ensure access controls are functioning correctly.
-
-## Setting Up Network Manually
-
-TODO: ADD CONTENT HERE
 
 ## Setting Up Git Repos
 

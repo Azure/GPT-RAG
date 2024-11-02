@@ -2,7 +2,7 @@
 
 This guide provides steps to create a custom role in Azure and assign it to a user for performing the GPT-RAG installation at the subscription level.
 
-> **Tip**  
+> [!TIP]  
 > This procedure applies when you prefer creating a custom role with more specific permissions instead of assigning the **Owner** or **Contributor + User Access Administrator** role.
 
 ## Step-by-Step Procedure
