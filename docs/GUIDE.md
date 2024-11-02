@@ -334,20 +334,20 @@ Select your preferred network setup:
    | **app-int-subnet**      | 10.0.0.128/26     |
    | **AzureBastionSubnet**  | 10.0.0.64/26      |
 
-   > [!NOTE] 
-   > Each `/26` subnet provides 59 usable IP addresses, with Azure reserving 5 addresses per subnet.
+> [!NOTE] 
+> Each `/26` subnet provides 59 usable IP addresses, with Azure reserving 5 addresses per subnet.
 
 2. **Automatic Setup with Custom Address Ranges**  
    If custom addressing is required, you can adjust address ranges in the configuration files to prevent overlap with existing networks.
 
-   > [!TIP]
-   > Choose this option if you want custom addressing to avoid overlap with existing networks. This helps prevent issues with direct connections using VNet peering, VPN gateways, or ExpressRoute.
+> [!TIP]
+> Choose this option if you want custom addressing to avoid overlap with existing networks. This helps prevent issues with direct connections using VNet peering, VPN gateways, or ExpressRoute.
 
 3. **Manual Network Setup**  
    If you prefer to manually create the VNet, subnets, and other network resources, you can configure these outside of the Bicep templates, which will then deploy only the non-network resources.
 
-   > [!TIP]
-   > Choose this option if deploying across subscriptions (e.g., Connectivity subscription) or if you want to adopt a network topology different from the provided architecture.
+> [!TIP]
+> Choose this option if deploying across subscriptions (e.g., Connectivity subscription) or if you want to adopt a network topology different from the provided architecture.
 
 #### Reusing Existing Resources
 
@@ -490,7 +490,7 @@ We recommend following this network topology to align with the Zero Trust archit
 | app-int-subnet           | 10.0.0.128/26     |
 | AzureBastionSubnet       | 10.0.0.64/26      |
 
-> **Important**  
+> [!IMPORTANT]
 > Use network addressing that avoids overlaps with your existing VNets. Overlapping address ranges prevent direct connections via VNet peering, VPN gateways, or ExpressRoute.
 
 #### 10.2. Set Up Private Endpoints
