@@ -6,9 +6,10 @@ Sometimes, you might prefer to utilize existing resources in your subscription r
 
 Let's delve deeper into the general process of integrating existing resources into our project. To provide a clear and practical example, I will guide you through the process of reusing an existing **AI Services** resource. 
 
-**Pre-requisites**:
+**Prerequisites**:
 
-- AI Services resource created in the same subscription you will deploy Enterprise RAG.
+- The resources to be reused must be located in the same subscription where you will deploy Enterprise RAG.
+- This prerequisite does not apply for networking resources reusing (e.g., VNet reuse).
 
 **General Instruction Steps**:
 
@@ -130,112 +131,41 @@ If you are reusing a Key Vault, the identity used to execute the AZD commands, w
 
 ### Virtual Network (VNet)
 
-If you prefer to create your own network resources, such as VNet and Subnets that's perfectly fine.
+If you prefer to use an existing VNet, that's perfectly fine. In this case, you’ll need to set up your network resources—such as the VNet, subnets, and private endpoints—manually and indicate this by setting the `VNET_REUSE` variable. 
 
-**Steps to Provision GPT-RAG Resources reusing network resources:**
+Below is a typical workflow: first, provision non-network resources, such as the Function App and CosmosDB; then, create and configure the network resources; and finally, deploy the application components (orchestrator, frontend, and data ingestion).
+
+> [!NOTE] You may create the VNet and subnets before provisioning non-network resources if preferred. However, private endpoints can only be created after the associated resources are provisioned.
+
+**Steps to Provision GPT-RAG Resources while Reusing Network Resources:**
 
 1. **Set Environment Variable:**
    Before provisioning, set the environment variable to indicate that you will reuse an existing VNet by running:
    ```bash
    azd env set NETWORK_ISOLATION true 
-   azd env set AI_VNET_REUSE true
-   ``` 
+   azd env set VNET_REUSE true
+   ```
 
 2. **Provision Resources:**
-   Provision the core GPT-RAG resources (Function App, AI Services, etc) by executing:
+   Provision the core GPT-RAG resources (Function App, AI Services, etc.) by executing:
    ```bash
    azd provision
    ```
 
-3. **Configure Network Resources:**
-   After provisioning, configure the necessary network resources to ensure your application functions smoothly. Use the information in the section below, "What Do I Need to Know...", to assist with this part.
+3. **Setup Network:**
+   After provisioning, you can configure the necessary network resources to ensure your application functions smoothly. Instructions on creating these network elements manually via the Azure Portal are available on the [Manual Network Setup](GUIDE.md#3-manual-network-setup) section in the Admin Guide.
 
-4. **Deploying GPT-RAG Applicaiton Compoents:**
+   This page explains how to manually create the network resources used by the solution, following the same architectural definitions as the Bicep template used for automatic network setup.
+
+   >[!NOTE]
+   > We recommend using the same VNet and subnet topology as defined in the architecture to facilitate maintenance, but feel free to organize as preferred. The important part is to ensure the same connectivity among resources.
+
+4. **Deploying GPT-RAG Application Components:**
     After provisioning the GPT-RAG resources with `azd provision` and configuring the network resources, you can deploy the GPT-RAG application components using:
     ```bash
     azd package
     azd deploy
     ```
-
-**What Do I Need to Know When Creating the VNet and Other Network Resources?**
-
-In the following sections, you’ll find reference information to assist you in creating and configuring the required network resources after provisioning the core GPT-RAG resources. The information provided below is based on the network resources created by the GPT-RAG templates. Since you are creating the network resources yourself, feel free to configure the network in the manner that best suits your organization's conventions.
-
-#### VNet and Subnets
-
-The diagram below illustrates the AI Services VNet and its five subnets utilized by the GPT-RAG Zero Trust architecture deployment:
-
-![Zero Trust Architecture](../media/architecture-GPT-RAG-ZeroTrust.png)
-
-We recommend following this organization to maintain consistency with the Zero Trust architecture; however, feel free to use your own organization’s VNet and subnet standards.
-
-| VNet Name | Subnet Name          | Predefined Name      |
-|-----------|----------------------|----------------------|
-| AI VNet   | AI Subnet            | ai-subnet            |
-| AI VNet   | Azure Bastion Subnet | AzureBastionSubnet   |
-| AI VNet   | App Int Subnet       | app-int-subnet       |
-| AI VNet   | App Services Subnet  | app-services-subnet  |
-| AI VNet   | Database Subnet      | database-subnet      |
-
-#### Other Networking Resources
-
-When reusing an existing VNet, you must configure the necessary network resources **after provisioning the GPT-RAG core resources** (`azd provision`) and **before deploying the GPT-RAG application components** (`azd deploy`). 
-
-These network resources include Private Endpoints, Private DNS Links, Search Private Links, Network Security Groups (NSGs), and Network Interfaces.
-
-| **Service Type**        | **Related Service**           | **Description**                                              |
-|-------------------------|-------------------------------|--------------------------------------------------------------|
-| Private Endpoint        | Data Ingestion Function App   | Private Endpoint for Data Ingestion Function App             |
-| Private Endpoint        | Azure Storage Account         | Private Endpoint for Azure Storage Account                   |
-| Private Endpoint        | Azure Cosmos DB               | Private Endpoint for Azure Cosmos DB                         |
-| Private Endpoint        | Azure Key Vault               | Private Endpoint for Azure Key Vault                         |
-| Private Endpoint        | Orchestrator Function App     | Private Endpoint for Orchestrator Function App               |
-| Private Endpoint        | Frontend Web App              | Private Endpoint for Frontend Web App                        |
-| Private Endpoint        | Azure AI Services             | Private Endpoint for Azure AI Services                       |
-| Private Endpoint        | Azure OpenAI                  | Private Endpoint for Azure OpenAI                            |
-| Private Endpoint        | Azure Search                  | Private Endpoint for Azure Search                            |
-| DNS Zone                | Azure Storage Account         | DNS Zone for Azure Storage Account                           |
-| DNS Zone                | Azure Cosmos DB               | DNS Zone for Azure Cosmos DB                                 |
-| DNS Zone                | Azure Key Vault               | DNS Zone for Azure Key Vault                                 |
-| DNS Zone                | Azure App Services            | DNS Zone for Azure App Services                              |
-| DNS Zone                | Azure AI Services             | DNS Zone for Azure AI Services                               |
-| DNS Zone                | Azure OpenAI                  | DNS Zone for Azure OpenAI                                    |
-| DNS Zone                | Azure Search                  | DNS Zone for Azure Search                                    |
-| Search Private Link     | Data Ingestion Function App   | AI Search Private Link for Data Ingestion Function App       |
-| Search Private Link     | Storage Account               | Azure AI Search Private Link for Storage Account             |
-| Network Security Group  | AI Services VNet              | Network Security Group for AI Services VNet                  |
-| Network Security Group  | Azure Bastion Subnet          | Network Security Group for Azure Bastion Subnet              |
-| Network Security Group  | App Int Subnet                | Network Security Group for App Int Subnet                    |
-| Network Security Group  | App Services Subnet           | Network Security Group for App Services Subnet               |
-| Network Security Group  | Database Subnet               | Network Security Group for Database Subnet                   |
-| Network Interface       | Data Ingestion Function App PE| Network Interface for Data Ingestion Function App Private Endpoint |
-| Network Interface       | Azure Storage Account PE      | Network Interface for Azure Storage Account Private Endpoint |
-| Network Interface       | Azure Cosmos DB PE            | Network Interface for Azure Cosmos DB Private Endpoint       |
-| Network Interface       | Azure Key Vault PE            | Network Interface for Azure Key Vault Private Endpoint       |
-| Network Interface       | Orchestrator Function App PE  | Network Interface for Orchestrator Function App Private Endpoint |
-| Network Interface       | Frontend Web App PE           | Network Interface for Frontend Web App Private Endpoint      |
-| Network Interface       | Azure AI Services PE          | Network Interface for Azure AI Services Private Endpoint     |
-| Network Interface       | Azure OpenAI PE               | Network Interface for Azure OpenAI Private Endpoint          |
-| Network Interface       | Azure Search PE               | Network Interface for Azure Search Private Endpoint          |
-
-> **NOTE:** You can create the Private DNS Zones in your Hub/Connectivity subscription to centralize DNS management.
-
-#### Networking Addresses
-
-Below is a reference for the default address ranges used by the GPT-RAG solution when it creates the VNet and subnets. You may customize the network addressing to align with your organization’s standards and practices.
-
-| **Network Item**         | **Address Range** |
-|--------------------------|-------------------|
-| **AI VNet**              | **10.0.0.0/23**   |
-| **ai-subnet**            | **10.0.0.0/26**   |
-| **Azure Bastion Subnet** | **10.0.0.64/26**  |
-| **app-int-subnet**       | **10.0.0.128/26** |
-| **app-services-subnet**  | **10.0.0.192/26** |
-| **database-subnet**      | **10.0.1.0/26**   |
-
-> **IMPORTANT:** Use network addressing that avoids overlaps with your existing VNets. Overlapping address ranges prevent direct connections via VNet peering, VPN gateways, or ExpressRoute.
-
-Here’s a proofread version of your text:
 
 #### Bastion and Data Science VM:
 

@@ -103,8 +103,7 @@ The deployment procedure is quite simple, just install the prerequisites mention
 azd init -t azure/gpt-rag
 ```
 
-> [!NOTE]  
-> Add the `-b agentic` parameter if you want to use the agentic options.
+> **Note**: Add `-b agentic` if using the Agentic AutoGen-based orchestrator.
 > ```sh
 > azd init -t azure/gpt-rag -b agentic
 > ```
@@ -156,8 +155,7 @@ The deployment procedure is similar to that of the Basic Architecture, but with 
 azd init -t azure/gpt-rag
 ```
 
-> [!NOTE]  
-> Add the `-b agentic` parameter if you want to use the agentic options.
+> **Note**: Add `-b agentic` if using the Agentic AutoGen-based orchestrator.
 > ```sh
 > azd init -t azure/gpt-rag -b agentic
 > ```
