@@ -17,17 +17,24 @@ This guide details the automated installation of the Solution Accelerator within
 
 - [Azure Subscription](https://azure.microsoft.com/free/).
 - [Access to Azure OpenAI](https://learn.microsoft.com/legal/cognitive-services/openai/limited-access) - submit a form to request access.
+- Initiate an [Azure AI services creation](https://portal.azure.com/#create/Microsoft.CognitiveServicesAllInOne) and agree to the Responsible AI terms **
+
+** If you have not created an Azure AI service resource in the subscription before
+
+**Permissions required**
+
+You will also need **Owner** or **Contributor + User Access Administrator** permission in Subscription scope.
+
+Alternatively, you can create a [**Custom Role**](MANUAL_CUSTOM_ROLE.md).
+
+**Tools to run the setup**
+
 - [Azure CLI (az)](https://aka.ms/install-az) - to run azure cli commands.
 - Azure Developer CLI: [Download azd for Windows](https://azdrelease.azureedge.net/azd/standalone/release/1.5.0/azd-windows-amd64.msi), [Other OS's](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd).
  - Powershell 7+ with AZ module (Windows only): [Powershell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4#installing-the-msi-package), [AZ Module](https://learn.microsoft.com/en-us/powershell/azure/what-is-azure-powershell?view=azps-11.6.0#the-az-powershell-module)
  - Git: [Download Git](https://git-scm.com/downloads)
  - Node.js 16+ [windows/mac](https://nodejs.dev/en/download/)  [linux/wsl](https://nodejs.dev/en/download/package-manager/)
  - Python 3.11: [Download Python](https://www.python.org/downloads/release/python-3118/)
- - Initiate an [Azure AI services creation](https://portal.azure.com/#create/Microsoft.CognitiveServicesAllInOne) and agree to the Responsible AI terms **
-
-** If you have not created an Azure AI service resource in the subscription before
-
-You will also need **Owner** or **Contributor + User Access Administrator** permission in Subscription scope.
 
 ## Resource List
 
@@ -133,18 +140,18 @@ Here is the complete list of resources for a standard Zero Trust deployment, inc
 
 - **Virtual Network**
     <BR>AI Services VNet.
-    - Address Space: 10.0.0.0/24
+    - Address Space: 10.0.0.0/23
 > Address range is a suggestion, you should use what works for you.
 
 - **Subnets**
     <BR>Designate network segments in the AI Services VNet to organize and secure traffic.
     - Subnets:
-        - ai-subnet <BR>10.0.0.0/28
-        - app-services-subnet <BR>10.0.0.16/28
-        - database-subnet <BR>10.0.0.32/28
-        - app-int-subnet <BR>10.0.0.48/28
-        - AzureBastionSubnet <BR>10.0.0.64/28
-    > Address range is a suggestion, you should use what works for you.
+        - **ai-subnet** <BR>10.0.0.0/26
+        - **app-services-subnet** <BR>10.0.0.192/26
+        - **database-subnet** <BR>10.0.1.0/26
+        - **app-int-subnet** <BR>10.0.0.128/26
+        - **AzureBastionSubnet** <BR>10.0.0.64/26
+    > The address ranges are suggestions; please adjust them to fit your specific network requirements.
 
 - **Private Endpoints**
     <BR>Enable private, secure access to Azure services via a virtual network.
@@ -225,14 +232,14 @@ Adjust network addressing to avoid overlaps with existing VNets, as overlapping 
 
 | **Network Item**         | **Address Range**    |
 |--------------------------|----------------------|
-| AI VNet                  | 10.0.0.0/24          |
-| ai-subnet                | 10.0.0.0/28          |
-| app-services-subnet      | 10.0.0.16/28         |
-| database-subnet          | 10.0.0.32/28         |
-| app-int-subnet           | 10.0.0.48/28         |
-| AzureBastionSubnet       | 10.0.0.64/28         |
+| **AI VNet**              | **10.0.0.0/23**      |
+| **ai-subnet**            | **10.0.0.0/26**      |
+| **app-services-subnet**  | **10.0.0.192/26**    |
+| **database-subnet**      | **10.0.1.0/26**      |
+| **app-int-subnet**       | **10.0.0.128/26**    |
+| **AzureBastionSubnet**   | **10.0.0.64/26**     |
 
-Each `/28` subnet offers 11 usable IP addresses, as Azure reserves 5 IP addresses in each subnet. The `/24` VNet allows 251 usable IP addresses. To customize address ranges, set the following environment variables:
+Each `/26` subnet offers 59 usable IP addresses, as Azure reserves 5 IP addresses in each subnet. The `/23` VNet allows 507 usable IP addresses. To customize address ranges, set the following environment variables:
 
 | **Environment Variable**               | **Network Item**      |
 |----------------------------------------|-----------------------|
@@ -245,7 +252,15 @@ Each `/28` subnet offers 11 usable IP addresses, as Azure reserves 5 IP addresse
 
 Set the desired address range with `azd env` command after `azd int` and before `az provision`. 
 
-Example: `azd env set AZURE_AI_SUBNET_PREFIX 10.0.0.16/28`.
+Example: `azd env set AZURE_AI_SUBNET_PREFIX 10.0.0.16/26`.
+
+- **DNS Customization** (optional)
+
+The Solution Accelerator will configure default DNS settings using Azure Private DNS Zones to resolve private endpoints within the resource group. This setup ensures seamless name resolution without requiring additional configuration.
+
+However, if your organization has specific DNS requirements or prefers a different DNS setup, you have the flexibility to customize the DNS configurations. These customizations are not included in the automated installation process and will need to be configured separately.
+
+Customization options include creating and managing your own private DNS zones, integrating with on-premises DNS servers, or setting up conditional forwarders to handle name resolution across various network environments. For detailed guidance on these customization strategies, please refer to our comprehensive [Private Endpoint DNS Integration scenarios](https://github.com/dmauser/PrivateLink/tree/master/DNS-Integration-Scenarios).
 
 ### Installation Steps
 
@@ -257,8 +272,7 @@ Before starting the Zero Trust architecture deployment, review the prerequisites
 azd init -t azure/gpt-rag
 ```
 
-> [!NOTE]  
-> Add the `-b agentic` parameter if you want to use the agentic version.
+> **Note**: Add `-b agentic` if using the Agentic AutoGen-based orchestrator.
 > ```sh
 > azd init -t azure/gpt-rag -b agentic
 > ```
@@ -330,8 +344,7 @@ azd deploy
 > [!IMPORTANT] 
 > Note: when running the ```azd init ...``` and ```azd env refresh```, use the same environment name, subscription, and region used in the initial provisioning of the infrastructure.  
    
-> [!IMPORTANT]  
-> Add the `-b agentic` parameter to azd init command if you are using the agentic option.
+> **Note**: Add `-b agentic` if using the Agentic AutoGen-based orchestrator.
 > ```sh
 > azd init -t azure/gpt-rag -b agentic
 > ```

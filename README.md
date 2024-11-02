@@ -17,9 +17,7 @@ The **RAG pattern** enables businesses to use the reasoning capabilities of LLMs
 
 The **Enterprise RAG** Solution Accelerator (GPT-RAG) offers a robust architecture tailored for enterprise-grade deployment of the RAG pattern. It ensures grounded responses and is built on Zero-trust security and Responsible AI, ensuring availability, scalability, and auditability. Ideal for organizations transitioning from exploration and PoC stages to full-scale production and MVPs.
 
-## Enterprise RAG Community
-
-* [Discord Channel](https://discord.gg/28VMVKawgk) Enterprise RAG - Connected Community
+✨ See our [User & Admin Guide](docs/GUIDE.md) for complete setup and usage details.
 
 ## Application Components
 
@@ -50,7 +48,12 @@ If you want to learn more about the RAG Pattern and GPT-RAG architecture.
 
 *  [Enterprise RAG +Prompt Engineering+Finetuning+Train (Video in Spanish)](https://www.youtube.com/watch?v=ICsf4yirieA)
 
+<!-- ## Administration Guide
+
+For detailed instructions on managing and configuring the system, please refer to the [Administration Guide](docs/ADMINISTRATION_GUIDE.md) 📖. -->
+
 <!-- <a href="https://www.youtube.com/watch?v=ICsf4yirieA"><img src="https://img.youtube.com/vi/ICsf4yirieA/0.jpg" alt="Alt text" width="480"/></a> -->
+
 
 ## Setup Guide
 
@@ -100,8 +103,7 @@ The deployment procedure is quite simple, just install the prerequisites mention
 azd init -t azure/gpt-rag
 ```
 
-> [!NOTE]  
-> Add the `-b agentic` parameter if you want to use the agentic options.
+> **Note**: Add `-b agentic` if using the Agentic AutoGen-based orchestrator.
 > ```sh
 > azd init -t azure/gpt-rag -b agentic
 > ```
@@ -153,8 +155,7 @@ The deployment procedure is similar to that of the Basic Architecture, but with 
 azd init -t azure/gpt-rag
 ```
 
-> [!NOTE]  
-> Add the `-b agentic` parameter if you want to use the agentic options.
+> **Note**: Add `-b agentic` if using the Agentic AutoGen-based orchestrator.
 > ```sh
 > azd init -t azure/gpt-rag -b agentic
 > ```
@@ -226,6 +227,8 @@ azd deploy
 
 ## How to?
 
+This section provides quick guides for customizing, managing, and troubleshooting your deployment.
+
 ### Customize Your Deployment
 
 The standard deployment process sets up Azure resources and deploys the accelerator components with a standard configuration. To tailor the deployment to your specific needs, follow the steps in the [Custom Deployment](docs/CUSTOMIZATIONS.md) section for further customization options.
@@ -257,6 +260,10 @@ Understand the cost implications of your deployment by reviewing the [Pricing Mo
 ### Manage Governance
 
 Ensure proper governance of your deployment by following the guidelines provided in the [Governance Model](https://share.mindmanager.com/#publish/9ogrdWqzmAzZB6ilgURohV4lj1LriKjOWc0w_u2U).
+
+## Enterprise RAG Community
+
+* [Discord Channel](https://discord.gg/28VMVKawgk) Enterprise RAG - Connected Community
 
 ## Contributing
 
