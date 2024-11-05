@@ -608,7 +608,7 @@ module searchDnsZone './core/network/private-dns-zones.bicep' = if (_networkIsol
   }
 }
 
-module testvm './core/vm/dsvm.bicep' = if (_networkIsolation && _deployVM)  {
+module testvm './core/vm/dsvm.bicep' = if (_networkIsolation && !_vnetReuse && _deployVM)  {
   name: 'testvm'
   scope: resourceGroup
   params: {
@@ -644,8 +644,6 @@ module storage './core/storage/storage-account.bicep' = {
       { name: _storageImagesContainerName, publicAccess: 'None' }
       { name: _storageNl2sqlContainerName, publicAccess: 'None' }      
     ]
-    keyVaultName: keyVault.outputs.name
-    secretName: 'storageConnectionString'
     deleteRetentionPolicy: {
       enabled: true
       days: 7
@@ -765,14 +763,45 @@ module appInsights './core/host/appinsights.bicep' = {
   }
 }
 
+// Orchestrator Storage Account
+module orchestratorStorage './core/storage/storage-account.bicep' = {
+  name: 'orchestratorstorage'
+  scope: resourceGroup
+  params: {
+    name: _azureReuseConfig.orchestratorFunctionAppStorageReuse?_azureReuseConfig.existingOrchestratorFunctionAppStorageName:'${_storageAccountName}orc'
+    location: location
+    storageReuse: _azureReuseConfig.orchestratorFunctionAppStorageReuse
+    existingStorageResourceGroupName: _azureReuseConfig.existingOrchestratorFunctionAppStorageResourceGroupName
+    tags: tags
+    publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
+    allowBlobPublicAccess: false // Disable anonymous access
+    defaultToOAuthAuthentication: true
+    containers: []
+  }  
+}
+
+module orchestratorStoragepe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
+  name: 'orchestratorstoragepe'
+  scope: resourceGroup
+  params: {
+    location: location
+    name: _azureStorageAccountPe
+    tags: tags
+    subnetId: _networkIsolation?vnet.outputs.aiSubId:''
+    serviceId: orchestratorStorage.outputs.id
+    groupIds: ['blob']
+    dnsZoneId: _networkIsolation?blobDnsZone.outputs.id:''
+  }
+}
+
 // Orchestrator Function App
 module orchestrator './core/host/functions.bicep' =  {
   name: 'orchestrator'
   scope: resourceGroup
   params: {
-    networkIsolation: _networkIsolation
-    vnetName: _networkIsolation?vnet.outputs.name:''
-    subnetId: _networkIsolation?vnet.outputs.appIntSubId:''
+    networkIsolation: (_networkIsolation && !_vnetReuse)
+    vnetName: (_networkIsolation && !_vnetReuse)?vnet.outputs.name:''
+    subnetId: (_networkIsolation && !_vnetReuse)?vnet.outputs.appIntSubId:''
     keyVaultName: keyVault.outputs.name
     storageAccountName: '${_storageAccountName}orc'
     appServicePlanId: appServicePlan.outputs.id
@@ -780,9 +809,6 @@ module orchestrator './core/host/functions.bicep' =  {
     location: location
     functionAppReuse: _azureReuseConfig.orchestratorFunctionAppReuse
     existingFunctionAppResourceGroupName: _azureReuseConfig.existingOrchestratorFunctionAppResourceGroupName
-    functionAppStorageReuse: _azureReuseConfig.orchestratorFunctionAppStorageReuse
-    existingFunctionAppStorageName: _azureReuseConfig.existingOrchestratorFunctionAppStorageName
-    existingFunctionAppStorageResourceGroupName: _azureReuseConfig.existingOrchestratorFunctionAppStorageResourceGroupName
     appInsightsConnectionString: appInsights.outputs.connectionString
     appInsightsInstrumentationKey: appInsights.outputs.instrumentationKey
     tags: union(tags, { 'azd-service-name': 'orchestrator' })
@@ -934,6 +960,16 @@ module orchestrator './core/host/functions.bicep' =  {
   }
 }
 
+module orchestratorStorageBlobStorageAccess './core/security/blobstorage-contributor-access.bicep' = {
+  name: 'orchestrator-storage-blobstorage-access'
+  scope: resourceGroup
+  params: {
+    storageAccountName: orchestratorStorage.outputs.name
+    principalId: orchestrator.outputs.identityPrincipalId
+  }
+}
+
+
 module orchestratorPe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'orchestratorPe'
   scope: resourceGroup
@@ -995,9 +1031,9 @@ module frontEnd  'core/host/appservice.bicep' = {
     applicationInsightsResourceGroupName: _azureReuseConfig.appInsightsReuse?_azureReuseConfig.existingAppInsightsResourceGroupName:_resourceGroupName  
     appServiceReuse: _azureReuseConfig.appServiceReuse
     existingAppServiceNameResourceGroupName: _azureReuseConfig.existingAppServiceNameResourceGroupName
-    networkIsolation: _networkIsolation
-    vnetName: _networkIsolation?vnet.outputs.name:''
-    subnetId: _networkIsolation?vnet.outputs.appIntSubId:''
+    networkIsolation: (_networkIsolation && !_vnetReuse)
+    vnetName: (_networkIsolation && !_vnetReuse)?vnet.outputs.name:''
+    subnetId: (_networkIsolation && !_vnetReuse)?vnet.outputs.appIntSubId:''
     appCommandLine: 'python ./app.py'
     location: location
     tags: union(tags, { 'azd-service-name': 'frontend' })
@@ -1109,8 +1145,39 @@ module appserviceAIAccess './core/security/aiservices-access.bicep' = {
   }
 } 
 
-// Data Ingestion Function App
 
+// Data Ingestion Storage Account
+module dataIngestionStorage './core/storage/storage-account.bicep' = {
+  name: 'dataingestionstorage'
+  scope: resourceGroup
+  params: {
+    name: _azureReuseConfig.dataIngestionFunctionAppStorageReuse?_azureReuseConfig.existingDataIngestionFunctionAppStorageName:'${_storageAccountName}ing'
+    location: location
+    storageReuse: _azureReuseConfig.dataIngestionFunctionAppStorageReuse
+    existingStorageResourceGroupName: _azureReuseConfig.existingDataIngestionFunctionAppStorageResourceGroupName
+    tags: tags
+    publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
+    allowBlobPublicAccess: false // Disable anonymous access
+    defaultToOAuthAuthentication: true
+    containers: []
+  }  
+}
+
+module dataIngestionStoragepe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
+  name: 'dataIngestionStoragepe'
+  scope: resourceGroup
+  params: {
+    location: location
+    name: _azureStorageAccountPe
+    tags: tags
+    subnetId: _networkIsolation?vnet.outputs.aiSubId:''
+    serviceId: dataIngestionStorage.outputs.id
+    groupIds: ['blob']
+    dnsZoneId: _networkIsolation?blobDnsZone.outputs.id:''
+  }
+}
+
+// Data Ingestion Function App
 module dataIngestion './core/host/functions.bicep' = {
   name: 'dataIngestion'
   scope: resourceGroup
@@ -1124,10 +1191,7 @@ module dataIngestion './core/host/functions.bicep' = {
     appName: _dataIngestionFunctionAppName
     location: location
     functionAppReuse: _azureReuseConfig.dataIngestionFunctionAppReuse
-    existingFunctionAppResourceGroupName: _azureReuseConfig.existingDataIngestionFunctionAppResourceGroupName
-    functionAppStorageReuse: _azureReuseConfig.dataIngestionFunctionAppStorageReuse
-    existingFunctionAppStorageName: _azureReuseConfig.existingDataIngestionFunctionAppStorageName
-    existingFunctionAppStorageResourceGroupName: _azureReuseConfig.existingDataIngestionFunctionAppStorageResourceGroupName
+    existingFunctionAppResourceGroupName: _azureReuseConfig.existingDataIngestionFunctionAppResourceGroupName    
     appInsightsConnectionString: appInsights.outputs.connectionString
     appInsightsInstrumentationKey: appInsights.outputs.instrumentationKey
     tags: union(tags, { 'azd-service-name': 'dataIngest' })
@@ -1240,6 +1304,15 @@ module dataIngestion './core/host/functions.bicep' = {
         value: 'INFO'
       }       
     ]  
+  }
+}
+
+module dataIngestionStorageBlobStorageAccess './core/security/blobstorage-contributor-access.bicep' = {
+  name: 'data-ingestion-storage-blobstorage-access'
+  scope: resourceGroup
+  params: {
+    storageAccountName: dataIngestionStorage.outputs.name
+    principalId: dataIngestion.outputs.identityPrincipalId
   }
 }
 
@@ -1467,11 +1540,20 @@ module searchPe './core/network/private-endpoint.bicep' = if (_networkIsolation 
   }
 }
 
+module searchStorageAccess './core/security/blobstorage-contributor-access.bicep' = {
+  name: 'search-blobstorage-access'
+  scope: resourceGroup
+  params: {
+    storageAccountName: storage.outputs.name
+    principalId: searchService.outputs.principalId
+  }
+}
+
 module searchOaiAccess './core/security/openai-access.bicep' = {
   name: 'search-openai-access'
   scope: resourceGroup
   params: {
-    principalId: searchService.outputs.id
+    principalId: searchService.outputs.principalId
     openaiAccountName: openAi.outputs.name
   }
 } 

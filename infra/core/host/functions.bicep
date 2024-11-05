@@ -23,23 +23,17 @@ param networkIsolation bool
 param vnetName string
 param subnetId string
 
-param allowSharedKeyAccess bool = true
-
 param functionAppReuse bool
 param deployFunctionApp bool = true
 param existingFunctionAppResourceGroupName string
 
-param functionAppStorageReuse bool
-param existingFunctionAppStorageName string
-param existingFunctionAppStorageResourceGroupName string
-
-@description('Storage Account type')
-@allowed([
-  'Standard_LRS'
-  'Standard_GRS'
-  'Standard_RAGRS'
-])
-param storageAccountType string = 'Standard_LRS'
+// @description('Storage Account type')
+// @allowed([
+//   'Standard_LRS'
+//   'Standard_GRS'
+//   'Standard_RAGRS'
+// ])
+// param storageAccountType string = 'Standard_LRS'
 
 @description('Location for all resources.')
 param location string = resourceGroup().location
@@ -53,28 +47,28 @@ param runtime string = 'python'
 var functionAppName = appName
 var functionWorkerRuntime = runtime
 
-resource existingStorageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' existing  = if (functionAppStorageReuse && deployFunctionApp) {
-  scope: resourceGroup(existingFunctionAppStorageResourceGroupName)
-  name: existingFunctionAppStorageName
-}
+// resource existingStorageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' existing  = if (functionAppStorageReuse && deployFunctionApp) {
+//   scope: resourceGroup(existingFunctionAppStorageResourceGroupName)
+//   name: existingFunctionAppStorageName
+// }
 
-resource newStorageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = if (!functionAppStorageReuse && deployFunctionApp) {
-  name: storageAccountName
-  location: location
-  sku: {
-    name: storageAccountType
-  }
-  kind: 'Storage'
-  properties: {
-    allowBlobPublicAccess: false // Disable anonymous access 
-    supportsHttpsTrafficOnly: true
-    allowSharedKeyAccess: allowSharedKeyAccess    
-    defaultToOAuthAuthentication: true
-  }
-}
+// resource newStorageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = if (!functionAppStorageReuse && deployFunctionApp) {
+//   name: storageAccountName
+//   location: location
+//   sku: {
+//     name: storageAccountType
+//   }
+//   kind: 'Storage'
+//   properties: {
+//     allowBlobPublicAccess: false // Disable anonymous access 
+//     supportsHttpsTrafficOnly: true
+//     allowSharedKeyAccess: allowSharedKeyAccess    
+//     defaultToOAuthAuthentication: true
+//   }
+// }
 
-var _storage_keys = !deployFunctionApp ? '' : functionAppStorageReuse ? existingStorageAccount.listKeys().keys[0].value : newStorageAccount.listKeys().keys[0].value
-var _storageAccountName= !deployFunctionApp ? '' : functionAppStorageReuse ? existingStorageAccount.name : newStorageAccount.name
+// var _storage_keys = !deployFunctionApp ? '' : functionAppStorageReuse ? existingStorageAccount.listKeys().keys[0].value : newStorageAccount.listKeys().keys[0].value
+// var _storageAccountName= !deployFunctionApp ? '' : functionAppStorageReuse ? existingStorageAccount.name : newStorageAccount.name
 
 
 resource existingFunctionApp 'Microsoft.Web/sites@2022-09-01' existing  = if (functionAppReuse && deployFunctionApp) {
@@ -108,10 +102,14 @@ resource newFunctionApp 'Microsoft.Web/sites@2022-09-01' = if (!functionAppReuse
       functionAppScaleLimit: functionAppScaleLimit
       healthCheckPath: healthCheckPath
       appSettings: concat(appSettings,[
+        // {
+        //   name: 'AzureWebJobsStorage'
+        //   value: 'DefaultEndpointsProtocol=https;AccountName=${_storageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${_storage_keys}'
+        // }
         {
-          name: 'AzureWebJobsStorage'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${_storageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${_storage_keys}'
-        }
+          name: 'AzureWebJobsStorage__accountName'
+          value: storageAccountName
+        }        
         {
           name: 'FUNCTIONS_EXTENSION_VERSION'
           value: '~4'
