@@ -406,6 +406,7 @@ var _chunkTokenOverlap = !empty(chunkTokenOverlap) ? chunkTokenOverlap : '200'
 param storageContainerName string = ''
 var _storageContainerName = !empty(storageContainerName) ? storageContainerName : 'documents'
 var _storageImagesContainerName = '${_storageContainerName}-images'
+var _storageNl2sqlContainerName = 'nl2sql'
 
 @description('Storage Account Name. Use your own name convention or leave as it is to generate a random name.')
 param storageAccountName string = ''
@@ -512,7 +513,7 @@ var _orchestratorEndpoint = 'https://${_orchestratorFunctionAppName}.azurewebsit
 
 // Networking
 
-module vnet './core/network/vnet.bicep' = if (_networkIsolation) {
+module vnet './core/network/vnet.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'virtual-network'
   scope: resourceGroup
   params: {
@@ -641,6 +642,7 @@ module storage './core/storage/storage-account.bicep' = {
     containers: [
       { name: _storageContainerName, publicAccess: 'None' }
       { name: _storageImagesContainerName, publicAccess: 'None' }
+      { name: _storageNl2sqlContainerName, publicAccess: 'None' }      
     ]
     keyVaultName: keyVault.outputs.name
     secretName: 'storageConnectionString'
@@ -1440,6 +1442,17 @@ module searchFuncAppPrivatelink 'core/search/search-private-link.bicep' = if (_n
   }
 }
 
+module searchAzureOpenAIPrivatelink 'core/search/search-private-link.bicep' = if (_networkIsolation && !_vnetReuse) {
+  name: 'searchAzureOpenAIPrivatelink'
+  scope: resourceGroup
+  params: {
+   name: '${_searchServiceName}-aoailink'
+   searchName: _searchServiceName
+   resourceId: openAi.outputs.id
+    groupId: 'openai_account'
+  }
+}
+
 module searchPe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'searchPe'
   scope: resourceGroup
@@ -1453,6 +1466,15 @@ module searchPe './core/network/private-endpoint.bicep' = if (_networkIsolation 
     dnsZoneId: _networkIsolation?searchDnsZone.outputs.id:''
   }
 }
+
+module searchOaiAccess './core/security/openai-access.bicep' = {
+  name: 'search-openai-access'
+  scope: resourceGroup
+  params: {
+    principalId: searchService.outputs.id
+    openaiAccountName: openAi.outputs.name
+  }
+} 
 
 // Load Testing
 
