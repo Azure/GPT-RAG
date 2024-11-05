@@ -25,7 +25,7 @@
     },
     "azureSearchUseMIS": {
       "value": "${AZURE_SEARCH_USE_MIS}"
-    },    
+    },
     "chatGptModelName": {
       "value": "gpt-35-turbo-16k"
     },
@@ -89,7 +89,20 @@
     "azureVnetName": {
       "value": "${AZURE_VNET_NAME}"
     },
-    "deploymentTags":{
+
+    "azureSqlServerName": {
+      "value": "${AZURE_SQL_SERVER_NAME}"
+    },
+    "azureSqlDatabaseName": {
+      "value": "${AZURE_SQL_DATABASE_NAME}"
+    },
+    "administratorLogin": {
+      "value": "${AZURE_SQL_ADMIN_USER}"
+    },
+    "administratorLoginPassword": {
+      "value": "${AZURE_SQL_ADMIN_PASSWORD}"
+    },
+    "deploymentTags": {
       "value": {}
     }
   }

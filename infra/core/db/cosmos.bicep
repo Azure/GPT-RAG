@@ -180,7 +180,7 @@ resource feedbackContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/c
       id: 'feedback'
       partitionKey: {
         paths: [
-          '/id'
+          '/_partitionKey'
         ]
         kind: 'Hash'
       }
@@ -198,11 +198,6 @@ resource feedbackContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/c
             path: '/"_etag"/?'
           }
         ]
-      }
-    }
-    options: {
-      autoscaleSettings: {
-        maxThroughput: autoscaleMaxThroughput
       }
     }
   }
@@ -279,7 +274,7 @@ resource settingsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/c
       id: 'settings'
       partitionKey: {
         paths: [
-          '/id'
+          '/_partitionKey'
         ]
         kind: 'Hash'
       }
@@ -297,11 +292,6 @@ resource settingsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/c
             path: '/"_etag"/?'
           }
         ]
-      }
-    }
-    options: {
-      autoscaleSettings: {
-        maxThroughput: autoscaleMaxThroughput
       }
     }
   }
@@ -333,11 +323,6 @@ resource usersContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/cont
             path: '/"_etag"/?'
           }
         ]
-      }
-    }
-    options: {
-      autoscaleSettings: {
-        maxThroughput: autoscaleMaxThroughput
       }
     }
   }
