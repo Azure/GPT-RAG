@@ -35,7 +35,7 @@ az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-grou
 
 az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings AZURE_OPENAI_STREAM="false"
 
-az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings AZURE_SEARCH_API_VERSION="2023-10-01-Preview"
+az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings AZURE_SEARCH_API_VERSION="2024-07-01"
 
 az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings AZURE_SEARCH_APPROACH="hybrid"
 
@@ -125,7 +125,7 @@ az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-grou
 
 az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings SEARCH_ANALYZER_NAME="standard"
 
-az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings SEARCH_API_VERSION="2023-10-01-Preview"
+az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings SEARCH_API_VERSION="2024-07-01"
 
 az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings SEARCH_INDEX_INTERVAL="PT1H"
 

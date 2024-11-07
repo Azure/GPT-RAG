@@ -20,5 +20,6 @@ resource newApplicationInsights 'Microsoft.Insights/components@2020-02-02' = if 
 }
 
 output id string = appInsightsReuse ? existingApplicationInsights.id : newApplicationInsights.id
+output name string = appInsightsReuse ? existingApplicationInsights.name : newApplicationInsights.name
 output instrumentationKey string = appInsightsReuse ? existingApplicationInsights.properties.InstrumentationKey : newApplicationInsights.properties.InstrumentationKey
 output connectionString string = appInsightsReuse ? existingApplicationInsights.properties.ConnectionString : newApplicationInsights.properties.ConnectionString
