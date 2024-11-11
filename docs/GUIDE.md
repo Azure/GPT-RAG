@@ -26,9 +26,11 @@
      - [4.5.1 Front Door & WAF](#configuring-front-door-and-web-application-firewall-waf)
      - [4.5.2 IP Allowlist](#configuring-ip-allowlist)
    - [4.6 Entra Authentication](#configuring-entra-authentication)
-   - [4.7 Authorization Setup](#configuring-authorization)
+   - [4.7 Authorization Setup](#configuring-authorization) 
    - [4.8 Setting Up Git Repos](#setting-up-git-repos)
-5. [**Troubleshooting**](#troubleshooting)
+5. [**Reference**](reference)
+   - [5.1 Azure Resources](#azure-resources)
+6. [**Troubleshooting**](#troubleshooting)
 
 ---
 
@@ -269,7 +271,7 @@ This section provides step-by-step guides for common administrative tasks.
 
 ## Deploying the Solution Accelerator
 
-This setup guide will walk you through provisioning a resource group containing all the essential components for the solution to operate effectively. The diagram below highlights the resource group and its corresponding components, marked in red, that will be provisioned during the process.
+This setup guide provides step-by-step instructions for provisioning a resource group with all the necessary components to ensure the solution operates efficiently. The diagram below highlights the resource group and its corresponding components, outlined in red, that will be provisioned during this process.
 
 ![Zero Trust Architecture](../media/admin-guide-architecture-scope.png)
 <br>*GPT-RAG Zero Trust Architecture*
@@ -277,8 +279,8 @@ This setup guide will walk you through provisioning a resource group containing 
 ### Prerequisites
 
 - Azure subscription with access to **Azure OpenAI**.
-- **Owner** or **Contributor + User Access Administrator** permission at the Subscription scope.
-- Confirm you have the required quota to provision resources in the chosen Azure region for deployment. For details on resources and SKUs, refer to the [Installation Guide](https://github.com/Azure/GPT-RAG/blob/main/docs/AUTOMATED_INSTALLATION.md#resource-list).
+- You need either the **Owner** role or both the **Contributor** and **User Access Administrator** roles at the subscription level. Alternatively, you can create a custom role. [Learn how to create a **Custom Role** here](MANUAL_CUSTOM_ROLE.md).
+- Confirm you have the required quota to provision resources in the chosen Azure region for deployment. <BR>For details on resources and SKUs, refer to the [Azure Resources](#azure-resources).
 - Agree to the Responsible AI terms by initiating the creation of an [Azure AI service](https://portal.azure.com/#create/Microsoft.CognitiveServicesAllInOne) resource in the portal. 
 
 > [!NOTE]
@@ -286,12 +288,310 @@ This setup guide will walk you through provisioning a resource group containing 
 
 ### Deployment Overview
 
-1. Clone the deployment repository.  
-2. Evaluate which network creation scenario best applies to your case (next section).  
-3. Update the configuration files to reflect your desired settings.  
-4. Execute the automated deployment script.
+This guide will walk you through each step needed to deploy the GPT-RAG solution in a Zero Trust architecture. Follow these steps to ensure a smooth and successful deployment.
 
-For the detailed, step-by-step deployment procedure, refer to the [installation procedure](AUTOMATED_INSTALLATION.md).
+1. **Plan Your Deployment**
+2. **Download the Repository**
+3. **Select Zero Trust Installation**
+4. **Define Your Network Creation Scenario**
+5. **Set Network Address Range (Optional)**
+6. **Customize Resource Names (Optional)**
+7. **Reuse Existing Resources (Optional)**
+8. **Log In to Azure**
+9. **Provision Infrastructure Components**
+10. **Manually Configure Network Resources (Optional)**
+11. **Deploy Application Components**
+
+---
+
+### 1. Plan Your Deployment
+
+#### Gather Basic Information
+
+Ensure you have the following details before starting:
+
+- **Subscription Name**
+- **Resource Group Name**
+- **Azure Region**
+- **Azure Environment Name** (e.g., gpt-rag-dev, gpt-rag-poc)
+
+> [!NOTE] 
+> Choose a region with sufficient service quotas. Commonly tested regions include `northcentralus`, `eastus2`, `eastus`, and `westus`.
+
+#### Identify Your Network Setup Scenario
+
+Select your preferred network setup:
+
+1. **Automatic Setup with Default Address Range**  
+   Automatically creates network resources with default address ranges in the GPT-RAG resource group.
+
+   | **Network Item**        | **Address Range** |
+   |-------------------------|-------------------|
+   | **ai-vnet**             | 10.0.0.0/23       |
+   | **ai-subnet**           | 10.0.0.0/26       |
+   | **app-services-subnet** | 10.0.0.192/26     |
+   | **database-subnet**     | 10.0.1.0/26       |
+   | **app-int-subnet**      | 10.0.0.128/26     |
+   | **AzureBastionSubnet**  | 10.0.0.64/26      |
+
+> [!NOTE] 
+> Each `/26` subnet provides 59 usable IP addresses, with Azure reserving 5 addresses per subnet.
+
+2. **Automatic Setup with Custom Address Ranges**  
+   If custom addressing is required, you can adjust address ranges in the configuration files to prevent overlap with existing networks.
+
+> [!TIP]
+> Choose this option if you want custom addressing to avoid overlap with existing networks. This helps prevent issues with direct connections using VNet peering, VPN gateways, or ExpressRoute.
+
+3. **Manual Network Setup**  
+   If you prefer to manually create the VNet, subnets, and other network resources, you can configure these outside of the Bicep templates, which will then deploy only the non-network resources.
+
+> [!TIP]
+> Choose this option if deploying across subscriptions (e.g., Connectivity subscription) or if you want to adopt a network topology different from the provided architecture.
+
+#### Reusing Existing Resources
+
+To optimize your setup, you can reuse non-networking resources already deployed within the same subscription, such as Azure OpenAI, Cosmos DB, and Key Vault. If you choose to reuse any of these resources, ensure you have their names and resource group details ready.
+
+> [!IMPORTANT]
+> If you’re reusing an existing Virtual Network (VNet), you must manually create all related network resources. This includes configuring subnets, private endpoints, and network interfaces as outlined in the **Manual Network Setup** scenario. In this case, the Bicep templates will not deploy network resources automatically when an existing VNet is reused.
+
+#### Resource Naming and Tagging
+
+By default, `azd` generates a unique, random name for each resource based on the environment name, subscription, and location. You can customize resource names during solution provisioning if desired, so this is a good time to note down your preferred names.
+
+If you use tags to manage resources (e.g., `business-unit`, `cost-center`), define them in advance to apply during installation.
+
+### 2. Download the Repository
+
+Initialize the repository:
+
+```sh
+azd init -t azure/gpt-rag
+```
+
+> **Note**: Add `-b agentic` if using the Agentic AutoGen-based orchestrator.
+>
+> ```sh
+> azd init -t azure/gpt-rag -b agentic
+> ```
+
+### 3. Select Zero Trust Installation
+
+Enable network isolation:
+
+```sh
+azd env set AZURE_NETWORK_ISOLATION true
+```
+
+### 4. Define Your Network Creation Scenario
+
+Select a network setup option:
+
+- For **Automatic Setup with Default Address Ranges**, skip to Step 6.
+- For **Automatic Setup with Custom Address Ranges**, proceed to Step 5.
+- For **Manual Network Setup**, run the following command before continuing to Step 6.  
+  More details on manual setup are provided later:
+
+```sh
+azd env set VNET_REUSE true
+```
+
+### 5. Set Custom Address Range (Optional)
+
+To set custom address ranges, use the variables below with `azd env set`:
+
+| **Environment Variable**               | **Network Item**      |
+|----------------------------------------|-----------------------|
+| `AZURE_VNET_ADDRESS`                   | AI VNet               |
+| `AZURE_AI_SUBNET_PREFIX`               | AI Subnet             |
+| `AZURE_APP_INT_SUBNET_PREFIX`          | App Internal Subnet   |
+| `AZURE_APP_SERVICES_SUBNET_PREFIX`     | App Services Subnet   |
+| `AZURE_BASTION_SUBNET_PREFIX`          | Bastion Subnet        |
+| `AZURE_DATABASE_SUBNET_PREFIX`         | Database Subnet       |
+
+Example:
+
+```sh
+azd env set AZURE_VNET_ADDRESS 10.1.0.0/23
+azd env set AZURE_AI_SUBNET_PREFIX 10.1.0.0/26
+azd env set AZURE_APP_SERVICES_SUBNET_PREFIX 10.1.0.64/26
+azd env set AZURE_DATABASE_SUBNET_PREFIX 10.1.1.0/26
+azd env set AZURE_APP_INT_SUBNET_PREFIX 10.1.0.128/26
+azd env set AZURE_BASTION_SUBNET_PREFIX 10.1.0.192/26
+```
+
+### 6. Customize Resource Names (Optional)
+
+To customize names, set environment variables for each resource. For example, the following command set the name of the Storage Account:
+
+```sh
+azd env set AZURE_STORAGE_ACCOUNT_NAME <yourResourceName>
+```
+
+See [Customizing resource names](CUSTOMIZATIONS_RESOURCE_NAMES.md) to find out which variables correspond to each resource.
+
+### 7. Reuse Azure Resources (Optional)
+
+You can set environment variables if you want to reuse existing resources in the same subscription.
+
+Example for AI Services:
+
+```sh
+azd env set AI_SERVICES_REUSE true
+azd env set AI_SERVICES_RESOURCE_GROUP_NAME rg-gptrag-common
+azd env set AI_SERVICES_NAME my-shared-ai-service
+```
+
+More details at [Bring Your Own Resources](CUSTOMIZATIONS_BYOR.md).
+
+### 8. Log In to Azure
+
+Azure Developer CLI:
+
+```sh
+azd auth login
+```
+
+Azure CLI:
+
+```sh
+az login
+```
+
+### 9. Provision Infrastructure Components
+
+Run:
+
+```sh
+azd provision
+```
+
+### 10. Manually Configure Network Resources (Optional)
+
+This section is intended for those who have chosen to manually create their network resources. If this is not the case, skip to Step 11.
+
+#### 10.1. Create Virtual Networks and Subnets
+
+- Create your VNet and subnets based on your organization's network architecture.
+- Ensure that address ranges do not overlap with existing VNets to maintain connectivity.
+- Check this reference to learn how to create VNets and Subnets in the Azure Portal:<BR>[Quickstart: Create a virtual network using the Azure portal](https://learn.microsoft.com/azure/virtual-network/quick-create-portal)
+
+![Zero Trust Architecture](../media/admin-guide-vnet.png)
+
+We recommend following this network topology to align with the Zero Trust architecture. However, you may use your organization’s VNet and subnet standards if preferred. For reference, the default addressing used in the Bicep template is shown below:
+
+| **Name**                 | **Address Range** |
+|--------------------------|-------------------|
+| ai-vnet                  | 10.0.0.0/23       |
+| ai-subnet                | 10.0.0.0/26       |
+| app-services-subnet      | 10.0.0.192/26     |
+| database-subnet          | 10.0.1.0/26       |
+| app-int-subnet           | 10.0.0.128/26     |
+| AzureBastionSubnet       | 10.0.0.64/26      |
+
+> [!IMPORTANT]
+> Use network addressing that avoids overlaps with your existing VNets. Overlapping address ranges prevent direct connections via VNet peering, VPN gateways, or ExpressRoute.
+
+#### 10.2. Set Up Private Endpoints
+
+- Manually create private endpoints for the following Azure services:
+  - **Data Ingestion Function App**
+  - **Azure Storage Account**
+  - **Azure Cosmos DB**
+  - **Azure Key Vault**
+  - **Orchestrator Function App**
+  - **Frontend Web App**
+  - **Azure AI Services**
+  - **Azure OpenAI**
+  - **Azure Search**
+- Ensure they are correctly associated with the appropriate subnets.
+- Check this reference to learn how to create Private Endpoints in Azure Portal: <BR>[Create a private endpoint using the Azure portal](https://learn.microsoft.com/en-us/azure/private-link/create-private-endpoint-portal?tabs=dynamic-ip#create-a-private-endpoint)
+- When creating the private endpoint in the portal, a Private DNS Zone for name resolution will also be set up. Ensure that all Private DNS Zones are created correctly.
+
+![Private DNS Zones](../media/admin-guide-private-dns.png)
+
+#### 10.3. Create Network Security Groups
+
+- Define NSGs with rules that align with your security policies.
+- Apply NSGs to the five subnets to control traffic flow.
+- Check this reference to learn how to create Network Security Groups in Azure Portal: <BR>[Filter network traffic with a network security group using the Azure portal](https://learn.microsoft.com/azure/virtual-network/tutorial-filter-network-traffic)
+
+#### 10.4. Configure Search Shared Private Access
+
+Azure AI Search will access the Blob Storage Account and the Function App where the chunking function is located.
+
+- Configure Shared Private Link with the Storage Account.
+- Configure Shared Private Link with the Function App that performs the chunking.
+- Check this reference to learn how to [Configure shared private link for Azure AI Search](https://learn.microsoft.com/en-us/azure/search/search-indexer-howto-access-private?tabs=portal-create)
+
+#### 10.5. Configure App Service Plan VNet Integration
+
+The App Service Plan supporting GPT-RAG Function Apps needs integration with the `ai-vnet`.
+
+- Configure VNet integration for the App Service Plan.
+- Check this reference to learn how to [Integrate your app with an Azure virtual network](https://learn.microsoft.com/azure/app-service/configure-vnet-integration-enable)
+
+#### 10.6. Data Science Virtual Machine (Test VM)
+
+- Create a Data Science Virtual Machine and configure a bastion for VM Access.
+- Check this reference to learn how to [Provision a Data Science Virtual Machine](https://learn.microsoft.com/azure/machine-learning/data-science-virtual-machine/provision-vm)
+- Check this reference to learn how to [Connect to a Windows VM using Azure Bastion](https://learn.microsoft.com/azure/bastion/bastion-connect-vm-rdp)
+
+Use this configuration for the VM:
+   - **Operating System**: Windows (Windows Server 2019 Datacenter)
+   - **SKU**: Standard_D4s_v3 (4 vCPUs, 16 GiB memory)
+   - **Image Publisher**: `microsoft-dsvm` (Data Science VM)
+   - **Image Offer**: `dsvm-win-2019`
+
+
+### Validation
+
+- Ensure all network resources are deployed successfully.
+- Verify that access controls and network configurations align with Zero Trust principles.
+
+### 11. Deploy Application Components
+
+Deploy the application components by connecting through the Data Science VM with Bastion (Step 9 or manual setup in Step 10) or by directly accessing the VNet via a secure connection like ExpressRoute or VPN.
+
+> [!NOTE]
+> If you have direct VNet access, you can deploy from your own machine, eliminating the need for a Bastion VM. Instructions for both options are below.
+
+**Access VNet from Your Machine**:
+
+```sh
+azd package
+azd deploy
+```
+
+**Access VNet from the Data Science VM (Bastion)**:
+
+1. Log in to the VM using the password stored in Key Vault.
+2. Update `azd`:
+
+   ```sh
+   choco upgrade azd
+   ```
+
+3. Create a new directory and initialize deployment:
+
+> [!Important]  
+> Use the same environment name, subscription, and region as initial provisioning.
+
+   ```sh
+   mkdir deploy
+   cd deploy
+   azd init -t azure/gpt-rag
+   azd auth login
+   azd env refresh
+   azd package
+   azd deploy
+   ```
+
+🎉 **Congratulations! Your Zero Trust deployment is now complete.**
+
+> [!Note]  
+> After the initial deployment, you may choose to customize or update specific features, such as adjusting prompts, adding a logo to the frontend, testing different chunking strategies, or configuring a custom orchestration strategy like NL2SQL. For detailed guidance on these optional customizations, refer to the deployment section in each component's repository. [Orchestrator](https://github.com/azure/gpt-rag-agentic), [Front-end](https://github.com/azure/gpt-rag-frontend), [Data Ingestion](https://github.com/Azure/gpt-rag-ingestion).
 
 ## Network Configuration Scenarios
 
@@ -311,7 +611,7 @@ The setup includes a VNet, five subnets, a Network Security Group (NSG) for each
 
 | **Network Item**         | **Address Range**    |
 |--------------------------|----------------------|
-| **ai-vnet**               | **10.0.0.0/23**      |
+| **ai-vnet**              | **10.0.0.0/23**      |
 | **ai-subnet**            | **10.0.0.0/26**      |
 | **app-services-subnet**  | **10.0.0.192/26**    |
 | **database-subnet**      | **10.0.1.0/26**      |
@@ -327,47 +627,38 @@ This option is ideal for users who want a hassle-free setup with optimal securit
 
 For deployments integrating with existing infrastructure, GPT-RAG allows you to adjust **network addressing** in the configuration files, preventing address overlaps while automating resource creation.
 
-For detailed instructions on customizing these network settings, refer to the [installation procedure](AUTOMATED_INSTALLATION.md).
+Adjust network addressing to avoid overlaps with existing VNets, as overlapping address ranges prevent direct connections via VNet peering, VPN gateways, or ExpressRoute. The default address ranges are:
+
+| **Network Item**         | **Address Range**    |
+|--------------------------|----------------------|
+| **AI VNet**              | **10.0.0.0/23**      |
+| **ai-subnet**            | **10.0.0.0/26**      |
+| **app-services-subnet**  | **10.0.0.192/26**    |
+| **database-subnet**      | **10.0.1.0/26**      |
+| **app-int-subnet**       | **10.0.0.128/26**    |
+| **AzureBastionSubnet**   | **10.0.0.64/26**     |
+
+Each `/26` subnet offers 59 usable IP addresses, as Azure reserves 5 IP addresses in each subnet. The `/23` VNet allows 507 usable IP addresses. To customize address ranges, set the following environment variables:
+
+| **Environment Variable**               | **Network Item**      |
+|----------------------------------------|-----------------------|
+| `AZURE_VNET_ADDRESS`                   | AI VNet               |
+| `AZURE_AI_SUBNET_PREFIX`               | AI Subnet             |
+| `AZURE_APP_INT_SUBNET_PREFIX`          | App Internal Subnet   |
+| `AZURE_APP_SERVICES_SUBNET_PREFIX`     | App Services Subnet   |
+| `AZURE_BASTION_SUBNET_PREFIX`          | Bastion Subnet        |
+| `AZURE_DATABASE_SUBNET_PREFIX`         | Database Subnet       |
+
+Set the desired address range with `azd env` command after `azd int` and before `az provision`. 
+
+Example: `azd env set AZURE_AI_SUBNET_PREFIX 10.0.0.16/26`.
 
 ### 3. Manual Network Setup
 
-If you need full control over network resources or are integrating GPT-RAG into a complex environment, you can manually create the required network resources. This approach is ideal for organizations with specific networking needs or strict security policies.
-
-For detailed instructions on setting up network resources manually, refer to the [Bring Your Own Resources (BYOR) - Virtual Network (VNet) section](https://github.com/Azure/GPT-RAG/blob/main/docs/CUSTOMIZATIONS_BYOR.md#virtual-network-vnet) in the GPT-RAG documentation. The following steps offer a general overview of the process.
-
-**Manual Setup Steps:**
-
-1. **Create Virtual Networks and Subnets:**
-   - Define your VNet and subnets based on your organization's network architecture.
-   - Ensure that address ranges do not overlap with existing VNets to maintain connectivity.
-
-2. **Set Up Private Endpoints:**
-   - Manually create private endpoints for Azure services that GPT-RAG will use.
-   - Ensure they are correctly associated with the appropriate subnets.
-
-3. **Configure Private DNS Zones:**
-   - Establish Azure Private DNS Zones within your preferred resource group or subscription.
-   - Link the DNS zones to your VNets to enable proper name resolution for private endpoints.
-
-4. **Implement Network Security Groups:**
-   - Define NSGs with rules that align with your security policies.
-   - Apply NSGs to the relevant subnets to control traffic flow.
-
-5. **Integrate with GPT-RAG:**
-   - Reference your manually created VNets, subnets, private endpoints, and DNS zones in the GPT-RAG deployment configuration.
-   - Ensure that all dependencies and connections are correctly established.
-
+If you need full control over network resources or are integrating GPT-RAG into a complex environment, you can manually create the necessary network resources. This approach is ideal for organizations with specific networking requirements or strict security policies. Refer to [Manually Configure Network Resources](#10-manually-configure-network-resources-optional) in the deployment procedure for more details on setting up your network.
 
 > [!NOTE]
 > **User Connectivity:** Regardless of the network configuration approach you select, you may need to configure additional network settings to enable connectivity for external or internal users. Refer to the **Internal User Access** and **Internal User Access** sections in this guide for detailed instructions tailored to your specific access requirements.
-
-### Validation
-
-- Ensure all resources are deployed successfully.
-- Verify that access controls and network configurations align with Zero Trust principles.
-
-> [!NOTE]  
-> After the initial deployment, you may choose to customize or update specific features, such as adjusting prompts, adding a logo to the frontend, testing different chunking strategies, or configuring a custom orchestration strategy like NL2SQL. For detailed guidance on these optional customizations, refer to the deployment section in each component's repository.
 
 ## Accessing the Data Science VM via Bastion
 
@@ -710,6 +1001,172 @@ For detailed instructions and advanced import scenarios, refer to the [Importing
 ### Option 2: Contributing by Forking and Creating Pull Requests
 
 If you intend to contribute to the ongoing development of the Solution Accelerator by submitting pull requests, please refer to our [Contribution Guidelines](https://github.com/Azure/GPT-RAG/blob/main/CONTRIBUTING.md#contribution-guidelines) for detailed instructions on how to fork repositories and create pull requests.
+
+## Reference
+
+### Azure Resources
+
+Here is the complete list of resources for a standard Zero Trust deployment, including descriptions and SKUs. These defaults have been extensively tested in the automated installation. You can review them to adjust to your needs, considering usage factors like user volume and data.
+
+> [!TIP]
+> Review this list before deploying to ensure you have the necessary quota for deployment in the desired subscription and region.
+
+#### App Services
+
+- **App Service Plan**
+    <BR>Hosts the frontend and function apps.
+    - SKU: P0v3
+    - Operating System: Linux
+    - Zone Redundant: Disabled
+- **Function App (Orchestrator)**
+    <BR>Orchestrates the RAG flow.
+    - Operating System: Linux
+    - LinuxFxVersion: python|3.11
+- **Function App (Data Ingestion)**
+    <BR>Supports the Data Ingestion Pipeline.
+    - Operating System: Linux
+    - LinuxFxVersion: python|3.11
+- **App Service (Frontend)**
+    <BR>Provides the Web User Interface.
+    - Operating System: Linux
+    - LinuxFxVersion: python|3.12
+- **Application Insights**
+    <BR>Provides real-time monitoring for apps.
+    - Type: Classic
+
+#### Security
+
+- **Key Vault (Application)**
+    <BR>Stores API keys when needed.
+    - SKU: Standard
+    - Soft Delete: Enabled
+    - Purge Protection: Enabled
+- **Key Vault (Test VM Bastion)**
+    <BR>Used by Bastion to store the Test VM password.
+    - SKU: Standard
+    - Soft Delete: Enabled
+    - Purge Protection: Enabled
+
+#### AI Services
+
+- **Azure AI Services Multi-Service Account**
+    <BR>Reads documents (Data Ingestion) and interacts with users (Web UI).
+    - SKU: Standard
+- **Azure OpenAI**
+    <BR>Generates responses and vector embeddings.
+    - SKU: Standard
+    - Deployments:
+        - Regional gpt-4o, 40 TPM.
+        - text-embedding-ada-002, 40 TPM.
+- **Search Service**
+    <BR>Provides vector indexes for the retrieval step.
+    - SKU: Standard2
+    - Replicas: 1
+    - Partitions: 1
+
+#### Compute
+
+- **Virtual Machine (Test VM)**
+    <BR>Provides access to configure and test the solution after disabling public endpoints.
+    - Operating System: Windows (Windows Server 2019 Datacenter)
+    - SKU: Standard_D4s_v3 (4 vCPUs, 16 GiB memory)
+    - Image Publisher: microsoft-dsvm (Data Science VM)
+    - Image Offer: dsvm-win-2019
+
+#### Storage
+
+- **Storage Account (Documents)**
+    <BR>Stores content used for grounding responses.
+    - Performance: Standard
+    - Replication: Locally-redundant storage (LRS)
+    - Account Type: StorageV2 (general purpose v2)
+- **Storage Account (Orchestrator Function App)**
+    <BR>Stores logs, code, and execution state for the Orchestrator Function App.
+    - Performance: Standard
+    - Replication: Locally-redundant storage (LRS)
+    - Account Type: Storage (general purpose v1)
+- **Storage Account (Data Ingestion Function App)**
+    <BR>Stores logs, code, and execution state for the Data Ingestion Function App.
+    - Performance: Standard
+    - Replication: Locally-redundant storage (LRS)
+    - Account Type: Storage (general purpose v1)
+- **Test VM Disk**
+    <BR>Disk for the Test VM.
+    - Disk Size: 128 GiB
+    - Storage Type: Premium SSD LRS
+    - Operating System: Windows
+
+#### Database
+
+- **Azure Cosmos DB**
+    <BR>Stores conversation history and metadata to improve quality.
+    - Kind: GlobalDocumentDB
+    - Database Account Offer Type: Standard
+    - Capacity Mode: Provisioned throughput
+
+#### Networking
+
+- **Virtual Network**
+    <BR>AI Services VNet.
+    - Address Space: 10.0.0.0/23
+> Address range is a suggestion, you should use what works for you.
+
+- **Subnets**
+    <BR>Designate network segments in the AI Services VNet to organize and secure traffic.
+    - Subnets:
+        - **ai-subnet** <BR>10.0.0.0/26
+        - **app-services-subnet** <BR>10.0.0.192/26
+        - **database-subnet** <BR>10.0.1.0/26
+        - **app-int-subnet** <BR>10.0.0.128/26
+        - **AzureBastionSubnet** <BR>10.0.0.64/26
+    > The address ranges are suggestions; please adjust them to fit your specific network requirements.
+
+- **Private Endpoints**
+    <BR>Enable private, secure access to Azure services via a virtual network.
+    - Private Endpoints (PEs):
+        - AI Search Private Endpoint
+        - AI Services Private Endpoint
+        - Azure OpenAI Private Endpoint
+        - CosmosDB Private Endpoint
+        - Data Ingestion Function App Private Endpoint
+        - Frontend App Service Private Endpoint
+        - Key Vault Private Endpoint
+        - Orchestrator Function App Private Endpoint
+        - Storage Account (Documents) Private Endpoint
+
+- **Private DNS Zones**
+    <BR>Resolve private endpoints to private IPs within a virtual network.
+    - Private DNS Zones:
+        - App Service and Function Apps Private DNS <BR> privatelink.azurewebsites.net
+        - AI Services Private DNS <BR> privatelink.cognitiveservices.azure.com
+        - Azure OpenAI Private DNS <BR> privatelink.openai.azure.com
+        - Storage Account (Documents) Private DNS <BR> privatelink.blob.core.windows.net
+        - CosmosDB Private DNS <BR> privatelink.documents.azure.com
+        - AI Search Private DNS <BR> privatelink.search.windows.net
+        - Key Vault Private DNS <BR> privatelink.vaultcore.azure.net
+
+- **Network Interfaces**
+    <BR>Provide connectivity to private endpoints and virtual machines within the AI Services VNet.
+    - Interfaces:
+        - AI Search PE's Network Interface
+        - AI Services PE's Network Interface
+        - Azure OpenAI PE's Network Interface
+        - CosmosDB PE's Network Interface
+        - Data Ingestion Function App PE's Network Interface
+        - Frontend App Service PE's Network Interface
+        - Key Vault PE's Network Interface
+        - Orchestrator Function App PE's Network Interface
+        - Storage Account (Documents) PE's Network Interface
+        - Test Virtual Machine Network Interface
+
+- **Bastion**
+    <BR>Enables private and secure access to the Test VM without exposing the VM directly to the internet.
+    - Tier: Standard
+
+- **Public IP**
+    <BR>Used by Bastion to enable secure access to the Test VM.
+    - SKU: Standard
+    - Tier: Regional
 
 ## Troubleshooting
 

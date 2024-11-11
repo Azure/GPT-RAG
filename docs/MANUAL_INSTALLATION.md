@@ -15,6 +15,8 @@ You will also need the following permissions:
 * Role: Owner or Contributor + User Access Administrator
 * Scope: Resource group or Subscription
 
+Alternatively, you can create a [**Custom Role**](MANUAL_CUSTOM_ROLE.md).
+
 ## Resources List
 
 Here is the complete list of resources for a standard Zero Trust deployment, including descriptions and SKUs. These defaults have been extensively tested in the automated installation. You can adjust them during manual installation to suit your needs, considering usage factors like user volume and data.
