@@ -986,6 +986,15 @@ module orchestratorStorageAccountStorageAccess './core/security/blobstorage-data
   }
 }
 
+module orchestratorStorageAccess './core/security/blobstorage-reader-access.bicep' = {
+  name: 'orchestrator-blobstorage-access'
+  scope: resourceGroup
+  params: {
+    storageAccountName: storage.outputs.name
+    principalId: orchestrator.outputs.identityPrincipalId
+  }
+}
+
 module orchestratorKeyVaultAccess './core/security/keyvault-access.bicep' =  {
   name: 'orchestrator-keyvault-access'
   scope: resourceGroup
