@@ -41,7 +41,7 @@ Create lists of words that should never be used and filter queries and answers t
 - Give the security hub function the roles of Cognitive Services Users and Reader in the content safety resource. 
 - Add eviroment variables to security hub:
     "CONTENT_SAFETY_ENDPOINT": "https://{your-content-safety-resource}.cognitiveservices.azure.com/",
-- You can also add this optional variables if you want to add your blocklists(you should first create and fill the blocklist.[How to](https://learn.microsoft.com/en-us/azure/ai-services/content-safety/how-to/use-blocklist?tabs=windows%2Crest#create-or-modify-a-blocklist):
+- You can also add this optional variables if you want to add your blocklists(you should first [create and fill the blocklist](https://learn.microsoft.com/en-us/azure/ai-services/content-safety/how-to/use-blocklist?tabs=windows%2Crest#create-or-modify-a-blocklist)):
     "BLOCK_LIST_CHECK": "true",
     "BLOCK_LISTS_NAMES": [names]
 - Add enviroment variables to orchestrator:
