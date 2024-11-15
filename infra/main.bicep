@@ -10,6 +10,7 @@ targetScope = 'subscription'
 // If you want to set the value of any of those variables, just run the following command: azd env set ENV_VAR_NAME value.
 // The value of 'ENV_VAR_NAME' will be automatically fetched if you deploy the template using 'azd'.
 
+// Templates Reference: https://learn.microsoft.com/en-us/azure/templates/
 
 // Environment name. This is automatically set by the 'azd' tool.
 @description('Environment name used as a tag for all resources. This is directly mapped to the azd-environment.')
@@ -315,7 +316,7 @@ var _chatGptDeploymentName = !empty(chatGptDeploymentName) ? chatGptDeploymentNa
 // @minValue(1)
 // @maxValue(300)
 param chatGptDeploymentCapacity int = 0
-var _chatGptDeploymentCapacity = chatGptDeploymentCapacity != 0 ? chatGptDeploymentCapacity : 40
+var _chatGptDeploymentCapacity = chatGptDeploymentCapacity != 0 ? chatGptDeploymentCapacity : 09
 
 @description('Embeddings model used to generate vector embeddings. Don\'t forget to check region availability.')
 // @allowed([ 'text-embedding-ada-002' ])
@@ -333,7 +334,7 @@ var _embeddingsDeploymentName = !empty(embeddingsDeploymentName) ? embeddingsDep
 
 @description('Embeddings model tokens per Minute Rate Limit (thousands).')
 param embeddingsDeploymentCapacity int = 0
-var _embeddingsDeploymentCapacity = embeddingsDeploymentCapacity != 0 ? embeddingsDeploymentCapacity : 40
+var _embeddingsDeploymentCapacity = embeddingsDeploymentCapacity != 0 ? embeddingsDeploymentCapacity : 09
 
 @description('Azure OpenAI API version.')
 param openaiApiVersion string = ''
@@ -1507,12 +1508,29 @@ module searchService 'core/search/search-services.bicep' = {
   }
 }
 
+module searchAzureOpenAIPrivatelink 'core/search/search-private-link.bicep' = if (_networkIsolation && !_vnetReuse) {
+  name: 'searchAzureOpenAIPrivatelink'
+  scope: resourceGroup
+  dependsOn: [
+    openAi, openAiPe
+  ] 
+  params: {
+   name: '${_searchServiceName}-aoailink'
+   searchName: searchService.outputs.name
+   resourceId: openAi.outputs.id
+    groupId: 'openai_account'
+  }
+}
+
 module searchStoragePrivatelink 'core/search/search-private-link.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'searchStoragePrivatelink'
   scope: resourceGroup
+  dependsOn: [
+    searchAzureOpenAIPrivatelink, storage, storagepe
+  ]  
   params: {
    name: '${_searchServiceName}-storagelink'
-   searchName: _searchServiceName
+   searchName: searchService.outputs.name
    resourceId: storage.outputs.id
    groupId: 'blob'
   }
@@ -1521,22 +1539,14 @@ module searchStoragePrivatelink 'core/search/search-private-link.bicep' = if (_n
 module searchFuncAppPrivatelink 'core/search/search-private-link.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'searchFuncAppPrivatelink'
   scope: resourceGroup
+  dependsOn: [
+    searchStoragePrivatelink, dataIngestion, ingestionPe
+  ]  
   params: {
    name: '${_searchServiceName}-funcapplink'
-   searchName: _searchServiceName
+   searchName: searchService.outputs.name
    resourceId: dataIngestion.outputs.id
     groupId: 'sites'
-  }
-}
-
-module searchAzureOpenAIPrivatelink 'core/search/search-private-link.bicep' = if (_networkIsolation && !_vnetReuse) {
-  name: 'searchAzureOpenAIPrivatelink'
-  scope: resourceGroup
-  params: {
-   name: '${_searchServiceName}-aoailink'
-   searchName: _searchServiceName
-   resourceId: openAi.outputs.id
-    groupId: 'openai_account'
   }
 }
 
