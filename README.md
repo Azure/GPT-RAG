@@ -233,9 +233,13 @@ This section provides quick guides for customizing, managing, and troubleshootin
 
 The standard deployment process sets up Azure resources and deploys the accelerator components with a standard configuration. To tailor the deployment to your specific needs, follow the steps in the [Custom Deployment](docs/CUSTOMIZATIONS.md) section for further customization options.
 
+<!-- 
+
+Commenting out this section as the integration hub needs to be reviewed.
+
 ### Integrate with Additional Data Sources
   
-Expand your data retrieval capabilities by integrating new data sources such as Bing Custom Search, SQL Server, and Teradata. For detailed instructions, refer to the [AI Integration Hub](docs/AI_INTEGRATION_HUB.md) page.
+Expand your data retrieval capabilities by integrating new data sources such as Bing Custom Search, SQL Server, and Teradata. For detailed instructions, refer to the [AI Integration Hub](docs/AI_INTEGRATION_HUB.md) page. -->
 
 ### Multi-Environment Deployment
 

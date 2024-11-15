@@ -9,7 +9,7 @@ param deployStorageAccount bool = true
 param accessTier string = 'Hot'
 param allowBlobPublicAccess bool = false
 param allowCrossTenantReplication bool = true
-param allowSharedKeyAccess bool = true
+param allowSharedKeyAccess bool = false
 param defaultToOAuthAuthentication bool = false
 param deleteRetentionPolicy object = {}
 @allowed([ 'AzureDnsZone', 'Standard' ])
@@ -19,8 +19,6 @@ param minimumTlsVersion string = 'TLS1_2'
 @allowed([ 'Enabled', 'Disabled' ])
 param publicNetworkAccess string = 'Disabled'
 param sku object = { name: 'Standard_LRS' }
-param secretName string = 'storageConnectionString'
-param keyVaultName string
 param containers array = []
 
 
@@ -43,6 +41,7 @@ resource newStorage 'Microsoft.Storage/storageAccounts@2022-05-01' = if (!storag
     defaultToOAuthAuthentication: defaultToOAuthAuthentication
     dnsEndpointType: dnsEndpointType
     minimumTlsVersion: minimumTlsVersion
+    supportsHttpsTrafficOnly: true
     networkAcls: {
       bypass: 'AzureServices'
       defaultAction: 'Allow'
@@ -61,27 +60,6 @@ resource newStorage 'Microsoft.Storage/storageAccounts@2022-05-01' = if (!storag
         publicAccess: contains(container, 'publicAccess') ? container.publicAccess : 'None'
       }
     }]
-  }
-}
-
-resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
-  name: keyVaultName
-}
-
-var storage_keys = !deployStorageAccount ? '' : storageReuse ? existingStorage.listKeys().keys[0].value : newStorage.listKeys().keys[0].value
-
-resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' =  {
-  name: secretName
-  tags: tags
-  parent: keyVault
-  properties: {
-    attributes: {
-      enabled: true
-      exp: 0
-      nbf: 0
-    }
-    contentType: 'string'
-    value: 'DefaultEndpointsProtocol=https;AccountName=${name};AccountKey=${storage_keys};EndpointSuffix=core.windows.net'
   }
 }
 
