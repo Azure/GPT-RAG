@@ -316,7 +316,7 @@ var _chatGptDeploymentName = !empty(chatGptDeploymentName) ? chatGptDeploymentNa
 // @minValue(1)
 // @maxValue(300)
 param chatGptDeploymentCapacity int = 0
-var _chatGptDeploymentCapacity = chatGptDeploymentCapacity != 0 ? chatGptDeploymentCapacity : 09
+var _chatGptDeploymentCapacity = chatGptDeploymentCapacity != 0 ? chatGptDeploymentCapacity : 40
 
 @description('Embeddings model used to generate vector embeddings. Don\'t forget to check region availability.')
 // @allowed([ 'text-embedding-ada-002' ])
@@ -334,7 +334,7 @@ var _embeddingsDeploymentName = !empty(embeddingsDeploymentName) ? embeddingsDep
 
 @description('Embeddings model tokens per Minute Rate Limit (thousands).')
 param embeddingsDeploymentCapacity int = 0
-var _embeddingsDeploymentCapacity = embeddingsDeploymentCapacity != 0 ? embeddingsDeploymentCapacity : 09
+var _embeddingsDeploymentCapacity = embeddingsDeploymentCapacity != 0 ? embeddingsDeploymentCapacity : 40
 
 @description('Azure OpenAI API version.')
 param openaiApiVersion string = ''
