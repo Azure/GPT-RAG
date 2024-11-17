@@ -6,11 +6,11 @@ On this page, you will find some options to configure your deployment:
 - [Configuring AOAI content filters](#configuring-aoai-content-filters)
 - [Setting Custom Names for Resources](#defining-resources-names)
 - [Applying Tags to All Resources](#adding-tags-for-all-resources)
-- [Bringing Your Own Resources](#bring-your-own-resources)
-<!-- - [Selecting Your Components](#selecting-your-components) -->
-- [Accessing Data Ingest function using AI Search Managed Identity](#accessing-the-data-ingest-function-from-ai-search-using-a-managed-identity)
+- [Bringing Your Own Resources](#bring-your-own-resources)- [Accessing Data Ingest function using AI Search Managed Identity](#accessing-the-data-ingest-function-from-ai-search-using-a-managed-identity)
 - [Extending Enteprise RAG components](#extending-solution-components)
-- [Filter Files with AI Search Using Security Trimming](#Filter-Files-with-AI-Search-Using-Security-Trimming)
+
+<!-- - [Filter Files with AI Search Using Security Trimming](#Filter-Files-with-AI-Search-Using-Security-Trimming) -->
+<!-- - [Selecting Your Components](#selecting-your-components) -->
 
 **Note on Environment Variables**
 
@@ -126,6 +126,6 @@ azd up
 
 Azd automatically provisions the infrastructure and deploys the three components. However, you may want to change and customize parts of the code to meet a specific requirement. Our Solution Accelerator allows you to do this. For detailed instructions on how this can be achieved, please take a look at the [Extending Application Components](EXTENDING_APP_COMPONENTS.md) page.
 
-## Filter Files with AI Search Using Security Trimming
+<!-- ## Filter Files with AI Search Using Security Trimming
 
-This customization is particularly valuable in scenarios where sensitive documents need to be accessed by specific groups or individuals within an organization. By enabling the AZURE_SEARCH_TRIMMING variable, you can ensure that AI Search returns results tailored to each user’s access (no RBAC permissions), please take a look at the [Filter Files with AI Search Using Security Trimming](CUSTOMIZATIONS_SEARCH_TRIMMING.md) page.
+This customization is particularly valuable in scenarios where sensitive documents need to be accessed by specific groups or individuals within an organization. By enabling the AZURE_SEARCH_TRIMMING variable, you can ensure that AI Search returns results tailored to each user’s access (no RBAC permissions), please take a look at the [Filter Files with AI Search Using Security Trimming](CUSTOMIZATIONS_SEARCH_TRIMMING.md) page. -->

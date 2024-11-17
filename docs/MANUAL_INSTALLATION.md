@@ -15,6 +15,8 @@ You will also need the following permissions:
 * Role: Owner or Contributor + User Access Administrator
 * Scope: Resource group or Subscription
 
+Alternatively, you can create a [**Custom Role**](MANUAL_CUSTOM_ROLE.md).
+
 ## Resources List
 
 Here is the complete list of resources for a standard Zero Trust deployment, including descriptions and SKUs. These defaults have been extensively tested in the automated installation. You can adjust them during manual installation to suit your needs, considering usage factors like user volume and data.
@@ -122,11 +124,11 @@ Here is the complete list of resources for a standard Zero Trust deployment, inc
 - **Subnets**
     <BR>Designate network segments in the AI Services VNet to organize and secure traffic.
     - Subnets:
-        - ai-subnet <BR>10.0.0.0/28
-        - app-services-subnet <BR>10.0.0.16/28
-        - database-subnet <BR>10.0.0.32/28
-        - app-int-subnet <BR>10.0.0.48/28
-        - AzureBastionSubnet <BR>10.0.0.64/28
+        - **ai-subnet** <BR>10.0.0.0/26
+        - **app-services-subnet** <BR>10.0.0.192/26
+        - **database-subnet** <BR>10.0.1.0/26
+        - **app-int-subnet** <BR>10.0.0.128/26
+        - **AzureBastionSubnet** <BR>10.0.0.64/26
     > Address range is a suggestion, you should use what works for you.
 
 - **Private Endpoints**
@@ -303,6 +305,14 @@ Gather Necessary Information:
             --scope "/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$storageAccountName"
         ```
 
+        - Assign Storage Account "Storage Blob Data Reader" role to the Orchestrator Managed Identity.
+        ```
+        az role assignment create \
+            --assignee $principalId \
+            --role "Storage Blob Data Reader" \
+            --scope "/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$storageAccountName"
+        ```
+
         - Assign Storage Account "Storage Blob Data Contributor" role to the Data Ingestion Function App Identity.
         ```
         az role assignment create \
@@ -347,6 +357,7 @@ Gather Necessary Information:
         - Assign Azure OpenAI "Cognitive Services OpenAI User" role to the Identities of the following Resources:
             - Orchestrator Function App
             - Data Ingestion Function App
+            - Azure AI Search            
         ```    
             az role assignment create \
                 --assignee $principalId \

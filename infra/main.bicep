@@ -10,6 +10,7 @@ targetScope = 'subscription'
 // If you want to set the value of any of those variables, just run the following command: azd env set ENV_VAR_NAME value.
 // The value of 'ENV_VAR_NAME' will be automatically fetched if you deploy the template using 'azd'.
 
+// Templates Reference: https://learn.microsoft.com/en-us/azure/templates/
 
 // Environment name. This is automatically set by the 'azd' tool.
 @description('Environment name used as a tag for all resources. This is directly mapped to the azd-environment.')
@@ -406,6 +407,7 @@ var _chunkTokenOverlap = !empty(chunkTokenOverlap) ? chunkTokenOverlap : '200'
 param storageContainerName string = ''
 var _storageContainerName = !empty(storageContainerName) ? storageContainerName : 'documents'
 var _storageImagesContainerName = '${_storageContainerName}-images'
+var _storageNl2sqlContainerName = 'nl2sql'
 
 @description('Storage Account Name. Use your own name convention or leave as it is to generate a random name.')
 param storageAccountName string = ''
@@ -512,7 +514,7 @@ var _orchestratorEndpoint = 'https://${_orchestratorFunctionAppName}.azurewebsit
 
 // Networking
 
-module vnet './core/network/vnet.bicep' = if (_networkIsolation) {
+module vnet './core/network/vnet.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'virtual-network'
   scope: resourceGroup
   params: {
@@ -607,7 +609,7 @@ module searchDnsZone './core/network/private-dns-zones.bicep' = if (_networkIsol
   }
 }
 
-module testvm './core/vm/dsvm.bicep' = if (_networkIsolation && _deployVM)  {
+module testvm './core/vm/dsvm.bicep' = if (_networkIsolation && !_vnetReuse && _deployVM)  {
   name: 'testvm'
   scope: resourceGroup
   params: {
@@ -641,9 +643,8 @@ module storage './core/storage/storage-account.bicep' = {
     containers: [
       { name: _storageContainerName, publicAccess: 'None' }
       { name: _storageImagesContainerName, publicAccess: 'None' }
+      { name: _storageNl2sqlContainerName, publicAccess: 'None' }      
     ]
-    keyVaultName: keyVault.outputs.name
-    secretName: 'storageConnectionString'
     deleteRetentionPolicy: {
       enabled: true
       days: 7
@@ -768,30 +769,33 @@ module orchestrator './core/host/functions.bicep' =  {
   name: 'orchestrator'
   scope: resourceGroup
   params: {
-    networkIsolation: _networkIsolation
-    vnetName: _networkIsolation?vnet.outputs.name:''
-    subnetId: _networkIsolation?vnet.outputs.appIntSubId:''
-    keyVaultName: keyVault.outputs.name
-    storageAccountName: '${_storageAccountName}orc'
-    appServicePlanId: appServicePlan.outputs.id
-    appName: _orchestratorFunctionAppName
+    name: _orchestratorFunctionAppName
     location: location
-    functionAppReuse: _azureReuseConfig.orchestratorFunctionAppReuse
-    existingFunctionAppResourceGroupName: _azureReuseConfig.existingOrchestratorFunctionAppResourceGroupName
-    functionAppStorageReuse: _azureReuseConfig.orchestratorFunctionAppStorageReuse
-    existingFunctionAppStorageName: _azureReuseConfig.existingOrchestratorFunctionAppStorageName
-    existingFunctionAppStorageResourceGroupName: _azureReuseConfig.existingOrchestratorFunctionAppStorageResourceGroupName
-    appInsightsConnectionString: appInsights.outputs.connectionString
-    appInsightsInstrumentationKey: appInsights.outputs.instrumentationKey
+    networkIsolation: _networkIsolation
+    vnetName: (_networkIsolation && !_vnetReuse)?vnet.outputs.name:''
+    subnetId: (_networkIsolation && !_vnetReuse)?vnet.outputs.appIntSubId:''
     tags: union(tags, { 'azd-service-name': 'orchestrator' })
-    alwaysOn: true
-    functionAppScaleLimit: 2
-    numberOfWorkers: 2
+    identityType: 'SystemAssigned'
+    keyVaultName: keyVault.outputs.name
+    // identityId: identityId
+    applicationInsightsName: appInsights.outputs.name
+    appServicePlanId: appServicePlan.outputs.id
     runtimeName: 'python'
     runtimeVersion: _funcAppRuntimeVersion
+    storageAccountName: orchestratorStorage.outputs.name 
+    numberOfWorkers: 2
+    functionAppScaleLimit: 2
     minimumElasticInstanceCount: 1
-    allowedOrigins: [ '*' ]    
-    appSettings:[
+    allowedOrigins: [ '*' ]       
+    appSettings: [
+      // {
+      //   name: 'AzureWebJobsStorage__clientId'
+      //   value: identityClientId
+      // }
+      // {
+      //   name: 'APPLICATIONINSIGHTS_AUTHENTICATION_STRING'
+      //   value: applicationInsightsIdentity
+      // }
       {
         name: 'AZURE_DB_ID'
         value: _azureDbConfig.dbAccountName
@@ -799,7 +803,7 @@ module orchestrator './core/host/functions.bicep' =  {
       {
         name: 'AZURE_DB_NAME'
         value: _azureDbConfig.dbDatabaseName
-      }      
+      }
       {
         name: 'AZURE_DB_CONVERSATIONS_CONTAINER_NAME'
         value: _azureDbConfig.conversationContainerName
@@ -807,11 +811,11 @@ module orchestrator './core/host/functions.bicep' =  {
       {
         name: 'AZURE_DB_MODELS_CONTAINER_NAME'
         value: _azureDbConfig.modelsContainerName
-      }   
+      }
       {
         name: 'AZURE_KEY_VAULT_NAME'
         value: keyVault.outputs.name
-      }      
+      }
       {
         name: 'AZURE_SEARCH_SERVICE'
         value: _searchServiceName
@@ -827,7 +831,7 @@ module orchestrator './core/host/functions.bicep' =  {
       {
         name: 'AZURE_SEARCH_USE_SEMANTIC'
         value: _useSemanticReranking
-      }      
+      }
       {
         name: 'AZURE_SEARCH_API_VERSION'
         value: _searchApiVersion
@@ -843,7 +847,7 @@ module orchestrator './core/host/functions.bicep' =  {
       {
         name: 'AZURE_OPENAI_CHATGPT_MODEL'
         value: _chatGptModelName
-      }      
+      }
       {
         name: 'AZURE_OPENAI_CHATGPT_DEPLOYMENT'
         value: _chatGptDeploymentName
@@ -855,22 +859,22 @@ module orchestrator './core/host/functions.bicep' =  {
       {
         name: 'AZURE_OPENAI_API_VERSION'
         value: _openaiApiVersion
-      }      
+      }
       {
         name: 'AZURE_OPENAI_LOAD_BALANCING'
-        value: false
-      }               
+        value: 'false'
+      }
       {
         name: 'AZURE_OPENAI_EMBEDDING_MODEL'
         value: _embeddingsModelName
-      }      
+      }
       {
         name: 'AZURE_OPENAI_EMBEDDING_DEPLOYMENT'
         value: _embeddingsDeploymentName
       }
       {
         name: 'AZURE_OPENAI_STREAM'
-        value: false
+        value: 'false'
       }
       {
         name: 'ORCHESTRATOR_MESSAGES_LANGUAGE'
@@ -919,7 +923,7 @@ module orchestrator './core/host/functions.bicep' =  {
       {
         name: 'RETRIEVAL_PRIORITY'
         value: 'search'
-      }      
+      }
       {
         name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
         value: 'true'
@@ -927,8 +931,36 @@ module orchestrator './core/host/functions.bicep' =  {
       {
         name: 'LOGLEVEL'
         value: 'INFO'
-      }                         
-    ]  
+      }
+    ]
+  }
+}
+
+// Orchestrator Storage Account
+
+module orchestratorStorage './core/storage/function-storage-account.bicep' = {
+  name: 'orchestratorstorage'
+  scope: resourceGroup
+  params: {
+    name: '${_storageAccountName}orc'
+    location: location
+    tags: tags
+    containers: [{name: 'deploymentpackage'}]
+    publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'    
+  }
+}
+
+module orchestratorStoragepe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
+  name: 'orchestratorstoragepe'
+  scope: resourceGroup
+  params: {
+    location: location
+    name: '${_azureStorageAccountPe}orc'
+    tags: tags
+    subnetId: _networkIsolation?vnet.outputs.appServicesSubId:''
+    serviceId: orchestratorStorage.outputs.id
+    groupIds: ['blob']
+    dnsZoneId: _networkIsolation?blobDnsZone.outputs.id:''
   }
 }
 
@@ -943,6 +975,24 @@ module orchestratorPe './core/network/private-endpoint.bicep' = if (_networkIsol
     serviceId: orchestrator.outputs.id
     groupIds: ['sites']
     dnsZoneId: _networkIsolation?websitesDnsZone.outputs.id:''
+  }
+}
+
+module orchestratorStorageAccountStorageAccess './core/security/blobstorage-dataowner-access.bicep' = {
+  name: 'orchestratorstorageroleassignment'
+  scope: resourceGroup
+  params: {
+    storageAccountName: orchestratorStorage.outputs.name
+    principalID: orchestrator.outputs.identityPrincipalId
+  }
+}
+
+module orchestratorStorageAccess './core/security/blobstorage-reader-access.bicep' = {
+  name: 'orchestrator-blobstorage-access'
+  scope: resourceGroup
+  params: {
+    storageAccountName: storage.outputs.name
+    principalId: orchestrator.outputs.identityPrincipalId
   }
 }
 
@@ -993,9 +1043,9 @@ module frontEnd  'core/host/appservice.bicep' = {
     applicationInsightsResourceGroupName: _azureReuseConfig.appInsightsReuse?_azureReuseConfig.existingAppInsightsResourceGroupName:_resourceGroupName  
     appServiceReuse: _azureReuseConfig.appServiceReuse
     existingAppServiceNameResourceGroupName: _azureReuseConfig.existingAppServiceNameResourceGroupName
-    networkIsolation: _networkIsolation
-    vnetName: _networkIsolation?vnet.outputs.name:''
-    subnetId: _networkIsolation?vnet.outputs.appIntSubId:''
+    networkIsolation: (_networkIsolation && !_vnetReuse)
+    vnetName: (_networkIsolation && !_vnetReuse)?vnet.outputs.name:''
+    subnetId: (_networkIsolation && !_vnetReuse)?vnet.outputs.appIntSubId:''
     appCommandLine: 'python ./app.py'
     location: location
     tags: union(tags, { 'azd-service-name': 'frontend' })
@@ -1107,36 +1157,38 @@ module appserviceAIAccess './core/security/aiservices-access.bicep' = {
   }
 } 
 
-// Data Ingestion Function App
 
 module dataIngestion './core/host/functions.bicep' = {
   name: 'dataIngestion'
   scope: resourceGroup
   params: {
-    keyVaultName: keyVault.outputs.name
-    appServicePlanId: appServicePlan.outputs.id
-    networkIsolation: _networkIsolation
-    vnetName: _networkIsolation?vnet.outputs.name:''
-    subnetId: _networkIsolation?vnet.outputs.appIntSubId:''
-    storageAccountName: '${_storageAccountName}ing'
-    appName: _dataIngestionFunctionAppName
+    name: _dataIngestionFunctionAppName
     location: location
-    functionAppReuse: _azureReuseConfig.dataIngestionFunctionAppReuse
-    existingFunctionAppResourceGroupName: _azureReuseConfig.existingDataIngestionFunctionAppResourceGroupName
-    functionAppStorageReuse: _azureReuseConfig.dataIngestionFunctionAppStorageReuse
-    existingFunctionAppStorageName: _azureReuseConfig.existingDataIngestionFunctionAppStorageName
-    existingFunctionAppStorageResourceGroupName: _azureReuseConfig.existingDataIngestionFunctionAppStorageResourceGroupName
-    appInsightsConnectionString: appInsights.outputs.connectionString
-    appInsightsInstrumentationKey: appInsights.outputs.instrumentationKey
+    networkIsolation: _networkIsolation
+    vnetName: (_networkIsolation && !_vnetReuse)?vnet.outputs.name:''
+    subnetId: (_networkIsolation && !_vnetReuse)?vnet.outputs.appIntSubId:'' 
     tags: union(tags, { 'azd-service-name': 'dataIngest' })
-    alwaysOn: true
-    allowedOrigins: [ '*' ]
-    functionAppScaleLimit: 1
-    minimumElasticInstanceCount: 1
-    numberOfWorkers: 1
+    identityType: 'SystemAssigned'
+    // identityId: identityId
+    keyVaultName: keyVault.outputs.name    
+    applicationInsightsName: appInsights.outputs.name
+    appServicePlanId: appServicePlan.outputs.id
     runtimeName: 'python'
     runtimeVersion: _funcAppRuntimeVersion
-    appSettings:[
+    storageAccountName: dataIngestionStorage.outputs.name
+    numberOfWorkers: 2
+    functionAppScaleLimit: 2
+    minimumElasticInstanceCount: 1
+    allowedOrigins: [ '*' ]       
+    appSettings: [
+      // {
+      //   name: 'AzureWebJobsStorage__clientId'
+      //   value: identityClientId
+      // }
+      // {
+      //   name: 'APPLICATIONINSIGHTS_AUTHENTICATION_STRING'
+      //   value: applicationInsightsIdentity
+      // }      
       {
         name: 'DOCINT_API_VERSION'
         value: _docintApiVersion
@@ -1145,7 +1197,7 @@ module dataIngestion './core/host/functions.bicep' = {
         name: 'AZURE_KEY_VAULT_NAME'
         value: keyVault.outputs.name
       }
-      {      
+      {
         name: 'FUNCTION_APP_NAME'
         value: _dataIngestionFunctionAppName
       }
@@ -1156,7 +1208,7 @@ module dataIngestion './core/host/functions.bicep' = {
       {
         name: 'SEARCH_INDEX_NAME'
         value: _searchIndex
-      } 
+      }
       {
         name: 'SEARCH_ANALYZER_NAME'
         value: _searchAnalyzerName
@@ -1228,7 +1280,7 @@ module dataIngestion './core/host/functions.bicep' = {
       {
         name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
         value: 'true'
-      }   
+      }
       {
         name: 'AzureWebJobsFeatureFlags'
         value: 'EnableWorkerIndexing'
@@ -1236,8 +1288,46 @@ module dataIngestion './core/host/functions.bicep' = {
       {
         name: 'LOGLEVEL'
         value: 'INFO'
-      }       
-    ]  
+      }
+    ]        
+  }
+}
+
+
+// Data Ingestion Storage Account
+
+module dataIngestionStorage './core/storage/function-storage-account.bicep' = {
+  name: 'dataingestionstorage'
+  scope: resourceGroup
+  params: {
+    name: '${_storageAccountName}ing'
+    location: location
+    tags: tags
+    containers: [{name: 'deploymentpackage'}]
+    publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
+  }
+}
+
+module dataIngestionStoragepe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
+  name: 'dataingestionstoragepe'
+  scope: resourceGroup
+  params: {
+    location: location
+    name: '${_azureStorageAccountPe}ing'
+    tags: tags
+    subnetId: _networkIsolation?vnet.outputs.appServicesSubId:''
+    serviceId: dataIngestionStorage.outputs.id
+    groupIds: ['blob']
+    dnsZoneId: _networkIsolation?blobDnsZone.outputs.id:''
+  }
+}
+
+module dataIngestionStorageAccountStorageAccess './core/security/blobstorage-dataowner-access.bicep' = {
+  name: 'dataingestionstorageroleassignment'
+  scope: resourceGroup
+  params: {
+    storageAccountName: dataIngestionStorage.outputs.name
+    principalID: dataIngestion.outputs.identityPrincipalId
   }
 }
 
@@ -1418,12 +1508,29 @@ module searchService 'core/search/search-services.bicep' = {
   }
 }
 
+module searchAzureOpenAIPrivatelink 'core/search/search-private-link.bicep' = if (_networkIsolation && !_vnetReuse) {
+  name: 'searchAzureOpenAIPrivatelink'
+  scope: resourceGroup
+  dependsOn: [
+    openAi, openAiPe
+  ] 
+  params: {
+   name: '${_searchServiceName}-aoailink'
+   searchName: searchService.outputs.name
+   resourceId: openAi.outputs.id
+    groupId: 'openai_account'
+  }
+}
+
 module searchStoragePrivatelink 'core/search/search-private-link.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'searchStoragePrivatelink'
   scope: resourceGroup
+  dependsOn: [
+    searchAzureOpenAIPrivatelink, storage, storagepe
+  ]  
   params: {
    name: '${_searchServiceName}-storagelink'
-   searchName: _searchServiceName
+   searchName: searchService.outputs.name
    resourceId: storage.outputs.id
    groupId: 'blob'
   }
@@ -1432,9 +1539,12 @@ module searchStoragePrivatelink 'core/search/search-private-link.bicep' = if (_n
 module searchFuncAppPrivatelink 'core/search/search-private-link.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'searchFuncAppPrivatelink'
   scope: resourceGroup
+  dependsOn: [
+    searchStoragePrivatelink, dataIngestion, ingestionPe
+  ]  
   params: {
    name: '${_searchServiceName}-funcapplink'
-   searchName: _searchServiceName
+   searchName: searchService.outputs.name
    resourceId: dataIngestion.outputs.id
     groupId: 'sites'
   }
@@ -1453,6 +1563,24 @@ module searchPe './core/network/private-endpoint.bicep' = if (_networkIsolation 
     dnsZoneId: _networkIsolation?searchDnsZone.outputs.id:''
   }
 }
+
+module searchStorageAccess './core/security/blobstorage-contributor-access.bicep' = {
+  name: 'search-blobstorage-access'
+  scope: resourceGroup
+  params: {
+    storageAccountName: storage.outputs.name
+    principalId: searchService.outputs.principalId
+  }
+}
+
+module searchOaiAccess './core/security/openai-access.bicep' = {
+  name: 'search-openai-access'
+  scope: resourceGroup
+  params: {
+    principalId: searchService.outputs.principalId
+    openaiAccountName: openAi.outputs.name
+  }
+} 
 
 // Load Testing
 

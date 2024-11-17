@@ -31,16 +31,21 @@ Violence describes language related to physical actions intended to hurt, injure
 #### Self-Harm
 Self-harm describes language related to physical actions intended to purposely hurt, injure, or damage one's body or kill oneself.
 
+### Block lists:
+Create lists of words that should never be used and filter queries and answers that include them.
+
 
 ## Security hub implementation
 - Deploy the [security hub function](https://github.com/Azure/gpt-rag-securityhub)
 - Create a content safety resource
+- Give the security hub function the roles of Cognitive Services Users and Reader in the content safety resource. 
 - Add eviroment variables to security hub:
     "CONTENT_SAFETY_ENDPOINT": "https://{your-content-safety-resource}.cognitiveservices.azure.com/",
-    "AZURE_KEY_VAULT_NAME": "{your-keyVault-resource}",
-- Add function key to keyvault with name "securityHubKey" and content safety key with name "contentSafetyKey"
+- You can also add this optional variables if you want to add your blocklists(you should first [create and fill the blocklist](https://learn.microsoft.com/en-us/azure/ai-services/content-safety/how-to/use-blocklist?tabs=windows%2Crest#create-or-modify-a-blocklist)):
+    "BLOCK_LIST_CHECK": "true",
+    "BLOCK_LISTS_NAMES": [names]
 - Add enviroment variables to orchestrator:
-    "SECURITY_HUB_ENDPOINT": "https://{your-securityHub-function-url}/api/SecurityHub",
+    "SECURITY_HUB_ENDPOINT": "https://{your-securityHub-function-url}/api",
     "SECURITY_HUB_CHECK": "true",
 - OPTIONAL: To customize threshholds of harm and groundedness checks, add these env variables to orchestrator with your prefered values:
     "SECURITY_HUB_HATE_THRESHHOLD": "0",
