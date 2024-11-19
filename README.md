@@ -259,7 +259,7 @@ Learn how to query and analyze conversation data by following the steps outlined
 
 ### Estimate Pricing
 
-Understand the cost implications of your deployment by reviewing the [Pricing Model](https://github.com/Azure/GPT-RAG/wiki/GPT%E2%80%90RAG-%E2%80%90-Pricing-Model) for detailed pricing estimation.
+Understand the cost implications of your deployment by reviewing the [Pricing Model](docs/CALCULATOR.md) for detailed pricing estimation.
 
 ### Manage Governance
 
