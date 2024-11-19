@@ -18,7 +18,7 @@ To view the cost estimate for this scenario, visit the [Azure Pricing Calculator
 - **Operations per second**: 
   - **Creates**: 20 
   - **Reads**: 20 
-  - **Updates**
+  - **Updates**: 20
 
 
 #### Azure OpenAI
