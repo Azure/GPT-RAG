@@ -41,11 +41,16 @@ param subnetId string = ''
 param appServiceReuse bool
 param deployAppService bool = true
 
-param existingAppServiceNameResourceGroupName string    
+param existingAppServiceResourceGroupName string    
 
 resource existingAppService 'Microsoft.Web/sites@2022-09-01' existing = if (appServiceReuse && deployAppService) {
-  scope: resourceGroup(existingAppServiceNameResourceGroupName)
+  scope: resourceGroup(existingAppServiceResourceGroupName)
   name: name
+}
+
+resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing = if (!empty(applicationInsightsName)) {
+  scope: resourceGroup(applicationInsightsResourceGroupName)
+  name: applicationInsightsName
 }
 
 resource newAppService 'Microsoft.Web/sites@2022-09-01' = if (!appServiceReuse && deployAppService) {
@@ -116,11 +121,6 @@ resource newAppService 'Microsoft.Web/sites@2022-09-01' = if (!appServiceReuse &
       allow: basicPublishingCredentials
     }
   }
-}
-
-resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing = if (!empty(applicationInsightsName)) {
-  scope: resourceGroup(applicationInsightsResourceGroupName)
-  name: applicationInsightsName
 }
 
 output identityPrincipalId string = !deployAppService ? '' : appServiceReuse ? existingAppService.identity.principalId : newAppService.identity.principalId
