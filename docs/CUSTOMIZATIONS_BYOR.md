@@ -106,7 +106,7 @@ However, if you're using a different name for the GPT, or a different model, you
 To set these environment variables, use the `azd env set` command as described earlier.
 
 For instance, to inform the name of the GPT deployment, you would update the `AZURE_CHAT_GPT_DEPLOYMENT_NAME` variable like this:
-`azd env set AZURE_CHAT_GPT_DEPLOYMENT_NAME=my-gpt-deployment-name`
+`azd env set AZURE_CHAT_GPT_DEPLOYMENT_NAME my-gpt-deployment-name`
 
 ### CosmosDB
 

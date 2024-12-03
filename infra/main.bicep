@@ -75,7 +75,7 @@ var _azureReuseConfigDefaults = {
   existingKeyVaultResourceGroupName: ''
   existingKeyVaultName: ''
   storageReuse: false
-  existingAccountResourceGroupName: ''
+  existingStorageResourceGroupName: ''
   existingStorageName: ''
   vnetReuse: false
   existingVnetResourceGroupName: ''
@@ -122,7 +122,7 @@ var _azureReuseConfig = union(_azureReuseConfigDefaults, {
     existingKeyVaultResourceGroupName: (empty(azureReuseConfig.existingKeyVaultResourceGroupName) ? _azureReuseConfigDefaults.existingKeyVaultResourceGroupName : azureReuseConfig.existingKeyVaultResourceGroupName)
     existingKeyVaultName: (empty(azureReuseConfig.existingKeyVaultName) ? _azureReuseConfigDefaults.existingKeyVaultName : azureReuseConfig.existingKeyVaultName)
     storageReuse: (empty(azureReuseConfig.storageReuse) ? _azureReuseConfigDefaults.storageReuse : toLower(azureReuseConfig.storageReuse) == 'true')
-    existingAccountResourceGroupName: (empty(azureReuseConfig.existingAccountResourceGroupName) ? _azureReuseConfigDefaults.existingAccountResourceGroupName : azureReuseConfig.existingAccountResourceGroupName)
+    existingStorageResourceGroupName: (empty(azureReuseConfig.existingStorageResourceGroupName) ? _azureReuseConfigDefaults.existingStorageResourceGroupName : azureReuseConfig.existingStorageResourceGroupName)
     existingStorageName: (empty(azureReuseConfig.existingStorageName) ? _azureReuseConfigDefaults.existingStorageName : azureReuseConfig.existingStorageName)
     vnetReuse: (empty(azureReuseConfig.vnetReuse) ? _azureReuseConfigDefaults.vnetReuse : toLower(azureReuseConfig.vnetReuse) == 'true')
     existingVnetResourceGroupName: (empty(azureReuseConfig.existingVnetResourceGroupName) ? _azureReuseConfigDefaults.existingVnetResourceGroupName : azureReuseConfig.existingVnetResourceGroupName)
@@ -255,6 +255,7 @@ var _azureDbConfig = union(_azureDbConfigDefaults, {
     conversationContainerName: (empty(azureDbConfig.conversationContainerName) ? _azureDbConfigDefaults.conversationContainerName : azureDbConfig.conversationContainerName)
     modelsContainerName: (empty(azureDbConfig.modelsContainerName) ? _azureDbConfigDefaults.modelsContainerName : azureDbConfig.modelsContainerName)
 })
+var _cosmosDbResourceGroupName = _azureReuseConfig.cosmosDbReuse ? _azureReuseConfig.existingCosmosDbResourceGroupName : _resourceGroupName
 
 // Orchestrator settings
 
@@ -412,6 +413,7 @@ var _storageNl2sqlContainerName = 'nl2sql'
 @description('Storage Account Name. Use your own name convention or leave as it is to generate a random name.')
 param storageAccountName string = ''
 var _storageAccountName = _azureReuseConfig.storageReuse ? _azureReuseConfig.existingStorageName : !empty(storageAccountName) ? storageAccountName : 'strag0${resourceToken}'
+var _storageAccountResourceGroupName = _azureReuseConfig.storageReuse ? _azureReuseConfig.existingStorageResourceGroupName : _resourceGroupName
 
 // Resource name settings
 
@@ -421,14 +423,17 @@ var _storageAccountName = _azureReuseConfig.storageReuse ? _azureReuseConfig.exi
 @description('Key Vault Name. Use your own name convention or leave as it is to generate a random name.')
 param keyVaultName string = ''
 var _keyVaultName = _azureReuseConfig.keyVaultReuse ? _azureReuseConfig.existingKeyVaultName : !empty(keyVaultName) ? keyVaultName : 'kv0-${resourceToken}'
+var _keyVaultResourceGroupName = _azureReuseConfig.keyVaultReuse ? _azureReuseConfig.existingKeyVaultResourceGroupName : _resourceGroupName
 
 @description('OpenAI Service Name. Use your own name convention or leave as it is to generate a random name.')
 param openAiServiceName string = ''
 var _openAiServiceName = _azureReuseConfig.aoaiReuse ? _azureReuseConfig.existingAoaiName : !empty(openAiServiceName) ? openAiServiceName : 'oai0-${resourceToken}'
+var _openAiResourceGroupName = _azureReuseConfig.aoaiReuse ? _azureReuseConfig.existingAoaiResourceGroupName : _resourceGroupName
 
 @description('AI services multi-service name. Use your own name convention or leave as it is to generate a random name.')
 param aiServicesName string = ''
 var _aiServicesName = _azureReuseConfig.aiServicesReuse ? _azureReuseConfig.existingAiServicesName : !empty(aiServicesName) ? aiServicesName : 'ai0-${resourceToken}'
+var _aiServicesResourceGroupName = _azureReuseConfig.aiServicesReuse ? _azureReuseConfig.existingAiServicesResourceGroupName : _resourceGroupName
 
 @description('App Service Plan Name. Use your own name convention or leave as it is to generate a random name.')
 param appServicePlanName string = ''
@@ -437,6 +442,7 @@ var _appServicePlanName = _azureReuseConfig.appServicePlanReuse ? _azureReuseCon
 @description('App Insights Name. Use your own name convention or leave as it is to generate a random name.')
 param appInsightsName string = ''
 var _appInsightsName = _azureReuseConfig.appInsightsReuse ? _azureReuseConfig.existingAppInsightsName : !empty(appInsightsName) ? appInsightsName : 'appins0-${resourceToken}'
+var _appInsightsResourceGroupName = _azureReuseConfig.appInsightsReuse ? _azureReuseConfig.existingAppInsightsResourceGroupName : _resourceGroupName
 
 @description('Front-end App Service Name. Use your own name convention or leave as it is to generate a random name.')
 param appServiceName string = ''
@@ -449,14 +455,17 @@ var _loadtestingName = !empty(loadTestingName) ? loadTestingName : 'loadtest0-${
 @description('Orchestrator Function Name. Use your own name convention or leave as it is to generate a random name.')
 param orchestratorFunctionAppName string = ''
 var _orchestratorFunctionAppName = _azureReuseConfig.orchestratorFunctionAppReuse ? _azureReuseConfig.existingOrchestratorFunctionAppName : !empty(orchestratorFunctionAppName) ? orchestratorFunctionAppName : 'fnorch0-${resourceToken}'
+var _orchestratorFunctionAppResourceGroupName = _azureReuseConfig.orchestratorFunctionAppReuse ? _azureReuseConfig.existingOrchestratorFunctionAppResourceGroupName : _resourceGroupName
 
 @description('Data Ingestion Function Name. Use your own name convention or leave as it is to generate a random name.')
 param dataIngestionFunctionAppName string = ''
 var _dataIngestionFunctionAppName = _azureReuseConfig.dataIngestionFunctionAppReuse ? _azureReuseConfig.existingDataIngestionFunctionAppName : !empty(dataIngestionFunctionAppName) ? dataIngestionFunctionAppName : 'fninges0-${resourceToken}'
+var _dataIngestionFunctionAppResourceGroupName = _azureReuseConfig.dataIngestionFunctionAppReuse ? _azureReuseConfig.existingDataIngestionFunctionAppResourceGroupName : _resourceGroupName
 
 @description('Search Service Name. Use your own name convention or leave as it is to generate a random name.')
 param searchServiceName string = ''
 var _searchServiceName = _azureReuseConfig.aiSearchReuse ? _azureReuseConfig.existingAiSearchName : !empty(searchServiceName) ? searchServiceName : 'search0-${resourceToken}'
+var _searchResourceGroupName = _azureReuseConfig.aiSearchReuse ? _azureReuseConfig.existingAiSearchResourceGroupName : _resourceGroupName
 
 @description('The name of the Azure Storage Account Private Endpoint. If left empty, a random name will be generated.')
 param azureStorageAccountPe string = ''
@@ -636,7 +645,7 @@ module storage './core/storage/storage-account.bicep' = {
     name: _storageAccountName
     location: location
     storageReuse: _azureReuseConfig.storageReuse
-    existingStorageResourceGroupName: _azureReuseConfig.existingAccountResourceGroupName
+    existingStorageResourceGroupName: _azureReuseConfig.existingStorageResourceGroupName
     tags: tags
     publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
     allowBlobPublicAccess: false // Disable anonymous access
@@ -770,6 +779,8 @@ module orchestrator './core/host/functions.bicep' =  {
   scope: resourceGroup
   params: {
     name: _orchestratorFunctionAppName
+    functionAppResourceGroupName: _orchestratorFunctionAppResourceGroupName
+    functionAppReuse: _azureReuseConfig.orchestratorFunctionAppReuse
     location: location
     networkIsolation: _networkIsolation
     vnetName: (_networkIsolation && !_vnetReuse)?vnet.outputs.name:''
@@ -777,25 +788,19 @@ module orchestrator './core/host/functions.bicep' =  {
     tags: union(tags, { 'azd-service-name': 'orchestrator' })
     identityType: 'SystemAssigned'
     keyVaultName: keyVault.outputs.name
-    // identityId: identityId
+    keyVaultResourceGroupName: _keyVaultResourceGroupName
     applicationInsightsName: appInsights.outputs.name
+    applicationInsightsResourceGroupName: _appInsightsResourceGroupName
     appServicePlanId: appServicePlan.outputs.id
     runtimeName: 'python'
     runtimeVersion: _funcAppRuntimeVersion
     storageAccountName: orchestratorStorage.outputs.name 
+    storageResourceGroupName: _orchestratorFunctionAppResourceGroupName // creates storage account in the same resource group as the function app
     numberOfWorkers: 2
     functionAppScaleLimit: 2
     minimumElasticInstanceCount: 1
     allowedOrigins: [ '*' ]       
     appSettings: [
-      // {
-      //   name: 'AzureWebJobsStorage__clientId'
-      //   value: identityClientId
-      // }
-      // {
-      //   name: 'APPLICATIONINSIGHTS_AUTHENTICATION_STRING'
-      //   value: applicationInsightsIdentity
-      // }
       {
         name: 'AZURE_DB_ID'
         value: _azureDbConfig.dbAccountName
@@ -934,6 +939,9 @@ module orchestrator './core/host/functions.bicep' =  {
       }
     ]
   }
+  dependsOn: [
+    appServicePlan
+  ]
 }
 
 // Orchestrator Storage Account
@@ -982,53 +990,54 @@ module orchestratorStorageAccountStorageAccess './core/security/blobstorage-data
   name: 'orchestratorstorageroleassignment'
   scope: resourceGroup
   params: {
-    storageAccountName: orchestratorStorage.outputs.name
+    resourceName: orchestratorStorage.outputs.name
     principalID: orchestrator.outputs.identityPrincipalId
   }
 }
 
 module orchestratorStorageAccess './core/security/blobstorage-reader-access.bicep' = {
   name: 'orchestrator-blobstorage-access'
-  scope: resourceGroup
+  scope: az.resourceGroup(_storageAccountResourceGroupName)
   params: {
-    storageAccountName: storage.outputs.name
+    resourceName: storage.outputs.name
     principalId: orchestrator.outputs.identityPrincipalId
   }
 }
 
 module orchestratorKeyVaultAccess './core/security/keyvault-access.bicep' =  {
   name: 'orchestrator-keyvault-access'
-  scope: resourceGroup
+  scope: az.resourceGroup(_keyVaultResourceGroupName)
   params: {
-    keyVaultName: keyVault.outputs.name
+    resourceName: keyVault.outputs.name
     principalId: orchestrator.outputs.identityPrincipalId
   }
 } 
 
 module orchestratorCosmosAccess './core/security/cosmos-access.bicep' =  {
   name: 'orchestrator-cosmos-access'
-  scope: resourceGroup
+  scope: az.resourceGroup(_cosmosDbResourceGroupName)
   params: {
     principalId: orchestrator.outputs.identityPrincipalId
     accountName: cosmosAccount.outputs.name
+    resourceGroupName: _cosmosDbResourceGroupName
   }
 } 
 
 module orchestratorOaiAccess './core/security/openai-access.bicep' = {
   name: 'orchestrator-openai-access'
-  scope: resourceGroup
+  scope: az.resourceGroup(_openAiResourceGroupName)
   params: {
     principalId: orchestrator.outputs.identityPrincipalId
-    openaiAccountName: openAi.outputs.name
+    resourceName: openAi.outputs.name
   }
 } 
 
 module orchestratorSearchAccess './core/security/search-access.bicep' = {
   name: 'orchestrator-search-access'
-  scope: resourceGroup
+  scope: az.resourceGroup(_searchResourceGroupName)
   params: {
     principalId: orchestrator.outputs.identityPrincipalId
-    searchServiceName: searchService.outputs.name
+    resourceName: searchService.outputs.name
   }
 } 
 
@@ -1042,7 +1051,7 @@ module frontEnd  'core/host/appservice.bicep' = {
     applicationInsightsName: _azureReuseConfig.appInsightsReuse?_azureReuseConfig.existingAppInsightsName:_appInsightsName
     applicationInsightsResourceGroupName: _azureReuseConfig.appInsightsReuse?_azureReuseConfig.existingAppInsightsResourceGroupName:_resourceGroupName  
     appServiceReuse: _azureReuseConfig.appServiceReuse
-    existingAppServiceNameResourceGroupName: _azureReuseConfig.existingAppServiceNameResourceGroupName
+    existingAppServiceResourceGroupName: _azureReuseConfig.existingAppServiceNameResourceGroupName
     networkIsolation: (_networkIsolation && !_vnetReuse)
     vnetName: (_networkIsolation && !_vnetReuse)?vnet.outputs.name:''
     subnetId: (_networkIsolation && !_vnetReuse)?vnet.outputs.appIntSubId:''
@@ -1123,37 +1132,37 @@ module frontendPe './core/network/private-endpoint.bicep' = if (_networkIsolatio
 
 module appserviceKeyVaultAccess './core/security/keyvault-access.bicep' = {
   name: 'appservice-keyvault-access'
-  scope: resourceGroup
+  scope: az.resourceGroup(_keyVaultResourceGroupName)
   params: {
-    keyVaultName: keyVault.outputs.name
+    resourceName: keyVault.outputs.name
     principalId: frontEnd.outputs.identityPrincipalId
   }
 }
 
 module appserviceStorageAccountAccess './core/security/blobstorage-reader-access.bicep' = {
   name: 'appservice-blobstorage-access'
-  scope: resourceGroup
+  scope: az.resourceGroup(_storageAccountResourceGroupName)
   params: {
-    storageAccountName: storage.outputs.name
+    resourceName: storage.outputs.name
     principalId: frontEnd.outputs.identityPrincipalId
   }
 }
 
-module appserviceOrchestratorAccess './core/host/functions-access.bicep' = {
+module appserviceOrchestratorAccess './core/security/functions-access.bicep' = {
   name: 'appservice-function-access'
-  scope: resourceGroup
+  scope: az.resourceGroup(_orchestratorFunctionAppResourceGroupName)
   params: {
-    functionAppName: orchestrator.outputs.name
+    resourceName: orchestrator.outputs.name
     principalId: frontEnd.outputs.identityPrincipalId
   }
 }
 
 module appserviceAIAccess './core/security/aiservices-access.bicep' = {
   name: 'appservice-ai-access'
-  scope: resourceGroup
+  scope: az.resourceGroup(_aiServicesResourceGroupName)
   params: {
     principalId: frontEnd.outputs.identityPrincipalId
-    aiAccountName: aiServices.outputs.name
+    resourceName: aiServices.outputs.name
   }
 } 
 
@@ -1163,6 +1172,8 @@ module dataIngestion './core/host/functions.bicep' = {
   scope: resourceGroup
   params: {
     name: _dataIngestionFunctionAppName
+    functionAppResourceGroupName: _dataIngestionFunctionAppResourceGroupName
+    functionAppReuse: _azureReuseConfig.dataIngestionFunctionAppReuse
     location: location
     networkIsolation: _networkIsolation
     vnetName: (_networkIsolation && !_vnetReuse)?vnet.outputs.name:''
@@ -1170,12 +1181,15 @@ module dataIngestion './core/host/functions.bicep' = {
     tags: union(tags, { 'azd-service-name': 'dataIngest' })
     identityType: 'SystemAssigned'
     // identityId: identityId
-    keyVaultName: keyVault.outputs.name    
+    keyVaultName: keyVault.outputs.name
+    keyVaultResourceGroupName: _keyVaultResourceGroupName
     applicationInsightsName: appInsights.outputs.name
+    applicationInsightsResourceGroupName: _appInsightsResourceGroupName
     appServicePlanId: appServicePlan.outputs.id
     runtimeName: 'python'
     runtimeVersion: _funcAppRuntimeVersion
     storageAccountName: dataIngestionStorage.outputs.name
+    storageResourceGroupName: _dataIngestionFunctionAppResourceGroupName // creates storage account in the same resource group as the function app
     numberOfWorkers: 2
     functionAppScaleLimit: 2
     minimumElasticInstanceCount: 1
@@ -1326,44 +1340,44 @@ module dataIngestionStorageAccountStorageAccess './core/security/blobstorage-dat
   name: 'dataingestionstorageroleassignment'
   scope: resourceGroup
   params: {
-    storageAccountName: dataIngestionStorage.outputs.name
+    resourceName: dataIngestionStorage.outputs.name
     principalID: dataIngestion.outputs.identityPrincipalId
   }
 }
 
 module dataIngestionKeyVaultAccess './core/security/keyvault-access.bicep' = {
   name: 'data-ingestion-keyvault-access'
-  scope: resourceGroup
+  scope: az.resourceGroup(_keyVaultResourceGroupName)
   params: {
-    keyVaultName: keyVault.outputs.name
+    resourceName: keyVault.outputs.name
     principalId: dataIngestion.outputs.identityPrincipalId
   }
 }
 
 module dataIngestionBlobStorageAccess './core/security/blobstorage-contributor-access.bicep' = {
   name: 'data-ingestion-blobstorage-access'
-  scope: resourceGroup
+  scope: az.resourceGroup(_storageAccountResourceGroupName)
   params: {
-    storageAccountName: storage.outputs.name
+    resourceName: storage.outputs.name
     principalId: dataIngestion.outputs.identityPrincipalId
   }
 }
 
 module dataIngestionOaiAccess './core/security/openai-access.bicep' = {
   name: 'dataingestion-openai-access'
-  scope: resourceGroup
+  scope: az.resourceGroup(_openAiResourceGroupName)
   params: {
     principalId: dataIngestion.outputs.identityPrincipalId
-    openaiAccountName: openAi.outputs.name
+    resourceName: openAi.outputs.name
   }
 } 
 
 module dataIngestionAIAccess './core/security/aiservices-access.bicep' = {
   name: 'dataingestion-ai-access'
-  scope: resourceGroup
+  scope: az.resourceGroup(_aiServicesResourceGroupName)
   params: {
     principalId: dataIngestion.outputs.identityPrincipalId
-    aiAccountName: aiServices.outputs.name
+    resourceName: aiServices.outputs.name
   }
 } 
 
@@ -1566,21 +1580,30 @@ module searchPe './core/network/private-endpoint.bicep' = if (_networkIsolation 
 
 module searchStorageAccess './core/security/blobstorage-contributor-access.bicep' = {
   name: 'search-blobstorage-access'
-  scope: resourceGroup
+  scope: az.resourceGroup(_storageAccountResourceGroupName)
   params: {
-    storageAccountName: storage.outputs.name
+    resourceName: storage.outputs.name
     principalId: searchService.outputs.principalId
   }
 }
 
 module searchOaiAccess './core/security/openai-access.bicep' = {
   name: 'search-openai-access'
-  scope: resourceGroup
+  scope: az.resourceGroup(_openAiResourceGroupName)
   params: {
     principalId: searchService.outputs.principalId
-    openaiAccountName: openAi.outputs.name
+    resourceName: openAi.outputs.name
   }
 } 
+
+module searchIngestionAccess './core/security/functions-access.bicep' = {
+  name: 'search-function-access'
+  scope: az.resourceGroup(_dataIngestionFunctionAppResourceGroupName)
+  params: {
+    resourceName: dataIngestion.outputs.name
+    principalId: searchService.outputs.principalId
+  }
+}
 
 // Load Testing
 
@@ -1596,9 +1619,9 @@ module loadtesting './core/loadtesting/loadtesting.bicep' = if (_provisionLoadTe
 
 module loadtestingKeyVaultAccess './core/security/keyvault-access.bicep' = if (_provisionLoadTesting){
   name: 'loadtesting-keyvault-access'
-  scope: resourceGroup
+  scope: az.resourceGroup(_keyVaultResourceGroupName)
   params: {
-    keyVaultName: keyVault.outputs.name
+    resourceName: keyVault.outputs.name
     principalId: _provisionLoadTesting ? loadtesting.outputs.id : ''
   }
 } 
