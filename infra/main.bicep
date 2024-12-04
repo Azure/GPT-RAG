@@ -1032,7 +1032,7 @@ module orchestratorOaiAccess './core/security/openai-access.bicep' = {
   }
 } 
 
-module orchestratorSearchAccess './core/security/search-access.bicep' = {
+module orchestratorSearchAccess './core/security/search-index-contributor-access.bicep' = {
   name: 'orchestrator-search-access'
   scope: az.resourceGroup(_searchResourceGroupName)
   params: {
@@ -1378,6 +1378,15 @@ module dataIngestionAIAccess './core/security/aiservices-access.bicep' = {
   params: {
     principalId: dataIngestion.outputs.identityPrincipalId
     resourceName: aiServices.outputs.name
+  }
+} 
+
+module dataIngestionSearchAccess './core/security/search-index-contributor-access.bicep' = {
+  name: 'data-ingestion-search-access'
+  scope: az.resourceGroup(_searchResourceGroupName)
+  params: {
+    principalId: dataIngestion.outputs.identityPrincipalId
+    resourceName: searchService.outputs.name
   }
 } 
 
