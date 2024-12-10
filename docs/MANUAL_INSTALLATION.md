@@ -353,6 +353,15 @@ Gather Necessary Information:
                 --scope "/subscriptions/<subscription-id>/resourceGroups/$resourceGroupName/providers/Microsoft.Search/searchServices/$searchServiceName"
         ```
 
+    - **Azure AI Search**
+        - Assign AI Search "Search Index Data Contributor" role to Data Ingestion's Managed Identity.
+        ```    
+            az role assignment create \
+                --assignee $principalId \
+                --role "Search Index Data Contributor" \
+                --scope "/subscriptions/<subscription-id>/resourceGroups/$resourceGroupName/providers/Microsoft.Search/searchServices/$searchServiceName"
+        ```
+
     - **Azure OpenAI**
         - Assign Azure OpenAI "Cognitive Services OpenAI User" role to the Identities of the following Resources:
             - Orchestrator Function App
