@@ -1216,10 +1216,6 @@ module dataIngestion './core/host/functions.bicep' = {
         value: _dataIngestionFunctionAppName
       }
       {
-        name: 'SEARCH_SERVICE'
-        value: _searchServiceName
-      }
-      {
         name: 'SEARCH_INDEX_NAME'
         value: _searchIndex
       }
@@ -1259,6 +1255,10 @@ module dataIngestion './core/host/functions.bicep' = {
         name: 'AZURE_SEARCH_APPROACH'
         value: _retrievalApproach
       }
+      {
+        name: 'AZURE_SEARCH_SERVICE'
+        value: _searchServiceName
+      }            
       {
         name: 'AZURE_OPENAI_SERVICE_NAME'
         value: _openAiServiceName
