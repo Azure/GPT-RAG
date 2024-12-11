@@ -1032,7 +1032,7 @@ module orchestratorOaiAccess './core/security/openai-access.bicep' = {
   }
 } 
 
-module orchestratorSearchAccess './core/security/search-access.bicep' = {
+module orchestratorSearchAccess './core/security/search-index-contributor-access.bicep' = {
   name: 'orchestrator-search-access'
   scope: az.resourceGroup(_searchResourceGroupName)
   params: {
@@ -1216,10 +1216,6 @@ module dataIngestion './core/host/functions.bicep' = {
         value: _dataIngestionFunctionAppName
       }
       {
-        name: 'SEARCH_SERVICE'
-        value: _searchServiceName
-      }
-      {
         name: 'SEARCH_INDEX_NAME'
         value: _searchIndex
       }
@@ -1259,6 +1255,10 @@ module dataIngestion './core/host/functions.bicep' = {
         name: 'AZURE_SEARCH_APPROACH'
         value: _retrievalApproach
       }
+      {
+        name: 'AZURE_SEARCH_SERVICE'
+        value: _searchServiceName
+      }            
       {
         name: 'AZURE_OPENAI_SERVICE_NAME'
         value: _openAiServiceName
@@ -1378,6 +1378,15 @@ module dataIngestionAIAccess './core/security/aiservices-access.bicep' = {
   params: {
     principalId: dataIngestion.outputs.identityPrincipalId
     resourceName: aiServices.outputs.name
+  }
+} 
+
+module dataIngestionSearchAccess './core/security/search-index-contributor-access.bicep' = {
+  name: 'data-ingestion-search-access'
+  scope: az.resourceGroup(_searchResourceGroupName)
+  params: {
+    principalId: dataIngestion.outputs.identityPrincipalId
+    resourceName: searchService.outputs.name
   }
 } 
 
