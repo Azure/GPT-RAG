@@ -14,14 +14,20 @@ param healthCheckPath string = ''
 param allowedOrigins array = []
 
 param name string
+param functionAppReuse bool
+param functionAppResourceGroupName string
 param location string = resourceGroup().location
 param tags object = {}
+param keyVaultResourceGroupName string
 param keyVaultName string = ''
 
 // Reference Properties
 param applicationInsightsName string = ''
+param applicationInsightsResourceGroupName string
 param appServicePlanId string
+
 param storageAccountName string
+param storageResourceGroupName string
 
 param clientAffinityEnabled bool = false
 @allowed(['SystemAssigned', 'UserAssigned'])
@@ -36,14 +42,26 @@ param kind string = 'functionapp,linux'
 param appSettings array = []
 
 resource stg 'Microsoft.Storage/storageAccounts@2022-09-01' existing = {
+  scope: resourceGroup(storageResourceGroupName)  
   name: storageAccountName
 }
 
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = if (!(empty(keyVaultName))) {
+  scope: resourceGroup(keyVaultResourceGroupName)
   name: keyVaultName
  }
 
-resource functions 'Microsoft.Web/sites@2023-12-01' = {
+ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing = if (!empty(applicationInsightsName)) {
+  scope: resourceGroup(applicationInsightsResourceGroupName)
+  name: applicationInsightsName
+}
+
+ resource existingFunction 'Microsoft.Web/sites@2022-09-01' existing = if (functionAppReuse) {
+  scope: resourceGroup(functionAppResourceGroupName)
+  name: name
+}
+
+resource newFunction 'Microsoft.Web/sites@2022-03-01' = {
   name: name
   location: location
   tags: tags
@@ -51,9 +69,6 @@ resource functions 'Microsoft.Web/sites@2023-12-01' = {
 
   identity: {
     type: identityType
-    // userAssignedIdentities: { 
-    //   '${identityId}': {}
-    // }
   }
 
   properties: {
@@ -72,23 +87,7 @@ resource functions 'Microsoft.Web/sites@2023-12-01' = {
       minimumElasticInstanceCount: minimumElasticInstanceCount
       use32BitWorkerProcess: use32BitWorkerProcess      
       functionAppScaleLimit: functionAppScaleLimit
-      healthCheckPath: healthCheckPath
-      // deployment: {
-      //   storage: {
-      //     type: 'blobContainer'
-      //     value: '${stg.properties.primaryEndpoints.blob}deploymentpackage'
-      //     authentication: {
-      //       type: 'SystemAssignedIdentity'
-      //       userAssignedIdentityResourceId: '' 
-      //       // type: identityType == 'SystemAssigned' ? 'SystemAssignedIdentity' : 'UserAssignedIdentity'            
-      //       // userAssignedIdentityResourceId: identityType == 'UserAssigned' ? identityId : '' 
-      //     }
-      //   }      
-      //   cors: {
-      //     allowedOrigins: union([ 'https://portal.azure.com', 'https://ms.portal.azure.com' ], allowedOrigins)
-      //   }      
-      // }
-      
+      healthCheckPath: healthCheckPath      
       appSettings: union(appSettings,
         [
           {
@@ -122,20 +121,11 @@ resource functions 'Microsoft.Web/sites@2023-12-01' = {
         }          
 
     } 
-
-
-   
-
   }
-
 }
 
-resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing = if (!empty(applicationInsightsName)) {
-  name: applicationInsightsName
-}
-
-output id string = functions.id
-output name string = functions.name
-output uri string = 'https://${functions.properties.defaultHostName}'
-output identityPrincipalId string = identityType == 'SystemAssigned' ? functions.identity.principalId : ''
-output location string = functions.location
+output id string = functionAppReuse ? existingFunction.id : newFunction.id
+output name string = functionAppReuse ? existingFunction.name : newFunction.name
+output uri string = functionAppReuse ? 'https://${existingFunction.properties.defaultHostName}' : 'https://${newFunction.properties.defaultHostName}'
+output identityPrincipalId string = identityType == 'SystemAssigned' ? functionAppReuse ? existingFunction.identity.principalId : newFunction.identity.principalId : ''
+output location string = functionAppReuse ? existingFunction.location : newFunction.location

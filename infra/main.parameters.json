@@ -140,12 +140,6 @@
       "speechSynthesisVoiceName": {
         "value": "${AZURE_SPEECH_SYNTHESIS_VOICE_NAME}"
       },
-      "dbAccountName": {
-        "value": "${AZURE_DB_ACCOUNT_NAME}"
-      },
-      "dbDatabaseName": {
-        "value": "${AZURE_DB_DATABASE_NAME}"
-      },
       "storageAccountName": {
         "value": "${AZURE_STORAGE_ACCOUNT_NAME}"
       },
@@ -257,7 +251,7 @@
           "existingKeyVaultResourceGroupName": "${KEY_VAULT_RESOURCE_GROUP_NAME}",
           "existingKeyVaultName": "${KEY_VAULT_NAME}",
           "storageReuse": "${STORAGE_REUSE}",
-          "existingAccountResourceGroupName": "${STORAGE_RESOURCE_GROUP_NAME}",
+          "existingStorageResourceGroupName": "${STORAGE_RESOURCE_GROUP_NAME}",
           "existingStorageName": "${STORAGE_NAME}",
           "vnetReuse": "${VNET_REUSE}",
           "existingVnetResourceGroupName": "${VNET_RESOURCE_GROUP_NAME}",

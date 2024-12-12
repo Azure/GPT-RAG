@@ -305,6 +305,14 @@ Gather Necessary Information:
             --scope "/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$storageAccountName"
         ```
 
+        - Assign Storage Account "Storage Blob Data Reader" role to the Orchestrator Managed Identity.
+        ```
+        az role assignment create \
+            --assignee $principalId \
+            --role "Storage Blob Data Reader" \
+            --scope "/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$storageAccountName"
+        ```
+
         - Assign Storage Account "Storage Blob Data Contributor" role to the Data Ingestion Function App Identity.
         ```
         az role assignment create \
@@ -345,10 +353,20 @@ Gather Necessary Information:
                 --scope "/subscriptions/<subscription-id>/resourceGroups/$resourceGroupName/providers/Microsoft.Search/searchServices/$searchServiceName"
         ```
 
+    - **Azure AI Search**
+        - Assign AI Search "Search Index Data Contributor" role to Data Ingestion's Managed Identity.
+        ```    
+            az role assignment create \
+                --assignee $principalId \
+                --role "Search Index Data Contributor" \
+                --scope "/subscriptions/<subscription-id>/resourceGroups/$resourceGroupName/providers/Microsoft.Search/searchServices/$searchServiceName"
+        ```
+
     - **Azure OpenAI**
         - Assign Azure OpenAI "Cognitive Services OpenAI User" role to the Identities of the following Resources:
             - Orchestrator Function App
             - Data Ingestion Function App
+            - Azure AI Search            
         ```    
             az role assignment create \
                 --assignee $principalId \

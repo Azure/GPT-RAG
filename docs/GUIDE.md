@@ -27,7 +27,9 @@
      - [4.5.2 IP Allowlist](#configuring-ip-allowlist)
    - [4.6 Entra Authentication](#configuring-entra-authentication)
    - [4.7 Authorization Setup](#configuring-authorization) 
-   - [4.8 Setting Up Git Repos](#setting-up-git-repos)
+   - [4.8 Data Ingestion](#data-ingestion)    
+     - [4.8.1 Sharepoint Setup](#sharepoint-setup)     
+   - [4.9 Setting Up Git Repos](#setting-up-git-repos)
 5. [**Reference**](reference)
    - [5.1 Azure Resources](#azure-resources)
 6. [**Troubleshooting**](#troubleshooting)
@@ -908,6 +910,12 @@ Based on your authorization setup, validate access:
 
 > [!NOTE]
 > Use and test only the methods you have configured to ensure access controls are functioning correctly.
+
+## Data Ingestion
+
+### SharePoint Setup
+
+For detailed instructions on setting up SharePoint for data ingestion, please refer to the [SharePoint Setup Guide](INGESTION_SHAREPOINT_SETUP.md).
 
 ## Setting Up Git Repos
 
