@@ -273,7 +273,7 @@ This section provides step-by-step guides for common administrative tasks.
 
 ## Deploying the Solution Accelerator
 
-This setup guide provides step-by-step instructions for provisioning a resource group with all the necessary components to ensure the solution operates efficiently. The diagram below highlights the resource group and its corresponding components, outlined in red, that will be provisioned during this process.
+This setup guide provides step-by-step instructions for provisioning a resource group with all the necessary components to ensure the solution operates efficiently. The diagram below highlights the resource group and its corresponding components, outlined in red, that will be provisioned during this process. 
 
 ![Zero Trust Architecture](../media/admin-guide-architecture-scope.png)
 <br>*GPT-RAG Zero Trust Architecture*
@@ -290,7 +290,7 @@ This setup guide provides step-by-step instructions for provisioning a resource 
 
 ### Deployment Overview
 
-This guide will walk you through each step needed to deploy the GPT-RAG solution in a Zero Trust architecture. Follow these steps to ensure a smooth and successful deployment.
+This guide will walk you through each step required to deploy the GPT-RAG solution in a Zero Trust architecture. Follow these steps to ensure a smooth and successful deployment. You can check the [Installation and Post-Installation Checklist](INSTALLATION_CHECKLIST.md) to verify that everything is as expected.
 
 1. **Plan Your Deployment**
 2. **Download the Repository**
