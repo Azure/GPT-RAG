@@ -1,8 +1,8 @@
 param principalID string
-param storageAccountName string
+param resourceName string
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2021-09-01' existing = {
-  name: storageAccountName
+  name: resourceName
 }
 
 var storageBlobDataOwnerRoleId = 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b' // Storage Blob Data Owner role
