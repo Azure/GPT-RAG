@@ -131,7 +131,7 @@ az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-grou
 
 az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings SEARCH_INDEX_NAME="ragindex"
 
-az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings SEARCH_SERVICE="search0-randomsufix"
+az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings AZURE_SEARCH_SERVICE="search0-randomsufix"
 
 az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings STORAGE_ACCOUNT_NAME="strag0randomsufix"
 
