@@ -28,7 +28,8 @@
    - [4.6 Entra Authentication](#configuring-entra-authentication)
    - [4.7 Authorization Setup](#configuring-authorization) 
    - [4.8 Data Ingestion](#data-ingestion)    
-     - [4.8.1 Sharepoint Setup](#sharepoint-setup)     
+     - [4.8.1 Sharepoint Setup](#sharepoint-setup)
+     - [4.8.2 Search Trimming](#search-trimming)     
    - [4.9 Setting Up Git Repos](#setting-up-git-repos)
 5. [**Reference**](reference)
    - [5.1 Azure Resources](#azure-resources)
@@ -916,6 +917,10 @@ Based on your authorization setup, validate access:
 ### SharePoint Setup
 
 For detailed instructions on setting up SharePoint for data ingestion, please refer to the [SharePoint Setup Guide](INGESTION_SHAREPOINT_SETUP.md).
+
+## Search Trimming
+
+This customization is particularly valuable in scenarios where sensitive documents need to be accessed by specific groups or individuals within an organization. With this feature you can ensure that AI Search returns results tailored to each user’s access (no RBAC permissions), please take a look at the [Filter Files with AI Search Using Security Trimming](CUSTOMIZATIONS_SEARCH_TRIMMING.md) page.
 
 ## Setting Up Git Repos
 
