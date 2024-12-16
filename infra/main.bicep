@@ -994,6 +994,15 @@ module orchestrator './core/host/functions.bicep' = {
         name: 'LOGLEVEL'
         value: 'INFO'
       }
+      {
+        name: 'TAVILY_API_KEY'
+      }
+      {
+        name: 'FUNCTIONS_WORKER_RUNTIME'
+      }
+      {
+        name: 'SERPER_API_KEY'
+      }
     ]
   }
 }
@@ -1102,7 +1111,7 @@ module frontEnd 'core/host/appservice.bicep' = {
         value: stripeProductId
       }
       {
-        name: 'STRIPE_FA_PPRICE_ID'
+        name: 'STRIPE_FA_PRICE_ID'
         value: stripeFAPriceId
       }
       {
@@ -1220,6 +1229,17 @@ module frontEnd 'core/host/appservice.bicep' = {
       {
         name: 'SQLALCHEMY_DATABASE_URI'
         value: 'mysql+pymysql://${administratorLogin}:@Microsoft.KeyVault(SecretUri=${keyVault.outputs.endpoint}secrets/mySqlDBPassword)@${mySqlDatabase.outputs.serverFullyQualifiedDomainName}:3306/${mySqlDatabase.outputs.databaseName}'
+      }
+      {
+        name: 'FLASK_SECRET_KEY'
+      }
+      {
+        name: 'AZURE_DB_ID'
+        value: dbAccountName
+      }
+      {
+        name: 'AZURE_DB_NAME'
+        value: dbDatabaseName
       }
     ]
   }

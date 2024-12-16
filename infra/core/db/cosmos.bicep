@@ -401,6 +401,41 @@ resource invitationsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabase
   }
 }
 
+resource reportsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
+  parent: database
+  name: 'reports'
+  properties: {
+    resource: {
+      id: 'reports'
+      partitionKey: {
+        paths:[
+          '/id'
+        ]
+        kind: 'Hash'
+      }
+      analyticalStorageTtl: analyticalStoreTTL
+      indexingPolicy: {
+        automatic: true
+        includedPaths: [
+          {
+            path: '/*'
+          }
+        ]
+        excludedPaths: [
+          {
+            path: '/"_etag"/?'
+          }
+        ]
+      }
+    }
+    options: {
+      autoscaleSettings: {
+        maxThroughput: autoscaleMaxThroughput
+      }
+    }
+  }
+}
+
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
   name: keyVaultName
 }
