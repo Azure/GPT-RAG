@@ -26,8 +26,6 @@ In the following sections, we will provide detailed instructions on how to confi
 
 By default, the Security Trimming feature is activated and always returns documents where the `metadata_security_id` field is blank, ensuring broad accessibility when no specific restrictions are defined.
 
-![Storage Metadata - Search Trimming](../media/readme-search_trimming_sample.png)
-
 **General Instruction Steps**:
 
 1. **Deploy the Solution**:
@@ -36,10 +34,14 @@ By default, the Security Trimming feature is activated and always returns docume
 2. **Verify Metadata**:
    Ensure that all files in the storage container have the `metadata_security_id` metadata field populated with the relevant values, such as Entra ID `object_ids` and/or group names. This step is crucial for restricting document access to authorized users only.
 
+![Storage Metadata - Search Trimming](../media/readme-search_trimming_sample.png)
+
 3. **Check Deployment**:
    After deployment, verify that the AI Search index has been created with the `metadata_security_id` field and that the skillset mappings are functioning correctly.
 
-* [Azure AI Search - Search Trimming Documentation](https://learn.microsoft.com/en-us/azure/search/search-security-trimming-for-azure-search)
-
 > [!NOTE]
 > In step 2, use the format `['00000000-0000-0000-0000-000000000123', 'Group Name', '00000000-0000-0000-0000-000000000456']` for the `metadata_security_id` field, including Entra ID user `object_ids` and group names.
+
+**Reference**:
+
+* [Azure AI Search - Search Trimming Documentation](https://learn.microsoft.com/en-us/azure/search/search-security-trimming-for-azure-search)
