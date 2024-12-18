@@ -220,6 +220,9 @@ This section explains how to configure SharePoint as a data source for the `ragi
 
      - Replace placeholders with the actual values obtained from previous steps.
 
+  >[!NOTE]
+  > Leave `SHAREPOINT_FILES_FORMAT` empty to include the following default extensions: vtt, xlsx, xls, pdf, png, jpeg, jpg, bmp, tiff, docx, pptx.
+
    - **Save and Restart**:
 
      - Click **Save** to apply the changes.
