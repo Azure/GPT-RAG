@@ -40,7 +40,7 @@ By default, the Security Trimming feature is activated and always returns docume
    After deployment, verify that the AI Search index has been created with the `metadata_security_id` field and that the skillset mappings are functioning correctly.
 
 > [!NOTE]
-> In step 2, use the format `['00000000-0000-0000-0000-000000000123', 'Group Name', '00000000-0000-0000-0000-000000000456']` for the `metadata_security_id` field, including Entra ID user `object_ids` and group names.
+> For step 2, ensure that the `metadata_security_id` field follows this format: `['00000000-0000-0000-0000-000000000123', 'Group Name', '00000000-0000-0000-0000-000000000456']`. This field specifies who or which group can access the blob. Leave it blank if there are no access restrictions.
 
 ## References:
 
