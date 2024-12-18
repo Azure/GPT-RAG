@@ -26,8 +26,10 @@
      - [4.5.1 Front Door & WAF](#configuring-front-door-and-web-application-firewall-waf)
      - [4.5.2 IP Allowlist](#configuring-ip-allowlist)
    - [4.6 Entra Authentication](#configuring-entra-authentication)
-   - [4.7 Authorization Setup](#configuring-authorization) 
-   - [4.8 Setting Up Git Repos](#setting-up-git-repos)
+   - [4.7 Authorization Setup](#configuring-authorization)  
+   - [4.8 Sharepoint Indexing](#sharepoint-setup)
+   - [4.9 Search Trimming](#search-trimming)     
+   - [4.10 Setting Up Git Repos](#setting-up-git-repos)
 5. [**Reference**](reference)
    - [5.1 Azure Resources](#azure-resources)
 6. [**Troubleshooting**](#troubleshooting)
@@ -271,7 +273,7 @@ This section provides step-by-step guides for common administrative tasks.
 
 ## Deploying the Solution Accelerator
 
-This setup guide provides step-by-step instructions for provisioning a resource group with all the necessary components to ensure the solution operates efficiently. The diagram below highlights the resource group and its corresponding components, outlined in red, that will be provisioned during this process.
+This setup guide provides step-by-step instructions for provisioning a resource group with all the necessary components to ensure the solution operates efficiently. The diagram below highlights the resource group and its corresponding components, outlined in red, that will be provisioned during this process. 
 
 ![Zero Trust Architecture](../media/admin-guide-architecture-scope.png)
 <br>*GPT-RAG Zero Trust Architecture*
@@ -288,7 +290,7 @@ This setup guide provides step-by-step instructions for provisioning a resource 
 
 ### Deployment Overview
 
-This guide will walk you through each step needed to deploy the GPT-RAG solution in a Zero Trust architecture. Follow these steps to ensure a smooth and successful deployment.
+This guide will walk you through each step required to deploy the GPT-RAG solution in a Zero Trust architecture. Follow these steps to ensure a smooth and successful deployment. You can check the [Installation and Post-Installation Checklist](INSTALLATION_CHECKLIST.md) to verify that everything is as expected.
 
 1. **Plan Your Deployment**
 2. **Download the Repository**
@@ -908,6 +910,14 @@ Based on your authorization setup, validate access:
 
 > [!NOTE]
 > Use and test only the methods you have configured to ensure access controls are functioning correctly.
+
+## SharePoint Setup
+
+The SharePoint connector indexes and purges files using scheduled Azure Functions to maintain an up-to-date Azure AI Search Index. For more information on how this works, see the Sharepoint section on the [Data Ingestion Page](https://github.com/Azure/gpt-rag-ingestion?tab=readme-ov-file#sharepoint-indexing). For detailed instructions on setting up SharePoint for data ingestion, please refer to the [SharePoint Setup Guide](INGESTION_SHAREPOINT_SETUP.md).
+
+## Search Trimming
+
+This customization is particularly valuable in scenarios where sensitive documents need to be accessed by specific groups or individuals within an organization. With this feature you can ensure that AI Search returns results tailored to each user’s access (no RBAC permissions), please take a look at the [Filter Files with AI Search Using Security Trimming](CUSTOMIZATIONS_SEARCH_TRIMMING.md) page.
 
 ## Setting Up Git Repos
 
