@@ -22,7 +22,7 @@ In the following sections, we will provide detailed instructions on how to confi
    - `"client_group_names"`: List of group names associated with the client.
 
 > [!NOTE]
-> This information is already included by our Frontend component and will have the correct values if authentication has been configured.
+> Orchestrator Payload: These attributes are already added by the Frontend and populated correctly if authentication is properly configured.
 
 By default, the Security Trimming feature is activated and always returns documents where the `metadata_security_id` field is blank, ensuring broad accessibility when no specific restrictions are defined.
 
