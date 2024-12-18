@@ -1,6 +1,10 @@
 # Filter Files with AI Search Using Security Trimming
 
-This customization allows the GPT-RAG solution to filter information during searches in AI Search based on a specific field defined in the index schema. The AI Search setup automatically creates an index with a `metadata_security_id` field. This field is mapped in the skillset for use during indexing, enabling secure, targeted searches.
+This customization allows the GPT-RAG solution to filter information during searches in AI Search based on a specific field defined in the index schema. The AI Search setup automatically creates an index with a `metadata_security_id` field. This field is # Filter Files with AI Search Using Security Trimming
+
+This customization allows the GPT-RAG solution to filter information during searches in AI Search based on a specific field defined in the index schema. **AI Search security trimming** ensures that only authorized users or groups can access specific search results by enforcing access control at query time. It checks the `metadata_security_id` field in the index against the user or group identifiers provided during the search.
+
+The AI Search setup automatically creates an index with a `metadata_security_id` field. This field is mapped in the skillset for use during indexing, enabling secure and targeted searches while protecting sensitive information.
 
 ## General Instructions
 
@@ -12,7 +16,15 @@ In the following sections, we will provide detailed instructions on how to confi
   - Entra ID `object_ids` of authorized users.
   - Entra ID group names.
 
-By default, the feature is activated and always returns documents where the `metadata_security_id` field is blank, ensuring broad accessibility when no specific restrictions are defined.
+- **Orchestrator Payload**: The following attributes must be included in the JSON payload sent to the Orchestrator to enable the search trimming functionality:
+   - `"client_principal_id"`: Unique identifier of the client.  
+   - `"client_principal_name"`: Principal name of the client.  
+   - `"client_group_names"`: List of group names associated with the client.
+
+  > [!NOTE]
+  > This information is already included by our Frontend component and will have the correct values if authentication has been configured.
+
+By default, the Security Trimming feature is activated and always returns documents where the `metadata_security_id` field is blank, ensuring broad accessibility when no specific restrictions are defined.
 
 ![Storage Metadata - Search Trimming](../media/readme-search_trimming_sample.png)
 
@@ -22,9 +34,12 @@ By default, the feature is activated and always returns documents where the `met
    Deploy the GPT-RAG solution. The Function Apps for Ingestion and Orchestration will be set up to handle security trimming by default. This ensures that the AI Search index includes the `metadata_security_id` field and that the skillset is correctly mapped.
 
 2. **Verify Metadata**:
-   Ensure that all files in the storage container have the `metadata_security_id` metadata field populated with the relevant values, such as Entra ID `object_ids` or group names. This step is crucial for restricting document access to authorized users only.
+   Ensure that all files in the storage container have the `metadata_security_id` metadata field populated with the relevant values, such as Entra ID `object_ids` and/or group names. This step is crucial for restricting document access to authorized users only.
 
 3. **Check Deployment**:
    After deployment, verify that the AI Search index has been created with the `metadata_security_id` field and that the skillset mappings are functioning correctly.
 
 * [Azure AI Search - Search Trimming Documentation](https://learn.microsoft.com/en-us/azure/search/search-security-trimming-for-azure-search)
+
+> [!NOTE]
+> In step 2, use the format `['00000000-0000-0000-0000-000000000123', 'Group Name', '00000000-0000-0000-0000-000000000456']` for the `metadata_security_id` field, including Entra ID user `object_ids` and group names.
