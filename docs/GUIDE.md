@@ -912,7 +912,7 @@ Based on your authorization setup, validate access:
 
 ### SharePoint Setup
 
-The SharePoint connector indexes and purges files using scheduled Azure Functions to maintain an up-to-date Azure AI Search Index. For more information on how this works, see the [Data Ingestion Function Page](https://github.com/Azure/gpt-rag-ingestion?tab=readme-ov-file#sharepoint-indexing). For detailed instructions on setting up SharePoint for data ingestion, please refer to the [SharePoint Setup Guide](INGESTION_SHAREPOINT_SETUP.md).
+The SharePoint connector indexes and purges files using scheduled Azure Functions to maintain an up-to-date Azure AI Search Index. For more information on how this works, see the Sharepoint section on the [Data Ingestion Page](https://github.com/Azure/gpt-rag-ingestion?tab=readme-ov-file#sharepoint-indexing). For detailed instructions on setting up SharePoint for data ingestion, please refer to the [SharePoint Setup Guide](INGESTION_SHAREPOINT_SETUP.md).
 
 ## Setting Up Git Repos
 
