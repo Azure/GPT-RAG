@@ -10,7 +10,7 @@ The AI Search setup automatically creates an index with a `metadata_security_id`
 
 In the following sections, we will provide detailed instructions on how to configure and use this functionality.
 
-**Pre-requisites**:
+### Pre-requisites:
 
 - **Storage Metadata**: Ensure that the files in the storage container to be indexed include a `metadata_security_id` field in their metadata. This field should contain a list of values, which may include:
   - Entra ID `object_ids` of authorized users.
@@ -26,7 +26,7 @@ In the following sections, we will provide detailed instructions on how to confi
 
 By default, the Security Trimming feature is activated and always returns documents where the `metadata_security_id` field is blank, ensuring broad accessibility when no specific restrictions are defined.
 
-**General Instruction Steps**:
+### Setup Steps:
 
 1. **Deploy the Solution**:
    Deploy the GPT-RAG solution. The Function Apps for Ingestion and Orchestration will be set up to handle security trimming by default. This ensures that the AI Search index includes the `metadata_security_id` field and that the skillset is correctly mapped.
@@ -42,6 +42,6 @@ By default, the Security Trimming feature is activated and always returns docume
 > [!NOTE]
 > In step 2, use the format `['00000000-0000-0000-0000-000000000123', 'Group Name', '00000000-0000-0000-0000-000000000456']` for the `metadata_security_id` field, including Entra ID user `object_ids` and group names.
 
-**Reference**:
+## References:
 
 * [Azure AI Search - Search Trimming Documentation](https://learn.microsoft.com/en-us/azure/search/search-security-trimming-for-azure-search)
