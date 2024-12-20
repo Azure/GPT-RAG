@@ -89,7 +89,7 @@ Here is the complete list of resources for a standard Zero Trust deployment, inc
     - SKU: Standard
     - Deployments:
         - Regional gpt-4o, 40 TPM.
-        - text-embedding-ada-002, 40 TPM.
+        - text-embedding-3-large, 40 TPM.
 - **Search Service**
     <BR>Provides vector indexes for the retrieval step.
     - SKU: Standard2
@@ -212,7 +212,7 @@ Here is the complete list of resources for a standard Zero Trust deployment, inc
 - Azure Environment Name (ex: gpt-rag-dev,  gpt-rag-poc, ...)
 
 > [!NOTE]
-> Choose a region with sufficient service quotas. Commonly tested regions include eastus2, eastus, and westus.
+> Choose a region with sufficient service quotas. Commonly tested regions include `northcentralus`, `southcentralus`, `eastus2`, and `westus`.
 
 **Review these points for potential customizations**
 
@@ -306,6 +306,9 @@ Run the `azd env set` commands if you want to customize the installation as indi
 ```sh
 azd provision
 ```
+
+> [!TIP]  
+> The regions we test most often are `northcentralus`, `southcentralus`, `eastus2`, and `westus`.
 
 **5** Use the Virtual Machine with the Bastion connection (created in step 4) to proceed with the deployment.
    

@@ -67,7 +67,7 @@ Here is the complete list of resources for a standard Zero Trust deployment, inc
     - SKU: Standard
     - Deployments:
         - Regional gpt-4o, 40 TPM.
-        - text-embedding-ada-002, 40 TPM.
+        - text-embedding-3-large, 40 TPM.
 - **Search Service**
     <BR>Provides vector indexes for the retrieval step.
     - SKU: Standard2
@@ -228,7 +228,7 @@ Gather Necessary Information:
      - Create an Azure OpenAI service
      - Create deployments:
         - Regional gpt-4o, 40 TPM.
-        - text-embedding-ada-002, 40 TPM.
+        - text-embedding-3-large, 40 TPM.
      - Disable public network access.
      
    - **Azure Search**

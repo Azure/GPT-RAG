@@ -92,9 +92,9 @@ When reusing an Azure OpenAI resource, it's essential to first specify both the 
 
 Additionally, the original resource must have two deployments, one for a GPT model and another for an embeddings model.
 
-Ensure the embeddings model is **text-embedding-ada-002** version 2, with the deployment named **text-embedding-ada-002**.
+Ensure the embeddings model is **text-embedding-3-large** version 1, with the deployment named **text-embedding**.
 
-The default GPT model is **gpt-4o** and the default deployment name is **chat**. If you're using the pre-created service with these default settings, no further modifications are required.
+The default GPT model is **gpt-4o** version **2024-11-20** and the default deployment name is **chat**. If you're using the pre-created service with these default settings, no further modifications are required.
 
 However, if you're using a different name for the GPT, or a different model, you'll need to set the corresponding environment variables as shown in the table below.
 

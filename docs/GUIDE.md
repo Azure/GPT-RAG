@@ -86,8 +86,6 @@ The diagram above illustrates the Zero Trust architecture. The **GPT-RAG Solutio
 
 For more information about Zero Trust architecture, see the [Enterprise RAG (GPT-RAG) Architecture](ARCHITECTURE.md) page.
 
-> [!TIP]
-> Need the Visio diagrams used in this documentation? You can easily download them here: [Enterprise RAG](../media/visio/Enterprise%20RAG.vsdx).
 
 ## Data Ingestion
 
@@ -317,8 +315,54 @@ Ensure you have the following details before starting:
 - **Azure Region**
 - **Azure Environment Name** (e.g., gpt-rag-dev, gpt-rag-poc)
 
-> [!NOTE] 
-> Choose a region with sufficient service quotas. Commonly tested regions include `northcentralus`, `eastus2`, `eastus`, and `westus`.
+### Selecting the Azure Region
+
+When selecting the Azure region for your deployment, consider the availability and quota of the resources required by the solution in the chosen region. A detailed list of resources is available in the [Azure Resources](#azure-resources) section of this guide.
+
+As of December 19, 2024, the solution has been tested in the following regions with the default service configurations: `northcentralus`, `southcentralus`, `eastus2`, `westus`, and `westus3`. You can select a different region if needed, but you must carefully verify the deployment compatibility for Azure OpenAI models and the availability of Semantic Ranking in Azure Cognitive Search.
+
+#### Azure OpenAI Model Support
+
+By default, the solution deploys a **Global Deployment** of the GPT-4o model (version 2024-11-20) and a **Standard Deployment** of the text-embedding-3-large model for embedding generation. To ensure compatibility, refer to the Azure OpenAI model summary table and region availability at the following link:  
+[Azure OpenAI Model Availability](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models?tabs=global-standard%2Cstandard-chat-completions#model-summary-table-and-region-availability).
+
+If your selected region does not support these default models, you have two options:
+
+1. **Change the Default Models:**  
+
+Before proceeding with the [Provision Infrastructure Components](#9-provision-infrastructure-components) step, you can update the default models by setting the following environment variables:
+
+   For the Chat Completions model:
+   ```bash
+   azd env set AZURE_CHAT_GPT_MODEL_NAME gpt-4o
+   azd env set AZURE_CHAT_GPT_MODEL_VERSION 2024-11-20
+   azd env set AZURE_CHAT_GPT_DEPLOYMENT_TYPE Global-Standard
+   ```
+
+   For the Embeddings model:
+   ```bash
+   azd env set AZURE_EMBEDDINGS_MODEL_NAME text-embedding-3-large
+   azd env set AZURE_EMBEDDINGS_VERSION 1
+   azd env set AZURE_EMBEDDINGS_VECTOR_SIZE 3072
+   ```
+
+2. **Reuse an Existing Deployment:**  
+   If you prefer to reuse an existing Azure OpenAI resource, refer to the instructions in the [Reuse Azure Resources](#7-reuse-azure-resources-optional) step. 
+
+#### Regions Without Semantic Ranking
+
+By default, the Azure AI resource created during deployment has the [Semantic Ranking](https://learn.microsoft.com/en-us/azure/search/semantic-search-overview) feature enabled. To verify if your selected region supports this feature, refer to the region availability list for Semantic Ranking: [Azure Search Region Support](https://learn.microsoft.com/en-us/azure/search/search-region-support#azure-public-regions).
+
+If Semantic Ranking is not available in your region, you have two options:
+
+1. **Disable Semantic Ranking:**  
+   Before proceeding with the [Provision Infrastructure Components](#9-provision-infrastructure-components) step, you can disable Semantic Ranking by setting the following environment variable:
+   ```bash
+   azd env set AZURE_USE_SEMANTIC_RERANKING false
+   ```
+
+2. **Reuse an Existing AI Search Resource:**  
+   Similar to Azure OpenAI, you can reuse a pre-existing AI Search resource in a supported region. Detailed instructions are provided in the [Reuse Azure Resources](#7-reuse-azure-resources-optional) step.
 
 #### Identify Your Network Setup Scenario
 
@@ -1067,7 +1111,7 @@ Here is the complete list of resources for a standard Zero Trust deployment, inc
     - SKU: Standard
     - Deployments:
         - Regional gpt-4o, 40 TPM.
-        - text-embedding-ada-002, 40 TPM.
+        - text-embedding-3-large, 40 TPM.
 - **Search Service**
     <BR>Provides vector indexes for the retrieval step.
     - SKU: Standard2
