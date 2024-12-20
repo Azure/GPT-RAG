@@ -294,9 +294,9 @@ param chatGptModelName string = ''
 var _chatGptModelName = !empty(chatGptModelName) ? chatGptModelName : 'gpt-4o'
 
 @description('GPT model deployment type.')
-// @allowed([ 'Standard', 'Provisioned-Managed', 'Global-Standard'])
+// @allowed([ 'Standard', 'ProvisionedManaged', 'GlobalStandard'])
 param chatGptModelDeploymentType string = ''
-var _chatGptModelDeploymentType = !empty(chatGptModelDeploymentType) ? chatGptModelDeploymentType : 'Global-Standard'
+var _chatGptModelDeploymentType = !empty(chatGptModelDeploymentType) ? chatGptModelDeploymentType : 'GlobalStandard'
 
 @description('GPT model version.')
 // @allowed([ '0613', '1106', '1106-Preview', '0125-preview', 'turbo-2024-04-09', '2024-05-13', '2024-11-20'])

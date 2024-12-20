@@ -17,12 +17,12 @@ param sku object = {
   name: 'S0'
 }
 
-resource existingAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' existing  = if (aiServicesReuse && aiServicesDeploy) {
+resource existingAccount 'Microsoft.CognitiveServices/accounts@2024-10-01' existing  = if (aiServicesReuse && aiServicesDeploy) {
   scope: resourceGroup(existingAiServicesResourceGroupName)
   name: name
 }
 
-resource newAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' = if (!aiServicesReuse && aiServicesDeploy) {
+resource newAccount 'Microsoft.CognitiveServices/accounts@2024-10-01' = if (!aiServicesReuse && aiServicesDeploy) {
   name: name
   location: location
   tags: tags
@@ -35,7 +35,7 @@ resource newAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' = if (!aiS
 }
 
 @batchSize(1)
-resource deployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = [for deployment in deployments: if (!aiServicesReuse && aiServicesDeploy) {
+resource deployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = [for deployment in deployments: if (!aiServicesReuse && aiServicesDeploy) {
   parent: newAccount
   name: deployment.name
   properties: {
