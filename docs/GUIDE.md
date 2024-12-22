@@ -616,7 +616,6 @@ Deploy the application components by connecting through the Data Science VM with
 **Access VNet from Your Machine**:
 
 ```sh
-azd package
 azd deploy
 ```
 
@@ -639,8 +638,8 @@ azd deploy
    cd deploy
    azd init -t azure/gpt-rag
    azd auth login
+   az login
    azd env refresh
-   azd package
    azd deploy
    ```
 

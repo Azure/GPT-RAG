@@ -1291,6 +1291,16 @@ module dataIngestion './core/host/functions.bicep' = {
         name: 'NETWORK_ISOLATION'
         value: _networkIsolation
       }
+
+      {
+        name: 'AZURE_STORAGE_ACCOUNT_RG'
+        value: _storageAccountResourceGroupName
+      }
+
+      {
+        name: 'AZURE_AOAI_RG'
+        value: _openAiResourceGroupName
+      }
       {
         name: 'ENABLE_ORYX_BUILD'
         value: 'true'

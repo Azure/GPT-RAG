@@ -338,9 +338,9 @@ To finalize the procedure, execute the subsequent commands in the command prompt
 
 ```  
 azd init -t azure/gpt-rag  
-azd auth login   
+azd auth login
+az login
 azd env refresh  
-azd package  
 azd deploy  
 ```  
 
