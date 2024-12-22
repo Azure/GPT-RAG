@@ -319,7 +319,7 @@ Ensure you have the following details before starting:
 
 When selecting the Azure region for your deployment, consider the availability and quota of the resources required by the solution in the chosen region. A detailed list of resources is available in the [Azure Resources](#azure-resources) section of this guide.
 
-As of December 19, 2024, the solution has been tested in the following regions with the default service configurations: `northcentralus`, `southcentralus`, `eastus2`, `westus`, and `westus3`. You can select a different region if needed, but you must carefully verify the deployment compatibility for Azure OpenAI models and the availability of Semantic Ranking in Azure Cognitive Search.
+As of December 19, 2024, the solution has been tested in the following regions with the default service configurations:  `eastus`, `eastus2`, `westus3`. You can select a different region if needed, but you must carefully verify the deployment compatibility for Azure OpenAI models and the availability of Semantic Ranking in Azure Cognitive Search.
 
 #### Azure OpenAI Model Support
 
@@ -336,7 +336,7 @@ Before proceeding with the [Provision Infrastructure Components](#9-provision-in
    ```bash
    azd env set AZURE_CHAT_GPT_MODEL_NAME gpt-4o
    azd env set AZURE_CHAT_GPT_MODEL_VERSION 2024-11-20
-   azd env set AZURE_CHAT_GPT_DEPLOYMENT_TYPE Global-Standard
+   azd env set AZURE_CHAT_GPT_DEPLOYMENT_TYPE GlobalStandard
    ```
 
    For the Embeddings model:

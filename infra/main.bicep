@@ -1537,7 +1537,7 @@ module searchService 'core/search/search-services.bicep' = {
 
 module searchAzureOpenAIPrivatelink 'core/search/search-private-link.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'searchAzureOpenAIPrivatelink'
-  scope: resourceGroup
+  scope: az.resourceGroup(_searchResourceGroupName)
   dependsOn: [
     openAi, openAiPe
   ] 
@@ -1551,7 +1551,7 @@ module searchAzureOpenAIPrivatelink 'core/search/search-private-link.bicep' = if
 
 module searchStoragePrivatelink 'core/search/search-private-link.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'searchStoragePrivatelink'
-  scope: resourceGroup
+  scope: az.resourceGroup(_searchResourceGroupName)
   dependsOn: [
     searchAzureOpenAIPrivatelink, storage, storagepe
   ]  
@@ -1565,7 +1565,7 @@ module searchStoragePrivatelink 'core/search/search-private-link.bicep' = if (_n
 
 module searchFuncAppPrivatelink 'core/search/search-private-link.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'searchFuncAppPrivatelink'
-  scope: resourceGroup
+  scope: az.resourceGroup(_searchResourceGroupName)
   dependsOn: [
     searchStoragePrivatelink, dataIngestion, ingestionPe
   ]  

@@ -186,7 +186,7 @@ az login
 azd provision
 ```
 > [!TIP]  
-> The regions we test most often are `northcentralus`, `southcentralus`, `eastus2`, and `westus`.
+> The regions we test most often are  `eastus`, `eastus2`, `westus3`.
 
 **5** Next, you will use the Virtual Machine with the Bastion connection (created during step 4) to continue the deployment.  
    

@@ -212,7 +212,7 @@ Here is the complete list of resources for a standard Zero Trust deployment, inc
 - Azure Environment Name (ex: gpt-rag-dev,  gpt-rag-poc, ...)
 
 > [!NOTE]
-> Choose a region with sufficient service quotas. Commonly tested regions include `northcentralus`, `southcentralus`, `eastus2`, and `westus`.
+> Choose a region with sufficient service quotas. Commonly tested regions include  `eastus`, `eastus2`, `westus3`.
 
 **Review these points for potential customizations**
 
@@ -308,7 +308,7 @@ azd provision
 ```
 
 > [!TIP]  
-> The regions we test most often are `northcentralus`, `southcentralus`, `eastus2`, and `westus`.
+> The regions we test most often are  `eastus`, `eastus2`, `westus3`.
 
 **5** Use the Virtual Machine with the Bastion connection (created in step 4) to proceed with the deployment.
    
