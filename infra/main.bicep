@@ -1628,6 +1628,8 @@ module searchIngestionAccess './core/security/functions-access.bicep' = {
   }
 }
 
+// TODO: Add Search Service Contributor to principal Id
+
 // Load Testing
 
 module loadtesting './core/loadtesting/loadtesting.bicep' = if (_provisionLoadTesting){

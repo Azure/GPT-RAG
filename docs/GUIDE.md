@@ -231,7 +231,7 @@ If you need to perform updates frequently, consider using **Azure Storage Explor
 
 Before reindexing, ensure that you have the necessary permissions:
 
-- **Azure Role Required:** You must have the **Cognitive Search Contributor** or **Cognitive Search Index Administrator** role assigned in Azure Entra ID for the AI Search resource.
+- **Azure Role Required:** You must have the **Search Service Contributor** or **Search Index Data Contributor** role assigned in Azure Entra ID for the AI Search resource.
 
 > [!NOTE]
 > If you do not have the required role, contact your Azure administrator to obtain the necessary permissions.

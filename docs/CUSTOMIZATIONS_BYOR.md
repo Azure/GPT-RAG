@@ -72,7 +72,7 @@ In addition to specifying the AI Search service name and resource group as menti
 
 - The AI Search tier must be Standard 2 (S2) or higher if you want to use a zero-trust environment.
 
-- The AI Search must have Managed Identity Enabled.
+- The AI Search must have **Managed Identity** and **Role-based access control** enabled.
 
 - If the AI Search will be used for more than one gpt-rag project, to avoid conflicts, you should use different names for the index where retrieval is performed and the container where the documents are obtained. These two items can be configured with the variables `AZURE_STORAGE_CONTAINER_NAME` and `AZURE_SEARCH_INDEX`.
 
