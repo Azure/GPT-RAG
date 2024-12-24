@@ -640,6 +640,24 @@ module testvm './core/vm/dsvm.bicep' = if (_networkIsolation && !_vnetReuse && _
   }
 }
 
+module testvmSearchAccess './core/security/search-service-contributor.bicep' = {
+  name: 'dsvm-search-access'
+  scope: az.resourceGroup(_searchResourceGroupName)
+  params: {
+    principalId: testvm.outputs.vmPrincipalId
+    resourceName: searchService.outputs.name
+  }
+} 
+
+module principalSearchAccess './core/security/search-service-contributor.bicep' = {
+  name: 'principal-search-access'
+  scope: az.resourceGroup(_searchResourceGroupName)
+  params: {
+    principalId: principalId
+    resourceName: searchService.outputs.name
+  }
+} 
+
 // Storage
 
 module storage './core/storage/storage-account.bicep' = {
@@ -1627,8 +1645,6 @@ module searchIngestionAccess './core/security/functions-access.bicep' = {
     principalId: searchService.outputs.principalId
   }
 }
-
-// TODO: Add Search Service Contributor to principal Id
 
 // Load Testing
 
