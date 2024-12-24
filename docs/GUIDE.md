@@ -86,8 +86,6 @@ The diagram above illustrates the Zero Trust architecture. The **GPT-RAG Solutio
 
 For more information about Zero Trust architecture, see the [Enterprise RAG (GPT-RAG) Architecture](ARCHITECTURE.md) page.
 
-> [!TIP]
-> Need the Visio diagrams used in this documentation? You can easily download them here: [Enterprise RAG](../media/visio/Enterprise%20RAG.vsdx).
 
 ## Data Ingestion
 
@@ -233,7 +231,7 @@ If you need to perform updates frequently, consider using **Azure Storage Explor
 
 Before reindexing, ensure that you have the necessary permissions:
 
-- **Azure Role Required:** You must have the **Cognitive Search Contributor** or **Cognitive Search Index Administrator** role assigned in Azure Entra ID for the AI Search resource.
+- **Azure Role Required:** You must have the **Search Service Contributor** or **Search Index Data Contributor** role assigned in Azure Entra ID for the AI Search resource.
 
 > [!NOTE]
 > If you do not have the required role, contact your Azure administrator to obtain the necessary permissions.
@@ -278,7 +276,7 @@ This setup guide provides step-by-step instructions for provisioning a resource 
 ![Zero Trust Architecture](../media/admin-guide-architecture-scope.png)
 <br>*GPT-RAG Zero Trust Architecture*
 
-### Prerequisites
+### Pre-requisites
 
 - Azure subscription with access to **Azure OpenAI**.
 - You need either the **Owner** role or both the **Contributor** and **User Access Administrator** roles at the subscription level. Alternatively, you can create a custom role. [Learn how to create a **Custom Role** here](MANUAL_CUSTOM_ROLE.md).
@@ -287,6 +285,16 @@ This setup guide provides step-by-step instructions for provisioning a resource 
 
 > [!NOTE]
 > The last step is unnecessary if an Azure AI service resource already exists in the subscription. 
+
+#### Software pre-reqs
+
+- Azure Developer CLI: [Download azd for Windows](https://azdrelease.azureedge.net/azd/standalone/release/1.5.0/azd-windows-amd64.msi), [Other OS's](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd).
+ - Powershell 7+ (Windows only): [Powershell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4#installing-the-msi-package) 
+ - Git: [Download Git](https://git-scm.com/downloads)
+ - Node.js 16+ [windows/mac](https://nodejs.dev/en/download/)  [linux/wsl](https://nodejs.dev/en/download/package-manager/)
+ - Python 3.11: [Download Python](https://www.python.org/downloads/release/python-3118/)
+
+<!-- [AZ Module](https://learn.microsoft.com/en-us/powershell/azure/what-is-azure-powershell?view=azps-11.6.0#the-az-powershell-module) -->
 
 ### Deployment Overview
 
@@ -317,8 +325,54 @@ Ensure you have the following details before starting:
 - **Azure Region**
 - **Azure Environment Name** (e.g., gpt-rag-dev, gpt-rag-poc)
 
-> [!NOTE] 
-> Choose a region with sufficient service quotas. Commonly tested regions include `northcentralus`, `eastus2`, `eastus`, and `westus`.
+### Selecting the Azure Region
+
+When selecting the Azure region for your deployment, consider the availability and quota of the resources required by the solution in the chosen region. A detailed list of resources is available in the [Azure Resources](#azure-resources) section of this guide.
+
+As of December 19, 2024, the solution has been tested in the following regions with the default service configurations:  `eastus`, `eastus2`, `westus3`. You can select a different region if needed, but you must carefully verify the deployment compatibility for Azure OpenAI models and the availability of Semantic Ranking in Azure Cognitive Search.
+
+#### Azure OpenAI Model Support
+
+By default, the solution deploys a **Global Deployment** of the GPT-4o model (version 2024-11-20) and a **Standard Deployment** of the text-embedding-3-large model for embedding generation. To ensure compatibility, refer to the Azure OpenAI model summary table and region availability at the following link:  
+[Azure OpenAI Model Availability](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models?tabs=global-standard%2Cstandard-chat-completions#model-summary-table-and-region-availability).
+
+If your selected region does not support these default models, you have two options:
+
+1. **Change the Default Models:**  
+
+Before proceeding with the [Provision Infrastructure Components](#9-provision-infrastructure-components) step, you can update the default models by setting the following environment variables:
+
+   For the Chat Completions model:
+   ```bash
+   azd env set AZURE_CHAT_GPT_MODEL_NAME gpt-4o
+   azd env set AZURE_CHAT_GPT_MODEL_VERSION 2024-11-20
+   azd env set AZURE_CHAT_GPT_DEPLOYMENT_TYPE GlobalStandard
+   ```
+
+   For the Embeddings model:
+   ```bash
+   azd env set AZURE_EMBEDDINGS_MODEL_NAME text-embedding-3-large
+   azd env set AZURE_EMBEDDINGS_VERSION 1
+   azd env set AZURE_EMBEDDINGS_VECTOR_SIZE 3072
+   ```
+
+2. **Reuse an Existing Deployment:**  
+   If you prefer to reuse an existing Azure OpenAI resource, refer to the instructions in the [Reuse Azure Resources](#7-reuse-azure-resources-optional) step. 
+
+#### Regions Without Semantic Ranking
+
+By default, the Azure AI resource created during deployment has the [Semantic Ranking](https://learn.microsoft.com/en-us/azure/search/semantic-search-overview) feature enabled. To verify if your selected region supports this feature, refer to the region availability list for Semantic Ranking: [Azure Search Region Support](https://learn.microsoft.com/en-us/azure/search/search-region-support#azure-public-regions).
+
+If Semantic Ranking is not available in your region, you have two options:
+
+1. **Disable Semantic Ranking:**  
+   Before proceeding with the [Provision Infrastructure Components](#9-provision-infrastructure-components) step, you can disable Semantic Ranking by setting the following environment variable:
+   ```bash
+   azd env set AZURE_USE_SEMANTIC_RERANKING false
+   ```
+
+2. **Reuse an Existing AI Search Resource:**  
+   Similar to Azure OpenAI, you can reuse a pre-existing AI Search resource in a supported region. Detailed instructions are provided in the [Reuse Azure Resources](#7-reuse-azure-resources-optional) step.
 
 #### Identify Your Network Setup Scenario
 
@@ -562,7 +616,6 @@ Deploy the application components by connecting through the Data Science VM with
 **Access VNet from Your Machine**:
 
 ```sh
-azd package
 azd deploy
 ```
 
@@ -585,8 +638,8 @@ azd deploy
    cd deploy
    azd init -t azure/gpt-rag
    azd auth login
+   az login
    azd env refresh
-   azd package
    azd deploy
    ```
 
@@ -1067,7 +1120,7 @@ Here is the complete list of resources for a standard Zero Trust deployment, inc
     - SKU: Standard
     - Deployments:
         - Regional gpt-4o, 40 TPM.
-        - text-embedding-ada-002, 40 TPM.
+        - text-embedding-3-large, 40 TPM.
 - **Search Service**
     <BR>Provides vector indexes for the retrieval step.
     - SKU: Standard2

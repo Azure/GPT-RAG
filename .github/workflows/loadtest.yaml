@@ -69,10 +69,10 @@ jobs:
     - name: Update user.properties
       run: |
           sed -i "s/ORCHESTRATOR_FUNC_NAME/${{ env.ORCHESTRATOR_FUNC_NAME }}/g" loadtest/user.properties
-
+# 
     - name: 'Azure Load Testing'
-      uses: azure/load-testing@v1
+      uses: azure/load-testing@v1.1.25
       with:
-        loadTestConfigFile: 'loadtest/config.yaml'
-        loadTestResource: ${{ env.LOAD_TESTING_SERVICE_NAME }}
+        loadtestConfigFile: 'loadtest/config.yaml'
+        loadtestResource: ${{ env.LOAD_TESTING_SERVICE_NAME }}
         resourceGroup: ${{ env.RESOURCE_GROUP_NAME }}
