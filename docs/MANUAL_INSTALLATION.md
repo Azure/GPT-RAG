@@ -361,15 +361,6 @@ Gather Necessary Information:
                 --scope "/subscriptions/<subscription-id>/resourceGroups/$resourceGroupName/providers/Microsoft.Search/searchServices/$searchServiceName"
         ```
 
-        - Assign the "Search Service Contributor" role for the AI Search resource to the Data Science VM's Managed Identity and the user who deploy data ingestion function.  
-          This is required to run the `azd deploy` command and execute the data ingestion post-deployment script in the VM.
-        ```    
-            az role assignment create \
-                --assignee $principalId \
-                --role "Search Service Contributor" \
-                --scope "/subscriptions/<subscription-id>/resourceGroups/$resourceGroupName/providers/Microsoft.Search/searchServices/$searchServiceName"
-        ```
-
     - **Azure OpenAI**
         - Assign Azure OpenAI "Cognitive Services OpenAI User" role to the Identities of the following Resources:
             - Orchestrator Function App
