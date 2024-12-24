@@ -1,7 +1,5 @@
 # Filter Files with AI Search Using Security Trimming
 
-This customization allows the GPT-RAG solution to filter information during searches in AI Search based on a specific field defined in the index schema. The AI Search setup automatically creates an index with a `metadata_security_id` field. This field is # Filter Files with AI Search Using Security Trimming
-
 This customization allows the GPT-RAG solution to filter information during searches in AI Search based on a specific field defined in the index schema. **AI Search security trimming** ensures that only authorized users or groups can access specific search results by enforcing access control at query time. It checks the `metadata_security_id` field in the index against the user or group identifiers provided during the search.
 
 The AI Search setup automatically creates an index with a `metadata_security_id` field. This field is mapped in the skillset for use during indexing, enabling secure and targeted searches while protecting sensitive information.
