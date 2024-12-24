@@ -81,11 +81,13 @@ This guide will walk you through the deployment process of Enterprise RAG. There
 **Pre-requisites**
 
 - Azure Developer CLI: [Download azd for Windows](https://azdrelease.azureedge.net/azd/standalone/release/1.5.0/azd-windows-amd64.msi), [Other OS's](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd).
- - Powershell 7+ with AZ module (Windows only): [Powershell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4#installing-the-msi-package), [AZ Module](https://learn.microsoft.com/en-us/powershell/azure/what-is-azure-powershell?view=azps-11.6.0#the-az-powershell-module)
- - Git: [Download Git](https://git-scm.com/downloads)
+ - Powershell 7+ (Windows only): [Powershell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4#installing-the-msi-package).
+ - Git: [Download Git](https://git-scm.com/downloads).
  - Node.js 16+ [windows/mac](https://nodejs.dev/en/download/)  [linux/wsl](https://nodejs.dev/en/download/package-manager/)
- - Python 3.11: [Download Python](https://www.python.org/downloads/release/python-3118/)
+ - Python 3.11: [Download Python](https://www.python.org/downloads/release/python-3118/).
  - Initiate an [Azure AI services creation](https://portal.azure.com/#create/Microsoft.CognitiveServicesAllInOne) and agree to the Responsible AI terms **
+
+<!-- [AZ Module](https://learn.microsoft.com/en-us/powershell/azure/what-is-azure-powershell?view=azps-11.6.0#the-az-powershell-module) -->
 
 ** If you have not created an Azure AI service resource in the subscription before
 
@@ -185,6 +187,8 @@ az login
 ```sh
 azd provision
 ```
+> [!TIP]  
+> The regions we test most often are  `eastus`, `eastus2`, `westus3`.
 
 **5** Next, you will use the Virtual Machine with the Bastion connection (created during step 4) to continue the deployment.  
    
@@ -213,9 +217,9 @@ To finalize the procedure, execute the subsequent commands in the command prompt
 
 ```  
 azd init -t azure/gpt-rag  
-azd auth login   
-azd env refresh  
-azd package  
+azd auth login
+az login 
+azd env refresh
 azd deploy  
 ```  
    

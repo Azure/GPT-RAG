@@ -81,7 +81,7 @@
         "value": "${AZURE_VM_DEPLOY_VM}"
       },
       "vmUserInitialPassword": {
-        "value": "$(secretOrRandomPassword ${AZURE_VM_KV_NAME} vmUserInitialPassword)"
+        "value": "$(secretOrRandomPassword ${AZURE_BASTION_KV_NAME} vmUserInitialPassword)"
       },      
       "vmUserName": {
         "value": "${AZURE_VM_USER_NAME}"
@@ -103,6 +103,18 @@
       },    
       "chatGptModelVersion": {
         "value": "${AZURE_CHAT_GPT_MODEL_VERSION}"
+      },
+      "embeddingsModelName": {
+        "value": "${AZURE_EMBEDDINGS_MODEL_NAME}"
+      },
+      "embeddingsModelVersion": {
+        "value": "${AZURE_EMBEDDINGS_VERSION}"
+      },
+      "embeddingsDeploymentName": {
+        "value": "${AZURE_EMBEDDINGS_DEPLOYMENT_NAME}"
+      },
+      "embeddingsVectorSize": {
+        "value": "${AZURE_EMBEDDINGS_VECTOR_SIZE}"
       },
       "openaiApiVersion": {
         "value": "${AZURE_OPENAI_API_VERSION}"

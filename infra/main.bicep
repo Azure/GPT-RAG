@@ -287,20 +287,21 @@ var _appServiceRuntimeVersion = !empty(appServiceRuntimeVersion) ? appServiceRun
 
 // Azure OpenAI settings
 
+
 @description('GPT model used to answer user questions. Don\'t forget to check region availability.')
 // @allowed([ 'gpt-35-turbo','gpt-35-turbo-16k', 'gpt-4', 'gpt-4-32k', 'gpt-4o', 'gpt-4o-mini' ])
 param chatGptModelName string = ''
 var _chatGptModelName = !empty(chatGptModelName) ? chatGptModelName : 'gpt-4o'
 
 @description('GPT model deployment type.')
-// @allowed([ 'Standard', 'Provisioned-Managed', 'Global-Standard'])
+// @allowed([ 'Standard', 'ProvisionedManaged', 'GlobalStandard'])
 param chatGptModelDeploymentType string = ''
-var _chatGptModelDeploymentType = !empty(chatGptModelDeploymentType) ? chatGptModelDeploymentType : 'Standard'
+var _chatGptModelDeploymentType = !empty(chatGptModelDeploymentType) ? chatGptModelDeploymentType : 'GlobalStandard'
 
 @description('GPT model version.')
-// @allowed([ '0613', '1106', '1106-Preview', '0125-preview', 'turbo-2024-04-09', '2024-05-13'])
+// @allowed([ '0613', '1106', '1106-Preview', '0125-preview', 'turbo-2024-04-09', '2024-05-13', '2024-11-20'])
 param chatGptModelVersion string = ''
-var _chatGptModelVersion = !empty(chatGptModelVersion) ? chatGptModelVersion : '2024-05-13'
+var _chatGptModelVersion = !empty(chatGptModelVersion) ? chatGptModelVersion : '2024-11-20'
 
 @description('GPT model deployment name.')
 param chatGptDeploymentName string = ''
@@ -313,18 +314,28 @@ param chatGptDeploymentCapacity int = 0
 var _chatGptDeploymentCapacity = chatGptDeploymentCapacity != 0 ? chatGptDeploymentCapacity : 40
 
 @description('Embeddings model used to generate vector embeddings. Don\'t forget to check region availability.')
-// @allowed([ 'text-embedding-ada-002' ])
+// @allowed([ 'text-embedding-ada-002', 'text-embedding-3-small', 'text-embedding-3-large' ])
 param embeddingsModelName string = ''
-var _embeddingsModelName = !empty(embeddingsModelName) ? embeddingsModelName : 'text-embedding-ada-002'
+var _embeddingsModelName = !empty(embeddingsModelName) ? embeddingsModelName : 'text-embedding-3-large'
+
+@description('Embeddings model deployment type.')
+// @allowed([ 'Standard'])
+param embeddingsDeploymentType string = 'Standard'
+var _embeddingsDeploymentType = !empty(embeddingsDeploymentType) ? embeddingsDeploymentType : 'Standard'
 
 @description('Embeddings model version.')
-// @allowed([ '2' ])
+// @allowed([ '1', '2' ])
 param embeddingsModelVersion string = ''
-var _embeddingsModelVersion = !empty(embeddingsModelVersion) ? embeddingsModelVersion : '2'
+var _embeddingsModelVersion = !empty(embeddingsModelVersion) ? embeddingsModelVersion : '1'
 
 @description('Embeddings model deployment name.')
 param embeddingsDeploymentName string = ''
-var _embeddingsDeploymentName = !empty(embeddingsDeploymentName) ? embeddingsDeploymentName : 'text-embedding-ada-002'
+var _embeddingsDeploymentName = !empty(embeddingsDeploymentName) ? embeddingsDeploymentName : 'text-embedding'
+
+@description('Vector embeddings size.')
+// @allowed([ 1536, 3072 ])
+param embeddingsVectorSize int = 0
+var _embeddingsVectorSize = embeddingsVectorSize != 0 ? embeddingsVectorSize : 3072
 
 @description('Embeddings model tokens per Minute Rate Limit (thousands).')
 param embeddingsDeploymentCapacity int = 0
@@ -332,7 +343,7 @@ var _embeddingsDeploymentCapacity = embeddingsDeploymentCapacity != 0 ? embeddin
 
 @description('Azure OpenAI API version.')
 param openaiApiVersion string = ''
-var _openaiApiVersion = !empty(openaiApiVersion) ? openaiApiVersion : '2024-07-01-preview'
+var _openaiApiVersion = !empty(openaiApiVersion) ? openaiApiVersion : '2024-10-21'
 
 @description('Enables LLM monitoring to generate conversation metrics.')
 @allowed([true, false])
@@ -341,7 +352,7 @@ var _chatGptLlmMonitoring = chatGptLlmMonitoring != null ? chatGptLlmMonitoring 
 
 // Document intelligence settings
 
-var _docintApiVersion = (location == 'eastus' || location == 'westus2' || location == 'westeurope' || location == 'northcentralus') ? '2024-07-31-preview' : '2023-07-31'
+var _docintApiVersion = '2024-11-30'
 
 // AI search settings
 
@@ -629,6 +640,24 @@ module testvm './core/vm/dsvm.bicep' = if (_networkIsolation && !_vnetReuse && _
   }
 }
 
+module testvmSearchAccess './core/security/search-service-contributor.bicep' = {
+  name: 'dsvm-search-access'
+  scope: az.resourceGroup(_searchResourceGroupName)
+  params: {
+    principalId: testvm.outputs.vmPrincipalId
+    resourceName: searchService.outputs.name
+  }
+} 
+
+module principalSearchAccess './core/security/search-service-contributor.bicep' = {
+  name: 'principal-search-access'
+  scope: az.resourceGroup(_searchResourceGroupName)
+  params: {
+    principalId: principalId
+    resourceName: searchService.outputs.name
+  }
+} 
+
 // Storage
 
 module storage './core/storage/storage-account.bicep' = {
@@ -865,6 +894,10 @@ module orchestrator './core/host/functions.bicep' =  {
       {
         name: 'AZURE_OPENAI_EMBEDDING_DEPLOYMENT'
         value: _embeddingsDeploymentName
+      }
+      {
+        name: 'AZURE_EMBEDDINGS_VECTOR_SIZE'
+        value: _embeddingsVectorSize
       }
       {
         name: 'AZURE_OPENAI_STREAM'
@@ -1184,14 +1217,6 @@ module dataIngestion './core/host/functions.bicep' = {
     minimumElasticInstanceCount: 1
     allowedOrigins: [ '*' ]       
     appSettings: [
-      // {
-      //   name: 'AzureWebJobsStorage__clientId'
-      //   value: identityClientId
-      // }
-      // {
-      //   name: 'APPLICATIONINSIGHTS_AUTHENTICATION_STRING'
-      //   value: applicationInsightsIdentity
-      // }      
       {
         name: 'DOCINT_API_VERSION'
         value: _docintApiVersion
@@ -1257,6 +1282,14 @@ module dataIngestion './core/host/functions.bicep' = {
         value: _embeddingsDeploymentName
       }
       {
+        name: 'AZURE_EMBEDDINGS_VECTOR_SIZE'
+        value: _embeddingsVectorSize
+      }
+      {
+        name: 'AZURE_OPENAI_EMBEDDING_MODEL'
+        value: _embeddingsModelName
+      }      
+      {
         name: 'AZURE_OPENAI_CHATGPT_DEPLOYMENT'
         value: _chatGptDeploymentName
       }
@@ -1275,6 +1308,16 @@ module dataIngestion './core/host/functions.bicep' = {
       {
         name: 'NETWORK_ISOLATION'
         value: _networkIsolation
+      }
+
+      {
+        name: 'AZURE_STORAGE_ACCOUNT_RG'
+        value: _storageAccountResourceGroupName
+      }
+
+      {
+        name: 'AZURE_AOAI_RG'
+        value: _openAiResourceGroupName
       }
       {
         name: 'ENABLE_ORYX_BUILD'
@@ -1472,7 +1515,7 @@ module openAi 'core/ai/aiservices.bicep' = {
           version: _embeddingsModelVersion
         }
         sku: {
-          name: 'Standard'
+          name: _embeddingsDeploymentType
           capacity: _embeddingsDeploymentCapacity
         }
       }      
@@ -1522,12 +1565,12 @@ module searchService 'core/search/search-services.bicep' = {
 
 module searchAzureOpenAIPrivatelink 'core/search/search-private-link.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'searchAzureOpenAIPrivatelink'
-  scope: resourceGroup
+  scope: az.resourceGroup(_searchResourceGroupName)
   dependsOn: [
     openAi, openAiPe
   ] 
   params: {
-   name: '${_searchServiceName}-aoailink'
+   name: '${_searchServiceName}-aoailink-${resourceToken}'
    searchName: searchService.outputs.name
    resourceId: openAi.outputs.id
     groupId: 'openai_account'
@@ -1536,12 +1579,12 @@ module searchAzureOpenAIPrivatelink 'core/search/search-private-link.bicep' = if
 
 module searchStoragePrivatelink 'core/search/search-private-link.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'searchStoragePrivatelink'
-  scope: resourceGroup
+  scope: az.resourceGroup(_searchResourceGroupName)
   dependsOn: [
     searchAzureOpenAIPrivatelink, storage, storagepe
   ]  
   params: {
-   name: '${_searchServiceName}-storagelink'
+   name: '${_searchServiceName}-storagelink-${resourceToken}'
    searchName: searchService.outputs.name
    resourceId: storage.outputs.id
    groupId: 'blob'
@@ -1550,12 +1593,12 @@ module searchStoragePrivatelink 'core/search/search-private-link.bicep' = if (_n
 
 module searchFuncAppPrivatelink 'core/search/search-private-link.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'searchFuncAppPrivatelink'
-  scope: resourceGroup
+  scope: az.resourceGroup(_searchResourceGroupName)
   dependsOn: [
     searchStoragePrivatelink, dataIngestion, ingestionPe
   ]  
   params: {
-   name: '${_searchServiceName}-funcapplink'
+   name: '${_searchServiceName}-funcapplink-${resourceToken}'
    searchName: searchService.outputs.name
    resourceId: dataIngestion.outputs.id
     groupId: 'sites'
@@ -1648,6 +1691,10 @@ output AZURE_CHAT_GPT_DEPLOYMENT_CAPACITY int = _chatGptDeploymentCapacity
 output AZURE_CHAT_GPT_DEPLOYMENT_NAME string = _chatGptDeploymentName
 output AZURE_CHAT_GPT_MODEL_NAME string = _chatGptModelName
 output AZURE_CHAT_GPT_MODEL_VERSION string = _chatGptModelVersion
+output AZURE_EMBEDDINGS_MODEL_NAME string = _embeddingsModelName
+output AZURE_EMBEDDINGS_VERSION string = _embeddingsModelVersion
+output AZURE_EMBEDDINGS_DEPLOYMENT_NAME string = _embeddingsDeploymentName
+output AZURE_EMBEDDINGS_VECTOR_SIZE int = _embeddingsVectorSize
 output AZURE_AI_SERVICES_NAME string = _aiServicesName
 output AZURE_AI_SERVICES_PE string = _azureAiServicesPe
 output AZURE_DB_ACCOUNT_PE string = _azureDbAccountPe
@@ -1678,8 +1725,6 @@ output AZURE_SEARCH_PE string = _azureSearchPe
 output AZURE_SEARCH_PRINCIPAL_ID string = searchService.outputs.principalId
 output AZURE_SEARCH_SERVICE_NAME string = _searchServiceName
 output AZURE_SPEECH_RECOGNITION_LANGUAGE string = _speechRecognitionLanguage
-output AZURE_SPEECH_SYNTHESIS_LANGUAGE string = _speechSynthesisLanguage
-output AZURE_SPEECH_SYNTHESIS_VOICE_NAME string = _speechSynthesisVoiceName
 output AZURE_STORAGE_ACCOUNT_PE string = _azureStorageAccountPe
 output AZURE_STORAGE_ACCOUNT_NAME string = _storageAccountName 
 output AZURE_STORAGE_CONTAINER_NAME string = _storageContainerName
@@ -1687,7 +1732,6 @@ output AZURE_SUBSCRIPTION_ID string = subscription().subscriptionId
 output AZURE_TENANT_ID string = tenant().tenantId
 output AZURE_USE_SEMANTIC_RERANKING bool = _useSemanticReranking
 output AZURE_VM_DEPLOY_VM bool = _deployVM
-output AZURE_VM_KV_NAME string = _keyVaultName
 output AZURE_VM_KV_SEC_NAME string = _networkIsolation ? _vmKeyVaultSecName : ''
 output AZURE_VM_NAME string = _networkIsolation ? _ztVmName : ''
 output AZURE_VM_USER_NAME string = _networkIsolation ? _vmUserName : ''
