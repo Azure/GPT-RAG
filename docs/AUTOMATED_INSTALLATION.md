@@ -31,10 +31,10 @@ Alternatively, you can create a [**Custom Role**](MANUAL_CUSTOM_ROLE.md).
 
 - [Azure CLI (az)](https://aka.ms/install-az) - to run azure cli commands.
 - Azure Developer CLI: [Download azd for Windows](https://azdrelease.azureedge.net/azd/standalone/release/1.5.0/azd-windows-amd64.msi), [Other OS's](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd).
- - Powershell 7+ with AZ module (Windows only): [Powershell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4#installing-the-msi-package), [AZ Module](https://learn.microsoft.com/en-us/powershell/azure/what-is-azure-powershell?view=azps-11.6.0#the-az-powershell-module)
- - Git: [Download Git](https://git-scm.com/downloads)
- - Node.js 16+ [windows/mac](https://nodejs.dev/en/download/)  [linux/wsl](https://nodejs.dev/en/download/package-manager/)
- - Python 3.11: [Download Python](https://www.python.org/downloads/release/python-3118/)
+ - Powershell 7+ (Windows only): [Powershell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4#installing-the-msi-package).
+ - Git: [Download Git](https://git-scm.com/downloads).
+ - Node.js 16+ [windows/mac](https://nodejs.dev/en/download/)  [linux/wsl](https://nodejs.dev/en/download/package-manager/).
+ - Python 3.11: [Download Python](https://www.python.org/downloads/release/python-3118/).
 
 ## Resource List
 
@@ -89,7 +89,7 @@ Here is the complete list of resources for a standard Zero Trust deployment, inc
     - SKU: Standard
     - Deployments:
         - Regional gpt-4o, 40 TPM.
-        - text-embedding-ada-002, 40 TPM.
+        - text-embedding-3-large, 40 TPM.
 - **Search Service**
     <BR>Provides vector indexes for the retrieval step.
     - SKU: Standard2
@@ -212,7 +212,7 @@ Here is the complete list of resources for a standard Zero Trust deployment, inc
 - Azure Environment Name (ex: gpt-rag-dev,  gpt-rag-poc, ...)
 
 > [!NOTE]
-> Choose a region with sufficient service quotas. Commonly tested regions include eastus2, eastus, and westus.
+> Choose a region with sufficient service quotas. Commonly tested regions include  `eastus`, `eastus2`, `westus3`.
 
 **Review these points for potential customizations**
 
@@ -307,6 +307,9 @@ Run the `azd env set` commands if you want to customize the installation as indi
 azd provision
 ```
 
+> [!TIP]  
+> The regions we test most often are  `eastus`, `eastus2`, `westus3`.
+
 **5** Use the Virtual Machine with the Bastion connection (created in step 4) to proceed with the deployment.
    
 Log into the created VM with the user **gptrag** and authenticate with the password stored in the key vault, similar to the figure below:  
@@ -335,9 +338,9 @@ To finalize the procedure, execute the subsequent commands in the command prompt
 
 ```  
 azd init -t azure/gpt-rag  
-azd auth login   
+azd auth login
+az login
 azd env refresh  
-azd package  
 azd deploy  
 ```  
 
