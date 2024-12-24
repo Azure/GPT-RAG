@@ -1570,7 +1570,7 @@ module searchAzureOpenAIPrivatelink 'core/search/search-private-link.bicep' = if
     openAi, openAiPe
   ] 
   params: {
-   name: '${_searchServiceName}-aoailink'
+   name: '${_searchServiceName}-aoailink-${resourceToken}'
    searchName: searchService.outputs.name
    resourceId: openAi.outputs.id
     groupId: 'openai_account'
@@ -1584,7 +1584,7 @@ module searchStoragePrivatelink 'core/search/search-private-link.bicep' = if (_n
     searchAzureOpenAIPrivatelink, storage, storagepe
   ]  
   params: {
-   name: '${_searchServiceName}-storagelink'
+   name: '${_searchServiceName}-storagelink-${resourceToken}'
    searchName: searchService.outputs.name
    resourceId: storage.outputs.id
    groupId: 'blob'
@@ -1598,7 +1598,7 @@ module searchFuncAppPrivatelink 'core/search/search-private-link.bicep' = if (_n
     searchStoragePrivatelink, dataIngestion, ingestionPe
   ]  
   params: {
-   name: '${_searchServiceName}-funcapplink'
+   name: '${_searchServiceName}-funcapplink-${resourceToken}'
    searchName: searchService.outputs.name
    resourceId: dataIngestion.outputs.id
     groupId: 'sites'
