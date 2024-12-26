@@ -25,9 +25,11 @@ az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-grou
 
 az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings AZURE_OPENAI_CHATGPT_MODEL="gpt-4o"
 
-az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings AZURE_OPENAI_EMBEDDING_DEPLOYMENT="text-embedding-ada-002"
+az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings AZURE_OPENAI_EMBEDDING_DEPLOYMENT="text-embedding-3-large"
 
-az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings AZURE_OPENAI_EMBEDDING_MODEL="text-embedding-ada-002"
+az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings AZURE_OPENAI_EMBEDDING_MODEL="text-embedding-3-large"
+
+az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings AZURE_EMBEDDINGS_VECTOR_SIZE="3072"
 
 az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings AZURE_OPENAI_LOAD_BALANCING="false"
 
@@ -89,21 +91,23 @@ az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-grou
 
 az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings AZURE_KEY_VAULT_NAME="kv0-randomsufix"
 
-az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings AZURE_OPENAI_API_VERSION="2024-02-15-preview"
+az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings AZURE_OPENAI_API_VERSION="2024-10-21"
 
-az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings AZURE_OPENAI_EMBEDDING_DEPLOYMENT="text-embedding-ada-002"
+az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings AZURE_OPENAI_EMBEDDING_DEPLOYMENT="text-embedding"
 
 az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings AZURE_OPENAI_SERVICE_NAME="oai0-randomsufix"
 
+az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings AZURE_EMBEDDINGS_VECTOR_SIZE="3072"
+
+az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings AZURE_OPENAI_EMBEDDING_MODEL="text-embedding-3-large"
+
 az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings AZURE_SEARCH_APPROACH="hybrid"
 
-az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings Azure
-
-WebJobsFeatureFlags="EnableWorkerIndexing"
+az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings AzureWebJobsFeatureFlags="EnableWorkerIndexing"
 
 az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings AzureWebJobsStorage="functionstorageconnectionstring"
 
-az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings DOCINT_API_VERSION="2023-07-31"
+az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings DOCINT_API_VERSION="2024-11-30"
 
 az functionapp config appsettings set --name <FUNCTION_APP_NAME> --resource-group <RESOURCE_GROUP> --settings ENABLE_ORYX_BUILD="true"
 

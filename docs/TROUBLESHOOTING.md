@@ -101,7 +101,32 @@ The SQL Database might be in an **autopause** state or temporarily unavailable, 
    - After ensuring the database is active, attempt to reconnect.
    - If the issue persists, consider contacting Azure Support and provide the session tracing ID for further assistance.
 
-**Client IP Address Not Allowed by SQL Database Firewall**
+**Error Authenticating to VM via Bastion**
+
+*Symptoms*
+- Unable to log into the VM through Bastion.  
+- The generated password does not work, or Bastion login fails when using the password option.  
+
+*Cause*  
+During zero-trust deployment, the VM password may not be properly generated or assigned, leading to authentication issues.
+
+*Solution*
+
+1. **Reset the VM Password Manually**:  
+   - Open the [Azure Portal](https://portal.azure.com/).  
+   - Navigate to the VM's page.  
+   - Go to **Help + Support** > **Reset password**.  
+   - Reset the password for the user account.  
+
+2. **Log in via Bastion**:  
+   - Attempt to log into the VM using Bastion.  
+   - When prompted, do not select the option to use the password stored in Key Vault.  
+
+3. **Optional: Update the Key Vault Secret for Future Access**:  
+   - Update the secret **`vmUserInitialPassword`** in the Key Vault with the newly reset password.
+   - This ensures the stored password matches the reset one, simplifying future Bastion logins.
+
+**Client IP Address Not Allowed by SQL Database Firewall** (When using NL2SQL orchestration)
 
 *Symptoms:*
 
