@@ -640,7 +640,7 @@ module testvm './core/vm/dsvm.bicep' = if (_networkIsolation && !_vnetReuse && _
   }
 }
 
-module testvmSearchAccess './core/security/search-service-contributor.bicep' = {
+module testvmSearchAccess './core/security/search-service-contributor.bicep' = if (_networkIsolation && _deployVM) {
   name: 'dsvm-search-access'
   scope: az.resourceGroup(_searchResourceGroupName)
   params: {
