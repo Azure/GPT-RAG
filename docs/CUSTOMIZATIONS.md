@@ -6,7 +6,8 @@ On this page, you will find some options to configure your deployment:
 - [Configuring AOAI content filters](#configuring-aoai-content-filters)
 - [Setting Custom Names for Resources](#defining-resources-names)
 - [Applying Tags to All Resources](#adding-tags-for-all-resources)
-- [Bringing Your Own Resources](#bring-your-own-resources)- [Accessing Data Ingest function using AI Search Managed Identity](#accessing-the-data-ingest-function-from-ai-search-using-a-managed-identity)
+- [Bringing Your Own Resources](#bring-your-own-resources)
+- [Accessing Data Ingest function using AI Search Managed Identity](#accessing-the-data-ingest-function-from-ai-search-using-a-managed-identity)
 - [Extending Enteprise RAG components](#extending-solution-components)
 
 <!-- - [Filter Files with AI Search Using Security Trimming](#Filter-Files-with-AI-Search-Using-Security-Trimming) -->
