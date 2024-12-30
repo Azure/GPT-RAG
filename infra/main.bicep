@@ -629,8 +629,8 @@ module testvm './core/vm/dsvm.bicep' = if (_networkIsolation && !_vnetReuse && _
     location: location
     name: _ztVmName
     tags: tags
-    subnetId: (_networkIsolation && !_vnetReuse)?vnet.outputs.aiSubId:''
-    bastionSubId: (_networkIsolation && !_vnetReuse)?vnet.outputs.bastionSubId:''
+    subnetId: _networkIsolation?vnet.outputs.aiSubId:''
+    bastionSubId: _networkIsolation?vnet.outputs.bastionSubId:''
     vmUserPassword: vmUserInitialPassword
     vmUserName: _vmUserName
     keyVaultName: _bastionKvName
@@ -1001,10 +1001,10 @@ module orchestratorPe './core/network/private-endpoint.bicep' = if (_networkIsol
     location: location
     name: _azureOrchestratorPe
     tags: tags
-    subnetId: (_networkIsolation && !_vnetReuse)?vnet.outputs.appServicesSubId:''
+    subnetId: _networkIsolation?vnet.outputs.appServicesSubId:''
     serviceId: orchestrator.outputs.id
     groupIds: ['sites']
-    dnsZoneId: (_networkIsolation && !_vnetReuse)?websitesDnsZone.outputs.id:''
+    dnsZoneId: _networkIsolation?websitesDnsZone.outputs.id:''
   }
 }
 
