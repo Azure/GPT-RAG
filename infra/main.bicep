@@ -629,8 +629,8 @@ module testvm './core/vm/dsvm.bicep' = if (_networkIsolation && !_vnetReuse && _
     location: location
     name: _ztVmName
     tags: tags
-    subnetId:  _networkIsolation?vnet.outputs.aiSubId:''
-    bastionSubId: _networkIsolation?vnet.outputs.bastionSubId:''
+    subnetId: (_networkIsolation && !_vnetReuse)?vnet.outputs.aiSubId:''
+    bastionSubId: (_networkIsolation && !_vnetReuse)?vnet.outputs.bastionSubId:''
     vmUserPassword: vmUserInitialPassword
     vmUserName: _vmUserName
     keyVaultName: _bastionKvName
@@ -640,7 +640,7 @@ module testvm './core/vm/dsvm.bicep' = if (_networkIsolation && !_vnetReuse && _
   }
 }
 
-module testvmSearchAccess './core/security/search-service-contributor.bicep' = if (_networkIsolation && _deployVM) {
+module testvmSearchAccess './core/security/search-service-contributor.bicep' = if (_networkIsolation && !_vnetReuse && _deployVM) {
   name: 'dsvm-search-access'
   scope: az.resourceGroup(_searchResourceGroupName)
   params: {
@@ -804,7 +804,7 @@ module orchestrator './core/host/functions.bicep' =  {
     functionAppResourceGroupName: _orchestratorFunctionAppResourceGroupName
     functionAppReuse: _azureReuseConfig.orchestratorFunctionAppReuse
     location: location
-    networkIsolation: _networkIsolation
+    networkIsolation: (_networkIsolation && !_vnetReuse)?true:false
     vnetName: (_networkIsolation && !_vnetReuse)?vnet.outputs.name:''
     subnetId: (_networkIsolation && !_vnetReuse)?vnet.outputs.appIntSubId:''
     tags: union(tags, { 'azd-service-name': 'orchestrator' })
@@ -1001,10 +1001,10 @@ module orchestratorPe './core/network/private-endpoint.bicep' = if (_networkIsol
     location: location
     name: _azureOrchestratorPe
     tags: tags
-    subnetId: _networkIsolation?vnet.outputs.appServicesSubId:''
+    subnetId: (_networkIsolation && !_vnetReuse)?vnet.outputs.appServicesSubId:''
     serviceId: orchestrator.outputs.id
     groupIds: ['sites']
-    dnsZoneId: _networkIsolation?websitesDnsZone.outputs.id:''
+    dnsZoneId: (_networkIsolation && !_vnetReuse)?websitesDnsZone.outputs.id:''
   }
 }
 
@@ -1197,7 +1197,7 @@ module dataIngestion './core/host/functions.bicep' = {
     functionAppResourceGroupName: _dataIngestionFunctionAppResourceGroupName
     functionAppReuse: _azureReuseConfig.dataIngestionFunctionAppReuse
     location: location
-    networkIsolation: _networkIsolation
+    networkIsolation: (_networkIsolation && !_vnetReuse)?true:false
     vnetName: (_networkIsolation && !_vnetReuse)?vnet.outputs.name:''
     subnetId: (_networkIsolation && !_vnetReuse)?vnet.outputs.appIntSubId:'' 
     tags: union(tags, { 'azd-service-name': 'dataIngest' })
