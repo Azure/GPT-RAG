@@ -168,8 +168,8 @@ Below is a typical workflow: first, provision non-network resources, such as the
 
    This page explains how to manually create the network resources used by the solution, following the same architectural definitions as the Bicep template used for automatic network setup.
 
-   >[!NOTE]
-   > We recommend using the same VNet and subnet topology as defined in the architecture to facilitate maintenance, but feel free to organize as preferred. The important part is to ensure the same connectivity among resources.
+> [!Note]
+> We recommend using the same VNet and subnet topology as defined in the architecture to facilitate maintenance, but feel free to organize as preferred. The important part is to ensure the same connectivity among resources.
 
 4. **Deploying GPT-RAG Application Components:**
     After provisioning the GPT-RAG resources with `azd provision` and configuring the network resources, you can deploy the GPT-RAG application components using:
