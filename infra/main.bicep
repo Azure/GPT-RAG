@@ -1249,7 +1249,7 @@ module dataIngestion './core/host/functions.bicep' = {
         value: _searchServiceName
       }
       {
-        name: 'SEARCH_INDEX_NAME'
+        name: 'AZURE_SEARCH_INDEX_NAME'
         value: _searchIndex
       }      
       {
