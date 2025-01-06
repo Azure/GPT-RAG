@@ -975,12 +975,12 @@ module orchestratorPe './core/network/private-endpoint.bicep' = if (_networkIsol
   }
 }
 
-module orchestratorStorageAccountStorageAccess './core/security/blobstorage-dataowner-access.bicep' = {
+module orchestratorStorageAccountStorageAccess './core/security/blobstorage-contributor-access.bicep' = {
   name: 'orchestratorstorageroleassignment'
   scope: resourceGroup
   params: {
     resourceName: orchestratorStorage.outputs.name
-    principalID: orchestrator.outputs.identityPrincipalId
+    principalId: orchestrator.outputs.identityPrincipalId
   }
 }
 
@@ -1329,12 +1329,12 @@ module dataIngestionStoragepe './core/network/private-endpoint.bicep' = if (_net
   }
 }
 
-module dataIngestionStorageAccountStorageAccess './core/security/blobstorage-dataowner-access.bicep' = {
+module dataIngestionStorageAccountStorageAccess './core/security/blobstorage-contributor-access.bicep' = {
   name: 'dataingestionstorageroleassignment'
   scope: resourceGroup
   params: {
     resourceName: dataIngestionStorage.outputs.name
-    principalID: dataIngestion.outputs.identityPrincipalId
+    principalId: dataIngestion.outputs.identityPrincipalId
   }
 }
 
