@@ -94,6 +94,15 @@ Additionally, the original resource must have two deployments, one for a GPT mod
 
 Ensure the embeddings model is **text-embedding-3-large** version 1, with the deployment named **text-embedding**.
 
+If you're using a different name for the Embedding model, you'll need to set the corresponding environment variables as shown in the table below.
+
+| Item                       | Environment Variable Name               |
+|----------------------------|-----------------------------------------|
+| Embeddings Model Name      | AZURE_EMBEDDINGS_MODEL_NAME             |
+| Embeddings Model Version   | AZURE_EMBEDDINGS_VERSION                |
+| Embeddings Deployment Name | AZURE_EMBEDDINGS_DEPLOYMENT_NAME        |
+| Embeddings Vector Size     | AZURE_EMBEDDINGS_VECTOR_SIZE            |
+
 The default GPT model is **gpt-4o** version **2024-11-20** and the default deployment name is **chat**. If you're using the pre-created service with these default settings, no further modifications are required.
 
 However, if you're using a different name for the GPT, or a different model, you'll need to set the corresponding environment variables as shown in the table below.
@@ -102,10 +111,12 @@ However, if you're using a different name for the GPT, or a different model, you
 |----------------------------|-----------------------------------------|
 | GPT Deployment Name        | AZURE_CHAT_GPT_DEPLOYMENT_NAME          |
 | GPT Model Name             | AZURE_CHAT_GPT_MODEL_NAME               |
+| GPT Model Version          | AZURE_CHAT_GPT_MODEL_VERSION            |
 
 To set these environment variables, use the `azd env set` command as described earlier.
 
 For instance, to inform the name of the GPT deployment, you would update the `AZURE_CHAT_GPT_DEPLOYMENT_NAME` variable like this:
+
 `azd env set AZURE_CHAT_GPT_DEPLOYMENT_NAME my-gpt-deployment-name`
 
 ### CosmosDB
@@ -157,8 +168,8 @@ Below is a typical workflow: first, provision non-network resources, such as the
 
    This page explains how to manually create the network resources used by the solution, following the same architectural definitions as the Bicep template used for automatic network setup.
 
-   >[!NOTE]
-   > We recommend using the same VNet and subnet topology as defined in the architecture to facilitate maintenance, but feel free to organize as preferred. The important part is to ensure the same connectivity among resources.
+> [!Note]
+> We recommend using the same VNet and subnet topology as defined in the architecture to facilitate maintenance, but feel free to organize as preferred. The important part is to ensure the same connectivity among resources.
 
 4. **Deploying GPT-RAG Application Components:**
     After provisioning the GPT-RAG resources with `azd provision` and configuring the network resources, you can deploy the GPT-RAG application components using:
