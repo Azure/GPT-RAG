@@ -38,23 +38,6 @@ resource newKeyVault 'Microsoft.KeyVault/vaults@2022-07-01' = if (!keyVaultReuse
   }
 }
 
-// resource vmUserPasswordSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (publicNetworkAccess == 'Enabled') {
-//   parent: newKeyVault
-//   name: vmUserPasswordKey
-//   properties: {
-//     value: vmUserPassword
-//   }
-// }
-
-// resource KeyVaultAccessRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (publicNetworkAccess == 'Enabled') {
-//   name: guid(subscription().id, resourceGroup().id, principalId,  keyVaultReuse ? existingKeyVault.id: newKeyVault.id, 'Secret Reader')
-//   scope: keyVaultReuse ? existingKeyVault: newKeyVault
-//   properties: {
-//     principalId: principalId
-//     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')
-//   }
-// }
-
 output id string = keyVaultReuse ? existingKeyVault.id: newKeyVault.id
 output name string = keyVaultReuse ? existingKeyVault.name: newKeyVault.name
 output endpoint string = keyVaultReuse ? existingKeyVault.properties.vaultUri: newKeyVault.properties.vaultUri

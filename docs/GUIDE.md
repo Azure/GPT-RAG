@@ -27,10 +27,11 @@
      - [4.5.2 IP Allowlist](#configuring-ip-allowlist)
    - [4.6 Entra Authentication](#configuring-entra-authentication)
    - [4.7 Authorization Setup](#configuring-authorization)  
-   - [4.8 Sharepoint Indexing](#sharepoint-setup)
-   - [4.9 Search Trimming](#search-trimming)
-   - [4.10 Bringing Your Own Resources](#bring-your-own-resources)   
-   - [4.11 Setting Up Git Repos](#setting-up-git-repos)
+   - [4.8 Enabling Multimodality](#enabling-multimodality)
+   - [4.9 Sharepoint Indexing](#sharepoint-setup)
+   - [4.10 Search Trimming](#search-trimming)
+   - [4.11 Bringing Your Own Resources](#bring-your-own-resources)   
+   - [4.12 Setting Up Git Repos](#setting-up-git-repos)
 5. [**Reference**](reference)
    - [5.1 Azure Resources](#azure-resources)
 6. [**Troubleshooting**](#troubleshooting)
@@ -967,6 +968,12 @@ Based on your authorization setup, validate access:
 
 > [!NOTE]
 > Use and test only the methods you have configured to ensure access controls are functioning correctly.
+
+## Enabling Multimodality
+
+To enable GPT-RAG to use multimodal capabilities, such as those provided by GPT-4o, set the `MULTIMODALITY` environment variable to `true` in both the data ingestion and orchestration Function Apps. For more details on how multimodality works and image data is ingested, refer to [Multimodal RAG Overview](MULTIMODAL_RAG.md) and the documentation in the data ingestion repository: [Multimodal Ingestion](https://github.com/Azure/gpt-rag-ingestion?tab=readme-ov-file#multimodal-ingestion) respectively.
+
+> Note: Currently, only the Agentic Orchestrator supports this feature.
 
 ## SharePoint Setup
 
