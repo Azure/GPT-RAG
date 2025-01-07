@@ -1,4 +1,4 @@
-# Multimodal Solution Architecture Overview
+# Multimodal RAG Overview
 
 This document outlines the architecture and workflow for our **multimodal Retrieval Augmented Generation (RAG)** solution, integrating **AI Search Service**, **Azure OpenAI embeddings**, and **Azure Functions**. The goal is to enrich responses with **textual and visual content** (e.g., images) extracted from ingested PDF documents, all managed within a unified search index.
 
@@ -25,27 +25,24 @@ This document outlines the architecture and workflow for our **multimodal Retrie
 3. **Embedding Generation**  
    - Azure OpenAI generates:
      - Text embeddings stored in `contentVector`.
-     - Embeddings for combined image descriptions stored in a new field, `imageCaptionsVector`.
+     - Embeddings for combined image descriptions stored in a new field, `captionVector`.
 
 4. **Unified Multimodal Indexing**  
    The search index is extended to include multimodal data:
    - **Fields**:
      - `content` & `contentVector`: Original text and its embeddings.
-     - `combinedImageCaptions` & `imageCaptionsVector`: Descriptions of associated images and their embeddings.
+     - `imageCaptions` & `captionVector`: Descriptions of associated images and their embeddings.
      - `relatedImages`: URLs pointing to images in Blob Storage.
    - Each document represents a text segment and its associated images, forming a complete multimodal unit.
 
 5. **Query & Retrieval**  
    When a user submits a query:
    - Convert the query to embeddings using Azure OpenAI.
-   - Route the query based on intent:
-     - **Textual focus**: Use `contentVector`.
-     - **Visual focus**: Use `imageCaptionsVector`.
-     - **Hybrid queries**: Perform multimodal retrieval, combining results from both vectors.
+   - Perform retrieval, searching both `contentVector` and `captionVector` fields.
    - Results include both textual context and references to relevant images.
 
-6. **Response Generation (GPT-4)**  
-   - Construct a multimodal prompt that includes retrieved text, image descriptions, and image URLs.
+6. **Response Generation (GPT-4o)**  
+   - Build a multimodal prompt that includes retrieved text, image descriptions, and image URLs.
    - GPT-4 generates a final enriched response, referencing both textual and visual elements.
 
 7. **Document & Image Lifecycle Management**  
@@ -59,9 +56,7 @@ This document outlines the architecture and workflow for our **multimodal Retrie
 - **Combined Image Captions**: Related images are grouped into one descriptive field for easier retrieval.
 - **Two Vector Fields**:
   - `contentVector`: For text embeddings.
-  - `imageCaptionsVector`: For image description embeddings.
-
-- **Dynamic Query Routing**: Queries are routed to text, image, or hybrid embeddings based on user intent, inferred through keyword analysis or heuristics.
+  - `captionVector`: For image description embeddings.
 
 ## Benefits
 
@@ -69,5 +64,3 @@ This document outlines the architecture and workflow for our **multimodal Retrie
 - **Simplified Architecture**: Reuses the same embedding model and index for multimodal data.
 - **Enhanced User Experience**: Delivers enriched responses combining textual and visual elements.
 - **Scalability**: Leverages Azure-native services (Functions, Storage, AI Search Service, and Azure OpenAI) for robust and scalable performance.
-
-This architecture enables a comprehensive, multimodal retrieval and generation workflow, unifying text and visual content into a seamless RAG solution, enhancing both flexibility and scalability.
