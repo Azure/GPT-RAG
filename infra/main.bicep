@@ -1161,8 +1161,8 @@ module appserviceKeyVaultAccess './core/security/keyvault-access.bicep' = {
   }
 }
 
-module appserviceStorageAccountAccess './core/security/blobstorage-reader-access.bicep' = {
-  name: 'appservice-blobstorage-access'
+module appserviceStorageAccountAccess './core/security/blobstorage-contributor-access.bicep' = {
+  name: 'appservice-blobstorage-contributor-access'
   scope: az.resourceGroup(_storageAccountResourceGroupName)
   params: {
     resourceName: storage.outputs.name
