@@ -436,6 +436,42 @@ resource reportsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/co
   }
 }
 
+resource summarizationreportsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
+  parent: database
+  name: 'summarization-report'
+  properties: {
+    resource: {
+      id: 'summarization-report'
+      partitionKey: {
+        paths:[
+          '/id'
+        ]
+        kind: 'Hash'
+      }
+      analyticalStorageTtl: analyticalStoreTTL
+      indexingPolicy: {
+        automatic: true
+        includedPaths: [
+          {
+            path: '/*'
+          }
+        ]
+        excludedPaths: [
+          {
+            path: '/"_etag"/?'
+          }
+        ]
+      }
+    }
+    options: {
+      autoscaleSettings: {
+        maxThroughput: autoscaleMaxThroughput
+      }
+    }
+  }
+}
+
+
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
   name: keyVaultName
 }
