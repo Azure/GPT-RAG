@@ -1,6 +1,5 @@
 .azure
 .devcontainer
-.github
 .azdo
 local/
 venv/

@@ -2,7 +2,7 @@ targetScope = 'subscription'
 
 // parametes Note:
 // Use main.parameters.json to set the parameters values.
-// From main.parametes.json, you can map the parameters to environment variables using the "${ENV_VAR_NAME}" notation,
+// From main.parameters.json, you can map the parameters to environment variables using the "${ENV_VAR_NAME}" notation,
 // The ENV_VAR_NAME's value will be automatically pulled if you use azd to deploy the template.
 
 // environmentName, location and principalId are mapped to env_vars and automatically resolved if you are using azd.
@@ -426,18 +426,22 @@ var searchServiceName = !empty(azureSearchServiceName) ? azureSearchServiceName 
 @description('OpenAI Service Name. Use your own name convention or leave as it is to generate a random name.')
 param azureOpenAiServiceName string = ''
 var openAiServiceName = !empty(azureOpenAiServiceName) ? azureOpenAiServiceName : 'oai0-${resourceToken}'
+@description('Azure OpenAI endpoint URL. For example: "https://myopenairesource.openai.azure.com"')
+param azureOpenAiEndpoint string = ''
+var openAiEndpoint = !empty(azureOpenAiEndpoint)
+  ? azureOpenAiEndpoint
+  : 'https://${openAiServiceName}.openai.azure.com/'
 @description('Virtual network name if using network isolation. Use your own name convention or leave as it is to generate a random name.')
 param azureVnetName string = ''
-
-//Web App
-@description('Stripe api key')
-param webAppStripeApiKey string = ''
-var stripeApiKey = !empty(webAppStripeApiKey) ? webAppStripeApiKey : ''
-
-@description('Stripe signing secret')
+@description('Stripe API Key used by the orchestrator.')
 @secure()
-param webAppStripeSigningSecret string = ''
-var stripeSigningSecret = !empty(webAppStripeSigningSecret) ? webAppStripeSigningSecret : ''
+param stripeApiKey string = ''
+var stripeApiKeyVar = !empty(stripeApiKey) ? stripeApiKey : ''
+
+@description('Stripe signing secret used by the orchestrator.')
+@secure()
+param stripeSigningSecret string = ''
+var stripeSigningSecretVar = !empty(stripeSigningSecret) ? stripeSigningSecret : ''
 
 @description('Stripe product ID')
 param webAppStripeProductId string = ''
@@ -509,6 +513,26 @@ var aiSearchApiKey = !empty(azureAiSearchApiKey) ? azureAiSearchApiKey : ''
 @description('Azure OpenAI API Key')
 param azureOpenAiApiKey string = ''
 var openAiApiKey = !empty(azureOpenAiApiKey) ? azureOpenAiApiKey : ''
+
+// ---------------------------------------------------------------------
+// ADDITIONAL PARAMETERS FOR THE ORCHESTRATOR SETTINGS (REFACTORED)
+// ---------------------------------------------------------------------
+
+@description('Tavily API Key used by the orchestrator.')
+@secure()
+param orchestratorTavilyApiKey string = ''
+var orchestratorTavilyApiKeyVar = !empty(orchestratorTavilyApiKey) ? orchestratorTavilyApiKey : ''
+
+@description('Functions worker runtime for the orchestrator.')
+param orchestratorFunctionsWorkerRuntime string = ''
+var orchestratorFunctionsWorkerRuntimeVar = !empty(orchestratorFunctionsWorkerRuntime)
+  ? orchestratorFunctionsWorkerRuntime
+  : ''
+
+@description('Serper API Key used by the orchestrator.')
+@secure()
+param orchestratorSerperApiKey string = ''
+var orchestratorSerperApiKeyVar = !empty(orchestratorSerperApiKey) ? orchestratorSerperApiKey : ''
 
 var vnetName = !empty(azureVnetName) ? azureVnetName : 'aivnet0-${resourceToken}'
 
@@ -816,6 +840,7 @@ module orchestrator './core/host/functions.bicep' = {
       }
       {
         name: 'AZURE_OPENAI_ENDPOINT'
+        value: openAiEndpoint
       }
       {
         name: 'AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG'
@@ -826,6 +851,30 @@ module orchestrator './core/host/functions.bicep' = {
       {
         name: 'AZURE_STORAGE_ACCOUNT_URL'
       }
+      // ---------------------------------------------------------------
+      // REFACTORED: ADD NEW APP SETTINGS BELOW, LINKED TO NEW PARAMS
+      // ---------------------------------------------------------------
+      {
+        name: 'STRIPE_API_KEY'
+        value: stripeApiKeyVar
+      }
+      {
+        name: 'STRIPE_SIGNING_SECRET'
+        value: stripeSigningSecretVar
+      }
+      {
+        name: 'TAVILY_API_KEY'
+        value: orchestratorTavilyApiKeyVar
+      }
+      {
+        name: 'FUNCTIONS_WORKER_RUNTIME'
+        value: orchestratorFunctionsWorkerRuntimeVar
+      }
+      {
+        name: 'SERPER_API_KEY'
+        value: orchestratorSerperApiKeyVar
+      }
+      // ---------------------------------------------------------------
       {
         name: 'BING_SEARCH_API_KEY'
       }
@@ -1039,11 +1088,11 @@ module frontEnd 'core/host/appservice.bicep' = {
     appSettings: [
       {
         name: 'STRIPE_API_KEY'
-        value: stripeApiKey
+        value: stripeApiKeyVar
       }
       {
         name: 'STRIPE_SIGNING_SECRET'
-        value: stripeSigningSecret
+        value: stripeSigningSecretVar
       }
       {
         name: 'STRIPE_PRODUCT_ID'
