@@ -942,6 +942,10 @@ module orchestrator './core/host/functions.bicep' = {
         value: chatGptLlmMonitoring
       }
       {
+        name: 'AZURE_OPENAI_API_VERSION'
+        value: openaiApiVersion
+      }
+      {
         name: 'AZURE_OPENAI_LOAD_BALANCING'
         value: false
       }
