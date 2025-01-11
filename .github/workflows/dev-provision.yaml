@@ -34,7 +34,7 @@ jobs:
         env:
           # Core Azure Settings
           AZURE_ENV_NAME: "develop-clew"
-          AZURE_LOCATION: "eastus2"
+          AZURE_LOCATION: "eastus"
           AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
           # Required Password Parameters
