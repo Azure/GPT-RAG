@@ -1009,31 +1009,31 @@ module orchestratorPe './core/network/private-endpoint.bicep' = if (networkIsola
   }
 }
 
-// B2C Tenant
-module b2cTenant './core/identity/b2c.bicep' = {
-  name: 'b2ctenant'
-  scope: resourceGroup
-  params: {
-    name: b2cName
-    tags: tags
-    displayName: 'Sales Factory AI B2C'
-  }
-}
+// // B2C Tenant
+// module b2cTenant './core/identity/b2c.bicep' = {
+//   name: 'b2ctenant'
+//   scope: resourceGroup
+//   params: {
+//     name: b2cName
+//     tags: tags
+//     displayName: 'Sales Factory AI B2C'
+//   }
+// }
 
-// B2C Policies
-module b2cPolicies './core/identity/b2c-policies.bicep' = {
-  name: 'b2cpolicies'
-  scope: resourceGroup
-  params: {
-    name: b2cName
-    tenantId: b2cTenant.outputs.tenantId
-    keyVaultName: keyVault.outputs.name
-    azureB2cStorageAccountName: azureB2cStorageAccountName
-    azureB2cContainerName: azureB2cContainerName
-    location: location
-    tags: tags
-  }
-}
+// // B2C Policies
+// module b2cPolicies './core/identity/b2c-policies.bicep' = {
+//   name: 'b2cpolicies'
+//   scope: resourceGroup
+//   params: {
+//     name: b2cName
+//     tenantId: b2cTenant.outputs.tenantId
+//     keyVaultName: keyVault.outputs.name
+//     azureB2cStorageAccountName: azureB2cStorageAccountName
+//     azureB2cContainerName: azureB2cContainerName
+//     location: location
+//     tags: tags
+//   }
+// }
 
 // Give the orchestrator access to KeyVault
 module orchestratorKeyVaultAccess './core/security/keyvault-access.bicep' = {

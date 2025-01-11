@@ -1,8 +1,10 @@
-// core/identity/b2c.bicep
+@description('Name of the B2C tenant')
 param name string
+
+@description('Tags to apply to the B2C tenant')
 param tags object = {}
 
-@description('B2C tenant country/region')
+@description('B2C tenant country/region code (e.g., US for United States)')
 param countryCode string = 'US'
 
 @description('Display name of the B2C tenant')
@@ -10,12 +12,8 @@ param displayName string = name
 
 resource b2cTenant 'Microsoft.AzureActiveDirectory/b2cDirectories@2021-04-01' = {
   name: name
-  location: 'United States'
+  location: 'global' // Change from 'United States' to 'global'
   tags: tags
-  sku: {
-    name: 'Standard'
-    tier: 'A0'
-  }
   properties: {
     createTenantProperties: {
       countryCode: countryCode
@@ -23,7 +21,3 @@ resource b2cTenant 'Microsoft.AzureActiveDirectory/b2cDirectories@2021-04-01' = 
     }
   }
 }
-
-output id string = b2cTenant.id
-output name string = b2cTenant.name
-output tenantId string = b2cTenant.properties.tenantId
