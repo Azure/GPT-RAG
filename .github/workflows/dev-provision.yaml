@@ -30,7 +30,7 @@ jobs:
           AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Provision Azure Resources
-        run: azd provision --no-prompt
+        run: azd provision --no-prompt --debug
         env:
           # Core Azure Settings
           AZURE_ENV_NAME: "develop-clew"
