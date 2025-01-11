@@ -10,7 +10,7 @@ param displayName string = name
 
 resource b2cTenant 'Microsoft.AzureActiveDirectory/b2cDirectories@2021-04-01' = {
   name: name
-  location: 'unitedstates'
+  location: 'United States'
   tags: tags
   sku: {
     name: 'Standard'
