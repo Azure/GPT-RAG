@@ -542,12 +542,12 @@ var orchestratorUri = 'https://${orchestratorFunctionAppName}.azurewebsites.net'
 // B2C parameters
 @description('B2C Tenant Name')
 param b2cTenantName string = ''
-var b2cName = !empty(b2cTenantName) ? b2cTenantName : 'b2c0-${resourceToken}'
+var b2cName = !empty(b2cTenantName) ? b2cTenantName : 'b2c0${resourceToken}'
 
 // Add these parameters at the top of your main.bicep
 @description('B2C Storage Account Name. Use your own name convention or leave as it is to generate a random name.')
 param azureB2cStorageAccountName string = ''
-var b2cStorageAccountName = !empty(azureB2cStorageAccountName) ? azureB2cStorageAccountName : 'adb2auth${resourceToken}'
+// var b2cStorageAccountName = !empty(azureB2cStorageAccountName) ? azureB2cStorageAccountName : 'adb2auth${resourceToken}'
 
 @description('B2C Storage Container Name. Use your own name convention or leave as it is to use default.')
 param azureB2cContainerName string = ''
@@ -580,7 +580,7 @@ module blobDnsZone './core/network/private-dns-zones.bicep' = if (networkIsolati
   name: 'blob-dnzones'
   scope: resourceGroup
   params: {
-    dnsZoneName: 'privatelink.blob.core.windows.net'
+    dnsZoneName: 'privatelink.blob.${environment().suffixes.storage}'
     tags: tags
     virtualNetworkName: vnet.outputs.name
   }
@@ -1026,16 +1026,11 @@ module b2cPolicies './core/identity/b2c-policies.bicep' = {
   scope: resourceGroup
   params: {
     name: b2cName
-    location: location
-    tags: tags
     tenantId: b2cTenant.outputs.tenantId
     keyVaultName: keyVault.outputs.name
     azureB2cStorageAccountName: azureB2cStorageAccountName
     azureB2cContainerName: azureB2cContainerName
   }
-  dependsOn: [
-    b2cTenant
-  ]
 }
 
 // Give the orchestrator access to KeyVault

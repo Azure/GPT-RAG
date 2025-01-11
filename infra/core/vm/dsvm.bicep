@@ -61,13 +61,12 @@ resource nic 'Microsoft.Network/networkInterfaces@2020-06-01' = {
           privateIPAllocationMethod: 'Dynamic'
           subnet: {
             id: aiSubId
-          }  
+          }
         }
       }
     ]
   }
 }
-
 
 resource virtualMachine 'Microsoft.Compute/virtualMachines@2021-03-01' = {
   name: name
@@ -93,13 +92,13 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2021-03-01' = {
         managedDisk: {
           storageAccountType: osDiskType
         }
-      }      
+      }
     }
     osProfile: {
       computerName: 'gptragvm'
       adminUsername: vmUserName
       adminPassword: vmUserPassword
-      linuxConfiguration: ((authenticationType == 'password') ? json('null') : linuxConfiguration)
+      linuxConfiguration: ((authenticationType == 'password') ? null : linuxConfiguration)
     }
     networkProfile: {
       networkInterfaces: [
@@ -137,12 +136,14 @@ resource cy 'Microsoft.Network/bastionHosts@2023-04-01' = {
   }
 }
 
-
 resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(subscription().id, resourceGroup().id, 'Contributor')
   scope: resourceGroup()
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b24988ac-6180-42a0-ab88-20f7382dd24c')
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      'b24988ac-6180-42a0-ab88-20f7382dd24c'
+    )
     principalId: virtualMachine.identity.principalId
   }
 }
@@ -160,8 +161,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2021-06-01-preview' = {
       family: 'A'
     }
     tenantId: subscription().tenantId
-    accessPolicies: [
-    ]
+    accessPolicies: []
     enableRbacAuthorization: true
   }
 }
@@ -179,7 +179,10 @@ resource KeyVaultAccessRole 'Microsoft.Authorization/roleAssignments@2022-04-01'
   scope: keyVault
   properties: {
     principalId: principalId
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      '4633458b-17de-408a-b874-0445c86b69e6'
+    )
     principalType: 'User'
   }
 }

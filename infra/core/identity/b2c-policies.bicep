@@ -1,7 +1,5 @@
 // core/identity/b2c-policies.bicep
 param name string
-param location string
-param tags object = {}
 param tenantId string
 param keyVaultName string
 
