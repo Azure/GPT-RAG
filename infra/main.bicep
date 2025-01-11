@@ -851,17 +851,7 @@ module orchestrator './core/host/functions.bicep' = {
       {
         name: 'AZURE_STORAGE_ACCOUNT_URL'
       }
-      // ---------------------------------------------------------------
-      // REFACTORED: ADD NEW APP SETTINGS BELOW, LINKED TO NEW PARAMS
-      // ---------------------------------------------------------------
-      {
-        name: 'STRIPE_API_KEY'
-        value: stripeApiKeyVar
-      }
-      {
-        name: 'STRIPE_SIGNING_SECRET'
-        value: stripeSigningSecretVar
-      }
+
       {
         name: 'TAVILY_API_KEY'
         value: orchestratorTavilyApiKeyVar
@@ -874,7 +864,6 @@ module orchestrator './core/host/functions.bicep' = {
         name: 'SERPER_API_KEY'
         value: orchestratorSerperApiKeyVar
       }
-      // ---------------------------------------------------------------
       {
         name: 'BING_SEARCH_API_KEY'
       }
@@ -898,9 +887,11 @@ module orchestrator './core/host/functions.bicep' = {
       }
       {
         name: 'STRIPE_API_KEY'
+        value: stripeApiKeyVar
       }
       {
         name: 'STRIPE_SIGNING_SECRET'
+        value: stripeSigningSecretVar
       }
       {
         name: 'AZURE_DB_ID'
@@ -981,15 +972,6 @@ module orchestrator './core/host/functions.bicep' = {
       {
         name: 'LOGLEVEL'
         value: 'INFO'
-      }
-      {
-        name: 'TAVILY_API_KEY'
-      }
-      {
-        name: 'FUNCTIONS_WORKER_RUNTIME'
-      }
-      {
-        name: 'SERPER_API_KEY'
       }
     ]
   }
