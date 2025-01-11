@@ -523,12 +523,6 @@ var openAiApiKey = !empty(azureOpenAiApiKey) ? azureOpenAiApiKey : ''
 param orchestratorTavilyApiKey string = ''
 var orchestratorTavilyApiKeyVar = !empty(orchestratorTavilyApiKey) ? orchestratorTavilyApiKey : ''
 
-@description('Functions worker runtime for the orchestrator.')
-param orchestratorFunctionsWorkerRuntime string = ''
-var orchestratorFunctionsWorkerRuntimeVar = !empty(orchestratorFunctionsWorkerRuntime)
-  ? orchestratorFunctionsWorkerRuntime
-  : ''
-
 @description('Serper API Key used by the orchestrator.')
 @secure()
 param orchestratorSerperApiKey string = ''
@@ -857,10 +851,6 @@ module orchestrator './core/host/functions.bicep' = {
         value: orchestratorTavilyApiKeyVar
       }
       {
-        name: 'FUNCTIONS_WORKER_RUNTIME'
-        value: orchestratorFunctionsWorkerRuntimeVar
-      }
-      {
         name: 'SERPER_API_KEY'
         value: orchestratorSerperApiKeyVar
       }
@@ -940,10 +930,6 @@ module orchestrator './core/host/functions.bicep' = {
       {
         name: 'AZURE_OPENAI_CHATGPT_LLM_MONITORING'
         value: chatGptLlmMonitoring
-      }
-      {
-        name: 'AZURE_OPENAI_API_VERSION'
-        value: openaiApiVersion
       }
       {
         name: 'AZURE_OPENAI_LOAD_BALANCING'
