@@ -3,7 +3,7 @@ targetScope = 'subscription'
 // parametes Note:
 // Use main.parameters.json to set the parameters values.
 // From main.parameters.json, you can map the parameters to environment variables using the "${ENV_VAR_NAME}" notation,
-// The ENV_VAR_NAME's value will be automatically pulled if you use azd to deploy the template.
+// The ENV_VAR_NAME's value will be automatically pulled if you use azd to deploy the template.x
 
 // environmentName, location and principalId are mapped to env_vars and automatically resolved if you are using azd.
 
@@ -580,7 +580,7 @@ module blobDnsZone './core/network/private-dns-zones.bicep' = if (networkIsolati
   name: 'blob-dnzones'
   scope: resourceGroup
   params: {
-    dnsZoneName: 'privatelink.blob.${environment().suffixes.storage}'
+    dnsZoneName: 'privatelink.blob.core.windows.net}'
     tags: tags
     virtualNetworkName: vnet.outputs.name
   }
@@ -1030,6 +1030,8 @@ module b2cPolicies './core/identity/b2c-policies.bicep' = {
     keyVaultName: keyVault.outputs.name
     azureB2cStorageAccountName: azureB2cStorageAccountName
     azureB2cContainerName: azureB2cContainerName
+    location: location
+    tags: tags
   }
 }
 

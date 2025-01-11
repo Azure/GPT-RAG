@@ -98,7 +98,7 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2021-03-01' = {
       computerName: 'gptragvm'
       adminUsername: vmUserName
       adminPassword: vmUserPassword
-      linuxConfiguration: ((authenticationType == 'password') ? null : linuxConfiguration)
+      linuxConfiguration: ((authenticationType == 'password') ? json('null') : linuxConfiguration)
     }
     networkProfile: {
       networkInterfaces: [
