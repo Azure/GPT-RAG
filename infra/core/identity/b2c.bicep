@@ -1,20 +1,16 @@
 // core/identity/b2c.bicep
 param name string
-param location string = resourceGroup().location
 param tags object = {}
 
 @description('B2C tenant country/region')
 param countryCode string = 'US'
-
-@description('B2C tenant data residency')
-param dataResidency string = 'United States'
 
 @description('Display name of the B2C tenant')
 param displayName string = name
 
 resource b2cTenant 'Microsoft.AzureActiveDirectory/b2cDirectories@2021-04-01' = {
   name: name
-  location: location
+  location: 'unitedstates'
   tags: tags
   sku: {
     name: 'Standard'
@@ -24,7 +20,6 @@ resource b2cTenant 'Microsoft.AzureActiveDirectory/b2cDirectories@2021-04-01' = 
     createTenantProperties: {
       countryCode: countryCode
       displayName: displayName
-      dataResidency: dataResidency
     }
   }
 }

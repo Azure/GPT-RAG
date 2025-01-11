@@ -1015,7 +1015,6 @@ module b2cTenant './core/identity/b2c.bicep' = {
   scope: resourceGroup
   params: {
     name: b2cName
-    location: location
     tags: tags
     displayName: 'Sales Factory AI B2C'
   }
