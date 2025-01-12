@@ -1177,6 +1177,31 @@ module frontEnd 'core/host/appservice.bicep' = {
         name: 'BLOB_CONTAINER_NAME'
         value: containerName
       }
+      {
+        name: 'AZURE_OPENAI_ENDPOINT'
+        value: openAiEndpoint
+      }
+      {
+        name: 'AZURE_OPENAI_API_KEY'
+        value: openAiApiKey
+      }
+      {
+        name: 'AZURE_OPENAI_API_VERSION'
+        value: openaiApiVersion
+      }
+      {
+        name: 'AZURE_OPENAI_API_VERSION'
+        value: 'Agent'
+      }
+      {
+        name: 'AZURE_OPENAI_EMBEDDING_MODEL'
+        value: embeddingsModelName
+      }
+      {
+        name: 'TAVILY_API_KEY'
+        value: orchestratorTavilyApiKeyVar
+      }
+
     ]
   }
 }

@@ -21,6 +21,10 @@ param keyVaultName string
 
 param containers array = []
 
+// Add parameter for SAS token expiry with utcNow() as default
+@description('Expiry date for SAS token in ISO 8601 format. Set to maximum allowed date (year 9999).')
+param sasTokenExpiry string = '9999-12-31T23:59:59Z'
+
 resource storage 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   name: name
   location: location
@@ -57,6 +61,7 @@ resource storage 'Microsoft.Storage/storageAccounts@2022-05-01' = {
     ]
   }
 }
+
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
   name: keyVaultName
 }
@@ -73,6 +78,28 @@ resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
     }
     contentType: 'string'
     value: 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[0].value};EndpointSuffix=core.windows.net'
+  }
+}
+
+resource keyVaultSasToken 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (!empty(containers)) {
+  name: 'blobSasToken'
+  tags: tags
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
+      exp: 0
+      nbf: 0
+    }
+    contentType: 'string'
+    value: listServiceSAS(storage.id, '2021-08-01', {
+      canonicalizedResource: '/blob/${storage.name}/${containers[0].name}'
+      signedProtocol: 'https'
+      signedResourceTypes: 'c'
+      signedPermission: 'r'
+      signedServices: 'b'
+      signedExpiry: sasTokenExpiry
+    }).serviceSasToken
   }
 }
 
