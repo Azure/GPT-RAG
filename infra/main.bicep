@@ -1190,7 +1190,7 @@ module frontEnd 'core/host/appservice.bicep' = {
         value: openaiApiVersion
       }
       {
-        name: 'AZURE_OPENAI_API_VERSION'
+        name: 'OPENAI_GPT_MODEL'
         value: 'Agent'
       }
       {
@@ -1201,7 +1201,6 @@ module frontEnd 'core/host/appservice.bicep' = {
         name: 'TAVILY_API_KEY'
         value: orchestratorTavilyApiKeyVar
       }
-
     ]
   }
 }
