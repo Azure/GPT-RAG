@@ -1173,6 +1173,10 @@ module frontEnd 'core/host/appservice.bicep' = {
         name: 'AZURE_DB_NAME'
         value: dbDatabaseName
       }
+      {
+        name: 'BLOB_CONTAINER_NAME'
+        value: containerName
+      }
     ]
   }
 }
