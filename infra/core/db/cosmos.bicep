@@ -401,6 +401,44 @@ resource invitationsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabase
   }
 }
 
+resource schedulesContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
+  parent: database
+  name: 'schedules'
+  properties: {
+    resource: {
+      id: 'schedules'
+      partitionKey: {
+        paths:[
+          '/companyId'
+          '/reportType'
+        ]
+        kind: 'Hash'
+        version: 2
+      }
+      analyticalStorageTtl: analyticalStoreTTL
+      indexingPolicy: {
+        indexingMode: 'consistent'
+        automatic: true
+        includedPaths: [
+          {
+            path: '/*'
+          }
+        ]
+        excludedPaths: [
+          {
+            path: '/"_etag"/?'
+          }
+        ]
+      }
+    }
+    options: {
+      autoscaleSettings: {
+        maxThroughput: autoscaleMaxThroughput
+      }
+    }
+  }
+}
+
 resource reportsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
   parent: database
   name: 'reports'
