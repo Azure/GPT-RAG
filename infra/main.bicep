@@ -844,6 +844,7 @@ module orchestrator './core/host/functions.bicep' = {
       }
       {
         name: 'AZURE_STORAGE_ACCOUNT_URL'
+        value: storage.outputs.primaryEndpoints.blob
       }
 
       {

@@ -23,7 +23,7 @@ param containers array = []
 
 // Add parameter for SAS token expiry with utcNow() as default
 @description('Expiry date for SAS token in ISO 8601 format. Set to maximum allowed date (year 9999).')
-param sasTokenExpiry string = '9999-12-31T23:59:59Z'
+param sasTokenExpiry string = dateTimeAdd(utcNow(), 'P3Y')
 
 resource storage 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   name: name
@@ -81,6 +81,15 @@ resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
   }
 }
 
+var serviceSasToken = listServiceSAS(storage.id, '2021-08-01', {
+  canonicalizedResource: '/blob/${storage.name}/${containers[0].name}'
+  signedProtocol: 'https'
+  signedResourceTypes: 'o'
+  signedPermission: 'r'
+  signedServices: 'b'
+  signedExpiry: sasTokenExpiry
+}).serviceSasToken
+
 resource keyVaultSasToken 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (!empty(containers)) {
   name: 'blobSasToken'
   tags: tags
@@ -92,14 +101,7 @@ resource keyVaultSasToken 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (!
       nbf: 0
     }
     contentType: 'string'
-    value: listServiceSAS(storage.id, '2021-08-01', {
-      canonicalizedResource: '/blob/${storage.name}/${containers[0].name}'
-      signedProtocol: 'https'
-      signedResourceTypes: 'c'
-      signedPermission: 'r'
-      signedServices: 'b'
-      signedExpiry: sasTokenExpiry
-    }).serviceSasToken
+    value: serviceSasToken
   }
 }
 
