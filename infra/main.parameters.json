@@ -25,7 +25,7 @@
     },
     "azureSearchUseMIS": {
       "value": "${AZURE_SEARCH_USE_MIS}"
-    },    
+    },
     "chatGptModelName": {
       "value": "gpt-35-turbo-16k"
     },
@@ -84,12 +84,75 @@
       "value": "${AZURE_SEARCH_SERVICE_NAME}"
     },
     "azureOpenAIServiceName": {
-      "value": "${AZURE_OPEN_AI_SERVICE_NAME}"
+      "value": "${AZURE_OPENAI_SERVICE_NAME}"
     },
     "azureVnetName": {
       "value": "${AZURE_VNET_NAME}"
     },
-    "deploymentTags":{
+    "stripeApiKey": {
+      "value": "${STRIPE_API_KEY}"
+    },
+    "stripeSigningSecret": {
+      "value": "${STRIPE_SIGNING_SECRET}"
+    },
+    "webAppStripeProductId": {
+      "value": "${STRIPE_PRODUCT_ID}"
+    },
+    "webAppStripeFAPriceID": {
+      "value": "${STRIPE_FA_PRICE_ID}"
+    },
+    "webAppAADTenantName": {
+      "value": "${AZURE_WEBAPP_AAD_TENANT_NAME}"
+    },
+    "webAppAADClientId": {
+      "value": "${AZURE_WEBAPP_AAD_CLIENT_ID}"
+    },
+    "webAppAADPolicyName": {
+      "value": "${AZURE_WEBAPP_AAD_POLICY_NAME}"
+    },
+    "webAppAADRedirectUri": {
+      "value": "${AZURE_WEBAPP_AAD_REDIRECT_URI}"
+    },
+    "webAppAADAuthority": {
+      "value": "${AZURE_WEBAPP_AAD_AUTHORITY}"
+    },
+    "webAppAADEditProfile": {
+      "value": "${AZURE_WEBAPP_AAD_EDIT_PROFILE}"
+    },
+    "webAppAADClientSecret": {
+      "value": "${AZURE_WEBAPP_AAD_CLIENT_SECRET}"
+    },
+    "webAppAADResetPassword": {
+      "value": "${AZURE_WEBAPP_AAD_RESET_PASSWORD}"
+    },
+    "webAppEmailHost": {
+      "value": "${AZURE_WEBAPP_EMAIL_HOST}"
+    },
+    "webAppEmailUser": {
+      "value": "${AZURE_WEBAPP_EMAIL_USER}"
+    },
+    "webAppEmailPass": {
+      "value": "${AZURE_WEBAPP_EMAIL_PASSWORD}"
+    },
+    "webAppInvitationLink": {
+      "value": "${AZURE_WEBAPP_INVITATION_LINK}"
+    },
+    "azureAiSearchApiKey": {
+      "value": "${AZURE_AI_SEARCH_API_KEY}"
+    },
+    "azureOpenAiApiKey": {
+      "value": "${AZURE_OPENAI_API_KEY}"
+    },
+    "orchestratorTavilyApiKey": {
+      "value": "${TAVILY_API_KEY}"
+    },
+    "orchestratorFunctionsWorkerRuntime": {
+      "value": "${AZURE_FUNCTIONS_WORKER_RUNTIME}"
+    },
+    "orchestratorSerperApiKey": {
+      "value": "${SERPER_API_KEY}"
+    },
+    "deploymentTags": {
       "value": {}
     }
   }

@@ -180,7 +180,7 @@ resource feedbackContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/c
       id: 'feedback'
       partitionKey: {
         paths: [
-          '/id'
+          '/_partitionKey'
         ]
         kind: 'Hash'
       }
@@ -198,11 +198,6 @@ resource feedbackContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/c
             path: '/"_etag"/?'
           }
         ]
-      }
-    }
-    options: {
-      autoscaleSettings: {
-        maxThroughput: autoscaleMaxThroughput
       }
     }
   }
@@ -279,7 +274,7 @@ resource settingsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/c
       id: 'settings'
       partitionKey: {
         paths: [
-          '/id'
+          '/_partitionKey'
         ]
         kind: 'Hash'
       }
@@ -297,11 +292,6 @@ resource settingsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/c
             path: '/"_etag"/?'
           }
         ]
-      }
-    }
-    options: {
-      autoscaleSettings: {
-        maxThroughput: autoscaleMaxThroughput
       }
     }
   }
@@ -333,11 +323,6 @@ resource usersContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/cont
             path: '/"_etag"/?'
           }
         ]
-      }
-    }
-    options: {
-      autoscaleSettings: {
-        maxThroughput: autoscaleMaxThroughput
       }
     }
   }
@@ -415,6 +400,77 @@ resource invitationsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabase
     }
   }
 }
+
+resource reportsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
+  parent: database
+  name: 'reports'
+  properties: {
+    resource: {
+      id: 'reports'
+      partitionKey: {
+        paths:[
+          '/id'
+        ]
+        kind: 'Hash'
+      }
+      analyticalStorageTtl: analyticalStoreTTL
+      indexingPolicy: {
+        automatic: true
+        includedPaths: [
+          {
+            path: '/*'
+          }
+        ]
+        excludedPaths: [
+          {
+            path: '/"_etag"/?'
+          }
+        ]
+      }
+    }
+    options: {
+      autoscaleSettings: {
+        maxThroughput: autoscaleMaxThroughput
+      }
+    }
+  }
+}
+
+resource summarizationreportsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
+  parent: database
+  name: 'summarization-report'
+  properties: {
+    resource: {
+      id: 'summarization-report'
+      partitionKey: {
+        paths:[
+          '/id'
+        ]
+        kind: 'Hash'
+      }
+      analyticalStorageTtl: analyticalStoreTTL
+      indexingPolicy: {
+        automatic: true
+        includedPaths: [
+          {
+            path: '/*'
+          }
+        ]
+        excludedPaths: [
+          {
+            path: '/"_etag"/?'
+          }
+        ]
+      }
+    }
+    options: {
+      autoscaleSettings: {
+        maxThroughput: autoscaleMaxThroughput
+      }
+    }
+  }
+}
+
 
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
   name: keyVaultName

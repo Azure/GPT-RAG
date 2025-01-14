@@ -1,0 +1,72 @@
+name: create Azure resources to Production
+
+on:
+  push:
+    branches:
+      - main
+jobs:
+  provision:
+    environment: production
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install azd
+        uses: Azure/setup-azd@v1.0.0
+
+      - name: Log in with Azure (Client Credentials)
+        if: ${{ env.AZURE_CREDENTIALS != '' }}
+        run: |
+          $info = $Env:AZURE_CREDENTIALS | ConvertFrom-Json -AsHashtable;
+          Write-Host "::add-mask::$($info.clientSecret)"
+
+          azd auth login `
+            --client-id "$($info.clientId)" `
+            --client-secret "$($info.clientSecret)" `
+            --tenant-id "$($info.tenantId)"
+        shell: pwsh
+        env:
+          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Provision Azure Resources
+        run: azd provision --no-prompt --debug
+        env:
+          # Core Azure Settings
+          AZURE_ENV_NAME: "SalesFactoryEmpolyees"
+          AZURE_LOCATION: "eastus"
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+          # Required Password Parameters
+          AZURE_VM_USER_INITIAL_PASSWORD: ${{ secrets.VM_USER_INITIAL_PASSWORD }}
+          AZURE_WEBAPP_AAD_CLIENT_SECRET: ${{ secrets.AAD_CLIENT_SECRET }}
+          AZURE_WEBAPP_AAD_RESET_PASSWORD: ${{ secrets.AAD_RESET_PASSWORD }}
+          AZURE_WEBAPP_EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+
+          # Stripe Integration
+          STRIPE_API_KEY: ${{ secrets.STRIPE_API_KEY }}
+          STRIPE_SIGNING_SECRET: ${{ secrets.STRIPE_SIGNING_SECRET }}
+          STRIPE_PRODUCT_ID: ${{ secrets.STRIPE_PRODUCT_ID }}
+          STRIPE_FA_PRICE_ID: ${{ secrets.STRIPE_FA_PRICE_ID }}
+
+          # Azure AD B2C Configuration
+          AZURE_WEBAPP_AAD_TENANT_NAME: ${{ secrets.AAD_TENANT_NAME }}
+          AZURE_WEBAPP_AAD_CLIENT_ID: ${{ secrets.AAD_CLIENT_ID }}
+          AZURE_WEBAPP_AAD_POLICY_NAME: ${{ secrets.AAD_POLICY_NAME }}
+          AZURE_WEBAPP_AAD_REDIRECT_URI: ${{ secrets.AAD_REDIRECT_URI }}
+          AZURE_WEBAPP_AAD_AUTHORITY: ${{ secrets.AAD_AUTHORITY }}
+          AZURE_WEBAPP_AAD_EDIT_PROFILE: ${{ secrets.AAD_EDIT_PROFILE }}
+
+          # Email Configuration
+          AZURE_WEBAPP_EMAIL_HOST: ${{ secrets.EMAIL_HOST }}
+          AZURE_WEBAPP_EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          AZURE_WEBAPP_INVITATION_LINK: ${{ secrets.INVITATION_LINK }}
+
+          # Azure Service Keys
+          AZURE_AI_SEARCH_API_KEY: ${{ secrets.AI_SEARCH_API_KEY }}
+          AZURE_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+          # Orchestrator Settings
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+          AZURE_FUNCTIONS_WORKER_RUNTIME: "python"
+          SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}

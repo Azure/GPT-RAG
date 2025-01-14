@@ -20,13 +20,15 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
     enableSoftDelete: true
     publicNetworkAccess: publicNetworkAccess
     enablePurgeProtection: true
-    accessPolicies: !empty(principalId) ? [
-      {
-        objectId: principalId
-        permissions: { secrets: [ 'get', 'list', 'set'] }
-        tenantId: subscription().tenantId
-      }
-    ] : []
+    accessPolicies: !empty(principalId)
+      ? [
+          {
+            objectId: principalId
+            permissions: { secrets: ['get', 'list', 'set'] }
+            tenantId: subscription().tenantId
+          }
+        ]
+      : []
   }
 }
 
@@ -43,8 +45,11 @@ resource KeyVaultAccessRole 'Microsoft.Authorization/roleAssignments@2022-04-01'
   scope: keyVault
   properties: {
     principalId: principalId
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')
-    principalType: 'User'
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      '4633458b-17de-408a-b874-0445c86b69e6'
+    )
+    principalType: 'ServicePrincipal'
   }
 }
 
