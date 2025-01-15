@@ -1008,12 +1008,12 @@ module orchestratorPe './core/network/private-endpoint.bicep' = if (_networkIsol
   }
 }
 
-module orchestratorStorageAccountStorageAccess './core/security/blobstorage-dataowner-access.bicep' = {
+module orchestratorStorageAccountStorageAccess './core/security/blobstorage-contributor-access.bicep' = {
   name: 'orchestratorstorageroleassignment'
   scope: resourceGroup
   params: {
     resourceName: orchestratorStorage.outputs.name
-    principalID: orchestrator.outputs.identityPrincipalId
+    principalId: orchestrator.outputs.identityPrincipalId
   }
 }
 
@@ -1161,8 +1161,8 @@ module appserviceKeyVaultAccess './core/security/keyvault-access.bicep' = {
   }
 }
 
-module appserviceStorageAccountAccess './core/security/blobstorage-reader-access.bicep' = {
-  name: 'appservice-blobstorage-access'
+module appserviceStorageAccountAccess './core/security/blobstorage-contributor-access.bicep' = {
+  name: 'appservice-blobstorage-contributor-access'
   scope: az.resourceGroup(_storageAccountResourceGroupName)
   params: {
     resourceName: storage.outputs.name
@@ -1272,7 +1272,11 @@ module dataIngestion './core/host/functions.bicep' = {
       {
         name: 'AZURE_SEARCH_SERVICE'
         value: _searchServiceName
-      }            
+      }
+      {
+        name: 'AZURE_SEARCH_INDEX_NAME'
+        value: _searchIndex
+      }      
       {
         name: 'AZURE_OPENAI_SERVICE_NAME'
         value: _openAiServiceName
@@ -1368,12 +1372,12 @@ module dataIngestionStoragepe './core/network/private-endpoint.bicep' = if (_net
   }
 }
 
-module dataIngestionStorageAccountStorageAccess './core/security/blobstorage-dataowner-access.bicep' = {
+module dataIngestionStorageAccountStorageAccess './core/security/blobstorage-contributor-access.bicep' = {
   name: 'dataingestionstorageroleassignment'
   scope: resourceGroup
   params: {
     resourceName: dataIngestionStorage.outputs.name
-    principalID: dataIngestion.outputs.identityPrincipalId
+    principalId: dataIngestion.outputs.identityPrincipalId
   }
 }
 
