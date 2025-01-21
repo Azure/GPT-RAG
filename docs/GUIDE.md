@@ -27,9 +27,11 @@
      - [4.5.2 IP Allowlist](#configuring-ip-allowlist)
    - [4.6 Entra Authentication](#configuring-entra-authentication)
    - [4.7 Authorization Setup](#configuring-authorization)  
-   - [4.8 Sharepoint Indexing](#sharepoint-setup)
-   - [4.9 Search Trimming](#search-trimming)     
-   - [4.10 Setting Up Git Repos](#setting-up-git-repos)
+   - [4.8 Enabling Multimodality](#enabling-multimodality)
+   - [4.9 Sharepoint Indexing](#sharepoint-setup)
+   - [4.10 Search Trimming](#search-trimming)
+   - [4.11 Bringing Your Own Resources](#bring-your-own-resources)   
+   - [4.12 Setting Up Git Repos](#setting-up-git-repos)
 5. [**Reference**](reference)
    - [5.1 Azure Resources](#azure-resources)
 6. [**Troubleshooting**](#troubleshooting)
@@ -645,6 +647,9 @@ azd deploy
 
 🎉 **Congratulations! Your Zero Trust deployment is now complete.**
 
+> [!Note]
+> If you want to upload documents for ingestion into the GPT-RAG storage account, you must have the **Storage Blob Data Contributor** role assigned in Azure Entra ID.
+
 > [!Note]  
 > After the initial deployment, you may choose to customize or update specific features, such as adjusting prompts, adding a logo to the frontend, testing different chunking strategies, or configuring a custom orchestration strategy like NL2SQL. For detailed guidance on these optional customizations, refer to the deployment section in each component's repository. [Orchestrator](https://github.com/azure/gpt-rag-agentic), [Front-end](https://github.com/azure/gpt-rag-frontend), [Data Ingestion](https://github.com/Azure/gpt-rag-ingestion).
 
@@ -964,6 +969,13 @@ Based on your authorization setup, validate access:
 > [!NOTE]
 > Use and test only the methods you have configured to ensure access controls are functioning correctly.
 
+## Enabling Multimodality
+
+To enable GPT-RAG to use multimodal capabilities, such as those provided by GPT-4o, set the `MULTIMODALITY` environment variable to `true` in both the data ingestion and orchestration Function Apps. For more details on how multimodality works and image data is ingested, refer to [Multimodal RAG Overview](MULTIMODAL_RAG.md) and the documentation in the data ingestion repository: [Multimodal Ingestion](https://github.com/Azure/gpt-rag-ingestion?tab=readme-ov-file#multimodal-ingestion) respectively.
+
+> [!NOTE]
+> Currently, only the Agentic Orchestrator supports this feature.
+
 ## SharePoint Setup
 
 The SharePoint connector indexes and purges files using scheduled Azure Functions to maintain an up-to-date Azure AI Search Index. For more information on how this works, see the Sharepoint section on the [Data Ingestion Page](https://github.com/Azure/gpt-rag-ingestion?tab=readme-ov-file#sharepoint-indexing). For detailed instructions on setting up SharePoint for data ingestion, please refer to the [SharePoint Setup Guide](INGESTION_SHAREPOINT_SETUP.md).
@@ -971,6 +983,10 @@ The SharePoint connector indexes and purges files using scheduled Azure Function
 ## Search Trimming
 
 This customization is particularly valuable in scenarios where sensitive documents need to be accessed by specific groups or individuals within an organization. With this feature you can ensure that AI Search returns results tailored to each user’s access (no RBAC permissions), please take a look at the [Filter Files with AI Search Using Security Trimming](CUSTOMIZATIONS_SEARCH_TRIMMING.md) page.
+
+## Bring Your Own Resources
+
+In some cases, you may want to use one or more pre-existing resources in your subscription instead of creating new ones. Our Bicep template allows you to do this. For detailed instructions on how this can be achieved, please take a look at the [Bring Your Own Resources](CUSTOMIZATIONS_BYOR.md) page.
 
 ## Setting Up Git Repos
 

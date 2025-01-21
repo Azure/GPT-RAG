@@ -136,6 +136,9 @@ Upload your documents to the 'documents' folder located in the storage account. 
 
  ![storage_sample](media/readme-storage_sample.png)
 
+> [!Note]
+> If you want to upload documents for ingestion into the GPT-RAG storage account, you must have the **Storage Blob Data Contributor** role assigned in Azure Entra ID.
+
 **Done! Basic deployment is completed.**
 
 **Recommended**: [Add app authentication](https://learn.microsoft.com/en-us/azure/app-service/scenario-secure-app-authentication-app-service). [Watch this quick tutorial](https://youtu.be/sA-an25jMB4) for step-by-step guidance.
@@ -226,6 +229,9 @@ azd deploy
 > Note: when running the ```azd init ...``` and ```azd env refresh```, use the same environment name, subscription, and region used in the initial provisioning of the infrastructure.  
    
 **Done! Zero trust deployment is completed.**
+
+> [!Note]
+> If you want to upload documents for ingestion into the GPT-RAG storage account, you must have the **Storage Blob Data Contributor** role assigned in Azure Entra ID.
 
 **Recommended**: [Add app authentication](https://learn.microsoft.com/en-us/azure/app-service/scenario-secure-app-authentication-app-service). [Watch this quick tutorial](https://youtu.be/sA-an25jMB4) for step-by-step guidance.
 
