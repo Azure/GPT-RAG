@@ -29,5 +29,5 @@ fi
 echo "For accessing the ${YELLOW}Zero Trust infrastructure${NC}, from the Azure Portal:"
 echo "Virtual Machine: ${BLUE}$AZURE_VM_NAME${NC}"
 echo "Select connect using Bastion with:"
-echo "  username: $AZURE_VM_USERNAME"
+echo "  username: $AZURE_VM_USER_NAME"
 echo "  Key Vault/Secret: ${BLUE}$AZURE_BASTION_KV_NAME${NC}/${BLUE}$AZURE_VM_KV_SEC_NAME${NC}"
