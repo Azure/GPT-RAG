@@ -22,5 +22,5 @@ if ($env:AZURE_ZERO_TRUST -eq "FALSE") {
 Write-Host "For accessing the Zero Trust infrastructure, from the Azure Portal:"
 Write-Host "Virtual Machine: $($env:AZURE_VM_NAME)"
 Write-Host "Select connect using Bastion with:"
-Write-Host "  username: $($env:AZURE_VM_USERNAME)"
+Write-Host "  username: $($env:AZURE_VM_USER_NAME)"
 Write-Host "  Key Vault/Secret: $($env:AZURE_BASTION_KV_NAME)/$($env:AZURE_VM_KV_SEC_NAME)"

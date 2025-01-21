@@ -973,7 +973,8 @@ Based on your authorization setup, validate access:
 
 To enable GPT-RAG to use multimodal capabilities, such as those provided by GPT-4o, set the `MULTIMODALITY` environment variable to `true` in both the data ingestion and orchestration Function Apps. For more details on how multimodality works and image data is ingested, refer to [Multimodal RAG Overview](MULTIMODAL_RAG.md) and the documentation in the data ingestion repository: [Multimodal Ingestion](https://github.com/Azure/gpt-rag-ingestion?tab=readme-ov-file#multimodal-ingestion) respectively.
 
-> Note: Currently, only the Agentic Orchestrator supports this feature.
+> [!NOTE]
+> Currently, only the Agentic Orchestrator supports this feature.
 
 ## SharePoint Setup
 
