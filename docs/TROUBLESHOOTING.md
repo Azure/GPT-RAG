@@ -1,5 +1,21 @@
 # Troubleshooting  
-   
+
+**Frontend error message: "I'm sorry, I had a problem with the request..."**
+
+*Symptoms:*  
+
+Users see an error message stating: "I'm sorry, I had a problem with the request. Please report the error to the support team. SyntaxError: Failed to execute 'json' on 'Response': Unexpected end of JSON input."
+
+*Cause:*
+
+This issue typically occurs when the orchestrator does not send a response to the frontend.
+
+*Resolution:*
+
+Please check the orchestrator's log stream for any specific errors. If the issue persists, feel free to reopen it.
+      
+---
+
 **Powershell 7+ is not installed** (Windows only)
    
 *Symptoms:*  
