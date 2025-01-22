@@ -32,8 +32,9 @@
    - [4.10 Search Trimming](#search-trimming)
    - [4.11 Bringing Your Own Resources](#bring-your-own-resources)   
    - [4.12 Setting Up Git Repos](#setting-up-git-repos)
-5. [**Reference**](reference)
+5. [**Reference**](#reference)
    - [5.1 Azure Resources](#azure-resources)
+   - [5.2 Useful Links](#useful-links) 
 6. [**Troubleshooting**](#troubleshooting)
 
 ---
@@ -1246,6 +1247,18 @@ Here is the complete list of resources for a standard Zero Trust deployment, inc
     <BR>Used by Bastion to enable secure access to the Test VM.
     - SKU: Standard
     - Tier: Regional
+
+### Useful Links
+
+- [Microsoft Customer Digital Experiences](https://cdx.transform.microsoft.com/)  
+  Set up an M365 demo tenant with an E5 license, which includes Power BI and allows you to enable Fabric. Useful for testing connections with Fabric, MS Teams, and SharePoint using the Microsoft Graph REST API. Available to Microsoft employees and partners.
+
+- [Microsoft 365 Developer Program](https://learn.microsoft.com/en-us/microsoftteams/platform/toolkit/tools-prerequisites#microsoft-365-developer-program)  
+  This program also allows you to create an M365 sandbox tenant with an E5 license, available to Visual Studio Enterprise or Professional subscribers.  
+
+- [Microsoft Fabric Trial Capacity](https://learn.microsoft.com/en-us/fabric/get-started/fabric-trial)  
+  A good option to explore Fabric and test connections for 60 days; requires a work account.
+
 
 ## Troubleshooting
 
