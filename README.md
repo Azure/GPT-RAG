@@ -13,24 +13,21 @@ name: Multi-repo ChatGPT and Enterprise data with Azure OpenAI and AI Search
 description: GPT-RAG core is a Retrieval-Augmented Generation pattern running in Azure, using Azure AI Search for retrieval and Azure OpenAI large language models to power ChatGPT-style and Q&A experiences.
 -->
 <!-- YAML front-matter schema: https://review.learn.microsoft.com/en-us/help/contribute/samples/process/onboarding?branch=main#supported-metadata-fields-for-readmemd -->
-
 The **RAG pattern** enables businesses to use the reasoning capabilities of LLMs, using their existing models to process and generate responses based on new data. RAG facilitates periodic data updates without the need for fine-tuning, thereby streamlining the integration of LLMs into businesses. 
 
 The **Enterprise RAG** Solution Accelerator (GPT-RAG) offers a robust architecture tailored for enterprise-grade deployment of the RAG pattern. It ensures grounded responses and is built on Zero-trust security and Responsible AI, ensuring availability, scalability, and auditability. Ideal for organizations transitioning from exploration and PoC stages to full-scale production and MVPs.
 
-## Enterprise RAG Community
+✨ See our [User & Admin Guide](docs/GUIDE.md) for complete setup and usage details.
 
-* [Discord Channel](https://discord.gg/28VMVKawgk) Enterprise RAG - Connected Community
-
-## Components
+## Application Components
 
 GPT-RAG follows a modular approach, consisting of three components, each with a specific function.
 
-* [Data Ingestion](https://github.com/Azure/gpt-rag-ingestion) - Optimizes data chunking and indexing for the RAG retrieval step.
+* **[Data Ingestion](https://github.com/Azure/gpt-rag-ingestion)** - Optimizes data chunking and indexing for the RAG retrieval step.
 
-* [Orchestrator](https://github.com/Azure/gpt-rag-orchestrator) - Orchestrates LLMs and knowledge bases calls to generate optimal responses for users.
+* **Orchestrator** - Coordinates the flow to retrieve information and generate a user response. It offers two options: **[Functional](https://github.com/Azure/gpt-rag-orchestrator)**, using Semantic Kernel functions (default), and **[Agentic](https://github.com/Azure/gpt-rag-agentic)**, using AutoGen agents. See deployment instructions to switch to Agentic.
 
-* [App Front-End](https://github.com/Azure/gpt-rag-frontend) - Uses the [Backend for Front-End](https://learn.microsoft.com/en-us/azure/architecture/patterns/backends-for-frontends) pattern to provide a scalable and efficient web interface.
+* **[App Front-End](https://github.com/Azure/gpt-rag-frontend)** - Uses the [Backend for Front-End](https://learn.microsoft.com/en-us/azure/architecture/patterns/backends-for-frontends) pattern to provide a scalable and efficient web interface.
 
 <!-- * [Teams-BOT](https://github.com/Azure/gpt-rag-bot) Constructed using Azure BOT Services, this platform enables users to engage with the Orchestrator seamlessly through the Microsoft Teams interface. -->
 
@@ -38,7 +35,6 @@ GPT-RAG follows a modular approach, consisting of three components, each with a 
 Removing temporarily while not finished
 ## GPT-RAG Integration HUB
 * [SQL Integration](https://github.com/Azure/gpt-rag-int-sql) Connect the GPT-RAG Infrastructure to SQL using NL2SQL. -->
-
 
 ## Concepts
 
@@ -52,7 +48,31 @@ If you want to learn more about the RAG Pattern and GPT-RAG architecture.
 
 *  [Enterprise RAG +Prompt Engineering+Finetuning+Train (Video in Spanish)](https://www.youtube.com/watch?v=ICsf4yirieA)
 
+<!-- ## Administration Guide
+
+For detailed instructions on managing and configuring the system, please refer to the [Administration Guide](docs/ADMINISTRATION_GUIDE.md) 📖. -->
+
 <!-- <a href="https://www.youtube.com/watch?v=ICsf4yirieA"><img src="https://img.youtube.com/vi/ICsf4yirieA/0.jpg" alt="Alt text" width="480"/></a> -->
+
+
+## Setup Guide
+
+1) **Basic Architecture Deployment:** *for quick demos with no network isolation*⚙️
+
+Learn how to **quickly set up** the basic architecture for scenarios without network isolation. [Click the link to proceed](#basic-architecture-deployment).
+
+2) **Standard Zero-Trust Architecture Deployment:** *fastest Zero-Trust deployment option*⚡
+
+Deploy the solution accelerator using the standard zero-trust architecture with pre-configured solution settings. No customization needed. [Click the link to proceed](#zero-trust-architecture-deployment).
+
+3) **Custom Zero-Trust Architecture Setup:** *most used* ⭐
+
+Explore options for customizing the deployment of the solution accelerator with a zero-trust architecture, adjusting solution settings to your needs. [Click the link to proceed](docs/AUTOMATED_INSTALLATION.md).
+
+4) **Step-by-Step Manual Setup: Zero-Trust Architecture:** *hands-on approach* 🛠️**
+
+For those who prefer complete control, follow this detailed guide to manually set up the solution accelerator with a zero-trust architecture. [Click the link to proceed](docs/MANUAL_INSTALLATION.md).
+
 
 ## Getting Started
 
@@ -61,22 +81,23 @@ This guide will walk you through the deployment process of Enterprise RAG. There
 **Pre-requisites**
 
 - Azure Developer CLI: [Download azd for Windows](https://azdrelease.azureedge.net/azd/standalone/release/1.5.0/azd-windows-amd64.msi), [Other OS's](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd).
- - Powershell 7+ with AZ module (Windows only): [Powershell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4#installing-the-msi-package), [AZ Module](https://learn.microsoft.com/en-us/powershell/azure/what-is-azure-powershell?view=azps-11.6.0#the-az-powershell-module)
- - Git: [Download Git](https://git-scm.com/downloads)
+ - Powershell 7+ (Windows only): [Powershell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4#installing-the-msi-package).
+ - Git: [Download Git](https://git-scm.com/downloads).
  - Node.js 16+ [windows/mac](https://nodejs.dev/en/download/)  [linux/wsl](https://nodejs.dev/en/download/package-manager/)
- - Python 3.11: [Download Python](https://www.python.org/downloads/release/python-3118/)
+ - Python 3.11: [Download Python](https://www.python.org/downloads/release/python-3118/).
  - Initiate an [Azure AI services creation](https://portal.azure.com/#create/Microsoft.CognitiveServicesAllInOne) and agree to the Responsible AI terms **
 
-** If you have not created an Azure AI service resource in the subscription before
+<!-- [AZ Module](https://learn.microsoft.com/en-us/powershell/azure/what-is-azure-powershell?view=azps-11.6.0#the-az-powershell-module) -->
 
-**Note:** If you implement the Zero-trust architecture described below, you will only need Node.js and Python for the second part of the procedure, which you will carry out on the VM created during the deployment process of this architecture.
+** If you have not created an Azure AI service resource in the subscription before
 
 ### Basic Architecture Deployment
 
 For quick demonstrations or proof-of-concept projects without network isolation requirements, you can deploy the accelerator using its basic architecture.
 ![Basic Architecture](media/architecture-GPT-RAG-Basic.png)
 
-The deployment procedure is quite simple, just install the prerequisites and follow these four steps using [Azure Developer CLI (azd)](https://aka.ms/azure-dev/install) in a terminal:
+The deployment procedure is quite simple, just install the prerequisites mentioned above and follow these four steps using [Azure Developer CLI (azd)](https://aka.ms/azure-dev/install) in a terminal:
+
 
 **1** Download the Repository:
 
@@ -84,10 +105,23 @@ The deployment procedure is quite simple, just install the prerequisites and fol
 azd init -t azure/gpt-rag
 ```
 
+> **Note**: Add `-b agentic` if using the Agentic AutoGen-based orchestrator.
+> ```sh
+> azd init -t azure/gpt-rag -b agentic
+> ```
+
 **2** Login to Azure:
+
+**2.a** Azure Developer CLI:
 
 ```sh
 azd auth login
+```
+
+**2.b** Azure CLI:
+
+```sh
+az login
 ```
 
 **3** Start Building the infrastructure and components deployment:
@@ -100,22 +134,36 @@ azd up
 
 Upload your documents to the 'documents' folder located in the storage account. The name of this account should start with 'strag'. This is the default storage account, as shown in the sample image below.
 
-
  ![storage_sample](media/readme-storage_sample.png)
+
+> [!Note]
+> If you want to upload documents for ingestion into the GPT-RAG storage account, you must have the **Storage Blob Data Contributor** role assigned in Azure Entra ID.
+
+**Done! Basic deployment is completed.**
+
+**Recommended**: [Add app authentication](https://learn.microsoft.com/en-us/azure/app-service/scenario-secure-app-authentication-app-service). [Watch this quick tutorial](https://youtu.be/sA-an25jMB4) for step-by-step guidance.
+
 
 ### Zero Trust Architecture Deployment
 
 For more secure and isolated deployments, you can opt for the Zero Trust architecture. This architecture is ideal for production environments where network isolation and stringent security measures are highly valued.
 
- ![Zero Trust Architecture](media/architecture-GPT-RAG-ZeroTrust.png)
+ ![Zero Trust Architecture](media/architecture-GPT-RAG-ZeroTrust-LZ.png)
 
-Deploying the Zero Trust architecture follows a similar procedure to the Basic Architecture deployment, but includes some additional steps. Refer to the instructions below for a detailed guide on deploying this option: 
-   
+Before deploying the Zero Trust architecture, make sure to review the prerequisites. It's important to note that you will only need Node.js and Python for the second part of the process, which will be carried out on the VM created during the deployment of this architecture.
+
+The deployment procedure is similar to that of the Basic Architecture, but with some additional steps. For a detailed guide on deploying this option, refer to the instructions below:
+
 **1** Download the Repository
 
 ```sh
 azd init -t azure/gpt-rag
 ```
+
+> **Note**: Add `-b agentic` if using the Agentic AutoGen-based orchestrator.
+> ```sh
+> azd init -t azure/gpt-rag -b agentic
+> ```
 
 **2** Enable network isolation
    
@@ -125,8 +173,16 @@ azd env set AZURE_NETWORK_ISOLATION true
  
 **3** Login to Azure:
 
+**2.a** Azure Developer CLI:
+
 ```sh
 azd auth login
+```
+
+**2.b** Azure CLI:
+
+```sh
+az login
 ```
 
 **4** Start Building the infrastructure and components deployment:
@@ -134,6 +190,8 @@ azd auth login
 ```sh
 azd provision
 ```
+> [!TIP]  
+> The regions we test most often are  `eastus`, `eastus2`, `westus3`.
 
 **5** Next, you will use the Virtual Machine with the Bastion connection (created during step 4) to continue the deployment.  
    
@@ -162,59 +220,70 @@ To finalize the procedure, execute the subsequent commands in the command prompt
 
 ```  
 azd init -t azure/gpt-rag  
-azd auth login   
-azd env refresh  
-azd package  
+azd auth login
+az login 
+azd env refresh
 azd deploy  
 ```  
    
 > Note: when running the ```azd init ...``` and ```azd env refresh```, use the same environment name, subscription, and region used in the initial provisioning of the infrastructure.  
    
-Done! Zero trust deployment is completed.
+**Done! Zero trust deployment is completed.**
 
-## Customizing your Deployment
+> [!Note]
+> If you want to upload documents for ingestion into the GPT-RAG storage account, you must have the **Storage Blob Data Contributor** role assigned in Azure Entra ID.
 
-The deployment process outlined in the Getting Started section sets up Azure resources and deploys the accelerator components with a standard configuration. For those looking to tailor the deployment more closely to their specific requirements, the [Custom Deployment](docs/CUSTOMIZATIONS.md) section offers further customization possibilities.
+**Recommended**: [Add app authentication](https://learn.microsoft.com/en-us/azure/app-service/scenario-secure-app-authentication-app-service). [Watch this quick tutorial](https://youtu.be/sA-an25jMB4) for step-by-step guidance.
 
-## Integrating with Additional Data Sources
+## How to?
 
-If you're looking to expand your data retrieval capabilities by adding new data sources, consider integrating Bing Custom Search, SQL Server, and Teradata. For more information, refer to the [AI Integration Hub](docs/AI_INTEGRATION_HUB.md) page.
+This section provides quick guides for customizing, managing, and troubleshooting your deployment.
 
-## Additional Resources
+### Customize Your Deployment
 
-### Troubleshooting
+The standard deployment process sets up Azure resources and deploys the accelerator components with a standard configuration. To tailor the deployment to your specific needs, follow the steps in the [Custom Deployment](docs/CUSTOMIZATIONS.md) section for further customization options.
 
-Look at the [Troubleshooting](docs/TROUBLESHOOTING.md) page in case you face some error in the deployment process.
+<!-- 
 
-### Evaluating
+Commenting out this section as the integration hub needs to be reviewed.
 
-* [Performance Testing](docs/PERFTEST.md)
+### Integrate with Additional Data Sources
+  
+Expand your data retrieval capabilities by integrating new data sources such as Bing Custom Search, SQL Server, and Teradata. For detailed instructions, refer to the [AI Integration Hub](docs/AI_INTEGRATION_HUB.md) page. -->
 
-### Querying Conversation History
+### Multi-Environment Deployment
 
-* [How to Query and Analyze Conversations](docs/QUERYING_CONVERSATIONS.md)
+Once you've successfully deployed the GPT-RAG solution as a proof of concept and you're ready to formalize the deployment using a proper CI/CD process to accelerate your deployment to production, refer to the multi-environment deployment guides for either [Azure DevOps](./docs/AZDO-SETUP.md) or [GitHub](./docs/GH-SETUP.md).
+ 
+### Troubleshoot Deployment Issues
 
-### Pricing Estimation
+If you encounter any errors during the deployment process, consult the [Troubleshooting](docs/TROUBLESHOOTING.md) page for guidance on resolving common issues.
 
-* [Pricing Model](https://github.com/Azure/GPT-RAG/wiki/GPT%E2%80%90RAG-%E2%80%90-Pricing-Model)
+### Evaluate Performance
 
-### Governance
+To assess the performance of your deployment, refer to the [Performance Testing](docs/PERFTEST.md) guide for testing methodologies and best practices.
 
-* [Governance Model](https://share.mindmanager.com/#publish/9ogrdWqzmAzZB6ilgURohV4lj1LriKjOWc0w_u2U)
+### Query the Conversation History
+
+Learn how to query and analyze conversation data by following the steps outlined in the [How to Query and Analyze Conversations](docs/QUERYING_CONVERSATIONS.md) document.
+
+### Estimate Pricing
+
+Understand the cost implications of your deployment by reviewing the [Pricing Model](docs/CALCULATOR.md) for detailed pricing estimation.
+
+### Manage Governance
+
+Ensure proper governance of your deployment by following the guidelines provided in the [Governance Model](https://share.mindmanager.com/#publish/9ogrdWqzmAzZB6ilgURohV4lj1LriKjOWc0w_u2U).
+
+## Enterprise RAG Community
+
+* [Discord Channel](https://discord.gg/28VMVKawgk) Enterprise RAG - Connected Community
 
 ## Contributing
 
-This project welcomes contributions and suggestions.  Most contributions require you to agree to a
-Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
+We appreciate your interest in contributing to this project! Please refer to the [CONTRIBUTING.md](./CONTRIBUTING.md) page for detailed guidelines on how to contribute, including information about the Contributor License Agreement (CLA), code of conduct, and the process for submitting pull requests.
 
-When you submit a pull request, a CLA bot will automatically determine whether you need to provide
-a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.
-
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
-contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+Thank you for your support and contributions!
 
 ## Trademarks
 

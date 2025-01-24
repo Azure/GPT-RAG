@@ -10,6 +10,9 @@ On this page, you will find some options to configure your deployment:
 - [Accessing Data Ingest function using AI Search Managed Identity](#accessing-the-data-ingest-function-from-ai-search-using-a-managed-identity)
 - [Extending Enteprise RAG components](#extending-solution-components)
 
+<!-- - [Filter Files with AI Search Using Security Trimming](#Filter-Files-with-AI-Search-Using-Security-Trimming) -->
+<!-- - [Selecting Your Components](#selecting-your-components) -->
+
 **Note on Environment Variables**
 
 Most of the customizations described on this page involve the use of environment variables. Therefore, it's worth noting the following about using `azd` environment variables:
@@ -73,6 +76,35 @@ azd env set COST_CENTER bar
 
 In some cases, you may want to use one or more pre-existing resources in your subscription instead of creating new ones. Our Bicep template allows you to do this. For detailed instructions on how this can be achieved, please take a look at the [Bring Your Own Resources](CUSTOMIZATIONS_BYOR.md) page.
 
+<!-- ## Selecting Your Components
+
+To install just some specific GPT-RAG components, you can adjust the installation process by setting one or more of the following variables to false, based on the components you prefer not to install:
+
+- DEPLOY_DATA_INGESTION
+- DEPLOY_FRONTEND
+- DEPLOY_ORCHESTRATOR
+
+After setting the variables, begin the deployment process by running `azd init` as directed in the Getting Started section on the main page. Next, execute `azd provision`. Following this, use the `azd package` and `azd deploy` commands, specifying which components to install: `dataIngest`, `orchestrator`, or `frontend`. If no components are specified, the system will attempt to package and deploy all components.
+
+For example, suppose you are only interested in the **Data ingestion** component.
+
+First, you would set the deployment of the other two components to false:
+
+```
+azd env set DEPLOY_FRONTEND false
+azd env set DEPLOY_ORCHESTRATOR false
+```
+
+Then, you proceed with the deployment procedure, as previously described.
+
+```
+azd provision
+azd package dataIngest
+azd deploy dataIngest
+```
+
+Done! you deployed only the **Data ingestion** component. -->
+
 ## Accessing the data ingest function from AI Search using a Managed Identity
 
 In the AI Search indexing process, a skillset incorporates a custom web app skill. This skill is powered by the data ingestion Azure Function, which is responsible for chunking the data. By default, the AI Search service establishes a connection with the Azure Function via an API key.
@@ -93,45 +125,8 @@ azd up
 
 ## Extending solution components
 
-Azd automatically provisions the infrastructure and deploys the three components. However, you may want to change and customize parts of the code to meet a specific requirement.
+Azd automatically provisions the infrastructure and deploys the three components. However, you may want to change and customize parts of the code to meet a specific requirement. Our Solution Accelerator allows you to do this. For detailed instructions on how this can be achieved, please take a look at the [Extending Application Components](EXTENDING_APP_COMPONENTS.md) page.
 
-A simple customization within the orchestrator component involves updating the [bot description](https://github.com/Azure/gpt-rag-orchestrator/blob/main/orc/bot_description.prompt). This adjustment can help in more accurately defining the bot's scope for the orchestrator.
+## Filter Files with AI Search Using Security Trimming
 
-That said, if you want to manually deploy and customize the components, you can follow the deployment instructions for each component:
-
-**1) Data Ingestion Component**
-
-Fork or copy the original [Data ingestion](https://github.com/Azure/gpt-rag-ingestion) repo template to create your data ingestion git repo and follow the steps in its **What if I want to redeploy just the ingestion component?** section to learn how to redeploy the component.
-
-If you want to run the component locally, which is interesting for testing your modifications before deploying, check out the **Running Locally with VS Code** section in the component's repository.
-
-**2) Orchestrator Component**
-
-Fork or copy the original [Orchestrator](https://github.com/Azure/gpt-rag-orchestrator) repo template to create your orchestrator git repo and follow the steps in its **Cloud Deployment** section to learn how to redeploy the component.
-
-If you want to run the component locally, which is interesting for testing your modifications before deploying, check out the **Running Locally with VS Code** section in the component's repository.
-
-**3) Front-end Component**
-
-Fork or copy the original [App Front-end](https://github.com/Azure/gpt-rag-frontend) repo template to create your own frontend git repo and follow the steps in its **Deploy (quickstart)** section to learn how to redeploy the component.
-
-If you want to run the component locally, which is interesting for testing your modifications before deploying, check out the **Test locally** section in the component's repository.
-
-**(Optional) Integrate custom component repo to the main gpt-rag**
-
-Customizing the components of your project allows for a tailored experience, but `gpt-rag` solution repository won't automatically detect your custom component repos.
-
-Integrating your custom component repository with the gpt-rag project enhances workflow efficiency, allowing you to directly use azd commands like `azd up` and `azd deploy` within the gpt-rag repository.
-
-To achieve this integration, simply follow these steps:
-
-1. **Create Your Own `gpt-rag` Repository**: Start by forking or copying the original `gpt-rag` repository. This will be the foundation for integrating your custom components.
-
-2. **Point to Your Custom Component Repositories**:
-   - Navigate to the `scripts` folder within your newly created `gpt-rag` repository.
-   - Open and edit the  `fetchComponents.ps1` and `fetchComponents.sh` scripts.
-   - Adjust these scripts to reference your custom component repositories, replacing the original repository links.
-
-3. **Initialize Your Customized Setup**:
-   - With your `gpt-rag` repository scripts pointing to your component repositories, initialize the environment.
-   - Run the `azd init -t <owner>/<repository>` using your own github org and repository.
+This customization is particularly valuable in scenarios where sensitive documents need to be accessed by specific groups or individuals within an organization. With this feature you can ensure that AI Search returns results tailored to each user’s access (no RBAC permissions), please take a look at the [Filter Files with AI Search Using Security Trimming](CUSTOMIZATIONS_SEARCH_TRIMMING.md) page.

@@ -16,7 +16,7 @@ The Basic Architecture is an ideal choice for quick demonstrations or Proof of C
 
 The Zero Trust Architecture is designed for deployments that require a higher level of security and network isolation. This model is particularly suitable for production environments where stringent security measures are paramount. It ensures that every request is authenticated and authorized, thereby significantly reducing the risk of internal threats. This architecture guarantees secure, isolated, and efficient communication among the components, adhering to a zero-trust model.
 
- ![Zero Trust Architecture](../media/architecture-GPT-RAG-ZeroTrust.png)
+ ![Zero Trust Architecture](../media/architecture-GPT-RAG-ZeroTrust-LZ.png)
 
 The following Azure services are incorporated into this Zero Trust architecture.
 

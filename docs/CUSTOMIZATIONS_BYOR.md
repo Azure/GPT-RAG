@@ -6,10 +6,10 @@ Sometimes, you might prefer to utilize existing resources in your subscription r
 
 Let's delve deeper into the general process of integrating existing resources into our project. To provide a clear and practical example, I will guide you through the process of reusing an existing **AI Services** resource. 
 
-**Pre-requisites**:
+**Prerequisites**:
 
-- AI Services resource created in the same subscription you will deploy Enterprise RAG.
-- Gpt-rag downloaded and initialized from the official repo `azd init -t azure/gpt-rag` or from you own forked/copied git repo by using `git clone` then `azd init`.
+- The resources to be reused must be located in the same subscription where you will deploy Enterprise RAG.
+- This prerequisite does not apply for networking resources reusing (e.g., VNet reuse).
 
 **General Instruction Steps**:
 
@@ -27,7 +27,7 @@ The table below outlines the environment variables associated with each resource
 | Cosmos DB                         | `COSMOS_DB_REUSE`, `COSMOS_DB_RESOURCE_GROUP_NAME`, `COSMOS_DB_ACCOUNT_NAME`, `COSMOS_DB_DATABASE_NAME`  |
 | Key Vault                         | `KEY_VAULT_REUSE`, `KEY_VAULT_RESOURCE_GROUP_NAME`, `KEY_VAULT_NAME`                                     |
 | Storage                           | `STORAGE_REUSE`, `STORAGE_RESOURCE_GROUP_NAME`, `STORAGE_NAME`                                           |
-| Virtual Network (VNet)            | `VNET_REUSE`, `VNET_RESOURCE_GROUP_NAME`, `VNET_NAME`                                                    |
+| Virtual Network (VNet)            | `VNET_REUSE`                                                                                             |
 | App Service                       | `APP_SERVICE_REUSE`, `APP_SERVICE_NAME`, `APP_SERVICE_RESOURCE_GROUP_NAME`                               |
 | Orchestrator Function App         | `ORCHESTRATOR_FUNCTION_APP_REUSE`, `ORCHESTRATOR_FUNCTION_APP_RESOURCE_GROUP_NAME`, `ORCHESTRATOR_FUNCTION_APP_NAME` |
 | Orchestrator Function App Storage | `ORCHESTRATOR_FUNCTION_APP_STORAGE_REUSE`, `ORCHESTRATOR_FUNCTION_APP_STORAGE_NAME`, `ORCHESTRATOR_FUNCTION_APP_STORAGE_RESOURCE_GROUP_NAME` |
@@ -64,7 +64,7 @@ App Service Plan kind must be Linux.
 
 ### Application Service Environment
 
-If you prefer, you can use a previously created [Application Service Environment (ASE)](https://learn.microsoft.com/en-us/azure/app-service/environment/overview) to run the function apps and the front-end web app. Just follow the instructions in the [**General Instructions**](#general-instructions) section to inform the App Service Plan, contained within your App Service Environment, that you want to reuse. The App Service Plan must be Linux-based. Since the existence of a VNet and Subnet is a prerequisite for creating an ASE, if you wish to reuse an ASE, you must also bring the VNet created for this ASE, according to the instructions in the [VNet](#virtual-network-vnet) section.
+If you want to use an existing [Application Service Environment (ASE)](https://learn.microsoft.com/en-us/azure/app-service/environment/overview) to run the function apps and the front-end web app, please note that the installation must be performed manually, as Bicep does not support this scenario. You should follow the manual procedure, ensuring that the App Service Plan within your ASE is Linux-based.
 
 ### Azure AI Search
 
@@ -72,7 +72,7 @@ In addition to specifying the AI Search service name and resource group as menti
 
 - The AI Search tier must be Standard 2 (S2) or higher if you want to use a zero-trust environment.
 
-- The AI Search must have Managed Identity Enabled.
+- The AI Search must have **Managed Identity** and **Role-based access control** enabled.
 
 - If the AI Search will be used for more than one gpt-rag project, to avoid conflicts, you should use different names for the index where retrieval is performed and the container where the documents are obtained. These two items can be configured with the variables `AZURE_STORAGE_CONTAINER_NAME` and `AZURE_SEARCH_INDEX`.
 
@@ -92,9 +92,18 @@ When reusing an Azure OpenAI resource, it's essential to first specify both the 
 
 Additionally, the original resource must have two deployments, one for a GPT model and another for an embeddings model.
 
-Ensure the embeddings model is **text-embedding-ada-002** version 2, with the deployment named **text-embedding-ada-002**.
+Ensure the embeddings model is **text-embedding-3-large** version 1, with the deployment named **text-embedding**.
 
-The default GPT model is **gpt-3.5-turbo** and the default deployment name is **chat**. If you're using the pre-created service with these default settings, no further modifications are required.
+If you're using a different name for the Embedding model, you'll need to set the corresponding environment variables as shown in the table below.
+
+| Item                       | Environment Variable Name               |
+|----------------------------|-----------------------------------------|
+| Embeddings Model Name      | AZURE_EMBEDDINGS_MODEL_NAME             |
+| Embeddings Model Version   | AZURE_EMBEDDINGS_VERSION                |
+| Embeddings Deployment Name | AZURE_EMBEDDINGS_DEPLOYMENT_NAME        |
+| Embeddings Vector Size     | AZURE_EMBEDDINGS_VECTOR_SIZE            |
+
+The default GPT model is **gpt-4o** version **2024-11-20** and the default deployment name is **chat**. If you're using the pre-created service with these default settings, no further modifications are required.
 
 However, if you're using a different name for the GPT, or a different model, you'll need to set the corresponding environment variables as shown in the table below.
 
@@ -102,11 +111,13 @@ However, if you're using a different name for the GPT, or a different model, you
 |----------------------------|-----------------------------------------|
 | GPT Deployment Name        | AZURE_CHAT_GPT_DEPLOYMENT_NAME          |
 | GPT Model Name             | AZURE_CHAT_GPT_MODEL_NAME               |
+| GPT Model Version          | AZURE_CHAT_GPT_MODEL_VERSION            |
 
 To set these environment variables, use the `azd env set` command as described earlier.
 
 For instance, to inform the name of the GPT deployment, you would update the `AZURE_CHAT_GPT_DEPLOYMENT_NAME` variable like this:
-`azd env set AZURE_CHAT_GPT_DEPLOYMENT_NAME=my-gpt-deployment-name`
+
+`azd env set AZURE_CHAT_GPT_DEPLOYMENT_NAME my-gpt-deployment-name`
 
 ### CosmosDB
 
@@ -129,60 +140,50 @@ If you prefer custom names, use the following variables to define your names wit
 
 If you are reusing a Key Vault, the identity used to execute the AZD commands, whether it's your Entra ID user or a Service Principal, must have an Access Policy that allows `list`, `get`, and `set` operations on the secrets within this Key Vault.
 
-### Virtual Network (Vnet)
+### Virtual Network (VNet)
 
-Reusing a VNet involves more than simply pre-creating an AI Services VNet and inform its name and resource group as indicated in the [General Instructions Section](#general-instructions).
+If you prefer to use an existing VNet, that's perfectly fine. In this case, you’ll need to set up your network resources—such as the VNet, subnets, and private endpoints—manually and indicate this by setting the `VNET_REUSE` variable. 
 
-To reuse a VNet, configure the required subnets and networking resources as detailed below.
+Below is a typical workflow: first, provision non-network resources, such as the Function App and CosmosDB; then, create and configure the network resources; and finally, deploy the application components (orchestrator, frontend, and data ingestion).
 
-#### Subnets
+> [!NOTE] You may create the VNet and subnets before provisioning non-network resources if preferred. However, private endpoints can only be created after the associated resources are provisioned.
 
-**Before deploying GPT-RAG**, ensure the reused VNet is pre-configured with the 5 required subnets.
+**Steps to Provision GPT-RAG Resources while Reusing Network Resources:**
 
-The diagram below illustrates the AI Services VNet and its 5 subnets utilized by GPT-RAG:
+1. **Set Environment Variable:**
+   Before provisioning, set the environment variable to indicate that you will reuse an existing VNet by running:
+   ```bash
+   azd env set NETWORK_ISOLATION true 
+   azd env set VNET_REUSE true
+   ```
 
-![Zero Trust Architecture](../media/architecture-GPT-RAG-ZeroTrust.png)
+2. **Provision Resources:**
+   Provision the core GPT-RAG resources (Function App, AI Services, etc.) by executing:
+   ```bash
+   azd provision
+   ```
 
-The simplest approach is to create subnets with predefined names: **ai-subnet**, **AzureBastionSubnet**, **app-int-subnet**, **app-services-subnet**, **database-subnet**.
+3. **Setup Network:**
+   After provisioning, you can configure the necessary network resources to ensure your application functions smoothly. Instructions on creating these network elements manually via the Azure Portal are available on the [Manual Network Setup](GUIDE.md#3-manual-network-setup) section in the Admin Guide.
 
-If you prefer different names for the subnets, you can use custom names by specifying them with the corresponding variables. Refer to the table below for the predefined names and their associated variables:
+   This page explains how to manually create the network resources used by the solution, following the same architectural definitions as the Bicep template used for automatic network setup.
 
-| Subnet Name           | Predefined Name       | Environment Variable Name      |
-|-----------------------|-----------------------|--------------------------------|
-| AI Subnet             | ai-subnet             | AZURE_AI_SUBNET_NAME           |
-| Azure Bastion Subnet  | AzureBastionSubnet    | AZURE_BASTION_SUBNET_NAME      |
-| App Int Subnet        | app-int-subnet        | AZURE_APP_INT_SUBNET_NAME      |
-| App Services Subnet   | app-services-subnet   | AZURE_APP_SERVICES_SUBNET_NAME |
-| Database Subnet       | database-subnet       | AZURE_DATABASE_SUBNET_NAME     |
+> [!Note]
+> We recommend using the same VNet and subnet topology as defined in the architecture to facilitate maintenance, but feel free to organize as preferred. The important part is to ensure the same connectivity among resources.
 
-For instance, if your AI subnet has a custom name, specify it using the `AZURE_AI_SUBNET_NAME` variable.
+4. **Deploying GPT-RAG Application Components:**
+    After provisioning the GPT-RAG resources with `azd provision` and configuring the network resources, you can deploy the GPT-RAG application components using:
+    ```bash
+    azd package
+    azd deploy
+    ```
 
-`azd env set AZURE_AI_SUBNET_NAME my-ai-subnet-name`
+#### Bastion and Data Science VM:
 
-#### Networking resources
+If users have secure access to the VNet through ExpressRoute or VPN, they can perform the required tasks directly from their own machines. This eliminates the need for a Bastion VM, making its creation optional. This way, you won’t need to create a Bastion subnet or provision a Data Science VM.
 
-When reusing an existing VNet, you must configure the network resources according to your standards **after deploying GPT-RAG**.
+To skip provisioning the Data Science VM when running `azd provision`, remember to set the following variable to false:
 
-These resources include Private Endpoints, Private DNS Links, and Search Private Links:
-
-
-| Service Type        | Related Service                | Description                                                  |
-|---------------------|--------------------------------|--------------------------------------------------------------|
-| Private Endpoint    | Data Ingestion Function App    | Data Ingestion Function App Private Endpoint                 |
-| Private Endpoint    | Azure Storage Account          | Azure Storage Account Private Endpoint                       |
-| Private Endpoint    | Azure Cosmos DB                | Azure Cosmos DB Private Endpoint                             |
-| Private Endpoint    | Azure Key Vault                | Azure Key Vault Private Endpoint                             |
-| Private Endpoint    | Orchestrator Function App      | Orchestrator Function App Private Endpoint                   |
-| Private Endpoint    | Frontend Web App               | Frontend Web App Private Endpoint                            |
-| Private Endpoint    | Azure AI Services              | Azure AI Services Private Endpoint                           |
-| Private Endpoint    | Azure OpenAI                   | Azure OpenAI Private Endpoint                                |
-| Private Endpoint    | Azure Search                   | Azure Search Private Endpoint                                |
-| DNS Zone            | Azure Storage Account          | DNS Zone for Azure Storage Account                           |
-| DNS Zone            | Azure Cosmos DB                | DNS Zone for Azure Cosmos DB                                 |
-| DNS Zone            | Azure Key Vault                | DNS Zone for Azure Key Vault                                 |
-| DNS Zone            | Azure App Services             | DNS Zone for Azure App Services                              |
-| DNS Zone            | Azure AI Services              | DNS Zone for Azure AI Services                               |
-| DNS Zone            | Azure OpenAI                   | DNS Zone for Azure OpenAI                                    |
-| DNS Zone            | Azure Search                   | DNS Zone for Azure Search                                    |
-| Search Private Link | Data Ingestion Function App    | AI Search Private Link for Data Ingestion Function App       |
-| Search Private Link | Storage Account                | Azure AI Search Private Link for Storage Account             |
+```bash
+azd env set AZURE_VM_DEPLOY_VM false
+```

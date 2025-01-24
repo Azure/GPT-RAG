@@ -1,0 +1,36 @@
+name: Multi-Environment Build and Deploy
+
+on:
+  workflow_dispatch:
+  push:
+    # Run when commits are pushed to mainline branch (main or master)
+    # Set this to the mainline branch you are using
+    branches:
+      # - main
+      # - master
+      - none
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy-dev:
+    uses: ./.github/workflows/deploy-template.yml
+    secrets: inherit
+    with:
+      AZURE_ENV_NAME: EDIT-dev # edit to match the name of your environment
+
+  deploy-test:
+    uses: ./.github/workflows/deploy-template.yml
+    secrets: inherit
+    needs: [deploy-dev]
+    with:
+      AZURE_ENV_NAME: EDIT-test # edit to match the name of your environment
+
+  deploy-prod:
+    uses: ./.github/workflows/deploy-template.yml
+    secrets: inherit
+    needs: [deploy-test]
+    with:
+      AZURE_ENV_NAME: EDIT-ghprod # edit to match the name of your environment

@@ -81,7 +81,7 @@
         "value": "${AZURE_VM_DEPLOY_VM}"
       },
       "vmUserInitialPassword": {
-        "value": "$(secretOrRandomPassword ${AZURE_VM_KV_NAME} vmUserInitialPassword)"
+        "value": "$(secretOrRandomPassword ${AZURE_BASTION_KV_NAME} vmUserInitialPassword)"
       },      
       "vmUserName": {
         "value": "${AZURE_VM_USER_NAME}"
@@ -103,6 +103,18 @@
       },    
       "chatGptModelVersion": {
         "value": "${AZURE_CHAT_GPT_MODEL_VERSION}"
+      },
+      "embeddingsModelName": {
+        "value": "${AZURE_EMBEDDINGS_MODEL_NAME}"
+      },
+      "embeddingsModelVersion": {
+        "value": "${AZURE_EMBEDDINGS_VERSION}"
+      },
+      "embeddingsDeploymentName": {
+        "value": "${AZURE_EMBEDDINGS_DEPLOYMENT_NAME}"
+      },
+      "embeddingsVectorSize": {
+        "value": "${AZURE_EMBEDDINGS_VECTOR_SIZE}"
       },
       "openaiApiVersion": {
         "value": "${AZURE_OPENAI_API_VERSION}"
@@ -136,12 +148,6 @@
       },
       "speechSynthesisVoiceName": {
         "value": "${AZURE_SPEECH_SYNTHESIS_VOICE_NAME}"
-      },
-      "dbAccountName": {
-        "value": "${AZURE_DB_ACCOUNT_NAME}"
-      },
-      "dbDatabaseName": {
-        "value": "${AZURE_DB_DATABASE_NAME}"
       },
       "storageAccountName": {
         "value": "${AZURE_STORAGE_ACCOUNT_NAME}"
@@ -254,7 +260,7 @@
           "existingKeyVaultResourceGroupName": "${KEY_VAULT_RESOURCE_GROUP_NAME}",
           "existingKeyVaultName": "${KEY_VAULT_NAME}",
           "storageReuse": "${STORAGE_REUSE}",
-          "existingAccountResourceGroupName": "${STORAGE_RESOURCE_GROUP_NAME}",
+          "existingStorageResourceGroupName": "${STORAGE_RESOURCE_GROUP_NAME}",
           "existingStorageName": "${STORAGE_NAME}",
           "vnetReuse": "${VNET_REUSE}",
           "existingVnetResourceGroupName": "${VNET_RESOURCE_GROUP_NAME}",

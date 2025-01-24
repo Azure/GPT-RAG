@@ -170,11 +170,10 @@ resource vmUserPasswordSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
 }
 
 resource KeyVaultAccessRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(subscription().id, resourceGroup().id, principalId, keyVault.id, 'Secret Reader')
+  name: guid(subscription().id, resourceGroup().id, principalId, keyVault.id, 'Key Vault Secrets Officer')
   scope: keyVault
   properties: {
     principalId: principalId
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')
-    // principalType: 'User'
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b86a8fe4-44ce-4948-aee5-eccb2c155cd7')
   }
 }

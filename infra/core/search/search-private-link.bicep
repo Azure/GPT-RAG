@@ -3,11 +3,11 @@ param searchName string
 param resourceId string
 param groupId string
 
-resource search 'Microsoft.Search/searchServices@2021-04-01-preview' existing = {
+resource search 'Microsoft.Search/searchServices@2024-03-01-preview' existing = {
   name: searchName
 }
 
-resource sharedPrivateLinkResources 'Microsoft.Search/searchServices/sharedPrivateLinkResources@2021-04-01-preview' = {
+resource sharedPrivateLinkResources 'Microsoft.Search/searchServices/sharedPrivateLinkResources@2024-03-01-preview' = {
   name: name
   parent: search
   properties: {

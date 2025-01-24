@@ -1,0 +1,27 @@
+{
+  "data": {
+    "subscriptionId": "$SUBSCRIPTION_ID",
+    "subscriptionName": "$SUBSCRIPTION_NAME"
+  },
+  "name": "$NAME",
+  "type": "azurerm",
+  "url": "https://management.azure.com/",
+  "authorization": {
+    "parameters": {
+      "serviceprincipalid": "$SERVICE_PRINCIPAL_ID",
+      "tenantid": "$TENANT_ID"
+    },
+    "scheme": "WorkloadIdentityFederation"
+  },
+  "isShared": false,
+  "isReady": true,
+  "serviceEndpointProjectReferences": [
+    {
+      "projectReference": {
+        "id": "$PROJECT_ID",
+        "name": "$PROJECT_NAME"
+      },
+      "name": "$NAME"
+    }
+  ]
+}

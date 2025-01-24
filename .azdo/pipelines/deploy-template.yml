@@ -1,0 +1,74 @@
+parameters:
+  - name: azureEnvName
+    type: string
+    default: "dev"
+    displayName: "Azure Environment Name"
+  - name: serviceConnection
+    type: string
+    default: "dev"
+    displayName: "Azure Service Connection Name"
+
+steps:
+  - checkout: self
+
+  - task: Bash@3
+    displayName: Install azd
+    inputs:
+      targetType: "inline"
+      script: |
+        curl -fsSL https://aka.ms/install-azd.sh | bash
+
+  - pwsh: |
+      azd config set auth.useAzCliAuth "true"
+    displayName: Configure AZD to Use AZ CLI Authentication.
+
+  - task: AzureCLI@2
+    displayName: Provision Infrastructure
+    inputs:
+      addSpnToEnvironment: true
+      azureSubscription: ${{ parameters.serviceConnection }}
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        chmod -R 755 ./scripts
+        az login --service-principal -u $servicePrincipalId --tenant $tenantId --federated-token $idToken -o none
+        azd provision --no-prompt
+    env:
+      AZURE_SUBSCRIPTION_ID: $(AZURE_SUBSCRIPTION_ID)
+      AZURE_ENV_NAME: ${{ parameters.azureEnvName }}
+      AZURE_LOCATION: $(AZURE_LOCATION)
+      AZURE_SERVICE_CONNECTION: ${{ parameters.serviceConnection }}
+
+  - task: AzureCLI@2
+    displayName: Package Services
+    inputs:
+      addSpnToEnvironment: true
+      azureSubscription: ${{ parameters.serviceConnection }}
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        chmod -R 755 ./scripts
+        az login --service-principal -u $servicePrincipalId --tenant $tenantId --federated-token $idToken -o none
+        azd package --no-prompt
+    env:
+      AZURE_SUBSCRIPTION_ID: $(AZURE_SUBSCRIPTION_ID)
+      AZURE_ENV_NAME: ${{ parameters.azureEnvName }}
+      AZURE_LOCATION: $(AZURE_LOCATION)
+      AZURE_SERVICE_CONNECTION: ${{ parameters.serviceConnection }}
+
+  - task: AzureCLI@2
+    displayName: Deploy Services
+    inputs:
+      addSpnToEnvironment: true
+      azureSubscription: ${{ parameters.serviceConnection }}
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        chmod -R 755 ./scripts
+        az login --service-principal -u $servicePrincipalId --tenant $tenantId --federated-token $idToken -o none
+        azd deploy --no-prompt
+    env:
+      AZURE_SUBSCRIPTION_ID: $(AZURE_SUBSCRIPTION_ID)
+      AZURE_ENV_NAME: ${{ parameters.azureEnvName }}
+      AZURE_LOCATION: $(AZURE_LOCATION)
+      AZURE_SERVICE_CONNECTION: ${{ parameters.serviceConnection }}

@@ -28,3 +28,4 @@ resource newAppServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = if (!appServ
 
 output id string = appServicePlanReuse ? existingAppServicePlan.id: newAppServicePlan.id
 output name string = appServicePlanReuse ? existingAppServicePlan.name: newAppServicePlan.name
+output resourceGroupName string = appServicePlanReuse ? existingAppServicePlanResourceGroupName : resourceGroup().name
