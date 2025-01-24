@@ -34,7 +34,8 @@
    - [4.12 Setting Up Git Repos](#setting-up-git-repos)
 5. [**Reference**](#reference)
    - [5.1 Azure Resources](#azure-resources)
-   - [5.2 Useful Links](#useful-links) 
+   - [5.2 Permissions](#permissions)   
+   - [5.3 Useful Links](#useful-links) 
 6. [**Troubleshooting**](#troubleshooting)
 
 ---
@@ -1248,10 +1249,60 @@ Here is the complete list of resources for a standard Zero Trust deployment, inc
     - SKU: Standard
     - Tier: Regional
 
+### Permissions
+
+This section outlines the necessary Azure permissions required to operate the solution, categorized for clarity.
+
+1. **Provisioning and Deployment**  
+
+   Users or service principals (e.g., CI/CD pipelines) need permissions to create, configure, and deploy resources, as well as assign roles for access control. This requires either the **Owner** role or a combination of **Contributor** and **User Access Administrator** roles at the subscription level. Alternatively, a custom role with the necessary permissions can be created. [Learn how to create a **Custom Role** here](MANUAL_CUSTOM_ROLE.md).
+
+2. **Deployment Only**
+
+   This category includes the minimum permissions required to deploy application code when the necessary resources have already been provisioned. In such cases, the **Contributor** role provides sufficient permissions to deploy the application. However, if you prefer a more specialized role, you can use the **Website Contributor** role. This role grants the necessary permissions to deploy code to the existing resources.
+
+3. **File Upload for Data Ingestion:**  
+
+   To upload documents, the user must have the **Storage Blob Data Contributor** role assigned in Azure Entra ID for the respective storage account where the documents will be stored. This role grants permission to upload and manage blobs within the storage containers.
+
+4. **Solution Components:**  
+
+Solution components require specific Azure pre-built roles to securely interact with services and maintain operational integrity. The table below outlines the required role assignments.
+
+#### Role Assignment Table
+
+The following table provides a detailed overview of the required roles across different solution components:
+
+
+| **Permission Scope**                        | **Role Assigned**                 | **Assigned to**               | **Description**                                                                                  |
+|---------------------------------------------|-----------------------------------|-------------------------------|--------------------------------------------------------------------------------------------------|
+| **AI Services**                             | Cognitive Services Contributor    | Data Ingestion Function App   | Enables Document Intelligence features for data ingestion.                                       |
+| **AI Services**                             | Cognitive Services Contributor    | Frontend App Service          | Grants access to Speech Service (optional).                                                     |
+| **Azure AI Search**                         | Search Index Data Contributor     | Data Ingestion Function App   | Allows indexing of data in Azure AI Search.                                                     |
+| **Azure AI Search**                         | Search Index Data Reader          | Orchestrator Function App     | Provides read access to the search index.                                                       |
+| **Azure OpenAI**                            | Cognitive Services OpenAI User    | Azure AI Search               | Enables OpenAI capabilities for Azure AI Search.                                                |
+| **Azure OpenAI**                            | Cognitive Services OpenAI User    | Data Ingestion Function App   | Grants access to OpenAI capabilities for data ingestion.                                        |
+| **Azure OpenAI**                            | Cognitive Services OpenAI User    | Orchestrator Function App     | Allows the orchestrator to use OpenAI services.                                                 |
+| **Cosmos DB**                               | Cosmos DB Built-in Data Contributor | Orchestrator Function App     | Grants data contribution permissions to Cosmos DB.                                              |
+| **KeyVault**                                | Access via `get`, `list` permissions (Access Policies) or the Key Vault Secrets User role (RBAC model) | Data Ingestion Function App   | Provides access to secrets in Key Vault.                                                        |
+| **KeyVault**                                | Access via `get`, `list` permissions (Access Policies) or the Key Vault Secrets User role (RBAC model) | Orchestrator Function App     | Provides access to secrets in Key Vault.                                                        |
+| **Orchestrator Function App**               | Contributor                        | Frontend App Service          | Grants interaction permissions with the orchestrator.                                           |
+| **Data Ingestion Function App Storage Account** | Storage Blob Data Contributor   | Data Ingestion Function App   | Grants read/write access to the storage account.                                                |
+| **Orchestrator Function App Storage Account**   | Storage Blob Data Contributor   | Orchestrator Function App     | Grants read/write access to the storage account.                                                |
+| **Source Docs Storage Account**             | Storage Blob Data Contributor     | Data Ingestion Function App   | Enables writing to the storage account for image extraction in the multimodal scenario.         |
+| **Source Docs Storage Account**             | Storage Blob Data Reader          | Frontend App Service          | Provides read access to the storage account.                                                    |
+| **Source Docs Storage Account**             | Storage Blob Data Reader          | Azure AI Search               | Grants read access to search service.                                                           |
+| **Source Docs Storage Account**             | Storage Blob Data Reader          | Orchestrator Function App     | Allows reading source documents from the storage account.                                       |
+
+
+> [Note]
+> Permissions for external resource connections, such as SQL databases (for NL2SQL), Fabric, or SharePoint, are covered in a separate section dedicated to connection setup.
+
+
 ### Useful Links
 
 - [Microsoft Customer Digital Experiences](https://cdx.transform.microsoft.com/)  
-  Set up an M365 demo tenant with an E5 license, which includes Power BI and allows you to enable Fabric. Useful for testing connections with Fabric, MS Teams, and SharePoint using the Microsoft Graph REST API. Available to Microsoft employees and partners.
+  Set up an M365 demo tenant with an E5 license, which includes Power BI and allows you to enable Fabric. Useful for testing connections with MS Teams, and SharePoint using the Microsoft Graph REST API. Available to Microsoft employees and partners.
 
 - [Microsoft 365 Developer Program](https://learn.microsoft.com/en-us/microsoftteams/platform/toolkit/tools-prerequisites#microsoft-365-developer-program)  
   This program also allows you to create an M365 sandbox tenant with an E5 license, available to Visual Studio Enterprise or Professional subscribers.  
