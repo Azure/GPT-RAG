@@ -1,4 +1,5 @@
-param permissions object = { secrets: [ 'get', 'list', 'set', 'delete' ] }
+param permissions object = { secrets: [ 'get', 'list' ] }
+// param permissions object = { secrets: [ 'get', 'list', 'set', 'delete' ] }
 param principalId string
 param resourceName string
 
