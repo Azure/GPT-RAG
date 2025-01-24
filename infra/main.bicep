@@ -640,6 +640,7 @@ module testvm './core/vm/dsvm.bicep' = if (_networkIsolation && !_vnetReuse && _
   }
 }
 
+//The VM's Managed Identity is granted access to create AI Search indexes and indexers for convenience, as the role is also assigned to the provisioning identity afterward.
 module testvmSearchAccess './core/security/search-service-contributor.bicep' = if (_networkIsolation && !_vnetReuse && _deployVM) {
   name: 'dsvm-search-access'
   scope: az.resourceGroup(_searchResourceGroupName)
@@ -1054,7 +1055,7 @@ module orchestratorOaiAccess './core/security/openai-access.bicep' = {
   }
 } 
 
-module orchestratorSearchAccess './core/security/search-index-contributor-access.bicep' = {
+module orchestratorSearchAccess './core/security/search-index-read-access.bicep' = {
   name: 'orchestrator-search-access'
   scope: az.resourceGroup(_searchResourceGroupName)
   params: {
@@ -1152,17 +1153,8 @@ module frontendPe './core/network/private-endpoint.bicep' = if (_networkIsolatio
   }
 }
 
-module appserviceKeyVaultAccess './core/security/keyvault-access.bicep' = {
-  name: 'appservice-keyvault-access'
-  scope: az.resourceGroup(_keyVaultResourceGroupName)
-  params: {
-    resourceName: keyVault.outputs.name
-    principalId: frontEnd.outputs.identityPrincipalId
-  }
-}
-
-module appserviceStorageAccountAccess './core/security/blobstorage-contributor-access.bicep' = {
-  name: 'appservice-blobstorage-contributor-access'
+module appserviceStorageAccountAccess './core/security/blobstorage-reader-access.bicep' = {
+  name: 'appservice-blobstorage-reader-access'
   scope: az.resourceGroup(_storageAccountResourceGroupName)
   params: {
     resourceName: storage.outputs.name
@@ -1640,15 +1632,6 @@ module searchOaiAccess './core/security/openai-access.bicep' = {
     resourceName: openAi.outputs.name
   }
 } 
-
-module searchIngestionAccess './core/security/functions-access.bicep' = {
-  name: 'search-function-access'
-  scope: az.resourceGroup(_dataIngestionFunctionAppResourceGroupName)
-  params: {
-    resourceName: dataIngestion.outputs.name
-    principalId: searchService.outputs.principalId
-  }
-}
 
 // Load Testing
 
