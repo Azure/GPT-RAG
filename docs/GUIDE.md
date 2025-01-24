@@ -1294,8 +1294,7 @@ The following table provides a detailed overview of the required roles across di
 | **Source Docs Storage Account**             | Storage Blob Data Reader          | Azure AI Search               | Grants read access to search service.                                                           |
 | **Source Docs Storage Account**             | Storage Blob Data Reader          | Orchestrator Function App     | Allows reading source documents from the storage account.                                       |
 
-
-> [Note]
+> [!Note]
 > Permissions for external resource connections, such as SQL databases (for NL2SQL), Fabric, or SharePoint, are covered in a separate section dedicated to connection setup.
 
 
