@@ -75,7 +75,7 @@ The Bicep templates include role assignments to ensure each service can perform 
 
 The **Azure Developer CLI (azd)** simplifies the development, provisioning, and deployment of Azure applications. It integrates with Bicep templates for efficient infrastructure management and automates deployment workflows. In this project, azd is used to streamline resource provisioning, configuration management, and service integration, improving productivity and minimizing manual effort.
 
-### Integration with `main.bicep`
+### Azure Developer CLI Integration with Bicep
 
 The `main.bicep` file orchestrates the deployment of all Azure resources through a modular approach.
 
@@ -97,81 +97,76 @@ The `main.bicep` file orchestrates the deployment of all Azure resources through
 
 - **Output Definitions:** Provides information about deployed resources (e.g., account names, endpoints) to support integration with other services or scripts. These outputs facilitate seamless interoperability and automation across different components of your infrastructure.
 
-### Provision and Deploy Workflow
+Below is an improved version of the process description in English, focusing on the “Function” points for each stage and hook. The text is concise and does not include code.
 
-The deployment process is managed using the **Azure Developer CLI (azd)**, which orchestrates the workflow in two main stages:
+---
 
-1. **Provision Stage**
+## Provision and Deploy Workflow
+
+The deployment process is managed using the **Azure Developer CLI (azd)**, which orchestrates two main stages:
+
+1. **Provision Stage**  
 2. **Deploy Stage**
 
-Each stage involves executing specific hooks and deploying resources or services accordingly.
+Each stage involves specific hooks and tasks to create or update resources and services.
 
 ---
 
 ### 1. Provision Stage
 
-**Command:** `azd provision`
-
+**Command:** `azd provision`  
 **Purpose:** Sets up the necessary Azure infrastructure as defined in the project’s resource templates.
 
 **Process:**
 
-1. **Global Preprovision Hooks:**
-   - **Scripts Executed:** `preprovision.sh` or `preprovision.ps1`
-   - **Function:** Perform initial setup tasks required before deploying resources, such as validating configurations or setting environment variables.
-   - **Scope:** Executed **once globally** before any resources are deployed.
+1. **Global Preprovision Hooks**  
+   - **Scripts Executed:** `preprovision`
+   - **Function:** Warns about network isolation if enabled, prompts for user confirmation, and handles any initial setup tasks before provisioning.  
+   - **Scope:** Runs **once** before any resources are deployed.
 
-2. **Resource Deployment:**
-   - **Tools Used:** Deploys all Azure resources using `main.bicep`.
-   - **Function:** Creates the necessary infrastructure components (e.g., databases, storage accounts, networking resources).
+2. **Resource Deployment**  
+   - **Tools Used:** `main.bicep`  
+   - **Function:** Creates all required Azure resources (e.g., storage accounts, networking, databases).
 
-3. **Global Postprovision Hooks:**
-   - **Scripts Executed:** `postprovision.sh` or `postprovision.ps1`
-   - **Function:** Finalize configurations after resource deployment, such as configuring resource-specific settings or initializing services.
-   - **Scope:** Executed **once globally** after all resources have been deployed.
+3. **Global Postprovision Hooks**  
+   - **Scripts Executed:** `postprovision`
+   - **Function:** Completes final configuration steps, including applying Responsible AI (RAI) policies to Azure OpenAI services, and provides instructions for Zero Trust access.  
+   - **Scope:** Runs **once** after all resources have been deployed.
 
 ---
 
 ### 2. Deploy Stage
 
-**Command:** `azd deploy`
-
-**Purpose:** Deploys individual services within the provisioned infrastructure, handling service-specific configurations and integrations.
+**Command:** `azd deploy`  
+**Purpose:** Deploys services within the provisioned infrastructure, handling any additional service-specific configurations.
 
 **Process:**
 
-1. **Global Predeploy Hooks:**
-   - **Scripts Executed:** `preDeploy.sh` or `preDeploy.ps1`
-   - **Additional Scripts:** `scripts/fetchComponents.sh` or `scripts/fetchComponents.ps1`
-   - **Function:** Perform tasks that need to be completed before deploying any service, such as pulling necessary components from repositories.
-   - **Scope:** Executed **once globally** before deploying any individual services.
+1. **Global Predeploy Hooks**  
+   - **Scripts Executed:** `preDeploy`, plus `fetchComponents`
+   - **Function:** Verifies readiness for Zero Trust environments, prompts for confirmation if necessary, and fetches required service components from repositories.  
+   - **Scope:** Runs **once** before deploying individual services.
 
-2. **Service Deployments:**
-   
-   Each service undergoes its specific deployment process, which may include service-specific hooks:
+2. **Service Deployments**  
+   Each service has its own deployment flow and optional hooks:
 
-   - **a. Data Ingestion Service:**
-     - **Deployment:** Deploys the Data Ingestion Function App.
-     - **Postdeploy Hooks:**
-       - **Function:** Configures Azure AI Search components like indexers and indexes.
-       - **Scripts:** Custom scripts or commands specific to Azure AI Search configuration.
+   - **a. Data Ingestion Service**  
+     - **Deployment:** Deploys the Function App for data ingestion.  
+     - **Postdeploy Hooks:** `preprovision` script in **gpt-rag-ingestion** repo sets up Azure AI Search (indexes, indexers) and any other service-specific configurations.
 
-   - **b. Orchestrator Service:**
-     - **Deployment:** Deploys the Orchestrator Function App.
-     - **Configurations:**
-       - Sets up necessary integrations with other services.
-       - Configures permissions and access controls.
+   - **b. Orchestrator Service**  
+     - **Deployment:** Deploys the Orchestrator Function App.  
 
-   - **c. Frontend Service:**
-     - **Prepackage Hooks:**
-       - **Tasks:** Builds the frontend application using commands like `npm install` and `npm run build`.
+   - **c. Frontend Service**  
+     - **Prepackage Hooks:** Installs dependencies and builds the frontend application.  
      - **Deployment:** Deploys the Frontend App Service.
-     - **Postdeploy Hooks:**
-       - **Function:** Cleans up temporary artifacts, including removing fetched repositories to maintain a clean deployment environment.
 
-   **Note:** Service-specific hooks are executed **only for their respective services** and are not part of the global hook executions.
+   **Note:** Service-specific hooks apply **only** to their respective services.
 
-3. **Global Postdeploy Hooks:**
-   - **Scripts Executed:** `cleanComponents.sh` or `cleanComponents.ps1`
-   - **Function:** Cleans up any remaining fetched repositories and finalizes deployment tasks to ensure the environment is tidy and secure.
-   - **Scope:** Executed **once globally** after all individual services have been deployed.
+3. **Global Postdeploy Hooks**  
+   - **Scripts Executed:** `cleanComponents`
+   - **Function:** Removes remaining cloned repositories and completes final housekeeping to ensure a secure, uncluttered environment.  
+   - **Scope:** Runs **once** after all services have been deployed.
+
+> [!Note]  
+> To support both PowerShell and Bash shells during deployment, the scripts are provided in both formats. To simplify the text, we removed file extensions (e.g., `.ps1` or `.sh`) from the explanation above.
