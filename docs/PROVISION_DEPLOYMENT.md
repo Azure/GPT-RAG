@@ -96,9 +96,7 @@ The `main.bicep` file orchestrates the deployment of all Azure resources through
 - **Conditional Deployments:** Utilizes parameters to conditionally deploy resources, such as enabling network isolation or reusing existing resources. This allows for dynamic and adaptable infrastructure setups based on the defined parameters.
 
 - **Output Definitions:** Provides information about deployed resources (e.g., account names, endpoints) to support integration with other services or scripts. These outputs facilitate seamless interoperability and automation across different components of your infrastructure.
-
-Below is an improved version of the process description in English, focusing on the “Function” points for each stage and hook. The text is concise and does not include code.
-
+  
 ---
 
 ## Provision and Deploy Workflow
