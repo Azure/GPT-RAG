@@ -11,6 +11,7 @@
    - [2.3 Orchestration Flow](#orchestration-flow)
    - [2.4 Network Components](#network-components)
    - [2.5 Access Control](#access-control)
+   - [2.6 Provision and Deployment](#provision-and-deployment)   
 3. [**How-to: User**](#how-to-user)
    - [3.1 Accessing the Application](#accessing-the-application)
    - [3.2 Upload Content](#uploading-documents-for-ingestion)
@@ -34,8 +35,9 @@
    - [4.12 Setting Up Git Repos](#setting-up-git-repos)
 5. [**Reference**](#reference)
    - [5.1 Azure Resources](#azure-resources)
-   - [5.2 Permissions](#permissions)   
-   - [5.3 Useful Links](#useful-links) 
+   - [5.2 Permissions](#permissions)
+   - [5.3 AZD Deployment Overview](#permissions)     
+   - [5.4 Useful Links](#useful-links) 
 6. [**Troubleshooting**](#troubleshooting)
 
 ---
@@ -154,6 +156,9 @@ The solution utilizes **Azure Entra ID** (formerly Azure Active Directory) for a
 
 Authorization is managed by defining specific Entra ID users and groups that are permitted to use the application. These allowed users and groups are configured directly in the App Service settings, ensuring that only authorized individuals have access to the application.
 
+## Provision and Deployment
+
+The provisioning and deployment processes are integral to setting up and maintaining the solution. For a comprehensive understanding of how these processes are executed in this project, please refer to the dedicated [Provisioning and Deployment](PROVISIONING_DEPLOYMENT.md) page.
 
 ## How-to: User
 

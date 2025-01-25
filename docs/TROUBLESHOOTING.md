@@ -1,6 +1,22 @@
 # Troubleshooting  
-   
-**Powershell 7+ is not installed** (Windows only)
+
+### **Frontend error message: "I'm sorry, I had a problem with the request..."**
+
+*Symptoms:*  
+
+Users see an error message stating: "I'm sorry, I had a problem with the request. Please report the error to the support team. SyntaxError: Failed to execute 'json' on 'Response': Unexpected end of JSON input."
+
+*Cause:*
+
+This issue typically occurs when the orchestrator does not send a response to the frontend.
+
+*Resolution:*
+
+Please check the orchestrator's log stream for any specific errors. If the issue persists, feel free to reopen it.
+      
+---
+
+### **Powershell 7+ is not installed** (Windows only)
    
 *Symptoms:*  
    
@@ -13,7 +29,7 @@ You do not have the correct Powershell version. You need to install the appropri
    
 ---
 
-**Azure OpenAI model is not available in the selected region.**
+### **Azure OpenAI model is not available in the selected region.**
    
 *Symptoms:*  
    
@@ -27,7 +43,7 @@ The error message indicates that the deployment failed to provision an infrastru
    
 ---
 
-**The tenant used by azd is different from the tenant used by another authentication method**  
+### **The tenant used by azd is different from the tenant used by another authentication method**  
    
 *Symptoms:*  
   
@@ -55,7 +71,7 @@ In this case, a method with higher precedence than azd, for example az, is logge
    
 ---
 
-**Zero-trust deployment from a machine outside its vnet**  
+### **Zero-trust deployment from a machine outside its vnet**  
    
 *Symptoms:*  
    
@@ -74,8 +90,7 @@ For deployment of the zero trust components, it is necessary to perform it from 
 
 ---
 
-
-**SQL Database is Unavailable or Autopaused**
+### **SQL Database is Unavailable or Autopaused**
 
 *Symptoms:*
 
