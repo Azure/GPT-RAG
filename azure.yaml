@@ -14,11 +14,11 @@ services:
         posix:
           # this path is relative to ./.azure/gpt-rag-ingestion
           run: scripts/postdeploy.sh
-          interactive: false
+          interactive: true
         windows:
           # this path is relative to ./.azure/gpt-rag-ingestion
           run: scripts/postdeploy.ps1
-          interactive: false
+          interactive: true
   orchestrator:
     project: ./.azure/gpt-rag-orchestrator
     language: python
@@ -41,39 +41,40 @@ services:
           interactive: false
           continueOnError: false
 hooks:
-  # Components are pulled from their own repo for deployment but are not persisted to this repo.
-  prepackage:
-    posix:
-      run: scripts/fetchComponents.sh
-      interactive: false
-    windows:
-      run: scripts/fetchComponents.ps1
-      interactive: false      
   preprovision:
-    windows:
-      run: scripts/preprovision.ps1
-      interactive: true
     posix:
+      shell: sh    
       run: scripts/preprovision.sh
+      interactive: true
+    windows:
+      shell: pwsh    
+      run: scripts/preprovision.ps1
       interactive: true
   postprovision:
     posix:
+      shell: sh    
       run: scripts/postprovision.sh
       interactive: true
     windows:
+      shell: pwsh    
       run: scripts/postprovision.ps1
       interactive: true
+  # Components are pulled from their own repo for deployment but are not persisted to this repo.
   predeploy:
     posix:
-      run: scripts/preDeploy.sh
+      shell: sh
+      run: scripts/preDeploy.sh; scripts/fetchComponents.sh
       interactive: true
     windows:
-      run: scripts/preDeploy.ps1
+      shell: pwsh
+      run: scripts/preDeploy.ps1; scripts/fetchComponents.ps1
       interactive: true
   postdeploy:
     posix:
+      shell: sh    
       run: scripts/cleanComponents.sh
       interactive: false
     windows:
+      shell: pwsh    
       run: scripts/cleanComponents.ps1
       interactive: false
