@@ -158,7 +158,7 @@ Authorization is managed by defining specific Entra ID users and groups that are
 
 ## Provision and Deployment
 
-The provisioning and deployment processes are integral to setting up and maintaining the solution. For a comprehensive understanding of how these processes are executed in this project, please refer to the dedicated [Provisioning and Deployment](PROVISIONING_DEPLOYMENT.md) page.
+The provisioning and deployment processes are integral to setting up and maintaining the solution. For a comprehensive understanding of how these processes are executed in this project, please refer to the dedicated [Provisioning and Deployment](PROVISION_DEPLOYMENT.md) page.
 
 ## How-to: User
 
