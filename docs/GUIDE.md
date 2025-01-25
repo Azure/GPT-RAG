@@ -35,9 +35,8 @@
    - [4.12 Setting Up Git Repos](#setting-up-git-repos)
 5. [**Reference**](#reference)
    - [5.1 Azure Resources](#azure-resources)
-   - [5.2 Permissions](#permissions)
-   - [5.3 AZD Deployment Overview](#permissions)     
-   - [5.4 Useful Links](#useful-links) 
+   - [5.2 Permissions](#permissions)    
+   - [5.3 Useful Links](#useful-links) 
 6. [**Troubleshooting**](#troubleshooting)
 
 ---
@@ -158,7 +157,7 @@ Authorization is managed by defining specific Entra ID users and groups that are
 
 ## Provision and Deployment
 
-The provisioning and deployment processes are integral to setting up and maintaining the solution. For a comprehensive understanding of how these processes are executed in this project, please refer to the dedicated [Provisioning and Deployment](PROVISIONING_DEPLOYMENT.md) page.
+The provisioning and deployment processes are integral to setting up and maintaining the solution. For a comprehensive understanding of how these processes are executed in this project, please refer to the dedicated [Provisioning and Deployment](PROVISION_DEPLOYMENT.md) page.
 
 ## How-to: User
 

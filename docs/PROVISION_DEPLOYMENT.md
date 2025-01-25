@@ -97,10 +97,6 @@ The `main.bicep` file orchestrates the deployment of all Azure resources through
 
 - **Output Definitions:** Provides information about deployed resources (e.g., account names, endpoints) to support integration with other services or scripts. These outputs facilitate seamless interoperability and automation across different components of your infrastructure.
 
-Below is an improved version of the process description in English, focusing on the “Function” points for each stage and hook. The text is concise and does not include code.
-
----
-
 ## Provision and Deploy Workflow
 
 The deployment process is managed using the **Azure Developer CLI (azd)**, which orchestrates two main stages:
@@ -109,8 +105,6 @@ The deployment process is managed using the **Azure Developer CLI (azd)**, which
 2. **Deploy Stage**
 
 Each stage involves specific hooks and tasks to create or update resources and services.
-
----
 
 ### 1. Provision Stage
 
@@ -132,8 +126,6 @@ Each stage involves specific hooks and tasks to create or update resources and s
    - **Scripts Executed:** `postprovision`
    - **Function:** Completes final configuration steps, including applying Responsible AI (RAI) policies to Azure OpenAI services, and provides instructions for Zero Trust access.  
    - **Scope:** Runs **once** after all resources have been deployed.
-
----
 
 ### 2. Deploy Stage
 
