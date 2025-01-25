@@ -35,9 +35,8 @@
    - [4.12 Setting Up Git Repos](#setting-up-git-repos)
 5. [**Reference**](#reference)
    - [5.1 Azure Resources](#azure-resources)
-   - [5.2 Permissions](#permissions)
-   - [5.3 AZD Deployment Overview](#permissions)     
-   - [5.4 Useful Links](#useful-links) 
+   - [5.2 Permissions](#permissions)    
+   - [5.3 Useful Links](#useful-links) 
 6. [**Troubleshooting**](#troubleshooting)
 
 ---
