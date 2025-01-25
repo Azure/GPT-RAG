@@ -96,8 +96,6 @@ The `main.bicep` file orchestrates the deployment of all Azure resources through
 - **Conditional Deployments:** Utilizes parameters to conditionally deploy resources, such as enabling network isolation or reusing existing resources. This allows for dynamic and adaptable infrastructure setups based on the defined parameters.
 
 - **Output Definitions:** Provides information about deployed resources (e.g., account names, endpoints) to support integration with other services or scripts. These outputs facilitate seamless interoperability and automation across different components of your infrastructure.
-  
----
 
 ## Provision and Deploy Workflow
 
@@ -107,8 +105,6 @@ The deployment process is managed using the **Azure Developer CLI (azd)**, which
 2. **Deploy Stage**
 
 Each stage involves specific hooks and tasks to create or update resources and services.
-
----
 
 ### 1. Provision Stage
 
@@ -130,8 +126,6 @@ Each stage involves specific hooks and tasks to create or update resources and s
    - **Scripts Executed:** `postprovision`
    - **Function:** Completes final configuration steps, including applying Responsible AI (RAI) policies to Azure OpenAI services, and provides instructions for Zero Trust access.  
    - **Scope:** Runs **once** after all resources have been deployed.
-
----
 
 ### 2. Deploy Stage
 
