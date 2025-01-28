@@ -125,7 +125,7 @@ Each stage involves specific hooks and tasks to create or update resources and s
 3. **Global Postprovision Hooks**  
    - **Scripts Executed:** `postprovision`
    - **Function:** Completes final configuration steps, including applying Responsible AI (RAI) policies to Azure OpenAI services, and provides instructions for Zero Trust access.  
-   - **Scope:** Runs **once** after all resources have been deployed.
+   - **Scope:** Runs **once** after all resources have been provisioned.
 
 ### 2. Deploy Stage
 
@@ -144,13 +144,13 @@ Each stage involves specific hooks and tasks to create or update resources and s
 
    - **a. Data Ingestion Service**  
      - **Deployment:** Deploys the Function App for data ingestion.  
-     - **Postdeploy Hooks:** `preprovision` script in **gpt-rag-ingestion** repo sets up Azure AI Search (indexes, indexers) and any other service-specific configurations.
+     - **Postdeploy Hooks:** `posdeploy` script in **gpt-rag-ingestion** repo sets up Azure AI Search (indexes, indexers) and any other service-specific configurations.
 
    - **b. Orchestrator Service**  
      - **Deployment:** Deploys the Orchestrator Function App.  
 
    - **c. Frontend Service**  
-     - **Prepackage Hooks:** Installs dependencies and builds the frontend application.  
+     - **Prepackage Hooks:** prepackage hook installs dependencies and builds the frontend application.  
      - **Deployment:** Deploys the Frontend App Service.
 
    **Note:** Service-specific hooks apply **only** to their respective services.
