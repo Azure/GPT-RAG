@@ -2,6 +2,8 @@ param name string
 param location string = resourceGroup().location
 param tags object = {}
 
+@secure()
+@description('The names of the secrets to be created in the key vault')
 param secretsNames object = {}
 param keyVaultName string
 

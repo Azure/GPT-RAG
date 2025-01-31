@@ -2,7 +2,7 @@
 param accountName string
 
 @description('Enable/disable public network access for the Cosmos DB account.')
-param publicNetworkAccess string = 'Disabled'
+param publicNetworkAccess string = 'Enabled'
 
 @description('Location for the Cosmos DB account.')
 param location string = resourceGroup().location
@@ -436,12 +436,50 @@ resource reportsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/co
   }
 }
 
-resource summarizationreportsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
+resource schedulesContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
   parent: database
-  name: 'summarization-report'
+  name: 'schedules'
   properties: {
     resource: {
-      id: 'summarization-report'
+      id: 'schedules'
+      partitionKey: {
+        paths:[
+          '/companyId'
+          '/reportType'
+        ]
+        kind: 'MultiHash'
+        version: 2
+      }
+      analyticalStorageTtl: analyticalStoreTTL
+      indexingPolicy: {
+        indexingMode: 'consistent'
+        automatic: true
+        includedPaths: [
+          {
+            path: '/*'
+          }
+        ]
+        excludedPaths: [
+          {
+            path: '/"_etag"/?'
+          }
+        ]
+      }
+    }
+    options: {
+      autoscaleSettings: {
+        maxThroughput: autoscaleMaxThroughput
+      }
+    }
+  }
+}
+
+resource auditLogsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
+  parent: database
+  name: 'auditLogs'
+  properties: {
+    resource: {
+      id: 'auditLogs'
       partitionKey: {
         paths:[
           '/id'
@@ -471,7 +509,41 @@ resource summarizationreportsContainer 'Microsoft.DocumentDB/databaseAccounts/sq
   }
 }
 
-
+resource subscriptionEmailsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
+  parent: database
+  name: 'subscription_emails'
+  properties: {
+    resource: {
+      id: 'subscription_emails'
+      partitionKey: {
+        paths:[
+          '/id'
+        ]
+        kind: 'MultiHash'
+        version: 2
+      }
+      analyticalStorageTtl: analyticalStoreTTL
+      indexingPolicy: {
+        automatic: true
+        includedPaths: [
+          {
+            path: '/*'
+          }
+        ]
+        excludedPaths: [
+          {
+            path: '/"_etag"/?'
+          }
+        ]
+      }
+    }
+    options: {
+      autoscaleSettings: {
+        maxThroughput: autoscaleMaxThroughput
+      }
+    }
+  }
+}
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
   name: keyVaultName
 }
