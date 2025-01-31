@@ -339,7 +339,7 @@ param embeddingsDeploymentName string = 'text-embedding-ada-002'
 @maxValue(240)
 param embeddingsDeploymentCapacity int = 20
 @description('Azure OpenAI API version.')
-@allowed(['2024-02-15-preview','2024-05-01-preview'])
+@allowed(['2024-02-15-preview', '2024-05-01-preview'])
 param openaiApiVersion string = '2024-05-01-preview'
 @description('Enables LLM monitoring to generate conversation metrics.')
 @allowed([true, false])
@@ -532,6 +532,7 @@ var vnetName = !empty(azureVnetName) ? azureVnetName : 'aivnet0-${resourceToken}
 
 var orchestratorEndpoint = 'https://${orchestratorFunctionAppName}.azurewebsites.net/api/orc'
 var orchestratorUri = 'https://${orchestratorFunctionAppName}.azurewebsites.net'
+var webAppUri = 'https://${appServiceName}.azurewebsites.net'
 
 // B2C parameters
 @description('B2C Tenant Name')
@@ -963,6 +964,10 @@ module orchestrator './core/host/functions.bicep' = {
       {
         name: 'LOGLEVEL'
         value: 'INFO'
+      }
+      {
+        name: 'WEB_APP_URL'
+        value: webAppUri
       }
     ]
   }
