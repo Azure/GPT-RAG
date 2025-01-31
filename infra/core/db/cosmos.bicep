@@ -7,6 +7,9 @@ param publicNetworkAccess string = 'Enabled'
 @description('Location for the Cosmos DB account.')
 param location string = resourceGroup().location
 
+@description('Minimum throughput for the Cosmos DB account.')
+param throughput int = 400
+
 param tags object = {}
 
 @description('The default consistency level of the Cosmos DB account.')
@@ -141,6 +144,40 @@ resource agentErrorsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabase
   }
 }
 
+resource companyAnalysisContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
+  parent: database
+  name: 'companyAnalysis'
+  properties: {
+    resource: {
+      defaultTtl: 86400
+      id: 'companyAnalysis'
+      partitionKey: {
+        paths: [
+          '/id'
+        ]
+        kind: 'Hash'
+      }
+      analyticalStorageTtl: analyticalStoreTTL
+      indexingPolicy: {
+        indexingMode: 'consistent'
+        automatic: true
+        includedPaths: [
+          {
+            path: '/*'
+          }
+        ]
+        excludedPaths: [
+          {
+            path: '/"_etag"/?'
+          }
+        ]
+      }
+    }
+    options: {
+      throughput: throughput
+    }
+  }
+}
 resource conversationsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
   parent: database
   name: containerName
