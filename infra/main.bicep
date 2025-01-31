@@ -1250,6 +1250,16 @@ module appserviceOrchestratorAccess './core/host/functions-access.bicep' = {
   }
 }
 
+// Give the App Service access to Cosmos
+module appserviceCosmosAccess './core/security/cosmos-access.bicep' = {
+  name: 'appservice-cosmos-access'
+  scope: resourceGroup
+  params: {
+    principalId: frontEnd.outputs.identityPrincipalId
+    accountName: cosmosAccount.outputs.name
+  }
+}
+
 module dataIngestion './core/host/functions.bicep' = {
   name: 'dataIngestion'
   scope: resourceGroup
