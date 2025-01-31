@@ -339,7 +339,7 @@ param embeddingsDeploymentName string = 'text-embedding-ada-002'
 @maxValue(240)
 param embeddingsDeploymentCapacity int = 20
 @description('Azure OpenAI API version.')
-@allowed(['2024-02-15-preview', '2024-05-01-preview'])
+@allowed(['2024-05-01-preview'])
 param openaiApiVersion string = '2024-05-01-preview'
 @description('Enables LLM monitoring to generate conversation metrics.')
 @allowed([true, false])
@@ -360,7 +360,7 @@ param useSemanticReranking bool = true
 var searchServiceSkuName = networkIsolation ? 'standard2' : 'standard'
 @description('Search index name.')
 var searchIndex = 'ragindex'
-@allowed(['2023-10-01-Preview', '2024-05-01-preview'])
+@allowed(['2024-05-01-preview'])
 // Requires version 2023-10-01-Preview or higher for indexProjections and MIS authResourceId.
 param searchApiVersion string = '2024-05-01-preview'
 
