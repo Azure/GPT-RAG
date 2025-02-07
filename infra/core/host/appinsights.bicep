@@ -1,16 +1,15 @@
 param applicationInsightsName string
 param appInsightsLocation string
-
 param appInsightsReuse bool
 param existingAppInsightsResourceGroupName string
-
-// New parameter: if this is provided (non‐empty) then the App Insights resource will be linked
-// to that Log Analytics workspace. Otherwise (when empty) we will deploy a default workspace.
 param logAnalyticsWorkspaceResourceId string = ''
 
-// When we are creating a new Application Insights resource (i.e. not reusing an existing one)
-// and no workspace id was provided, deploy a new Log Analytics workspace.
-resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' = if (!appInsightsReuse && empty(logAnalyticsWorkspaceResourceId)) {
+// Only deploy a new Log Analytics workspace when:
+//   - We are creating a new Application Insights resource (i.e. not reusing an existing one)
+//   - No workspace resource ID was provided
+//   - AND the location is NOT eastus or eastus2 (this is temporary, for Tech Connect 2025 Lab)
+
+resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' = if ( !appInsightsReuse && empty(logAnalyticsWorkspaceResourceId) && !contains(['eastus', 'eastus2'], toLower(appInsightsLocation))) {
   name: '${applicationInsightsName}-law'
   location: appInsightsLocation
   properties: {
@@ -28,7 +27,8 @@ resource existingApplicationInsights 'Microsoft.Insights/components@2020-02-02' 
 }
 
 // Create a new Application Insights resource in workspace‐based mode.
-// Its properties include the WorkspaceResourceId. This value comes either from the parameter
+// Its properties include the WorkspaceResourceId. When appInsightsLocation is eastus or eastus2,
+// we set WorkspaceResourceId to empty. Otherwise, the value comes either from the parameter
 // (if one was provided) or from the newly deployed Log Analytics workspace.
 resource newApplicationInsights 'Microsoft.Insights/components@2020-02-02' = if (!appInsightsReuse) {
   name: applicationInsightsName
@@ -36,7 +36,10 @@ resource newApplicationInsights 'Microsoft.Insights/components@2020-02-02' = if 
   kind: 'web'
   properties: {
     Application_Type: 'web'
-    WorkspaceResourceId: empty(logAnalyticsWorkspaceResourceId) ? logAnalyticsWorkspace.id : logAnalyticsWorkspaceResourceId
+    Request_Source: 'rest'
+    WorkspaceResourceId: contains(['eastus', 'eastus2'], toLower(appInsightsLocation))
+      ? '' 
+      : (empty(logAnalyticsWorkspaceResourceId) ? logAnalyticsWorkspace.id : logAnalyticsWorkspaceResourceId)
   }
 }
 
