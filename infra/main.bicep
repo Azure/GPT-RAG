@@ -372,8 +372,8 @@ var _searchAnalyzerName = !empty(searchAnalyzerName) ? searchAnalyzerName : 'sta
 
 @description('Use semantic reranking on top of search results?.')
 @allowed([true, false])
-param useSemanticReranking bool = true
-var _useSemanticReranking = useSemanticReranking != null ? useSemanticReranking : true
+param useSemanticReranking bool = false
+var _useSemanticReranking = useSemanticReranking != null ? useSemanticReranking : false
 
 var _searchServiceSkuName = _networkIsolation?'standard2':'standard'
 
@@ -1553,7 +1553,7 @@ module searchService 'core/search/search-services.bicep' = {
     sku: {
       name: _searchServiceSkuName
     }
-    semanticSearch: 'free'
+    semanticSearch: _useSemanticReranking?'free':'disabled'
   }
 }
 
