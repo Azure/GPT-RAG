@@ -1257,19 +1257,15 @@ Here is the complete list of resources for a standard Zero Trust deployment, inc
 
 This section outlines the necessary Azure permissions required to operate the solution, categorized for clarity.
 
-1. **Provisioning and Deployment**  
+1. **Resources Provisioning and Application Deployment**  
 
    Users or service principals (e.g., CI/CD pipelines) need permissions to create, configure, and deploy resources, as well as assign roles for access control. This requires either the **Owner** role or a combination of **Contributor** and **User Access Administrator** roles at the subscription level. Alternatively, a custom role with the necessary permissions can be created. [Learn how to create a **Custom Role** here](MANUAL_CUSTOM_ROLE.md).
 
-2. **Deployment Only**
+2. **Application Deployment**
 
    This category includes the minimum permissions required to deploy application code when the necessary resources have already been provisioned. In such cases, the **Contributor** role provides sufficient permissions to deploy the application. However, if you prefer a more specialized role, you can use the **Website Contributor** role. This role grants the necessary permissions to deploy code to the existing resources.
 
-3. **File Upload for Data Ingestion:**  
-
-   To upload documents, the user must have the **Storage Blob Data Contributor** role assigned in Azure Entra ID for the respective storage account where the documents will be stored. This role grants permission to upload and manage blobs within the storage containers.
-
-4. **Solution Components:**  
+3. **Solution Components:**  
 
 Solution components require specific Azure pre-built roles to securely interact with services and maintain operational integrity. The table below outlines the required role assignments.
 
@@ -1301,6 +1297,18 @@ The following table provides a detailed overview of the required roles across di
 > [!Note]
 > Permissions for external resource connections, such as SQL databases (for NL2SQL), Fabric, or SharePoint, are covered in a separate section dedicated to connection setup.
 
+### 4. User-Specific Permissions  
+
+Certain tasks performed by users require specific permissions in Azure. Review the details below and assign the appropriate permissions based on user needs.  
+
+#### 4.1. **File Upload for Data Ingestion**  
+To upload documents, the user must be assigned the **Storage Blob Data Contributor** role in Azure Entra ID for the respective storage account. This role grants permission to upload and manage blobs within the storage containers.
+
+#### 4.2. **Query the AI Search Index**  
+To query the search index, the user must have the **Search Index Data Reader** role assigned in the AI Search service being used.
+
+#### 4.3. **Configure Data Source Connections**  
+For scenarios involving external data sources, configurations must be set within the `datasources` container in Cosmos DB. The user responsible for this configuration must have the **Cosmos DB Built-in Data Contributor** role assigned in Cosmos DB.
 
 ### Useful Links
 

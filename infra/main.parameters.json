@@ -217,7 +217,7 @@
           "dbAccountName": "${AZURE_DB_ACCOUNT_NAME}",
           "dbDatabaseName": "${AZURE_DB_DATABASE_NAME}",
           "conversationContainerName": "${AZURE_DB_CONVERSATIONS_CONTAINER_NAME}",
-          "modelsContainerName": "${AZURE_DB_MODELS_CONTAINER_NAME}"         
+          "datasourcesContainerName": "${AZURE_DB_DATASOURCES_CONTAINER_NAME}"         
         }
       },
       "azureReuseConfig":{
@@ -228,6 +228,8 @@
           "appInsightsReuse": "${APP_INSIGHTS_REUSE}",
           "existingAppInsightsResourceGroupName": "${APP_INSIGHTS_RESOURCE_GROUP_NAME}",
           "existingAppInsightsName": "${APP_INSIGHTS_NAME}",
+          "logAnalyticsWorkspaceReuse": "${LOG_ANALYTICS_WORKSPACE_REUSE}",
+          "existingLogAnalyticsWorkspaceResourceId": "${LOG_ANALYTICS_WORKSPACE_ID}",          
           "appServicePlanReuse": "${APP_SERVICE_PLAN_REUSE}",
           "existingAppServicePlanResourceGroupName": "${APP_SERVICE_PLAN_RESOURCE_GROUP_NAME}",
           "existingAppServicePlanName": "${APP_SERVICE_PLAN_NAME}",
