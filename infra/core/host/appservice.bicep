@@ -74,20 +74,25 @@ resource newAppService 'Microsoft.Web/sites@2022-09-01' = if (!appServiceReuse &
       use32BitWorkerProcess: use32BitWorkerProcess
       functionAppScaleLimit: functionAppScaleLimit != -1 ? functionAppScaleLimit : null
       healthCheckPath: healthCheckPath
-      appSettings: concat(appSettings,[
-        {
-          name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
-          value: string(scmDoBuildDuringDeployment)
-        }  
-        {
-          name: 'ENABLE_ORYX_BUILD'
-          value: string(enableOryxBuild)
-        }  
-        {
-          name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-          value: applicationInsights.properties.ConnectionString
-        }    
-      ])      
+      appSettings: concat(
+        appSettings,
+        empty(applicationInsightsName) ? [] : [
+          {
+            name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+            value: applicationInsights.properties.ConnectionString
+          }
+        ],
+        [
+          {
+            name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
+            value: string(scmDoBuildDuringDeployment)
+          }
+          {
+            name: 'ENABLE_ORYX_BUILD'
+            value: string(enableOryxBuild)
+          }
+        ]
+      )    
       cors: {
         allowedOrigins: union([ 'https://portal.azure.com', 'https://ms.portal.azure.com' ], allowedOrigins)
       }
