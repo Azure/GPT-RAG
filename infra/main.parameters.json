@@ -122,6 +122,9 @@
       "orchestratorMessagesLanguage": {
         "value": "${AZURE_ORCHESTRATOR_MESSAGES_LANGUAGE}"
       },
+      "provisionApplicationInsights": {
+        "value": "${AZURE_PROVISION_APPLICATION_INSIGHTS}"
+      },
       "retrievalApproach": {
         "value": "${AZURE_RETRIEVAL_APPROACH}"
       },

@@ -254,6 +254,13 @@ var _azureDbConfig = union(_azureDbConfigDefaults, {
 })
 var _cosmosDbResourceGroupName = _azureReuseConfig.cosmosDbReuse ? _azureReuseConfig.existingCosmosDbResourceGroupName : _resourceGroupName
 
+// App Insights Settings
+
+@description('Provision Application Insights (and Log Analytics workspace) if true. Default is false.')
+@allowed([true, false])
+param provisionApplicationInsights bool = false
+var _provisionApplicationInsights = provisionApplicationInsights
+
 // Orchestrator settings
 
 @description('Language used when orchestrator needs send error messages to the UX.')
@@ -290,7 +297,6 @@ param appServiceRuntimeVersion string = ''
 var _appServiceRuntimeVersion = !empty(appServiceRuntimeVersion) ? appServiceRuntimeVersion : '3.12'
 
 // Azure OpenAI settings
-
 
 @description('GPT model used to answer user questions. Don\'t forget to check region availability.')
 // @allowed([ 'gpt-35-turbo','gpt-35-turbo-16k', 'gpt-4', 'gpt-4-32k', 'gpt-4o', 'gpt-4o-mini' ])
@@ -451,6 +457,9 @@ var _appServicePlanName = _azureReuseConfig.appServicePlanReuse ? _azureReuseCon
 param appInsightsName string = ''
 var _appInsightsName = _azureReuseConfig.appInsightsReuse ? _azureReuseConfig.existingAppInsightsName : !empty(appInsightsName) ? appInsightsName : 'appins0-${resourceToken}'
 var _appInsightsResourceGroupName = _azureReuseConfig.appInsightsReuse ? _azureReuseConfig.existingAppInsightsResourceGroupName : _resourceGroupName
+var _effectiveAppInsightsName = provisionApplicationInsights ? appInsights.outputs.name : ''
+var _effectiveAppInsightsRG   = provisionApplicationInsights ? _appInsightsResourceGroupName : ''
+
 
 @description('Front-end App Service Name. Use your own name convention or leave as it is to generate a random name.')
 param appServiceName string = ''
@@ -780,7 +789,7 @@ module appServicePlan './core/host/appserviceplan.bicep' =  {
 }
 
 // App Insights Module
-module appInsights './core/host/appinsights.bicep' = {
+module appInsights './core/host/appinsights.bicep' = if (provisionApplicationInsights) {
   name: 'appinsights'
   scope: resourceGroup
   params: {
@@ -788,8 +797,6 @@ module appInsights './core/host/appinsights.bicep' = {
     appInsightsLocation: location
     appInsightsReuse: _azureReuseConfig.appInsightsReuse
     existingAppInsightsResourceGroupName: _azureReuseConfig.existingAppInsightsResourceGroupName
-    // Optionally, if you want to re‐use an existing Log Analytics workspace,
-    // pass its resource id here. Otherwise, leave it empty so a new one is deployed.
     logAnalyticsWorkspaceResourceId: _azureReuseConfig.existingLogAnalyticsWorkspaceResourceId ?? ''
   }
 }
@@ -810,8 +817,8 @@ module orchestrator './core/host/functions.bicep' =  {
     identityType: 'SystemAssigned'
     keyVaultName: keyVault.outputs.name
     keyVaultResourceGroupName: _keyVaultResourceGroupName
-    applicationInsightsName: appInsights.outputs.name
-    applicationInsightsResourceGroupName: _appInsightsResourceGroupName
+    applicationInsightsName: _effectiveAppInsightsName
+    applicationInsightsResourceGroupName: _effectiveAppInsightsRG
     appServicePlanId: appServicePlan.outputs.id
     runtimeName: 'python'
     runtimeVersion: _funcAppRuntimeVersion
@@ -1069,8 +1076,8 @@ module frontEnd  'core/host/appservice.bicep' = {
   scope: resourceGroup
   params: {
     name: _appServiceName
-    applicationInsightsName: _azureReuseConfig.appInsightsReuse?_azureReuseConfig.existingAppInsightsName:_appInsightsName
-    applicationInsightsResourceGroupName: _azureReuseConfig.appInsightsReuse?_azureReuseConfig.existingAppInsightsResourceGroupName:_resourceGroupName  
+    applicationInsightsName: _effectiveAppInsightsName
+    applicationInsightsResourceGroupName: _effectiveAppInsightsRG
     appServiceReuse: _azureReuseConfig.appServiceReuse
     existingAppServiceResourceGroupName: _azureReuseConfig.existingAppServiceNameResourceGroupName
     networkIsolation: (_networkIsolation && !_vnetReuse)
@@ -1195,8 +1202,8 @@ module dataIngestion './core/host/functions.bicep' = {
     // identityId: identityId
     keyVaultName: keyVault.outputs.name
     keyVaultResourceGroupName: _keyVaultResourceGroupName
-    applicationInsightsName: appInsights.outputs.name
-    applicationInsightsResourceGroupName: _appInsightsResourceGroupName
+    applicationInsightsName: _effectiveAppInsightsName
+    applicationInsightsResourceGroupName: _effectiveAppInsightsRG
     appServicePlanId: appServicePlan.outputs.id
     runtimeName: 'python'
     runtimeVersion: _funcAppRuntimeVersion
