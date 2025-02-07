@@ -58,6 +58,8 @@ var _azureReuseConfigDefaults = {
   appInsightsReuse: false
   existingAppInsightsResourceGroupName: ''
   existingAppInsightsName: ''
+  logAnalyticsWorkspaceReuse: false  
+  existingLogAnalyticsWorkspaceResourceId: ''
   appServicePlanReuse: false
   existingAppServicePlanResourceGroupName: ''
   existingAppServicePlanName: ''
@@ -108,6 +110,8 @@ var _azureReuseConfig = union(_azureReuseConfigDefaults, {
     appInsightsReuse: (empty(azureReuseConfig.appInsightsReuse) ? _azureReuseConfigDefaults.appInsightsReuse : toLower(azureReuseConfig.appInsightsReuse) == 'true')
     existingAppInsightsResourceGroupName: (empty(azureReuseConfig.existingAppInsightsResourceGroupName) ? _azureReuseConfigDefaults.existingAppInsightsResourceGroupName : azureReuseConfig.existingAppInsightsResourceGroupName)
     existingAppInsightsName: (empty(azureReuseConfig.existingAppInsightsName) ? _azureReuseConfigDefaults.existingAppInsightsName : azureReuseConfig.existingAppInsightsName)
+    logAnalyticsWorkspaceReuse: (empty(azureReuseConfig.logAnalyticsWorkspaceReuse) ? _azureReuseConfigDefaults.logAnalyticsWorkspaceReuse : toLower(azureReuseConfig.logAnalyticsWorkspaceReuse) == 'true')
+    existingLogAnalyticsWorkspaceResourceId: (empty(azureReuseConfig.existingLogAnalyticsWorkspaceResourceId) ? _azureReuseConfigDefaults.existingLogAnalyticsWorkspaceResourceId : azureReuseConfig.existingLogAnalyticsWorkspaceResourceId)
     appServicePlanReuse: (empty(azureReuseConfig.appServicePlanReuse) ? _azureReuseConfigDefaults.appServicePlanReuse : toLower(azureReuseConfig.appServicePlanReuse) == 'true')
     existingAppServicePlanResourceGroupName: (empty(azureReuseConfig.existingAppServicePlanResourceGroupName) ? _azureReuseConfigDefaults.existingAppServicePlanResourceGroupName : azureReuseConfig.existingAppServicePlanResourceGroupName)
     existingAppServicePlanName: (empty(azureReuseConfig.existingAppServicePlanName) ? _azureReuseConfigDefaults.existingAppServicePlanName : azureReuseConfig.existingAppServicePlanName)
@@ -239,14 +243,14 @@ var _azureDbConfigDefaults = {
   dbAccountName: 'dbgpt0-${resourceToken}'
   dbDatabaseName: 'db0-${resourceToken}'
   conversationContainerName: 'conversations'
-  modelsContainerName: 'models'
+  datasourcesContainerName: 'datasources'
 }
 param azureDbConfig object = {} 
 var _azureDbConfig = union(_azureDbConfigDefaults, {
     dbAccountName: (empty(azureDbConfig.dbAccountName) ? _azureDbConfigDefaults.dbAccountName : azureDbConfig.dbAccountName)
     dbDatabaseName: (empty(azureDbConfig.dbDatabaseName) ? _azureDbConfigDefaults.dbDatabaseName : azureDbConfig.dbDatabaseName)
     conversationContainerName: (empty(azureDbConfig.conversationContainerName) ? _azureDbConfigDefaults.conversationContainerName : azureDbConfig.conversationContainerName)
-    modelsContainerName: (empty(azureDbConfig.modelsContainerName) ? _azureDbConfigDefaults.modelsContainerName : azureDbConfig.modelsContainerName)
+    datasourcesContainerName: (empty(azureDbConfig.datasourcesContainerName) ? _azureDbConfigDefaults.datasourcesContainerName : azureDbConfig.datasourcesContainerName)
 })
 var _cosmosDbResourceGroupName = _azureReuseConfig.cosmosDbReuse ? _azureReuseConfig.existingCosmosDbResourceGroupName : _resourceGroupName
 
@@ -650,15 +654,6 @@ module testvmSearchAccess './core/security/search-service-contributor.bicep' = i
   }
 } 
 
-module principalSearchAccess './core/security/search-service-contributor.bicep' = {
-  name: 'principal-search-access'
-  scope: az.resourceGroup(_searchResourceGroupName)
-  params: {
-    principalId: principalId
-    resourceName: searchService.outputs.name
-  }
-} 
-
 // Storage
 
 module storage './core/storage/storage-account.bicep' = {
@@ -711,7 +706,7 @@ module cosmosAccount './core/db/cosmos.bicep' = {
     publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
     location: location
     conversationContainerName:  _azureDbConfig.conversationContainerName
-    modelsContainerName: _azureDbConfig.modelsContainerName   
+    datasourcesContainerName: _azureDbConfig.datasourcesContainerName   
     databaseName: _azureDbConfig.dbDatabaseName
     tags: tags
     secretName: 'azureDBkey'
@@ -784,7 +779,7 @@ module appServicePlan './core/host/appserviceplan.bicep' =  {
   }
 }
 
-// App Insights
+// App Insights Module
 module appInsights './core/host/appinsights.bicep' = {
   name: 'appinsights'
   scope: resourceGroup
@@ -793,6 +788,9 @@ module appInsights './core/host/appinsights.bicep' = {
     appInsightsLocation: location
     appInsightsReuse: _azureReuseConfig.appInsightsReuse
     existingAppInsightsResourceGroupName: _azureReuseConfig.existingAppInsightsResourceGroupName
+    // Optionally, if you want to re‐use an existing Log Analytics workspace,
+    // pass its resource id here. Otherwise, leave it empty so a new one is deployed.
+    logAnalyticsWorkspaceResourceId: _azureReuseConfig.existingLogAnalyticsWorkspaceResourceId ?? ''
   }
 }
 
@@ -837,8 +835,8 @@ module orchestrator './core/host/functions.bicep' =  {
         value: _azureDbConfig.conversationContainerName
       }
       {
-        name: 'AZURE_DB_MODELS_CONTAINER_NAME'
-        value: _azureDbConfig.modelsContainerName
+        name: 'AZURE_DB_DATASOURCES_CONTAINER_NAME'
+        value: _azureDbConfig.datasourcesContainerName
       }
       {
         name: 'AZURE_KEY_VAULT_NAME'
@@ -1653,6 +1651,37 @@ module loadtestingKeyVaultAccess './core/security/keyvault-access.bicep' = if (_
     principalId: _provisionLoadTesting ? loadtesting.outputs.id : ''
   }
 } 
+
+// Adding permissions for the user or service principal provisioning the resources to configure CosmosDB datasources, upload ingestion files, and query the index after deployment.
+
+module principalCosmosAccess './core/security/cosmos-access.bicep' =  {
+  name: 'principal-cosmos-access'
+  scope: az.resourceGroup(_cosmosDbResourceGroupName)
+  params: {
+    principalId: principalId
+    accountName: cosmosAccount.outputs.name
+    resourceGroupName: _cosmosDbResourceGroupName
+  }
+} 
+
+module principalSearchAccess './core/security/search-service-contributor.bicep' = {
+  name: 'principal-search-access'
+  scope: az.resourceGroup(_searchResourceGroupName)
+  params: {
+    principalId: principalId
+    resourceName: searchService.outputs.name
+  }
+} 
+
+module principalStorageAccountStorageAccess './core/security/blobstorage-contributor-access.bicep' = {
+  name: 'principal-storage-role-assignment'
+  scope: resourceGroup
+  params: {
+    resourceName: orchestratorStorage.outputs.name
+    principalId: principalId
+  }
+}
+
 
 /////////////////////////////////////////////////////////////////////////////
 // TEMPLATE OUTPUTS

@@ -15,7 +15,7 @@ param deployCosmosDb bool = true
 
 
 param conversationContainerName string
-param modelsContainerName string  
+param datasourcesContainerName string  
 
 param tags object = {}
 
@@ -149,10 +149,10 @@ resource conversationsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDataba
 
 resource modelsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = if (!cosmosDbReuse && deployCosmosDb) {
   parent: database
-  name: modelsContainerName
+  name: datasourcesContainerName
   properties: {
     resource: {
-      id: modelsContainerName
+      id: datasourcesContainerName
       partitionKey: {
         paths: [
           '/id'
