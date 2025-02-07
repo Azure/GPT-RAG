@@ -457,8 +457,8 @@ var _appServicePlanName = _azureReuseConfig.appServicePlanReuse ? _azureReuseCon
 param appInsightsName string = ''
 var _appInsightsName = _azureReuseConfig.appInsightsReuse ? _azureReuseConfig.existingAppInsightsName : !empty(appInsightsName) ? appInsightsName : 'appins0-${resourceToken}'
 var _appInsightsResourceGroupName = _azureReuseConfig.appInsightsReuse ? _azureReuseConfig.existingAppInsightsResourceGroupName : _resourceGroupName
-var _effectiveAppInsightsName = provisionApplicationInsights ? appInsights.outputs.name : ''
-var _effectiveAppInsightsRG   = provisionApplicationInsights ? _appInsightsResourceGroupName : ''
+var _effectiveAppInsightsName = _provisionApplicationInsights ? appInsights.outputs.name : ''
+var _effectiveAppInsightsRG   = _provisionApplicationInsights ? _appInsightsResourceGroupName : ''
 
 
 @description('Front-end App Service Name. Use your own name convention or leave as it is to generate a random name.')
@@ -1707,7 +1707,7 @@ output AZURE_APP_SERVICE_NAME string = _appServiceName
 output AZURE_APP_SERVICE_PLAN_NAME string = _appServicePlanName
 output AZURE_APP_SERVICES_SUBNET_NAME string = _appServicesSubnetName
 output AZURE_APP_SERVICES_SUBNET_PREFIX string = _appServicesSubnetPrefix
-output AZURE_BASTION_KV_NAME string = _bastionKvName
+output AZURE_BASTION_KV_NAME string = _networkIsolation ? _bastionKvName : '' 
 output AZURE_BASTION_SUBNET_NAME string = _bastionSubnetName
 output AZURE_BASTION_SUBNET_PREFIX string = _bastionSubnetPrefix
 output AZURE_CHAT_GPT_DEPLOYMENT_CAPACITY int = _chatGptDeploymentCapacity
