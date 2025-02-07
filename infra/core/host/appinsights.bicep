@@ -15,8 +15,9 @@ resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09
   location: appInsightsLocation
   properties: {
     sku: {
-      name: 'free'
+      name: 'pergb2018'
     }
+    retentionInDays: 30
   }
 }
 
