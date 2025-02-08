@@ -124,17 +124,17 @@ For instance, to inform the name of the GPT deployment, you would update the `AZ
 In addition to specifying the CosmosDB service name, database name, and resource group as mentioned in the [General Instructions](#general-instructions), it's important to note that the reused Cosmos account should contain the following containers:
 
 - Conversations Container
-- Models Container
+- Datasources Container
 
 You can create the containers with default names or use your own names. If using default names, please create them with the following names:
 
 - Conversations Container: 'conversations'
-- Models Container: 'models'
+- Datasources Container (used when orchestration layer will connect to SQL or Fabric data sources): 'datasources'
 
 If you prefer custom names, use the following variables to define your names with `azd env set` command:
 
 - AZURE_DB_CONVERSATIONS_CONTAINER_NAME
-- AZURE_DB_MODELS_CONTAINER_NAME
+- AZURE_DB_DATASOURCES_CONTAINER_NAME
 
 ### Key Vault
 

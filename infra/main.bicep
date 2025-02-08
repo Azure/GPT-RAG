@@ -58,6 +58,8 @@ var _azureReuseConfigDefaults = {
   appInsightsReuse: false
   existingAppInsightsResourceGroupName: ''
   existingAppInsightsName: ''
+  logAnalyticsWorkspaceReuse: false  
+  existingLogAnalyticsWorkspaceResourceId: ''
   appServicePlanReuse: false
   existingAppServicePlanResourceGroupName: ''
   existingAppServicePlanName: ''
@@ -108,6 +110,8 @@ var _azureReuseConfig = union(_azureReuseConfigDefaults, {
     appInsightsReuse: (empty(azureReuseConfig.appInsightsReuse) ? _azureReuseConfigDefaults.appInsightsReuse : toLower(azureReuseConfig.appInsightsReuse) == 'true')
     existingAppInsightsResourceGroupName: (empty(azureReuseConfig.existingAppInsightsResourceGroupName) ? _azureReuseConfigDefaults.existingAppInsightsResourceGroupName : azureReuseConfig.existingAppInsightsResourceGroupName)
     existingAppInsightsName: (empty(azureReuseConfig.existingAppInsightsName) ? _azureReuseConfigDefaults.existingAppInsightsName : azureReuseConfig.existingAppInsightsName)
+    logAnalyticsWorkspaceReuse: (empty(azureReuseConfig.logAnalyticsWorkspaceReuse) ? _azureReuseConfigDefaults.logAnalyticsWorkspaceReuse : toLower(azureReuseConfig.logAnalyticsWorkspaceReuse) == 'true')
+    existingLogAnalyticsWorkspaceResourceId: (empty(azureReuseConfig.existingLogAnalyticsWorkspaceResourceId) ? _azureReuseConfigDefaults.existingLogAnalyticsWorkspaceResourceId : azureReuseConfig.existingLogAnalyticsWorkspaceResourceId)
     appServicePlanReuse: (empty(azureReuseConfig.appServicePlanReuse) ? _azureReuseConfigDefaults.appServicePlanReuse : toLower(azureReuseConfig.appServicePlanReuse) == 'true')
     existingAppServicePlanResourceGroupName: (empty(azureReuseConfig.existingAppServicePlanResourceGroupName) ? _azureReuseConfigDefaults.existingAppServicePlanResourceGroupName : azureReuseConfig.existingAppServicePlanResourceGroupName)
     existingAppServicePlanName: (empty(azureReuseConfig.existingAppServicePlanName) ? _azureReuseConfigDefaults.existingAppServicePlanName : azureReuseConfig.existingAppServicePlanName)
@@ -199,8 +203,7 @@ param aiSubnetPrefix string = ''
 var _aiSubnetPrefix = !empty(aiSubnetPrefix) ? aiSubnetPrefix : '10.0.0.0/26'
 
 @description('Name of the Bastion subnet')
-param bastionSubnetName string = ''
-var _bastionSubnetName = !empty(bastionSubnetName) ? bastionSubnetName : 'AzureBastionSubnet'
+var _bastionSubnetName = 'AzureBastionSubnet'
 
 @description('Address prefix for the Bastion subnet')
 param bastionSubnetPrefix string = ''
@@ -239,16 +242,23 @@ var _azureDbConfigDefaults = {
   dbAccountName: 'dbgpt0-${resourceToken}'
   dbDatabaseName: 'db0-${resourceToken}'
   conversationContainerName: 'conversations'
-  modelsContainerName: 'models'
+  datasourcesContainerName: 'datasources'
 }
 param azureDbConfig object = {} 
 var _azureDbConfig = union(_azureDbConfigDefaults, {
     dbAccountName: (empty(azureDbConfig.dbAccountName) ? _azureDbConfigDefaults.dbAccountName : azureDbConfig.dbAccountName)
     dbDatabaseName: (empty(azureDbConfig.dbDatabaseName) ? _azureDbConfigDefaults.dbDatabaseName : azureDbConfig.dbDatabaseName)
     conversationContainerName: (empty(azureDbConfig.conversationContainerName) ? _azureDbConfigDefaults.conversationContainerName : azureDbConfig.conversationContainerName)
-    modelsContainerName: (empty(azureDbConfig.modelsContainerName) ? _azureDbConfigDefaults.modelsContainerName : azureDbConfig.modelsContainerName)
+    datasourcesContainerName: (empty(azureDbConfig.datasourcesContainerName) ? _azureDbConfigDefaults.datasourcesContainerName : azureDbConfig.datasourcesContainerName)
 })
 var _cosmosDbResourceGroupName = _azureReuseConfig.cosmosDbReuse ? _azureReuseConfig.existingCosmosDbResourceGroupName : _resourceGroupName
+
+// App Insights Settings
+
+@description('Provision Application Insights (and Log Analytics workspace) if true. Default is false.')
+@allowed([true, false])
+param provisionApplicationInsights bool = false
+var _provisionApplicationInsights = provisionApplicationInsights
 
 // Orchestrator settings
 
@@ -286,7 +296,6 @@ param appServiceRuntimeVersion string = ''
 var _appServiceRuntimeVersion = !empty(appServiceRuntimeVersion) ? appServiceRuntimeVersion : '3.12'
 
 // Azure OpenAI settings
-
 
 @description('GPT model used to answer user questions. Don\'t forget to check region availability.')
 // @allowed([ 'gpt-35-turbo','gpt-35-turbo-16k', 'gpt-4', 'gpt-4-32k', 'gpt-4o', 'gpt-4o-mini' ])
@@ -368,8 +377,8 @@ var _searchAnalyzerName = !empty(searchAnalyzerName) ? searchAnalyzerName : 'sta
 
 @description('Use semantic reranking on top of search results?.')
 @allowed([true, false])
-param useSemanticReranking bool = true
-var _useSemanticReranking = useSemanticReranking != null ? useSemanticReranking : true
+param useSemanticReranking bool = false
+var _useSemanticReranking = useSemanticReranking != null ? useSemanticReranking : false
 
 var _searchServiceSkuName = _networkIsolation?'standard2':'standard'
 
@@ -447,6 +456,9 @@ var _appServicePlanName = _azureReuseConfig.appServicePlanReuse ? _azureReuseCon
 param appInsightsName string = ''
 var _appInsightsName = _azureReuseConfig.appInsightsReuse ? _azureReuseConfig.existingAppInsightsName : !empty(appInsightsName) ? appInsightsName : 'appins0-${resourceToken}'
 var _appInsightsResourceGroupName = _azureReuseConfig.appInsightsReuse ? _azureReuseConfig.existingAppInsightsResourceGroupName : _resourceGroupName
+var _effectiveAppInsightsName = _provisionApplicationInsights ? appInsights.outputs.name : ''
+var _effectiveAppInsightsRG   = _provisionApplicationInsights ? _appInsightsResourceGroupName : ''
+
 
 @description('Front-end App Service Name. Use your own name convention or leave as it is to generate a random name.')
 param appServiceName string = ''
@@ -650,15 +662,6 @@ module testvmSearchAccess './core/security/search-service-contributor.bicep' = i
   }
 } 
 
-module principalSearchAccess './core/security/search-service-contributor.bicep' = {
-  name: 'principal-search-access'
-  scope: az.resourceGroup(_searchResourceGroupName)
-  params: {
-    principalId: principalId
-    resourceName: searchService.outputs.name
-  }
-} 
-
 // Storage
 
 module storage './core/storage/storage-account.bicep' = {
@@ -711,7 +714,7 @@ module cosmosAccount './core/db/cosmos.bicep' = {
     publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
     location: location
     conversationContainerName:  _azureDbConfig.conversationContainerName
-    modelsContainerName: _azureDbConfig.modelsContainerName   
+    datasourcesContainerName: _azureDbConfig.datasourcesContainerName   
     databaseName: _azureDbConfig.dbDatabaseName
     tags: tags
     secretName: 'azureDBkey'
@@ -784,8 +787,8 @@ module appServicePlan './core/host/appserviceplan.bicep' =  {
   }
 }
 
-// App Insights
-module appInsights './core/host/appinsights.bicep' = {
+// App Insights Module
+module appInsights './core/host/appinsights.bicep' = if (provisionApplicationInsights) {
   name: 'appinsights'
   scope: resourceGroup
   params: {
@@ -793,6 +796,7 @@ module appInsights './core/host/appinsights.bicep' = {
     appInsightsLocation: location
     appInsightsReuse: _azureReuseConfig.appInsightsReuse
     existingAppInsightsResourceGroupName: _azureReuseConfig.existingAppInsightsResourceGroupName
+    logAnalyticsWorkspaceResourceId: _azureReuseConfig.existingLogAnalyticsWorkspaceResourceId ?? ''
   }
 }
 
@@ -812,8 +816,8 @@ module orchestrator './core/host/functions.bicep' =  {
     identityType: 'SystemAssigned'
     keyVaultName: keyVault.outputs.name
     keyVaultResourceGroupName: _keyVaultResourceGroupName
-    applicationInsightsName: appInsights.outputs.name
-    applicationInsightsResourceGroupName: _appInsightsResourceGroupName
+    applicationInsightsName: _effectiveAppInsightsName
+    applicationInsightsResourceGroupName: _effectiveAppInsightsRG
     appServicePlanId: appServicePlan.outputs.id
     runtimeName: 'python'
     runtimeVersion: _funcAppRuntimeVersion
@@ -837,8 +841,8 @@ module orchestrator './core/host/functions.bicep' =  {
         value: _azureDbConfig.conversationContainerName
       }
       {
-        name: 'AZURE_DB_MODELS_CONTAINER_NAME'
-        value: _azureDbConfig.modelsContainerName
+        name: 'AZURE_DB_DATASOURCES_CONTAINER_NAME'
+        value: _azureDbConfig.datasourcesContainerName
       }
       {
         name: 'AZURE_KEY_VAULT_NAME'
@@ -1071,8 +1075,8 @@ module frontEnd  'core/host/appservice.bicep' = {
   scope: resourceGroup
   params: {
     name: _appServiceName
-    applicationInsightsName: _azureReuseConfig.appInsightsReuse?_azureReuseConfig.existingAppInsightsName:_appInsightsName
-    applicationInsightsResourceGroupName: _azureReuseConfig.appInsightsReuse?_azureReuseConfig.existingAppInsightsResourceGroupName:_resourceGroupName  
+    applicationInsightsName: _effectiveAppInsightsName
+    applicationInsightsResourceGroupName: _effectiveAppInsightsRG
     appServiceReuse: _azureReuseConfig.appServiceReuse
     existingAppServiceResourceGroupName: _azureReuseConfig.existingAppServiceNameResourceGroupName
     networkIsolation: (_networkIsolation && !_vnetReuse)
@@ -1197,8 +1201,8 @@ module dataIngestion './core/host/functions.bicep' = {
     // identityId: identityId
     keyVaultName: keyVault.outputs.name
     keyVaultResourceGroupName: _keyVaultResourceGroupName
-    applicationInsightsName: appInsights.outputs.name
-    applicationInsightsResourceGroupName: _appInsightsResourceGroupName
+    applicationInsightsName: _effectiveAppInsightsName
+    applicationInsightsResourceGroupName: _effectiveAppInsightsRG
     appServicePlanId: appServicePlan.outputs.id
     runtimeName: 'python'
     runtimeVersion: _funcAppRuntimeVersion
@@ -1555,7 +1559,7 @@ module searchService 'core/search/search-services.bicep' = {
     sku: {
       name: _searchServiceSkuName
     }
-    semanticSearch: 'free'
+    semanticSearch: _useSemanticReranking?'free':'disabled'
   }
 }
 
@@ -1654,6 +1658,37 @@ module loadtestingKeyVaultAccess './core/security/keyvault-access.bicep' = if (_
   }
 } 
 
+// Adding permissions for the user or service principal provisioning the resources to configure CosmosDB datasources, upload ingestion files, and query the index after deployment.
+
+module principalCosmosAccess './core/security/cosmos-access.bicep' =  {
+  name: 'principal-cosmos-access'
+  scope: az.resourceGroup(_cosmosDbResourceGroupName)
+  params: {
+    principalId: principalId
+    accountName: cosmosAccount.outputs.name
+    resourceGroupName: _cosmosDbResourceGroupName
+  }
+} 
+
+module principalSearchAccess './core/security/search-service-contributor.bicep' = {
+  name: 'principal-search-access'
+  scope: az.resourceGroup(_searchResourceGroupName)
+  params: {
+    principalId: principalId
+    resourceName: searchService.outputs.name
+  }
+} 
+
+module principalStorageAccountStorageAccess './core/security/blobstorage-contributor-access.bicep' = {
+  name: 'principal-storage-role-assignment'
+  scope: resourceGroup
+  params: {
+    resourceName: orchestratorStorage.outputs.name
+    principalId: principalId
+  }
+}
+
+
 /////////////////////////////////////////////////////////////////////////////
 // TEMPLATE OUTPUTS
 /////////////////////////////////////////////////////////////////////////////
@@ -1671,8 +1706,7 @@ output AZURE_APP_SERVICE_NAME string = _appServiceName
 output AZURE_APP_SERVICE_PLAN_NAME string = _appServicePlanName
 output AZURE_APP_SERVICES_SUBNET_NAME string = _appServicesSubnetName
 output AZURE_APP_SERVICES_SUBNET_PREFIX string = _appServicesSubnetPrefix
-output AZURE_BASTION_KV_NAME string = _bastionKvName
-output AZURE_BASTION_SUBNET_NAME string = _bastionSubnetName
+output AZURE_BASTION_KV_NAME string = _networkIsolation ? _bastionKvName : '' 
 output AZURE_BASTION_SUBNET_PREFIX string = _bastionSubnetPrefix
 output AZURE_CHAT_GPT_DEPLOYMENT_CAPACITY int = _chatGptDeploymentCapacity
 output AZURE_CHAT_GPT_DEPLOYMENT_NAME string = _chatGptDeploymentName

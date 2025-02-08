@@ -24,6 +24,7 @@ param keyVaultName string = ''
 // Reference Properties
 param applicationInsightsName string = ''
 param applicationInsightsResourceGroupName string
+
 param appServicePlanId string
 
 param storageAccountName string
@@ -87,8 +88,15 @@ resource newFunction 'Microsoft.Web/sites@2022-03-01' = {
       minimumElasticInstanceCount: minimumElasticInstanceCount
       use32BitWorkerProcess: use32BitWorkerProcess      
       functionAppScaleLimit: functionAppScaleLimit
-      healthCheckPath: healthCheckPath      
-      appSettings: union(appSettings,
+      healthCheckPath: healthCheckPath
+      appSettings: union(
+        appSettings,
+        empty(applicationInsightsName) ? [] : [
+          {
+            name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+            value: applicationInsights.properties.ConnectionString
+          }
+        ],
         [
           {
             name: 'AzureWebJobsStorage__accountName'
@@ -97,10 +105,6 @@ resource newFunction 'Microsoft.Web/sites@2022-03-01' = {
           {
             name: 'AzureWebJobsStorage__credential'
             value: 'managedidentity'
-          }
-          {
-            name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-            value: applicationInsights.properties.ConnectionString
           }
           {
             name: 'AZURE_KEY_VAULT_ENDPOINT'
@@ -114,8 +118,8 @@ resource newFunction 'Microsoft.Web/sites@2022-03-01' = {
             name: 'FUNCTIONS_EXTENSION_VERSION'
             value: '~4'
           }          
-        ])
-
+        ]
+      )
       cors: {
           allowedOrigins: union([ 'https://portal.azure.com', 'https://ms.portal.azure.com' ], allowedOrigins)
         }          
