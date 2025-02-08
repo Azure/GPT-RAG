@@ -4,7 +4,7 @@ param aiSubnetName string
 param appIntSubnetName string
 param appServicesSubnetName string
 param databaseSubnetName string
-param bastionSubnetName string
+param bastionSubnetName string = 'AzureBastionSubnet'
 param vnetAddress string = '10.0.0.0/23'
 param aiSubnetPrefix string = '10.0.0.0/26'
 param appIntSubnetPrefix string = '10.0.0.128/26'
