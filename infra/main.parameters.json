@@ -35,9 +35,6 @@
       "aiSubnetPrefix": {
           "value": "${AZURE_AI_SUBNET_PREFIX}"
       },
-      "bastionSubnetName": {
-          "value": "${AZURE_BASTION_SUBNET_NAME}"
-      },
       "bastionSubnetPrefix": {
           "value": "${AZURE_BASTION_SUBNET_PREFIX}"
       },

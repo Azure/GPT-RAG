@@ -203,8 +203,7 @@ param aiSubnetPrefix string = ''
 var _aiSubnetPrefix = !empty(aiSubnetPrefix) ? aiSubnetPrefix : '10.0.0.0/26'
 
 @description('Name of the Bastion subnet')
-param bastionSubnetName string = ''
-var _bastionSubnetName = !empty(bastionSubnetName) ? bastionSubnetName : 'AzureBastionSubnet'
+var _bastionSubnetName = 'AzureBastionSubnet'
 
 @description('Address prefix for the Bastion subnet')
 param bastionSubnetPrefix string = ''
@@ -1708,7 +1707,6 @@ output AZURE_APP_SERVICE_PLAN_NAME string = _appServicePlanName
 output AZURE_APP_SERVICES_SUBNET_NAME string = _appServicesSubnetName
 output AZURE_APP_SERVICES_SUBNET_PREFIX string = _appServicesSubnetPrefix
 output AZURE_BASTION_KV_NAME string = _networkIsolation ? _bastionKvName : '' 
-output AZURE_BASTION_SUBNET_NAME string = _bastionSubnetName
 output AZURE_BASTION_SUBNET_PREFIX string = _bastionSubnetPrefix
 output AZURE_CHAT_GPT_DEPLOYMENT_CAPACITY int = _chatGptDeploymentCapacity
 output AZURE_CHAT_GPT_DEPLOYMENT_NAME string = _chatGptDeploymentName
