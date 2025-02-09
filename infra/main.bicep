@@ -1090,7 +1090,9 @@ module frontEnd  'core/host/appservice.bicep' = {
     runtimeVersion: _appServiceRuntimeVersion
     scmDoBuildDuringDeployment: true
     basicPublishingCredentials: _networkIsolation?true:false
-    appSettings: [
+    keyVaultName: keyVault.outputs.name
+    flaskSecretName: 'flaskSecretKey'
+        appSettings: [
       {
         name: 'SPEECH_SYNTHESIS_VOICE_NAME'
         value: _speechSynthesisVoiceName
@@ -1184,6 +1186,14 @@ module appserviceAIAccess './core/security/aiservices-access.bicep' = {
   }
 } 
 
+module appserviceKeyVaultAccess './core/security/keyvault-access.bicep' =  {
+  name: 'appservice-keyvault-access'
+  scope: az.resourceGroup(_keyVaultResourceGroupName)
+  params: {
+    resourceName: keyVault.outputs.name
+    principalId: frontEnd.outputs.identityPrincipalId
+  }
+} 
 
 module dataIngestion './core/host/functions.bicep' = {
   name: 'dataIngestion'
