@@ -534,6 +534,8 @@ var orchestratorEndpoint = 'https://${orchestratorFunctionAppName}.azurewebsites
 var orchestratorUri = 'https://${orchestratorFunctionAppName}.azurewebsites.net'
 var webAppUri = 'https://${appServiceName}.azurewebsites.net'
 
+var pythonEnableInitIndexing = '1'
+
 // B2C parameters
 @description('B2C Tenant Name')
 param b2cTenantName string = ''
@@ -809,6 +811,10 @@ module orchestrator './core/host/functions.bicep' = {
     minimumElasticInstanceCount: 1
     allowedOrigins: ['*']
     appSettings: [
+      {
+        name: 'PYTHON_ENABLE_INIT_INDEXING'
+        value: pythonEnableInitIndexing
+      }
       {
         name: 'AZURE_AI_SEARCH_API_KEY'
         value: aiSearchApiKey
