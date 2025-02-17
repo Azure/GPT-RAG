@@ -255,9 +255,9 @@ var _cosmosDbResourceGroupName = _azureReuseConfig.cosmosDbReuse ? _azureReuseCo
 
 // App Insights Settings
 
-@description('Provision Application Insights (and Log Analytics workspace) if true. Default is false.')
+@description('Provision Application Insights (and Log Analytics workspace) if true. Default is true.')
 @allowed([true, false])
-param provisionApplicationInsights bool = false
+param provisionApplicationInsights bool = true
 var _provisionApplicationInsights = provisionApplicationInsights
 
 // Orchestrator settings
