@@ -62,4 +62,4 @@ If this change adds a new functionality, provide a link to its documentation.
 
 ## Contributing guidelines
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for more details.
+See [CONTRIBUTING.md](../CONTRIBUTING.md) for more details.
