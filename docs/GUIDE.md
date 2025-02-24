@@ -31,9 +31,10 @@
    - [4.8 NL2SQL and Fabric Setup](#nl2sql-and-fabric-setup)
    - [4.9 Enabling Multimodality](#enabling-multimodality)
    - [4.10 Sharepoint Indexing](#sharepoint-setup)
-   - [4.11 Search Trimming](#search-trimming)
-   - [4.12 Bringing Your Own Resources](#bring-your-own-resources)   
-   - [4.13 Setting Up Git Repos](#setting-up-git-repos)
+   - [4.11 Speech Avatar Integration](#speech-avatar-integration)
+   - [4.12 Search Trimming](#search-trimming)
+   - [4.13 Bringing Your Own Resources](#bring-your-own-resources)   
+   - [4.14 Setting Up Git Repos](#setting-up-git-repos)
 5. [**Reference**](#reference)
    - [5.1 Azure Resources](#azure-resources)
    - [5.2 Permissions](#permissions)    
@@ -1051,6 +1052,12 @@ To enable GPT-RAG to use multimodal capabilities, such as those provided by GPT-
 ## SharePoint Setup
 
 The SharePoint connector indexes and purges files using scheduled Azure Functions to maintain an up-to-date Azure AI Search Index. For more information on how this works, see the Sharepoint section on the [Data Ingestion Page](https://github.com/Azure/gpt-rag-ingestion?tab=readme-ov-file#sharepoint-indexing). For detailed instructions on setting up SharePoint for data ingestion, please refer to the [SharePoint Setup Guide](INGESTION_SHAREPOINT_SETUP.md).
+
+## Speech Avatar Integration
+
+GPT-RAG supports the integration of an interactive **Speech Avatar** that enhances user interaction by combining GenAI-powered responses with voice recognition and text-to-speech capabilities. This optional feature is available through a dedicated repository and can be added as an alternative user interface alongside the standard front end.
+
+The Speech Avatar leverages Azure Speech Services, Azure Key Vault, and Azure App Service to provide secure and engaging conversational experiences. For detailed information on how the Speech Avatar works and instructions on configuring and deploying it, visit the [Enterprise RAG Avatar repository](https://github.com/azure/gpt-rag-avatar).
 
 ## Search Trimming
 
