@@ -27,6 +27,8 @@
      - [4.5.1 Front Door & WAF](#configuring-front-door-and-web-application-firewall-waf)
      - [4.5.2 IP Allowlist](#configuring-ip-allowlist)
    - [4.6 Entra Authentication](#configuring-entra-authentication)
+      - [4.6.1 Easy Auth Authentication](#easy-auth-authentication)   
+      - [4.6.2 Custom Authentication](#custom-authentication)
    - [4.7 Authorization Setup](#configuring-authorization)  
    - [4.8 Enabling Multimodality](#enabling-multimodality)
    - [4.9 Sharepoint Indexing](#sharepoint-setup)
@@ -886,7 +888,11 @@ With the **Private Endpoint** already set up for **App Service**, you can still 
 
 ## Configuring Entra Authentication
 
-This section outlines the steps to configure Azure Entra authentication for Front-end app service.
+This section outlines the steps to configure Azure Entra authentication for Front-end app service.  TODO: Add more explanation here.
+
+### Easy Auth Authentication
+
+TODO: you can improve this dscription if needed.
 
 #### Prerequisites
 
@@ -906,6 +912,11 @@ If you **do not have permission** to register a new application in Azure Entra I
 - Access your web app URL.
 - You should be redirected to the Azure AD sign-in page.
 - Upon successful login, you should be redirected back to your app.
+
+### Custom Authentication
+
+TODO: Add custom authentication explanation here.
+
 
 ## Configuring Authorization
 
