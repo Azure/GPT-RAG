@@ -1135,7 +1135,8 @@ For example, the secret for the **`wwi-sales-aggregated-data`** datasource shoul
 wwi-sales-aggregated-data-secret
 ```
 
-![Sample Datasource Secrets](./media/admin-guide-datasource-secrets.png)
+![Sample Datasource Secrets](../media/admin-guide-datasource-secrets.png)
+*Sample Datasource Secrets*
 
 This ensures secure storage and access to credentials required for authentication.
 
