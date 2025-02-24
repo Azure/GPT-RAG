@@ -912,6 +912,14 @@ module orchestrator './core/host/functions.bicep' =  {
         name: 'LOGLEVEL'
         value: 'INFO'
       }
+      {
+        name: 'PYTHON_ENABLE_INIT_INDEXING'
+        value: '1'
+      }
+      {
+        name: 'PYTHON_ISOLATE_WORKER_DEPENDENCIES'
+        value: '1'
+      }
     ]
   }
   dependsOn: [
