@@ -28,11 +28,12 @@
      - [4.5.2 IP Allowlist](#configuring-ip-allowlist)
    - [4.6 Entra Authentication](#configuring-entra-authentication)
    - [4.7 Authorization Setup](#configuring-authorization)  
-   - [4.8 Enabling Multimodality](#enabling-multimodality)
-   - [4.9 Sharepoint Indexing](#sharepoint-setup)
-   - [4.10 Search Trimming](#search-trimming)
-   - [4.11 Bringing Your Own Resources](#bring-your-own-resources)   
-   - [4.12 Setting Up Git Repos](#setting-up-git-repos)
+   - [4.8 Configuring NL2SQL and Fabric Scenarios](#configuring-nl2sql-and-fabric-scenarios)
+   - [4.9 Enabling Multimodality](#enabling-multimodality)
+   - [4.10 Sharepoint Indexing](#sharepoint-setup)
+   - [4.11 Search Trimming](#search-trimming)
+   - [4.12 Bringing Your Own Resources](#bring-your-own-resources)   
+   - [4.13 Setting Up Git Repos](#setting-up-git-repos)
 5. [**Reference**](#reference)
    - [5.1 Azure Resources](#azure-resources)
    - [5.2 Permissions](#permissions)    
@@ -1034,9 +1035,112 @@ Based on your authorization setup, validate access:
 > [!NOTE]
 > Use and test only the methods you have configured to ensure access controls are functioning correctly.
 
-## Enabling Multimodality
+## Configuring NL2SQL and Fabric Scenarios
 
-multimodal_rag
+The **NL2SQL and Fabric scenarios** extend GPT-RAG beyond traditional Retrieval-Augmented Generation (RAG). While RAG retrieves information from an indexed corpus using AI Search, these scenarios use **Generative AI models to construct SQL or other structured queries**, enabling AI-driven data retrieval from databases for precise answers.
+
+### How It Works
+
+In these scenarios, the **orchestrator** interprets the user's query, identifies the relevant **data sources** and **tables** containing the required information, formulates the necessary **queries**, executes them, and generates a response based on the retrieved results.
+
+To implement these scenarios, the solution relies on two key components of GPT-RAG:
+
+1. **Orchestrator** – Generates and executes queries, retrieves results, and formulates the final response for the user.
+2. **Data Ingestion** – Ingests data source metadata, like data dictionaries, to enhance query generation accuracy.
+
+For details on how the **orchestrator** works and how to configure it, refer to the [Orchestrator Repository](https://github.com/Azure/gpt-rag-agentic?tab=readme-ov-file#nl2sql-strategies-configuration).
+
+To configure the **data ingestion** process for these scenarios, refer to the [Data Ingestion Repository](https://github.com/Azure/gpt-rag-ingestion?tab=readme-ov-file#nl2sql-ingestion-process). 
+
+### SQL Data Sources
+
+Every SQL data source, such as an SQL Database or a Fabric SQL endpoint, serves as a data source for GPT-RAG. Currently, we support three types of SQL data sources, and this list will expand as additional SQL data sources are supported.
+
+#### Supported SQL Data Source Types
+
+The following **data source types** are currently supported:
+
+1. **Semantic Model** (Fabric)  
+2. **SQL Endpoint** (Fabric)  
+3. **SQL Database**
+
+> [!NOTE]  
+> Although the **Semantic Model** is listed as an SQL data source, queries against this model are actually performed using **DAX**. However, for simplicity, we use the **NL2SQL** terminology for these cases as well.
+
+#### Authentication Methods
+
+- For **Semantic Models** and **SQL Endpoints**, the orchestrator connects using a **Service Principal/App Registration**.  
+- For **SQL Database**, the connection is established using **Managed Identity**.
+
+#### SQL Data Sources Configuration
+
+Each data source, such as an SQL Database or a Fabric SQL endpoint, must be configured. Data source configurations are stored as JSON documents in the `datasources` container within **CosmosDB**, which is used by GPT-RAG. Each document contains key details such as the data source type and connection information.
+
+![Sample Datasource Configuration](../media/admin-guide-datasource-configuration.png)
+*Sample Datasource Configuration*
+
+Below you can see examples of configurations for each data source type. 
+
+##### **Semantic Model Datasource**
+```json
+{
+    "id": "wwi-sales-aggregated-data",    
+    "description": "This data source is a semantic model containing aggregated sales data. It is ideal for insights such as sales by employee or city.",
+    "type": "semantic_model",
+    "organization": "myorg",
+    "dataset": "your_dataset_or_semantic_model_name",
+    "tenant_id": "your_sp_tenant_id",
+    "client_id": "your_sp_client_id"    
+}
+```
+
+##### **SQL Endpoint Datasource**
+```json
+{
+    "id": "wwi-sales-star-schema",
+    "description": "This data source is a star schema that organizes sales data. It includes a fact table for sales and dimension tables such as city, customer, and inventory items (products).",
+    "type": "sql_endpoint",
+    "organization": "myorg",
+    "server": "your_sql_endpoint. Ex: xpto.datawarehouse.fabric.microsoft.com",
+    "database": "your_lakehouse_name",
+    "tenant_id": "your_sp_tenant_id",
+    "client_id": "your_sp_client_id"
+}
+```
+
+##### **SQL Database Datasource**
+```json
+{
+    "id": "adventureworks",
+    "description": "AdventureWorksLT is a database featuring a schema with tables for customers, orders, products, and sales.",
+    "type": "sql_database",
+    "database": "adventureworkslt",
+    "server": "sqlservername.database.windows.net"
+}
+```
+
+---
+
+### Handling Service Principal Authentication
+
+For **datasources that require Service Principal authentication** (i.e., those that include a `client_id` in their configuration), the corresponding **client secret** must be stored in **Azure Key Vault**. The standard naming convention for storing these secrets follows this pattern:
+
+```
+{datasource_id}-secret
+```
+
+For example, the secret for the **`wwi-sales-aggregated-data`** datasource should be stored as:
+
+```
+wwi-sales-aggregated-data-secret
+```
+
+![Sample Datasource Secrets](./media/admin-guide-datasource-secrets.png)
+
+This ensures secure storage and access to credentials required for authentication.
+
+
+## Enabling Multimodality
 
 To enable GPT-RAG to use multimodal capabilities, such as those provided by GPT-4o, set the `MULTIMODAL` environment variable to `true` in the data ingestion and set the `multimodal_rag` agent strategy in agentic orchestration Function Apps. For more details on how multimodality works and image data is ingested, refer to [Multimodal RAG Overview](MULTIMODAL_RAG.md) and the documentation in the data ingestion repository: [Multimodal Ingestion](https://github.com/Azure/gpt-rag-ingestion?tab=readme-ov-file#multimodal-ingestion) respectively.
 
