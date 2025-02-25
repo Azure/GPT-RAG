@@ -27,14 +27,14 @@
      - [4.5.1 Front Door & WAF](#configuring-front-door-and-web-application-firewall-waf)
      - [4.5.2 IP Allowlist](#configuring-ip-allowlist)
    - [4.6 Entra Authentication](#configuring-entra-authentication)
-      - [4.6.1 Easy Auth Authentication](#easy-auth-authentication)   
-      - [4.6.2 Custom Authentication](#custom-authentication)
-   - [4.7 Authorization Setup](#configuring-authorization)  
-   - [4.8 Enabling Multimodality](#enabling-multimodality)
-   - [4.9 Sharepoint Indexing](#sharepoint-setup)
-   - [4.10 Search Trimming](#search-trimming)
-   - [4.11 Bringing Your Own Resources](#bring-your-own-resources)   
-   - [4.12 Setting Up Git Repos](#setting-up-git-repos)
+   - [4.7 Authorization Setup](#configuring-authorization) 
+   - [4.8 NL2SQL and Fabric Setup](#nl2sql-and-fabric-setup)
+   - [4.9 Enabling Multimodality](#enabling-multimodality)
+   - [4.10 Sharepoint Indexing](#sharepoint-setup)
+   - [4.11 Speech Avatar Integration](#speech-avatar-integration)
+   - [4.12 Search Trimming](#search-trimming)
+   - [4.13 Bringing Your Own Resources](#bring-your-own-resources)   
+   - [4.14 Setting Up Git Repos](#setting-up-git-repos)
 5. [**Reference**](#reference)
    - [5.1 Azure Resources](#azure-resources)
    - [5.2 Permissions](#permissions)    
@@ -888,35 +888,85 @@ With the **Private Endpoint** already set up for **App Service**, you can still 
 
 ## Configuring Entra Authentication
 
-This section outlines the steps to configure Azure Entra authentication for Front-end app service.  TODO: Add more explanation here.
+This section outlines the steps to configure a custom MSAL-based authentication flow based on Azure Entra authentication for your [front-end App Service](https://github.com/azure/gpt-rag-frontend), this can also be used to configure the authentication to you [Avatar service](https://github.com/azure/gpt-rag-avatar).
 
-### Easy Auth Authentication
+### Prerequisites
+1. The Front-end or Avatar app deployed in Azure App Service. 
 
-TODO: you can improve this dscription if needed.
+   > From this point on, I will refer to it as the Front-end, but the same procedure applies if you are using Avatar as the UI.  
 
-#### Prerequisites
+2. The ability (permissions) to register an application in Azure Entra ID.  
+   - You must have one of these Azure Entra roles:  
+     **Application Administrator**, **Cloud Application Administrator**, or **Global Administrator**.
 
-- The front-end app deployed in App Service.
-- Permission to register your application in Entra ID.*
+### 1. Create an App Registration in Azure Entra ID
 
-*\* Use one of these Entra roles: **Application Administrator**, **Cloud Application Administrator**, or **Global Administrator**.*
+1. Sign in to the [Azure Portal](https://portal.azure.com) and go to **Azure Active Directory**.  
+2. Under **App registrations**, choose **New registration**.  
+3. Enter a **Name** for your application (e.g., *FrontEndMSALApp*) and set the **Supported account types** as needed.  
+4. For **Redirect URI**, specify the exact path where your application expects the authentication response. For example:  
+   ```
+   https://<your-frontend-app-url>/getAToken
+   ```
+   This path must match the environment variable `REDIRECT_PATH` configured in your code (defaults to `/getAToken`).  
+5. Click **Register**.  
 
-#### Procedure
+> **Note**: After registration, copy the **Application (client) ID**—you will set it in the environment as `CLIENT_ID`.
 
-If you **have the necessary permissions** to register a new application in Azure Entra ID, simply follow step 3 of the procedure outlined on this page: [Add app authentication](https://learn.microsoft.com/en-us/azure/app-service/scenario-secure-app-authentication-app-service?tabs=workforce-configuration#3-configure-authentication-and-authorization) or [watch this brief tutorial](https://youtu.be/sA-an25jMB4) for step-by-step instructions.
+### 2. Create and Store the Client Secret
 
-If you **do not have permission** to register a new application in Azure Entra ID, that’s not a problem. You can still set up authentication by collaborating with an Entra ID administrator. Simply follow the procedure described on this page: [How to Apply Easy Auth on Web App under a High-security policy environment](https://learn.microsoft.com/en-us/azure/app-service/scenario-secure-app-authentication-app-service?tabs=workforce-configuration#3-configure-authentication-and-authorization).
+1. In your newly created app registration, go to **Certificates & secrets**.  
+2. Under **Client secrets**, select **New client secret**.  
+3. Provide a description and expiration. Click **Add** to generate the secret.  
+4. **Copy** the secret value (once you leave the page, you will no longer have access to it).  
 
-#### Validation
+#### Store in Key Vault
 
-- Access your web app URL.
-- You should be redirected to the Azure AD sign-in page.
-- Upon successful login, you should be redirected back to your app.
+1. Go to your **Azure Key Vault**, select **Secrets**, then **Generate/Import**.  
+2. Name this secret something meaningful, for example: **appServiceClientSecretKey**.  
+3. Paste the client secret value into the **Value** field.  
+4. Click **Create**.  
 
-### Custom Authentication
+> **Important**: In your front-end app, set the environment variable `APP_SERVICE_CLIENT_SECRET_NAME` to reference the **name** of the secret in Key Vault, not the secret value itself. Your code retrieves the secret value at runtime.
 
-TODO: Add custom authentication explanation here.
+### 3. Configure the Required Environment Variables
 
+Below are the key environment variables that must be set in your front-end App Service for custom MSAL-based authentication. In Azure Portal, go to your App Service > **Configuration** > **Application settings**, and add/update the following:
+
+| **Variable**                         | **Description**                                                                                                           | **Example Value**                                                    |
+|-------------------------------------|---------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------|
+| **ENABLE_AUTHENTICATION**           | Controls if MSAL-based authentication is enabled. Set to `"true"` or `"false"`.                                          | `"true"`                                                              |
+| **CLIENT_ID**                       | The Client ID (Application ID) of your Azure AD app registration.                                                         | `"00000000-0000-0000-0000-000000000000"`                             |
+| **APP_SERVICE_CLIENT_SECRET_NAME**  | Name of the secret in Key Vault that stores your app registration’s client secret.                                        | `"appServiceClientSecretKey"`                                        |
+| **AUTHORITY**                       | The authority / tenant ID for Azure AD.                                                                                  | `"https://login.microsoftonline.com/your_tenant_id"`                 |
+| **REDIRECT_PATH**                   | The path the identity provider will redirect back to after sign-in.                                                      | `"/getAToken"`                                                        |
+| **OTHER_AUTH_SCOPES**               | A comma-separated list of additional API scopes (beyond "User.Read").                                                    | `"https://analysis.windows.net/powerbi/api/.default,SomeOther.Scope"` |
+| **FLASK_SECRET_KEY_NAME**           | Name of the secret in Key Vault that stores your Flask session key (only if you’re using Flask-based sessions). | `"flaskSecretKey"` |  
+| **SESSION_SECRET_KEY**              | Name of the secret in Key Vault that stores your FastAPI session key (only if you’re using a FastAPI-based front-end). | `"sessionSecretKey"` |  
+| **FORWARD_ACCESS_TOKEN_TO_ORCHESTRATOR** | A boolean indicating whether the user's access token should be included in the payload sent to the orchestrator. This is only required when the app registration must access APIs on behalf of the user (e.g., Power BI REST API, where permissions are delegated from the user rather than the app). When set to `"true"`, the payload sent to the orchestrator (`/chatgpt` endpoint) will include the following fields: <br> - **`client_principal_id`**: The user’s Object ID in Azure AD. <br> - **`client_principal_name`**: The user’s UPN or preferred username. <br> - **`access_token`**: The valid access token for additional APIs (included only if acquired). | `"true"` |
+
+
+> **Important**: If you plan to use the Power BI REST API, you must include the following scope in `OTHER_AUTH_SCOPES`:
+> ```
+> https://analysis.windows.net/powerbi/api/.default
+> ```
+> This ensures that your front-end can request an access token to call the Power BI API on behalf of the signed-in user.
+
+### 4. Update Your Redirect URIs and Reply URLs in App Registration
+
+In the Azure AD app registration:
+- Go to **Authentication**.  
+- Under **Redirect URIs**, ensure the URI you used in step 1.4 is listed (e.g., `https://<your-frontend-app-url>/getAToken`).  
+- If needed, add additional reply URLs that match your deployment’s domain(s).  
+
+### 5. Validation and Testing
+
+1. **Enable authentication** in your front-end app by setting `ENABLE_AUTHENTICATION = "true"`.  
+2. Navigate to your front-end URL.  
+   - If you are not signed in, you will be redirected to the Microsoft login page.  
+   - After successful sign-in, you will be redirected back to your application’s `REDIRECT_PATH` (e.g., `/getAToken`).  
+3. If you have included extra scopes in `OTHER_AUTH_SCOPES` (e.g., Power BI), the code attempts to silently acquire tokens for those scopes as well.  
+4. Confirm that the necessary tokens are being retrieved by observing the logs or the session state.
 
 ## Configuring Authorization
 
@@ -986,9 +1036,15 @@ Based on your authorization setup, validate access:
 > [!NOTE]
 > Use and test only the methods you have configured to ensure access controls are functioning correctly.
 
+## NL2SQL and Fabric Setup
+
+The **NL2SQL and Fabric scenarios** extend GPT-RAG beyond traditional Retrieval-Augmented Generation (RAG). While RAG retrieves information from an indexed corpus using AI Search, these scenarios use **Generative AI models to construct SQL or other structured queries**, enabling AI-driven data retrieval from databases for precise answers.  
+
+To learn how this scenario works and configure it, check the [NL2SQL and Fabric Guide](NL2SQL_GUIDE.md).
+
 ## Enabling Multimodality
 
-To enable GPT-RAG to use multimodal capabilities, such as those provided by GPT-4o, set the `MULTIMODALITY` environment variable to `true` in both the data ingestion and orchestration Function Apps. For more details on how multimodality works and image data is ingested, refer to [Multimodal RAG Overview](MULTIMODAL_RAG.md) and the documentation in the data ingestion repository: [Multimodal Ingestion](https://github.com/Azure/gpt-rag-ingestion?tab=readme-ov-file#multimodal-ingestion) respectively.
+To enable GPT-RAG to use multimodal capabilities, such as those provided by GPT-4o, set the `MULTIMODAL` environment variable to `true` in the data ingestion and set the `multimodal_rag` agent strategy in agentic orchestration Function Apps. For more details on how multimodality works and image data is ingested, refer to [Multimodal RAG Overview](MULTIMODAL_RAG.md) and the documentation in the data ingestion repository: [Multimodal Ingestion](https://github.com/Azure/gpt-rag-ingestion?tab=readme-ov-file#multimodal-ingestion) respectively.
 
 > [!NOTE]
 > Currently, only the Agentic Orchestrator supports this feature.
@@ -996,6 +1052,12 @@ To enable GPT-RAG to use multimodal capabilities, such as those provided by GPT-
 ## SharePoint Setup
 
 The SharePoint connector indexes and purges files using scheduled Azure Functions to maintain an up-to-date Azure AI Search Index. For more information on how this works, see the Sharepoint section on the [Data Ingestion Page](https://github.com/Azure/gpt-rag-ingestion?tab=readme-ov-file#sharepoint-indexing). For detailed instructions on setting up SharePoint for data ingestion, please refer to the [SharePoint Setup Guide](INGESTION_SHAREPOINT_SETUP.md).
+
+## Speech Avatar Integration
+
+GPT-RAG supports the integration of an interactive **Speech Avatar** that enhances user interaction by combining GenAI-powered responses with voice recognition and text-to-speech capabilities. This optional feature is available through a dedicated repository and can be added as an alternative user interface alongside the standard front end.
+
+The Speech Avatar leverages Azure Speech Services, Azure Key Vault, and Azure App Service to provide secure and engaging conversational experiences. For detailed information on how the Speech Avatar works and instructions on configuring and deploying it, visit the [Enterprise RAG Avatar repository](https://github.com/azure/gpt-rag-avatar).
 
 ## Search Trimming
 

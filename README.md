@@ -13,6 +13,12 @@ name: Multi-repo ChatGPT and Enterprise data with Azure OpenAI and AI Search
 description: GPT-RAG core is a Retrieval-Augmented Generation pattern running in Azure, using Azure AI Search for retrieval and Azure OpenAI large language models to power ChatGPT-style and Q&A experiences.
 -->
 <!-- YAML front-matter schema: https://review.learn.microsoft.com/en-us/help/contribute/samples/process/onboarding?branch=main#supported-metadata-fields-for-readmemd -->
+
+
+<img src="media/logo.png" alt="Enterprise RAG Logo" width="80" align="left"/>
+
+# GPT-RAG Solution Accelerator
+
 The **RAG pattern** enables businesses to use the reasoning capabilities of LLMs, using their existing models to process and generate responses based on new data. RAG facilitates periodic data updates without the need for fine-tuning, thereby streamlining the integration of LLMs into businesses. 
 
 The **Enterprise RAG** Solution Accelerator (GPT-RAG) offers a robust architecture tailored for enterprise-grade deployment of the RAG pattern. It ensures grounded responses and is built on Zero-trust security and Responsible AI, ensuring availability, scalability, and auditability. Ideal for organizations transitioning from exploration and PoC stages to full-scale production and MVPs.
@@ -25,7 +31,7 @@ GPT-RAG follows a modular approach, consisting of three components, each with a 
 
 * **[Data Ingestion](https://github.com/Azure/gpt-rag-ingestion)** - Optimizes data chunking and indexing for the RAG retrieval step.
 
-* **Orchestrator** - Coordinates the flow to retrieve information and generate a user response. It offers two options: **[Functional](https://github.com/Azure/gpt-rag-orchestrator)**, using Semantic Kernel functions (default), and **[Agentic](https://github.com/Azure/gpt-rag-agentic)**, using AutoGen agents. See deployment instructions to switch to Agentic.
+* **Orchestrator** - Manages information retrieval and response generation. Choose between **[Functional](https://github.com/Azure/gpt-rag-orchestrator)** using Semantic Kernel functions or **[Agentic](https://github.com/Azure/gpt-rag-agentic)** powered by AutoGen. Refer to the deployment instructions to switch.
 
 * **[App Front-End](https://github.com/Azure/gpt-rag-frontend)** - Uses the [Backend for Front-End](https://learn.microsoft.com/en-us/azure/architecture/patterns/backends-for-frontends) pattern to provide a scalable and efficient web interface.
 

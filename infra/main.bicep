@@ -881,16 +881,8 @@ module orchestrator './core/host/functions.bicep' =  {
         value: _chatGptDeploymentName
       }
       {
-        name: 'AZURE_OPENAI_CHATGPT_LLM_MONITORING'
-        value: _chatGptLlmMonitoring
-      }
-      {
         name: 'AZURE_OPENAI_API_VERSION'
         value: _openaiApiVersion
-      }
-      {
-        name: 'AZURE_OPENAI_LOAD_BALANCING'
-        value: 'false'
       }
       {
         name: 'AZURE_OPENAI_EMBEDDING_MODEL'
@@ -905,10 +897,6 @@ module orchestrator './core/host/functions.bicep' =  {
         value: _embeddingsVectorSize
       }
       {
-        name: 'AZURE_OPENAI_STREAM'
-        value: 'false'
-      }
-      {
         name: 'ORCHESTRATOR_MESSAGES_LANGUAGE'
         value: _orchestratorMessagesLanguage
       }
@@ -917,52 +905,20 @@ module orchestrator './core/host/functions.bicep' =  {
         value: 'true'
       }
       {
-        name: 'BING_SEARCH_TOP_K'
-        value: '3'
-      }
-      {
-        name: 'BING_RETRIEVAL'
-        value: 'false'
-      }
-      {
-        name: 'BING_SEARCH_MAX_TOKENS'
-        value: '1000'
-      }
-      {
-        name: 'SQL_RETRIEVAL'
-        value: 'false'
-      }
-      {
-        name: 'SQL_TOP_K'
-        value: '3'
-      }
-      {
-        name: 'SQL_MAX_TOKENS'
-        value: '1000'
-      }
-      {
-        name: 'TERADATA_TOP_K'
-        value: '3'
-      }
-      {
-        name: 'TERADATA_RETRIEVAL'
-        value: 'false'
-      }
-      {
-        name: 'TERADATA_MAX_TOKENS'
-        value: '1000'
-      }
-      {
-        name: 'RETRIEVAL_PRIORITY'
-        value: 'search'
-      }
-      {
         name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
         value: 'true'
       }
       {
         name: 'LOGLEVEL'
         value: 'INFO'
+      }
+      {
+        name: 'PYTHON_ENABLE_INIT_INDEXING'
+        value: '1'
+      }
+      {
+        name: 'PYTHON_ISOLATE_WORKER_DEPENDENCIES'
+        value: '1'
       }
     ]
   }
