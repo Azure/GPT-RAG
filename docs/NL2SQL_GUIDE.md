@@ -11,9 +11,9 @@ To implement these scenarios, the solution relies on two key components of GPT-R
 1. **Orchestrator** – Generates and executes queries, retrieves results, and formulates the final response for the user.
 2. **Data Ingestion** – Ingests data source metadata, like data dictionaries, to enhance query generation accuracy.
 
-Learn how the **orchestrator** works and configure it for NL2SQL and Fabric in the [Orchestrator Repository](https://github.com/Azure/gpt-rag-agentic?tab=readme-ov-file#nl2sql-strategies-configuration).
+Learn how the **orchestrator** works and configure it for NL2SQL and Fabric in the [Orchestrator Repository](https://github.com/Azure/gpt-rag-agentic/blob/main/docs/NL2SQL.md).
 
-To configure the **data ingestion** process for these scenarios, refer to the [Data Ingestion Repository](https://github.com/Azure/gpt-rag-ingestion?tab=readme-ov-file#nl2sql-ingestion-process).
+To configure the **data ingestion** process for these scenarios, refer to the [Data Ingestion Repository](https://github.com/Azure/gpt-rag-agentic/blob/main/docs/NL2SQL.md).
 
 > [!NOTE]
 > Currently, only the Agentic Orchestrator supports NL2SQL feature.
