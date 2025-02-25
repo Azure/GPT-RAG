@@ -255,9 +255,9 @@ var _cosmosDbResourceGroupName = _azureReuseConfig.cosmosDbReuse ? _azureReuseCo
 
 // App Insights Settings
 
-@description('Provision Application Insights (and Log Analytics workspace) if true. Default is false.')
+@description('Provision Application Insights (and Log Analytics workspace) if true. Default is true.')
 @allowed([true, false])
-param provisionApplicationInsights bool = false
+param provisionApplicationInsights bool = true
 var _provisionApplicationInsights = provisionApplicationInsights
 
 // Orchestrator settings
@@ -882,16 +882,8 @@ module orchestrator './core/host/functions.bicep' =  {
         value: _chatGptDeploymentName
       }
       {
-        name: 'AZURE_OPENAI_CHATGPT_LLM_MONITORING'
-        value: _chatGptLlmMonitoring
-      }
-      {
         name: 'AZURE_OPENAI_API_VERSION'
         value: _openaiApiVersion
-      }
-      {
-        name: 'AZURE_OPENAI_LOAD_BALANCING'
-        value: 'false'
       }
       {
         name: 'AZURE_OPENAI_EMBEDDING_MODEL'
@@ -906,10 +898,6 @@ module orchestrator './core/host/functions.bicep' =  {
         value: _embeddingsVectorSize
       }
       {
-        name: 'AZURE_OPENAI_STREAM'
-        value: 'false'
-      }
-      {
         name: 'ORCHESTRATOR_MESSAGES_LANGUAGE'
         value: _orchestratorMessagesLanguage
       }
@@ -918,52 +906,20 @@ module orchestrator './core/host/functions.bicep' =  {
         value: 'true'
       }
       {
-        name: 'BING_SEARCH_TOP_K'
-        value: '3'
-      }
-      {
-        name: 'BING_RETRIEVAL'
-        value: 'false'
-      }
-      {
-        name: 'BING_SEARCH_MAX_TOKENS'
-        value: '1000'
-      }
-      {
-        name: 'SQL_RETRIEVAL'
-        value: 'false'
-      }
-      {
-        name: 'SQL_TOP_K'
-        value: '3'
-      }
-      {
-        name: 'SQL_MAX_TOKENS'
-        value: '1000'
-      }
-      {
-        name: 'TERADATA_TOP_K'
-        value: '3'
-      }
-      {
-        name: 'TERADATA_RETRIEVAL'
-        value: 'false'
-      }
-      {
-        name: 'TERADATA_MAX_TOKENS'
-        value: '1000'
-      }
-      {
-        name: 'RETRIEVAL_PRIORITY'
-        value: 'search'
-      }
-      {
         name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
         value: 'true'
       }
       {
         name: 'LOGLEVEL'
         value: 'INFO'
+      }
+      {
+        name: 'PYTHON_ENABLE_INIT_INDEXING'
+        value: '1'
+      }
+      {
+        name: 'PYTHON_ISOLATE_WORKER_DEPENDENCIES'
+        value: '1'
       }
     ]
   }
@@ -1091,7 +1047,9 @@ module frontEnd  'core/host/appservice.bicep' = {
     runtimeVersion: _appServiceRuntimeVersion
     scmDoBuildDuringDeployment: true
     basicPublishingCredentials: _networkIsolation?true:false
-    appSettings: [
+    keyVaultName: keyVault.outputs.name
+    flaskSecretName: 'flaskSecretKey'
+        appSettings: [
       {
         name: 'SPEECH_SYNTHESIS_VOICE_NAME'
         value: _speechSynthesisVoiceName
@@ -1185,6 +1143,14 @@ module appserviceAIAccess './core/security/aiservices-access.bicep' = {
   }
 } 
 
+module appserviceKeyVaultAccess './core/security/keyvault-access.bicep' =  {
+  name: 'appservice-keyvault-access'
+  scope: az.resourceGroup(_keyVaultResourceGroupName)
+  params: {
+    resourceName: keyVault.outputs.name
+    principalId: frontEnd.outputs.identityPrincipalId
+  }
+} 
 
 module dataIngestion './core/host/functions.bicep' = {
   name: 'dataIngestion'
