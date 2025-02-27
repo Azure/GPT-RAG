@@ -220,6 +220,7 @@ This section explains how to configure SharePoint as a data source for the `ragi
 
      - Replace placeholders with the actual values obtained from previous steps.
 
+   - **Add SharePoint Client Secret to KeyVault**:
      - Add the SharePoint client secret value to the GPT-RAG Key Vault. You can use **sharepointClientSecret** as the secret name, or if you choose a custom name, make sure to add it to the `SHAREPOINT_CLIENT_SECRET_NAME` environment variable.
 
   >[!NOTE]
