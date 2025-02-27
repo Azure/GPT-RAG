@@ -211,7 +211,7 @@ This section explains how to configure SharePoint as a data source for the `ragi
      
      SHAREPOINT_TENANT_ID=your_actual_tenant_id
      SHAREPOINT_CLIENT_ID=your_actual_client_id
-     SHAREPOINT_CLIENT_SECRET=your_client_secret_value
+     SHAREPOINT_CLIENT_SECRET_NAME=sharepoint_keyvault_secret_name (Default to sharepointClientSecret)
      SHAREPOINT_SITE_DOMAIN=your_actual_site_domain
      SHAREPOINT_SITE_NAME=your_actual_site_name
      SHAREPOINT_SITE_FOLDER=/your/folder/path # Leave empty if using the root folder
@@ -219,6 +219,8 @@ This section explains how to configure SharePoint as a data source for the `ragi
      ```
 
      - Replace placeholders with the actual values obtained from previous steps.
+
+     - Add the SharePoint client secret value to the GPT-RAG Key Vault. You can use **sharepointClientSecret** as the secret name, or if you choose a custom name, make sure to add it to the `SHAREPOINT_CLIENT_SECRET_NAME` environment variable.
 
   >[!NOTE]
   > Leave `SHAREPOINT_FILES_FORMAT` empty to include the following default extensions: vtt, xlsx, xls, pdf, png, jpeg, jpg, bmp, tiff, docx, pptx.
