@@ -253,8 +253,8 @@ Gather Necessary Information:
         - Disable public access.
           
 > [!NOTE]
-> Create the Key Vault without any secrets, as we are currently using Managed Identities for services to access other services, but it will still be useful for adding secrets such as API keys or credentials if needed.
-    
+> Create the Key Vault without any secrets, as we are currently using Managed Identities for services to access other services. However, it will still be useful for storing secrets such as API keys or credentials if needed.
+
 8. **App Services**
 
     - **App Service Plan**
