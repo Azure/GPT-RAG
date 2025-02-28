@@ -146,15 +146,15 @@ This section explains how to configure SharePoint as a data source for the `ragi
          }
          ```
 
-       - **Run the Query** and ensure you receive a `201 Created` response.
+   - **Run the Query** and ensure you receive a `201 Created` response.
 
-     - **Repeat** the permission assignment for each site you wish to index.
+   - **Repeat** the permission assignment for each site you wish to index.
 
     ![Assign Site Permissions](../media/sharepoint-site-permissions-created.png)
          *Assigning site permissions via Microsoft Graph Explorer*
     
     
-       - **If you encounter a permission denied error when trying to assign site permissions**:
+   - **If you encounter a permission denied error when trying to assign site permissions**:
     
     If you encounter a permission error, like the one shown in the next screen, it may be necessary to grant permissions to your user.
     
