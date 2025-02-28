@@ -2,15 +2,17 @@
 
 This section explains how to configure SharePoint as a data source for the `ragindex` GPT-RAG Azure AI Search Index, using the `Sites.Selected` permission to limit access to specific site collections.
 
-## Prerequisites
+### Prerequisites  
 
-- **Azure Entra ID Administrative Permissions**: Permission to register an application in Azure Entra ID.
+Before executing this procedure ensure you have the necessary roles for each step:  
 
-*Use an Entra role: **Application Administrator**, **Cloud Application Administrator**, or **Global Administrator**.*
+| Steps | Required Role(s) |
+|--------|------------------|
+| **Register app and assign `Sites.Selected`.** | Global Administrator, Application Administrator, or Cloud Application Administrator. |
+| **Grant admin consent.** | Global Administrator or Application Administrator. |
+| **Get SharePoint Site ID via Graph API.** | SharePoint Administrator, Global Administrator, or a user with access to the site. |
+| **Assign site permissions via Graph API.** | SharePoint Administrator or Global Administrator. |
 
-- **Access to SharePoint Online**: Ensure you have access to the SharePoint site(s) and folders you wish to index.
-
-- **Ability to Use Microsoft Graph API**: Assigning specific site permissions using `Sites.Selected` requires making API calls via Microsoft Graph. This step cannot be completed solely through the Azure Portal.
 
 ## Procedure
 
