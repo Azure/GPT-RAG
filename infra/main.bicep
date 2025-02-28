@@ -339,8 +339,8 @@ param embeddingsDeploymentName string = 'text-embedding-ada-002'
 @maxValue(240)
 param embeddingsDeploymentCapacity int = 20
 @description('Azure OpenAI API version.')
-@allowed(['2023-05-15', '2024-02-15-preview'])
-param openaiApiVersion string
+@allowed(['2024-05-01-preview'])
+param openaiApiVersion string = '2024-05-01-preview'
 @description('Enables LLM monitoring to generate conversation metrics.')
 @allowed([true, false])
 param chatGptLlmMonitoring bool = true
@@ -360,9 +360,9 @@ param useSemanticReranking bool = true
 var searchServiceSkuName = networkIsolation ? 'standard2' : 'standard'
 @description('Search index name.')
 var searchIndex = 'ragindex'
-@allowed(['2023-11-01', '2023-10-01-Preview'])
+@allowed(['2024-05-01-preview'])
 // Requires version 2023-10-01-Preview or higher for indexProjections and MIS authResourceId.
-param searchApiVersion string = '2023-10-01-Preview'
+param searchApiVersion string = '2024-05-01-preview'
 
 @description('Frequency of search reindexing. PT5M (5 min), PT1H (1 hour), P1D (1 day).')
 @allowed(['PT5M', 'PT1H', 'P1D'])
@@ -532,6 +532,7 @@ var vnetName = !empty(azureVnetName) ? azureVnetName : 'aivnet0-${resourceToken}
 
 var orchestratorEndpoint = 'https://${orchestratorFunctionAppName}.azurewebsites.net/api/orc'
 var orchestratorUri = 'https://${orchestratorFunctionAppName}.azurewebsites.net'
+var webAppUri = 'https://${appServiceName}.azurewebsites.net'
 
 // B2C parameters
 @description('B2C Tenant Name')
@@ -964,6 +965,10 @@ module orchestrator './core/host/functions.bicep' = {
         name: 'LOGLEVEL'
         value: 'INFO'
       }
+      {
+        name: 'WEB_APP_URL'
+        value: webAppUri
+      }
     ]
   }
 }
@@ -1247,6 +1252,16 @@ module appserviceOrchestratorAccess './core/host/functions-access.bicep' = {
   params: {
     functionAppName: orchestrator.outputs.name
     principalId: frontEnd.outputs.identityPrincipalId
+  }
+}
+
+// Give the App Service access to Cosmos
+module appserviceCosmosAccess './core/security/cosmos-access.bicep' = {
+  name: 'appservice-cosmos-access'
+  scope: resourceGroup
+  params: {
+    principalId: frontEnd.outputs.identityPrincipalId
+    accountName: cosmosAccount.outputs.name
   }
 }
 

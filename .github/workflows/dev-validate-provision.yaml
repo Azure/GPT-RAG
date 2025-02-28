@@ -13,8 +13,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install azd
-        uses: Azure/setup-azd@v1.0.0
+      - name: Install Azure Developer CLI manually
+        run: |
+          curl -fsSL https://aka.ms/install-azd.sh | bash
+
+      - name: Verify azd installation
+        run: azd version
 
       - name: Log in with Azure (Client Credentials)
         if: ${{ env.AZURE_CREDENTIALS != '' }}
