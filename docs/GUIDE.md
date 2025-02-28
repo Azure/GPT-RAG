@@ -35,6 +35,7 @@
    - [4.12 Search Trimming](#search-trimming)
    - [4.13 Bringing Your Own Resources](#bring-your-own-resources)   
    - [4.14 Setting Up Git Repos](#setting-up-git-repos)
+   - [4.15 Creating a Teams App Interface](#creating-a-teams-app-interface)
 5. [**Reference**](#reference)
    - [5.1 Azure Resources](#azure-resources)
    - [5.2 Permissions](#permissions)    
@@ -1159,6 +1160,10 @@ For detailed instructions and advanced import scenarios, refer to the [Importing
 ### Option 2: Contributing by Forking and Creating Pull Requests
 
 If you intend to contribute to the ongoing development of the Solution Accelerator by submitting pull requests, please refer to our [Contribution Guidelines](https://github.com/Azure/GPT-RAG/blob/main/CONTRIBUTING.md#contribution-guidelines) for detailed instructions on how to fork repositories and create pull requests.
+
+## Creating a Teams App Interface
+
+[This step-by-step guide](TEAMS_INTEGRATION_MAIN.md) provides instructions for creating a Teams App Interface for the Enterprise GPT-RAG Solution Accelerator using the Teams toolkit. It covers the prerequisites and high-level steps required to build, test, deploy, and publish the Teams App. The guide includes creating a new Teams App, connecting it to the GPT-RAG Orchestrator, provisioning and deploying Azure resources, building the app, and finally publishing it.
 
 ## Reference
 
