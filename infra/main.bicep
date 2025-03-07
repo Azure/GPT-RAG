@@ -382,7 +382,8 @@ param chunkTokenOverlap string = '200'
 // storage
 @description('Name of the container where source documents will be stored.')
 param storageContainerName string = 'documents'
-
+@description('Name of the container where financial agent documents will be stored.')
+param storageFinancialAgentContainerName string = 'fa-documents'
 // Service names
 // The name for each service can be set from environment variables which are mapped in main.parameters.json.
 // Then no maping to specific name is defined, a unique name is generated for each service based on the resourceToken created above.
@@ -679,7 +680,10 @@ module storage './core/storage/storage-account.bicep' = {
     tags: tags
     publicNetworkAccess: networkIsolation ? 'Disabled' : 'Enabled'
     allowBlobPublicAccess: false // Disable anonymous access
-    containers: [{ name: containerName, publicAccess: 'None' }]
+    containers: [
+      { name: containerName, publicAccess: 'None' }
+      { name: storageFinancialAgentContainerName, publicAccess: 'None' }
+    ]
     keyVaultName: keyVault.outputs.name
     secretName: 'storageConnectionString'
     deleteRetentionPolicy: {
