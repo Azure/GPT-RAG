@@ -248,14 +248,13 @@ Gather Necessary Information:
      - Enable soft delete for blobs.
 
 7. **Security**
-    - **Key Vault (Application)**
-        - Create the Azure Key Vault with the following secrets
-            - azureOpenAIKey (Azure OpenAI API Key)
-            - azureSearchKey (Azure AI Search query API Key)
-            - formRecKey (Azure AI Services API Key)
-            - speechKey (Azure AI Services API Key)
+    - **Key Vault**
+        - Create the Azure Key Vault
         - Disable public access.
-     
+          
+> [!NOTE]
+> Create the Key Vault without any secrets, as we are currently using Managed Identities for services to access other services. However, it will still be useful for storing secrets such as API keys or credentials if needed.
+
 8. **App Services**
 
     - **App Service Plan**

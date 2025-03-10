@@ -1,19 +1,19 @@
 # Multimodal RAG Overview
 
-This document outlines the architecture and workflow for our **multimodal Retrieval Augmented Generation (RAG)** solution, integrating **AI Search Service**, **Azure OpenAI embeddings**, and **Azure Functions**. The goal is to enrich responses with **textual and visual content** (e.g., images) extracted from ingested PDF documents, all managed within a unified search index.
+This document outlines the architecture and workflow for our **multimodal Retrieval Augmented Generation (RAG)** solution, integrating **AI Search Service**, **Azure OpenAI embeddings**, and **Azure Functions**. The goal is to enrich responses with **textual and visual content** (e.g., images) extracted from ingested documents, all managed within a unified search index.
 
 ## Key Components
 
-- **Azure Blob Storage**: Stores original PDF documents, extracted text, and associated images.
+- **Azure Blob Storage**: Stores original documents, extracted text, and associated images.
 - **Azure Functions**: Orchestrates ingestion, text and image extraction, embedding generation, indexing, and data cleanup.
-- **Azure Document Processing Service**: Extracts text segments and identifies images from PDFs, enabling multimodal content association.
+- **Azure Document Processing Service**: Extracts text segments and identifies images from source documents, enabling multimodal content association.
 - **Azure OpenAI**: Generates semantic embeddings for both text and image descriptions.
 - **AI Search Service**: Hosts a unified index for both textual embeddings and image descriptions.
 
 ## Multimodal End-to-End Workflow
 
 1. **Data Ingestion**  
-   - PDF files are uploaded to Azure Blob Storage.
+   - Documents files are uploaded to Azure Blob Storage.
    - An Azure Function triggers upon new file uploads.
 
 2. **Preprocessing & Content Extraction**  

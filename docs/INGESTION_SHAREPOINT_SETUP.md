@@ -2,15 +2,17 @@
 
 This section explains how to configure SharePoint as a data source for the `ragindex` GPT-RAG Azure AI Search Index, using the `Sites.Selected` permission to limit access to specific site collections.
 
-## Prerequisites
+### Prerequisites  
 
-- **Azure Entra ID Administrative Permissions**: Permission to register an application in Azure Entra ID.
+Before executing this procedure ensure you have the necessary roles for each step:  
 
-*Use an Entra role: **Application Administrator**, **Cloud Application Administrator**, or **Global Administrator**.*
+| Steps | Required Role(s) |
+|--------|------------------|
+| **Register app and assign `Sites.Selected`.** | Global Administrator, Application Administrator, or Cloud Application Administrator. |
+| **Grant admin consent.** | Global Administrator or Application Administrator. |
+| **Get SharePoint Site ID via Graph API.** | SharePoint Administrator, Global Administrator, or a user with access to the site. |
+| **Assign site permissions via Graph API.** | SharePoint Administrator or Global Administrator. |
 
-- **Access to SharePoint Online**: Ensure you have access to the SharePoint site(s) and folders you wish to index.
-
-- **Ability to Use Microsoft Graph API**: Assigning specific site permissions using `Sites.Selected` requires making API calls via Microsoft Graph. This step cannot be completed solely through the Azure Portal.
 
 ## Procedure
 
@@ -146,15 +148,15 @@ This section explains how to configure SharePoint as a data source for the `ragi
          }
          ```
 
-       - **Run the Query** and ensure you receive a `201 Created` response.
+   - **Run the Query** and ensure you receive a `201 Created` response.
 
-     - **Repeat** the permission assignment for each site you wish to index.
+   - **Repeat** the permission assignment for each site you wish to index.
 
     ![Assign Site Permissions](../media/sharepoint-site-permissions-created.png)
          *Assigning site permissions via Microsoft Graph Explorer*
     
     
-       - **If you encounter a permission denied error when trying to assign site permissions**:
+   - **If you encounter a permission denied error when trying to assign site permissions**:
     
     If you encounter a permission error, like the one shown in the next screen, it may be necessary to grant permissions to your user.
     
@@ -211,7 +213,7 @@ This section explains how to configure SharePoint as a data source for the `ragi
      
      SHAREPOINT_TENANT_ID=your_actual_tenant_id
      SHAREPOINT_CLIENT_ID=your_actual_client_id
-     SHAREPOINT_CLIENT_SECRET=your_client_secret_value
+     SHAREPOINT_CLIENT_SECRET_NAME=sharepoint_keyvault_secret_name (Default to sharepointClientSecret)
      SHAREPOINT_SITE_DOMAIN=your_actual_site_domain
      SHAREPOINT_SITE_NAME=your_actual_site_name
      SHAREPOINT_SITE_FOLDER=/your/folder/path # Leave empty if using the root folder
@@ -219,6 +221,9 @@ This section explains how to configure SharePoint as a data source for the `ragi
      ```
 
      - Replace placeholders with the actual values obtained from previous steps.
+
+   - **Add SharePoint Client Secret to KeyVault**:
+     - Add the SharePoint client secret value to the GPT-RAG Key Vault. You can use **sharepointClientSecret** as the secret name, or if you choose a custom name, make sure to add it to the `SHAREPOINT_CLIENT_SECRET_NAME` environment variable.
 
   >[!NOTE]
   > Leave `SHAREPOINT_FILES_FORMAT` empty to include the following default extensions: vtt, xlsx, xls, pdf, png, jpeg, jpg, bmp, tiff, docx, pptx.
