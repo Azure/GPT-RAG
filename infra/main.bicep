@@ -625,7 +625,7 @@ module openaiDnsZone './core/network/private-dns-zones.bicep' = if (_networkIsol
 }
 
 module searchDnsZone './core/network/private-dns-zones.bicep' = if (_networkIsolation && !_vnetReuse) {
-  name: 'searchs-dnzones'
+  name: 'search-dnzones'
   scope: resourceGroup
   params: {
     dnsZoneName: 'privatelink.search.windows.net' 
