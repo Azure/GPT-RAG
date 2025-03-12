@@ -33,14 +33,21 @@ services:
         windows:
           shell: pwsh
           run:  cd ../frontend;npm install;npm run build
-          interactive: false
+          interactive: true
           continueOnError: false
         posix:
           shell: sh
           run:  cd ../frontend;npm install;npm run build
-          interactive: false
+          interactive: true
           continueOnError: false
 hooks:
+  prepackage:
+    posix:
+      run: scripts/fetchComponents.sh
+      interactive: false
+    windows:
+      run: scripts/fetchComponents.ps1
+      interactive: false 
   preprovision:
     posix:
       shell: sh    
