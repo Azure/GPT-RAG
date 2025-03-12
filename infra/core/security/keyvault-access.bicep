@@ -1,5 +1,3 @@
-//param permissions object = { secrets: [ 'get', 'list' ] }
-// param permissions object = { secrets: [ 'get', 'list', 'set', 'delete' ] }
 param principalId string
 param roleDefinitionId string = ''
 param resourceName string
@@ -13,18 +11,6 @@ resource keyVaultSecretsUserRoleDefinition 'Microsoft.Authorization/roleDefiniti
   scope: subscription()
   name: '4633458b-17de-408a-b874-0445c86b69e6'
 }
-
-//resource keyVaultAccessPolicies 'Microsoft.KeyVault/vaults/accessPolicies@2022-07-01' = {
-//  parent: resource
-//  name: 'add'
-//  properties: {
-//    accessPolicies: [ {
-//        objectId: principalId
-//        tenantId: subscription().tenantId
-//        permissions: permissions
-//      } ]
-//  }
-//}
 
 resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!empty(principalId)) {
   scope: resource

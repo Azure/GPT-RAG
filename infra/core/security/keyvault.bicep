@@ -35,13 +35,6 @@ resource newKeyVault 'Microsoft.KeyVault/vaults@2022-07-01' = if (!keyVaultReuse
     publicNetworkAccess: publicNetworkAccess
     enablePurgeProtection: true
     enableRbacAuthorization: true    
-    //accessPolicies: !empty(principalId) ? [
-    //  {
-    //    objectId: principalId
-    //    permissions: { secrets: [ 'get', 'list', 'set'] }
-    //    tenantId: subscription().tenantId
-    //  }
-    //] : []
   }
 }
 
