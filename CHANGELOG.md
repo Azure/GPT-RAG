@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
  
 ## Changelog
 
+### 2025-03-12
+- **Changed**: Refactored the Key Vault access method from access policies to RBAC and fixed some typos.
+
 ### 2024-06-15
 - **Added**: Option to install just some specific GPT-RAG components: data ingestion, orchestrator and frontend.
 
