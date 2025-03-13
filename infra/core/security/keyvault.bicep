@@ -18,6 +18,12 @@ resource existingKeyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = if (
   name: name  
 }
 
+@description('This is the built-in Key Vault Secrets Officer role. See https://learn.microsoft.com/en-gb/azure/role-based-access-control/built-in-roles/security#key-vault-secrets-officer')
+resource keyVaultSecretsOfficerRoleDefinition 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+  scope: subscription()
+  name: 'b86a8fe4-44ce-4948-aee5-eccb2c155cd7'
+}
+
 resource newKeyVault 'Microsoft.KeyVault/vaults@2022-07-01' = if (!keyVaultReuse) {
   name: name
   location: location
@@ -27,14 +33,17 @@ resource newKeyVault 'Microsoft.KeyVault/vaults@2022-07-01' = if (!keyVaultReuse
     sku: { family: 'A', name: 'standard' }
     enableSoftDelete: true
     publicNetworkAccess: publicNetworkAccess
-    enablePurgeProtection: true    
-    accessPolicies: !empty(principalId) ? [
-      {
-        objectId: principalId
-        permissions: { secrets: [ 'get', 'list', 'set'] }
-        tenantId: subscription().tenantId
-      }
-    ] : []
+    enablePurgeProtection: true
+    enableRbacAuthorization: true    
+  }
+}
+
+resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!empty(principalId)) {
+  scope: newKeyVault
+  name: guid(newKeyVault.id, principalId, keyVaultSecretsOfficerRoleDefinition.id)
+  properties: {
+    principalId: principalId
+    roleDefinitionId: keyVaultSecretsOfficerRoleDefinition.id
   }
 }
 
