@@ -434,6 +434,10 @@ var openAiEndpoint = !empty(azureOpenAiEndpoint)
   : 'https://${openAiServiceName}.openai.azure.com/'
 @description('Virtual network name if using network isolation. Use your own name convention or leave as it is to generate a random name.')
 param azureVnetName string = ''
+@description('Azure AI Vision Ingestion Service Name. Use your own name convention or leave as it is to generate a random name.')
+param azureVisionIngestionServiceName string = ''
+var visionIngestionServiceName = !empty(azureVisionIngestionServiceName) ? azureVisionIngestionServiceName : 'azai0-${resourceToken}'
+
 @description('Stripe API Key used by the orchestrator.')
 @secure()
 param stripeApiKey string = ''
@@ -704,6 +708,19 @@ module storagepe './core/network/private-endpoint.bicep' = if (networkIsolation)
     serviceId: storage.outputs.id
     groupIds: ['blob']
     dnsZoneId: networkIsolation ? blobDnsZone.outputs.id : ''
+  }
+}
+
+// Vision Ingestion
+module visionIngestion './core/ai/vision-ingestion.bicep' = {
+  name: 'visioningestion'
+  scope: resourceGroup
+  params: {
+    name: visionIngestionServiceName
+    location: 'westus' //Workaround for service availability
+    tags: tags
+    keyVaultName: keyVault.outputs.name
+    storageAccountName: storageAccountName
   }
 }
 
@@ -1307,6 +1324,14 @@ module dataIngestion './core/host/functions.bicep' = {
       {
         name: 'FUNCTION_APP_NAME'
         value: dataIngestionFunctionAppName
+      }
+      {
+        name: 'AZ_COMPUTER_VISION_ENDPOINT'
+        value: visionIngestion.outputs.aiServiceEndpoint
+      }
+      {
+        name: 'AZ_COMPUTER_VISION_KEY'
+        value: visionIngestion.outputs.aiServiceKey
       }
       {
         name: 'SEARCH_SERVICE'
