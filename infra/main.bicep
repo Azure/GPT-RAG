@@ -431,7 +431,7 @@ param azureOpenAiServiceName string = ''
 var openAiServiceName = !empty(azureOpenAiServiceName) ? azureOpenAiServiceName : 'oai0-${resourceToken}'
 
 // o1
-var o1ServiceName = 'o10ai-${resourceToken}'
+var o1ServiceName = 'o1ai0-${resourceToken}'
 
 @description('Azure OpenAI endpoint URL. For example: "https://myopenairesource.openai.azure.com"')
 param azureOpenAiEndpoint string = ''
