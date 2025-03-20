@@ -31,8 +31,8 @@ resource deepseekR1Hub 'Microsoft.MachineLearningServices/workspaces@2024-10-01'
   name: hubName
   location: location
   tags: {
-    '__SYSTEM__AzureOpenAI_${aiServiceName}_aoai': deepseekR1AIService.id
-    '__SYSTEM__AIServices_${aiServiceName}': deepseekR1AIService.id
+    'AzureOpenAI_${aiServiceName}_aoai': deepseekR1AIService.id
+    'AIServices_${aiServiceName}': deepseekR1AIService.id
   }
   sku: {
     name: 'Basic'
