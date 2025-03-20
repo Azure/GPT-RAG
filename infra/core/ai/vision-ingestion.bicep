@@ -30,10 +30,7 @@ resource visionIngestionAIService 'Microsoft.CognitiveServices/accounts@2024-10-
 resource visionIngestionHub 'Microsoft.MachineLearningServices/workspaces@2024-10-01' = {
   name: hubName
   location: location
-  tags: {
-    'AzureOpenAI_${aiServiceName}_aoai': visionIngestionAIService.id
-    'AIServices_${aiServiceName}': visionIngestionAIService.id
-  }
+  tags: tags
   sku: {
     name: 'Basic'
     tier: 'Basic'

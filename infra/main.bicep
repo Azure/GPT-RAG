@@ -1500,6 +1500,7 @@ module deepseekR1Deployment 'core/ai/r1-deployment.bicep' = {
     name: 'deepseekR1Deployment'
     keyVaultName: keyVault.outputs.id
     storageAccountName: storage.outputs.id
+    tags: tags
   }
 }
 
