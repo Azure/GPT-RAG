@@ -721,7 +721,7 @@ module visionIngestion './core/ai/vision-ingestion.bicep' = {
     name: visionIngestionServiceName
     location: 'westus' //Workaround for service availability
     tags: tags
-    keyVaultName: keyVault.outputs.name
+    keyVaultName: keyVault.outputs.id
     storageAccountName: storage.outputs.id
   }
 }
@@ -1498,7 +1498,7 @@ module deepseekR1Deployment 'core/ai/r1-deployment.bicep' = {
   scope: resourceGroup
   params: {
     name: 'deepseekR1Deployment'
-    keyVaultName: keyVault.outputs.name
+    keyVaultName: keyVault.outputs.id
     storageAccountName: storage.outputs.id
   }
 }
