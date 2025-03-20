@@ -1,34 +1,32 @@
 param name string
-param location string = resourceGroup().location
+param keyVaultName string
+param deployments array = []
+param secretsNames object = {}
+param location string = 'eastus2'
 param tags object = {}
 
-@secure()
-@description('The names of the secrets to be created in the key vault')
-param secretsNames object = {}
-param keyVaultName string
-param customSubDomainName string = name
-param deployments array = []
-param kind string = 'OpenAI'
-param publicNetworkAccess string = 'Enabled'
-param sku object = {
-  name: 'S0'
-}
-
-resource account 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
+resource o1Account 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
   name: name
-  location: location
-  tags: tags
-  kind: kind
-  properties: {
-    customSubDomainName: customSubDomainName
-    publicNetworkAccess: publicNetworkAccess
+  location: 'eastus2'
+  sku: {
+    name: 'S0'
   }
-  sku: sku
+  kind: 'OpenAI'
+  properties: {
+    apiProperties: {}
+    customSubDomainName: name
+    networkAcls: {
+      defaultAction: 'Allow'
+      virtualNetworkRules: []
+      ipRules: []
+    }
+    publicNetworkAccess: 'Enabled'
+  }
 }
 
 @batchSize(1)
 resource deployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = [for deployment in deployments: {
-  parent: account
+  parent: o1Account
   name: deployment.name
   properties: {
     model: deployment.model
@@ -55,10 +53,10 @@ resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' =  [for s
       nbf: 0
     }
     contentType: 'string'
-    value: account.listKeys().key1
+    value: o1Account.listKeys().key1
   }
 }]
 
-output endpoint string = account.properties.endpoint
-output id string = account.id
-output name string = account.name
+
+output o1Endpoint string = o1Account.properties.endpoint
+output o1Key string = o1Account.listKeys().key1
