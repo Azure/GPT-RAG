@@ -1,29 +1,26 @@
 param name string
-param keyVaultName string
 param deployments array = []
-param secretsNames object = {}
 param location string = 'eastus2'
+param publicNetworkAccess string = 'Enabled'
+param kind string = 'OpenAI'
+param sku object = {
+  name: 'S0'
+}
 param tags object = {}
 
 resource o1Account 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
   name: name
-  location: 'eastus2'
-  sku: {
-    name: 'S0'
-  }
-  kind: 'OpenAI'
+  location: location
+  tags: tags
+  kind: kind
   properties: {
-    apiProperties: {}
     customSubDomainName: name
-    networkAcls: {
-      defaultAction: 'Allow'
-      virtualNetworkRules: []
-      ipRules: []
-    }
-    publicNetworkAccess: 'Enabled'
+    publicNetworkAccess: publicNetworkAccess
   }
+  sku: sku
 }
 
+/*
 @batchSize(1)
 resource deployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = [for deployment in deployments: {
   parent: o1Account
@@ -37,26 +34,7 @@ resource deployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01
     capacity: 20
   }
 }]
-
-resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
-  name: keyVaultName
-}
-
-resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' =  [for secretName in items(secretsNames): {
-  name: secretName.value
-  tags: tags
-  parent: keyVault
-  properties: {
-    attributes: {
-      enabled: true
-      exp: 0
-      nbf: 0
-    }
-    contentType: 'string'
-    value: o1Account.listKeys().key1
-  }
-}]
-
+*/
 
 output o1Endpoint string = o1Account.properties.endpoint
 output o1Key string = o1Account.listKeys().key1

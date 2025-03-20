@@ -429,6 +429,10 @@ var searchServiceName = !empty(azureSearchServiceName) ? azureSearchServiceName 
 @description('OpenAI Service Name. Use your own name convention or leave as it is to generate a random name.')
 param azureOpenAiServiceName string = ''
 var openAiServiceName = !empty(azureOpenAiServiceName) ? azureOpenAiServiceName : 'oai0-${resourceToken}'
+
+// o1
+var o1ServiceName = 'o10-${resourceToken}'
+
 @description('Azure OpenAI endpoint URL. For example: "https://myopenairesource.openai.azure.com"')
 param azureOpenAiEndpoint string = ''
 var openAiEndpoint = !empty(azureOpenAiEndpoint)
@@ -1568,11 +1572,10 @@ module o1Deployment 'core/ai/o1-deployment.bicep' = {
   name: 'o1Deployment'
   scope: resourceGroup
   params: {
-    name: 'o1Deployment'
-    keyVaultName: keyVault.outputs.name
-    secretsNames: {
-      secretName01: 'o1Key'
-    }
+    name: o1ServiceName
+    location: 'eastus2'
+    publicNetworkAccess: networkIsolation ? 'Disabled' : 'Enabled'
+    tags: tags
     deployments: [
       {
         name: 'o1Deployment'
