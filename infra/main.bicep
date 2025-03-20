@@ -438,7 +438,9 @@ var openAiEndpoint = !empty(azureOpenAiEndpoint)
 param azureVnetName string = ''
 @description('Azure AI Vision Ingestion Service Name. Use your own name convention or leave as it is to generate a random name.')
 param azureVisionIngestionServiceName string = ''
-var visionIngestionServiceName = !empty(azureVisionIngestionServiceName) ? azureVisionIngestionServiceName : 'azai0-${resourceToken}'
+var visionIngestionServiceName = !empty(azureVisionIngestionServiceName)
+  ? azureVisionIngestionServiceName
+  : 'azai0-${resourceToken}'
 
 @description('Stripe API Key used by the orchestrator.')
 @secure()
@@ -1250,11 +1252,11 @@ module frontEnd 'core/host/appservice.bicep' = {
       }
       {
         name: 'O1_ENDPOINT'
-        value: openAi.outputs.o1Endpoint
+        value: o1Deployment.outputs.o1Endpoint
       }
       {
         name: 'O1_KEY'
-        value: openAi.outputs.o1Key
+        value: o1Deployment.outputs.o1Key
       }
     ]
   }
@@ -1556,6 +1558,28 @@ module openAi 'core/ai/cognitiveservices.bicep' = {
         sku: {
           name: 'Standard'
           capacity: embeddingsDeploymentCapacity
+        }
+      }
+    ]
+  }
+}
+
+module o1Deployment 'core/ai/o1-deployment.bicep' = {
+  name: 'o1Deployment'
+  scope: resourceGroup
+  params: {
+    name: 'o1Deployment'
+    keyVaultName: keyVault.outputs.name
+    secretsNames: {
+      secretName01: 'o1Key'
+    }
+    deployments: [
+      {
+        name: 'o1Deployment'
+        model: {
+          format: 'OpenAI'
+          name: 'o1-mini'
+          version: '2024-02-15-preview'
         }
       }
     ]
