@@ -4,7 +4,6 @@ param tags object = {}
 @secure()
 @description('The names of the secrets to be created in the key vault')
 
-param keyVaultName string
 param storageAccountName string
 var aiServiceName = '${name}-r1-aiservice'
 var hubName = '${name}-r1-hub'
@@ -25,7 +24,7 @@ resource deepseekR1AIService 'Microsoft.CognitiveServices/accounts@2024-10-01' =
     publicNetworkAccess: 'Enabled'
   }
 }
-
+/*
 // R1 Hub
 resource deepseekR1Hub 'Microsoft.MachineLearningServices/workspaces@2024-10-01' = {
   name: hubName
@@ -159,6 +158,6 @@ resource projectAoaiConnection 'Microsoft.MachineLearningServices/workspaces/con
     }
   }
 }
-
+*/
 output r1Endpoint string = deepseekR1AIService.properties.endpoint
 output r1Key string = deepseekR1AIService.listKeys().key1

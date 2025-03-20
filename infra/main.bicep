@@ -431,7 +431,7 @@ param azureOpenAiServiceName string = ''
 var openAiServiceName = !empty(azureOpenAiServiceName) ? azureOpenAiServiceName : 'oai0-${resourceToken}'
 
 // o1
-var o1ServiceName = 'o10-${resourceToken}'
+var o1ServiceName = 'o10ai-${resourceToken}'
 
 @description('Azure OpenAI endpoint URL. For example: "https://myopenairesource.openai.azure.com"')
 param azureOpenAiEndpoint string = ''
@@ -1504,7 +1504,6 @@ module deepseekR1Deployment 'core/ai/r1-deployment.bicep' = {
   scope: resourceGroup
   params: {
     name: 'deepseekR1Deployment'
-    keyVaultName: keyVault.outputs.id
     storageAccountName: storage.outputs.id
     tags: tags
   }
