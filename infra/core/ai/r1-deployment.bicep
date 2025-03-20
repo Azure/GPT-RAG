@@ -1,16 +1,16 @@
 param name string
-param location string = 'westus'
-param tags object = {}
+param location string = resourceGroup().location
 
-// Key vault parameters
+@secure()
+@description('The names of the secrets to be created in the key vault')
+
 param keyVaultName string
 param storageAccountName string
+var aiServiceName = '${name}-r1-aiservice'
+var hubName = '${name}-r1-hub'
+var projectName = '${name}-r1-project'
 
-var aiServiceName = '${name}-aiservice'
-var hubName = '${name}-hub'
-var projectName = '${name}-project'
-
-resource visionIngestionAIService 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
+resource deepseekR1AIService 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
   name: aiServiceName
   location: location
   sku: {
@@ -26,13 +26,13 @@ resource visionIngestionAIService 'Microsoft.CognitiveServices/accounts@2024-10-
   }
 }
 
-// Vision Ingestion Hub
-resource visionIngestionHub 'Microsoft.MachineLearningServices/workspaces@2024-10-01' = {
+// R1 Hub
+resource deepseekR1Hub 'Microsoft.MachineLearningServices/workspaces@2024-10-01' = {
   name: hubName
   location: location
   tags: {
-    '__SYSTEM__AzureOpenAI_${aiServiceName}_aoai': visionIngestionAIService.id
-    '__SYSTEM__AIServices_${aiServiceName}': visionIngestionAIService.id
+    '__SYSTEM__AzureOpenAI_${aiServiceName}_aoai': deepseekR1AIService.id
+    '__SYSTEM__AIServices_${aiServiceName}': deepseekR1AIService.id
   }
   sku: {
     name: 'Basic'
@@ -60,8 +60,8 @@ resource visionIngestionHub 'Microsoft.MachineLearningServices/workspaces@2024-1
   }
 }
 
-// Vision Ingestion Project
-resource visionIngestionProject 'Microsoft.MachineLearningServices/workspaces@2024-10-01' = {
+// R1 Project
+resource deepseekR1Project 'Microsoft.MachineLearningServices/workspaces@2024-10-01' = {
   name: projectName
   location: location
   tags: {
@@ -86,14 +86,14 @@ resource visionIngestionProject 'Microsoft.MachineLearningServices/workspaces@20
     v1LegacyMode: false
     publicNetworkAccess: 'Enabled'
     discoveryUrl: 'https://westus.api.azureml.ms/discovery'
-    hubResourceId: visionIngestionHub.id
+    hubResourceId: deepseekR1Hub.id
     enableDataIsolation: true
   }
 }
 
 // Hub Connections
 resource hubAIServiceConnection 'Microsoft.MachineLearningServices/workspaces/connections@2024-10-01' = {
-  parent: visionIngestionHub
+  parent: deepseekR1Hub
   name: aiServiceName
   properties: {
     authType: 'ApiKey'
@@ -103,7 +103,7 @@ resource hubAIServiceConnection 'Microsoft.MachineLearningServices/workspaces/co
     sharedUserList: []
     metadata: {
       ApiType: 'Azure'
-      ResourceId: visionIngestionAIService.id
+      ResourceId: deepseekR1AIService.id
       ApiVersion: '2023-07-01-preview'
       DeploymentApiVersion: '2023-10-01-preview'
     }
@@ -111,7 +111,7 @@ resource hubAIServiceConnection 'Microsoft.MachineLearningServices/workspaces/co
 }
 
 resource hubAoaiConnection 'Microsoft.MachineLearningServices/workspaces/connections@2024-10-01' = {
-  parent: visionIngestionHub
+  parent: deepseekR1Hub
   name: '${aiServiceName}_aoai'
   properties: {
     authType: 'ApiKey'
@@ -121,7 +121,7 @@ resource hubAoaiConnection 'Microsoft.MachineLearningServices/workspaces/connect
     sharedUserList: []
     metadata: {
       ApiType: 'Azure'
-      ResourceId: visionIngestionAIService.id
+      ResourceId: deepseekR1AIService.id
       ApiVersion: '2023-07-01-preview'
       DeploymentApiVersion: '2023-10-01-preview'
     }
@@ -130,7 +130,7 @@ resource hubAoaiConnection 'Microsoft.MachineLearningServices/workspaces/connect
 
 // Project Connections
 resource projectAIServiceConnection 'Microsoft.MachineLearningServices/workspaces/connections@2024-10-01' = {
-  parent: visionIngestionProject
+  parent: deepseekR1Project
   name: aiServiceName
   properties: {
     authType: 'ApiKey'
@@ -140,7 +140,7 @@ resource projectAIServiceConnection 'Microsoft.MachineLearningServices/workspace
     sharedUserList: []
     metadata: {
       ApiType: 'Azure'
-      ResourceId: visionIngestionAIService.id
+      ResourceId: deepseekR1AIService.id
       ApiVersion: '2023-07-01-preview'
       DeploymentApiVersion: '2023-10-01-preview'
     }
@@ -148,7 +148,7 @@ resource projectAIServiceConnection 'Microsoft.MachineLearningServices/workspace
 }
 
 resource projectAoaiConnection 'Microsoft.MachineLearningServices/workspaces/connections@2024-10-01' = {
-  parent: visionIngestionProject
+  parent: deepseekR1Project
   name: '${aiServiceName}_aoai'
   properties: {
     authType: 'ApiKey'
@@ -158,18 +158,12 @@ resource projectAoaiConnection 'Microsoft.MachineLearningServices/workspaces/con
     sharedUserList: []
     metadata: {
       ApiType: 'Azure'
-      ResourceId: visionIngestionAIService.id
+      ResourceId: deepseekR1AIService.id
       ApiVersion: '2023-07-01-preview'
       DeploymentApiVersion: '2023-10-01-preview'
     }
   }
 }
 
-// Outputs
-output hubWorkspaceId string = visionIngestionHub.id
-output projectWorkspaceId string = visionIngestionProject.id
-output aiServiceId string = visionIngestionAIService.id
-output aiServiceEndpoint string = visionIngestionAIService.properties.endpoint
-// NOT SURE HOW TO RETURN THIS ERROR: Outputs should not contain secrets. Found possible secret: function 'listKeys'
-output aiServiceKey string = visionIngestionAIService.listKeys().key1
-
+output r1Endpoint string = deepseekR1AIService.properties.endpoint
+output r1Key string = deepseekR1AIService.listKeys().key1

@@ -1002,6 +1002,14 @@ module orchestrator './core/host/functions.bicep' = {
         name: 'WEB_APP_URL'
         value: webAppUri
       }
+      {
+        name: 'AZURE_INFERENCE_SDK_ENDPOINT'
+        value: deepseekR1Deployment.outputs.r1Endpoint
+      }
+      {
+        name: 'AZURE_INFERENCE_SDK_KEY'
+        value: deepseekR1Deployment.outputs.r1Key
+      }
     ]
   }
 }
@@ -1240,6 +1248,14 @@ module frontEnd 'core/host/appservice.bicep' = {
         name: 'TAVILY_API_KEY'
         value: orchestratorTavilyApiKeyVar
       }
+      {
+        name: 'O1_ENDPOINT'
+        value: openAi.outputs.o1Endpoint
+      }
+      {
+        name: 'O1_KEY'
+        value: openAi.outputs.o1Key
+      }
     ]
   }
 }
@@ -1474,6 +1490,16 @@ module cognitiveServices 'core/ai/cognitiveservices.bicep' = {
       secretName02: 'speechKey'
     }
     keyVaultName: keyVault.outputs.name
+  }
+}
+
+module deepseekR1Deployment 'core/ai/r1-deployment.bicep' = {
+  name: 'deepseekR1Deployment'
+  scope: resourceGroup
+  params: {
+    name: 'deepseekR1Deployment'
+    keyVaultName: keyVault.outputs.name
+    storageAccountName: storageAccountName
   }
 }
 
