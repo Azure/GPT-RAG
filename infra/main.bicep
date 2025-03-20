@@ -1573,7 +1573,7 @@ module o1Deployment 'core/ai/o1-deployment.bicep' = {
   scope: resourceGroup
   params: {
     name: o1ServiceName
-    location: location//'eastus2'
+    location: 'eastus2'
     publicNetworkAccess: networkIsolation ? 'Disabled' : 'Enabled'
     tags: tags
     deployments: [
