@@ -1,6 +1,6 @@
 param name string
 param location string = resourceGroup().location
-
+param tags object = {}
 @secure()
 @description('The names of the secrets to be created in the key vault')
 
@@ -30,10 +30,7 @@ resource deepseekR1AIService 'Microsoft.CognitiveServices/accounts@2024-10-01' =
 resource deepseekR1Hub 'Microsoft.MachineLearningServices/workspaces@2024-10-01' = {
   name: hubName
   location: location
-  tags: {
-    'AzureOpenAI_${aiServiceName}_aoai': deepseekR1AIService.id
-    'AIServices_${aiServiceName}': deepseekR1AIService.id
-  }
+  tags: tags
   sku: {
     name: 'Basic'
     tier: 'Basic'
