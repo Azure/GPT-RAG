@@ -363,6 +363,8 @@ var searchIndex = 'ragindex'
 @allowed(['2024-05-01-preview'])
 // Requires version 2023-10-01-Preview or higher for indexProjections and MIS authResourceId.
 param searchApiVersion string = '2024-05-01-preview'
+@description('Financial search indexer name.')
+var financialSearchIndexerName = 'financial-search-indexer'
 
 @description('Frequency of search reindexing. PT5M (5 min), PT1H (1 hour), P1D (1 day).')
 @allowed(['PT5M', 'PT1H', 'P1D'])
@@ -931,6 +933,10 @@ module orchestrator './core/host/functions.bicep' = {
       {
         name: 'AZURE_SEARCH_INDEX'
         value: searchIndex
+      }
+      {
+        name: 'AZURE_FINANCIAL_SEARCH_INDEXER_NAME'
+        value: financialSearchIndexerName
       }
       {
         name: 'AZURE_SEARCH_APPROACH'
