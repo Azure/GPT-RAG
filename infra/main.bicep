@@ -722,7 +722,7 @@ module visionIngestion './core/ai/vision-ingestion.bicep' = {
     location: 'westus' //Workaround for service availability
     tags: tags
     keyVaultName: keyVault.outputs.name
-    storageAccountName: storageAccountName
+    storageAccountName: storage.outputs.id
   }
 }
 
@@ -1499,7 +1499,7 @@ module deepseekR1Deployment 'core/ai/r1-deployment.bicep' = {
   params: {
     name: 'deepseekR1Deployment'
     keyVaultName: keyVault.outputs.name
-    storageAccountName: storageAccountName
+    storageAccountName: storage.outputs.id
   }
 }
 
