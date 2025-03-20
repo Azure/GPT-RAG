@@ -31,8 +31,8 @@ resource visionIngestionHub 'Microsoft.MachineLearningServices/workspaces@2024-1
   name: hubName
   location: location
   tags: {
-    '__SYSTEM__AzureOpenAI_${aiServiceName}_aoai': visionIngestionAIService.id
-    '__SYSTEM__AIServices_${aiServiceName}': visionIngestionAIService.id
+    'AzureOpenAI_${aiServiceName}_aoai': visionIngestionAIService.id
+    'AIServices_${aiServiceName}': visionIngestionAIService.id
   }
   sku: {
     name: 'Basic'
