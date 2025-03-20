@@ -25,7 +25,7 @@ resource visionIngestionAIService 'Microsoft.CognitiveServices/accounts@2024-10-
     publicNetworkAccess: 'Enabled'
   }
 }
-
+/*
 // Vision Ingestion Hub
 resource visionIngestionHub 'Microsoft.MachineLearningServices/workspaces@2024-10-01' = {
   name: hubName
@@ -166,7 +166,8 @@ resource projectAoaiConnection 'Microsoft.MachineLearningServices/workspaces/con
 output hubWorkspaceId string = visionIngestionHub.id
 output projectWorkspaceId string = visionIngestionProject.id
 output aiServiceId string = visionIngestionAIService.id
+*/
+
 output aiServiceEndpoint string = visionIngestionAIService.properties.endpoint
-// NOT SURE HOW TO RETURN THIS ERROR: Outputs should not contain secrets. Found possible secret: function 'listKeys'
 output aiServiceKey string = visionIngestionAIService.listKeys().key1
 
