@@ -42,7 +42,6 @@ resource deepseekR1Hub 'Microsoft.MachineLearningServices/workspaces@2024-10-01'
   properties: {
     friendlyName: hubName
     storageAccount: storageAccountName
-    keyVault: keyVaultName
     hbiWorkspace: false
     managedNetwork: {
       isolationMode: 'Disabled'
@@ -75,7 +74,6 @@ resource deepseekR1Project 'Microsoft.MachineLearningServices/workspaces@2024-10
   properties: {
     friendlyName: projectName
     storageAccount: storageAccountName
-    keyVault: keyVaultName
     hbiWorkspace: false
     managedNetwork: {
       isolationMode: 'Disabled'

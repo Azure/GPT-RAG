@@ -1568,12 +1568,12 @@ module openAi 'core/ai/cognitiveservices.bicep' = {
   }
 }
 
-module o1Deployment 'core/ai/o1-deployment.bicep' = { 
+module o1Deployment 'core/ai/o1-deployment.bicep' = {
   name: 'o1Deployment'
   scope: resourceGroup
   params: {
     name: o1ServiceName
-    location: 'eastus2'
+    location: location//'eastus2'
     publicNetworkAccess: networkIsolation ? 'Disabled' : 'Enabled'
     tags: tags
     deployments: [
