@@ -5,9 +5,9 @@ param tags object = {}
 @description('The names of the secrets to be created in the key vault')
 
 param storageAccountName string
-var aiServiceName = '${name}-r1-aiservice'
-var hubName = '${name}-r1-hub'
-var projectName = '${name}-r1-project'
+var aiServiceName = '${name}-aiservice'
+var hubName = '${name}-hub'
+var projectName = '${name}-project'
 
 resource deepseekR1AIService 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
   name: aiServiceName
@@ -159,5 +159,5 @@ resource projectAoaiConnection 'Microsoft.MachineLearningServices/workspaces/con
   }
 }
 */
-output r1Endpoint string = deepseekR1AIService.properties.endpoint
+output r1Endpoint string = '${deepseekR1AIService.name}.services.ai.azure.com/models'
 output r1Key string = deepseekR1AIService.listKeys().key1

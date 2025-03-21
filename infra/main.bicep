@@ -432,6 +432,8 @@ var openAiServiceName = !empty(azureOpenAiServiceName) ? azureOpenAiServiceName 
 
 // o1
 var o1ServiceName = 'o1ai0-${resourceToken}'
+// r1
+var r1ServiceName = 'r1ai0-${resourceToken}'
 
 @description('Azure OpenAI endpoint URL. For example: "https://myopenairesource.openai.azure.com"')
 param azureOpenAiEndpoint string = ''
@@ -1010,7 +1012,7 @@ module orchestrator './core/host/functions.bicep' = {
       }
       {
         name: 'AZURE_INFERENCE_SDK_ENDPOINT' 
-        value: '${deepseekR1Deployment.outputs.r1Endpoint}/models'
+        value: '${deepseekR1Deployment.outputs.r1Endpoint}models'
       }
       {
         name: 'AZURE_INFERENCE_SDK_KEY'
@@ -1503,7 +1505,7 @@ module deepseekR1Deployment 'core/ai/r1-deployment.bicep' = {
   name: 'deepseekR1Deployment'
   scope: resourceGroup
   params: {
-    name: 'deepseekR1Deployment'
+    name: r1ServiceName
     storageAccountName: storage.outputs.id
     tags: tags
   }
