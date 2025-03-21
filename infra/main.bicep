@@ -1012,7 +1012,7 @@ module orchestrator './core/host/functions.bicep' = {
       }
       {
         name: 'AZURE_INFERENCE_SDK_ENDPOINT' 
-        value: '${deepseekR1Deployment.outputs.r1Endpoint}models'
+        value: deepseekR1Deployment.outputs.r1Endpoint
       }
       {
         name: 'AZURE_INFERENCE_SDK_KEY'
