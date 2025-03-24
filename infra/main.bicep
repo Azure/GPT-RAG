@@ -446,7 +446,7 @@ param azureVnetName string = ''
 param azureVisionIngestionServiceName string = ''
 var visionIngestionServiceName = !empty(azureVisionIngestionServiceName)
   ? azureVisionIngestionServiceName
-  : 'azai0-${resourceToken}'
+  : 'visionai0-${resourceToken}'
 
 @description('Stripe API Key used by the orchestrator.')
 @secure()
@@ -729,8 +729,6 @@ module visionIngestion './core/ai/vision-ingestion.bicep' = {
     name: visionIngestionServiceName
     location: 'westus' //Workaround for service availability
     tags: tags
-    keyVaultName: keyVault.outputs.id
-    storageAccountName: storage.outputs.id
   }
 }
 
