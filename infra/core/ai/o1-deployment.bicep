@@ -1,12 +1,18 @@
 param name string
-param deployments array = []
 param location string = 'eastus2'
 param publicNetworkAccess string = 'Enabled'
 param kind string = 'OpenAI'
+param capacity int = 50
+param modelName string = 'o1'
+param deploymentName string = 'o1'
+param modelVersion string = '2024-12-17'
 param sku object = {
   name: 'S0'
 }
-param tags object = {}
+param tags object = {
+  environment: 'production'
+  service: 'openai'
+}
 
 resource o1Account 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
   name: name
@@ -20,21 +26,25 @@ resource o1Account 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
   sku: sku
 }
 
-/*
-@batchSize(1)
-resource deployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = [for deployment in deployments: {
+resource o1Deployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
   parent: o1Account
-  name: deployment.name
+  name: deploymentName
+  sku: {
+    name: 'GlobalStandard'
+    capacity: capacity
+  }
   properties: {
-    model: deployment.model
-    raiPolicyName: contains(deployment, 'raiPolicyName') ? deployment.raiPolicyName : null
+    model: {
+      format: kind
+      name: modelName
+      version: modelVersion
+    }
+    versionUpgradeOption: 'OnceNewDefaultVersionAvailable'
+    currentCapacity: capacity
+    raiPolicyName: 'Microsoft.DefaultV2'
   }
-  sku: contains(deployment, 'sku') ? deployment.sku : {
-    name: 'Standard'
-    capacity: 20
-  }
-}]
-*/
+}
+
 
 output o1Endpoint string = o1Account.properties.endpoint
 output o1Key string = o1Account.listKeys().key1
