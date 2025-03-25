@@ -363,6 +363,8 @@ var searchIndex = 'ragindex'
 @allowed(['2024-05-01-preview'])
 // Requires version 2023-10-01-Preview or higher for indexProjections and MIS authResourceId.
 param searchApiVersion string = '2024-05-01-preview'
+@description('Financial search indexer name.')
+var financialSearchIndexerName = 'financial-search-indexer'
 
 @description('Frequency of search reindexing. PT5M (5 min), PT1H (1 hour), P1D (1 day).')
 @allowed(['PT5M', 'PT1H', 'P1D'])
@@ -382,7 +384,8 @@ param chunkTokenOverlap string = '200'
 // storage
 @description('Name of the container where source documents will be stored.')
 param storageContainerName string = 'documents'
-
+@description('Name of the container where financial agent documents will be stored.')
+param storageFinancialAgentContainerName string = 'fa-documents'
 // Service names
 // The name for each service can be set from environment variables which are mapped in main.parameters.json.
 // Then no maping to specific name is defined, a unique name is generated for each service based on the resourceToken created above.
@@ -426,6 +429,12 @@ var searchServiceName = !empty(azureSearchServiceName) ? azureSearchServiceName 
 @description('OpenAI Service Name. Use your own name convention or leave as it is to generate a random name.')
 param azureOpenAiServiceName string = ''
 var openAiServiceName = !empty(azureOpenAiServiceName) ? azureOpenAiServiceName : 'oai0-${resourceToken}'
+
+// o1
+var o1ServiceName = 'o1ai0-${resourceToken}'
+// r1
+var r1ServiceName = 'r1ai0-${resourceToken}'
+
 @description('Azure OpenAI endpoint URL. For example: "https://myopenairesource.openai.azure.com"')
 param azureOpenAiEndpoint string = ''
 var openAiEndpoint = !empty(azureOpenAiEndpoint)
@@ -433,6 +442,12 @@ var openAiEndpoint = !empty(azureOpenAiEndpoint)
   : 'https://${openAiServiceName}.openai.azure.com/'
 @description('Virtual network name if using network isolation. Use your own name convention or leave as it is to generate a random name.')
 param azureVnetName string = ''
+@description('Azure AI Vision Ingestion Service Name. Use your own name convention or leave as it is to generate a random name.')
+param azureVisionIngestionServiceName string = ''
+var visionIngestionServiceName = !empty(azureVisionIngestionServiceName)
+  ? azureVisionIngestionServiceName
+  : 'visionai0-${resourceToken}'
+
 @description('Stripe API Key used by the orchestrator.')
 @secure()
 param stripeApiKey string = ''
@@ -533,6 +548,8 @@ var vnetName = !empty(azureVnetName) ? azureVnetName : 'aivnet0-${resourceToken}
 var orchestratorEndpoint = 'https://${orchestratorFunctionAppName}.azurewebsites.net/api/orc'
 var orchestratorUri = 'https://${orchestratorFunctionAppName}.azurewebsites.net'
 var webAppUri = 'https://${appServiceName}.azurewebsites.net'
+
+var pythonEnableInitIndexing = '1'
 
 // B2C parameters
 @description('B2C Tenant Name')
@@ -677,7 +694,10 @@ module storage './core/storage/storage-account.bicep' = {
     tags: tags
     publicNetworkAccess: networkIsolation ? 'Disabled' : 'Enabled'
     allowBlobPublicAccess: false // Disable anonymous access
-    containers: [{ name: containerName, publicAccess: 'None' }]
+    containers: [
+      { name: containerName, publicAccess: 'None' }
+      { name: storageFinancialAgentContainerName, publicAccess: 'None' }
+    ]
     keyVaultName: keyVault.outputs.name
     secretName: 'storageConnectionString'
     deleteRetentionPolicy: {
@@ -698,6 +718,17 @@ module storagepe './core/network/private-endpoint.bicep' = if (networkIsolation)
     serviceId: storage.outputs.id
     groupIds: ['blob']
     dnsZoneId: networkIsolation ? blobDnsZone.outputs.id : ''
+  }
+}
+
+// Vision Ingestion
+module visionIngestion './core/ai/vision-ingestion.bicep' = {
+  name: 'visioningestion'
+  scope: resourceGroup
+  params: {
+    name: visionIngestionServiceName
+    location: 'westus' //Workaround for service availability
+    tags: tags
   }
 }
 
@@ -810,6 +841,10 @@ module orchestrator './core/host/functions.bicep' = {
     allowedOrigins: ['*']
     appSettings: [
       {
+        name: 'PYTHON_ENABLE_INIT_INDEXING'
+        value: pythonEnableInitIndexing
+      }
+      {
         name: 'AZURE_AI_SEARCH_API_KEY'
         value: aiSearchApiKey
       }
@@ -906,6 +941,10 @@ module orchestrator './core/host/functions.bicep' = {
         value: searchIndex
       }
       {
+        name: 'AZURE_FINANCIAL_SEARCH_INDEXER_NAME'
+        value: financialSearchIndexerName
+      }
+      {
         name: 'AZURE_SEARCH_APPROACH'
         value: retrievalApproach
       }
@@ -968,6 +1007,14 @@ module orchestrator './core/host/functions.bicep' = {
       {
         name: 'WEB_APP_URL'
         value: webAppUri
+      }
+      {
+        name: 'AZURE_INFERENCE_SDK_ENDPOINT' 
+        value: deepseekR1Deployment.outputs.r1Endpoint
+      }
+      {
+        name: 'AZURE_INFERENCE_SDK_KEY'
+        value: deepseekR1Deployment.outputs.r1Key
       }
     ]
   }
@@ -1207,6 +1254,14 @@ module frontEnd 'core/host/appservice.bicep' = {
         name: 'TAVILY_API_KEY'
         value: orchestratorTavilyApiKeyVar
       }
+      {
+        name: 'O1_ENDPOINT'
+        value: o1Deployment.outputs.o1Endpoint
+      }
+      {
+        name: 'O1_KEY'
+        value: o1Deployment.outputs.o1Key
+      }
     ]
   }
 }
@@ -1297,6 +1352,14 @@ module dataIngestion './core/host/functions.bicep' = {
       {
         name: 'FUNCTION_APP_NAME'
         value: dataIngestionFunctionAppName
+      }
+      {
+        name: 'AZ_COMPUTER_VISION_ENDPOINT'
+        value: visionIngestion.outputs.aiServiceEndpoint
+      }
+      {
+        name: 'AZ_COMPUTER_VISION_KEY'
+        value: visionIngestion.outputs.aiServiceKey
       }
       {
         name: 'SEARCH_SERVICE'
@@ -1436,6 +1499,16 @@ module cognitiveServices 'core/ai/cognitiveservices.bicep' = {
   }
 }
 
+module deepseekR1Deployment 'core/ai/r1-deployment.bicep' = {
+  name: 'deepseekR1Deployment'
+  scope: resourceGroup
+  params: {
+    name: r1ServiceName
+    storageAccountName: storage.outputs.id
+    tags: tags
+  }
+}
+
 module cognitiveServicesPe './core/network/private-endpoint.bicep' = if (networkIsolation) {
   name: 'cognitiveServicesPe'
   scope: resourceGroup
@@ -1488,6 +1561,27 @@ module openAi 'core/ai/cognitiveservices.bicep' = {
         sku: {
           name: 'Standard'
           capacity: embeddingsDeploymentCapacity
+        }
+      }
+    ]
+  }
+}
+
+module o1Deployment 'core/ai/o1-deployment.bicep' = {
+  name: 'o1Deployment'
+  scope: resourceGroup
+  params: {
+    name: o1ServiceName
+    location: 'eastus2'
+    publicNetworkAccess: networkIsolation ? 'Disabled' : 'Enabled'
+    tags: tags
+    deployments: [
+      {
+        name: 'o1Deployment'
+        model: {
+          format: 'OpenAI'
+          name: 'o1-mini'
+          version: '2024-02-15-preview'
         }
       }
     ]

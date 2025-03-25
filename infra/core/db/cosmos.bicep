@@ -199,7 +199,6 @@ resource conversationsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDataba
           }
         ]
       }
-      defaultTtl: 86400
     }
     options: {
       autoscaleSettings: {

@@ -6,7 +6,6 @@ param tags object = {}
 @description('The names of the secrets to be created in the key vault')
 param secretsNames object = {}
 param keyVaultName string
-
 param customSubDomainName string = name
 param deployments array = []
 param kind string = 'OpenAI'
@@ -59,7 +58,6 @@ resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' =  [for s
     value: account.listKeys().key1
   }
 }]
-
 
 output endpoint string = account.properties.endpoint
 output id string = account.id
