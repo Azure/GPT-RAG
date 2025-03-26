@@ -8,7 +8,7 @@ param appInsightsInstrumentationKey string
 param tags object = {}
 param allowedOrigins array = []
 param alwaysOn bool = true
-param appCommandLine string = ''
+param appCommandLine string = 'apt-get update && apt-get install -y weasyprint'
 param clientAffinityEnabled bool = false
 param kind string = 'functionapp,linux'
 param functionAppScaleLimit int = -1
