@@ -159,5 +159,5 @@ resource projectAoaiConnection 'Microsoft.MachineLearningServices/workspaces/con
   }
 }
 */
-output r1Endpoint string = '${deepseekR1AIService.name}.services.ai.azure.com/models'
+output r1Endpoint string = 'https://${deepseekR1AIService.name}.cognitiveservices.azure.com/models'
 output r1Key string = deepseekR1AIService.listKeys().key1

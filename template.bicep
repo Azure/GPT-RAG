@@ -686,7 +686,7 @@ resource accounts_oai0_vm2b2htvuuclm_name_text_embedding_3_small 'Microsoft.Cogn
   parent: accounts_oai0_vm2b2htvuuclm_name_resource
   name: 'text-embedding-3-small'
   properties: {
-    currentCapacity: 120
+    currentCapacity: 900
     model: {
       format: 'OpenAI'
       name: 'text-embedding-3-small'
@@ -696,8 +696,8 @@ resource accounts_oai0_vm2b2htvuuclm_name_text_embedding_3_small 'Microsoft.Cogn
     versionUpgradeOption: 'OnceNewDefaultVersionAvailable'
   }
   sku: {
-    capacity: 120
-    name: 'Standard'
+    capacity: 900
+    name: 'GlobalStandard'
   }
 }
 
@@ -3334,8 +3334,8 @@ resource workspaces_MachineLearningPromptFlowTest_name_AzureOpenAIClew_text_embe
   name: 'text-embedding-3-small'
   properties: {}
   sku: {
-    capacity: 120
-    name: 'Standard'
+    capacity: 150
+    name: 'GlobalStandard'
   }
   dependsOn: [
     workspaces_MachineLearningPromptFlowTest_name_resource

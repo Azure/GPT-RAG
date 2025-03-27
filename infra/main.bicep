@@ -1262,6 +1262,10 @@ module frontEnd 'core/host/appservice.bicep' = {
         name: 'O1_KEY'
         value: o1Deployment.outputs.o1Key
       }
+      {
+        name: 'FINANCIAL_AGENT_CONTAINER'
+        value: storageFinancialAgentContainerName
+      }
     ]
   }
 }
@@ -1575,16 +1579,6 @@ module o1Deployment 'core/ai/o1-deployment.bicep' = {
     location: 'eastus2'
     publicNetworkAccess: networkIsolation ? 'Disabled' : 'Enabled'
     tags: tags
-    deployments: [
-      {
-        name: 'o1Deployment'
-        model: {
-          format: 'OpenAI'
-          name: 'o1-mini'
-          version: '2024-02-15-preview'
-        }
-      }
-    ]
   }
 }
 

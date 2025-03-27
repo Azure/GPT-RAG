@@ -18,7 +18,7 @@ param dnsEndpointType string = 'Standard'
 param kind string = 'StorageV2'
 param minimumTlsVersion string = 'TLS1_2'
 @allowed(['Enabled', 'Disabled'])
-param publicNetworkAccess string = 'Disabled'
+param publicNetworkAccess string = 'Enabled'
 param sku object = { name: 'Standard_LRS' }
 param secretName string = 'storageConnectionString'
 param keyVaultName string
@@ -53,6 +53,9 @@ param containers array = [
 // Add parameter for SAS token expiry with utcNow() as default
 @description('Expiry date for SAS token in ISO 8601 format. Set to maximum allowed date (year 9999).')
 param sasTokenExpiry string = dateTimeAdd(utcNow(), 'P3Y')
+
+@description('Start date for SAS token in ISO 8601 format')
+param sasTokenStart string = utcNow()
 
 resource storage 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   name: name
@@ -136,14 +139,25 @@ resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
   }
 }
 
-var serviceSasToken = listServiceSAS(storage.id, '2021-08-01', {
-  canonicalizedResource: '/blob/${storage.name}/${containers[0].name}'
-  signedProtocol: 'https'
-  signedResourceTypes: 'o'
+// Specify desired permissions
+var sasConfig = {
+  signedExpiry: sasTokenExpiry
+  signedResourceTypes: 'sco'
   signedPermission: 'r'
   signedServices: 'b'
-  signedExpiry: sasTokenExpiry
-}).serviceSasToken
+  signedProtocol: 'https'
+}
+var sasToken = storage.listAccountSas(storage.apiVersion, sasConfig).accountSasToken
+
+
+// var serviceSasToken = listServiceSAS(storage.id, '2021-08-01', {
+//   canonicalizedResource: storage.id
+//   signedProtocol: 'https'
+//   signedResourceTypes: 'sco'
+//   signedPermission: 'r'
+//   signedServices: 'b'
+//   signedExpiry: sasTokenExpiry
+// }).serviceSasToken
 
 resource keyVaultSasToken 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (!empty(containers)) {
   name: 'blobSasToken'
@@ -152,11 +166,11 @@ resource keyVaultSasToken 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (!
   properties: {
     attributes: {
       enabled: true
-      exp: 0
-      nbf: 0
+      exp: dateTimeToEpoch(sasTokenExpiry)
+      nbf: dateTimeToEpoch(sasTokenStart)
     }
     contentType: 'string'
-    value: serviceSasToken
+    value: sasToken
   }
 }
 
