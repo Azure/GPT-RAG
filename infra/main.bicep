@@ -1262,6 +1262,10 @@ module frontEnd 'core/host/appservice.bicep' = {
         name: 'O1_KEY'
         value: o1Deployment.outputs.o1Key
       }
+      {
+        name: 'FINANCIAL_AGENT_CONTAINER'
+        value: storageFinancialAgentContainerName
+      }
     ]
   }
 }
