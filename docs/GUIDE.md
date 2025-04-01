@@ -1171,6 +1171,9 @@ If you intend to contribute to the ongoing development of the Solution Accelerat
 
 Here is the complete list of resources for a standard Zero Trust deployment, including descriptions and SKUs. These defaults have been extensively tested in the automated installation. You can review them to adjust to your needs, considering usage factors like user volume and data.
 
+> [!Note]  
+> If you prefer a spreadsheet with the complete list of resources, you can download it [here](../misc/gptrag_resources_and_permissions.xlsx). In the spreadsheet, resource names are highlighted in **bold** and can be replaced with the names used in your own deployment.
+
 > [!TIP]
 > Review this list before deploying to ensure you have the necessary quota for deployment in the desired subscription and region.
 
@@ -1333,11 +1336,14 @@ Here is the complete list of resources for a standard Zero Trust deployment, inc
 
 ### Permissions
 
-This section outlines the necessary Azure permissions required to operate the solution, categorized for clarity.
+This section details the required Azure permissions to operate the solution, organized for clarity.
 
-1. **Resources Provisioning and Application Deployment**  
+> [!Note]  
+> If you prefer a spreadsheet with the complete list of permissions, you can download it [here](../misc/gptrag_resources_and_permissions.xlsx). In the spreadsheet, the resource names are highlighted in **bold** and can be replaced with the names used in your own deployment.
 
-   Users or service principals (e.g., CI/CD pipelines) need permissions to create, configure, and deploy resources, as well as assign roles for access control. This requires either the **Owner** role or a combination of **Contributor** and **User Access Administrator** roles at the subscription level. Alternatively, a custom role with the necessary permissions can be created. [Learn how to create a **Custom Role** here](MANUAL_CUSTOM_ROLE.md).
+1. **Resources Provisioning**  
+
+Users or service principals (e.g., CI/CD pipelines) responsible for provisioning resources need permissions to create, configure, and deploy resources, as well as assign roles for access control. This requires either the **Owner** role or a combination of the **Contributor** and **User Access Administrator** roles at the subscription level. Alternatively, you can create a custom role with the necessary permissions. [Learn how to create a **Custom Role** here](MANUAL_CUSTOM_ROLE.md).
 
 2. **Application Deployment**
 
