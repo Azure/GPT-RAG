@@ -364,7 +364,7 @@ var searchIndex = 'ragindex'
 // Requires version 2023-10-01-Preview or higher for indexProjections and MIS authResourceId.
 param searchApiVersion string = '2024-05-01-preview'
 @description('Financial search indexer name.')
-var financialSearchIndexerName = 'financial-search-indexer'
+var financialSearchIndexerName = 'financial-indexer-test'
 
 @description('Frequency of search reindexing. PT5M (5 min), PT1H (1 hour), P1D (1 day).')
 @allowed(['PT5M', 'PT1H', 'P1D'])
@@ -1015,6 +1015,10 @@ module orchestrator './core/host/functions.bicep' = {
       {
         name: 'AZURE_INFERENCE_SDK_KEY'
         value: deepseekR1Deployment.outputs.r1Key
+      }
+      {
+        name: 'AZURE_STORAGE_CONNECTION_STRING'
+        value: storage.outputs.blobStorageConnectionString
       }
     ]
   }
