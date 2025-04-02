@@ -380,7 +380,6 @@ var _searchAnalyzerName = !empty(searchAnalyzerName) ? searchAnalyzerName : 'sta
 param useSemanticReranking bool = false
 var _useSemanticReranking = useSemanticReranking != null ? useSemanticReranking : false
 
-// Temporary for TechConnect
 var _searchServiceSkuName = _networkIsolation?'standard2':'standard'
 
 @description('Search index name.')
