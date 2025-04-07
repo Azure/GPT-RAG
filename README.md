@@ -33,7 +33,8 @@ GPT-RAG follows a modular approach, consisting of three components, each with a 
 
 * **Orchestrator** - Manages information retrieval and response generation. Choose between **[Functional](https://github.com/Azure/gpt-rag-orchestrator)** using Semantic Kernel functions or **[Agentic](https://github.com/Azure/gpt-rag-agentic)** powered by AutoGen. Refer to the deployment instructions to switch.
 
-* **[App Front-End](https://github.com/Azure/gpt-rag-frontend)** - Uses the [Backend for Front-End](https://learn.microsoft.com/en-us/azure/architecture/patterns/backends-for-frontends) pattern to provide a scalable and efficient web interface.
+* **App Front-End** – Provides the user interface. Choose between the **[React Front-End](https://github.com/Azure/gpt-rag-frontend)**, the original interface built with React, or the **[Chainlit Front-End](https://github.com/Azure/gpt-rag-ui)**, supporting streaming and easy customization, used exclusively with the agentic orchestrator. Both follow the [Backend for Front-End](https://learn.microsoft.com/en-us/azure/architecture/patterns/backends-for-frontends) pattern.
+
 
 <!-- * [Teams-BOT](https://github.com/Azure/gpt-rag-bot) Constructed using Azure BOT Services, this platform enables users to engage with the Orchestrator seamlessly through the Microsoft Teams interface. -->
 
