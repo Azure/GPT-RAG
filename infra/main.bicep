@@ -1039,7 +1039,7 @@ module frontEnd  'core/host/appservice.bicep' = {
     networkIsolation: (_networkIsolation && !_vnetReuse)
     vnetName: (_networkIsolation && !_vnetReuse)?vnet.outputs.name:''
     subnetId: (_networkIsolation && !_vnetReuse)?vnet.outputs.appIntSubId:''
-    appCommandLine:'python -m uvicorn main:app --host 0.0.0.0 --port $\${PORT:-8000}'
+    appCommandLine:'python -m uvicorn main:app --host 0.0.0.0 --port \${PORT:-8000}'
     location: location
     tags: union(tags, { 'azd-service-name': 'frontend' })
     appServicePlanId: appServicePlan.outputs.id
@@ -1047,29 +1047,7 @@ module frontEnd  'core/host/appservice.bicep' = {
     runtimeVersion: _appServiceRuntimeVersion
     scmDoBuildDuringDeployment: true
     basicPublishingCredentials: _networkIsolation?true:false
-    keyVaultName: keyVault.outputs.name
-    flaskSecretName: 'flaskSecretKey'
         appSettings: [
-      {
-        name: 'SPEECH_SYNTHESIS_VOICE_NAME'
-        value: _speechSynthesisVoiceName
-      }
-      {
-        name: 'SPEECH_SYNTHESIS_LANGUAGE'
-        value: _speechSynthesisLanguage
-      }      
-      {
-        name: 'SPEECH_RECOGNITION_LANGUAGE'
-        value: _speechRecognitionLanguage
-      }
-      {
-        name: 'SPEECH_REGION'
-        value: location
-      }
-      {
-        name: 'ORCHESTRATOR_ENDPOINT'
-        value: _orchestratorEndpoint
-      }
       {
         name: 'ORCHESTRATOR_STREAM_ENDPOINT'
         value: _orchestratorStreamingEndpoint
@@ -1085,19 +1063,19 @@ module frontEnd  'core/host/appservice.bicep' = {
       {
         name: 'AZURE_ORCHESTRATOR_FUNC_NAME'
         value: _orchestratorFunctionAppName
-      }            
-      {
-        name: 'AZURE_KEY_VAULT_ENDPOINT'
-        value: keyVault.outputs.endpoint
-      }
-      {
-        name: 'AZURE_KEY_VAULT_NAME'
-        value: keyVault.outputs.name
       }
       {
         name: 'STORAGE_ACCOUNT'
         value: _storageAccountName
       }
+      {
+        name: 'STORAGE_CONTAINER'
+        value: _storageContainerName
+      }
+      {
+        name: 'STORAGE_CONTAINER_IMAGES'
+        value: _storageImagesContainerName
+      }         
       {
         name: 'LOGLEVEL'
         value: 'INFO'
