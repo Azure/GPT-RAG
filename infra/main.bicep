@@ -838,14 +838,6 @@ module orchestrator './core/host/functions.bicep' =  {
         value: _azureDbConfig.dbDatabaseName
       }
       {
-        name: 'AZURE_DB_CONVERSATIONS_CONTAINER_NAME'
-        value: _azureDbConfig.conversationContainerName
-      }
-      {
-        name: 'AZURE_DB_DATASOURCES_CONTAINER_NAME'
-        value: _azureDbConfig.datasourcesContainerName
-      }
-      {
         name: 'AZURE_KEY_VAULT_NAME'
         value: keyVault.outputs.name
       }
@@ -898,16 +890,12 @@ module orchestrator './core/host/functions.bicep' =  {
         value: _embeddingsVectorSize
       }
       {
-        name: 'ORCHESTRATOR_MESSAGES_LANGUAGE'
-        value: _orchestratorMessagesLanguage
-      }
-      {
         name: 'ENABLE_ORYX_BUILD'
-        value: 'true'
+        value: 'True'
       }
       {
         name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
-        value: 'true'
+        value: 'True'
       }
       {
         name: 'LOGLEVEL'
