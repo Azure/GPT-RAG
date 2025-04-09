@@ -1360,8 +1360,8 @@ The following table provides a detailed overview of the required roles across di
 
 | **Permission Scope**                        | **Role Assigned**                 | **Assigned to**               | **Description**                                                                                  |
 |---------------------------------------------|-----------------------------------|-------------------------------|--------------------------------------------------------------------------------------------------|
-| **AI Services**                             | Cognitive Services Contributor    | Data Ingestion Function App   | Enables Document Intelligence features for data ingestion.                                       |
-| **AI Services**                             | Cognitive Services Contributor    | Frontend App Service          | Grants access to Speech Service (optional).                                                     |
+| **AI Services**                             | Cognitive Services User    | Data Ingestion Function App   | Enables Document Intelligence features for data ingestion.                                       |
+| **AI Services**                             | Cognitive Services User    | Frontend App Service          | Grants access to Speech Service (optional).                                                     |
 | **Azure AI Search**                         | Search Index Data Contributor     | Data Ingestion Function App   | Allows indexing of data in Azure AI Search.                                                     |
 | **Azure AI Search**                         | Search Index Data Reader          | Orchestrator Function App     | Provides read access to the search index.                                                       |
 | **Azure OpenAI**                            | Cognitive Services OpenAI User    | Azure AI Search               | Enables OpenAI capabilities for Azure AI Search.                                                |
