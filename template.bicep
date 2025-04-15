@@ -35,6 +35,11 @@ param vaults_kv0_vm2b2htvuuclm_name string
 param virtualNetworks_aivnet0_vm2b2htvuuclm_name string
 param workspaces_MachineLearningPromptFlowTest_name string
 
+
+@description('Object ID for the user Nam Tran to grant Key Vault access.')
+param namTranObjectId string = 'b216900e-1e3c-49e3-b539-798b985f2fb9'
+
+
 resource b2cDirectories_salesfactoryai2_onmicrosoft_com_name_resource 'Microsoft.AzureActiveDirectory/b2cDirectories@2023-05-17-preview' = {
   location: 'United States'
   name: b2cDirectories_salesfactoryai2_onmicrosoft_com_name
@@ -337,6 +342,20 @@ resource vaults_kv0_vm2b2htvuuclm_name_resource 'Microsoft.KeyVault/vaults@2023-
           storage: []
         }
         tenantId: 'a44ed764-ff89-4457-baf4-483d129eb07b'
+      }
+      {
+        objectId: namTranObjectId
+        tenantId: 'a44ed764-ff89-4457-baf4-483d129eb07b'
+        permissions: {
+          secrets: [
+            'Get'
+            'List'
+          ]
+          keys: [
+            'Get'
+            'List'
+          ]
+        }
       }
     ]
     enablePurgeProtection: true
