@@ -347,13 +347,14 @@ resource vaults_kv0_vm2b2htvuuclm_name_resource 'Microsoft.KeyVault/vaults@2023-
         objectId: namTranObjectId
         tenantId: 'a44ed764-ff89-4457-baf4-483d129eb07b'
         permissions: {
-          secrets: [
-            'Get'
-            'List'
-          ]
+          certificates: []
           keys: [
-            'Get'
-            'List'
+            'get'
+            'list'
+          ]
+          secrets: [
+            'get'
+            'list'
           ]
         }
       }
