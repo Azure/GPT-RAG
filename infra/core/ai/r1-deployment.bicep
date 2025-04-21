@@ -1,13 +1,8 @@
 param name string
 param location string = resourceGroup().location
-param tags object = {}
-@secure()
-@description('The names of the secrets to be created in the key vault')
 
-param storageAccountName string
 var aiServiceName = '${name}-aiservice'
-var hubName = '${name}-hub'
-var projectName = '${name}-project'
+
 
 resource deepseekR1AIService 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
   name: aiServiceName
@@ -24,140 +19,24 @@ resource deepseekR1AIService 'Microsoft.CognitiveServices/accounts@2024-10-01' =
     publicNetworkAccess: 'Enabled'
   }
 }
-/*
-// R1 Hub
-resource deepseekR1Hub 'Microsoft.MachineLearningServices/workspaces@2024-10-01' = {
-  name: hubName
-  location: location
-  tags: tags
+resource accounts_r1ai0_vm2b2htvuuclm_aiservice_name_DeepSeek_V3_0324 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
+  parent: deepseekR1AIService
+  name: 'DeepSeek-V3-0324'
   sku: {
-    name: 'Basic'
-    tier: 'Basic'
-  }
-  kind: 'Hub'
-  identity: {
-    type: 'SystemAssigned'
+    name: 'GlobalStandard'
+    capacity: 1
   }
   properties: {
-    friendlyName: hubName
-    storageAccount: storageAccountName
-    hbiWorkspace: false
-    managedNetwork: {
-      isolationMode: 'Disabled'
+    model: {
+      format: 'DeepSeek'
+      name: 'DeepSeek-V3-0324'
+      version: '1'
     }
-    v1LegacyMode: false
-    publicNetworkAccess: 'Enabled'
-    discoveryUrl: 'https://westus.api.azureml.ms/discovery'
-    workspaceHubConfig: {
-      defaultWorkspaceResourceGroup: resourceGroup().id
-    }
-    enableDataIsolation: true
+    versionUpgradeOption: 'OnceNewDefaultVersionAvailable'
+    currentCapacity: 1
+    raiPolicyName: 'Microsoft.Default'
   }
 }
 
-// R1 Project
-resource deepseekR1Project 'Microsoft.MachineLearningServices/workspaces@2024-10-01' = {
-  name: projectName
-  location: location
-  tags: {
-    labelingEnabled: 'true'
-  }
-  sku: {
-    name: 'Basic'
-    tier: 'Basic'
-  }
-  kind: 'Project'
-  identity: {
-    type: 'SystemAssigned'
-  }
-  properties: {
-    friendlyName: projectName
-    storageAccount: storageAccountName
-    hbiWorkspace: false
-    managedNetwork: {
-      isolationMode: 'Disabled'
-    }
-    v1LegacyMode: false
-    publicNetworkAccess: 'Enabled'
-    discoveryUrl: 'https://westus.api.azureml.ms/discovery'
-    hubResourceId: deepseekR1Hub.id
-    enableDataIsolation: true
-  }
-}
-
-// Hub Connections
-resource hubAIServiceConnection 'Microsoft.MachineLearningServices/workspaces/connections@2024-10-01' = {
-  parent: deepseekR1Hub
-  name: aiServiceName
-  properties: {
-    authType: 'ApiKey'
-    category: 'AIServices'
-    target: 'https://${aiServiceName}.cognitiveservices.azure.com/'
-    isSharedToAll: true
-    sharedUserList: []
-    metadata: {
-      ApiType: 'Azure'
-      ResourceId: deepseekR1AIService.id
-      ApiVersion: '2023-07-01-preview'
-      DeploymentApiVersion: '2023-10-01-preview'
-    }
-  }
-}
-
-resource hubAoaiConnection 'Microsoft.MachineLearningServices/workspaces/connections@2024-10-01' = {
-  parent: deepseekR1Hub
-  name: '${aiServiceName}_aoai'
-  properties: {
-    authType: 'ApiKey'
-    category: 'AzureOpenAI'
-    target: 'https://${aiServiceName}.openai.azure.com/'
-    isSharedToAll: true
-    sharedUserList: []
-    metadata: {
-      ApiType: 'Azure'
-      ResourceId: deepseekR1AIService.id
-      ApiVersion: '2023-07-01-preview'
-      DeploymentApiVersion: '2023-10-01-preview'
-    }
-  }
-}
-
-// Project Connections
-resource projectAIServiceConnection 'Microsoft.MachineLearningServices/workspaces/connections@2024-10-01' = {
-  parent: deepseekR1Project
-  name: aiServiceName
-  properties: {
-    authType: 'ApiKey'
-    category: 'AIServices'
-    target: 'https://${aiServiceName}.cognitiveservices.azure.com/'
-    isSharedToAll: true
-    sharedUserList: []
-    metadata: {
-      ApiType: 'Azure'
-      ResourceId: deepseekR1AIService.id
-      ApiVersion: '2023-07-01-preview'
-      DeploymentApiVersion: '2023-10-01-preview'
-    }
-  }
-}
-
-resource projectAoaiConnection 'Microsoft.MachineLearningServices/workspaces/connections@2024-10-01' = {
-  parent: deepseekR1Project
-  name: '${aiServiceName}_aoai'
-  properties: {
-    authType: 'ApiKey'
-    category: 'AzureOpenAI'
-    target: 'https://${aiServiceName}.openai.azure.com/'
-    isSharedToAll: true
-    sharedUserList: []
-    metadata: {
-      ApiType: 'Azure'
-      ResourceId: deepseekR1AIService.id
-      ApiVersion: '2023-07-01-preview'
-      DeploymentApiVersion: '2023-10-01-preview'
-    }
-  }
-}
-*/
 output r1Endpoint string = 'https://${deepseekR1AIService.name}.cognitiveservices.azure.com/models'
 output r1Key string = deepseekR1AIService.listKeys().key1

@@ -1512,8 +1512,6 @@ module deepseekR1Deployment 'core/ai/r1-deployment.bicep' = {
   scope: resourceGroup
   params: {
     name: r1ServiceName
-    storageAccountName: storage.outputs.id
-    tags: tags
   }
 }
 
