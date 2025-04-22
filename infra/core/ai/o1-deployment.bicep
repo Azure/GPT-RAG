@@ -46,5 +46,24 @@ resource o1Deployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-
 }
 
 
+resource gpt41Deployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
+  parent: o1Account
+  name: 'gpt-4.1'
+  sku: {
+    name: 'GlobalStandard'
+    capacity: 508
+  }
+  properties: {
+    model: {
+      format: kind
+      name: 'gpt-4.1'
+      version: '2025-04-14'
+    }
+    versionUpgradeOption: 'OnceNewDefaultVersionAvailable'
+    currentCapacity: 508
+    raiPolicyName: 'Microsoft.DefaultV2'
+  }
+}
+
 output o1Endpoint string = o1Account.properties.endpoint
 output o1Key string = o1Account.listKeys().key1

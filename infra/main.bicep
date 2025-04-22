@@ -1020,6 +1020,14 @@ module orchestrator './core/host/functions.bicep' = {
         name: 'AZURE_STORAGE_CONNECTION_STRING'
         value: storage.outputs.blobStorageConnectionString
       }
+      {
+        name: 'O1_ENDPOINT'
+        value: o1Deployment.outputs.o1Endpoint
+      }
+      {
+        name: 'O1_KEY'
+        value: o1Deployment.outputs.o1Key
+      }
     ]
   }
 }
