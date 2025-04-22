@@ -405,7 +405,6 @@ resource invitationsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabase
   name: 'invitations'
   properties: {
     resource: {
-      defaultTtl: 604800
       id: 'invitations'
       partitionKey: {
         paths: [
