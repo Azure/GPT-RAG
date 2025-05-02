@@ -28,7 +28,7 @@ var resourceToken = toLower(uniqueString(subscription().id, environmentName, loc
 var azdTags = { 'azd-env-name': environmentName }
 
 @description('Key-value pairs of tags to assign to all resources. The default azd tags are automatically added.')
-param deploymentTags object
+param deploymentTags object = {}
 
 // Merge azdTags and deploymentTags
 var tags = union(azdTags, deploymentTags)
