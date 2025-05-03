@@ -740,8 +740,8 @@
         "currentCapacity": 20,
         "model": {
           "format": "OpenAI",
-          "name": "gpt-35-turbo-16k",
-          "version": "0613"
+          "name": "gpt-35-turbo",
+          "version": "0125"
         },
         "versionUpgradeOption": "OnceNewDefaultVersionAvailable"
       },

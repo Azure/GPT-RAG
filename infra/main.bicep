@@ -315,10 +315,10 @@ param speechSynthesisVoiceName string
 
 // openai
 @description('GPT model used to answer user questions. Don\'t forget to check region availability.')
-@allowed(['gpt-35-turbo', 'gpt-35-turbo-16k', 'gpt-4', 'gpt-4-32k'])
+@allowed(['gpt-35-turbo', 'gpt-4', 'gpt-4-32k'])
 param chatGptModelName string
 @description('GPT model version.')
-@allowed(['0613', '1106', '1106-Preview', '0125-preview'])
+@allowed(['0125', '1106', '1106-Preview', '0125-preview'])
 param chatGptModelVersion string
 @description('GPT model deployment name.')
 param chatGptDeploymentName string = 'chat'
