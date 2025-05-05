@@ -27,7 +27,7 @@
       "value": "${AZURE_SEARCH_USE_MIS}"
     },
     "chatGptModelName": {
-      "value": "gpt-35-turbo-16k"
+      "value": "gpt-35-turbo"
     },
     "chatGptModelVersion": {
       "value": "0613"

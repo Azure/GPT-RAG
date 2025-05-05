@@ -691,8 +691,8 @@ resource accounts_oai0_vm2b2htvuuclm_name_chat 'Microsoft.CognitiveServices/acco
     currentCapacity: 20
     model: {
       format: 'OpenAI'
-      name: 'gpt-35-turbo-16k'
-      version: '0613'
+      name: 'gpt-35-turbo'
+      version: '0125'
     }
     versionUpgradeOption: 'OnceNewDefaultVersionAvailable'
   }
