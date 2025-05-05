@@ -1555,6 +1555,9 @@ module openAi 'core/ai/cognitiveservices.bicep' = {
 }
 
 module o1Deployment 'core/ai/o1-deployment.bicep' = {
+  dependsOn: [
+    openAi
+  ]
   name: 'o1Deployment'
   scope: resourceGroup
   params: {

@@ -47,6 +47,9 @@ resource o1Deployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-
 
 
 resource gpt41Deployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
+  dependsOn: [
+    o1Deployment
+  ]
   parent: o1Account
   name: 'gpt-4.1'
   sku: {
