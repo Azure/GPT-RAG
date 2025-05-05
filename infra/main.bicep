@@ -314,18 +314,7 @@ param speechSynthesisLanguage string
 param speechSynthesisVoiceName string
 
 // openai
-@description('GPT model used to answer user questions. Don\'t forget to check region availability.')
-@allowed(['gpt-35-turbo', 'gpt-4', 'gpt-4-32k'])
-param chatGptModelName string
-@description('GPT model version.')
-@allowed(['0125', '1106', '1106-Preview', '0125-preview'])
-param chatGptModelVersion string
-@description('GPT model deployment name.')
 param chatGptDeploymentName string = 'chat'
-@description('GPT model tokens per Minute Rate Limit (thousands). Default quota per model and region: gpt-4: 20; gpt-4-32: 60; All others: 240.')
-@minValue(1)
-@maxValue(20)
-param chatGptDeploymentCapacity int = 20
 @description('Embeddings model used to generate vector embeddings. Don\'t forget to check region availability.')
 @allowed(['text-embedding-ada-002'])
 param embeddingsModelName string = 'text-embedding-ada-002'
@@ -961,10 +950,6 @@ module orchestrator './core/host/functions.bicep' = {
         value: openAiServiceName
       }
       {
-        name: 'AZURE_OPENAI_CHATGPT_MODEL'
-        value: chatGptModelName
-      }
-      {
         name: 'AZURE_OPENAI_CHATGPT_DEPLOYMENT'
         value: chatGptDeploymentName
       }
@@ -1553,18 +1538,6 @@ module openAi 'core/ai/cognitiveservices.bicep' = {
     }
     keyVaultName: keyVault.outputs.name
     deployments: [
-      {
-        name: chatGptDeploymentName
-        model: {
-          format: 'OpenAI'
-          name: chatGptModelName
-          version: chatGptModelVersion
-        }
-        sku: {
-          name: 'Standard'
-          capacity: chatGptDeploymentCapacity
-        }
-      }
       {
         name: embeddingsDeploymentName
         model: {
