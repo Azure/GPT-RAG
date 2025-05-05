@@ -54,7 +54,7 @@ resource gpt41Deployment 'Microsoft.CognitiveServices/accounts/deployments@2024-
   name: 'gpt-4.1'
   sku: {
     name: 'GlobalStandard'
-    capacity: 508
+    capacity: 490
   }
   properties: {
     model: {
@@ -63,7 +63,7 @@ resource gpt41Deployment 'Microsoft.CognitiveServices/accounts/deployments@2024-
       version: '2025-04-14'
     }
     versionUpgradeOption: 'OnceNewDefaultVersionAvailable'
-    currentCapacity: 508
+    currentCapacity: 490
     raiPolicyName: 'Microsoft.DefaultV2'
   }
 }
