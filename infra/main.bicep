@@ -30,7 +30,7 @@ var _resourceGroupName = !empty(resourceGroupName) ? resourceGroupName : 'rg-${e
 var azdTags = { 'azd-env-name': environmentName }
 
 @description('Key-value pairs of tags to assign to all resources. The default azd tags are automatically added.')
-param deploymentTags object
+param deploymentTags object = {}
 var tags = union(azdTags, deploymentTags)
 
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
