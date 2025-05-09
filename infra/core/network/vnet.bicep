@@ -1,12 +1,17 @@
 param vnetName string
 param location string
 param aiSubnetName string
+param acaSubnetName string
+param aksSubnetName string
 param appIntSubnetName string
 param appServicesSubnetName string
 param databaseSubnetName string
 param bastionSubnetName string = 'AzureBastionSubnet'
 param vnetAddress string = '10.0.0.0/23'
+param vnetAddressAks string = '10.220.128.0/20'
 param aiSubnetPrefix string = '10.0.0.0/26'
+param acaSubnetPrefix string = '10.0.1.64/26'
+param aksSubnetPrefix string = '10.220.132.0/22'
 param appIntSubnetPrefix string = '10.0.0.128/26'
 param appServicesSubnetPrefix string = '10.0.0.192/26'
 param databaseSubnetPrefix string = '10.0.1.0/26'
@@ -18,15 +23,28 @@ param vnetReuse bool
 param existingVnetResourceGroupName string
 
 // Parameters for NSG names
-param aiNsgName string = 'ai-nsg'
-param appIntNsgName string = 'appInt-nsg'
-param appServicesNsgName string = 'appServices-nsg'
-param databaseNsgName string = 'database-nsg'
-param bastionNsgName string = 'bastion-nsg'
+param aiNsgName string = ''
+param acaNsgName string = ''
+param aksNsgName string = ''
+param appIntNsgName string = ''
+param appServicesNsgName string = ''
+param databaseNsgName string = ''
+param bastionNsgName string = ''
+
+var abbrs = loadJsonContent('../../abbreviations.json')
+var roles = loadJsonContent('../../roles.json')
+
+var _aiNsgName = !empty(aiNsgName) ? aiNsgName : '${abbrs.networking.networkSecurityGroup}ai'
+var _acaNsgName = !empty(acaNsgName) ? acaNsgName : '${abbrs.networking.networkSecurityGroup}aca'
+var _aksNsgName = !empty(aksNsgName) ? aksNsgName : '${abbrs.networking.networkSecurityGroup}aks'
+var _appIntNsgName = !empty(appIntNsgName) ? appIntNsgName : '${abbrs.networking.networkSecurityGroup}appInt'
+var _appServicesNsgName = !empty(appServicesNsgName) ? appServicesNsgName : '${abbrs.networking.networkSecurityGroup}appServices'
+var _databaseNsgName = !empty(databaseNsgName) ? databaseNsgName : '${abbrs.networking.networkSecurityGroup}db'
+var _bastionNsgName = !empty(bastionNsgName) ? bastionNsgName : '${abbrs.networking.networkSecurityGroup}bastion'
 
 // Network Security Groups
-resource aiNsg 'Microsoft.Network/networkSecurityGroups@2020-11-01' = {
-  name: aiNsgName
+resource aiNsg 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
+  name: _aiNsgName
   location: location
   tags: tags
   properties: {
@@ -34,8 +52,8 @@ resource aiNsg 'Microsoft.Network/networkSecurityGroups@2020-11-01' = {
   }
 }
 
-resource appIntNsg 'Microsoft.Network/networkSecurityGroups@2020-11-01' = {
-  name: appIntNsgName
+resource acaNsg 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
+  name: _acaNsgName
   location: location
   tags: tags
   properties: {
@@ -43,8 +61,8 @@ resource appIntNsg 'Microsoft.Network/networkSecurityGroups@2020-11-01' = {
   }
 }
 
-resource appServicesNsg 'Microsoft.Network/networkSecurityGroups@2020-11-01' = {
-  name: appServicesNsgName
+resource aksNsg 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
+  name: _aksNsgName
   location: location
   tags: tags
   properties: {
@@ -52,8 +70,8 @@ resource appServicesNsg 'Microsoft.Network/networkSecurityGroups@2020-11-01' = {
   }
 }
 
-resource databaseNsg 'Microsoft.Network/networkSecurityGroups@2020-11-01' = {
-  name: databaseNsgName
+resource appIntNsg 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
+  name: _appIntNsgName
   location: location
   tags: tags
   properties: {
@@ -61,8 +79,26 @@ resource databaseNsg 'Microsoft.Network/networkSecurityGroups@2020-11-01' = {
   }
 }
 
-resource bastionNsg 'Microsoft.Network/networkSecurityGroups@2020-11-01' = {
-  name: bastionNsgName
+resource appServicesNsg 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
+  name: _appServicesNsgName
+  location: location
+  tags: tags
+  properties: {
+    securityRules: []
+  }
+}
+
+resource databaseNsg 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
+  name: _databaseNsgName
+  location: location
+  tags: tags
+  properties: {
+    securityRules: []
+  }
+}
+
+resource bastionNsg 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
+  name: _bastionNsgName
   location: location
   tags: tags
   properties: {
@@ -188,12 +224,12 @@ resource bastionNsg 'Microsoft.Network/networkSecurityGroups@2020-11-01' = {
 }
 
 // Virtual Network and Subnets
-resource existingVnet 'Microsoft.Network/virtualNetworks@2020-06-01' existing = if (vnetReuse) {
+resource existingVnet 'Microsoft.Network/virtualNetworks@2024-05-01' existing = if (vnetReuse) {
   scope: resourceGroup(existingVnetResourceGroupName)
   name: vnetName
 }
 
-resource newVnet 'Microsoft.Network/virtualNetworks@2020-11-01' = if (!vnetReuse) {
+resource newVnet 'Microsoft.Network/virtualNetworks@2024-05-01' = if (!vnetReuse) {
   name: vnetName
   location: location
   tags: tags
@@ -201,6 +237,7 @@ resource newVnet 'Microsoft.Network/virtualNetworks@2020-11-01' = if (!vnetReuse
     addressSpace: {
       addressPrefixes: [
         vnetAddress
+        vnetAddressAks
       ]
     }
     subnets: [
@@ -212,6 +249,28 @@ resource newVnet 'Microsoft.Network/virtualNetworks@2020-11-01' = if (!vnetReuse
           privateLinkServiceNetworkPolicies: 'Enabled'
           networkSecurityGroup: {
             id: aiNsg.id
+          }
+        }
+      }
+      {
+        name: acaSubnetName
+        properties: {
+          addressPrefix: acaSubnetPrefix
+          privateEndpointNetworkPolicies: 'Enabled'
+          privateLinkServiceNetworkPolicies: 'Enabled'
+          networkSecurityGroup: {
+            id: acaNsg.id
+          }
+        }
+      }
+      {
+        name: aksSubnetName
+        properties: {
+          addressPrefix: aksSubnetPrefix
+          privateEndpointNetworkPolicies: 'Enabled'
+          privateLinkServiceNetworkPolicies: 'Enabled'
+          networkSecurityGroup: {
+            id: aksNsg.id
           }
         }
       }
@@ -275,7 +334,9 @@ resource newVnet 'Microsoft.Network/virtualNetworks@2020-11-01' = if (!vnetReuse
 output name string = vnetReuse ? existingVnet.name : newVnet.name
 output id string = vnetReuse ? existingVnet.id : newVnet.id
 output aiSubId string = vnetReuse ? resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, aiSubnetName) : newVnet.properties.subnets[0].id
-output appServicesSubId string = vnetReuse ? resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, appServicesSubnetName) : newVnet.properties.subnets[1].id
-output databaseSubId string = vnetReuse ? resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, databaseSubnetName) : newVnet.properties.subnets[2].id
-output bastionSubId string = vnetReuse ? resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, bastionSubnetName) : newVnet.properties.subnets[3].id
-output appIntSubId string = vnetReuse ? resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, appIntSubnetName) : newVnet.properties.subnets[4].id
+output acaSubId string = vnetReuse ? resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, aiSubnetName) : newVnet.properties.subnets[1].id
+output aksSubId string = vnetReuse ? resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, aiSubnetName) : newVnet.properties.subnets[2].id
+output appServicesSubId string = vnetReuse ? resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, appServicesSubnetName) : newVnet.properties.subnets[3].id
+output databaseSubId string = vnetReuse ? resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, databaseSubnetName) : newVnet.properties.subnets[4].id
+output bastionSubId string = vnetReuse ? resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, bastionSubnetName) : newVnet.properties.subnets[5].id
+output appIntSubId string = vnetReuse ? resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, appIntSubnetName) : newVnet.properties.subnets[6].id

@@ -4,20 +4,39 @@ if (Test-Path -Path ".\.azure\gpt-rag-ingestion") {
 }
 
 # Clone the repository into the .azure folder
-git clone https://github.com/Azure/gpt-rag-ingestion .\.azure\gpt-rag-ingestion
+git clone https://github.com/givenscj/gpt-rag-ingestion .\.azure\gpt-rag-ingestion
 
 # Delete the gpt-rag-orchestrator folder from .azure if it exists
 if (Test-Path -Path ".\.azure\gpt-rag-orchestrator") {
     Remove-Item -Path ".\.azure\gpt-rag-orchestrator" -Recurse -Force
 }
 
-# Clone the repository into the .azure folder
-git clone https://github.com/Azure/gpt-rag-orchestrator .\.azure\gpt-rag-orchestrator
+if ($env:AZURE_USE_AGENTIC)
+{
+    write-host "Using Agentic version of gpt-rag-orchestrator"
+    # Clone the repository into the .azure folder
+    git clone https://github.com/givenscj/gpt-rag-agentic .\.azure\gpt-rag-orchestrator
+}
+else
+{
+    write-host "Using standard version of gpt-rag-orchestrator"
+    # Clone the repository into the .azure folder
+    git clone https://github.com/givenscj/gpt-rag-orchestrator .\.azure\gpt-rag-orchestrator
+}
 
 # Delete the gpt-rag-frontend folder from .azure if it exists
 if (Test-Path -Path ".\.azure\gpt-rag-frontend") {
     Remove-Item -Path ".\.azure\gpt-rag-frontend" -Recurse -Force
 }
 
+
 # Clone the repository into the .azure folder
-git clone https://github.com/Azure/gpt-rag-frontend .\.azure\gpt-rag-frontend
+git clone https://github.com/givenscj/gpt-rag-frontend .\.azure\gpt-rag-frontend
+
+# Delete the gpt-rag-frontend folder from .azure if it exists
+if (Test-Path -Path ".\.azure\gpt-rag-mcp") {
+    Remove-Item -Path ".\.azure\gpt-rag-mcp" -Recurse -Force
+}
+
+# Clone the repository into the .azure folder
+git clone https://github.com/givenscj/gpt-rag-mcp .\.azure\gpt-rag-mcp

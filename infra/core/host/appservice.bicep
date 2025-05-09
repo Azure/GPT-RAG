@@ -79,6 +79,16 @@ resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' =  {
   }
 }
 
+/** Resources **/
+@description('User Assigned Identity for appservice')
+resource uaiAppService 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+  location: location
+  name: 'uai-${name}'
+  tags: {
+      'azd-env-name' : environment().name
+    }
+}
+
 resource newAppService 'Microsoft.Web/sites@2022-09-01' = if (!appServiceReuse && deployAppService) {
   name: name
   location: location
@@ -117,6 +127,10 @@ resource newAppService 'Microsoft.Web/sites@2022-09-01' = if (!appServiceReuse &
             name: 'ENABLE_ORYX_BUILD'
             value: string(enableOryxBuild)
           }
+          {
+            name: 'AZURE_CLIENT_ID'
+            value: uaiAppService.properties.clientId
+          }
         ]
       )    
       cors: {
@@ -127,7 +141,10 @@ resource newAppService 'Microsoft.Web/sites@2022-09-01' = if (!appServiceReuse &
     httpsOnly: true
   }
   identity: {
-    type: 'SystemAssigned'
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${uaiAppService.id}': {}
+    }
   }
   resource configLogs 'config' = {
     name: 'logs'
@@ -154,7 +171,7 @@ resource newAppService 'Microsoft.Web/sites@2022-09-01' = if (!appServiceReuse &
   }
 }
 
-output identityPrincipalId string = !deployAppService ? '' : appServiceReuse ? existingAppService.identity.principalId : newAppService.identity.principalId
+output identityPrincipalId string = uaiAppService.properties.principalId
 output name string = !deployAppService ? '' : appServiceReuse ? existingAppService.name : newAppService.name
 output uri string = !deployAppService ? '' : 'https://${appServiceReuse ? existingAppService.properties.defaultHostName : newAppService.properties.defaultHostName }'
 output id string = !deployAppService ? '' : appServiceReuse ? existingAppService.id : newAppService.id

@@ -13,6 +13,8 @@ param functionAppScaleLimit int = -1
 param healthCheckPath string = ''
 param allowedOrigins array = []
 
+param resourceToken string = uniqueString(resourceGroup().id)
+
 param name string
 param functionAppReuse bool
 param functionAppResourceGroupName string
@@ -62,6 +64,16 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = if (!(empty(
   name: name
 }
 
+/** Resources **/
+@description('User Assigned Identity for function')
+resource uaiFunc 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+  location: location
+  name: 'uai-${name}'
+  tags: {
+    'azd-env-name' : environment().name
+  }
+}
+
 resource newFunction 'Microsoft.Web/sites@2022-03-01' = {
   name: name
   location: location
@@ -69,7 +81,10 @@ resource newFunction 'Microsoft.Web/sites@2022-03-01' = {
   kind: kind
 
   identity: {
-    type: identityType
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${uaiFunc.id}': {}
+    }
   }
 
   properties: {
@@ -117,7 +132,15 @@ resource newFunction 'Microsoft.Web/sites@2022-03-01' = {
           {
             name: 'FUNCTIONS_EXTENSION_VERSION'
             value: '~4'
-          }          
+          }
+          {
+            name: 'AZURE_CLIENT_ID'
+            value: uaiFunc.properties.clientId
+          }
+          {
+            name: 'AZURE_TENANT_ID'
+            value: subscription().tenantId
+          }
         ]
       )
       cors: {
@@ -131,5 +154,5 @@ resource newFunction 'Microsoft.Web/sites@2022-03-01' = {
 output id string = functionAppReuse ? existingFunction.id : newFunction.id
 output name string = functionAppReuse ? existingFunction.name : newFunction.name
 output uri string = functionAppReuse ? 'https://${existingFunction.properties.defaultHostName}' : 'https://${newFunction.properties.defaultHostName}'
-output identityPrincipalId string = identityType == 'SystemAssigned' ? functionAppReuse ? existingFunction.identity.principalId : newFunction.identity.principalId : ''
+output identityPrincipalId string = uaiFunc.properties.principalId
 output location string = functionAppReuse ? existingFunction.location : newFunction.location

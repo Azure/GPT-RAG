@@ -17,6 +17,8 @@ param deployCosmosDb bool = true
 param conversationContainerName string
 param datasourcesContainerName string  
 
+param identityId string
+
 param tags object = {}
 
 @description('The default consistency level of the Cosmos DB account.')

@@ -14,8 +14,20 @@
       "resourceGroupName": {
         "value": "${AZURE_RESOURCE_GROUP_NAME}"
       },
+      "vnetResourceGroupName": {
+        "value": "${AZURE_VNET_RESOURCE_GROUP_NAME}"
+      },
       "networkIsolation": {
         "value": "${AZURE_NETWORK_ISOLATION}"
+      },
+      "useACA": {
+        "value": "${AZURE_USE_ACA}"
+      },
+      "useAKS": {
+        "value": "${AZURE_USE_AKS}"
+      },
+      "useMCP": {
+        "value": "${AZURE_USE_MCP}"
       },
       "provisionLoadTesting": {
         "value": "${AZURE_PROVISION_LOAD_TESTING}"
@@ -225,6 +237,9 @@
           "aoaiReuse": "${AOAI_REUSE}",
           "existingAoaiResourceGroupName": "${AOAI_RESOURCE_GROUP_NAME}",
           "existingAoaiName": "${AOAI_NAME}",
+          "appConfigReuse": "${APP_CONFIG_REUSE}",
+          "existingAppConfigResourceGroupName": "${APP_CONFIG_RESOURCE_GROUP_NAME}",
+          "existingAppConfigName": "${APP_CONFIG_NAME}",
           "appInsightsReuse": "${APP_INSIGHTS_REUSE}",
           "existingAppInsightsResourceGroupName": "${APP_INSIGHTS_RESOURCE_GROUP_NAME}",
           "existingAppInsightsName": "${APP_INSIGHTS_NAME}",
@@ -245,6 +260,9 @@
           "appServiceReuse": "${APP_SERVICE_REUSE}",
           "existingAppServiceName": "${APP_SERVICE_NAME}",
           "existingAppServiceNameResourceGroupName": "${APP_SERVICE_RESOURCE_GROUP_NAME}",
+          "mcpServiceReuse": "${MCP_SERVICE_REUSE}",
+          "existingMcpServiceName": "${MCP_SERVICE_NAME}",
+          "existingMcpServiceNameResourceGroupName": "${MCP_SERVICE_RESOURCE_GROUP_NAME}",
           "orchestratorFunctionAppStorageReuse": "${ORCHESTRATOR_FUNCTION_APP_STORAGE_REUSE}",
           "existingOrchestratorFunctionAppStorageName": "${ORCHESTRATOR_FUNCTION_APP_STORAGE_NAME}",
           "existingOrchestratorFunctionAppStorageResourceGroupName": "${ORCHESTRATOR_FUNCTION_APP_STORAGE_RESOURCE_GROUP_NAME}",

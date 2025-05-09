@@ -2,14 +2,18 @@ param applicationInsightsName string
 param appInsightsLocation string
 param appInsightsReuse bool
 param existingAppInsightsResourceGroupName string
+param resourceToken string
 param logAnalyticsWorkspaceResourceId string = ''
+
+var abbrs = loadJsonContent('../../abbreviations.json')
+var roles = loadJsonContent('../../roles.json')
 
 // Only deploy a new Log Analytics workspace when:
 //   - We are creating a new Application Insights resource (i.e. not reusing an existing one)
 //   - No workspace resource ID was provided
 
-resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' = if ( !appInsightsReuse && empty(logAnalyticsWorkspaceResourceId) ) {
-  name: '${applicationInsightsName}-law'
+resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2025-02-01' = if ( !appInsightsReuse && empty(logAnalyticsWorkspaceResourceId) ) {
+  name: '${abbrs.managementGovernance.logAnalyticsWorkspace}${resourceToken}'
   location: appInsightsLocation
   properties: {
     sku: {
@@ -43,3 +47,5 @@ output id string = appInsightsReuse ? existingApplicationInsights.id : newApplic
 output name string = appInsightsReuse ? existingApplicationInsights.name : newApplicationInsights.name
 output instrumentationKey string = appInsightsReuse ? existingApplicationInsights.properties.InstrumentationKey : newApplicationInsights.properties.InstrumentationKey
 output connectionString string = appInsightsReuse ? existingApplicationInsights.properties.ConnectionString : newApplicationInsights.properties.ConnectionString
+output logAnalyticsWorkspaceName string = logAnalyticsWorkspace.name
+output logAnalyticsWorkspaceId string = logAnalyticsWorkspace.id
