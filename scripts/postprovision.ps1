@@ -18,8 +18,12 @@ $RAIscript = Join-Path -Path $PSScriptRoot -ChildPath 'rai\raipolicies.ps1'
 $useACA = $env:AZURE_USE_ACA
 $useAKS = $env:AZURE_USE_AKS
 
-write-host $useACA
-write-host $useAKS
+write-host "Use ACA: $useACA"
+write-host "Use AKS: $useAKS"
+
+#run the /scripts/fetchComponents.ps1 script to fetch the components
+$fetchScript = Join-Path -Path $PSScriptRoot -ChildPath 'fetchComponents.ps1'
+& $fetchScript
 
 # Build the container images
 if ($useACA -eq "true" -or $useAKS -eq "true") {
@@ -49,6 +53,16 @@ if ($useACA -eq "true" -or $useAKS -eq "true") {
     Write-Host "Building image: $imageName" -ForegroundColor $YELLOW
     docker build -t $imageName -f $dockerfilePath $dockerContextPath
     docker push $imageName
+
+    if ($env:USE_MCP)
+    {
+        $dockerfilePath = Join-Path -Path $PSScriptRoot -ChildPath '.\.azure\gpt-rag-mcp\Dockerfile'
+        $dockerContextPath = Join-Path -Path $PSScriptRoot -ChildPath '.\.azure\gpt-rag-mcp'
+        $imageName = "$($containerRegistryName)/gpt-rag-mcp"
+        Write-Host "Building image: $imageName" -ForegroundColor $YELLOW
+        docker build -t $imageName -f $dockerfilePath $dockerContextPath
+        docker push $imageName
+    }
 }
 
 # Set the ACA container images
@@ -59,7 +73,7 @@ if ($useACA -eq "true") {
     $acaImage = $env:AZURE_ACA_IMAGE_NAME
     $acaTag = $env:AZURE_ACA_IMAGE_TAG
     $AzureContainerImageName = "gpt-rag-orchestrator:latest"
-    $acaImageName = "$($acrLogin)/$AzureContainerImageName"
+    $acaImageName = "$($acrLogin)/$AzureContainerImageName".replace("https://", "")
     Write-Host "Setting ACA image to $acaImageName" -ForegroundColor $YELLOW
     $AZURE_ACA_NAME = "ca-orch-$env:AZURE_RESOURCE_TOKEN"
     az containerapp update --name $AZURE_ACA_NAME --resource-group $resourceGroupName --image $acaImageName
@@ -67,7 +81,7 @@ if ($useACA -eq "true") {
     $acaImage = $env:AZURE_ACA_IMAGE_NAME
     $acaTag = $env:AZURE_ACA_IMAGE_TAG
     $AzureContainerImageName = "gpt-rag-frontend:latest"
-    $acaImageName = "$($acrLogin)/$AzureContainerImageName"
+    $acaImageName = "$($acrLogin)/$AzureContainerImageName".replace("https://", "")
     Write-Host "Setting ACA image to $acaImageName" -ForegroundColor $YELLOW
     $AZURE_ACA_NAME = "ca-web-$env:AZURE_RESOURCE_TOKEN"
     az containerapp update --name $AZURE_ACA_NAME --resource-group $resourceGroupName --image $acaImageName
@@ -75,10 +89,21 @@ if ($useACA -eq "true") {
     $acaImage = $env:AZURE_ACA_IMAGE_NAME
     $acaTag = $env:AZURE_ACA_IMAGE_TAG
     $AzureContainerImageName = "gpt-rag-ingestion:latest"
-    $acaImageName = "https://$($acrLogin)/$AzureContainerImageName"
+    $acaImageName = "https://$($acrLogin)/$AzureContainerImageName".replace("https://", "")
     Write-Host "Setting ACA image to $acaImageName" -ForegroundColor $YELLOW
     $AZURE_ACA_NAME = "ca-ing-$env:AZURE_RESOURCE_TOKEN"
     az containerapp update --name $AZURE_ACA_NAME --resource-group $resourceGroupName --image $acaImageName
+
+    if ($env:USE_MCP)
+    {
+        $acaImage = $env:AZURE_ACA_IMAGE_NAME
+        $acaTag = $env:AZURE_ACA_IMAGE_TAG
+        $AzureContainerImageName = "gpt-rag-mcp:latest"
+        $acaImageName = "https://$($acrLogin)/$AzureContainerImageName".replace("https://", "")
+        Write-Host "Setting ACA image to $acaImageName" -ForegroundColor $YELLOW
+        $AZURE_ACA_NAME = "ca-mcp-$env:AZURE_RESOURCE_TOKEN"
+        az containerapp update --name $AZURE_ACA_NAME --resource-group $resourceGroupName --image $acaImageName
+    }
 }
 
 # Set the AKS deployment images

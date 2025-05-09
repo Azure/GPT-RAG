@@ -122,10 +122,12 @@ resource containerApp 'Microsoft.App/containerApps@2024-10-02-preview' = {
   location: location
   tags: tags
   identity: {
-    type: 'UserAssigned'
-    userAssignedIdentities: {
-      '${containerAppIdentityId}': {}
-    }
+    type: containerAppIdentityId == null ? 'SystemAssigned' : 'UserAssigned'
+    userAssignedIdentities: containerAppIdentityId == null
+      ? null
+      : {
+          '${containerAppIdentityId}': {}
+        }
   }
   properties: {
     environmentId: containerAppsEnvironmentId

@@ -72,7 +72,12 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2021-03-01' = {
   location: location
   tags: tags
   identity: {
-    type: 'SystemAssigned'
+    type: principalId == null ? 'SystemAssigned' : 'UserAssigned'
+    userAssignedIdentities: principalId == null
+      ? null
+      : {
+          '${principalId}': {}
+        }
   }
   properties: {
     hardwareProfile: {

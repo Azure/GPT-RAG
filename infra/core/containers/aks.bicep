@@ -117,10 +117,12 @@ resource main 'Microsoft.ContainerService/managedClusters@2025-02-01' = {
   ]
 
   identity: {
-    type: 'UserAssigned'
-    userAssignedIdentities: {
-      '${identityId}': {}
-    }
+    type: identityId == null ? 'SystemAssigned' : 'UserAssigned'
+    userAssignedIdentities: identityId == null
+      ? null
+      : {
+          '${identityId}': {}
+        }
   }
 
   sku: {
