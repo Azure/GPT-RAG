@@ -3498,6 +3498,43 @@ module aksBackend './core/containers/aks.bicep' = if(useAKS) {
   }
 }
 
+module setAksAppConfig './core/appConfig/appconfig-values.bicep' = if (useAKS) {
+  name: 'setAksAppConfig'
+  scope: rg
+  dependsOn: [
+    appConfig
+    aksBackend
+  ]
+  params: {
+    name : _appConfigName
+    appSettings : [
+      {
+        name: 'AZURE_ORCHESTRATOR_FUNC_NAME'
+        value: 'orchestrator'
+      }
+      {
+        name: 'ORCHESTRATOR_ENDPOINT'
+        value: 'orchestrator.${k8sNamespace}.svc.cluster.local'
+      }
+      {
+        name: 'AZURE_MCP_SERVER_URL'
+        value: 'mcp.${k8sNamespace}.svc.cluster.local/sse'
+      }
+      {
+        name: 'AZURE_MCP_SERVER_TIMEOUT'
+        value: 30
+      }
+      {
+        name: 'AZURE_MCP_SERVER_APIKEY'
+        value: ''
+      }
+    ]
+    secureAppSettings: [
+      
+    ]
+  }
+}
+
 
 /////////////////////////////////////////////////////////////////////////////
 // TEMPLATE OUTPUTS

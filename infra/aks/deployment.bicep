@@ -45,6 +45,7 @@ resource appsDeployment_gptRagFrontend 'apps/Deployment@v1' = {
         nodeSelector: {
           'kubernetes.io/os': 'linux'
         }
+        serviceAccountName: '${name}-service-account'
         containers: [
           {
             name: fullName

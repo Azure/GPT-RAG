@@ -313,6 +313,14 @@ module nsGateway '../../aks/namespace.bicep' = {
   }
 }
 
+module nsIngress '../../aks/namespace.bicep' = {
+  name: 'nsIngress'
+  params: {
+    kubeConfig: main.listClusterAdminCredential().kubeconfigs[0].value
+    name: 'ingress-ngnix'
+  }
+}
+
 module ingressNgnix '../../aks/ingress-ngnix.bicep' = {
   name: 'ingressNgnix'
   params: {
@@ -337,6 +345,47 @@ var services = [
   'orchestrator'
   'mcp'
 ]
+  
+  
+module frontendSvcAccount '../../aks/service-account.bicep' = {
+  name: 'frontendSvcAccount'
+  params: {
+    kubeConfig: main.listClusterAdminCredential().kubeconfigs[0].value
+    clientId: filter(webEnvs, (env) => env.name == 'AZURE_CLIENT_ID')[0].value
+    name: 'frontend-service-account'
+    namespace: k8sNamespace
+  }
+}
+
+module orchSvcAccount '../../aks/service-account.bicep' = {
+  name: 'orchSvcAccount'
+  params: {
+    kubeConfig: main.listClusterAdminCredential().kubeconfigs[0].value
+    clientId: filter(orchEnvs, (env) => env.name == 'AZURE_CLIENT_ID')[0].value
+    name: 'orch-service-account'
+    namespace: k8sNamespace
+  }
+}
+
+module ingSvcAccount '../../aks/service-account.bicep' = {
+  name: 'ingSvcAccount'
+  params: {
+    kubeConfig: main.listClusterAdminCredential().kubeconfigs[0].value
+    clientId: filter(ingEnvs, (env) => env.name == 'AZURE_CLIENT_ID')[0].value
+    name: 'ing-service-account'
+    namespace: k8sNamespace
+  }
+}
+
+module mcpSvcAccount '../../aks/service-account.bicep' = {
+  name: 'mcpSvcAccount'
+  params: {
+    kubeConfig: main.listClusterAdminCredential().kubeconfigs[0].value
+    clientId: filter(mcpEnvs, (env) => env.name == 'AZURE_CLIENT_ID')[0].value
+    name: 'mcp-service-account'
+    namespace: k8sNamespace
+  }
+}
 
 module aksweb '../../aks/deployment.bicep' = {
   name: 'aksweb'
@@ -360,6 +409,7 @@ module aksingest '../../aks/deployment.bicep' = {
     image: '${repoUrl}/gpt-rag-ingestion:latest'
     namespace: k8sNamespace
     env : ingEnvs
+    useLoadBalancer: true
   }
 }
 
