@@ -2710,6 +2710,30 @@ module appConfigDataOwnerAccess './core/security/resource-group-role-assignment.
   }
 }
 
+module aksConfigDataOwnerAccess './core/security/resource-group-role-assignment.bicep' = if (useACA) {
+  name: 'aksConfigDataOwnerAccess'
+  scope: rg
+  params: {
+    roleAssignments: concat(appConfigDataOwnerIdentityAssignments, [
+      {
+        principalId: aksWebManagedIdentity.outputs.principalId
+        roleDefinitionId: appConfigDataOwnerRole.id
+        principalType: 'ServicePrincipal'
+      }
+      {
+        principalId: aksIngestManagedIdentity.outputs.principalId
+        roleDefinitionId: appConfigDataOwnerRole.id
+        principalType: 'ServicePrincipal'
+      }
+      {
+        principalId: aksOrchManagedIdentity.outputs.principalId
+        roleDefinitionId: appConfigDataOwnerRole.id
+        principalType: 'ServicePrincipal'
+      }
+    ])
+  }
+}
+
 module containerMcpConfigDataOwnerAccess './core/security/resource-group-role-assignment.bicep' = if (useACA && useMCP) {
   name: 'containerMcpConfigDataOwnerAccess'
   scope: rg
@@ -2717,6 +2741,20 @@ module containerMcpConfigDataOwnerAccess './core/security/resource-group-role-as
     roleAssignments: concat(appConfigDataOwnerIdentityAssignments, [
       {
         principalId: containerAppMcpManagedIdentity.outputs.principalId
+        roleDefinitionId: appConfigDataOwnerRole.id
+        principalType: 'ServicePrincipal'
+      }
+    ])
+  }
+}
+
+module akscontainerMcpConfigDataOwnerAccess './core/security/resource-group-role-assignment.bicep' = if (useAKS && useMCP) {
+  name: 'akscontainerMcpConfigDataOwnerAccess'
+  scope: rg
+  params: {
+    roleAssignments: concat(appConfigDataOwnerIdentityAssignments, [
+      {
+        principalId: aksMcpManagedIdentity.outputs.principalId
         roleDefinitionId: appConfigDataOwnerRole.id
         principalType: 'ServicePrincipal'
       }
@@ -2876,6 +2914,21 @@ module containerRegistryAksPullAccess './core/security/resource-group-role-assig
     roleAssignments: concat(acrPullIdentityAssignments, [
       {
         principalId: aksManagedIdentity.outputs.principalId
+        roleDefinitionId: acrPullRole.id
+        principalType: 'ServicePrincipal'
+      }
+      {
+        principalId: aksWebManagedIdentity.outputs.principalId
+        roleDefinitionId: acrPullRole.id
+        principalType: 'ServicePrincipal'
+      }
+      {
+        principalId: aksIngestManagedIdentity.outputs.principalId
+        roleDefinitionId: acrPullRole.id
+        principalType: 'ServicePrincipal'
+      }
+      {
+        principalId: aksOrchManagedIdentity.outputs.principalId
         roleDefinitionId: acrPullRole.id
         principalType: 'ServicePrincipal'
       }
@@ -3356,7 +3409,36 @@ module keyVaultSecretRoleAssignment './core/security/resource-group-role-assignm
         roleDefinitionId: keyVaultSecretsUserRole.id
         principalType: 'ServicePrincipal'
       }
+      {
+        principalId: aksIngestManagedIdentity.outputs.principalId
+        roleDefinitionId: keyVaultSecretsUserRole.id
+        principalType: 'ServicePrincipal'
+      }
+      {
+        principalId: aksOrchManagedIdentity.outputs.principalId
+        roleDefinitionId: keyVaultSecretsUserRole.id
+        principalType: 'ServicePrincipal'
+      }
+      {
+        principalId: aksWebManagedIdentity.outputs.principalId
+        roleDefinitionId: keyVaultSecretsUserRole.id
+        principalType: 'ServicePrincipal'
+      }
     ]
+  }
+}
+
+module akscontainerMcpkeyVaultSecretAccess './core/security/resource-group-role-assignment.bicep' = if (useAKS && useMCP) {
+  name: 'akscontainerMcpkeyVaultSecretAccess'
+  scope: rg
+  params: {
+    roleAssignments: concat(appConfigDataOwnerIdentityAssignments, [
+      {
+        principalId: aksMcpManagedIdentity.outputs.principalId
+        roleDefinitionId: keyVaultSecretsUserRole.id
+        principalType: 'ServicePrincipal'
+      }
+    ])
   }
 }
 
@@ -3607,3 +3689,4 @@ output AZURE_VNET_NAME string = _vnetName
 output AZURE_ZERO_TRUST string = _networkIsolation ? 'TRUE' : 'FALSE'
 output AZURE_SEARCH_USE_MIS bool = _azureSearchUseMIS
 output AZURE_RESOURCE_TOKEN string = resourceToken
+output GENERATE_SSL_CERT bool = false

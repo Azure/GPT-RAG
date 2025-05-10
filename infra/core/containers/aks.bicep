@@ -321,12 +321,14 @@ module nsIngress '../../aks/namespace.bicep' = {
   }
 }
 
+/*
 module ingressNgnix '../../aks/ingress-ngnix.bicep' = {
   name: 'ingressNgnix'
   params: {
     kubeConfig: main.listClusterAdminCredential().kubeconfigs[0].value
   }
 }
+*/
 
 module certificates '../../aks/certificates.bicep' = {
   name: 'certificates'
