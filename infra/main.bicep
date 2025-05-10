@@ -3399,6 +3399,46 @@ module grafana './core/management_governance/grafana.bicep' = if (useAKS) {
 }
   */
 
+module aksWebManagedIdentity './core/security/managed-identity.bicep' = if (useAKS) {
+  name: '${abbrs.security.managedIdentity}${abbrs.containers.aksCluster}web-${resourceToken}'
+  scope: rg
+  params: {
+    name: '${abbrs.security.managedIdentity}${abbrs.containers.aksCluster}web-${resourceToken}'
+    location: location
+    tags: union(tags, {})
+  }
+}
+
+module aksOrchManagedIdentity './core/security/managed-identity.bicep' = if (useAKS) {
+  name: '${abbrs.security.managedIdentity}${abbrs.containers.aksCluster}orch-${resourceToken}'
+  scope: rg
+  params: {
+    name: '${abbrs.security.managedIdentity}${abbrs.containers.aksCluster}orch-${resourceToken}'
+    location: location
+    tags: union(tags, {})
+  }
+}
+
+module aksIngestManagedIdentity './core/security/managed-identity.bicep' = if (useAKS) {
+  name: '${abbrs.security.managedIdentity}${abbrs.containers.aksCluster}ing-${resourceToken}'
+  scope: rg
+  params: {
+    name: '${abbrs.security.managedIdentity}${abbrs.containers.aksCluster}ing-${resourceToken}'
+    location: location
+    tags: union(tags, {})
+  }
+}
+
+module aksMcpManagedIdentity './core/security/managed-identity.bicep' = if (useAKS) {
+  name: '${abbrs.security.managedIdentity}${abbrs.containers.aksCluster}mcp-${resourceToken}'
+  scope: rg
+  params: {
+    name: '${abbrs.security.managedIdentity}${abbrs.containers.aksCluster}mcp-${resourceToken}'
+    location: location
+    tags: union(tags, {})
+  }
+}
+
 module aksBackend './core/containers/aks.bicep' = if(useAKS) {
   scope: rg
   name: '${abbrs.containers.aksCluster}backend-${timestamp}'
@@ -3422,10 +3462,38 @@ module aksBackend './core/containers/aks.bicep' = if(useAKS) {
     subnetId: subnets['aks-subnet'].id
     subnetIdPrivateEndpoint: _networkIsolation?subnets['aks-subnet'].id: ''
     tags: tags
-    orchEnvs: orchestratorEnvs
-    ingEnvs: ingestionEnvs
-    webEnvs: webEnvs
-    mcpEnvs: mcpEnvs
+    orchEnvs: concat(orchestratorEnvs,
+      [
+        {
+          name: 'AZURE_CLIENT_ID'
+          value: aksOrchManagedIdentity.outputs.clientId
+        }
+      ]
+    )
+    ingEnvs: concat(ingestionEnvs,
+      [
+        {
+          name: 'AZURE_CLIENT_ID'
+          value: aksIngestManagedIdentity.outputs.clientId
+        }
+      ]
+    )
+    webEnvs: concat(webEnvs,
+      [
+        {
+          name: 'AZURE_CLIENT_ID'
+          value: aksWebManagedIdentity.outputs.clientId
+        }
+      ]
+    )
+    mcpEnvs: concat(mcpEnvs,
+      [
+        {
+          name: 'AZURE_CLIENT_ID'
+          value: aksMcpManagedIdentity.outputs.clientId
+        }
+      ]
+    )
     repoUrl: repoUrl
   }
 }

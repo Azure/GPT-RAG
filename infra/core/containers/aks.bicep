@@ -344,7 +344,7 @@ module aksweb '../../aks/deployment.bicep' = {
     prefix: 'gpt-rag'
     name: 'frontend'
     kubeConfig: main.listClusterAdminCredential().kubeconfigs[0].value
-    image: 'gpt-rag-frontend:latest'
+    image: '${repoUrl}/gpt-rag-frontend:latest'
     namespace: k8sNamespace
     env : webEnvs
     useLoadBalancer: true
@@ -357,7 +357,7 @@ module aksingest '../../aks/deployment.bicep' = {
     prefix: 'gpt-rag'
     name: 'ingestion'
     kubeConfig: main.listClusterAdminCredential().kubeconfigs[0].value
-    image: 'gpt-rag-ingestion:latest'
+    image: '${repoUrl}/gpt-rag-ingestion:latest'
     namespace: k8sNamespace
     env : ingEnvs
   }
@@ -369,7 +369,7 @@ module aksorch '../../aks/deployment.bicep' = {
     prefix: 'gpt-rag'
     name: 'orchestrator'
     kubeConfig: main.listClusterAdminCredential().kubeconfigs[0].value
-    image: 'gpt-rag-orchestrator:latest'
+    image: '${repoUrl}/gpt-rag-orchestrator:latest'
     namespace: k8sNamespace
     env : orchEnvs
   }
@@ -381,7 +381,7 @@ module aksmcp '../../aks/deployment.bicep' = {
     prefix: 'gpt-rag'
     name: 'mcp'
     kubeConfig: main.listClusterAdminCredential().kubeconfigs[0].value
-    image: 'gpt-rag-mcp:latest'
+    image: '${repoUrl}/gpt-rag-mcp:latest'
     namespace: k8sNamespace
     env : mcpEnvs
   }
