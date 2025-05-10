@@ -37,7 +37,7 @@ if ($useAKS) {
     #you need to install openssl
     #choco install openssl -y
 
-    if ($env:GENERATE_SSL_CERT)
+    if ($env:GENERATE_SSL_CERT -eq "true")
     {
         $hostname = "$($resourcePrefix).com"
 

@@ -707,6 +707,16 @@ module vnet './core/network/vnet.bicep' = if (_networkIsolation || useAKS) {
   }
 }
 
+module domainDnsZone './core/network/private-dns-zones.bicep' = if ((_networkIsolation && !_vnetReuse) || useAKS) {
+  name: 'domain-dnzones'
+  scope: (!empty(vnetResourceGroupName)) ? vnetrg : rg
+  params: {
+    dnsZoneName: '${resourceToken}.com' 
+    tags: tags
+    virtualNetworkName: vnet.outputs.name
+  }
+}
+
 module blobDnsZone './core/network/private-dns-zones.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'blob-dnzones'
   scope: (!empty(vnetResourceGroupName)) ? vnetrg : rg
@@ -3550,6 +3560,10 @@ module aksBackend './core/containers/aks.bicep' = if(useAKS) {
           name: 'AZURE_CLIENT_ID'
           value: aksOrchManagedIdentity.outputs.clientId
         }
+        {
+          name : '${functionsWebJobStorageVariableName}__clientId'
+          value: aksOrchManagedIdentity.outputs.clientId
+        }
       ]
     )
     ingEnvs: concat(ingestionEnvs,
@@ -3557,6 +3571,10 @@ module aksBackend './core/containers/aks.bicep' = if(useAKS) {
         {
           name: 'AZURE_CLIENT_ID'
           value: aksIngestManagedIdentity.outputs.clientId
+        }
+        {
+          name : 'AZURE_STORAGE_QUEUES_CONNECTION_STRING__clientId'
+          value: aksOrchManagedIdentity.outputs.clientId
         }
       ]
     )
@@ -3566,6 +3584,10 @@ module aksBackend './core/containers/aks.bicep' = if(useAKS) {
           name: 'AZURE_CLIENT_ID'
           value: aksWebManagedIdentity.outputs.clientId
         }
+        {
+          name : 'AZURE_STORAGE_QUEUES_CONNECTION_STRING__clientId'
+          value: aksOrchManagedIdentity.outputs.clientId
+        }
       ]
     )
     mcpEnvs: concat(mcpEnvs,
@@ -3573,6 +3595,10 @@ module aksBackend './core/containers/aks.bicep' = if(useAKS) {
         {
           name: 'AZURE_CLIENT_ID'
           value: aksMcpManagedIdentity.outputs.clientId
+        }
+        {
+          name : 'AZURE_STORAGE_QUEUES_CONNECTION_STRING__clientId'
+          value: aksOrchManagedIdentity.outputs.clientId
         }
       ]
     )
