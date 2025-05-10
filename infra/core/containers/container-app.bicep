@@ -5,6 +5,9 @@ param location string = resourceGroup().location
 @description('Tags for the resource.')
 param tags object = {}
 
+@description('Default repo url with default images.')
+param repoUrl string
+
 @export()
 @description('Information about the ingress configuration for the container app.')
 type ingressConfigInfo = {
@@ -117,7 +120,7 @@ param daprEnabled bool = false
 @description('Name for the Dapr App ID. Required if Dapr is enabled. Defaults to empty.')
 param daprAppId string = ''
 
-resource containerApp 'Microsoft.App/containerApps@2024-10-02-preview' = {
+resource containerApp 'Microsoft.App/containerApps@2025-01-01' = {
   name: name
   location: location
   tags: tags
@@ -156,9 +159,10 @@ resource containerApp 'Microsoft.App/containerApps@2024-10-02-preview' = {
     template: {
       containers: [
         {
+          registry: repoUrl
           image: imageInContainerRegistry
             ? '${containerRegistryName}.azurecr.io/${containerImageName}'
-            : containerImageName
+            : '${repoUrl}/${containerImageName}'
           name: name
           resources: containerResources
           env: environmentVariables

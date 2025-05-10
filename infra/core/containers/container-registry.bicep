@@ -9,6 +9,8 @@ param tags object = {}
 @description('MSI Id.')
 param identityId string?
 
+param networkIsolation bool
+
 param containerRegistryReuse bool
 param existingContainerRegistryResourceGroupName string
 
@@ -57,7 +59,7 @@ resource containerRegistry 'Microsoft.ContainerRegistry/registries@2024-11-01-pr
     publicNetworkAccess: publicNetworkAccess
     networkRuleBypassOptions: 'AzureServices'
     networkRuleSet: {
-      defaultAction: 'Deny'
+      defaultAction: networkIsolation ? 'Deny' : 'Allow'
       ipRules: [
       ]
     }

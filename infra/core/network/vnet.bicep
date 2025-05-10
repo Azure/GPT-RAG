@@ -1,3 +1,5 @@
+targetScope = 'resourceGroup'
+
 param vnetName string
 param location string
 param aiSubnetName string
@@ -43,66 +45,80 @@ var _databaseNsgName = !empty(databaseNsgName) ? databaseNsgName : '${abbrs.netw
 var _bastionNsgName = !empty(bastionNsgName) ? bastionNsgName : '${abbrs.networking.networkSecurityGroup}bastion'
 
 // Network Security Groups
-resource aiNsg 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
+module aiNsg './security-group.bicep' = {
+  scope: resourceGroup(existingVnetResourceGroupName)
   name: _aiNsgName
-  location: location
-  tags: tags
-  properties: {
-    securityRules: []
+  params: {
+    location: location
+    name: _aiNsgName
+    tags: tags
+    securityRules : []
   }
 }
 
-resource acaNsg 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
+module acaNsg './security-group.bicep' = {
+  scope: resourceGroup(existingVnetResourceGroupName)
   name: _acaNsgName
-  location: location
-  tags: tags
-  properties: {
-    securityRules: []
+  params: {
+    location: location
+    name: _acaNsgName
+    tags: tags
+    securityRules : []
   }
 }
 
-resource aksNsg 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
+module aksNsg './security-group.bicep' = {
+  scope: resourceGroup(existingVnetResourceGroupName)
   name: _aksNsgName
-  location: location
-  tags: tags
-  properties: {
-    securityRules: []
+  params: {
+    location: location
+    name: _aksNsgName
+    tags: tags
+    securityRules : []
   }
 }
 
-resource appIntNsg 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
+module appIntNsg './security-group.bicep' = {
+  scope: resourceGroup(existingVnetResourceGroupName)
   name: _appIntNsgName
-  location: location
-  tags: tags
-  properties: {
-    securityRules: []
+  params: {
+    location: location
+    name: _appIntNsgName
+    tags: tags
+    securityRules : []
   }
 }
 
-resource appServicesNsg 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
+module appServicesNsg './security-group.bicep' = {
+  scope: resourceGroup(existingVnetResourceGroupName)
   name: _appServicesNsgName
-  location: location
-  tags: tags
-  properties: {
-    securityRules: []
+  params: {
+    location: location
+    name: _appServicesNsgName
+    tags: tags
+    securityRules : []
   }
 }
 
-resource databaseNsg 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
+module databaseNsg './security-group.bicep' = {
+  scope: resourceGroup(existingVnetResourceGroupName)
   name: _databaseNsgName
-  location: location
-  tags: tags
-  properties: {
-    securityRules: []
+  params: {
+    location: location
+    name: _databaseNsgName
+    tags: tags
+    securityRules : []
   }
 }
 
-resource bastionNsg 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
+module bastionNsg './security-group.bicep' = {
+  scope: resourceGroup(existingVnetResourceGroupName)
   name: _bastionNsgName
-  location: location
-  tags: tags
-  properties: {
-    securityRules: [
+  params: {
+    location: location
+    name: _bastionNsgName
+    tags: tags
+    securityRules : [
       {
         name: 'AllowHttpsInbound'
         properties: {
@@ -223,120 +239,116 @@ resource bastionNsg 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
   }
 }
 
-// Virtual Network and Subnets
-resource existingVnet 'Microsoft.Network/virtualNetworks@2024-05-01' existing = if (vnetReuse) {
+var subnets = [
+  {
+    name: aiSubnetName
+    properties: {
+      addressPrefix: aiSubnetPrefix
+      privateEndpointNetworkPolicies: 'Enabled'
+      privateLinkServiceNetworkPolicies: 'Enabled'
+      networkSecurityGroup: {
+        id: aiNsg.outputs.id
+      }
+    }
+  }
+  {
+    name: acaSubnetName
+    properties: {
+      addressPrefix: acaSubnetPrefix
+      privateEndpointNetworkPolicies: 'Enabled'
+      privateLinkServiceNetworkPolicies: 'Enabled'
+      networkSecurityGroup: {
+        id: acaNsg.outputs.id
+      }
+    }
+  }
+  {
+    name: aksSubnetName
+    properties: {
+      addressPrefix: aksSubnetPrefix
+      privateEndpointNetworkPolicies: 'Enabled'
+      privateLinkServiceNetworkPolicies: 'Enabled'
+      networkSecurityGroup: {
+        id: aksNsg.outputs.id
+      }
+    }
+  }
+  {
+    name: appServicesSubnetName
+    properties: {
+      addressPrefix: appServicesSubnetPrefix
+      privateEndpointNetworkPolicies: 'Enabled'
+      privateLinkServiceNetworkPolicies: 'Enabled'
+      networkSecurityGroup: {
+        id: appServicesNsg.outputs.id
+      }
+    }
+  }
+  {
+    name: databaseSubnetName
+    properties: {
+      addressPrefix: databaseSubnetPrefix
+      privateEndpointNetworkPolicies: 'Enabled'
+      privateLinkServiceNetworkPolicies: 'Enabled'
+      networkSecurityGroup: {
+        id: databaseNsg.outputs.id
+      }
+    }
+  }
+  {
+    name: bastionSubnetName 
+    properties: {
+      addressPrefix: bastionSubnetPrefix
+      privateEndpointNetworkPolicies: 'Enabled'
+      privateLinkServiceNetworkPolicies: 'Enabled'
+      networkSecurityGroup: {
+        id: bastionNsg.outputs.id
+      }
+    }
+  }
+  {
+    name: appIntSubnetName
+    properties: {
+      addressPrefix: appIntSubnetPrefix
+      privateEndpointNetworkPolicies: 'Enabled'
+      privateLinkServiceNetworkPolicies: 'Enabled'
+      delegations: [
+        {
+          id: appServicePlanId
+          name: appServicePlanName
+          properties: {
+            serviceName: 'Microsoft.Web/serverFarms'
+          }
+        }
+      ]
+      networkSecurityGroup: {
+        id: appIntNsg.outputs.id
+      }
+    }
+  }
+]
+
+module vnet './vnet_core.bicep' = {
   scope: resourceGroup(existingVnetResourceGroupName)
   name: vnetName
-}
-
-resource newVnet 'Microsoft.Network/virtualNetworks@2024-05-01' = if (!vnetReuse) {
-  name: vnetName
-  location: location
-  tags: tags
-  properties: {
-    addressSpace: {
-      addressPrefixes: [
-        vnetAddress
-        vnetAddressAks
-      ]
-    }
-    subnets: [
-      {
-        name: aiSubnetName
-        properties: {
-          addressPrefix: aiSubnetPrefix
-          privateEndpointNetworkPolicies: 'Enabled'
-          privateLinkServiceNetworkPolicies: 'Enabled'
-          networkSecurityGroup: {
-            id: aiNsg.id
-          }
-        }
-      }
-      {
-        name: acaSubnetName
-        properties: {
-          addressPrefix: acaSubnetPrefix
-          privateEndpointNetworkPolicies: 'Enabled'
-          privateLinkServiceNetworkPolicies: 'Enabled'
-          networkSecurityGroup: {
-            id: acaNsg.id
-          }
-        }
-      }
-      {
-        name: aksSubnetName
-        properties: {
-          addressPrefix: aksSubnetPrefix
-          privateEndpointNetworkPolicies: 'Enabled'
-          privateLinkServiceNetworkPolicies: 'Enabled'
-          networkSecurityGroup: {
-            id: aksNsg.id
-          }
-        }
-      }
-      {
-        name: appServicesSubnetName
-        properties: {
-          addressPrefix: appServicesSubnetPrefix
-          privateEndpointNetworkPolicies: 'Enabled'
-          privateLinkServiceNetworkPolicies: 'Enabled'
-          networkSecurityGroup: {
-            id: appServicesNsg.id
-          }
-        }
-      }
-      {
-        name: databaseSubnetName
-        properties: {
-          addressPrefix: databaseSubnetPrefix
-          privateEndpointNetworkPolicies: 'Enabled'
-          privateLinkServiceNetworkPolicies: 'Enabled'
-          networkSecurityGroup: {
-            id: databaseNsg.id
-          }
-        }
-      }
-      {
-        name: bastionSubnetName 
-        properties: {
-          addressPrefix: bastionSubnetPrefix
-          privateEndpointNetworkPolicies: 'Enabled'
-          privateLinkServiceNetworkPolicies: 'Enabled'
-          networkSecurityGroup: {
-            id: bastionNsg.id
-          }
-        }
-      }
-      {
-        name: appIntSubnetName
-        properties: {
-          addressPrefix: appIntSubnetPrefix
-          privateEndpointNetworkPolicies: 'Enabled'
-          privateLinkServiceNetworkPolicies: 'Enabled'
-          delegations: [
-            {
-              id: appServicePlanId
-              name: appServicePlanName
-              properties: {
-                serviceName: 'Microsoft.Web/serverFarms'
-              }
-            }
-          ]
-          networkSecurityGroup: {
-            id: appIntNsg.id
-          }
-        }
-      }
+  params : {
+    name : vnetName
+    location: location
+    tags: tags
+    addressPrefixes: [
+      vnetAddress
+      vnetAddressAks
     ]
+    subnets: subnets
   }
 }
 
-output name string = vnetReuse ? existingVnet.name : newVnet.name
-output id string = vnetReuse ? existingVnet.id : newVnet.id
-output aiSubId string = vnetReuse ? resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, aiSubnetName) : newVnet.properties.subnets[0].id
-output acaSubId string = vnetReuse ? resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, aiSubnetName) : newVnet.properties.subnets[1].id
-output aksSubId string = vnetReuse ? resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, aiSubnetName) : newVnet.properties.subnets[2].id
-output appServicesSubId string = vnetReuse ? resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, appServicesSubnetName) : newVnet.properties.subnets[3].id
-output databaseSubId string = vnetReuse ? resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, databaseSubnetName) : newVnet.properties.subnets[4].id
-output bastionSubId string = vnetReuse ? resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, bastionSubnetName) : newVnet.properties.subnets[5].id
-output appIntSubId string = vnetReuse ? resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, appIntSubnetName) : newVnet.properties.subnets[6].id
+output name string = vnet.outputs.name
+output id string = vnet.outputs.id
+output aiSubId string = vnet.outputs.subnets[0].id
+output acaSubId string = vnet.outputs.subnets[1].id
+output aksSubId string = vnet.outputs.subnets[2].id
+output appServicesSubId string = vnet.outputs.subnets[3].id
+output databaseSubId string = vnet.outputs.subnets[4].id
+output bastionSubId string = vnet.outputs.subnets[5].id
+output appIntSubId string = vnet.outputs.subnets[6].id

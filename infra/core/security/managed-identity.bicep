@@ -25,7 +25,7 @@ type identityInfo = {
   principalType: 'Device' | 'User' | 'Group' | 'ServicePrincipal' | 'ForeignGroup'
 }
 
-resource identity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
+resource identity 'Microsoft.ManagedIdentity/userAssignedIdentities@2025-01-31-preview' = {
   name: name
   location: location
   tags: tags

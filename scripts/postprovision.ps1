@@ -10,6 +10,11 @@ $tenantId = $env:AZURE_TENANT_ID
 $aoaiResourceName = $env:AZURE_OPENAI_SERVICE_NAME
 $aoaiModelName = $env:AZURE_CHAT_GPT_DEPLOYMENT_NAME
 
+write-host "Running from path : $PSScriptRoot" -ForegroundColor $YELLOW
+
+$repoPath = $repoPath
+write-host "Repo path: $repoPath" -ForegroundColor $YELLOW
+
 # Check conditions
 # RAI script: AOAI content filters
 $RAIscript = Join-Path -Path $PSScriptRoot -ChildPath 'rai\raipolicies.ps1'
@@ -20,44 +25,46 @@ $useAKS = $env:AZURE_USE_AKS
 
 write-host "Use ACA: $useACA"
 write-host "Use AKS: $useAKS"
-
-#run the /scripts/fetchComponents.ps1 script to fetch the components
-$fetchScript = Join-Path -Path $PSScriptRoot -ChildPath 'fetchComponents.ps1'
-& $fetchScript
+write-host "Use MCP: $useMCP"
 
 # Build the container images
 if ($useACA -eq "true" -or $useAKS -eq "true") {
+
+    #run the /scripts/fetchComponents.ps1 script to fetch the components
+    $fetchScript = Join-Path -Path $PSScriptRoot -ChildPath 'fetchComponents.ps1'
+    & $fetchScript
+
     Write-Host "Building container images..." -ForegroundColor $YELLOW
 
     $ContainerRegistryName = "cr$env:AZURE_RESOURCE_TOKEN.azurecr.io"
 
     az acr login --name $ContainerRegistryName --resource-group $resourceGroupName
     
-    $dockerfilePath = Join-Path -Path $PSScriptRoot -ChildPath '.\.azure\gpt-rag-frontend\Dockerfile'
-    $dockerContextPath = Join-Path -Path $PSScriptRoot -ChildPath '.\.azure\gpt-rag-frontend'
+    $dockerfilePath = Join-Path -Path $repoPath -ChildPath '.\.azure\gpt-rag-frontend\Dockerfile'
+    $dockerContextPath = Join-Path -Path $repoPath -ChildPath '.\.azure\gpt-rag-frontend'
     $imageName = "$($containerRegistryName)/gpt-rag-frontend"
     Write-Host "Building image: $imageName" -ForegroundColor $YELLOW
     docker build -t $imageName -f $dockerfilePath $dockerContextPath
     docker push $imageName
 
-    $dockerfilePath = Join-Path -Path $PSScriptRoot -ChildPath '.\.azure\gpt-rag-ingestion\Dockerfile'
-    $dockerContextPath = Join-Path -Path $PSScriptRoot -ChildPath '.\.azure\gpt-rag-ingestion'
+    $dockerfilePath = Join-Path -Path $repoPath -ChildPath '.\.azure\gpt-rag-ingestion\Dockerfile'
+    $dockerContextPath = Join-Path -Path $repoPath -ChildPath '.\.azure\gpt-rag-ingestion'
     $imageName = "$($containerRegistryName)/gpt-rag-ingestion"
     Write-Host "Building image: $imageName" -ForegroundColor $YELLOW
     docker build -t $imageName -f $dockerfilePath $dockerContextPath
     docker push $imageName
 
-    $dockerfilePath = Join-Path -Path $PSScriptRoot -ChildPath '.\.azure\gpt-rag-orchestrator\Dockerfile'
-    $dockerContextPath = Join-Path -Path $PSScriptRoot -ChildPath '.\.azure\gpt-rag-orchestrator'
+    $dockerfilePath = Join-Path -Path $repoPath -ChildPath '.\.azure\gpt-rag-orchestrator\Dockerfile'
+    $dockerContextPath = Join-Path -Path $repoPath -ChildPath '.\.azure\gpt-rag-orchestrator'
     $imageName = "$($containerRegistryName)/gpt-rag-orchestrator"
     Write-Host "Building image: $imageName" -ForegroundColor $YELLOW
     docker build -t $imageName -f $dockerfilePath $dockerContextPath
     docker push $imageName
 
-    if ($env:USE_MCP)
+    if ($env:USE_MCP -eq "true")
     {
-        $dockerfilePath = Join-Path -Path $PSScriptRoot -ChildPath '.\.azure\gpt-rag-mcp\Dockerfile'
-        $dockerContextPath = Join-Path -Path $PSScriptRoot -ChildPath '.\.azure\gpt-rag-mcp'
+        $dockerfilePath = Join-Path -Path $repoPath -ChildPath '.\.azure\gpt-rag-mcp\Dockerfile'
+        $dockerContextPath = Join-Path -Path $repoPath -ChildPath '.\.azure\gpt-rag-mcp'
         $imageName = "$($containerRegistryName)/gpt-rag-mcp"
         Write-Host "Building image: $imageName" -ForegroundColor $YELLOW
         docker build -t $imageName -f $dockerfilePath $dockerContextPath
@@ -69,6 +76,11 @@ if ($useACA -eq "true" -or $useAKS -eq "true") {
 if ($useACA -eq "true") {
     
     $acrLogin = $(az acr show --name $ContainerRegistryName --resource-group $resourceGroupName -o json | ConvertFrom-Json).loginServer
+
+    if ($env:REPOSITORY_URL)
+    {
+        $acrLogin = $env:REPOSITORY_URL
+    }
 
     $acaImage = $env:AZURE_ACA_IMAGE_NAME
     $acaTag = $env:AZURE_ACA_IMAGE_TAG
@@ -94,7 +106,7 @@ if ($useACA -eq "true") {
     $AZURE_ACA_NAME = "ca-ing-$env:AZURE_RESOURCE_TOKEN"
     az containerapp update --name $AZURE_ACA_NAME --resource-group $resourceGroupName --image $acaImageName
 
-    if ($env:USE_MCP)
+    if ($env:USE_MCP -eq "true")
     {
         $acaImage = $env:AZURE_ACA_IMAGE_NAME
         $acaTag = $env:AZURE_ACA_IMAGE_TAG
@@ -117,6 +129,11 @@ if ($useAKS -eq "true") {
     kubectl apply -f web.yaml
     kubectl apply -f ingestion.yaml
     kubectl apply -f orchestration.yaml
+
+    if ($env:USE_MCP -eq "true")
+    {
+        kubectl apply -f mcp.yaml
+    }
 }
 
 if ($env:AZURE_ZERO_TRUST -eq "FALSE") {

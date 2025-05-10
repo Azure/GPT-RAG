@@ -29,6 +29,9 @@
       "useMCP": {
         "value": "${AZURE_USE_MCP}"
       },
+      "repoUrl": {
+        "value": "${REPOSITORY_URL}"
+      },
       "provisionLoadTesting": {
         "value": "${AZURE_PROVISION_LOAD_TESTING}"
       },    

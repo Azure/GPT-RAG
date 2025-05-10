@@ -1,7 +1,9 @@
 param vnetName string
 param subnetNames array
+param resourceGroupName string = resourceGroup().name
 
 resource network 'Microsoft.Network/virtualNetworks@2024-05-01' existing = {
+  scope: resourceGroup(resourceGroupName)
   name: vnetName
 }
 
