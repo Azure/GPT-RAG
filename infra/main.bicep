@@ -1045,6 +1045,22 @@ var appSettings = [
   {
     name: 'AZURE_SEARCH_INDEX_NAME'
     value: _searchIndex
+  }
+  {
+    name: 'AZURE_OPENAI_DEPLOYMENT_MODEL'
+    value: _chatGptModelName
+  }
+  {
+    name: 'AZURE_OPENAI_ENDPOINT'
+    value: openAi.outputs.endpoint
+  }
+  {
+    name: 'AZURE_OPENAI_API_KEY'
+    value: ''
+  }
+  {
+    name: 'AZURE_OPENAI_API_VERSION'
+    value: _openaiApiVersion
   }      
   {
     name: 'AZURE_OPENAI_SERVICE_NAME'
@@ -1149,10 +1165,6 @@ var appSettings = [
     value: _chatGptModelName
   }
   {
-    name: 'AZURE_OPENAI_API_VERSION'
-    value: _openaiApiVersion
-  }
-  {
     name: 'AZURE_OPENAI_EMBEDDING_APIVERSION'
     value: _openaiApiVersion
   }
@@ -1163,10 +1175,6 @@ var appSettings = [
   {
     name: 'ORCHESTRATOR_MESSAGES_LANGUAGE'
     value: 'en'
-  }
-  {
-    name: 'AZURE_ORCHESTRATOR_FUNC_NAME'
-    value: ''
   }
   {
     name: 'AZURE_SUBSCRIPTION_ID'
@@ -1211,10 +1219,6 @@ var appSettings = [
   {
     name: 'ENABLE_AUTHENTICATION'
     value: 'false'
-  }
-  {
-    name: 'CLIENT_ID'
-    value: ''
   }
   {
     name: 'AUTHORITY'
@@ -1406,7 +1410,7 @@ var appSettings = [
   }
   {
     name: 'AUTOGEN_ORCHESTRATION_STRATEGY'
-    value: 'classic_rag'
+    value: (useMCP) ? 'mcp' : 'classic_rag'
   }
   {
     name: 'CONVERSATION_CONTAINER'
@@ -1540,6 +1544,194 @@ module appConfigPe './core/network/private-endpoint.bicep' = if (_networkIsolati
   }
 }
 
+var commonEnvs = [
+  {
+    name: 'APP_CONFIGURATION_URI'
+    value: concat('https://', _appConfigName, '.azconfig.io')
+  }
+  {
+    name: 'AZURE_TENANT_ID'
+    value: tenantId
+  }
+  {
+    name: 'allow_environment_variables'
+    value: 'true'
+  }
+]
+
+var orchestratorEnvs = concat(commonEnvs,[
+  {
+    name: 'AzureWebJobsFeatureFlags'
+    value: 'EnableWorkerIndexing'
+  }
+  {
+    name: 'FUNCTIONS_EXTENSION_VERSION'
+    value: '~4'
+  }
+  {
+    name: 'FUNCTIONS_WORKER_RUNTIME'
+    value: 'python'
+  }
+  {
+    name: '${functionsWebJobStorageVariableName}__accountName'
+    value: '${_storageAccountName}orc'
+  }
+  {
+    name: '${functionsWebJobStorageVariableName}__credential'
+    value: 'managedidentity'
+  }
+  {
+    name: '${documentsConnectionStringVariableName}__accountName'
+    value: '${_storageAccountName}orc'
+  }
+  {
+    name: '${documentsConnectionStringVariableName}__credential'
+    value: 'managedidentity'
+  }
+  {
+    name: 'WEBSITE_HTTPLOGGING_RETENTION_DAYS'
+    value: '7'
+  }
+  {
+    name: 'WEBSITE_VNET_ROUTE_ALL'
+    value: '0'
+  }
+  {
+    name: 'WEBSITE_HOSTNAME'
+    value: 'localhost'
+  }
+  {
+    name: 'ENABLE_ORYX_BUILD'
+    value: 'true'
+  }
+  {
+    name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
+    value: 'true'
+  }
+  {
+    name: 'PYTHON_ENABLE_INIT_INDEXING'
+    value: '1'
+  }
+  {
+    name: 'PYTHON_ISOLATE_WORKER_DEPENDENCIES'
+    value: '1'
+  }
+])
+
+var ingestionEnvs = concat(commonEnvs,[
+  {
+    name: 'AzureWebJobsFeatureFlags'
+    value: 'EnableWorkerIndexing'
+  }
+  {
+    name: 'FUNCTIONS_EXTENSION_VERSION'
+    value: '~4'
+  }
+  {
+    name: 'FUNCTIONS_WORKER_RUNTIME'
+    value: 'python'
+  }
+  {
+    name: '${functionsWebJobStorageVariableName}__accountName'
+    value: '${_storageAccountName}orc'
+  }
+  {
+    name: '${functionsWebJobStorageVariableName}__credential'
+    value: 'managedidentity'
+  }
+  {
+    name: '${documentsConnectionStringVariableName}__accountName'
+    value: '${_storageAccountName}orc'
+  }
+  {
+    name: '${documentsConnectionStringVariableName}__credential'
+    value: 'managedidentity'
+  }
+  {
+    name: 'WEBSITE_HTTPLOGGING_RETENTION_DAYS'
+    value: '7'
+  }
+  {
+    name: 'WEBSITE_VNET_ROUTE_ALL'
+    value: '0'
+  }
+  {
+    name: 'WEBSITE_HOSTNAME'
+    value: 'localhost'
+  }
+  {
+    name: 'ENABLE_ORYX_BUILD'
+    value: 'true'
+  }
+  {
+    name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
+    value: 'true'
+  }
+  {
+    name: 'PYTHON_ENABLE_INIT_INDEXING'
+    value: '1'
+  }
+  {
+    name: 'PYTHON_ISOLATE_WORKER_DEPENDENCIES'
+    value: '1'
+  }
+])
+
+var webEnvs = concat(commonEnvs,[
+  {
+    name: 'AzureWebJobsFeatureFlags'
+    value: 'EnableWorkerIndexing'
+  }
+  {
+    name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+    value: appInsights.outputs.connectionString
+  }
+  {
+    name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
+    value: appInsights.outputs.instrumentationKey
+  }
+  {
+    name: 'ApplicationInsights_InstrumentationKey'
+    value: appInsights.outputs.instrumentationKey
+  }
+  {
+    name: '${documentsConnectionStringVariableName}__accountName'
+    value: '${_storageAccountName}'
+  }
+  {
+    name: '${documentsConnectionStringVariableName}__credential'
+    value: 'managedidentity'
+  }
+  {
+    name: 'WEBSITE_HOSTNAME'
+    value: 'localhost'
+  }
+  {
+    name: 'WEBSITE_HTTPLOGGING_RETENTION_DAYS'
+    value: '7'
+  }
+  {
+    name: 'WEBSITE_VNET_ROUTE_ALL'
+    value: '0'
+  }
+])
+
+var mcpEnvs = concat(commonEnvs, [
+  {
+    name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+    value: appInsights.outputs.connectionString
+  }
+  {
+    name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
+    value: appInsights.outputs.instrumentationKey
+  }
+  {
+    name: 'ApplicationInsights_InstrumentationKey'
+    value: appInsights.outputs.instrumentationKey
+  }
+])
+
+
 // Orchestrator Function App
 module orchestrator './core/host/functions.bicep' = if(!useACA && !useAKS)  {
   name: 'orchestrator'
@@ -1567,156 +1759,37 @@ module orchestrator './core/host/functions.bicep' = if(!useACA && !useAKS)  {
     functionAppScaleLimit: 2
     minimumElasticInstanceCount: 1
     allowedOrigins: [ '*' ]       
-    appSettings: [
-      {
-        name: 'APP_CONFIGURATION_URI'
-        value: concat('https://', _appConfigName, '.azconfig.io')
-      }
-      {
-        name: 'AZURE_DB_ID'
-        value: _azureDbConfig.dbAccountName
-      }
-      {
-        name: 'AZURE_DB_NAME'
-        value: _azureDbConfig.dbDatabaseName
-      }
-      {
-        name: 'AZURE_DB_CONVERSATIONS_CONTAINER_NAME'
-        value: _azureDbConfig.conversationContainerName
-      }
-      {
-        name: 'AZURE_DB_DATASOURCES_CONTAINER_NAME'
-        value: _azureDbConfig.datasourcesContainerName
-      }
-      {
-        name: 'AZURE_KEY_VAULT_NAME'
-        value: keyVault.outputs.name
-      }
-      {
-        name: 'AZURE_SEARCH_SERVICE'
-        value: _searchServiceName
-      }
-      {
-        name: 'AZURE_SEARCH_INDEX'
-        value: _searchIndex
-      }
-      {
-        name: 'AZURE_SEARCH_APPROACH'
-        value: _retrievalApproach
-      }
-      {
-        name: 'AZURE_SEARCH_USE_SEMANTIC'
-        value: _useSemanticReranking
-      }
-      {
-        name: 'AZURE_SEARCH_TOP_K'
-        value: 3
-      }
-      {
-        name: 'AZURE_SEARCH_API_VERSION'
-        value: _searchApiVersion
-      }
-      {
-        name: 'AZURE_OPENAI_RESOURCE'
-        value: _openAiServiceName
-      }
-      {
-        name: 'AZURE_OPENAI_CHATGPT_MODEL'
-        value: _chatGptModelName
-      }
-      {
-        name: 'AZURE_OPENAI_CHATGPT_DEPLOYMENT'
-        value: _chatGptDeploymentName
-      }
-      {
-        name: 'AZURE_OPENAI_API_VERSION'
-        value: _openaiApiVersion
-      }
-      {
-        name: 'AZURE_OPENAI_EMBEDDING_MODEL'
-        value: _embeddingsModelName
-      }
-      {
-        name: 'AZURE_OPENAI_EMBEDDING_DEPLOYMENT'
-        value: _embeddingsDeploymentName
-      }
-      {
-        name: 'AZURE_EMBEDDINGS_VECTOR_SIZE'
-        value: _embeddingsVectorSize
-      }
-      {
-        name: 'ORCHESTRATOR_MESSAGES_LANGUAGE'
-        value: _orchestratorMessagesLanguage
-      }
-      {
-        name: 'ENABLE_ORYX_BUILD'
-        value: 'true'
-      }
-      {
-        name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
-        value: 'true'
-      }
-      {
-        name: 'LOGLEVEL'
-        value: 'INFO'
-      }
-      {
-        name: 'PYTHON_ENABLE_INIT_INDEXING'
-        value: '1'
-      }
-      {
-        name: 'PYTHON_ISOLATE_WORKER_DEPENDENCIES'
-        value: '1'
-      }
-      {
-        name: 'AZURE_OPENAI_APIVERSION'
-        value: '2024-05-01-preview'
-      }
-      {
-        name: 'BING_SEARCH_TOP_K'
-        value: '3'
-      }
-      {
-        name: 'CONVERSATION_MAX_HISTORY'
-        value: '3'
-      }
-      {
-        name: 'BLOCKED_LIST_CHECK'
-        value: 'true'
-      }
-      {
-        name: 'GROUNDEDNESS_CHECK'
-        value: 'true'
-      }
-      {
-        name: 'RESPONSIBLE_AI_CHECK'
-        value: 'true'
-      }
-      {
-        name: 'SECURITY_HUB_CHECK'
-        value: 'false'
-      }
-      {
-        name: 'SECURITY_HUB_AUDIT'
-        value: 'false'
-      }
-      {
-        name: 'SECURITY_HUB_ENDPOINT'
-        value: ''
-      }
-      {
-        name: 'CONVERSATION_METADATA'
-        value: 'false'
-      }
-    ]
+    appSettings: orchestratorEnvs
   }
   dependsOn: [
     appServicePlan
   ]
 }
 
-// Orchestrator Storage Account
+module orchestratorAppSetings './core/appConfig/appconfig-values.bicep' = if (!useACA && !useAKS) {
+  name: 'orchestratorAppSetings'
+  scope: rg
+  dependsOn: [
+    appConfig
+    orchestrator
+  ]
+  params: {
+    name : _appConfigName
+    appSettings : [
+      {
+        name: 'AZURE_ORCHESTRATOR_FUNC_NAME'
+        value: orchestrator.outputs.name
+      }
+      {
+        name: 'ORCHESTRATOR_ENDPOINT'
+        value: orchestrator.outputs.uri
+      }
+    ]
+    secureAppSettings: []
+  }
+}
 
+// Orchestrator Storage Account
 module orchestratorStorage './core/storage/function-storage-account.bicep' = {
   name: 'orchestratorstorage'
   scope: rg
@@ -1883,12 +1956,7 @@ module frontEnd  'core/host/appservice.bicep' = if(!useACA && !useAKS) {
     basicPublishingCredentials: _networkIsolation?true:false
     keyVaultName: keyVault.outputs.name
     flaskSecretName: 'flaskSecretKey'
-    appSettings: [
-      {
-        name: 'APP_CONFIGURATION_URI'
-        value: concat('https://', _appConfigName, '.azconfig.io')
-      }
-    ]
+    appSettings: webEnvs
   }
 }
 
@@ -1928,41 +1996,7 @@ module mcpAppServer  'core/host/appservice.bicep' = if(!useACA && !useAKS && use
     basicPublishingCredentials: _networkIsolation?true:false
     keyVaultName: keyVault.outputs.name
     flaskSecretName: 'flaskSecretKey'
-    appSettings: [
-      {
-        name: 'APP_CONFIGURATION_URI'
-        value: concat('https://', _appConfigName, '.azconfig.io')
-      }
-      {
-        name: 'AZURE_TENANT_ID'
-        value: subscription().tenantId
-      }
-      {
-        name: 'allow_environment_variables'
-        value: true
-      }
-      {
-        name: 'AZURE_OPENAI_DEPLOYMENT_MODEL'
-        value: _chatGptModelName
-      }
-      {
-        name: 'AZURE_OPENAI_ENDPOINT'
-        value: openAi.outputs.endpoint
-      }
-      {
-        name: 'AZURE_OPENAI_API_KEY'
-        value: ''
-      }
-      {
-        name: 'AZURE_OPENAI_API_VERSION'
-        value: _openaiApiVersion
-      }
-      {
-        name: 'MCP_PORT'
-        value: '80'
-      }
-      
-    ]
+    appSettings: mcpEnvs
   }
 }
 
@@ -2070,20 +2104,7 @@ module dataIngestion './core/host/functions.bicep' = if (!useACA && !useAKS) {
     functionAppScaleLimit: 2
     minimumElasticInstanceCount: 1
     allowedOrigins: [ '*' ]       
-    appSettings: [
-      {
-        name: 'ENABLE_ORYX_BUILD'
-        value: 'true'
-      }
-      {
-        name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
-        value: 'true'
-      }
-      {
-        name: 'AzureWebJobsFeatureFlags'
-        value: 'EnableWorkerIndexing'
-      }
-    ]        
+    appSettings: ingestionEnvs
   }
 }
 
@@ -3009,7 +3030,7 @@ module containerAppOrc './core/containers/container-app.bicep' = if (useACA) {
     imageInContainerRegistry: false
     repoUrl: repoUrl
     containerRegistryName: containerRegistry.name
-    containerImageName: 'mcr.microsoft.com/k8se/quickstart:latest'
+    containerImageName: empty(repoUrl) ? 'mcr.microsoft.com/k8se/quickstart:latest' : '${repoUrl}/gpt-rag-orchestrator:latest'
     containerIngress: {
       external: true
       targetPort: 80
@@ -3040,7 +3061,7 @@ module containerAppOrc './core/containers/container-app.bicep' = if (useACA) {
         value: appInsights.outputs.instrumentationKey
       }
     ]
-    environmentVariables: [
+    environmentVariables: concat([
       {
         name: 'AzureWebJobsSecretStorageType'
         value: 'keyvault'
@@ -3053,99 +3074,7 @@ module containerAppOrc './core/containers/container-app.bicep' = if (useACA) {
         name: 'AzureWebJobsSecretStorageKeyVaultClientId'
         value: containerAppOrchManagedIdentity.outputs.clientId
       }
-      {
-        name: 'AzureWebJobsFeatureFlags'
-        value: 'EnableWorkerIndexing'
-      }
-      {
-        name: 'FUNCTIONS_EXTENSION_VERSION'
-        value: '~4'
-      }
-      {
-        name: 'FUNCTIONS_WORKER_RUNTIME'
-        value: 'python'
-      }
-      {
-        name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-        secretRef: applicationInsightsConnectionStringSecretName
-      }
-      {
-        name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
-        secretRef: applicationInsightsKeySecretName
-      }
-      {
-        name: 'ApplicationInsights_InstrumentationKey'
-        secretRef: applicationInsightsKeySecretName
-      }
-      {
-        name: 'APP_CONFIGURATION_URI'
-        value: concat('https://', _appConfigName, '.azconfig.io')
-      }
-      {
-        name: '${functionsWebJobStorageVariableName}__accountName'
-        value: '${_storageAccountName}orc'
-      }
-      {
-        name: '${functionsWebJobStorageVariableName}__credential'
-        value: 'managedidentity'
-      }
-      {
-        name: '${functionsWebJobStorageVariableName}__clientId'
-        value: containerAppOrchManagedIdentity.outputs.clientId
-      }
-      {
-        name: 'AZURE_CLIENT_ID'
-        value: containerAppOrchManagedIdentity.outputs.clientId
-      }
-      {
-        name: 'AZURE_TENANT_ID'
-        value: tenantId
-      }
-      {
-        name: 'AZURE_AISERVICES_ENDPOINT'
-        value: aiServices.outputs.endpoint
-      }
-      {
-        name: 'AZURE_OPENAI_ENDPOINT'
-        value: aiServices.outputs.endpoint
-      }
-      {
-        name: 'AZURE_OPENAI_CHAT_DEPLOYMENT'
-        value: chatModelDeploymentModel
-      }
-      {
-        name: 'AZURE_STORAGE_ACCOUNT'
-        value: '${_storageAccountName}orc'
-      }
-      {
-        name: '${documentsConnectionStringVariableName}__accountName'
-        value: '${_storageAccountName}orc'
-      }
-      {
-        name: '${documentsConnectionStringVariableName}__credential'
-        value: 'managedidentity'
-      }
-      {
-        name: '${documentsConnectionStringVariableName}__clientId'
-        value: containerAppOrchManagedIdentity.outputs.clientId
-      }
-      {
-        name: 'WEBSITE_HTTPLOGGING_RETENTION_DAYS'
-        value: '7'
-      }
-      {
-        name: 'WEBSITE_VNET_ROUTE_ALL'
-        value: '0'
-      }
-      {
-        name: 'WEBSITE_HOSTNAME'
-        value: 'localhost'
-      }
-      {
-        name: 'allow_environment_variables'
-        value: 'true'
-      }
-    ]
+    ], orchestratorEnvs)
   }
 }
 
@@ -3164,7 +3093,7 @@ module containerAppIngest './core/containers/container-app.bicep' = if (useACA) 
     imageInContainerRegistry: false
     repoUrl: repoUrl
     containerRegistryName: containerRegistry.name
-    containerImageName: 'mcr.microsoft.com/k8se/quickstart:latest'
+    containerImageName: empty(repoUrl) ? 'mcr.microsoft.com/k8se/quickstart:latest' : '${repoUrl}/gpt-rag-ingestion:latest'
     containerIngress: {
       external: true
       targetPort: 80
@@ -3195,43 +3124,7 @@ module containerAppIngest './core/containers/container-app.bicep' = if (useACA) 
         value: appInsights.outputs.instrumentationKey
       }
     ]
-    environmentVariables: [
-      {
-        name: 'AzureWebJobsFeatureFlags'
-        value: 'EnableWorkerIndexing'
-      }
-      {
-        name: 'FUNCTIONS_EXTENSION_VERSION'
-        value: '~4'
-      }
-      {
-        name: 'FUNCTIONS_WORKER_RUNTIME'
-        value: 'python'
-      }
-      {
-        name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-        secretRef: applicationInsightsConnectionStringSecretName
-      }
-      {
-        name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
-        secretRef: applicationInsightsKeySecretName
-      }
-      {
-        name: 'ApplicationInsights_InstrumentationKey'
-        secretRef: applicationInsightsKeySecretName
-      }
-      {
-        name: 'APP_CONFIGURATION_URI'
-        value: concat('https://', _appConfigName, '.azconfig.io')
-      }
-      {
-        name: '${functionsWebJobStorageVariableName}__accountName'
-        value: '${_storageAccountName}ing'
-      }
-      {
-        name: '${functionsWebJobStorageVariableName}__credential'
-        value: 'managedidentity'
-      }
+    environmentVariables: concat(ingestionEnvs,[
       {
         name: '${functionsWebJobStorageVariableName}__clientId'
         value: containerAppIngestManagedIdentity.outputs.clientId
@@ -3241,58 +3134,10 @@ module containerAppIngest './core/containers/container-app.bicep' = if (useACA) 
         value: containerAppIngestManagedIdentity.outputs.clientId
       }
       {
-        name: 'AZURE_TENANT_ID'
-        value: tenantId
-      }
-      {
-        name: 'AZURE_AISERVICES_ENDPOINT'
-        value: aiServices.outputs.endpoint
-      }
-      {
-        name: 'AZURE_OPENAI_ENDPOINT'
-        value: aiServices.outputs.endpoint
-      }
-      {
-        name: 'AZURE_OPENAI_CHAT_DEPLOYMENT'
-        value: chatModelDeploymentModel
-      }
-      {
-        name: 'AZURE_STORAGE_ACCOUNT'
-        value: '${_storageAccountName}ing'
-      }
-      {
-        name: '${documentsConnectionStringVariableName}__accountName'
-        value: '${_storageAccountName}ing'
-      }
-      {
-        name: '${documentsConnectionStringVariableName}__credential'
-        value: 'managedidentity'
-      }
-      {
         name: '${documentsConnectionStringVariableName}__clientId'
         value: containerAppIngestManagedIdentity.outputs.clientId
       }
-      {
-        name: 'WEBSITE_HOSTNAME'
-        value: 'localhost'
-      }
-      {
-        name: 'WEBSITE_HTTPLOGGING_RETENTION_DAYS'
-        value: '7'
-      }
-      {
-        name: 'WEBSITE_VNET_ROUTE_ALL'
-        value: '0'
-      }
-      {
-        name: 'WEBSITE_HOSTNAME'
-        value: 'localhost'
-      }
-      {
-        name: 'allow_environment_variables'
-        value: 'true'
-      }
-    ]
+    ])
   }
 }
 
@@ -3311,7 +3156,7 @@ module containerAppWeb './core/containers/container-app.bicep' = if (useACA) {
     imageInContainerRegistry: false
     repoUrl: repoUrl
     containerRegistryName: containerRegistry.name
-    containerImageName: 'mcr.microsoft.com/k8se/quickstart:latest'
+    containerImageName: empty(repoUrl) ? 'mcr.microsoft.com/k8se/quickstart:latest' : '${repoUrl}/gpt-rag-frontend:latest'
     containerIngress: {
       external: true
       targetPort: 80
@@ -3342,104 +3187,12 @@ module containerAppWeb './core/containers/container-app.bicep' = if (useACA) {
         value: appInsights.outputs.instrumentationKey
       }
     ]
-    environmentVariables: [
-      {
-        name: 'AzureWebJobsFeatureFlags'
-        value: 'EnableWorkerIndexing'
-      }
-      {
-        name: 'FUNCTIONS_EXTENSION_VERSION'
-        value: '~4'
-      }
-      {
-        name: 'FUNCTIONS_WORKER_RUNTIME'
-        value: 'python'
-      }
-      {
-        name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-        secretRef: applicationInsightsConnectionStringSecretName
-      }
-      {
-        name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
-        secretRef: applicationInsightsKeySecretName
-      }
-      {
-        name: 'ApplicationInsights_InstrumentationKey'
-        secretRef: applicationInsightsKeySecretName
-      }
-      {
-        name: 'APP_CONFIGURATION_URI'
-        value: concat('https://', _appConfigName, '.azconfig.io')
-      }
-      {
-        name: '${functionsWebJobStorageVariableName}__accountName'
-        value: '${_storageAccountName}'
-      }
-      {
-        name: '${functionsWebJobStorageVariableName}__credential'
-        value: 'managedidentity'
-      }
-      {
-        name: '${functionsWebJobStorageVariableName}__clientId'
-        value: containerAppWebManagedIdentity.outputs.clientId
-      }
+    environmentVariables: concat([
       {
         name: 'AZURE_CLIENT_ID'
         value: containerAppWebManagedIdentity.outputs.clientId
       }
-      {
-        name: 'AZURE_TENANT_ID'
-        value: tenantId
-      }
-      {
-        name: 'AZURE_AISERVICES_ENDPOINT'
-        value: aiServices.outputs.endpoint
-      }
-      {
-        name: 'AZURE_OPENAI_ENDPOINT'
-        value: aiServices.outputs.endpoint
-      }
-      {
-        name: 'AZURE_OPENAI_CHAT_DEPLOYMENT'
-        value: chatModelDeploymentModel
-      }
-      {
-        name: 'AZURE_STORAGE_ACCOUNT'
-        value: '${_storageAccountName}'
-      }
-      {
-        name: '${documentsConnectionStringVariableName}__accountName'
-        value: '${_storageAccountName}'
-      }
-      {
-        name: '${documentsConnectionStringVariableName}__credential'
-        value: 'managedidentity'
-      }
-      {
-        name: '${documentsConnectionStringVariableName}__clientId'
-        value: containerAppWebManagedIdentity.outputs.clientId
-      }
-      {
-        name: 'WEBSITE_HOSTNAME'
-        value: 'localhost'
-      }
-      {
-        name: 'WEBSITE_HTTPLOGGING_RETENTION_DAYS'
-        value: '7'
-      }
-      {
-        name: 'WEBSITE_VNET_ROUTE_ALL'
-        value: '0'
-      }
-      {
-        name: 'WEBSITE_HOSTNAME'
-        value: 'localhost'
-      }
-      {
-        name: 'allow_environment_variables'
-        value: 'true'
-      }
-    ]
+    ], webEnvs)
   }
 }
 
@@ -3458,7 +3211,7 @@ module containerAppMcp './core/containers/container-app.bicep' = if (useMCP && u
     imageInContainerRegistry: false
     repoUrl: repoUrl
     containerRegistryName: containerRegistry.name
-    containerImageName: 'mcr.microsoft.com/k8se/quickstart:latest'
+    containerImageName: empty(repoUrl) ? 'mcr.microsoft.com/k8se/quickstart:latest' : '${repoUrl}/gpt-rag-mcp:latest'
     containerIngress: {
       external: true
       targetPort: 80
@@ -3489,44 +3242,7 @@ module containerAppMcp './core/containers/container-app.bicep' = if (useMCP && u
         value: appInsights.outputs.instrumentationKey
       }
     ]
-    environmentVariables: [
-      {
-        name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-        secretRef: applicationInsightsConnectionStringSecretName
-      }
-      {
-        name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
-        secretRef: applicationInsightsKeySecretName
-      }
-      {
-        name: 'ApplicationInsights_InstrumentationKey'
-        secretRef: applicationInsightsKeySecretName
-      }
-      {
-        name: 'APP_CONFIGURATION_URI'
-        value: concat('https://', _appConfigName, '.azconfig.io')
-      }
-      {
-        name: 'AZURE_CLIENT_ID'
-        value: containerAppMcpManagedIdentity.outputs.clientId
-      }
-      {
-        name: 'AZURE_TENANT_ID'
-        value: tenantId
-      }
-      {
-        name: 'MCP_PORT'
-        value: '80'
-      }
-      {
-        name: 'WEBSITE_HTTPLOGGING_RETENTION_DAYS'
-        value: '7'
-      }
-      {
-        name: 'allow_environment_variables'
-        value: 'true'
-      }
-    ]
+    environmentVariables: mcpEnvs
   }
 }
 
@@ -3563,6 +3279,7 @@ module network './core/util/virtualNetworkData.bicep' = if (_networkIsolation ||
     vnet
   ]
   params: {
+    resourceGroupName: (!empty(vnetResourceGroupName)) ? vnetrg.name : rg.name
     vnetName: _vnetName
     subnetNames: [
       'aks-subnet'
@@ -3705,6 +3422,11 @@ module aksBackend './core/containers/aks.bicep' = if(useAKS) {
     subnetId: subnets['aks-subnet'].id
     subnetIdPrivateEndpoint: _networkIsolation?subnets['aks-subnet'].id: ''
     tags: tags
+    orchEnvs: orchestratorEnvs
+    ingEnvs: ingestionEnvs
+    webEnvs: webEnvs
+    mcpEnvs: mcpEnvs
+    repoUrl: repoUrl
   }
 }
 
@@ -3753,7 +3475,6 @@ output AZURE_LOAD_TESTING_NAME string = _loadtestingName
 output AZURE_NETWORK_ISOLATION bool = _networkIsolation
 output AZURE_OPEN_AI_PE string = _azureOpenAiPe
 output AZURE_OPENAI_SERVICE_NAME string = _openAiServiceName
-output AZURE_ORCHESTRATOR_FUNC_NAME string = _orchestratorFunctionAppName
 output AZURE_ORCHESTRATOR_FUNC_RG string = _resourceGroupName
 output AZURE_ORCHESTRATOR_MESSAGES_LANGUAGE string = _orchestratorMessagesLanguage
 output AZURE_ORCHESTRATOR_PE string = _azureOrchestratorPe

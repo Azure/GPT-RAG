@@ -12,6 +12,13 @@ param k8sVersion string = '1.31.7'
 param k8sNamespace string = 'gptrag'
 param vmSize string = 'Standard_D2s_v5'
 
+param webEnvs array = []
+param orchEnvs array = []
+param ingEnvs array = []
+param mcpEnvs array = []
+
+param repoUrl string
+
 @description('Location for all resources')
 param location string
 
@@ -293,9 +300,104 @@ resource main 'Microsoft.ContainerService/managedClusters@2025-02-01' = {
         enabled: true
       }
     }
-
   }
 }
+
+var privateIpIngressBackend = main.properties.networkProfile.dnsServiceIP
+
+module nsGateway '../../aks/namespace.bicep' = {
+  name: 'nsGateway'
+  params: {
+    kubeConfig: main.listClusterAdminCredential().kubeconfigs[0].value
+    name: 'gateway-system'
+  }
+}
+
+module ingressNgnix '../../aks/ingress-ngnix.bicep' = {
+  name: 'ingressNgnix'
+  params: {
+    kubeConfig: main.listClusterAdminCredential().kubeconfigs[0].value
+  }
+}
+
+module certificates '../../aks/certificates.bicep' = {
+  name: 'certificates'
+  params: {
+    kubeConfig: main.listClusterAdminCredential().kubeconfigs[0].value
+    name: k8sNamespace
+    namespace: k8sNamespace
+    identityId: identityId
+    keyVaultName: '${abbrs.security.keyVault}${resourceSuffix}'
+  }
+}
+
+var services = [
+  'frontend'
+  'ingestion'
+  'orchestrator'
+  'mcp'
+]
+
+module aksweb '../../aks/deployment.bicep' = {
+  name: 'aksweb'
+  params: {
+    prefix: 'gpt-rag'
+    name: 'frontend'
+    kubeConfig: main.listClusterAdminCredential().kubeconfigs[0].value
+    image: 'gpt-rag-frontend:latest'
+    namespace: k8sNamespace
+    env : webEnvs
+    useLoadBalancer: true
+  }
+}
+
+module aksingest '../../aks/deployment.bicep' = {
+  name: 'aksingest'
+  params: {
+    prefix: 'gpt-rag'
+    name: 'ingestion'
+    kubeConfig: main.listClusterAdminCredential().kubeconfigs[0].value
+    image: 'gpt-rag-ingestion:latest'
+    namespace: k8sNamespace
+    env : ingEnvs
+  }
+}
+
+module aksorch '../../aks/deployment.bicep' = {
+  name: 'aksorch'
+  params: {
+    prefix: 'gpt-rag'
+    name: 'orchestrator'
+    kubeConfig: main.listClusterAdminCredential().kubeconfigs[0].value
+    image: 'gpt-rag-orchestrator:latest'
+    namespace: k8sNamespace
+    env : orchEnvs
+  }
+}
+
+module aksmcp '../../aks/deployment.bicep' = {
+  name: 'aksmcp'
+  params: {
+    prefix: 'gpt-rag'
+    name: 'mcp'
+    kubeConfig: main.listClusterAdminCredential().kubeconfigs[0].value
+    image: 'gpt-rag-mcp:latest'
+    namespace: k8sNamespace
+    env : mcpEnvs
+  }
+}
+
+module allIngresses '../../aks/service-ingress.bicep' = [for svc in services: {
+    name: 'aks${svc}-ingress'
+    params: {
+      name: svc
+      kubeConfig: main.listClusterAdminCredential().kubeconfigs[0].value
+      namespace: k8sNamespace
+      path: '/'
+      pathType: 'ImplementationSpecific'
+    }
+  }
+]
 
 resource userPool 'Microsoft.ContainerService/managedClusters/agentPools@2025-02-01' = {
   name: 'user'

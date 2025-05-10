@@ -111,8 +111,32 @@ resource newFunction 'Microsoft.Web/sites@2022-03-01' = {
             name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
             value: applicationInsights.properties.ConnectionString
           }
+          {
+            name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+            secretRef: applicationInsights.properties.ConnectionString
+          }
+          {
+            name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
+            secretRef: applicationInsights.properties.InstrumentationKey
+          }
+          {
+            name: 'ApplicationInsights_InstrumentationKey'
+            secretRef: applicationInsights.properties.InstrumentationKey
+          }
         ],
         [
+          {
+            name: 'AzureWebJobsStorage__clientId'
+            value: uaiFunc.properties.clientId
+          }
+          {
+            name: 'AZURE_CLIENT_ID'
+            value: uaiFunc.properties.clientId
+          }
+          {
+            name: 'AZURE_STORAGE_QUEUES_CONNECTION_STRING__clientId'
+            value: uaiFunc.properties.clientId
+          }
           {
             name: 'AzureWebJobsStorage__accountName'
             value: stg.name
@@ -124,14 +148,6 @@ resource newFunction 'Microsoft.Web/sites@2022-03-01' = {
           {
             name: 'AZURE_KEY_VAULT_ENDPOINT'
             value: keyVault.properties.vaultUri
-          }
-          {
-            name: 'FUNCTIONS_WORKER_RUNTIME'
-            value: 'python'
-          }
-          {
-            name: 'FUNCTIONS_EXTENSION_VERSION'
-            value: '~4'
           }
           {
             name: 'AZURE_CLIENT_ID'

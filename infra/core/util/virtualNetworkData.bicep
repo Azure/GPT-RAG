@@ -1,6 +1,8 @@
+targetScope = 'resourceGroup'
+
 param vnetName string
 param subnetNames array
-param resourceGroupName string = resourceGroup().name
+param resourceGroupName string
 
 resource network 'Microsoft.Network/virtualNetworks@2024-05-01' existing = {
   scope: resourceGroup(resourceGroupName)

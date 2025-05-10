@@ -159,14 +159,14 @@ resource containerApp 'Microsoft.App/containerApps@2025-01-01' = {
     template: {
       containers: [
         {
-          registry: repoUrl
           image: imageInContainerRegistry
             ? '${containerRegistryName}.azurecr.io/${containerImageName}'
-            : '${repoUrl}/${containerImageName}'
+            : '${containerImageName}'
           name: name
           resources: containerResources
           env: environmentVariables
           volumeMounts: volumeMounts
+          probes: []
         }
       ]
       scale: containerScale
