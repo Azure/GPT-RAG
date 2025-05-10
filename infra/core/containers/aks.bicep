@@ -364,7 +364,7 @@ module orchSvcAccount '../../aks/service-account.bicep' = {
   params: {
     kubeConfig: main.listClusterAdminCredential().kubeconfigs[0].value
     clientId: filter(orchEnvs, (env) => env.name == 'AZURE_CLIENT_ID')[0].value
-    name: 'orch-service-account'
+    name: 'orchestrator-service-account'
     namespace: k8sNamespace
   }
 }
@@ -374,7 +374,7 @@ module ingSvcAccount '../../aks/service-account.bicep' = {
   params: {
     kubeConfig: main.listClusterAdminCredential().kubeconfigs[0].value
     clientId: filter(ingEnvs, (env) => env.name == 'AZURE_CLIENT_ID')[0].value
-    name: 'ing-service-account'
+    name: 'ingestion-service-account'
     namespace: k8sNamespace
   }
 }

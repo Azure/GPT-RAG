@@ -20,6 +20,9 @@ resource coreServiceAccount_SERVICE_ACCOUNT_NAME 'core/ServiceAccount@v1' = {
       'azure.workload.identity/tenant-id': subscription().tenantId
       'azure.workload.identity/service-account-token-expiration': '3600'  //can go to a maximum of 86400
     }
+    labels: {
+      'azure.workload.identity/use': 'true'
+    }
     name: name
     namespace: namespace
   }

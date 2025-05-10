@@ -50,6 +50,7 @@ resource appsDeployment_gptRagFrontend 'apps/Deployment@v1' = {
           {
             name: fullName
             image: image
+            imagePullPolicy: 'Always'
             env: env
             ports: [
               {
