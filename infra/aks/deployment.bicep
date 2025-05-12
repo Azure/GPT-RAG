@@ -9,6 +9,7 @@ param image string
 param env array = []
 param port int = 80
 param targetPort int = 8000
+param serviceType string = 'LoadBalancer'
 param useLoadBalancer bool = false
 
 var fullName = '${prefix}-${name}'
@@ -39,6 +40,10 @@ resource appsDeployment_gptRagFrontend 'apps/Deployment@v1' = {
         name: fullName
         labels: {
           app: fullName
+          'azure.workload.identity/use' : 'true'
+        }
+        annotations: {
+          //'azure.workload.identity/use' : 'true'
         }
       }
       spec: {
@@ -69,13 +74,44 @@ resource appsDeployment_gptRagFrontend 'apps/Deployment@v1' = {
   }
 }
 
-resource coreService_frontendService 'core/Service@v1' = if(useLoadBalancer) {
+resource secret 'core/Secret@v1' = {
   metadata: {
-    name: '${name}-service'
+    name: '${name}-secret'
+    namespace: namespace
+  }
+  type: 'Opaque'
+  data: {
+    secret: 'dGVzdA=='
+  }
+}
+
+resource coreServiceExt 'core/Service@v1' = if (useLoadBalancer) {
+  metadata: {
+    name: '${name}-ext'
     namespace: namespace
   }
   spec: {
     type: 'LoadBalancer'
+    ports: [
+      {
+        name: 'http'
+        port: port
+        targetPort: targetPort
+      }
+    ]
+    selector: {
+      app: fullName
+    }
+  }
+}
+
+resource coreServiceInt 'core/Service@v1' = {
+  metadata: {
+    name: name
+    namespace: namespace
+  }
+  spec: {
+    type: 'ClusterIP'
     ports: [
       {
         name: 'http'

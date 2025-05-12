@@ -14,6 +14,9 @@ if ($env:AZURE_ZERO_TRUST -eq "TRUE") {
 }
 
 if ($env:AZURE_USE_AKS -eq "TRUE") {
+    #need the latest aks-preview extension
+    az extension add --name aks-preview
+
     #run the script
     $scriptPath = Join-Path -Path $PSScriptRoot -ChildPath 'deploy\aks\scripts\deploy-aks.ps1'
     $scriptPath = Resolve-Path $scriptPath

@@ -2,7 +2,7 @@ import { modelDeploymentInfo, raiPolicyInfo } from './core/ai/ai-services.bicep'
 import { identityInfo } from './core/security/managed-identity.bicep'
 import { vnetConfigInfo } from './core/containers/vnet-config.bicep'
 
-targetScope = 'subscription'
+targetScope = 'resourceGroup'
 
 /////////////////////////////////////////////////////////////////////////////
 // TEMPLATE SETTINGS (PARAMETERS and VARIABLES)
@@ -60,6 +60,9 @@ param identities identityInfo[] = union([], [{
 @description('Environment name used as a tag for all resources. This is directly mapped to the azd-environment.')
 param environmentName string = ''
 
+@description('TLS certificate name.')
+param tlsCertificateName string = 'gptrag-tls'
+
 @description('Project Name, used in naming resources.')
 param project string = 'gptrag'
 
@@ -88,16 +91,14 @@ var azdTags = { 'azd-env-name': environmentName }
 param deploymentTags object = {}
 var tags = union(azdTags, deploymentTags)
 
-resource rg 'Microsoft.Resources/resourceGroups@2024-11-01' = {
-  name: _resourceGroupName
-  location: location
-  tags: tags
-}
-
-resource vnetrg 'Microsoft.Resources/resourceGroups@2024-11-01' = if (!empty(vnetResourceGroupName)) {
-  name: _vnetResourceGroupName
-  location: location
-  tags: tags
+module vnetrg './core/management_governance/resource-group.bicep' = if (!empty(vnetResourceGroupName)) {
+  scope : subscription()
+  name: 'vnetrg'
+  params: {
+    name: _vnetResourceGroupName
+    location: location
+    tags: tags
+  }
 }
 
 var abbrs = loadJsonContent('./abbreviations.json')
@@ -679,12 +680,12 @@ var _orchestratorEndpoint = 'https://${_orchestratorFunctionAppName}.azurewebsit
 
 module vnet './core/network/vnet.bicep' = if (_networkIsolation || useAKS) {
   name: 'virtual-network'
-  scope: (!empty(vnetResourceGroupName)) ? resourceGroup(vnetrg.name) : resourceGroup(rg.name)
+  scope: (!empty(vnetResourceGroupName)) ? resourceGroup(_vnetResourceGroupName) : resourceGroup(_resourceGroupName)
   params: {
     location: location
     vnetName: _vnetName
     vnetReuse: _vnetReuse
-    existingVnetResourceGroupName: (!empty(vnetResourceGroupName)) ? vnetrg.name : rg.name
+    existingVnetResourceGroupName: (!empty(vnetResourceGroupName)) ? _vnetResourceGroupName : _resourceGroupName
     tags: tags
     vnetAddress: _vnetAddress
     vnetAddressAks: _vnetAddressAks
@@ -707,19 +708,20 @@ module vnet './core/network/vnet.bicep' = if (_networkIsolation || useAKS) {
   }
 }
 
-module domainDnsZone './core/network/private-dns-zones.bicep' = if ((_networkIsolation && !_vnetReuse) || useAKS) {
+module domainDnsZoneModule './core/network/private-dns-zones.bicep' = if ((_networkIsolation && !_vnetReuse) || useAKS) {
   name: 'domain-dnzones'
-  scope: (!empty(vnetResourceGroupName)) ? vnetrg : rg
   params: {
     dnsZoneName: '${resourceToken}.com' 
     tags: tags
     virtualNetworkName: vnet.outputs.name
+    aRecords: [
+    ]
   }
 }
 
 module blobDnsZone './core/network/private-dns-zones.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'blob-dnzones'
-  scope: (!empty(vnetResourceGroupName)) ? vnetrg : rg
+  scope: (!empty(vnetResourceGroupName)) ? resourceGroup(_vnetResourceGroupName) : resourceGroup(_resourceGroupName)
   params: {
     dnsZoneName: 'privatelink.blob.${environment().suffixes.storage}' 
     tags: tags
@@ -729,7 +731,7 @@ module blobDnsZone './core/network/private-dns-zones.bicep' = if (_networkIsolat
 
 module documentsDnsZone './core/network/private-dns-zones.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'documents-dnzones'
-  scope: (!empty(vnetResourceGroupName)) ? vnetrg : rg
+  scope: (!empty(vnetResourceGroupName)) ? resourceGroup(_vnetResourceGroupName) : resourceGroup(_resourceGroupName)
   params: {
     dnsZoneName: 'privatelink.documents.azure.com' 
     tags: tags
@@ -739,7 +741,7 @@ module documentsDnsZone './core/network/private-dns-zones.bicep' = if (_networkI
 
 module vaultDnsZone './core/network/private-dns-zones.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'vault-dnzones'
-  scope: (!empty(vnetResourceGroupName)) ? vnetrg : rg
+  scope: (!empty(vnetResourceGroupName)) ? resourceGroup(_vnetResourceGroupName) : resourceGroup(_resourceGroupName)
   params: {
     dnsZoneName: 'privatelink.vaultcore.azure.net' 
     tags: tags
@@ -749,7 +751,7 @@ module vaultDnsZone './core/network/private-dns-zones.bicep' = if (_networkIsola
 
 module appConfigDnsZone './core/network/private-dns-zones.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'appconfig-dnzones'
-  scope: (!empty(vnetResourceGroupName)) ? vnetrg : rg
+  scope: (!empty(vnetResourceGroupName)) ? resourceGroup(_vnetResourceGroupName) : resourceGroup(_resourceGroupName)
   params: {
     dnsZoneName: 'privatelink.azconfig.io' 
     tags: tags
@@ -759,7 +761,7 @@ module appConfigDnsZone './core/network/private-dns-zones.bicep' = if (_networkI
 
 module websitesDnsZone './core/network/private-dns-zones.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'websites-dnzones'
-  scope: (!empty(vnetResourceGroupName)) ? vnetrg : rg
+  scope: (!empty(vnetResourceGroupName)) ? resourceGroup(_vnetResourceGroupName) : resourceGroup(_resourceGroupName)
   params: {
     dnsZoneName: 'privatelink.azurewebsites.net' 
     tags: tags
@@ -769,7 +771,7 @@ module websitesDnsZone './core/network/private-dns-zones.bicep' = if (_networkIs
 
 module aiservicesDnsZone './core/network/private-dns-zones.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'aiservices-dnzones'
-  scope: (!empty(vnetResourceGroupName)) ? vnetrg : rg
+  scope: (!empty(vnetResourceGroupName)) ? resourceGroup(_vnetResourceGroupName) : resourceGroup(_resourceGroupName)
   params: {
     dnsZoneName: 'privatelink.cognitiveservices.azure.com' 
     tags: tags
@@ -779,7 +781,7 @@ module aiservicesDnsZone './core/network/private-dns-zones.bicep' = if (_network
 
 module openaiDnsZone './core/network/private-dns-zones.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'openai-dnzones'
-  scope: (!empty(vnetResourceGroupName)) ? vnetrg : rg
+  scope: (!empty(vnetResourceGroupName)) ? resourceGroup(_vnetResourceGroupName) : resourceGroup(_resourceGroupName)
   params: {
     dnsZoneName: 'privatelink.openai.azure.com' 
     tags: tags
@@ -789,7 +791,7 @@ module openaiDnsZone './core/network/private-dns-zones.bicep' = if (_networkIsol
 
 module searchDnsZone './core/network/private-dns-zones.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'searchs-dnzones'
-  scope: (!empty(vnetResourceGroupName)) ? vnetrg : rg
+  scope: (!empty(vnetResourceGroupName)) ? resourceGroup(_vnetResourceGroupName) : resourceGroup(_resourceGroupName)
   params: {
     dnsZoneName: 'privatelink.search.windows.net' 
     tags: tags
@@ -799,7 +801,7 @@ module searchDnsZone './core/network/private-dns-zones.bicep' = if (_networkIsol
 
 module testvm './core/vm/dsvm.bicep' = if (_networkIsolation && !_vnetReuse && _deployVM)  {
   name: 'testvm'
-  scope: rg
+  
   params: {
     location: location
     name: _ztVmName
@@ -829,7 +831,7 @@ module testvmSearchAccess './core/security/search-service-contributor.bicep' = i
 
 module storage './core/storage/storage-account.bicep' = {
   name: 'storage'
-  scope: rg
+  
   params: {
     name: _storageAccountName
     location: location
@@ -852,7 +854,7 @@ module storage './core/storage/storage-account.bicep' = {
 
 module storagepe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'storagepe'
-  scope: (!empty(vnetResourceGroupName)) ? vnetrg : rg
+  scope: (!empty(vnetResourceGroupName)) ? resourceGroup(_vnetResourceGroupName) : resourceGroup(_resourceGroupName)
   params: {
     location: location
     name: _azureStorageAccountPe
@@ -866,7 +868,7 @@ module storagepe './core/network/private-endpoint.bicep' = if (_networkIsolation
 
 module cosmosManagedIdentity './core/security/managed-identity.bicep' = {
   name: '${abbrs.security.managedIdentity}${abbrs.databases.cosmosDBDatabase}${resourceToken}'
-  scope: rg
+  
   params: {
     name: '${abbrs.security.managedIdentity}${abbrs.databases.cosmosDBDatabase}${resourceToken}'
     location: location
@@ -878,7 +880,7 @@ module cosmosManagedIdentity './core/security/managed-identity.bicep' = {
 
 module cosmosAccount './core/db/cosmos.bicep' = {
   name: 'cosmosaccount'
-  scope: rg
+  
   params: {
     accountName: _azureDbConfig.dbAccountName
     cosmosDbReuse: _azureReuseConfig.cosmosDbReuse
@@ -898,7 +900,7 @@ module cosmosAccount './core/db/cosmos.bicep' = {
 
 module cosmospe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'cosmospe'
-  scope: (!empty(vnetResourceGroupName)) ? vnetrg : rg
+  scope: (!empty(vnetResourceGroupName)) ? resourceGroup(_vnetResourceGroupName) : resourceGroup(_resourceGroupName)
   params: {
     location: location
     name: _azureDbAccountPe
@@ -914,7 +916,7 @@ module cosmospe './core/network/private-endpoint.bicep' = if (_networkIsolation 
 
 module keyVault './core/security/keyvault.bicep' = {
   name: 'keyvault'
-  scope: rg
+  
   params: {
     name: _keyVaultName
     location: location
@@ -927,12 +929,13 @@ module keyVault './core/security/keyvault.bicep' = {
     // this is the named of the secret to store the vm password in keyvault. It matches what is used on main.parameters.json
     // vmUserPasswordKey: _vmKeyVaultSecName
     // vmUserPassword: _vmUserInitialPassword
+    tlsCertificateName: tlsCertificateName
   }
 }
 
 module keyvaultpe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'keyvaultpe'
-  scope: (!empty(vnetResourceGroupName)) ? vnetrg : rg
+  scope: (!empty(vnetResourceGroupName)) ? resourceGroup(_vnetResourceGroupName) : resourceGroup(_resourceGroupName)
   params: {
     location: location
     name: _azureKeyvaultPe
@@ -947,7 +950,7 @@ module keyvaultpe './core/network/private-endpoint.bicep' = if (_networkIsolatio
 // App Service Plan
 module appServicePlan './core/host/appserviceplan.bicep' = if (!useACA && !useAKS)  {
   name: 'appserviceplan'
-  scope: rg
+  
   params: {
     name: _appServicePlanName
     location: location
@@ -965,7 +968,7 @@ module appServicePlan './core/host/appserviceplan.bicep' = if (!useACA && !useAK
 // App Insights Module
 module appInsights './core/host/appinsights.bicep' = if (provisionApplicationInsights) {
   name: 'appinsights'
-  scope: rg
+  
   params: {
     resourceToken: resourceToken
     applicationInsightsName: _appInsightsName
@@ -1013,6 +1016,38 @@ var secureAppSettings = [
     name: 'DB_PASSWORD'
     value: ''
   }
+  {
+    name: 'host--functionkey--default'
+    value: resourceToken
+  }
+  {
+    name: 'host--masterkey--master'
+    value: resourceToken
+  }
+  {
+    name: 'function--orc--default'
+    value: resourceToken
+  }
+  {
+    name: 'function--orc_streaming--default'
+    value: resourceToken
+  }
+  {
+    name: 'function--document_chunking--default'
+    value: resourceToken
+  }  
+  {
+    name: 'function--multimodality_images_purger--default'
+    value: resourceToken
+  }  
+  {
+    name: 'function--sharepoint_index_files--default'
+    value: resourceToken
+  }  
+  {
+    name: 'function--sharepoint_purge_deleted_files--default'
+    value: resourceToken
+  }  
 ]
 
 var appSettings = [
@@ -1180,7 +1215,7 @@ var appSettings = [
   }
   {
     name: 'ORCHESTRATOR_ENDPOINT'
-    value: (!useACA && !useAKS) ? '${orchestrator.outputs.uri}/api/orc' : ''
+    value: (!useACA && !useAKS) ? '${orchestrator.outputs.uri}/api/orc' : (useAKS) ? 'http://orchestrator.${k8sNamespace}.svc.cluster.local/api/orc' : ''
   }
   {
     name: 'ORCHESTRATOR_MESSAGES_LANGUAGE'
@@ -1426,6 +1461,14 @@ var appSettings = [
     name: 'CONVERSATION_CONTAINER'
     value: 'conversations'
   }
+  {
+    name: 'FUNC_AUTH_TYPE'
+    value: 'function'
+  }
+  {
+    name: 'MCP_PORT'
+    value: '80'
+  }
 ]
 
 module appConfig './core/appConfig/appconfig.bicep' = if (provisionAppConfig) {
@@ -1433,7 +1476,7 @@ module appConfig './core/appConfig/appconfig.bicep' = if (provisionAppConfig) {
     keyVault
   ]
   name: 'appconfig'
-  scope: rg
+  
   params: {
     name: _appConfigName
     //actionGroupId: actionGroup.outputs.id
@@ -1453,7 +1496,7 @@ module appConfig './core/appConfig/appconfig.bicep' = if (provisionAppConfig) {
 
 module setOrchestratorEndPointACA './core/appConfig/appconfig-values.bicep' = if (useACA) {
   name: 'setOrchestratorACA'
-  scope: rg
+  
   dependsOn: [
     appConfig
   ]
@@ -1466,25 +1509,26 @@ module setOrchestratorEndPointACA './core/appConfig/appconfig-values.bicep' = if
       }
       {
         name: 'AZURE_ORCHESTRATOR_FUNC_KEY'
-        value: 'test'
+        value: resourceToken
+      }
+      {
+        name: 'AzureWebJobsSecretStorageType'
+        value: 'keyvault'
+      }
+      {
+        name: 'AzureWebJobsSecretStorageKeyVaultName'
+        value: '${abbrs.security.keyVault}${resourceToken}'
       }
     ]
     secureAppSettings: [
-      {
-        name: 'host--functionkey--default'
-        value: 'test'
-      }
-      {
-        name: 'host--masterkey--master'
-        value: 'test'
-      }
+      
     ]
   }
 }
 
 module setMcpApp './core/appConfig/appconfig-values.bicep' = if (!useACA && !useAKS && useMCP) {
   name: 'setMcpApp'
-  scope: rg
+  
   dependsOn: [
     appConfig
     mcpAppServer
@@ -1513,7 +1557,7 @@ module setMcpApp './core/appConfig/appconfig-values.bicep' = if (!useACA && !use
 
 module setMcpACA './core/appConfig/appconfig-values.bicep' = if (useACA && useMCP) {
   name: 'setMcpACA'
-  scope: rg
+  
   dependsOn: [
     appConfig
     containerAppMcp
@@ -1542,7 +1586,7 @@ module setMcpACA './core/appConfig/appconfig-values.bicep' = if (useACA && useMC
 
 module appConfigPe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'appConfigPe'
-  scope: (!empty(vnetResourceGroupName)) ? vnetrg : rg
+  scope: (!empty(vnetResourceGroupName)) ? resourceGroup(_vnetResourceGroupName) : resourceGroup(_resourceGroupName)
   params: {
     location: location
     name: _azureAppConfigPe
@@ -1745,7 +1789,7 @@ var mcpEnvs = concat(commonEnvs, [
 // Orchestrator Function App
 module orchestrator './core/host/functions.bicep' = if(!useACA && !useAKS)  {
   name: 'orchestrator'
-  scope: rg
+  
   params: {
     name: _orchestratorFunctionAppName
     functionAppResourceGroupName: _orchestratorFunctionAppResourceGroupName
@@ -1778,7 +1822,7 @@ module orchestrator './core/host/functions.bicep' = if(!useACA && !useAKS)  {
 
 module orchestratorAppSetings './core/appConfig/appconfig-values.bicep' = if (!useACA && !useAKS) {
   name: 'orchestratorAppSetings'
-  scope: rg
+  
   dependsOn: [
     appConfig
     orchestrator
@@ -1802,7 +1846,7 @@ module orchestratorAppSetings './core/appConfig/appconfig-values.bicep' = if (!u
 // Orchestrator Storage Account
 module orchestratorStorage './core/storage/function-storage-account.bicep' = {
   name: 'orchestratorstorage'
-  scope: rg
+  
   params: {
     name: '${_storageAccountName}orc'
     location: location
@@ -1814,7 +1858,7 @@ module orchestratorStorage './core/storage/function-storage-account.bicep' = {
 
 module orchestratorStoragepe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'orchestratorstoragepe'
-  scope: (!empty(vnetResourceGroupName)) ? vnetrg : rg
+  scope: (!empty(vnetResourceGroupName)) ? resourceGroup(_vnetResourceGroupName) : resourceGroup(_resourceGroupName)
   params: {
     location: location
     name: '${_azureStorageAccountPe}orc'
@@ -1828,7 +1872,7 @@ module orchestratorStoragepe './core/network/private-endpoint.bicep' = if (_netw
 
 module orchestratorPe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'orchestratorPe'
-  scope: (!empty(vnetResourceGroupName)) ? vnetrg : rg
+  scope: (!empty(vnetResourceGroupName)) ? resourceGroup(_vnetResourceGroupName) : resourceGroup(_resourceGroupName)
   params: {
     location: location
     name: _azureOrchestratorPe
@@ -1842,7 +1886,7 @@ module orchestratorPe './core/network/private-endpoint.bicep' = if (_networkIsol
 
 module orchestratorStorageAccountStorageAccess './core/security/blobstorage-contributor-access.bicep' = if(!useACA && !useAKS) {
   name: 'orchestratorstorageroleassignment'
-  scope: rg
+  
   params: {
     resourceName: orchestratorStorage.outputs.name
     principalId: orchestrator.outputs.identityPrincipalId
@@ -1851,7 +1895,7 @@ module orchestratorStorageAccountStorageAccess './core/security/blobstorage-cont
 
 module orchestratorAppConfigAccess './core/security/appconfig-access.bicep' = if(!useACA && !useAKS) {
   name: 'orchestratorappconfigroleassignment'
-  scope: rg
+  
   params: {
     resourceName: appConfig.outputs.name
     principalId: orchestrator.outputs.identityPrincipalId
@@ -1906,7 +1950,7 @@ var cosmosContributorIdentityAssignmentsAll =  concat(cosmosContributorIdentityA
 
 module cosmosContributorAccessACA './core/security/cosmos-access.bicep' = if(useACA) {
   name: 'cosmosContributorAccessACA'
-  scope: rg
+  
   params: {
     accountName: cosmosAccount.outputs.name
     resourceGroupName: _cosmosDbResourceGroupName
@@ -1946,7 +1990,7 @@ module orchestratorSearchAccess './core/security/search-index-read-access.bicep'
 
 module frontEnd  'core/host/appservice.bicep' = if(!useACA && !useAKS) {
   name: 'frontend'
-  scope: rg
+  
   params: {
     name: _appServiceName
     applicationInsightsName: _effectiveAppInsightsName
@@ -1972,7 +2016,7 @@ module frontEnd  'core/host/appservice.bicep' = if(!useACA && !useAKS) {
 
 module frontendPe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse && !useACA && !useAKS) {
   name: 'frontendPe'
-  scope: (!empty(vnetResourceGroupName)) ? vnetrg : rg
+  scope: (!empty(vnetResourceGroupName)) ? resourceGroup(_vnetResourceGroupName) : resourceGroup(_resourceGroupName)
   params: {
     location: location
     name: _azureFrontendPe
@@ -1986,7 +2030,7 @@ module frontendPe './core/network/private-endpoint.bicep' = if (_networkIsolatio
 
 module mcpAppServer  'core/host/appservice.bicep' = if(!useACA && !useAKS && useMCP) {
   name: 'mcpAppServer'
-  scope: rg
+  
   params: {
     name: _mcpServiceName
     applicationInsightsName: _effectiveAppInsightsName
@@ -2012,7 +2056,7 @@ module mcpAppServer  'core/host/appservice.bicep' = if(!useACA && !useAKS && use
 
 module mcpServerPe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse && !useACA && !useAKS && useMCP) {
   name: 'mcpAppServerPe'
-  scope: (!empty(vnetResourceGroupName)) ? vnetrg : rg
+  scope: (!empty(vnetResourceGroupName)) ? resourceGroup(_vnetResourceGroupName) : resourceGroup(_resourceGroupName)
   params: {
     location: location
     name: _azureMcpPe
@@ -2035,7 +2079,7 @@ module appserviceStorageAccountAccess './core/security/blobstorage-reader-access
 
 module appserviceAppConfigAccess './core/security/appconfig-access.bicep' = if (!useACA && !useAKS) {
   name: 'appservice-appconfig-roleassignment'
-  scope: rg
+  
   params: {
     resourceName: appConfig.outputs.name
     principalId: frontEnd.outputs.identityPrincipalId
@@ -2044,7 +2088,7 @@ module appserviceAppConfigAccess './core/security/appconfig-access.bicep' = if (
 
 module mcpserviceAppConfigAccess './core/security/appconfig-access.bicep' = if (!useACA && !useAKS && useMCP) {
   name: 'mcp-appconfig-roleassignment'
-  scope: rg
+  
   params: {
     resourceName: appConfig.outputs.name
     principalId: mcpAppServer.outputs.identityPrincipalId
@@ -2089,7 +2133,7 @@ module mcpserviceKeyVaultAccess './core/security/keyvault-access.bicep' = if (!u
 
 module dataIngestion './core/host/functions.bicep' = if (!useACA && !useAKS) {
   name: 'dataIngestion'
-  scope: rg
+  
   params: {
     name: _dataIngestionFunctionAppName
     functionAppResourceGroupName: _dataIngestionFunctionAppResourceGroupName
@@ -2123,7 +2167,7 @@ module dataIngestion './core/host/functions.bicep' = if (!useACA && !useAKS) {
 
 module dataIngestionStorage './core/storage/function-storage-account.bicep' = {
   name: 'dataingestionstorage'
-  scope: rg
+  
   params: {
     name: '${_storageAccountName}ing'
     location: location
@@ -2135,7 +2179,7 @@ module dataIngestionStorage './core/storage/function-storage-account.bicep' = {
 
 module dataIngestionStoragepe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'dataingestionstoragepe'
-  scope: (!empty(vnetResourceGroupName)) ? vnetrg : rg
+  scope: (!empty(vnetResourceGroupName)) ? resourceGroup(_vnetResourceGroupName) : resourceGroup(_resourceGroupName)
   params: {
     location: location
     name: '${_azureStorageAccountPe}ing'
@@ -2149,7 +2193,7 @@ module dataIngestionStoragepe './core/network/private-endpoint.bicep' = if (_net
 
 module dataIngestionStorageAccountStorageAccess './core/security/blobstorage-contributor-access.bicep' = if(!useACA && !useAKS) {
   name: 'dataingestionstorageroleassignment'
-  scope: rg
+  
   params: {
     resourceName: dataIngestionStorage.outputs.name
     principalId: dataIngestion.outputs.identityPrincipalId
@@ -2158,7 +2202,7 @@ module dataIngestionStorageAccountStorageAccess './core/security/blobstorage-con
 
 module dataIngestionAppConfigAccess './core/security/appconfig-access.bicep' = if(!useACA && !useAKS) {
   name: 'dataingest-appconfig-roleassignment'
-  scope: rg
+  
   params: {
     resourceName: appConfig.outputs.name
     principalId: dataIngestion.outputs.identityPrincipalId
@@ -2212,7 +2256,7 @@ module dataIngestionSearchAccess './core/security/search-index-contributor-acces
 
 module ingestionPe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'ingestionPe'
-  scope: (!empty(vnetResourceGroupName)) ? vnetrg : rg
+  scope: (!empty(vnetResourceGroupName)) ? resourceGroup(_vnetResourceGroupName) : resourceGroup(_resourceGroupName)
   params: {
     location: location
     name: _azureDataIngestionPe
@@ -2228,7 +2272,7 @@ module ingestionPe './core/network/private-endpoint.bicep' = if (_networkIsolati
 
 module aiServices 'core/ai/aiservices.bicep' = {
   name: 'AiServices'
-  scope: rg
+  
   params: {
     name: _aiServicesName
     location: location
@@ -2251,7 +2295,7 @@ module aiServices 'core/ai/aiservices.bicep' = {
 
 module aiServicesPe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'aiServicesPe'
-  scope: (!empty(vnetResourceGroupName)) ? vnetrg : rg
+  scope: (!empty(vnetResourceGroupName)) ? resourceGroup(_vnetResourceGroupName) : resourceGroup(_resourceGroupName)
   params: {
     location: location
     name: _azureAiServicesPe
@@ -2267,7 +2311,7 @@ module aiServicesPe './core/network/private-endpoint.bicep' = if (_networkIsolat
 
 module openAi 'core/ai/aiservices.bicep' = {
   name: 'openai'
-  scope: rg
+  
   params: {
     name: _openAiServiceName
     location: location
@@ -2313,7 +2357,7 @@ module openAi 'core/ai/aiservices.bicep' = {
 
 module openAiPe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'openAiPe'
-  scope: (!empty(vnetResourceGroupName)) ? vnetrg : rg
+  scope: (!empty(vnetResourceGroupName)) ? resourceGroup(_vnetResourceGroupName) : resourceGroup(_resourceGroupName)
   params: {
     location: location
     name: _azureOpenAiPe
@@ -2329,7 +2373,7 @@ module openAiPe './core/network/private-endpoint.bicep' = if (_networkIsolation 
 
 module searchService 'core/search/search-services.bicep' = {
   name: 'search-service'
-  scope: rg
+  
   params: {
     name: _searchServiceName
     location: location
@@ -2395,7 +2439,7 @@ module searchFuncAppPrivatelink 'core/search/search-private-link.bicep' = if (_n
 
 module searchPe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
   name: 'searchPe'
-  scope: (!empty(vnetResourceGroupName)) ? vnetrg : rg
+  scope: (!empty(vnetResourceGroupName)) ? resourceGroup(_vnetResourceGroupName) : resourceGroup(_resourceGroupName)
   params: {
     location: location
     name: _azureSearchPe
@@ -2429,7 +2473,7 @@ module searchOaiAccess './core/security/openai-access.bicep' = {
 
 module loadtesting './core/loadtesting/loadtesting.bicep' = if (_provisionLoadTesting){
   name: _loadtestingName
-  scope: rg
+  
   params: {
     name: _loadtestingName
     location: location
@@ -2469,7 +2513,7 @@ module principalSearchAccess './core/security/search-service-contributor.bicep' 
 
 module principalStorageAccountStorageAccess './core/security/blobstorage-contributor-access.bicep' = {
   name: 'principal-storage-role-assignment'
-  scope: rg
+  
   params: {
     resourceName: orchestratorStorage.outputs.name
     principalId: principalId
@@ -2477,7 +2521,7 @@ module principalStorageAccountStorageAccess './core/security/blobstorage-contrib
 }
 
 resource keyVaultSecretsUserRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
-  scope: rg
+  
   name: roles.security.keyVaultSecretsUser
 }
 
@@ -2489,9 +2533,56 @@ var keyVaultSecretUserIdentityAssignments = [
   }
 ]
 
+resource keyVaultCertificatesOfficerRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+  
+  name: roles.security.keyVaultCertificatesOfficer
+}
+
+var keyVaultCertificateOfficerIdentityAssignments = [
+  for identity in identities: {
+    principalId: identity.principalId
+    roleDefinitionId: keyVaultCertificatesOfficerRole.id
+    principalType: identity.principalType
+  }
+]
+
+module keyVaultCertificateOfficerAccess './core/security/resource-group-role-assignment.bicep' = if (useAKS) {
+  name: 'keyVaultCertificateOfficerAccess'
+  
+  params: {
+    roleAssignments: concat(keyVaultCertificateOfficerIdentityAssignments, [
+      {
+        principalId: aksManagedIdentity.outputs.principalId
+        roleDefinitionId: keyVaultCertificatesOfficerRole.id
+        principalType: 'ServicePrincipal'
+      }
+      {
+        principalId: aksIngestManagedIdentity.outputs.principalId
+        roleDefinitionId: keyVaultCertificatesOfficerRole.id
+        principalType: 'ServicePrincipal'
+      }
+      {
+        principalId: aksOrchManagedIdentity.outputs.principalId
+        roleDefinitionId: keyVaultCertificatesOfficerRole.id
+        principalType: 'ServicePrincipal'
+      }
+      {
+        principalId: aksWebManagedIdentity.outputs.principalId
+        roleDefinitionId: keyVaultCertificatesOfficerRole.id
+        principalType: 'ServicePrincipal'
+      }
+      {
+        principalId: aksMcpManagedIdentity.outputs.principalId
+        roleDefinitionId: keyVaultCertificatesOfficerRole.id
+        principalType: 'ServicePrincipal'
+      }
+    ])
+  }
+}
+
 module keyVaultSecretUserAccess './core/security/resource-group-role-assignment.bicep' = if (useACA) {
   name: 'keyVaultSecretUserAccess'
-  scope: rg
+  
   params: {
     roleAssignments: concat(keyVaultSecretUserIdentityAssignments, [
       {
@@ -2520,7 +2611,7 @@ module keyVaultSecretUserAccess './core/security/resource-group-role-assignment.
 
 module containerMcpKeyVaultSecretUserAccess './core/security/resource-group-role-assignment.bicep' = if (useACA && useMCP) {
   name: 'containerMcpKeyVaultSecretUserAccess'
-  scope: rg
+  
   params: {
     roleAssignments: concat(appConfigDataOwnerIdentityAssignments, [
       {
@@ -2533,7 +2624,7 @@ module containerMcpKeyVaultSecretUserAccess './core/security/resource-group-role
 }
 
 resource openAIUserRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
-  scope: rg
+  
   name: roles.ai.cognitiveServicesOpenAIUser
 }
 
@@ -2547,7 +2638,7 @@ var openAIUserIdentityAssignments = [
 
 module openAIUserAccess './core/security/resource-group-role-assignment.bicep' = if (useACA) {
   name: 'openAIUserAccess'
-  scope: rg
+  
   params: {
     roleAssignments: concat(openAIUserIdentityAssignments, [
       {
@@ -2575,33 +2666,33 @@ module openAIUserAccess './core/security/resource-group-role-assignment.bicep' =
 }
 
 resource storageContributorRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
-  scope: rg
+  
   name: roles.storage.storageAccountContributor
 }
 
 resource storageBlobDataOwnerRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
-  scope: rg
+  
   name: roles.storage.storageBlobDataOwner
 }
 
 resource storageTableContributorRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
-  scope: rg
+  
   name: roles.storage.storageTableDataContributor
 }
 
 resource storageFileContributorRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
-  scope: rg
+  
   name: roles.storage.storageFileDataSMBShareContributor
 }
 
 resource storageQueueDataContributorRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
-  scope: rg
+  
   name: roles.storage.storageQueueDataContributor
 }
 
 module storageACAAccess './core/security/resource-group-role-assignment.bicep' = if (useACA) {
   name: 'storageAccess'
-  scope: rg
+  
   params: {
     roleAssignments: concat([], [
       {
@@ -2684,7 +2775,7 @@ module storageACAAccess './core/security/resource-group-role-assignment.bicep' =
 }
 
 resource appConfigDataOwnerRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
-  scope: rg
+  
   name: roles.configuration.appConfigurationDataOwner
 }
 
@@ -2698,7 +2789,7 @@ var appConfigDataOwnerIdentityAssignments = [
 
 module appConfigDataOwnerAccess './core/security/resource-group-role-assignment.bicep' = if (useACA) {
   name: 'appConfigDataOwnerAccess'
-  scope: rg
+  
   params: {
     roleAssignments: concat(appConfigDataOwnerIdentityAssignments, [
       {
@@ -2722,7 +2813,7 @@ module appConfigDataOwnerAccess './core/security/resource-group-role-assignment.
 
 module aksConfigDataOwnerAccess './core/security/resource-group-role-assignment.bicep' = if (useACA) {
   name: 'aksConfigDataOwnerAccess'
-  scope: rg
+  
   params: {
     roleAssignments: concat(appConfigDataOwnerIdentityAssignments, [
       {
@@ -2746,7 +2837,7 @@ module aksConfigDataOwnerAccess './core/security/resource-group-role-assignment.
 
 module containerMcpConfigDataOwnerAccess './core/security/resource-group-role-assignment.bicep' = if (useACA && useMCP) {
   name: 'containerMcpConfigDataOwnerAccess'
-  scope: rg
+  
   params: {
     roleAssignments: concat(appConfigDataOwnerIdentityAssignments, [
       {
@@ -2760,7 +2851,7 @@ module containerMcpConfigDataOwnerAccess './core/security/resource-group-role-as
 
 module akscontainerMcpConfigDataOwnerAccess './core/security/resource-group-role-assignment.bicep' = if (useAKS && useMCP) {
   name: 'akscontainerMcpConfigDataOwnerAccess'
-  scope: rg
+  
   params: {
     roleAssignments: concat(appConfigDataOwnerIdentityAssignments, [
       {
@@ -2773,12 +2864,12 @@ module akscontainerMcpConfigDataOwnerAccess './core/security/resource-group-role
 }
 
 resource acrPushRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
-  scope: rg
+  
   name: roles.containers.acrPush
 }
 
 resource acrPullRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
-  scope: rg
+  
   name: roles.containers.acrPull
 }
 
@@ -2798,20 +2889,49 @@ var acrPullIdentityAssignments = [
   }
 ]
 
-module containerRegistryDnsZone './core/network/private-dns-zones.bicep' = if (_networkIsolation && !_vnetReuse && (useACA || useAKS)) {
+module containerRegistryDnsZone './core/network/private-dns-zones.bicep' = if ((_networkIsolation && !_vnetReuse) && (useACA || useAKS)) {
   name: 'cr-dnzones'
-  scope: (!empty(vnetResourceGroupName)) ? vnetrg : rg
+  scope: (!empty(vnetResourceGroupName)) ? resourceGroup(_vnetResourceGroupName) : resourceGroup(_resourceGroupName)
   params: {
     dnsZoneName: 'privatelink.azurecr.io'
     tags: tags
-    virtualNetworkName: _networkIsolation?vnet.outputs.name:''
+    virtualNetworkName: vnet.outputs.name
   }
 }
+
+var aRecords = [
+  {
+    name: 'chat'
+  }
+  {
+    name: 'ingestion'
+  }
+  {
+    name: 'orchestrator'
+  }
+  {
+    name: 'mcp'
+  }
+]
+
+module dnsZoneRecords './core/network/private-dns-arecord.bicep' = [for record in aRecords: if (useAKS) {
+  scope: (!empty(vnetResourceGroupName)) ? resourceGroup(_vnetResourceGroupName) : resourceGroup(_resourceGroupName)
+  //
+  name: 'dns-arecord-${record.name}'
+  params: {
+    name : record.name
+    zone: '${resourceToken}.com' 
+    ipAddresses: [
+      aksBackend.outputs.privateIpIngress
+    ]
+  }
+}
+]
 
 var containerRegistryPEName = '${abbrs.containers.containerRegistry}${abbrs.security.privateEndpoint}${resourceToken}'
 module containerRegistryPe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse && (useACA || useAKS)) {
   name: containerRegistryPEName
-  scope: (!empty(vnetResourceGroupName)) ? vnetrg : rg
+  scope: (!empty(vnetResourceGroupName)) ? resourceGroup(_vnetResourceGroupName) : resourceGroup(_resourceGroupName)
   params: {
     location: location
     name: containerRegistryPEName
@@ -2826,7 +2946,7 @@ module containerRegistryPe './core/network/private-endpoint.bicep' = if (_networ
 var crManagedIdentityName = '${abbrs.security.managedIdentity}${abbrs.containers.containerRegistry}-${resourceToken}'
 module crManagedIdentity './core/security/managed-identity.bicep' = if (useACA || useAKS){
   name: crManagedIdentityName
-  scope: rg
+  
   params: {
     name: crManagedIdentityName
     location: location
@@ -2837,7 +2957,7 @@ module crManagedIdentity './core/security/managed-identity.bicep' = if (useACA |
 var containerRegistryName = '${abbrs.containers.containerRegistry}${resourceToken}'
 module containerRegistry './core/containers/container-registry.bicep' = if (useACA || useAKS) {
   name: containerRegistryName
-  scope: rg
+  
   params: {
     identityId: crManagedIdentity.outputs.id
     containerRegistryReuse: _azureReuseConfig.containerRegistryReuse
@@ -2857,7 +2977,7 @@ module containerRegistry './core/containers/container-registry.bicep' = if (useA
 
 module containerRegistryAcaPullAccess './core/security/resource-group-role-assignment.bicep' = if (useACA) {
   name: 'containerRegistryAcaPullAccess'
-  scope: rg
+  
   params: {
     roleAssignments: concat(acrPullIdentityAssignments, [
       {
@@ -2881,7 +3001,7 @@ module containerRegistryAcaPullAccess './core/security/resource-group-role-assig
 
 module containerMcpRegistryAcaPullAccess './core/security/resource-group-role-assignment.bicep' = if (useACA && useMCP) {
   name: 'containerMcpRegistryAcaPullAccess'
-  scope: rg
+  
   params: {
     roleAssignments: concat(acrPullIdentityAssignments, [
       {
@@ -2895,7 +3015,7 @@ module containerMcpRegistryAcaPullAccess './core/security/resource-group-role-as
 
 module containerRegistryAcaPushAccess './core/security/resource-group-role-assignment.bicep' = if (useACA) {
   name: 'containerRegistryAcaPushAccess'
-  scope: rg
+  
   params: {
     roleAssignments: concat(acrPushIdentityAssignments, [
       {
@@ -2919,7 +3039,7 @@ module containerRegistryAcaPushAccess './core/security/resource-group-role-assig
 
 module containerRegistryAksPullAccess './core/security/resource-group-role-assignment.bicep' = if (useAKS) {
   name: 'containerRegistryAksPullAccess'
-  scope: rg
+  
   params: {
     roleAssignments: concat(acrPullIdentityAssignments, [
       {
@@ -2948,7 +3068,7 @@ module containerRegistryAksPullAccess './core/security/resource-group-role-assig
 
 module containerRegistryAksPushAccess './core/security/resource-group-role-assignment.bicep' = if (useAKS) {
   name: 'containerRegistryAksPushAccess'
-  scope: rg
+  
   params: {
     roleAssignments: concat(acrPushIdentityAssignments, [
       {
@@ -2963,7 +3083,7 @@ module containerRegistryAksPushAccess './core/security/resource-group-role-assig
 var caeManagedIdentityName = '${abbrs.security.managedIdentity}${abbrs.containers.containerAppsEnvironment}${resourceToken}'
 module caeManagedIdentity './core/security/managed-identity.bicep' = if(useACA) {
   name: caeManagedIdentityName
-  scope: rg
+  
   params: {
     name: caeManagedIdentityName
     location: location
@@ -2974,7 +3094,7 @@ module caeManagedIdentity './core/security/managed-identity.bicep' = if(useACA) 
 var containerAppsPeName = '${abbrs.containers.containerAppsEnvironment}${abbrs.security.privateEndpoint}${resourceToken}'
 module containerAppPe './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse && useACA) {
   name: containerAppsPeName
-  scope: (!empty(vnetResourceGroupName)) ? vnetrg : rg
+  scope: (!empty(vnetResourceGroupName)) ? resourceGroup(_vnetResourceGroupName) : resourceGroup(_resourceGroupName)
   params: {
     location: location
     name: containerAppsPeName
@@ -2989,7 +3109,7 @@ module containerAppPe './core/network/private-endpoint.bicep' = if (_networkIsol
 var containerAppsEnvironmentName = '${abbrs.containers.containerAppsEnvironment}${resourceToken}'
 module containerAppsEnvironment './core/containers/container-apps-environment.bicep' = if (useACA) {
   name: containerAppsEnvironmentName
-  scope: rg
+  
   params: {
     identityId: caeManagedIdentity.outputs.id
     name: containerAppsEnvironmentName
@@ -3015,7 +3135,7 @@ module containerAppsEnvironment './core/containers/container-apps-environment.bi
 
 module containerAppsDnsZone './core/network/private-dns-zones.bicep' = if (_networkIsolation && !_vnetReuse && useACA) {
   name: 'cae-dnzones'
-  scope: (!empty(vnetResourceGroupName)) ? vnetrg : rg
+  scope: (!empty(vnetResourceGroupName)) ? resourceGroup(_vnetResourceGroupName) : resourceGroup(_resourceGroupName)
   params: {
     dnsZoneName: concat('privatelink.', split(containerAppsEnvironment.outputs.properties.defaultDomain, '.')[1], '.azurecontainerapps.io')
     tags: tags
@@ -3025,7 +3145,7 @@ module containerAppsDnsZone './core/network/private-dns-zones.bicep' = if (_netw
 
 module acaDnsZone './core/network/private-dns-zones.bicep' = if (_networkIsolation && !_vnetReuse && useACA) {
   name: 'aca-dnzones'
-  scope: (!empty(vnetResourceGroupName)) ? vnetrg : rg
+  scope: (!empty(vnetResourceGroupName)) ? resourceGroup(_vnetResourceGroupName) : resourceGroup(_resourceGroupName)
   params: {
     dnsZoneName: 'privatelink.eastus2.azurecontainerapps.io'
     tags: tags
@@ -3035,7 +3155,7 @@ module acaDnsZone './core/network/private-dns-zones.bicep' = if (_networkIsolati
 
 module containerAppOrchManagedIdentity './core/security/managed-identity.bicep' = if (useACA) {
   name: '${abbrs.security.managedIdentity}${abbrs.containers.containerApp}orch-${resourceToken}'
-  scope: rg
+  
   params: {
     name: '${abbrs.security.managedIdentity}${abbrs.containers.containerApp}orch-${resourceToken}'
     location: location
@@ -3045,7 +3165,7 @@ module containerAppOrchManagedIdentity './core/security/managed-identity.bicep' 
 
 module containerAppIngestManagedIdentity './core/security/managed-identity.bicep' = if (useACA) {
   name: '${abbrs.security.managedIdentity}${abbrs.containers.containerApp}ing-${resourceToken}'
-  scope: rg
+  
   params: {
     name: '${abbrs.security.managedIdentity}${abbrs.containers.containerApp}ing-${resourceToken}'
     location: location
@@ -3055,7 +3175,7 @@ module containerAppIngestManagedIdentity './core/security/managed-identity.bicep
 
 module containerAppWebManagedIdentity './core/security/managed-identity.bicep' = if (useACA) {
   name: '${abbrs.security.managedIdentity}${abbrs.containers.containerApp}web-${resourceToken}'
-  scope: rg
+  
   params: {
     name: '${abbrs.security.managedIdentity}${abbrs.containers.containerApp}web-${resourceToken}'
     location: location
@@ -3065,7 +3185,7 @@ module containerAppWebManagedIdentity './core/security/managed-identity.bicep' =
 
 module containerAppMcpManagedIdentity './core/security/managed-identity.bicep' = if (useMCP && useACA) {
   name: '${abbrs.security.managedIdentity}${abbrs.containers.containerApp}mcp-${resourceToken}'
-  scope: rg
+  
   params: {
     name: '${abbrs.security.managedIdentity}${abbrs.containers.containerApp}mcp-${resourceToken}'
     location: location
@@ -3080,7 +3200,7 @@ var applicationInsightsKeySecretName = 'applicationinsightskey'
 
 module containerAppOrc './core/containers/container-app.bicep' = if (useACA) {
   name: '${abbrs.containers.containerApp}orch-${resourceToken}'
-  scope: rg
+  
   dependsOn: [
     containerAppsEnvironment
   ]
@@ -3143,7 +3263,7 @@ module containerAppOrc './core/containers/container-app.bicep' = if (useACA) {
 
 module containerAppIngest './core/containers/container-app.bicep' = if (useACA) {
   name: '${abbrs.containers.containerApp}ing-${resourceToken}'
-  scope: rg
+  
   dependsOn: [
     containerAppsEnvironment
   ]
@@ -3206,7 +3326,7 @@ module containerAppIngest './core/containers/container-app.bicep' = if (useACA) 
 
 module containerAppWeb './core/containers/container-app.bicep' = if (useACA) {
   name: '${abbrs.containers.containerApp}web-${resourceToken}'
-  scope: rg
+  
   dependsOn: [
     containerAppsEnvironment
   ]
@@ -3261,7 +3381,7 @@ module containerAppWeb './core/containers/container-app.bicep' = if (useACA) {
 
 module containerAppMcp './core/containers/container-app.bicep' = if (useMCP && useACA) {
   name: '${abbrs.containers.containerApp}mcp-${resourceToken}'
-  scope: rg
+  
   dependsOn: [
     containerAppsEnvironment
   ]
@@ -3311,7 +3431,7 @@ module containerAppMcp './core/containers/container-app.bicep' = if (useMCP && u
 
 module aksManagedIdentity './core/security/managed-identity.bicep' = if (useAKS) {
   name: '${abbrs.security.managedIdentity}${abbrs.containers.aksCluster}${resourceToken}'
-  scope: rg
+  
   params: {
     name: '${abbrs.security.managedIdentity}${abbrs.containers.aksCluster}${resourceToken}'
     location: location
@@ -3321,14 +3441,14 @@ module aksManagedIdentity './core/security/managed-identity.bicep' = if (useAKS)
 
 module dnsZones './core/util/dnsZoneData.bicep' = {
   name: 'dnsZones-${timestamp}'
-  scope: rg
+  
   params: {
     location: location
   }
 }
 
 module monitor './core/management_governance/monitor.bicep' = if (useAKS) {
-  scope: rg
+  
   params: {
     name: 'mon-${resourceToken}'
     location: location
@@ -3337,12 +3457,12 @@ module monitor './core/management_governance/monitor.bicep' = if (useAKS) {
 
 module network './core/util/virtualNetworkData.bicep' = if (_networkIsolation || useAKS) {
   name: 'network-${resourceToken}-${timestamp}'
-  scope: (!empty(vnetResourceGroupName)) ? resourceGroup(vnetrg.name) : resourceGroup(rg.name)
+  scope: (!empty(vnetResourceGroupName)) ? resourceGroup(_vnetResourceGroupName) : resourceGroup(_resourceGroupName)
   dependsOn: [
     vnet
   ]
   params: {
-    resourceGroupName: (!empty(vnetResourceGroupName)) ? vnetrg.name : rg.name
+    resourceGroupName: (!empty(vnetResourceGroupName)) ? _vnetResourceGroupName : _resourceGroupName
     vnetName: _vnetName
     subnetNames: [
       'aks-subnet'
@@ -3363,7 +3483,7 @@ var subnets = (_networkIsolation || useAKS) ? reduce(
 
 @description('Azure Monitor Action Group')
 module actionGroup './core/management_governance/actionGroup.bicep' = {
-  scope: rg
+  
   name: 'actionGroup'
   params: {
     environmentName: environmentName
@@ -3377,7 +3497,6 @@ resource privateDnsContributorRole 'Microsoft.Authorization/roleDefinitions@2022
 }
 
 module dnsRoleAssignment './core/security/resource-group-role-assignment.bicep' = if (useAKS) {
-  scope :rg
   name: 'dnsRoleAssignment'
   params: {
     roleAssignments: [
@@ -3391,13 +3510,13 @@ module dnsRoleAssignment './core/security/resource-group-role-assignment.bicep' 
 }
 
 resource networkContributorRole 'Microsoft.Authorization/roleDefinitions@2022-05-01-preview' existing = {
-  scope: rg
+  
   name: roles.networking.networkContributor
 }
 
 module networkContribRoleAssignment './core/security/resource-group-role-assignment.bicep' = if (useAKS) {
   name: 'networkContribRoleAssignment'
-  scope: rg
+  
   params: {
     roleAssignments: [
       {
@@ -3409,9 +3528,11 @@ module networkContribRoleAssignment './core/security/resource-group-role-assignm
   }
 }
 
-module keyVaultSecretRoleAssignment './core/security/resource-group-role-assignment.bicep' = if (useAKS) {
-  name: 'keyVaultSecretRoleAssignment'
-  scope: rg
+
+
+module aksKeyVaultSecretRoleAssignment './core/security/resource-group-role-assignment.bicep' = if (useAKS) {
+  name: 'aksKeyVaultSecretRoleAssignment'
+  
   params: {
     roleAssignments: [
       {
@@ -3438,9 +3559,103 @@ module keyVaultSecretRoleAssignment './core/security/resource-group-role-assignm
   }
 }
 
+module aksStorageRolesAssignment './core/security/resource-group-role-assignment.bicep' = if (useAKS) {
+  name: 'aksStorageRolesAssignment'
+  
+  params: {
+    roleAssignments: [
+      //storage owner
+      {
+        principalId: aksManagedIdentity.outputs.principalId
+        roleDefinitionId: storageBlobDataOwnerRole.id
+        principalType: 'ServicePrincipal'
+      }
+      {
+        principalId: aksIngestManagedIdentity.outputs.principalId
+        roleDefinitionId: storageBlobDataOwnerRole.id
+        principalType: 'ServicePrincipal'
+      }
+      {
+        principalId: aksOrchManagedIdentity.outputs.principalId
+        roleDefinitionId: storageBlobDataOwnerRole.id
+        principalType: 'ServicePrincipal'
+      }
+      {
+        principalId: aksWebManagedIdentity.outputs.principalId
+        roleDefinitionId: storageBlobDataOwnerRole.id
+        principalType: 'ServicePrincipal'
+      }
+      //table contributor
+      {
+        principalId: aksManagedIdentity.outputs.principalId
+        roleDefinitionId: storageTableContributorRole.id
+        principalType: 'ServicePrincipal'
+      }
+      {
+        principalId: aksIngestManagedIdentity.outputs.principalId
+        roleDefinitionId: storageTableContributorRole.id
+        principalType: 'ServicePrincipal'
+      }
+      {
+        principalId: aksOrchManagedIdentity.outputs.principalId
+        roleDefinitionId: storageTableContributorRole.id
+        principalType: 'ServicePrincipal'
+      }
+      {
+        principalId: aksWebManagedIdentity.outputs.principalId
+        roleDefinitionId: storageTableContributorRole.id
+        principalType: 'ServicePrincipal'
+      }
+      //queue contributor
+      {
+        principalId: aksManagedIdentity.outputs.principalId
+        roleDefinitionId: storageQueueDataContributorRole.id
+        principalType: 'ServicePrincipal'
+      }
+      {
+        principalId: aksIngestManagedIdentity.outputs.principalId
+        roleDefinitionId: storageQueueDataContributorRole.id
+        principalType: 'ServicePrincipal'
+      }
+      {
+        principalId: aksOrchManagedIdentity.outputs.principalId
+        roleDefinitionId: storageQueueDataContributorRole.id
+        principalType: 'ServicePrincipal'
+      }
+      {
+        principalId: aksWebManagedIdentity.outputs.principalId
+        roleDefinitionId: storageQueueDataContributorRole.id
+        principalType: 'ServicePrincipal'
+      }
+      //files contributor
+      {
+        principalId: aksManagedIdentity.outputs.principalId
+        roleDefinitionId: storageFileContributorRole.id
+        principalType: 'ServicePrincipal'
+      }
+      {
+        principalId: aksIngestManagedIdentity.outputs.principalId
+        roleDefinitionId: storageFileContributorRole.id
+        principalType: 'ServicePrincipal'
+      }
+      {
+        principalId: aksOrchManagedIdentity.outputs.principalId
+        roleDefinitionId: storageFileContributorRole.id
+        principalType: 'ServicePrincipal'
+      }
+      {
+        principalId: aksWebManagedIdentity.outputs.principalId
+        roleDefinitionId: storageFileContributorRole.id
+        principalType: 'ServicePrincipal'
+      }
+    ]
+  }
+}
+
+
 module akscontainerMcpkeyVaultSecretAccess './core/security/resource-group-role-assignment.bicep' = if (useAKS && useMCP) {
   name: 'akscontainerMcpkeyVaultSecretAccess'
-  scope: rg
+  
   params: {
     roleAssignments: concat(appConfigDataOwnerIdentityAssignments, [
       {
@@ -3456,7 +3671,7 @@ var privateDnsZones = filter(dnsZones.outputs.ids, (zone) => contains([ 'aks' ],
 
 module aksPrivateEndpoint './core/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse && useAKS) {
   name: '${abbrs.containers.aksCluster}${abbrs.networking.privateEndpoint}${resourceToken}'
-  scope: (!empty(vnetResourceGroupName)) ? vnetrg : rg
+  scope: (!empty(vnetResourceGroupName)) ? resourceGroup(_vnetResourceGroupName) : resourceGroup(_resourceGroupName)
   params: {
     location: location
     name: '${abbrs.containers.aksCluster}${abbrs.networking.privateEndpoint}${resourceToken}'
@@ -3471,7 +3686,7 @@ module aksPrivateEndpoint './core/network/private-endpoint.bicep' = if (_network
 /*
 module grafanaManagedIdentity './core/security/managed-identity.bicep' = {
   name: '${abbrs.managementGovernance.grafana}${resourceToken}'
-  scope: rg
+  
   params: {
     name: '${abbrs.containers.aksCluster}${resourceToken}'
     location: location
@@ -3481,7 +3696,7 @@ module grafanaManagedIdentity './core/security/managed-identity.bicep' = {
   
 module grafana './core/management_governance/grafana.bicep' = if (useAKS) {
   name: 'grafana-${resourceToken}'
-  scope: rg
+  
   params: {
     name: 'grafana-${resourceToken}'
     location: location
@@ -3493,7 +3708,7 @@ module grafana './core/management_governance/grafana.bicep' = if (useAKS) {
 
 module aksWebManagedIdentity './core/security/managed-identity.bicep' = if (useAKS) {
   name: '${abbrs.security.managedIdentity}${abbrs.containers.aksCluster}web-${resourceToken}'
-  scope: rg
+  
   params: {
     name: '${abbrs.security.managedIdentity}${abbrs.containers.aksCluster}web-${resourceToken}'
     location: location
@@ -3503,7 +3718,7 @@ module aksWebManagedIdentity './core/security/managed-identity.bicep' = if (useA
 
 module aksOrchManagedIdentity './core/security/managed-identity.bicep' = if (useAKS) {
   name: '${abbrs.security.managedIdentity}${abbrs.containers.aksCluster}orch-${resourceToken}'
-  scope: rg
+  
   params: {
     name: '${abbrs.security.managedIdentity}${abbrs.containers.aksCluster}orch-${resourceToken}'
     location: location
@@ -3513,7 +3728,7 @@ module aksOrchManagedIdentity './core/security/managed-identity.bicep' = if (use
 
 module aksIngestManagedIdentity './core/security/managed-identity.bicep' = if (useAKS) {
   name: '${abbrs.security.managedIdentity}${abbrs.containers.aksCluster}ing-${resourceToken}'
-  scope: rg
+  
   params: {
     name: '${abbrs.security.managedIdentity}${abbrs.containers.aksCluster}ing-${resourceToken}'
     location: location
@@ -3523,7 +3738,7 @@ module aksIngestManagedIdentity './core/security/managed-identity.bicep' = if (u
 
 module aksMcpManagedIdentity './core/security/managed-identity.bicep' = if (useAKS) {
   name: '${abbrs.security.managedIdentity}${abbrs.containers.aksCluster}mcp-${resourceToken}'
-  scope: rg
+  
   params: {
     name: '${abbrs.security.managedIdentity}${abbrs.containers.aksCluster}mcp-${resourceToken}'
     location: location
@@ -3532,13 +3747,14 @@ module aksMcpManagedIdentity './core/security/managed-identity.bicep' = if (useA
 }
 
 module aksBackend './core/containers/aks.bicep' = if(useAKS) {
-  scope: rg
+  
   name: '${abbrs.containers.aksCluster}backend-${timestamp}'
   dependsOn: [
     vnet
   ]
   params: {
     identityId: aksManagedIdentity.outputs.id
+    resourceToken: resourceToken
     actionGroupId: actionGroup.outputs.id
     admnistratorObjectIds: [ principalId ]
     adminPassword: vmUserInitialPassword
@@ -3548,12 +3764,13 @@ module aksBackend './core/containers/aks.bicep' = if(useAKS) {
     logAnalyticWorkspaceId: appInsights.outputs.logAnalyticsWorkspaceId
     logAnalyticWorkspaceResourceId: appInsights.outputs.logAnalyticsWorkspaceId
     monitorWorkspaceName: monitor.outputs.name
-    networkingResourceGroupName: rg.name
+    networkingResourceGroupName: (!empty(vnetResourceGroupName)) ? _vnetResourceGroupName : _resourceGroupName
     privateDnsZones: _networkIsolation?privateDnsZones : []
     resourceSuffix: '${resourceToken}-backend'
     subnetId: subnets['aks-subnet'].id
     subnetIdPrivateEndpoint: _networkIsolation?subnets['aks-subnet'].id: ''
     tags: tags
+    certificateUri: (!empty(tlsCertificateName)) ? keyVault.outputs.tlsCertificateUri : ''
     orchEnvs: concat(orchestratorEnvs,
       [
         {
@@ -3563,6 +3780,14 @@ module aksBackend './core/containers/aks.bicep' = if(useAKS) {
         {
           name : '${functionsWebJobStorageVariableName}__clientId'
           value: aksOrchManagedIdentity.outputs.clientId
+        }
+        {
+          name: 'AzureWebJobsSecretStorageType'
+          value: 'keyvault'
+        }
+        {
+          name: 'AzureWebJobsSecretStorageKeyVaultName'
+          value: '${abbrs.security.keyVault}${resourceToken}'
         }
       ]
     )
@@ -3574,7 +3799,11 @@ module aksBackend './core/containers/aks.bicep' = if(useAKS) {
         }
         {
           name : 'AZURE_STORAGE_QUEUES_CONNECTION_STRING__clientId'
-          value: aksOrchManagedIdentity.outputs.clientId
+          value: aksIngestManagedIdentity.outputs.clientId
+        }
+        {
+          name : '${functionsWebJobStorageVariableName}__clientId'
+          value: aksIngestManagedIdentity.outputs.clientId
         }
       ]
     )
@@ -3586,7 +3815,7 @@ module aksBackend './core/containers/aks.bicep' = if(useAKS) {
         }
         {
           name : 'AZURE_STORAGE_QUEUES_CONNECTION_STRING__clientId'
-          value: aksOrchManagedIdentity.outputs.clientId
+          value: aksWebManagedIdentity.outputs.clientId
         }
       ]
     )
@@ -3598,7 +3827,7 @@ module aksBackend './core/containers/aks.bicep' = if(useAKS) {
         }
         {
           name : 'AZURE_STORAGE_QUEUES_CONNECTION_STRING__clientId'
-          value: aksOrchManagedIdentity.outputs.clientId
+          value: aksMcpManagedIdentity.outputs.clientId
         }
       ]
     )
@@ -3608,7 +3837,7 @@ module aksBackend './core/containers/aks.bicep' = if(useAKS) {
 
 module setAksAppConfig './core/appConfig/appconfig-values.bicep' = if (useAKS) {
   name: 'setAksAppConfig'
-  scope: rg
+  
   dependsOn: [
     appConfig
     aksBackend
@@ -3622,11 +3851,11 @@ module setAksAppConfig './core/appConfig/appconfig-values.bicep' = if (useAKS) {
       }
       {
         name: 'ORCHESTRATOR_ENDPOINT'
-        value: 'orchestrator.${k8sNamespace}.svc.cluster.local'
+        value: 'http://orchestrator.${k8sNamespace}.svc.cluster.local/api/orc'
       }
       {
         name: 'AZURE_MCP_SERVER_URL'
-        value: 'mcp.${k8sNamespace}.svc.cluster.local/sse'
+        value: 'http://mcp.${k8sNamespace}.svc.cluster.local/sse'
       }
       {
         name: 'AZURE_MCP_SERVER_TIMEOUT'
@@ -3635,6 +3864,14 @@ module setAksAppConfig './core/appConfig/appconfig-values.bicep' = if (useAKS) {
       {
         name: 'AZURE_MCP_SERVER_APIKEY'
         value: ''
+      }
+      {
+        name: 'AzureWebJobsSecretStorageType'
+        value: 'keyvault'
+      }
+      {
+        name: 'AzureWebJobsSecretStorageKeyVaultName'
+        value: '${abbrs.security.keyVault}${resourceToken}'
       }
     ]
     secureAppSettings: [

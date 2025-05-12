@@ -115,6 +115,14 @@ if ($useAKS -eq "true") {
     $azureAksClusterName = "aks-$($env:AZURE_RESOURCE_TOKEN)-backend"
     az aks install-cli
     az aks get-credentials --resource-group $resourceGroupName --name $azureAksClusterName
+
+    #https://learn.microsoft.com/en-us/azure/aks/custom-certificate-authority
+    #add the custom CA certificate to the AKS cluster
+    az aks update --resource-group $resourceGroupName --name $azureAksClusterName --custom-ca-trust-certificates 'tls.crt'
+
+    #https://learn.microsoft.com/en-us/azure/aks/app-routing-dns-ssl
+    $ZONEID=$(az network dns zone show --resource-group $resourceGroupName --name "$($env:AZURE_RESOURCE_TOKEN)$(".com")" --query "id" --output tsv)
+    az aks approuting zone add --resource-group $resourceGroupName --name "aks-$env:AZURE_RESOURCE_TOKEN-backend" --ids=$ZONEID --attach-zones
 }
 
 if ($env:AZURE_ZERO_TRUST -eq "FALSE") {

@@ -11,6 +11,9 @@ param aksNodeSku string
 param k8sVersion string = '1.31.7'
 param k8sNamespace string = 'gptrag'
 param vmSize string = 'Standard_D2s_v5'
+param resourceToken string
+
+param certificateUri string
 
 param webEnvs array = []
 param orchEnvs array = []
@@ -398,7 +401,9 @@ module aksweb '../../aks/deployment.bicep' = {
     image: '${repoUrl}/gpt-rag-frontend:latest'
     namespace: k8sNamespace
     env : webEnvs
+    serviceType : 'ClusterIP'
     useLoadBalancer: true
+    targetPort: 8000
   }
 }
 
@@ -411,7 +416,9 @@ module aksingest '../../aks/deployment.bicep' = {
     image: '${repoUrl}/gpt-rag-ingestion:latest'
     namespace: k8sNamespace
     env : ingEnvs
+    serviceType : 'ClusterIP'
     useLoadBalancer: true
+    targetPort: 80
   }
 }
 
@@ -424,6 +431,9 @@ module aksorch '../../aks/deployment.bicep' = {
     image: '${repoUrl}/gpt-rag-orchestrator:latest'
     namespace: k8sNamespace
     env : orchEnvs
+    serviceType : 'ClusterIP'
+    useLoadBalancer: false
+    targetPort: 80
   }
 }
 
@@ -436,17 +446,39 @@ module aksmcp '../../aks/deployment.bicep' = {
     image: '${repoUrl}/gpt-rag-mcp:latest'
     namespace: k8sNamespace
     env : mcpEnvs
+    serviceType : 'ClusterIP'
+    useLoadBalancer: false
+    targetPort: 8000
   }
+}
+
+var annotations = {
+  'nginx.ingress.kubernetes.io/rewrite-target': '/$1'
+  'nginx.ingress.kubernetes.io/use-regex': 'true'
+  'nginx.ingress.kubernetes.io/proxy-connect-timeout': '3600'
+  'nginx.ingress.kubernetes.io/proxy-send-timeout': '3600'
+  'nginx.ingress.kubernetes.io/proxy-read-timeout': '3600'
+}
+
+var annotationsWithTls = {
+  'nginx.ingress.kubernetes.io/rewrite-target': '/$1'
+  'nginx.ingress.kubernetes.io/use-regex': 'true'
+  'nginx.ingress.kubernetes.io/proxy-connect-timeout': '3600'
+  'nginx.ingress.kubernetes.io/proxy-send-timeout': '3600'
+  'nginx.ingress.kubernetes.io/proxy-read-timeout': '3600'
+  'kubernetes.azure.com/tls-cert-keyvault-uri': certificateUri
 }
 
 module allIngresses '../../aks/service-ingress.bicep' = [for svc in services: {
     name: 'aks${svc}-ingress'
     params: {
       name: svc
+      resourceToken: resourceToken
       kubeConfig: main.listClusterAdminCredential().kubeconfigs[0].value
       namespace: k8sNamespace
       path: '/'
-      pathType: 'ImplementationSpecific'
+      pathType: 'Prefix'
+      annotations: !empty(certificateUri) ? annotationsWithTls : annotations
     }
   }
 ]
@@ -615,7 +647,68 @@ module metricAlerts '../util/metricAlerts.bicep' = {
   }
 }
 
+resource aksMsi 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
+  name: '${abbrs.security.managedIdentity}${abbrs.containers.aksCluster}${resourceToken}'
+}
+
+resource aksFrontendMsi 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
+  name: '${abbrs.security.managedIdentity}${abbrs.containers.aksCluster}web-${resourceToken}'
+}
+
+resource aksOrchMsi 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
+  name: '${abbrs.security.managedIdentity}${abbrs.containers.aksCluster}orch-${resourceToken}'
+}
+
+resource aksIngMsi 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
+  name: '${abbrs.security.managedIdentity}${abbrs.containers.aksCluster}ing-${resourceToken}'
+}
+
+resource aksMcpMsi 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
+  name: '${abbrs.security.managedIdentity}${abbrs.containers.aksCluster}mcp-${resourceToken}'
+}
+
+resource aksFrontEndMsiFederated 'Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials@2025-01-31-preview' = {
+  name: 'aksFederatedFrontEnd'
+  parent : aksFrontendMsi
+  properties: {
+    issuer: main.properties.oidcIssuerProfile.issuerURL
+    subject: 'system:serviceaccount:${k8sNamespace}:frontend-service-account'
+    audiences: ['api://AzureADTokenExchange']
+  }
+}
+
+resource aksOrchMsiFederated 'Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials@2025-01-31-preview' = {
+  name: 'aksFederatedOrch'
+  parent : aksOrchMsi
+  properties: {
+    issuer: main.properties.oidcIssuerProfile.issuerURL
+    subject: 'system:serviceaccount:${k8sNamespace}:orchestrator-service-account'
+    audiences: ['api://AzureADTokenExchange']
+  }
+}
+
+resource aksIngMsiFederated 'Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials@2025-01-31-preview' = {
+  name: 'aksFederatedIng'
+  parent : aksIngMsi
+  properties: {
+    issuer: main.properties.oidcIssuerProfile.issuerURL
+    subject: 'system:serviceaccount:${k8sNamespace}:ingestion-service-account'
+    audiences: ['api://AzureADTokenExchange']
+  }
+}
+
+resource aksMcpMsiFederated 'Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials@2025-01-31-preview' = {
+  name: 'aksFederatedMcp'
+  parent : aksMcpMsi
+  properties: {
+    issuer: main.properties.oidcIssuerProfile.issuerURL
+    subject: 'system:serviceaccount:${k8sNamespace}:mcp-service-account'
+    audiences: ['api://AzureADTokenExchange']
+  }
+}
+
 /** Outputs **/
 output id string = main.id
 output name string = main.name
 output oidcIssuerUrl string = main.properties.oidcIssuerProfile.issuerURL
+output privateIpIngress string = main.properties.networkProfile.dnsServiceIP

@@ -32,6 +32,9 @@
       "repoUrl": {
         "value": "${REPOSITORY_URL}"
       },
+      "tlsCertificateName": {
+        "value": "${AZURE_TLS_CERTIFICATE_NAME}"
+      },
       "provisionLoadTesting": {
         "value": "${AZURE_PROVISION_LOAD_TESTING}"
       },    
