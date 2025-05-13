@@ -12,7 +12,7 @@
         "value": "${AZURE_PRINCIPAL_ID}"
       },
       "resourceGroupName": {
-        "value": "${AZURE_RESOURCE_GROUP_NAME}"
+        "value": "${AZURE_RESOURCE_GROUP}"
       },
       "vnetResourceGroupName": {
         "value": "${AZURE_VNET_RESOURCE_GROUP_NAME}"

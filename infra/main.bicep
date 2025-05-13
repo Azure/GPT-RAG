@@ -891,6 +891,7 @@ module cosmosAccount './core/db/cosmos.bicep' = {
     identityId : cosmosManagedIdentity.outputs.principalId
     conversationContainerName:  _azureDbConfig.conversationContainerName
     datasourcesContainerName: _azureDbConfig.datasourcesContainerName   
+    promptsContainerName: 'prompts'
     databaseName: _azureDbConfig.dbDatabaseName
     tags: tags
     secretName: 'azureDBkey'
@@ -1290,10 +1291,6 @@ var appSettings = [
     value: ''
   }
   {
-    name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-    value: _provisionApplicationInsights?appInsights.outputs.connectionString:''
-  }
-  {
     name: 'BING_RETRIEVAL'
     value: 'false'
   }
@@ -1611,6 +1608,18 @@ var commonEnvs = [
     name: 'allow_environment_variables'
     value: 'true'
   }
+  {
+    name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+    value: appInsights.outputs.connectionString
+  }
+  {
+    name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
+    value: appInsights.outputs.instrumentationKey
+  }
+  {
+    name: 'ApplicationInsights_InstrumentationKey'
+    value: appInsights.outputs.instrumentationKey
+  }
 ]
 
 var orchestratorEnvs = concat(commonEnvs,[
@@ -1737,18 +1746,6 @@ var webEnvs = concat(commonEnvs,[
     value: 'EnableWorkerIndexing'
   }
   {
-    name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-    value: appInsights.outputs.connectionString
-  }
-  {
-    name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
-    value: appInsights.outputs.instrumentationKey
-  }
-  {
-    name: 'ApplicationInsights_InstrumentationKey'
-    value: appInsights.outputs.instrumentationKey
-  }
-  {
     name: '${documentsConnectionStringVariableName}__accountName'
     value: '${_storageAccountName}'
   }
@@ -1771,18 +1768,7 @@ var webEnvs = concat(commonEnvs,[
 ])
 
 var mcpEnvs = concat(commonEnvs, [
-  {
-    name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-    value: appInsights.outputs.connectionString
-  }
-  {
-    name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
-    value: appInsights.outputs.instrumentationKey
-  }
-  {
-    name: 'ApplicationInsights_InstrumentationKey'
-    value: appInsights.outputs.instrumentationKey
-  }
+  
 ])
 
 

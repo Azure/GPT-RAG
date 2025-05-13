@@ -16,6 +16,7 @@ param deployCosmosDb bool = true
 
 param conversationContainerName string
 param datasourcesContainerName string  
+param promptsContainerName string  
 
 param identityId string
 
@@ -155,6 +156,32 @@ resource modelsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/con
   properties: {
     resource: {
       id: datasourcesContainerName
+      partitionKey: {
+        paths: [
+          '/id'
+        ]
+        kind: 'Hash'
+      }
+      analyticalStorageTtl: analyticalStoreTTL
+      indexingPolicy: {
+        indexingMode: 'none'
+        automatic: false
+      }
+    }
+    options: {
+      autoscaleSettings: {
+        maxThroughput: autoscaleMaxThroughput
+      }
+    }
+  }
+}
+
+resource promptsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = if (!cosmosDbReuse && deployCosmosDb) {
+  parent: database
+  name: promptsContainerName
+  properties: {
+    resource: {
+      id: promptsContainerName
       partitionKey: {
         paths: [
           '/id'

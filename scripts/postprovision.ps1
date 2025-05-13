@@ -116,6 +116,9 @@ if ($useAKS -eq "true") {
     az aks install-cli
     az aks get-credentials --resource-group $resourceGroupName --name $azureAksClusterName
 
+    #Install KEDA
+    kubectl apply -f https://github.com/kedacore/keda/releases/download/v2.17.0/keda-2.17.0.yamluest.
+
     #https://learn.microsoft.com/en-us/azure/aks/custom-certificate-authority
     #add the custom CA certificate to the AKS cluster
     az aks update --resource-group $resourceGroupName --name $azureAksClusterName --custom-ca-trust-certificates 'tls.crt'

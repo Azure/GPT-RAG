@@ -9,6 +9,8 @@ param existingKeyVaultResourceGroupName string
 @description('Secret Keys to add to App Configuration')
 param secureAppSettings array
 
+param tlsCertificateName string = 'gptrag-tls'
+
 // @secure()
 // param vmUserPasswordKey string
 // @secure()
@@ -70,3 +72,4 @@ output secrets array = [for (config, i) in secureAppSettings: {
   name: config.name
   value: concat('{"uri":"',secret[i].properties.secretUri, '"}')
 }]
+output tlsCertificateUri string = (!empty(tlsCertificateName)) ? 'https://${name}.vault.azure.net/certificates/${tlsCertificateName}' : ''
