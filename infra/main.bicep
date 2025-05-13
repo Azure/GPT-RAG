@@ -1883,6 +1883,7 @@ var cosmosContributorIdentityAssignments = [
     principalId: identity.principalId
     roleDefinitionId: cosmosContributorRoleDefinitionId
     principalType: identity.principalType
+    resourceId: ''
   }
 ]
 
@@ -1891,22 +1892,25 @@ var cosmosContributorIdentityAssignmentsAll =  concat(cosmosContributorIdentityA
     principalId: containerAppWebManagedIdentity.outputs.principalId
     roleDefinitionId: cosmosContributorRoleDefinitionId
     principalType: 'ServicePrincipal'
+    resourceId: cosmosAccount.outputs.id
   }
   {
     principalId: containerAppIngestManagedIdentity.outputs.principalId
     roleDefinitionId: cosmosContributorRoleDefinitionId
     principalType: 'ServicePrincipal'
+    resourceId: cosmosAccount.outputs.id
   }
   {
     principalId: containerAppOrchManagedIdentity.outputs.principalId
     roleDefinitionId: cosmosContributorRoleDefinitionId
     principalType: 'ServicePrincipal'
+    resourceId: cosmosAccount.outputs.id
   }
 ])
 
 module cosmosContributorAccessACA './core/security/cosmos-access.bicep' = if(useACA) {
   name: 'cosmosContributorAccessACA'
-  
+  scope: az.resourceGroup(_cosmosDbResourceGroupName)
   params: {
     accountName: cosmosAccount.outputs.name
     resourceGroupName: _cosmosDbResourceGroupName
@@ -1928,7 +1932,6 @@ module orchestratorCosmosAccess './core/security/cosmos-access.bicep' =  if(!use
 
 module frontEnd  'core/host/appservice.bicep' = if(!useACA && !useAKS) {
   name: 'frontend'
-  
   params: {
     name: _appServiceName
     applicationInsightsName: _effectiveAppInsightsName
@@ -1966,7 +1969,7 @@ module frontendPe './core/network/private-endpoint.bicep' = if (_networkIsolatio
   }
 }
 
-module mcpAppServer  'core/host/appservice.bicep' = if(!useACA && !useAKS && useMCP) {
+module mcpAppServer  'core/host/appservice.bicep' = if (!useACA && !useAKS && useMCP) {
   name: 'mcpAppServer'
   
   params: {
@@ -2006,7 +2009,7 @@ module mcpServerPe './core/network/private-endpoint.bicep' = if (_networkIsolati
   }
 }
 
-module mcpAccess './core/security/resource-group-role-assignment.bicep' = if (useMCP) {
+module mcpAccess './core/security/resource-group-role-assignment.bicep' = if (!useACA && !useAKS && useMCP) {
   name: 'mcpAccess'
   params: {
     name: 'mcpAccess'
@@ -2691,44 +2694,41 @@ resource keyVaultCertificatesOfficerRole 'Microsoft.Authorization/roleDefinition
   name: roles.security.keyVaultCertificatesOfficer
 }
 
-var keyVaultCertificateOfficerIdentityAssignments = [
-  for identity in identities: {
-    principalId: identity.principalId
-    roleDefinitionId: keyVaultCertificatesOfficerRole.id
-    principalType: identity.principalType
-  }
-]
-
 module aksKeyVaultCertificateOfficerAccess './core/security/resource-group-role-assignment.bicep' = if (useAKS) {
   name: 'aksKeyVaultCertificateOfficerAccess'
   params: {
     name: 'keyVaultCertificateOfficerAccess'
     timestamp: timestamp
-    roleAssignments: concat(keyVaultCertificateOfficerIdentityAssignments, [
+    roleAssignments: concat([], [
       {
         principalId: aksManagedIdentity.outputs.principalId
         roleDefinitionId: keyVaultCertificatesOfficerRole.id
         principalType: 'ServicePrincipal'
+        resourceId: keyVault.outputs.id
       }
       {
         principalId: aksIngestManagedIdentity.outputs.principalId
         roleDefinitionId: keyVaultCertificatesOfficerRole.id
         principalType: 'ServicePrincipal'
+        resourceId: keyVault.outputs.id
       }
       {
         principalId: aksOrchManagedIdentity.outputs.principalId
         roleDefinitionId: keyVaultCertificatesOfficerRole.id
         principalType: 'ServicePrincipal'
+        resourceId: keyVault.outputs.id
       }
       {
         principalId: aksWebManagedIdentity.outputs.principalId
         roleDefinitionId: keyVaultCertificatesOfficerRole.id
         principalType: 'ServicePrincipal'
+        resourceId: keyVault.outputs.id
       }
       {
         principalId: aksMcpManagedIdentity.outputs.principalId
         roleDefinitionId: keyVaultCertificatesOfficerRole.id
         principalType: 'ServicePrincipal'
+        resourceId: keyVault.outputs.id
       }
     ])
   }
@@ -2739,35 +2739,39 @@ module keyVaultSecretUserAccess './core/security/resource-group-role-assignment.
   params: {
     name: 'keyVaultSecretUserAccess'
     timestamp: timestamp
-    roleAssignments: concat(keyVaultSecretUserIdentityAssignments, [
+    roleAssignments: concat([], [
       {
         principalId: appConfig.outputs.principalId
         roleDefinitionId: keyVaultSecretsUserRole.id
         principalType: 'ServicePrincipal'
+        resourceId: appConfig.outputs.id
       }
       {
         principalId: containerAppWebManagedIdentity.outputs.principalId
         roleDefinitionId: keyVaultSecretsUserRole.id
         principalType: 'ServicePrincipal'
+        resourceId: keyVault.outputs.id
       }
       {
         principalId: containerAppIngestManagedIdentity.outputs.principalId
         roleDefinitionId: keyVaultSecretsUserRole.id
         principalType: 'ServicePrincipal'
+        resourceId: keyVault.outputs.id
       }
       {
         principalId: containerAppOrchManagedIdentity.outputs.principalId
         roleDefinitionId: keyVaultSecretsUserRole.id
         principalType: 'ServicePrincipal'
+        resourceId: keyVault.outputs.id
       }
     ])
   }
 }
 
-module containerMcpKeyVaultSecretUserAccess './core/security/resource-group-role-assignment.bicep' = if (useACA && useMCP) {
-  name: 'containerMcpKeyVaultSecretUserAccess'
+module acaMcpKeyVaultSecretUserAccess './core/security/resource-group-role-assignment.bicep' = if (useACA && useMCP) {
+  name: 'acaMcpKeyVaultSecretUserAccess'
   params: {
-    name: 'containerMcpKeyVaultSecretUserAccess'
+    name: 'acaMcpKeyVaultSecretUserAccess'
     timestamp: timestamp
     roleAssignments: [
       {
@@ -2784,20 +2788,12 @@ resource openAIUserRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' exi
   name: roles.ai.cognitiveServicesOpenAIUser
 }
 
-var openAIUserIdentityAssignments = [
-  for identity in identities: {
-    principalId: identity.principalId
-    roleDefinitionId: openAIUserRole.id
-    principalType: identity.principalType
-  }
-]
-
 module openAIUserAccess './core/security/resource-group-role-assignment.bicep' = if (useACA) {
   name: 'openAIUserAccess'
   params: {
     name: 'openAIUserAccess'
     timestamp: timestamp
-    roleAssignments: concat(openAIUserIdentityAssignments, [
+    roleAssignments: concat([], [
       {
         principalId: appConfig.outputs.principalId
         roleDefinitionId: openAIUserRole.id
@@ -2997,7 +2993,7 @@ module acaAppConfigDataOwnerAccess './core/security/resource-group-role-assignme
   }
 }
 
-module aksConfigDataOwnerAccess './core/security/resource-group-role-assignment.bicep' = if (useACA) {
+module aksConfigDataOwnerAccess './core/security/resource-group-role-assignment.bicep' = if (useAKS) {
   name: 'aksConfigDataOwnerAccess'
   params: {
     name: 'aksConfigDataOwnerAccess'
@@ -3025,10 +3021,10 @@ module aksConfigDataOwnerAccess './core/security/resource-group-role-assignment.
   }
 }
 
-module containerMcpConfigDataOwnerAccess './core/security/resource-group-role-assignment.bicep' = if (useACA && useMCP) {
-  name: 'containerMcpConfigDataOwnerAccess'
+module acaMcpConfigDataOwnerAccess './core/security/resource-group-role-assignment.bicep' = if (useACA && useMCP) {
+  name: 'acaMcpConfigDataOwnerAccess'
   params: {
-    name: 'containerMcpConfigDataOwnerAccess'
+    name: 'acaMcpConfigDataOwnerAccess'
     timestamp: timestamp
     roleAssignments: [
       {
@@ -3072,6 +3068,7 @@ var acrPushIdentityAssignments = [
     principalId: identity.principalId
     roleDefinitionId: acrPushRole.id
     principalType: identity.principalType
+    resourceId: ''
   }
 ]
 
@@ -3080,6 +3077,7 @@ var acrPullIdentityAssignments = [
     principalId: identity.principalId
     roleDefinitionId: acrPullRole.id
     principalType: identity.principalType
+    resourceId: ''
   }
 ]
 
@@ -3169,10 +3167,10 @@ module containerRegistry './core/containers/container-registry.bicep' = if (useA
   }
 }
 
-module containerRegistryAcaPullAccess './core/security/resource-group-role-assignment.bicep' = if (useACA) {
-  name: 'containerRegistryAcaPullAccess'
+module acaRegistryAcaPullAccess './core/security/resource-group-role-assignment.bicep' = if (useACA) {
+  name: 'acaRegistryAcaPullAccess'
   params: {
-    name: 'containerRegistryAcaPullAccess'
+    name: 'acaRegistryAcaPullAccess'
     timestamp: timestamp
     roleAssignments: concat(acrPullIdentityAssignments, [
       {
@@ -3197,10 +3195,10 @@ module containerRegistryAcaPullAccess './core/security/resource-group-role-assig
   }
 }
 
-module containerMcpRegistryAcaPullAccess './core/security/resource-group-role-assignment.bicep' = if (useACA && useMCP) {
-  name: 'containerMcpRegistryAcaPullAccess'
+module acaMcpRegistryAcaPullAccess './core/security/resource-group-role-assignment.bicep' = if (useACA && useMCP) {
+  name: 'acaMcpRegistryAcaPullAccess'
   params: {
-    name: 'containerMcpRegistryAcaPullAccess'
+    name: 'acaMcpRegistryAcaPullAccess'
     timestamp: timestamp
     roleAssignments: concat(acrPullIdentityAssignments, [
       {
@@ -3213,10 +3211,10 @@ module containerMcpRegistryAcaPullAccess './core/security/resource-group-role-as
   }
 }
 
-module containerRegistryAcaPushAccess './core/security/resource-group-role-assignment.bicep' = if (useACA) {
-  name: 'containerRegistryAcaPushAccess'
+module acaRegistryAcaPushAccess './core/security/resource-group-role-assignment.bicep' = if (useACA) {
+  name: 'acaRegistryAcaPushAccess'
   params: {
-    name: 'containerRegistryAcaPushAccess'
+    name: 'acaRegistryAcaPushAccess'
     timestamp: timestamp
     roleAssignments: concat(acrPushIdentityAssignments, [
       {
@@ -3717,7 +3715,7 @@ module dnsRoleAssignment './core/security/resource-group-role-assignment.bicep' 
         principalId: aksManagedIdentity.outputs.principalId
         roleDefinitionId: privateDnsContributorRole.id
         principalType: 'ServicePrincipal'
-        resourceId: rg.id
+        resourceId: ''
       }
     ]
   }
@@ -3737,7 +3735,7 @@ module networkContribRoleAssignment './core/security/resource-group-role-assignm
         principalId: aksManagedIdentity.outputs.principalId
         roleDefinitionId: networkContributorRole.id
         principalType: 'ServicePrincipal'
-        resourceId: rg.id
+        resourceId : ''
       }
     ]
   }

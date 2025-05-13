@@ -12,7 +12,7 @@ $aoaiModelName = $env:AZURE_CHAT_GPT_DEPLOYMENT_NAME
 
 write-host "Running from path : $PSScriptRoot" -ForegroundColor $YELLOW
 
-$repoPath = $PSScriptRoot.replace("/scripts","")
+$repoPath = $PSScriptRoot.replace("\scripts","")
 write-host "Repo path: $repoPath" -ForegroundColor $YELLOW
 
 # Check conditions
