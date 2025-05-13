@@ -3037,10 +3037,10 @@ module acaMcpConfigDataOwnerAccess './core/security/resource-group-role-assignme
   }
 }
 
-module akscontainerMcpConfigDataOwnerAccess './core/security/resource-group-role-assignment.bicep' = if (useAKS && useMCP) {
-  name: 'akscontainerMcpConfigDataOwnerAccess'
+module aksMcpConfigDataOwnerAccess './core/security/resource-group-role-assignment.bicep' = if (useAKS && useMCP) {
+  name: 'aksMcpConfigDataOwnerAccess'
   params: {
-    name: 'akscontainerMcpConfigDataOwnerAccess'
+    name: 'aksMcpConfigDataOwnerAccess'
     timestamp: timestamp
     roleAssignments: [
       {
@@ -3888,10 +3888,10 @@ module aksStorageRolesAssignment './core/security/resource-group-role-assignment
 }
 
 
-module akscontainerMcpkeyVaultSecretAccess './core/security/resource-group-role-assignment.bicep' = if (useAKS && useMCP) {
-  name: 'akscontainerMcpkeyVaultSecretAccess'
+module aksMcpkeyVaultSecretAccess './core/security/resource-group-role-assignment.bicep' = if (useAKS && useMCP) {
+  name: 'aksMcpkeyVaultSecretAccess'
   params: {
-    name: 'akscontainerMcpkeyVaultSecretAccess'
+    name: 'aksMcpkeyVaultSecretAccess'
     timestamp: timestamp
     roleAssignments: [
       {
@@ -4068,7 +4068,7 @@ module aksBackend './core/containers/aks.bicep' = if(useAKS) {
         }
       ]
     )
-    repoUrl: repoUrl
+    repoUrl: !empty(repoUrl) ? repoUrl : containerRegistry.outputs.loginServer
   }
 }
 

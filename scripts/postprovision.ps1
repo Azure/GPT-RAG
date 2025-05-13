@@ -62,7 +62,7 @@ if ($useACA -eq "true" -or $useAKS -eq "true") {
     docker build -t $imageName -f $dockerfilePath $dockerContextPath
     docker push $imageName
 
-    if ($env:USE_MCP -eq "true")
+    if ($useMCP -eq "true")
     {
         $dockerfilePath = Join-Path -Path $repoPath -ChildPath '.\.azure\gpt-rag-mcp\Dockerfile'
         $dockerContextPath = Join-Path -Path $repoPath -ChildPath '.\.azure\gpt-rag-mcp'
@@ -101,7 +101,7 @@ if ($useACA -eq "true") {
     $AZURE_ACA_NAME = "ca-ing-$env:AZURE_RESOURCE_TOKEN"
     az containerapp update --name $AZURE_ACA_NAME --resource-group $resourceGroupName --image $acaImageName
 
-    if ($env:USE_MCP -eq "true")
+    if ($useMCP -eq "true")
     {
         $AzureContainerImageName = "gpt-rag-mcp:latest"
         $acaImageName = "https://$($acrLogin)/$AzureContainerImageName".replace("https://", "")
