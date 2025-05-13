@@ -1622,7 +1622,7 @@ var commonEnvs = [
   }
 ]
 
-var orchestratorEnvs = concat(commonEnvs,[
+var commonFuncEnvs = [
   {
     name: 'AzureWebJobsFeatureFlags'
     value: 'EnableWorkerIndexing'
@@ -1636,32 +1636,12 @@ var orchestratorEnvs = concat(commonEnvs,[
     value: 'python'
   }
   {
-    name: '${functionsWebJobStorageVariableName}__accountName'
-    value: '${_storageAccountName}orc'
-  }
-  {
-    name: '${functionsWebJobStorageVariableName}__credential'
-    value: 'managedidentity'
-  }
-  {
-    name: '${documentsConnectionStringVariableName}__accountName'
-    value: '${_storageAccountName}orc'
-  }
-  {
-    name: '${documentsConnectionStringVariableName}__credential'
-    value: 'managedidentity'
-  }
-  {
     name: 'WEBSITE_HTTPLOGGING_RETENTION_DAYS'
     value: '7'
   }
   {
     name: 'WEBSITE_VNET_ROUTE_ALL'
     value: '0'
-  }
-  {
-    name: 'WEBSITE_HOSTNAME'
-    value: 'localhost'
   }
   {
     name: 'ENABLE_ORYX_BUILD'
@@ -1678,25 +1658,32 @@ var orchestratorEnvs = concat(commonEnvs,[
   {
     name: 'PYTHON_ISOLATE_WORKER_DEPENDENCIES'
     value: '1'
+  }
+]
+
+var orchestratorEnvs = concat(commonEnvs,commonFuncEnvs,[
+  {
+    name: '${functionsWebJobStorageVariableName}__accountName'
+    value: '${_storageAccountName}orc'
+  }
+  {
+    name: '${functionsWebJobStorageVariableName}__credential'
+    value: 'managedidentity'
+  }
+  {
+    name: '${documentsConnectionStringVariableName}__accountName'
+    value: '${_storageAccountName}orc'
+  }
+  {
+    name: '${documentsConnectionStringVariableName}__credential'
+    value: 'managedidentity'
   }
 ])
 
-var ingestionEnvs = concat(commonEnvs,[
-  {
-    name: 'AzureWebJobsFeatureFlags'
-    value: 'EnableWorkerIndexing'
-  }
-  {
-    name: 'FUNCTIONS_EXTENSION_VERSION'
-    value: '~4'
-  }
-  {
-    name: 'FUNCTIONS_WORKER_RUNTIME'
-    value: 'python'
-  }
+var ingestionEnvs = concat(commonEnvs,commonFuncEnvs,[
   {
     name: '${functionsWebJobStorageVariableName}__accountName'
-    value: '${_storageAccountName}orc'
+    value: '${_storageAccountName}ing'
   }
   {
     name: '${functionsWebJobStorageVariableName}__credential'
@@ -1704,39 +1691,11 @@ var ingestionEnvs = concat(commonEnvs,[
   }
   {
     name: '${documentsConnectionStringVariableName}__accountName'
-    value: '${_storageAccountName}orc'
+    value: '${_storageAccountName}ing'
   }
   {
     name: '${documentsConnectionStringVariableName}__credential'
     value: 'managedidentity'
-  }
-  {
-    name: 'WEBSITE_HTTPLOGGING_RETENTION_DAYS'
-    value: '7'
-  }
-  {
-    name: 'WEBSITE_VNET_ROUTE_ALL'
-    value: '0'
-  }
-  {
-    name: 'WEBSITE_HOSTNAME'
-    value: 'localhost'
-  }
-  {
-    name: 'ENABLE_ORYX_BUILD'
-    value: 'true'
-  }
-  {
-    name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
-    value: 'true'
-  }
-  {
-    name: 'PYTHON_ENABLE_INIT_INDEXING'
-    value: '1'
-  }
-  {
-    name: 'PYTHON_ISOLATE_WORKER_DEPENDENCIES'
-    value: '1'
   }
 ])
 
@@ -1744,18 +1703,6 @@ var webEnvs = concat(commonEnvs,[
   {
     name: 'AzureWebJobsFeatureFlags'
     value: 'EnableWorkerIndexing'
-  }
-  {
-    name: '${documentsConnectionStringVariableName}__accountName'
-    value: '${_storageAccountName}'
-  }
-  {
-    name: '${documentsConnectionStringVariableName}__credential'
-    value: 'managedidentity'
-  }
-  {
-    name: 'WEBSITE_HOSTNAME'
-    value: 'localhost'
   }
   {
     name: 'WEBSITE_HTTPLOGGING_RETENTION_DAYS'

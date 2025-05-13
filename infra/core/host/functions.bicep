@@ -13,8 +13,6 @@ param functionAppScaleLimit int = -1
 param healthCheckPath string = ''
 param allowedOrigins array = []
 
-param resourceToken string = uniqueString(resourceGroup().id)
-
 param name string
 param functionAppReuse bool
 param functionAppResourceGroupName string
@@ -106,24 +104,6 @@ resource newFunction 'Microsoft.Web/sites@2022-03-01' = {
       healthCheckPath: healthCheckPath
       appSettings: union(
         appSettings,
-        empty(applicationInsightsName) ? [] : [
-          {
-            name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-            value: applicationInsights.properties.ConnectionString
-          }
-          {
-            name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-            secretRef: applicationInsights.properties.ConnectionString
-          }
-          {
-            name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
-            secretRef: applicationInsights.properties.InstrumentationKey
-          }
-          {
-            name: 'ApplicationInsights_InstrumentationKey'
-            secretRef: applicationInsights.properties.InstrumentationKey
-          }
-        ],
         [
           {
             name: 'AzureWebJobsStorage__clientId'
@@ -138,24 +118,12 @@ resource newFunction 'Microsoft.Web/sites@2022-03-01' = {
             value: uaiFunc.properties.clientId
           }
           {
-            name: 'AzureWebJobsStorage__accountName'
-            value: stg.name
-          }
-          {
-            name: 'AzureWebJobsStorage__credential'
-            value: 'managedidentity'
+            name: 'AzureWebJobsStorage__cliendId'
+            value: uaiFunc.properties.clientId
           }
           {
             name: 'AZURE_KEY_VAULT_ENDPOINT'
             value: keyVault.properties.vaultUri
-          }
-          {
-            name: 'AZURE_CLIENT_ID'
-            value: uaiFunc.properties.clientId
-          }
-          {
-            name: 'AZURE_TENANT_ID'
-            value: subscription().tenantId
           }
         ]
       )

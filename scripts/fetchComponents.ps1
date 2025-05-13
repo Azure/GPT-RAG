@@ -33,10 +33,13 @@ if (Test-Path -Path ".\.azure\gpt-rag-frontend") {
 # Clone the repository into the .azure folder
 git clone https://github.com/givenscj/gpt-rag-frontend .\.azure\gpt-rag-frontend
 
-# Delete the gpt-rag-frontend folder from .azure if it exists
-if (Test-Path -Path ".\.azure\gpt-rag-mcp") {
-    Remove-Item -Path ".\.azure\gpt-rag-mcp" -Recurse -Force
-}
+if ($env:AZURE_USE_MCP -eq "true")
+{    
+    # Delete the gpt-rag-frontend folder from .azure if it exists
+    if (Test-Path -Path ".\.azure\gpt-rag-mcp") {
+        Remove-Item -Path ".\.azure\gpt-rag-mcp" -Recurse -Force
+    }
 
-# Clone the repository into the .azure folder
-git clone https://github.com/givenscj/gpt-rag-mcp .\.azure\gpt-rag-mcp
+    # Clone the repository into the .azure folder
+    git clone https://github.com/givenscj/gpt-rag-mcp .\.azure\gpt-rag-mcp
+}

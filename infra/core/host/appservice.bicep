@@ -112,12 +112,6 @@ resource newAppService 'Microsoft.Web/sites@2022-09-01' = if (!appServiceReuse &
       healthCheckPath: healthCheckPath
       appSettings: concat(
         appSettings,
-        empty(applicationInsightsName) ? [] : [
-          {
-            name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-            value: applicationInsights.properties.ConnectionString
-          }
-        ],
         [
           {
             name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
