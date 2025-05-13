@@ -12,5 +12,6 @@ resource loadTestingService 'Microsoft.LoadTestService/loadTests@2022-12-01' = {
   }
 }
 
-output id string = loadTestingService.identity.principalId
+output id string = loadTestingService.id
 output name string = loadTestingService.name
+output identityPrincipalId string = loadTestingService.identity.principalId

@@ -6,6 +6,12 @@
     "roleAssignmentInfo": {
       "type": "object",
       "properties": {
+        "resourceId": {
+          "type": "string",
+          "metadata": {
+            "description": "Resource ID for target role assingment."
+          }
+        },
         "roleDefinitionId": {
           "type": "string",
           "metadata": {
@@ -38,12 +44,6 @@
     }
   },
   "parameters": {
-    "resourceId": {
-      "type": "string",
-      "metadata": {
-        "description": "Resource ID of the resource to assign the role to."
-      }
-    },
     "roleAssignments": {
       "type": "array",
       "items": {
@@ -63,8 +63,8 @@
       },
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2022-04-01",
-      "name": "[guid(parameters('resourceId'), parameters('roleAssignments')[copyIndex()].principalId, parameters('roleAssignments')[copyIndex()].roleDefinitionId)]",
-      "scope": "[parameters('resourceId')]",
+      "name": "[guid(parameters('roleAssignments')[copyIndex()].principalId, parameters('roleAssignments')[copyIndex()].roleDefinitionId, parameters('roleAssignments')[copyIndex()].resourceId)]",
+      "scope": "[if(empty(parameters('roleAssignments')[copyIndex()].resourceId), '', parameters('roleAssignments')[copyIndex()].resourceId)]",
       "properties": {
         "principalId": "[parameters('roleAssignments')[copyIndex()].principalId]",
         "roleDefinitionId": "[parameters('roleAssignments')[copyIndex()].roleDefinitionId]",

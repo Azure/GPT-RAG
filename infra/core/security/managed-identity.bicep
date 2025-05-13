@@ -14,6 +14,8 @@ type roleAssignmentInfo = {
   principalId: string
   @description('Type of the principal ID.')
   principalType: 'Device' | 'User' | 'Group' | 'ServicePrincipal' | 'ForeignGroup'
+  @description('Resource ID to assing too.')
+  resourceId: string
 }
 
 @export()
