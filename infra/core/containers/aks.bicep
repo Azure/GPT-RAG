@@ -21,6 +21,7 @@ param ingEnvs array = []
 param mcpEnvs array = []
 
 param repoUrl string
+param useAgentic bool = false
 
 @description('Location for all resources')
 param location string
@@ -308,6 +309,14 @@ resource main 'Microsoft.ContainerService/managedClusters@2025-02-01' = {
 
 var privateIpIngressBackend = main.properties.networkProfile.dnsServiceIP
 
+module ns '../../aks/namespace.bicep' = {
+  name: 'ns'
+  params: {
+    kubeConfig: main.listClusterAdminCredential().kubeconfigs[0].value
+    name: k8sNamespace
+  }
+}
+
 module nsGateway '../../aks/namespace.bicep' = {
   name: 'nsGateway'
   params: {
@@ -428,11 +437,11 @@ module aksorch '../../aks/deployment.bicep' = {
     prefix: 'gpt-rag'
     name: 'orchestrator'
     kubeConfig: main.listClusterAdminCredential().kubeconfigs[0].value
-    image: '${repoUrl}/gpt-rag-orchestrator:latest'
+    image: (useAgentic)? '${repoUrl}/gpt-rag-agentic:latest' : '${repoUrl}/gpt-rag-orchestrator:latest'
     namespace: k8sNamespace
     env : orchEnvs
     serviceType : 'ClusterIP'
-    useLoadBalancer: false
+    useLoadBalancer: true
     targetPort: 80
   }
 }
@@ -447,7 +456,7 @@ module aksmcp '../../aks/deployment.bicep' = {
     namespace: k8sNamespace
     env : mcpEnvs
     serviceType : 'ClusterIP'
-    useLoadBalancer: false
+    useLoadBalancer: true
     targetPort: 8000
   }
 }

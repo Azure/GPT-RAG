@@ -62,6 +62,13 @@ if ($useACA -eq "true" -or $useAKS -eq "true") {
     docker build -t $imageName -f $dockerfilePath $dockerContextPath
     docker push $imageName
 
+    $dockerfilePath = Join-Path -Path $repoPath -ChildPath '.\.azure\gpt-rag-agentic\Dockerfile'
+    $dockerContextPath = Join-Path -Path $repoPath -ChildPath '.\.azure\gpt-rag-agentic'
+    $imageName = "$($containerRegistryName)/gpt-rag-agentic"
+    Write-Host "Building image: $imageName" -ForegroundColor $YELLOW
+    docker build -t $imageName -f $dockerfilePath $dockerContextPath
+    docker push $imageName
+
     if ($useMCP -eq "true")
     {
         $dockerfilePath = Join-Path -Path $repoPath -ChildPath '.\.azure\gpt-rag-mcp\Dockerfile'

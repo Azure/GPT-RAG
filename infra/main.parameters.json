@@ -32,6 +32,9 @@
       "useMCP": {
         "value": "${AZURE_USE_MCP}"
       },
+      "useAgentic": {
+        "value": "${AZURE_USE_AGENTIC}"
+      },
       "repoUrl": {
         "value": "${REPOSITORY_URL}"
       },

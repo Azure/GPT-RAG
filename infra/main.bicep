@@ -283,6 +283,11 @@ var _installKeda = installKeda
 param useMCP bool = false
 var _useMCP = useMCP
 
+@description('Use Agentic?')
+@allowed([true, false])
+param useAgentic bool = false
+var _useAgentic = useAgentic
+
 // Network settings
 
 @description('Network isolation? If yes it will create the private endpoints.')
@@ -3480,7 +3485,7 @@ module containerAppOrc './core/containers/container-app.bicep' = if (useACA) {
     imageInContainerRegistry: false
     repoUrl: repoUrl
     containerRegistryName: containerRegistry.name
-    containerImageName: empty(repoUrl) ? 'mcr.microsoft.com/k8se/quickstart:latest' : '${repoUrl}/gpt-rag-orchestrator:latest'
+    containerImageName: empty(repoUrl) ? 'mcr.microsoft.com/k8se/quickstart:latest' : (useAgentic)? '${repoUrl}/gpt-rag-agentic:latest' : '${repoUrl}/gpt-rag-orchestrator:latest'
     containerIngress: {
       external: true
       targetPort: 80
@@ -4126,6 +4131,7 @@ module aksBackend './core/containers/aks.bicep' = if(useAKS) {
       ]
     )
     repoUrl: !empty(repoUrl) ? repoUrl : containerRegistry.outputs.loginServer
+    useAgentic: useAgentic
   }
 }
 
