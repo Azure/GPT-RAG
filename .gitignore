@@ -5,3 +5,6 @@ results/
 **azdoenv.json
 **federated_id.json
 **service_connection.json
+.python_packages
+__pycache__
+.venv

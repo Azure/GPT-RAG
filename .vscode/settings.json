@@ -1,0 +1,11 @@
+{
+    "azureFunctions.createPythonVenv": false,
+    "azureFunctions.pythonVenv": "C:/github/cmf/GPT-RAG/.venv",
+    "azureFunctions.projectLanguage": "Python",
+    "azureFunctions.deploySubpath": ".",
+    "azureFunctions.scmDoBuildDuringDeployment": true,
+    "azureFunctions.projectRuntime": "~4",
+    "debug.internalConsoleOptions": "neverOpen",
+    "azureFunctions.projectLanguageModel": 2,
+    "azureFunctions.functionSubpath": "scripts/.azure/gpt-rag-orchestrator"
+}

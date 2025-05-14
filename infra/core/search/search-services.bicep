@@ -18,17 +18,28 @@ param authOptions object = {}
 param semanticSearch string = 'free'
 
 
-resource existingSearch 'Microsoft.Search/searchServices@2021-04-01-preview' existing  = if (aiSearchReuse && deployAiSearch) {
+resource existingSearch 'Microsoft.Search/searchServices@2025-02-01-preview' existing  = if (aiSearchReuse && deployAiSearch) {
   scope: resourceGroup(existingAiSearchResourceGroupName)
   name: name
 }
 
-resource newSearch 'Microsoft.Search/searchServices@2021-04-01-preview' = if (!aiSearchReuse && deployAiSearch) {
+/** Resources **/
+@description('User Assigned Identity for search')
+resource uaiFunc 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
+  location: location
+  name: 'uai-${name}'
+  tags: tags
+}
+
+resource newSearch 'Microsoft.Search/searchServices@2025-02-01-preview' = if (!aiSearchReuse && deployAiSearch) {
   name: name
   location: location
   tags: tags
   identity: {
-    type: 'SystemAssigned'
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${uaiFunc.id}': {}
+    }
   }
   properties: {
     authOptions: authOptions
@@ -50,11 +61,11 @@ resource newSearch 'Microsoft.Search/searchServices@2021-04-01-preview' = if (!a
   sku: sku
 }
 
-resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
+resource keyVault 'Microsoft.KeyVault/vaults@2024-11-01' existing = {
   name: keyVaultName
 }
 
-resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' =  {
+resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2024-11-01' =  {
   name: secretName
   tags: tags
   parent: keyVault
@@ -71,5 +82,5 @@ resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' =  {
  
 output id string = !deployAiSearch ? '' : aiSearchReuse ? existingSearch.id : newSearch.id
 output name string = !deployAiSearch ? '' : aiSearchReuse ? existingSearch.name : newSearch.name
-output principalId string = !deployAiSearch ? '' : aiSearchReuse ? existingSearch.identity.principalId : newSearch.identity.principalId
+output principalId string = !deployAiSearch ? '' : uaiFunc.properties.principalId
 output endpoint string = !deployAiSearch ? '' : 'https://${aiSearchReuse ? existingSearch.name: newSearch.name}.search.windows.net/'

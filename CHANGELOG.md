@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
  
 ## Changelog
 
+### 2025-05-14
+
+- **Added**: Application Configuration support
+- **Added**: Azure Container Apps (ACA) support
+- **Added**: Azure Kubernetes (AKS) support
+- **Added**: Model Context Protocol (MPC) support
+- **Added**: Bring your own Resource Group for Virtual Network
+- **Added**: Bicep parameters:
+  - `AZURE_USE_ACA` (true|false) - Will enable deployment of ACA infrastructure
+  - `AZURE_USE_AKS` (true|false) - Will enable deployment of AKS infrastructure
+  - `INSTALL_KEDA` (true|false) - When used with AKS, will install KEDA (for function scaling)
+  - `AZURE_USE_MCP` (true|false) - Will deploy the function app/ACA/AKS compute to support MCP server deployment
+  - `AZURE_USE_AGENTIC` (true|false) - Will switch the orchestrator func/container to use the Basic Orchestrator or Agentic repo
+  - `REPOSITORY_URL` (docker.io, acr registry) - Will default to using this repo for container deployment for ACA/AKS
+  - `AZURE_TLS_CERTIFCATE_NAME` (TLS Certificat in Key Vault) - The TLS/SSL certificate used in AKS custom domain DNS deployment.
+
+**BREAKING CHANGES**
+
+- Naming convention of resources was changed to map to the recommended Azure naming best practices (Note the `infra\abbreviations.json` file).
+- Extra permissions are needed in the custom role to support AppConfig, Container Registry, ACA and AKS
+- Code in supporting repos (Agentic, Orchestrator, Ingestion, Mcp) has been refactored to suport Docker containerization.
+
 ### 2024-06-15
 - **Added**: Option to install just some specific GPT-RAG components: data ingestion, orchestrator and frontend.
 

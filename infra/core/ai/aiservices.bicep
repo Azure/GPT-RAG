@@ -1,6 +1,7 @@
 param name string
 param location string = resourceGroup().location
 param tags object = {}
+
 param aiServicesReuse bool
 param existingAiServicesResourceGroupName string
 
@@ -30,6 +31,9 @@ resource newAccount 'Microsoft.CognitiveServices/accounts@2024-10-01' = if (!aiS
   properties: {
     customSubDomainName: customSubDomainName
     publicNetworkAccess: publicNetworkAccess
+    networkAcls: {
+      defaultAction: 'Allow'
+    }
   }
   sku: sku
 }
@@ -52,7 +56,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
   name: keyVaultName
 }
 
-resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' =  [for secretName in items(secretsNames): {
+resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2024-11-01' =  [for secretName in items(secretsNames): {
   name: secretName.value
   tags: tags
   parent: keyVault
@@ -70,3 +74,4 @@ resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' =  [for s
 output name string = !aiServicesDeploy ? '' : aiServicesReuse? existingAccount.name : newAccount.name
 output id string = !aiServicesDeploy ? '' : aiServicesReuse? existingAccount.id : newAccount.id
 output endpoint string = !aiServicesDeploy ? '' : aiServicesReuse? existingAccount.properties.endpoint : newAccount.properties.endpoint
+output location string = newAccount.location

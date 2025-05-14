@@ -2,7 +2,7 @@ param location string = resourceGroup().location
 param utcValue string = utcNow()
 param sleepName string = 'sleep-1'
 param sleepSeconds int = 120
-resource sleepDelay 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
+resource sleepDelay 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
   name: sleepName
   location: location
   kind: 'AzurePowerShell'  
