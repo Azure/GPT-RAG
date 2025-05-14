@@ -116,15 +116,20 @@ if ($useAKS -eq "true") {
     az aks install-cli
     az aks get-credentials --resource-group $resourceGroupName --name $azureAksClusterName
 
+    az aks update --name $azureAksClusterName --resource-group $resourceGroupName --attach-acr "cr$($env:AZURE_RESOURCE_TOKEN)"
+
     #Install KEDA
-    kubectl apply -f https://github.com/kedacore/keda/releases/download/v2.17.0/keda-2.17.0.yamluest.
+    if ($env:INSTALL_KEDA -eq "true")
+    {
+        kubectl apply -f https://github.com/kedacore/keda/releases/download/v2.17.0/keda-2.17.0.yaml
+    }
 
     #https://learn.microsoft.com/en-us/azure/aks/custom-certificate-authority
     #add the custom CA certificate to the AKS cluster
     az aks update --resource-group $resourceGroupName --name $azureAksClusterName --custom-ca-trust-certificates 'tls.crt'
 
     #https://learn.microsoft.com/en-us/azure/aks/app-routing-dns-ssl
-    $ZONEID=$(az network dns zone show --resource-group $resourceGroupName --name "$($env:AZURE_RESOURCE_TOKEN)$(".com")" --query "id" --output tsv)
+    $ZONEID=$(az network private-dns zone show --resource-group $resourceGroupName --name "$($env:AZURE_RESOURCE_TOKEN)$(".com")" --query "id" --output tsv)
     az aks approuting zone add --resource-group $resourceGroupName --name "aks-$env:AZURE_RESOURCE_TOKEN-backend" --ids=$ZONEID --attach-zones
 }
 

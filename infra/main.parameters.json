@@ -26,6 +26,9 @@
       "useAKS": {
         "value": "${AZURE_USE_AKS}"
       },
+      "installKeda": {
+        "value": "${INSTALL_KEDA}"
+      },
       "useMCP": {
         "value": "${AZURE_USE_MCP}"
       },
