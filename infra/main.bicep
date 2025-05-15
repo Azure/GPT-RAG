@@ -39,7 +39,7 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   tags: tags
 }
 
-// unique hash based on the subcription id, environment name and location. The hash is used to generate unique names for resources.
+// unique hash based on the subscription id, environment name and location. The hash is used to generate unique names for resources.
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
 
 // Disable load testing?
@@ -173,7 +173,7 @@ var _deployVM = deployVM
 param vmUserName string = ''
 var _vmUserName = !empty(vmUserName) ? vmUserName : 'gptrag'
 
-// PricipalId that will have access to KeyVault secrets, this is automatically set by the 'azd' tool to the principal runing azd
+// PrincipalId that will have access to KeyVault secrets, this is automatically set by the 'azd' tool to the principal running azd
 @description('Id of the user or app to assign application roles')
 param principalId string = ''
 
@@ -431,7 +431,7 @@ var _storageAccountResourceGroupName = _azureReuseConfig.storageReuse ? _azureRe
 // Resource name settings
 
 // The name for each service can be set from environment variables which are mapped in main.parameters.json.
-// If no maping to specific name is defined, a unique name is generated for each service based on the resourceToken created above.
+// If no mapping to specific name is defined, a unique name is generated for each service based on the resourceToken created above.
 
 @description('Key Vault Name. Use your own name convention or leave as it is to generate a random name.')
 param keyVaultName string = ''
@@ -625,7 +625,7 @@ module openaiDnsZone './core/network/private-dns-zones.bicep' = if (_networkIsol
 }
 
 module searchDnsZone './core/network/private-dns-zones.bicep' = if (_networkIsolation && !_vnetReuse) {
-  name: 'searchs-dnzones'
+  name: 'search-dnzones'
   scope: resourceGroup
   params: {
     dnsZoneName: 'privatelink.search.windows.net' 
