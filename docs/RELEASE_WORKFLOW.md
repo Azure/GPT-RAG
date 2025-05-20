@@ -25,8 +25,6 @@ This project uses a lightweight and structured Git workflow designed for teams w
 
 * Commit your changes and push the branch to your fork.
 
----
-
 ### 🔹 Step 2 – Submit a Pull Request to `develop`
 
 **Who:** *Contributor*
@@ -34,8 +32,6 @@ This project uses a lightweight and structured Git workflow designed for teams w
 * Open a Pull Request from your feature branch to the `develop` branch of the main repository.
 
 > 🧪 This triggers PR pipeline checks.
-
----
 
 ### 🔹 Step 3 – Review and Merge the PR into `develop`
 
@@ -45,8 +41,6 @@ This project uses a lightweight and structured Git workflow designed for teams w
 * Once approved, merge it into `develop`.
 
 > 📦 🚀 Builds the image and deploys `develop` to **Dev**.
-
----
 
 ### 🔹 Step 4 – Create a Release Candidate Tag (e.g., `v1.3.0-rc1`)
 
@@ -63,15 +57,11 @@ This project uses a lightweight and structured Git workflow designed for teams w
 
 > 🚀 This triggers deployment to the **QA** environment.
 
----
-
 ### 🔹 Step 5 – Promote to Production: Open PR from `develop` to `main`
 
 **Who:** *Maintaner*
 
 * After successful QA validation, open a Pull Request from `develop` to `main`.
-
----
 
 ### 🔹 Step 6 – Review and Merge the PR into `main`
 
@@ -79,8 +69,6 @@ This project uses a lightweight and structured Git workflow designed for teams w
 
 * Review the Pull Request.
 * Once approved, merge it into `main`.
-
----
 
 ### 🔹 Step 7 – Tag the Final Production Release (e.g., `v1.3.0`)
 
