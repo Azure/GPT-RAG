@@ -8,7 +8,10 @@ Below, you'll find details on how our code update process works and instructions
 
 ## Contribution Guidelines
 
-Follow these guidelines to ensure smooth integration and maintain the quality of the project. Adhering to these best practices will streamline the review process and keep the codebase clean.
+To maintain project quality, the following items will be considered during the PR review.
+
+> [!IMPORTANT]
+> Adhering to these best practices will streamline the review process.
 
 - **Target the `develop` Branch:** Always direct your pull request to the `develop` branch to ensure that changes are properly integrated into the project's development workflow.
  
@@ -16,9 +19,12 @@ Follow these guidelines to ensure smooth integration and maintain the quality of
   
 - **Associate with Prioritized Issues:** Ensure that each pull request is linked to a specific, prioritized issue in the project backlog. This helps maintain alignment with project goals and ensures that work is being done on tasks of the highest importance.
 
+- **Include Documentation:** Every new feature or functionality must be accompanied by clear documentation explaining its purpose and configuration. This ensures others can use it independently in a self-service manner.
+
 - **Bugs and Documentation Corrections:** Pull requests that address bugs or correct documentation do not need to be associated with prioritized issues. These can be submitted directly to maintain the quality and accuracy of the project.
 
 - **Multi-Repo Dependencies:** If your pull request has dependencies on updates in other repositories, make sure to mention this in the pull request description. Additionally, create a corresponding pull request in the other repository to ensure synchronized updates across all related projects.
+
 
 ## Code Update Workflow
 
