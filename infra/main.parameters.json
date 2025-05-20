@@ -2,272 +2,134 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-      "environmentName": {
-        "value": "${AZURE_ENV_NAME}"
-      },
-      "location": {
-        "value": "${AZURE_LOCATION}"
-      },
-      "principalId": {
-        "value": "${AZURE_PRINCIPAL_ID}"
-      },
-      "resourceGroupName": {
-        "value": "${AZURE_RESOURCE_GROUP_NAME}"
-      },
-      "networkIsolation": {
-        "value": "${AZURE_NETWORK_ISOLATION}"
-      },
-      "provisionLoadTesting": {
-        "value": "${AZURE_PROVISION_LOAD_TESTING}"
-      },    
-      "vnetName": {
-        "value": "${AZURE_VNET_NAME}"
-      },
-      "vnetAddress": {
-        "value": "${AZURE_VNET_ADDRESS}"
-      },                  
-      "chatGptDeploymentName": {
-        "value": "${AZURE_CHAT_GPT_DEPLOYMENT_NAME}"
-      },
-      "aiSubnetName": {
-          "value": "${AZURE_AI_SUBNET_NAME}"
-      },
-      "aiSubnetPrefix": {
-          "value": "${AZURE_AI_SUBNET_PREFIX}"
-      },
-      "bastionSubnetPrefix": {
-          "value": "${AZURE_BASTION_SUBNET_PREFIX}"
-      },
-      "bastionKvName": {
-        "value": "${AZURE_BASTION_KV_NAME}"
-      },    
-      "chunkNumTokens": {
-        "value": "${AZURE_CHUNK_NUM_TOKENS}"
-      },
-      "chunkMinSize": {
-        "value": "${AZURE_CHUNK_MIN_SIZE}"
-      },
-      "chunkTokenOverlap": {
-        "value": "${AZURE_CHUNK_TOKEN_OVERLAP}"
-      },    
-      "appIntSubnetName": {
-          "value": "${AZURE_APP_INT_SUBNET_NAME}"
-      },
-      "appIntSubnetPrefix": {
-          "value": "${AZURE_APP_INT_SUBNET_PREFIX}"
-      },
-      "appServicesSubnetName": {
-          "value": "${AZURE_APP_SERVICES_SUBNET_NAME}"
-      },
-      "appServicesSubnetPrefix": {
-          "value": "${AZURE_APP_SERVICES_SUBNET_PREFIX}"
-      },
-      "databaseSubnetName": {
-          "value": "${AZURE_DATABASE_SUBNET_NAME}"
-      },
-      "databaseSubnetPrefix": {
-          "value": "${AZURE_DATABASE_SUBNET_PREFIX}"
-      },
-      "vmKeyVaultSecName": {
-        "value": "${AZURE_VM_KV_SEC_NAME}"
-      },
-      "ztVmName": {
-        "value": "${AZURE_VM_NAME}"
-      },
-      "deployVM": {
-        "value": "${AZURE_VM_DEPLOY_VM}"
-      },
-      "vmUserInitialPassword": {
-        "value": "$(secretOrRandomPassword ${AZURE_BASTION_KV_NAME} vmUserInitialPassword)"
-      },      
-      "vmUserName": {
-        "value": "${AZURE_VM_USER_NAME}"
-      },
-      "keyVaultName": {
-        "value": "${AZURE_KEY_VAULT_NAME}"
-      },      
-      "searchUseMIS": {
-        "value": "${AZURE_SEARCH_USE_MIS}"
-      },
-      "chatGptDeploymentCapacity": {
-        "value": "${AZURE_CHAT_GPT_DEPLOYMENT_CAPACITY}"
-      },
-      "chatGptModelDeploymentType": {
-        "value": "${AZURE_CHAT_GPT_DEPLOYMENT_TYPE}"
-      },
-      "chatGptModelName": {
-        "value": "${AZURE_CHAT_GPT_MODEL_NAME}"
-      },    
-      "chatGptModelVersion": {
-        "value": "${AZURE_CHAT_GPT_MODEL_VERSION}"
-      },
-      "embeddingsModelName": {
-        "value": "${AZURE_EMBEDDINGS_MODEL_NAME}"
-      },
-      "embeddingsModelVersion": {
-        "value": "${AZURE_EMBEDDINGS_VERSION}"
-      },
-      "embeddingsDeploymentName": {
-        "value": "${AZURE_EMBEDDINGS_DEPLOYMENT_NAME}"
-      },
-      "embeddingsVectorSize": {
-        "value": "${AZURE_EMBEDDINGS_VECTOR_SIZE}"
-      },
-      "openaiApiVersion": {
-        "value": "${AZURE_OPENAI_API_VERSION}"
-      },
-      "orchestratorMessagesLanguage": {
-        "value": "${AZURE_ORCHESTRATOR_MESSAGES_LANGUAGE}"
-      },
-      "provisionApplicationInsights": {
-        "value": "${AZURE_PROVISION_APPLICATION_INSIGHTS}"
-      },
-      "retrievalApproach": {
-        "value": "${AZURE_RETRIEVAL_APPROACH}"
-      },
-      "searchAnalyzerName": {
-        "value": "${AZURE_SEARCH_ANALYZER_NAME}"
-      },
-      "useSemanticReranking": {
-        "value": "${AZURE_USE_SEMANTIC_RERANKING}"
-      },
-      "searchIndex": {
-        "value": "${AZURE_SEARCH_INDEX}"
-      },
-      "searchApiVersion": {
-        "value": "${AZURE_SEARCH_API_VERSION}"
-      },
-      "searchIndexInterval": {
-        "value": "${AZURE_SEARCH_INDEX_INTERVAL}"
-      },
-      "speechRecognitionLanguage": {
-        "value": "${AZURE_SPEECH_RECOGNITION_LANGUAGE}"
-      },
-      "speechSynthesisLanguage": {
-        "value": "${AZURE_SPEECH_SYNTHESIS_LANGUAGE}"
-      },
-      "speechSynthesisVoiceName": {
-        "value": "${AZURE_SPEECH_SYNTHESIS_VOICE_NAME}"
-      },
-      "storageAccountName": {
-        "value": "${AZURE_STORAGE_ACCOUNT_NAME}"
-      },
-      "storageContainerName": {
-        "value": "${AZURE_STORAGE_CONTAINER_NAME}"
-      },
-      "aiServicesName": {
-        "value": "${AZURE_AI_SERVICES_NAME}"
-      },
-      "appServicePlanName": {
-        "value": "${AZURE_APP_SERVICE_PLAN_NAME}"
-      },
-      "appInsightsName": {
-        "value": "${AZURE_APP_INSIGHTS_NAME}"
-      },
-      "appServiceName": {
-        "value": "${AZURE_APP_SERVICE_NAME}"
-      },
-      "loadTestingName": {
-        "value": "${AZURE_LOAD_TESTING_NAME}"
-      },
-      "orchestratorFunctionAppName": {
-        "value": "${AZURE_ORCHESTRATOR_FUNCTION_APP_NAME}"
-      },
-      "dataIngestionFunctionAppName": {
-        "value": "${AZURE_DATA_INGEST_FUNC_NAME}"
-      },
-      "searchServiceName": {
-        "value": "${AZURE_SEARCH_SERVICE_NAME}"
-      },
-      "openAiServiceName": {
-        "value": "${AZURE_OPENAI_SERVICE_NAME}"
-      },
-      "azureStorageAccountPe": {
-        "value": "${AZURE_STORAGE_ACCOUNT_PE}"
-      },
-      "azureDbAccountPe": {
-        "value": "${AZURE_DB_ACCOUNT_PE}"
-      },
-      "azureKeyvaultPe": {
-        "value": "${AZURE_KEYVAULT_PE}"
-      },
-      "azureOrchestratorPe": {
-        "value": "${AZURE_ORCHESTRATOR_PE}"
-      },
-      "azureFrontendPe": {
-        "value": "${AZURE_FRONTEND_PE}"
-      },
-      "azureDataIngestionPe": {
-        "value": "${AZURE_DATA_INGESTION_PE}"
-      },
-      "azureAiServicesPe": {
-        "value": "${AZURE_AI_SERVICES_PE}"
-      },
-      "azureOpenAiPe": {
-        "value": "${AZURE_OPEN_AI_PE}"
-      },
-      "azureSearchPe": {
-        "value": "${AZURE_SEARCH_PE}"
-      },
-      "deploymentTags":{
-        "value": {}
-      },    
-      "azureDbConfig":{
-        "value": {
-          "dbAccountName": "${AZURE_DB_ACCOUNT_NAME}",
-          "dbDatabaseName": "${AZURE_DB_DATABASE_NAME}",
-          "conversationContainerName": "${AZURE_DB_CONVERSATIONS_CONTAINER_NAME}",
-          "datasourcesContainerName": "${AZURE_DB_DATASOURCES_CONTAINER_NAME}"         
+    "environmentName":                       { "value": "${AZURE_ENV_NAME}" },
+    "location":                              { "value": "${AZURE_LOCATION}" },
+    "deploymentTags":                        { "value": {} },
+    "principalId":                           { "value": "${AZURE_PRINCIPAL_ID}" },
+    "configureRbac":                         { "value": "${AZURE_CONFIGURE_RBAC}" },
+
+    "installAiFoundry":                     { "value": "${AZURE_INSTALL_AI_FOUNDRY}" },
+    "installApim":                          { "value": "${AZURE_INSTALL_APIM}" },
+    "installAoai":                          { "value": "${AZURE_INSTALL_AOAI}" },
+    "installAppConfig":                     { "value": "${AZURE_INSTALL_APP_CONFIG}" },
+    "installKeyVault":                      { "value": "${AZURE_INSTALL_KEY_VAULT}" },
+    "installLogAnalytics":                  { "value": "${AZURE_INSTALL_LOG_ANALYTICS}" },
+    "installAppInsights":                   { "value": "${AZURE_INSTALL_APP_INSIGHTS}" },
+    "installSearchService":                 { "value": "${AZURE_INSTALL_SEARCH_SERVICE}" },
+    "installStorageAccount":                { "value": "${AZURE_INSTALL_STORAGE_ACCOUNT}" },
+    "installCosmosDb":                      { "value": "${AZURE_INSTALL_COSMOS_DB}" },
+    "installContainerApps":                 { "value": "${AZURE_INSTALL_CONTAINER_APPS}" },
+    "installContainerRegistry":             { "value": "${AZURE_INSTALL_CONTAINER_REGISTRY}" },
+    "installAiServices":                    { "value": "${AZURE_INSTALL_AI_SERVICES}" },
+    "installContainerEnv":                  { "value": "${AZURE_INSTALL_CONTAINER_ENV}" },
+
+    "aiFoundryStorageAccountName":           { "value": "${AZURE_AI_FOUNDRY_STORAGE_ACCOUNT_NAME}" },
+    "aiHubName":                             { "value": "${AZURE_AI_FOUNDRY_HUB_NAME}" },
+    "aiProjectName":                         { "value": "${AZURE_AI_FOUNDRY_PROJECT_NAME}" },
+    "aiServicesName":                        { "value": "${AZURE_AI_SERVICES_NAME}" },
+    "aoaiServiceName":                       { "value": "${AZURE_AOAI_SERVICE_NAME}" },
+    "apimResourceName":                      { "value": "${AZURE_APIM_SERVICE_NAME}" },
+    "appConfigName":                         { "value": "${AZURE_APP_CONFIG_NAME}" },
+    "appInsightsName":                       { "value": "${AZURE_APP_INSIGHTS_NAME}" },
+    "containerEnvName":                      { "value": "${AZURE_CONTAINER_ENV_NAME}" },
+    "containerRegistryName":                 { "value": "${AZURE_CONTAINER_REGISTRY_NAME}" },
+    "conversationContainerName":             { "value": "${AZURE_DATABASE_CONVERSATION_CONTAINER_NAME}" },
+    "dataIngestContainerAppName":            { "value": "${AZURE_DATA_INGEST_CONTAINER_APP_NAME}" },
+    "datasourcesContainerName":              { "value": "${AZURE_DATABASE_DATASOURCES_CONTAINER_NAME}" },
+    "dbAccountName":                         { "value": "${AZURE_DATABASE_ACCOUNT_NAME}" },
+    "dbDatabaseName":                        { "value": "${AZURE_DATABASE_NAME}" },
+    "frontEndContainerAppName":              { "value": "${AZURE_FRONTEND_CONTAINER_APP_NAME}" },
+    "keyVaultName":                          { "value": "${AZURE_KEY_VAULT_NAME}" },
+    "logAnalyticsWorkspaceName":             { "value": "${AZURE_LOG_ANALYTICS_WORKSPACE_NAME}" },
+    "orchestratorContainerAppName":          { "value": "${AZURE_ORCHESTRATOR_CONTAINER_APP_NAME}" },
+    "searchServiceName":                     { "value": "${AZURE_SEARCH_SERVICE_NAME}" },
+    "solutionStorageAccountName":            { "value": "${AZURE_STORAGE_ACCOUNT_NAME}" },
+
+    "apimPublisherEmail":                    { "value": "${AZURE_APIM_PUBLISHER_EMAIL}" },
+    "apimPublisherName":                     { "value": "${AZURE_APIM_PUBLISHER_NAME}" },
+    "apimSku":                               { "value": "${AZURE_APIM_SKU}" },
+    "apimAoaiApiName":                       { "value": "${AZURE_APIM_AOAI_API_NAME}" },
+    "apimAoaiApiDisplayName":                { "value": "${AZURE_APIM_AOAI_API_DISPLAY_NAME}" },
+    "apimAoaiApiPath":                       { "value": "${AZURE_APIM_AOAI_API_PATH}" },
+    "apimAoaiSubscriptionName":              { "value": "${AZURE_APIM_AOAI_SUBSCRIPTION_NAME}" },
+    "apimAoaiSubscriptionDisplayName":       { "value": "${AZURE_APIM_AOAI_SUBSCRIPTION_DISPLAY_NAME}" },
+
+    
+    "aoaiApiVersion":                       { "value": "${AZURE_AOAI_API_VERSION}" },
+    "docIntelligecenApiVersion":            { "value": "${AZURE_DOC_INTELLIGENCE_API_VERSION}" },    
+    "searchApiVersion":                     { "value": "${AZURE_SEARCH_API_VERSION}" },
+
+    "aoaiDeploymentList":{
+      "value": [
+        {
+          "name": "chat",
+          "model": "gpt-4o-mini",
+          "type": "GlobalStandard",
+          "version": "2024-07-18",          
+          "capacity": 40,
+          "internal_name": "AZURE_CHAT_DEPLOYMENT_NAME"
+        },
+        {
+          "name": "text-embedding",
+          "model": "text-embedding-3-large",
+          "type": "Standard",
+          "version": "1",          
+          "capacity": 40,
+          "internal_name": "AZURE_EMBEDDING_DEPLOYMENT_NAME"
         }
-      },
-      "azureReuseConfig":{
-        "value": {
-          "aoaiReuse": "${AOAI_REUSE}",
-          "existingAoaiResourceGroupName": "${AOAI_RESOURCE_GROUP_NAME}",
-          "existingAoaiName": "${AOAI_NAME}",
-          "appInsightsReuse": "${APP_INSIGHTS_REUSE}",
-          "existingAppInsightsResourceGroupName": "${APP_INSIGHTS_RESOURCE_GROUP_NAME}",
-          "existingAppInsightsName": "${APP_INSIGHTS_NAME}",
-          "logAnalyticsWorkspaceReuse": "${LOG_ANALYTICS_WORKSPACE_REUSE}",
-          "existingLogAnalyticsWorkspaceResourceId": "${LOG_ANALYTICS_WORKSPACE_ID}",          
-          "appServicePlanReuse": "${APP_SERVICE_PLAN_REUSE}",
-          "existingAppServicePlanResourceGroupName": "${APP_SERVICE_PLAN_RESOURCE_GROUP_NAME}",
-          "existingAppServicePlanName": "${APP_SERVICE_PLAN_NAME}",
-          "aiSearchReuse": "${AI_SEARCH_REUSE}",
-          "existingAiSearchResourceGroupName": "${AI_SEARCH_RESOURCE_GROUP_NAME}",
-          "existingAiSearchName": "${AI_SEARCH_NAME}",
-          "orchestratorFunctionAppReuse": "${ORCHESTRATOR_FUNCTION_APP_REUSE}",
-          "existingOrchestratorFunctionAppResourceGroupName": "${ORCHESTRATOR_FUNCTION_APP_RESOURCE_GROUP_NAME}",
-          "existingOrchestratorFunctionAppName": "${ORCHESTRATOR_FUNCTION_APP_NAME}",
-          "dataIngestionFunctionAppReuse": "${DATA_INGESTION_FUNCTION_APP_REUSE}",
-          "existingDataIngestionFunctionAppResourceGroupName": "${DATA_INGESTION_FUNCTION_APP_RESOURCE_GROUP_NAME}",
-          "existingDataIngestionFunctionAppName": "${DATA_INGESTION_FUNCTION_APP_NAME}",
-          "appServiceReuse": "${APP_SERVICE_REUSE}",
-          "existingAppServiceName": "${APP_SERVICE_NAME}",
-          "existingAppServiceNameResourceGroupName": "${APP_SERVICE_RESOURCE_GROUP_NAME}",
-          "orchestratorFunctionAppStorageReuse": "${ORCHESTRATOR_FUNCTION_APP_STORAGE_REUSE}",
-          "existingOrchestratorFunctionAppStorageName": "${ORCHESTRATOR_FUNCTION_APP_STORAGE_NAME}",
-          "existingOrchestratorFunctionAppStorageResourceGroupName": "${ORCHESTRATOR_FUNCTION_APP_STORAGE_RESOURCE_GROUP_NAME}",
-          "dataIngestionFunctionAppStorageReuse": "${DATA_INGESTION_FUNCTION_APP_STORAGE_REUSE}",
-          "existingDataIngestionFunctionAppStorageName": "${DATA_INGESTION_FUNCTION_APP_STORAGE_NAME}",
-          "existingDataIngestionFunctionAppStorageResourceGroupName": "${DATA_INGESTION_FUNCTION_APP_STORAGE_RESOURCE_GROUP_NAME}",
-          "aiServicesReuse": "${AI_SERVICES_REUSE}",
-          "existingAiServicesResourceGroupName": "${AI_SERVICES_RESOURCE_GROUP_NAME}",
-          "existingAiServicesName": "${AI_SERVICES_NAME}",
-          "cosmosDbReuse": "${COSMOS_DB_REUSE}",
-          "existingCosmosDbResourceGroupName": "${COSMOS_DB_RESOURCE_GROUP_NAME}",
-          "existingCosmosDbAccountName": "${COSMOS_DB_ACCOUNT_NAME}",
-          "existingCosmosDbDatabaseName": "${COSMOS_DB_DATABASE_NAME}",          
-          "keyVaultReuse": "${KEY_VAULT_REUSE}",
-          "existingKeyVaultResourceGroupName": "${KEY_VAULT_RESOURCE_GROUP_NAME}",
-          "existingKeyVaultName": "${KEY_VAULT_NAME}",
-          "storageReuse": "${STORAGE_REUSE}",
-          "existingStorageResourceGroupName": "${STORAGE_RESOURCE_GROUP_NAME}",
-          "existingStorageName": "${STORAGE_NAME}",
-          "vnetReuse": "${VNET_REUSE}",
-          "existingVnetResourceGroupName": "${VNET_RESOURCE_GROUP_NAME}",
-          "existingVnetName": "${VNET_NAME}"
+      ]
+    },
+
+    "containerAppsList": {
+      "value": [
+        {
+          "name": "",
+          "service_name": "orchestrator",
+          "internal_name": "ORCHESTRATOR_CONTAINER_APP",
+          "min_replicas": 1,
+          "max_replicas": 1
+        },
+        {
+          "name": "",           
+          "service_name": "frontend",
+          "internal_name": "FRONT_END_CONTAINER_APP",
+          "min_replicas": 1,
+          "max_replicas": 1                 
+        },
+        {
+          "name": "",               
+          "service_name": "dataingest",
+          "internal_name": "DATA_INGEST_CONTAINER_APP",
+          "min_replicas": 1,
+          "max_replicas": 1                    
         }
-      }	
+      ]
+    }, 
+
+    "storageAccountContainersList": {
+      "value": [
+        {
+          "name": "documents-images"
+        },
+        {
+          "name": "documents"
+        },
+        {
+          "name": "nl2sql"
+        }
+      ]
+    },  
+
+    "databaseContainersList": {
+      "value": [
+        {
+          "name": "conversations"
+        },
+        {
+          "name": "datasources"
+        }
+      ]
+    }  
+    
   }
 }
