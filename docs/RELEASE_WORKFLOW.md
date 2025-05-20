@@ -82,7 +82,7 @@ This project uses a lightweight and structured Git workflow designed for teams w
 
 ---
 
-### 🔹 Step  – Tag the Final Production Release (e.g., `v1.3.0`)
+### 🔹 Step 7 – Tag the Final Production Release (e.g., `v1.3.0`)
 
 **Who:** *Maintainer*
 
