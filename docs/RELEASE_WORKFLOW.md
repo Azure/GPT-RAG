@@ -73,7 +73,7 @@ This project uses a lightweight and structured Git workflow designed for teams w
 
 ---
 
-### 🔹 Step 6 – Tag the Final Production Release (e.g., `v1.3.0`)
+### 🔹 Step 6 – Review and Merge the PR into `main`
 
 **Who:** *Reviewer*
 
