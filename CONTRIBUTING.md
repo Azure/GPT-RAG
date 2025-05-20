@@ -45,7 +45,7 @@ This section outlines the contribution process, highlighting the key actions for
 3. **Add Upstream**: Link the original repository as "upstream" to keep your fork synced.
 4. **Create a Feature Branch**: Start a new branch for your changes.
 5. **Commit and Push Changes**: Implement your changes and push them to your GitHub fork.
-**6. Open a Pull Request**: Submit your changes for review. If approved, they’ll be merged into the `develop` branch and later into `main` based on the project’s release process.
+6. **Open a Pull Request**: Submit your changes for review. If approved, they’ll be merged into the `develop` branch and later into `main` based on the project’s release process.
 7. **Keep Your Fork Updated**: Regularly sync your fork with the original repository to stay current.
 
 ## Contributor's Step-by-Step Guide
