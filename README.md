@@ -22,15 +22,13 @@ The **RAG pattern** enables businesses to use the reasoning capabilities of LLMs
 
 The GPT-RAG Solution Accelerator offers a robust architecture tailored for enterprise-grade deployment of the RAG pattern. It ensures grounded responses and is built on Zero-trust security and Responsible AI, ensuring availability, scalability, and auditability. Ideal for organizations transitioning from exploration and PoC stages to full-scale production and MVPs.
 
-> [!NOTE] 
-> This repo has undergone a major architectural update. For the original version, see [v1.0.0](https://github.com/Azure/gpt-rag/tree/v1.0.0).
-
-
-### Zero Trust Architecture Deployment
-
-For more secure and isolated deployments, you can opt for the Zero Trust architecture. This architecture is ideal for production environments where network isolation and stringent security measures are highly valued.
+### Architecture Overview Diagram
 
  ![Zero Trust Architecture](media/architecture-zero-trust.png)
+
+## Original Release
+
+This repo has undergone a major architectural update. For the original version, see [v1.0.0](https://github.com/Azure/gpt-rag/tree/v1.0.0).
 
 ## Contributing
 
