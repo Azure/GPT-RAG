@@ -2,6 +2,10 @@
 
 <!-- Describe the intention of the changes being proposed. What problem does it solve or functionality does it add? -->
 
+## Contributing guidelines
+
+Please see [Contributing Guidelines](../CONTRIBUTING.md) before creating your Pull Request.
+
 ## Type of change
 
 ```
@@ -60,6 +64,3 @@ If this change adds a new functionality, provide a link to its documentation.
 - [ ] I have reviewed the code for readability, maintainability, and adherence to project conventions
 - [ ] I have added at least two reviewers to the Pull Request
 
-## Contributing guidelines
-
-See [CONTRIBUTING.md](../CONTRIBUTING.md) for more details.
