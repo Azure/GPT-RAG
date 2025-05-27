@@ -132,7 +132,16 @@ azd auth login
 az login
 ```
 
-**3** Start Building the infrastructure and components deployment:
+**3** Set location for Azure Developer CLI:
+
+```sh
+azd env set AZURE_LOCATION eastus
+```
+
+> [!TIP]  
+> The regions we test most often are  `eastus`, `eastus2`, `westus3`.
+
+**4** Start Building the infrastructure and components deployment:
 
 ```sh
 azd up
