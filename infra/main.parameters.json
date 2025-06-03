@@ -146,6 +146,9 @@
     "orchestratorTavilyApiKey": {
       "value": "${TAVILY_API_KEY}"
     },
+    "orchestratorAnthropicApiKey": {
+      "value": "${ANTHROPIC_API_KEY}"
+    },
     "orchestratorFunctionsWorkerRuntime": {
       "value": "${AZURE_FUNCTIONS_WORKER_RUNTIME}"
     },
