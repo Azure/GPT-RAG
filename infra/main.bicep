@@ -527,6 +527,11 @@ var openAiApiKey = !empty(azureOpenAiApiKey) ? azureOpenAiApiKey : ''
 param orchestratorTavilyApiKey string = ''
 var orchestratorTavilyApiKeyVar = !empty(orchestratorTavilyApiKey) ? orchestratorTavilyApiKey : ''
 
+@description('Anthropic API Key used by the orchestrator.')
+@secure()
+param orchestratorAnthropicApiKey string = ''
+var orchestratorAnthropicApiKeyVar = !empty(orchestratorAnthropicApiKey) ? orchestratorAnthropicApiKey : ''
+
 @description('Serper API Key used by the orchestrator.')
 @secure()
 param orchestratorSerperApiKey string = ''
@@ -875,6 +880,10 @@ module orchestrator './core/host/functions.bicep' = {
       {
         name: 'TAVILY_API_KEY'
         value: orchestratorTavilyApiKeyVar
+      }
+      {
+        name: 'ANTHROPIC_API_KEY'
+        value: orchestratorAnthropicApiKeyVar
       }
       {
         name: 'SERPER_API_KEY'
