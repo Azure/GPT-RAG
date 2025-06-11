@@ -2,16 +2,15 @@
 set -euo pipefail
 
 # avoid unbound-variable errors by setting defaults
-: "${AZURE_INSTALL_AOAI:=false}"
-: "${AZURE_INSTALL_SEARCH_SERVICE:=false}"
-: "${AZURE_INSTALL_AI_FOUNDRY:=false}"
-: "${AZURE_CONFIGURE_RBAC:=false}"
-: "${AZURE_NETWORK_ISOLATION:=false}"
+: "${deployAppConfig:=true}"
+: "${deploySearchService:=true}"
+: "${deployAiFoundry:=true}"
+: "${networkIsolation:=false}"
 
 echo "🔧 Running post-provision steps…"
 
 echo "📋 Current environment variables:"
-for v in AZURE_INSTALL_AOAI AZURE_INSTALL_SEARCH_SERVICE AZURE_INSTALL_AI_FOUNDRY AZURE_CONFIGURE_RBAC AZURE_NETWORK_ISOLATION; do
+for v in deployAppConfig deploySearchService deployAiFoundry networkIsolation ; do
   printf "  %s=%s\n" "$v" "${!v:-<unset>}"
 done
 
@@ -19,8 +18,10 @@ done
 # Setup Python environment
 ###############################################################################
 echo "📦 Creating temporary venv…"
-python -m venv config/.venv_temp
+python3 -m venv --without-pip config/.venv_temp
 source config/.venv_temp/bin/activate
+echo "⬇️ Manually bootstrapping pip…"
+curl -sS https://bootstrap.pypa.io/get-pip.py | python
 
 echo "⬇️  Installing requirements…"
 pip install --upgrade pip
@@ -34,108 +35,54 @@ echo "📑 Seeding App Configuration…"
 {
 
   echo "🚀 Running scripts.appconfig.seed_config…"
-  python -m config.appconfig.seed_config
+  python -m config.appconfig.setup
   echo "✅ App Configuration script finished."
 } || {
   echo "❗️ Error during App Configuration Setup. Skipping it."
 }
 
 ###############################################################################
-# 2) RBAC Setup
+# 2) AI Foundry Setup
 ###############################################################################
 echo 
-if [[ "${AZURE_CONFIGURE_RBAC,,}" == "true" ]]; then
-  echo "📑 RBAC Setup…"
-  {
-    echo "🚀 Running config.rbac.setup…"
-    python -m config.rbac.rbac_setup
-    echo "✅ RBAC setup script finished."
-  } || {
-    echo "❗️ Error during RBAC setup. Skipping it."
-  }
-else
-  echo "⚠️  Skipping RBAC setup (AZURE_CONFIGURE_RBAC is not 'true')."
-fi
-
-###############################################################################
-# 3) AOAI Setup
-###############################################################################
-echo 
-if [[ "${AZURE_INSTALL_AOAI,,}" == "true" ]]; then
-  echo "📑 AOAI Setup…"
-  {
-    echo "🚀 Running config.aoai.raipolicies (Applying RAI policies)…"
-    python -m config.aoai.raipolicies
-    echo "✅ AOAI setup script finished."
-  } || {
-    echo "❗️ Error during AOAI setup. Skipping it."
-  }
-else
-  echo "⚠️  Skipping AOAI setup (AZURE_INSTALL_AOAI is not 'true')."
-fi
-
-###############################################################################
-# 4) AI Foundry Setup
-###############################################################################
-echo 
-if [[ "${AZURE_INSTALL_AI_FOUNDRY,,}" == "true" ]]; then
+if [[ "${deployAiFoundry,,}" == "true" ]]; then
   echo "📑 AI Foundry Setup…"
   {
     echo "🚀 Running config.aifoundry.aifoundry_setup…"
-    python -m config.aifoundry.aifoundry_setup
+    python -m config.aifoundry.setup
     echo "✅ AI Foundry setup script finished."
   } || {
     echo "❗️ Error during AI Foundry setup. Skipping it."
   }
 else
-  echo "⚠️  Skipping AI Foundry setup (AZURE_INSTALL_AI_FOUNDRY is not 'true')."
+  echo "⚠️  Skipping AI Foundry setup (deployAiFoundry is not 'true')."
 fi
 
-# ###############################################################################
-# # 5) AI Search Setup
-# ###############################################################################
-echo 
-if [[ "${AZURE_INSTALL_SEARCH_SERVICE,,}" == "true" ]]; then
+###############################################################################
+# 3) AI Search Setup
+###############################################################################
+echo
+if [[ "${deploySearchService,,}" == "true" ]]; then
   echo "🔍 AI Search setup…"
   {
     echo "🚀 Running config.search.setup…"
-    python -m config.search.search_setup
+    python -m config.search.setup
     echo "✅ Search setup script finished."
   } || {
     echo "❗️ Error during Search setup. Skipping it."
   }
 else
-  echo "⚠️  Skipping AI Search setup (AZURE_INSTALL_SEARCH_SERVICE is not 'true')."
-fi
-
-# ###############################################################################
-# # 5) Container Apps Setup
-# ###############################################################################
-echo 
-if [[ "${AZURE_INSTALL_CONTAINER_APPS,,}" == "true" ]]; then
-  echo "🔍 Container Apps setup…"
-  {
-    echo "🚀 Running config.containerapps.capps_setup…"
-    python -m config.containerapps.capp_setup
-    echo "✅ Container Apps setup script finished."
-  } || {
-    echo "❗️ Error during Container Apps setup. Skipping it."
-  }
-else
-  echo "⚠️  Skipping Container Apps setup (AZURE_INSTALL_CONTAINER_APPS is not 'true')."
+  echo "⚠️  Skipping AI Search setup (deploySearchService is not 'true')."
 fi
 
 ###############################################################################
-# 7) Zero Trust Information
+# 4) Zero Trust Information
 ###############################################################################
 echo 
-if [[ "${AZURE_NETWORK_ISOLATION,,}" == "true" ]]; then
-  echo "🔒 Access the Zero Trust bastion:"
-  echo "  VM: $AZURE_VM_NAME"
-  echo "  User: $AZURE_VM_USER_NAME"
-  echo "  Credentials: $AZURE_BASTION_KV_NAME/$AZURE_VM_KV_SEC_NAME"
+if [[ "${networkIsolation,,}" == "true" ]]; then
+  echo "🔒 Access the Zero Trust bastion"
 else
-  echo "🚧 Zero Trust not enabled; provisioning Standard architecture."
+  echo "🚧 Zero Trust not enabled; provisioning Basic architecture."
 fi
 
 echo 

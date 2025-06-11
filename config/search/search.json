@@ -1,11 +1,11 @@
 {
     "datasources": [
     {
-        "name": "{AZURE_SEARCH_RAG_INDEX_DATASOURCE_NAME}",
+        "name": "{searchRagIndexDataSourceName}",
         "description": "Datastore for ragindex",
         "type": "azureblob",
         "credentials": {
-            "connectionString": "ResourceId={AZURE_RESOURCE_IDS.STORAGE_ACCOUNT}/;"
+            "connectionString": "ResourceId={storageAccountResourceId}/;"
         },
         "container": {
             "name": "documents",
@@ -16,11 +16,11 @@
         }
     },
     {
-        "name": "{AZURE_SEARCH_MEASURES_INDEX_DATASOURCE_NAME}",
+        "name": "{searchMeasuresIndexDataSourceName}",
         "description": "Datastore for nl2sql-measures",
         "type": "azureblob",
         "credentials": {
-            "connectionString": "ResourceId={AZURE_RESOURCE_IDS.STORAGE_ACCOUNT}/;"
+            "connectionString": "ResourceId={storageAccountResourceId}/;"
         },
         "container": {
           "name": "nl2sql",
@@ -31,12 +31,12 @@
         }
       },
       {
-        "name": "{AZURE_SEARCH_QUERIES_INDEX_DATASOURCE_NAME}",
+        "name": "{searchQueriesIndexDataSourceName}",
         "description": "Datastore for nl2sql-queries",
         "type": "azureblob",
         "subtype": null,
         "credentials": {
-            "connectionString": "ResourceId={AZURE_RESOURCE_IDS.STORAGE_ACCOUNT}/;"
+            "connectionString": "ResourceId={storageAccountResourceId}/;"
         },
         "container": {
           "name": "nl2sql",
@@ -49,12 +49,12 @@
       
 
       {
-        "name": "{AZURE_SEARCH_TABLES_INDEX_DATASOURCE_NAME}",
+        "name": "{searchTablesIndexDataSourceName}",
         "description": "Datastore for nl2sql-tables",
         "type": "azureblob",
         "subtype": null,
         "credentials": {
-            "connectionString": "ResourceId={AZURE_RESOURCE_IDS.STORAGE_ACCOUNT}/;"
+            "connectionString": "ResourceId={storageAccountResourceId}/;"
         },
         "container": {
           "name": "nl2sql",
@@ -72,7 +72,7 @@
   
     "indexes": [
       {
-        "name": "{AZURE_SEARCH_RAG_INDEX_NAME}",    
+        "name": "{searchRagIndexName}",    
         "fields": [
           { "name": "id",                          "type": "Edm.String",               "key": true,  "searchable": true,  "retrievable": true,  "analyzer": "keyword" },
           { "name": "parent_id",                   "type": "Edm.String",               "searchable": false, "retrievable": true },
@@ -81,21 +81,21 @@
           { "name": "metadata_storage_last_modified", "type": "Edm.DateTimeOffset",    "searchable": false, "retrievable": true, "sortable": true, "filterable": true },
           { "name": "metadata_security_id",        "type": "Collection(Edm.String)",   "searchable": false, "retrievable": true, "filterable": true },
           { "name": "chunk_id",                    "type": "Edm.Int32",                "searchable": false, "retrievable": true },
-          { "name": "content",                     "type": "Edm.String",               "searchable": true,  "retrievable": true, "analyzer": "{AZURE_SEARCH_ANALYZER_NAME}" },
-          { "name": "imageCaptions",               "type": "Edm.String",               "searchable": true,  "retrievable": true, "analyzer": "{AZURE_SEARCH_ANALYZER_NAME}" },
+          { "name": "content",                     "type": "Edm.String",               "searchable": true,  "retrievable": true, "analyzer": "{searchAnalyzerName}" },
+          { "name": "imageCaptions",               "type": "Edm.String",               "searchable": true,  "retrievable": true, "analyzer": "{searchAnalyzerName}" },
           { "name": "page",                        "type": "Edm.Int32",                "searchable": false, "retrievable": true },
           { "name": "offset",                      "type": "Edm.Int64",                "searchable": false, "retrievable": true },
           { "name": "length",                      "type": "Edm.Int32",                "searchable": false, "retrievable": true },
-          { "name": "title",                       "type": "Edm.String",               "searchable": true,  "retrievable": true,  "filterable": true, "analyzer": "{AZURE_SEARCH_ANALYZER_NAME}" },
-          { "name": "category",                    "type": "Edm.String",               "searchable": true,  "retrievable": true,  "filterable": true, "analyzer": "{AZURE_SEARCH_ANALYZER_NAME}" },
+          { "name": "title",                       "type": "Edm.String",               "searchable": true,  "retrievable": true,  "filterable": true, "analyzer": "{searchAnalyzerName}" },
+          { "name": "category",                    "type": "Edm.String",               "searchable": true,  "retrievable": true,  "filterable": true, "analyzer": "{searchAnalyzerName}" },
           { "name": "filepath",                    "type": "Edm.String",               "searchable": false, "retrievable": true },
           { "name": "url",                         "type": "Edm.String",               "searchable": false, "retrievable": true },
           { "name": "summary",                     "type": "Edm.String",               "searchable": true,  "retrievable": true },
           { "name": "relatedImages",               "type": "Collection(Edm.String)",   "searchable": false, "retrievable": true },
           { "name": "relatedFiles",                "type": "Collection(Edm.String)",   "searchable": false, "retrievable": true },
           { "name": "source",                      "type": "Edm.String",               "searchable": false, "retrievable": true,  "filterable": true },
-          { "name": "contentVector",               "type": "Collection(Edm.Single)",   "searchable": true,  "retrievable": true,  "dimensions": "{AZURE_EMBEDDINGS_VECTOR_DIMENSIONS}", "vectorSearchProfile": "default" },
-          { "name": "captionVector",               "type": "Collection(Edm.Single)",   "searchable": true,  "retrievable": true,  "dimensions": "{AZURE_EMBEDDINGS_VECTOR_DIMENSIONS}", "vectorSearchProfile": "default" }
+          { "name": "contentVector",               "type": "Collection(Edm.Single)",   "searchable": true,  "retrievable": true,  "dimensions": "{embeddingsVectorDimensions}", "vectorSearchProfile": "default" },
+          { "name": "captionVector",               "type": "Collection(Edm.Single)",   "searchable": true,  "retrievable": true,  "dimensions": "{embeddingsVectorDimensions}", "vectorSearchProfile": "default" }
         ],
         "corsOptions": {
           "allowedOrigins": ["*"],
@@ -131,14 +131,14 @@
         }
       },
       {
-        "name": "{AZURE_SEARCH_QUERIES_INDEX_NAME}", 
+        "name": "{searchQueriesIndexName}", 
         "fields": [
           { "name": "id",            "type": "Edm.String",               "key": true },
           { "name": "datasource",    "type": "Edm.String",               "searchable": true, "filterable": true, "retrievable": true },
-          { "name": "question",      "type": "Edm.String",               "searchable": true, "retrievable": true, "analyzer": "{AZURE_SEARCH_ANALYZER_NAME}" },
+          { "name": "question",      "type": "Edm.String",               "searchable": true, "retrievable": true, "analyzer": "{searchAnalyzerName}" },
           { "name": "query",         "type": "Edm.String",               "searchable": false },
           { "name": "reasoning",     "type": "Edm.String",               "searchable": true },
-          { "name": "contentVector", "type": "Collection(Edm.Single)",   "searchable": true, "dimensions": "{AZURE_EMBEDDINGS_VECTOR_DIMENSIONS}", "vectorSearchProfile": "default" }
+          { "name": "contentVector", "type": "Collection(Edm.Single)",   "searchable": true, "dimensions": "{embeddingsVectorDimensions}", "vectorSearchProfile": "default" }
         ],
         "corsOptions": {
           "allowedOrigins": ["*"],
@@ -158,23 +158,23 @@
         }        
       },
       {
-        "name": "{AZURE_SEARCH_TABLES_INDEX_NAME}",
+        "name": "{searchTablesIndexName}",
         "fields": [
           { "name": "id",            "type": "Edm.String",               "key": true },
           { "name": "table",         "type": "Edm.String",               "searchable": true, "retrievable": true },
-          { "name": "description",   "type": "Edm.String",               "searchable": true, "analyzer": "{AZURE_SEARCH_ANALYZER_NAME}" },
+          { "name": "description",   "type": "Edm.String",               "searchable": true, "analyzer": "{searchAnalyzerName}" },
           { "name": "datasource",    "type": "Edm.String",               "searchable": true },
           {
             "name": "columns",
             "type": "Collection(Edm.ComplexType)",
             "fields": [
               { "name": "name",        "type": "Edm.String", "searchable": true },
-              { "name": "description", "type": "Edm.String", "searchable": true, "analyzer": "{AZURE_SEARCH_ANALYZER_NAME}" },
+              { "name": "description", "type": "Edm.String", "searchable": true, "analyzer": "{searchAnalyzerName}" },
               { "name": "type",        "type": "Edm.String" },
               { "name": "examples",    "type": "Collection(Edm.String)" }
             ]
           },
-          { "name": "contentVector", "type": "Collection(Edm.Single)", "searchable": true, "dimensions": "{AZURE_EMBEDDINGS_VECTOR_DIMENSIONS}", "vectorSearchProfile": "default" }
+          { "name": "contentVector", "type": "Collection(Edm.Single)", "searchable": true, "dimensions": "{embeddingsVectorDimensions}", "vectorSearchProfile": "default" }
         ],
         "corsOptions": {
           "allowedOrigins": ["*"],
@@ -194,17 +194,17 @@
         }
       },
       {
-        "name": "{AZURE_SEARCH_MEASURES_INDEX_NAME}",
+        "name": "{searchMeasuresIndexName}",
         "fields": [
           { "name": "id",            "type": "Edm.String",             "key": true },
           { "name": "datasource",    "type": "Edm.String",             "searchable": true, "filterable": true },
           { "name": "name",          "type": "Edm.String",             "searchable": true, "filterable": true },
-          { "name": "description",   "type": "Edm.String",             "searchable": true, "analyzer": "{AZURE_SEARCH_ANALYZER_NAME}" },
+          { "name": "description",   "type": "Edm.String",             "searchable": true, "analyzer": "{searchAnalyzerName}" },
           { "name": "type",          "type": "Edm.String",             "searchable": true, "filterable": true },
           { "name": "source_table",  "type": "Edm.String",             "searchable": true, "filterable": true },
           { "name": "data_type",     "type": "Edm.String",             "searchable": true },
           { "name": "source_model",  "type": "Edm.String",             "searchable": true },
-          { "name": "contentVector", "type": "Collection(Edm.Single)", "searchable": true, "dimensions": "{AZURE_EMBEDDINGS_VECTOR_DIMENSIONS}", "vectorSearchProfile": "default" }
+          { "name": "contentVector", "type": "Collection(Edm.Single)", "searchable": true, "dimensions": "{embeddingsVectorDimensions}", "vectorSearchProfile": "default" }
         ],
         "corsOptions": {
           "allowedOrigins": ["*"],
@@ -227,14 +227,14 @@
   
     "skillsets": [
       {
-        "name": "{AZURE_SEARCH_RAG_INDEX_SKILLSET_NAME}",
+        "name": "{searchRagIndexSkillsetName}",
         "description": "Document chunking skillset",
         "skills": [
           {
             "@odata.type": "#Microsoft.Skills.Custom.WebApiSkill",
             "name": "document-chunking",
             "description": "Extract chunks from documents.",
-            "uri": "{AZURE_CONTAINER_APPS_LIST.DATA_INGEST_CONTAINER_APP.fqdn}/document-chunking",  
+            "uri": "{containerApps.DATA_INGEST_CONTAINER_APP.fqdn}/document-chunking",  
             "httpMethod": "POST",
             "timeout": "PT230S",
             "context": "/document",
@@ -252,7 +252,7 @@
         "indexProjections": {
           "selectors": [
             {
-              "targetIndexName": "{AZURE_SEARCH_RAG_INDEX_NAME}",
+              "targetIndexName": "{searchRagIndexName}",
               "parentKeyFieldName": "parent_id",
               "sourceContext": "/document/chunks/*",
               "mappings": [
@@ -285,14 +285,14 @@
         }
       },
       {
-        "name": "{AZURE_SEARCH_QUERIES_INDEX_SKILLSET_NAME}",
+        "name": "{searchQueriesIndexSkillsetName}",
         "description": "Embedding skillset for queries",
         "skills": [
           {
             "@odata.type": "#Microsoft.Skills.Custom.WebApiSkill",
-            "name": "{AZURE_SEARCH_QUERIES_INDEX_SKILLSET_NAME}",
+            "name": "{searchQueriesIndexSkillsetName}",
             "description": "Generates embeddings for question.",
-            "uri": "{AZURE_CONTAINER_APPS_LIST.DATA_INGEST_CONTAINER_APP.fqdn}/text-embedding",
+            "uri": "{containerApps.DATA_INGEST_CONTAINER_APP.fqdn}/text-embedding",
             "httpMethod": "POST",
             "batchSize": 1,
             "timeout": "PT60S",
@@ -308,14 +308,14 @@
         ]
       },
       {
-        "name": "{AZURE_SEARCH_TABLES_INDEX_SKILLSET_NAME}",
+        "name": "{searchTablesIndexSkillsetName}",
         "description": "Embedding skillset for tables",
         "skills": [
           {
             "@odata.type": "#Microsoft.Skills.Custom.WebApiSkill",
-            "name": "{AZURE_SEARCH_TABLES_INDEX_SKILLSET_NAME}",
+            "name": "{searchTablesIndexSkillsetName}",
             "description": "Generates embeddings for description.",
-            "uri": "{AZURE_CONTAINER_APPS_LIST.DATA_INGEST_CONTAINER_APP.fqdn}/text-embedding",
+            "uri": "{containerApps.DATA_INGEST_CONTAINER_APP.fqdn}/text-embedding",
             "httpMethod": "POST",
             "batchSize": 1,
             "timeout": "PT60S",
@@ -331,14 +331,14 @@
         ]
       },
       {
-        "name": "{AZURE_SEARCH_MEASURES_INDEX_SKILLSET_NAME}",
+        "name": "{searchMeasuresIndexSkillsetName}",
         "description": "Embedding skillset for measures",
         "skills": [
           {
             "@odata.type": "#Microsoft.Skills.Custom.WebApiSkill",
-            "name": "{AZURE_SEARCH_MEASURES_INDEX_SKILLSET_NAME}",
+            "name": "{searchMeasuresIndexSkillsetName}",
             "description": "Generates embeddings for description.",
-            "uri": "{AZURE_CONTAINER_APPS_LIST.DATA_INGEST_CONTAINER_APP.fqdn}/text-embedding",
+            "uri": "{containerApps.DATA_INGEST_CONTAINER_APP.fqdn}/text-embedding",
             "httpMethod": "POST",
             "batchSize": 1,
             "timeout": "PT60S",
@@ -357,12 +357,12 @@
   
     "indexers": [
       {
-        "name": "{AZURE_SEARCH_RAG_INDEX_INDEXER_NAME}",
+        "name": "{searchRagIndexIndexerName}",
         "body": {
-          "dataSourceName": "{AZURE_SEARCH_RAG_INDEX_DATASOURCE_NAME}",
-          "targetIndexName": "{AZURE_SEARCH_RAG_INDEX_NAME}",
-          "skillsetName": "{AZURE_SEARCH_RAG_INDEX_SKILLSET_NAME}",
-          "schedule": { "interval": "{AZURE_SEARCH_RAG_INDEX_INTERVAL}" },
+          "dataSourceName": "{searchRagIndexDataSourceName}",
+          "targetIndexName": "{searchRagIndexName}",
+          "skillsetName": "{searchRagIndexSkillsetName}",
+          "schedule": { "interval": "{searchRagIndexInterval}" },
           "fieldMappings": [
             { "sourceFieldName": "metadata_storage_path", "targetFieldName": "id", "mappingFunction": { "name": "fixedLengthEncode" } }
           ],
@@ -378,12 +378,12 @@
         }
       },
       {
-        "name": "{AZURE_SEARCH_QUERIES_INDEX_INDEXER_NAME}",
+        "name": "{searchQueriesIndexIndexerName}",
         "body": {
-          "dataSourceName": "{AZURE_SEARCH_QUERIES_INDEX_DATASOURCE_NAME}",
-          "targetIndexName": "{AZURE_SEARCH_QUERIES_INDEX_NAME}",
-          "skillsetName": "{AZURE_SEARCH_QUERIES_INDEX_SKILLSET_NAME}",
-          "schedule": { "interval": "{AZURE_SEARCH_QUERIES_INDEX_INTERVAL}" },
+          "dataSourceName": "{searchQueriesIndexDataSourceName}",
+          "targetIndexName": "{searchQueriesIndexDataSourceName}",
+          "skillsetName": "{searchQueriesIndexSkillsetName}",
+          "schedule": { "interval": "{searchQueriesIndexInterval}" },
           "fieldMappings": [
             { "sourceFieldName": "metadata_storage_path", "targetFieldName": "id", "mappingFunction": { "name": "fixedLengthEncode" } },
             { "sourceFieldName": "datasource",            "targetFieldName": "datasource" },
@@ -397,12 +397,12 @@
         }
       },
       {
-        "name": "{AZURE_SEARCH_TABLES_INDEX_INDEXER_NAME}",
+        "name": "{searchTablesIndexIndexerName}",
         "body": {
-          "dataSourceName": "{AZURE_SEARCH_TABLES_INDEX_DATASOURCE_NAME}",
-          "targetIndexName": "{AZURE_SEARCH_TABLES_INDEX_NAME}",
-          "skillsetName": "{AZURE_SEARCH_TABLES_INDEX_SKILLSET_NAME}",
-          "schedule": { "interval": "{AZURE_SEARCH_TABLES_INDEX_INTERVAL}" },
+          "dataSourceName": "{searchTablesIndexDataSourceName}",
+          "targetIndexName": "{searchTablesIndexName}",
+          "skillsetName": "{searchTablesIndexSkillsetName}",
+          "schedule": { "interval": "{searchTablesIndexInterval}" },
           "fieldMappings": [
             { "sourceFieldName": "metadata_storage_path", "targetFieldName": "id", "mappingFunction": { "name": "fixedLengthEncode" } },
             { "sourceFieldName": "table",                "targetFieldName": "table" },
@@ -416,12 +416,12 @@
         }
       },
       {
-        "name": "{AZURE_SEARCH_MEASURES_INDEX_INDEXER_NAME}",
+        "name": "{searchMeasuresIndexIndexerName}",
         "body": {
-          "dataSourceName": "{AZURE_SEARCH_MEASURES_INDEX_DATASOURCE_NAME}",
-          "targetIndexName": "{AZURE_SEARCH_MEASURES_INDEX_NAME}",
-          "skillsetName": "{AZURE_SEARCH_MEASURES_INDEX_SKILLSET_NAME}",
-          "schedule": { "interval": "{AZURE_SEARCH_MEASURES_INDEX_INTERVAL}" },
+          "dataSourceName": "{searchMeasuresIndexDataSourceName}",
+          "targetIndexName": "{searchMeasuresIndexName}",
+          "skillsetName": "{searchMeasuresIndexSkillsetName}",
+          "schedule": { "interval": "{searchMeasuresIndexInterval}" },
           "fieldMappings": [
             { "sourceFieldName": "metadata_storage_path", "targetFieldName": "id", "mappingFunction": { "name": "fixedLengthEncode" } },
             { "sourceFieldName": "datasource",            "targetFieldName": "datasource" },

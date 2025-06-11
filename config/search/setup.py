@@ -153,15 +153,15 @@ def call_search_api(endpoint, api_version, rtype, rname, method, cred, body=None
 
 def execute_setup():
     cred = ChainedTokenCredential(ManagedIdentityCredential(), AzureCliCredential())
-    ac_endpoint = os.getenv("AZURE_APP_CONFIG_ENDPOINT")
+    ac_endpoint = os.getenv("appConfigEndpoint")
     if not ac_endpoint:
-        logging.error("AZURE_APP_CONFIG_ENDPOINT not set")
+        logging.error("appConfigEndpoint not set")
         sys.exit(1)
     ac = AzureAppConfigurationClient(ac_endpoint, cred)
 
     # load all settings
     app_cfg = {}
-    for setting in ac.list_configuration_settings(label_filter="infra"):
+    for setting in ac.list_configuration_settings(label_filter="gpt-rag"):
         try:
             app_cfg[setting.key] = json.loads(setting.value)
         except:
@@ -179,8 +179,16 @@ def execute_setup():
         ds_to_indexers.setdefault(ds_name, []).append(ix_name)
 
     # core
-    search_endpoint = app_cfg["AZURE_SEARCH_ENDPOINT"]
-    api_version     = app_cfg["AZURE_SEARCH_API_VERSION"]
+    search_endpoint = app_cfg["searchServiceQueryEndpoint"]
+    api_version     = env_cfg["searchApiVersion"]
+
+    if not search_endpoint:
+        logging.error("❗️ searchServiceQueryEndpoint not found in App Configuration; skipping Azure Search setup.")
+        return
+
+    if not api_version:
+        logging.error("❗️ searchApiVersion not found in search.env; skipping Azure Search setup.")
+        return
 
     # datasources: delete dependent indexers first, then recreate
     logging.info("Creating datasources...")
@@ -233,13 +241,17 @@ def execute_setup():
         # resolve any placeholders in the .env value
         final_val = resolve_placeholders(raw_val, env_cfg, app_cfg)
         try:
-            ac.set_configuration_setting(ConfigurationSetting(key=key, value=final_val, label="infra"))
+            ac.set_configuration_setting(ConfigurationSetting(key=key, value=final_val, label="gpt-rag"))
             logging.info(f"✅ Set App Config '{key}' = '{final_val}'")
         except Exception as e:
             logging.error(f"❗️ Failed to set '{key}': {e}")
 
 if __name__ == "__main__":
-    logging.info("Starting Azure Search setup.")
+    logging.info("🔍 Starting Azure Search setup.")
     t0 = time.time()
-    execute_setup()
-    logging.info(f"Setup completed in {round(time.time() - t0, 2)} seconds.")
+    try:
+        execute_setup()
+    except Exception as e:
+        logging.error(f"❗️ Unexpected error during Search setup: {e}")
+    finally:
+        logging.info(f"✅ Azure Search setup script finished in {round(time.time() - t0, 2)} seconds.")

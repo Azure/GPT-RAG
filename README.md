@@ -6,6 +6,7 @@ languages:
 - bicep
 products:
 - azure
+- azure-ai-foundry
 - azure-openai
 - azure-ai-search
 urlFragment: GPT-RAG
@@ -22,9 +23,58 @@ The **RAG pattern** enables businesses to use the reasoning capabilities of LLMs
 
 The GPT-RAG Solution Accelerator offers a robust architecture tailored for enterprise-grade deployment of the RAG pattern. It ensures grounded responses and is built on Zero-trust security and Responsible AI, ensuring availability, scalability, and auditability. Ideal for organizations transitioning from exploration and PoC stages to full-scale production and MVPs.
 
-### Architecture Overview Diagram
+### Architecture
 
  ![Zero Trust Architecture](media/architecture-zero-trust.png)
+
+## Pre-requisites
+
+To deploy this template, you need the following permissions on the Resource Group:
+
+- Contributor
+- Role-Based Access Administrator
+
+## Permissions
+
+| Resource                   | Role                                | Assignee                   | Description                                                                                         |
+|:---------------------------|:------------------------------------|:---------------------------|:----------------------------------------------------------------------------------------------------|
+| App Configuration Settings | App Configuration Data Owner        | Executor                   | Full control over App Configuration                                                                  |
+| Azure Container Registry   | AcrPush                             | Executor                   | Push container images                                                                                |
+| Key Vault                  | Key Vault Contributor               | Executor                   | Manage key vault settings                                                                            |
+| Search Service             | Search Service Contributor          | Executor                   | Create search service elements                                                                       |
+| Search Service             | Search Index Data Contributor       | Executor                   | Read and write search index data                                                                     |
+| Storage Account            | Storage Blob Data Contributor       | Executor                   | Read and write blob data                                                                             |
+| AI Foundry Search Service  | Search Service Contributor          | AI Foundry Project         | Manage AI search service                                                                             |
+| AI Foundry Search Service  | Search Index Data Contributor       | AI Foundry Project         | Read/write AI search index data                                                                      |
+| AI Foundry Blob Storage    | Storage Blob Data Contributor       | AI Foundry Project         | File and intermediate data storage (chunks, embeddings)                                              |
+| AI Foundry Storage         | Storage Blob Data Owner             | AI Foundry Project         | File and intermediate data storage (chunks, embeddings)                                              |
+| AI Foundry Cosmos DB       | Cosmos DB Operator                  | AI Foundry Project         | Thread storage: persist conversation messages & transactions                                         |
+| AI Foundry Cosmos DB       | Cosmos DB Built-in Data Contributor | AI Foundry Project         | Thread storage: persist conversation messages & transactions                                         |
+| Search Service             | Search Index Data Reader            | AI Foundry Project         | Read search index data                                                                               |
+| Storage Account            | Storage Blob Data Reader            | AI Foundry Project         | Read blob data                                                                                       |
+| Key Vault                  | Key Vault Crypto User               | AI Foundry Project         | Perform cryptographic ops only if CMK used                                                           |
+| Key Vault                  | Key Vault Secrets User              | AI Foundry Project         | Read secrets for encryption only if CMK used                                                         |
+| App Configuration Settings | App Configuration Data Reader       | ContainerApp: orchestrator | Read App Configuration data                                                                          |
+| App Configuration Settings | App Configuration Data Reader       | ContainerApp: frontend     | Read App Configuration data                                                                          |
+| App Configuration Settings | App Configuration Data Reader       | ContainerApp: dataingest   | Read App Configuration data                                                                          |
+| AI Foundry Account         | Cognitive Services User             | ContainerApp: orchestrator | Access Cognitive Services operations                                                                 |
+| AI Foundry Account         | Cognitive Services User             | ContainerApp: dataingest   | Access Cognitive Services operations                                                                 |
+| AI Foundry Account         | Cognitive Services OpenAI User      | ContainerApp: orchestrator | Use OpenAI APIs                                                                                      |
+| AI Foundry Account         | Cognitive Services OpenAI User      | ContainerApp: dataingest   | Use OpenAI APIs                                                                                      |
+| Azure Container Registry   | AcrPull                             | ContainerApp: orchestrator | Pull container images                                                                                |
+| Azure Container Registry   | AcrPull                             | ContainerApp: frontend     | Pull container images                                                                                |
+| Azure Container Registry   | AcrPull                             | ContainerApp: dataingest   | Pull container images                                                                                |
+| Cosmos DB                  | Cosmos DB Built-in Data Contributor | ContainerApp: orchestrator | Read/write Cosmos DB data                                                                            |
+| Key Vault                  | Key Vault Secrets User              | ContainerApp: orchestrator | Read vault secrets                                                                                   |
+| Key Vault                  | Key Vault Secrets User              | ContainerApp: frontend     | Read vault secrets                                                                                   |
+| Key Vault                  | Key Vault Secrets User              | ContainerApp: dataingest   | Read vault secrets                                                                                   |
+| Search Service             | Search Index Data Reader            | ContainerApp: orchestrator | Read search index data                                                                               |
+| Search Service             | Search Index Data Contributor       | ContainerApp: dataingest   | Read and write search index data                                                                     |
+| Storage Account            | Storage Blob Data Contributor       | ContainerApp: dataingest   | Read and write blob data                                                                             |
+| Storage Account            | Storage Blob Data Reader            | ContainerApp: orchestrator | Read blob data                                                                                       |
+| Storage Account            | Storage Blob Data Reader            | ContainerApp: frontend     | Read blob data                                                                                       |
+| Storage Account            | Storage Blob Data Reader            | Search Service             | Read blob data for search integration                                                                 |
+
 
 ## Original Release
 

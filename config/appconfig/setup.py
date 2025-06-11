@@ -8,18 +8,17 @@ each one as its own key/value in Azure App Configuration.
 
 Steps:
 1. Validate required environment variables:
-   - AZURE_SUBSCRIPTION_ID
-   - AZURE_RESOURCE_GROUP
-   - AZURE_DEPLOYMENT_NAME
-   - AZURE_APP_CONFIG_ENDPOINT
+   - subscriptionId
+   - resourceGroupName
+   - deploymentName
+   - appConfigEndpoint
 2. Authenticate via Azure CLI or Managed Identity
 3. Fetch all deployment outputs
 4. For each output:
-     - Normalize the name to uppercase
      - Convert the value to JSON if not a string
      - Write it to App Configuration with up to 3 retries
+     - Gracefully handle missing deployment or no outputs
 """
-
 import os
 import sys
 import json
@@ -29,6 +28,7 @@ import time
 from azure.identity import AzureCliCredential, ManagedIdentityCredential, ChainedTokenCredential
 from azure.mgmt.resource import ResourceManagementClient
 from azure.appconfiguration import AzureAppConfigurationClient, ConfigurationSetting
+from azure.core.exceptions import ResourceNotFoundError
 
 # suppress verbose HTTP logs
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -41,10 +41,10 @@ for name in (
     logging.getLogger(name).setLevel(logging.WARNING)
 
 REQUIRED_ENV_VARS = [
-    "AZURE_SUBSCRIPTION_ID",
-    "AZURE_RESOURCE_GROUP",
-    "AZURE_DEPLOYMENT_NAME",
-    "AZURE_APP_CONFIG_ENDPOINT"
+    "subscriptionId",
+    "resourceGroupName",
+    "deploymentName",
+    "appConfigEndpoint"
 ]
 
 def check_env_vars():
@@ -53,12 +53,13 @@ def check_env_vars():
         logging.error("❗️ Missing environment variables: %s", ", ".join(missing))
         sys.exit(1)
 
+
 def main():
     check_env_vars()
-    sub_id = os.environ["AZURE_SUBSCRIPTION_ID"]
-    rg = os.environ["AZURE_RESOURCE_GROUP"]
-    deployment = os.environ["AZURE_DEPLOYMENT_NAME"]
-    app_conf_endpoint = os.environ["AZURE_APP_CONFIG_ENDPOINT"]
+    sub_id = os.environ["subscriptionId"]
+    rg = os.environ["resourceGroupName"]
+    deployment = os.environ["deploymentName"]
+    app_conf_endpoint = os.environ["appConfigEndpoint"]
 
     logging.info("Seeding App Configuration at %s for deployment %s/%s",
                  app_conf_endpoint, rg, deployment)
@@ -69,10 +70,23 @@ def main():
         ManagedIdentityCredential()
     )
 
-    # fetch ARM outputs
     resource_client = ResourceManagementClient(cred, sub_id)
-    raw_outputs = resource_client.deployments.get(rg, deployment).properties.outputs or {}
-    outputs = {k.upper(): v for k, v in raw_outputs.items()}
+
+    # fetch ARM outputs, handle missing deployment gracefully
+    try:
+        deployment_resource = resource_client.deployments.get(rg, deployment)
+        raw_outputs = deployment_resource.properties.outputs or {}
+    except ResourceNotFoundError:
+        logging.error("❌ Deployment '%s' not found in resource group '%s'. Exiting.", deployment, rg)
+        sys.exit(1)
+
+    # outputs = {k.upper(): v for k, v in raw_outputs.items()}
+    outputs = raw_outputs
+
+    # if no outputs, warn and exit
+    if not outputs:
+        logging.warning("⚠️ No outputs found for deployment '%s' in resource group '%s'. Nothing to seed.", deployment, rg)
+        sys.exit(0)
 
     # connect to App Configuration
     client = AzureAppConfigurationClient(app_conf_endpoint, cred)
@@ -91,7 +105,7 @@ def main():
         for attempt in range(1, retries + 1):
             try:
                 client.set_configuration_setting(
-                    ConfigurationSetting(key=key, value=setting_value, label="infra"),
+                    ConfigurationSetting(key=key, value=setting_value, label="gpt-rag"),
                 )
                 logging.info("✅ Successfully seeded %s", key)
                 break
@@ -102,6 +116,7 @@ def main():
                     time.sleep(20)
                 else:
                     logging.error("❌ Giving up on %s after %d attempts", key, retries)
+
 
 if __name__ == "__main__":
     main()

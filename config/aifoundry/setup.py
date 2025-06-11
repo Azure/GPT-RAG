@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 """
-Configure RAI blocklist and policy for Azure OpenAI
+
+Configure AI Foundry Service
+
+- Configure RAI blocklist and policy for Azure OpenAI
 
 This script reads configuration from Azure App Configuration, loads blocklist and policy
 definitions from JSON files, and applies them to the specified Azure OpenAI deployment.
 
 Steps:
 1. Validate required env vars:
-   - AZURE_APP_CONFIG_ENDPOINT
+   - appConfigEndpoint
 
 2. Authenticate via Azure CLI or Managed Identity
 
@@ -44,7 +47,7 @@ for logger_name in (
     logging.getLogger(logger_name).setLevel(logging.WARNING)
 
 # ── required env vars ───────────────────────────────────────────
-REQUIRED_ENV_VARS = ["AZURE_APP_CONFIG_ENDPOINT"]
+REQUIRED_ENV_VARS = ["appConfigEndpoint"]
 
 def check_env():
     missing = [v for v in REQUIRED_ENV_VARS if not os.getenv(v)]
@@ -54,7 +57,7 @@ def check_env():
             logging.error("  • %s", name)
         sys.exit(1)
 
-def cfg(client: AzureAppConfigurationClient, key: str, label= 'infra', required: bool = True) -> str:
+def cfg(client: AzureAppConfigurationClient, key: str, label= 'gpt-rag', required: bool = True) -> str:
     """
     Fetch a single value from App Configuration; exit if missing or empty.
     """
@@ -88,7 +91,7 @@ def load_and_replace(path: str, replacements: dict) -> dict:
 
 def main():
     check_env()
-    endpoint = os.environ["AZURE_APP_CONFIG_ENDPOINT"]
+    endpoint = os.environ["appConfigEndpoint"]
 
     # authenticate using CLI or Managed Identity
     cred = ChainedTokenCredential(
@@ -100,19 +103,19 @@ def main():
     app_conf = AzureAppConfigurationClient(endpoint, cred)
 
     # ── 1) Read core settings ────────────────────────────────────────
-    subscription_id = cfg(app_conf, "AZURE_SUBSCRIPTION_ID")
-    resource_group  = cfg(app_conf, "AZURE_RESOURCE_GROUP")
-    account_name    = cfg(app_conf, "AZURE_AOAI_SERVICE_NAME")
+    subscription_id = cfg(app_conf, "subscriptionId")
+    resource_group  = cfg(app_conf, "resourceGroupName")
+    account_name    = cfg(app_conf, "aiFoundryAccountName")
 
-    logging.info("Loaded: SUBSCRIPTION_ID=%s, RESOURCE_GROUP=%s", subscription_id, resource_group)
-    logging.info("Loaded: SERVICE_NAME=%s", account_name)
+    logging.info("Loaded: subscriptionId=%s, resourceGroupName=%s", subscription_id, resource_group)
+    logging.info("Loaded: aiFoundryAccountName=%s", account_name)
 
     # ── 2) Determine deployment name from list ───────────────────────
-    raw_list = cfg(app_conf, "AZURE_AOAI_DEPLOYMENT_LIST")
+    raw_list = cfg(app_conf, "modelDeployments")
     try:
         deployments = json.loads(raw_list)
     except json.JSONDecodeError as e:
-        logging.error("AZURE_AOAI_DEPLOYMENT_LIST is not valid JSON: %s", e)
+        logging.error("modelDeployments is not valid JSON: %s", e)
         sys.exit(1)
 
     internal_key = "AZURE_CHAT_DEPLOYMENT_NAME"
@@ -124,7 +127,7 @@ def main():
 
     if not deployment_name:
         logging.error(
-            "No deployment with internal_name '%s' found in AZURE_AOAI_DEPLOYMENT_LIST",
+            "No deployment with internal_name '%s' found in modelDeployments",
             internal_key
         )
         sys.exit(1)
@@ -140,7 +143,7 @@ def main():
 
     # ── 4) Blocklist creation/update ────────────────────────────────
     bl_def = load_and_replace(
-        "config/aoai/raiblocklist.json",
+        "config/aifoundry/raiblocklist.json",
         {"{{BlocklistName}}": blocklist_name}
     )
     bl_name = bl_def.get("name") or bl_def.get("blocklistname")
@@ -193,7 +196,7 @@ def main():
 
     # ── 4) RAI policy creation/update ────────────────────────────────
     pol_def = load_and_replace(
-        "config/aoai/raipolicies.json",
+        "config/aifoundry/raipolicies.json",
         {
             "{{PolicyName}}": policy_name,
             "{{BlocklistName}}": bl_name
