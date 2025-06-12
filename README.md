@@ -45,7 +45,7 @@ Além disso voce vai precisar mais dessas ferramentas instaladas na maquina que 
 ## How to deploy the landing zone?
 
 ```
-azd init
+azd init -t azure/gpt-rag -b feature/vnext-architecture
 azd provision
 ```
 
