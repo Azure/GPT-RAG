@@ -52,6 +52,10 @@ azd provision
 > [!TIP]
 > You can update `main.parameters.json` to customize settings before running `azd provision`.
 
+## Demo Video
+
+[![Watch the demo](https://img.youtube.com/vi/nZMDtaDQuP4/0.jpg)](https://www.youtube.com/embed/nZMDtaDQuP4?autoplay=1)
+
 ## GPT-RAG Services
 
 After infrastructure is in place, deploy the GPT-RAG services from their respective repositories:
