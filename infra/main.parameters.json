@@ -5,15 +5,14 @@
 
     "environmentName":                     { "value": "${AZURE_ENV_NAME}" },
     "location":                            { "value": "${AZURE_LOCATION}" },
-    "deploymentTags":                      { "value": {"project": "TestProject"} },
+    "deploymentTags":                      { "value": {} },
     "principalId":                         { "value": "${AZURE_PRINCIPAL_ID}" },
-    "networkIsolation":                    { "value": "false" },  
+    "networkIsolation":                    { "value": "false" },
 
-    "deployAiFoundry":                     { "value": "true" },    
-    "deployAiFoundryStorageAccount":       { "value": "true" },
-    "deployAiFoundryKeyVault":             { "value": "true" },
-    "deployAiFoundrySearchService":        { "value": "true" },        
-    "deployAiFoundryCosmosDb":             { "value": "true" },
+    "aiSearchResourceId":                  { "value": null },
+    "aiFoundryStorageAccountResourceId":   { "value": null },
+    "aiFoundryCosmosDBAccountResourceId":  { "value": null },
+    
     "deployGroundingWithBing":             { "value": "true" },    
     "deployAppConfig":                     { "value": "true" },
     "deployKeyVault":                      { "value": "true" },
@@ -31,7 +30,6 @@
     "aiFoundryProjectDisplayName":           { "value": null },
     "aiFoundryProjectDescription":           { "value": null },    
     "aiFoundryStorageAccountName":           { "value": null },
-    "aiFoundryKeyVaultName":                 { "value": null },
     "aiFoundrySearchServiceName":            { "value": null },
     "aiFoundryCosmosDbName":                 { "value": null },
     "bingSearchName":                        { "value": null },  
@@ -52,17 +50,15 @@
     "solutionStorageAccountName":            { "value": null },
 
     "useCMK":                                { "value": "false" },        
-    "keyName":                               { "value": null },
-    "keyVersion":                            { "value": null },
 
     "modelDeploymentList":{
       "value": [
         {
           "name": "chat",
-          "model": "gpt-4o-mini",
+          "model": "gpt-4o",
           "modelFormat": "OpenAI",          
           "type": "GlobalStandard",
-          "version": "2024-07-18",          
+          "version": "2024-11-20",          
           "capacity": 40,
           "internal_name": "AZURE_CHAT_DEPLOYMENT_NAME"
         },

@@ -8,12 +8,11 @@ Set-StrictMode -Version Latest
 # -----------------------------------------------------------------------------
 $deployAppConfig     = $env:deployAppConfig     ?? 'true'
 $deploySearchService = $env:deploySearchService ?? 'true'
-$deployAiFoundry     = $env:deployAiFoundry     ?? 'true'
 $networkIsolation    = $env:networkIsolation    ?? 'false'
 
 Write-Host "🔧 Running post-provision steps…`n"
 Write-Host "📋 Current environment variables:"
-foreach ($v in 'deployAppConfig','deploySearchService','deployAiFoundry','networkIsolation') {
+foreach ($v in 'deployAppConfig','deploySearchService','networkIsolation') {
     $value = Get-Variable -Name $v -ValueOnly
     Write-Host "  $v = $value"
 }
@@ -63,18 +62,15 @@ try {
 # 2) AI Foundry Setup
 # -----------------------------------------------------------------------------
 Write-Host ""
-if ($deployAiFoundry.ToLower() -eq 'true') {
-    Write-Host "📑 AI Foundry Setup…"
-    try {
-        Write-Host "🚀 Running config.aifoundry.setup…"
-        & $python -m config.aifoundry.setup
-        Write-Host "✅ AI Foundry setup script finished."
-    } catch {
-        Write-Warning "❗️ Error during AI Foundry setup. Skipping it."
-    }
-} else {
-    Write-Warning "⚠️ Skipping AI Foundry setup (deployAiFoundry is not 'true')."
+Write-Host "📑 AI Foundry Setup…"
+try {
+    Write-Host "🚀 Running config.aifoundry.setup…"
+    & $python -m config.aifoundry.setup
+    Write-Host "✅ AI Foundry setup script finished."
+} catch {
+    Write-Warning "❗️ Error during AI Foundry setup. Skipping it."
 }
+
 
 # -----------------------------------------------------------------------------
 # 3) AI Search Setup

@@ -29,6 +29,7 @@ resource accountCapabilityHost 'Microsoft.CognitiveServices/accounts/capabilityH
    }
 }
 
+
 resource projectCapabilityHost 'Microsoft.CognitiveServices/accounts/projects/capabilityHosts@2025-04-01-preview' = {
   name: projectCapHost
   parent: project

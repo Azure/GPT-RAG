@@ -1,13 +1,7 @@
-@description('Name of the AI Services account to create')
+
 param accountName string
-
-@description('Azure location where the AI Services account and deployments will be created')
 param location string
-
-@description('Array of model deployments. Each item should include properties: name, model, modelFormat, type, version, and capacity')
 param modelDeployments array
-
-// AI Foundry Account Resource
 
 resource account 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' = {
   name: accountName
@@ -28,8 +22,10 @@ resource account 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' = {
       ipRules: []
     }
     publicNetworkAccess: 'Enabled'
+
+    // API-key based auth is not supported for the Agent service
     disableLocalAuth: false
-  } 
+  }
 }
 
 // Model Deployments Resource
@@ -57,5 +53,3 @@ output accountName string = account.name
 output accountID string = account.id
 output accountTarget string = account.properties.endpoint
 output accountPrincipalId string = account.identity.principalId
-output resourceId string = account.id
-output endpoint string = account.properties.endpoint

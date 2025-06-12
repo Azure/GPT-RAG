@@ -4,13 +4,12 @@ set -euo pipefail
 # avoid unbound-variable errors by setting defaults
 : "${deployAppConfig:=true}"
 : "${deploySearchService:=true}"
-: "${deployAiFoundry:=true}"
 : "${networkIsolation:=false}"
 
 echo "🔧 Running post-provision steps…"
 
 echo "📋 Current environment variables:"
-for v in deployAppConfig deploySearchService deployAiFoundry networkIsolation ; do
+for v in deployAppConfig deploySearchService networkIsolation ; do
   printf "  %s=%s\n" "$v" "${!v:-<unset>}"
 done
 
@@ -45,18 +44,15 @@ echo "📑 Seeding App Configuration…"
 # 2) AI Foundry Setup
 ###############################################################################
 echo 
-if [[ "${deployAiFoundry,,}" == "true" ]]; then
-  echo "📑 AI Foundry Setup…"
-  {
-    echo "🚀 Running config.aifoundry.aifoundry_setup…"
-    python -m config.aifoundry.setup
-    echo "✅ AI Foundry setup script finished."
-  } || {
-    echo "❗️ Error during AI Foundry setup. Skipping it."
-  }
-else
-  echo "⚠️  Skipping AI Foundry setup (deployAiFoundry is not 'true')."
-fi
+echo "📑 AI Foundry Setup…"
+{
+  echo "🚀 Running config.aifoundry.aifoundry_setup…"
+  python -m config.aifoundry.setup
+  echo "✅ AI Foundry setup script finished."
+} || {
+  echo "❗️ Error during AI Foundry setup. Skipping it."
+}
+
 
 ###############################################################################
 # 3) AI Search Setup

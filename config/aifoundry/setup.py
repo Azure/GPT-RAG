@@ -28,6 +28,7 @@ import json
 import logging
 
 from azure.identity import AzureCliCredential, ManagedIdentityCredential, ChainedTokenCredential
+from azure.core.exceptions import ClientAuthenticationError
 from azure.appconfiguration import AzureAppConfigurationClient
 from azure.mgmt.cognitiveservices import CognitiveServicesManagementClient
 from azure.mgmt.cognitiveservices.models import (
@@ -94,10 +95,15 @@ def main():
     endpoint = os.environ["appConfigEndpoint"]
 
     # authenticate using CLI or Managed Identity
-    cred = ChainedTokenCredential(
-        AzureCliCredential(),
-        ManagedIdentityCredential()
-    )
+    try:
+        cred = ChainedTokenCredential(
+            AzureCliCredential(),
+            ManagedIdentityCredential()
+        )
+    except ClientAuthenticationError as e:
+        logging.error("❗️ Authentication failed: %s", e)
+        logging.info("ℹ️ Skipping configuration due to missing credentials.")
+        sys.exit(0)
 
     # connect to App Configuration
     app_conf = AzureAppConfigurationClient(endpoint, cred)

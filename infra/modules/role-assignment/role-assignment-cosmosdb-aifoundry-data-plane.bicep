@@ -1,8 +1,8 @@
 @description('Name of the CosmosDB resource')
 param cosmosAccountName string
 
-@description('Project name')
-param projectPrincipalId string
+@description('Principal Id')
+param principalId string
 
 param projectWorkspaceId string
 
@@ -51,9 +51,9 @@ var scopeEntityContainer = '/subscriptions/${subscription().subscriptionId}/reso
 
 resource containerRoleAssignmentUserContainer 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2022-05-15' = {
   parent: cosmosAccount
-  name: guid(projectWorkspaceId, containerUserMessageStore.id, roleDefinitionId, projectPrincipalId)
+  name: guid(projectWorkspaceId, containerUserMessageStore.id, roleDefinitionId, principalId)
   properties: {
-    principalId: projectPrincipalId
+    principalId: principalId
     roleDefinitionId: roleDefinitionId
     scope: scopeUserContainer
   }
@@ -61,9 +61,9 @@ resource containerRoleAssignmentUserContainer 'Microsoft.DocumentDB/databaseAcco
 
 resource containerRoleAssignmentSystemContainer 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2022-05-15' = {
   parent: cosmosAccount
-  name: guid(projectWorkspaceId, containerSystemMessageStore.id, roleDefinitionId, projectPrincipalId)
+  name: guid(projectWorkspaceId, containerSystemMessageStore.id, roleDefinitionId, principalId)
   properties: {
-    principalId: projectPrincipalId
+    principalId: principalId
     roleDefinitionId: roleDefinitionId
     scope: scopeSystemContainer
   }
@@ -71,9 +71,9 @@ resource containerRoleAssignmentSystemContainer 'Microsoft.DocumentDB/databaseAc
 
   resource containerRoleAssignmentEntityContainer 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2022-05-15' = {
     parent: cosmosAccount
-    name: guid(projectWorkspaceId, containerEntityStore.id, roleDefinitionId, projectPrincipalId)
+    name: guid(projectWorkspaceId, containerEntityStore.id, roleDefinitionId, principalId)
     properties: {
-      principalId: projectPrincipalId
+      principalId: principalId
       roleDefinitionId: roleDefinitionId
       scope: scopeEntityContainer
     }

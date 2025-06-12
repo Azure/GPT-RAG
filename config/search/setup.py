@@ -14,6 +14,8 @@ from azure.identity import (
     ChainedTokenCredential
 )
 from azure.appconfiguration import AzureAppConfigurationClient, ConfigurationSetting
+from azure.core.exceptions import ClientAuthenticationError
+
 
 # ── Silence verbose logging ─────────────────────────────────────────────────
 for logger_name in (
@@ -152,7 +154,16 @@ def call_search_api(endpoint, api_version, rtype, rname, method, cred, body=None
         logging.info(f"✅ {method.upper()} {rtype}/{rname} succeeded ({resp.status_code})")
 
 def execute_setup():
-    cred = ChainedTokenCredential(ManagedIdentityCredential(), AzureCliCredential())
+    try:
+        cred = ChainedTokenCredential(
+            AzureCliCredential(),
+            ManagedIdentityCredential()
+        )
+    except ClientAuthenticationError as e:
+        logging.error("❗️ Authentication failed: %s", e)
+        logging.info("ℹ️ Skipping configuration due to missing credentials.")
+        sys.exit(0)
+
     ac_endpoint = os.getenv("appConfigEndpoint")
     if not ac_endpoint:
         logging.error("appConfigEndpoint not set")

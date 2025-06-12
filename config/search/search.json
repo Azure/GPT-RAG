@@ -234,7 +234,7 @@
             "@odata.type": "#Microsoft.Skills.Custom.WebApiSkill",
             "name": "document-chunking",
             "description": "Extract chunks from documents.",
-            "uri": "{containerApps.DATA_INGEST_CONTAINER_APP.fqdn}/document-chunking",  
+            "uri": "https://{containerApps.dataIngest.fqdn}/document-chunking",  
             "httpMethod": "POST",
             "timeout": "PT230S",
             "context": "/document",
@@ -292,7 +292,7 @@
             "@odata.type": "#Microsoft.Skills.Custom.WebApiSkill",
             "name": "{searchQueriesIndexSkillsetName}",
             "description": "Generates embeddings for question.",
-            "uri": "{containerApps.DATA_INGEST_CONTAINER_APP.fqdn}/text-embedding",
+            "uri": "https://{containerApps.dataIngest.fqdn}/text-embedding",
             "httpMethod": "POST",
             "batchSize": 1,
             "timeout": "PT60S",
@@ -315,7 +315,7 @@
             "@odata.type": "#Microsoft.Skills.Custom.WebApiSkill",
             "name": "{searchTablesIndexSkillsetName}",
             "description": "Generates embeddings for description.",
-            "uri": "{containerApps.DATA_INGEST_CONTAINER_APP.fqdn}/text-embedding",
+            "uri": "https://{containerApps.dataIngest.fqdn}/text-embedding",
             "httpMethod": "POST",
             "batchSize": 1,
             "timeout": "PT60S",
@@ -338,7 +338,7 @@
             "@odata.type": "#Microsoft.Skills.Custom.WebApiSkill",
             "name": "{searchMeasuresIndexSkillsetName}",
             "description": "Generates embeddings for description.",
-            "uri": "{containerApps.DATA_INGEST_CONTAINER_APP.fqdn}/text-embedding",
+            "uri": "https://{containerApps.dataIngest.fqdn}/text-embedding",
             "httpMethod": "POST",
             "batchSize": 1,
             "timeout": "PT60S",
@@ -370,18 +370,17 @@
             "batchSize": 1,
             "maxFailedItems": -1,
             "maxFailedItemsPerBatch": -1,
-            "base64EncodeKeys": true,
             "configuration": {
               "dataToExtract": "allMetadata"
             }
-          }
+          }          
         }
       },
       {
         "name": "{searchQueriesIndexIndexerName}",
         "body": {
           "dataSourceName": "{searchQueriesIndexDataSourceName}",
-          "targetIndexName": "{searchQueriesIndexDataSourceName}",
+          "targetIndexName": "{searchQueriesIndexName}",
           "skillsetName": "{searchQueriesIndexSkillsetName}",
           "schedule": { "interval": "{searchQueriesIndexInterval}" },
           "fieldMappings": [

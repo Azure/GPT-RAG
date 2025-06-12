@@ -26,6 +26,7 @@ import logging
 import time
 
 from azure.identity import AzureCliCredential, ManagedIdentityCredential, ChainedTokenCredential
+from azure.core.exceptions import ClientAuthenticationError
 from azure.mgmt.resource import ResourceManagementClient
 from azure.appconfiguration import AzureAppConfigurationClient, ConfigurationSetting
 from azure.core.exceptions import ResourceNotFoundError
@@ -65,10 +66,15 @@ def main():
                  app_conf_endpoint, rg, deployment)
 
     # authenticate
-    cred = ChainedTokenCredential(
-        AzureCliCredential(),
-        ManagedIdentityCredential()
-    )
+    try:
+        cred = ChainedTokenCredential(
+            AzureCliCredential(),
+            ManagedIdentityCredential()
+        )
+    except ClientAuthenticationError as e:
+        logging.error("❗️ Authentication failed: %s", e)
+        logging.info("ℹ️ Skipping configuration due to missing credentials.")
+        sys.exit(0)
 
     resource_client = ResourceManagementClient(cred, sub_id)
 
