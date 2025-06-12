@@ -20,35 +20,42 @@ foreach ($v in 'deployAppConfig','deploySearchService','networkIsolation') {
 # -----------------------------------------------------------------------------
 # Find the Python executable
 # -----------------------------------------------------------------------------
-$python = (Get-Command python3 -ErrorAction SilentlyContinue | Where-Object { -not ($_.Source -like '*WindowsApps*') }).Name
-if (-not $python) { $python = (Get-Command python  -ErrorAction SilentlyContinue | Where-Object { -not ($_.Source -like '*WindowsApps*') }).Name }
-if (-not $python) { $python = (Get-Command py      -ErrorAction SilentlyContinue).Name }
+$python = $null
+
+# Try python3 (exclude stubs in WindowsApps)
+$cmd = Get-Command python3 -ErrorAction SilentlyContinue |
+       Where-Object { -not ($_.Source -like '*WindowsApps*') }
+if ($cmd) { $python = $cmd.Name }
+
+# Fallback to python
 if (-not $python) {
-    Throw "Python executable not found. Ensure a real Python is on PATH or use the py launcher."
+    $cmd = Get-Command python -ErrorAction SilentlyContinue |
+           Where-Object { -not ($_.Source -like '*WindowsApps*') }
+    if ($cmd) { $python = $cmd.Name }
 }
+
+# Fallback to Windows py launcher
+if (-not $python) {
+    $cmd = Get-Command py -ErrorAction SilentlyContinue
+    if ($cmd) { $python = $cmd.Name }
+}
+
+if (-not $python) {
+    Throw "Python executable not found. Install Python or ensure it's on PATH."
+}
+
+Write-Host "`n🐍 Using Python: $python"
 
 # -----------------------------------------------------------------------------
 # 0) Setup Python environment
 # -----------------------------------------------------------------------------
 Write-Host "`n📦 Creating temporary venv…"
-& $python -m venv --without-pip config/.venv_temp
-
-# Activate it (cross-platform)
-if (Test-Path 'config/.venv_temp/Scripts/Activate.ps1') {
-    & 'config/.venv_temp/Scripts/Activate.ps1'
-} elseif (Test-Path 'config/.venv_temp/bin/Activate.ps1') {
-    & 'config/.venv_temp/bin/Activate.ps1'
-} else {
-    Throw "Activation script not found in config/.venv_temp"
-}
-
-Write-Host "⬇️ Manually bootstrapping pip…"
-Invoke-WebRequest https://bootstrap.pypa.io/get-pip.py -UseBasicParsing |
-    & $python
+& $python -m venv config/.venv_temp
+& config/.venv_temp/Scripts/Activate.ps1  
 
 Write-Host "⬇️ Installing requirements…"
-pip install --upgrade pip
-pip install -r config/requirements.txt
+& $python -m pip install --upgrade pip
+& $python -m pip install -r config/requirements.txt
 
 # -----------------------------------------------------------------------------
 # 1) App Configuration Setup
@@ -114,3 +121,4 @@ if (Get-Command deactivate -ErrorAction SilentlyContinue) {
     deactivate
 }
 Remove-Item -Recurse -Force config/.venv_temp
+Write-Host "🧼 Temporary files removed. All done!"
