@@ -20,8 +20,12 @@ foreach ($v in 'deployAppConfig','deploySearchService','networkIsolation') {
 # -----------------------------------------------------------------------------
 # Find the Python executable
 # -----------------------------------------------------------------------------
-$python = (Get-Command python3 -ErrorAction SilentlyContinue)?.Name
-if (-not $python) { $python = (Get-Command python -ErrorAction Stop).Name }
+$python = (Get-Command python3 -ErrorAction SilentlyContinue | Where-Object { -not ($_.Source -like '*WindowsApps*') }).Name
+if (-not $python) { $python = (Get-Command python  -ErrorAction SilentlyContinue | Where-Object { -not ($_.Source -like '*WindowsApps*') }).Name }
+if (-not $python) { $python = (Get-Command py      -ErrorAction SilentlyContinue).Name }
+if (-not $python) {
+    Throw "Python executable not found. Ensure a real Python is on PATH or use the py launcher."
+}
 
 # -----------------------------------------------------------------------------
 # 0) Setup Python environment
