@@ -36,7 +36,7 @@ targetScope = 'resourceGroup'
 // PARAMETERS
 //////////////////////////////////////////////////////////////////////////
 
-// NOTE: Set parameter values using environment variables defined in main.parameters.json
+// NOTE: Set parameter values using main.parameters.json
 
 // ----------------------------------------------------------------------
 // General Parameters
@@ -56,7 +56,6 @@ param deploymentTags     object = {}
 @description('Enable network isolation for the deployment. This will restrict public access to resources and require private endpoints where applicable.')
 param networkIsolation   bool   = false 
 
-
 // ----------------------------------------------------------------------
 // Standard Setup Parameters
 // ----------------------------------------------------------------------
@@ -70,9 +69,6 @@ param aiFoundryStorageAccountResourceId string = ''
 
 @description('The Cosmos DB Account full ARM Resource ID. This is an optional field, and if not provided, the resource will be created.')
 param aiFoundryCosmosDBAccountResourceId string = ''
-
-// @description('The KeyVault full ARM Resource ID. This is an optional field, and if not provided, the resource will be created.')
-// param aiFoundryKeyVaultResourceId string = ''
 
 @description('The name of the project capability host to be used for the AI Foundry project.')
 param projectCapHost string = 'caphostproj'
@@ -142,24 +138,28 @@ param abbrs object = {
 // ----------------------------------------------------------------------
 // Azure AI Foundry Service params
 // ----------------------------------------------------------------------
+
 @description('List of model deployments to create in the AI Foundry account')
 param modelDeploymentList                 array  
 
 // ----------------------------------------------------------------------
-// Container params
+// Container Apps params
 // ----------------------------------------------------------------------
+
 @description('List of container apps to create')
 param containerAppsList                   array 
 
 // ----------------------------------------------------------------------
 // Cosmos DB Database params
 // ----------------------------------------------------------------------
+
 @description('Name of the Cosmos DB account to create')
 param databaseContainersList             array 
 
 // ----------------------------------------------------------------------
 // Storage Account params
 // ----------------------------------------------------------------------
+
 @description('List of containers to create in the Storage Account')
 param storageAccountContainersList        array 
 
@@ -208,7 +208,6 @@ var storageParts = split(aiFoundryStorageAccountResourceId, '/')
 var azureStorageSubscriptionId = storagePassedIn ? storageParts[2] : subscription().subscriptionId
 var azureStorageResourceGroupName = storagePassedIn ? storageParts[4] : resourceGroup().name
 
-
 // ----------------------------------------------------------------------
 // Role Assignment vars
 // ----------------------------------------------------------------------
@@ -243,8 +242,9 @@ var _role_Ids = {
 // AI Foundry Standard Setup
 //////////////////////////////////////////////////////////////////////////
 
-// Based on AI Foundry Documentation Samples
-// https://github.com/azure-ai-foundry/foundry-samples
+// Custom modules are used for AI Foundry Account and Project (V2) since no published AVM module available at this time.
+// Custom modules based on AI Foundry Documentation Samples:
+// https://github.com/azure-ai-foundry/foundry-samples/tree/main/samples/microsoft/infrastructure-setup
 
 module aiFoundryValidateExistingResources 'modules/standard-setup/validate-existing-resources.bicep' = {
   name: 'validate-existing-resources-${resourceToken}-deployment'
@@ -280,9 +280,7 @@ module aiFoundryDependencies 'modules/standard-setup/standard-dependent-resource
     }
 }
 
-/*
-  Create the AI Services account and model deployments
-*/
+// Create the AI Services account and model deployments
 module aiFoundryAccount 'modules/standard-setup/ai-account-identity.bicep' = {
   name: 'ai-${aiFoundryAccountName}-${resourceToken}-deployment'
   params: {
@@ -295,9 +293,7 @@ module aiFoundryAccount 'modules/standard-setup/ai-account-identity.bicep' = {
   ]
 }
 
-/*
-  Creates a new project (sub-resource of the AI Services account)
-*/
+// Creates a new project (sub-resource of the AI Services account)
 module aiFoundryProject 'modules/standard-setup/ai-project-identity.bicep' = {
   name: 'ai-${aiFoundryProjectName}-${resourceToken}-deployment'
   params: {
@@ -355,7 +351,6 @@ module aiFoundryBingConnection 'modules/standard-setup/ai-foundry-bing-search-to
 }
 
 // AI Foundry Connections
-//////////////////////////////////////////////////////////////////////////
 
 module aiFoundryConnectionSearch 'modules/standard-setup/connection-ai-search.bicep' = if (deploySearchService) {
   name: 'connection-ai-search-${resourceToken}'
