@@ -1,0 +1,22 @@
+# general
+
+azure-identity==1.21.0
+azure-mgmt-resource==23.3.0 # for appconfig and rbac
+azure-appconfiguration==1.7.1
+
+# aoai
+
+azure-mgmt-cognitiveservices==13.6.0
+
+# aifoundry
+
+azure-ai-ml==1.27.0             
+azure-ai-projects==1.0.0b10  
+azure-mgmt-apimanagement==5.0.0  
+
+# search
+
+requests==2.32.3
+azure-mgmt-appcontainers==3.2.0
+azure-keyvault-secrets==4.9.0
+azure-ai-projects==1.0.0b10
