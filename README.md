@@ -62,7 +62,7 @@ After infrastructure is in place, deploy the GPT-RAG services from their respect
 
 * **[Orchestrator](https://github.com/Azure/gpt-rag-orchestrator/tree/feature/vnext-architecture)** – Manages information retrieval and response generation with an agent-based approach using Semantic Kernel and Azure AI Foundry Agent Service.
 
-* **[Web UI](https://github.com/Azure/gpt-rag-ui/tree/feature/vnext-architecture)** – Provides the user interface, supports streaming responses, and allows easy customization; used exclusively with the agentic orchestrator. Follows the Backend for Frontend pattern.
+* **[Web UI](https://github.com/Azure/gpt-rag-ui/tree/feature/vnext-architecture)** – Provides the user interface, supports streaming responses, and allows easy customization.
 
 * **[Data Ingestion](https://github.com/Azure/gpt-rag-ingestion/tree/feature/vnext-architecture)** – Handles data chunking and indexing to optimize retrieval for the RAG workflow.
 
