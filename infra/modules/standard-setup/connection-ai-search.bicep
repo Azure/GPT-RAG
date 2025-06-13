@@ -4,8 +4,10 @@ Connections enable your AI applications to access tools and objects managed else
 This example demonstrates how to add an Azure AI Search connection.
 */
 param aiFoundryName string = '<your-account-name>'
+param aiProjectName string = '<your-project-name>'
 param connectedResourceName string = 'ais-${aiFoundryName}'
- 
+param aiSearchConnectionName string  = '${aiFoundryName}-connection'
+
 // Refers your existing Azure AI Foundry resource
 resource aiFoundry 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' existing = {
   name: aiFoundryName
@@ -19,7 +21,7 @@ resource existingSearchService 'Microsoft.Search/searchServices@2025-02-01-previ
 
 // Creates the Azure Foundry connection to your Azure AI Search resource
 resource connection 'Microsoft.CognitiveServices/accounts/connections@2025-04-01-preview' = {
-  name: '${aiFoundryName}-aisearch'
+  name: aiSearchConnectionName
   parent: aiFoundry
   properties: {
     category: 'CognitiveSearch'
@@ -33,3 +35,5 @@ resource connection 'Microsoft.CognitiveServices/accounts/connections@2025-04-01
     }
   }
 }
+
+output seachConnectionId string = '/subscriptions/${subscription().subscriptionId}/resourceGroups/${resourceGroup().name}/providers/Microsoft.CognitiveServices/accounts/${aiFoundryName}/projects/${aiProjectName}/connections/${aiSearchConnectionName}'

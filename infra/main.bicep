@@ -342,20 +342,23 @@ module aiFoundryAddProjectCapabilityHost 'modules/standard-setup/add-project-cap
   ]
 }
 
+
+// AI Foundry Connections
+
 module aiFoundryBingConnection 'modules/standard-setup/ai-foundry-bing-search-tool.bicep' = if (deployGroundingWithBing) {
   name:  '${bingSearchName}-connection' 
   params: {
     account_name: aiFoundryAccount.outputs.accountName
+    project_name: aiFoundryProject.outputs.projectName
     bingSearchName: bingSearchName   
   }
 }
-
-// AI Foundry Connections
 
 module aiFoundryConnectionSearch 'modules/standard-setup/connection-ai-search.bicep' = if (deploySearchService) {
   name: 'connection-ai-search-${resourceToken}'
   params: {
     aiFoundryName:         aiFoundryAccount.outputs.accountName
+    aiProjectName:         aiFoundryProject.outputs.projectName 
     connectedResourceName: searchService.outputs.name
   }
   dependsOn: [
@@ -943,7 +946,6 @@ module assignStorageStorageBlobDataReaderAIFoundryProject 'modules/role-assignme
   ]  
 }
 
-
 //////////////////////////////////////////////////////////////////////////
 // OUTPUTS
 //////////////////////////////////////////////////////////////////////////
@@ -1018,6 +1020,12 @@ output aiFoundryProjectWorkspaceId  string = aiFoundryFormatProjectWorkspaceId.o
 output cosmosDbEndpoint             string = CosmosDBAccount.outputs.endpoint
 
 // ──────────────────────────────────────────────────────────────────────
+// Connections
+// ──────────────────────────────────────────────────────────────────────
+output seachConnectionId string = deploySearchService ? aiFoundryConnectionSearch.outputs.seachConnectionId : ''
+output bingConnectionId  string =  deployGroundingWithBing ? aiFoundryBingConnection.outputs.bingConnectionId : ''
+
+// ──────────────────────────────────────────────────────────────────────
 // Managed Identity Principals
 // ──────────────────────────────────────────────────────────────────────
 output containerEnvPrincipalId        string = containerEnv.outputs.systemAssignedMIPrincipalId!
@@ -1044,7 +1052,6 @@ output containerApps array = [
     fqdn:          containerApps[i].outputs.fqdn
   }
 ]
-
 
 // ──────────────────────────────────────────────────────────────────────
 // Model Deployment Summary
