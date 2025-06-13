@@ -1039,7 +1039,7 @@ output containerApps array = [
   for (app, i) in containerAppsList: {
     name:          empty(app.name) ? '${abbrs.containerApps}-${resourceToken}-${app.service_name}' : app.name
     serviceName:   app.service_name
-    internal_name:  app.internal_name
+    canonical_name:  app.canonical_name
     principalId:   containerApps[i].outputs.systemAssignedMIPrincipalId!
     fqdn:          containerApps[i].outputs.fqdn
   }

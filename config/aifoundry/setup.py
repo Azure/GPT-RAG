@@ -124,21 +124,21 @@ def main():
         logging.error("modelDeployments is not valid JSON: %s", e)
         sys.exit(1)
 
-    internal_key = "AZURE_CHAT_DEPLOYMENT_NAME"
+    canonical_name = "chatDeploymentName"
     deployment_name = None
     for item in deployments:
-        if item.get("internal_name") == internal_key:
+        if item.get("canonical_name") == canonical_name:
             deployment_name = item.get("name")
             break
 
     if not deployment_name:
         logging.error(
-            "No deployment with internal_name '%s' found in modelDeployments",
-            internal_key
+            "No deployment with canonical_name '%s' found in modelDeployments",
+            canonical_name
         )
         sys.exit(1)
 
-    logging.info("Selected deployment: %s (internal_name=%s)", deployment_name, internal_key)
+    logging.info("Selected deployment: %s (canonical_name=%s)", deployment_name, canonical_name)
 
     # ── 3) Create Cognitive Services client ─────────────────────────
     client = CognitiveServicesManagementClient(cred, subscription_id)

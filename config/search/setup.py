@@ -44,8 +44,8 @@ def resolve_placeholders(obj, env_cfg, app_cfg):
     Lookup order:
       1) Single-level {A} → env_cfg[A] if exists, else app_cfg[A]
       2) Two-level  {A.B} → if app_cfg[A] is dict, return its B;
-                          if it's list, find element with internal_name==B and return that element (JSON-dumped)
-      3) Three-level{A.B.C} → app_cfg[A] must be list; find element with internal_name==B and return its C
+                          if it's list, find element with canonical_name==B and return that element (JSON-dumped)
+      3) Three-level{A.B.C} → app_cfg[A] must be list; find element with canonical_name==B and return its C
     """
 
     if isinstance(obj, str):
@@ -89,10 +89,10 @@ def resolve_placeholders(obj, env_cfg, app_cfg):
                         return m.group(0)
                     cfg = parsed
 
-                # list → find by internal_name
+                # list → find by canonical_name
                 if isinstance(cfg, list):
                     for elem in cfg:
-                        if elem.get("internal_name") == B:
+                        if elem.get("canonical_name") == B:
                             return json.dumps(elem)
                     return m.group(0)
 
@@ -113,7 +113,7 @@ def resolve_placeholders(obj, env_cfg, app_cfg):
                 # must be list
                 if isinstance(cfg, list):
                     for elem in cfg:
-                        if elem.get("internal_name") == B:
+                        if elem.get("canonical_name") == B:
                             if C in elem:
                                 val = elem[C]
                                 if isinstance(val, (dict, list)):
