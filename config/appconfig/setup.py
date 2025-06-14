@@ -84,6 +84,10 @@ def main():
             logging.warning("Skipping %s: no 'value' field", key)
             continue
 
+        if key == "APP_CONFIG_ENDPOINT":
+            logging.warning("Skipping 'APP_CONFIG_ENDPOINT' key")
+            continue
+
         val = out["value"]
         setting_value = json.dumps(val) if not isinstance(val, str) else val
 
