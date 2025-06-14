@@ -81,7 +81,7 @@
           "service_name": "orchestrator",
           "min_replicas": 1,
           "max_replicas": 1,
-          "canonical_name": "orchestrator",
+          "canonical_name": "orchestratorApp",
           "roles": [
             "App Configuration Data Reader",
             "Cognitive Services User",
@@ -98,7 +98,7 @@
           "service_name": "frontend",
           "min_replicas": 1,
           "max_replicas": 1,
-          "canonical_name": "frontend",          
+          "canonical_name": "frontendApp",          
           "roles": [
             "App Configuration Data Reader",
             "AcrPull",
@@ -111,7 +111,7 @@
           "service_name": "dataingest",
           "min_replicas": 1,
           "max_replicas": 1,
-          "canonical_name": "dataIngest",
+          "canonical_name": "dataIngestApp",
           "roles": [
             "App Configuration Data Reader",
             "Azure Machine Learning Workspace Connection Secrets Reader",
