@@ -46,9 +46,9 @@ def get_config_value(appconfig, key, required=True):
 def main():
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)-8s %(message)s")
 
-    endpoint = os.getenv("appConfigEndpoint")
+    endpoint = os.getenv("APP_CONFIG_ENDPOINT")
     if not endpoint:
-        logging.error("Environment variable appConfigEndpoint is not set.")
+        logging.error("Environment variable APP_CONFIG_ENDPOINT is not set.")
         sys.exit(1)
 
     # Authenticate to App Configuration and ARM

@@ -1010,7 +1010,6 @@ output deployContainerEnv               bool = deployContainerEnv
 // Endpoints / URIs
 // ──────────────────────────────────────────────────────────────────────
 output keyVaultUri                  string = keyVault.outputs.uri
-output appConfigEndpoint            string = appConfig.outputs.endpoint
 output containerRegistryLoginServer string = containerRegistry.outputs.loginServer
 output storageBlobEndpoint          string = storageAccount.outputs.primaryBlobEndpoint
 output searchServiceQueryEndpoint   string = searchService.outputs.endpoint
@@ -1018,6 +1017,7 @@ output aiFoundryAccountEndpoint     string = aiFoundryAccount.outputs.accountTar
 output aiFoundryProjectEndpoint     string = aiFoundryProject.outputs.endpoint
 output aiFoundryProjectWorkspaceId  string = aiFoundryFormatProjectWorkspaceId.outputs.projectWorkspaceIdGuid
 output cosmosDbEndpoint             string = CosmosDBAccount.outputs.endpoint
+output APP_CONFIG_ENDPOINT          string = appConfig.outputs.endpoint
 
 // ──────────────────────────────────────────────────────────────────────
 // Connections

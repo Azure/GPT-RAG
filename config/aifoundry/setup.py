@@ -10,7 +10,7 @@ definitions from JSON files, and applies them to the specified Azure OpenAI depl
 
 Steps:
 1. Validate required env vars:
-   - appConfigEndpoint
+   - APP_CONFIG_ENDPOINT
 
 2. Authenticate via Azure CLI or Managed Identity
 
@@ -48,7 +48,7 @@ for logger_name in (
     logging.getLogger(logger_name).setLevel(logging.WARNING)
 
 # ── required env vars ───────────────────────────────────────────
-REQUIRED_ENV_VARS = ["appConfigEndpoint"]
+REQUIRED_ENV_VARS = ["APP_CONFIG_ENDPOINT"]
 
 def check_env():
     missing = [v for v in REQUIRED_ENV_VARS if not os.getenv(v)]
@@ -92,7 +92,7 @@ def load_and_replace(path: str, replacements: dict) -> dict:
 
 def main():
     check_env()
-    endpoint = os.environ["appConfigEndpoint"]
+    endpoint = os.environ["APP_CONFIG_ENDPOINT"]
 
     # authenticate using CLI or Managed Identity
     try:

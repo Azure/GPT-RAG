@@ -164,9 +164,9 @@ def execute_setup():
         logging.info("ℹ️ Skipping configuration due to missing credentials.")
         sys.exit(0)
 
-    ac_endpoint = os.getenv("appConfigEndpoint")
+    ac_endpoint = os.getenv("APP_CONFIG_ENDPOINT")
     if not ac_endpoint:
-        logging.error("appConfigEndpoint not set")
+        logging.error("APP_CONFIG_ENDPOINT not set")
         sys.exit(1)
     ac = AzureAppConfigurationClient(ac_endpoint, cred)
 
