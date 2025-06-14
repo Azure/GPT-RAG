@@ -3,13 +3,14 @@ set -euo pipefail
 
 # avoid unbound-variable errors by setting defaults
 : "${deployAppConfig:=true}"
+: "${deployContainerApps:=true}"
 : "${deploySearchService:=true}"
 : "${networkIsolation:=false}"
 
 echo "🔧 Running post-provision steps…"
 
 echo "📋 Current environment variables:"
-for v in deployAppConfig deploySearchService networkIsolation ; do
+for v in deployAppConfig deployContainerApps deploySearchService networkIsolation ; do
   printf "  %s=%s\n" "$v" "${!v:-<unset>}"
 done
 
@@ -53,9 +54,25 @@ echo "📑 AI Foundry Setup…"
   echo "❗️ Error during AI Foundry setup. Skipping it."
 }
 
+###############################################################################
+# 3) Container Apps Setup
+###############################################################################
+echo
+if [[ "${deployContainerApps,,}" == "true" ]]; then
+  echo "🔍 ContainerApp setup…"
+  {
+    echo "🚀 Running config.containerapps.setup…"
+    python -m config.containerapps.setup
+    echo "✅ Container Apps setup script finished."
+  } || {
+    echo "❗️ Error during Container Apps setup. Skipping it."
+  }
+else
+  echo "⚠️  Container Apps setup (deployContainerApps is not 'true')."
+fi
 
 ###############################################################################
-# 3) AI Search Setup
+# 4) AI Search Setup
 ###############################################################################
 echo
 if [[ "${deploySearchService,,}" == "true" ]]; then
@@ -72,7 +89,7 @@ else
 fi
 
 ###############################################################################
-# 4) Zero Trust Information
+# 5) Zero Trust Information
 ###############################################################################
 echo 
 if [[ "${networkIsolation,,}" == "true" ]]; then

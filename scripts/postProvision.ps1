@@ -7,12 +7,13 @@ Set-StrictMode -Version Latest
 # Default environment-variable values (override by setting $env:DEPLOY*)
 # -----------------------------------------------------------------------------
 $deployAppConfig     = $env:deployAppConfig     ?? 'true'
+$deployContainerApps = $env:deployContainerApps ?? 'true'
 $deploySearchService = $env:deploySearchService ?? 'true'
 $networkIsolation    = $env:networkIsolation    ?? 'false'
 
 Write-Host "🔧 Running post-provision steps…`n"
 Write-Host "📋 Current environment variables:"
-foreach ($v in 'deployAppConfig','deploySearchService','networkIsolation') {
+foreach ($v in 'deployAppConfig','deployContainerApps','deploySearchService','networkIsolation') {
     $value = Get-Variable -Name $v -ValueOnly
     Write-Host "  $v = $value"
 }
@@ -82,9 +83,25 @@ try {
     Write-Warning "❗️ Error during AI Foundry setup. Skipping it."
 }
 
+# -----------------------------------------------------------------------------
+# 3) Container Apps Setup
+# -----------------------------------------------------------------------------
+Write-Host ""
+if ($deployContainerApps.ToLower() -eq 'true') {
+    Write-Host "🔍 Container Apps setup…"
+    try {
+        Write-Host "🚀 Running config.containerapps.setup…"
+        & $python -m config.containerapps.setup
+        Write-Host "✅ Container Apps setup script finished."
+    } catch {
+        Write-Warning "❗️ Error during Container Apps setup. Skipping it."
+    }
+} else {
+    Write-Warning "⚠️ Skipping Container Apps setup (deployContainerApps is not 'true')."
+}
 
 # -----------------------------------------------------------------------------
-# 3) AI Search Setup
+# 4) AI Search Setup
 # -----------------------------------------------------------------------------
 Write-Host ""
 if ($deploySearchService.ToLower() -eq 'true') {
@@ -101,7 +118,7 @@ if ($deploySearchService.ToLower() -eq 'true') {
 }
 
 # -----------------------------------------------------------------------------
-# 4) Zero Trust Information
+# 5) Zero Trust Information
 # -----------------------------------------------------------------------------
 Write-Host ""
 if ($networkIsolation.ToLower() -eq 'true') {

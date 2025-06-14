@@ -1041,7 +1041,7 @@ output aiFoundryCosmosDbConnection  string = aiFoundryProject.outputs.cosmosDBCo
 output aiFoundrySearchConnection    string = aiFoundryProject.outputs.aiSearchConnection
 
 // ──────────────────────────────────────────────────────────────────────
-// Container Apps Summary
+// Container Apps List
 // ──────────────────────────────────────────────────────────────────────
 output containerApps array = [
   for (app, i) in containerAppsList: {
@@ -1054,7 +1054,7 @@ output containerApps array = [
 ]
 
 // ──────────────────────────────────────────────────────────────────────
-// Model Deployment Summary
+// Model Deployment List
 // ──────────────────────────────────────────────────────────────────────
 output modelDeployments array = modelDeploymentList
 
