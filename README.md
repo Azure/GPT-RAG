@@ -29,10 +29,13 @@ This solution accelerator offers a robust architecture tailored for enterprise-g
 
 ## Prerequisites
 
+<details markdown="block">
+<summary>Expand to view prerequisites</summary>
+
 To deploy this template, the user or service principal requires the following permissions on the target Resource Group:
 
-- Contributor
-- Role-Based Access Administrator
+* An Azure subscription.
+* An Azure user with **Contributor** and **User Access Admin** permissions on the target resource group.
 
 In addition, the machine or environment used for deployment should have:
 
@@ -41,6 +44,8 @@ In addition, the machine or environment used for deployment should have:
 - Git: [Download Git](https://git-scm.com/downloads)
 - Python 3.12: [Download Python](https://www.python.org/downloads/release/python-3120/)
 - An Azure AI Services resource created or agreement to Responsible AI terms in the portal
+
+</details>
 
 ## How to deploy the infrastructure
 
