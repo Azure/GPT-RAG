@@ -75,10 +75,10 @@ After infrastructure is in place, deploy the GPT-RAG services from their respect
 
 | Resource                              | Role                                | Assignee                   | Description                                                           |
 | :------------------------------------ | :---------------------------------- | :------------------------- | :-------------------------------------------------------------------- |
-| GenAI App Configuration Settings      | App Configuration Data Owner        | Executor                   | Full control over configuration settings                              |
-| GenAI App Configuration Settings      | App Configuration Data Reader       | ContainerApp: orchestrator | Read configuration data                                               |
-| GenAI App Configuration Settings      | App Configuration Data Reader       | ContainerApp: frontend     | Read configuration data                                               |
-| GenAI App Configuration Settings      | App Configuration Data Reader       | ContainerApp: dataingest   | Read configuration data                                               |
+| GenAI App Configuration Store         | App Configuration Data Owner        | Executor                   | Full control over configuration settings                              |
+| GenAI App Configuration Store         | App Configuration Data Reader       | ContainerApp: orchestrator | Read configuration data                                               |
+| GenAI App Configuration Store         | App Configuration Data Reader       | ContainerApp: frontend     | Read configuration data                                               |
+| GenAI App Configuration Store         | App Configuration Data Reader       | ContainerApp: dataingest   | Read configuration data                                               |
 | GenAI App Container Registry          | AcrPush                             | Executor                   | Push container images                                                 |
 | GenAI App Container Registry          | AcrPull                             | ContainerApp: orchestrator | Pull container images                                                 |
 | GenAI App Container Registry          | AcrPull                             | ContainerApp: frontend     | Pull container images                                                 |
