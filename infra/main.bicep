@@ -653,7 +653,7 @@ module storageAccount 'br/public:avm/res/storage/storage-account:0.19.0' = if (d
 // Role assignments are centralized in this section to make it easier to view all permissions granted in this template.
 // Custom modules are used for role assignments since no published AVM module available for this at the time we created this template.
 
-// Storage Account - Storage Blob Data Contributor -> AI Foundry Project
+// AI Foundry Storage Account - Storage Blob Data Contributor -> AI Foundry Project
 module assignStorageAccountAiFoundryProject 'modules/standard-setup/azure-storage-account-role-assignment.bicep' = {
   name: 'assignStorageAccountAiFoundryProject'
   scope: resourceGroup(azureStorageSubscriptionId, azureStorageResourceGroupName)
@@ -663,7 +663,7 @@ module assignStorageAccountAiFoundryProject 'modules/standard-setup/azure-storag
   }
 }
 
-// Cosmos DB Account - Cosmos DB Operator -> AI Foundry Project
+// AI Foundry Cosmos DB Account - Cosmos DB Operator -> AI Foundry Project
 module assignCosmosDBAiFoundryProject 'modules/standard-setup/cosmosdb-account-role-assignment.bicep' = {
   name: 'assignCosmosDBAiFoundryProject'
   scope: resourceGroup(cosmosDBSubscriptionId, cosmosDBResourceGroupName)
@@ -676,8 +676,8 @@ module assignCosmosDBAiFoundryProject 'modules/standard-setup/cosmosdb-account-r
   ]
 }
 
-// Search Service - Search Index Data Contributor -> AI Foundry Project
-// Search Service - Search Service Contributor -> AI Foundry Project
+// AI Foundry Search Service - Search Index Data Contributor -> AI Foundry Project
+// AI Foundry Search Service - Search Service Contributor -> AI Foundry Project
 module assignSearchAiFoundryProject 'modules/standard-setup/ai-search-role-assignments.bicep' = {
   name: 'assignSearchAiFoundryProject'
   scope: resourceGroup(aiSearchServiceSubscriptionId, aiSearchServiceResourceGroupName)
@@ -690,7 +690,7 @@ module assignSearchAiFoundryProject 'modules/standard-setup/ai-search-role-assig
   ]
 }
 
-// Storage Account - Storage Blob Data Owner (workspace-limited) -> AI Foundry Project
+// AI Foundry Storage Account - Storage Blob Data Owner (workspace-limited) -> AI Foundry Project
 module assignStorageContainersAiFoundryProject 'modules/standard-setup/blob-storage-container-role-assignments.bicep' = {
   name: 'assignStorageContainersAiFoundryProject'
   scope: resourceGroup(azureStorageSubscriptionId, azureStorageResourceGroupName)
@@ -704,7 +704,7 @@ module assignStorageContainersAiFoundryProject 'modules/standard-setup/blob-stor
   ]
 }
 
-// Cosmos DB Containers - Cosmos DB Built-in Data Contributor -> AI Foundry Project
+// AI Foundry Cosmos DB Containers - Cosmos DB Built-in Data Contributor -> AI Foundry Project
 module assignCosmosDBContainersAiFoundryProject 'modules/standard-setup/cosmos-container-role-assignments.bicep' = {
   name: 'assignCosmosDBContainersAiFoundryProject'
   scope: resourceGroup(cosmosDBSubscriptionId, cosmosDBResourceGroupName)
@@ -787,6 +787,17 @@ module assignAiFoundryAccountAzureAiProjectManagerExecutor 'modules/role-assignm
       principalId: principalId
       roleDefinition: _role_Ids['Azure AI Project Manager']         
     }
+}
+
+// Cosmos DB Account - Cosmos DB Built-in Data Contributor -> Executor
+module assignCosmosDBCosmosDbBuiltInDataContributorExecutor 'modules/role-assignment/role-assignment-cosmosdb-data-plane.bicep' =  if (deployCosmosDb) {
+  name: 'assignCosmosDBCosmosDbBuiltInDataContributorExecutor'
+  params: {
+    cosmosDbAccountName: CosmosDBAccount.outputs.name
+    principalId: principalId
+    roleDefinitionGuid: _role_Ids['Cosmos DB Built-in Data Contributor']
+    scopePath: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${resourceGroup().name}/providers/Microsoft.DocumentDB/databaseAccounts/${dbAccountName}/dbs/${dbDatabaseName}'
+  }
 }
 
 // App Configuration Settings Service - App Configuration Data Reader -> ContainerApp

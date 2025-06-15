@@ -99,6 +99,7 @@ After infrastructure is in place, deploy the GPT-RAG services from their respect
 | GenAI App Storage Account             | Storage Blob Data Contributor       | ContainerApp: dataingest   | Read/write blob data                                                  |
 | GenAI App Storage Account             | Storage Blob Data Reader            | Search Service             | Read blob data for search integration                                 |
 | GenAI App Cosmos DB                   | Cosmos DB Built-in Data Contributor | ContainerApp: orchestrator | Read/write Cosmos DB data                                             |
+| GenAI App Cosmos DB                   | Cosmos DB Built-in Data Contributor | Executor                   | Read/write Cosmos DB data                                             |
 | AI Foundry Project                    | Azure AI Project Manager            | Executor                   | Manage AI Foundry projects and assign roles                           |
 | AI Foundry Storage Account            | Storage Blob Data Contributor       | AI Foundry Project         | Enable agent to store/retrieve blob artifacts in customer storage     |
 | AI Foundry Storage Account Containers | Storage Blob Data Owner (workspace) | AI Foundry Project         | Scoped owner access to workspace containers for session-specific data |
