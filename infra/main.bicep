@@ -180,6 +180,7 @@ param storageAccountContainersList        array
 
 var _azdTags = { 'azd-env-name': environmentName }
 var _tags = union(_azdTags, deploymentTags)
+var _roles = loadJsonContent('./roles.json')
 
 // ----------------------------------------------------------------------
 // Container vars
@@ -207,33 +208,6 @@ var cosmosDBResourceGroupName = cosmosPassedIn ? cosmosParts[4] : resourceGroup(
 var storageParts = split(aiFoundryStorageAccountResourceId, '/')
 var azureStorageSubscriptionId = storagePassedIn ? storageParts[2] : subscription().subscriptionId
 var azureStorageResourceGroupName = storagePassedIn ? storageParts[4] : resourceGroup().name
-
-// ----------------------------------------------------------------------
-// Role Assignment vars
-// ----------------------------------------------------------------------
-
-var _role_Ids = {
-  'Storage Blob Data Reader':           '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'
-  'Storage Blob Data Contributor':      'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
-  'Storage Blob Data Owner':            'b7e6dc6d-f1e8-4753-8033-0f276bb0955b'
-  'App Configuration Data Reader':      '516239f1-63e1-4d78-a4de-a74fb236a071'
-  'App Configuration Data Owner':       '5ae67dd6-50cb-40e7-96ff-dc2bfa4b606b'
-  AcrPull:                              '7f951dda-4ed3-4680-a7ca-43fe172d538d'
-  AcrPush:                              '8311e382-0749-4cb8-b61a-304f252e45ec'
-  'Key Vault Contributor':              'f25e0fa2-a7c8-4377-a976-54943a77a395'
-  'Key Vault Secrets User':             '4633458b-17de-408a-b874-0445c86b69e6'
-  'Key Vault Crypto User':              '12338af0-0e69-4776-bea7-57ae8d297424'
-  'Cognitive Services User':            'a97b65f3-24c7-4388-baec-2e87135dc908'
-  'Cognitive Services OpenAI User':     '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
-  'Cosmos DB Built-in Data Reader':     '00000000-0000-0000-0000-000000000001'
-  'Cosmos DB Built-in Data Contributor':'00000000-0000-0000-0000-000000000002'  
-  'Search Index Data Reader':           '1407120a-92aa-4202-b7e9-c0e197c71c8f'
-  'Search Index Data Contributor':      '8ebe5a00-799e-43f5-93ac-243d3dce84a7'
-  'Search Service Contributor':         '7ca78c08-252a-4471-8644-bb5ff32d4ba0'
-  'Cosmos DB Operator':                 '230815da-be43-4aae-9cb4-875f7bd000aa'
-  'Azure AI User':                      '53ca6127-db72-4b80-b1b0-d745d6d5456d'
-  'Azure AI Project Manager':           'eadc314b-1a2d-4efa-be10-5d325db5065e'
-}
 
 //////////////////////////////////////////////////////////////////////////
 // RESOURCES 
@@ -724,7 +698,7 @@ module assignAppConfigAppConfigurationDataReaderExecutor 'modules/role-assignmen
     name: 'assignAppConfigAppConfigurationDataReaderExecutor'
     params: {
       principalId: principalId 
-      roleDefinition: _role_Ids['App Configuration Data Owner']  
+      roleDefinition: _roles.configuration.appConfigurationDataOwner
       appConfigName: appConfig.outputs.name
     }  
 }
@@ -735,7 +709,7 @@ module assignCrAcrPushExecutor 'modules/role-assignment/role-assignment-containe
   params: {
     registryName:   containerRegistry.outputs.name
     principalId: principalId
-    roleDefinition: _role_Ids.AcrPush      
+    roleDefinition: _roles.containers.acrPush     
   }
 }
 
@@ -745,7 +719,7 @@ module assignKeyVaultKeyVaultContributorExecutor 'modules/role-assignment/role-a
     params: {
       vaultName: keyVault.outputs.name
       principalId: principalId
-      roleDefinition: _role_Ids['Key Vault Contributor']         
+      roleDefinition: _roles.security.keyVaultContributor 
     }
 }
 
@@ -755,7 +729,7 @@ module assignSearchSearchServiceContributorExecutor 'modules/role-assignment/rol
     params: {
       searchServiceName: searchService.outputs.name
       principalId: principalId
-      roleDefinition: _role_Ids['Search Service Contributor']   
+      roleDefinition: _roles.ai.searchServiceContributor
     }
 }
 
@@ -765,7 +739,7 @@ module assignSearchSearchIndexDataContributorExecutor 'modules/role-assignment/r
     params: {
       searchServiceName: searchService.outputs.name
       principalId: principalId
-      roleDefinition: _role_Ids['Search Index Data Contributor']  
+      roleDefinition: _roles.ai.searchIndexDataContributor
     }
 }
 
@@ -775,7 +749,7 @@ module assignStorageStorageBlobDataContributorExecutor 'modules/role-assignment/
   params: {
     storageAccountName: storageAccount.outputs.name
     principalId: principalId
-      roleDefinition: _role_Ids['Storage Blob Data Contributor']  
+      roleDefinition: _roles.storage.storageBlobDataContributor
   }
 }
 
@@ -785,7 +759,7 @@ module assignAiFoundryAccountAzureAiProjectManagerExecutor 'modules/role-assignm
     params: {
       cognitiveAccountName: aiFoundryAccount.outputs.accountName
       principalId: principalId
-      roleDefinition: _role_Ids['Azure AI Project Manager']         
+      roleDefinition: _roles.ai.azureAIProjectManager       
     }
 }
 
@@ -795,7 +769,7 @@ module assignCosmosDBCosmosDbBuiltInDataContributorExecutor 'modules/role-assign
   params: {
     cosmosDbAccountName: CosmosDBAccount.outputs.name
     principalId: principalId
-    roleDefinitionGuid: _role_Ids['Cosmos DB Built-in Data Contributor']
+    roleDefinitionGuid: _roles.databases.CosmosDBBuiltInDataContributor
     scopePath: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${resourceGroup().name}/providers/Microsoft.DocumentDB/databaseAccounts/${dbAccountName}/dbs/${dbDatabaseName}'
   }
 }
@@ -807,7 +781,7 @@ module assignAppConfigAppConfigurationDataReaderContainerApps 'modules/role-assi
     params: {
       appConfigName:  appConfig.outputs.name
       principalId:    containerApps[i].outputs.systemAssignedMIPrincipalId!
-      roleDefinition: _role_Ids['App Configuration Data Reader']  
+      roleDefinition: _roles.configuration.appConfigurationDataReader
     }
   }
 ]
@@ -819,7 +793,7 @@ module assignAiFoundryAccountCognitiveServicesUserContainerApps 'modules/role-as
     params: {
       cognitiveAccountName: aiFoundryAccount.outputs.accountName
       principalId: containerApps[i].outputs.systemAssignedMIPrincipalId!
-      roleDefinition: _role_Ids['Cognitive Services User']   
+      roleDefinition: _roles.ai.cognitiveServicesUser 
     }
   }
 ]
@@ -831,7 +805,7 @@ module assignAIFoundryAccountCognitiveServicesOpenAIUserContainerApps 'modules/r
     params: {
       cognitiveAccountName: aiFoundryAccount.outputs.accountName
       principalId: containerApps[i].outputs.systemAssignedMIPrincipalId!
-      roleDefinition: _role_Ids['Cognitive Services OpenAI User']  
+      roleDefinition: _roles.ai.cognitiveServicesOpenAIUser 
     }
   }
 ]
@@ -843,7 +817,7 @@ module assignCrAcrPullContainerApps 'modules/role-assignment/role-assignment-con
     params: {
       registryName:   containerRegistry.outputs.name
       principalId: containerApps[i].outputs.systemAssignedMIPrincipalId!
-      roleDefinition: _role_Ids.AcrPull
+      roleDefinition: _roles.containers.acrPull
     }
   }
 ]
@@ -855,7 +829,7 @@ module assignCosmosDBCosmosDbBuiltInDataContributorContainerApps 'modules/role-a
     params: {
       cosmosDbAccountName: CosmosDBAccount.outputs.name
       principalId: containerApps[i].outputs.systemAssignedMIPrincipalId!
-      roleDefinitionGuid: _role_Ids['Cosmos DB Built-in Data Contributor']
+      roleDefinitionGuid: _roles.databases.CosmosDBBuiltInDataContributor
       scopePath: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${resourceGroup().name}/providers/Microsoft.DocumentDB/databaseAccounts/${dbAccountName}/dbs/${dbDatabaseName}'
     }
   }
@@ -868,7 +842,7 @@ module assignKeyVaultKeyVaultSecretsUserContainerApps 'modules/role-assignment/r
     params: {
       vaultName: keyVault.outputs.name
       principalId: containerApps[i].outputs.systemAssignedMIPrincipalId!
-      roleDefinition: _role_Ids['Key Vault Secrets User']  
+      roleDefinition: _roles.security.keyVaultSecretsUser
     }
   }
 ]
@@ -880,7 +854,7 @@ module assignSearchSearchIndexDataReaderContainerApps 'modules/role-assignment/r
     params: {
       searchServiceName: searchService.outputs.name
       principalId: containerApps[i].outputs.systemAssignedMIPrincipalId!
-      roleDefinition: _role_Ids['Search Index Data Reader']        
+      roleDefinition: _roles.ai.searchIndexDataReader       
     }
   }
 ]
@@ -892,7 +866,7 @@ module assignSearchSearchIndexDataContributorContainerApps 'modules/role-assignm
     params: {
       searchServiceName: searchService.outputs.name
       principalId: containerApps[i].outputs.systemAssignedMIPrincipalId!
-      roleDefinition: _role_Ids['Search Index Data Contributor']        
+      roleDefinition: _roles.ai.searchIndexDataContributor   
     }
   }
 ]
@@ -904,7 +878,7 @@ module assignStorageStorageBlobDataContributorContainerApps 'modules/role-assign
     params: {
       storageAccountName: storageAccount.outputs.name
       principalId: containerApps[i].outputs.systemAssignedMIPrincipalId!
-      roleDefinition: _role_Ids['Storage Blob Data Contributor']        
+      roleDefinition: _roles.storage.storageBlobDataContributor    
     }
   }
 ]
@@ -916,7 +890,7 @@ module assignStorageStorageBlobDataReaderContainerApps 'modules/role-assignment/
     params: {
       storageAccountName: storageAccount.outputs.name
       principalId: containerApps[i].outputs.systemAssignedMIPrincipalId!
-      roleDefinition: _role_Ids['Storage Blob Data Reader']        
+      roleDefinition: _roles.storage.storageBlobDataReader
     }
   }
 ]
@@ -927,7 +901,7 @@ module assignStorageStorageBlobDataReaderSearch 'modules/role-assignment/role-as
   params: {
     storageAccountName: storageAccount.outputs.name
     principalId: searchService.outputs.systemAssignedMIPrincipalId!
-    roleDefinition: _role_Ids['Storage Blob Data Reader']      
+    roleDefinition: _roles.storage.storageBlobDataReader   
   }
 }
 
@@ -937,7 +911,7 @@ module assignSearchSearchIndexDataReaderAIFoundryProject 'modules/role-assignmen
   params: {
     searchServiceName: searchService.outputs.name
     principalId: aiFoundryProject.outputs.projectPrincipalId
-    roleDefinition: _role_Ids['Search Index Data Reader']  
+    roleDefinition: _roles.ai.searchIndexDataReader
   }
   dependsOn:[
     assignSearchAiFoundryProject, assignCosmosDBAiFoundryProject, assignStorageAccountAiFoundryProject
@@ -950,7 +924,7 @@ module assignStorageStorageBlobDataReaderAIFoundryProject 'modules/role-assignme
   params: {
     storageAccountName: storageAccount.outputs.name
     principalId: aiFoundryProject.outputs.projectPrincipalId
-    roleDefinition: _role_Ids['Storage Blob Data Reader']      
+    roleDefinition: _roles.storage.storageBlobDataReader     
   }
   dependsOn:[
     assignSearchAiFoundryProject, assignCosmosDBAiFoundryProject, assignStorageAccountAiFoundryProject, assignSearchSearchIndexDataReaderAIFoundryProject
@@ -964,97 +938,98 @@ module assignStorageStorageBlobDataReaderAIFoundryProject 'modules/role-assignme
 // ──────────────────────────────────────────────────────────────────────
 // General / Deployment
 // ──────────────────────────────────────────────────────────────────────
-output tenantId            string = tenant().tenantId
-output subscriptionId      string = subscription().subscriptionId
-output resourceGroupName   string = resourceGroup().name
-output location            string = location
-output environmentName     string = environmentName
-output deploymentName      string = deployment().name
-output resourceToken       string = resourceToken
-output networkIsolation    bool   = networkIsolation
+output TENANT_ID           string = tenant().tenantId
+output SUBSCRIPTION_ID     string = subscription().subscriptionId
+output RESOURCE_GROUP_NAME string = resourceGroup().name
+output LOCATION            string = location
+output ENVIRONMENT_NAME    string = environmentName
+output DEPLOYMENT_NAME     string = deployment().name
+output RESOURCE_TOKEN      string = resourceToken
+output NETWORK_ISOLATION   bool   = networkIsolation
 
 // ──────────────────────────────────────────────────────────────────────
 // Resource IDs
 // ──────────────────────────────────────────────────────────────────────
-output keyVaultResourceId           string = keyVault.outputs.resourceId
-output storageAccountResourceId     string = storageAccount.outputs.resourceId
-output cosmosDbAccountResourceId    string = CosmosDBAccount.outputs.resourceId
-output appConfigResourceId          string = appConfig.outputs.resourceId
-output appInsightsResourceId        string = appInsights.outputs.resourceId
-output logAnalyticsResourceId       string = logAnalytics.outputs.resourceId
-output containerEnvResourceId       string = containerEnv.outputs.resourceId
-output containerRegistryResourceId  string = containerRegistry.outputs.resourceId
-output searchServiceResourceId      string = searchService.outputs.resourceId
-output aiFoundryAccountResourceId   string = aiFoundryAccount.outputs.accountID
-output aiFoundryProjectResourceId   string = aiFoundryProject.outputs.projectId
+output KEY_VAULT_RESOURCE_ID           string = keyVault.outputs.resourceId
+output STORAGE_ACCOUNT_RESOURCE_ID     string = storageAccount.outputs.resourceId
+output COSMOS_DB_ACCOUNT_RESOURCE_ID   string = CosmosDBAccount.outputs.resourceId
+output APP_CONFIG_RESOURCE_ID          string = appConfig.outputs.resourceId
+output APP_INSIGHTS_RESOURCE_ID        string = appInsights.outputs.resourceId
+output LOG_ANALYTICS_RESOURCE_ID       string = logAnalytics.outputs.resourceId
+output CONTAINER_ENV_RESOURCE_ID       string = containerEnv.outputs.resourceId
+output CONTAINER_REGISTRY_RESOURCE_ID  string = containerRegistry.outputs.resourceId
+output SEARCH_SERVICE_RESOURCE_ID      string = searchService.outputs.resourceId
+output AI_FOUNDRY_ACCOUNT_RESOURCE_ID  string = aiFoundryAccount.outputs.accountID
+output AI_FOUNDRY_PROJECT_RESOURCE_ID  string = aiFoundryProject.outputs.projectId
 
 // ──────────────────────────────────────────────────────────────────────
 // Resource Names
 // ──────────────────────────────────────────────────────────────────────
-output aiFoundryAccountName         string = aiFoundryAccountName
-output aiFoundryProjectName         string = aiFoundryProjectName
-output aiFoundryStorageAccountName  string = aiFoundryStorageAccountName
-output appConfigName                string = appConfigName
-output appInsightsName              string = appInsightsName
-output containerEnvName             string = containerEnvName
-output containerRegistryName        string = containerRegistryName
-output databaseAccountName          string = dbAccountName
-output databaseName                 string = dbDatabaseName
-output searchServiceName            string = searchServiceName
-output storageAccountName           string = storageAccountName
+output AI_FOUNDRY_ACCOUNT_NAME         string = aiFoundryAccountName
+output AI_FOUNDRY_PROJECT_NAME         string = aiFoundryProjectName
+output AI_FOUNDRY_STORAGE_ACCOUNT_NAME string = aiFoundryStorageAccountName
+output APP_CONFIG_NAME                 string = appConfigName
+output APP_INSIGHTS_NAME               string = appInsightsName
+output CONTAINER_ENV_NAME              string = containerEnvName
+output CONTAINER_REGISTRY_NAME         string = containerRegistryName
+output DATABASE_ACCOUNT_NAME           string = dbAccountName
+output DATABASE_NAME                   string = dbDatabaseName
+output SEARCH_SERVICE_NAME             string = searchServiceName
+output STORAGE_ACCOUNT_NAME            string = storageAccountName
 
 // ──────────────────────────────────────────────────────────────────────
 // Feature flagging
 // ──────────────────────────────────────────────────────────────────────
-output deployAppConfig                  bool = deployAppConfig
-output deployKeyVault                   bool = deployKeyVault
-output deployLogAnalytics               bool = deployLogAnalytics
-output deployAppInsights                bool = deployAppInsights
-output deploySearchService              bool = deploySearchService
-output deployStorageAccount             bool = deployStorageAccount
-output deployCosmosDb                   bool = deployCosmosDb
-output deployContainerApps              bool = deployContainerApps
-output deployContainerRegistry          bool = deployContainerRegistry
-output deployContainerEnv               bool = deployContainerEnv
+output DEPLOY_APP_CONFIG          bool = deployAppConfig
+output DEPLOY_KEY_VAULT           bool = deployKeyVault
+output DEPLOY_LOG_ANALYTICS       bool = deployLogAnalytics
+output DEPLOY_APP_INSIGHTS        bool = deployAppInsights
+output DEPLOY_SEARCH_SERVICE      bool = deploySearchService
+output DEPLOY_STORAGE_ACCOUNT     bool = deployStorageAccount
+output DEPLOY_COSMOS_DB           bool = deployCosmosDb
+output DEPLOY_CONTAINER_APPS      bool = deployContainerApps
+output DEPLOY_CONTAINER_REGISTRY  bool = deployContainerRegistry
+output DEPLOY_CONTAINER_ENV       bool = deployContainerEnv
 
 // ──────────────────────────────────────────────────────────────────────
 // Endpoints / URIs
 // ──────────────────────────────────────────────────────────────────────
-output keyVaultUri                  string = keyVault.outputs.uri
-output containerRegistryLoginServer string = containerRegistry.outputs.loginServer
-output storageBlobEndpoint          string = storageAccount.outputs.primaryBlobEndpoint
-output searchServiceQueryEndpoint   string = searchService.outputs.endpoint
-output aiFoundryAccountEndpoint     string = aiFoundryAccount.outputs.accountTarget
-output aiFoundryProjectEndpoint     string = aiFoundryProject.outputs.endpoint
-output aiFoundryProjectWorkspaceId  string = aiFoundryFormatProjectWorkspaceId.outputs.projectWorkspaceIdGuid
-output cosmosDbEndpoint             string = CosmosDBAccount.outputs.endpoint
-output APP_CONFIG_ENDPOINT          string = appConfig.outputs.endpoint
+output KEY_VAULT_URI                     string = keyVault.outputs.uri
+output CONTAINER_REGISTRY_LOGIN_SERVER   string = containerRegistry.outputs.loginServer
+output STORAGE_BLOB_ENDPOINT             string = storageAccount.outputs.primaryBlobEndpoint
+output SEARCH_SERVICE_QUERY_ENDPOINT     string = searchService.outputs.endpoint
+output AI_FOUNDRY_ACCOUNT_ENDPOINT       string = aiFoundryAccount.outputs.accountTarget
+output AI_FOUNDRY_PROJECT_ENDPOINT       string = aiFoundryProject.outputs.endpoint
+output AI_FOUNDRY_PROJECT_WORKSPACE_ID   string = aiFoundryFormatProjectWorkspaceId.outputs.projectWorkspaceIdGuid
+output COSMOS_DB_ENDPOINT                string = CosmosDBAccount.outputs.endpoint
+output APP_CONFIG_ENDPOINT               string = appConfig.outputs.endpoint
 
 // ──────────────────────────────────────────────────────────────────────
 // Connections
 // ──────────────────────────────────────────────────────────────────────
-output seachConnectionId string = deploySearchService ? aiFoundryConnectionSearch.outputs.seachConnectionId : ''
-output bingConnectionId  string =  deployGroundingWithBing ? aiFoundryBingConnection.outputs.bingConnectionId : ''
+output SEARCH_CONNECTION_ID string = deploySearchService ? aiFoundryConnectionSearch.outputs.seachConnectionId : ''
+output BING_CONNECTION_ID   string = deployGroundingWithBing ? aiFoundryBingConnection.outputs.bingConnectionId : ''
+
 
 // ──────────────────────────────────────────────────────────────────────
 // Managed Identity Principals
 // ──────────────────────────────────────────────────────────────────────
-output containerEnvPrincipalId        string = containerEnv.outputs.systemAssignedMIPrincipalId!
-output searchServicePrincipalId       string = searchService.outputs.systemAssignedMIPrincipalId!
-output aiFoundryAccountPrincipalId    string = aiFoundryAccount.outputs.accountPrincipalId
-output aiFoundryProjectPrincipalId    string = aiFoundryProject.outputs.projectPrincipalId
+output CONTAINER_ENV_PRINCIPAL_ID       string = containerEnv.outputs.systemAssignedMIPrincipalId!
+output SEARCH_SERVICE_PRINCIPAL_ID      string = searchService.outputs.systemAssignedMIPrincipalId!
+output AI_FOUNDRY_ACCOUNT_PRINCIPAL_ID  string = aiFoundryAccount.outputs.accountPrincipalId
+output AI_FOUNDRY_PROJECT_PRINCIPAL_ID  string = aiFoundryProject.outputs.projectPrincipalId
 
 // ──────────────────────────────────────────────────────────────────────
 // Module-Specific Connection Objects
 // ──────────────────────────────────────────────────────────────────────
-output aiFoundryStorageConnection   string = aiFoundryProject.outputs.azureStorageConnection
-output aiFoundryCosmosDbConnection  string = aiFoundryProject.outputs.cosmosDBConnection
-output aiFoundrySearchConnection    string = aiFoundryProject.outputs.aiSearchConnection
+output AI_FOUNDRY_STORAGE_CONNECTION   string = aiFoundryProject.outputs.azureStorageConnection
+output AI_FOUNDRY_COSMOS_DB_CONNECTION string = aiFoundryProject.outputs.cosmosDBConnection
+output AI_FOUNDRY_SEARCH_CONNECTION    string = aiFoundryProject.outputs.aiSearchConnection
 
 // ──────────────────────────────────────────────────────────────────────
 // Container Apps List
 // ──────────────────────────────────────────────────────────────────────
-output containerApps array = [
+output CONTAINER_APPS array = [
   for (app, i) in containerAppsList: {
     name:          empty(app.name) ? '${abbrs.containerApps}-${resourceToken}-${app.service_name}' : app.name
     serviceName:   app.service_name
@@ -1067,5 +1042,4 @@ output containerApps array = [
 // ──────────────────────────────────────────────────────────────────────
 // Model Deployment List
 // ──────────────────────────────────────────────────────────────────────
-output modelDeployments array = modelDeploymentList
-
+output MODEL_DEPLOYMENTS array = modelDeploymentList

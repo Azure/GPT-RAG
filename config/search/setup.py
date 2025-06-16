@@ -154,6 +154,25 @@ def call_search_api(endpoint, api_version, rtype, rname, method, cred, body=None
         logging.info(f"✅ {method.upper()} {rtype}/{rname} succeeded ({resp.status_code})")
 
 def execute_setup():
+
+    # Load configuration details
+
+    # search.env (Names of indexers, data sources, and other components)
+    try:
+        env_path = "config/search/search.env"    
+        env_cfg = load_env_file(env_path) or {}
+    except Exception as e:
+        logging.info("ℹ️ Skipping setup due to missing or invalid .env configuration.")
+        sys.exit(0)
+
+    # search.json (Definitions of indexers, data sources, and other components)
+    try:
+        json_path = "config/search/search.json"
+        with open(json_path, "r") as f:
+            defs = json.load(f) or {}
+    except (FileNotFoundError, json.JSONDecodeError, ValueError) as e:
+        logging.info("ℹ️ Skipping setup due to missing or invalid JSON configuration.")
+        sys.exit(0)
     try:
         cred = ChainedTokenCredential(
             AzureCliCredential(),
@@ -161,8 +180,8 @@ def execute_setup():
         )
     except ClientAuthenticationError as e:
         logging.error("❗️ Authentication failed: %s", e)
-        logging.info("ℹ️ Skipping configuration due to missing credentials.")
-        sys.exit(0)
+        logging.info("ℹ️ Skipping setup due to authentication failure.")
+        sys.exit(0)        
 
     ac_endpoint = os.getenv("APP_CONFIG_ENDPOINT")
     if not ac_endpoint:
@@ -177,9 +196,6 @@ def execute_setup():
             app_cfg[setting.key] = json.loads(setting.value)
         except:
             app_cfg[setting.key] = setting.value
-
-    env_cfg = load_env_file("config/search/search.env")
-    defs   = json.load(open("config/search/search.json", "r"))
 
     # precompute indexer→datasource map
     indexers = defs.get("indexers", [])

@@ -30,9 +30,9 @@ for name in (
     logging.getLogger(name).setLevel(logging.WARNING)
 
 REQUIRED_ENV_VARS = [
-    "subscriptionId",
-    "resourceGroupName",
-    "deploymentName",
+    "SUBSCRIPTION_ID",
+    "RESOURCE_GROUP_NAME",
+    "DEPLOYMENT_NAME",
     "APP_CONFIG_ENDPOINT"
 ]
 
@@ -44,9 +44,9 @@ def check_env_vars():
 
 def main():
     check_env_vars()
-    sub_id = os.environ["subscriptionId"]
-    rg = os.environ["resourceGroupName"]
-    deployment = os.environ["deploymentName"]
+    sub_id = os.environ["SUBSCRIPTION_ID"]
+    rg = os.environ["RESOURCE_GROUP_NAME"]
+    deployment = os.environ["DEPLOYMENT_NAME"]
     endpoint = os.environ["APP_CONFIG_ENDPOINT"]
 
     logging.info("Seeding App Configuration at %s for deployment %s/%s", endpoint, rg, deployment)

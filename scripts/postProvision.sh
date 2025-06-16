@@ -2,15 +2,14 @@
 set -euo pipefail
 
 # avoid unbound-variable errors by setting defaults
-: "${deployAppConfig:=true}"
-: "${deployContainerApps:=true}"
-: "${deploySearchService:=true}"
-: "${networkIsolation:=false}"
+: "${DEPLOY_CONTAINER_APPS:=true}"
+: "${DEPLOY_SEARCH_SERVICE:=true}"
+: "${NETWORK_ISOLATION:=false}"
 
 echo "🔧 Running post-provision steps…"
 
 echo "📋 Current environment variables:"
-for v in deployAppConfig deployContainerApps deploySearchService networkIsolation ; do
+for v in  DEPLOY_CONTAINER_APPS DEPLOY_SEARCH_SERVICE NETWORK_ISOLATION ; do
   printf "  %s=%s\n" "$v" "${!v:-<unset>}"
 done
 
@@ -58,7 +57,7 @@ echo "📑 AI Foundry Setup…"
 # 3) Container Apps Setup
 ###############################################################################
 echo
-if [[ "${deployContainerApps,,}" == "true" ]]; then
+if [[ "${DEPLOY_CONTAINER_APPS,,}" == "true" ]]; then
   echo "🔍 ContainerApp setup…"
   {
     echo "🚀 Running config.containerapps.setup…"
@@ -68,14 +67,14 @@ if [[ "${deployContainerApps,,}" == "true" ]]; then
     echo "❗️ Error during Container Apps setup. Skipping it."
   }
 else
-  echo "⚠️  Container Apps setup (deployContainerApps is not 'true')."
+  echo "⚠️  Container Apps setup (DEPLOY_CONTAINER_APPS is not 'true')."
 fi
 
 ###############################################################################
 # 4) AI Search Setup
 ###############################################################################
 echo
-if [[ "${deploySearchService,,}" == "true" ]]; then
+if [[ "${DEPLOY_SEARCH_SERVICE,,}" == "true" ]]; then
   echo "🔍 AI Search setup…"
   {
     echo "🚀 Running config.search.setup…"
@@ -85,14 +84,14 @@ if [[ "${deploySearchService,,}" == "true" ]]; then
     echo "❗️ Error during Search setup. Skipping it."
   }
 else
-  echo "⚠️  Skipping AI Search setup (deploySearchService is not 'true')."
+  echo "⚠️  Skipping AI Search setup (DEPLOY_SEARCH_SERVICE is not 'true')."
 fi
 
 ###############################################################################
 # 5) Zero Trust Information
 ###############################################################################
 echo 
-if [[ "${networkIsolation,,}" == "true" ]]; then
+if [[ "${NETWORK_ISOLATION,,}" == "true" ]]; then
   echo "🔒 Access the Zero Trust bastion"
 else
   echo "🚧 Zero Trust not enabled; provisioning Basic architecture."

@@ -6,14 +6,13 @@ Set-StrictMode -Version Latest
 # -----------------------------------------------------------------------------
 # Default environment-variable values (override by setting $env:DEPLOY*)
 # -----------------------------------------------------------------------------
-$deployAppConfig     = $env:deployAppConfig     ?? 'true'
-$deployContainerApps = $env:deployContainerApps ?? 'true'
-$deploySearchService = $env:deploySearchService ?? 'true'
-$networkIsolation    = $env:networkIsolation    ?? 'false'
+$deployContainerApps = $env:DEPLOY_CONTAINER_APPS ?? 'true'
+$deploySearchService = $env:DEPLOY_SEARCH_SERVICE ?? 'true'
+$networkIsolation    = $env:NETWORK_ISOLATION    ?? 'false'
 
 Write-Host "🔧 Running post-provision steps…`n"
 Write-Host "📋 Current environment variables:"
-foreach ($v in 'deployAppConfig','deployContainerApps','deploySearchService','networkIsolation') {
+foreach ($v in 'DEPLOY_CONTAINER_APPS','DEPLOY_SEARCH_SERVICE','NETWORK_ISOLATION') {
     $value = Get-Variable -Name $v -ValueOnly
     Write-Host "  $v = $value"
 }
@@ -97,7 +96,7 @@ if ($deployContainerApps.ToLower() -eq 'true') {
         Write-Warning "❗️ Error during Container Apps setup. Skipping it."
     }
 } else {
-    Write-Warning "⚠️ Skipping Container Apps setup (deployContainerApps is not 'true')."
+    Write-Warning "⚠️ Skipping Container Apps setup (DEPLOY_CONTAINER_APPS is not 'true')."
 }
 
 # -----------------------------------------------------------------------------
@@ -114,7 +113,7 @@ if ($deploySearchService.ToLower() -eq 'true') {
         Write-Warning "❗️ Error during Search setup. Skipping it."
     }
 } else {
-    Write-Warning "⚠️ Skipping AI Search setup (deploySearchService is not 'true')."
+    Write-Warning "⚠️ Skipping AI Search setup (DEPLOY_SEARCH_SERVICE is not 'true')."
 }
 
 # -----------------------------------------------------------------------------

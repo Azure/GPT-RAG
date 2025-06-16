@@ -109,19 +109,19 @@ def main():
     app_conf = AzureAppConfigurationClient(endpoint, cred)
 
     # ── 1) Read core settings ────────────────────────────────────────
-    subscription_id = cfg(app_conf, "subscriptionId")
-    resource_group  = cfg(app_conf, "resourceGroupName")
-    account_name    = cfg(app_conf, "aiFoundryAccountName")
+    subscription_id = cfg(app_conf, "SUBSCRIPTION_ID")
+    resource_group  = cfg(app_conf, "RESOURCE_GROUP_NAME")
+    account_name    = cfg(app_conf, "AI_FOUNDRY_ACCOUNT_NAME")
 
     logging.info("Loaded: subscriptionId=%s, resourceGroupName=%s", subscription_id, resource_group)
     logging.info("Loaded: aiFoundryAccountName=%s", account_name)
 
     # ── 2) Determine deployment name from list ───────────────────────
-    raw_list = cfg(app_conf, "modelDeployments")
+    raw_list = cfg(app_conf, "MODEL_DEPLOYMENTS")
     try:
         deployments = json.loads(raw_list)
     except json.JSONDecodeError as e:
-        logging.error("modelDeployments is not valid JSON: %s", e)
+        logging.error("MODEL_DEPLOYMENTS is not valid JSON: %s", e)
         sys.exit(1)
 
     canonical_name = "chatDeploymentName"
@@ -133,7 +133,7 @@ def main():
 
     if not deployment_name:
         logging.error(
-            "No deployment with canonical_name '%s' found in modelDeployments",
+            "No deployment with canonical_name '%s' found in MODEL_DEPLOYMENTS",
             canonical_name
         )
         sys.exit(1)

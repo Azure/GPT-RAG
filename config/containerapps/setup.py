@@ -56,17 +56,17 @@ def main():
     appconfig = AzureAppConfigurationClient(endpoint, cred)
 
     # Read global settings
-    subscription_id = get_config_value(appconfig, "subscriptionId")
-    resource_group  = get_config_value(appconfig, "resourceGroupName")
-    acr_name        = get_config_value(appconfig, "containerRegistryName")
+    subscription_id = get_config_value(appconfig, "SUBSCRIPTION_ID")
+    resource_group  = get_config_value(appconfig, "RESOURCE_GROUP_NAME")
+    acr_name        = get_config_value(appconfig, "CONTAINER_REGISTRY_NAME")
     acr_server      = f"{acr_name}.azurecr.io"
 
     # Read and parse the list of container apps
-    raw_list = get_config_value(appconfig, "containerApps")
+    raw_list = get_config_value(appconfig, "CONTAINER_APPS")
     try:
         apps_list = json.loads(raw_list)
     except json.JSONDecodeError:
-        logging.error("containerApps is not valid JSON")
+        logging.error("CONTAINER_APPS is not valid JSON")
         sys.exit(1)
 
     # Initialize Container Apps management client
