@@ -268,7 +268,7 @@ def execute_setup():
         # resolve any placeholders in the .env value
         final_val = resolve_placeholders(raw_val, env_cfg, app_cfg)
         try:
-            ac.set_configuration_setting(ConfigurationSetting(key=key, value=final_val, label="gpt-rag"))
+            ac.set_configuration_setting(ConfigurationSetting(key=key, value=final_val, label="gpt-rag", content_type="text/plain"))
             logging.info(f"✅ Set App Config '{key}' = '{final_val}'")
         except Exception as e:
             logging.error(f"❗️ Failed to set '{key}': {e}")
