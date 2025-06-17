@@ -57,7 +57,24 @@ else
 fi
 
 ###############################################################################
-# 3) Zero Trust Information
+# 3) AI Search Setup
+###############################################################################
+echo
+if [[ "${DEPLOY_SEARCH_SERVICE,,}" == "true" ]]; then
+  echo "🔍 AI Search setup…"
+  {
+    echo "🚀 Running config.search.setup…"
+    python -m config.search.setup
+    echo "✅ Search setup script finished."
+  } || {
+    echo "❗️ Error during Search setup. Skipping it."
+  }
+else
+  echo "⚠️  Skipping AI Search setup (DEPLOY_SEARCH_SERVICE is not 'true')."
+fi
+
+###############################################################################
+# 4) Zero Trust Information
 ###############################################################################
 echo 
 if [[ "${NETWORK_ISOLATION,,}" == "true" ]]; then

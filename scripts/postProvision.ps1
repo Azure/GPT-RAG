@@ -88,7 +88,24 @@ if ($deployContainerApps.ToLower() -eq 'true') {
 }
 
 # -----------------------------------------------------------------------------
-# 3) Zero Trust Information
+# 3) AI Search Setup
+# -----------------------------------------------------------------------------
+Write-Host ""
+if ($deploySearchService.ToLower() -eq 'true') {
+    Write-Host "🔍 AI Search setup…"
+    try {
+        Write-Host "🚀 Running config.search.setup…"
+        & $python -m config.search.setup
+        Write-Host "✅ Search setup script finished."
+    } catch {
+        Write-Warning "❗️ Error during Search setup. Skipping it."
+    }
+} else {
+    Write-Warning "⚠️ Skipping AI Search setup (DEPLOY_SEARCH_SERVICE is not 'true')."
+}
+
+# -----------------------------------------------------------------------------
+# 4) Zero Trust Information
 # -----------------------------------------------------------------------------
 Write-Host ""
 if ($networkIsolation.ToLower() -eq 'true') {
