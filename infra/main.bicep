@@ -917,7 +917,6 @@ module assignStorageStorageBlobDataReaderAIFoundryProject 'modules/role-assignme
 // App Configuration Store
 //////////////////////////////////////////////////////////////////////////
 
-
 module appConfig 'br/public:avm/res/app-configuration/configuration-store:0.6.3' = if (deployAppConfig) {
   name: 'appConfig'
   params: {
@@ -984,6 +983,7 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
     storeName: appConfig.outputs.name
     keyValues: concat(
       containerAppsSettings.outputs.containerAppsEndpoints,
+      containerAppsSettings.outputs.containerAppsName,
       _modelDeploymentNamesSettings,
       _databaseContainerNamesSettings,
       _storageContainerNamesSettings,
