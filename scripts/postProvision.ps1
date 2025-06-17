@@ -58,19 +58,7 @@ Write-Host "⬇️ Installing requirements…"
 & $python -m pip install -r config/requirements.txt
 
 # -----------------------------------------------------------------------------
-# 1) App Configuration Setup
-# -----------------------------------------------------------------------------
-Write-Host "`n📑 Seeding App Configuration…"
-try {
-    Write-Host "🚀 Running config.appconfig.setup…"
-    & $python -m config.appconfig.setup
-    Write-Host "✅ App Configuration script finished."
-} catch {
-    Write-Warning "❗️ Error during App Configuration Setup. Skipping it."
-}
-
-# -----------------------------------------------------------------------------
-# 2) AI Foundry Setup
+# 1) AI Foundry Setup
 # -----------------------------------------------------------------------------
 Write-Host ""
 Write-Host "📑 AI Foundry Setup…"
@@ -83,7 +71,7 @@ try {
 }
 
 # -----------------------------------------------------------------------------
-# 3) Container Apps Setup
+# 2) Container Apps Setup
 # -----------------------------------------------------------------------------
 Write-Host ""
 if ($deployContainerApps.ToLower() -eq 'true') {
@@ -100,24 +88,7 @@ if ($deployContainerApps.ToLower() -eq 'true') {
 }
 
 # -----------------------------------------------------------------------------
-# 4) AI Search Setup
-# -----------------------------------------------------------------------------
-Write-Host ""
-if ($deploySearchService.ToLower() -eq 'true') {
-    Write-Host "🔍 AI Search setup…"
-    try {
-        Write-Host "🚀 Running config.search.setup…"
-        & $python -m config.search.setup
-        Write-Host "✅ Search setup script finished."
-    } catch {
-        Write-Warning "❗️ Error during Search setup. Skipping it."
-    }
-} else {
-    Write-Warning "⚠️ Skipping AI Search setup (DEPLOY_SEARCH_SERVICE is not 'true')."
-}
-
-# -----------------------------------------------------------------------------
-# 5) Zero Trust Information
+# 3) Zero Trust Information
 # -----------------------------------------------------------------------------
 Write-Host ""
 if ($networkIsolation.ToLower() -eq 'true') {

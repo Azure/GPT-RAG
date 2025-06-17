@@ -60,7 +60,7 @@
           "type": "GlobalStandard",
           "version": "2024-11-20",          
           "capacity": 40,
-          "canonical_name": "chatDeploymentName"
+          "canonical_name": "CHAT_DEPLOYMENT_NAME"
         },
         {
           "name": "text-embedding",
@@ -69,7 +69,7 @@
           "type": "Standard",
           "version": "1",          
           "capacity": 40,
-          "canonical_name": "embeddingDeploymentName"
+          "canonical_name": "EMBEDDING_DEPLOYMENT_NAME"
         }
       ]
     },
@@ -81,7 +81,7 @@
           "service_name": "orchestrator",
           "min_replicas": 1,
           "max_replicas": 1,
-          "canonical_name": "orchestratorApp",
+          "canonical_name": "ORCHESTRATOR_APP",
           "roles": [
             "App Configuration Data Reader",
             "Cognitive Services User",
@@ -98,7 +98,7 @@
           "service_name": "frontend",
           "min_replicas": 1,
           "max_replicas": 1,
-          "canonical_name": "frontendApp",          
+          "canonical_name": "FRONTEND_APP",          
           "roles": [
             "App Configuration Data Reader",
             "AcrPull",
@@ -111,7 +111,7 @@
           "service_name": "dataingest",
           "min_replicas": 1,
           "max_replicas": 1,
-          "canonical_name": "dataIngestApp",
+          "canonical_name": "DATA_INGEST_APP",
           "roles": [
             "App Configuration Data Reader",
             "Azure Machine Learning Workspace Connection Secrets Reader",

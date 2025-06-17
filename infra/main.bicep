@@ -362,27 +362,6 @@ module aiFoundryConnectionStorage 'modules/standard-setup/connection-storage-acc
   ]
 }
 
-// App Configuration Store
-//////////////////////////////////////////////////////////////////////////
-
-module appConfig 'br/public:avm/res/app-configuration/configuration-store:0.6.3' = if (deployAppConfig) {
-  name: 'appConfig'
-  params: {
-    name:     appConfigName
-    location: location
-    managedIdentities: {
-      systemAssigned: true
-    }    
-    sku:      'Standard'
-    publicNetworkAccess : 'Enabled'
-    tags:     _tags
-    dataPlaneProxy: {
-      authenticationMode: 'Pass-through'
-      privateLinkDelegation: 'Disabled'
-    }
-  }
-}
-
 // Application Insights
 //////////////////////////////////////////////////////////////////////////
 
@@ -477,7 +456,7 @@ module containerApps 'br/public:avm/res/app/container-app:0.16.0' = [for app in 
         env: [
           {
             name:  'APP_CONFIG_ENDPOINT'
-            value: appConfig.outputs.endpoint
+            value: 'https://${appConfigName}.azconfig.io'
           }
         ]
       }
@@ -932,6 +911,253 @@ module assignStorageStorageBlobDataReaderAIFoundryProject 'modules/role-assignme
 }
 
 //////////////////////////////////////////////////////////////////////////
+// App Configuration Settings Service
+//////////////////////////////////////////////////////////////////////////
+
+// App Configuration Store
+//////////////////////////////////////////////////////////////////////////
+
+
+module appConfigCreate 'br/public:avm/res/app-configuration/configuration-store:0.6.3' = if (deployAppConfig) {
+  name: 'appConfigCreate'
+  params: {
+    name: appConfigName
+    location: location
+    sku: 'Standard'
+    managedIdentities: {
+      systemAssigned: true
+    }
+    roleAssignments: [
+      {
+        principalId: principalId
+        roleDefinitionIdOrName: _roles.configuration.appConfigurationDataOwner
+      }
+    ]
+    tags: _tags
+    dataPlaneProxy: {
+      authenticationMode: 'Pass-through'
+      privateLinkDelegation: 'Disabled'
+    }
+  }
+}
+
+// prepare the container apps settings for the app configuration store
+module containerAppsSettings 'modules/container-apps/container-apps-list.bicep' = if (deployContainerApps) {
+  name: 'containerAppsSettings'
+  params: {
+    containerAppsList: [
+      for i in range(0, length(containerAppsList)): {
+        name: containerAppsList[i].name
+        serviceName: containerAppsList[i].service_name
+        canonical_name: containerAppsList[i].canonical_name
+        principalId: containerApps[i].outputs.systemAssignedMIPrincipalId!
+        fqdn: containerApps[i].outputs.fqdn
+      }
+    ]
+  }
+}
+
+// prepare the model deployment names for the app configuration store
+var _modelDeploymentNamesSettings = [
+  for modelDeployment in modelDeploymentList: { 
+    name: modelDeployment.canonical_name, value: modelDeployment.name, label: 'gpt-rag', contentType: 'text/plain' 
+  }
+]
+
+module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = if (deployAppConfig) {
+  name: 'appConfigPopulate'
+  params: {
+    storeName:         appConfigCreate.outputs.name
+    keyValues: concat(
+      containerAppsSettings.outputs.containerAppsEndpoints,
+      _modelDeploymentNamesSettings,
+      [
+      // ── General / Deployment ─────────────────────────────────────────────
+      { name: 'TENANT_ID',           value: tenant().tenantId,                        label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'SUBSCRIPTION_ID',     value: subscription().subscriptionId,            label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'RESOURCE_GROUP_NAME', value: resourceGroup().name,                     label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'LOCATION',            value: location,                                 label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'ENVIRONMENT_NAME',    value: environmentName,                          label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'DEPLOYMENT_NAME',     value: deployment().name,                        label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'RESOURCE_TOKEN',      value: resourceToken,                            label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'NETWORK_ISOLATION',   value: string(networkIsolation),                         label: 'gpt-rag', contentType: 'text/plain' }
+
+      // ── Resource IDs ─────────────────────────────────────────────────────
+      { name: 'KEY_VAULT_RESOURCE_ID',          value: keyVault.outputs.resourceId,                        label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'STORAGE_ACCOUNT_RESOURCE_ID',    value: storageAccount.outputs.resourceId,                  label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'COSMOS_DB_ACCOUNT_RESOURCE_ID',  value: CosmosDBAccount.outputs.resourceId,                 label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'APP_INSIGHTS_RESOURCE_ID',       value: appInsights.outputs.resourceId,                     label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'LOG_ANALYTICS_RESOURCE_ID',      value: logAnalytics.outputs.resourceId,                    label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'CONTAINER_ENV_RESOURCE_ID',      value: containerEnv.outputs.resourceId,                    label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'CONTAINER_REGISTRY_RESOURCE_ID', value: containerRegistry.outputs.resourceId,               label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'SEARCH_SERVICE_RESOURCE_ID',     value: searchService.outputs.resourceId,                   label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AI_FOUNDRY_ACCOUNT_RESOURCE_ID', value: aiFoundryAccount.outputs.accountID,                 label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AI_FOUNDRY_PROJECT_RESOURCE_ID', value: aiFoundryProject.outputs.projectId,                 label: 'gpt-rag', contentType: 'text/plain' }
+
+      // ── Resource Names ───────────────────────────────────────────────────
+      { name: 'AI_FOUNDRY_ACCOUNT_NAME',         value: aiFoundryAccountName,             label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AI_FOUNDRY_PROJECT_NAME',         value: aiFoundryProjectName,             label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AI_FOUNDRY_STORAGE_ACCOUNT_NAME', value: aiFoundryStorageAccountName,      label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'APP_CONFIG_NAME',                 value: appConfigName,                    label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'APP_INSIGHTS_NAME',               value: appInsightsName,                  label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'CONTAINER_ENV_NAME',              value: containerEnvName,                 label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'CONTAINER_REGISTRY_NAME',         value: containerRegistryName,            label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'DATABASE_ACCOUNT_NAME',           value: dbAccountName,                    label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'DATABASE_NAME',                   value: dbDatabaseName,                   label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'SEARCH_SERVICE_NAME',             value: searchServiceName,                label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'STORAGE_ACCOUNT_NAME',            value: storageAccountName,               label: 'gpt-rag', contentType: 'text/plain' }
+
+      // ── Feature flagging ─────────────────────────────────────────────────
+      { name: 'DEPLOY_APP_CONFIG',         value: string(deployAppConfig),        label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'DEPLOY_KEY_VAULT',          value: string(deployKeyVault),         label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'DEPLOY_LOG_ANALYTICS',      value: string(deployLogAnalytics),     label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'DEPLOY_APP_INSIGHTS',       value: string(deployAppInsights),      label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'DEPLOY_SEARCH_SERVICE',     value: string(deploySearchService),    label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'DEPLOY_STORAGE_ACCOUNT',    value: string(deployStorageAccount),   label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'DEPLOY_COSMOS_DB',          value: string(deployCosmosDb),         label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'DEPLOY_CONTAINER_APPS',     value: string(deployContainerApps),    label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'DEPLOY_CONTAINER_REGISTRY', value: string(deployContainerRegistry),label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'DEPLOY_CONTAINER_ENV',      value: string(deployContainerEnv),     label: 'gpt-rag', contentType: 'text/plain' }
+
+      // ── Endpoints / URIs ──────────────────────────────────────────────────
+      { name: 'KEY_VAULT_URI',                   value: keyVault.outputs.uri,                        label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'CONTAINER_REGISTRY_LOGIN_SERVER', value: containerRegistry.outputs.loginServer,       label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'STORAGE_BLOB_ENDPOINT',           value: storageAccount.outputs.primaryBlobEndpoint,  label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'SEARCH_SERVICE_QUERY_ENDPOINT',   value: searchService.outputs.endpoint,              label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AI_FOUNDRY_ACCOUNT_ENDPOINT',     value: aiFoundryAccount.outputs.accountTarget,      label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AI_FOUNDRY_PROJECT_ENDPOINT',     value: aiFoundryProject.outputs.endpoint,           label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AI_FOUNDRY_PROJECT_WORKSPACE_ID', value: aiFoundryFormatProjectWorkspaceId.outputs.projectWorkspaceIdGuid, label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'COSMOS_DB_ENDPOINT',              value: CosmosDBAccount.outputs.endpoint,            label: 'gpt-rag', contentType: 'text/plain' }
+
+      // ── Connections ───────────────────────────────────────────────────────
+      { name: 'SEARCH_CONNECTION_ID', value: deploySearchService ? aiFoundryConnectionSearch.outputs.seachConnectionId : '',  label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'BING_CONNECTION_ID',   value: deployGroundingWithBing ? aiFoundryBingConnection.outputs.bingConnectionId : '', label: 'gpt-rag', contentType: 'text/plain' }
+
+      // ── Managed Identity Principals ───────────────────────────────────────
+      { name: 'CONTAINER_ENV_PRINCIPAL_ID',      value: containerEnv.outputs.systemAssignedMIPrincipalId!,     label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'SEARCH_SERVICE_PRINCIPAL_ID',     value: searchService.outputs.systemAssignedMIPrincipalId!,    label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AI_FOUNDRY_ACCOUNT_PRINCIPAL_ID', value: aiFoundryAccount.outputs.accountPrincipalId,           label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AI_FOUNDRY_PROJECT_PRINCIPAL_ID', value: aiFoundryProject.outputs.projectPrincipalId,           label: 'gpt-rag', contentType: 'text/plain' }
+
+      // ── Module-Specific Connection Objects ─────────────────────────────────
+      { name: 'AI_FOUNDRY_STORAGE_CONNECTION',   value: aiFoundryProject.outputs.azureStorageConnection, label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AI_FOUNDRY_COSMOS_DB_CONNECTION', value: aiFoundryProject.outputs.cosmosDBConnection,     label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AI_FOUNDRY_SEARCH_CONNECTION',    value: aiFoundryProject.outputs.aiSearchConnection,     label: 'gpt-rag', contentType: 'text/plain' }
+
+      // ── Container Apps List & Model Deployments ────────────────────────────
+      { name: 'CONTAINER_APPS',       value: string(containerAppsSettings.outputs.containerAppsList), label: 'gpt-rag', contentType: 'application/json' }
+      { name: 'MODEL_DEPLOYMENTS',    value: string(modelDeploymentList), label: 'gpt-rag', contentType: 'application/json' }
+    ]
+    )
+  }
+  dependsOn: [
+    appConfigCreate!
+  ]
+}
+
+// Create an App Configuration Store and populates it with key-value pairs
+module appConfig 'br/public:avm/res/app-configuration/configuration-store:0.6.3' = if (deployAppConfig) {
+  name: 'appConfig'
+  params: {
+    name:     appConfigName
+    location: location
+    managedIdentities: {
+      systemAssigned: true
+    }
+    roleAssignments: [
+      {
+        principalId: principalId
+        roleDefinitionIdOrName: _roles.configuration.appConfigurationDataOwner
+      }
+    ]
+    sku:      'Standard'
+    publicNetworkAccess : 'Enabled'
+    tags:     _tags
+    dataPlaneProxy: {
+      authenticationMode: 'Pass-through'
+      privateLinkDelegation: 'Disabled'
+    }
+    keyValues:  concat(containerAppsSettings.outputs.containerAppsEndpoints, _modelDeploymentNamesSettings, [
+      // ── General / Deployment ─────────────────────────────────────────────
+      { name: 'TENANT_ID',           value: tenant().tenantId,                        label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'SUBSCRIPTION_ID',     value: subscription().subscriptionId,            label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'RESOURCE_GROUP_NAME', value: resourceGroup().name,                     label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'LOCATION',            value: location,                                 label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'ENVIRONMENT_NAME',    value: environmentName,                          label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'DEPLOYMENT_NAME',     value: deployment().name,                        label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'RESOURCE_TOKEN',      value: resourceToken,                            label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'NETWORK_ISOLATION',   value: string(networkIsolation),                         label: 'gpt-rag', contentType: 'text/plain' }
+
+      // ── Resource IDs ─────────────────────────────────────────────────────
+      { name: 'KEY_VAULT_RESOURCE_ID',          value: keyVault.outputs.resourceId,                        label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'STORAGE_ACCOUNT_RESOURCE_ID',    value: storageAccount.outputs.resourceId,                  label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'COSMOS_DB_ACCOUNT_RESOURCE_ID',  value: CosmosDBAccount.outputs.resourceId,                 label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'APP_INSIGHTS_RESOURCE_ID',       value: appInsights.outputs.resourceId,                     label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'LOG_ANALYTICS_RESOURCE_ID',      value: logAnalytics.outputs.resourceId,                    label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'CONTAINER_ENV_RESOURCE_ID',      value: containerEnv.outputs.resourceId,                    label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'CONTAINER_REGISTRY_RESOURCE_ID', value: containerRegistry.outputs.resourceId,               label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'SEARCH_SERVICE_RESOURCE_ID',     value: searchService.outputs.resourceId,                   label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AI_FOUNDRY_ACCOUNT_RESOURCE_ID', value: aiFoundryAccount.outputs.accountID,                 label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AI_FOUNDRY_PROJECT_RESOURCE_ID', value: aiFoundryProject.outputs.projectId,                 label: 'gpt-rag', contentType: 'text/plain' }
+
+      // ── Resource Names ───────────────────────────────────────────────────
+      { name: 'AI_FOUNDRY_ACCOUNT_NAME',         value: aiFoundryAccountName,             label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AI_FOUNDRY_PROJECT_NAME',         value: aiFoundryProjectName,             label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AI_FOUNDRY_STORAGE_ACCOUNT_NAME', value: aiFoundryStorageAccountName,      label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'APP_CONFIG_NAME',                 value: appConfigName,                    label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'APP_INSIGHTS_NAME',               value: appInsightsName,                  label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'CONTAINER_ENV_NAME',              value: containerEnvName,                 label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'CONTAINER_REGISTRY_NAME',         value: containerRegistryName,            label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'DATABASE_ACCOUNT_NAME',           value: dbAccountName,                    label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'DATABASE_NAME',                   value: dbDatabaseName,                   label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'SEARCH_SERVICE_NAME',             value: searchServiceName,                label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'STORAGE_ACCOUNT_NAME',            value: storageAccountName,               label: 'gpt-rag', contentType: 'text/plain' }
+
+      // ── Feature flagging ─────────────────────────────────────────────────
+      { name: 'DEPLOY_APP_CONFIG',         value: string(deployAppConfig),        label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'DEPLOY_KEY_VAULT',          value: string(deployKeyVault),         label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'DEPLOY_LOG_ANALYTICS',      value: string(deployLogAnalytics),     label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'DEPLOY_APP_INSIGHTS',       value: string(deployAppInsights),      label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'DEPLOY_SEARCH_SERVICE',     value: string(deploySearchService),    label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'DEPLOY_STORAGE_ACCOUNT',    value: string(deployStorageAccount),   label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'DEPLOY_COSMOS_DB',          value: string(deployCosmosDb),         label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'DEPLOY_CONTAINER_APPS',     value: string(deployContainerApps),    label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'DEPLOY_CONTAINER_REGISTRY', value: string(deployContainerRegistry),label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'DEPLOY_CONTAINER_ENV',      value: string(deployContainerEnv),     label: 'gpt-rag', contentType: 'text/plain' }
+
+      // ── Endpoints / URIs ──────────────────────────────────────────────────
+      { name: 'KEY_VAULT_URI',                   value: keyVault.outputs.uri,                        label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'CONTAINER_REGISTRY_LOGIN_SERVER', value: containerRegistry.outputs.loginServer,       label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'STORAGE_BLOB_ENDPOINT',           value: storageAccount.outputs.primaryBlobEndpoint,  label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'SEARCH_SERVICE_QUERY_ENDPOINT',   value: searchService.outputs.endpoint,              label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AI_FOUNDRY_ACCOUNT_ENDPOINT',     value: aiFoundryAccount.outputs.accountTarget,      label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AI_FOUNDRY_PROJECT_ENDPOINT',     value: aiFoundryProject.outputs.endpoint,           label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AI_FOUNDRY_PROJECT_WORKSPACE_ID', value: aiFoundryFormatProjectWorkspaceId.outputs.projectWorkspaceIdGuid, label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'COSMOS_DB_ENDPOINT',              value: CosmosDBAccount.outputs.endpoint,            label: 'gpt-rag', contentType: 'text/plain' }
+
+      // ── Connections ───────────────────────────────────────────────────────
+      { name: 'SEARCH_CONNECTION_ID', value: deploySearchService ? aiFoundryConnectionSearch.outputs.seachConnectionId : '',  label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'BING_CONNECTION_ID',   value: deployGroundingWithBing ? aiFoundryBingConnection.outputs.bingConnectionId : '', label: 'gpt-rag', contentType: 'text/plain' }
+
+      // ── Managed Identity Principals ───────────────────────────────────────
+      { name: 'CONTAINER_ENV_PRINCIPAL_ID',      value: containerEnv.outputs.systemAssignedMIPrincipalId!,     label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'SEARCH_SERVICE_PRINCIPAL_ID',     value: searchService.outputs.systemAssignedMIPrincipalId!,    label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AI_FOUNDRY_ACCOUNT_PRINCIPAL_ID', value: aiFoundryAccount.outputs.accountPrincipalId,           label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AI_FOUNDRY_PROJECT_PRINCIPAL_ID', value: aiFoundryProject.outputs.projectPrincipalId,           label: 'gpt-rag', contentType: 'text/plain' }
+
+      // ── Module-Specific Connection Objects ─────────────────────────────────
+      { name: 'AI_FOUNDRY_STORAGE_CONNECTION',   value: aiFoundryProject.outputs.azureStorageConnection, label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AI_FOUNDRY_COSMOS_DB_CONNECTION', value: aiFoundryProject.outputs.cosmosDBConnection,     label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AI_FOUNDRY_SEARCH_CONNECTION',    value: aiFoundryProject.outputs.aiSearchConnection,     label: 'gpt-rag', contentType: 'text/plain' }
+
+      // ── Container Apps List & Model Deployments ────────────────────────────
+      { name: 'CONTAINER_APPS',       value: string(containerAppsSettings.outputs.containerAppsList), label: 'gpt-rag', contentType: 'application/json' }
+      { name: 'MODEL_DEPLOYMENTS',    value: string(modelDeploymentList), label: 'gpt-rag', contentType: 'application/json' }
+    ])
+  }
+}
+
+//////////////////////////////////////////////////////////////////////////
 // OUTPUTS
 //////////////////////////////////////////////////////////////////////////
 
@@ -946,36 +1172,6 @@ output ENVIRONMENT_NAME    string = environmentName
 output DEPLOYMENT_NAME     string = deployment().name
 output RESOURCE_TOKEN      string = resourceToken
 output NETWORK_ISOLATION   bool   = networkIsolation
-
-// ──────────────────────────────────────────────────────────────────────
-// Resource IDs
-// ──────────────────────────────────────────────────────────────────────
-output KEY_VAULT_RESOURCE_ID           string = keyVault.outputs.resourceId
-output STORAGE_ACCOUNT_RESOURCE_ID     string = storageAccount.outputs.resourceId
-output COSMOS_DB_ACCOUNT_RESOURCE_ID   string = CosmosDBAccount.outputs.resourceId
-output APP_CONFIG_RESOURCE_ID          string = appConfig.outputs.resourceId
-output APP_INSIGHTS_RESOURCE_ID        string = appInsights.outputs.resourceId
-output LOG_ANALYTICS_RESOURCE_ID       string = logAnalytics.outputs.resourceId
-output CONTAINER_ENV_RESOURCE_ID       string = containerEnv.outputs.resourceId
-output CONTAINER_REGISTRY_RESOURCE_ID  string = containerRegistry.outputs.resourceId
-output SEARCH_SERVICE_RESOURCE_ID      string = searchService.outputs.resourceId
-output AI_FOUNDRY_ACCOUNT_RESOURCE_ID  string = aiFoundryAccount.outputs.accountID
-output AI_FOUNDRY_PROJECT_RESOURCE_ID  string = aiFoundryProject.outputs.projectId
-
-// ──────────────────────────────────────────────────────────────────────
-// Resource Names
-// ──────────────────────────────────────────────────────────────────────
-output AI_FOUNDRY_ACCOUNT_NAME         string = aiFoundryAccountName
-output AI_FOUNDRY_PROJECT_NAME         string = aiFoundryProjectName
-output AI_FOUNDRY_STORAGE_ACCOUNT_NAME string = aiFoundryStorageAccountName
-output APP_CONFIG_NAME                 string = appConfigName
-output APP_INSIGHTS_NAME               string = appInsightsName
-output CONTAINER_ENV_NAME              string = containerEnvName
-output CONTAINER_REGISTRY_NAME         string = containerRegistryName
-output DATABASE_ACCOUNT_NAME           string = dbAccountName
-output DATABASE_NAME                   string = dbDatabaseName
-output SEARCH_SERVICE_NAME             string = searchServiceName
-output STORAGE_ACCOUNT_NAME            string = storageAccountName
 
 // ──────────────────────────────────────────────────────────────────────
 // Feature flagging
@@ -994,52 +1190,5 @@ output DEPLOY_CONTAINER_ENV       bool = deployContainerEnv
 // ──────────────────────────────────────────────────────────────────────
 // Endpoints / URIs
 // ──────────────────────────────────────────────────────────────────────
-output KEY_VAULT_URI                     string = keyVault.outputs.uri
-output CONTAINER_REGISTRY_LOGIN_SERVER   string = containerRegistry.outputs.loginServer
-output STORAGE_BLOB_ENDPOINT             string = storageAccount.outputs.primaryBlobEndpoint
-output SEARCH_SERVICE_QUERY_ENDPOINT     string = searchService.outputs.endpoint
-output AI_FOUNDRY_ACCOUNT_ENDPOINT       string = aiFoundryAccount.outputs.accountTarget
-output AI_FOUNDRY_PROJECT_ENDPOINT       string = aiFoundryProject.outputs.endpoint
-output AI_FOUNDRY_PROJECT_WORKSPACE_ID   string = aiFoundryFormatProjectWorkspaceId.outputs.projectWorkspaceIdGuid
-output COSMOS_DB_ENDPOINT                string = CosmosDBAccount.outputs.endpoint
+
 output APP_CONFIG_ENDPOINT               string = appConfig.outputs.endpoint
-
-// ──────────────────────────────────────────────────────────────────────
-// Connections
-// ──────────────────────────────────────────────────────────────────────
-output SEARCH_CONNECTION_ID string = deploySearchService ? aiFoundryConnectionSearch.outputs.seachConnectionId : ''
-output BING_CONNECTION_ID   string = deployGroundingWithBing ? aiFoundryBingConnection.outputs.bingConnectionId : ''
-
-
-// ──────────────────────────────────────────────────────────────────────
-// Managed Identity Principals
-// ──────────────────────────────────────────────────────────────────────
-output CONTAINER_ENV_PRINCIPAL_ID       string = containerEnv.outputs.systemAssignedMIPrincipalId!
-output SEARCH_SERVICE_PRINCIPAL_ID      string = searchService.outputs.systemAssignedMIPrincipalId!
-output AI_FOUNDRY_ACCOUNT_PRINCIPAL_ID  string = aiFoundryAccount.outputs.accountPrincipalId
-output AI_FOUNDRY_PROJECT_PRINCIPAL_ID  string = aiFoundryProject.outputs.projectPrincipalId
-
-// ──────────────────────────────────────────────────────────────────────
-// Module-Specific Connection Objects
-// ──────────────────────────────────────────────────────────────────────
-output AI_FOUNDRY_STORAGE_CONNECTION   string = aiFoundryProject.outputs.azureStorageConnection
-output AI_FOUNDRY_COSMOS_DB_CONNECTION string = aiFoundryProject.outputs.cosmosDBConnection
-output AI_FOUNDRY_SEARCH_CONNECTION    string = aiFoundryProject.outputs.aiSearchConnection
-
-// ──────────────────────────────────────────────────────────────────────
-// Container Apps List
-// ──────────────────────────────────────────────────────────────────────
-output CONTAINER_APPS array = [
-  for (app, i) in containerAppsList: {
-    name:          empty(app.name) ? '${abbrs.containerApps}-${resourceToken}-${app.service_name}' : app.name
-    serviceName:   app.service_name
-    canonical_name:  app.canonical_name
-    principalId:   containerApps[i].outputs.systemAssignedMIPrincipalId!
-    fqdn:          containerApps[i].outputs.fqdn
-  }
-]
-
-// ──────────────────────────────────────────────────────────────────────
-// Model Deployment List
-// ──────────────────────────────────────────────────────────────────────
-output MODEL_DEPLOYMENTS array = modelDeploymentList

@@ -27,21 +27,7 @@ pip install --upgrade pip
 pip install -r config/requirements.txt
 
 ###############################################################################
-# 1) App Configuration Setup
-###############################################################################
-echo 
-echo "📑 Seeding App Configuration…"
-{
-
-  echo "🚀 Running scripts.appconfig.seed_config…"
-  python -m config.appconfig.setup
-  echo "✅ App Configuration script finished."
-} || {
-  echo "❗️ Error during App Configuration Setup. Skipping it."
-}
-
-###############################################################################
-# 2) AI Foundry Setup
+# 1) AI Foundry Setup
 ###############################################################################
 echo 
 echo "📑 AI Foundry Setup…"
@@ -54,7 +40,7 @@ echo "📑 AI Foundry Setup…"
 }
 
 ###############################################################################
-# 3) Container Apps Setup
+# 2) Container Apps Setup
 ###############################################################################
 echo
 if [[ "${DEPLOY_CONTAINER_APPS,,}" == "true" ]]; then
@@ -71,24 +57,7 @@ else
 fi
 
 ###############################################################################
-# 4) AI Search Setup
-###############################################################################
-echo
-if [[ "${DEPLOY_SEARCH_SERVICE,,}" == "true" ]]; then
-  echo "🔍 AI Search setup…"
-  {
-    echo "🚀 Running config.search.setup…"
-    python -m config.search.setup
-    echo "✅ Search setup script finished."
-  } || {
-    echo "❗️ Error during Search setup. Skipping it."
-  }
-else
-  echo "⚠️  Skipping AI Search setup (DEPLOY_SEARCH_SERVICE is not 'true')."
-fi
-
-###############################################################################
-# 5) Zero Trust Information
+# 3) Zero Trust Information
 ###############################################################################
 echo 
 if [[ "${NETWORK_ISOLATION,,}" == "true" ]]; then

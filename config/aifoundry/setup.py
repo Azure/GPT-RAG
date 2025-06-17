@@ -90,11 +90,59 @@ def load_and_replace(path: str, replacements: dict) -> dict:
         logging.error("❗️ Failed to parse JSON in %s: %s", path, e)
         sys.exit(1)
 
+
+def validate_json_file(path: str):
+    if not os.path.exists(path):
+        logging.info(f"ℹ️ File not found: {path!r}. Skipping configuration.")
+        sys.exit(0)
+
+    try:
+        content = open(path, "r", encoding="utf-8").read()
+    except Exception as e:
+        logging.info(f"ℹ️ Unable to read {path!r}: {e}. Skipping configuration.")
+        sys.exit(0)
+
+    if not content.strip():
+        logging.info(f"ℹ️ File is empty: {path!r}. Skipping configuration.")
+        sys.exit(0)
+
+    try:
+        json.loads(content)
+    except json.JSONDecodeError as e:
+        logging.info(f"ℹ️ Invalid JSON in {path!r}: {e}. Skipping configuration.")
+        sys.exit(0)
+
 def main():
+    """
+    Configures Responsible AI (RAI) blocklists and policies for an Azure AI Foundry deployment.
+
+    This function performs the following steps:
+      1. Checks the environment and validates required JSON configuration files.
+      2. Authenticates with Azure using CLI or Managed Identity credentials.
+      3. Connects to Azure App Configuration to retrieve core settings such as subscription ID, resource group, and account name.
+      4. Loads the list of model deployments and selects the deployment with canonical name 'chatDeploymentName'.
+      5. Creates or updates a RAI blocklist in Azure Cognitive Services, removing any existing items and adding new ones from the provided JSON.
+      6. Creates or updates a RAI policy, normalizing and merging blocklist and filter settings as required.
+      7. Associates the created/updated RAI policy with the selected deployment.
+
+    Exits the process with an error message if any critical step fails (e.g., authentication, missing configuration, invalid JSON).
+
+    Logging is used throughout to provide progress and error information.
+
+    Raises:
+        SystemExit: If authentication fails, configuration is missing or invalid, or required JSON fields are not present.
+    """
+    # ── 0) Validate environment and input files ──────────────────────
     check_env()
+
+    rai_policies_json_file   = "config/aifoundry/raipolicies.json"
+    rai_blocklist_json_file  = "config/aifoundry/raiblocklist.json"
+    validate_json_file(rai_policies_json_file)
+    validate_json_file(rai_blocklist_json_file)
+
     endpoint = os.environ["APP_CONFIG_ENDPOINT"]
 
-    # authenticate using CLI or Managed Identity
+    # ── Authenticate using Azure CLI or Managed Identity ─────────────
     try:
         cred = ChainedTokenCredential(
             AzureCliCredential(),
@@ -124,7 +172,7 @@ def main():
         logging.error("MODEL_DEPLOYMENTS is not valid JSON: %s", e)
         sys.exit(1)
 
-    canonical_name = "chatDeploymentName"
+    canonical_name = "CHAT_DEPLOYMENT_NAME"
     deployment_name = None
     for item in deployments:
         if item.get("canonical_name") == canonical_name:
@@ -149,7 +197,7 @@ def main():
 
     # ── 4) Blocklist creation/update ────────────────────────────────
     bl_def = load_and_replace(
-        "config/aifoundry/raiblocklist.json",
+        rai_blocklist_json_file,
         {"{{BlocklistName}}": blocklist_name}
     )
     bl_name = bl_def.get("name") or bl_def.get("blocklistname")
@@ -202,7 +250,7 @@ def main():
 
     # ── 4) RAI policy creation/update ────────────────────────────────
     pol_def = load_and_replace(
-        "config/aifoundry/raipolicies.json",
+        rai_policies_json_file,
         {
             "{{PolicyName}}": policy_name,
             "{{BlocklistName}}": bl_name
