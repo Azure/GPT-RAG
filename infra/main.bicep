@@ -897,6 +897,20 @@ module assignSearchSearchIndexDataReaderAIFoundryProject 'modules/role-assignmen
   ]    
 }
 
+// Search Service - Search Service Contributor -> AiFoundryProject
+module assignSearchSearchServiceContributorAIFoundryProject 'modules/role-assignment/role-assignment-searchservice.bicep' = if (deploySearchService) {
+  name: 'assignSearchSearchServiceContributorAIFoundryProject'
+  params: {
+    searchServiceName: searchService.outputs.name
+    principalId: aiFoundryProject.outputs.projectPrincipalId
+    roleDefinition: _roles.ai.searchServiceContributor
+  }
+  dependsOn:[
+    assignSearchAiFoundryProject, assignCosmosDBAiFoundryProject, assignStorageAccountAiFoundryProject, assignSearchSearchIndexDataReaderAIFoundryProject
+  ]    
+}
+
+
 // Storage Account - Storage Blob Data Reader -> AiFoundry Project
 module assignStorageStorageBlobDataReaderAIFoundryProject 'modules/role-assignment/role-assignment-storageaccount.bicep' = if (deployStorageAccount) {
   name: 'assignStorageStorageBlobDataReaderAIFoundryProject'
