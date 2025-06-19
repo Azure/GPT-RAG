@@ -1,6 +1,7 @@
 .azure
 .devcontainer
 local/
+.local/
 results/
 **azdoenv.json
 **federated_id.json
