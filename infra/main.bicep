@@ -320,7 +320,7 @@ var _chatGptDeploymentName = !empty(chatGptDeploymentName) ? chatGptDeploymentNa
 // @minValue(1)
 // @maxValue(300)
 param chatGptDeploymentCapacity int = 0
-var _chatGptDeploymentCapacity = chatGptDeploymentCapacity != 0 ? chatGptDeploymentCapacity : 40
+var _chatGptDeploymentCapacity = chatGptDeploymentCapacity != 0 ? chatGptDeploymentCapacity : 100
 
 @description('Embeddings model used to generate vector embeddings. Don\'t forget to check region availability.')
 // @allowed([ 'text-embedding-ada-002', 'text-embedding-3-small', 'text-embedding-3-large' ])
@@ -348,7 +348,7 @@ var _embeddingsVectorSize = embeddingsVectorSize != 0 ? embeddingsVectorSize : 3
 
 @description('Embeddings model tokens per Minute Rate Limit (thousands).')
 param embeddingsDeploymentCapacity int = 0
-var _embeddingsDeploymentCapacity = embeddingsDeploymentCapacity != 0 ? embeddingsDeploymentCapacity : 40
+var _embeddingsDeploymentCapacity = embeddingsDeploymentCapacity != 0 ? embeddingsDeploymentCapacity : 120
 
 @description('Azure OpenAI API version.')
 param openaiApiVersion string = ''
@@ -532,6 +532,7 @@ param bastionKvName string = ''
 var _bastionKvName = !empty(bastionKvName) ? bastionKvName : 'bastionkv-${resourceToken}'
 
 var _orchestratorEndpoint = 'https://${_orchestratorFunctionAppName}.azurewebsites.net/api/orc'
+var _orchestratorStreamingEndpoint = 'https://${_orchestratorFunctionAppName}.azurewebsites.net/api/orcstream'
 
 /////////////////////////////////////////////////////////////////////////////
 // TEMPLATE MODULES
@@ -837,14 +838,6 @@ module orchestrator './core/host/functions.bicep' =  {
         value: _azureDbConfig.dbDatabaseName
       }
       {
-        name: 'AZURE_DB_CONVERSATIONS_CONTAINER_NAME'
-        value: _azureDbConfig.conversationContainerName
-      }
-      {
-        name: 'AZURE_DB_DATASOURCES_CONTAINER_NAME'
-        value: _azureDbConfig.datasourcesContainerName
-      }
-      {
         name: 'AZURE_KEY_VAULT_NAME'
         value: keyVault.outputs.name
       }
@@ -897,16 +890,12 @@ module orchestrator './core/host/functions.bicep' =  {
         value: _embeddingsVectorSize
       }
       {
-        name: 'ORCHESTRATOR_MESSAGES_LANGUAGE'
-        value: _orchestratorMessagesLanguage
-      }
-      {
         name: 'ENABLE_ORYX_BUILD'
-        value: 'true'
+        value: 'True'
       }
       {
         name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
-        value: 'true'
+        value: 'True'
       }
       {
         name: 'LOGLEVEL'
@@ -1038,7 +1027,7 @@ module frontEnd  'core/host/appservice.bicep' = {
     networkIsolation: (_networkIsolation && !_vnetReuse)
     vnetName: (_networkIsolation && !_vnetReuse)?vnet.outputs.name:''
     subnetId: (_networkIsolation && !_vnetReuse)?vnet.outputs.appIntSubId:''
-    appCommandLine: 'python ./app.py'
+    appCommandLine:'python -m uvicorn main:app --host 0.0.0.0 --port \${PORT:-8000}'
     location: location
     tags: union(tags, { 'azd-service-name': 'frontend' })
     appServicePlanId: appServicePlan.outputs.id
@@ -1046,29 +1035,11 @@ module frontEnd  'core/host/appservice.bicep' = {
     runtimeVersion: _appServiceRuntimeVersion
     scmDoBuildDuringDeployment: true
     basicPublishingCredentials: _networkIsolation?true:false
-    keyVaultName: keyVault.outputs.name
-    flaskSecretName: 'flaskSecretKey'
         appSettings: [
       {
-        name: 'SPEECH_SYNTHESIS_VOICE_NAME'
-        value: _speechSynthesisVoiceName
-      }
-      {
-        name: 'SPEECH_SYNTHESIS_LANGUAGE'
-        value: _speechSynthesisLanguage
+        name: 'ORCHESTRATOR_STREAM_ENDPOINT'
+        value: _orchestratorStreamingEndpoint
       }      
-      {
-        name: 'SPEECH_RECOGNITION_LANGUAGE'
-        value: _speechRecognitionLanguage
-      }
-      {
-        name: 'SPEECH_REGION'
-        value: location
-      }
-      {
-        name: 'ORCHESTRATOR_ENDPOINT'
-        value: _orchestratorEndpoint
-      }
       {
         name: 'AZURE_SUBSCRIPTION_ID'
         value: subscription().subscriptionId
@@ -1080,19 +1051,19 @@ module frontEnd  'core/host/appservice.bicep' = {
       {
         name: 'AZURE_ORCHESTRATOR_FUNC_NAME'
         value: _orchestratorFunctionAppName
-      }            
-      {
-        name: 'AZURE_KEY_VAULT_ENDPOINT'
-        value: keyVault.outputs.endpoint
-      }
-      {
-        name: 'AZURE_KEY_VAULT_NAME'
-        value: keyVault.outputs.name
       }
       {
         name: 'STORAGE_ACCOUNT'
         value: _storageAccountName
-      } 
+      }
+      {
+        name: 'STORAGE_CONTAINER'
+        value: _storageContainerName
+      }
+      {
+        name: 'STORAGE_CONTAINER_IMAGES'
+        value: _storageImagesContainerName
+      }         
       {
         name: 'LOGLEVEL'
         value: 'INFO'

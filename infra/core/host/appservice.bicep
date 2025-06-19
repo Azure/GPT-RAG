@@ -7,10 +7,6 @@ param applicationInsightsName string = ''
 param applicationInsightsResourceGroupName string = ''
 param appServicePlanId string
 
-// KeyVault Properties
-param keyVaultName string
-param flaskSecretName string = 'flaskSecretKey'
-
 // Runtime Properties
 @allowed([
   'dotnet', 'dotnetcore', 'dotnet-isolated', 'node', 'python', 'java', 'powershell', 'custom'
@@ -33,7 +29,7 @@ param functionAppScaleLimit int = -1
 param linuxFxVersion string = runtimeNameAndVersion
 param minimumElasticInstanceCount int = -1
 param numberOfWorkers int = -1
-param scmDoBuildDuringDeployment bool = false
+param scmDoBuildDuringDeployment bool = true
 param use32BitWorkerProcess bool = false
 param ftpsState string = 'FtpsOnly'
 param healthCheckPath string = ''
@@ -55,28 +51,6 @@ resource existingAppService 'Microsoft.Web/sites@2022-09-01' existing = if (appS
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing = if (!empty(applicationInsightsName)) {
   scope: resourceGroup(applicationInsightsResourceGroupName)
   name: applicationInsightsName
-}
-
-
-resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
-  name: keyVaultName
-}
-
-var flaskSecretValue = uniqueString(resourceGroup().id, flaskSecretName, 'salt')
-
-resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' =  {
-  name: flaskSecretName
-  tags: tags
-  parent: keyVault
-  properties: {
-    attributes: {
-      enabled: true
-      exp: 0
-      nbf: 0
-    }
-    contentType: 'string'
-    value: flaskSecretValue
-  }
 }
 
 resource newAppService 'Microsoft.Web/sites@2022-09-01' = if (!appServiceReuse && deployAppService) {
@@ -117,6 +91,10 @@ resource newAppService 'Microsoft.Web/sites@2022-09-01' = if (!appServiceReuse &
             name: 'ENABLE_ORYX_BUILD'
             value: string(enableOryxBuild)
           }
+          {
+            name: 'WEBSITE_HTTPLOGGING_RETENTION_DAYS'
+            value: '1'
+          }         
         ]
       )    
       cors: {
