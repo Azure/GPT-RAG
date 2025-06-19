@@ -118,7 +118,7 @@ Here is the complete list of resources for a standard Zero Trust deployment, inc
 
 - **Virtual Network**
     <BR>AI Services VNet.
-    - Address Space: 10.0.0.0/24
+    - Address Space: 10.0.0.0/23
 > Address range is a suggestion, you should use what works for you.
 
 - **Subnets**
