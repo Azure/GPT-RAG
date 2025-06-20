@@ -12,10 +12,10 @@ $networkIsolation    = $env:NETWORK_ISOLATION    ?? 'false'
 
 Write-Host "🔧 Running post-provision steps…`n"
 Write-Host "📋 Current environment variables:"
-foreach ($v in 'DEPLOY_CONTAINER_APPS','DEPLOY_SEARCH_SERVICE','NETWORK_ISOLATION') {
-    $value = Get-Variable -Name $v -ValueOnly
-    Write-Host "  $v = $value"
-}
+Write-Host "  DEPLOY_CONTAINER_APPS = $deployContainerApps"
+Write-Host "  DEPLOY_SEARCH_SERVICE = $deploySearchService"
+Write-Host "  NETWORK_ISOLATION = $networkIsolation"
+
 
 # -----------------------------------------------------------------------------
 # Find the Python executable
