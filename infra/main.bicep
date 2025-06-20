@@ -118,6 +118,7 @@ param logAnalyticsWorkspaceName    string = '${abbrs.operationalInsightsWorkspac
 param searchServiceName            string = '${abbrs.searchSearchServices}-${resourceToken}'
 param storageAccountName           string = '${abbrs.storageAccounts}${resourceToken}'
 
+
 param abbrs object = {
   aiFoundry:                     'aif'
   aiFoundryProject:              'proj'
@@ -1003,7 +1004,7 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       _storageContainerNamesSettings,
       [
       // ── General / Deployment ─────────────────────────────────────────────
-      { name: 'TENANT_ID',           value: tenant().tenantId,                        label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AZURE_TENANT_ID',     value: tenant().tenantId,                        label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'SUBSCRIPTION_ID',     value: subscription().subscriptionId,            label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'RESOURCE_GROUP_NAME', value: resourceGroup().name,                     label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'LOCATION',            value: location,                                 label: 'gpt-rag', contentType: 'text/plain' }
@@ -1011,6 +1012,7 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       { name: 'DEPLOYMENT_NAME',     value: deployment().name,                        label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'RESOURCE_TOKEN',      value: resourceToken,                            label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'NETWORK_ISOLATION',   value: string(networkIsolation),                 label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'LOG_LEVEL',           value: 'INFO',                                   label: 'gpt-rag', contentType: 'text/plain' }
 
       // ── Resource IDs ─────────────────────────────────────────────────────
       { name: 'KEY_VAULT_RESOURCE_ID',          value: keyVault.outputs.resourceId,                        label: 'gpt-rag', contentType: 'text/plain' }
@@ -1058,6 +1060,26 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       { name: 'AI_FOUNDRY_PROJECT_ENDPOINT',     value: aiFoundryProject.outputs.endpoint,           label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'AI_FOUNDRY_PROJECT_WORKSPACE_ID', value: aiFoundryFormatProjectWorkspaceId.outputs.projectWorkspaceIdGuid, label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'COSMOS_DB_ENDPOINT',              value: CosmosDBAccount.outputs.endpoint,            label: 'gpt-rag', contentType: 'text/plain' }
+
+      //orchestrator
+      { name: 'ORCHESTRATOR_APIKEY',              value: resourceToken,                               label: 'orchestrator', contentType: 'text/plain' }
+      { name: 'CHAT_DEPLOYMENT_NAME',             value: 'chat',                                      label: 'orchestrator', contentType: 'text/plain' }
+      { name: 'OPENAI_API_VERSION',               value: '2024-10-21',                                label: 'orchestrator', contentType: 'text/plain' }
+      { name: 'LOG_LEVEL',                        value: 'INFO',                                      label: 'orchestrator', contentType: 'text/plain' }
+      { name: 'CONVERSATIONS_DATABASE_CONTAINER', value: 'conversations',                             label: 'orchestrator', contentType: 'text/plain' }
+      { name: 'AGENT_STRATEGY',                   value: 'single_agent_rag',                          label: 'orchestrator', contentType: 'text/plain' }
+      { name: 'PROMPT_SOURCE',                    value: 'file',                                      label: 'orchestrator', contentType: 'text/plain' }
+      { name: 'AGENT_ID',                         value: null,                                        label: 'orchestrator', contentType: 'text/plain' }
+      { name: 'SEARCH_RAG_INDEX_NAME',            value: 'ragindex',                                  label: 'orchestrator', contentType: 'text/plain' }
+      { name: 'SEARCH_TOP_K',                     value: 5,                                           label: 'orchestrator', contentType: 'text/plain' }
+      
+      //mcp
+      { name: 'MCP_CLIENT_TIMEOUT',         value: 600,                                         label: 'gpt-rag',   contentType: 'text/plain' }
+      { name: 'MCP_SERVER_TIMEOUT',         value: 600,                                         label: 'gpt-rag',   contentType: 'text/plain' }
+      { name: 'MCP_SERVER_APIKEY',          value: resourceToken,                               label: 'gpt-rag',   contentType: 'text/plain' }
+      { name: 'MCP_SERVER_TRANSPORT',       value: 'sse',                                       label: 'gpt-rag',   contentType: 'text/plain' }
+      
+      //ingestion
 
       // ── Connections ───────────────────────────────────────────────────────
       { name: 'SEARCH_CONNECTION_ID', value: deploySearchService ? aiFoundryConnectionSearch.outputs.seachConnectionId : '',  label: 'gpt-rag', contentType: 'text/plain' }

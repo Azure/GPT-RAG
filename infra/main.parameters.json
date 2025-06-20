@@ -122,6 +122,23 @@
             "Storage Blob Data Contributor",
             "Key Vault Secrets User"
           ]
+        },
+        {
+          "name": null,
+          "service_name": "mcp",
+          "min_replicas": 1,
+          "max_replicas": 1,
+          "canonical_name": "MCP_APP",
+          "roles": [
+            "App Configuration Data Reader",
+            "Cognitive Services User",
+            "Cognitive Services OpenAI User",
+            "AcrPull",
+            "Search Index Data Contributor",
+            "Storage Blob Data Contributor",
+            "Storage Queue Data Contributor",
+            "Key Vault Secrets User"
+          ]
         }
       ]
     },
@@ -152,6 +169,14 @@
         {
           "name": "datasources",
           "canonical_name": "DATASOURCES_DATABASE_CONTAINER"
+        },
+        {
+          "name": "prompts",
+          "canonical_name": "PROMPTS_CONTAINER"
+        },
+        {
+          "name": "mcp",
+          "canonical_name": "MCP_CONTAINER"
         }
       ]
     }    
