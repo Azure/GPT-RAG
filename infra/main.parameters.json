@@ -129,13 +129,16 @@
     "storageAccountContainersList": {
       "value": [
         {
-          "name": "documents-images"
+          "name": "documents-images",
+          "canonical_name": "DOCUMENTS_IMAGES_STORAGE_CONTAINER"          
         },
         {
-          "name": "documents"
+          "name": "documents",
+          "canonical_name": "DOCUMENTS_STORAGE_CONTAINER"
         },
         {
-          "name": "nl2sql"
+          "name": "nl2sql",
+          "canonical_name": "NL2SQL_STORAGE_CONTAINER"
         }
       ]
     },  
@@ -143,13 +146,15 @@
     "databaseContainersList": {
       "value": [
         {
-          "name": "conversations"
+          "name": "conversations",
+          "canonical_name": "CONVERSATIONS_DATABASE_CONTAINER"
         },
         {
-          "name": "datasources"
+          "name": "datasources",
+          "canonical_name": "DATASOURCES_DATABASE_CONTAINER"
         }
       ]
     }    
-    
   }
+  
 }

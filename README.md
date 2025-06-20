@@ -90,6 +90,7 @@ After infrastructure is in place, deploy the GPT-RAG services from their respect
 | GenAI App Search Service              | Search Service Contributor          | Executor                   | Create/update search service elements                                 |
 | GenAI App Search Service              | Search Index Data Contributor       | Executor                   | Read/write search index data                                          |
 | GenAI App Search Service              | Search Index Data Reader            | AI Foundry Account         | Read index data                                                       |
+| GenAI App Search Service              | Search Service Contributor          | AI Foundry Account         | Create AI search connection                                           |
 | GenAI App Search Service              | Search Index Data Reader            | ContainerApp: orchestrator | Read index data                                                       |
 | GenAI App Search Service              | Search Index Data Contributor       | ContainerApp: dataingest   | Read/write index data                                                 |
 | GenAI App Storage Account             | Storage Blob Data Contributor       | Executor                   | Read/write blob data                                                  |
