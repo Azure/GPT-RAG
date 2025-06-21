@@ -143,15 +143,17 @@ def main():
     endpoint = os.environ["APP_CONFIG_ENDPOINT"]
 
     # ── Authenticate using Azure CLI or Managed Identity ─────────────
+    cred = ChainedTokenCredential(
+        AzureCliCredential(),
+        ManagedIdentityCredential()
+    )
     try:
-        cred = ChainedTokenCredential(
-            AzureCliCredential(),
-            ManagedIdentityCredential()
-        )
+        scope = f"{endpoint}/.default"
+        cred.get_token(scope)
     except ClientAuthenticationError as e:
         logging.error("❗️ Authentication failed: %s", e)
         logging.info("ℹ️ Skipping configuration due to missing credentials.")
-        sys.exit(0)
+        sys.exit(0)        
 
     # connect to App Configuration
     app_conf = AzureAppConfigurationClient(endpoint, cred)
