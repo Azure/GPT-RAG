@@ -32,6 +32,8 @@
 
 targetScope = 'resourceGroup'
 
+import * as variables from 'variables.bicep'
+
 //////////////////////////////////////////////////////////////////////////
 // PARAMETERS
 //////////////////////////////////////////////////////////////////////////
@@ -80,17 +82,23 @@ param accountCapHost string = 'caphostacc'
 // Feature-flagging Params (as booleans with a default of true)
 // ----------------------------------------------------------------------
 
-param deployGroundingWithBing          bool = true
 param deployAppConfig                  bool = true
-param deployKeyVault                   bool = true
-param deployLogAnalytics               bool = true
 param deployAppInsights                bool = true
-param deploySearchService              bool = true
-param deployStorageAccount             bool = true
 param deployCosmosDb                   bool = true
 param deployContainerApps              bool = true
 param deployContainerRegistry          bool = true
 param deployContainerEnv               bool = true
+param deployKeyVault                   bool = true
+param deployGroundingWithBing          bool = true
+param deployLogAnalytics               bool = true
+param deploySearchService              bool = true
+param deployStorageAccount             bool = true
+
+// ----------------------------------------------------------------------
+// Feature-flagging Params (as booleans with a default of false)
+// ----------------------------------------------------------------------
+param deployMcp                        bool = false // Deploy Model Context Protocol (MCP) resources
+param useUAI                           bool = false // Use User Assigned Identity (UAI)
 
 // ----------------------------------------------------------------------
 // Resource Naming params
@@ -99,42 +107,24 @@ param deployContainerEnv               bool = true
 @description('Unique token for resource names, derived from the subscription ID, environment name, and location')
 param resourceToken                string = toLower(uniqueString(subscription().id, environmentName, location))
 
-param aiFoundryAccountName         string = '${abbrs.aiFoundry}-${resourceToken}'
-param aiFoundryProjectName         string = '${abbrs.aiFoundryProject}-${resourceToken}' 
-param aiFoundryProjectDisplayName  string = '${abbrs.aiFoundryProject}-${resourceToken}' 
-param aiFoundryProjectDescription  string = '${abbrs.aiFoundryProject}-${resourceToken} Project' 
-param aiFoundryStorageAccountName  string = '${abbrs.storageAccounts}foundry0${resourceToken}'
-param aiFoundrySearchServiceName   string = '${abbrs.searchSearchServices}-foundry-${resourceToken}'
-param aiFoundryCosmosDbName        string = '${abbrs.cosmosDbAccount}-foundry-${resourceToken}'
-param bingSearchName               string = '${abbrs.bingSearch}-${resourceToken}'  
-param appConfigName                string = '${abbrs.appConfigurationStores}-${resourceToken}'
-param appInsightsName              string = '${abbrs.insightsComponents}-${resourceToken}'
-param containerEnvName             string = '${abbrs.containerEnvs}${resourceToken}'
-param containerRegistryName        string = '${abbrs.containerRegistries}${resourceToken}'
-param dbAccountName                string = '${abbrs.cosmosDbAccount}-${resourceToken}'
-param dbDatabaseName               string = '${abbrs.cosmosDbDatabase}-${resourceToken}'
-param keyVaultName                 string = '${abbrs.keyVaultVaults}-${resourceToken}'
-param logAnalyticsWorkspaceName    string = '${abbrs.operationalInsightsWorkspaces}-${resourceToken}'
-param searchServiceName            string = '${abbrs.searchSearchServices}-${resourceToken}'
-param storageAccountName           string = '${abbrs.storageAccounts}${resourceToken}'
-
-
-param abbrs object = {
-  aiFoundry:                     'aif'
-  aiFoundryProject:              'proj'
-  storageAccounts:               'st'
-  keyVaultVaults:                'kv'
-  searchSearchServices:          'srch'
-  cosmosDbAccount:               'cosmos'
-  cosmosDbDatabase:              'cosmos'
-  appConfigurationStores:        'appcs'
-  insightsComponents:            'appi'
-  containerEnvs:                 'cae'
-  containerRegistries:           'cr'
-  operationalInsightsWorkspaces: 'log'
-  bingSearch:                    'bing'
-  containerApps:                 'ca'
-}
+param aiFoundryAccountName         string = '${variables._abbrs.ai.aiFoundry}${resourceToken}'
+param aiFoundryProjectName         string = '${variables._abbrs.ai.aiFoundryProject}${resourceToken}' 
+param aiFoundryProjectDisplayName  string = '${variables._abbrs.ai.aiFoundryProject}${resourceToken}' 
+param aiFoundryProjectDescription  string = '${variables._abbrs.ai.aiFoundryProject}${resourceToken} Project' 
+param aiFoundryStorageAccountName  string = replace('${variables._abbrs.storage.storageAccount}${variables._abbrs.ai.aiFoundry}${resourceToken}', '-', '')
+param aiFoundrySearchServiceName   string = '${variables._abbrs.ai.aiSearch}${variables._abbrs.ai.aiFoundry}${resourceToken}'
+param aiFoundryCosmosDbName        string = '${variables._abbrs.databases.cosmosDBDatabase}${variables._abbrs.ai.aiFoundry}${resourceToken}'
+param bingSearchName               string = '${variables._abbrs.ai.bing}${resourceToken}'  
+param appConfigName                string = '${variables._abbrs.configuration.appConfiguration}${resourceToken}'
+param appInsightsName              string = '${variables._abbrs.managementGovernance.applicationInsights}${resourceToken}'
+param containerEnvName             string = '${variables._abbrs.containers.containerAppsEnvironment}${resourceToken}'
+param containerRegistryName        string = '${variables._abbrs.containers.containerRegistry}${resourceToken}'
+param dbAccountName                string = '${variables._abbrs.databases.cosmosDBDatabase}${resourceToken}'
+param dbDatabaseName               string = '${variables._abbrs.databases.cosmosDBDatabase}db${resourceToken}'
+param keyVaultName                 string = '${variables._abbrs.security.keyVault}${resourceToken}'
+param logAnalyticsWorkspaceName    string = '${variables._abbrs.managementGovernance.logAnalyticsWorkspace}${resourceToken}'
+param searchServiceName            string = '${variables._abbrs.ai.aiSearch}${resourceToken}'
+param storageAccountName           string = '${variables._abbrs.storage.storageAccount}${resourceToken}'
 
 // ----------------------------------------------------------------------
 // Azure AI Foundry Service params
@@ -181,7 +171,6 @@ param storageAccountContainersList        array
 
 var _azdTags = { 'azd-env-name': environmentName }
 var _tags = union(_azdTags, deploymentTags)
-var _roles = loadJsonContent('./roles.json')
 
 // ----------------------------------------------------------------------
 // Container vars
@@ -230,12 +219,38 @@ module aiFoundryValidateExistingResources 'modules/standard-setup/validate-exist
   }
 }
 
+//AI Foundry Search User Mangaed Identity
+module aiFoundrySearchServiceNameUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
+  name: '${variables._abbrs.security.managedIdentity}${aiFoundrySearchServiceName}'
+  params: {
+    // Required parameters
+    name: '${variables._abbrs.security.managedIdentity}${aiFoundrySearchServiceName}'
+    // Non-required parameters
+    location: location
+  }
+}
+
+//AI Foundry Cosmos User Mangaed Identity
+module aiFoundryCosmosDbNameUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
+  name: '${variables._abbrs.security.managedIdentity}${aiFoundryCosmosDbName}'
+  params: {
+    // Required parameters
+    name: '${variables._abbrs.security.managedIdentity}${aiFoundryCosmosDbName}'
+    // Non-required parameters
+    location: location
+  }
+}
+
 // This module will create new agent dependent resources
 // A Cosmos DB account, an AI Search Service, and a Storage Account are created if they do not already exist
 module aiFoundryDependencies 'modules/standard-setup/standard-dependent-resources.bicep' = {
   name: 'dependencies-${aiFoundryAccountName}-${resourceToken}-deployment'
   params: {
     location: location
+    useUAI: useUAI
+    searchIdentityId: (useUAI) ? aiFoundrySearchServiceNameUAI.outputs.resourceId : ''
+    cosmosIdentityId: (useUAI) ? aiFoundryCosmosDbNameUAI.outputs.resourceId : ''
+
     azureStorageName: aiFoundryStorageAccountName
     aiSearchName: aiFoundrySearchServiceName
     cosmosDBName: aiFoundryCosmosDbName
@@ -255,6 +270,17 @@ module aiFoundryDependencies 'modules/standard-setup/standard-dependent-resource
     }
 }
 
+//AI Foundry User Mangaed Identity
+module aiFoundryUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
+  name: '${variables._abbrs.security.managedIdentity}${aiFoundryAccountName}'
+  params: {
+    // Required parameters
+    name: '${variables._abbrs.security.managedIdentity}${aiFoundryAccountName}'
+    // Non-required parameters
+    location: location
+  }
+}
+
 // Create the AI Services account and model deployments
 module aiFoundryAccount 'modules/standard-setup/ai-account-identity.bicep' = {
   name: 'ai-${aiFoundryAccountName}-${resourceToken}-deployment'
@@ -262,10 +288,23 @@ module aiFoundryAccount 'modules/standard-setup/ai-account-identity.bicep' = {
     accountName: aiFoundryAccountName
     location: location
     modelDeployments: modelDeploymentList
+    useUAI: useUAI
+    identityId: (useUAI) ? aiFoundryUAI.outputs.resourceId : ''
   }
   dependsOn: [
     aiFoundryValidateExistingResources, aiFoundryDependencies
   ]
+}
+
+//AI Foundry User Mangaed Identity
+module projectUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
+  name: '${variables._abbrs.security.managedIdentity}${aiFoundryProjectName}'
+  params: {
+    // Required parameters
+    name: '${variables._abbrs.security.managedIdentity}${aiFoundryProjectName}'
+    // Non-required parameters
+    location: location
+  }
 }
 
 // Creates a new project (sub-resource of the AI Services account)
@@ -276,6 +315,9 @@ module aiFoundryProject 'modules/standard-setup/ai-project-identity.bicep' = {
     projectDescription: aiFoundryProjectDescription
     displayName: aiFoundryProjectDisplayName
     location: location
+
+    useUAI: useUAI
+    identityId: (useUAI) ? projectUAI.outputs.resourceId : ''
 
     aiSearchName: aiFoundryDependencies.outputs.aiSearchName
     aiSearchServiceResourceGroupName: aiFoundryDependencies.outputs.aiSearchServiceResourceGroupName
@@ -382,6 +424,17 @@ module appInsights 'br/public:avm/res/insights/component:0.6.0' = if (deployAppI
 // Container Resources
 //////////////////////////////////////////////////////////////////////////
 
+//Container Apps Env User Mangaed Identity
+module containerEnvUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
+  name: '${variables._abbrs.security.managedIdentity}${containerEnvName}'
+  params: {
+    // Required parameters
+    name: '${variables._abbrs.security.managedIdentity}${containerEnvName}'
+    // Non-required parameters
+    location: location
+  }
+}
+
 // Container Apps Environment
 module containerEnv 'br/public:avm/res/app/managed-environment:0.9.1' = if (deployContainerEnv) {
   name: 'containerEnv'
@@ -393,8 +446,20 @@ module containerEnv 'br/public:avm/res/app/managed-environment:0.9.1' = if (depl
     appInsightsConnectionString: appInsights.outputs.connectionString
     zoneRedundant: false
     managedIdentities: {
-      systemAssigned: true
+      systemAssigned: (useUAI) ? false : true
+      userAssignedResourceIds: (useUAI) ? [containerEnvUAI.outputs.resourceId] : []
     }    
+  }
+}
+
+//Container Registry User Mangaed Identity
+module containerRegistryUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
+  name: '${variables._abbrs.security.managedIdentity}${containerRegistryName}'
+  params: {
+    // Required parameters
+    name: '${variables._abbrs.security.managedIdentity}${containerRegistryName}'
+    // Non-required parameters
+    location: location
   }
 }
 
@@ -408,19 +473,32 @@ module containerRegistry 'br/public:avm/res/container-registry/registry:0.9.1' =
     acrSku:   'Basic'
     tags:     _tags
     managedIdentities: {
-      systemAssigned: true
+      systemAssigned: (useUAI) ? false : true
+      userAssignedResourceIds: (useUAI) ? [containerRegistryUAI.outputs.resourceId] : []
     }
   }
 }
 
+//Container Apps User Mangaed Identity
+module containerAppsUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = [for app in containerAppsList: if (useUAI) {
+  name: '${app.service_name}'
+  params: {
+    // Required parameters
+    name: '${variables._abbrs.security.managedIdentity}${variables._abbrs.containers.containerApp}${resourceToken}-${app.service_name}'
+    // Non-required parameters
+    location: location
+  }
+}
+]
+
 // Container Apps
-module containerApps 'br/public:avm/res/app/container-app:0.16.0' = [for app in containerAppsList: if (deployContainerApps) {
+module containerApps 'br/public:avm/res/app/container-app:0.17.0' = [for (app, index) in containerAppsList: if (deployContainerApps) {
   name: empty(app.name)
-    ? '${abbrs.containerApps}-${resourceToken}-${app.service_name}'
+    ? '${variables._abbrs.containers.containerApp}${resourceToken}-${app.service_name}'
     : app.name  
   params: {
     name: empty(app.name)
-    ? '${abbrs.containerApps}-${resourceToken}-${app.service_name}'
+    ? '${variables._abbrs.containers.containerApp}${resourceToken}-${app.service_name}'
     : app.name
     location:              location
     environmentResourceId: containerEnv.outputs.resourceId
@@ -438,7 +516,8 @@ module containerApps 'br/public:avm/res/app/container-app:0.16.0' = [for app in 
     }
 
     managedIdentities: {
-      systemAssigned: true
+      systemAssigned: (useUAI) ? false : true
+      userAssignedResourceIds: (useUAI) ? [containerAppsUAI[index].outputs.resourceId] : []
     }
 
     scaleSettings: {
@@ -459,6 +538,14 @@ module containerApps 'br/public:avm/res/app/container-app:0.16.0' = [for app in 
             name:  'APP_CONFIG_ENDPOINT'
             value: 'https://${appConfigName}.azconfig.io'
           }
+          {
+            name:  'AZURE_TENANT_ID'
+            value: subscription().tenantId
+          }
+          {
+            name:  'AZURE_CLIENT_ID'
+            value: useUAI ? containerAppsUAI[index].outputs.clientId : ''
+          }
         ]
       }
     ]
@@ -469,6 +556,17 @@ module containerApps 'br/public:avm/res/app/container-app:0.16.0' = [for app in 
   }
 }]
 
+//Cosmos User Mangaed Identity
+module cosmosUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
+  name: '${variables._abbrs.security.managedIdentity}${dbAccountName}'
+  params: {
+    // Required parameters
+    name: '${variables._abbrs.security.managedIdentity}${dbAccountName}'
+    // Non-required parameters
+    location: location
+  }
+}
+
 // Cosmos DB Account and Database
 //////////////////////////////////////////////////////////////////////////
 
@@ -478,7 +576,8 @@ module CosmosDBAccount 'br/public:avm/res/document-db/database-account:0.12.0' =
     name:                   dbAccountName  
     location:               location
     managedIdentities: {
-      systemAssigned: true
+      systemAssigned: (useUAI) ? false : true
+      userAssignedResourceIds: (useUAI) ? [cosmosUAI.outputs.resourceId] : []
     }    
     locations: [
       {
@@ -524,6 +623,17 @@ module keyVault 'br/public:avm/res/key-vault/vault:0.12.1' = if (deployKeyVault)
   }
 }
 
+//Log Analytics User Mangaed Identity
+module logAnaltyicsUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
+  name: '${variables._abbrs.security.managedIdentity}${logAnalyticsWorkspaceName}'
+  params: {
+    // Required parameters
+    name: '${variables._abbrs.security.managedIdentity}${logAnalyticsWorkspaceName}'
+    // Non-required parameters
+    location: location
+  }
+}
+
 // Log Analytics Workspace
 //////////////////////////////////////////////////////////////////////////
 
@@ -536,8 +646,20 @@ module logAnalytics 'br/public:avm/res/operational-insights/workspace:0.11.1' = 
     dataRetention: 30           
     tags:          _tags
     managedIdentities: {
-      systemAssigned: true
+      systemAssigned: (useUAI) ? false : true
+      userAssignedResourceIds: (useUAI) ? [logAnaltyicsUAI.outputs.resourceId] : []
     }    
+  }
+}
+
+//Search Service User Mangaed Identity
+module searchServiceUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
+  name: '${variables._abbrs.security.managedIdentity}${searchServiceName}'
+  params: {
+    // Required parameters
+    name: '${variables._abbrs.security.managedIdentity}${searchServiceName}'
+    // Non-required parameters
+    location: location
   }
 }
 
@@ -557,7 +679,8 @@ module searchService 'br/public:avm/res/search/search-service:0.10.0' =  if (dep
     replicaCount: 1
     semanticSearch: 'disabled'
     managedIdentities : {
-      systemAssigned: true
+      systemAssigned: (useUAI) ? false : true
+      userAssignedResourceIds: (useUAI) ? [searchServiceUAI.outputs.resourceId] : []
     }
     disableLocalAuth: false
     authOptions: { aadOrApiKey: { aadAuthFailureMode: 'http401WithBearerChallenge'}} 
@@ -678,7 +801,7 @@ module assignAppConfigAppConfigurationDataReaderExecutor 'modules/role-assignmen
     name: 'assignAppConfigAppConfigurationDataReaderExecutor'
     params: {
       principalId: principalId 
-      roleDefinition: _roles.configuration.appConfigurationDataOwner
+      roleDefinition: variables._roles.configuration.appConfigurationDataOwner
       appConfigName: appConfig.outputs.name
     }  
 }
@@ -689,7 +812,7 @@ module assignCrAcrPushExecutor 'modules/role-assignment/role-assignment-containe
   params: {
     registryName:   containerRegistry.outputs.name
     principalId: principalId
-    roleDefinition: _roles.containers.acrPush     
+    roleDefinition: variables._roles.containers.acrPush     
   }
 }
 
@@ -699,7 +822,7 @@ module assignKeyVaultKeyVaultContributorExecutor 'modules/role-assignment/role-a
     params: {
       vaultName: keyVault.outputs.name
       principalId: principalId
-      roleDefinition: _roles.security.keyVaultContributor 
+      roleDefinition: variables._roles.security.keyVaultContributor 
     }
 }
 
@@ -709,7 +832,7 @@ module assignSearchSearchServiceContributorExecutor 'modules/role-assignment/rol
     params: {
       searchServiceName: searchService.outputs.name
       principalId: principalId
-      roleDefinition: _roles.ai.searchServiceContributor
+      roleDefinition: variables._roles.ai.searchServiceContributor
     }
 }
 
@@ -719,7 +842,7 @@ module assignSearchSearchIndexDataContributorExecutor 'modules/role-assignment/r
     params: {
       searchServiceName: searchService.outputs.name
       principalId: principalId
-      roleDefinition: _roles.ai.searchIndexDataContributor
+      roleDefinition: variables._roles.ai.searchIndexDataContributor
     }
 }
 
@@ -729,7 +852,7 @@ module assignStorageStorageBlobDataContributorExecutor 'modules/role-assignment/
   params: {
     storageAccountName: storageAccount.outputs.name
     principalId: principalId
-      roleDefinition: _roles.storage.storageBlobDataContributor
+      roleDefinition: variables._roles.storage.storageBlobDataContributor
   }
 }
 
@@ -739,7 +862,7 @@ module assignAiFoundryAccountAzureAiProjectManagerExecutor 'modules/role-assignm
     params: {
       cognitiveAccountName: aiFoundryAccount.outputs.accountName
       principalId: principalId
-      roleDefinition: _roles.ai.azureAIProjectManager       
+      roleDefinition: variables._roles.ai.azureAIProjectManager       
     }
 }
 
@@ -749,7 +872,7 @@ module assignCosmosDBCosmosDbBuiltInDataContributorExecutor 'modules/role-assign
   params: {
     cosmosDbAccountName: CosmosDBAccount.outputs.name
     principalId: principalId
-    roleDefinitionGuid: _roles.databases.CosmosDBBuiltInDataContributor
+    roleDefinitionGuid: variables._roles.databases.CosmosDBBuiltInDataContributor
     scopePath: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${resourceGroup().name}/providers/Microsoft.DocumentDB/databaseAccounts/${dbAccountName}/dbs/${dbDatabaseName}'
   }
 }
@@ -760,8 +883,8 @@ module assignAppConfigAppConfigurationDataReaderContainerApps 'modules/role-assi
     name: 'assignAppConfigAppConfigurationDataReader-${app.service_name}'
     params: {
       appConfigName:  appConfig.outputs.name
-      principalId:    containerApps[i].outputs.systemAssignedMIPrincipalId!
-      roleDefinition: _roles.configuration.appConfigurationDataReader
+      principalId:    (useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
+      roleDefinition: variables._roles.configuration.appConfigurationDataReader
     }
   }
 ]
@@ -772,8 +895,8 @@ module assignAiFoundryAccountCognitiveServicesUserContainerApps 'modules/role-as
     name: 'assignAIFoundryAccountCognitiveServicesUser-${app.service_name}'
     params: {
       cognitiveAccountName: aiFoundryAccount.outputs.accountName
-      principalId: containerApps[i].outputs.systemAssignedMIPrincipalId!
-      roleDefinition: _roles.ai.cognitiveServicesUser 
+      principalId:    (useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
+      roleDefinition: variables._roles.ai.cognitiveServicesUser 
     }
   }
 ]
@@ -784,8 +907,8 @@ module assignAIFoundryAccountCognitiveServicesOpenAIUserContainerApps 'modules/r
     name: 'assignAIFoundryAccountCognitiveServicesOpenAIUser-${app.service_name}'
     params: {
       cognitiveAccountName: aiFoundryAccount.outputs.accountName
-      principalId: containerApps[i].outputs.systemAssignedMIPrincipalId!
-      roleDefinition: _roles.ai.cognitiveServicesOpenAIUser 
+      principalId:    (useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
+      roleDefinition: variables._roles.ai.cognitiveServicesOpenAIUser 
     }
   }
 ]
@@ -796,8 +919,8 @@ module assignCrAcrPullContainerApps 'modules/role-assignment/role-assignment-con
     name: 'assignCrAcrPull-${app.service_name}'
     params: {
       registryName:   containerRegistry.outputs.name
-      principalId: containerApps[i].outputs.systemAssignedMIPrincipalId!
-      roleDefinition: _roles.containers.acrPull
+      principalId:    (useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
+      roleDefinition: variables._roles.containers.acrPull
     }
   }
 ]
@@ -808,8 +931,8 @@ module assignCosmosDBCosmosDbBuiltInDataContributorContainerApps 'modules/role-a
     name: 'assignCosmosDBCosmosDbBuiltInDataContributor-${app.service_name}'
     params: {
       cosmosDbAccountName: CosmosDBAccount.outputs.name
-      principalId: containerApps[i].outputs.systemAssignedMIPrincipalId!
-      roleDefinitionGuid: _roles.databases.CosmosDBBuiltInDataContributor
+      principalId:    (useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
+      roleDefinitionGuid: variables._roles.databases.CosmosDBBuiltInDataContributor
       scopePath: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${resourceGroup().name}/providers/Microsoft.DocumentDB/databaseAccounts/${dbAccountName}/dbs/${dbDatabaseName}'
     }
   }
@@ -821,8 +944,8 @@ module assignKeyVaultKeyVaultSecretsUserContainerApps 'modules/role-assignment/r
     name: 'assignKeyVaultKeyVaultSecretsUser-${app.service_name}'
     params: {
       vaultName: keyVault.outputs.name
-      principalId: containerApps[i].outputs.systemAssignedMIPrincipalId!
-      roleDefinition: _roles.security.keyVaultSecretsUser
+      principalId:    (useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
+      roleDefinition: variables._roles.security.keyVaultSecretsUser
     }
   }
 ]
@@ -833,8 +956,8 @@ module assignSearchSearchIndexDataReaderContainerApps 'modules/role-assignment/r
     name: 'assignSearchSearchIndexDataReader-${app.service_name}'
     params: {
       searchServiceName: searchService.outputs.name
-      principalId: containerApps[i].outputs.systemAssignedMIPrincipalId!
-      roleDefinition: _roles.ai.searchIndexDataReader       
+      principalId:    (useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
+      roleDefinition: variables._roles.ai.searchIndexDataReader       
     }
   }
 ]
@@ -845,8 +968,8 @@ module assignSearchSearchIndexDataContributorContainerApps 'modules/role-assignm
     name: 'assignSearchSearchIndexDataContributor-${app.service_name}'
     params: {
       searchServiceName: searchService.outputs.name
-      principalId: containerApps[i].outputs.systemAssignedMIPrincipalId!
-      roleDefinition: _roles.ai.searchIndexDataContributor   
+      principalId:    (useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
+      roleDefinition: variables._roles.ai.searchIndexDataContributor   
     }
   }
 ]
@@ -857,8 +980,8 @@ module assignStorageStorageBlobDataContributorContainerApps 'modules/role-assign
     name: 'assignStorageStorageBlobDataContributor-${app.service_name}'
     params: {
       storageAccountName: storageAccount.outputs.name
-      principalId: containerApps[i].outputs.systemAssignedMIPrincipalId!
-      roleDefinition: _roles.storage.storageBlobDataContributor    
+      principalId:    (useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
+      roleDefinition: variables._roles.storage.storageBlobDataContributor    
     }
   }
 ]
@@ -869,8 +992,8 @@ module assignStorageStorageBlobDataReaderContainerApps 'modules/role-assignment/
     name: 'assignStorageStorageBlobDataReader-${app.service_name}'
     params: {
       storageAccountName: storageAccount.outputs.name
-      principalId: containerApps[i].outputs.systemAssignedMIPrincipalId!
-      roleDefinition: _roles.storage.storageBlobDataReader
+      principalId:    (useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
+      roleDefinition: variables._roles.storage.storageBlobDataReader
     }
   }
 ]
@@ -880,8 +1003,8 @@ module assignStorageStorageBlobDataReaderSearch 'modules/role-assignment/role-as
   name: 'assignStorageStorageBlobDataReaderSearch'
   params: {
     storageAccountName: storageAccount.outputs.name
-    principalId: searchService.outputs.systemAssignedMIPrincipalId!
-    roleDefinition: _roles.storage.storageBlobDataReader   
+    principalId: (useUAI) ? searchServiceUAI.outputs.principalId : searchService.outputs.systemAssignedMIPrincipalId!
+    roleDefinition: variables._roles.storage.storageBlobDataReader   
   }
 }
 
@@ -891,7 +1014,7 @@ module assignSearchSearchIndexDataReaderAIFoundryProject 'modules/role-assignmen
   params: {
     searchServiceName: searchService.outputs.name
     principalId: aiFoundryProject.outputs.projectPrincipalId
-    roleDefinition: _roles.ai.searchIndexDataReader
+    roleDefinition: variables._roles.ai.searchIndexDataReader
   }
   dependsOn:[
     assignSearchAiFoundryProject, assignCosmosDBAiFoundryProject, assignStorageAccountAiFoundryProject
@@ -904,7 +1027,7 @@ module assignSearchSearchServiceContributorAIFoundryProject 'modules/role-assign
   params: {
     searchServiceName: searchService.outputs.name
     principalId: aiFoundryProject.outputs.projectPrincipalId
-    roleDefinition: _roles.ai.searchServiceContributor
+    roleDefinition: variables._roles.ai.searchServiceContributor
   }
   dependsOn:[
     assignSearchAiFoundryProject, assignCosmosDBAiFoundryProject, assignStorageAccountAiFoundryProject, assignSearchSearchIndexDataReaderAIFoundryProject
@@ -918,7 +1041,7 @@ module assignStorageStorageBlobDataReaderAIFoundryProject 'modules/role-assignme
   params: {
     storageAccountName: storageAccount.outputs.name
     principalId: aiFoundryProject.outputs.projectPrincipalId
-    roleDefinition: _roles.storage.storageBlobDataReader     
+    roleDefinition: variables._roles.storage.storageBlobDataReader     
   }
   dependsOn:[
     assignSearchAiFoundryProject, assignCosmosDBAiFoundryProject, assignStorageAccountAiFoundryProject, assignSearchSearchIndexDataReaderAIFoundryProject
@@ -931,6 +1054,16 @@ module assignStorageStorageBlobDataReaderAIFoundryProject 'modules/role-assignme
 
 // App Configuration Store
 //////////////////////////////////////////////////////////////////////////
+//Search Service User Mangaed Identity
+module appConfigUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
+  name: '${variables._abbrs.security.managedIdentity}${appConfigName}'
+  params: {
+    // Required parameters
+    name: '${variables._abbrs.security.managedIdentity}${appConfigName}'
+    // Non-required parameters
+    location: location
+  }
+}
 
 module appConfig 'br/public:avm/res/app-configuration/configuration-store:0.6.3' = if (deployAppConfig) {
   name: 'appConfig'
@@ -939,12 +1072,13 @@ module appConfig 'br/public:avm/res/app-configuration/configuration-store:0.6.3'
     location: location
     sku: 'Standard'
     managedIdentities: {
-      systemAssigned: true
+      systemAssigned: (useUAI) ? false : true
+      userAssignedResourceIds: (useUAI) ? [appConfigUAI.outputs.resourceId] : []
     }
     roleAssignments: [
       {
         principalId: principalId
-        roleDefinitionIdOrName: _roles.configuration.appConfigurationDataOwner
+        roleDefinitionIdOrName: variables._roles.configuration.appConfigurationDataOwner
       }
     ]
     tags: _tags
@@ -964,7 +1098,7 @@ module containerAppsSettings 'modules/container-apps/container-apps-list.bicep' 
         name: containerApps[i].outputs.name
         serviceName: containerAppsList[i].service_name
         canonical_name: containerAppsList[i].canonical_name
-        principalId: containerApps[i].outputs.systemAssignedMIPrincipalId!
+        principalId: (useUAI) ? containerAppsUAI[i].outputs.principalId! : containerApps[i].outputs.systemAssignedMIPrincipalId!
         fqdn: containerApps[i].outputs.fqdn
       }
     ]
