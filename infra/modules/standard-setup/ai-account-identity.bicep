@@ -1,7 +1,11 @@
+import * as variables from '../../variables.bicep'
 
 param accountName string
 param location string
 param modelDeployments array
+
+param useUAI bool = false
+param identityId string 
 
 resource account 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' = {
   name: accountName
@@ -11,7 +15,8 @@ resource account 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' = {
   }
   kind: 'AIServices'
   identity: {
-    type: 'SystemAssigned'
+    type: (useUAI) ? 'UserAssigned' :  'SystemAssigned'
+    userAssignedIdentities: (useUAI) ? {'${identityId}' : {}} : null
   }
   properties: {
     allowProjectManagement: true
@@ -52,4 +57,4 @@ resource modelDeployment 'Microsoft.CognitiveServices/accounts/deployments@2025-
 output accountName string = account.name
 output accountID string = account.id
 output accountTarget string = account.properties.endpoint
-output accountPrincipalId string = account.identity.principalId
+output accountPrincipalId string = (useUAI) ? account.identity.userAssignedIdentities[identityId].principalId : account.identity.principalId

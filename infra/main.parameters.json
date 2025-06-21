@@ -13,17 +13,20 @@
     "aiFoundryStorageAccountResourceId":   { "value": null },
     "aiFoundryCosmosDBAccountResourceId":  { "value": null },
     
-    "deployGroundingWithBing":             { "value": "true" },    
     "deployAppConfig":                     { "value": "true" },
-    "deployKeyVault":                      { "value": "true" },
-    "deployLogAnalytics":                  { "value": "true" },
     "deployAppInsights":                   { "value": "true" },
-    "deploySearchService":                 { "value": "true" },
-    "deployStorageAccount":                { "value": "true" },
     "deployCosmosDb":                      { "value": "true" },
     "deployContainerApps":                 { "value": "true" },
     "deployContainerRegistry":             { "value": "true" },
     "deployContainerEnv":                  { "value": "true" },
+    "deployMcp":                           { "value": "true" },
+    "deployGroundingWithBing":             { "value": "true" },    
+    "deployKeyVault":                      { "value": "true" },
+    "deployLogAnalytics":                  { "value": "true" },
+    "deploySearchService":                 { "value": "true" },
+    "deployStorageAccount":                { "value": "true" },
+    
+    "useUAI":                              { "value": "true" },
 
     "aiFoundryAccountName":                  { "value": null },
     "aiFoundryProjectName":                  { "value": null },
@@ -122,6 +125,23 @@
             "Storage Blob Data Contributor",
             "Key Vault Secrets User"
           ]
+        },
+        {
+          "name": null,
+          "service_name": "mcp",
+          "min_replicas": 1,
+          "max_replicas": 1,
+          "canonical_name": "MCP_APP",
+          "roles": [
+            "App Configuration Data Reader",
+            "Cognitive Services User",
+            "Cognitive Services OpenAI User",
+            "AcrPull",
+            "Search Index Data Contributor",
+            "Storage Blob Data Contributor",
+            "Storage Queue Data Contributor",
+            "Key Vault Secrets User"
+          ]
         }
       ]
     },
@@ -152,6 +172,14 @@
         {
           "name": "datasources",
           "canonical_name": "DATASOURCES_DATABASE_CONTAINER"
+        },
+        {
+          "name": "prompts",
+          "canonical_name": "PROMPTS_CONTAINER"
+        },
+        {
+          "name": "mcp",
+          "canonical_name": "MCP_CONTAINER"
         }
       ]
     }    

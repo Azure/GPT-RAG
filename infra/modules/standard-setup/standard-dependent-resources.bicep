@@ -1,3 +1,5 @@
+import * as variables from '../../variables.bicep'
+
 // Creates Azure dependent resources for Azure AI Agent Service standard agent setup
 
 @description('Azure region of the deployment')
@@ -26,6 +28,9 @@ param aiSearchExists bool
 param azureStorageExists bool
 param cosmosDBExists bool
 
+param useUAI bool = false
+param searchIdentityId string = ''
+param cosmosIdentityId string = ''
 
 var cosmosParts = split(cosmosDBResourceId, '/')
 
@@ -39,6 +44,12 @@ var cosmosDbRegion = contains(canaryRegions, location) ? 'westus' : location
 resource cosmosDB 'Microsoft.DocumentDB/databaseAccounts@2024-11-15' = if(!cosmosDBExists) {
   name: cosmosDBName
   location: cosmosDbRegion
+  identity: {
+    type: (useUAI) ? 'UserAssigned' : 'SystemAssigned'
+    userAssignedIdentities: (useUAI) ? {
+      '${cosmosIdentityId}': {}
+    } : {}
+  }
   kind: 'GlobalDocumentDB'
   properties: {
     consistencyPolicy: {
@@ -65,11 +76,15 @@ resource existingSearchService 'Microsoft.Search/searchServices@2024-06-01-previ
   name: acsParts[8]
   scope: resourceGroup(acsParts[2], acsParts[4])
 }
+
 resource aiSearch 'Microsoft.Search/searchServices@2024-06-01-preview' = if(!aiSearchExists) {
   name: aiSearchName
   location: location
   identity: {
-    type: 'SystemAssigned'
+    type: (useUAI) ? 'UserAssigned' : 'SystemAssigned'
+    userAssignedIdentities: (useUAI) ? {
+      '${searchIdentityId}': {}
+    } : {}
   }
   properties: {
     disableLocalAuth: false
