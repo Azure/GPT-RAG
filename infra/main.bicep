@@ -832,7 +832,7 @@ module assignKeyVaultKeyVaultSecretsOfficeExecutor 'modules/role-assignment/role
     params: {
       vaultName: keyVault.outputs.name
       principalId: principalId
-      roleDefinition: _roles.security.keyVaultSecretsOfficer
+      roleDefinition: variables._roles.security.keyVaultSecretsOfficer
     }
 }
 
