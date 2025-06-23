@@ -519,7 +519,7 @@ module keyVault 'br/public:avm/res/key-vault/vault:0.12.1' = if (deployKeyVault)
     publicNetworkAccess:   'Enabled'
     sku:                   'standard'
     enableRbacAuthorization: true
-    tags:                  _tags    
+    tags:                  _tags 
   }
 }
 
@@ -699,6 +699,16 @@ module assignKeyVaultKeyVaultContributorExecutor 'modules/role-assignment/role-a
       vaultName: keyVault.outputs.name
       principalId: principalId
       roleDefinition: _roles.security.keyVaultContributor 
+    }
+}
+
+// Key Vault Service - Key Vault Secrets Officer -> Executor
+module assignKeyVaultKeyVaultSecretsOfficeExecutor 'modules/role-assignment/role-assignment-keyvault.bicep' = if (deployKeyVault) {
+    name: 'assignKeyVaultKeyVaultSecretsOfficeExecutor'
+    params: {
+      vaultName: keyVault.outputs.name
+      principalId: principalId
+      roleDefinition: _roles.security.keyVaultSecretsOfficer
     }
 }
 

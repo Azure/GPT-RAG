@@ -84,6 +84,7 @@ After infrastructure is in place, deploy the GPT-RAG services from their respect
 | GenAI App Container Registry          | AcrPull                             | ContainerApp: frontend     | Pull container images                                                 |
 | GenAI App Container Registry          | AcrPull                             | ContainerApp: dataingest   | Pull container images                                                 |
 | GenAI App Key Vault                   | Key Vault Contributor               | Executor                   | Manage Key Vault settings                                             |
+| GenAI App Key Vault                   | Key Vault Secrets Officer           | Executor                   | Create Key Vault Secrets                                              |
 | GenAI App Key Vault                   | Key Vault Secrets User              | ContainerApp: orchestrator | Read secrets                                                          |
 | GenAI App Key Vault                   | Key Vault Secrets User              | ContainerApp: frontend     | Read secrets                                                          |
 | GenAI App Key Vault                   | Key Vault Secrets User              | ContainerApp: dataingest   | Read secrets                                                          |

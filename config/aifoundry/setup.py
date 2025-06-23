@@ -9,17 +9,20 @@ This script reads configuration from Azure App Configuration, loads blocklist an
 definitions from JSON files, and applies them to the specified Azure OpenAI deployment.
 
 Steps:
-1. Validate required env vars:
-   - APP_CONFIG_ENDPOINT
+1. Validate required environment variables:
+    - APP_CONFIG_ENDPOINT
 
-2. Authenticate via Azure CLI or Managed Identity
+2. Authenticate via Azure CLI or Managed Identity.
 
-3. Load core settings from App Configuration:
-   - Subscription ID, Resource Group, Service & Deployment Names
+3. Load core settings from Azure App Configuration:
+    - Subscription ID, Resource Group, Service & Deployment Names.
 
-4. Create or update RAI blocklist and items
+4. Create or update the RAI blocklist and its items.
 
-5. Create or update RAI policy and associate it with the deployment
+5. Create or update the RAI policy and associate it with the deployment.
+
+6. Store the AI Foundry Account API Key in Azure Key Vault (pre-requisite for AI Foundry Project Evaluation).
+
 """
 
 import os
@@ -37,6 +40,7 @@ from azure.mgmt.cognitiveservices.models import (
     RaiBlocklistItem,
     RaiBlocklistItemProperties
 )
+from .keyvault import KeyVaultClient
 
 # ── configure logging ─────────────────────────────────────────
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -58,7 +62,7 @@ def check_env():
             logging.error("  • %s", name)
         sys.exit(1)
 
-def cfg(client: AzureAppConfigurationClient, key: str, label= 'gpt-rag', required: bool = True) -> str:
+def cfg(client: AzureAppConfigurationClient, key: str, label='gpt-rag', required: bool=True) -> str:
     """
     Fetch a single value from App Configuration; exit if missing or empty.
     """
@@ -112,25 +116,29 @@ def validate_json_file(path: str):
         logging.info(f"ℹ️ Invalid JSON in {path!r}: {e}. Skipping configuration.")
         sys.exit(0)
 
+
+def add_ai_foundry_account_api_key_to_key_vault(
+    mgmt_client: CognitiveServicesManagementClient,
+    resource_group: str,
+    account_name: str,
+    vault_uri: str,
+    secret_name: str
+):
+    """
+    Fetches the AI Foundry Account API key and stores it in Azure Key Vault.
+    """
+    logging.info("Fetching AI Foundry Account API key for account %s ...", account_name)
+    keys = mgmt_client.accounts.list_keys(resource_group, account_name)
+    api_key = keys.key1
+    logging.info("Storing API key in Key Vault at %s ...", vault_uri)
+    kv_client = KeyVaultClient(vault_uri)
+    kv_client.set_secret(secret_name, api_key)
+    logging.info("Secret %s set successfully in Key Vault.", secret_name)
+
+
 def main():
     """
     Configures Responsible AI (RAI) blocklists and policies for an Azure AI Foundry deployment.
-
-    This function performs the following steps:
-      1. Checks the environment and validates required JSON configuration files.
-      2. Authenticates with Azure using CLI or Managed Identity credentials.
-      3. Connects to Azure App Configuration to retrieve core settings such as subscription ID, resource group, and account name.
-      4. Loads the list of model deployments and selects the deployment with canonical name 'chatDeploymentName'.
-      5. Creates or updates a RAI blocklist in Azure Cognitive Services, removing any existing items and adding new ones from the provided JSON.
-      6. Creates or updates a RAI policy, normalizing and merging blocklist and filter settings as required.
-      7. Associates the created/updated RAI policy with the selected deployment.
-
-    Exits the process with an error message if any critical step fails (e.g., authentication, missing configuration, invalid JSON).
-
-    Logging is used throughout to provide progress and error information.
-
-    Raises:
-        SystemExit: If authentication fails, configuration is missing or invalid, or required JSON fields are not present.
     """
     # ── 0) Validate environment and input files ──────────────────────
     check_env()
@@ -153,7 +161,7 @@ def main():
     except ClientAuthenticationError as e:
         logging.error("❗️ Authentication failed: %s", e)
         logging.info("ℹ️ Skipping configuration due to missing credentials.")
-        sys.exit(0)        
+        sys.exit(0)
 
     # connect to App Configuration
     app_conf = AzureAppConfigurationClient(endpoint, cred)
@@ -288,7 +296,7 @@ def main():
         rai_policy={"properties": props}
     )
 
-    # ── 5) Associate policy to deployment ─────────────────────────────
+    # ── 5) Associate policy to deployment ────────────────────────────
     logging.info("Associating policy %s with deployment %s …", p_name, deployment_name)
     existing = client.deployments.get(resource_group, account_name, deployment_name)
     dep_dict = existing.as_dict()
@@ -301,7 +309,22 @@ def main():
         deployment=dep_dict
     ).result()
 
-    logging.info("RAI blocklist, policy, and deployment association complete.")
+    # ── 6) Store AI Foundry Account API Key in Key Vault ─────────────
+    logging.info("Adding AI Foundry Account API Key to Key Vault …")
+    key_vault_uri = cfg(app_conf, "KEY_VAULT_URI")
+    secret_name = "evaluationsModelApiKey"
+    try:
+        add_ai_foundry_account_api_key_to_key_vault(
+            client,
+            resource_group,
+            account_name,
+            key_vault_uri,
+            secret_name
+        )
+    except Exception as e:
+        logging.error("❗️ Failed to set secret in Key Vault: %s", e)
+
+    logging.info("RAI blocklist, policy, deployment association, and secret injection complete.")
 
 if __name__ == "__main__":
     main()
