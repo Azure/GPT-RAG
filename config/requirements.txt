@@ -15,3 +15,4 @@ azure-mgmt-cognitiveservices==13.6.0
 
 requests==2.32.3
 azure-keyvault-secrets==4.9.0
+jinja2==3.1.6

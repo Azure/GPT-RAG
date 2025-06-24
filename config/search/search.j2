@@ -1,98 +1,119 @@
 {
   "datasources": [
     {
-      "name": "{SEARCH_RAG_INDEX_DATA_SOURCE_NAME}",
+      "name": "{{SEARCH_RAG_INDEX_DATA_SOURCE_NAME}}",
       "description": "Datastore for ragindex",
       "type": "azureblob",
       "credentials": {
-        "connectionString": "ResourceId={STORAGE_ACCOUNT_RESOURCE_ID}/;"
+        "connectionString": "ResourceId={{STORAGE_ACCOUNT_RESOURCE_ID}}/;"
       },
       "container": {
         "name": "documents",
         "query": ""
       },
+      {% if USE_UAI %}
+      "identity": {
+          "@odata.type": "#Microsoft.Azure.Search.DataUserAssignedIdentity",
+          "userAssignedIdentity": "{{SEARCH_SERVICE_UAI_RESOURCE_ID}}" 
+      },
+      {% endif %}
       "dataDeletionDetectionPolicy": {
         "@odata.type": "#Microsoft.Azure.Search.NativeBlobSoftDeleteDeletionDetectionPolicy"
       }
     },
     {
-      "name": "{SEARCH_MEASURES_INDEX_DATA_SOURCE_NAME}",
+      "name": "{{SEARCH_MEASURES_INDEX_DATA_SOURCE_NAME}}",
       "description": "Datastore for nl2sql-measures",
       "type": "azureblob",
       "credentials": {
-        "connectionString": "ResourceId={STORAGE_ACCOUNT_RESOURCE_ID}/;"
+        "connectionString": "ResourceId={{STORAGE_ACCOUNT_RESOURCE_ID}}/;"
       },
       "container": {
         "name": "nl2sql",
         "query": "measures/"
       },
+      {% if USE_UAI %}
+      "identity": {
+          "@odata.type": "#Microsoft.Azure.Search.DataUserAssignedIdentity",
+          "userAssignedIdentity": "{{SEARCH_SERVICE_UAI_RESOURCE_ID}}" 
+      },
+      {% endif %}      
       "dataDeletionDetectionPolicy": {
         "@odata.type": "#Microsoft.Azure.Search.NativeBlobSoftDeleteDeletionDetectionPolicy"
       }
     },
     {
-      "name": "{SEARCH_QUERIES_INDEX_DATA_SOURCE_NAME}",
+      "name": "{{SEARCH_QUERIES_INDEX_DATA_SOURCE_NAME}}",
       "description": "Datastore for nl2sql-queries",
       "type": "azureblob",
       "subtype": null,
       "credentials": {
-        "connectionString": "ResourceId={STORAGE_ACCOUNT_RESOURCE_ID}/;"
+        "connectionString": "ResourceId={{STORAGE_ACCOUNT_RESOURCE_ID}}/;"
       },
       "container": {
         "name": "nl2sql",
         "query": "queries/"
       },
+      {% if USE_UAI %}
+      "identity": {
+          "@odata.type": "#Microsoft.Azure.Search.DataUserAssignedIdentity",
+          "userAssignedIdentity": "{{SEARCH_SERVICE_UAI_RESOURCE_ID}}" 
+      },
+      {% endif %}      
       "dataDeletionDetectionPolicy": {
         "@odata.type": "#Microsoft.Azure.Search.NativeBlobSoftDeleteDeletionDetectionPolicy"
       }
     },
     {
-      "name": "{SEARCH_TABLES_INDEX_DATA_SOURCE_NAME}",
+      "name": "{{SEARCH_TABLES_INDEX_DATA_SOURCE_NAME}}",
       "description": "Datastore for nl2sql-tables",
       "type": "azureblob",
       "subtype": null,
       "credentials": {
-        "connectionString": "ResourceId={STORAGE_ACCOUNT_RESOURCE_ID}/;"
+        "connectionString": "ResourceId={{STORAGE_ACCOUNT_RESOURCE_ID}}/;"
       },
       "container": {
         "name": "nl2sql",
         "query": "tables/"
       },
-      "dataChangeDetectionPolicy": null,
+      {% if USE_UAI %}
+      "identity": {
+          "@odata.type": "#Microsoft.Azure.Search.DataUserAssignedIdentity",
+          "userAssignedIdentity": "{{SEARCH_SERVICE_UAI_RESOURCE_ID}}" 
+      },
+      {% endif %}      
       "dataDeletionDetectionPolicy": {
         "@odata.type": "#Microsoft.Azure.Search.NativeBlobSoftDeleteDeletionDetectionPolicy"
-      },
-      "encryptionKey": null,
-      "identity": null
+      }
     }
   ],
 
   "indexes": [
     {
-      "name": "{SEARCH_RAG_INDEX_NAME}",
+      "name": "{{SEARCH_RAG_INDEX_NAME}}",
       "fields": [
-        { "name": "id",                          "type": "Edm.String",               "key": true,  "searchable": true,  "retrievable": true,  "analyzer": "keyword" },
-        { "name": "parent_id",                   "type": "Edm.String",               "searchable": false, "retrievable": true },
-        { "name": "metadata_storage_path",       "type": "Edm.String",               "searchable": false, "retrievable": true },
-        { "name": "metadata_storage_name",       "type": "Edm.String",               "searchable": false, "retrievable": true },
+        { "name": "id",                             "type": "Edm.String",               "key": true,  "searchable": true,  "retrievable": true,  "analyzer": "keyword" },
+        { "name": "parent_id",                      "type": "Edm.String",               "searchable": false, "retrievable": true },
+        { "name": "metadata_storage_path",          "type": "Edm.String",               "searchable": false, "retrievable": true },
+        { "name": "metadata_storage_name",          "type": "Edm.String",               "searchable": false, "retrievable": true },
         { "name": "metadata_storage_last_modified", "type": "Edm.DateTimeOffset",    "searchable": false, "retrievable": true, "sortable": true, "filterable": true },
-        { "name": "metadata_security_id",        "type": "Collection(Edm.String)",   "searchable": false, "retrievable": true, "filterable": true },
-        { "name": "chunk_id",                    "type": "Edm.Int32",                "searchable": false, "retrievable": true },
-        { "name": "content",                     "type": "Edm.String",               "searchable": true,  "retrievable": true, "analyzer": "{SEARCH_ANALYZER_NAME}" },
-        { "name": "imageCaptions",               "type": "Edm.String",               "searchable": true,  "retrievable": true, "analyzer": "{SEARCH_ANALYZER_NAME}" },
-        { "name": "page",                        "type": "Edm.Int32",                "searchable": false, "retrievable": true },
-        { "name": "offset",                      "type": "Edm.Int64",                "searchable": false, "retrievable": true },
-        { "name": "length",                      "type": "Edm.Int32",                "searchable": false, "retrievable": true },
-        { "name": "title",                       "type": "Edm.String",               "searchable": true,  "retrievable": true,  "filterable": true, "analyzer": "{SEARCH_ANALYZER_NAME}" },
-        { "name": "category",                    "type": "Edm.String",               "searchable": true,  "retrievable": true,  "filterable": true, "analyzer": "{SEARCH_ANALYZER_NAME}" },
-        { "name": "filepath",                    "type": "Edm.String",               "searchable": false, "retrievable": true },
-        { "name": "url",                         "type": "Edm.String",               "searchable": false, "retrievable": true },
-        { "name": "summary",                     "type": "Edm.String",               "searchable": true,  "retrievable": true },
-        { "name": "relatedImages",               "type": "Collection(Edm.String)",   "searchable": false, "retrievable": true },
-        { "name": "relatedFiles",                "type": "Collection(Edm.String)",   "searchable": false, "retrievable": true },
-        { "name": "source",                      "type": "Edm.String",               "searchable": false, "retrievable": true,  "filterable": true },
-        { "name": "contentVector",               "type": "Collection(Edm.Single)",   "searchable": true,  "retrievable": true,  "dimensions": "{EMBEDDINGS_VECTOR_DIMENSIONS}", "vectorSearchProfile": "default" },
-        { "name": "captionVector",               "type": "Collection(Edm.Single)",   "searchable": true,  "retrievable": true,  "dimensions": "{EMBEDDINGS_VECTOR_DIMENSIONS}", "vectorSearchProfile": "default" }
+        { "name": "metadata_security_id",           "type": "Collection(Edm.String)",   "searchable": false, "retrievable": true, "filterable": true },
+        { "name": "chunk_id",                       "type": "Edm.Int32",                "searchable": false, "retrievable": true },
+        { "name": "content",                        "type": "Edm.String",               "searchable": true,  "retrievable": true, "analyzer": "{{SEARCH_ANALYZER_NAME}}" },
+        { "name": "imageCaptions",                  "type": "Edm.String",               "searchable": true,  "retrievable": true, "analyzer": "{{SEARCH_ANALYZER_NAME}}" },
+        { "name": "page",                           "type": "Edm.Int32",                "searchable": false, "retrievable": true },
+        { "name": "offset",                         "type": "Edm.Int64",                "searchable": false, "retrievable": true },
+        { "name": "length",                         "type": "Edm.Int32",                "searchable": false, "retrievable": true },
+        { "name": "title",                          "type": "Edm.String",               "searchable": true,  "retrievable": true,  "filterable": true, "analyzer": "{{SEARCH_ANALYZER_NAME}}" },
+        { "name": "category",                       "type": "Edm.String",               "searchable": true,  "retrievable": true,  "filterable": true, "analyzer": "{{SEARCH_ANALYZER_NAME}}" },
+        { "name": "filepath",                       "type": "Edm.String",               "searchable": false, "retrievable": true },
+        { "name": "url",                            "type": "Edm.String",               "searchable": false, "retrievable": true },
+        { "name": "summary",                        "type": "Edm.String",               "searchable": true,  "retrievable": true },
+        { "name": "relatedImages",                  "type": "Collection(Edm.String)",   "searchable": false, "retrievable": true },
+        { "name": "relatedFiles",                   "type": "Collection(Edm.String)",   "searchable": false, "retrievable": true },
+        { "name": "source",                         "type": "Edm.String",               "searchable": false, "retrievable": true,  "filterable": true },
+        { "name": "contentVector",                  "type": "Collection(Edm.Single)",   "searchable": true,  "retrievable": true,  "dimensions": "{{EMBEDDINGS_VECTOR_DIMENSIONS}}", "vectorSearchProfile": "default" },
+        { "name": "captionVector",                  "type": "Collection(Edm.Single)",   "searchable": true,  "retrievable": true,  "dimensions": "{{EMBEDDINGS_VECTOR_DIMENSIONS}}", "vectorSearchProfile": "default" }
       ],
       "corsOptions": {
         "allowedOrigins": ["*"],
@@ -128,14 +149,14 @@
       }
     },
     {
-      "name": "{SEARCH_QUERIES_INDEX_NAME}",
+      "name": "{{SEARCH_QUERIES_INDEX_NAME}}",
       "fields": [
         { "name": "id",            "type": "Edm.String",             "key": true },
         { "name": "datasource",    "type": "Edm.String",             "searchable": true, "filterable": true, "retrievable": true },
-        { "name": "question",      "type": "Edm.String",             "searchable": true, "retrievable": true, "analyzer": "{SEARCH_ANALYZER_NAME}" },
+        { "name": "question",      "type": "Edm.String",             "searchable": true, "retrievable": true, "analyzer": "{{SEARCH_ANALYZER_NAME}}" },
         { "name": "query",         "type": "Edm.String",             "searchable": false },
         { "name": "reasoning",     "type": "Edm.String",             "searchable": true },
-        { "name": "contentVector", "type": "Collection(Edm.Single)", "searchable": true, "dimensions": "{EMBEDDINGS_VECTOR_DIMENSIONS}", "vectorSearchProfile": "default" }
+        { "name": "contentVector", "type": "Collection(Edm.Single)", "searchable": true, "dimensions": "{{EMBEDDINGS_VECTOR_DIMENSIONS}}", "vectorSearchProfile": "default" }
       ],
       "corsOptions": {
         "allowedOrigins": ["*"],
@@ -155,23 +176,23 @@
       }
     },
     {
-      "name": "{SEARCH_TABLES_INDEX_NAME}",
+      "name": "{{SEARCH_TABLES_INDEX_NAME}}",
       "fields": [
         { "name": "id",            "type": "Edm.String",             "key": true },
         { "name": "table",         "type": "Edm.String",             "searchable": true, "retrievable": true },
-        { "name": "description",   "type": "Edm.String",             "searchable": true, "analyzer": "{SEARCH_ANALYZER_NAME}" },
+        { "name": "description",   "type": "Edm.String",             "searchable": true, "analyzer": "{{SEARCH_ANALYZER_NAME}}" },
         { "name": "datasource",    "type": "Edm.String",             "searchable": true },
         {
           "name": "columns",
           "type": "Collection(Edm.ComplexType)",
           "fields": [
             { "name": "name",        "type": "Edm.String", "searchable": true },
-            { "name": "description", "type": "Edm.String", "searchable": true, "analyzer": "{SEARCH_ANALYZER_NAME}" },
+            { "name": "description", "type": "Edm.String", "searchable": true, "analyzer": "{{SEARCH_ANALYZER_NAME}}" },
             { "name": "type",        "type": "Edm.String" },
             { "name": "examples",    "type": "Collection(Edm.String)" }
           ]
         },
-        { "name": "contentVector", "type": "Collection(Edm.Single)", "searchable": true, "dimensions": "{EMBEDDINGS_VECTOR_DIMENSIONS}", "vectorSearchProfile": "default" }
+        { "name": "contentVector", "type": "Collection(Edm.Single)", "searchable": true, "dimensions": "{{EMBEDDINGS_VECTOR_DIMENSIONS}}", "vectorSearchProfile": "default" }
       ],
       "corsOptions": {
         "allowedOrigins": ["*"],
@@ -191,17 +212,17 @@
       }
     },
     {
-      "name": "{SEARCH_MEASURES_INDEX_NAME}",
+      "name": "{{SEARCH_MEASURES_INDEX_NAME}}",
       "fields": [
         { "name": "id",            "type": "Edm.String",             "key": true },
         { "name": "datasource",    "type": "Edm.String",             "searchable": true, "filterable": true },
         { "name": "name",          "type": "Edm.String",             "searchable": true, "filterable": true },
-        { "name": "description",   "type": "Edm.String",             "searchable": true, "analyzer": "{SEARCH_ANALYZER_NAME}" },
+        { "name": "description",   "type": "Edm.String",             "searchable": true, "analyzer": "{{SEARCH_ANALYZER_NAME}}" },
         { "name": "type",          "type": "Edm.String",             "searchable": true, "filterable": true },
         { "name": "source_table",  "type": "Edm.String",             "searchable": true, "filterable": true },
         { "name": "data_type",     "type": "Edm.String",             "searchable": true },
         { "name": "source_model",  "type": "Edm.String",             "searchable": true },
-        { "name": "contentVector", "type": "Collection(Edm.Single)", "searchable": true, "dimensions": "{EMBEDDINGS_VECTOR_DIMENSIONS}", "vectorSearchProfile": "default" }
+        { "name": "contentVector", "type": "Collection(Edm.Single)", "searchable": true, "dimensions": "{{EMBEDDINGS_VECTOR_DIMENSIONS}}", "vectorSearchProfile": "default" }
       ],
       "corsOptions": {
         "allowedOrigins": ["*"],
@@ -224,14 +245,18 @@
 
   "skillsets": [
     {
-      "name": "{SEARCH_RAG_INDEX_SKILLSET_NAME}",
+      "name": "{{SEARCH_RAG_INDEX_SKILLSET_NAME}}",
       "description": "Document chunking skillset",
       "skills": [
         {
           "@odata.type": "#Microsoft.Skills.Custom.WebApiSkill",
           "name": "document-chunking",
           "description": "Extract chunks from documents.",
-          "uri": "https://{CONTAINER_APPS.DATA_INGEST_APP.fqdn}/document-chunking",
+          {% set data_ingest = CONTAINER_APPS 
+              | selectattr('canonical_name', 'equalto', 'DATA_INGEST_APP') 
+              | list 
+              | first %}
+          "uri": "https://{{ data_ingest.fqdn }}/document-chunking",
           "httpMethod": "POST",
           "timeout": "PT230S",
           "context": "/document",
@@ -249,7 +274,7 @@
       "indexProjections": {
         "selectors": [
           {
-            "targetIndexName": "{SEARCH_RAG_INDEX_NAME}",
+            "targetIndexName": "{{SEARCH_RAG_INDEX_NAME}}",
             "parentKeyFieldName": "parent_id",
             "sourceContext": "/document/chunks/*",
             "mappings": [
@@ -282,14 +307,18 @@
       }
     },
     {
-      "name": "{SEARCH_QUERIES_INDEX_SKILLSET_NAME}",
+      "name": "{{SEARCH_QUERIES_INDEX_SKILLSET_NAME}}",
       "description": "Embedding skillset for queries",
       "skills": [
         {
           "@odata.type": "#Microsoft.Skills.Custom.WebApiSkill",
-          "name": "{SEARCH_QUERIES_INDEX_SKILLSET_NAME}",
+          "name": "{{SEARCH_QUERIES_INDEX_SKILLSET_NAME}}",
           "description": "Generates embeddings for question.",
-          "uri": "https://{CONTAINER_APPS.DATA_INGEST_APP.fqdn}/text-embedding",
+          {% set data_ingest = CONTAINER_APPS 
+              | selectattr('canonical_name', 'equalto', 'DATA_INGEST_APP') 
+              | list 
+              | first %}
+          "uri": "https://{{ data_ingest.fqdn }}/document-chunking",
           "httpMethod": "POST",
           "batchSize": 1,
           "timeout": "PT60S",
@@ -305,14 +334,18 @@
       ]
     },
     {
-      "name": "{SEARCH_TABLES_INDEX_SKILLSET_NAME}",
+      "name": "{{SEARCH_TABLES_INDEX_SKILLSET_NAME}}",
       "description": "Embedding skillset for tables",
       "skills": [
         {
           "@odata.type": "#Microsoft.Skills.Custom.WebApiSkill",
-          "name": "{SEARCH_TABLES_INDEX_SKILLSET_NAME}",
+          "name": "{{SEARCH_TABLES_INDEX_SKILLSET_NAME}}",
           "description": "Generates embeddings for description.",
-          "uri": "https://{CONTAINER_APPS.DATA_INGEST_APP.fqdn}/text-embedding",
+          {% set data_ingest = CONTAINER_APPS 
+              | selectattr('canonical_name', 'equalto', 'DATA_INGEST_APP') 
+              | list 
+              | first %}
+          "uri": "https://{{ data_ingest.fqdn }}/document-chunking",
           "httpMethod": "POST",
           "batchSize": 1,
           "timeout": "PT60S",
@@ -328,14 +361,18 @@
       ]
     },
     {
-      "name": "{SEARCH_MEASURES_INDEX_SKILLSET_NAME}",
+      "name": "{{SEARCH_MEASURES_INDEX_SKILLSET_NAME}}",
       "description": "Embedding skillset for measures",
       "skills": [
         {
           "@odata.type": "#Microsoft.Skills.Custom.WebApiSkill",
-          "name": "{SEARCH_MEASURES_INDEX_SKILLSET_NAME}",
+          "name": "{{SEARCH_MEASURES_INDEX_SKILLSET_NAME}}",
           "description": "Generates embeddings for description.",
-          "uri": "https://{CONTAINER_APPS.DATA_INGEST_APP.fqdn}/text-embedding",
+          {% set data_ingest = CONTAINER_APPS 
+              | selectattr('canonical_name', 'equalto', 'DATA_INGEST_APP') 
+              | list 
+              | first %}
+          "uri": "https://{{ data_ingest.fqdn }}/document-chunking",
           "httpMethod": "POST",
           "batchSize": 1,
           "timeout": "PT60S",
@@ -354,12 +391,12 @@
 
   "indexers": [
     {
-      "name": "{SEARCH_RAG_INDEX_INDEXER_NAME}",
+      "name": "{{SEARCH_RAG_INDEX_INDEXER_NAME}}",
       "body": {
-        "dataSourceName": "{SEARCH_RAG_INDEX_DATA_SOURCE_NAME}",
-        "targetIndexName": "{SEARCH_RAG_INDEX_NAME}",
-        "skillsetName": "{SEARCH_RAG_INDEX_SKILLSET_NAME}",
-        "schedule": { "interval": "{SEARCH_RAG_INDEX_INTERVAL}" },
+        "dataSourceName": "{{SEARCH_RAG_INDEX_DATA_SOURCE_NAME}}",
+        "targetIndexName": "{{SEARCH_RAG_INDEX_NAME}}",
+        "skillsetName": "{{SEARCH_RAG_INDEX_SKILLSET_NAME}}",
+        "schedule": { "interval": "{{SEARCH_RAG_INDEX_INTERVAL}}" },
         "fieldMappings": [
           { "sourceFieldName": "metadata_storage_path", "targetFieldName": "id", "mappingFunction": { "name": "fixedLengthEncode" } }
         ],
@@ -374,12 +411,12 @@
       }
     },
     {
-      "name": "{SEARCH_QUERIES_INDEX_INDEXER_NAME}",
+      "name": "{{SEARCH_QUERIES_INDEX_INDEXER_NAME}}",
       "body": {
-        "dataSourceName": "{SEARCH_QUERIES_INDEX_DATA_SOURCE_NAME}",
-        "targetIndexName": "{SEARCH_QUERIES_INDEX_NAME}",
-        "skillsetName": "{SEARCH_QUERIES_INDEX_SKILLSET_NAME}",
-        "schedule": { "interval": "{SEARCH_QUERIES_INDEX_INTERVAL}" },
+        "dataSourceName": "{{SEARCH_QUERIES_INDEX_DATA_SOURCE_NAME}}",
+        "targetIndexName": "{{SEARCH_QUERIES_INDEX_NAME}}",
+        "skillsetName": "{{SEARCH_QUERIES_INDEX_SKILLSET_NAME}}",
+        "schedule": { "interval": "{{SEARCH_QUERIES_INDEX_INTERVAL}}" },
         "fieldMappings": [
           { "sourceFieldName": "metadata_storage_path", "targetFieldName": "id", "mappingFunction": { "name": "fixedLengthEncode" } },
           { "sourceFieldName": "datasource",            "targetFieldName": "datasource" },
@@ -393,14 +430,14 @@
       }
     },
     {
-      "name": "{SEARCH_TABLES_INDEX_INDEXER_NAME}",
+      "name": "{{SEARCH_TABLES_INDEX_INDEXER_NAME}}",
       "body": {
-        "dataSourceName": "{SEARCH_TABLES_INDEX_DATA_SOURCE_NAME}",
-        "targetIndexName": "{SEARCH_TABLES_INDEX_NAME}",
-        "skillsetName": "{SEARCH_TABLES_INDEX_SKILLSET_NAME}",
-        "schedule": { "interval": "{SEARCH_TABLES_INDEX_INTERVAL}" },
+        "dataSourceName": "{{SEARCH_TABLES_INDEX_DATA_SOURCE_NAME}}",
+        "targetIndexName": "{{SEARCH_TABLES_INDEX_NAME}}",
+        "skillsetName": "{{SEARCH_TABLES_INDEX_SKILLSET_NAME}}",
+        "schedule": { "interval": "{{SEARCH_TABLES_INDEX_INTERVAL}}" },
         "fieldMappings": [
-          { "sourceFieldName": "metadata_storage_path", "targetFieldName": "id",           "mappingFunction": { "name": "fixedLengthEncode" } },
+          { "sourceFieldName": "metadata_storage_path", "targetFieldName": "id", "mappingFunction": { "name": "fixedLengthEncode" } },
           { "sourceFieldName": "table",                "targetFieldName": "table" },
           { "sourceFieldName": "description",          "targetFieldName": "description" },
           { "sourceFieldName": "datasource",           "targetFieldName": "datasource" },
@@ -412,14 +449,14 @@
       }
     },
     {
-      "name": "{SEARCH_MEASURES_INDEX_INDEXER_NAME}",
+      "name": "{{SEARCH_MEASURES_INDEX_INDEXER_NAME}}",
       "body": {
-        "dataSourceName": "{SEARCH_MEASURES_INDEX_DATA_SOURCE_NAME}",
-        "targetIndexName": "{SEARCH_MEASURES_INDEX_NAME}",
-        "skillsetName": "{SEARCH_MEASURES_INDEX_SKILLSET_NAME}",
-        "schedule": { "interval": "{SEARCH_MEASURES_INDEX_INTERVAL}" },
+        "dataSourceName": "{{SEARCH_MEASURES_INDEX_DATA_SOURCE_NAME}}",
+        "targetIndexName": "{{SEARCH_MEASURES_INDEX_NAME}}",
+        "skillsetName": "{{SEARCH_MEASURES_INDEX_SKILLSET_NAME}}",
+        "schedule": { "interval": "{{SEARCH_MEASURES_INDEX_INTERVAL}}" },
         "fieldMappings": [
-          { "sourceFieldName": "metadata_storage_path", "targetFieldName": "id",           "mappingFunction": { "name": "fixedLengthEncode" } },
+          { "sourceFieldName": "metadata_storage_path", "targetFieldName": "id", "mappingFunction": { "name": "fixedLengthEncode" } },
           { "sourceFieldName": "datasource",            "targetFieldName": "datasource" },
           { "sourceFieldName": "name",                  "targetFieldName": "name" },
           { "sourceFieldName": "description",           "targetFieldName": "description" },

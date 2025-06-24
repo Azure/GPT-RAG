@@ -18,3 +18,5 @@ resource kvResources 'Microsoft.AppConfiguration/configurationStores/keyValues@2
     }
   }
 ]
+
+

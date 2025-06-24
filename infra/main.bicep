@@ -481,7 +481,7 @@ module containerRegistry 'br/public:avm/res/container-registry/registry:0.9.1' =
 
 //Container Apps User Mangaed Identity
 module containerAppsUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = [for app in containerAppsList: if (useUAI) {
-  name: '${app.service_name}'
+  name: '${variables._abbrs.security.managedIdentity}${app.service_name}'
   params: {
     // Required parameters
     name: '${variables._abbrs.security.managedIdentity}${variables._abbrs.containers.containerApp}${resourceToken}-${app.service_name}'
@@ -1109,7 +1109,7 @@ module containerAppsSettings 'modules/container-apps/container-apps-list.bicep' 
         serviceName: containerAppsList[i].service_name
         canonical_name: containerAppsList[i].canonical_name
         principalId: (useUAI) ? containerAppsUAI[i].outputs.principalId! : containerApps[i].outputs.systemAssignedMIPrincipalId!
-        fqdn: containerApps[i].outputs.fqdn
+        fqdn: containerApps[i].outputs.fqdn! 
       }
     ]
   }
@@ -1136,18 +1136,19 @@ var _storageContainerNamesSettings = [
   }
 ]
 
+
 module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = if (deployAppConfig) {
   name: 'appConfigPopulate'
   params: {
     storeName: appConfig.outputs.name
     keyValues: concat(
-      containerAppsSettings.outputs.containerAppsEndpoints,
-      containerAppsSettings.outputs.containerAppsName,
+      (deployContainerApps ? containerAppsSettings.outputs.containerAppsEndpoints : []),
+      (deployContainerApps ? containerAppsSettings.outputs.containerAppsName      : []),
       _modelDeploymentNamesSettings,
       _databaseContainerNamesSettings,
       _storageContainerNamesSettings,
       [
-      // ── General / Deployment ─────────────────────────────────────────────
+        // ── General / Deployment ─────────────────────────────────────────────
       { name: 'AZURE_TENANT_ID',     value: tenant().tenantId,                        label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'SUBSCRIPTION_ID',     value: subscription().subscriptionId,            label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'RESOURCE_GROUP_NAME', value: resourceGroup().name,                     label: 'gpt-rag', contentType: 'text/plain' }
@@ -1156,6 +1157,7 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       { name: 'DEPLOYMENT_NAME',     value: deployment().name,                        label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'RESOURCE_TOKEN',      value: resourceToken,                            label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'NETWORK_ISOLATION',   value: string(networkIsolation),                 label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'USE_UAI',             value: string(useUAI),                           label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'LOG_LEVEL',           value: 'INFO',                                   label: 'gpt-rag', contentType: 'text/plain' }
 
       // ── Resource IDs ─────────────────────────────────────────────────────
@@ -1167,6 +1169,7 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       { name: 'CONTAINER_ENV_RESOURCE_ID',      value: containerEnv.outputs.resourceId,                    label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'CONTAINER_REGISTRY_RESOURCE_ID', value: containerRegistry.outputs.resourceId,               label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'SEARCH_SERVICE_RESOURCE_ID',     value: searchService.outputs.resourceId,                   label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'SEARCH_SERVICE_UAI_RESOURCE_ID', value: searchServiceUAI.outputs.resourceId,                label: 'gpt-rag', contentType: 'text/plain' }      
       { name: 'AI_FOUNDRY_ACCOUNT_RESOURCE_ID', value: aiFoundryAccount.outputs.accountID,                 label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'AI_FOUNDRY_PROJECT_RESOURCE_ID', value: aiFoundryProject.outputs.projectId,                 label: 'gpt-rag', contentType: 'text/plain' }
 
@@ -1210,10 +1213,11 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       { name: 'BING_CONNECTION_ID',   value: deployGroundingWithBing ? aiFoundryBingConnection.outputs.bingConnectionId : '', label: 'gpt-rag', contentType: 'text/plain' }
 
       // ── Managed Identity Principals ───────────────────────────────────────
-      { name: 'CONTAINER_ENV_PRINCIPAL_ID',      value: containerEnv.outputs.systemAssignedMIPrincipalId!,     label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'SEARCH_SERVICE_PRINCIPAL_ID',     value: searchService.outputs.systemAssignedMIPrincipalId!,    label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'AI_FOUNDRY_ACCOUNT_PRINCIPAL_ID', value: aiFoundryAccount.outputs.accountPrincipalId,           label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'AI_FOUNDRY_PROJECT_PRINCIPAL_ID', value: aiFoundryProject.outputs.projectPrincipalId,           label: 'gpt-rag', contentType: 'text/plain' }
+
+      { name: 'CONTAINER_ENV_PRINCIPAL_ID',      value:  (useUAI) ? containerEnvUAI.outputs.principalId  : containerEnv.outputs.systemAssignedMIPrincipalId!,  label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'SEARCH_SERVICE_PRINCIPAL_ID',     value:  (useUAI) ? searchServiceUAI.outputs.principalId : searchService.outputs.systemAssignedMIPrincipalId!, label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AI_FOUNDRY_ACCOUNT_PRINCIPAL_ID', value: aiFoundryAccount.outputs.accountPrincipalId, label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AI_FOUNDRY_PROJECT_PRINCIPAL_ID', value: aiFoundryProject.outputs.projectPrincipalId, label: 'gpt-rag', contentType: 'text/plain' }
 
       // ── Module-Specific Connection Objects ─────────────────────────────────
       { name: 'AI_FOUNDRY_STORAGE_CONNECTION',   value: aiFoundryProject.outputs.azureStorageConnection, label: 'gpt-rag', contentType: 'text/plain' }

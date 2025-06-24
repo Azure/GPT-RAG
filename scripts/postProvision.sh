@@ -9,7 +9,7 @@ set -euo pipefail
 echo "🔧 Running post-provision steps…"
 
 echo "📋 Current environment variables:"
-for v in  DEPLOY_CONTAINER_APPS DEPLOY_SEARCH_SERVICE NETWORK_ISOLATION ; do
+for v in  APP_CONFIG_ENDPOINT DEPLOY_CONTAINER_APPS DEPLOY_SEARCH_SERVICE NETWORK_ISOLATION ; do
   printf "  %s=%s\n" "$v" "${!v:-<unset>}"
 done
 
@@ -41,7 +41,7 @@ echo "📑 AI Foundry Setup…"
 
 ###############################################################################
 # 2) Container Apps Setup
-###############################################################################
+# ###############################################################################
 echo
 if [[ "${DEPLOY_CONTAINER_APPS,,}" == "true" ]]; then
   echo "🔍 ContainerApp setup…"
