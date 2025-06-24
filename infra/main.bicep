@@ -1096,6 +1096,16 @@ module orchestratorOaiAccess './core/security/openai-access.bicep' = {
   }
 }
 
+// Give the orchestrator access to blob storage with enhanced permissions (to write and expose conversation links)
+module orchestratorBlobStorageAccess './core/security/blobstorage-access-orc.bicep' = {
+  name: 'orchestrator-blobstorage-access'
+  scope: resourceGroup
+  params: {
+    storageAccountName: storage.outputs.name
+    principalId: orchestrator.outputs.identityPrincipalId
+  }
+}
+
 module frontEnd 'core/host/appservice.bicep' = {
   name: 'frontend'
   scope: resourceGroup
