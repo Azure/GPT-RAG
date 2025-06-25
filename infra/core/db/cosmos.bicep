@@ -579,6 +579,43 @@ resource subscriptionEmailsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlD
     }
   }
 }
+
+resource organizationWebsitesContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
+  parent: database
+  name: 'OrganizationWebsites'
+  properties: {
+    resource: {
+      id: 'OrganizationWebsites'
+      partitionKey: {
+        paths: [
+          '/organizationId'
+        ]
+        kind: 'Hash'
+      }
+      analyticalStorageTtl: analyticalStoreTTL
+      indexingPolicy: {
+        indexingMode: 'consistent'
+        automatic: true
+        includedPaths: [
+          {
+            path: '/*'
+          }
+        ]
+        excludedPaths: [
+          {
+            path: '/"_etag"/?'
+          }
+        ]
+      }
+    }
+    options: {
+      autoscaleSettings: {
+        maxThroughput: autoscaleMaxThroughput
+      }
+    }
+  }
+}
+
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
   name: keyVaultName
 }
