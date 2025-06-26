@@ -1161,17 +1161,17 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       { name: 'LOG_LEVEL',           value: 'INFO',                                   label: 'gpt-rag', contentType: 'text/plain' }
 
       // ── Resource IDs ─────────────────────────────────────────────────────
-      { name: 'KEY_VAULT_RESOURCE_ID',          value: keyVault.outputs.resourceId,                        label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'STORAGE_ACCOUNT_RESOURCE_ID',    value: storageAccount.outputs.resourceId,                  label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'COSMOS_DB_ACCOUNT_RESOURCE_ID',  value: CosmosDBAccount.outputs.resourceId,                 label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'APP_INSIGHTS_RESOURCE_ID',       value: appInsights.outputs.resourceId,                     label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'LOG_ANALYTICS_RESOURCE_ID',      value: logAnalytics.outputs.resourceId,                    label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'CONTAINER_ENV_RESOURCE_ID',      value: containerEnv.outputs.resourceId,                    label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'CONTAINER_REGISTRY_RESOURCE_ID', value: containerRegistry.outputs.resourceId,               label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'SEARCH_SERVICE_RESOURCE_ID',     value: searchService.outputs.resourceId,                   label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'SEARCH_SERVICE_UAI_RESOURCE_ID', value: searchServiceUAI.outputs.resourceId,                label: 'gpt-rag', contentType: 'text/plain' }      
-      { name: 'AI_FOUNDRY_ACCOUNT_RESOURCE_ID', value: aiFoundryAccount.outputs.accountID,                 label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'AI_FOUNDRY_PROJECT_RESOURCE_ID', value: aiFoundryProject.outputs.projectId,                 label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'KEY_VAULT_RESOURCE_ID',          value: keyVault.outputs.resourceId,                         label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'STORAGE_ACCOUNT_RESOURCE_ID',    value: storageAccount.outputs.resourceId,                   label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'COSMOS_DB_ACCOUNT_RESOURCE_ID',  value: CosmosDBAccount.outputs.resourceId,                  label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'APP_INSIGHTS_RESOURCE_ID',       value: appInsights.outputs.resourceId,                      label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'LOG_ANALYTICS_RESOURCE_ID',      value: logAnalytics.outputs.resourceId,                     label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'CONTAINER_ENV_RESOURCE_ID',      value: containerEnv.outputs.resourceId,                     label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'CONTAINER_REGISTRY_RESOURCE_ID', value: containerRegistry.outputs.resourceId,                label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'SEARCH_SERVICE_RESOURCE_ID',     value: searchService.outputs.resourceId,                    label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'SEARCH_SERVICE_UAI_RESOURCE_ID', value: (useUAI) ? searchServiceUAI.outputs.resourceId : '', label: 'gpt-rag', contentType: 'text/plain' }      
+      { name: 'AI_FOUNDRY_ACCOUNT_RESOURCE_ID', value: aiFoundryAccount.outputs.accountID,                  label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AI_FOUNDRY_PROJECT_RESOURCE_ID', value: aiFoundryProject.outputs.projectId,                  label: 'gpt-rag', contentType: 'text/plain' }
 
       // ── Resource Names ───────────────────────────────────────────────────
       { name: 'AI_FOUNDRY_ACCOUNT_NAME',         value: aiFoundryAccountName,             label: 'gpt-rag', contentType: 'text/plain' }

@@ -14,10 +14,16 @@ resource account 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' = {
     name: 'S0'
   }
   kind: 'AIServices'
-  identity: {
-    type: (useUAI) ? 'UserAssigned' :  'SystemAssigned'
-    userAssignedIdentities: (useUAI) ? {'${identityId}' : {}} : null
-  }
+  identity: union(
+    {
+      type: (useUAI) ? 'UserAssigned' : 'SystemAssigned'
+    },
+    useUAI ? {
+      userAssignedIdentities: {
+        '${identityId}': {}
+      }
+    } : {}
+  )  
   properties: {
     allowProjectManagement: true
     customSubDomainName: accountName

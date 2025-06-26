@@ -1,17 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# avoid unbound-variable errors by setting defaults
-: "${DEPLOY_CONTAINER_APPS:=true}"
-: "${DEPLOY_SEARCH_SERVICE:=true}"
-: "${NETWORK_ISOLATION:=false}"
 
 echo "🔧 Running post-provision steps…"
-
-echo "📋 Current environment variables:"
-for v in  APP_CONFIG_ENDPOINT DEPLOY_CONTAINER_APPS DEPLOY_SEARCH_SERVICE NETWORK_ISOLATION ; do
-  printf "  %s=%s\n" "$v" "${!v:-<unset>}"
-done
+echo 
 
 ###############################################################################
 # Setup Python environment
@@ -25,6 +17,21 @@ curl -sS https://bootstrap.pypa.io/get-pip.py | python
 echo "⬇️  Installing requirements…"
 pip install --upgrade pip
 pip install -r config/requirements.txt
+
+###############################################################################
+# Environment Variables
+###############################################################################
+
+# avoid unbound-variable errors by setting defaults
+: "${DEPLOY_CONTAINER_APPS:=true}"
+: "${DEPLOY_SEARCH_SERVICE:=true}"
+: "${NETWORK_ISOLATION:=false}"
+: "${USE_UAI:=false}"
+
+echo "📋 Current environment variables:"
+for v in  APP_CONFIG_ENDPOINT DEPLOY_CONTAINER_APPS DEPLOY_SEARCH_SERVICE NETWORK_ISOLATION USE_UAI ; do
+  printf "  %s=%s\n" "$v" "${!v:-<unset>}"
+done
 
 ###############################################################################
 # 1) AI Foundry Setup

@@ -43,12 +43,16 @@ resource project 'Microsoft.CognitiveServices/accounts/projects@2025-04-01-previ
   parent: account
   name: projectName
   location: location
-  identity: {
-    type: (useUAI) ? 'UserAssigned' : 'SystemAssigned'
-    userAssignedIdentities: (useUAI) ? {
-      '${identityId}': {}
+  identity: union(
+    {
+      type: (useUAI) ? 'UserAssigned' : 'SystemAssigned'
+    },
+    useUAI ? {
+      userAssignedIdentities: {
+        '${identityId}': {}
+      }
     } : {}
-  }
+  )  
   properties: {
     description: projectDescription
     displayName: displayName

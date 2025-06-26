@@ -8,6 +8,7 @@
     "deploymentTags":                      { "value": {} },
     "principalId":                         { "value": "${AZURE_PRINCIPAL_ID}" },
     "networkIsolation":                    { "value": "false" },
+   "useUAI":                                { "value": "false" },
 
     "aiSearchResourceId":                  { "value": null },
     "aiFoundryStorageAccountResourceId":   { "value": null },
@@ -26,7 +27,6 @@
     "deploySearchService":                 { "value": "true" },
     "deployStorageAccount":                { "value": "true" },
     
-    "useUAI":                                { "value": "true" },
     "aiFoundryAccountName":                  { "value": null },
     "aiFoundryProjectName":                  { "value": null },
     "aiFoundryProjectDisplayName":           { "value": null },

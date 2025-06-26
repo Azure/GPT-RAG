@@ -44,12 +44,16 @@ var cosmosDbRegion = contains(canaryRegions, location) ? 'westus' : location
 resource cosmosDB 'Microsoft.DocumentDB/databaseAccounts@2024-11-15' = if(!cosmosDBExists) {
   name: cosmosDBName
   location: cosmosDbRegion
-  identity: {
-    type: (useUAI) ? 'UserAssigned' : 'SystemAssigned'
-    userAssignedIdentities: (useUAI) ? {
-      '${cosmosIdentityId}': {}
+  identity: union(
+    {
+      type: (useUAI) ? 'UserAssigned' : 'SystemAssigned'
+    },
+    useUAI ? {
+      userAssignedIdentities: {
+        '${cosmosIdentityId}': {}
+      }
     } : {}
-  }
+  )  
   kind: 'GlobalDocumentDB'
   properties: {
     consistencyPolicy: {
@@ -80,12 +84,16 @@ resource existingSearchService 'Microsoft.Search/searchServices@2024-06-01-previ
 resource aiSearch 'Microsoft.Search/searchServices@2024-06-01-preview' = if(!aiSearchExists) {
   name: aiSearchName
   location: location
-  identity: {
-    type: (useUAI) ? 'UserAssigned' : 'SystemAssigned'
-    userAssignedIdentities: (useUAI) ? {
-      '${searchIdentityId}': {}
+  identity: union(
+    {
+      type: (useUAI) ? 'UserAssigned' : 'SystemAssigned'
+    },
+    useUAI ? {
+      userAssignedIdentities: {
+        '${searchIdentityId}': {}
+      }
     } : {}
-  }
+  )
   properties: {
     disableLocalAuth: false
     authOptions: { aadOrApiKey: { aadAuthFailureMode: 'http401WithBearerChallenge'}}

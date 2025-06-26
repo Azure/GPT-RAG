@@ -9,12 +9,14 @@ Set-StrictMode -Version Latest
 $deployContainerApps = $env:DEPLOY_CONTAINER_APPS ?? 'true'
 $deploySearchService = $env:DEPLOY_SEARCH_SERVICE ?? 'true'
 $networkIsolation    = $env:NETWORK_ISOLATION    ?? 'false'
+$useUAI              = $env:USE_UAI              ?? 'false'
 
 Write-Host "🔧 Running post-provision steps…`n"
 Write-Host "📋 Current environment variables:"
 Write-Host "  DEPLOY_CONTAINER_APPS = $deployContainerApps"
 Write-Host "  DEPLOY_SEARCH_SERVICE = $deploySearchService"
 Write-Host "  NETWORK_ISOLATION = $networkIsolation"
+Write-Host "  USE_UAI = $useUAI"
 
 
 # -----------------------------------------------------------------------------
