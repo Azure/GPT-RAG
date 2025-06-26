@@ -92,7 +92,7 @@
     {
       "name": "{{SEARCH_RAG_INDEX_NAME}}",
       "fields": [
-        { "name": "id",                             "type": "Edm.String",               "key": true,  "searchable": true,  "retrievable": true},
+        { "name": "id",                             "type": "Edm.String",               "key": true,  "searchable": true,  "retrievable": true, "filterable": true, "analyzer": "keyword" },
         { "name": "parent_id",                      "type": "Edm.String",               "searchable": false, "retrievable": true },
         { "name": "metadata_storage_path",          "type": "Edm.String",               "searchable": false, "retrievable": true },
         { "name": "metadata_storage_name",          "type": "Edm.String",               "searchable": false, "retrievable": true },

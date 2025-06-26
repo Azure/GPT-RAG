@@ -36,32 +36,32 @@ done
 ###############################################################################
 # 1) AI Foundry Setup
 ###############################################################################
-echo 
-echo "📑 AI Foundry Setup…"
-{
-  echo "🚀 Running config.aifoundry.aifoundry_setup…"
-  python -m config.aifoundry.setup
-  echo "✅ AI Foundry setup script finished."
-} || {
-  echo "❗️ Error during AI Foundry setup. Skipping it."
-}
+# echo 
+# echo "📑 AI Foundry Setup…"
+# {
+#   echo "🚀 Running config.aifoundry.aifoundry_setup…"
+#   python -m config.aifoundry.setup
+#   echo "✅ AI Foundry setup script finished."
+# } || {
+#   echo "❗️ Error during AI Foundry setup. Skipping it."
+# }
 
 ###############################################################################
 # 2) Container Apps Setup
 # ###############################################################################
-echo
-if [[ "${DEPLOY_CONTAINER_APPS,,}" == "true" ]]; then
-  echo "🔍 ContainerApp setup…"
-  {
-    echo "🚀 Running config.containerapps.setup…"
-    python -m config.containerapps.setup
-    echo "✅ Container Apps setup script finished."
-  } || {
-    echo "❗️ Error during Container Apps setup. Skipping it."
-  }
-else
-  echo "⚠️  Container Apps setup (DEPLOY_CONTAINER_APPS is not 'true')."
-fi
+# echo
+# if [[ "${DEPLOY_CONTAINER_APPS,,}" == "true" ]]; then
+#   echo "🔍 ContainerApp setup…"
+#   {
+#     echo "🚀 Running config.containerapps.setup…"
+#     python -m config.containerapps.setup
+#     echo "✅ Container Apps setup script finished."
+#   } || {
+#     echo "❗️ Error during Container Apps setup. Skipping it."
+#   }
+# else
+#   echo "⚠️  Container Apps setup (DEPLOY_CONTAINER_APPS is not 'true')."
+# fi
 
 ###############################################################################
 # 3) AI Search Setup
