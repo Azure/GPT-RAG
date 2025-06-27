@@ -55,6 +55,7 @@ jobs:
 
           # Azure AD B2C Configuration
           AZURE_WEBAPP_AAD_TENANT_NAME: ${{ secrets.AAD_TENANT_NAME }}
+          AZURE_WEBAPP_AAD_TENANT_ID: ${{ secrets.AAD_TENANT_ID }}
           AZURE_WEBAPP_AAD_CLIENT_ID: ${{ secrets.AAD_CLIENT_ID }}
           AZURE_WEBAPP_AAD_POLICY_NAME: ${{ secrets.AAD_POLICY_NAME }}
           AZURE_WEBAPP_AAD_REDIRECT_URI: ${{ secrets.AAD_REDIRECT_URI }}
@@ -75,4 +76,3 @@ jobs:
           AZURE_FUNCTIONS_WORKER_RUNTIME: "python"
           SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-

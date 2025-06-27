@@ -455,6 +455,10 @@ var stripeProductId = !empty(webAppStripeProductId) ? webAppStripeProductId : ''
 param webAppStripeFAPriceID string = ''
 var stripeFAPriceId = !empty(webAppStripeFAPriceID) ? webAppStripeFAPriceID : ''
 
+@description('Azure Active Directory tenant ID')
+param webAppAADTenantId string = ''
+var aadTenantId = !empty(webAppAADTenantId) ? webAppAADTenantId : ''
+
 @description('Azure Active Directory tenant name')
 param webAppAADTenantName string = ''
 var aadTenantName = !empty(webAppAADTenantName) ? webAppAADTenantName : ''
@@ -1003,7 +1007,7 @@ module orchestrator './core/host/functions.bicep' = {
         value: webAppUri
       }
       {
-        name: 'AZURE_INFERENCE_SDK_ENDPOINT' 
+        name: 'AZURE_INFERENCE_SDK_ENDPOINT'
         value: deepseekR1Deployment.outputs.r1Endpoint
       }
       {
@@ -1142,6 +1146,10 @@ module frontEnd 'core/host/appservice.bicep' = {
       {
         name: 'AAD_TENANT_NAME'
         value: aadTenantName
+      }
+      {
+        name: 'AAD_TENANT_ID'
+        value: aadTenantId
       }
       {
         name: 'AAD_CLIENT_ID'
