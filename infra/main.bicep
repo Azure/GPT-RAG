@@ -140,6 +140,9 @@ param modelDeploymentList                 array
 @description('List of container apps to create')
 param containerAppsList                   array 
 
+@description('Workload profiles.')
+param workloadProfiles array = []
+
 // ----------------------------------------------------------------------
 // Cosmos DB Database params
 // ----------------------------------------------------------------------
@@ -418,6 +421,7 @@ module appInsights 'br/public:avm/res/insights/component:0.6.0' = if (deployAppI
     kind:                'web'
     disableIpMasking:    false
     tags:                _tags
+    enableTelemetry:     true
   }
 }
 
@@ -445,6 +449,7 @@ module containerEnv 'br/public:avm/res/app/managed-environment:0.9.1' = if (depl
     logAnalyticsWorkspaceResourceId: logAnalytics.outputs.resourceId
     appInsightsConnectionString: appInsights.outputs.connectionString
     zoneRedundant: false
+    workloadProfiles: workloadProfiles
     managedIdentities: {
       systemAssigned: (useUAI) ? false : true
       userAssignedResourceIds: (useUAI) ? [containerEnvUAI.outputs.resourceId] : []
@@ -588,6 +593,8 @@ module CosmosDBAccount 'br/public:avm/res/document-db/database-account:0.12.0' =
     ]
     defaultConsistencyLevel:'Session'
     capabilitiesToAdd: ['EnableServerless']
+    enableAnalyticalStorage: true
+    enableFreeTier: false
     networkRestrictions: {
       publicNetworkAccess: 'Enabled'
     }
@@ -701,6 +708,7 @@ module storageAccount 'br/public:avm/res/storage/storage-account:0.19.0' = if (d
     kind:                     'StorageV2'
     allowBlobPublicAccess:    false
     supportsHttpsTrafficOnly: true
+    requireInfrastructureEncryption: true
     networkAcls: {
       bypass: 'AzureServices'
       virtualNetworkRules: []  
@@ -1092,6 +1100,7 @@ module appConfig 'br/public:avm/res/app-configuration/configuration-store:0.6.3'
       }
     ]
     tags: _tags
+    enableTelemetry: true
     dataPlaneProxy: {
       authenticationMode: 'Pass-through'
       privateLinkDelegation: 'Disabled'
@@ -1136,6 +1145,18 @@ var _storageContainerNamesSettings = [
   }
 ]
 
+var outputModelDeploymentSettings = [
+  for modelDeployment in modelDeploymentList: { 
+    canonical_name: modelDeployment.canonical_name 
+    capacity: modelDeployment.capacity
+    model : modelDeployment.model
+    modelFormat: modelDeployment.modelFormat
+    name: modelDeployment.name
+    version: modelDeployment.version
+    endpoint: 'https://${variables._abbrs.ai.aiFoundry}${resourceToken}.openai.azure.com/'
+  }
+]
+
 
 module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = if (deployAppConfig) {
   name: 'appConfigPopulate'
@@ -1159,6 +1180,12 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       { name: 'NETWORK_ISOLATION',   value: string(networkIsolation),                 label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'USE_UAI',             value: string(useUAI),                           label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'LOG_LEVEL',           value: 'INFO',                                   label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'ENABLE_CONSOLE_LOGGING',value: 'true',                                 label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'PROMPT_SOURCE',       value: 'file',                                   label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING',       value: appInsights.outputs.connectionString,                                   label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'APPLICATIONINSIGHTS__INSTRUMENTATIONKEY',     value: appInsights.outputs.instrumentationKey,                                   label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AGENT_STRATEGY',     value: 'single_agent_rag',                                   label: 'gpt-rag', contentType: 'text/plain' }
+      
 
       // ── Resource IDs ─────────────────────────────────────────────────────
       { name: 'KEY_VAULT_RESOURCE_ID',          value: keyVault.outputs.resourceId,                         label: 'gpt-rag', contentType: 'text/plain' }
@@ -1207,6 +1234,9 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       { name: 'AI_FOUNDRY_PROJECT_ENDPOINT',     value: aiFoundryProject.outputs.endpoint,           label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'AI_FOUNDRY_PROJECT_WORKSPACE_ID', value: aiFoundryFormatProjectWorkspaceId.outputs.projectWorkspaceIdGuid, label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'COSMOS_DB_ENDPOINT',              value: CosmosDBAccount.outputs.endpoint,            label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'ORCHESTRATOR_APP_APIKEY',              value: resourceToken,            label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'MCP_APP_APIKEY',              value: resourceToken,            label: 'gpt-rag', contentType: 'text/plain' }
+      
   
       // ── Connections ───────────────────────────────────────────────────────
       { name: 'SEARCH_CONNECTION_ID', value: deploySearchService ? aiFoundryConnectionSearch.outputs.seachConnectionId : '',  label: 'gpt-rag', contentType: 'text/plain' }
@@ -1226,7 +1256,7 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
 
       // ── Container Apps List & Model Deployments ────────────────────────────
       { name: 'CONTAINER_APPS',       value: string(containerAppsSettings.outputs.containerAppsList), label: 'gpt-rag', contentType: 'application/json' }
-      { name: 'MODEL_DEPLOYMENTS',    value: string(modelDeploymentList), label: 'gpt-rag', contentType: 'application/json' }
+      { name: 'MODEL_DEPLOYMENTS',    value: string(outputModelDeploymentSettings), label: 'gpt-rag', contentType: 'application/json' }
     ]
     )
   }
