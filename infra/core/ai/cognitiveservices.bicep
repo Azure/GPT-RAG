@@ -19,6 +19,9 @@ resource account 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
   location: location
   tags: tags
   kind: kind
+  identity: {
+    type: 'SystemAssigned'
+  }
   properties: {
     customSubDomainName: customSubDomainName
     publicNetworkAccess: publicNetworkAccess
@@ -62,3 +65,4 @@ resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' =  [for s
 output endpoint string = account.properties.endpoint
 output id string = account.id
 output name string = account.name
+output principalId string = account.identity.principalId

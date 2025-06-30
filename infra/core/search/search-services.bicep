@@ -11,6 +11,9 @@ param keyVaultName string
 param authOptions object = {}
 param semanticSearch string = 'free'
 
+// Azure AI Developer role definition ID
+var azureAIDeveloperRoleId = '64702f94-c441-49e6-a78b-ef80e0188fee'
+
 resource search 'Microsoft.Search/searchServices@2021-04-01-preview' = {
   name: name
   location: location
@@ -36,6 +39,17 @@ resource search 'Microsoft.Search/searchServices@2021-04-01-preview' = {
     semanticSearch: semanticSearch
   }
   sku: sku
+}
+
+// Role assignment to grant Azure AI Developer role to the search service
+resource searchAzureAIDeveloperRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(resourceGroup().id, search.id, azureAIDeveloperRoleId)
+  scope: resourceGroup()
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', azureAIDeveloperRoleId)
+    principalId: search.identity.principalId
+    principalType: 'ServicePrincipal'
+  }
 }
 
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {

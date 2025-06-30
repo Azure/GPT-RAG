@@ -103,6 +103,9 @@
     },
     "webAppAADTenantName": {
       "value": "${AZURE_WEBAPP_AAD_TENANT_NAME}"
+    },  
+    "webAppAADTenantId": {
+      "value": "${AZURE_WEBAPP_AAD_TENANT_ID}"
     },
     "webAppAADClientId": {
       "value": "${AZURE_WEBAPP_AAD_CLIENT_ID}"
