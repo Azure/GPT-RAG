@@ -1110,6 +1110,16 @@ module orchestratorBlobStorageAccess './core/security/blobstorage-access-orc.bic
   }
 }
 
+// Give the orchestrator access to Azure AI Search
+module orchestratorSearchAccess './core/security/search-access.bicep' = {
+  name: 'orchestrator-agenticsearch-access'
+  scope: resourceGroup
+  params: {
+    searchServiceName: searchService.outputs.name
+    principalId: orchestrator.outputs.identityPrincipalId
+  }
+}
+
 module frontEnd 'core/host/appservice.bicep' = {
   name: 'frontend'
   scope: resourceGroup
