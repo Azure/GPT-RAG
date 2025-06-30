@@ -158,6 +158,18 @@
     "orchestratorSerperApiKey": {
       "value": "${SERPER_API_KEY}"
     },
+    "langsmithApiKey": {
+      "value": "${LANGCHAIN_API_KEY}"
+    },
+    "langsmithEndpoint": {
+      "value": "${LANGCHAIN_ENDPOINT}"
+    },
+    "langsmithProject": {
+      "value": "${LANGCHAIN_PROJECT}"
+    },
+    "langsmithTracingV2": {
+      "value": "${LANGCHAIN_TRACING_V2}"
+    },
     "deploymentTags": {
       "value": {}
     }
