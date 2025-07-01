@@ -24,7 +24,7 @@ resource accounts_r1ai0_vm2b2htvuuclm_aiservice_name_DeepSeek_V3_0324 'Microsoft
   name: 'DeepSeek-V3-0324'
   sku: {
     name: 'GlobalStandard'
-    capacity: 2500
+    capacity: 3000
   }
   properties: {
     model: {
