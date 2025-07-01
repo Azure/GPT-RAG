@@ -318,7 +318,7 @@
               | selectattr('canonical_name', 'equalto', 'DATA_INGEST_APP') 
               | list 
               | first %}
-          "uri": "https://{{ data_ingest.fqdn }}/document-chunking",
+          "uri": "https://{{ data_ingest.fqdn }}/text-embedding",
           "httpMethod": "POST",
           "batchSize": 1,
           "timeout": "PT60S",
@@ -345,7 +345,7 @@
               | selectattr('canonical_name', 'equalto', 'DATA_INGEST_APP') 
               | list 
               | first %}
-          "uri": "https://{{ data_ingest.fqdn }}/document-chunking",
+          "uri": "https://{{ data_ingest.fqdn }}/text-embedding",
           "httpMethod": "POST",
           "batchSize": 1,
           "timeout": "PT60S",
@@ -372,7 +372,7 @@
               | selectattr('canonical_name', 'equalto', 'DATA_INGEST_APP') 
               | list 
               | first %}
-          "uri": "https://{{ data_ingest.fqdn }}/document-chunking",
+          "uri": "https://{{ data_ingest.fqdn }}/text-embedding",
           "httpMethod": "POST",
           "batchSize": 1,
           "timeout": "PT60S",
