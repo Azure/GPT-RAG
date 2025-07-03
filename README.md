@@ -89,6 +89,7 @@ This guide will walk you through the deployment process of Enterprise RAG. There
 
 - Azure Developer CLI: [Download azd for Windows](https://azdrelease.azureedge.net/azd/standalone/release/1.5.0/azd-windows-amd64.msi), [Other OS's](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd).
  - Powershell 7+ (Windows only): [Powershell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4#installing-the-msi-package).
+ - Microsoft Visual Studio Build Tools (Windows only: [Download Build Tools](https://visualstudio.microsoft.com/downloads/?q=build+tools#build-tools-for-visual-studio-2022).
  - Git: [Download Git](https://git-scm.com/downloads).
  - Node.js 16+ [windows/mac](https://nodejs.dev/en/download/)  [linux/wsl](https://nodejs.dev/en/download/package-manager/)
  - Python 3.11: [Download Python](https://www.python.org/downloads/release/python-3118/).
