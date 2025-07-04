@@ -258,6 +258,9 @@
               | first %}
           "uri": "https://{{ data_ingest.fqdn }}/document-chunking",
           "httpMethod": "POST",
+          "httpHeaders": {
+            "x-api-key": "{{RESOURCE_TOKEN}}"
+          },
           "timeout": "PT230S",
           "context": "/document",
           "batchSize": 1,
@@ -320,6 +323,9 @@
               | first %}
           "uri": "https://{{ data_ingest.fqdn }}/document-chunking",
           "httpMethod": "POST",
+          "httpHeaders": {
+            "x-api-key": "{{RESOURCE_TOKEN}}"
+          },
           "batchSize": 1,
           "timeout": "PT60S",
           "context": "/document",
@@ -347,6 +353,9 @@
               | first %}
           "uri": "https://{{ data_ingest.fqdn }}/document-chunking",
           "httpMethod": "POST",
+          "httpHeaders": {
+            "x-api-key": "{{RESOURCE_TOKEN}}"
+          },
           "batchSize": 1,
           "timeout": "PT60S",
           "context": "/document",
@@ -374,6 +383,9 @@
               | first %}
           "uri": "https://{{ data_ingest.fqdn }}/document-chunking",
           "httpMethod": "POST",
+          "httpHeaders": {
+            "x-api-key": "{{RESOURCE_TOKEN}}"
+          },
           "batchSize": 1,
           "timeout": "PT60S",
           "context": "/document",
@@ -405,7 +417,7 @@
           "maxFailedItems": -1,
           "maxFailedItemsPerBatch": -1,
           "configuration": {
-            "dataToExtract": "allMetadata"
+            "dataToExtract": "contentAndMetadata"
           }
         }
       }

@@ -1236,6 +1236,7 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       { name: 'COSMOS_DB_ENDPOINT',              value: CosmosDBAccount.outputs.endpoint,            label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'ORCHESTRATOR_APP_APIKEY',              value: resourceToken,            label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'MCP_APP_APIKEY',              value: resourceToken,            label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'INGESTION_APP_APIKEY',              value: resourceToken,            label: 'gpt-rag', contentType: 'text/plain' }
       
   
       // ── Connections ───────────────────────────────────────────────────────
