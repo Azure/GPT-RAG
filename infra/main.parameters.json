@@ -75,7 +75,20 @@
         }
       ]
     },
-
+    "workloadProfiles" : {
+      "value": [
+        {
+          "name": "Consumption",
+          "workloadProfileType": "Consumption"
+        },
+        {
+          "workloadProfileType": "D4",
+          "name": "main",
+          "minimumCount": 0,
+          "maximumCount": 1
+        }
+      ]
+    },
     "containerAppsList": {
       "value": [
         {
