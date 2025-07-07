@@ -536,6 +536,23 @@ var orchestratorTavilyApiKeyVar = !empty(orchestratorTavilyApiKey) ? orchestrato
 param orchestratorAnthropicApiKey string = ''
 var orchestratorAnthropicApiKeyVar = !empty(orchestratorAnthropicApiKey) ? orchestratorAnthropicApiKey : ''
 
+@description('Langsmith API Key for tracing')
+@secure()
+param langsmithApiKey string = ''
+var langsmithApiKeyVar = !empty(langsmithApiKey) ? langsmithApiKey : ''
+
+@description('Langsmith endpoint for tracing')
+param langsmithEndpoint string = ''
+var langsmithEndpointVar = !empty(langsmithEndpoint) ? langsmithEndpoint : ''
+
+@description('Langsmith project for tracing')
+param langsmithProject string = ''
+var langsmithProjectVar = !empty(langsmithProject) ? langsmithProject : ''
+
+@description('Langsmith tracing v2 for tracing')
+param langsmithTracingV2 string = ''
+var langsmithTracingV2Var = !empty(langsmithTracingV2) ? langsmithTracingV2 : ''
+
 @description('Serper API Key used by the orchestrator.')
 @secure()
 param orchestratorSerperApiKey string = ''
@@ -904,15 +921,19 @@ module orchestrator './core/host/functions.bicep' = {
       }
       {
         name: 'LANGCHAIN_API_KEY'
+        value: langsmithApiKeyVar
       }
       {
         name: 'LANGCHAIN_ENDPOINT'
+        value: langsmithEndpointVar
       }
       {
         name: 'LANGCHAIN_PROJECT'
+        value: langsmithProjectVar
       }
       {
         name: 'LANGCHAIN_TRACING_V2'
+        value: langsmithTracingV2Var
       }
       {
         name: 'STRIPE_API_KEY'
