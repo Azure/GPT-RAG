@@ -488,10 +488,9 @@ var aadAuthority = !empty(webAppAADAuthority) ? webAppAADAuthority : ''
 param webAppAADEditProfile string = ''
 var aadEditProfile = !empty(webAppAADEditProfile) ? webAppAADEditProfile : ''
 
-@description('Azure Active Directory reset password')
-@secure()
-param webAppAADResetPassword string = ''
-var aadResetPassword = !empty(webAppAADResetPassword) ? webAppAADResetPassword : ''
+@description('Azure Active Directory Change')
+param webAppAADChange string = ''
+var addChange = !empty(webAppAADChange) ? webAppAADChange : ''
 
 @description('Csv storage container')
 param azureCsvStorageContainer string = ''
@@ -1187,6 +1186,10 @@ module frontEnd 'core/host/appservice.bicep' = {
         value: aadClientId
       }
       {
+        name: 'ADD_CHANGE_PASSWORD'
+        value: addChange
+      }
+      {
         name: 'AAD_POLICY_NAME'
         value: aadPolicyName
       }
@@ -1205,10 +1208,6 @@ module frontEnd 'core/host/appservice.bicep' = {
       {
         name: 'EDITPROFILE_USER_FLOW'
         value: aadEditProfile
-      }
-      {
-        name: 'RESETPASSSWORD_USER_FLOW'
-        vale: aadResetPassword
       }
       {
         name: 'AZURE_CSV_STORAGE_CONTAINER'

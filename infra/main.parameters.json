@@ -104,6 +104,9 @@
     "webAppAADTenantName": {
       "value": "${AZURE_WEBAPP_AAD_TENANT_NAME}"
     },  
+    "webAppAADChange": {
+      "value": "${AZURE_WEBAPP_AAD_CHANGE}"
+    },
     "webAppAADTenantId": {
       "value": "${AZURE_WEBAPP_AAD_TENANT_ID}"
     },
@@ -124,9 +127,6 @@
     },
     "webAppAADClientSecret": {
       "value": "${AZURE_WEBAPP_AAD_CLIENT_SECRET}"
-    },
-    "webAppAADResetPassword": {
-      "value": "${AZURE_WEBAPP_AAD_RESET_PASSWORD}"
     },
     "webAppEmailHost": {
       "value": "${AZURE_WEBAPP_EMAIL_HOST}"
