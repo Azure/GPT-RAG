@@ -47,7 +47,7 @@ In addition, the machine or environment used for deployment should have:
 ## How to deploy the infrastructure
 
 ```shell
-azd init -t azure/gpt-rag
+azd init -t azure/gpt-rag -b feature/vnext-architecture
 azd provision
 ````
 
