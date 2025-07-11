@@ -1,130 +1,105 @@
-#!/usr/bin/env pwsh
-# Stop on errors and enforce strict mode
-$ErrorActionPreference = 'Stop'
+# postProvision.ps1
+
 Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
 
-# -----------------------------------------------------------------------------
-# Default environment-variable values (override by setting $env:DEPLOY*)
-# -----------------------------------------------------------------------------
-$deployContainerApps = $env:DEPLOY_CONTAINER_APPS ?? 'true'
-$deploySearchService = $env:DEPLOY_SEARCH_SERVICE ?? 'true'
-$networkIsolation    = $env:NETWORK_ISOLATION    ?? 'false'
-$useUAI              = $env:USE_UAI              ?? 'false'
-
-Write-Host "🔧 Running post-provision steps…`n"
-Write-Host "📋 Current environment variables:"
-Write-Host "  DEPLOY_CONTAINER_APPS = $deployContainerApps"
-Write-Host "  DEPLOY_SEARCH_SERVICE = $deploySearchService"
-Write-Host "  NETWORK_ISOLATION = $networkIsolation"
-Write-Host "  USE_UAI = $useUAI"
-
-
-# -----------------------------------------------------------------------------
-# Find the Python executable
-# -----------------------------------------------------------------------------
-$python = $null
-
-# Try python3 (exclude stubs in WindowsApps)
-$cmd = Get-Command python3 -ErrorAction SilentlyContinue |
-       Where-Object { -not ($_.Source -like '*WindowsApps*') }
-if ($cmd) { $python = $cmd.Name }
-
-# Fallback to python
-if (-not $python) {
-    $cmd = Get-Command python -ErrorAction SilentlyContinue |
-           Where-Object { -not ($_.Source -like '*WindowsApps*') }
-    if ($cmd) { $python = $cmd.Name }
-}
-
-# Fallback to Windows py launcher
-if (-not $python) {
-    $cmd = Get-Command py -ErrorAction SilentlyContinue
-    if ($cmd) { $python = $cmd.Name }
-}
-
-if (-not $python) {
-    Throw "Python executable not found. Install Python or ensure it's on PATH."
-}
-
-Write-Host "`n🐍 Using Python: $python"
-
-# -----------------------------------------------------------------------------
-# 0) Setup Python environment
-# -----------------------------------------------------------------------------
-Write-Host "`n📦 Creating temporary venv…"
-& $python -m venv config/.venv_temp
-& config/.venv_temp/Scripts/Activate.ps1  
-
-Write-Host "⬇️ Installing requirements…"
-& $python -m pip install --upgrade pip
-& $python -m pip install -r config/requirements.txt
-
-# -----------------------------------------------------------------------------
-# 1) AI Foundry Setup
-# -----------------------------------------------------------------------------
+Write-Host "🔧 Running post-provision steps..."
 Write-Host ""
-Write-Host "📑 AI Foundry Setup…"
+
+#-------------------------------------------------------------------------------
+# Zero Trust Information
+#-------------------------------------------------------------------------------
+Write-Host ""
+if ($env:NETWORK_ISOLATION -and $env:NETWORK_ISOLATION.ToLower() -eq 'true') {
+    Write-Host "🔒 Zero Trust enabled."
+    Write-Host "Access to Azure resources is restricted to the VNet."
+    Write-Host "Ensure you run scripts/postProvision.ps1 from within the VNet."
+    Write-Host "If you are using a local machine, make sure you have a VPN connection to the VNet."
+    Write-Host "You can also use the Test VM to access the environment and complete the setup."
+    $answer = Read-Host "Are you running this script from inside the VNet or via VPN? [Y/n]"
+    if ($answer.ToLower() -notmatch '^(y|yes)$') {
+        Write-Host "❌ Please run this script from inside the VNet or with VPN access. Exiting."
+        exit 0
+    }
+} else {
+    Write-Host "🚧 Provisioning basic architecture."
+}
+
+#-------------------------------------------------------------------------------
+# Check required environment variable
+#-------------------------------------------------------------------------------
+Write-Host "📋 Current environment variables:"
+$vars = @('APP_CONFIG_ENDPOINT')
+foreach ($v in $vars) {
+    $value = [Environment]::GetEnvironmentVariable($v)
+    if (-not $value) { $value = '<unset>' }
+    Write-Host "  $v=$value"
+}
+
+if (-not [Environment]::GetEnvironmentVariable('APP_CONFIG_ENDPOINT')) {
+    Write-Host "❗ APP_CONFIG_ENDPOINT environment variable must be set before running this script."
+    exit 1
+}
+
+#-------------------------------------------------------------------------------
+# Setup Python environment
+#-------------------------------------------------------------------------------
+Write-Host "📦 Creating temporary venv..."
+python3 -m venv --without-pip config/.venv_temp
+
+# Activate the venv
+& config/.venv_temp/Scripts/Activate.ps1
+
+Write-Host "⬇️ Manually bootstrapping pip..."
+Invoke-WebRequest -Uri "https://bootstrap.pypa.io/get-pip.py" -UseBasicParsing |
+    Select-Object -ExpandProperty Content |
+    & python
+
+Write-Host "⬇️ Installing requirements..."
+& python -m pip install --upgrade pip
+& python -m pip install -r config/requirements.txt
+
+#-------------------------------------------------------------------------------
+# 1) AI Foundry Setup
+#-------------------------------------------------------------------------------
+Write-Host "`n📑 AI Foundry Setup..."
 try {
-    Write-Host "🚀 Running config.aifoundry.setup…"
-    & $python -m config.aifoundry.setup
+    Write-Host "🚀 Running config.aifoundry.setup..."
+    & python -m config.aifoundry.setup
     Write-Host "✅ AI Foundry setup script finished."
 } catch {
-    Write-Warning "❗️ Error during AI Foundry setup. Skipping it."
+    Write-Host "❗ Error during AI Foundry setup. Skipping it."
 }
 
-# -----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # 2) Container Apps Setup
-# -----------------------------------------------------------------------------
-Write-Host ""
-if ($deployContainerApps.ToLower() -eq 'true') {
-    Write-Host "🔍 Container Apps setup…"
-    try {
-        Write-Host "🚀 Running config.containerapps.setup…"
-        & $python -m config.containerapps.setup
-        Write-Host "✅ Container Apps setup script finished."
-    } catch {
-        Write-Warning "❗️ Error during Container Apps setup. Skipping it."
-    }
-} else {
-    Write-Warning "⚠️ Skipping Container Apps setup (DEPLOY_CONTAINER_APPS is not 'true')."
+#-------------------------------------------------------------------------------
+Write-Host "`n🔍 ContainerApp setup..."
+try {
+    Write-Host "🚀 Running config.containerapps.setup..."
+    & python -m config.containerapps.setup
+    Write-Host "✅ Container Apps setup script finished."
+} catch {
+    Write-Host "❗ Error during Container Apps setup. Skipping it."
 }
 
-# -----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # 3) AI Search Setup
-# -----------------------------------------------------------------------------
-Write-Host ""
-if ($deploySearchService.ToLower() -eq 'true') {
-    Write-Host "🔍 AI Search setup…"
-    try {
-        Write-Host "🚀 Running config.search.setup…"
-        & $python -m config.search.setup
-        Write-Host "✅ Search setup script finished."
-    } catch {
-        Write-Warning "❗️ Error during Search setup. Skipping it."
-    }
-} else {
-    Write-Warning "⚠️ Skipping AI Search setup (DEPLOY_SEARCH_SERVICE is not 'true')."
+#-------------------------------------------------------------------------------
+Write-Host "🔍 AI Search setup..."
+try {
+    Write-Host "🚀 Running config.search.setup..."
+    & python -m config.search.setup
+    Write-Host "✅ Search setup script finished."
+} catch {
+    Write-Host "❗ Error during Search setup. Skipping it."
 }
 
-# -----------------------------------------------------------------------------
-# 4) Zero Trust Information
-# -----------------------------------------------------------------------------
-Write-Host ""
-if ($networkIsolation.ToLower() -eq 'true') {
-    Write-Host "🔒 Access the Zero Trust bastion"
-} else {
-    Write-Host "🚧 Zero Trust not enabled; provisioning Basic architecture."
-}
-
-Write-Host "`n✅ postProvisioning completed.`n"
-
-# -----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # Cleaning up
-# -----------------------------------------------------------------------------
-Write-Host "🧹 Cleaning Python environment up…"
-# 'deactivate' is defined by the Activate.ps1 script
-if (Get-Command deactivate -ErrorAction SilentlyContinue) {
-    deactivate
-}
+#-------------------------------------------------------------------------------
+Write-Host "`n🧹 Cleaning Python environment up..."
+if (Get-Command deactivate -ErrorAction SilentlyContinue) { deactivate }
 Remove-Item -Recurse -Force config/.venv_temp
-Write-Host "🧼 Temporary files removed. All done!"
+
+Write-Host "`n✅ postProvisioning completed."

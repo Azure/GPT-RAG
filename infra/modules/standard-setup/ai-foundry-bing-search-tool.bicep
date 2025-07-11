@@ -11,7 +11,7 @@ param bingSearchName string
 param bingConnectionName string  = '${bingSearchName}-connection'
 
 #disable-next-line BCP081
-resource account_name_resource 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' existing = {
+resource account_name_resource 'Microsoft.CognitiveServices/accounts@2025-06-01' existing = {
   name: account_name
   scope: resourceGroup()
 }
@@ -27,7 +27,7 @@ resource bingAccount 'Microsoft.Bing/accounts@2025-05-01-preview' = {
 }
 
 #disable-next-line BCP081
-resource bing_search_account_connection 'Microsoft.CognitiveServices/accounts/connections@2025-04-01-preview' = {
+resource bing_search_account_connection 'Microsoft.CognitiveServices/accounts/connections@2025-06-01' = {
   name: bingConnectionName
   parent: account_name_resource
   properties: {

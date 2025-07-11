@@ -1,5 +1,3 @@
-import * as variables from '../../variables.bicep'
-
 param accountName string
 param location string
 param projectName string
@@ -17,9 +15,6 @@ param cosmosDBResourceGroupName string
 param azureStorageName string
 param azureStorageSubscriptionId string
 param azureStorageResourceGroupName string
-
-param useUAI bool = false
-param identityId string = ''
 
 resource searchService 'Microsoft.Search/searchServices@2024-06-01-preview' existing = {
   name: aiSearchName
@@ -43,16 +38,9 @@ resource project 'Microsoft.CognitiveServices/accounts/projects@2025-04-01-previ
   parent: account
   name: projectName
   location: location
-  identity: union(
-    {
-      type: (useUAI) ? 'UserAssigned' : 'SystemAssigned'
-    },
-    useUAI ? {
-      userAssignedIdentities: {
-        '${identityId}': {}
-      }
-    } : {}
-  )  
+  identity: {
+    type: 'SystemAssigned'
+  }
   properties: {
     description: projectDescription
     displayName: displayName
@@ -104,7 +92,7 @@ resource project 'Microsoft.CognitiveServices/accounts/projects@2025-04-01-previ
 
 output projectName string = project.name
 output projectId string = project.id
-output projectPrincipalId string = (useUAI) ? project.identity.userAssignedIdentities[identityId].principalId : project.identity.principalId
+output projectPrincipalId string = project.identity.principalId
 output endpoint string = 'https://${accountName}.services.ai.azure.com/api/projects/${project.name}'
 
 #disable-next-line BCP053

@@ -17,11 +17,8 @@ description: GPT-RAG core is a Retrieval-Augmented Generation pattern running in
 
 # GPT-RAG Solution Accelerator
 
-This repository provides infrastructure deployment templates to establish a landing zone for hosting GPT-RAG application services. It sets up the core Azure resources and patterns required to deploy a modular RAG-based solution, ensuring security, scalability, and operational readiness.
+This repository provides templates to quickly set up all the core Azure resources needed for RAG applications, allowing you to build a secure and scalable environment based on proven architecture patterns. Retrieval-Augmented Generation (RAG) enables large language models to generate responses grounded in your organization’s data, so answers stay current without retraining the model. This accelerator delivers an enterprise-ready foundation with zero-trust security, Responsible AI features, high availability, and auditing—making it ideal for moving from prototypes to MVPs or production.
 
-The **Retrieval-Augmented Generation (RAG) pattern** enables organizations to combine large language models with custom data: LLMs generate responses grounded in retrieved data instead of relying solely on pre-trained knowledge. By separating data retrieval from model fine-tuning, RAG allows periodic data updates without retraining, streamlining integration of LLM capabilities into enterprise applications.
-
-This solution accelerator offers a robust architecture tailored for enterprise-grade deployment of the RAG pattern. It enforces zero-trust security, Responsible AI principles, high availability, and auditability. It is ideal for teams moving from proofs-of-concept and experimentation to full-scale production or MVPs.
 
 ### Architecture
 
@@ -50,7 +47,7 @@ In addition, the machine or environment used for deployment should have:
 ## How to deploy the infrastructure
 
 ```shell
-azd init -t azure/gpt-rag -b feature/vnext-architecture
+azd init -t azure/gpt-rag
 azd provision
 ````
 
@@ -79,6 +76,8 @@ After infrastructure is in place, deploy the GPT-RAG services from their respect
 | GenAI App Configuration Store         | App Configuration Data Reader       | ContainerApp: orchestrator | Read configuration data                                               |
 | GenAI App Configuration Store         | App Configuration Data Reader       | ContainerApp: frontend     | Read configuration data                                               |
 | GenAI App Configuration Store         | App Configuration Data Reader       | ContainerApp: dataingest   | Read configuration data                                               |
+| GenAI App Configuration Store         | App Configuration Data Reader        | ContainerApp: mcp     | Read configuration data              |
+| GenAI App Container Registry          | AcrPull                             | ContainerApp: mcp     | Pull container images                |
 | GenAI App Container Registry          | AcrPush                             | Executor                   | Push container images                                                 |
 | GenAI App Container Registry          | AcrPull                             | ContainerApp: orchestrator | Pull container images                                                 |
 | GenAI App Container Registry          | AcrPull                             | ContainerApp: frontend     | Pull container images                                                 |
@@ -88,18 +87,22 @@ After infrastructure is in place, deploy the GPT-RAG services from their respect
 | GenAI App Key Vault                   | Key Vault Secrets User              | ContainerApp: orchestrator | Read secrets                                                          |
 | GenAI App Key Vault                   | Key Vault Secrets User              | ContainerApp: frontend     | Read secrets                                                          |
 | GenAI App Key Vault                   | Key Vault Secrets User              | ContainerApp: dataingest   | Read secrets                                                          |
+| GenAI App Key Vault                   | Key Vault Secrets User              | ContainerApp: mcp     | Read secrets                         |
 | GenAI App Search Service              | Search Service Contributor          | Executor                   | Create/update search service elements                                 |
 | GenAI App Search Service              | Search Index Data Contributor       | Executor                   | Read/write search index data                                          |
-| GenAI App Search Service              | Search Index Data Reader            | AI Foundry Account         | Read index data                                                       |
-| GenAI App Search Service              | Search Service Contributor          | AI Foundry Account         | Create AI search connection                                           |
+| GenAI App Search Service              | Search Index Data Reader            | AI Foundry Project         | Read index data                                                       |
+| GenAI App Search Service              | Search Service Contributor          | AI Foundry Project         | Create AI search connection                                           |
 | GenAI App Search Service              | Search Index Data Reader            | ContainerApp: orchestrator | Read index data                                                       |
 | GenAI App Search Service              | Search Index Data Contributor       | ContainerApp: dataingest   | Read/write index data                                                 |
+| GenAI App Search Service              | Search Index Data Contributor       | ContainerApp: mcp     | Read/write index data                |
 | GenAI App Storage Account             | Storage Blob Data Contributor       | Executor                   | Read/write blob data                                                  |
 | GenAI App Storage Account             | Storage Blob Data Reader            | AI Foundry Account         | Read blob data                                                        |
 | GenAI App Storage Account             | Storage Blob Data Reader            | ContainerApp: orchestrator | Read blob data                                                        |
 | GenAI App Storage Account             | Storage Blob Data Reader            | ContainerApp: frontend     | Read blob data                                                        |
 | GenAI App Storage Account             | Storage Blob Data Contributor       | ContainerApp: dataingest   | Read/write blob data                                                  |
 | GenAI App Storage Account             | Storage Blob Data Reader            | Search Service             | Read blob data for search integration                                 |
+| GenAI App Storage Account             | Storage Blob Data Contributor       | ContainerApp: mcp     | Read/write blob data                 |
+| GenAI App Storage Account             | Storage Queue Data Contributor      | ContainerApp: mcp     | Read/write storage queue data        |
 | GenAI App Cosmos DB                   | Cosmos DB Built-in Data Contributor | ContainerApp: orchestrator | Read/write Cosmos DB data                                             |
 | GenAI App Cosmos DB                   | Cosmos DB Built-in Data Contributor | Executor                   | Read/write Cosmos DB data                                             |
 | AI Foundry Project                    | Azure AI Project Manager            | Executor                   | Manage AI Foundry projects and assign roles                           |
@@ -113,10 +116,22 @@ After infrastructure is in place, deploy the GPT-RAG services from their respect
 | AI Foundry Account                    | Cognitive Services User             | ContainerApp: dataingest   | Access Cognitive Services operations                                  |
 | AI Foundry Account                    | Cognitive Services OpenAI User      | ContainerApp: orchestrator | Use OpenAI APIs                                                       |
 | AI Foundry Account                    | Cognitive Services OpenAI User      | ContainerApp: dataingest   | Use OpenAI APIs                                                       |
+| AI Foundry Account                    | Cognitive Services User             | ContainerApp: mcp     | Access Cognitive Services            |
+| AI Foundry Account                    | Cognitive Services OpenAI User      | ContainerApp: mcp     | Use OpenAI APIs                      |
+
+
+
 
 ## Original Release
 
 This repo has undergone a major architectural update. For the original version, see [v1.0.0](https://github.com/Azure/gpt-rag/tree/v1.0.0).
+
+To deploy v1.0.0 run the following commands:
+
+```shell
+azd init -t azure/gpt-rag -b v1.0.0
+azd provision
+````
 
 ## Contributing
 

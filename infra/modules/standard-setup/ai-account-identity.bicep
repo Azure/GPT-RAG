@@ -1,11 +1,9 @@
-import * as variables from '../../variables.bicep'
 
 param accountName string
 param location string
 param modelDeployments array
-
-param useUAI bool = false
-param identityId string 
+param networkIsolation bool = false
+param agentSubnetId string
 
 resource account 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' = {
   name: accountName
@@ -14,16 +12,9 @@ resource account 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' = {
     name: 'S0'
   }
   kind: 'AIServices'
-  identity: union(
-    {
-      type: (useUAI) ? 'UserAssigned' : 'SystemAssigned'
-    },
-    useUAI ? {
-      userAssignedIdentities: {
-        '${identityId}': {}
-      }
-    } : {}
-  )  
+  identity: {
+    type: 'SystemAssigned'
+  }
   properties: {
     allowProjectManagement: true
     customSubDomainName: accountName
@@ -32,7 +23,15 @@ resource account 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' = {
       virtualNetworkRules: []
       ipRules: []
     }
-    publicNetworkAccess: 'Enabled'
+    publicNetworkAccess: networkIsolation ? 'Disabled' : 'Enabled'
+    #disable-next-line BCP036
+    networkInjections:((networkIsolation) ? [
+      {
+        scenario: 'agent'
+        subnetArmId: agentSubnetId
+        useMicrosoftManagedNetwork: false
+      }
+      ] : null )      
 
     // API-key based auth is not supported for the Agent service
     disableLocalAuth: false
@@ -63,4 +62,4 @@ resource modelDeployment 'Microsoft.CognitiveServices/accounts/deployments@2025-
 output accountName string = account.name
 output accountID string = account.id
 output accountTarget string = account.properties.endpoint
-output accountPrincipalId string = (useUAI) ? account.identity.userAssignedIdentities[identityId].principalId : account.identity.principalId
+output accountPrincipalId string = account.identity.principalId

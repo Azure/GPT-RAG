@@ -9,7 +9,7 @@ param aiFoundryName string = '<your-foundry-name>'
 param connectedResourceName string = 'appi${aiFoundryName}'
 
 // Refers your existing Azure AI Foundry resource
-resource aiFoundry 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' existing = {
+resource aiFoundry 'Microsoft.CognitiveServices/accounts@2025-06-01' existing = {
   name: aiFoundryName
   scope: resourceGroup()
 }
@@ -20,7 +20,7 @@ resource existingAppInsights 'Microsoft.Insights/components@2020-02-02' existing
 }
 
 // Creates the Azure Foundry connection to your Azure App Insights resource
-resource connection 'Microsoft.CognitiveServices/accounts/connections@2025-04-01-preview' = {
+resource connection 'Microsoft.CognitiveServices/accounts/connections@2025-06-01' = {
   name: '${aiFoundryName}-appinsights'
   parent: aiFoundry
   properties: {

@@ -1,5 +1,7 @@
 // This module exists solely to pass the `containerAppsList` parameter through as an output,
 // allowing you to assign the entire array directly as a key-value in your App Configuration.
+// This is useful for scenarios where you want to do post-processing based on the list of container apps.
+
 param containerAppsList array
 
 output containerAppsList array = containerAppsList

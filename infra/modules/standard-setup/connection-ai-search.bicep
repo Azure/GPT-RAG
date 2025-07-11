@@ -9,7 +9,7 @@ param connectedResourceName string = 'ais-${aiFoundryName}'
 param aiSearchConnectionName string  = '${aiFoundryName}-connection'
 
 // Refers your existing Azure AI Foundry resource
-resource aiFoundry 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' existing = {
+resource aiFoundry 'Microsoft.CognitiveServices/accounts@2025-06-01' existing = {
   name: aiFoundryName
   scope: resourceGroup()
 }
@@ -20,7 +20,7 @@ resource existingSearchService 'Microsoft.Search/searchServices@2025-02-01-previ
 }
 
 // Creates the Azure Foundry connection to your Azure AI Search resource
-resource connection 'Microsoft.CognitiveServices/accounts/connections@2025-04-01-preview' = {
+resource connection 'Microsoft.CognitiveServices/accounts/connections@2025-06-01' = {
   name: aiSearchConnectionName
   parent: aiFoundry
   properties: {

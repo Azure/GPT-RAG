@@ -22,7 +22,7 @@ resource cosmosAccount 'Microsoft.DocumentDB/databaseAccounts@2021-04-15' existi
 
 resource containerRoleAssignmentUserContainer 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2022-05-15' = {
   parent: cosmosAccount
-  name: guid(cosmosAccount.id,  principalId, roleDefinitionId)
+  name: guid(cosmosAccount.id, principalId, roleDefinitionId, scopePath)
   properties: {
     principalId: principalId
     roleDefinitionId: roleDefinitionId

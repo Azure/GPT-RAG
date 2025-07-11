@@ -1,5 +1,3 @@
-import * as variables from '../../variables.bicep'
-
 // Creates Azure dependent resources for Azure AI Agent Service standard agent setup
 
 @description('Azure region of the deployment')
@@ -23,6 +21,8 @@ param azureStorageAccountResourceId string
 @description('The Cosmos DB Account full ARM Resource ID. This is an optional field, and if not provided, the resource will be created.')
 param cosmosDBResourceId string
 
+param networkIsolation bool = false
+
 // param aiServiceExists bool
 param aiSearchExists bool
 param azureStorageExists bool
@@ -45,13 +45,11 @@ resource cosmosDB 'Microsoft.DocumentDB/databaseAccounts@2024-11-15' = if(!cosmo
   name: cosmosDBName
   location: cosmosDbRegion
   identity: union(
-    {
-      type: (useUAI) ? 'UserAssigned' : 'SystemAssigned'
+    { 
+      type: (useUAI) ? 'UserAssigned' : 'SystemAssigned' 
     },
-    useUAI ? {
-      userAssignedIdentities: {
-        '${cosmosIdentityId}': {}
-      }
+    useUAI ? { 
+      userAssignedIdentities: { '${cosmosIdentityId}': {} } 
     } : {}
   )  
   kind: 'GlobalDocumentDB'
@@ -62,6 +60,7 @@ resource cosmosDB 'Microsoft.DocumentDB/databaseAccounts@2024-11-15' = if(!cosmo
     disableLocalAuth: true
     enableAutomaticFailover: false
     enableMultipleWriteLocations: false
+    publicNetworkAccess: networkIsolation ? 'Disabled' : 'Enabled'
     enableFreeTier: false
     locations: [
       {
@@ -102,7 +101,7 @@ resource aiSearch 'Microsoft.Search/searchServices@2024-06-01-preview' = if(!aiS
     }
     hostingMode: 'default'
     partitionCount: 1
-    publicNetworkAccess: 'enabled'
+    publicNetworkAccess: networkIsolation ? 'disabled' : 'enabled'
     replicaCount: 1
     semanticSearch: 'disabled'
   }
@@ -130,7 +129,7 @@ resource storage 'Microsoft.Storage/storageAccounts@2023-05-01' = if(!azureStora
   properties: {
     minimumTlsVersion: 'TLS1_2'
     allowBlobPublicAccess: false
-    publicNetworkAccess: 'Enabled'
+    publicNetworkAccess: networkIsolation ? 'Disabled' : 'Enabled'
     networkAcls: {
       bypass: 'AzureServices'
       defaultAction: 'Allow'

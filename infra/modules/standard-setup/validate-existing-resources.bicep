@@ -58,3 +58,20 @@ output cosmosDBResourceGroupName string = cosmosDBResourceGroupName
 
 output azureStorageSubscriptionId string = azureStorageSubscriptionId
 output azureStorageResourceGroupName string = azureStorageResourceGroupName
+
+
+// Adding DNS Zone Check
+
+@description('Object mapping DNS zone names to their resource group, or empty string to indicate creation')
+param existingDnsZones object
+
+@description('List of private DNS zone names to validate')
+param dnsZoneNames array
+
+// Output whether each DNS zone exists
+output dnsZoneExists array = [
+  for zoneName in dnsZoneNames: {
+    name: zoneName
+    exists: !empty(existingDnsZones[zoneName])
+  }
+]
