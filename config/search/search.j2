@@ -258,6 +258,9 @@
               | first %}
           "uri": "https://{{ data_ingest.fqdn }}/document-chunking",
           "httpMethod": "POST",
+          "httpHeaders": {
+            "x-api-key": "{{RESOURCE_TOKEN}}"
+          },
           "timeout": "PT230S",
           "context": "/document",
           "batchSize": 1,
@@ -320,6 +323,9 @@
               | first %}
           "uri": "https://{{ data_ingest.fqdn }}/text-embedding",
           "httpMethod": "POST",
+          "httpHeaders": {
+            "x-api-key": "{{RESOURCE_TOKEN}}"
+          },
           "batchSize": 1,
           "timeout": "PT60S",
           "context": "/document",
@@ -347,6 +353,9 @@
               | first %}
           "uri": "https://{{ data_ingest.fqdn }}/text-embedding",
           "httpMethod": "POST",
+          "httpHeaders": {
+            "x-api-key": "{{RESOURCE_TOKEN}}"
+          },
           "batchSize": 1,
           "timeout": "PT60S",
           "context": "/document",
@@ -374,6 +383,9 @@
               | first %}
           "uri": "https://{{ data_ingest.fqdn }}/text-embedding",
           "httpMethod": "POST",
+          "httpHeaders": {
+            "x-api-key": "{{RESOURCE_TOKEN}}"
+          },
           "batchSize": 1,
           "timeout": "PT60S",
           "context": "/document",
@@ -396,7 +408,9 @@
         "dataSourceName": "{{SEARCH_RAG_INDEX_DATA_SOURCE_NAME}}",
         "targetIndexName": "{{SEARCH_RAG_INDEX_NAME}}",
         "skillsetName": "{{SEARCH_RAG_INDEX_SKILLSET_NAME}}",
+        {% if SEARCH_RAG_INDEX_INTERVAL %}
         "schedule": { "interval": "{{SEARCH_RAG_INDEX_INTERVAL}}" },
+        {% endif %}                    
         "fieldMappings": [
           { "sourceFieldName": "metadata_storage_path", "targetFieldName": "id", "mappingFunction": { "name": "fixedLengthEncode" } }
         ],
@@ -405,7 +419,7 @@
           "maxFailedItems": -1,
           "maxFailedItemsPerBatch": -1,
           "configuration": {
-            "dataToExtract": "allMetadata"
+            "dataToExtract": "contentAndMetadata"
           }
         }
       }
@@ -416,7 +430,9 @@
         "dataSourceName": "{{SEARCH_QUERIES_INDEX_DATA_SOURCE_NAME}}",
         "targetIndexName": "{{SEARCH_QUERIES_INDEX_NAME}}",
         "skillsetName": "{{SEARCH_QUERIES_INDEX_SKILLSET_NAME}}",
+        {% if SEARCH_QUERIES_INDEX_INTERVAL %}
         "schedule": { "interval": "{{SEARCH_QUERIES_INDEX_INTERVAL}}" },
+        {% endif %}        
         "fieldMappings": [
           { "sourceFieldName": "metadata_storage_path", "targetFieldName": "id", "mappingFunction": { "name": "fixedLengthEncode" } },
           { "sourceFieldName": "datasource",            "targetFieldName": "datasource" },
@@ -435,7 +451,9 @@
         "dataSourceName": "{{SEARCH_TABLES_INDEX_DATA_SOURCE_NAME}}",
         "targetIndexName": "{{SEARCH_TABLES_INDEX_NAME}}",
         "skillsetName": "{{SEARCH_TABLES_INDEX_SKILLSET_NAME}}",
+        {% if SEARCH_TABLES_INDEX_INTERVAL %}
         "schedule": { "interval": "{{SEARCH_TABLES_INDEX_INTERVAL}}" },
+        {% endif %}
         "fieldMappings": [
           { "sourceFieldName": "metadata_storage_path", "targetFieldName": "id", "mappingFunction": { "name": "fixedLengthEncode" } },
           { "sourceFieldName": "table",                "targetFieldName": "table" },
@@ -454,7 +472,9 @@
         "dataSourceName": "{{SEARCH_MEASURES_INDEX_DATA_SOURCE_NAME}}",
         "targetIndexName": "{{SEARCH_MEASURES_INDEX_NAME}}",
         "skillsetName": "{{SEARCH_MEASURES_INDEX_SKILLSET_NAME}}",
+        {% if SEARCH_MEASURES_INDEX_INTERVAL %}
         "schedule": { "interval": "{{SEARCH_MEASURES_INDEX_INTERVAL}}" },
+        {% endif %}            
         "fieldMappings": [
           { "sourceFieldName": "metadata_storage_path", "targetFieldName": "id", "mappingFunction": { "name": "fixedLengthEncode" } },
           { "sourceFieldName": "datasource",            "targetFieldName": "datasource" },

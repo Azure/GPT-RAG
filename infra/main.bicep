@@ -252,6 +252,9 @@ param modelDeploymentList array
 @description('List of container apps to create')
 param containerAppsList array
 
+@description('Workload profiles.')
+param workloadProfiles array = []
+
 // ----------------------------------------------------------------------
 // Cosmos DB Database params
 // ----------------------------------------------------------------------
@@ -1349,10 +1352,18 @@ module appInsights 'br/public:avm/res/insights/component:0.6.0' = if (deployAppI
     location: location
     #disable-next-line BCP318
     workspaceResourceId: logAnalytics.outputs.resourceId
+<<<<<<< HEAD
     applicationType: 'web'
     kind: 'web'
     disableIpMasking: false
     tags: _tags
+=======
+    applicationType:     'web'
+    kind:                'web'
+    disableIpMasking:    false
+    tags:                _tags
+    enableTelemetry:     true
+>>>>>>> origin/cjg-vnext
   }
 }
 
@@ -1383,6 +1394,7 @@ module containerEnv 'br/public:avm/res/app/managed-environment:0.9.1' = if (depl
     #disable-next-line BCP318
     appInsightsConnectionString: appInsights.outputs.connectionString
     zoneRedundant: false
+<<<<<<< HEAD
 
     // scale settings
     workloadProfiles: [
@@ -1391,6 +1403,9 @@ module containerEnv 'br/public:avm/res/app/managed-environment:0.9.1' = if (depl
     ]
 
     // identity
+=======
+    workloadProfiles: workloadProfiles
+>>>>>>> origin/cjg-vnext
     managedIdentities: {
       systemAssigned: useUAI ? false : true
       #disable-next-line BCP318
@@ -1549,6 +1564,8 @@ module cosmosDBAccount 'br/public:avm/res/document-db/database-account:0.12.0' =
     ]
     defaultConsistencyLevel: 'Session'
     capabilitiesToAdd: ['EnableServerless']
+    enableAnalyticalStorage: true
+    enableFreeTier: false
     networkRestrictions: {
       publicNetworkAccess: networkIsolation ? 'Disabled' : 'Enabled'
     }
@@ -1686,6 +1703,7 @@ module storageAccount 'br/public:avm/res/storage/storage-account:0.19.0' = if (d
     kind: 'StorageV2'
     allowBlobPublicAccess: false
     supportsHttpsTrafficOnly: true
+    requireInfrastructureEncryption: true
     networkAcls: {
       bypass: 'AzureServices'
       virtualNetworkRules: []
@@ -2317,6 +2335,7 @@ module appConfig 'br/public:avm/res/app-configuration/configuration-store:0.6.3'
       }
     ]
     tags: _tags
+    enableTelemetry: true
     dataPlaneProxy: {
       authenticationMode: 'Pass-through'
       privateLinkDelegation: 'Disabled'
@@ -2373,6 +2392,22 @@ var _storageContainerNamesSettings = [
   }
 ]
 
+<<<<<<< HEAD
+=======
+var outputModelDeploymentSettings = [
+  for modelDeployment in modelDeploymentList: { 
+    canonical_name: modelDeployment.canonical_name 
+    capacity: modelDeployment.capacity
+    model : modelDeployment.model
+    modelFormat: modelDeployment.modelFormat
+    name: modelDeployment.name
+    version: modelDeployment.version
+    endpoint: 'https://${variables._abbrs.ai.aiFoundry}${resourceToken}.openai.azure.com/'
+  }
+]
+
+
+>>>>>>> origin/cjg-vnext
 module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = if (deployAppConfig) {
   name: 'appConfigPopulate'
   params: {
@@ -2388,6 +2423,7 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       _storageContainerNamesSettings,
       [
         // ── General / Deployment ─────────────────────────────────────────────
+<<<<<<< HEAD
         { name: 'AZURE_TENANT_ID', value: tenant().tenantId, label: 'gpt-rag', contentType: 'text/plain' }
         { name: 'SUBSCRIPTION_ID', value: subscription().subscriptionId, label: 'gpt-rag', contentType: 'text/plain' }
         { name: 'RESOURCE_GROUP_NAME', value: resourceGroup().name, label: 'gpt-rag', contentType: 'text/plain' }
@@ -2398,6 +2434,24 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
         { name: 'NETWORK_ISOLATION', value: string(networkIsolation), label: 'gpt-rag', contentType: 'text/plain' }
         { name: 'USE_UAI', value: string(useUAI), label: 'gpt-rag', contentType: 'text/plain' }
         { name: 'LOG_LEVEL', value: 'INFO', label: 'gpt-rag', contentType: 'text/plain' }
+=======
+      { name: 'AZURE_TENANT_ID',     value: tenant().tenantId,                        label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'SUBSCRIPTION_ID',     value: subscription().subscriptionId,            label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'RESOURCE_GROUP_NAME', value: resourceGroup().name,                     label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'LOCATION',            value: location,                                 label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'ENVIRONMENT_NAME',    value: environmentName,                          label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'DEPLOYMENT_NAME',     value: deployment().name,                        label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'RESOURCE_TOKEN',      value: resourceToken,                            label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'NETWORK_ISOLATION',   value: string(networkIsolation),                 label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'USE_UAI',             value: string(useUAI),                           label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'LOG_LEVEL',           value: 'INFO',                                   label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'ENABLE_CONSOLE_LOGGING',value: 'true',                                 label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'PROMPT_SOURCE',       value: 'file',                                   label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING',       value: appInsights.outputs.connectionString,                                   label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'APPLICATIONINSIGHTS__INSTRUMENTATIONKEY',     value: appInsights.outputs.instrumentationKey,                                   label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AGENT_STRATEGY',     value: 'single_agent_rag',                                   label: 'gpt-rag', contentType: 'text/plain' }
+      
+>>>>>>> origin/cjg-vnext
 
         // ── Resource IDs ─────────────────────────────────────────────────────
         #disable-next-line BCP318
@@ -2451,6 +2505,7 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
         { name: 'DEPLOY_CONTAINER_REGISTRY', value: string(deployContainerRegistry), label: 'gpt-rag', contentType: 'text/plain' }
         { name: 'DEPLOY_CONTAINER_ENV', value: string(deployContainerEnv), label: 'gpt-rag', contentType: 'text/plain' }
 
+<<<<<<< HEAD
         // ── Endpoints / URIs ──────────────────────────────────────────────────
         #disable-next-line BCP318
         { name: 'KEY_VAULT_URI', value: keyVault.outputs.uri, label: 'gpt-rag', contentType: 'text/plain' }
@@ -2465,6 +2520,25 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
         { name: 'AI_FOUNDRY_PROJECT_WORKSPACE_ID', value: aiFoundryFormatProjectWorkspaceId.outputs.projectWorkspaceIdGuid, label: 'gpt-rag', contentType: 'text/plain' }
         #disable-next-line BCP318
         { name: 'COSMOS_DB_ENDPOINT', value: cosmosDBAccount.outputs.endpoint, label: 'gpt-rag', contentType: 'text/plain' }
+=======
+      // ── Endpoints / URIs ──────────────────────────────────────────────────
+      { name: 'KEY_VAULT_URI',                   value: keyVault.outputs.uri,                        label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'CONTAINER_REGISTRY_LOGIN_SERVER', value: containerRegistry.outputs.loginServer,       label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'STORAGE_BLOB_ENDPOINT',           value: storageAccount.outputs.primaryBlobEndpoint,  label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'SEARCH_SERVICE_QUERY_ENDPOINT',   value: searchService.outputs.endpoint,              label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AI_FOUNDRY_ACCOUNT_ENDPOINT',     value: aiFoundryAccount.outputs.accountTarget,      label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AI_FOUNDRY_PROJECT_ENDPOINT',     value: aiFoundryProject.outputs.endpoint,           label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AI_FOUNDRY_PROJECT_WORKSPACE_ID', value: aiFoundryFormatProjectWorkspaceId.outputs.projectWorkspaceIdGuid, label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'COSMOS_DB_ENDPOINT',              value: CosmosDBAccount.outputs.endpoint,            label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'ORCHESTRATOR_APP_APIKEY',              value: resourceToken,            label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'MCP_APP_APIKEY',              value: resourceToken,            label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'INGESTION_APP_APIKEY',              value: resourceToken,            label: 'gpt-rag', contentType: 'text/plain' }
+      
+  
+      // ── Connections ───────────────────────────────────────────────────────
+      { name: 'SEARCH_CONNECTION_ID', value: deploySearchService ? aiFoundryConnectionSearch.outputs.seachConnectionId : '',  label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'BING_CONNECTION_ID',   value: deployGroundingWithBing ? aiFoundryBingConnection.outputs.bingConnectionId : '', label: 'gpt-rag', contentType: 'text/plain' }
+>>>>>>> origin/cjg-vnext
 
         // ── Connections ───────────────────────────────────────────────────────
         #disable-next-line BCP318
@@ -2485,11 +2559,18 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
         { name: 'AI_FOUNDRY_COSMOS_DB_CONNECTION', value: aiFoundryProject.outputs.cosmosDBConnection, label: 'gpt-rag', contentType: 'text/plain' }
         { name: 'AI_FOUNDRY_SEARCH_CONNECTION', value: aiFoundryProject.outputs.aiSearchConnection, label: 'gpt-rag', contentType: 'text/plain' }
 
+<<<<<<< HEAD
         // ── Container Apps List & Model Deployments ────────────────────────────
         #disable-next-line BCP318
         { name: 'CONTAINER_APPS', value: string(containerAppsSettings.outputs.containerAppsList), label: 'gpt-rag', contentType: 'application/json' }
         { name: 'MODEL_DEPLOYMENTS', value: string(modelDeploymentList), label: 'gpt-rag', contentType: 'application/json' }
       ]
+=======
+      // ── Container Apps List & Model Deployments ────────────────────────────
+      { name: 'CONTAINER_APPS',       value: string(containerAppsSettings.outputs.containerAppsList), label: 'gpt-rag', contentType: 'application/json' }
+      { name: 'MODEL_DEPLOYMENTS',    value: string(outputModelDeploymentSettings), label: 'gpt-rag', contentType: 'application/json' }
+    ]
+>>>>>>> origin/cjg-vnext
     )
   }
   dependsOn: [
