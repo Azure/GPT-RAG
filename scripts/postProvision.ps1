@@ -45,7 +45,7 @@ if (-not [Environment]::GetEnvironmentVariable('APP_CONFIG_ENDPOINT')) {
 # Setup Python environment
 #-------------------------------------------------------------------------------
 Write-Host "📦 Creating temporary venv..."
-python3 -m venv --without-pip config/.venv_temp
+python -m venv --without-pip config/.venv_temp
 
 # Activate the venv
 & config/.venv_temp/Scripts/Activate.ps1
