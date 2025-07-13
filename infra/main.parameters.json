@@ -1,35 +1,35 @@
-  {
-    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
 
-      "environmentName":                     { "value": "${AZURE_ENV_NAME}" },
-      "location":                            { "value": "${AZURE_LOCATION}" },
-      "deploymentTags":                      { "value": {} },
-      "principalId":                         { "value": "${AZURE_PRINCIPAL_ID}" },
+    "environmentName":                     { "value": "${AZURE_ENV_NAME}" },
+    "location":                            { "value": "${AZURE_LOCATION}" },
+    "deploymentTags":                      { "value": {} },
+    "principalId":                         { "value": "${AZURE_PRINCIPAL_ID}" },
 
-<<<<<<< HEAD
-      "networkIsolation":                    { "value": "false" },
-      "useUAI":                              { "value": "false" },
-      "useCMK":                              { "value": "false" },
-=======
+    "networkIsolation":                    { "value": "false" },
+    "useUAI":                              { "value": "false" },
+
     "aiSearchResourceId":                  { "value": null },
     "aiFoundryStorageAccountResourceId":   { "value": null },
     "aiFoundryCosmosDBAccountResourceId":  { "value": null },
     
-    "deployAppConfig":                     { "value": "true" },
-    "deployAppInsights":                   { "value": "true" },
-    "deployCosmosDb":                      { "value": "true" },
-    "deployContainerApps":                 { "value": "true" },
-    "deployContainerRegistry":             { "value": "true" },
-    "deployContainerEnv":                  { "value": "true" },
-    "deployMcp":                           { "value": "true" },
-    "deployGroundingWithBing":             { "value": "true" },    
-    "deployKeyVault":                      { "value": "true" },
-    "deployLogAnalytics":                  { "value": "true" },
-    "deploySearchService":                 { "value": "true" },
-    "deployStorageAccount":                { "value": "true" },
-    
+    "deployAppConfig":                      { "value": "true" },
+    "deployAppInsights":                    { "value": "true" },
+    "deployCosmosDb":                       { "value": "true" },
+    "deployContainerApps":                  { "value": "true" },
+    "deployContainerRegistry":              { "value": "true" },
+    "deployContainerEnv":                   { "value": "true" },
+    "deployMcp":                            { "value": "true" },
+    "deployGroundingWithBing":              { "value": "true" },
+    "deployKeyVault":                       { "value": "true" },
+    "deployLogAnalytics":                   { "value": "true" },
+    "deploySearchService":                  { "value": "true" },
+    "deployStorageAccount":                 { "value": "true" },
+    "greenFieldDeployment":                 { "value": "true" },
+    "deployVM":                             { "value": "true" },
+
     "aiFoundryAccountName":                  { "value": null },
     "aiFoundryProjectName":                  { "value": null },
     "aiFoundryProjectDisplayName":           { "value": null },
@@ -53,6 +53,8 @@
     "orchestratorContainerAppName":          { "value": null },
     "searchServiceName":                     { "value": null },
     "solutionStorageAccountName":            { "value": null },
+
+    "vmAdminPassword":                       {"value": "$(secretOrRandomPassword)"},  
 
     "useCMK":                                { "value": "false" },        
 
@@ -78,6 +80,7 @@
         }
       ]
     },
+
     "workloadProfiles" : {
       "value": [
         {
@@ -89,74 +92,6 @@
           "name": "main",
           "minimumCount": 0,
           "maximumCount": 1
-        }
-      ]
-    },
-    "containerAppsList": {
-      "value": [
-        {
-          "name": null,
-          "service_name": "orchestrator",
-          "min_replicas": 1,
-          "max_replicas": 1,
-          "canonical_name": "ORCHESTRATOR_APP",
-          "roles": [
-            "App Configuration Data Reader",
-            "Cognitive Services User",
-            "Cognitive Services OpenAI User",
-            "AcrPull",
-            "Cosmos DB Built-in Data Contributor",
-            "Search Index Data Reader",
-            "Storage Blob Data Reader",
-            "Key Vault Secrets User"
-          ]
-        },
-        {
-          "name": null,
-          "service_name": "frontend",
-          "min_replicas": 1,
-          "max_replicas": 1,
-          "canonical_name": "FRONTEND_APP",          
-          "roles": [
-            "App Configuration Data Reader",
-            "AcrPull",
-            "Storage Blob Data Reader",
-            "Key Vault Secrets User"
-          ]
-        },
-        {
-          "name": null,
-          "service_name": "dataingest",
-          "min_replicas": 1,
-          "max_replicas": 1,
-          "canonical_name": "DATA_INGEST_APP",
-          "roles": [
-            "App Configuration Data Reader",
-            "Azure Machine Learning Workspace Connection Secrets Reader",
-            "Cognitive Services User",
-            "Cognitive Services OpenAI User",
-            "AcrPull",
-            "Search Index Data Contributor",
-            "Storage Blob Data Contributor",
-            "Key Vault Secrets User"
-          ]
-        },
-        {
-          "name": null,
-          "service_name": "mcp",
-          "min_replicas": 1,
-          "max_replicas": 1,
-          "canonical_name": "MCP_APP",
-          "roles": [
-            "App Configuration Data Reader",
-            "Cognitive Services User",
-            "Cognitive Services OpenAI User",
-            "AcrPull",
-            "Search Index Data Contributor",
-            "Storage Blob Data Contributor",
-            "Storage Queue Data Contributor",
-            "Key Vault Secrets User"
-          ]
         }
       ]
     },
@@ -197,187 +132,83 @@
           "canonical_name": "MCP_CONTAINER"
         }
       ]
-    }    
-  }
->>>>>>> origin/cjg-vnext
-  
-      "greenFieldDeployment":                { "value": "true" }, 
-      "deployAppConfig":                     { "value": "true" },
-      "deployAppInsights":                   { "value": "true" },
-      "deployCosmosDb":                      { "value": "true" },
-      "deployContainerApps":                 { "value": "true" },
-      "deployContainerRegistry":             { "value": "true" },
-      "deployContainerEnv":                  { "value": "true" },
-      "deployGroundingWithBing":             { "value": "true" },    
-      "deployKeyVault":                      { "value": "true" },
-      "deployLogAnalytics":                  { "value": "true" },
-      "deploySearchService":                 { "value": "true" },
-      "deployStorageAccount":                { "value": "true" },
-      "deployVM":                            { "value": "true" },
+    },
 
-      "aiSearchResourceId":                  { "value": null },
-      "aiFoundryStorageAccountResourceId":   { "value": null },
-      "aiFoundryCosmosDBAccountResourceId":  { "value": null },
-
-      "aiFoundryAccountName":                  { "value": null },
-      "aiFoundryProjectName":                  { "value": null },
-      "aiFoundryProjectDisplayName":           { "value": null },
-      "aiFoundryProjectDescription":           { "value": null },    
-      "aiFoundryStorageAccountName":           { "value": null },
-      "aiFoundrySearchServiceName":            { "value": null },
-      "aiFoundryCosmosDbName":                 { "value": null },
-      "bingSearchName":                        { "value": null },  
-      "appConfigName":                         { "value": null },
-      "appInsightsName":                       { "value": null },
-      "containerEnvName":                      { "value": null },
-      "containerRegistryName":                 { "value": null },
-      "conversationContainerName":             { "value": null },
-      "dataIngestContainerAppName":            { "value": null },
-      "datasourcesContainerName":              { "value": null },
-      "dbAccountName":                         { "value": null },
-      "dbDatabaseName":                        { "value": null },
-      "frontEndContainerAppName":              { "value": null },
-      "keyVaultName":                          { "value": null },
-      "logAnalyticsWorkspaceName":             { "value": null },
-      "orchestratorContainerAppName":          { "value": null },
-      "searchServiceName":                     { "value": null },
-      "solutionStorageAccountName":            { "value": null },
-    
-      "vmAdminPassword":                     {"value": "$(secretOrRandomPassword)"},  
-      
-
-      "modelDeploymentList":{
-        "value": [
-          {
-            "name": "chat",
-            "model": "gpt-4o",
-            "modelFormat": "OpenAI",          
-            "type": "GlobalStandard",
-            "version": "2024-11-20",          
-            "capacity": 40,
-            "canonical_name": "CHAT_DEPLOYMENT_NAME"
-          },
-          {
-            "name": "text-embedding",
-            "model": "text-embedding-3-large",
-            "modelFormat": "OpenAI",
-            "type": "GlobalStandard",
-            "version": "1",          
-            "capacity": 40,
-            "canonical_name": "EMBEDDING_DEPLOYMENT_NAME"
-          }
-        ]
-      },
-
-      "containerAppsList": {
-        "value": [
-          {
-            "name": null,
-            "service_name": "orchestrator",
-            "profile_name": "D4",
-            "min_replicas": 1,
-            "max_replicas": 1,
-            "canonical_name": "ORCHESTRATOR_APP",
-            "roles": [
-              "AppConfigurationDataReader",
-              "CognitiveServicesUser",
-              "CognitiveServicesOpenAIUser",
-              "AcrPull",
-              "CosmosDBBuiltInDataContributor",
-              "SearchIndexDataReader",
-              "StorageBlobDataReader",
-              "KeyVaultSecretsUser"
-            ]
-          },
-          {
-            "name": null,
-            "service_name": "frontend",
-            "profile_name": "D4",
-            "min_replicas": 1,
-            "max_replicas": 1,
-            "canonical_name": "FRONTEND_APP",          
-            "roles": [
-              "AppConfigurationDataReader",
-              "AcrPull",
-              "StorageBlobDataReader",
-              "KeyVaultSecretsUser"
-            ]
-          },
-          {
-            "name": null,
-            "service_name": "dataingest",
-            "profile_name": "D4",
-            "min_replicas": 1,
-            "max_replicas": 1,
-            "canonical_name": "DATA_INGEST_APP",
-            "roles": [
-              "AppConfigurationDataReader",
-              "CognitiveServicesUser",
-              "CognitiveServicesOpenAIUser",
-              "AcrPull",
-              "SearchIndexDataContributor",
-              "StorageBlobDataContributor",
-              "KeyVaultSecretsUser"
-            ]
-          },
-          {
-            "name": null,
-            "service_name": "mcp",
-            "profile_name": "D4",
-            "min_replicas": 1,
-            "max_replicas": 1,
-            "canonical_name": "MCP_APP",
-            "roles": [
-              "AppConfigurationDataReader",
-              "CognitiveServicesUser",
-              "CognitiveServicesOpenAIUser",
-              "AcrPull",
-              "SearchIndexDataContributor",
-              "StorageBlobDataContributor",
-              "StorageQueueDataContributor",
-              "KeyVaultSecretsUser"
-            ]
-          }
-        ]
-      },
-
-      "storageAccountContainersList": {
-        "value": [
-          {
-            "name": "documents-images",
-            "canonical_name": "DOCUMENTS_IMAGES_STORAGE_CONTAINER"          
-          },
-          {
-            "name": "documents",
-            "canonical_name": "DOCUMENTS_STORAGE_CONTAINER"
-          },
-          {
-            "name": "nl2sql",
-            "canonical_name": "NL2SQL_STORAGE_CONTAINER"
-          }
-        ]
-      },  
-
-      "databaseContainersList": {
-        "value": [
-          {
-            "name": "conversations",
-            "canonical_name": "CONVERSATIONS_DATABASE_CONTAINER"
-          },
-          {
-            "name": "datasources",
-            "canonical_name": "DATASOURCES_DATABASE_CONTAINER"
-          },
-          {
-            "name": "prompts",
-            "canonical_name": "PROMPTS_CONTAINER"
-          },
-          {
-            "name": "mcp",
-            "canonical_name": "MCP_CONTAINER"
-          }
-        ]
-      }    
+    "containerAppsList": {
+      "value": [
+        {
+          "name": null,
+          "service_name": "orchestrator",
+          "profile_name": "D4",
+          "min_replicas": 1,
+          "max_replicas": 1,
+          "canonical_name": "ORCHESTRATOR_APP",
+          "roles": [
+            "AppConfigurationDataReader",
+            "CognitiveServicesUser",
+            "CognitiveServicesOpenAIUser",
+            "AcrPull",
+            "CosmosDBBuiltInDataContributor",
+            "SearchIndexDataReader",
+            "StorageBlobDataReader",
+            "KeyVaultSecretsUser"
+          ]
+        },
+        {
+          "name": null,
+          "service_name": "frontend",
+          "profile_name": "D4",
+          "min_replicas": 1,
+          "max_replicas": 1,
+          "canonical_name": "FRONTEND_APP",          
+          "roles": [
+            "AppConfigurationDataReader",
+            "AcrPull",
+            "StorageBlobDataReader",
+            "KeyVaultSecretsUser"
+          ]
+        },
+        {
+          "name": null,
+          "service_name": "dataingest",
+          "profile_name": "D4",
+          "min_replicas": 1,
+          "max_replicas": 1,
+          "canonical_name": "DATA_INGEST_APP",
+          "roles": [
+            "AppConfigurationDataReader",
+            "CognitiveServicesUser",
+            "CognitiveServicesOpenAIUser",
+            "AcrPull",
+            "SearchIndexDataContributor",
+            "StorageBlobDataContributor",
+            "KeyVaultSecretsUser"
+          ]
+        },
+        {
+          "name": null,
+          "service_name": "mcp",
+          "profile_name": "D4",
+          "min_replicas": 1,
+          "max_replicas": 1,
+          "canonical_name": "MCP_APP",
+          "roles": [
+            "AppConfigurationDataReader",
+            "CognitiveServicesUser",
+            "CognitiveServicesOpenAIUser",
+            "AcrPull",
+            "SearchIndexDataContributor",
+            "StorageBlobDataContributor",
+            "StorageQueueDataContributor",
+            "KeyVaultSecretsUser"
+          ]
+        }
+      ]
     }
-    
   }
+}
+
+
+
+  
+      

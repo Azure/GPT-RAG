@@ -3,10 +3,7 @@
 var abbrs = loadJsonContent('./abbreviations.json')
 
 @export()
-<<<<<<< HEAD:infra/constants/constants.bicep
 var roles = loadJsonContent('./roles.json')
-=======
-var _roles = loadJsonContent('./roles.json')
 
 @export()
 @description('Information about a workload profile for the environment.')
@@ -32,4 +29,3 @@ type workloadProfileInfo = {
   @description('Maximum number of nodes for the workload profile.')
   maximumCount: int!
 }
->>>>>>> origin/cjg-vnext:infra/variables.bicep
