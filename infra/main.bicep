@@ -2238,7 +2238,7 @@ module assignSearchSearchIndexDataReaderAIFoundryProject 'modules/security/resou
     name: 'assignSearchSearchIndexDataReaderAIFoundryProject'
     roleAssignments: [
       {
-        principalId: principalId
+        principalId: aiFoundryProject.outputs.projectPrincipalId
         roleDefinitionId: subscriptionResourceId(
           'Microsoft.Authorization/roleDefinitions',
           const.roles.SearchIndexDataReader.guid
