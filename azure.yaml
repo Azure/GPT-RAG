@@ -1,87 +1,27 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
-
 name: azure-gpt-rag
 metadata:
   template: azure-gpt-rag
-services:
-  dataIngest:
-    # project is temporally pulled fro its repo during deployment.
-    project: ./.azure/gpt-rag-ingestion
-    language: python
-    host: function
-    hooks:
-      postdeploy:
-        posix:
-          # this path is relative to ./.azure/gpt-rag-ingestion
-          run: scripts/postdeploy.sh
-          interactive: true
-        windows:
-          # this path is relative to ./.azure/gpt-rag-ingestion
-          run: scripts/postdeploy.ps1
-          interactive: true
-  orchestrator:
-    project: ./.azure/gpt-rag-orchestrator
-    language: python
-    host: function
-  frontend:
-    # backend is python and frontend is Vite app. The frontend is built with Vite settings to output into the backend's static folder.
-    project: ./.azure/gpt-rag-frontend/backend
-    language: python
-    host: appservice
-    hooks:
-      prepackage:
-        windows:
-          shell: pwsh
-          run:  cd ../frontend;npm install;npm run build
-          interactive: true
-          continueOnError: false
-        posix:
-          shell: sh
-          run:  cd ../frontend;npm install;npm run build
-          interactive: true
-          continueOnError: false
+infra:
+  provider: bicep
+  path: infra
+  module: main  
 hooks:
-  prepackage:
-    posix:
-      run: scripts/fetchComponents.sh
-      interactive: false
-    windows:
-      run: scripts/fetchComponents.ps1
-      interactive: false 
   preprovision:
     posix:
-      shell: sh    
-      run: scripts/preprovision.sh
-      interactive: true
-    windows:
-      shell: pwsh    
-      run: scripts/preprovision.ps1
-      interactive: true
-  postprovision:
-    posix:
-      shell: sh    
-      run: scripts/postprovision.sh
-      interactive: true
-    windows:
-      shell: pwsh    
-      run: scripts/postprovision.ps1
-      interactive: true
-  # Components are pulled from their own repo for deployment but are not persisted to this repo.
-  predeploy:
-    posix:
       shell: sh
-      run: scripts/preDeploy.sh; scripts/fetchComponents.sh
+      run: scripts/preProvision.sh
       interactive: true
     windows:
       shell: pwsh
-      run: scripts/preDeploy.ps1; scripts/fetchComponents.ps1
+      run: scripts/preProvision.ps1
       interactive: true
-  postdeploy:
+  postprovision:
     posix:
-      shell: sh    
-      run: scripts/cleanComponents.sh
-      interactive: false
+      shell: sh
+      run: scripts/postProvision.sh
+      interactive: true
     windows:
-      shell: pwsh    
-      run: scripts/cleanComponents.ps1
-      interactive: false
+      shell: pwsh
+      run: scripts/postProvision.ps1
+      interactive: true
