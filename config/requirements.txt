@@ -13,6 +13,6 @@ azure-mgmt-cognitiveservices==13.6.0
 
 # search
 
-requests==2.32.3
+requests==2.32.4
 azure-keyvault-secrets==4.9.0
 jinja2==3.1.6
