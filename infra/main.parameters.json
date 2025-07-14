@@ -139,7 +139,7 @@
         {
           "name": null,
           "service_name": "orchestrator",
-          "profile_name": "D4",
+          "profile_name": "main",
           "min_replicas": 1,
           "max_replicas": 1,
           "canonical_name": "ORCHESTRATOR_APP",
@@ -157,7 +157,7 @@
         {
           "name": null,
           "service_name": "frontend",
-          "profile_name": "D4",
+          "profile_name": "main",
           "min_replicas": 1,
           "max_replicas": 1,
           "canonical_name": "FRONTEND_APP",          
@@ -171,7 +171,7 @@
         {
           "name": null,
           "service_name": "dataingest",
-          "profile_name": "D4",
+          "profile_name": "main",
           "min_replicas": 1,
           "max_replicas": 1,
           "canonical_name": "DATA_INGEST_APP",
@@ -188,7 +188,7 @@
         {
           "name": null,
           "service_name": "mcp",
-          "profile_name": "D4",
+          "profile_name": "main",
           "min_replicas": 1,
           "max_replicas": 1,
           "canonical_name": "MCP_APP",
