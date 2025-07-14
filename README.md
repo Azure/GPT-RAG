@@ -47,7 +47,7 @@ In addition, the machine or environment used for deployment should have:
 ## How to deploy the infrastructure
 
 ```shell
-azd init -t azure/gpt-rag -b feature/vnext-architecture
+azd init -t azure/gpt-rag 
 azd provision
 ````
 
@@ -118,9 +118,6 @@ After infrastructure is in place, deploy the GPT-RAG services from their respect
 | AI Foundry Account                    | Cognitive Services OpenAI User      | ContainerApp: dataingest   | Use OpenAI APIs                                                       |
 | AI Foundry Account                    | Cognitive Services User             | ContainerApp: mcp     | Access Cognitive Services            |
 | AI Foundry Account                    | Cognitive Services OpenAI User      | ContainerApp: mcp     | Use OpenAI APIs                      |
-
-
-
 
 ## Original Release
 
