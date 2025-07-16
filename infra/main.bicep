@@ -50,8 +50,11 @@ import * as const from 'constants/constants.bicep'
 @description('Name of the Azure Developer CLI environment')
 param environmentName string
 
-@description('The Azure region where your AI Foundry resource and project will be created.')
+@description('The Azure region where your resources will be created.')
 param location string = resourceGroup().location
+
+@description('The Azure region where your AI Foundry resource and project will be created. Defaults to the resource group location.')
+param aiFoundryLocation string = resourceGroup().location
 
 @description('Principal ID for role assignments. This is typically the Object ID of the user or service principal running the deployment.')
 param principalId string
@@ -766,7 +769,7 @@ module privateEndpointSearchDepStd 'br/public:avm/res/network/private-endpoint:0
   name: 'dep-search-std-private-endpoint'
   params: {
     name: '${const.abbrs.networking.privateEndpoint}${aiFoundryDependencies.outputs.aiSearchName}'
-    location: location
+    location: empty(aiFoundryLocation) ? location : aiFoundryLocation
     tags: _tags
     subnetResourceId: _peSubnetId
     privateLinkServiceConnections: [
@@ -800,7 +803,7 @@ module privateEndpointCosmosDepStd 'br/public:avm/res/network/private-endpoint:0
   name: 'dep-cosmos-std-private-endpoint'
   params: {
     name: '${const.abbrs.networking.privateEndpoint}${aiFoundryDependencies.outputs.cosmosDBName}'
-    location: location
+    location: empty(aiFoundryLocation) ? location : aiFoundryLocation
     tags: _tags
     subnetResourceId: _peSubnetId
     privateLinkServiceConnections: [
@@ -834,7 +837,7 @@ module privateEndpointBlobDepStd 'br/public:avm/res/network/private-endpoint:0.1
   name: 'dep-blob-std-private-endpoint'
   params: {
     name: '${const.abbrs.networking.privateEndpoint}${aiFoundryDependencies.outputs.azureStorageName}'
-    location: location
+    location: empty(aiFoundryLocation) ? location : aiFoundryLocation
     tags: _tags
     subnetResourceId: _peSubnetId
     privateLinkServiceConnections: [
@@ -1190,7 +1193,7 @@ module aiFoundryProjectUAI 'br/public:avm/res/managed-identity/user-assigned-ide
 module aiFoundryDependencies 'modules/standard-setup/standard-dependent-resources.bicep' = {
   name: 'dependencies-${aiFoundryAccountName}-${resourceToken}-deployment'
   params: {
-    location: location
+    location: empty(aiFoundryLocation) ? location : aiFoundryLocation
     azureStorageName: aiFoundryStorageAccountName
     aiSearchName: aiFoundrySearchServiceName
     cosmosDBName: aiFoundryCosmosDbName
@@ -1215,7 +1218,7 @@ module aiFoundryAccount 'modules/standard-setup/ai-account-identity.bicep' = {
   name: 'ai-${aiFoundryAccountName}-${resourceToken}-deployment'
   params: {
     accountName: aiFoundryAccountName
-    location: location
+    location: aiFoundryLocation
     modelDeployments: modelDeploymentList
     networkIsolation: networkIsolation
     agentSubnetId: _agentSubnetId
@@ -1233,7 +1236,7 @@ module aiFoundryProject 'modules/standard-setup/ai-project-identity.bicep' = {
     projectName: aiFoundryProjectName
     projectDescription: aiFoundryProjectDescription
     displayName: aiFoundryProjectDisplayName
-    location: location
+    location: empty(aiFoundryLocation) ? location : aiFoundryLocation
 
     aiSearchName: aiFoundryDependencies.outputs.aiSearchName
     aiSearchServiceResourceGroupName: aiFoundryDependencies.outputs.aiSearchServiceResourceGroupName
@@ -1356,7 +1359,6 @@ module appInsights 'br/public:avm/res/insights/component:0.6.0' = if (deployAppI
     kind:                'web'
     disableIpMasking:    false
     tags:                _tags
-    enableTelemetry:     true
   }
 }
 
@@ -1440,7 +1442,7 @@ module containerAppsUAI 'br/public:avm/res/managed-identity/user-assigned-identi
 ]
 
 // Container Apps
-@batchSize(1)
+@batchSize(4)
 module containerApps 'br/public:avm/res/app/container-app:0.17.0' = [
   for (app, index) in containerAppsList: if (deployContainerApps) {
     name: empty(app.name) ? '${const.abbrs.containers.containerApp}${resourceToken}-${app.service_name}' : app.name
@@ -2245,7 +2247,7 @@ module assignSearchSearchIndexDataReaderAIFoundryProject 'modules/security/resou
         )
         #disable-next-line BCP318
         resourceId: searchService.outputs.resourceId
-        principalType: principalType
+        principalType: 'ServicePrincipal'
       }
     ]
   }
@@ -2317,7 +2319,6 @@ module appConfig 'br/public:avm/res/app-configuration/configuration-store:0.6.3'
       }
     ]
     tags: _tags
-    enableTelemetry: true
     dataPlaneProxy: {
       authenticationMode: 'Pass-through'
       privateLinkDelegation: 'Disabled'
@@ -2504,7 +2505,7 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       // ── Container Apps List & Model Deployments ────────────────────────────
       #disable-next-line BCP318
       { name: 'CONTAINER_APPS', value: string(containerAppsSettings.outputs.containerAppsList), label: 'gpt-rag', contentType: 'application/json' }
-      { name: 'MODEL_DEPLOYMENTS', value: string(modelDeploymentList), label: 'gpt-rag', contentType: 'application/json' }
+      { name: 'MODEL_DEPLOYMENTS', value: string(outputModelDeploymentSettings), label: 'gpt-rag', contentType: 'application/json' }
       ]
     )
   }
