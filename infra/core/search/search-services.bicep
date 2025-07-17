@@ -9,6 +9,7 @@ param secretName string = 'azureSearchKey'
 param keyVaultName string
 
 param authOptions object = {}
+@allowed(['free', 'standard'])
 param semanticSearch string = 'standard'
 
 // Azure AI Developer role definition ID
