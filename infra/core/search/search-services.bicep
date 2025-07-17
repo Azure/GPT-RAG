@@ -9,7 +9,7 @@ param secretName string = 'azureSearchKey'
 param keyVaultName string
 
 param authOptions object = {}
-param semanticSearch string = 'free'
+param semanticSearch string = 'standard'
 
 // Azure AI Developer role definition ID
 var azureAIDeveloperRoleId = '64702f94-c441-49e6-a78b-ef80e0188fee'
