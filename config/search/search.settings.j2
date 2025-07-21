@@ -1,0 +1,31 @@
+{
+    
+    {# AI Search settings serve as the context for Jinja templates, combined with the App Config settings. #}
+    "SEARCH_API_VERSION": "2025-05-01-preview",
+    "SEARCH_ANALYZER_NAME": "standard.lucene",
+    "EMBEDDINGS_VECTOR_DIMENSIONS": "3072",
+
+    "SEARCH_RAG_INDEX_NAME": "ragindex-{{RESOURCE_TOKEN}}",
+    "SEARCH_RAG_INDEX_DATA_SOURCE_NAME": "ragindex-{{RESOURCE_TOKEN}}-datasource",
+    "SEARCH_RAG_INDEX_SKILLSET_NAME": "ragindex-{{RESOURCE_TOKEN}}-skillset",
+    "SEARCH_RAG_INDEX_INDEXER_NAME": "ragindex-{{RESOURCE_TOKEN}}-indexer",
+    "SEARCH_RAG_INDEX_INTERVAL": "",
+
+    "SEARCH_QUERIES_INDEX_NAME": "nl2sql-{{RESOURCE_TOKEN}}-queries",
+    "SEARCH_QUERIES_INDEX_DATA_SOURCE_NAME": "nl2sql-{{RESOURCE_TOKEN}}-queries-datasource",
+    "SEARCH_QUERIES_INDEX_SKILLSET_NAME": "nl2sql-{{RESOURCE_TOKEN}}-queries-skillset",
+    "SEARCH_QUERIES_INDEX_INDEXER_NAME": "nl2sql-{{RESOURCE_TOKEN}}-queries-indexer",
+    "SEARCH_QUERIES_INDEX_INTERVAL": "",
+
+    "SEARCH_TABLES_INDEX_NAME": "nl2sql-{{RESOURCE_TOKEN}}-tables",
+    "SEARCH_TABLES_INDEX_DATA_SOURCE_NAME": "nl2sql-{{RESOURCE_TOKEN}}-tables-datasource",
+    "SEARCH_TABLES_INDEX_SKILLSET_NAME": "nl2sql-{{RESOURCE_TOKEN}}-tables-skillset",
+    "SEARCH_TABLES_INDEX_INDEXER_NAME": "nl2sql-{{RESOURCE_TOKEN}}-tables-indexer",
+    "SEARCH_TABLES_INDEX_INTERVAL": "",
+
+    "SEARCH_MEASURES_INDEX_NAME": "nl2sql-{{RESOURCE_TOKEN}}-measures",
+    "SEARCH_MEASURES_INDEX_DATA_SOURCE_NAME": "nl2sql-{{RESOURCE_TOKEN}}-measures-datasource",
+    "SEARCH_MEASURES_INDEX_SKILLSET_NAME": "nl2sql-{{RESOURCE_TOKEN}}-measures-skillset",
+    "SEARCH_MEASURES_INDEX_INDEXER_NAME": "nl2sql-{{RESOURCE_TOKEN}}-measures-indexer",
+    "SEARCH_MEASURES_INDEX_INTERVAL": ""
+}
