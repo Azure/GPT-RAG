@@ -31,6 +31,7 @@
     "deployStorageAccount":                 { "value": "true" },
     "greenFieldDeployment":                 { "value": "true" },
     "deployVM":                             { "value": "true" },
+    "deploySoftware":                       { "value": "true" },
 
     "aiFoundryAccountName":                  { "value": null },
     "aiFoundryProjectName":                  { "value": null },

@@ -10,8 +10,6 @@ var threadConnections = ['${cosmosDBConnection}']
 var storageConnections = ['${azureStorageConnection}']
 var vectorStoreConnections = ['${aiSearchConnection}']
 
-param timestamp string = utcNow()
-
 resource account 'Microsoft.CognitiveServices/accounts@2025-06-01' existing = {
    name: accountName
 }

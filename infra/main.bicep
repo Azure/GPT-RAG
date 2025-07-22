@@ -111,6 +111,9 @@ param deployContainerEnv bool = true
 @description('Deploy a Virtual Machine (e.g., for jumpbox or specialized workloads).')
 param deployVM bool = true
 
+@description('Deploy Virtual Machine software.')
+param deploySoftware bool = true
+
 @description('Deploy capability hosts.')
 param deployCapabilityHosts bool = true
 
@@ -566,9 +569,8 @@ var fileUris = [
   'https://raw.githubusercontent.com/givenscj/gpt-rag/refs/heads/cjg-v2-fixes-2/infra/install.ps1'
 ]
 
-resource cse 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = {
-  parent: testVm
-  name: 'cse'
+resource cse 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = if (deploySoftware) {
+  name: '${_vmName}/cse'
   location: location
   properties: {
     publisher: 'Microsoft.Compute'
@@ -578,12 +580,15 @@ resource cse 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = {
     forceUpdateTag: 'alwaysRun'
     settings: {
       fileUris: fileUris
-      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File install.ps1 -AzureTenantId ${subscription().tenantId} -AzureSubscriptionId ${subscription().subscriptionId} -AzureResourceGroupName ${resourceGroup().name} -AzdEnvName ${azdEnvironmentName}'
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File install.ps1 -AzureTenantId ${subscription().tenantId} -AzureSubscriptionId ${subscription().subscriptionId} -AzureResourceGroupName ${resourceGroup().name} -AzdEnvName ${environmentName}'
     }
     protectedSettings: {
       
     }
   }
+  dependsOn: [
+    testVm
+  ]
 }
 
 // Private DNS Zones.

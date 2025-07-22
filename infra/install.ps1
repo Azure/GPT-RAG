@@ -50,6 +50,9 @@ choco install notepadplusplus -y --ignoredetectedreboot --force
 write-host "Installing Github Desktop";
 choco install github-desktop -y --ignoredetectedreboot --force
 
+write-host "Installing Docker Desktop";
+choco install docker-desktop -y --ignoredetectedreboot --force
+
 #install extenstions
 Start-Process "C:\Program Files\Microsoft VS Code\bin\code.cmd" -ArgumentList "--install-extension","ms-azuretools.vscode-bicep","--force" -wait
 Start-Process "C:\Program Files\Microsoft VS Code\bin\code.cmd" -ArgumentList "--install-extension","ms-azuretools.vscode-azurefunctions","--force" -wait
@@ -66,6 +69,9 @@ git clone https://github.com/givenscj/gpt-rag -b cjg-v2-fixes-2
 cd gpt-rag
 
 git config --global --add safe.directory C:/github/gpt-rag
+
+
+wsl --update
 
 #add azd to path
 $env:Path += ";C:\Program Files\Azure Dev CLI"
