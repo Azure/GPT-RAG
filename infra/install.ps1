@@ -93,7 +93,8 @@ write-host "Initializing AZD";
 azd init -e $AzdEnvName
 
 #set variables if not present
-$content = Get-Content .$($AzdEnvName)\.env
+$deploySoftware = $true
+$content = Get-Content .azure\$($AzdEnvName)\.env
 if ($content -notmatch "AZURE_SUBSCRIPTION_ID") {
   $content += "AZURE_SUBSCRIPTION_ID=$azureSubscriptionID"
 }
@@ -103,27 +104,41 @@ if ($content -notmatch "AZURE_TENANT_ID") {
 if ($content -notmatch "AZURE_RESOURCE_GROUP") {
   $content += "AZURE_RESOURCE_GROUP=$AzureResourceGroupName"
 }
-Set-Content .$($AzdEnvName)\.env $content
+if ($content -notmatch "DEPLOY_SOFTWARE") {
+  $content += "DEPLOY_SOFTWARE=false"
+}
+else
+{
+  $deploySoftware = $false
+  $content = $content -replace "DEPLOY_SOFTWARE=.*", "DEPLOY_SOFTWARE=false"
+}
+
+Set-Content .azure\$($AzdEnvName)\.env $content
 
 write-host "Downloading GPT-RAG-ORCHESTRATOR repository";
 cd C:\github
 git clone https://github.com/azure/gpt-rag-orchestrator
 
 git config --global --add safe.directory C:/github/gpt-rag-orchestrator -b release/2.0.0
+copy c:\github\gpt-rag\.azure c:\github\gpt-rag-orchestrator\.azure
 
 write-host "Downloading GPT-RAG-UI repository";
 cd C:\github
 git clone https://github.com/azure/gpt-rag-ui
+copy c:\github\gpt-rag\.azure c:\github\gpt-rag-ui\.azure
 
 git config --global --add safe.directory C:/github/gpt-rag-ui
 
 write-host "Downloading GPT-RAG-MCP repository";
 cd C:\github
 git clone https://github.com/azure/gpt-rag-mcp -b release/0.2.0
+copy c:\github\gpt-rag\.azure c:\github\gpt-rag-mcp\.azure
 
 git config --global --add safe.directory C:/github/gpt-rag-mcp
 
-write-host "Restarting the machine to complete installation";
-shutdown /r
+if ($deploySoftware) {  
+  write-host "Restarting the machine to complete installation";
+  shutdown /r
+}
 
 Stop-Transcript

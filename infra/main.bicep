@@ -521,6 +521,17 @@ module testVmBastionHost 'br/public:avm/res/network/bastion-host:0.6.1' = if (de
   }
 }
 
+//AI Foundry Search User Managed Identity
+module testVmUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
+  name: '${const.abbrs.security.managedIdentity}${_vmName}'
+  params: {
+    // Required parameters
+    name: '${const.abbrs.security.managedIdentity}${_vmName}'
+    // Non-required parameters
+    location: location
+  }
+}
+
 // Test VM
 module testVm 'br/public:avm/res/compute/virtual-machine:0.15.0' = if (deployVM && networkIsolation) {
   name: 'testVmDeployment'
@@ -529,6 +540,11 @@ module testVm 'br/public:avm/res/compute/virtual-machine:0.15.0' = if (deployVM 
     location: location
     adminUsername: _vmUserName
     adminPassword: vmAdminPassword
+    managedIdentities: {
+      systemAssigned: useUAI ? false : true
+      #disable-next-line BCP318
+      userAssignedResourceIds: useUAI ? [testVmUAI.outputs.resourceId] : []
+    }
     imageReference: {
       publisher: 'microsoft-dsvm'
       offer: 'dsvm-win-2022'
@@ -563,6 +579,145 @@ module testVm 'br/public:avm/res/compute/virtual-machine:0.15.0' = if (deployVM 
     testVmKeyVault
     testVmBastionHost
   ]
+}
+
+// Azure Container Registry Service - AcrPush -> TestVm
+module assignCrAcrPushTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deployContainerRegistry) {
+  name: 'assignCrAcrPushTestVm'
+  params: {
+    name: 'assignCrAcrPushTestVm'
+    roleAssignments: concat([
+      {
+        principalId: (useUAI ? testVmUAI.outputs.principalId : testVmUAI.outputs.principalId)
+        roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', const.roles.AcrPush.guid)
+        #disable-next-line BCP318
+        resourceId: containerRegistry.outputs.resourceId
+        principalType: 'ServicePrincipal'
+      }
+    ])
+  }
+}
+
+// Key Vault Service - Key Vault Contributor -> TestVm
+// Key Vault Service - Key Vault Secrets Officer -> TestVm
+module assignKeyVaultContributorAndSecretsOfficerTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deployKeyVault) {
+  name: 'assignKeyVaultContributorAndSecretsOfficerTestVm'
+  params: {
+    name: 'assignKeyVaultContributorAndSecretsOfficerTestVm'
+    roleAssignments: concat([
+      {
+        principalId: (useUAI ? testVmUAI.outputs.principalId : testVmUAI.outputs.principalId)
+        roleDefinitionId: subscriptionResourceId(
+          'Microsoft.Authorization/roleDefinitions',
+          const.roles.KeyVaultContributor.guid
+        )
+        #disable-next-line BCP318
+        resourceId: keyVault.outputs.resourceId
+        principalType: 'ServicePrincipal'
+      }
+      {
+        principalId: (useUAI ? testVmUAI.outputs.principalId : testVmUAI.outputs.principalId)
+        roleDefinitionId: subscriptionResourceId(
+          'Microsoft.Authorization/roleDefinitions',
+          const.roles.KeyVaultSecretsOfficer.guid
+        )
+        #disable-next-line BCP318
+        resourceId: keyVault.outputs.resourceId
+        principalType: 'ServicePrincipal'
+      }
+    ])
+  }
+}
+
+// Search Service - Search Service Contributor -> TestVm
+module assignSearchSearchServiceContributorTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deploySearchService) {
+  name: 'assignSearchSearchServiceContributorTestVm'
+  params: {
+    name: 'assignSearchSearchServiceContributorTestVm'
+    roleAssignments: [
+      {
+        principalId: (useUAI ? testVmUAI.outputs.principalId : testVmUAI.outputs.principalId)
+        roleDefinitionId: subscriptionResourceId(
+          'Microsoft.Authorization/roleDefinitions',
+          const.roles.SearchServiceContributor.guid
+        )
+        #disable-next-line BCP318
+        resourceId: searchService.outputs.resourceId
+        principalType: 'ServicePrincipal'
+      }
+    ]
+  }
+}
+
+// Search Service - Search Index Data Contributor -> TestVm
+module assignSearchSearchIndexDataContributorTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deploySearchService) {
+  name: 'assignSearchSearchIndexDataContributorTestVm'
+  params: {
+    name: 'assignSearchSearchIndexDataContributorTestVm'
+    roleAssignments: [
+      {
+        principalId: (useUAI ? testVmUAI.outputs.principalId : testVmUAI.outputs.principalId)
+        roleDefinitionId: subscriptionResourceId(
+          'Microsoft.Authorization/roleDefinitions',
+          const.roles.SearchIndexDataContributor.guid
+        )
+        #disable-next-line BCP318
+        resourceId: searchService.outputs.resourceId
+        principalType: 'ServicePrincipal'
+      }
+    ]
+  }
+}
+
+// Storage Account - Storage Blob Data Contributor -> TestVm
+module assignStorageStorageBlobDataContributorTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deployStorageAccount) {
+  name: 'assignStorageStorageBlobDataContributorTestVm'
+  params: {
+    name: 'assignStorageStorageBlobDataContributorTestVm'
+    roleAssignments: [
+      {
+        principalId: (useUAI ? testVmUAI.outputs.principalId : testVmUAI.outputs.principalId)
+        roleDefinitionId: subscriptionResourceId(
+          'Microsoft.Authorization/roleDefinitions',
+          const.roles.StorageBlobDataContributor.guid
+        )
+        #disable-next-line BCP318
+        resourceId: storageAccount.outputs.resourceId
+        principalType: 'ServicePrincipal'
+      }
+    ]
+  }
+}
+
+// AI Foundry Account - Azure AI Project Manager -> TestVm
+module assignAiFoundryAccountAzureAiProjectManagerTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM) {
+  name: 'assignAiFoundryAccountAzureAiProjectManagerTestVm'
+  params: {
+    name: 'assignAiFoundryAccountAzureAiProjectManagerTestVm'
+    roleAssignments: [
+      {
+        principalId: (useUAI ? testVmUAI.outputs.principalId : testVmUAI.outputs.principalId)
+        roleDefinitionId: subscriptionResourceId(
+          'Microsoft.Authorization/roleDefinitions',
+          const.roles.AzureAIProjectManager.guid
+        )
+        resourceId: aiFoundryAccount.outputs.accountID
+        principalType: 'ServicePrincipal'
+      }
+    ]
+  }
+}
+
+// Cosmos DB Account - Cosmos DB Built-in Data Contributor -> TestVm
+module assignCosmosDBCosmosDbBuiltInDataContributorTestVm 'modules/security/cosmos-data-plane-role-assignment.bicep' = if (deployCosmosDb) {
+  name: 'assignCosmosDBCosmosDbBuiltInDataContributorTestVm'
+  params: {
+    #disable-next-line BCP318
+    cosmosDbAccountName: cosmosDBAccount.outputs.name
+    principalId: (useUAI ? testVmUAI.outputs.principalId : testVmUAI.outputs.principalId)
+    roleDefinitionGuid: const.roles.CosmosDBBuiltInDataContributor.guid
+    scopePath: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${resourceGroup().name}/providers/Microsoft.DocumentDB/databaseAccounts/${dbAccountName}/dbs/${dbDatabaseName}'
+  }
 }
 
 var fileUris = [
@@ -2632,6 +2787,7 @@ output NETWORK_ISOLATION bool = networkIsolation
 // Feature flagging
 // ──────────────────────────────────────────────────────────────────────
 output DEPLOY_APP_CONFIG bool = deployAppConfig
+output DEPLOY_SOFTWARE bool = deploySoftware
 output DEPLOY_KEY_VAULT bool = deployKeyVault
 output DEPLOY_LOG_ANALYTICS bool = deployLogAnalytics
 output DEPLOY_APP_INSIGHTS bool = deployAppInsights
