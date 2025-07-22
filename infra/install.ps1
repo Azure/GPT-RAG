@@ -23,8 +23,14 @@ Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManage
 write-host "Installing Visual Studio Code";
 choco upgrade vscode -y --ignoredetectedreboot --force
 
-write-host "Installing Azure CLI";
-choco upgrade azure-cli -y --ignoredetectedreboot --force
+if (choco list --lo -r -e azure-cli) {
+  Write-Host "'azure-cli' is installed"
+  write-host "Uninstalling Azure CLI";
+  choco uninstall azure-cli -y --ignoredetectedreboot --force
+
+  write-host "Installing Azure CLI";
+  choco install azure-cli -y --ignoredetectedreboot --force
+}
 
 write-host "Installing GIT";
 choco upgrade git -y --ignoredetectedreboot --force
@@ -72,6 +78,7 @@ else
 Start-Process "C:\Program Files\Microsoft VS Code\bin\code.cmd" -ArgumentList "--install-extension","ms-azuretools.vscode-bicep","--force" -wait
 Start-Process "C:\Program Files\Microsoft VS Code\bin\code.cmd" -ArgumentList "--install-extension","ms-azuretools.vscode-azurefunctions","--force" -wait
 Start-Process "C:\Program Files\Microsoft VS Code\bin\code.cmd" -ArgumentList "--install-extension","ms-python.python","--force" -wait
+Start-Process "C:\Program Files\Microsoft VS Code\bin\code.cmd" -ArgumentList "--install-extension","ms-vscode-remote.remote-containers","--force" -wait
 
 write-host "Downloading GPT-RAG repository";
 mkdir C:\github -ea SilentlyContinue
@@ -122,9 +129,17 @@ git clone https://github.com/azure/gpt-rag-orchestrator
 git config --global --add safe.directory C:/github/gpt-rag-orchestrator -b release/2.0.0
 copy c:\github\gpt-rag\.azure c:\github\gpt-rag-orchestrator\.azure
 
+write-host "Downloading GPT-RAG-INGESTION repository";
+cd C:\github
+git clone https://github.com/azure/gpt-rag-ingestion
+
+git config --global --add safe.directory C:/github/gpt-rag-ingestion -b release/2.0.0
+copy c:\github\gpt-rag\.azure c:\github\gpt-rag-ingestion\.azure
+
+
 write-host "Downloading GPT-RAG-UI repository";
 cd C:\github
-git clone https://github.com/azure/gpt-rag-ui
+git clone https://github.com/azure/gpt-rag-ui -b release/2.0.0
 copy c:\github\gpt-rag\.azure c:\github\gpt-rag-ui\.azure
 
 git config --global --add safe.directory C:/github/gpt-rag-ui

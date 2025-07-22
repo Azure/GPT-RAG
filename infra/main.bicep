@@ -554,9 +554,9 @@ module testVm 'br/public:avm/res/compute/virtual-machine:0.15.0' = if (deployVM 
     vmSize: vmSize
     osDisk: {
       caching: 'ReadWrite'
-      diskSizeGB: 128
+      diskSizeGB: 250
       managedDisk: {
-        storageAccountType: 'StandardSSD_LRS'
+        storageAccountType: 'Premium_LRS'
       }
     }
     osType: 'Windows'
@@ -579,6 +579,27 @@ module testVm 'br/public:avm/res/compute/virtual-machine:0.15.0' = if (deployVM 
     testVmKeyVault
     testVmBastionHost
   ]
+}
+
+// AppConfig -> AppConfig Data Reader -> TestVm
+module assignAppConfigAppConfigurationDataReaderTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deployAppConfig) {
+  name: 'assignAppConfigAppConfigurationDataReaderTestVm'
+  params: {
+    name: 'assignAppConfigAppConfigurationDataReaderTestVm'
+    roleAssignments: [
+      {
+        roleDefinitionId: subscriptionResourceId(
+          'Microsoft.Authorization/roleDefinitions',
+          const.roles.AppConfigurationDataReader.guid
+        )
+        #disable-next-line BCP318
+        principalId: (useUAI ? testVmUAI.outputs.principalId : testVmUAI.outputs.principalId)
+        #disable-next-line BCP318
+        resourceId: appConfig.outputs.resourceId
+        principalType: 'ServicePrincipal'
+      }
+    ]
+  }
 }
 
 // Azure Container Registry Service - AcrPush -> TestVm
