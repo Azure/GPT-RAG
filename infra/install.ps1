@@ -47,14 +47,26 @@ write-host "Installing Chrome";
 write-host "Installing Notepad++";
 choco install notepadplusplus -y --ignoredetectedreboot --force
 
-write-host "Installing Github Desktop";
-choco install github-desktop -y --ignoredetectedreboot --force
+if (choco list --lo -r -e github-desktop) {
+  Write-Host "'github-desktop' is installed"
+}
+else
+{
+  write-host "Installing Github Desktop";
+  choco install github-desktop -y --ignoredetectedreboot --force
+}
 
 write-host "Updating WSL";
 wsl.exe --update
 
-write-host "Installing Docker Desktop";
-choco install docker-desktop -y --ignoredetectedreboot --force
+if (choco list --lo -r -e docker-desktop) {
+  Write-Host "'docker-desktop' is installed"
+}
+else
+{
+  write-host "Installing Docker Desktop";
+  choco install docker-desktop -y --ignoredetectedreboot --force
+}
 
 #install extenstions
 Start-Process "C:\Program Files\Microsoft VS Code\bin\code.cmd" -ArgumentList "--install-extension","ms-azuretools.vscode-bicep","--force" -wait
@@ -79,6 +91,19 @@ azd auth login --managed-identity --tenant-id $azureTenantID
 
 write-host "Initializing AZD";
 azd init -e $AzdEnvName
+
+#set variables if not present
+$content = Get-Content .$($AzdEnvName)\.env
+if ($content -notmatch "AZURE_SUBSCRIPTION_ID") {
+  $content += "AZURE_SUBSCRIPTION_ID=$azureSubscriptionID"
+}
+if ($content -notmatch "AZURE_TENANT_ID") {
+  $content += "AZURE_TENANT_ID=$azureTenantID"
+}
+if ($content -notmatch "AZURE_RESOURCE_GROUP") {
+  $content += "AZURE_RESOURCE_GROUP=$AzureResourceGroupName"
+}
+Set-Content .$($AzdEnvName)\.env $content
 
 write-host "Downloading GPT-RAG-ORCHESTRATOR repository";
 cd C:\github
