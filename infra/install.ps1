@@ -50,6 +50,9 @@ choco install notepadplusplus -y --ignoredetectedreboot --force
 write-host "Installing Github Desktop";
 choco install github-desktop -y --ignoredetectedreboot --force
 
+write-host "Updating WSL";
+wsl.exe --update
+
 write-host "Installing Docker Desktop";
 choco install docker-desktop -y --ignoredetectedreboot --force
 
@@ -58,20 +61,14 @@ Start-Process "C:\Program Files\Microsoft VS Code\bin\code.cmd" -ArgumentList "-
 Start-Process "C:\Program Files\Microsoft VS Code\bin\code.cmd" -ArgumentList "--install-extension","ms-azuretools.vscode-azurefunctions","--force" -wait
 Start-Process "C:\Program Files\Microsoft VS Code\bin\code.cmd" -ArgumentList "--install-extension","ms-python.python","--force" -wait
 
-write-host "Updating WSL";
-wsl.exe --update
-
-write-host "Downloading repository";
+write-host "Downloading GPT-RAG repository";
 mkdir C:\github -ea SilentlyContinue
 cd C:\github
-git clone https://github.com/givenscj/gpt-rag -b cjg-v2-fixes-2
+git clone https://github.com/azure/gpt-rag -b release/2.0.1
 #git checkout cjg-zta
 cd gpt-rag
 
 git config --global --add safe.directory C:/github/gpt-rag
-
-
-wsl --update
 
 #add azd to path
 $env:Path += ";C:\Program Files\Azure Dev CLI"
@@ -82,6 +79,24 @@ azd auth login --managed-identity --tenant-id $azureTenantID
 
 write-host "Initializing AZD";
 azd init -e $AzdEnvName
+
+write-host "Downloading GPT-RAG-ORCHESTRATOR repository";
+cd C:\github
+git clone https://github.com/azure/gpt-rag-orchestrator
+
+git config --global --add safe.directory C:/github/gpt-rag-orchestrator -b release/2.0.0
+
+write-host "Downloading GPT-RAG-UI repository";
+cd C:\github
+git clone https://github.com/azure/gpt-rag-ui
+
+git config --global --add safe.directory C:/github/gpt-rag-ui
+
+write-host "Downloading GPT-RAG-MCP repository";
+cd C:\github
+git clone https://github.com/azure/gpt-rag-mcp -b release/0.2.0
+
+git config --global --add safe.directory C:/github/gpt-rag-mcp
 
 write-host "Restarting the machine to complete installation";
 shutdown /r
