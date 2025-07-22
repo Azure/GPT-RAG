@@ -9,8 +9,8 @@
     "deploymentTags":                      { "value": {} },
     "principalId":                         { "value": "${AZURE_PRINCIPAL_ID}" },
 
-    "networkIsolation":                    { "value": "false" },
-    "useUAI":                              { "value": "false" },
+    "networkIsolation":                    { "value": "true" },
+    "useUAI":                              { "value": "true" },
 
     "aiSearchResourceId":                  { "value": null },
     "aiFoundryStorageAccountResourceId":   { "value": null },
@@ -18,12 +18,13 @@
     
     "deployAppConfig":                      { "value": "true" },
     "deployAppInsights":                    { "value": "true" },
+    "deployCapabilityHosts":                { "value": "false" },
     "deployCosmosDb":                       { "value": "true" },
     "deployContainerApps":                  { "value": "true" },
     "deployContainerRegistry":              { "value": "true" },
     "deployContainerEnv":                   { "value": "true" },
     "deployMcp":                            { "value": "true" },
-    "deployGroundingWithBing":              { "value": "true" },
+    "deployGroundingWithBing":              { "value": "false" },
     "deployKeyVault":                       { "value": "true" },
     "deployLogAnalytics":                   { "value": "true" },
     "deploySearchService":                  { "value": "true" },

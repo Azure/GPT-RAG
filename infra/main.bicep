@@ -111,6 +111,9 @@ param deployContainerEnv bool = true
 @description('Deploy a Virtual Machine (e.g., for jumpbox or specialized workloads).')
 param deployVM bool = true
 
+@description('Deploy capability hosts.')
+param deployCapabilityHosts bool = true
+
 // ----------------------------------------------------------------------
 // Reuse Existing Services Parameters
 // Note: Reuse is optional. Leave empty to create new resources
@@ -524,9 +527,9 @@ module testVm 'br/public:avm/res/compute/virtual-machine:0.15.0' = if (deployVM 
     adminUsername: _vmUserName
     adminPassword: vmAdminPassword
     imageReference: {
-      publisher: 'MicrosoftWindowsServer'
-      offer: 'WindowsServer'
-      sku: '2022-datacenter-azure-edition'
+      publisher: 'microsoft-dsvm'
+      offer: 'dsvm-win-2022'
+      sku: 'winserver-2022'
       version: 'latest'
     }
     vmSize: vmSize
@@ -557,6 +560,30 @@ module testVm 'br/public:avm/res/compute/virtual-machine:0.15.0' = if (deployVM 
     testVmKeyVault
     testVmBastionHost
   ]
+}
+
+var fileUris = [
+  'https://raw.githubusercontent.com/givenscj/gpt-rag/refs/heads/cjg-v2-fixes-2/infra/install.ps1'
+]
+
+resource cse 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = {
+  parent: testVm
+  name: 'cse'
+  location: location
+  properties: {
+    publisher: 'Microsoft.Compute'
+    type: 'CustomScriptExtension'
+    typeHandlerVersion: '1.10'
+    autoUpgradeMinorVersion: true
+    forceUpdateTag: 'alwaysRun'
+    settings: {
+      fileUris: fileUris
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File install.ps1 -AzureTenantId ${subscription().tenantId} -AzureSubscriptionId ${subscription().subscriptionId} -AzureResourceGroupName ${resourceGroup().name} -AzdEnvName ${azdEnvironmentName}'
+    }
+    protectedSettings: {
+      
+    }
+  }
 }
 
 // Private DNS Zones.
@@ -1142,19 +1169,6 @@ module aiFoundryValidateExistingResources 'modules/standard-setup/validate-exist
   }
 }
 
-// User Managed Identities for AI Foundry resources
-
-//AI Foundry Account User Managed Identity
-module aiFoundryUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
-  name: '${const.abbrs.security.managedIdentity}${aiFoundryAccountName}'
-  params: {
-    // Required parameters
-    name: '${const.abbrs.security.managedIdentity}${aiFoundryAccountName}'
-    // Non-required parameters
-    location: location
-  }
-}
-
 //AI Foundry Search User Managed Identity
 module aiFoundrySearchServiceNameUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
   name: '${const.abbrs.security.managedIdentity}${aiFoundrySearchServiceName}'
@@ -1172,17 +1186,6 @@ module aiFoundryCosmosDbNameUAI 'br/public:avm/res/managed-identity/user-assigne
   params: {
     // Required parameters
     name: '${const.abbrs.security.managedIdentity}${aiFoundryCosmosDbName}'
-    // Non-required parameters
-    location: location
-  }
-}
-
-// AI Foundry Project User Managed Identity
-module aiFoundryProjectUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
-  name: '${const.abbrs.security.managedIdentity}${aiFoundryProjectName}'
-  params: {
-    // Required parameters
-    name: '${const.abbrs.security.managedIdentity}${aiFoundryProjectName}'
     // Non-required parameters
     location: location
   }
@@ -1213,6 +1216,17 @@ module aiFoundryDependencies 'modules/standard-setup/standard-dependent-resource
   }
 }
 
+//AI Foundry Account User Managed Identity
+module aiFoundryUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
+  name: '${const.abbrs.security.managedIdentity}${aiFoundryAccountName}'
+  params: {
+    // Required parameters
+    name: '${const.abbrs.security.managedIdentity}${aiFoundryAccountName}'
+    // Non-required parameters
+    location: location
+  }
+}
+
 // Create the AI Services account and model deployments
 module aiFoundryAccount 'modules/standard-setup/ai-account-identity.bicep' = {
   name: 'ai-${aiFoundryAccountName}-${resourceToken}-deployment'
@@ -1222,11 +1236,25 @@ module aiFoundryAccount 'modules/standard-setup/ai-account-identity.bicep' = {
     modelDeployments: modelDeploymentList
     networkIsolation: networkIsolation
     agentSubnetId: _agentSubnetId
+    useUAI: false
+    userAssignedIdentityResourceId: useUAI ? aiFoundryUAI.outputs.resourceId : ''
+    userAssignedIdentityPrincipalId: useUAI ? aiFoundryUAI.outputs.principalId : ''
   }
   dependsOn: [
     aiFoundryValidateExistingResources
     aiFoundryDependencies
   ]
+}
+
+// AI Foundry Project User Managed Identity
+module aiFoundryProjectUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
+  name: '${const.abbrs.security.managedIdentity}${aiFoundryProjectName}'
+  params: {
+    // Required parameters
+    name: '${const.abbrs.security.managedIdentity}${aiFoundryProjectName}'
+    // Non-required parameters
+    location: location
+  }
 }
 
 // Creates a new project (sub-resource of the AI Services account)
@@ -1251,6 +1279,10 @@ module aiFoundryProject 'modules/standard-setup/ai-project-identity.bicep' = {
     azureStorageResourceGroupName: aiFoundryDependencies.outputs.azureStorageResourceGroupName
 
     accountName: aiFoundryAccount.outputs.accountName
+
+    useUAI: false
+    userAssignedIdentityResourceId: useUAI ? aiFoundryProjectUAI.outputs.resourceId : ''
+    userAssignedIdentityPrincipalId: useUAI ? aiFoundryProjectUAI.outputs.principalId : ''
   }
 }
 
@@ -1263,7 +1295,7 @@ module aiFoundryFormatProjectWorkspaceId 'modules/standard-setup/format-project-
 }
 
 // AI Foundry Project Capabilities
-module aiFoundryAddProjectCapabilityHost 'modules/standard-setup/add-project-capability-host.bicep' = {
+module aiFoundryAddProjectCapabilityHost 'modules/standard-setup/add-project-capability-host.bicep' = if(deployCapabilityHosts) {
   name: 'capabilityHost-configuration-${resourceToken}-deployment'
   params: {
     accountName: aiFoundryAccount.outputs.accountName
@@ -1583,8 +1615,46 @@ module keyVault 'br/public:avm/res/key-vault/vault:0.12.1' = if (deployKeyVault)
     sku: 'standard'
     enableRbacAuthorization: true
     tags: _tags
+    //secrets: secureAppSettings
   }
 }
+
+var secureAppSettings = [
+  {
+        name: 'ORCHESTRATOR_APP_APIKEY'
+        value: resourceToken
+        contentType: 'string'
+      }
+      {
+        name: 'MCP_APP_APIKEY'
+        value: resourceToken
+        contentType: 'string'
+      }
+      {
+        name: 'INGESTION_APP_APIKEY'
+        value: resourceToken
+        contentType: 'string'
+      }
+]
+
+resource existingkeyVault 'Microsoft.KeyVault/vaults@2024-11-01' existing = {
+  name: keyVaultName
+  dependsOn: [
+    keyVault
+  ]
+}
+
+// Secret in Key Vault
+resource secret 'Microsoft.KeyVault/vaults/secrets@2024-11-01' = [for (config, i) in secureAppSettings: {
+  parent: existingkeyVault
+  name: replace(config.name, '_', '-')
+  properties: {
+      contentType: config.contentType
+      value:  config.value
+  }
+  tags: {}
+}
+]
 
 // Log Analytics Workspace
 //////////////////////////////////////////////////////////////////////////
@@ -2337,7 +2407,7 @@ module containerAppsSettings 'modules/container-apps/container-apps-list.bicep' 
         serviceName: containerAppsList[i].service_name
         canonical_name: containerAppsList[i].canonical_name
         #disable-next-line BCP318
-        principalId: containerApps[i].outputs.systemAssignedMIPrincipalId!
+        principalId: (useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
         #disable-next-line BCP318
         fqdn: containerApps[i].outputs.fqdn
       }
@@ -2387,6 +2457,37 @@ var outputModelDeploymentSettings = [
   }
 ]
 
+// Add container registry
+module appConfigContainerRegistryPopulate 'modules/app-configuration/app-configuration.bicep' = if (deployContainerRegistry && deployAppConfig) {
+  name: 'appConfigContainerRegistryPopulate'
+  params: {
+    #disable-next-line BCP318
+    storeName: appConfig.outputs.name
+    keyValues: concat(
+      [
+        { name: 'CONTAINER_REGISTRY_LOGIN_SERVER', value: containerRegistry.outputs.loginServer,       label: 'gpt-rag', contentType: 'text/plain' }
+      ]
+    )
+  }
+}
+
+// Add key vault values.
+module appConfigKeyVaultPopulate 'modules/app-configuration/app-configuration.bicep' = if (deployAppConfig && deployKeyVault) {
+  name: 'appConfigKeyVaultPopulate'
+  params: {
+    #disable-next-line BCP318
+    storeName: appConfig.outputs.name
+    keyValues: concat(
+      [
+        { name: 'ORCHESTRATOR_APP_APIKEY',         value: '{"uri":"${keyVault.outputs.uri}secrets/ORCHESTRATOR_APP_APIKEY"}',  label: 'gpt-rag', contentType: 'application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8' }
+        { name: 'MCP_APP_APIKEY',                  value: '{"uri":"${keyVault.outputs.uri}secrets/MCP_APP_APIKEY"}',  label: 'gpt-rag', contentType: 'application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8' }
+        { name: 'INGESTION_APP_APIKEY',            value: '{"uri":"${keyVault.outputs.uri}secrets/INGESTION_APP_APIKEY"}',  label: 'gpt-rag', contentType: 'application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8' }
+      ]
+    )
+  }
+}
+
+
 module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = if (deployAppConfig) {
   name: 'appConfigPopulate'
   params: {
@@ -2418,7 +2519,7 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       { name: 'APPLICATIONINSIGHTS__INSTRUMENTATIONKEY',     value: appInsights.outputs.instrumentationKey, label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'AGENT_STRATEGY',      value: 'single_agent_rag',                       label: 'gpt-rag', contentType: 'text/plain' }
 
-      // ── Resource IDs ─────────────────────────────────────────────────────
+      //── Resource IDs ─────────────────────────────────────────────────────
       #disable-next-line BCP318
       { name: 'KEY_VAULT_RESOURCE_ID', value: keyVault.outputs.resourceId, label: 'gpt-rag', contentType: 'text/plain' }
       #disable-next-line BCP318
@@ -2431,8 +2532,6 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       { name: 'LOG_ANALYTICS_RESOURCE_ID', value: logAnalytics.outputs.resourceId, label: 'gpt-rag', contentType: 'text/plain' }
       #disable-next-line BCP318
       { name: 'CONTAINER_ENV_RESOURCE_ID', value: containerEnv.outputs.resourceId, label: 'gpt-rag', contentType: 'text/plain' }
-      #disable-next-line BCP318
-      { name: 'CONTAINER_REGISTRY_RESOURCE_ID', value: containerRegistry.outputs.resourceId, label: 'gpt-rag', contentType: 'text/plain' }
       #disable-next-line BCP318
       { name: 'SEARCH_SERVICE_UAI_RESOURCE_ID', value: (useUAI) ? searchServiceUAI.outputs.resourceId : '', label: 'gpt-rag', contentType: 'text/plain' }
       #disable-next-line BCP318
@@ -2472,28 +2571,25 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
 
       // ── Endpoints / URIs ──────────────────────────────────────────────────
       { name: 'KEY_VAULT_URI',                   value: keyVault.outputs.uri,                        label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'CONTAINER_REGISTRY_LOGIN_SERVER', value: containerRegistry.outputs.loginServer,       label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'STORAGE_BLOB_ENDPOINT',           value: storageAccount.outputs.primaryBlobEndpoint,  label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'SEARCH_SERVICE_QUERY_ENDPOINT',   value: searchService.outputs.endpoint,              label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'AI_FOUNDRY_ACCOUNT_ENDPOINT',     value: aiFoundryAccount.outputs.accountTarget,      label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'AI_FOUNDRY_PROJECT_ENDPOINT',     value: aiFoundryProject.outputs.endpoint,           label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'AI_FOUNDRY_PROJECT_WORKSPACE_ID', value: aiFoundryFormatProjectWorkspaceId.outputs.projectWorkspaceIdGuid, label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'COSMOS_DB_ENDPOINT',              value: cosmosDBAccount.outputs.endpoint,            label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'ORCHESTRATOR_APP_APIKEY',         value: resourceToken,  label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'MCP_APP_APIKEY',                  value: resourceToken,  label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'INGESTION_APP_APIKEY',            value: resourceToken,  label: 'gpt-rag', contentType: 'text/plain' }
-    
+
       // ── Connections ───────────────────────────────────────────────────────
       #disable-next-line BCP318
       { name: 'SEARCH_CONNECTION_ID', value: deploySearchService ? aiFoundryConnectionSearch.outputs.seachConnectionId : '', label: 'gpt-rag', contentType: 'text/plain' }
       #disable-next-line BCP318
       { name: 'BING_CONNECTION_ID', value: deployGroundingWithBing ? aiFoundryBingConnection.outputs.bingConnectionId : '', label: 'gpt-rag', contentType: 'text/plain' }
 
-      // ── Managed Identity Principals ───────────────────────────────────────
+      //── Managed Identity Principals ───────────────────────────────────────
       #disable-next-line BCP318
-      { name: 'CONTAINER_ENV_PRINCIPAL_ID', value: containerEnv.outputs.systemAssignedMIPrincipalId!, label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'CONTAINER_ENV_PRINCIPAL_ID', value: (useUAI) ? containerEnvUAI.outputs.principalId : containerEnv.outputs.systemAssignedMIPrincipalId!, label: 'gpt-rag', contentType: 'text/plain' }
       #disable-next-line BCP318
-      { name: 'SEARCH_SERVICE_PRINCIPAL_ID', value: searchService.outputs.systemAssignedMIPrincipalId!, label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'SEARCH_SERVICE_PRINCIPAL_ID', value: (useUAI) ? searchServiceUAI.outputs.principalId : searchService.outputs.systemAssignedMIPrincipalId!, label: 'gpt-rag', contentType: 'text/plain' }
+
       { name: 'AI_FOUNDRY_ACCOUNT_PRINCIPAL_ID', value: aiFoundryAccount.outputs.accountPrincipalId, label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'AI_FOUNDRY_PROJECT_PRINCIPAL_ID', value: aiFoundryProject.outputs.projectPrincipalId, label: 'gpt-rag', contentType: 'text/plain' }
 
@@ -2502,16 +2598,13 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       { name: 'AI_FOUNDRY_COSMOS_DB_CONNECTION', value: aiFoundryProject.outputs.cosmosDBConnection, label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'AI_FOUNDRY_SEARCH_CONNECTION', value: aiFoundryProject.outputs.aiSearchConnection, label: 'gpt-rag', contentType: 'text/plain' }
 
-      // ── Container Apps List & Model Deployments ────────────────────────────
+      // //── Container Apps List & Model Deployments ────────────────────────────
       #disable-next-line BCP318
       { name: 'CONTAINER_APPS', value: string(containerAppsSettings.outputs.containerAppsList), label: 'gpt-rag', contentType: 'application/json' }
       { name: 'MODEL_DEPLOYMENTS', value: string(outputModelDeploymentSettings), label: 'gpt-rag', contentType: 'application/json' }
       ]
     )
   }
-  dependsOn: [
-    appConfig!
-  ]
 }
 
 //////////////////////////////////////////////////////////////////////////

@@ -5,7 +5,13 @@ param modelDeployments array
 param networkIsolation bool = false
 param agentSubnetId string
 
-resource account 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' = {
+param useUAI bool = false
+param userAssignedIdentityResourceId string
+param userAssignedIdentityPrincipalId string
+
+import * as const from '../../constants/constants.bicep'
+
+resource account 'Microsoft.CognitiveServices/accounts@2025-06-01' = {
   name: accountName
   location: location
   sku: {
@@ -13,7 +19,8 @@ resource account 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' = {
   }
   kind: 'AIServices'
   identity: {
-    type: 'SystemAssigned'
+    type: (useUAI) ? 'UserAssigned' : 'SystemAssigned'
+    userAssignedIdentities: useUAI ? { '${userAssignedIdentityResourceId}': {} } : null
   }
   properties: {
     allowProjectManagement: true
@@ -41,7 +48,7 @@ resource account 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' = {
 // Model Deployments Resource
 
 @batchSize(1)
-resource modelDeployment 'Microsoft.CognitiveServices/accounts/deployments@2025-04-01-preview' = [
+resource modelDeployment 'Microsoft.CognitiveServices/accounts/deployments@2025-06-01' = [
   for deployment in modelDeployments: {
     parent: account
     name: deployment.name
@@ -62,4 +69,4 @@ resource modelDeployment 'Microsoft.CognitiveServices/accounts/deployments@2025-
 output accountName string = account.name
 output accountID string = account.id
 output accountTarget string = account.properties.endpoint
-output accountPrincipalId string = account.identity.principalId
+output accountPrincipalId string = (useUAI) ? userAssignedIdentityPrincipalId : account.identity.principalId
