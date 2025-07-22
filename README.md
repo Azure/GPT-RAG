@@ -1,4 +1,4 @@
-<!-- 
+<!--
 page_type: sample
 languages:
 - azdeveloper
@@ -38,6 +38,7 @@ In addition, the machine or environment used for deployment should have:
 
 - Azure Developer CLI: [Install azd](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd)
 - PowerShell 7+ (Windows only): [Install PowerShell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4#installing-the-msi-package)
+ - Microsoft Visual Studio Build Tools (Windows only: [Download Build Tools](https://visualstudio.microsoft.com/downloads/?q=build+tools#build-tools-for-visual-studio-2022).
 - Git: [Download Git](https://git-scm.com/downloads)
 - Python 3.12: [Download Python](https://www.python.org/downloads/release/python-3120/)
 - An Azure AI Services resource created or agreement to Responsible AI terms in the portal
@@ -47,7 +48,7 @@ In addition, the machine or environment used for deployment should have:
 ## How to deploy the infrastructure
 
 ```shell
-azd init -t azure/gpt-rag 
+azd init -t azure/gpt-rag
 azd provision
 ````
 
