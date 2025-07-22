@@ -1,4 +1,4 @@
-<!-- 
+<!--
 page_type: sample
 languages:
 - azdeveloper
@@ -17,90 +17,7 @@ description: GPT-RAG core is a Retrieval-Augmented Generation pattern running in
 
 # GPT-RAG Solution Accelerator
 
-The **RAG pattern** enables businesses to use the reasoning capabilities of LLMs, using their existing models to process and generate responses based on new data. RAG facilitates periodic data updates without the need for fine-tuning, thereby streamlining the integration of LLMs into businesses. 
-
-The **Enterprise RAG** Solution Accelerator (GPT-RAG) offers a robust architecture tailored for enterprise-grade deployment of the RAG pattern. It ensures grounded responses and is built on Zero-trust security and Responsible AI, ensuring availability, scalability, and auditability. Ideal for organizations transitioning from exploration and PoC stages to full-scale production and MVPs.
-
-✨ See our [User & Admin Guide](docs/GUIDE.md) for complete setup and usage details.
-
-## Application Components
-
-GPT-RAG follows a modular approach, consisting of three components, each with a specific function.
-
-* **[Data Ingestion](https://github.com/Azure/gpt-rag-ingestion)** - Optimizes data chunking and indexing for the RAG retrieval step.
-
-* **Orchestrator** - Manages information retrieval and response generation. Choose between **[Functional](https://github.com/Azure/gpt-rag-orchestrator)** using Semantic Kernel functions or **[Agentic](https://github.com/Azure/gpt-rag-agentic)** powered by AutoGen. Refer to the deployment instructions to switch.
-
-* **App Front-End** – Provides the user interface. Choose between the **[React Front-End](https://github.com/Azure/gpt-rag-frontend)**, the original interface built with React, or the **[Chainlit Front-End](https://github.com/Azure/gpt-rag-ui)**, supporting streaming and easy customization, used exclusively with the agentic orchestrator. Both follow the [Backend for Front-End](https://learn.microsoft.com/en-us/azure/architecture/patterns/backends-for-frontends) pattern.
-
-
-<!-- * [Teams-BOT](https://github.com/Azure/gpt-rag-bot) Constructed using Azure BOT Services, this platform enables users to engage with the Orchestrator seamlessly through the Microsoft Teams interface. -->
-
-<!-- 
-Removing temporarily while not finished
-## GPT-RAG Integration HUB
-* [SQL Integration](https://github.com/Azure/gpt-rag-int-sql) Connect the GPT-RAG Infrastructure to SQL using NL2SQL. -->
-
-## Concepts
-
-If you want to learn more about the RAG Pattern and GPT-RAG architecture.
-
-* [RAG Pattern: What and Why?](docs/RAG_CONCEPTS.md)
-
-* [Solution Architecture Overview](docs/ARCHITECTURE.md)
-
-<!-- ![Architecture Overview](media/GPT-RAG-ZeroTrust.png) -->
-
-*  [Enterprise RAG +Prompt Engineering+Finetuning+Train (Video in Spanish)](https://www.youtube.com/watch?v=ICsf4yirieA)
-
-<!-- ## Administration Guide
-
-For detailed instructions on managing and configuring the system, please refer to the [Administration Guide](docs/ADMINISTRATION_GUIDE.md) 📖. -->
-
-<!-- <a href="https://www.youtube.com/watch?v=ICsf4yirieA"><img src="https://img.youtube.com/vi/ICsf4yirieA/0.jpg" alt="Alt text" width="480"/></a> -->
-
-
-## Setup Guide
-
-1) **Basic Architecture Deployment:** *for quick demos with no network isolation*⚙️
-
-Learn how to **quickly set up** the basic architecture for scenarios without network isolation. [Click the link to proceed](#basic-architecture-deployment).
-
-2) **Standard Zero-Trust Architecture Deployment:** *fastest Zero-Trust deployment option*⚡
-
-Deploy the solution accelerator using the standard zero-trust architecture with pre-configured solution settings. No customization needed. [Click the link to proceed](#zero-trust-architecture-deployment).
-
-3) **Custom Zero-Trust Architecture Setup:** *most used* ⭐
-
-Explore options for customizing the deployment of the solution accelerator with a zero-trust architecture, adjusting solution settings to your needs. [Click the link to proceed](docs/AUTOMATED_INSTALLATION.md).
-
-4) **Step-by-Step Manual Setup: Zero-Trust Architecture:** *hands-on approach* 🛠️**
-
-For those who prefer complete control, follow this detailed guide to manually set up the solution accelerator with a zero-trust architecture. [Click the link to proceed](docs/MANUAL_INSTALLATION.md).
-
-
-## Getting Started
-
-This guide will walk you through the deployment process of Enterprise RAG. There are two deployment options available, **Basic Architecture** and **Zero Trust Architecture**. Before beginning the deployment, please ensure you have prepared all the necessary tools and services as outlined in the **Pre-requisites** section.
-
-**Pre-requisites**
-
-- Azure Developer CLI: [Download azd for Windows](https://azdrelease.azureedge.net/azd/standalone/release/1.5.0/azd-windows-amd64.msi), [Other OS's](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd).
- - Powershell 7+ (Windows only): [Powershell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4#installing-the-msi-package).
- - Microsoft Visual Studio Build Tools (Windows only: [Download Build Tools](https://visualstudio.microsoft.com/downloads/?q=build+tools#build-tools-for-visual-studio-2022).
- - Git: [Download Git](https://git-scm.com/downloads).
- - Node.js 16+ [windows/mac](https://nodejs.dev/en/download/)  [linux/wsl](https://nodejs.dev/en/download/package-manager/)
- - Python 3.11: [Download Python](https://www.python.org/downloads/release/python-3118/).
- - Initiate an [Azure AI services creation](https://portal.azure.com/#create/Microsoft.CognitiveServicesAllInOne) and agree to the Responsible AI terms **
-
-<!-- [AZ Module](https://learn.microsoft.com/en-us/powershell/azure/what-is-azure-powershell?view=azps-11.6.0#the-az-powershell-module) -->
-
-** If you have not created an Azure AI service resource in the subscription before
-
-### Basic Architecture Deployment
-
-For quick demonstrations or proof-of-concept projects without network isolation requirements, you can deploy the accelerator using its basic architecture.
-![Basic Architecture](media/architecture-GPT-RAG-Basic.png)
+This repository provides templates to quickly set up all the core Azure resources needed for RAG applications, allowing you to build a secure and scalable environment based on proven architecture patterns. Retrieval-Augmented Generation (RAG) enables large language models to generate responses grounded in your organization’s data, so answers stay current without retraining the model. This accelerator delivers an enterprise-ready foundation with zero-trust security, Responsible AI features, high availability, and auditing—making it ideal for moving from prototypes to MVPs or production.
 
 
 ### Architecture
@@ -121,6 +38,7 @@ In addition, the machine or environment used for deployment should have:
 
 - Azure Developer CLI: [Install azd](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd)
 - PowerShell 7+ (Windows only): [Install PowerShell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4#installing-the-msi-package)
+ - Microsoft Visual Studio Build Tools (Windows only: [Download Build Tools](https://visualstudio.microsoft.com/downloads/?q=build+tools#build-tools-for-visual-studio-2022).
 - Git: [Download Git](https://git-scm.com/downloads)
 - Python 3.12: [Download Python](https://www.python.org/downloads/release/python-3120/)
 - An Azure AI Services resource created or agreement to Responsible AI terms in the portal
@@ -130,7 +48,7 @@ In addition, the machine or environment used for deployment should have:
 ## How to deploy the infrastructure
 
 ```shell
-azd init -t azure/gpt-rag 
+azd init -t azure/gpt-rag
 azd provision
 ````
 
