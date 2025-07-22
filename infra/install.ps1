@@ -20,6 +20,12 @@ Start-Transcript -Path C:\WindowsAzure\Logs\CMFAI_CustomScriptExtension.txt -App
 
 Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 
+# Variable specifying the drive you want to extend  
+$drive_letter = "C"  
+# Script to get the partition sizes and then resize the volume  
+$size = (Get-PartitionSupportedSize -DriveLetter $drive_letter)  
+Resize-Partition -DriveLetter $drive_letter -Size $size.SizeMax 
+
 write-host "Installing Visual Studio Code";
 choco upgrade vscode -y --ignoredetectedreboot --force
 
@@ -53,6 +59,7 @@ write-host "Installing Chrome";
 write-host "Installing Notepad++";
 choco install notepadplusplus -y --ignoredetectedreboot --force
 
+<#
 if (choco list --lo -r -e github-desktop) {
   Write-Host "'github-desktop' is installed"
 }
@@ -61,6 +68,13 @@ else
   write-host "Installing Github Desktop";
   choco install github-desktop -y --ignoredetectedreboot --force
 }
+#>
+
+Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux, VirtualMachinePlatform -NoRestart
+
+#https://learn.microsoft.com/en-us/windows/wsl/install-on-server
+Invoke-WebRequest -Uri "https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi" -OutFile ".\wsl_update_x64.msi"
+Start-Process "msiexec.exe" -ArgumentList "/i .\wsl_update_x64.msi /quiet" -NoNewWindow -Wait
 
 write-host "Updating WSL";
 wsl.exe --update

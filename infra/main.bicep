@@ -483,7 +483,7 @@ module testVmKeyVault 'br/public:avm/res/key-vault/vault:0.12.1' = if (deployVM 
   params: {
     name: '${const.abbrs.security.keyVault}testvm-${resourceToken}'
     location: location
-    publicNetworkAccess: 'Disabled'
+    publicNetworkAccess: 'Enabled' //can't get to bastion without this public.
     sku: 'standard'
     enableRbacAuthorization: true
     tags: _tags
