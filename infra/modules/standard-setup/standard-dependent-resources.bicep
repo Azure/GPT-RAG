@@ -22,6 +22,7 @@ param azureStorageAccountResourceId string
 param cosmosDBResourceId string
 
 param networkIsolation bool = false
+param peSubnetId string = ''
 
 // param aiServiceExists bool
 param aiSearchExists bool
@@ -41,6 +42,7 @@ resource existingCosmosDB 'Microsoft.DocumentDB/databaseAccounts@2024-11-15' exi
 
 var canaryRegions = ['eastus2euap', 'centraluseuap']
 var cosmosDbRegion = contains(canaryRegions, location) ? 'westus' : location
+
 resource cosmosDB 'Microsoft.DocumentDB/databaseAccounts@2024-11-15' = if(!cosmosDBExists) {
   name: cosmosDBName
   location: cosmosDbRegion
@@ -61,6 +63,11 @@ resource cosmosDB 'Microsoft.DocumentDB/databaseAccounts@2024-11-15' = if(!cosmo
     enableAutomaticFailover: false
     enableMultipleWriteLocations: false
     publicNetworkAccess: networkIsolation ? 'Disabled' : 'Enabled'
+    virtualNetworkRules: networkIsolation ? [
+      {
+        id: peSubnetId
+      }
+    ] : []
     enableFreeTier: false
     locations: [
       {

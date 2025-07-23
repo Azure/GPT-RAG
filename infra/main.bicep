@@ -756,7 +756,7 @@ resource cse 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = if (dep
     forceUpdateTag: 'alwaysRun'
     settings: {
       fileUris: fileUris
-      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File install.ps1 -AzureTenantId ${subscription().tenantId} -AzureSubscriptionId ${subscription().subscriptionId} -AzureResourceGroupName ${resourceGroup().name} -AzdEnvName ${environmentName}'
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File install.ps1 -ResourceToken ${resourceToken} -AzureTenantId ${subscription().tenantId} -AzureLocation ${location} -AzureSubscriptionId ${subscription().subscriptionId} -AzureResourceGroupName ${resourceGroup().name} -AzdEnvName ${environmentName}'
     }
     protectedSettings: {
       
@@ -1382,6 +1382,7 @@ module aiFoundryDependencies 'modules/standard-setup/standard-dependent-resource
     aiSearchName: aiFoundrySearchServiceName
     cosmosDBName: aiFoundryCosmosDbName
     networkIsolation: networkIsolation
+    peSubnetId : _peSubnetId
 
     // AI Search Service parameters
     aiSearchResourceId: aiSearchResourceId
@@ -1765,6 +1766,16 @@ module cosmosDBAccount 'br/public:avm/res/document-db/database-account:0.12.0' =
     enableFreeTier: false
     networkRestrictions: {
       publicNetworkAccess: networkIsolation ? 'Disabled' : 'Enabled'
+      virtualNetworkRules: networkIsolation ? [
+        {
+          subnetResourceId: _peSubnetId.outputs.resourceId
+          ignoreMissingVnetServiceEndpoint: true
+        }
+        {
+          subnetResourceId: _caEnvSubnetId.outputs.resourceId
+          ignoreMissingVnetServiceEndpoint: true
+        }
+      ] : []
     }
     tags: _tags
     sqlDatabases: [
@@ -2041,14 +2052,21 @@ module assignCosmosDBContainersAiFoundryProject 'modules/standard-setup/cosmos-c
 }
 
 // Azure Container Registry Service - AcrPush -> Executor
-module assignCrAcrPushExecutor 'modules/security/resource-role-assignment.bicep' = if (deployContainerRegistry) {
-  name: 'assignCrAcrPushExecutor'
+module assignCrAcrPushPullExecutor 'modules/security/resource-role-assignment.bicep' = if (deployContainerRegistry) {
+  name: 'assignCrAcrPushPullExecutor'
   params: {
-    name: 'assignCrAcrPushExecutor'
+    name: 'assignCrAcrPushPullExecutor'
     roleAssignments: concat([
       {
         principalId: principalId
         roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', const.roles.AcrPush.guid)
+        #disable-next-line BCP318
+        resourceId: containerRegistry.outputs.resourceId
+        principalType: principalType
+      }
+      {
+        principalId: principalId
+        roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', const.roles.AcrPull.guid)
         #disable-next-line BCP318
         resourceId: containerRegistry.outputs.resourceId
         principalType: principalType

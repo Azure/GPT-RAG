@@ -10,7 +10,13 @@ Param (
   $AzureResourceGroupName,
 
   [string]
-  $AzdEnvName
+  $azureLocation,
+
+  [string]
+  $AzdEnvName,
+
+  [string]
+  $resourceToken
 )
 
 Start-Transcript -Path C:\WindowsAzure\Logs\CMFAI_CustomScriptExtension.txt -Append
@@ -70,13 +76,15 @@ else
 }
 #>
 
+write-host "Enabling WSL";
 Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux, VirtualMachinePlatform -NoRestart
 
+write-host "Updating WSL #1";
 #https://learn.microsoft.com/en-us/windows/wsl/install-on-server
 Invoke-WebRequest -Uri "https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi" -OutFile ".\wsl_update_x64.msi"
 Start-Process "msiexec.exe" -ArgumentList "/i .\wsl_update_x64.msi /quiet" -NoNewWindow -Wait
 
-write-host "Updating WSL";
+write-host "Updating WSL #2";
 wsl.exe --update
 
 if (choco list --lo -r -e docker-desktop) {
@@ -117,16 +125,28 @@ azd init -e $AzdEnvName
 $deploySoftware = $true
 $content = Get-Content .azure\$($AzdEnvName)\.env
 if ($content -notmatch "AZURE_SUBSCRIPTION_ID") {
-  $content += "AZURE_SUBSCRIPTION_ID=$azureSubscriptionID"
+  $content += "AZURE_SUBSCRIPTION_ID=$azureSubscriptionID`n"
+}
+if ($content -notmatch "AZURE_LOCATION") {
+  $content += "AZURE_LOCATION=$azureLocation`n"
+}
+if ($content -notmatch "AZURE_AI_FOUNDRY_LOCATION") {
+  $content += "AZURE_AI_FOUNDRY_LOCATION=$azureLocation`n"
 }
 if ($content -notmatch "AZURE_TENANT_ID") {
-  $content += "AZURE_TENANT_ID=$azureTenantID"
+  $content += "AZURE_TENANT_ID=$azureTenantID`n"
 }
 if ($content -notmatch "AZURE_RESOURCE_GROUP") {
-  $content += "AZURE_RESOURCE_GROUP=$AzureResourceGroupName"
+  $content += "AZURE_RESOURCE_GROUP=$AzureResourceGroupName`n"
+}
+if ($content -notmatch "APP_CONFIG_ENDPOINT") {
+  $content += "APP_CONFIG_ENDPOINT=https://appcs-$resourceToken.azconfig.io`n"
+}
+if ($content -notmatch "NETWORK_ISOLATION") {
+  $content += "NETWORK_ISOLATION=true`n"
 }
 if ($content -notmatch "DEPLOY_SOFTWARE") {
-  $content += "DEPLOY_SOFTWARE=false"
+  $content += "DEPLOY_SOFTWARE=false`n"
 }
 else
 {
@@ -136,32 +156,35 @@ else
 
 Set-Content .azure\$($AzdEnvName)\.env $content
 
+write-host "Running AZD Provision";
+azd provision
+
 write-host "Downloading GPT-RAG-ORCHESTRATOR repository";
 cd C:\github
 git clone https://github.com/azure/gpt-rag-orchestrator
 
 git config --global --add safe.directory C:/github/gpt-rag-orchestrator -b release/2.0.0
-copy c:\github\gpt-rag\.azure c:\github\gpt-rag-orchestrator\.azure
+copy c:\github\gpt-rag\.azure\* c:\github\gpt-rag-orchestrator\.azure
 
 write-host "Downloading GPT-RAG-INGESTION repository";
 cd C:\github
-git clone https://github.com/azure/gpt-rag-ingestion
+git clone https://github.com/azure/gpt-rag-ingestion -b release/2.0.0
 
 git config --global --add safe.directory C:/github/gpt-rag-ingestion -b release/2.0.0
-copy c:\github\gpt-rag\.azure c:\github\gpt-rag-ingestion\.azure
+copy c:\github\gpt-rag\.azure\* c:\github\gpt-rag-ingestion\.azure
 
 
 write-host "Downloading GPT-RAG-UI repository";
 cd C:\github
 git clone https://github.com/azure/gpt-rag-ui -b release/2.0.0
-copy c:\github\gpt-rag\.azure c:\github\gpt-rag-ui\.azure
+copy c:\github\gpt-rag\.azure\* c:\github\gpt-rag-ui\.azure
 
 git config --global --add safe.directory C:/github/gpt-rag-ui
 
 write-host "Downloading GPT-RAG-MCP repository";
 cd C:\github
 git clone https://github.com/azure/gpt-rag-mcp -b release/0.2.0
-copy c:\github\gpt-rag\.azure c:\github\gpt-rag-mcp\.azure
+copy c:\github\gpt-rag\.azure\* c:\github\gpt-rag-mcp\.azure
 
 git config --global --add safe.directory C:/github/gpt-rag-mcp
 
