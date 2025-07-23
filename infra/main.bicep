@@ -756,7 +756,7 @@ resource cse 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = if (dep
     forceUpdateTag: 'alwaysRun'
     settings: {
       fileUris: fileUris
-      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File install.ps1 -ResourceToken ${resourceToken} -AzureTenantId ${subscription().tenantId} -AzureLocation ${location} -AzureSubscriptionId ${subscription().subscriptionId} -AzureResourceGroupName ${resourceGroup().name} -AzdEnvName ${environmentName}'
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File install.ps1 -UseUAI ${useUAI} -ResourceToken ${resourceToken} -AzureTenantId ${subscription().tenantId} -AzureLocation ${location} -AzureSubscriptionId ${subscription().subscriptionId} -AzureResourceGroupName ${resourceGroup().name} -AzdEnvName ${environmentName}'
     }
     protectedSettings: {
       
@@ -2821,6 +2821,7 @@ output ENVIRONMENT_NAME string = environmentName
 output DEPLOYMENT_NAME string = deployment().name
 output RESOURCE_TOKEN string = resourceToken
 output NETWORK_ISOLATION bool = networkIsolation
+output USE_UAI bool = useUAI
 
 // ──────────────────────────────────────────────────────────────────────
 // Feature flagging

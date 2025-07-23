@@ -199,6 +199,7 @@
             "AppConfigurationDataReader",
             "CognitiveServicesUser",
             "CognitiveServicesOpenAIUser",
+            "CosmosDBBuiltInDataContributor",
             "AcrPull",
             "SearchIndexDataContributor",
             "StorageBlobDataContributor",

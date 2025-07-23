@@ -16,7 +16,10 @@ Param (
   $AzdEnvName,
 
   [string]
-  $resourceToken
+  $resourceToken,
+
+  [boolean]
+  $useUAI 
 )
 
 Start-Transcript -Path C:\WindowsAzure\Logs\CMFAI_CustomScriptExtension.txt -Append
@@ -144,6 +147,14 @@ if ($content -notmatch "APP_CONFIG_ENDPOINT") {
 }
 if ($content -notmatch "NETWORK_ISOLATION") {
   $content += "NETWORK_ISOLATION=true`n"
+}
+if ($content -notmatch "USE_UAI") {
+  if ($useUAI) {
+    $content += "USE_UAI=true`n"
+  }
+  else {
+    $content += "USE_UAI=false`n"
+  }
 }
 if ($content -notmatch "DEPLOY_SOFTWARE") {
   $content += "DEPLOY_SOFTWARE=false`n"
