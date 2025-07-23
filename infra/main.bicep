@@ -84,6 +84,9 @@ param deployAppConfig bool = true
 @description('Deploy an Azure Key Vault to securely store secrets, keys, and certificates.')
 param deployKeyVault bool = true
 
+@description('Deploy an Azure Key Vault to securely store VM secrets, keys, and certificates.')
+param deployVmKeyVault bool = true
+
 @description('Deploy an Azure Log Analytics workspace for centralized log collection and query.')
 param deployLogAnalytics bool = true
 
@@ -477,6 +480,15 @@ module virtualNetwork 'br/public:avm/res/network/virtual-network:0.7.0' = if (ne
 // Azure virtual machine creation (Jumpbox)
 ///////////////////////////////////////////////////////////////////////////
 
+resource secretDeploymentTracker 'Microsoft.Resources/tags@2021-01-01' = {
+  name: 'default'
+  properties: {
+    tags: {
+      secretDeployed: 'true'
+    }
+  }
+}
+
 // Azure Bastion
 
 //  Key Vault to store that password securely
@@ -489,15 +501,12 @@ module testVmKeyVault 'br/public:avm/res/key-vault/vault:0.12.1' = if (deployVM 
     sku: 'standard'
     enableRbacAuthorization: true
     tags: _tags
-    secrets: [
+    secrets: (deployVmKeyVault) ? [
       {
         name: _vmKeyVaultSecName
         value: vmAdminPassword
-        tags : {
-          secretDeployed: 'true'
-        }
       }
-    ]
+    ] : []
   }
 }
 
@@ -2842,6 +2851,7 @@ output DEPLOY_COSMOS_DB bool = deployCosmosDb
 output DEPLOY_CONTAINER_APPS bool = deployContainerApps
 output DEPLOY_CONTAINER_REGISTRY bool = deployContainerRegistry
 output DEPLOY_CONTAINER_ENV bool = deployContainerEnv
+output DEPLOY_VM_KEY_VAULT bool = false
 
 // ──────────────────────────────────────────────────────────────────────
 // Endpoints / URIs

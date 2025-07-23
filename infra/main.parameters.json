@@ -26,6 +26,7 @@
     "deployMcp":                            { "value": "true" },
     "deployGroundingWithBing":              { "value": "false" },
     "deployKeyVault":                       { "value": "true" },
+    "deployVmKeyVault":                     { "value": "false" },
     "deployLogAnalytics":                   { "value": "true" },
     "deploySearchService":                  { "value": "true" },
     "deployStorageAccount":                 { "value": "true" },
