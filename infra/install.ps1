@@ -92,21 +92,22 @@ wsl.exe --update
 
 $install_content = "wsl.exe --update`n"
 $install_content += "choco install docker-desktop -y --ignoredetectedreboot --force`n"
-$install_content += "Unregister-ScheduledTask -TaskName 'MyOneTimeSelfDeletingTask' -Confirm:$false`n"
+
+#install extenstions
+$install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-azuretools.vscode-bicep`",`"--force`" -wait`n"
+$install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-azuretools.vscode-azurefunctions`",`"--force`" -wait`n"
+$install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-python.python`",`"--force`" -wait`n"
+$install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-vscode-remote.remote-containers`",`"--force`" -wait`n"
+
+$install_content += "Unregister-ScheduledTask -TaskName 'MyOneTimeSelfDeletingTask' -Confirm `$false`n"
+
 Set-Content "c:\temp\LoginInstall.ps1" $install_content
 
 #create a one time self-deleting task to run after login - this will install docker desktop and WSL
 $Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -File C:\temp\LoginInstall.ps1"
 $Trigger = New-ScheduledTaskTrigger -AtLogOn
-$Settings = New-ScheduledTaskSettingsSet -DeleteExpiredTaskAfter 00:00:30
-Register-ScheduledTask -TaskName "MyOneTimeSelfDeletingTask" -Action $Action -Trigger $Trigger -Settings $Settings
-
-
-#install extenstions
-Start-Process "C:\Program Files\Microsoft VS Code\bin\code.cmd" -ArgumentList "--install-extension","ms-azuretools.vscode-bicep","--force" -wait
-Start-Process "C:\Program Files\Microsoft VS Code\bin\code.cmd" -ArgumentList "--install-extension","ms-azuretools.vscode-azurefunctions","--force" -wait
-Start-Process "C:\Program Files\Microsoft VS Code\bin\code.cmd" -ArgumentList "--install-extension","ms-python.python","--force" -wait
-Start-Process "C:\Program Files\Microsoft VS Code\bin\code.cmd" -ArgumentList "--install-extension","ms-vscode-remote.remote-containers","--force" -wait
+#$Settings = New-ScheduledTaskSettingsSet -DeleteExpiredTaskAfter 00:00:30
+Register-ScheduledTask -TaskName "MyOneTimeSelfDeletingTask" -Action $Action -Trigger $Trigger #-Settings $Settings
 
 write-host "Downloading GPT-RAG repository";
 mkdir C:\github -ea SilentlyContinue

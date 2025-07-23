@@ -11,7 +11,7 @@ param userAssignedIdentityPrincipalId string
 
 import * as const from '../../constants/constants.bicep'
 
-resource account 'Microsoft.CognitiveServices/accounts@2025-06-01' = {
+resource account 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' = {
   name: accountName
   location: location
   sku: {
@@ -26,19 +26,25 @@ resource account 'Microsoft.CognitiveServices/accounts@2025-06-01' = {
     allowProjectManagement: true
     customSubDomainName: accountName
     networkAcls: {
-      defaultAction: 'Allow'
-      virtualNetworkRules: []
+      bypass: 'AzureServices'
+      defaultAction: networkIsolation ? 'Deny' : 'Allow'
+      virtualNetworkRules: [
+        {
+          id: agentSubnetId
+          ignoreMissingVnetServiceEndpoint: true
+        }
+      ]
       ipRules: []
     }
-    publicNetworkAccess: networkIsolation ? 'Disabled' : 'Enabled'
-    #disable-next-line BCP036
-    networkInjections:((networkIsolation) ? [
-      {
-        scenario: 'agent'
-        subnetArmId: agentSubnetId
-        useMicrosoftManagedNetwork: false
-      }
-      ] : null )      
+    publicNetworkAccess: 'Enabled' //this is because the firewall allows the subnets //networkIsolation ? 'Disabled' : 'Enabled'
+    // #disable-next-line BCP036
+    // networkInjections:((networkIsolation) ? [
+    //   {
+    //     scenario: 'agent'
+    //     subnetArmId: agentSubnetId
+    //     useMicrosoftManagedNetwork: false
+    //   }
+    //   ] : null )      
 
     // API-key based auth is not supported for the Agent service
     disableLocalAuth: false

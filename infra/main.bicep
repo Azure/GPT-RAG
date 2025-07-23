@@ -430,6 +430,9 @@ module virtualNetwork 'br/public:avm/res/network/virtual-network:0.7.0' = if (ne
         name: 'agent-subnet'
         addressPrefix: '192.168.0.0/24' // 256 IPs for AI Foundry agents
         delegation: 'Microsoft.app/environments'
+        serviceEndpoints: [
+          'Microsoft.CognitiveServices'
+        ]
         // privateEndpointNetworkPolicies: 'Disabled'
         // privateLinkServiceNetworkPolicies: 'Enabled'
       }
@@ -468,6 +471,9 @@ module virtualNetwork 'br/public:avm/res/network/virtual-network:0.7.0' = if (ne
         name: 'aca-environment-subnet'
         addressPrefix: '192.168.4.64/27' // 32 IPs for Container Apps environment
         delegation: 'Microsoft.app/environments'
+        serviceEndpoints: [
+          'Microsoft.AzureCosmosDB'
+        ]
       }
       {
         name: 'devops-build-agents-subnet'
@@ -1398,6 +1404,7 @@ module aiFoundryDependencies 'modules/standard-setup/standard-dependent-resource
     cosmosDBName: aiFoundryCosmosDbName
     networkIsolation: networkIsolation
     peSubnetId : _peSubnetId
+    acaSubnetId: _caEnvSubnetId
 
     // AI Search Service parameters
     aiSearchResourceId: aiSearchResourceId
@@ -1411,6 +1418,9 @@ module aiFoundryDependencies 'modules/standard-setup/standard-dependent-resource
     cosmosDBResourceId: aiFoundryCosmosDBAccountResourceId
     cosmosDBExists: aiFoundryValidateExistingResources.outputs.cosmosDBExists
   }
+  dependsOn: [
+    (networkIsolation) ? virtualNetwork : null
+  ]
 }
 
 //AI Foundry Account User Managed Identity
@@ -1780,7 +1790,7 @@ module cosmosDBAccount 'br/public:avm/res/document-db/database-account:0.12.0' =
     enableAnalyticalStorage: true
     enableFreeTier: false
     networkRestrictions: {
-      publicNetworkAccess: networkIsolation ? 'Disabled' : 'Enabled'
+      publicNetworkAccess: 'Enabled' //this is because the firewall allows the subnets //networkIsolation ? 'Disabled' : 'Enabled'
       virtualNetworkRules: networkIsolation ? [
         {
           subnetResourceId: _peSubnetId
@@ -2041,7 +2051,7 @@ module assignSearchAiFoundryProject 'modules/standard-setup/ai-search-role-assig
 }
 
 // AI Foundry Storage Account - Storage Blob Data Owner (workspace-limited) -> AI Foundry Project
-module assignStorageContainersAiFoundryProject 'modules/standard-setup/blob-storage-container-role-assignments.bicep' = {
+module assignStorageContainersAiFoundryProject 'modules/standard-setup/blob-storage-container-role-assignments.bicep' = if (deployCapabilityHosts) {
   name: 'assignStorageContainersAiFoundryProject'
   scope: resourceGroup(_azureStorageSubscriptionId, _azureStorageResourceGroupName)
   params: {
@@ -2055,7 +2065,7 @@ module assignStorageContainersAiFoundryProject 'modules/standard-setup/blob-stor
 }
 
 // AI Foundry Cosmos DB Containers - Cosmos DB Built-in Data Contributor -> AI Foundry Project
-module assignCosmosDBContainersAiFoundryProject 'modules/standard-setup/cosmos-container-role-assignments.bicep' = {
+module assignCosmosDBContainersAiFoundryProject 'modules/standard-setup/cosmos-container-role-assignments.bicep' = if (deployCapabilityHosts) {
   name: 'assignCosmosDBContainersAiFoundryProject'
   scope: resourceGroup(_cosmosDBSubscriptionId, _cosmosDBResourceGroupName)
   params: {
@@ -2696,9 +2706,28 @@ module appConfigKeyVaultPopulate 'modules/app-configuration/app-configuration.bi
     storeName: appConfig.outputs.name
     keyValues: concat(
       [
+        #disable-next-line BCP318
         { name: 'ORCHESTRATOR_APP_APIKEY',         value: '{"uri":"${keyVault.outputs.uri}secrets/ORCHESTRATOR_APP_APIKEY"}',  label: 'gpt-rag', contentType: 'application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8' }
+        #disable-next-line BCP318
         { name: 'MCP_APP_APIKEY',                  value: '{"uri":"${keyVault.outputs.uri}secrets/MCP_APP_APIKEY"}',  label: 'gpt-rag', contentType: 'application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8' }
+        #disable-next-line BCP318
         { name: 'INGESTION_APP_APIKEY',            value: '{"uri":"${keyVault.outputs.uri}secrets/INGESTION_APP_APIKEY"}',  label: 'gpt-rag', contentType: 'application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8' }
+      ]
+    )
+  }
+}
+
+module cosmosConfigKeyVaultPopulate 'modules/app-configuration/app-configuration.bicep' = if (deployCosmosDb && deployAppConfig) {
+  name: 'cosmosConfigKeyVaultPopulate'
+  params: {
+    #disable-next-line BCP318
+    storeName: appConfig.outputs.name
+    keyValues: concat(
+      [
+        #disable-next-line BCP318
+      { name: 'COSMOS_DB_ACCOUNT_RESOURCE_ID', value: cosmosDBAccount.outputs.resourceId, label: 'gpt-rag', contentType: 'text/plain' }
+      #disable-next-line BCP318
+      { name: 'COSMOS_DB_ENDPOINT',              value: cosmosDBAccount.outputs.endpoint,            label: 'gpt-rag', contentType: 'text/plain' }
       ]
     )
   }
@@ -2741,8 +2770,6 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       { name: 'KEY_VAULT_RESOURCE_ID', value: keyVault.outputs.resourceId, label: 'gpt-rag', contentType: 'text/plain' }
       #disable-next-line BCP318
       { name: 'STORAGE_ACCOUNT_RESOURCE_ID', value: storageAccount.outputs.resourceId, label: 'gpt-rag', contentType: 'text/plain' }
-      #disable-next-line BCP318
-      { name: 'COSMOS_DB_ACCOUNT_RESOURCE_ID', value: cosmosDBAccount.outputs.resourceId, label: 'gpt-rag', contentType: 'text/plain' }
       #disable-next-line BCP318
       { name: 'APP_INSIGHTS_RESOURCE_ID', value: appInsights.outputs.resourceId, label: 'gpt-rag', contentType: 'text/plain' }
       #disable-next-line BCP318
@@ -2793,7 +2820,6 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       { name: 'AI_FOUNDRY_ACCOUNT_ENDPOINT',     value: aiFoundryAccount.outputs.accountTarget,      label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'AI_FOUNDRY_PROJECT_ENDPOINT',     value: aiFoundryProject.outputs.endpoint,           label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'AI_FOUNDRY_PROJECT_WORKSPACE_ID', value: aiFoundryFormatProjectWorkspaceId.outputs.projectWorkspaceIdGuid, label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'COSMOS_DB_ENDPOINT',              value: cosmosDBAccount.outputs.endpoint,            label: 'gpt-rag', contentType: 'text/plain' }
 
       // ── Connections ───────────────────────────────────────────────────────
       #disable-next-line BCP318

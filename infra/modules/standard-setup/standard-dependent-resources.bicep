@@ -23,6 +23,7 @@ param cosmosDBResourceId string
 
 param networkIsolation bool = false
 param peSubnetId string = ''
+param acaSubnetId string = ''
 
 // param aiServiceExists bool
 param aiSearchExists bool
@@ -62,11 +63,14 @@ resource cosmosDB 'Microsoft.DocumentDB/databaseAccounts@2024-11-15' = if(!cosmo
     disableLocalAuth: true
     enableAutomaticFailover: false
     enableMultipleWriteLocations: false
-    publicNetworkAccess: networkIsolation ? 'Disabled' : 'Enabled'
+    publicNetworkAccess: 'Enabled' //this is because the firewall allows the subnets //networkIsolation ? 'Disabled' : 'Enabled'
     isVirtualNetworkFilterEnabled: networkIsolation ? true : false
     virtualNetworkRules: networkIsolation ? [
       {
         id: peSubnetId
+      }
+      {
+        id: acaSubnetId
       }
     ] : []
     enableFreeTier: false
