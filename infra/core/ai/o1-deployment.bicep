@@ -26,35 +26,12 @@ resource o1Account 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
   sku: sku
 }
 
-resource o1Deployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
-  parent: o1Account
-  name: deploymentName
-  sku: {
-    name: 'GlobalStandard'
-    capacity: capacity
-  }
-  properties: {
-    model: {
-      format: kind
-      name: modelName
-      version: modelVersion
-    }
-    versionUpgradeOption: 'OnceNewDefaultVersionAvailable'
-    currentCapacity: capacity
-    raiPolicyName: 'Microsoft.DefaultV2'
-  }
-}
-
-
 resource gpt41Deployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
-  dependsOn: [
-    o1Deployment
-  ]
   parent: o1Account
   name: 'gpt-4.1'
   sku: {
     name: 'GlobalStandard'
-    capacity: 490
+    capacity: 50
   }
   properties: {
     model: {
@@ -63,7 +40,7 @@ resource gpt41Deployment 'Microsoft.CognitiveServices/accounts/deployments@2024-
       version: '2025-04-14'
     }
     versionUpgradeOption: 'OnceNewDefaultVersionAvailable'
-    currentCapacity: 490
+    currentCapacity: 50
     raiPolicyName: 'Microsoft.DefaultV2'
   }
 }

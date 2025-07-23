@@ -400,6 +400,114 @@ resource userTokensContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases
   }
 }
 
+resource productsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
+  parent: database
+  name: 'productsContainer'
+  properties: {
+    resource: {
+      id: 'productsContainer'
+      partitionKey: {
+        paths: [
+          '/id'
+        ]
+        kind: 'Hash'
+      }
+      analyticalStorageTtl: analyticalStoreTTL
+      indexingPolicy: {
+        indexingMode: 'consistent'
+        automatic: true
+        includedPaths: [
+          {
+            path: '/*'
+          }
+        ]
+        excludedPaths: [
+          {
+            path: '/"_etag"/?'
+          }
+        ]
+      }
+    }
+    options: {
+      autoscaleSettings: {
+        maxThroughput: autoscaleMaxThroughput
+      }
+    }
+  }
+}
+
+resource brandsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
+  parent: database
+  name: 'brandsContainer'
+  properties: {
+    resource: {
+      id: 'brandsContainer'
+      partitionKey: {
+        paths: [
+          '/id'
+        ]
+        kind: 'Hash'
+      }
+      analyticalStorageTtl: analyticalStoreTTL
+      indexingPolicy: {
+        indexingMode: 'consistent'
+        automatic: true
+        includedPaths: [
+          {
+            path: '/*'
+          }
+        ]
+        excludedPaths: [
+          {
+            path: '/"_etag"/?'
+          }
+        ]
+      }
+    }
+    options: {
+      autoscaleSettings: {
+        maxThroughput: autoscaleMaxThroughput
+      }
+    }
+  }
+}
+
+resource competitorsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
+  parent: database
+  name: 'competitorsContainer'
+  properties: {
+    resource: {
+      id: 'competitorsContainer'
+      partitionKey: {
+        paths: [
+          '/id'
+        ]
+        kind: 'Hash'
+      }
+      analyticalStorageTtl: analyticalStoreTTL
+      indexingPolicy: {
+        indexingMode: 'consistent'
+        automatic: true
+        includedPaths: [
+          {
+            path: '/*'
+          }
+        ]
+        excludedPaths: [
+          {
+            path: '/"_etag"/?'
+          }
+        ]
+      }
+    }
+    options: {
+      autoscaleSettings: {
+        maxThroughput: autoscaleMaxThroughput
+      }
+    }
+  }
+}
+
 resource invitationsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
   parent: database
   name: 'invitations'
@@ -443,7 +551,7 @@ resource reportsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/co
     resource: {
       id: 'reports'
       partitionKey: {
-        paths:[
+        paths: [
           '/id'
         ]
         kind: 'Hash'
@@ -478,7 +586,7 @@ resource schedulesContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/
     resource: {
       id: 'schedules'
       partitionKey: {
-        paths:[
+        paths: [
           '/companyId'
           '/reportType'
         ]
@@ -516,7 +624,7 @@ resource auditLogsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/
     resource: {
       id: 'auditLogs'
       partitionKey: {
-        paths:[
+        paths: [
           '/id'
         ]
         kind: 'Hash'
@@ -551,7 +659,7 @@ resource subscriptionEmailsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlD
     resource: {
       id: 'subscription_emails'
       partitionKey: {
-        paths:[
+        paths: [
           '/id'
         ]
         kind: 'MultiHash'

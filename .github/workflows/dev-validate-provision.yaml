@@ -57,6 +57,7 @@ jobs:
           # Azure AD B2C Configuration
           AZURE_WEBAPP_AAD_TENANT_NAME: ${{ secrets.AAD_TENANT_NAME }}
           AZURE_WEBAPP_AAD_TENANT_ID: ${{ secrets.AAD_TENANT_ID }}
+          AZURE_WEBAPP_AAD_CHANGE: ${{ secrets.AAD_CHANGE }}
           AZURE_WEBAPP_AAD_CLIENT_ID: ${{ secrets.AAD_CLIENT_ID }}
           AZURE_WEBAPP_AAD_POLICY_NAME: ${{ secrets.AAD_POLICY_NAME }}
           AZURE_WEBAPP_AAD_REDIRECT_URI: ${{ secrets.AAD_REDIRECT_URI }}
@@ -83,4 +84,3 @@ jobs:
           LANGCHAIN_PROJECT: ${{ secrets.LANGCHAIN_PROJECT }}
           LANGCHAIN_ENDPOINT: ${{ secrets.LANGCHAIN_ENDPOINT }}
           LANGCHAIN_TRACING_V2: ${{ secrets.LANGCHAIN_TRACING_V2 }}
-
