@@ -9,8 +9,8 @@
     "deploymentTags":                      { "value": {} },
     "principalId":                         { "value": "${AZURE_PRINCIPAL_ID}" },
 
-    "networkIsolation":                    { "value": "true" },
-    "useUAI":                              { "value": "true" },
+    "networkIsolation":                    { "value": "${NETWORK_ISOLATION}" },
+    "useUAI":                              { "value": "${USE_UAI}" },
 
     "aiSearchResourceId":                  { "value": null },
     "aiFoundryStorageAccountResourceId":   { "value": null },

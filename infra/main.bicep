@@ -422,7 +422,6 @@ module virtualNetwork 'br/public:avm/res/network/virtual-network:0.7.0' = if (ne
     location: location
 
     tags: _tags
-
     subnets: [
       {
         name: 'agent-subnet'
@@ -434,6 +433,9 @@ module virtualNetwork 'br/public:avm/res/network/virtual-network:0.7.0' = if (ne
       {
         name: 'pe-subnet'
         addressPrefix: '192.168.1.0/24' // 256 IPs for private endpoints
+        serviceEndpoints: [
+          'Microsoft.AzureCosmosDB'
+        ]
       }
       {
         name: 'gateway-subnet'
@@ -491,6 +493,9 @@ module testVmKeyVault 'br/public:avm/res/key-vault/vault:0.12.1' = if (deployVM 
       {
         name: _vmKeyVaultSecName
         value: vmAdminPassword
+        tags : {
+          secretDeployed: 'true'
+        }
       }
     ]
   }
@@ -593,7 +598,7 @@ module assignAppConfigAppConfigurationDataReaderTestVm 'modules/security/resourc
           const.roles.AppConfigurationDataReader.guid
         )
         #disable-next-line BCP318
-        principalId: (useUAI ? testVmUAI.outputs.principalId : testVmUAI.outputs.principalId)
+        principalId: (useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId
         #disable-next-line BCP318
         resourceId: appConfig.outputs.resourceId
         principalType: 'ServicePrincipal'
@@ -609,7 +614,7 @@ module assignCrAcrPushTestVm 'modules/security/resource-role-assignment.bicep' =
     name: 'assignCrAcrPushTestVm'
     roleAssignments: concat([
       {
-        principalId: (useUAI ? testVmUAI.outputs.principalId : testVmUAI.outputs.principalId)
+        principalId: (useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId
         roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', const.roles.AcrPush.guid)
         #disable-next-line BCP318
         resourceId: containerRegistry.outputs.resourceId
@@ -627,7 +632,7 @@ module assignKeyVaultContributorAndSecretsOfficerTestVm 'modules/security/resour
     name: 'assignKeyVaultContributorAndSecretsOfficerTestVm'
     roleAssignments: concat([
       {
-        principalId: (useUAI ? testVmUAI.outputs.principalId : testVmUAI.outputs.principalId)
+        principalId: (useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId
         roleDefinitionId: subscriptionResourceId(
           'Microsoft.Authorization/roleDefinitions',
           const.roles.KeyVaultContributor.guid
@@ -637,7 +642,7 @@ module assignKeyVaultContributorAndSecretsOfficerTestVm 'modules/security/resour
         principalType: 'ServicePrincipal'
       }
       {
-        principalId: (useUAI ? testVmUAI.outputs.principalId : testVmUAI.outputs.principalId)
+        principalId: (useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId
         roleDefinitionId: subscriptionResourceId(
           'Microsoft.Authorization/roleDefinitions',
           const.roles.KeyVaultSecretsOfficer.guid
@@ -657,7 +662,7 @@ module assignSearchSearchServiceContributorTestVm 'modules/security/resource-rol
     name: 'assignSearchSearchServiceContributorTestVm'
     roleAssignments: [
       {
-        principalId: (useUAI ? testVmUAI.outputs.principalId : testVmUAI.outputs.principalId)
+        principalId: (useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId
         roleDefinitionId: subscriptionResourceId(
           'Microsoft.Authorization/roleDefinitions',
           const.roles.SearchServiceContributor.guid
@@ -677,7 +682,7 @@ module assignSearchSearchIndexDataContributorTestVm 'modules/security/resource-r
     name: 'assignSearchSearchIndexDataContributorTestVm'
     roleAssignments: [
       {
-        principalId: (useUAI ? testVmUAI.outputs.principalId : testVmUAI.outputs.principalId)
+        principalId: (useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId
         roleDefinitionId: subscriptionResourceId(
           'Microsoft.Authorization/roleDefinitions',
           const.roles.SearchIndexDataContributor.guid
@@ -697,7 +702,7 @@ module assignStorageStorageBlobDataContributorTestVm 'modules/security/resource-
     name: 'assignStorageStorageBlobDataContributorTestVm'
     roleAssignments: [
       {
-        principalId: (useUAI ? testVmUAI.outputs.principalId : testVmUAI.outputs.principalId)
+        principalId: (useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId
         roleDefinitionId: subscriptionResourceId(
           'Microsoft.Authorization/roleDefinitions',
           const.roles.StorageBlobDataContributor.guid
@@ -717,7 +722,7 @@ module assignAiFoundryAccountAzureAiProjectManagerTestVm 'modules/security/resou
     name: 'assignAiFoundryAccountAzureAiProjectManagerTestVm'
     roleAssignments: [
       {
-        principalId: (useUAI ? testVmUAI.outputs.principalId : testVmUAI.outputs.principalId)
+        principalId: (useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId
         roleDefinitionId: subscriptionResourceId(
           'Microsoft.Authorization/roleDefinitions',
           const.roles.AzureAIProjectManager.guid
@@ -735,7 +740,7 @@ module assignCosmosDBCosmosDbBuiltInDataContributorTestVm 'modules/security/cosm
   params: {
     #disable-next-line BCP318
     cosmosDbAccountName: cosmosDBAccount.outputs.name
-    principalId: (useUAI ? testVmUAI.outputs.principalId : testVmUAI.outputs.principalId)
+    principalId: (useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId
     roleDefinitionGuid: const.roles.CosmosDBBuiltInDataContributor.guid
     scopePath: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${resourceGroup().name}/providers/Microsoft.DocumentDB/databaseAccounts/${dbAccountName}/dbs/${dbDatabaseName}'
   }

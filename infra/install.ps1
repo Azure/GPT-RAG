@@ -18,7 +18,7 @@ Param (
   [string]
   $resourceToken,
 
-  [boolean]
+  [string]
   $useUAI 
 )
 
@@ -149,12 +149,7 @@ if ($content -notmatch "NETWORK_ISOLATION") {
   $content += "NETWORK_ISOLATION=true`n"
 }
 if ($content -notmatch "USE_UAI") {
-  if ($useUAI) {
-    $content += "USE_UAI=true`n"
-  }
-  else {
-    $content += "USE_UAI=false`n"
-  }
+    $content += "USE_UAI=$useUAI`n"
 }
 if ($content -notmatch "DEPLOY_SOFTWARE") {
   $content += "DEPLOY_SOFTWARE=false`n"

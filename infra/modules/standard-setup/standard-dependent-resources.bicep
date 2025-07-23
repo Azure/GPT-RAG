@@ -63,6 +63,7 @@ resource cosmosDB 'Microsoft.DocumentDB/databaseAccounts@2024-11-15' = if(!cosmo
     enableAutomaticFailover: false
     enableMultipleWriteLocations: false
     publicNetworkAccess: networkIsolation ? 'Disabled' : 'Enabled'
+    isVirtualNetworkFilterEnabled: networkIsolation ? true : false
     virtualNetworkRules: networkIsolation ? [
       {
         id: peSubnetId
