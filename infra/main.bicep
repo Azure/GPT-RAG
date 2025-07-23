@@ -778,6 +778,7 @@ resource cse 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = if (dep
   }
   dependsOn: [
     testVm
+    appConfigPopulate //the script and vm will need all the app config values to be populated before running
   ]
 }
 
@@ -1782,11 +1783,11 @@ module cosmosDBAccount 'br/public:avm/res/document-db/database-account:0.12.0' =
       publicNetworkAccess: networkIsolation ? 'Disabled' : 'Enabled'
       virtualNetworkRules: networkIsolation ? [
         {
-          subnetResourceId: _peSubnetId.outputs.resourceId
+          subnetResourceId: _peSubnetId
           ignoreMissingVnetServiceEndpoint: true
         }
         {
-          subnetResourceId: _caEnvSubnetId.outputs.resourceId
+          subnetResourceId: _caEnvSubnetId
           ignoreMissingVnetServiceEndpoint: true
         }
       ] : []
@@ -1807,6 +1808,9 @@ module cosmosDBAccount 'br/public:avm/res/document-db/database-account:0.12.0' =
       }
     ]
   }
+  dependsOn: [
+    (networkIsolation) ? virtualNetwork : null
+  ]
 }
 
 // Key Vault
@@ -2851,7 +2855,9 @@ output DEPLOY_COSMOS_DB bool = deployCosmosDb
 output DEPLOY_CONTAINER_APPS bool = deployContainerApps
 output DEPLOY_CONTAINER_REGISTRY bool = deployContainerRegistry
 output DEPLOY_CONTAINER_ENV bool = deployContainerEnv
+
 output DEPLOY_VM_KEY_VAULT bool = false
+output DEPLOY_CAPABILITY_HOSTS bool = false
 
 // ──────────────────────────────────────────────────────────────────────
 // Endpoints / URIs

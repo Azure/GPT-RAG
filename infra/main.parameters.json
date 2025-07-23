@@ -18,7 +18,7 @@
     
     "deployAppConfig":                      { "value": "true" },
     "deployAppInsights":                    { "value": "true" },
-    "deployCapabilityHosts":                { "value": "false" },
+    "deployCapabilityHosts":                { "value": "${DEPLOY_CAPABILITY_HOSTS}" },
     "deployCosmosDb":                       { "value": "true" },
     "deployContainerApps":                  { "value": "true" },
     "deployContainerRegistry":              { "value": "true" },

@@ -90,14 +90,17 @@ Start-Process "msiexec.exe" -ArgumentList "/i .\wsl_update_x64.msi /quiet" -NoNe
 write-host "Updating WSL #2";
 wsl.exe --update
 
-if (choco list --lo -r -e docker-desktop) {
-  Write-Host "'docker-desktop' is installed"
-}
-else
-{
-  write-host "Installing Docker Desktop";
-  choco install docker-desktop -y --ignoredetectedreboot --force
-}
+$install_content = "wsl.exe --update`n"
+$install_content += "choco install docker-desktop -y --ignoredetectedreboot --force`n"
+$install_content += "Unregister-ScheduledTask -TaskName 'MyOneTimeSelfDeletingTask' -Confirm:$false`n"
+Set-Content "c:\temp\LoginInstall.ps1" $install_content
+
+#create a one time self-deleting task to run after login - this will install docker desktop and WSL
+$Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -File C:\temp\LoginInstall.ps1"
+$Trigger = New-ScheduledTaskTrigger -AtLogOn
+$Settings = New-ScheduledTaskSettingsSet -DeleteExpiredTaskAfter 00:00:30
+Register-ScheduledTask -TaskName "MyOneTimeSelfDeletingTask" -Action $Action -Trigger $Trigger -Settings $Settings
+
 
 #install extenstions
 Start-Process "C:\Program Files\Microsoft VS Code\bin\code.cmd" -ArgumentList "--install-extension","ms-azuretools.vscode-bicep","--force" -wait
@@ -127,6 +130,7 @@ azd init -e $AzdEnvName
 #set variables if not present
 $deploySoftware = $true
 $content = Get-Content .azure\$($AzdEnvName)\.env
+
 if ($content -notmatch "AZURE_SUBSCRIPTION_ID") {
   $content += "AZURE_SUBSCRIPTION_ID=$azureSubscriptionID`n"
 }
