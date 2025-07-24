@@ -107,7 +107,7 @@ Set-Content "c:\temp\LoginInstall.ps1" $install_content
 $Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -File C:\temp\LoginInstall.ps1"
 $Trigger = New-ScheduledTaskTrigger -AtLogOn
 #$Settings = New-ScheduledTaskSettingsSet -DeleteExpiredTaskAfter 00:00:30
-Register-ScheduledTask -TaskName "MyOneTimeSelfDeletingTask" -Action $Action -Trigger $Trigger #-Settings $Settings
+Register-ScheduledTask -TaskName "MyOneTimeSelfDeletingTask" -Action $Action -Trigger $Trigger -User "testvmuser" #-Settings $Settings
 
 write-host "Downloading GPT-RAG repository";
 mkdir C:\github -ea SilentlyContinue
@@ -175,27 +175,27 @@ cd C:\github
 git clone https://github.com/azure/gpt-rag-orchestrator
 
 git config --global --add safe.directory C:/github/gpt-rag-orchestrator -b release/2.0.0
-copy c:\github\gpt-rag\.azure\* c:\github\gpt-rag-orchestrator\.azure
+copy-item c:\github\gpt-rag\.azure c:\github\gpt-rag-orchestrator -recure -container
 
 write-host "Downloading GPT-RAG-INGESTION repository";
 cd C:\github
 git clone https://github.com/azure/gpt-rag-ingestion -b release/2.0.0
 
 git config --global --add safe.directory C:/github/gpt-rag-ingestion -b release/2.0.0
-copy c:\github\gpt-rag\.azure\* c:\github\gpt-rag-ingestion\.azure
+copy-item c:\github\gpt-rag\.azure c:\github\gpt-rag-ingestion -recure -container
 
 
 write-host "Downloading GPT-RAG-UI repository";
 cd C:\github
 git clone https://github.com/azure/gpt-rag-ui -b release/2.0.0
-copy c:\github\gpt-rag\.azure\* c:\github\gpt-rag-ui\.azure
+copy-item c:\github\gpt-rag\.azure c:\github\gpt-rag-ui -recure -container
 
 git config --global --add safe.directory C:/github/gpt-rag-ui
 
 write-host "Downloading GPT-RAG-MCP repository";
 cd C:\github
 git clone https://github.com/azure/gpt-rag-mcp -b release/0.2.0
-copy c:\github\gpt-rag\.azure\* c:\github\gpt-rag-mcp\.azure
+copy-item c:\github\gpt-rag\.azure c:\github\gpt-rag-mcp -recure -container
 
 git config --global --add safe.directory C:/github/gpt-rag-mcp
 
