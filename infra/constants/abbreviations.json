@@ -188,6 +188,7 @@
     "networkSecurityGroupSecurityRules": "nsgsr-",
     "networkWatcher": "nw-",
     "privateLink": "pl-",
+    "privateLinkScope": "pls-",
     "privateEndpoint": "pep-",
     "publicIPAddress": "pip-",
     "publicIPAddressPrefix": "ippre-",
