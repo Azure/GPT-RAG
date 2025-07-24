@@ -92,6 +92,7 @@ wsl.exe --update
 
 $install_content = "wsl.exe --update`n"
 $install_content += "choco install docker-desktop -y --ignoredetectedreboot --force`n"
+$install_content += "choco install github-desktop -y --ignoredetectedreboot --force`n"
 $install_content += "stop-process -name `"dockerd`" -force`n"
 $install_content += "start-process `"C:\Program Files\docker\Docker\Docker Desktop.exe`"`n"
 
@@ -100,6 +101,7 @@ $install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code
 $install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-azuretools.vscode-azurefunctions`",`"--force`" -wait`n"
 $install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-python.python`",`"--force`" -wait`n"
 $install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-vscode-remote.remote-containers`",`"--force`" -wait`n"
+$install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-vscode-powershell`",`"--force`" -wait`n"
 
 $install_content += "Unregister-ScheduledTask -TaskName 'MyOneTimeSelfDeletingTask' -Confirm `$false`n"
 

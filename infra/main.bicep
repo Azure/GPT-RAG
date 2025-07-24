@@ -1485,22 +1485,6 @@ module aiFoundryAccount 'modules/standard-setup/ai-account-identity.bicep' = {
   ]
 }
 
-// Cosmos DB Account - Cosmos DB Built-in Data Contributor -> Foundry AI Cosmos
-module assignCosmosDBCosmosDbBuiltInDataContributorAIFoundry 'modules/security/cosmos-data-plane-role-assignment.bicep' = if (deployCosmosDb) {
-  name: 'assignCosmosDBCosmosDbBuiltInDataContributorAIFoundry'
-  params: {
-    #disable-next-line BCP318
-    cosmosDbAccountName: '${const.abbrs.databases.cosmosDBDatabase}${const.abbrs.ai.aiFoundry}${resourceToken}'
-    principalId: aiFoundryAccount.outputs.accountPrincipalId
-    roleDefinitionGuid: const.roles.CosmosDBBuiltInDataContributor.guid
-    scopePath: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${resourceGroup().name}/providers/Microsoft.DocumentDB/databaseAccounts/${dbAccountName}'
-  }
-  dependsOn: [
-    aiFoundryAccount!
-    aiFoundryDependencies
-  ]
-}
-
 // AI Foundry Project User Managed Identity
 module aiFoundryProjectUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
   name: '${const.abbrs.security.managedIdentity}${aiFoundryProjectName}'
@@ -2853,6 +2837,26 @@ module cosmosConfigKeyVaultPopulate 'modules/app-configuration/app-configuration
   }
 }
 
+module searchAppConfigPopulate 'modules/app-configuration/app-configuration.bicep' = if (deploySearchService && deployAppConfig) {
+  name: 'searchAppConfigPopulate'
+  params: {
+    #disable-next-line BCP318
+    storeName: appConfig.outputs.name
+    keyValues: concat(
+      [
+        #disable-next-line BCP318
+        { name: 'SEARCH_SERVICE_UAI_RESOURCE_ID', value: (useUAI) ? searchServiceUAI.outputs.resourceId : '', label: 'gpt-rag', contentType: 'text/plain' }
+        #disable-next-line BCP318
+        { name: 'SEARCH_SERVICE_RESOURCE_ID', value: searchService.outputs.resourceId, label: 'gpt-rag', contentType: 'text/plain' }
+        #disable-next-line BCP318
+        { name: 'SEARCH_SERVICE_QUERY_ENDPOINT',   value: searchService.outputs.endpoint,              label: 'gpt-rag', contentType: 'text/plain' }
+        #disable-next-line BCP318
+        { name: 'SEARCH_SERVICE_PRINCIPAL_ID', value: (useUAI) ? searchServiceUAI.outputs.principalId : searchService.outputs.systemAssignedMIPrincipalId!, label: 'gpt-rag', contentType: 'text/plain' }
+      ]
+    )
+  }
+}
+
 
 module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = if (deployAppConfig) {
   name: 'appConfigPopulate'
@@ -2881,7 +2885,9 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       { name: 'LOG_LEVEL',           value: 'INFO',                                   label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'ENABLE_CONSOLE_LOGGING',value: 'true',                                 label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'PROMPT_SOURCE',         value: 'file',                                 label: 'gpt-rag', contentType: 'text/plain' }
+      #disable-next-line BCP318
       { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING',       value: appInsights.outputs.connectionString,   label: 'gpt-rag', contentType: 'text/plain' }
+      #disable-next-line BCP318
       { name: 'APPLICATIONINSIGHTS__INSTRUMENTATIONKEY',     value: appInsights.outputs.instrumentationKey, label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'AGENT_STRATEGY',      value: 'single_agent_rag',                       label: 'gpt-rag', contentType: 'text/plain' }
 
@@ -2896,10 +2902,6 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       { name: 'LOG_ANALYTICS_RESOURCE_ID', value: logAnalytics.outputs.resourceId, label: 'gpt-rag', contentType: 'text/plain' }
       #disable-next-line BCP318
       { name: 'CONTAINER_ENV_RESOURCE_ID', value: containerEnv.outputs.resourceId, label: 'gpt-rag', contentType: 'text/plain' }
-      #disable-next-line BCP318
-      { name: 'SEARCH_SERVICE_UAI_RESOURCE_ID', value: (useUAI) ? searchServiceUAI.outputs.resourceId : '', label: 'gpt-rag', contentType: 'text/plain' }
-      #disable-next-line BCP318
-      { name: 'SEARCH_SERVICE_RESOURCE_ID', value: searchService.outputs.resourceId, label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'AI_FOUNDRY_ACCOUNT_RESOURCE_ID', value: aiFoundryAccount.outputs.accountID, label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'AI_FOUNDRY_PROJECT_RESOURCE_ID', value: aiFoundryProject.outputs.projectId, label: 'gpt-rag', contentType: 'text/plain' }
 
@@ -2934,9 +2936,10 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       { name: 'DEPLOY_CONTAINER_ENV', value: string(deployContainerEnv), label: 'gpt-rag', contentType: 'text/plain' }
 
       // ── Endpoints / URIs ──────────────────────────────────────────────────
+      #disable-next-line BCP318
       { name: 'KEY_VAULT_URI',                   value: keyVault.outputs.uri,                        label: 'gpt-rag', contentType: 'text/plain' }
+      #disable-next-line BCP318
       { name: 'STORAGE_BLOB_ENDPOINT',           value: storageAccount.outputs.primaryBlobEndpoint,  label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'SEARCH_SERVICE_QUERY_ENDPOINT',   value: searchService.outputs.endpoint,              label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'AI_FOUNDRY_ACCOUNT_ENDPOINT',     value: aiFoundryAccount.outputs.accountTarget,      label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'AI_FOUNDRY_PROJECT_ENDPOINT',     value: aiFoundryProject.outputs.endpoint,           label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'AI_FOUNDRY_PROJECT_WORKSPACE_ID', value: aiFoundryFormatProjectWorkspaceId.outputs.projectWorkspaceIdGuid, label: 'gpt-rag', contentType: 'text/plain' }
@@ -2950,8 +2953,6 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       //── Managed Identity Principals ───────────────────────────────────────
       #disable-next-line BCP318
       { name: 'CONTAINER_ENV_PRINCIPAL_ID', value: (useUAI) ? containerEnvUAI.outputs.principalId : containerEnv.outputs.systemAssignedMIPrincipalId!, label: 'gpt-rag', contentType: 'text/plain' }
-      #disable-next-line BCP318
-      { name: 'SEARCH_SERVICE_PRINCIPAL_ID', value: (useUAI) ? searchServiceUAI.outputs.principalId : searchService.outputs.systemAssignedMIPrincipalId!, label: 'gpt-rag', contentType: 'text/plain' }
 
       { name: 'AI_FOUNDRY_ACCOUNT_PRINCIPAL_ID', value: aiFoundryAccount.outputs.accountPrincipalId, label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'AI_FOUNDRY_PROJECT_PRINCIPAL_ID', value: aiFoundryProject.outputs.projectPrincipalId, label: 'gpt-rag', contentType: 'text/plain' }
