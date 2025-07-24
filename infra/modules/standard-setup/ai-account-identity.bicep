@@ -37,14 +37,14 @@ resource account 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' = {
       ipRules: []
     }
     publicNetworkAccess: 'Enabled' //this is because the firewall allows the subnets //networkIsolation ? 'Disabled' : 'Enabled'
-    // #disable-next-line BCP036
-    // networkInjections:((networkIsolation) ? [
-    //   {
-    //     scenario: 'agent'
-    //     subnetArmId: agentSubnetId
-    //     useMicrosoftManagedNetwork: false
-    //   }
-    //   ] : null )      
+    #disable-next-line BCP036
+    networkInjections:((networkIsolation) ? [
+      {
+        scenario: 'agent'
+        subnetArmId: agentSubnetId
+        useMicrosoftManagedNetwork: false
+      }
+      ] : null )      
 
     // API-key based auth is not supported for the Agent service
     disableLocalAuth: false

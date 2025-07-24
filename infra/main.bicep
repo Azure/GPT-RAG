@@ -483,20 +483,6 @@ module virtualNetwork 'br/public:avm/res/network/virtual-network:0.7.0' = if (ne
   }
 }
 
-// Azure virtual machine creation (Jumpbox)
-///////////////////////////////////////////////////////////////////////////
-
-resource secretDeploymentTracker 'Microsoft.Resources/tags@2021-01-01' = {
-  name: 'default'
-  properties: {
-    tags: {
-      secretDeployed: 'true'
-    }
-  }
-}
-
-// Azure Bastion
-
 //  Key Vault to store that password securely
 module testVmKeyVault 'br/public:avm/res/key-vault/vault:0.12.1' = if (deployVM && networkIsolation) {
   name: 'vmKeyVault'
@@ -809,6 +795,42 @@ module privateDnsZoneCogSvcs 'br/public:avm/res/network/private-dns-zone:0.7.1' 
   }
 }
 
+// Open AI
+module privateDnsZoneOpenAi 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (networkIsolation) {
+  name: 'dep-openai-private-dns-zone'
+  params: {
+    name: 'privatelink.openai.azure.com'
+    location: 'global'
+    tags: _tags
+    virtualNetworkLinks: [
+      {
+        name: '${vnetName}-openai-link'
+        registrationEnabled: false
+        #disable-next-line BCP318
+        virtualNetworkResourceId: virtualNetwork.outputs.resourceId
+      }
+    ]
+  }
+}
+
+// AI Services
+module privateDnsZoneAiService 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (networkIsolation) {
+  name: 'dep-aiservices-private-dns-zone'
+  params: {
+    name: 'privatelink.services.ai.azure.com'
+    location: 'global'
+    tags: _tags
+    virtualNetworkLinks: [
+      {
+        name: '${vnetName}-aiservices-link'
+        registrationEnabled: false
+        #disable-next-line BCP318
+        virtualNetworkResourceId: virtualNetwork.outputs.resourceId
+      }
+    ]
+  }
+}
+
 // AI Search
 module privateDnsZoneSearch 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (networkIsolation) {
   name: 'dep-search-std-private-dns-zone'
@@ -983,6 +1005,16 @@ module privateEndpointAIFoundryAccount 'br/public:avm/res/network/private-endpoi
           name: 'cogsvcsARecord'
           #disable-next-line BCP318
           privateDnsZoneResourceId: privateDnsZoneCogSvcs.outputs.resourceId
+        }
+        {
+          name: 'aiServiceARecord'
+          #disable-next-line BCP318
+          privateDnsZoneResourceId: privateDnsZoneAiService.outputs.resourceId
+        }
+        {
+          name: 'openAiARecord'
+          #disable-next-line BCP318
+          privateDnsZoneResourceId: privateDnsZoneOpenAi.outputs.resourceId
         }
       ]
     }
@@ -1453,6 +1485,22 @@ module aiFoundryAccount 'modules/standard-setup/ai-account-identity.bicep' = {
   ]
 }
 
+// Cosmos DB Account - Cosmos DB Built-in Data Contributor -> Foundry AI Cosmos
+module assignCosmosDBCosmosDbBuiltInDataContributorAIFoundry 'modules/security/cosmos-data-plane-role-assignment.bicep' = if (deployCosmosDb) {
+  name: 'assignCosmosDBCosmosDbBuiltInDataContributorAIFoundry'
+  params: {
+    #disable-next-line BCP318
+    cosmosDbAccountName: '${const.abbrs.databases.cosmosDBDatabase}${const.abbrs.ai.aiFoundry}${resourceToken}'
+    principalId: aiFoundryAccount.outputs.accountPrincipalId
+    roleDefinitionGuid: const.roles.CosmosDBBuiltInDataContributor.guid
+    scopePath: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${resourceGroup().name}/providers/Microsoft.DocumentDB/databaseAccounts/${dbAccountName}'
+  }
+  dependsOn: [
+    aiFoundryAccount!
+    aiFoundryDependencies
+  ]
+}
+
 // AI Foundry Project User Managed Identity
 module aiFoundryProjectUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
   name: '${const.abbrs.security.managedIdentity}${aiFoundryProjectName}'
@@ -1557,6 +1605,7 @@ module aiFoundryConnectionSearch 'modules/standard-setup/connection-ai-search.bi
   }
   dependsOn: [
     searchService!
+    aiFoundryAddProjectCapabilityHost
   ]
 }
 
@@ -1569,6 +1618,7 @@ module aiFoundryConnectionInsights 'modules/standard-setup/connection-applicatio
   }
   dependsOn: [
     appInsights!
+    aiFoundryAddProjectCapabilityHost
   ]
 }
 
@@ -1581,6 +1631,7 @@ module aiFoundryConnectionStorage 'modules/standard-setup/connection-storage-acc
   }
   dependsOn: [
     storageAccount!
+    aiFoundryAddProjectCapabilityHost
   ]
 }
 
@@ -2060,7 +2111,7 @@ module assignStorageContainersAiFoundryProject 'modules/standard-setup/blob-stor
     workspaceId: aiFoundryFormatProjectWorkspaceId.outputs.projectWorkspaceIdGuid
   }
   dependsOn: [
-    aiFoundryAddProjectCapabilityHost
+    
   ]
 }
 
@@ -2076,6 +2127,75 @@ module assignCosmosDBContainersAiFoundryProject 'modules/standard-setup/cosmos-c
   dependsOn: [
     aiFoundryAddProjectCapabilityHost
     assignStorageContainersAiFoundryProject
+  ]
+}
+
+// AI Foundry Storage Account - Storage Blob Data Contributor -> AI Foundry
+module assignStorageAccountAiFoundry 'modules/standard-setup/azure-storage-account-role-assignment.bicep' = {
+  name: 'assignStorageAccountAiFoundry'
+  scope: resourceGroup(_azureStorageSubscriptionId, _azureStorageResourceGroupName)
+  params: {
+    azureStorageName: aiFoundryDependencies.outputs.azureStorageName
+    projectPrincipalId: aiFoundryAccount.outputs.accountPrincipalId
+  }
+}
+
+// AI Foundry Cosmos DB Account - Cosmos DB Operator -> AI Foundry
+module assignCosmosDBAiFoundry 'modules/standard-setup/cosmosdb-account-role-assignment.bicep' = {
+  name: 'assignCosmosDBAiFoundry'
+  scope: resourceGroup(_cosmosDBSubscriptionId, _cosmosDBResourceGroupName)
+  params: {
+    cosmosDBName: aiFoundryDependencies.outputs.cosmosDBName
+    projectPrincipalId: aiFoundryAccount.outputs.accountPrincipalId
+  }
+  dependsOn: [
+    assignStorageAccountAiFoundry
+  ]
+}
+
+// AI Foundry Search Service - Search Index Data Contributor -> AI Foundry
+// AI Foundry Search Service - Search Service Contributor -> AI Foundry
+module assignSearchAiFoundry 'modules/standard-setup/ai-search-role-assignments.bicep' = {
+  name: 'assignSearchAiFoundry'
+  scope: resourceGroup(_aiSearchServiceSubscriptionId, _aiSearchServiceResourceGroupName)
+  params: {
+    aiSearchName: aiFoundryDependencies.outputs.aiSearchName
+    projectPrincipalId: aiFoundryAccount.outputs.accountPrincipalId
+  }
+  dependsOn: [
+    aiFoundryDependencies
+    aiFoundryAccount
+  ]
+}
+
+// AI Foundry Storage Account - Storage Blob Data Owner (workspace-limited) -> AI Foundry
+module assignStorageContainersAiFoundry 'modules/standard-setup/blob-storage-container-role-assignments.bicep' = if (deployCapabilityHosts) {
+  name: 'assignStorageContainersAiFoundry'
+  scope: resourceGroup(_azureStorageSubscriptionId, _azureStorageResourceGroupName)
+  params: {
+    aiProjectPrincipalId: aiFoundryAccount.outputs.accountPrincipalId
+    storageName: aiFoundryDependencies.outputs.azureStorageName
+    workspaceId: aiFoundryFormatProjectWorkspaceId.outputs.projectWorkspaceIdGuid
+  }
+  dependsOn: [
+    aiFoundryDependencies
+    aiFoundryAccount
+  ]
+}
+
+// AI Foundry Cosmos DB Containers - Cosmos DB Built-in Data Contributor -> AI Foundry
+module assignCosmosDBContainersAiFoundry 'modules/standard-setup/cosmos-container-role-assignments.bicep' = if (deployCapabilityHosts) {
+  name: 'assignCosmosDBContainersAiFoundry'
+  scope: resourceGroup(_cosmosDBSubscriptionId, _cosmosDBResourceGroupName)
+  params: {
+    cosmosAccountName: aiFoundryDependencies.outputs.cosmosDBName
+    projectWorkspaceId: aiFoundryFormatProjectWorkspaceId.outputs.projectWorkspaceIdGuid
+    projectPrincipalId: aiFoundryAccount.outputs.accountPrincipalId
+  }
+  dependsOn: [
+    aiFoundryAddProjectCapabilityHost
+    aiFoundryDependencies
+    aiFoundryAccount
   ]
 }
 

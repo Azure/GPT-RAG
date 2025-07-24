@@ -92,6 +92,8 @@ wsl.exe --update
 
 $install_content = "wsl.exe --update`n"
 $install_content += "choco install docker-desktop -y --ignoredetectedreboot --force`n"
+$install_content += "stop-process -name `"dockerd`" -force`n"
+$install_content += "start-process `"C:\Program Files\docker\Docker\Docker Desktop.exe`"`n"
 
 #install extenstions
 $install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-azuretools.vscode-bicep`",`"--force`" -wait`n"
@@ -175,27 +177,27 @@ cd C:\github
 git clone https://github.com/azure/gpt-rag-orchestrator
 
 git config --global --add safe.directory C:/github/gpt-rag-orchestrator -b release/2.0.0
-copy-item c:\github\gpt-rag\.azure c:\github\gpt-rag-orchestrator -recure -container
+copy-item c:\github\gpt-rag\.azure c:\github\gpt-rag-orchestrator -recurse -container
 
 write-host "Downloading GPT-RAG-INGESTION repository";
 cd C:\github
 git clone https://github.com/azure/gpt-rag-ingestion -b release/2.0.0
 
 git config --global --add safe.directory C:/github/gpt-rag-ingestion -b release/2.0.0
-copy-item c:\github\gpt-rag\.azure c:\github\gpt-rag-ingestion -recure -container
+copy-item c:\github\gpt-rag\.azure c:\github\gpt-rag-ingestion -recurse -container
 
 
 write-host "Downloading GPT-RAG-UI repository";
 cd C:\github
 git clone https://github.com/azure/gpt-rag-ui -b release/2.0.0
-copy-item c:\github\gpt-rag\.azure c:\github\gpt-rag-ui -recure -container
+copy-item c:\github\gpt-rag\.azure c:\github\gpt-rag-ui -recurse -container
 
 git config --global --add safe.directory C:/github/gpt-rag-ui
 
 write-host "Downloading GPT-RAG-MCP repository";
 cd C:\github
 git clone https://github.com/azure/gpt-rag-mcp -b release/0.2.0
-copy-item c:\github\gpt-rag\.azure c:\github\gpt-rag-mcp -recure -container
+copy-item c:\github\gpt-rag\.azure c:\github\gpt-rag-mcp -recurse -container
 
 git config --global --add safe.directory C:/github/gpt-rag-mcp
 

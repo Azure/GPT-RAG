@@ -14,6 +14,7 @@ if (-not (Get-AzContext)) {
 
 # Register Azure providers
 $providers = @(
+    "Microsoft.AlertsManagement",
     "Microsoft.App",
     "Microsoft.AppConfiguration",
     "Microsoft.ContainerService",
