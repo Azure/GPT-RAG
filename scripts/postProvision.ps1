@@ -12,6 +12,7 @@ Write-Host ""
 Write-Host ""
 if ($env:NETWORK_ISOLATION -and $env:NETWORK_ISOLATION.ToLower() -eq 'true') {
     Write-Host "🔒 Zero Trust enabled."
+    Write-Host "🚧 NOTE: If app config failed, run the azd provision again - this is due to token timeout restrictions."
     Write-Host "Access to Azure resources is restricted to the VNet."
     Write-Host "Ensure you run scripts/postProvision.ps1 from within the VNet."
     Write-Host "If you are using a local machine, make sure you have a VPN connection to the VNet."

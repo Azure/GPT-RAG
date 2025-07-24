@@ -9,6 +9,7 @@ echo
 echo
 if [[ "${NETWORK_ISOLATION,,}" == "true" ]]; then
   echo "🔒 Zero Trust enabled."
+  echo "🚧 NOTE: If app config failed, run the azd provision again - this is due to token timeout restrictions."
   echo "Access to Azure resources is restricted to the VNet."
   echo "Ensure you run scripts/postProvision.sh from within the VNet."
   echo "If you’re using a local machine, make sure you have a VPN connection to the VNet."

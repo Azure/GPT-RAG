@@ -9,8 +9,8 @@
     "deploymentTags":                      { "value": {} },
     "principalId":                         { "value": "${AZURE_PRINCIPAL_ID}" },
 
-    "networkIsolation":                    { "value": "false" },
-    "useUAI":                              { "value": "false" },
+    "networkIsolation":                    { "value": "${NETWORK_ISOLATION}" },
+    "useUAI":                              { "value": "${USE_UAI}" },
 
     "aiSearchResourceId":                  { "value": null },
     "aiFoundryStorageAccountResourceId":   { "value": null },
@@ -18,18 +18,21 @@
     
     "deployAppConfig":                      { "value": "true" },
     "deployAppInsights":                    { "value": "true" },
+    "deployCapabilityHosts":                { "value": "${DEPLOY_CAPABILITY_HOSTS}" },
     "deployCosmosDb":                       { "value": "true" },
     "deployContainerApps":                  { "value": "true" },
     "deployContainerRegistry":              { "value": "true" },
     "deployContainerEnv":                   { "value": "true" },
     "deployMcp":                            { "value": "true" },
-    "deployGroundingWithBing":              { "value": "true" },
+    "deployGroundingWithBing":              { "value": "false" },
     "deployKeyVault":                       { "value": "true" },
+    "deployVmKeyVault":                     { "value": "${DEPLOY_VM_KEY_VAULT}" },
     "deployLogAnalytics":                   { "value": "true" },
     "deploySearchService":                  { "value": "true" },
     "deployStorageAccount":                 { "value": "true" },
     "greenFieldDeployment":                 { "value": "true" },
     "deployVM":                             { "value": "true" },
+    "deploySoftware":                       { "value": "true" },
 
     "aiFoundryAccountName":                  { "value": null },
     "aiFoundryProjectName":                  { "value": null },
@@ -139,6 +142,7 @@
       "value": [
         {
           "name": null,
+          "external" : true,
           "service_name": "orchestrator",
           "profile_name": "main",
           "min_replicas": 1,
@@ -157,6 +161,7 @@
         },
         {
           "name": null,
+          "external" : true,
           "service_name": "frontend",
           "profile_name": "main",
           "min_replicas": 1,
@@ -171,6 +176,7 @@
         },
         {
           "name": null,
+          "external" : true,
           "service_name": "dataingest",
           "profile_name": "main",
           "min_replicas": 1,
@@ -188,6 +194,7 @@
         },
         {
           "name": null,
+          "external" : true,
           "service_name": "mcp",
           "profile_name": "main",
           "min_replicas": 1,
@@ -197,6 +204,7 @@
             "AppConfigurationDataReader",
             "CognitiveServicesUser",
             "CognitiveServicesOpenAIUser",
+            "CosmosDBBuiltInDataContributor",
             "AcrPull",
             "SearchIndexDataContributor",
             "StorageBlobDataContributor",

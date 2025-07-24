@@ -16,6 +16,12 @@ param azureStorageName string
 param azureStorageSubscriptionId string
 param azureStorageResourceGroupName string
 
+param useUAI bool = false
+param userAssignedIdentityResourceId string
+param userAssignedIdentityPrincipalId string
+
+import * as const from '../../constants/constants.bicep'
+
 resource searchService 'Microsoft.Search/searchServices@2024-06-01-preview' existing = {
   name: aiSearchName
   scope: resourceGroup(aiSearchServiceSubscriptionId, aiSearchServiceResourceGroupName)
@@ -29,24 +35,25 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' existing 
   scope: resourceGroup(azureStorageSubscriptionId, azureStorageResourceGroupName)
 }
 
-resource account 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' existing = {
+resource account 'Microsoft.CognitiveServices/accounts@2025-06-01' existing = {
   name: accountName
   scope: resourceGroup()
 }
 
-resource project 'Microsoft.CognitiveServices/accounts/projects@2025-04-01-preview' = {
+resource project 'Microsoft.CognitiveServices/accounts/projects@2025-06-01' = {
   parent: account
   name: projectName
   location: location
   identity: {
-    type: 'SystemAssigned'
+    type: (useUAI) ? 'UserAssigned' : 'SystemAssigned'
+    userAssignedIdentities: useUAI ? { '${userAssignedIdentityResourceId}': {} } : null
   }
   properties: {
     description: projectDescription
     displayName: displayName
   }
 
-  resource project_connection_cosmosdb_account 'connections@2025-04-01-preview' = {
+  resource project_connection_cosmosdb_account 'connections@2025-06-01' = {
     name: cosmosDBName
     properties: {
       category: 'CosmosDB'
@@ -60,7 +67,7 @@ resource project 'Microsoft.CognitiveServices/accounts/projects@2025-04-01-previ
     }
   }
 
-  resource project_connection_azure_storage 'connections@2025-04-01-preview' = {
+  resource project_connection_azure_storage 'connections@2025-06-01' = {
     name: azureStorageName
     properties: {
       category: 'AzureStorageAccount'
@@ -74,7 +81,7 @@ resource project 'Microsoft.CognitiveServices/accounts/projects@2025-04-01-previ
     }
   }
 
-  resource project_connection_azureai_search 'connections@2025-04-01-preview' = {
+  resource project_connection_azureai_search 'connections@2025-06-01' = {
     name: aiSearchName
     properties: {
       category: 'CognitiveSearch'
@@ -92,7 +99,7 @@ resource project 'Microsoft.CognitiveServices/accounts/projects@2025-04-01-previ
 
 output projectName string = project.name
 output projectId string = project.id
-output projectPrincipalId string = project.identity.principalId
+output projectPrincipalId string = (useUAI) ? userAssignedIdentityPrincipalId : project.identity.principalId
 output endpoint string = 'https://${accountName}.services.ai.azure.com/api/projects/${project.name}'
 
 #disable-next-line BCP053

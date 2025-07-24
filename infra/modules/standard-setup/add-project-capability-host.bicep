@@ -10,7 +10,6 @@ var threadConnections = ['${cosmosDBConnection}']
 var storageConnections = ['${azureStorageConnection}']
 var vectorStoreConnections = ['${aiSearchConnection}']
 
-
 resource account 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' existing = {
    name: accountName
 }
@@ -20,15 +19,22 @@ resource project 'Microsoft.CognitiveServices/accounts/projects@2025-04-01-previ
   parent: account
 }
 
-resource accountCapabilityHost 'Microsoft.CognitiveServices/accounts/capabilityHosts@2025-04-01-preview' = {
+// module accountCapabilityHost 'add-account-capability-host.bicep' = {
+//   name: 'addAccountCapabilityHost'
+//   params: {
+//     accountName: accountName
+//     accountCapHost: accountCapHost
+//   }
+// }
+
+//get existing capability host
+resource existingAccountCapabilityHost 'Microsoft.CognitiveServices/accounts/capabilityHosts@2025-04-01-preview' existing = {
    name: accountCapHost
    parent: account
-   properties: {
-     capabilityHostKind: 'Agents'
-
-   }
+   dependsOn: [
+     //accountCapabilityHost
+   ]
 }
-
 
 resource projectCapabilityHost 'Microsoft.CognitiveServices/accounts/projects/capabilityHosts@2025-04-01-preview' = {
   name: projectCapHost
@@ -40,6 +46,6 @@ resource projectCapabilityHost 'Microsoft.CognitiveServices/accounts/projects/ca
     threadStorageConnections: threadConnections
   }
   dependsOn: [
-    accountCapabilityHost
+    //accountCapabilityHost
   ]
 }

@@ -13,7 +13,6 @@ var userThreadName = '${projectWorkspaceId}-thread-message-store'
 var systemThreadName = '${projectWorkspaceId}-system-thread-message-store'
 var entityStoreName = '${projectWorkspaceId}-agent-entity-store'
 
-
 resource cosmosAccount 'Microsoft.DocumentDB/databaseAccounts@2024-12-01-preview' existing = {
   name: cosmosAccountName
   scope: resourceGroup()
@@ -28,16 +27,25 @@ resource database 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2024-12-01
 resource containerUserMessageStore  'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2024-12-01-preview' existing = {
   parent: database
   name: userThreadName
+  dependsOn: [
+    database
+  ]
 }
 
 resource containerSystemMessageStore 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2024-12-01-preview' existing = {
   parent: database
   name: systemThreadName
+  dependsOn: [
+    database
+  ]
 }
 
 resource containerEntityStore 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2024-12-01-preview' existing = {
   parent: database
   name: entityStoreName
+  dependsOn: [
+    database
+  ]
 }
 
 
@@ -59,6 +67,9 @@ resource containerRoleAssignmentUserContainer 'Microsoft.DocumentDB/databaseAcco
     roleDefinitionId: roleDefinitionId
     scope: scopeUserContainer
   }
+  dependsOn: [
+    database
+  ]
 }
 
 resource containerRoleAssignmentSystemContainer 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2022-05-15' = {
@@ -69,6 +80,9 @@ resource containerRoleAssignmentSystemContainer 'Microsoft.DocumentDB/databaseAc
     roleDefinitionId: roleDefinitionId
     scope: scopeSystemContainer
   }
+  dependsOn: [
+    database
+  ]
 }
 
   resource containerRoleAssignmentEntityContainer 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2022-05-15' = {
@@ -79,4 +93,7 @@ resource containerRoleAssignmentSystemContainer 'Microsoft.DocumentDB/databaseAc
       roleDefinitionId: roleDefinitionId
       scope: scopeEntityContainer
     }
+    dependsOn: [
+      database
+    ]
   }
