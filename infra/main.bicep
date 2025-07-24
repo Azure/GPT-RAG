@@ -1636,6 +1636,156 @@ module appInsights 'br/public:avm/res/insights/component:0.6.0' = if (deployAppI
   }
 }
 
+//private link scope
+resource privateLinkScope 'microsoft.insights/privatelinkscopes@2021-07-01-preview' = if (deployAppInsights) {
+  name: '${const.abbrs.networking.privateLinkScope}${resourceToken}'
+  location: 'global'
+  properties :{
+    accessModeSettings : {
+      queryAccessMode : 'Open'
+      ingestionAccessMode : 'Open'
+    }
+  }
+  dependsOn: [
+    appInsights!
+  ]
+}
+
+module privateDnsZoneAzureMonitor 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (networkIsolation) {
+  name: 'azure-monitor-private-dns-zone'
+  params: {
+    name: 'privatelink.monitor.azure.com'
+    location: 'global'
+    tags: _tags
+    virtualNetworkLinks: [
+      {
+        name: '${vnetName}-azure-monitor-link'
+        registrationEnabled: false
+        #disable-next-line BCP318
+        virtualNetworkResourceId: virtualNetwork.outputs.resourceId
+      }
+    ]
+  }
+}
+
+module privateDnsZoneOmsOpsInsights 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (networkIsolation) {
+  name: 'oms-opinsights-private-dns-zone'
+  params: {
+    name: 'privatelink.oms.opinsights.azure.com'
+    location: 'global'
+    tags: _tags
+    virtualNetworkLinks: [
+      {
+        name: '${vnetName}-opinsights-link'
+        registrationEnabled: false
+        #disable-next-line BCP318
+        virtualNetworkResourceId: virtualNetwork.outputs.resourceId
+      }
+    ]
+  }
+}
+
+module privateDnsZoneOdsOpsInsights 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (networkIsolation) {
+  name: 'ods-opinsights-private-dns-zone'
+  params: {
+    name: 'privatelink.ods.opinsights.azure.com'
+    location: 'global'
+    tags: _tags
+    virtualNetworkLinks: [
+      {
+        name: '${vnetName}-opinsights-link'
+        registrationEnabled: false
+        #disable-next-line BCP318
+        virtualNetworkResourceId: virtualNetwork.outputs.resourceId
+      }
+    ]
+  }
+}
+
+module privateDnsZoneAzureAutomation 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (networkIsolation) {
+  name: 'azure-automation-private-dns-zone'
+  params: {
+    name: 'privatelink.agentsvc.azure.automation.net'
+    location: 'global'
+    tags: _tags
+    virtualNetworkLinks: [
+      {
+        name: '${vnetName}-azure-automation-link'
+        registrationEnabled: false
+        #disable-next-line BCP318
+        virtualNetworkResourceId: virtualNetwork.outputs.resourceId
+      }
+    ]
+  }
+}
+
+module privateEndpointPrivateLinkScope 'br/public:avm/res/network/private-endpoint:0.11.0' = if (networkIsolation) {
+  name: 'privatelink-scope-private-endpoint'
+  params: {
+    name: '${const.abbrs.networking.privateEndpoint}${const.abbrs.networking.privateLinkScope}${resourceToken}'
+    location: location
+    tags: _tags
+    subnetResourceId: _peSubnetId
+    privateLinkServiceConnections: [
+      {
+        name: 'privateLinkScopeConnection'
+        properties: {
+          privateLinkServiceId: privateLinkScope.id
+          groupIds: ['azuremonitor']
+        }
+      }
+    ]
+    privateDnsZoneGroup: {
+      name: 'privateLinkDnsZoneGroup'
+      privateDnsZoneGroupConfigs: [
+        {
+          name: 'azuremonitorARecord'
+          #disable-next-line BCP318
+          privateDnsZoneResourceId: privateDnsZoneAzureMonitor.outputs.resourceId
+        }
+        {
+          name: 'omsinsightsARecord'
+          #disable-next-line BCP318
+          privateDnsZoneResourceId: privateDnsZoneOmsOpsInsights.outputs.resourceId
+        }
+        {
+          name: 'odsinsightsARecord'
+          #disable-next-line BCP318
+          privateDnsZoneResourceId: privateDnsZoneOdsOpsInsights.outputs.resourceId
+        }
+        {
+          name: 'automationARecord'
+          #disable-next-line BCP318
+          privateDnsZoneResourceId: privateDnsZoneAzureAutomation.outputs.resourceId
+        }
+      ]
+    }
+  }
+  dependsOn: [
+    privateLinkScope
+  ]
+}
+
+resource privateLinkScopedResources1 'microsoft.insights/privatelinkscopes/scopedresources@2021-07-01-preview' = if (deployAppInsights) {
+  name: '${const.abbrs.networking.privateLinkScope}${resourceToken}/${logAnalyticsWorkspaceName}'
+  properties :{
+    linkedResourceId: logAnalytics.outputs.resourceId
+  }
+  dependsOn: [
+    privateLinkScope
+  ]
+}
+
+resource privateLinkScopedResources2 'microsoft.insights/privatelinkscopes/scopedresources@2021-07-01-preview' = if (deployAppInsights) {
+  name: '${const.abbrs.networking.privateLinkScope}${resourceToken}/${appInsightsName}'
+  properties :{
+    linkedResourceId: appInsights.outputs.resourceId
+  }
+  dependsOn: [
+    privateLinkScope
+  ]
+}
+
 // Container Resources
 //////////////////////////////////////////////////////////////////////////
 
