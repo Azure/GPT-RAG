@@ -142,6 +142,7 @@
       "value": [
         {
           "name": null,
+          "external" : true,
           "service_name": "orchestrator",
           "profile_name": "main",
           "min_replicas": 1,
@@ -160,6 +161,7 @@
         },
         {
           "name": null,
+          "external" : true,
           "service_name": "frontend",
           "profile_name": "main",
           "min_replicas": 1,
@@ -174,6 +176,7 @@
         },
         {
           "name": null,
+          "external" : true,
           "service_name": "dataingest",
           "profile_name": "main",
           "min_replicas": 1,
@@ -191,6 +194,7 @@
         },
         {
           "name": null,
+          "external" : true,
           "service_name": "mcp",
           "profile_name": "main",
           "min_replicas": 1,

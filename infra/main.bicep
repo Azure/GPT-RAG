@@ -1727,7 +1727,7 @@ module containerApps 'br/public:avm/res/app/container-app:0.17.0' = [
       environmentResourceId: containerEnv.outputs.resourceId
       workloadProfileName: app.profile_name
 
-      ingressExternal: networkIsolation ? false : true
+      ingressExternal: app.external
       ingressTargetPort: 80
       ingressTransport: 'auto'
       ingressAllowInsecure: false
