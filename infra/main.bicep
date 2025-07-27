@@ -557,6 +557,7 @@ module testVm 'br/public:avm/res/compute/virtual-machine:0.15.0' = if (deployVM 
       sku: 'winserver-2022'
       version: 'latest'
     }
+    encryptionAtHost: true  // Enable encryption at host for security - requires a feature enablement
     vmSize: vmSize
     osDisk: {
       caching: 'ReadWrite'
@@ -564,6 +565,7 @@ module testVm 'br/public:avm/res/compute/virtual-machine:0.15.0' = if (deployVM 
       managedDisk: {
         storageAccountType: 'Premium_LRS'
       }
+      
     }
     osType: 'Windows'
     zone: 0
@@ -588,7 +590,7 @@ module testVm 'br/public:avm/res/compute/virtual-machine:0.15.0' = if (deployVM 
 }
 
 // AppConfig -> AppConfig Data Reader -> TestVm
-module assignAppConfigAppConfigurationDataReaderTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deployAppConfig) {
+module assignAppConfigAppConfigurationDataReaderTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deployAppConfig && networkIsolation) {
   name: 'assignAppConfigAppConfigurationDataReaderTestVm'
   params: {
     name: 'assignAppConfigAppConfigurationDataReaderTestVm'
@@ -609,7 +611,7 @@ module assignAppConfigAppConfigurationDataReaderTestVm 'modules/security/resourc
 }
 
 // Azure Container Registry Service - AcrPush -> TestVm
-module assignCrAcrPushTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deployContainerRegistry) {
+module assignCrAcrPushTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deployContainerRegistry && networkIsolation) {
   name: 'assignCrAcrPushTestVm'
   params: {
     name: 'assignCrAcrPushTestVm'
@@ -627,7 +629,7 @@ module assignCrAcrPushTestVm 'modules/security/resource-role-assignment.bicep' =
 
 // Key Vault Service - Key Vault Contributor -> TestVm
 // Key Vault Service - Key Vault Secrets Officer -> TestVm
-module assignKeyVaultContributorAndSecretsOfficerTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deployKeyVault) {
+module assignKeyVaultContributorAndSecretsOfficerTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deployKeyVault && networkIsolation) {
   name: 'assignKeyVaultContributorAndSecretsOfficerTestVm'
   params: {
     name: 'assignKeyVaultContributorAndSecretsOfficerTestVm'
@@ -657,7 +659,7 @@ module assignKeyVaultContributorAndSecretsOfficerTestVm 'modules/security/resour
 }
 
 // Search Service - Search Service Contributor -> TestVm
-module assignSearchSearchServiceContributorTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deploySearchService) {
+module assignSearchSearchServiceContributorTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deploySearchService && networkIsolation) {
   name: 'assignSearchSearchServiceContributorTestVm'
   params: {
     name: 'assignSearchSearchServiceContributorTestVm'
@@ -677,7 +679,7 @@ module assignSearchSearchServiceContributorTestVm 'modules/security/resource-rol
 }
 
 // Search Service - Search Index Data Contributor -> TestVm
-module assignSearchSearchIndexDataContributorTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deploySearchService) {
+module assignSearchSearchIndexDataContributorTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deploySearchService && networkIsolation) {
   name: 'assignSearchSearchIndexDataContributorTestVm'
   params: {
     name: 'assignSearchSearchIndexDataContributorTestVm'
@@ -697,7 +699,7 @@ module assignSearchSearchIndexDataContributorTestVm 'modules/security/resource-r
 }
 
 // Storage Account - Storage Blob Data Contributor -> TestVm
-module assignStorageStorageBlobDataContributorTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deployStorageAccount) {
+module assignStorageStorageBlobDataContributorTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deployStorageAccount && networkIsolation) {
   name: 'assignStorageStorageBlobDataContributorTestVm'
   params: {
     name: 'assignStorageStorageBlobDataContributorTestVm'
@@ -717,7 +719,7 @@ module assignStorageStorageBlobDataContributorTestVm 'modules/security/resource-
 }
 
 // AI Foundry Account - Azure AI Project Manager -> TestVm
-module assignAiFoundryAccountAzureAiProjectManagerTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM) {
+module assignAiFoundryAccountAzureAiProjectManagerTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && networkIsolation) {
   name: 'assignAiFoundryAccountAzureAiProjectManagerTestVm'
   params: {
     name: 'assignAiFoundryAccountAzureAiProjectManagerTestVm'
@@ -736,7 +738,7 @@ module assignAiFoundryAccountAzureAiProjectManagerTestVm 'modules/security/resou
 }
 
 // Cosmos DB Account - Cosmos DB Built-in Data Contributor -> TestVm
-module assignCosmosDBCosmosDbBuiltInDataContributorTestVm 'modules/security/cosmos-data-plane-role-assignment.bicep' = if (deployCosmosDb) {
+module assignCosmosDBCosmosDbBuiltInDataContributorTestVm 'modules/security/cosmos-data-plane-role-assignment.bicep' = if (deployVM && deployCosmosDb && networkIsolation) {
   name: 'assignCosmosDBCosmosDbBuiltInDataContributorTestVm'
   params: {
     #disable-next-line BCP318
@@ -748,10 +750,10 @@ module assignCosmosDBCosmosDbBuiltInDataContributorTestVm 'modules/security/cosm
 }
 
 var fileUris = [
-  'https://raw.githubusercontent.com/givenscj/gpt-rag/refs/heads/cjg-v2-fixes-2/infra/install.ps1'
+  'https://raw.githubusercontent.com/Azure/GPT-RAG/refs/heads/release/2.0.1/infra/install.ps1'
 ]
 
-resource cse 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = if (deploySoftware) {
+resource cse 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = if (deployVM && deploySoftware && networkIsolation) {
   name: '${_vmName}/cse'
   location: location
   properties: {

@@ -68,6 +68,8 @@ After infrastructure is in place, deploy the GPT-RAG services from their respect
 
 * **[Data Ingestion](https://github.com/Azure/gpt-rag-ingestion)** – Handles data chunking and indexing to optimize retrieval for the RAG workflow.
 
+* **[MCP](https://github.com/Azure/gpt-rag-mcp)** – The Model Context Proctol server to support standard and custom business logic tool hosting.
+
 ## Permissions
 
 | Resource                              | Role                                | Assignee                   | Description                                                           |

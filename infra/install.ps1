@@ -160,6 +160,9 @@ if ($content -notmatch "NETWORK_ISOLATION") {
 if ($content -notmatch "USE_UAI") {
     $content += "USE_UAI=$useUAI`n"
 }
+if ($content -notmatch "RESOURCE_TOKEN") {
+    $content += "RESOURCE_TOKEN=$resourceToken`n"
+}
 if ($content -notmatch "DEPLOY_SOFTWARE") {
   $content += "DEPLOY_SOFTWARE=false`n"
 }
@@ -176,16 +179,16 @@ azd provision
 
 write-host "Downloading GPT-RAG-ORCHESTRATOR repository";
 cd C:\github
-git clone https://github.com/azure/gpt-rag-orchestrator
+git clone https://github.com/azure/gpt-rag-orchestrator -b release/2.0.0
 
-git config --global --add safe.directory C:/github/gpt-rag-orchestrator -b release/2.0.0
+git config --global --add safe.directory C:/github/gpt-rag-orchestrator 
 copy-item c:\github\gpt-rag\.azure c:\github\gpt-rag-orchestrator -recurse -container
 
 write-host "Downloading GPT-RAG-INGESTION repository";
 cd C:\github
 git clone https://github.com/azure/gpt-rag-ingestion -b release/2.0.0
 
-git config --global --add safe.directory C:/github/gpt-rag-ingestion -b release/2.0.0
+git config --global --add safe.directory C:/github/gpt-rag-ingestion
 copy-item c:\github\gpt-rag\.azure c:\github\gpt-rag-ingestion -recurse -container
 
 
