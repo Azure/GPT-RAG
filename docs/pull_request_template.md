@@ -8,14 +8,12 @@ Please see [Contributing Guidelines](../CONTRIBUTING.md) before creating your Pu
 
 ## Type of change
 
-```
-[ ] Bugfix
-[ ] Feature
-[ ] Code style update (formatting, local variables)
-[ ] Refactoring (no functional changes, no api changes)
-[ ] Documentation content changes
-[ ] Other... Please describe:
-```
+- [ ] Bugfix
+- [ ] Feature
+- [ ] Code style update (formatting, local variables)
+- [ ] Refactoring (no functional changes, no api changes)
+- [ ] Documentation content changes
+- [ ] Other... Please describe:
 
 ## Related Backlog Item or Issue
 
@@ -27,10 +25,8 @@ If applicable, provide a link to the relevant backlog item or issue.
 
 If deploying this change could impact existing applications, please specify.
 
-```
-[ ] Yes
-[ ] No
-```
+- [ ] Yes
+- [ ] No
 
 ## Cross-Repository Dependencies
 
@@ -45,10 +41,8 @@ If this change depends on pull requests in other repositories within the solutio
 
 If the changes add new functionality, update the documentation accordingly.
 
-```
-[ ] Yes
-[ ] No
-```
+- [ ] Yes
+- [ ] No
 
 ## Documentation Link
 
@@ -63,4 +57,3 @@ If this change adds a new functionality, provide a link to its documentation.
 - [ ] I have updated the CHANGELOG.md file to document these changes
 - [ ] I have reviewed the code for readability, maintainability, and adherence to project conventions
 - [ ] I have added at least two reviewers to the Pull Request
-
