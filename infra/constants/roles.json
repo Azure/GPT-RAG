@@ -527,9 +527,17 @@
     "guid": "f7669afb-68b2-44b4-9c5f-6d2a47fddda0",
     "key": "ContainerAppsSessionPoolsContributor"
   },
-  "ContainerAppsSessionPoolsReader": {
-    "guid": "af61e8fc-2633-4b95-bed3-421ad6826515",
-    "key": "ContainerAppsSessionPoolsReader"
+  "ContainerRegistryRepositoryWriter": {
+    "guid": "2a1e307c-b015-4ebd-883e-5b7698a07328",
+    "key": "ContainerRegistryRepositoryWriter"
+  },
+  "ContainerRegistryTasksContributor": {
+    "guid": "fb382eab-e894-4461-af04-94435c366c3f",
+    "key": "ContainerRegistryTasksContributor"
+  },
+  "ContainerRegistryContributorDataAccessConfigurationAdministrator": {
+    "guid": "3bc748fc-213d-45c1-8d91-9da5725539b9",
+    "key": "ContainerRegistryContributorDataAccessConfigurationAdministrator"
   },
   "Contributor": {
     "guid": "b24988ac-6180-42a0-ab88-20f7382dd24c",

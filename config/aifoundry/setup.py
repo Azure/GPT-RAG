@@ -130,10 +130,7 @@ def validate_json_file(path: str) -> None:
 # ── Azure Authentication ──────────────────────────────
 def get_azure_credential() -> ChainedTokenCredential:
     """Get Azure credential (Managed Identity preferred, fallback to CLI)."""
-    return ChainedTokenCredential(
-        ManagedIdentityCredential(),
-        AzureCliCredential()
-    )
+    return ChainedTokenCredential(AzureCliCredential(),ManagedIdentityCredential())
 
 # ── Key Vault Helper ─────────────────────────────────
 def add_ai_foundry_account_api_key_to_key_vault(

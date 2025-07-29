@@ -11,7 +11,7 @@
         "name": "documents",
         "query": ""
       },
-      {% if USE_UAI == true or USE_UAI == 'true' %}
+      {% if USE_UAI == true or USE_UAI == 'true' or USE_UAI == 'True' or USE_UAI == 'TRUE' %}
       "identity": {
           "@odata.type": "#Microsoft.Azure.Search.DataUserAssignedIdentity",
           "userAssignedIdentity": "{{SEARCH_SERVICE_UAI_RESOURCE_ID}}" 
@@ -32,7 +32,7 @@
         "name": "nl2sql",
         "query": "measures/"
       },
-      {% if USE_UAI == true or USE_UAI == 'true' %}
+      {% if USE_UAI == true or USE_UAI == 'true' or USE_UAI == 'True' or USE_UAI == 'TRUE' %}
       "identity": {
           "@odata.type": "#Microsoft.Azure.Search.DataUserAssignedIdentity",
           "userAssignedIdentity": "{{SEARCH_SERVICE_UAI_RESOURCE_ID}}" 
@@ -54,7 +54,7 @@
         "name": "nl2sql",
         "query": "queries/"
       },
-      {% if USE_UAI == true or USE_UAI == 'true' %}
+      {% if USE_UAI == true or USE_UAI == 'true' or USE_UAI == 'True' or USE_UAI == 'TRUE' %}
       "identity": {
           "@odata.type": "#Microsoft.Azure.Search.DataUserAssignedIdentity",
           "userAssignedIdentity": "{{SEARCH_SERVICE_UAI_RESOURCE_ID}}" 
@@ -76,7 +76,7 @@
         "name": "nl2sql",
         "query": "tables/"
       },
-      {% if USE_UAI == true or USE_UAI == 'true' %}
+      {% if USE_UAI == true or USE_UAI == 'true' or USE_UAI == 'True' or USE_UAI == 'TRUE' %}
       "identity": {
           "@odata.type": "#Microsoft.Azure.Search.DataUserAssignedIdentity",
           "userAssignedIdentity": "{{SEARCH_SERVICE_UAI_RESOURCE_ID}}" 

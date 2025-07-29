@@ -85,7 +85,7 @@ def prepare_context_and_render(template_name: str, template_dir: str, label_filt
         logging.error("APP_CONFIG_ENDPOINT not set")
         return None, {}
 
-    cred = ChainedTokenCredential(ManagedIdentityCredential(), AzureCliCredential())
+    cred = ChainedTokenCredential(AzureCliCredential(),ManagedIdentityCredential())
     try:
         ac_client = AzureAppConfigurationClient(ac_endpoint, cred)
     except Exception as e:
@@ -214,7 +214,7 @@ def execute_setup(defs: Optional[dict], context: dict):
     if defs is None:
         logging.error("No search definitions to provision. Skipping setup.")
         return
-    cred = ChainedTokenCredential(ManagedIdentityCredential(), AzureCliCredential())
+    cred = ChainedTokenCredential(AzureCliCredential(),ManagedIdentityCredential())
     indexers = defs.get("indexers", [])
     ds_to_indexers = {}
     for ix in indexers:

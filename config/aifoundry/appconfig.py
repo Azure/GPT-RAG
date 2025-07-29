@@ -14,7 +14,7 @@ class AppConfigClient:
         if not endpoint:
             raise EnvironmentError("APP_CONFIG_ENDPOINT must be set")
 
-        credential = ChainedTokenCredential(ManagedIdentityCredential(), AzureCliCredential())
+        credential = ChainedTokenCredential(AzureCliCredential(),ManagedIdentityCredential())
         client = AzureAppConfigurationClient(base_url=endpoint, credential=credential)
 
         self._settings: Dict[str, str] = {}

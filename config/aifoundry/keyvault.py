@@ -17,7 +17,7 @@ class KeyVaultClient:
             if not vault_uri:
                 raise EnvironmentError("KEY_VAULT_URI must be set to your Key Vault URI in App Configuration")
         # Authenticate
-        credential = ChainedTokenCredential(ManagedIdentityCredential(), AzureCliCredential())
+        credential = ChainedTokenCredential(AzureCliCredential(),ManagedIdentityCredential())
         try:
             self._client = SecretClient(vault_url=vault_uri, credential=credential)
         except AzureError as e:

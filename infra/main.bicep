@@ -462,6 +462,7 @@ module virtualNetwork 'br/public:avm/res/network/virtual-network:0.7.0' = if (ne
       {
         name: 'jumpbox-subnet'
         addressPrefix: '192.168.4.0/27' // 32 IPs for jumpbox VMs
+        natGatewayResourceId: natGateway.id
       }
       {
         name: 'api-management-subnet'
@@ -557,13 +558,13 @@ module testVm 'br/public:avm/res/compute/virtual-machine:0.15.0' = if (deployVM 
       sku: 'winserver-2022'
       version: 'latest'
     }
-    encryptionAtHost: true  // Enable encryption at host for security - requires a feature enablement
+    encryptionAtHost: false  // Enable encryption at host for security - requires a feature enablement
     vmSize: vmSize
     osDisk: {
       caching: 'ReadWrite'
       diskSizeGB: 250
       managedDisk: {
-        storageAccountType: 'Premium_LRS'
+        storageAccountType: 'Standard_LRS'
       }
       
     }
@@ -589,6 +590,133 @@ module testVm 'br/public:avm/res/compute/virtual-machine:0.15.0' = if (deployVM 
   ]
 }
 
+resource natPublicIp 'Microsoft.Network/publicIPAddresses@2024-07-01' = if (deployVM && networkIsolation) {
+  name: '${const.abbrs.networking.publicIPAddress}${const.abbrs.networking.natGateway}${resourceToken}'
+  location: location
+  sku: {
+    name: 'Standard'
+    tier: 'Regional'
+  }
+  properties: {
+    publicIPAllocationMethod: 'Static'
+    publicIPAddressVersion: 'IPv4'
+    idleTimeoutInMinutes: 30
+    dnsSettings: {
+      domainNameLabel: '${const.abbrs.networking.publicIPAddress}${const.abbrs.networking.natGateway}${resourceToken}'
+    }
+  }
+  tags: _tags
+}
+
+resource natGateway 'Microsoft.Network/natGateways@2024-10-01' = if (deployVM && networkIsolation) {
+  name: '${const.abbrs.networking.natGateway}${resourceToken}'
+  location: location
+  sku: {
+    name: 'Standard'
+    tier: 'Regional'
+  }
+  properties: {
+    publicIpAddresses: [
+      {
+        id: natPublicIp.id
+      }
+    ]
+  }
+}
+
+// Container Apps
+// Container Apps Contributor
+// -> TestVm
+module assignContainerAppsTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deployAppConfig && deployContainerRegistry && networkIsolation) {
+  name: 'assignContainerAppsTestVm'
+  params: {
+    name: 'assignContainerAppsTestVm'
+    roleAssignments: [
+      {
+        roleDefinitionId: subscriptionResourceId(
+          'Microsoft.Authorization/roleDefinitions',
+          const.roles.ContainerAppsContributor.guid
+        )
+        #disable-next-line BCP318
+        principalId: (useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId
+        #disable-next-line BCP318
+        resourceId: ''
+        principalType: 'ServicePrincipal'
+      }
+      
+    ]
+  }
+}
+
+// Managed Identity Operator -> TestVm
+module assignManagedIdentityOperatorTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deployAppConfig && deployContainerRegistry && networkIsolation) {
+  name: 'assignManagedIdentityOperatorTestVm'
+  params: {
+    name: 'assignManagedIdentityOperatorTestVm'
+    roleAssignments: [
+      {
+        roleDefinitionId: subscriptionResourceId(
+          'Microsoft.Authorization/roleDefinitions',
+          const.roles.ManagedIdentityOperator.guid
+        )
+        #disable-next-line BCP318
+        principalId: (useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId
+        #disable-next-line BCP318
+        resourceId: ''
+        principalType: 'ServicePrincipal'
+      }
+      
+    ]
+  }
+}
+
+// Container Registry
+// Container Registry Repository Writer, Container Registry Tasks Contributor, Container Registry Contributor and Data Access Configuration Administrator
+// -> TestVm
+
+// AppConfig -> AppConfig Data Reader -> TestVm
+module assignContainerRegistryTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deployAppConfig && deployContainerRegistry && networkIsolation) {
+  name: 'assignContainerRegistryTestVm'
+  params: {
+    name: 'assignContainerRegistryTestVm'
+    roleAssignments: [
+      {
+        roleDefinitionId: subscriptionResourceId(
+          'Microsoft.Authorization/roleDefinitions',
+          const.roles.ContainerRegistryRepositoryWriter.guid
+        )
+        #disable-next-line BCP318
+        principalId: (useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId
+        #disable-next-line BCP318
+        resourceId: containerRegistry.outputs.resourceId
+        principalType: 'ServicePrincipal'
+      }
+      {
+        roleDefinitionId: subscriptionResourceId(
+          'Microsoft.Authorization/roleDefinitions',
+          const.roles.ContainerRegistryContributorDataAccessConfigurationAdministrator.guid
+        )
+        #disable-next-line BCP318
+        principalId: (useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId
+        #disable-next-line BCP318
+        resourceId: containerRegistry.outputs.resourceId
+        principalType: 'ServicePrincipal'
+      }
+      {
+        roleDefinitionId: subscriptionResourceId(
+          'Microsoft.Authorization/roleDefinitions',
+          const.roles.ContainerRegistryTasksContributor.guid
+        )
+        #disable-next-line BCP318
+        principalId: (useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId
+        #disable-next-line BCP318
+        resourceId: containerRegistry.outputs.resourceId
+        principalType: 'ServicePrincipal'
+      }
+    ]
+  }
+}
+
 // AppConfig -> AppConfig Data Reader -> TestVm
 module assignAppConfigAppConfigurationDataReaderTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deployAppConfig && networkIsolation) {
   name: 'assignAppConfigAppConfigurationDataReaderTestVm'
@@ -598,7 +726,7 @@ module assignAppConfigAppConfigurationDataReaderTestVm 'modules/security/resourc
       {
         roleDefinitionId: subscriptionResourceId(
           'Microsoft.Authorization/roleDefinitions',
-          const.roles.AppConfigurationDataReader.guid
+          const.roles.AppConfigurationDataOwner.guid
         )
         #disable-next-line BCP318
         principalId: (useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId
@@ -729,6 +857,15 @@ module assignAiFoundryAccountAzureAiProjectManagerTestVm 'modules/security/resou
         roleDefinitionId: subscriptionResourceId(
           'Microsoft.Authorization/roleDefinitions',
           const.roles.AzureAIProjectManager.guid
+        )
+        resourceId: aiFoundryAccount.outputs.accountID
+        principalType: 'ServicePrincipal'
+      }
+      {
+        principalId: (useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId
+        roleDefinitionId: subscriptionResourceId(
+          'Microsoft.Authorization/roleDefinitions',
+          const.roles.CognitiveServicesContributor.guid
         )
         resourceId: aiFoundryAccount.outputs.accountID
         principalType: 'ServicePrincipal'
@@ -2963,11 +3100,11 @@ module appConfigKeyVaultPopulate 'modules/app-configuration/app-configuration.bi
     keyValues: concat(
       [
         #disable-next-line BCP318
-        { name: 'ORCHESTRATOR_APP_APIKEY',         value: '{"uri":"${keyVault.outputs.uri}secrets/ORCHESTRATOR_APP_APIKEY"}',  label: 'gpt-rag', contentType: 'application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8' }
+        { name: 'ORCHESTRATOR_APP_APIKEY',         value: '{"uri":"${keyVault.outputs.uri}secrets/ORCHESTRATOR-APP-APIKEY"}',  label: 'gpt-rag', contentType: 'application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8' }
         #disable-next-line BCP318
-        { name: 'MCP_APP_APIKEY',                  value: '{"uri":"${keyVault.outputs.uri}secrets/MCP_APP_APIKEY"}',  label: 'gpt-rag', contentType: 'application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8' }
+        { name: 'MCP_APP_APIKEY',                  value: '{"uri":"${keyVault.outputs.uri}secrets/MCP-APP-APIKEY"}',  label: 'gpt-rag', contentType: 'application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8' }
         #disable-next-line BCP318
-        { name: 'INGESTION_APP_APIKEY',            value: '{"uri":"${keyVault.outputs.uri}secrets/INGESTION_APP_APIKEY"}',  label: 'gpt-rag', contentType: 'application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8' }
+        { name: 'INGESTION_APP_APIKEY',            value: '{"uri":"${keyVault.outputs.uri}secrets/INGESTION-APP-APIKEY"}',  label: 'gpt-rag', contentType: 'application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8' }
       ]
     )
   }

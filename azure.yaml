@@ -25,3 +25,12 @@ hooks:
       shell: pwsh
       run: scripts/postProvision.ps1
       interactive: true
+  predeploy:
+    posix:
+      shell: sh
+      run: scripts/preDeploy.sh
+      interactive: true
+    windows:
+      shell: pwsh
+      run: scripts/preDeploy.ps1
+      interactive: true
