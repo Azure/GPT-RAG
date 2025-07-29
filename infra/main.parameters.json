@@ -69,7 +69,7 @@
           "model": "gpt-4o",
           "modelFormat": "OpenAI",          
           "type": "GlobalStandard",
-          "version": "2024-11-20",          
+          "version": "2025-01-01-preview",          
           "capacity": 40,
           "canonical_name": "CHAT_DEPLOYMENT_NAME"
         },
