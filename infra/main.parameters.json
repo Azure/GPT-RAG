@@ -80,6 +80,9 @@
     "azureDataIngestionFunctionAppName": {
       "value": "${AZURE_DATA_INGESTION_FUNCTION_APP_NAME}"
     },
+    "azureMcpServerFunctionAppName": {
+      "value": "${AZURE_MCP_SERVER_FUNCTION_APP_NAME}"
+    },
     "azureSearchServiceName": {
       "value": "${AZURE_SEARCH_SERVICE_NAME}"
     },

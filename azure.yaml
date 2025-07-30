@@ -33,6 +33,18 @@ services:
           # this path is relative to ./.salesfactory/gpt-rag-orchestrator
           run: scripts/postdeploy.ps1
           interactive: false
+  mcpServer:
+    project: ./.salesfactory/freddAid-MCP-server
+    language: python
+    host: function
+    hooks:
+      postdeploy:
+        posix:
+          run: scripts/postdeploy.sh
+          interactive: false
+        windows:
+          run: scripts/postdeploy.ps1
+          interactive: false
   frontend:
     # backend is python and frontend is Vite app. The frontend is built with Vite settings to output into the backend's static folder.
     project: ./.salesfactory/gpt-rag-frontend/backend
