@@ -314,7 +314,7 @@ param speechSynthesisLanguage string
 param speechSynthesisVoiceName string
 
 // openai
-param chatGptDeploymentName string = 'gpt-4.1'
+param chatGptDeploymentName string = 'Agent'
 @description('Embeddings model used to generate vector embeddings. Don\'t forget to check region availability.')
 @allowed(['text-embedding-3-small'])
 param embeddingsModelName string = 'text-embedding-3-small'
@@ -1373,7 +1373,7 @@ module frontEnd 'core/host/appservice.bicep' = {
       }
       {
         name: 'OPENAI_GPT_MODEL'
-        value: 'gpt-4.1'
+        value: 'Agent' // Todo: just temporary, this will be removed later
       }
       {
         name: 'AZURE_OPENAI_EMBEDDING_MODEL'

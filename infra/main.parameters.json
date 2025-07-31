@@ -27,10 +27,10 @@
       "value": "${AZURE_SEARCH_USE_MIS}"
     },
     "chatGptModelName": {
-      "value": "gpt-4.1"
+      "value": "gpt-4o"
     },
     "chatGptModelVersion": {
-      "value": "2025-04-14"
+      "value": "2024-11-20"
     },
     "orchestratorMessagesLanguage": {
       "value": "en"
