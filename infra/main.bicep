@@ -883,7 +883,7 @@ module orchestrator './core/host/functions.bicep' = {
       }
       {
         name: 'AZURE_OPENAI_API_KEY'
-        value: o1Deployment.outputs.o1Key
+        value: openAiApiKey
       }
       {
         name: 'AZURE_OPENAI_API_VERSION'
@@ -895,7 +895,7 @@ module orchestrator './core/host/functions.bicep' = {
       }
       {
         name: 'AZURE_OPENAI_ENDPOINT'
-        value: o1Deployment.outputs.o1Endpoint
+        value: openAiEndpoint
       }
       {
         name: 'AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG'
@@ -1361,11 +1361,11 @@ module frontEnd 'core/host/appservice.bicep' = {
       }
       {
         name: 'AZURE_OPENAI_ENDPOINT'
-        value: o1Deployment.outputs.o1Endpoint
+        value: openAiEndpoint
       }
       {
         name: 'AZURE_OPENAI_API_KEY'
-        value: o1Deployment.outputs.o1Key
+        value: openAiApiKey
       }
       {
         name: 'AZURE_OPENAI_API_VERSION'
