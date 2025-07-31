@@ -1988,6 +1988,7 @@ module containerRegistry 'br/public:avm/res/container-registry/registry:0.9.1' =
       #disable-next-line BCP318
       userAssignedResourceIds: useUAI ? [containerRegistryUAI.outputs.resourceId] : []
     }
+    exportPolicyStatus: 'enabled'
   }
 }
 
@@ -3073,6 +3074,7 @@ var outputModelDeploymentSettings = [
     modelFormat: modelDeployment.modelFormat
     name: modelDeployment.name
     version: modelDeployment.version
+    apiVersion: modelDeployment.apiVersion
     endpoint: 'https://${const.abbrs.ai.aiFoundry}${resourceToken}.openai.azure.com/'
   }
 ]
