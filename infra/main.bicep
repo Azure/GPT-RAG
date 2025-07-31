@@ -314,15 +314,15 @@ param speechSynthesisLanguage string
 param speechSynthesisVoiceName string
 
 // openai
-param chatGptDeploymentName string = 'chat'
+param chatGptDeploymentName string = 'gpt-4.1'
 @description('Embeddings model used to generate vector embeddings. Don\'t forget to check region availability.')
-@allowed(['text-embedding-ada-002'])
-param embeddingsModelName string = 'text-embedding-ada-002'
+@allowed(['text-embedding-3-small'])
+param embeddingsModelName string = 'text-embedding-3-small'
 @description('Embeddings model version.')
-@allowed(['2'])
-param embeddingsModelVersion string = '2'
+@allowed(['1'])
+param embeddingsModelVersion string = '1'
 @description('Embeddings model deployment name.')
-param embeddingsDeploymentName string = 'text-embedding-ada-002'
+param embeddingsDeploymentName string = 'text-embedding-3-small'
 @description('Embeddings model tokens per Minute Rate Limit (thousands). Default quota per model and region: 240')
 @minValue(1)
 @maxValue(240)
@@ -883,7 +883,7 @@ module orchestrator './core/host/functions.bicep' = {
       }
       {
         name: 'AZURE_OPENAI_API_KEY'
-        value: openAiApiKey
+        value: o1Deployment.outputs.o1Key
       }
       {
         name: 'AZURE_OPENAI_API_VERSION'
@@ -895,7 +895,7 @@ module orchestrator './core/host/functions.bicep' = {
       }
       {
         name: 'AZURE_OPENAI_ENDPOINT'
-        value: openAiEndpoint
+        value: o1Deployment.outputs.o1Endpoint
       }
       {
         name: 'AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG'
@@ -1361,11 +1361,11 @@ module frontEnd 'core/host/appservice.bicep' = {
       }
       {
         name: 'AZURE_OPENAI_ENDPOINT'
-        value: openAiEndpoint
+        value: o1Deployment.outputs.o1Endpoint
       }
       {
         name: 'AZURE_OPENAI_API_KEY'
-        value: openAiApiKey
+        value: o1Deployment.outputs.o1Key
       }
       {
         name: 'AZURE_OPENAI_API_VERSION'
@@ -1373,7 +1373,7 @@ module frontEnd 'core/host/appservice.bicep' = {
       }
       {
         name: 'OPENAI_GPT_MODEL'
-        value: 'Agent'
+        value: 'gpt-4.1'
       }
       {
         name: 'AZURE_OPENAI_EMBEDDING_MODEL'
