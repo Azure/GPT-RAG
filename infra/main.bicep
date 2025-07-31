@@ -328,8 +328,8 @@ param embeddingsDeploymentName string = 'text-embedding-ada-002'
 @maxValue(240)
 param embeddingsDeploymentCapacity int = 20
 @description('Azure OpenAI API version.')
-@allowed(['2024-05-01-preview'])
-param openaiApiVersion string = '2024-05-01-preview'
+@allowed(['2025-04-01-preview'])
+param openaiApiVersion string = '2025-04-01-preview'
 @description('Enables LLM monitoring to generate conversation metrics.')
 @allowed([true, false])
 param chatGptLlmMonitoring bool = true
@@ -569,6 +569,12 @@ var orchestratorUri = 'https://${orchestratorFunctionAppName}.azurewebsites.net'
 var webAppUri = 'https://${appServiceName}.azurewebsites.net'
 
 var pythonEnableInitIndexing = '1'
+
+// MCP Function app
+@description('MCP Search Index')
+var mcpSearchIndex = 'ragindex-test'
+@description('Logging Verbosity')
+var loggingVerbosity = 'false'
 
 // B2C parameters
 @description('B2C Tenant Name')
@@ -1789,6 +1795,34 @@ module mcpServer './core/host/functions.bicep' = {
       {
         name: 'PYTHON_ENABLE_INIT_INDEXING'
         value: pythonEnableInitIndexing
+      }
+      {
+        name: 'SEARCH_API_KEY'
+        value: aiSearchApiKey
+      }
+      {
+        name: 'AZURE_SEARCH_SERVICE'
+        value: searchServiceName
+      }
+      {
+        name: 'TAVILY_API_KEY'
+        value: orchestratorTavilyApiKeyVar
+      }
+      {
+        name: 'AZURE_SEARCH_INDEX'
+        value: mcpSearchIndex
+      }
+      {
+        name: 'AZURE_OPENAI_ENDPOINT'
+        value: o1Deployment.outputs.o1Endpoint
+      }
+      {
+        name: 'AZURE_OPENAI_KEY'
+        value: o1Deployment.outputs.o1Key
+      }
+      {
+        name: 'VERBOSE_LOGGING'
+        value: loggingVerbosity
       }
       {
         name: 'ENABLE_ORYX_BUILD'
