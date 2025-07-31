@@ -32,9 +32,6 @@
     "chatGptModelVersion": {
       "value": "0613"
     },
-    "openaiApiVersion": {
-      "value": "2024-05-01-preview"
-    },
     "orchestratorMessagesLanguage": {
       "value": "en"
     },
