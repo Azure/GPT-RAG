@@ -27,10 +27,10 @@
       "value": "${AZURE_SEARCH_USE_MIS}"
     },
     "chatGptModelName": {
-      "value": "gpt-35-turbo"
+      "value": "gpt-4o"
     },
     "chatGptModelVersion": {
-      "value": "0613"
+      "value": "2024-11-20"
     },
     "orchestratorMessagesLanguage": {
       "value": "en"

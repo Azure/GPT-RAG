@@ -314,15 +314,15 @@ param speechSynthesisLanguage string
 param speechSynthesisVoiceName string
 
 // openai
-param chatGptDeploymentName string = 'chat'
+param chatGptDeploymentName string = 'Agent'
 @description('Embeddings model used to generate vector embeddings. Don\'t forget to check region availability.')
-@allowed(['text-embedding-ada-002'])
-param embeddingsModelName string = 'text-embedding-ada-002'
+@allowed(['text-embedding-3-small'])
+param embeddingsModelName string = 'text-embedding-3-small'
 @description('Embeddings model version.')
-@allowed(['2'])
-param embeddingsModelVersion string = '2'
+@allowed(['1'])
+param embeddingsModelVersion string = '1'
 @description('Embeddings model deployment name.')
-param embeddingsDeploymentName string = 'text-embedding-ada-002'
+param embeddingsDeploymentName string = 'text-embedding-3-small'
 @description('Embeddings model tokens per Minute Rate Limit (thousands). Default quota per model and region: 240')
 @minValue(1)
 @maxValue(240)
@@ -1373,7 +1373,7 @@ module frontEnd 'core/host/appservice.bicep' = {
       }
       {
         name: 'OPENAI_GPT_MODEL'
-        value: 'Agent'
+        value: 'Agent' // Todo: just temporary, this will be removed later
       }
       {
         name: 'AZURE_OPENAI_EMBEDDING_MODEL'
