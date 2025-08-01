@@ -30,8 +30,8 @@ resource gpt41Deployment 'Microsoft.CognitiveServices/accounts/deployments@2024-
   parent: o1Account
   name: 'gpt-4.1'
   sku: {
-    name: 'DataZoneStandard'
-    capacity: 100
+    name: 'GlobalStandard'
+    capacity: 50
   }
   properties: {
     model: {
@@ -40,7 +40,7 @@ resource gpt41Deployment 'Microsoft.CognitiveServices/accounts/deployments@2024-
       version: '2025-04-14'
     }
     versionUpgradeOption: 'OnceNewDefaultVersionAvailable'
-    currentCapacity: 100
+    currentCapacity: 50
     raiPolicyName: 'Microsoft.DefaultV2'
   }
 }
