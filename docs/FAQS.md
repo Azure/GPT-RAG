@@ -18,6 +18,10 @@ If using User Managed Identity, ensure that the 'AZURE_CLIENT_ID' is set to the 
 
 Double check that the app config url is set correctly in the container environment variables.
 
-## Indexer is not being created
+## AI Search Indexer is not being created
 
 Check that the service private link between Azure AI Search and the other services is in an `Approved` status.
+
+## Unable to start Docker Desktop in virtual machine
+
+Ensure that dockerd process is stopped and then start docker desktop.

@@ -28,12 +28,12 @@ resource account 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' = {
     networkAcls: {
       bypass: 'AzureServices'
       defaultAction: networkIsolation ? 'Deny' : 'Allow'
-      virtualNetworkRules: [
+      virtualNetworkRules: networkIsolation ? [
         {
           id: agentSubnetId
           ignoreMissingVnetServiceEndpoint: true
         }
-      ]
+      ] : null
       ipRules: []
     }
     publicNetworkAccess: 'Enabled' //this is because the firewall allows the subnets //networkIsolation ? 'Disabled' : 'Enabled'
