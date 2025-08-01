@@ -1776,7 +1776,7 @@ module appInsights 'br/public:avm/res/insights/component:0.6.0' = if (deployAppI
 }
 
 //private link scope
-resource privateLinkScope 'microsoft.insights/privatelinkscopes@2021-07-01-preview' = if (deployAppInsights) {
+resource privateLinkScope 'microsoft.insights/privatelinkscopes@2021-07-01-preview' = if (networkIsolation && deployAppInsights) {
   name: '${const.abbrs.networking.privateLinkScope}${resourceToken}'
   location: 'global'
   properties :{
@@ -1905,7 +1905,7 @@ module privateEndpointPrivateLinkScope 'br/public:avm/res/network/private-endpoi
   ]
 }
 
-resource privateLinkScopedResources1 'microsoft.insights/privatelinkscopes/scopedresources@2021-07-01-preview' = if (deployAppInsights) {
+resource privateLinkScopedResources1 'microsoft.insights/privatelinkscopes/scopedresources@2021-07-01-preview' = if (networkIsolation && deployAppInsights) {
   name: '${const.abbrs.networking.privateLinkScope}${resourceToken}/${logAnalyticsWorkspaceName}'
   properties :{
     linkedResourceId: logAnalytics.outputs.resourceId
@@ -1915,7 +1915,7 @@ resource privateLinkScopedResources1 'microsoft.insights/privatelinkscopes/scope
   ]
 }
 
-resource privateLinkScopedResources2 'microsoft.insights/privatelinkscopes/scopedresources@2021-07-01-preview' = if (deployAppInsights) {
+resource privateLinkScopedResources2 'microsoft.insights/privatelinkscopes/scopedresources@2021-07-01-preview' = if (networkIsolation && deployAppInsights) {
   name: '${const.abbrs.networking.privateLinkScope}${resourceToken}/${appInsightsName}'
   properties :{
     linkedResourceId: appInsights.outputs.resourceId
