@@ -170,6 +170,9 @@
     "langsmithTracingV2": {
       "value": "${LANGCHAIN_TRACING_V2}"
     },
+    "mcpCodeInterpreterAgentModel": {
+      "value": "${AGENT_MODEL}"
+    },
     "deploymentTags": {
       "value": {}
     }

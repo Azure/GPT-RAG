@@ -83,3 +83,6 @@ jobs:
           LANGCHAIN_PROJECT: ${{ secrets.LANGCHAIN_PROJECT }}
           LANGCHAIN_ENDPOINT: ${{ secrets.LANGCHAIN_ENDPOINT }}
           LANGCHAIN_TRACING_V2: ${{ secrets.LANGCHAIN_TRACING_V2 }}
+
+          # MCP
+          AGENT_MODEL: ${{ secrets.AGENT_MODEL }}

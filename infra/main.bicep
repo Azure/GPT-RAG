@@ -526,6 +526,14 @@ var aiSearchApiKey = !empty(azureAiSearchApiKey) ? azureAiSearchApiKey : ''
 param azureOpenAiApiKey string = ''
 var openAiApiKey = !empty(azureOpenAiApiKey) ? azureOpenAiApiKey : ''
 
+// MCP 
+@description('MCP code interpreter agent model')
+param mcpCodeInterpreterAgentModel string = ''
+var mcpCodeInterpreterAgentModelVar = !empty(mcpCodeInterpreterAgentModel) ? mcpCodeInterpreterAgentModel : ''
+
+@description('endpoint service for the agent model')
+var mcpAgentEndpointService = 'r1ai0-${resourceToken}-aiservice'
+
 // ---------------------------------------------------------------------
 // ADDITIONAL PARAMETERS FOR THE ORCHESTRATOR SETTINGS (REFACTORED)
 // ---------------------------------------------------------------------
@@ -1819,6 +1827,14 @@ module mcpServer './core/host/functions.bicep' = {
       {
         name: 'AZURE_OPENAI_KEY'
         value: o1Deployment.outputs.o1Key
+      }
+      {
+        name: 'AGENT_MODEL'
+        value: mcpCodeInterpreterAgentModelVar
+      }
+      {
+        name: 'AGENT_ENDPOINT_SERVICE'
+        value: mcpAgentEndpointService
       }
       {
         name: 'VERBOSE_LOGGING'
