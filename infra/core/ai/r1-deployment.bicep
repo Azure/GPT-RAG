@@ -40,6 +40,9 @@ resource accounts_r1ai0_vm2b2htvuuclm_aiservice_name_DeepSeek_V3_0324 'Microsoft
 resource gpt41Deployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
   parent: deepseekR1AIService
   name: 'gpt-4.1'
+  dependsOn: [
+    accounts_r1ai0_vm2b2htvuuclm_aiservice_name_DeepSeek_V3_0324
+  ]
   sku: {
     name: 'DataZoneStandard'
     capacity: gpt41Capacity
