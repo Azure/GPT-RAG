@@ -1,6 +1,6 @@
 param name string
 param location string = resourceGroup().location
-
+param gpt41Capacity int = 150
 var aiServiceName = '${name}-aiservice'
 
 
@@ -37,6 +37,23 @@ resource accounts_r1ai0_vm2b2htvuuclm_aiservice_name_DeepSeek_V3_0324 'Microsoft
     raiPolicyName: 'Microsoft.Default'
   }
 }
-
+resource gpt41Deployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
+  parent: deepseekR1AIService
+  name: 'gpt-4.1'
+  sku: {
+    name: 'DataZoneStandard'
+    capacity: gpt41Capacity
+  }
+  properties: {
+    model: {
+      format: 'OpenAI'
+      name: 'gpt-4.1'
+      version: '2025-04-14'
+    }
+    versionUpgradeOption: 'OnceNewDefaultVersionAvailable'
+    currentCapacity: gpt41Capacity
+    raiPolicyName: 'Microsoft.DefaultV2'
+  }
+}
 output r1Endpoint string = 'https://${deepseekR1AIService.name}.cognitiveservices.azure.com/models'
 output r1Key string = deepseekR1AIService.listKeys().key1
