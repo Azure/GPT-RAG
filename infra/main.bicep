@@ -1065,6 +1065,10 @@ module orchestrator './core/host/functions.bicep' = {
         name: 'O1_KEY'
         value: o1Deployment.outputs.o1Key
       }
+      {
+        name: 'MCP_FUNCTION_NAME'
+        value: mcpServerFunctionAppName
+      }
     ]
   }
 }
@@ -1219,6 +1223,15 @@ module mcpServerSearchAccess './core/security/search-access.bicep' = {
   scope: resourceGroup
   params: {
     searchServiceName: searchService.outputs.name
+    principalId: mcpServer.outputs.identityPrincipalId
+  }
+}
+
+// Give the MCP Resource Token function access to Azure AI Foundry
+module mcpServerAiFoundryAccess './core/security/ai-foundry-access.bicep' = {
+  name: 'mcp-server-ai-foundry-access'
+  scope: resourceGroup
+  params: {
     principalId: mcpServer.outputs.identityPrincipalId
   }
 }
