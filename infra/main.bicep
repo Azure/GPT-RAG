@@ -1065,6 +1065,10 @@ module orchestrator './core/host/functions.bicep' = {
         name: 'O1_KEY'
         value: o1Deployment.outputs.o1Key
       }
+      {
+        name: 'MCP_FUNCTION_NAME'
+        value: mcpServerFunctionAppName
+      }
     ]
   }
 }
