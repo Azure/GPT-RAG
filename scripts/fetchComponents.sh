@@ -23,3 +23,11 @@ fi
 
 # Clone the repository into the .salesfactory folder
 git clone -b develop https://github.com/Salesfactory/gpt-rag-frontend ./.salesfactory/gpt-rag-frontend
+
+# Delete the freddAid-MCP-server folder from .salesfactory if it exists
+if [ -d ./.salesfactory/freddAid-MCP-server ]; then
+    rm -rf ./.salesfactory/freddAid-MCP-server
+fi
+
+# Clone the freddAid-MCP-server repository into the .salesfactory folder
+git clone -b develop https://github.com/Salesfactory/freddAid-MCP-server ./.salesfactory/freddAid-MCP-server

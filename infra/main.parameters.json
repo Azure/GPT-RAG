@@ -32,9 +32,6 @@
     "chatGptModelVersion": {
       "value": "0613"
     },
-    "openaiApiVersion": {
-      "value": "2024-05-01-preview"
-    },
     "orchestratorMessagesLanguage": {
       "value": "en"
     },
@@ -79,6 +76,9 @@
     },
     "azureDataIngestionFunctionAppName": {
       "value": "${AZURE_DATA_INGESTION_FUNCTION_APP_NAME}"
+    },
+    "azureMcpServerFunctionAppName": {
+      "value": "${AZURE_MCP_SERVER_FUNCTION_APP_NAME}"
     },
     "azureSearchServiceName": {
       "value": "${AZURE_SEARCH_SERVICE_NAME}"
@@ -169,6 +169,9 @@
     },
     "langsmithTracingV2": {
       "value": "${LANGCHAIN_TRACING_V2}"
+    },
+    "mcpCodeInterpreterAgentModel": {
+      "value": "${AGENT_MODEL}"
     },
     "deploymentTags": {
       "value": {}

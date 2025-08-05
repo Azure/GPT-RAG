@@ -328,8 +328,8 @@ param embeddingsDeploymentName string = 'text-embedding-ada-002'
 @maxValue(240)
 param embeddingsDeploymentCapacity int = 20
 @description('Azure OpenAI API version.')
-@allowed(['2024-05-01-preview'])
-param openaiApiVersion string = '2024-05-01-preview'
+@allowed(['2025-04-01-preview'])
+param openaiApiVersion string = '2025-04-01-preview'
 @description('Enables LLM monitoring to generate conversation metrics.')
 @allowed([true, false])
 param chatGptLlmMonitoring bool = true
@@ -412,6 +412,11 @@ param azureDataIngestionFunctionAppName string = ''
 var dataIngestionFunctionAppName = !empty(azureDataIngestionFunctionAppName)
   ? azureDataIngestionFunctionAppName
   : 'fninges0-${resourceToken}'
+@description('MCP server function name')
+param azureMcpServerFunctionAppName string = ''
+var mcpServerFunctionAppName = !empty(azureMcpServerFunctionAppName)
+  ? azureMcpServerFunctionAppName
+  : 'fnmcp-${resourceToken}'
 @description('Search Service Name. Use your own name convention or leave as it is to generate a random name.')
 param azureSearchServiceName string = ''
 var searchServiceName = !empty(azureSearchServiceName) ? azureSearchServiceName : 'search0-${resourceToken}'
@@ -521,6 +526,14 @@ var aiSearchApiKey = !empty(azureAiSearchApiKey) ? azureAiSearchApiKey : ''
 param azureOpenAiApiKey string = ''
 var openAiApiKey = !empty(azureOpenAiApiKey) ? azureOpenAiApiKey : ''
 
+// MCP 
+@description('MCP code interpreter agent model')
+param mcpCodeInterpreterAgentModel string = ''
+var mcpCodeInterpreterAgentModelVar = !empty(mcpCodeInterpreterAgentModel) ? mcpCodeInterpreterAgentModel : ''
+
+@description('endpoint service for the agent model')
+var mcpAgentEndpointService = 'r1ai0-${resourceToken}-aiservice'
+
 // ---------------------------------------------------------------------
 // ADDITIONAL PARAMETERS FOR THE ORCHESTRATOR SETTINGS (REFACTORED)
 // ---------------------------------------------------------------------
@@ -564,6 +577,12 @@ var orchestratorUri = 'https://${orchestratorFunctionAppName}.azurewebsites.net'
 var webAppUri = 'https://${appServiceName}.azurewebsites.net'
 
 var pythonEnableInitIndexing = '1'
+
+// MCP Function app
+@description('MCP Search Index')
+var mcpSearchIndex = 'ragindex-test'
+@description('Logging Verbosity')
+var loggingVerbosity = 'false'
 
 // B2C parameters
 @description('B2C Tenant Name')
@@ -1064,6 +1083,20 @@ module orchestratorPe './core/network/private-endpoint.bicep' = if (networkIsola
   }
 }
 
+module mcpServerPe './core/network/private-endpoint.bicep' = if (networkIsolation) {
+  name: 'mcpServerPe'
+  scope: resourceGroup
+  params: {
+    location: location
+    name: 'mcpServerPe${resourceToken}'
+    tags: tags
+    subnetId: vnet.outputs.aiSubId
+    serviceId: mcpServer.outputs.id
+    groupIds: ['sites']
+    dnsZoneId: networkIsolation ? websitesDnsZone.outputs.id : ''
+  }
+}
+
 // // B2C Tenant
 // module b2cTenant './core/identity/b2c.bicep' = {
 //   name: 'b2ctenant'
@@ -1137,6 +1170,56 @@ module orchestratorSearchAccess './core/security/search-access.bicep' = {
   params: {
     searchServiceName: searchService.outputs.name
     principalId: orchestrator.outputs.identityPrincipalId
+  }
+}
+
+// Give the MCP Resource Token function access to KeyVault
+module mcpServerKeyVaultAccess './core/security/keyvault-access.bicep' = {
+  name: 'mcp-server-keyvault-access'
+  scope: resourceGroup
+  params: {
+    keyVaultName: keyVault.outputs.name
+    principalId: mcpServer.outputs.identityPrincipalId
+  }
+}
+
+// Give the MCP Resource Token function access to Cosmos
+module mcpServerCosmosAccess './core/security/cosmos-access.bicep' = {
+  name: 'mcp-server-cosmos-access'
+  scope: resourceGroup
+  params: {
+    principalId: mcpServer.outputs.identityPrincipalId
+    accountName: cosmosAccount.outputs.name
+  }
+}
+
+// Give the MCP Resource Token function access to AOAI
+module mcpServerOaiAccess './core/security/openai-access.bicep' = {
+  name: 'mcp-server-openai-access'
+  scope: resourceGroup
+  params: {
+    principalId: mcpServer.outputs.identityPrincipalId
+    openaiAccountName: openAi.outputs.name
+  }
+}
+
+// Give the MCP Resource Token function access to blob storage with enhanced permissions
+module mcpServerBlobStorageAccess './core/security/blobstorage-access-orc.bicep' = {
+  name: 'mcp-server-blobstorage-access'
+  scope: resourceGroup
+  params: {
+    storageAccountName: storage.outputs.name
+    principalId: mcpServer.outputs.identityPrincipalId
+  }
+}
+
+// Give the MCP Resource Token function access to Azure AI Search
+module mcpServerSearchAccess './core/security/search-access.bicep' = {
+  name: 'mcp-server-agenticsearch-access'
+  scope: resourceGroup
+  params: {
+    searchServiceName: searchService.outputs.name
+    principalId: mcpServer.outputs.identityPrincipalId
   }
 }
 
@@ -1696,6 +1779,87 @@ module searchPe './core/network/private-endpoint.bicep' = if (networkIsolation) 
   }
 }
 
+module mcpServer './core/host/functions.bicep' = {
+  name: 'mcpServer'
+  scope: resourceGroup
+  params: {
+    keyVaultName: keyVault.outputs.name
+    appServicePlanId: appServicePlan.outputs.id
+    subnetId: vnet.outputs.appIntSubId
+    vnetName: vnet.outputs.name
+    networkIsolation: networkIsolation
+    storageAccountName: '${storageAccountName}mcp'
+    appName: mcpServerFunctionAppName
+    location: location
+    appInsightsConnectionString: appInsights.outputs.connectionString
+    appInsightsInstrumentationKey: appInsights.outputs.instrumentationKey
+    tags: union(tags, { 'azd-service-name': 'mcpServer' })
+    alwaysOn: true
+    allowedOrigins: ['*']
+    functionAppScaleLimit: 2
+    minimumElasticInstanceCount: 1
+    numberOfWorkers: 2
+    appSettings: [
+      {
+        name: 'PYTHON_ENABLE_INIT_INDEXING'
+        value: pythonEnableInitIndexing
+      }
+      {
+        name: 'SEARCH_API_KEY'
+        value: aiSearchApiKey
+      }
+      {
+        name: 'AZURE_SEARCH_SERVICE'
+        value: searchServiceName
+      }
+      {
+        name: 'TAVILY_API_KEY'
+        value: orchestratorTavilyApiKeyVar
+      }
+      {
+        name: 'AZURE_SEARCH_INDEX'
+        value: mcpSearchIndex
+      }
+      {
+        name: 'AZURE_OPENAI_ENDPOINT'
+        value: o1Deployment.outputs.o1Endpoint
+      }
+      {
+        name: 'AZURE_OPENAI_KEY'
+        value: o1Deployment.outputs.o1Key
+      }
+      {
+        name: 'AGENT_MODEL'
+        value: mcpCodeInterpreterAgentModelVar
+      }
+      {
+        name: 'AGENT_ENDPOINT_SERVICE'
+        value: mcpAgentEndpointService
+      }
+      {
+        name: 'VERBOSE_LOGGING'
+        value: loggingVerbosity
+      }
+      {
+        name: 'ENABLE_ORYX_BUILD'
+        value: 'true'
+      }
+      {
+        name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
+        value: 'true'
+      }
+      {
+        name: 'AzureWebJobsFeatureFlags'
+        value: 'EnableWorkerIndexing'
+      }
+      {
+        name: 'LOGLEVEL'
+        value: 'INFO'
+      }
+    ]
+  }
+}
+
 output AZURE_KEY_VAULT_NAME string = keyVault.outputs.name
 output AZURE_ZERO_TRUST string = networkIsolation ? 'TRUE' : 'FALSE'
 output AZURE_VM_NAME string = networkIsolation ? ztVmName : ''
@@ -1707,6 +1871,8 @@ output AZURE_DATA_INGEST_FUNC_RG string = resourceGroup.name
 output AZURE_SEARCH_PRINCIPAL_ID string = searchService.outputs.principalId
 output AZURE_ORCHESTRATOR_FUNC_RG string = resourceGroup.name
 output AZURE_ORCHESTRATOR_FUNC_NAME string = orchestratorFunctionAppName
+output AZURE_MCPSERVER_FUNC_NAME string = mcpServerFunctionAppName
+output AZURE_MCPSERVER_FUNC_RG string = resourceGroup.name
 
 // Set input params as outputs to persist the selection
 // This strategy would allow to re-construct the .env file from a deployment object on azure by using env-name, sub and location.
@@ -1722,6 +1888,7 @@ output AZURE_APP_INSIGHTS_NAME string = azureAppInsightsName
 output AZURE_APP_SERVICE_NAME string = azureAppServiceName
 output AZURE_ORCHESTRATOR_FUNCTION_APP_NAME string = azureOrchestratorFunctionAppName
 output AZURE_DATA_INGESTION_FUNCTION_APP_NAME string = azureDataIngestionFunctionAppName
+output AZURE_MCP_SERVER_FUNCTION_APP_NAME string = azureMcpServerFunctionAppName
 output AZURE_SEARCH_SERVICE_NAME string = azureSearchServiceName
 output AZURE_OPEN_AI_SERVICE_NAME string = azureOpenAiServiceName
 output AZURE_VNET_NAME string = azureVnetName
