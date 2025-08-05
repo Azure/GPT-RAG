@@ -1223,6 +1223,15 @@ module mcpServerSearchAccess './core/security/search-access.bicep' = {
   }
 }
 
+// Give the MCP Resource Token function access to Azure AI Foundry
+module mcpServerAiFoundryAccess './core/security/ai-foundry-access.bicep' = {
+  name: 'mcp-server-ai-foundry-access'
+  scope: resourceGroup
+  params: {
+    principalId: mcpServer.outputs.identityPrincipalId
+  }
+}
+
 module frontEnd 'core/host/appservice.bicep' = {
   name: 'frontend'
   scope: resourceGroup
