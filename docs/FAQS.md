@@ -25,3 +25,11 @@ Check that the service private link between Azure AI Search and the other servic
 ## Unable to start Docker Desktop in virtual machine
 
 Ensure that dockerd process is stopped and then start docker desktop.
+
+## Azure Container Registry login fails
+
+Ensure that you are running the latest Azure CLI.  You can utilize the `az upgrade` command to validate you have the latest.
+
+## Error in generating the tag for the docker image
+
+If you did not use `git` to clone the application repositories, you will not have a `.git` folder.  This is used to generate the tag for the docker image.
