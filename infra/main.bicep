@@ -1835,7 +1835,7 @@ module mcpServer './core/host/functions.bicep' = {
       }
       {
         name: 'AZURE_OPENAI_ENDPOINT'
-        value: o1Deployment.outputs.o1Endpoint
+        value: o1Deployment.outputs.o1Endpoint //consider changing to use the name only, not the entire endpoint
       }
       {
         name: 'AZURE_OPENAI_KEY'
@@ -1864,6 +1864,10 @@ module mcpServer './core/host/functions.bicep' = {
       {
         name: 'AzureWebJobsFeatureFlags'
         value: 'EnableWorkerIndexing'
+      }
+      {
+        name: 'AZURE_STORAGE_ACCOUNT'
+        value: storageAccountName
       }
       {
         name: 'LOGLEVEL'
