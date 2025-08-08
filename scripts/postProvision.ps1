@@ -7,6 +7,17 @@ Write-Host "🔧 Running post-provision steps..."
 Write-Host ""
 
 #-------------------------------------------------------------------------------
+# Mirroring azd env variables in system env variables
+#-------------------------------------------------------------------------------
+& azd env get-values | ForEach-Object {
+  if ($_ -match '^([^=]+)=(.*)$') {
+    $k = $matches[1]
+    $v = $matches[2] -replace '^"|"$'
+    [Environment]::SetEnvironmentVariable($k, $v, "User")
+  }
+}
+
+#-------------------------------------------------------------------------------
 # Zero Trust Information
 #-------------------------------------------------------------------------------
 Write-Host ""
@@ -24,6 +35,16 @@ if ($env:NETWORK_ISOLATION -and $env:NETWORK_ISOLATION.ToLower() -eq 'true') {
     }
 } else {
     Write-Host "🚧 Provisioning basic architecture."
+}
+
+#-------------------------------------------------------------------------------
+# Container APP API Keys Warning
+#-------------------------------------------------------------------------------
+Write-Host ""
+if ($env:USE_CAPP_API_KEY -and $env:USE_CAPP_API_KEY.ToLower() -eq 'true') {
+    Write-Host "🔑 Using API Key for Container Apps access."
+    Write-Host "⚠️ IMPORTANT: Each App API Key was initialized with resourceToken."
+    Write-Host "    Please update to a custom API key ASAP."
 }
 
 #-------------------------------------------------------------------------------

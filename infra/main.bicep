@@ -36,9 +36,19 @@ targetScope = 'resourceGroup'
 // PARAMETERS
 //////////////////////////////////////////////////////////////////////////
 
-// NOTE: Set parameter values using main.parameters.json
+// Important notes about parameters:
+// 1) Before running azd provision, set parameter values using main.parameters.json or 
+// the command line: azd env set ENV_VARIABLE_NAME value, for parameters configured to allow substitution.
+//
+// 2) You can identify these substitutable parameters in main.parameters.json by this format:
+// "parameterName": { "value": "${ENV_VARIABLE_NAME}" }.
+// This allows the convenience of setting values via the command line (e.g., azd env set ENV_VARIABLE_NAME true).
+//
+// 3) Substitutable parameters: if an environment variable isn’t set before running `azd provision`, its value will be empty.
+// To prevent this, each parameter that uses the substitution mechanism has a corresponding Bicep variable (`_parameterName`) with a default value.
+// When adding new substitutable parameters in this Bicep file or in `main.parameters.bicep`, follow the same pattern.
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------
 // Imports
 // ----------------------------------------------------------------------
 import * as const from 'constants/constants.bicep'
@@ -72,8 +82,8 @@ param networkIsolation bool = false
 // Feature-flagging Params (as booleans with a default of true)
 // ----------------------------------------------------------------------
 
-@description('If false, skips creating platform infrastructure such as Firewall, Jumpbox, Bastion, etc.')
-param greenFieldDeployment bool = true
+// @description('If false, skips creating platform infrastructure such as Firewall, Jumpbox, Bastion, etc.')
+// param greenFieldDeployment bool = true
 
 @description('Whether to deploy Bing-powered grounding capabilities alongside your AI services.')
 param deployGroundingWithBing bool = true
@@ -184,6 +194,7 @@ param accountCapHost string = 'caphostacc'
 // Feature-flagging Params (as booleans with a default of false)
 // ----------------------------------------------------------------------
 param useUAI bool = false // Use User Assigned Identity (UAI)
+param useCAppAPIKey bool = false // Use API Keys to connect to container apps
 
 // ----------------------------------------------------------------------
 // Resource Naming params
@@ -316,8 +327,10 @@ param storageAccountContainersList array
 // General Variables
 // ----------------------------------------------------------------------
 
+var _manifest = loadJsonContent('./manifest.json')
 var _azdTags = { 'azd-env-name': environmentName }
 var _tags = union(_azdTags, deploymentTags)
+var _networkIsolation = empty(string(networkIsolation)) ? false : bool(networkIsolation)
 
 // ----------------------------------------------------------------------
 // Reuse Existing Services Variables
@@ -372,13 +385,13 @@ var _containerDummyImageName = 'mcr.microsoft.com/azuredocs/containerapps-hellow
 // ----------------------------------------------------------------------
 
 #disable-next-line BCP318
-var _peSubnetId = networkIsolation ? '${virtualNetwork.outputs.resourceId}/subnets/pe-subnet' : ''
+var _peSubnetId = _networkIsolation ? '${virtualNetwork.outputs.resourceId}/subnets/pe-subnet' : ''
 #disable-next-line BCP318
-var _caEnvSubnetId = networkIsolation ? '${virtualNetwork.outputs.resourceId}/subnets/aca-environment-subnet' : ''
+var _caEnvSubnetId = _networkIsolation ? '${virtualNetwork.outputs.resourceId}/subnets/aca-environment-subnet' : ''
 #disable-next-line BCP318
-var _jumpbxSubnetId = networkIsolation ? '${virtualNetwork.outputs.resourceId}/subnets/jumpbox-subnet' : ''
+var _jumpbxSubnetId = _networkIsolation ? '${virtualNetwork.outputs.resourceId}/subnets/jumpbox-subnet' : ''
 #disable-next-line BCP318
-var _agentSubnetId = networkIsolation ? '${virtualNetwork.outputs.resourceId}/subnets/agent-subnet' : ''
+var _agentSubnetId = _networkIsolation ? '${virtualNetwork.outputs.resourceId}/subnets/agent-subnet' : ''
 
 // ----------------------------------------------------------------------
 // VM vars
@@ -388,6 +401,25 @@ var _vmKeyVaultSecName = !empty(vmKeyVaultSecName) ? vmKeyVaultSecName : 'vmUser
 var _vmBaseName = !empty(vmName) ? vmName : 'testvm${resourceToken}'
 var _vmName = substring(_vmBaseName, 0, 15)
 var _vmUserName = !empty(vmUserName) ? vmUserName : 'testvmuser'
+
+// ----------------------------------------------------------------------
+// Container App vars
+// ----------------------------------------------------------------------
+
+var _containerAppsKeyVaultKeysTemp =  [
+  for app in containerAppsList: {
+    name: '${app.canonical_name}_APIKEY'
+    value: resourceToken
+    contentType: 'string'
+  }
+]
+var _containerAppsKeyVaultKeys = _useCAppAPIKey ? _containerAppsKeyVaultKeysTemp : []
+
+// ----------------------------------------------------------------------
+// // Feature-flagging vars 
+// ----------------------------------------------------------------------
+var _useUAI         = empty(string(useUAI)) ? false : bool(useUAI)
+var _useCAppAPIKey  = empty(string(useCAppAPIKey))? false : bool(useCAppAPIKey)
 
 //////////////////////////////////////////////////////////////////////////
 // RESOURCES
@@ -414,7 +446,7 @@ var _vmUserName = !empty(vmUserName) ? vmUserName : 'testvmuser'
 
 // VNet
 // Note on IP address sizing: https://learn.microsoft.com/en-us/azure/ai-foundry/agents/how-to/virtual-networks#known-limitations
-module virtualNetwork 'br/public:avm/res/network/virtual-network:0.7.0' = if (networkIsolation) {
+module virtualNetwork 'br/public:avm/res/network/virtual-network:0.7.0' = if (_networkIsolation) {
   name: 'virtualNetworkDeployment'
   params: {
     // VNet sized /16 to fit all subnets
@@ -464,10 +496,11 @@ module virtualNetwork 'br/public:avm/res/network/virtual-network:0.7.0' = if (ne
         addressPrefix: '192.168.4.0/27' // 32 IPs for jumpbox VMs
         natGatewayResourceId: natGateway.id
       }
-      {
-        name: 'api-management-subnet'
-        addressPrefix: '192.168.4.32/27' // 32 IPs for API Management
-      }
+      // For future use
+      // {
+      //   name: 'api-management-subnet'
+      //   addressPrefix: '192.168.4.32/27' // 32 IPs for API Management
+      // }
       {
         name: 'aca-environment-subnet'
         addressPrefix: '192.168.4.64/27' // 32 IPs for Container Apps environment
@@ -485,7 +518,7 @@ module virtualNetwork 'br/public:avm/res/network/virtual-network:0.7.0' = if (ne
 }
 
 //  Key Vault to store that password securely
-module testVmKeyVault 'br/public:avm/res/key-vault/vault:0.12.1' = if (deployVM && networkIsolation) {
+module testVmKeyVault 'br/public:avm/res/key-vault/vault:0.12.1' = if (deployVM && _networkIsolation && deployVmKeyVault) {
   name: 'vmKeyVault'
   params: {
     name: '${const.abbrs.security.keyVault}testvm-${resourceToken}'
@@ -504,7 +537,7 @@ module testVmKeyVault 'br/public:avm/res/key-vault/vault:0.12.1' = if (deployVM 
 }
 
 // Bastion Host
-module testVmBastionHost 'br/public:avm/res/network/bastion-host:0.6.1' = if (deployVM && networkIsolation) {
+module testVmBastionHost 'br/public:avm/res/network/bastion-host:0.6.1' = if (deployVM && _networkIsolation) {
   name: 'bastionHost'
   params: {
     // Bastion host name
@@ -529,7 +562,7 @@ module testVmBastionHost 'br/public:avm/res/network/bastion-host:0.6.1' = if (de
 }
 
 //AI Foundry Search User Managed Identity
-module testVmUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
+module testVmUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (_useUAI) {
   name: '${const.abbrs.security.managedIdentity}${_vmName}'
   params: {
     // Required parameters
@@ -540,7 +573,7 @@ module testVmUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.
 }
 
 // Test VM
-module testVm 'br/public:avm/res/compute/virtual-machine:0.15.0' = if (deployVM && networkIsolation) {
+module testVm 'br/public:avm/res/compute/virtual-machine:0.15.0' = if (deployVM && _networkIsolation) {
   name: 'testVmDeployment'
   params: {
     name: _vmName
@@ -548,9 +581,9 @@ module testVm 'br/public:avm/res/compute/virtual-machine:0.15.0' = if (deployVM 
     adminUsername: _vmUserName
     adminPassword: vmAdminPassword
     managedIdentities: {
-      systemAssigned: useUAI ? false : true
+      systemAssigned: _useUAI ? false : true
       #disable-next-line BCP318
-      userAssignedResourceIds: useUAI ? [testVmUAI.outputs.resourceId] : []
+      userAssignedResourceIds: _useUAI ? [testVmUAI.outputs.resourceId] : []
     }
     imageReference: {
       publisher: 'microsoft-dsvm'
@@ -590,7 +623,7 @@ module testVm 'br/public:avm/res/compute/virtual-machine:0.15.0' = if (deployVM 
   ]
 }
 
-resource natPublicIp 'Microsoft.Network/publicIPAddresses@2024-07-01' = if (deployVM && networkIsolation) {
+resource natPublicIp 'Microsoft.Network/publicIPAddresses@2024-07-01' = if (deployVM && _networkIsolation) {
   name: '${const.abbrs.networking.publicIPAddress}${const.abbrs.networking.natGateway}${resourceToken}'
   location: location
   sku: {
@@ -608,7 +641,8 @@ resource natPublicIp 'Microsoft.Network/publicIPAddresses@2024-07-01' = if (depl
   tags: _tags
 }
 
-resource natGateway 'Microsoft.Network/natGateways@2024-10-01' = if (deployVM && networkIsolation) {
+#disable-next-line BCP081
+resource natGateway 'Microsoft.Network/natGateways@2024-10-01' = if (deployVM && _networkIsolation) {
   name: '${const.abbrs.networking.natGateway}${resourceToken}'
   location: location
   sku: {
@@ -627,7 +661,7 @@ resource natGateway 'Microsoft.Network/natGateways@2024-10-01' = if (deployVM &&
 // Container Apps
 // Container Apps Contributor
 // -> TestVm
-module assignContainerAppsTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deployAppConfig && deployContainerRegistry && networkIsolation) {
+module assignContainerAppsTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deployAppConfig && deployContainerRegistry && _networkIsolation) {
   name: 'assignContainerAppsTestVm'
   params: {
     name: 'assignContainerAppsTestVm'
@@ -638,7 +672,7 @@ module assignContainerAppsTestVm 'modules/security/resource-role-assignment.bice
           const.roles.ContainerAppsContributor.guid
         )
         #disable-next-line BCP318
-        principalId: (useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId
+        principalId: (_useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId!
         #disable-next-line BCP318
         resourceId: ''
         principalType: 'ServicePrincipal'
@@ -649,7 +683,7 @@ module assignContainerAppsTestVm 'modules/security/resource-role-assignment.bice
 }
 
 // Managed Identity Operator -> TestVm
-module assignManagedIdentityOperatorTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deployAppConfig && deployContainerRegistry && networkIsolation) {
+module assignManagedIdentityOperatorTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deployAppConfig && deployContainerRegistry && _networkIsolation) {
   name: 'assignManagedIdentityOperatorTestVm'
   params: {
     name: 'assignManagedIdentityOperatorTestVm'
@@ -660,7 +694,7 @@ module assignManagedIdentityOperatorTestVm 'modules/security/resource-role-assig
           const.roles.ManagedIdentityOperator.guid
         )
         #disable-next-line BCP318
-        principalId: (useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId
+        principalId: (_useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId!
         #disable-next-line BCP318
         resourceId: ''
         principalType: 'ServicePrincipal'
@@ -675,7 +709,7 @@ module assignManagedIdentityOperatorTestVm 'modules/security/resource-role-assig
 // -> TestVm
 
 // AppConfig -> AppConfig Data Reader -> TestVm
-module assignContainerRegistryTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deployAppConfig && deployContainerRegistry && networkIsolation) {
+module assignContainerRegistryTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deployAppConfig && deployContainerRegistry && _networkIsolation) {
   name: 'assignContainerRegistryTestVm'
   params: {
     name: 'assignContainerRegistryTestVm'
@@ -686,7 +720,7 @@ module assignContainerRegistryTestVm 'modules/security/resource-role-assignment.
           const.roles.ContainerRegistryRepositoryWriter.guid
         )
         #disable-next-line BCP318
-        principalId: (useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId
+        principalId: (_useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId!
         #disable-next-line BCP318
         resourceId: containerRegistry.outputs.resourceId
         principalType: 'ServicePrincipal'
@@ -697,7 +731,7 @@ module assignContainerRegistryTestVm 'modules/security/resource-role-assignment.
           const.roles.ContainerRegistryContributorDataAccessConfigurationAdministrator.guid
         )
         #disable-next-line BCP318
-        principalId: (useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId
+        principalId: (_useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId!
         #disable-next-line BCP318
         resourceId: containerRegistry.outputs.resourceId
         principalType: 'ServicePrincipal'
@@ -708,7 +742,7 @@ module assignContainerRegistryTestVm 'modules/security/resource-role-assignment.
           const.roles.ContainerRegistryTasksContributor.guid
         )
         #disable-next-line BCP318
-        principalId: (useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId
+        principalId: (_useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId!
         #disable-next-line BCP318
         resourceId: containerRegistry.outputs.resourceId
         principalType: 'ServicePrincipal'
@@ -718,7 +752,7 @@ module assignContainerRegistryTestVm 'modules/security/resource-role-assignment.
 }
 
 // AppConfig -> AppConfig Data Reader -> TestVm
-module assignAppConfigAppConfigurationDataReaderTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deployAppConfig && networkIsolation) {
+module assignAppConfigAppConfigurationDataReaderTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deployAppConfig && _networkIsolation) {
   name: 'assignAppConfigAppConfigurationDataReaderTestVm'
   params: {
     name: 'assignAppConfigAppConfigurationDataReaderTestVm'
@@ -729,7 +763,7 @@ module assignAppConfigAppConfigurationDataReaderTestVm 'modules/security/resourc
           const.roles.AppConfigurationDataOwner.guid
         )
         #disable-next-line BCP318
-        principalId: (useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId
+        principalId: (_useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId!
         #disable-next-line BCP318
         resourceId: appConfig.outputs.resourceId
         principalType: 'ServicePrincipal'
@@ -739,13 +773,14 @@ module assignAppConfigAppConfigurationDataReaderTestVm 'modules/security/resourc
 }
 
 // Azure Container Registry Service - AcrPush -> TestVm
-module assignCrAcrPushTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deployContainerRegistry && networkIsolation) {
+module assignCrAcrPushTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deployContainerRegistry && _networkIsolation) {
   name: 'assignCrAcrPushTestVm'
   params: {
     name: 'assignCrAcrPushTestVm'
     roleAssignments: concat([
       {
-        principalId: (useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId
+        #disable-next-line BCP318
+        principalId: (_useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId!
         roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', const.roles.AcrPush.guid)
         #disable-next-line BCP318
         resourceId: containerRegistry.outputs.resourceId
@@ -757,13 +792,14 @@ module assignCrAcrPushTestVm 'modules/security/resource-role-assignment.bicep' =
 
 // Key Vault Service - Key Vault Contributor -> TestVm
 // Key Vault Service - Key Vault Secrets Officer -> TestVm
-module assignKeyVaultContributorAndSecretsOfficerTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deployKeyVault && networkIsolation) {
+module assignKeyVaultContributorAndSecretsOfficerTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deployKeyVault && _networkIsolation) {
   name: 'assignKeyVaultContributorAndSecretsOfficerTestVm'
   params: {
     name: 'assignKeyVaultContributorAndSecretsOfficerTestVm'
     roleAssignments: concat([
       {
-        principalId: (useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId
+        #disable-next-line BCP318
+        principalId: (_useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId!
         roleDefinitionId: subscriptionResourceId(
           'Microsoft.Authorization/roleDefinitions',
           const.roles.KeyVaultContributor.guid
@@ -773,7 +809,8 @@ module assignKeyVaultContributorAndSecretsOfficerTestVm 'modules/security/resour
         principalType: 'ServicePrincipal'
       }
       {
-        principalId: (useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId
+        #disable-next-line BCP318
+        principalId: (_useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId!
         roleDefinitionId: subscriptionResourceId(
           'Microsoft.Authorization/roleDefinitions',
           const.roles.KeyVaultSecretsOfficer.guid
@@ -787,13 +824,14 @@ module assignKeyVaultContributorAndSecretsOfficerTestVm 'modules/security/resour
 }
 
 // Search Service - Search Service Contributor -> TestVm
-module assignSearchSearchServiceContributorTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deploySearchService && networkIsolation) {
+module assignSearchSearchServiceContributorTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deploySearchService && _networkIsolation) {
   name: 'assignSearchSearchServiceContributorTestVm'
   params: {
     name: 'assignSearchSearchServiceContributorTestVm'
     roleAssignments: [
       {
-        principalId: (useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId
+        #disable-next-line BCP318
+        principalId: (_useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId!
         roleDefinitionId: subscriptionResourceId(
           'Microsoft.Authorization/roleDefinitions',
           const.roles.SearchServiceContributor.guid
@@ -807,13 +845,14 @@ module assignSearchSearchServiceContributorTestVm 'modules/security/resource-rol
 }
 
 // Search Service - Search Index Data Contributor -> TestVm
-module assignSearchSearchIndexDataContributorTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deploySearchService && networkIsolation) {
+module assignSearchSearchIndexDataContributorTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deploySearchService && _networkIsolation) {
   name: 'assignSearchSearchIndexDataContributorTestVm'
   params: {
     name: 'assignSearchSearchIndexDataContributorTestVm'
     roleAssignments: [
       {
-        principalId: (useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId
+        #disable-next-line BCP318
+        principalId: (_useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId!
         roleDefinitionId: subscriptionResourceId(
           'Microsoft.Authorization/roleDefinitions',
           const.roles.SearchIndexDataContributor.guid
@@ -827,13 +866,14 @@ module assignSearchSearchIndexDataContributorTestVm 'modules/security/resource-r
 }
 
 // Storage Account - Storage Blob Data Contributor -> TestVm
-module assignStorageStorageBlobDataContributorTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deployStorageAccount && networkIsolation) {
+module assignStorageStorageBlobDataContributorTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deployStorageAccount && _networkIsolation) {
   name: 'assignStorageStorageBlobDataContributorTestVm'
   params: {
     name: 'assignStorageStorageBlobDataContributorTestVm'
     roleAssignments: [
       {
-        principalId: (useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId
+        #disable-next-line BCP318
+        principalId: (_useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId!
         roleDefinitionId: subscriptionResourceId(
           'Microsoft.Authorization/roleDefinitions',
           const.roles.StorageBlobDataContributor.guid
@@ -847,13 +887,14 @@ module assignStorageStorageBlobDataContributorTestVm 'modules/security/resource-
 }
 
 // AI Foundry Account - Azure AI Project Manager -> TestVm
-module assignAiFoundryAccountAzureAiProjectManagerTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && networkIsolation) {
+module assignAiFoundryAccountAzureAiProjectManagerTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && _networkIsolation) {
   name: 'assignAiFoundryAccountAzureAiProjectManagerTestVm'
   params: {
     name: 'assignAiFoundryAccountAzureAiProjectManagerTestVm'
     roleAssignments: [
       {
-        principalId: (useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId
+        #disable-next-line BCP318
+        principalId: (_useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId!
         roleDefinitionId: subscriptionResourceId(
           'Microsoft.Authorization/roleDefinitions',
           const.roles.AzureAIProjectManager.guid
@@ -862,7 +903,8 @@ module assignAiFoundryAccountAzureAiProjectManagerTestVm 'modules/security/resou
         principalType: 'ServicePrincipal'
       }
       {
-        principalId: (useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId
+        #disable-next-line BCP318
+        principalId: (_useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId!
         roleDefinitionId: subscriptionResourceId(
           'Microsoft.Authorization/roleDefinitions',
           const.roles.CognitiveServicesContributor.guid
@@ -875,22 +917,23 @@ module assignAiFoundryAccountAzureAiProjectManagerTestVm 'modules/security/resou
 }
 
 // Cosmos DB Account - Cosmos DB Built-in Data Contributor -> TestVm
-module assignCosmosDBCosmosDbBuiltInDataContributorTestVm 'modules/security/cosmos-data-plane-role-assignment.bicep' = if (deployVM && deployCosmosDb && networkIsolation) {
+module assignCosmosDBCosmosDbBuiltInDataContributorTestVm 'modules/security/cosmos-data-plane-role-assignment.bicep' = if (deployVM && deployCosmosDb && _networkIsolation) {
   name: 'assignCosmosDBCosmosDbBuiltInDataContributorTestVm'
   params: {
     #disable-next-line BCP318
     cosmosDbAccountName: cosmosDBAccount.outputs.name
-    principalId: (useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId
+    #disable-next-line BCP318
+    principalId: (_useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId!
     roleDefinitionGuid: const.roles.CosmosDBBuiltInDataContributor.guid
     scopePath: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${resourceGroup().name}/providers/Microsoft.DocumentDB/databaseAccounts/${dbAccountName}/dbs/${dbDatabaseName}'
   }
 }
 
-var fileUris = [
-  'https://raw.githubusercontent.com/Azure/GPT-RAG/refs/heads/release/2.0.1/infra/install.ps1'
+var _fileUris = [
+  'https://raw.githubusercontent.com/Azure/GPT-RAG/refs/heads/${_manifest.release}/infra/install.ps1'
 ]
 
-resource cse 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = if (deployVM && deploySoftware && networkIsolation) {
+resource cse 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = if (deployVM && deploySoftware && _networkIsolation) {
   name: '${_vmName}/cse'
   location: location
   properties: {
@@ -900,8 +943,8 @@ resource cse 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = if (dep
     autoUpgradeMinorVersion: true
     forceUpdateTag: 'alwaysRun'
     settings: {
-      fileUris: fileUris
-      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File install.ps1 -UseUAI ${useUAI} -ResourceToken ${resourceToken} -AzureTenantId ${subscription().tenantId} -AzureLocation ${location} -AzureSubscriptionId ${subscription().subscriptionId} -AzureResourceGroupName ${resourceGroup().name} -AzdEnvName ${environmentName}'
+      fileUris: _fileUris
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File install.ps1 -release ${_manifest.release} -UseUAI ${_useUAI} -ResourceToken ${resourceToken} -AzureTenantId ${subscription().tenantId} -AzureLocation ${location} -AzureSubscriptionId ${subscription().subscriptionId} -AzureResourceGroupName ${resourceGroup().name} -AzdEnvName ${environmentName}'
     }
     protectedSettings: {
       
@@ -917,7 +960,7 @@ resource cse 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = if (dep
 ///////////////////////////////////////////////////////////////////////////
 
 // AI Foundry Account
-module privateDnsZoneCogSvcs 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (networkIsolation) {
+module privateDnsZoneCogSvcs 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (_networkIsolation) {
   name: 'dep-cogsvcs-private-dns-zone'
   params: {
     name: 'privatelink.cognitiveservices.azure.com'
@@ -935,7 +978,7 @@ module privateDnsZoneCogSvcs 'br/public:avm/res/network/private-dns-zone:0.7.1' 
 }
 
 // Open AI
-module privateDnsZoneOpenAi 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (networkIsolation) {
+module privateDnsZoneOpenAi 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (_networkIsolation) {
   name: 'dep-openai-private-dns-zone'
   params: {
     name: 'privatelink.openai.azure.com'
@@ -953,7 +996,7 @@ module privateDnsZoneOpenAi 'br/public:avm/res/network/private-dns-zone:0.7.1' =
 }
 
 // AI Services
-module privateDnsZoneAiService 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (networkIsolation) {
+module privateDnsZoneAiService 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (_networkIsolation) {
   name: 'dep-aiservices-private-dns-zone'
   params: {
     name: 'privatelink.services.ai.azure.com'
@@ -971,7 +1014,7 @@ module privateDnsZoneAiService 'br/public:avm/res/network/private-dns-zone:0.7.1
 }
 
 // AI Search
-module privateDnsZoneSearch 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (networkIsolation) {
+module privateDnsZoneSearch 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (_networkIsolation) {
   name: 'dep-search-std-private-dns-zone'
   params: {
     name: 'privatelink.search.windows.net'
@@ -989,7 +1032,7 @@ module privateDnsZoneSearch 'br/public:avm/res/network/private-dns-zone:0.7.1' =
 }
 
 // Cosmos DB
-module privateDnsZoneCosmos 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (networkIsolation) {
+module privateDnsZoneCosmos 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (_networkIsolation) {
   name: 'dep-cosmos-std-private-dns-zone'
   params: {
     name: 'privatelink.documents.azure.com'
@@ -1007,7 +1050,7 @@ module privateDnsZoneCosmos 'br/public:avm/res/network/private-dns-zone:0.7.1' =
 }
 
 // Storage Account
-module privateDnsZoneBlob 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (networkIsolation) {
+module privateDnsZoneBlob 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (_networkIsolation) {
   name: 'dep-blob-std-private-dns-zone'
   params: {
     name: 'privatelink.blob.${environment().suffixes.storage}'
@@ -1025,7 +1068,7 @@ module privateDnsZoneBlob 'br/public:avm/res/network/private-dns-zone:0.7.1' = i
 }
 
 // Key Vault
-module privateDnsZoneKeyVault 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (networkIsolation && deployKeyVault) {
+module privateDnsZoneKeyVault 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (_networkIsolation && deployKeyVault) {
   name: 'kv-private-dns-zone'
   params: {
     name: 'privatelink.vaultcore.azure.net'
@@ -1043,7 +1086,7 @@ module privateDnsZoneKeyVault 'br/public:avm/res/network/private-dns-zone:0.7.1'
 }
 
 // Application Configuration
-module privateDnsZoneAppConfig 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (networkIsolation && deployAppConfig) {
+module privateDnsZoneAppConfig 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (_networkIsolation && deployAppConfig) {
   name: 'appconfig-private-dns-zone'
   params: {
     name: 'privatelink.azconfig.io'
@@ -1061,7 +1104,7 @@ module privateDnsZoneAppConfig 'br/public:avm/res/network/private-dns-zone:0.7.1
 }
 
 // Application Insights
-module privateDnsZoneInsights 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (networkIsolation && deployAppInsights) {
+module privateDnsZoneInsights 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (_networkIsolation && deployAppInsights) {
   name: 'ai-private-dns-zone'
   params: {
     name: 'privatelink.applicationinsights.io'
@@ -1079,7 +1122,7 @@ module privateDnsZoneInsights 'br/public:avm/res/network/private-dns-zone:0.7.1'
 }
 
 // Container Apps
-module privateDnsZoneContainerApps 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (networkIsolation) {
+module privateDnsZoneContainerApps 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (_networkIsolation) {
   name: 'dep-containerapps-env-private-dns-zone'
   params: {
     name: 'privatelink.${location}.azurecontainerapps.io'
@@ -1097,7 +1140,7 @@ module privateDnsZoneContainerApps 'br/public:avm/res/network/private-dns-zone:0
 }
 
 // Container Registry
-module privateDnsZoneAcr 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (networkIsolation && deployContainerRegistry) {
+module privateDnsZoneAcr 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (_networkIsolation && deployContainerRegistry) {
   name: 'acr-private-dns-zone'
   params: {
     name: 'privatelink.azurecr.io'
@@ -1120,7 +1163,7 @@ module privateDnsZoneAcr 'br/public:avm/res/network/private-dns-zone:0.7.1' = if
 // AI Foundry dependencies
 
 // AI Foundry Account
-module privateEndpointAIFoundryAccount 'br/public:avm/res/network/private-endpoint:0.11.0' = if (networkIsolation) {
+module privateEndpointAIFoundryAccount 'br/public:avm/res/network/private-endpoint:0.11.0' = if (_networkIsolation) {
   name: 'dep-cogsvcs-private-endpoint'
   params: {
     name: '${const.abbrs.networking.privateEndpoint}${aiFoundryAccountName}'
@@ -1165,7 +1208,7 @@ module privateEndpointAIFoundryAccount 'br/public:avm/res/network/private-endpoi
 }
 
 // AI Search (AI Foundry dependency)
-module privateEndpointSearchDepStd 'br/public:avm/res/network/private-endpoint:0.11.0' = if (networkIsolation) {
+module privateEndpointSearchDepStd 'br/public:avm/res/network/private-endpoint:0.11.0' = if (_networkIsolation) {
   name: 'dep-search-std-private-endpoint'
   params: {
     name: '${const.abbrs.networking.privateEndpoint}${aiFoundryDependencies.outputs.aiSearchName}'
@@ -1199,7 +1242,7 @@ module privateEndpointSearchDepStd 'br/public:avm/res/network/private-endpoint:0
 }
 
 // Cosmos DB (AI Foundry dependency)
-module privateEndpointCosmosDepStd 'br/public:avm/res/network/private-endpoint:0.11.0' = if (networkIsolation) {
+module privateEndpointCosmosDepStd 'br/public:avm/res/network/private-endpoint:0.11.0' = if (_networkIsolation) {
   name: 'dep-cosmos-std-private-endpoint'
   params: {
     name: '${const.abbrs.networking.privateEndpoint}${aiFoundryDependencies.outputs.cosmosDBName}'
@@ -1233,7 +1276,7 @@ module privateEndpointCosmosDepStd 'br/public:avm/res/network/private-endpoint:0
 }
 
 // Storage Account (AI Foundry dependency)
-module privateEndpointBlobDepStd 'br/public:avm/res/network/private-endpoint:0.11.0' = if (networkIsolation) {
+module privateEndpointBlobDepStd 'br/public:avm/res/network/private-endpoint:0.11.0' = if (_networkIsolation) {
   name: 'dep-blob-std-private-endpoint'
   params: {
     name: '${const.abbrs.networking.privateEndpoint}${aiFoundryDependencies.outputs.azureStorageName}'
@@ -1267,7 +1310,7 @@ module privateEndpointBlobDepStd 'br/public:avm/res/network/private-endpoint:0.1
 }
 
 // Storage Account
-module privateEndpointStorageBlob 'br/public:avm/res/network/private-endpoint:0.11.0' = if (networkIsolation && deployStorageAccount) {
+module privateEndpointStorageBlob 'br/public:avm/res/network/private-endpoint:0.11.0' = if (_networkIsolation && deployStorageAccount) {
   name: 'blob-private-endpoint'
   params: {
     name: '${const.abbrs.networking.privateEndpoint}${storageAccountName}'
@@ -1302,7 +1345,7 @@ module privateEndpointStorageBlob 'br/public:avm/res/network/private-endpoint:0.
 }
 
 // Cosmos DB
-module privateEndpointCosmos 'br/public:avm/res/network/private-endpoint:0.11.0' = if (networkIsolation && deployCosmosDb) {
+module privateEndpointCosmos 'br/public:avm/res/network/private-endpoint:0.11.0' = if (_networkIsolation && deployCosmosDb) {
   name: 'cosmos-private-endpoint'
   params: {
     name: '${const.abbrs.networking.privateEndpoint}${dbAccountName}'
@@ -1337,7 +1380,7 @@ module privateEndpointCosmos 'br/public:avm/res/network/private-endpoint:0.11.0'
 }
 
 // AI Search
-module privateEndpointSearch 'br/public:avm/res/network/private-endpoint:0.11.0' = if (networkIsolation && deploySearchService) {
+module privateEndpointSearch 'br/public:avm/res/network/private-endpoint:0.11.0' = if (_networkIsolation && deploySearchService) {
   name: 'search-private-endpoint'
   params: {
     name: '${const.abbrs.networking.privateEndpoint}${searchServiceName}'
@@ -1372,7 +1415,7 @@ module privateEndpointSearch 'br/public:avm/res/network/private-endpoint:0.11.0'
 }
 
 // Key Vault
-module privateEndpointKeyVault 'br/public:avm/res/network/private-endpoint:0.11.0' = if (networkIsolation && deployKeyVault) {
+module privateEndpointKeyVault 'br/public:avm/res/network/private-endpoint:0.11.0' = if (_networkIsolation && deployKeyVault) {
   name: 'kv-private-endpoint'
   params: {
     name: '${const.abbrs.networking.privateEndpoint}${keyVaultName}'
@@ -1407,7 +1450,7 @@ module privateEndpointKeyVault 'br/public:avm/res/network/private-endpoint:0.11.
 }
 
 // Application Configuration
-module privateEndpointAppConfig 'br/public:avm/res/network/private-endpoint:0.11.0' = if (networkIsolation && deployAppConfig) {
+module privateEndpointAppConfig 'br/public:avm/res/network/private-endpoint:0.11.0' = if (_networkIsolation && deployAppConfig) {
   name: 'appconfig-private-endpoint'
   params: {
     name: '${const.abbrs.networking.privateEndpoint}${appConfigName}'
@@ -1442,7 +1485,7 @@ module privateEndpointAppConfig 'br/public:avm/res/network/private-endpoint:0.11
 }
 
 // Container Apps Environment
-module privateEndpointContainerAppsEnv 'br/public:avm/res/network/private-endpoint:0.11.0' = if (networkIsolation && deployContainerEnv) {
+module privateEndpointContainerAppsEnv 'br/public:avm/res/network/private-endpoint:0.11.0' = if (_networkIsolation && deployContainerEnv) {
   name: 'dep-containerapps-env-private-endpoint'
   params: {
     name: '${const.abbrs.networking.privateEndpoint}${containerEnvName}'
@@ -1477,7 +1520,7 @@ module privateEndpointContainerAppsEnv 'br/public:avm/res/network/private-endpoi
 }
 
 // Container Registry
-module privateEndpointAcr 'br/public:avm/res/network/private-endpoint:0.11.0' = if (networkIsolation && deployContainerRegistry) {
+module privateEndpointAcr 'br/public:avm/res/network/private-endpoint:0.11.0' = if (_networkIsolation && deployContainerRegistry) {
   name: 'dep-acr-private-endpoint'
   params: {
     name: '${const.abbrs.networking.privateEndpoint}${containerRegistryName}'
@@ -1537,13 +1580,13 @@ module aiFoundryValidateExistingResources 'modules/standard-setup/validate-exist
     azureStorageAccountResourceId: aiFoundryStorageAccountResourceId
     azureCosmosDBAccountResourceId: aiFoundryCosmosDBAccountResourceId
     #disable-next-line BCP321
-    existingDnsZones: networkIsolation ? existingDnsZones : {}
-    dnsZoneNames: networkIsolation ? dnsZoneNames : []
+    existingDnsZones: _networkIsolation ? existingDnsZones : {}
+    dnsZoneNames: _networkIsolation ? dnsZoneNames : []
   }
 }
 
 //AI Foundry Search User Managed Identity
-module aiFoundrySearchServiceNameUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
+module aiFoundrySearchServiceNameUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (_useUAI) {
   name: '${const.abbrs.security.managedIdentity}${aiFoundrySearchServiceName}'
   params: {
     // Required parameters
@@ -1554,7 +1597,7 @@ module aiFoundrySearchServiceNameUAI 'br/public:avm/res/managed-identity/user-as
 }
 
 //AI Foundry Cosmos User Managed Identity
-module aiFoundryCosmosDbNameUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
+module aiFoundryCosmosDbNameUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (_useUAI) {
   name: '${const.abbrs.security.managedIdentity}${aiFoundryCosmosDbName}'
   params: {
     // Required parameters
@@ -1573,7 +1616,7 @@ module aiFoundryDependencies 'modules/standard-setup/standard-dependent-resource
     azureStorageName: aiFoundryStorageAccountName
     aiSearchName: aiFoundrySearchServiceName
     cosmosDBName: aiFoundryCosmosDbName
-    networkIsolation: networkIsolation
+    networkIsolation: _networkIsolation
     peSubnetId : _peSubnetId
     acaSubnetId: _caEnvSubnetId
 
@@ -1590,12 +1633,13 @@ module aiFoundryDependencies 'modules/standard-setup/standard-dependent-resource
     cosmosDBExists: aiFoundryValidateExistingResources.outputs.cosmosDBExists
   }
   dependsOn: [
-    (networkIsolation) ? virtualNetwork : null
+    #disable-next-line BCP321
+    (_networkIsolation) ? virtualNetwork : null
   ]
 }
 
 //AI Foundry Account User Managed Identity
-module aiFoundryUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
+module aiFoundryUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (_useUAI) {
   name: '${const.abbrs.security.managedIdentity}${aiFoundryAccountName}'
   params: {
     // Required parameters
@@ -1612,11 +1656,13 @@ module aiFoundryAccount 'modules/standard-setup/ai-account-identity.bicep' = {
     accountName: aiFoundryAccountName
     location: aiFoundryLocation
     modelDeployments: modelDeploymentList
-    networkIsolation: networkIsolation
+    networkIsolation: _networkIsolation
     agentSubnetId: _agentSubnetId
     useUAI: false
-    userAssignedIdentityResourceId: useUAI ? aiFoundryUAI.outputs.resourceId : ''
-    userAssignedIdentityPrincipalId: useUAI ? aiFoundryUAI.outputs.principalId : ''
+    #disable-next-line BCP318
+    userAssignedIdentityResourceId: _useUAI ? aiFoundryUAI.outputs.resourceId : ''
+    #disable-next-line BCP318
+    userAssignedIdentityPrincipalId: _useUAI ? aiFoundryUAI.outputs.principalId : ''
   }
   dependsOn: [
     aiFoundryValidateExistingResources
@@ -1625,7 +1671,7 @@ module aiFoundryAccount 'modules/standard-setup/ai-account-identity.bicep' = {
 }
 
 // AI Foundry Project User Managed Identity
-module aiFoundryProjectUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
+module aiFoundryProjectUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (_useUAI) {
   name: '${const.abbrs.security.managedIdentity}${aiFoundryProjectName}'
   params: {
     // Required parameters
@@ -1659,8 +1705,10 @@ module aiFoundryProject 'modules/standard-setup/ai-project-identity.bicep' = {
     accountName: aiFoundryAccount.outputs.accountName
 
     useUAI: false
-    userAssignedIdentityResourceId: useUAI ? aiFoundryProjectUAI.outputs.resourceId : ''
-    userAssignedIdentityPrincipalId: useUAI ? aiFoundryProjectUAI.outputs.principalId : ''
+    #disable-next-line BCP318
+    userAssignedIdentityResourceId: _useUAI ? aiFoundryProjectUAI.outputs.resourceId : ''
+    #disable-next-line BCP318
+    userAssignedIdentityPrincipalId: _useUAI ? aiFoundryProjectUAI.outputs.principalId : ''
   }
 }
 
@@ -1673,7 +1721,7 @@ module aiFoundryFormatProjectWorkspaceId 'modules/standard-setup/format-project-
 }
 
 // AI Foundry Project Capabilities
-module aiFoundryAddProjectCapabilityHost 'modules/standard-setup/add-project-capability-host.bicep' = if(deployCapabilityHosts) {
+module aiFoundryAddProjectCapabilityHost 'modules/standard-setup/add-project-capability-host.bicep' = if(deployCapabilityHosts && !_networkIsolation) {
   name: 'capabilityHost-configuration-${resourceToken}-deployment'
   params: {
     accountName: aiFoundryAccount.outputs.accountName
@@ -1685,15 +1733,29 @@ module aiFoundryAddProjectCapabilityHost 'modules/standard-setup/add-project-cap
     projectCapHost: projectCapHost
     accountCapHost: accountCapHost
   }
-  dependsOn: _capabiityHostDependsAll
+  dependsOn: _capabilityHostDependsAll
 }
 
-var _capabiityHostBaseDepends = [
+module aiFoundryAddProjectCapabilityHostPrivate 'modules/standard-setup/add-project-capability-host-private.bicep' = if(deployCapabilityHosts && _networkIsolation) {
+  name: 'capabilityHost-configuration-${resourceToken}-deployment'
+  params: {
+    accountName: aiFoundryAccount.outputs.accountName
+    projectName: aiFoundryProject.outputs.projectName
+    cosmosDBConnection: aiFoundryProject.outputs.cosmosDBConnection
+    azureStorageConnection: aiFoundryProject.outputs.azureStorageConnection
+    aiSearchConnection: aiFoundryProject.outputs.aiSearchConnection
+
+    projectCapHost: projectCapHost
+  }
+  dependsOn: _capabilityHostDependsAll
+}
+
+var _capabilityHostBaseDepends = [
   assignSearchAiFoundryProject
   assignCosmosDBAiFoundryProject
   assignStorageAccountAiFoundryProject
 ]
-var _capabiityHostNetworkDepends = [
+var _capabilityHostNetworkDepends = [
   aiFoundryDependencies.outputs.azureStorageName
   aiFoundryDependencies.outputs.aiSearchName
   aiFoundryDependencies.outputs.cosmosDBName
@@ -1704,9 +1766,9 @@ var _capabiityHostNetworkDepends = [
   privateEndpointCosmosDepStd
   privateEndpointSearchDepStd
 ]
-var _capabiityHostDependsAll = networkIsolation
-  ? concat(_capabiityHostBaseDepends, _capabiityHostNetworkDepends)
-  : _capabiityHostBaseDepends
+var _capabilityHostDependsAll = _networkIsolation
+  ? concat(_capabilityHostBaseDepends, _capabilityHostNetworkDepends)
+  : _capabilityHostBaseDepends
 
 // AI Foundry Connections
 module aiFoundryBingConnection 'modules/standard-setup/ai-foundry-bing-search-tool.bicep' = if (deployGroundingWithBing) {
@@ -1776,7 +1838,7 @@ module appInsights 'br/public:avm/res/insights/component:0.6.0' = if (deployAppI
 }
 
 //private link scope
-resource privateLinkScope 'microsoft.insights/privatelinkscopes@2021-07-01-preview' = if (networkIsolation && deployAppInsights) {
+resource privateLinkScope 'microsoft.insights/privatelinkscopes@2021-07-01-preview' = if (_networkIsolation && deployAppInsights) {
   name: '${const.abbrs.networking.privateLinkScope}${resourceToken}'
   location: 'global'
   properties :{
@@ -1790,7 +1852,7 @@ resource privateLinkScope 'microsoft.insights/privatelinkscopes@2021-07-01-previ
   ]
 }
 
-module privateDnsZoneAzureMonitor 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (networkIsolation) {
+module privateDnsZoneAzureMonitor 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (_networkIsolation) {
   name: 'azure-monitor-private-dns-zone'
   params: {
     name: 'privatelink.monitor.azure.com'
@@ -1807,7 +1869,7 @@ module privateDnsZoneAzureMonitor 'br/public:avm/res/network/private-dns-zone:0.
   }
 }
 
-module privateDnsZoneOmsOpsInsights 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (networkIsolation) {
+module privateDnsZoneOmsOpsInsights 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (_networkIsolation) {
   name: 'oms-opinsights-private-dns-zone'
   params: {
     name: 'privatelink.oms.opinsights.azure.com'
@@ -1824,7 +1886,7 @@ module privateDnsZoneOmsOpsInsights 'br/public:avm/res/network/private-dns-zone:
   }
 }
 
-module privateDnsZoneOdsOpsInsights 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (networkIsolation) {
+module privateDnsZoneOdsOpsInsights 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (_networkIsolation) {
   name: 'ods-opinsights-private-dns-zone'
   params: {
     name: 'privatelink.ods.opinsights.azure.com'
@@ -1841,7 +1903,7 @@ module privateDnsZoneOdsOpsInsights 'br/public:avm/res/network/private-dns-zone:
   }
 }
 
-module privateDnsZoneAzureAutomation 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (networkIsolation) {
+module privateDnsZoneAzureAutomation 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (_networkIsolation) {
   name: 'azure-automation-private-dns-zone'
   params: {
     name: 'privatelink.agentsvc.azure.automation.net'
@@ -1858,7 +1920,7 @@ module privateDnsZoneAzureAutomation 'br/public:avm/res/network/private-dns-zone
   }
 }
 
-module privateEndpointPrivateLinkScope 'br/public:avm/res/network/private-endpoint:0.11.0' = if (networkIsolation) {
+module privateEndpointPrivateLinkScope 'br/public:avm/res/network/private-endpoint:0.11.0' = if (_networkIsolation) {
   name: 'privatelink-scope-private-endpoint'
   params: {
     name: '${const.abbrs.networking.privateEndpoint}${const.abbrs.networking.privateLinkScope}${resourceToken}'
@@ -1901,13 +1963,14 @@ module privateEndpointPrivateLinkScope 'br/public:avm/res/network/private-endpoi
     }
   }
   dependsOn: [
-    privateLinkScope
+    privateLinkScope!
   ]
 }
 
-resource privateLinkScopedResources1 'microsoft.insights/privatelinkscopes/scopedresources@2021-07-01-preview' = if (networkIsolation && deployAppInsights) {
-  name: '${const.abbrs.networking.privateLinkScope}${resourceToken}/${logAnalyticsWorkspaceName}'
+resource privateLinkScopedResources1 'microsoft.insights/privatelinkscopes/scopedresources@2021-07-01-preview' = if (_networkIsolation && deployAppInsights) {
+  name: '${const.abbrs.networking.privateLinkScope}${resourceToken}/${logAnalyticsWorkspaceName}'!
   properties :{
+    #disable-next-line BCP318
     linkedResourceId: logAnalytics.outputs.resourceId
   }
   dependsOn: [
@@ -1915,9 +1978,10 @@ resource privateLinkScopedResources1 'microsoft.insights/privatelinkscopes/scope
   ]
 }
 
-resource privateLinkScopedResources2 'microsoft.insights/privatelinkscopes/scopedresources@2021-07-01-preview' = if (networkIsolation && deployAppInsights) {
-  name: '${const.abbrs.networking.privateLinkScope}${resourceToken}/${appInsightsName}'
+resource privateLinkScopedResources2 'microsoft.insights/privatelinkscopes/scopedresources@2021-07-01-preview' = if (_networkIsolation && deployAppInsights) {
+  name: '${const.abbrs.networking.privateLinkScope}${resourceToken}/${appInsightsName}'!
   properties :{
+    #disable-next-line BCP318
     linkedResourceId: appInsights.outputs.resourceId
   }
   dependsOn: [
@@ -1929,7 +1993,7 @@ resource privateLinkScopedResources2 'microsoft.insights/privatelinkscopes/scope
 //////////////////////////////////////////////////////////////////////////
 
 //Container Apps Env User Managed Identity
-module containerEnvUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
+module containerEnvUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (_useUAI) {
   name: '${const.abbrs.security.managedIdentity}${containerEnvName}'
   params: {
     // Required parameters
@@ -1954,17 +2018,17 @@ module containerEnv 'br/public:avm/res/app/managed-environment:0.9.1' = if (depl
     zoneRedundant: false
     workloadProfiles: workloadProfiles
     managedIdentities: {
-      systemAssigned: useUAI ? false : true
+      systemAssigned: _useUAI ? false : true
       #disable-next-line BCP318
-      userAssignedResourceIds: useUAI ? [containerEnvUAI.outputs.resourceId] : []
+      userAssignedResourceIds: _useUAI ? [containerEnvUAI.outputs.resourceId] : []
     }
-    infrastructureSubnetId: networkIsolation ? _caEnvSubnetId : ''
-    internal: networkIsolation ? true : false
+    infrastructureSubnetId: _networkIsolation ? _caEnvSubnetId : ''
+    internal: _networkIsolation ? true : false
   }
 }
 
 //Container Registry User Managed Identity
-module containerRegistryUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
+module containerRegistryUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (_useUAI) {
   name: '${const.abbrs.security.managedIdentity}${containerRegistryName}'
   params: {
     // Required parameters
@@ -1979,14 +2043,14 @@ module containerRegistry 'br/public:avm/res/container-registry/registry:0.9.1' =
   name: 'containerRegistry'
   params: {
     name: containerRegistryName
-    publicNetworkAccess: networkIsolation ? 'Disabled' : 'Enabled'
+    publicNetworkAccess: _networkIsolation ? 'Disabled' : 'Enabled'
     location: location
-    acrSku: networkIsolation ? 'Premium' : 'Basic'
+    acrSku: _networkIsolation ? 'Premium' : 'Basic'
     tags: _tags
     managedIdentities: {
-      systemAssigned: useUAI ? false : true
+      systemAssigned: _useUAI ? false : true
       #disable-next-line BCP318
-      userAssignedResourceIds: useUAI ? [containerRegistryUAI.outputs.resourceId] : []
+      userAssignedResourceIds: _useUAI ? [containerRegistryUAI.outputs.resourceId] : []
     }
     exportPolicyStatus: 'enabled'
   }
@@ -1994,7 +2058,7 @@ module containerRegistry 'br/public:avm/res/container-registry/registry:0.9.1' =
 
 //Container Apps User Managed Identity
 module containerAppsUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = [
-  for app in containerAppsList: if (useUAI) {
+  for app in containerAppsList: if (_useUAI) {
     name: '${const.abbrs.security.managedIdentity}${app.service_name}'
     params: {
       // Required parameters
@@ -2030,9 +2094,9 @@ module containerApps 'br/public:avm/res/app/container-app:0.17.0' = [
       }
 
       managedIdentities: {
-        systemAssigned: (useUAI) ? false : true
+        systemAssigned: (_useUAI) ? false : true
         #disable-next-line BCP318
-        userAssignedResourceIds: (useUAI) ? [containerAppsUAI[index].outputs.resourceId] : []
+        userAssignedResourceIds: (_useUAI) ? [containerAppsUAI[index].outputs.resourceId] : []
       }
 
       scaleSettings: {
@@ -2060,7 +2124,7 @@ module containerApps 'br/public:avm/res/app/container-app:0.17.0' = [
             {
               name: 'AZURE_CLIENT_ID'
               #disable-next-line BCP318
-              value: useUAI ? containerAppsUAI[index].outputs.clientId : ''
+              value: _useUAI ? containerAppsUAI[index].outputs.clientId : ''
             }
           ]
         }
@@ -2082,7 +2146,7 @@ module containerApps 'br/public:avm/res/app/container-app:0.17.0' = [
 //////////////////////////////////////////////////////////////////////////
 
 //Cosmos User Managed Identity
-module cosmosUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
+module cosmosUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (_useUAI) {
   name: '${const.abbrs.security.managedIdentity}${dbAccountName}'
   params: {
     // Required parameters
@@ -2098,9 +2162,9 @@ module cosmosDBAccount 'br/public:avm/res/document-db/database-account:0.12.0' =
     name: dbAccountName
     location: location
     managedIdentities: {
-      systemAssigned: useUAI ? false : true
+      systemAssigned: _useUAI ? false : true
       #disable-next-line BCP318
-      userAssignedResourceIds: useUAI ? [cosmosUAI.outputs.resourceId] : []
+      userAssignedResourceIds: _useUAI ? [cosmosUAI.outputs.resourceId] : []
     }
 
     locations: [
@@ -2115,8 +2179,8 @@ module cosmosDBAccount 'br/public:avm/res/document-db/database-account:0.12.0' =
     enableAnalyticalStorage: true
     enableFreeTier: false
     networkRestrictions: {
-      publicNetworkAccess: 'Enabled' //this is because the firewall allows the subnets //networkIsolation ? 'Disabled' : 'Enabled'
-      virtualNetworkRules: networkIsolation ? [
+      publicNetworkAccess: 'Enabled' //this is because the firewall allows the subnets //_networkIsolation ? 'Disabled' : 'Enabled'
+      virtualNetworkRules: _networkIsolation ? [
         {
           subnetResourceId: _peSubnetId
           ignoreMissingVnetServiceEndpoint: true
@@ -2144,7 +2208,8 @@ module cosmosDBAccount 'br/public:avm/res/document-db/database-account:0.12.0' =
     ]
   }
   dependsOn: [
-    (networkIsolation) ? virtualNetwork : null
+    #disable-next-line BCP321
+    (_networkIsolation) ? virtualNetwork : null
   ]
 }
 
@@ -2156,31 +2221,12 @@ module keyVault 'br/public:avm/res/key-vault/vault:0.12.1' = if (deployKeyVault)
   params: {
     name: keyVaultName
     location: location
-    publicNetworkAccess: networkIsolation ? 'Disabled' : 'Enabled'
+    publicNetworkAccess: _networkIsolation ? 'Disabled' : 'Enabled'
     sku: 'standard'
     enableRbacAuthorization: true
     tags: _tags
-    //secrets: secureAppSettings
   }
 }
-
-var secureAppSettings = [
-  {
-        name: 'ORCHESTRATOR_APP_APIKEY'
-        value: resourceToken
-        contentType: 'string'
-      }
-      {
-        name: 'MCP_APP_APIKEY'
-        value: resourceToken
-        contentType: 'string'
-      }
-      {
-        name: 'INGESTION_APP_APIKEY'
-        value: resourceToken
-        contentType: 'string'
-      }
-]
 
 resource existingkeyVault 'Microsoft.KeyVault/vaults@2024-11-01' existing = {
   name: keyVaultName
@@ -2189,8 +2235,8 @@ resource existingkeyVault 'Microsoft.KeyVault/vaults@2024-11-01' existing = {
   ]
 }
 
-// Secret in Key Vault
-resource secret 'Microsoft.KeyVault/vaults/secrets@2024-11-01' = [for (config, i) in secureAppSettings: {
+// Provision Container App secrets in Key Vault (only happens when useAPIKeys is true)
+resource secret 'Microsoft.KeyVault/vaults/secrets@2024-11-01' = [for (config, i) in _containerAppsKeyVaultKeys: {
   parent: existingkeyVault
   name: replace(config.name, '_', '-')
   properties: {
@@ -2222,7 +2268,7 @@ module logAnalytics 'br/public:avm/res/operational-insights/workspace:0.11.1' = 
 //////////////////////////////////////////////////////////////////////////
 
 //Search Service User Managed Identity
-module searchServiceUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
+module searchServiceUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (_useUAI) {
   name: '${const.abbrs.security.managedIdentity}${searchServiceName}'
   params: {
     // Required parameters
@@ -2237,7 +2283,7 @@ module searchService 'br/public:avm/res/search/search-service:0.10.0' = if (depl
   params: {
     name: searchServiceName
     location: location
-    publicNetworkAccess: networkIsolation ? 'Disabled' : 'Enabled'
+    publicNetworkAccess: _networkIsolation ? 'Disabled' : 'Enabled'
     tags: _tags
 
     // SKU & capacity
@@ -2247,9 +2293,9 @@ module searchService 'br/public:avm/res/search/search-service:0.10.0' = if (depl
 
     // Identity & Auth
     managedIdentities: {
-      systemAssigned: useUAI ? false : true
+      systemAssigned: _useUAI ? false : true
       #disable-next-line BCP318
-      userAssignedResourceIds: useUAI ? [searchServiceUAI.outputs.resourceId] : []
+      userAssignedResourceIds: _useUAI ? [searchServiceUAI.outputs.resourceId] : []
     }
 
     disableLocalAuth: false
@@ -2258,7 +2304,7 @@ module searchService 'br/public:avm/res/search/search-service:0.10.0' = if (depl
         aadAuthFailureMode: 'http401WithBearerChallenge'
       }
     }
-    sharedPrivateLinkResources: networkIsolation
+    sharedPrivateLinkResources: _networkIsolation
       ? [
           // Storage (blob)
           {
@@ -2297,7 +2343,7 @@ module storageAccount 'br/public:avm/res/storage/storage-account:0.19.0' = if (d
   params: {
     name: storageAccountName
     location: location
-    publicNetworkAccess: networkIsolation ? 'Disabled' : 'Enabled'
+    publicNetworkAccess: _networkIsolation ? 'Disabled' : 'Enabled'
     skuName: 'Standard_LRS'
     kind: 'StorageV2'
     allowBlobPublicAccess: false
@@ -2437,8 +2483,8 @@ module assignSearchAiFoundry 'modules/standard-setup/ai-search-role-assignments.
     projectPrincipalId: aiFoundryAccount.outputs.accountPrincipalId
   }
   dependsOn: [
-    aiFoundryDependencies
-    aiFoundryAccount
+    aiFoundryDependencies!
+    aiFoundryAccount!
   ]
 }
 
@@ -2452,8 +2498,8 @@ module assignStorageContainersAiFoundry 'modules/standard-setup/blob-storage-con
     workspaceId: aiFoundryFormatProjectWorkspaceId.outputs.projectWorkspaceIdGuid
   }
   dependsOn: [
-    aiFoundryDependencies
-    aiFoundryAccount
+    aiFoundryDependencies!
+    aiFoundryAccount!
   ]
 }
 
@@ -2468,8 +2514,8 @@ module assignCosmosDBContainersAiFoundry 'modules/standard-setup/cosmos-containe
   }
   dependsOn: [
     aiFoundryAddProjectCapabilityHost
-    aiFoundryDependencies
-    aiFoundryAccount
+    aiFoundryDependencies!
+    aiFoundryAccount!
   ]
 }
 
@@ -2541,7 +2587,7 @@ module assignKeyVaultSecretsUserAca 'modules/security/resource-role-assignment.b
             const.roles.KeyVaultSecretsUser.guid
           )
           #disable-next-line BCP318
-          principalId: (useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
+          principalId: (_useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
           #disable-next-line BCP318
           resourceId: keyVault.outputs.resourceId
           principalType: 'ServicePrincipal'
@@ -2552,7 +2598,7 @@ module assignKeyVaultSecretsUserAca 'modules/security/resource-role-assignment.b
 ]
 
 // Bastion Key Vault Service - Key Vault Secrets Officer  -> Executor
-module assignKeyVaultSecretsOffExecutor 'modules/security/resource-role-assignment.bicep' = if (deployVM && networkIsolation) {
+module assignKeyVaultSecretsOffExecutor 'modules/security/resource-role-assignment.bicep' = if (deployVM && _networkIsolation) {
   name: 'assignKeyVaultSecretsOffExecutor'
   params: {
     name: 'assignKeyVaultSecretsOffExecutor'
@@ -2678,7 +2724,7 @@ module assignAppConfigAppConfigurationDataReaderContainerApps 'modules/security/
             const.roles.AppConfigurationDataReader.guid
           )
           #disable-next-line BCP318
-          principalId: (useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
+          principalId: (_useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
           #disable-next-line BCP318
           resourceId: appConfig.outputs.resourceId
           principalType: 'ServicePrincipal'
@@ -2704,7 +2750,7 @@ module assignAiFoundryAccountCognitiveServicesUserContainerApps 'modules/securit
             const.roles.CognitiveServicesUser.guid
           )
           #disable-next-line BCP318
-          principalId: (useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
+          principalId: (_useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
           resourceId: aiFoundryAccount.outputs.accountID
           principalType: 'ServicePrincipal'
         }
@@ -2729,7 +2775,7 @@ module assignAIFoundryCogServOAIUserContainerApps 'modules/security/resource-rol
             const.roles.CognitiveServicesOpenAIUser.guid
           )
           #disable-next-line BCP318
-          principalId: (useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
+          principalId: (_useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
           resourceId: aiFoundryAccount.outputs.accountID
           principalType: 'ServicePrincipal'
         }
@@ -2748,7 +2794,7 @@ module assignCrAcrPullContainerApps 'modules/security/resource-role-assignment.b
         {
           roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', const.roles.AcrPull.guid)
           #disable-next-line BCP318
-          principalId: (useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
+          principalId: (_useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
           #disable-next-line BCP318
           resourceId: containerRegistry.outputs.resourceId
           principalType: 'ServicePrincipal'
@@ -2769,7 +2815,7 @@ module assignCosmosDBCosmosDbBuiltInDataContributorContainerApps 'modules/securi
       #disable-next-line BCP318
       cosmosDbAccountName: cosmosDBAccount.outputs.name
       #disable-next-line BCP318
-      principalId: (useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
+      principalId: (_useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
       roleDefinitionGuid: const.roles.CosmosDBBuiltInDataContributor.guid
       scopePath: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${resourceGroup().name}/providers/Microsoft.DocumentDB/databaseAccounts/${dbAccountName}/dbs/${dbDatabaseName}'
     }
@@ -2789,7 +2835,7 @@ module assignKeyVaultKeyVaultSecretsUserContainerApps 'modules/security/resource
             const.roles.KeyVaultSecretsUser.guid
           )
           #disable-next-line BCP318
-          principalId: (useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
+          principalId: (_useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
           #disable-next-line BCP318
           resourceId: keyVault.outputs.resourceId
           principalType: 'ServicePrincipal'
@@ -2815,7 +2861,7 @@ module assignSearchSearchIndexDataReaderContainerApps 'modules/security/resource
             const.roles.SearchIndexDataReader.guid
           )
           #disable-next-line BCP318
-          principalId: (useUAI)  ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
+          principalId: (_useUAI)  ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
           #disable-next-line BCP318
           resourceId: searchService.outputs.resourceId
           principalType: 'ServicePrincipal'
@@ -2841,7 +2887,7 @@ module assignSearchSearchIndexDataContributorContainerApps 'modules/security/res
             const.roles.SearchIndexDataContributor.guid
           )
           #disable-next-line BCP318
-          principalId: (useUAI) ? containerAppsUAI[i].outputs.principalId  : containerApps[i].outputs.systemAssignedMIPrincipalId!
+          principalId: (_useUAI) ? containerAppsUAI[i].outputs.principalId  : containerApps[i].outputs.systemAssignedMIPrincipalId!
           #disable-next-line BCP318
           resourceId: searchService.outputs.resourceId
           principalType: 'ServicePrincipal'
@@ -2867,7 +2913,7 @@ module assignStorageStorageBlobDataContributorAca 'modules/security/resource-rol
             const.roles.StorageBlobDataContributor.guid
           )
           #disable-next-line BCP318
-          principalId: (useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
+          principalId: (_useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
           #disable-next-line BCP318
           resourceId: storageAccount.outputs.resourceId
           principalType: 'ServicePrincipal'
@@ -2893,7 +2939,7 @@ module assignStorageStorageBlobDataReaderAca 'modules/security/resource-role-ass
             const.roles.StorageBlobDataReader.guid
           )
           #disable-next-line BCP318
-          principalId: (useUAI)  ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
+          principalId: (_useUAI)  ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
           #disable-next-line BCP318
           resourceId: storageAccount.outputs.resourceId
           principalType: 'ServicePrincipal'
@@ -2911,7 +2957,7 @@ module assignStorageStorageBlobDataReaderSearch 'modules/security/resource-role-
     roleAssignments: [
       {
         #disable-next-line BCP318
-        principalId: (useUAI) ? searchServiceUAI.outputs.principalId : searchService.outputs.systemAssignedMIPrincipalId!
+        principalId: (_useUAI) ? searchServiceUAI.outputs.principalId : searchService.outputs.systemAssignedMIPrincipalId!
         roleDefinitionId: subscriptionResourceId(
           'Microsoft.Authorization/roleDefinitions',
           const.roles.StorageBlobDataReader.guid
@@ -3028,7 +3074,7 @@ module containerAppsSettings 'modules/container-apps/container-apps-list.bicep' 
         serviceName: containerAppsList[i].service_name
         canonical_name: containerAppsList[i].canonical_name
         #disable-next-line BCP318
-        principalId: (useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
+        principalId: (_useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
         #disable-next-line BCP318
         fqdn: containerApps[i].outputs.fqdn
       }
@@ -3079,75 +3125,23 @@ var outputModelDeploymentSettings = [
   }
 ]
 
-// Add container registry
-module appConfigContainerRegistryPopulate 'modules/app-configuration/app-configuration.bicep' = if (deployContainerRegistry && deployAppConfig) {
-  name: 'appConfigContainerRegistryPopulate'
-  params: {
-    #disable-next-line BCP318
-    storeName: appConfig.outputs.name
-    keyValues: concat(
-      [
-        { name: 'CONTAINER_REGISTRY_LOGIN_SERVER', value: containerRegistry.outputs.loginServer,       label: 'gpt-rag', contentType: 'text/plain' }
-      ]
-    )
-  }
-}
-
-// Add key vault values.
-module appConfigKeyVaultPopulate 'modules/app-configuration/app-configuration.bicep' = if (deployAppConfig && deployKeyVault) {
+// Populate App Configuration store with Container App API keys (only when useAPIKeys is true).
+module appConfigKeyVaultPopulate 'modules/app-configuration/app-configuration.bicep' = if (deployAppConfig && deployKeyVault && _useCAppAPIKey) {
   name: 'appConfigKeyVaultPopulate'
   params: {
     #disable-next-line BCP318
     storeName: appConfig.outputs.name
-    keyValues: concat(
-      [
-        #disable-next-line BCP318
-        { name: 'ORCHESTRATOR_APP_APIKEY',         value: '{"uri":"${keyVault.outputs.uri}secrets/ORCHESTRATOR-APP-APIKEY"}',  label: 'gpt-rag', contentType: 'application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8' }
-        #disable-next-line BCP318
-        { name: 'MCP_APP_APIKEY',                  value: '{"uri":"${keyVault.outputs.uri}secrets/MCP-APP-APIKEY"}',  label: 'gpt-rag', contentType: 'application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8' }
-        #disable-next-line BCP318
-        { name: 'INGESTION_APP_APIKEY',            value: '{"uri":"${keyVault.outputs.uri}secrets/INGESTION-APP-APIKEY"}',  label: 'gpt-rag', contentType: 'application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8' }
-      ]
-    )
+    keyValues:  [ 
+      for app in containerAppsList: {
+            name: '${app.canonical_name}_APIKEY'
+            #disable-next-line BCP318
+            value: '{"uri":"${keyVault.outputs.uri}secrets/${replace(app.canonical_name, '_', '-')}-APIKEY"}'
+            label: 'gpt-rag'
+            contentType: 'application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8'
+      }
+    ]
   }
 }
-
-module cosmosConfigKeyVaultPopulate 'modules/app-configuration/app-configuration.bicep' = if (deployCosmosDb && deployAppConfig) {
-  name: 'cosmosConfigKeyVaultPopulate'
-  params: {
-    #disable-next-line BCP318
-    storeName: appConfig.outputs.name
-    keyValues: concat(
-      [
-        #disable-next-line BCP318
-      { name: 'COSMOS_DB_ACCOUNT_RESOURCE_ID', value: cosmosDBAccount.outputs.resourceId, label: 'gpt-rag', contentType: 'text/plain' }
-      #disable-next-line BCP318
-      { name: 'COSMOS_DB_ENDPOINT',              value: cosmosDBAccount.outputs.endpoint,            label: 'gpt-rag', contentType: 'text/plain' }
-      ]
-    )
-  }
-}
-
-module searchAppConfigPopulate 'modules/app-configuration/app-configuration.bicep' = if (deploySearchService && deployAppConfig) {
-  name: 'searchAppConfigPopulate'
-  params: {
-    #disable-next-line BCP318
-    storeName: appConfig.outputs.name
-    keyValues: concat(
-      [
-        #disable-next-line BCP318
-        { name: 'SEARCH_SERVICE_UAI_RESOURCE_ID', value: (useUAI) ? searchServiceUAI.outputs.resourceId : '', label: 'gpt-rag', contentType: 'text/plain' }
-        #disable-next-line BCP318
-        { name: 'SEARCH_SERVICE_RESOURCE_ID', value: searchService.outputs.resourceId, label: 'gpt-rag', contentType: 'text/plain' }
-        #disable-next-line BCP318
-        { name: 'SEARCH_SERVICE_QUERY_ENDPOINT',   value: searchService.outputs.endpoint,              label: 'gpt-rag', contentType: 'text/plain' }
-        #disable-next-line BCP318
-        { name: 'SEARCH_SERVICE_PRINCIPAL_ID', value: (useUAI) ? searchServiceUAI.outputs.principalId : searchService.outputs.systemAssignedMIPrincipalId!, label: 'gpt-rag', contentType: 'text/plain' }
-      ]
-    )
-  }
-}
-
 
 module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = if (deployAppConfig) {
   name: 'appConfigPopulate'
@@ -3171,16 +3165,16 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       { name: 'ENVIRONMENT_NAME',    value: environmentName,                          label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'DEPLOYMENT_NAME',     value: deployment().name,                        label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'RESOURCE_TOKEN',      value: resourceToken,                            label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'NETWORK_ISOLATION',   value: string(networkIsolation),                 label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'USE_UAI',             value: string(useUAI),                           label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'NETWORK_ISOLATION',   value: string(_networkIsolation),                 label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'USE_UAI',             value: string(_useUAI),                           label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'LOG_LEVEL',           value: 'INFO',                                   label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'ENABLE_CONSOLE_LOGGING',value: 'true',                                 label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'ENABLE_CONSOLE_LOGGING', value: 'true',                                label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'PROMPT_SOURCE',         value: 'file',                                 label: 'gpt-rag', contentType: 'text/plain' }
       #disable-next-line BCP318
-      { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING',       value: appInsights.outputs.connectionString,   label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: appInsights.outputs.connectionString,   label: 'gpt-rag', contentType: 'text/plain' }
       #disable-next-line BCP318
-      { name: 'APPLICATIONINSIGHTS__INSTRUMENTATIONKEY',     value: appInsights.outputs.instrumentationKey, label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'AGENT_STRATEGY',      value: 'single_agent_rag',                       label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'APPLICATIONINSIGHTS__INSTRUMENTATIONKEY', value: appInsights.outputs.instrumentationKey, label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AGENT_STRATEGY', value: 'single_agent_rag', label: 'gpt-rag', contentType: 'text/plain' }
 
       //── Resource IDs ─────────────────────────────────────────────────────
       #disable-next-line BCP318
@@ -3195,16 +3189,18 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       { name: 'CONTAINER_ENV_RESOURCE_ID', value: containerEnv.outputs.resourceId, label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'AI_FOUNDRY_ACCOUNT_RESOURCE_ID', value: aiFoundryAccount.outputs.accountID, label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'AI_FOUNDRY_PROJECT_RESOURCE_ID', value: aiFoundryProject.outputs.projectId, label: 'gpt-rag', contentType: 'text/plain' }
-
+      #disable-next-line BCP318
+      { name: 'COSMOS_DB_ACCOUNT_RESOURCE_ID', value: cosmosDBAccount.outputs.resourceId, label: 'gpt-rag', contentType: 'text/plain'}
+      { name: 'AI_FOUNDRY_PROJECT_WORKSPACE_ID', value: aiFoundryFormatProjectWorkspaceId.outputs.projectWorkspaceIdGuid, label: 'gpt-rag', contentType: 'text/plain' }
+      #disable-next-line BCP318
+      { name: 'SEARCH_SERVICE_UAI_RESOURCE_ID', value: (_useUAI) ? searchServiceUAI.outputs.resourceId : '', label: 'gpt-rag', contentType: 'text/plain' }
+      #disable-next-line BCP318
+      { name: 'SEARCH_SERVICE_RESOURCE_ID', value: searchService.outputs.resourceId, label: 'gpt-rag', contentType: 'text/plain' }
+      
       // ── Resource Names ───────────────────────────────────────────────────
       { name: 'AI_FOUNDRY_ACCOUNT_NAME', value: aiFoundryAccountName, label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'AI_FOUNDRY_PROJECT_NAME', value: aiFoundryProjectName, label: 'gpt-rag', contentType: 'text/plain' }
-      {
-        name: 'AI_FOUNDRY_STORAGE_ACCOUNT_NAME'
-        value: aiFoundryStorageAccountName
-        label: 'gpt-rag'
-        contentType: 'text/plain'
-      }
+      { name: 'AI_FOUNDRY_STORAGE_ACCOUNT_NAME', value: aiFoundryStorageAccountName, label: 'gpt-rag', contentType: 'text/plain'}
       { name: 'APP_CONFIG_NAME', value: appConfigName, label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'APP_INSIGHTS_NAME', value: appInsightsName, label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'CONTAINER_ENV_NAME', value: containerEnvName, label: 'gpt-rag', contentType: 'text/plain' }
@@ -3213,6 +3209,10 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       { name: 'DATABASE_NAME', value: dbDatabaseName, label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'SEARCH_SERVICE_NAME', value: searchServiceName, label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'STORAGE_ACCOUNT_NAME', value: storageAccountName, label: 'gpt-rag', contentType: 'text/plain' }
+
+      // ── Container Registry ─────────────────-─────────────────────────────
+      #disable-next-line BCP318
+      { name: 'CONTAINER_REGISTRY_LOGIN_SERVER', value: containerRegistry.outputs.loginServer, label: 'gpt-rag', contentType: 'text/plain' }
 
       // ── Feature flagging ─────────────────────────────────────────────────
       { name: 'DEPLOY_APP_CONFIG', value: string(deployAppConfig), label: 'gpt-rag', contentType: 'text/plain' }
@@ -3233,7 +3233,10 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       { name: 'STORAGE_BLOB_ENDPOINT',           value: storageAccount.outputs.primaryBlobEndpoint,  label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'AI_FOUNDRY_ACCOUNT_ENDPOINT',     value: aiFoundryAccount.outputs.accountTarget,      label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'AI_FOUNDRY_PROJECT_ENDPOINT',     value: aiFoundryProject.outputs.endpoint,           label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'AI_FOUNDRY_PROJECT_WORKSPACE_ID', value: aiFoundryFormatProjectWorkspaceId.outputs.projectWorkspaceIdGuid, label: 'gpt-rag', contentType: 'text/plain' }
+      #disable-next-line BCP318
+      { name: 'COSMOS_DB_ENDPOINT',              value: cosmosDBAccount.outputs.endpoint, label: 'gpt-rag', contentType: 'text/plain'}
+      #disable-next-line BCP318
+      { name: 'SEARCH_SERVICE_QUERY_ENDPOINT',   value: searchService.outputs.endpoint,              label: 'gpt-rag', contentType: 'text/plain' }
 
       // ── Connections ───────────────────────────────────────────────────────
       #disable-next-line BCP318
@@ -3242,11 +3245,12 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       { name: 'BING_CONNECTION_ID', value: deployGroundingWithBing ? aiFoundryBingConnection.outputs.bingConnectionId : '', label: 'gpt-rag', contentType: 'text/plain' }
 
       //── Managed Identity Principals ───────────────────────────────────────
-      #disable-next-line BCP318
-      { name: 'CONTAINER_ENV_PRINCIPAL_ID', value: (useUAI) ? containerEnvUAI.outputs.principalId : containerEnv.outputs.systemAssignedMIPrincipalId!, label: 'gpt-rag', contentType: 'text/plain' }
-
       { name: 'AI_FOUNDRY_ACCOUNT_PRINCIPAL_ID', value: aiFoundryAccount.outputs.accountPrincipalId, label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'AI_FOUNDRY_PROJECT_PRINCIPAL_ID', value: aiFoundryProject.outputs.projectPrincipalId, label: 'gpt-rag', contentType: 'text/plain' }
+      #disable-next-line BCP318
+      { name: 'CONTAINER_ENV_PRINCIPAL_ID', value: (_useUAI) ? containerEnvUAI.outputs.principalId : containerEnv.outputs.systemAssignedMIPrincipalId!, label: 'gpt-rag', contentType: 'text/plain' }
+      #disable-next-line BCP318
+      { name: 'SEARCH_SERVICE_PRINCIPAL_ID', value: (_useUAI) ? searchServiceUAI.outputs.principalId : searchService.outputs.systemAssignedMIPrincipalId!, label: 'gpt-rag', contentType: 'text/plain' }
 
       // ── Module-Specific Connection Objects ─────────────────────────────────
       { name: 'AI_FOUNDRY_STORAGE_CONNECTION', value: aiFoundryProject.outputs.azureStorageConnection, label: 'gpt-rag', contentType: 'text/plain' }
@@ -3276,8 +3280,9 @@ output LOCATION string = location
 output ENVIRONMENT_NAME string = environmentName
 output DEPLOYMENT_NAME string = deployment().name
 output RESOURCE_TOKEN string = resourceToken
-output NETWORK_ISOLATION bool = networkIsolation
-output USE_UAI bool = useUAI
+output NETWORK_ISOLATION bool = _networkIsolation
+output USE_UAI bool = _useUAI
+output USE_CAPP_API_KEY bool = _useCAppAPIKey
 
 // ──────────────────────────────────────────────────────────────────────
 // Feature flagging
@@ -3293,9 +3298,7 @@ output DEPLOY_COSMOS_DB bool = deployCosmosDb
 output DEPLOY_CONTAINER_APPS bool = deployContainerApps
 output DEPLOY_CONTAINER_REGISTRY bool = deployContainerRegistry
 output DEPLOY_CONTAINER_ENV bool = deployContainerEnv
-
-output DEPLOY_VM_KEY_VAULT bool = false
-output DEPLOY_CAPABILITY_HOSTS bool = false
+output DEPLOY_VM_KEY_VAULT bool = deployVmKeyVault
 
 // ──────────────────────────────────────────────────────────────────────
 // Endpoints / URIs

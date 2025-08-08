@@ -3,6 +3,36 @@ set -euo pipefail
 echo "🔧 Running post-provision steps…"
 echo 
 
+#-------------------------------------------------------------------------------
+# Mirror azd environment variables into your shell environment
+#-------------------------------------------------------------------------------
+
+azd env get-values | while IFS='=' read -r key value; do
+  # Skip empty keys
+  [[ -z "$key" ]] && continue
+
+  # Strip leading and trailing double quotes
+  value="${value%\"}"
+  value="${value#\"}"
+
+  # Export into the current shell session
+  export "$key=$value"
+
+  # Show the mirrored pair
+  echo "$key=$value"
+done
+
+
+###############################################################################
+# Container APP API Keys Warning
+###############################################################################
+echo
+if [[ "${USE_CAPP_API_KEY,,}" == "true" ]]; then
+  echo "🔑 Using API Key for Container Apps access."
+  echo "⚠️ IMPORTANT: Each App API Key was initialized with resourceToken."
+  echo "    Please update to a custom API key ASAP."
+fi
+
 ###############################################################################
 # Zero Trust Information
 ###############################################################################

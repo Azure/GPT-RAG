@@ -1,0 +1,26 @@
+{
+  "release": "v2.0.1",
+  "repo": "https://github.com/azure/gpt-rag.git",
+  "components": [
+    {
+      "name": "gpt-rag-ui",
+      "repo": "https://github.com/azure/gpt-rag-ui.git",
+      "tag": "v2.0.1"
+    },
+    {
+      "name": "gpt-rag-mcp",
+      "repo": "https://github.com/azure/gpt-rag-mcp.git",
+      "tag": "v0.2.1"
+    },
+    {
+      "name": "gpt-rag-orchestrator",
+      "repo": "https://github.com/azure/gpt-rag-orchestrator.git",
+      "tag": "v2.0.1"
+    },
+    {
+      "name": "gpt-rag-ingestion",
+      "repo": "https://github.com/azure/gpt-rag-ingestion.git",
+      "tag": "v2.0.1"
+    }
+  ]
+}

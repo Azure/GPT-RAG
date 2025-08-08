@@ -7,8 +7,7 @@ from azure.core.exceptions import AzureError
 class AppConfigClient:
     def __init__(self):
         """
-        Bulk-loads all keys labeled 'gpt-rag-orchestrator' and 'gpt-rag' into an in-memory dict,
-        giving precedence to 'gpt-rag-orchestrator' where a key exists in both.
+        Bulk-loads all keys labeled 'gpt-rag' into an in-memory dict.
         """
         endpoint = os.getenv("APP_CONFIG_ENDPOINT")
         if not endpoint:

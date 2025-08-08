@@ -1,5 +1,51 @@
+<#
+This script automates setting up and provisioning a Windows VM for Azure-based GPT-RAG development.
+
+It will:
+  • Start logging to C:\WindowsAzure\Logs\CMFAI_CustomScriptExtension.txt
+  • Enable TLS 1.2+ for PowerShell
+  • Install or upgrade Chocolatey, then use it to install/upgrade:
+      – Visual Studio Code
+      – Azure CLI
+      – Git
+      – Node.js
+      – Python 3.11
+      – Azure Developer CLI (azd) v1.14.100
+      – PowerShell Core
+      – Notepad++
+  • Extend the C: drive to its maximum supported size
+  • Enable and update WSL and schedule a one-time login task to:
+      – Install Docker Desktop
+      – Install GitHub Desktop
+      – Start Docker
+  • Add key VS Code extensions: Bicep, Azure Functions, Python, Containers & PowerShell
+  • Clone the GPT-RAG repositories (specific tags for gpt-rag, orchestrator, ingestion, UI, MCP)
+  • Configure Git safe directories
+  • Log into Azure CLI and azd with managed identity
+  • Update the .azure\<env>\.env file with necessary environment variables
+  • Reboot the VM if new software was installed
+
+Parameters:
+  -release                : Release tag for GPT-RAG (ex: v2.0.1)
+  -azureTenantID          : Azure tenant ID (required)
+  -azureSubscriptionID    : Azure subscription ID
+  -AzureResourceGroupName : Resource group name
+  -azureLocation          : Azure region (e.g., eastus)
+  -AzdEnvName             : azd environment name
+  -resourceToken          : App Configuration token
+  -useUAI                 : Enable UAI integration flag
+
+Prerequisites:
+  • Windows Server 2019+ or Windows 10/11 with admin rights
+  • Internet access for downloads
+  • Local user "testvmuser" for scheduled tasks
+#>
+
 Param (
   [Parameter(Mandatory = $true)]
+  [string]
+  $release,
+  
   [string]
   $azureTenantID,
 
@@ -116,8 +162,8 @@ Register-ScheduledTask -TaskName "MyOneTimeSelfDeletingTask" -Action $Action -Tr
 write-host "Downloading GPT-RAG repository";
 mkdir C:\github -ea SilentlyContinue
 cd C:\github
-git clone https://github.com/azure/gpt-rag -b release/2.0.1
-#git checkout cjg-zta
+git clone https://github.com/azure/gpt-rag -b $release --depth 1
+
 cd gpt-rag
 
 git config --global --add safe.directory C:/github/gpt-rag
@@ -130,7 +176,9 @@ az login --identity --tenant $azureTenantID
 azd auth login --managed-identity --tenant-id $azureTenantID
 
 write-host "Initializing AZD";
-azd init -e $AzdEnvName
+azd init -e $AzdEnvName --subscription $azureSubscriptionID --location $azureLocation 
+azd env set AZURE_TENANT_ID $azureTenantID
+azd env set AZURE_RESOURCE_GROUP $AzureResourceGroupName
 
 #set variables if not present
 $deploySoftware = $true
@@ -173,38 +221,6 @@ else
 }
 
 Set-Content .azure\$($AzdEnvName)\.env $content
-
-write-host "Running AZD Provision";
-azd provision
-
-write-host "Downloading GPT-RAG-ORCHESTRATOR repository";
-cd C:\github
-git clone https://github.com/azure/gpt-rag-orchestrator -b release/2.0.0
-
-git config --global --add safe.directory C:/github/gpt-rag-orchestrator 
-copy-item c:\github\gpt-rag\.azure c:\github\gpt-rag-orchestrator -recurse -container
-
-write-host "Downloading GPT-RAG-INGESTION repository";
-cd C:\github
-git clone https://github.com/azure/gpt-rag-ingestion -b release/2.0.0
-
-git config --global --add safe.directory C:/github/gpt-rag-ingestion
-copy-item c:\github\gpt-rag\.azure c:\github\gpt-rag-ingestion -recurse -container
-
-
-write-host "Downloading GPT-RAG-UI repository";
-cd C:\github
-git clone https://github.com/azure/gpt-rag-ui -b release/2.0.0
-copy-item c:\github\gpt-rag\.azure c:\github\gpt-rag-ui -recurse -container
-
-git config --global --add safe.directory C:/github/gpt-rag-ui
-
-write-host "Downloading GPT-RAG-MCP repository";
-cd C:\github
-git clone https://github.com/azure/gpt-rag-mcp -b release/0.2.0
-copy-item c:\github\gpt-rag\.azure c:\github\gpt-rag-mcp -recurse -container
-
-git config --global --add safe.directory C:/github/gpt-rag-mcp
 
 if ($deploySoftware) {  
   write-host "Restarting the machine to complete installation";

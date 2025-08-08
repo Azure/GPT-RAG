@@ -209,7 +209,7 @@ def provision_indexers(defs: dict, context: dict, cred: ChainedTokenCredential, 
         call_search_api(search_endpoint, api_version, "indexers", name, "delete", cred)
         call_search_api(search_endpoint, api_version, "indexers", name, "put", cred, body)
 
-# ── Main Provisioning Orchestrator ─────────────────────────────────────────-
+# ── Main Provisioning to AI Search elements (datasources, indexes, skillset and indexers) ─────────────────────
 def execute_setup(defs: Optional[dict], context: dict):
     if defs is None:
         logging.error("No search definitions to provision. Skipping setup.")

@@ -11,6 +11,7 @@
 
     "networkIsolation":                    { "value": "${NETWORK_ISOLATION}" },
     "useUAI":                              { "value": "${USE_UAI}" },
+    "useCAppAPIKey":                       { "value": "${USE_CAPP_API_KEY}" },    
 
     "aiSearchResourceId":                  { "value": null },
     "aiFoundryStorageAccountResourceId":   { "value": null },
@@ -18,7 +19,6 @@
     
     "deployAppConfig":                      { "value": "true" },
     "deployAppInsights":                    { "value": "true" },
-    "deployCapabilityHosts":                { "value": "${DEPLOY_CAPABILITY_HOSTS}" },
     "deployCosmosDb":                       { "value": "true" },
     "deployContainerApps":                  { "value": "true" },
     "deployContainerRegistry":              { "value": "true" },
@@ -54,7 +54,6 @@
     "frontEndContainerAppName":              { "value": null },
     "keyVaultName":                          { "value": null },
     "logAnalyticsWorkspaceName":             { "value": null },
-    "orchestratorContainerAppName":          { "value": null },
     "searchServiceName":                     { "value": null },
     "solutionStorageAccountName":            { "value": null },
 
