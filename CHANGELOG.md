@@ -3,6 +3,9 @@
 All notable changes to this project will be documented in this file.  
 This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to [Semantic Versioning](https://semver.org/).
 
+## [v2.0.3] - In progress
+
+
 ## [v2.0.2] - 2025-08-08
 ### Changed
 - Updated deployment documentation.
