@@ -3173,8 +3173,9 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       #disable-next-line BCP318
       { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: appInsights.outputs.connectionString,   label: 'gpt-rag', contentType: 'text/plain' }
       #disable-next-line BCP318
-      { name: 'APPLICATIONINSIGHTS__INSTRUMENTATIONKEY', value: appInsights.outputs.instrumentationKey, label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'AGENT_STRATEGY', value: 'single_agent_rag', label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'APPLICATIONINSIGHTS__INSTRUMENTATIONKEY',     value: appInsights.outputs.instrumentationKey, label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AGENT_STRATEGY',      value: 'single_agent_rag',                       label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AGENT_ID',      value: '',                       label: 'gpt-rag', contentType: 'text/plain' }
 
       //── Resource IDs ─────────────────────────────────────────────────────
       #disable-next-line BCP318
