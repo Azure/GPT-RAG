@@ -2,10 +2,8 @@ param name string
 param location string = 'eastus2'
 param publicNetworkAccess string = 'Enabled'
 param kind string = 'OpenAI'
-param capacity int = 50
-param modelName string = 'o1'
-param deploymentName string = 'o1'
-param modelVersion string = '2024-12-17'
+param gpt41Capacity int = 100
+param gpt5nanoCapacity int = 100
 param sku object = {
   name: 'S0'
 }
@@ -31,7 +29,7 @@ resource gpt41Deployment 'Microsoft.CognitiveServices/accounts/deployments@2024-
   name: 'gpt-4.1'
   sku: {
     name: 'DataZoneStandard'
-    capacity: 100
+    capacity: gpt41Capacity
   }
   properties: {
     model: {
@@ -40,10 +38,30 @@ resource gpt41Deployment 'Microsoft.CognitiveServices/accounts/deployments@2024-
       version: '2025-04-14'
     }
     versionUpgradeOption: 'OnceNewDefaultVersionAvailable'
-    currentCapacity: 50
+    currentCapacity: gpt41Capacity
     raiPolicyName: 'Microsoft.DefaultV2'
   }
 }
-
+resource gpt5nanoDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
+  parent: o1Account
+  name: 'gpt-5-nano'
+  dependsOn: [
+    gpt41Deployment
+  ]
+  sku: {
+    name: 'GlobalStandard'
+    capacity: gpt5nanoCapacity
+  }
+  properties: {
+    model: {
+      format: kind
+      name: 'gpt-5-nano'
+      version: '2025-08-07'
+    }
+    versionUpgradeOption: 'OnceNewDefaultVersionAvailable'
+    currentCapacity: gpt5nanoCapacity
+    raiPolicyName: 'Microsoft.DefaultV2'
+  }
+}
 output o1Endpoint string = o1Account.properties.endpoint
 output o1Key string = o1Account.listKeys().key1
