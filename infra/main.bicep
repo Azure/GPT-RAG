@@ -735,7 +735,7 @@ module storage './core/storage/storage-account.bicep' = {
     secretName: 'storageConnectionString'
     deleteRetentionPolicy: {
       enabled: true
-      days: 7
+      days: 1
     }
   }
 }

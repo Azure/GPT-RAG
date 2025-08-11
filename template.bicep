@@ -35,10 +35,8 @@ param vaults_kv0_vm2b2htvuuclm_name string
 param virtualNetworks_aivnet0_vm2b2htvuuclm_name string
 param workspaces_MachineLearningPromptFlowTest_name string
 
-
 @description('Object ID for the user Nam Tran to grant Key Vault access.')
 param namTranObjectId string = 'b216900e-1e3c-49e3-b539-798b985f2fb9'
-
 
 resource b2cDirectories_salesfactoryai2_onmicrosoft_com_name_resource 'Microsoft.AzureActiveDirectory/b2cDirectories@2023-05-17-preview' = {
   location: 'United States'
@@ -1542,7 +1540,7 @@ resource storageAccounts_adb2auth_name_default 'Microsoft.Storage/storageAccount
   name: 'default'
   properties: {
     containerDeleteRetentionPolicy: {
-      days: 7
+      days: 1
       enabled: true
     }
     cors: {
@@ -1584,7 +1582,7 @@ resource storageAccounts_adb2auth_name_default 'Microsoft.Storage/storageAccount
     }
     deleteRetentionPolicy: {
       allowPermanentDelete: false
-      days: 7
+      days: 1
       enabled: true
     }
   }
@@ -1629,7 +1627,7 @@ resource storageAccounts_strag0vm2b2htvuuclm_name_default 'Microsoft.Storage/sto
     }
     deleteRetentionPolicy: {
       allowPermanentDelete: false
-      days: 7
+      days: 1
       enabled: true
     }
   }
@@ -1686,7 +1684,7 @@ resource Microsoft_Storage_storageAccounts_fileServices_storageAccounts_adb2auth
       smb: {}
     }
     shareDeleteRetentionPolicy: {
-      days: 7
+      days: 1
       enabled: true
     }
   }
@@ -1732,7 +1730,7 @@ resource Microsoft_Storage_storageAccounts_fileServices_storageAccounts_strag0vm
       smb: {}
     }
     shareDeleteRetentionPolicy: {
-      days: 7
+      days: 1
       enabled: true
     }
   }
@@ -1753,7 +1751,7 @@ resource Microsoft_Storage_storageAccounts_fileServices_storageAccounts_strag0vm
       smb: {}
     }
     shareDeleteRetentionPolicy: {
-      days: 7
+      days: 1
       enabled: true
     }
   }
@@ -1774,7 +1772,7 @@ resource Microsoft_Storage_storageAccounts_fileServices_storageAccounts_strag0vm
       smb: {}
     }
     shareDeleteRetentionPolicy: {
-      days: 7
+      days: 1
       enabled: true
     }
   }

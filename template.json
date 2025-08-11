@@ -1726,7 +1726,7 @@
       "name": "[concat(parameters('storageAccounts_adb2auth_name'), '/default')]",
       "properties": {
         "containerDeleteRetentionPolicy": {
-          "days": 7,
+          "days": 1,
           "enabled": true
         },
         "cors": {
@@ -1768,7 +1768,7 @@
         },
         "deleteRetentionPolicy": {
           "allowPermanentDelete": false,
-          "days": 7,
+          "days": 1,
           "enabled": true
         }
       },
@@ -1816,7 +1816,7 @@
         },
         "deleteRetentionPolicy": {
           "allowPermanentDelete": false,
-          "days": 7,
+          "days": 1,
           "enabled": true
         }
       },
@@ -1882,7 +1882,7 @@
           "smb": {}
         },
         "shareDeleteRetentionPolicy": {
-          "days": 7,
+          "days": 1,
           "enabled": true
         }
       },
@@ -1931,7 +1931,7 @@
           "smb": {}
         },
         "shareDeleteRetentionPolicy": {
-          "days": 7,
+          "days": 1,
           "enabled": true
         }
       },
@@ -1955,7 +1955,7 @@
           "smb": {}
         },
         "shareDeleteRetentionPolicy": {
-          "days": 7,
+          "days": 1,
           "enabled": true
         }
       },
@@ -1979,7 +1979,7 @@
           "smb": {}
         },
         "shareDeleteRetentionPolicy": {
-          "days": 7,
+          "days": 1,
           "enabled": true
         }
       },
