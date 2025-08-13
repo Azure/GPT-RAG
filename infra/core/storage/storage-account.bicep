@@ -10,7 +10,7 @@ param allowSharedKeyAccess bool = true
 param defaultToOAuthAuthentication bool = false
 param deleteRetentionPolicy object = {
   allowPermanentDelete: false
-  days: 7
+  days: 1
   enabled: true
 }
 @allowed(['AzureDnsZone', 'Standard'])
@@ -85,8 +85,8 @@ resource storage 'Microsoft.Storage/storageAccounts@2022-05-01' = {
       cors: {
         corsRules: [
           {
-            allowedHeaders: [ '*' ]
-            allowedMethods: [ 'GET', 'HEAD', 'PUT', 'DELETE', 'OPTIONS', 'POST', 'PATCH' ]
+            allowedHeaders: ['*']
+            allowedMethods: ['GET', 'HEAD', 'PUT', 'DELETE', 'OPTIONS', 'POST', 'PATCH']
             allowedOrigins: [
               'https://mlworkspace.azure.ai'
               'https://ml.azure.com'
@@ -94,14 +94,14 @@ resource storage 'Microsoft.Storage/storageAccounts@2022-05-01' = {
               'https://ai.azure.com'
               'https://*.ai.azure.com'
             ]
-            exposedHeaders: [ '*' ]
+            exposedHeaders: ['*']
             maxAgeInSeconds: 1800
           }
           {
-            allowedHeaders: [ '*' ]
-            allowedMethods: [ 'GET', 'OPTIONS', 'POST', 'PUT' ]
-            allowedOrigins: [ '*' ]
-            exposedHeaders: [ '*' ]
+            allowedHeaders: ['*']
+            allowedMethods: ['GET', 'OPTIONS', 'POST', 'PUT']
+            allowedOrigins: ['*']
+            exposedHeaders: ['*']
             maxAgeInSeconds: 200
           }
         ]
@@ -112,8 +112,12 @@ resource storage 'Microsoft.Storage/storageAccounts@2022-05-01' = {
         name: container.name
         properties: {
           publicAccess: contains(container, 'publicAccess') ? container.publicAccess : 'None'
-          defaultEncryptionScope: contains(container, 'defaultEncryptionScope') ? container.defaultEncryptionScope : '$account-encryption-key'
-          denyEncryptionScopeOverride: contains(container, 'denyEncryptionScopeOverride') ? container.denyEncryptionScopeOverride : false
+          defaultEncryptionScope: contains(container, 'defaultEncryptionScope')
+            ? container.defaultEncryptionScope
+            : '$account-encryption-key'
+          denyEncryptionScopeOverride: contains(container, 'denyEncryptionScopeOverride')
+            ? container.denyEncryptionScopeOverride
+            : false
         }
       }
     ]
@@ -149,7 +153,6 @@ var sasConfig = {
 }
 var sasToken = storage.listAccountSas(storage.apiVersion, sasConfig).accountSasToken
 
-
 // var serviceSasToken = listServiceSAS(storage.id, '2021-08-01', {
 //   canonicalizedResource: storage.id
 //   signedProtocol: 'https'
@@ -178,6 +181,5 @@ output name string = storage.name
 output id string = storage.id
 output primaryEndpoints object = storage.properties.primaryEndpoints
 output blobStorageConnectionString string = 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[0].value};EndpointSuffix=core.windows.net'
-
 
 // to test run this module: az deployment group what-if --resource-group < rg-name> --template-file infra/core/storage/storage-account.bicep --parameters name=<storage-name> keyVaultName=<key-vault-name>
