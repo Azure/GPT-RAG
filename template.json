@@ -735,27 +735,6 @@
       "dependsOn": [
         "[resourceId('Microsoft.CognitiveServices/accounts', parameters('accounts_oai0_vm2b2htvuuclm_name'))]"
       ],
-      "name": "[concat(parameters('accounts_oai0_vm2b2htvuuclm_name'), '/chat')]",
-      "properties": {
-        "currentCapacity": 20,
-        "model": {
-          "format": "OpenAI",
-          "name": "gpt-35-turbo",
-          "version": "0125"
-        },
-        "versionUpgradeOption": "OnceNewDefaultVersionAvailable"
-      },
-      "sku": {
-        "capacity": 20,
-        "name": "Standard"
-      },
-      "type": "Microsoft.CognitiveServices/accounts/deployments"
-    },
-    {
-      "apiVersion": "2024-04-01-preview",
-      "dependsOn": [
-        "[resourceId('Microsoft.CognitiveServices/accounts', parameters('accounts_oai0_vm2b2htvuuclm_name'))]"
-      ],
       "name": "[concat(parameters('accounts_oai0_vm2b2htvuuclm_name'), '/text-embedding-3-small')]",
       "properties": {
         "currentCapacity": 120,
@@ -769,27 +748,6 @@
       },
       "sku": {
         "capacity": 120,
-        "name": "Standard"
-      },
-      "type": "Microsoft.CognitiveServices/accounts/deployments"
-    },
-    {
-      "apiVersion": "2024-04-01-preview",
-      "dependsOn": [
-        "[resourceId('Microsoft.CognitiveServices/accounts', parameters('accounts_oai0_vm2b2htvuuclm_name'))]"
-      ],
-      "name": "[concat(parameters('accounts_oai0_vm2b2htvuuclm_name'), '/text-embedding-ada-002')]",
-      "properties": {
-        "currentCapacity": 20,
-        "model": {
-          "format": "OpenAI",
-          "name": "text-embedding-ada-002",
-          "version": "2"
-        },
-        "versionUpgradeOption": "OnceNewDefaultVersionAvailable"
-      },
-      "sku": {
-        "capacity": 20,
         "name": "Standard"
       },
       "type": "Microsoft.CognitiveServices/accounts/deployments"
@@ -3761,20 +3719,6 @@
       "properties": {},
       "sku": {
         "capacity": 120,
-        "name": "Standard"
-      },
-      "type": "Microsoft.MachineLearningServices/workspaces/connections/deployments"
-    },
-    {
-      "apiVersion": "2024-04-01-preview",
-      "dependsOn": [
-        "[resourceId('Microsoft.MachineLearningServices/workspaces/connections', parameters('workspaces_MachineLearningPromptFlowTest_name'), 'AzureOpenAIClew')]",
-        "[resourceId('Microsoft.MachineLearningServices/workspaces', parameters('workspaces_MachineLearningPromptFlowTest_name'))]"
-      ],
-      "name": "[concat(parameters('workspaces_MachineLearningPromptFlowTest_name'), '/AzureOpenAIClew/text-embedding-ada-002')]",
-      "properties": {},
-      "sku": {
-        "capacity": 20,
         "name": "Standard"
       },
       "type": "Microsoft.MachineLearningServices/workspaces/connections/deployments"

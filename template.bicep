@@ -682,24 +682,6 @@ resource accounts_oai0_vm2b2htvuuclm_name_Agent 'Microsoft.CognitiveServices/acc
   }
 }
 
-resource accounts_oai0_vm2b2htvuuclm_name_chat 'Microsoft.CognitiveServices/accounts/deployments@2024-04-01-preview' = {
-  parent: accounts_oai0_vm2b2htvuuclm_name_resource
-  name: 'chat'
-  properties: {
-    currentCapacity: 20
-    model: {
-      format: 'OpenAI'
-      name: 'gpt-35-turbo'
-      version: '0125'
-    }
-    versionUpgradeOption: 'OnceNewDefaultVersionAvailable'
-  }
-  sku: {
-    capacity: 20
-    name: 'Standard'
-  }
-}
-
 resource accounts_oai0_vm2b2htvuuclm_name_text_embedding_3_small 'Microsoft.CognitiveServices/accounts/deployments@2024-04-01-preview' = {
   parent: accounts_oai0_vm2b2htvuuclm_name_resource
   name: 'text-embedding-3-small'
@@ -716,24 +698,6 @@ resource accounts_oai0_vm2b2htvuuclm_name_text_embedding_3_small 'Microsoft.Cogn
   sku: {
     capacity: 900
     name: 'GlobalStandard'
-  }
-}
-
-resource accounts_oai0_vm2b2htvuuclm_name_text_embedding_ada_002 'Microsoft.CognitiveServices/accounts/deployments@2024-04-01-preview' = {
-  parent: accounts_oai0_vm2b2htvuuclm_name_resource
-  name: 'text-embedding-ada-002'
-  properties: {
-    currentCapacity: 20
-    model: {
-      format: 'OpenAI'
-      name: 'text-embedding-ada-002'
-      version: '2'
-    }
-    versionUpgradeOption: 'OnceNewDefaultVersionAvailable'
-  }
-  sku: {
-    capacity: 20
-    name: 'Standard'
   }
 }
 
@@ -3354,19 +3318,6 @@ resource workspaces_MachineLearningPromptFlowTest_name_AzureOpenAIClew_text_embe
   sku: {
     capacity: 150
     name: 'GlobalStandard'
-  }
-  dependsOn: [
-    workspaces_MachineLearningPromptFlowTest_name_resource
-  ]
-}
-
-resource workspaces_MachineLearningPromptFlowTest_name_AzureOpenAIClew_text_embedding_ada_002 'Microsoft.MachineLearningServices/workspaces/connections/deployments@2024-04-01-preview' = {
-  parent: workspaces_MachineLearningPromptFlowTest_name_AzureOpenAIClew
-  name: 'text-embedding-ada-002'
-  properties: {}
-  sku: {
-    capacity: 20
-    name: 'Standard'
   }
   dependsOn: [
     workspaces_MachineLearningPromptFlowTest_name_resource
