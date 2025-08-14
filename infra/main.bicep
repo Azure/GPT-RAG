@@ -534,6 +534,21 @@ var mcpCodeInterpreterAgentModelVar = !empty(mcpCodeInterpreterAgentModel) ? mcp
 @description('endpoint service for the agent model')
 var mcpAgentEndpointService = 'r1ai0-${resourceToken}-aiservice'
 
+@description('File Selection Model used by the MCP server.')
+@secure()
+param fileSelectionModel string = ''
+var fileSelectionModelVar = !empty(fileSelectionModel) ? fileSelectionModel : ''
+
+@description('File Selection Reasoning Effort used by the MCP server.')
+@secure()
+param fileSelectionReasoningEffort string = ''
+var fileSelectionReasoningEffortVar = !empty(fileSelectionReasoningEffort) ? fileSelectionReasoningEffort : ''
+
+@description('Model API Version used by the MCP server.')
+@secure()
+param modelApiVersion string = ''
+var modelApiVersionVar = !empty(modelApiVersion) ? modelApiVersion : ''
+
 // ---------------------------------------------------------------------
 // ADDITIONAL PARAMETERS FOR THE ORCHESTRATOR SETTINGS (REFACTORED)
 // ---------------------------------------------------------------------
@@ -1828,6 +1843,18 @@ module mcpServer './core/host/functions.bicep' = {
       {
         name: 'TAVILY_API_KEY'
         value: orchestratorTavilyApiKeyVar
+      }
+      {
+        name: 'FILE_SELECTION_MODEL'
+        value: fileSelectionModelVar
+      }
+      {
+        name: 'FILE_SELECTION_REASONING_EFFORT'
+        value: fileSelectionReasoningEffortVar
+      }
+      {
+        name: 'MODEL_API_VERSION'
+        value: modelApiVersionVar
       }
       {
         name: 'AZURE_SEARCH_INDEX'
