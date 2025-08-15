@@ -732,6 +732,20 @@ module testvm './core/vm/dsvm.bicep' = if (networkIsolation) {
   }
 }
 
+// Services Bus queue
+module serviceBus './core/servicebus/servicebus.bicep' = {
+  name: 'servicebus-core'
+  scope: resourceGroup
+  params: {
+    namespaceName: sbNamespaceName
+    location: location
+    queueName: 'report-jobs'
+    maxDeliveryCount: 10
+    defaultMessageTimeToLive: 'P1D'
+    lockDuration: 'PT60S'
+  }
+}
+
 // storage
 
 var containerName = storageContainerName
@@ -1195,6 +1209,17 @@ module orchestratorSearchAccess './core/security/search-access.bicep' = {
   }
 }
 
+// Give the orchestrator access to  Service Bus Data Receiver
+module orchestratorSbReceiverAccess './core/security/servicebus-access.bicep' = {
+  name: 'rbac-orchestrator-sb-receiver'
+  scope: resourceGroup
+  params: {
+    principalId: orchestrator.outputs.identityPrincipalId
+    namespaceName: sbNamespaceName
+    access: 'Receiver'
+  }
+}
+
 // Give the MCP Resource Token function access to KeyVault
 module mcpServerKeyVaultAccess './core/security/keyvault-access.bicep' = {
   name: 'mcp-server-keyvault-access'
@@ -1489,6 +1514,17 @@ module appserviceCosmosAccess './core/security/cosmos-access.bicep' = {
   params: {
     principalId: frontEnd.outputs.identityPrincipalId
     accountName: cosmosAccount.outputs.name
+  }
+}
+
+// Give the App Service access → Service Bus Data Sender
+module appserviceSeriveBusSenderAccess './core/security/servicebus-access.bicep' = {
+  name: 'rbac-appservice-sb-sender'
+  scope: resourceGroup
+  params: {
+    principalId: frontEnd.outputs.identityPrincipalId
+    namespaceName: sbNamespaceName
+    access: 'Sender'
   }
 }
 
@@ -1904,19 +1940,6 @@ module mcpServer './core/host/functions.bicep' = {
         value: 'INFO'
       }
     ]
-  }
-}
-
-module serviceBus './core/servicebus/servicebus.bicep' = {
-  name: 'servicebus-core'
-  scope: resourceGroup
-  params: {
-    namespaceName: sbNamespaceName
-    location: location
-    queueName: 'report-jobs'
-    maxDeliveryCount: 10
-    defaultMessageTimeToLive: 'P1D'
-    lockDuration: 'PT60S'
   }
 }
 
