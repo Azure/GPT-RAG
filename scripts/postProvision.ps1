@@ -50,17 +50,15 @@ if ($env:USE_CAPP_API_KEY -and $env:USE_CAPP_API_KEY.ToLower() -eq 'true') {
 #-------------------------------------------------------------------------------
 # Check required environment variable
 #-------------------------------------------------------------------------------
-Write-Host "📋 Current environment variables:"
-$vars = @('APP_CONFIG_ENDPOINT')
-foreach ($v in $vars) {
-    $value = [Environment]::GetEnvironmentVariable($v)
-    if (-not $value) { $value = '<unset>' }
-    Write-Host "  $v=$value"
+Write-Host "📋 Checking required environment variables..."
+$requiredVars = @('APP_CONFIG_ENDPOINT')
+$missing = @()
+foreach ($v in $requiredVars) {
+    $val = [Environment]::GetEnvironmentVariable($v)
+    if (-not $val) { $missing += $v; Write-Host "  $v=<missing>" -ForegroundColor Yellow } else { Write-Host "  $v=$val" }
 }
-
-if (-not [Environment]::GetEnvironmentVariable('APP_CONFIG_ENDPOINT')) {
-    Write-Host "❗ APP_CONFIG_ENDPOINT environment variable must be set before running this script."
-    exit 1
+if ($missing.Count -gt 0) {
+    Write-Host "⚠️  Missing required variables: $($missing -join ', '). Skipping configuration steps that depend on them." -ForegroundColor Yellow
 }
 
 #-------------------------------------------------------------------------------
@@ -84,37 +82,49 @@ Write-Host "⬇️ Installing requirements..."
 #-------------------------------------------------------------------------------
 # 1) AI Foundry Setup
 #-------------------------------------------------------------------------------
-Write-Host "`n📑 AI Foundry Setup..."
-try {
-    Write-Host "🚀 Running config.aifoundry.setup..."
-    & python -m config.aifoundry.setup
-    Write-Host "✅ AI Foundry setup script finished."
-} catch {
-    Write-Host "❗ Error during AI Foundry setup. Skipping it."
+if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
+    Write-Host "`n📑 AI Foundry Setup..."
+    try {
+        Write-Host "🚀 Running config.aifoundry.setup..."
+        & python -m config.aifoundry.setup
+        Write-Host "✅ AI Foundry setup script finished."
+    } catch {
+        Write-Host "❗ Error during AI Foundry setup. Skipping it."
+    }
+} else {
+    Write-Host "⏭️  Skipping AI Foundry setup (missing APP_CONFIG_ENDPOINT)."
 }
 
 #-------------------------------------------------------------------------------
 # 2) Container Apps Setup
 #-------------------------------------------------------------------------------
-Write-Host "`n🔍 ContainerApp setup..."
-try {
-    Write-Host "🚀 Running config.containerapps.setup..."
-    & python -m config.containerapps.setup
-    Write-Host "✅ Container Apps setup script finished."
-} catch {
-    Write-Host "❗ Error during Container Apps setup. Skipping it."
+if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
+    Write-Host "`n🔍 ContainerApp setup..."
+    try {
+        Write-Host "🚀 Running config.containerapps.setup..."
+        & python -m config.containerapps.setup
+        Write-Host "✅ Container Apps setup script finished."
+    } catch {
+        Write-Host "❗ Error during Container Apps setup. Skipping it."
+    }
+} else {
+    Write-Host "⏭️  Skipping Container Apps setup (missing APP_CONFIG_ENDPOINT)."
 }
 
 #-------------------------------------------------------------------------------
 # 3) AI Search Setup
 #-------------------------------------------------------------------------------
-Write-Host "🔍 AI Search setup..."
-try {
-    Write-Host "🚀 Running config.search.setup..."
-    & python -m config.search.setup
-    Write-Host "✅ Search setup script finished."
-} catch {
-    Write-Host "❗ Error during Search setup. Skipping it."
+if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
+    Write-Host "🔍 AI Search setup..."
+    try {
+        Write-Host "🚀 Running config.search.setup..."
+        & python -m config.search.setup
+        Write-Host "✅ Search setup script finished."
+    } catch {
+        Write-Host "❗ Error during Search setup. Skipping it."
+    }
+} else {
+    Write-Host "⏭️  Skipping Search setup (missing APP_CONFIG_ENDPOINT)."
 }
 
 #-------------------------------------------------------------------------------
@@ -122,6 +132,39 @@ try {
 #-------------------------------------------------------------------------------
 Write-Host "`n🧹 Cleaning Python environment up..."
 if (Get-Command deactivate -ErrorAction SilentlyContinue) { deactivate }
-Remove-Item -Recurse -Force config/.venv_temp
+# Try to stop any python processes that reference the temporary venv to avoid file locks
+$venvPattern = "config\\.venv_temp"
+try {
+    $procs = Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -and ($_.CommandLine -match $venvPattern) }
+} catch {
+    # Fallback if Get-CimInstance isn't available for some reason
+    $procs = @()
+}
+
+if ($procs -and $procs.Count -gt 0) {
+    Write-Host "Stopping processes referencing venv:"
+    foreach ($p in $procs) {
+        Write-Host "  Stopping pid $($p.ProcessId) - $($p.Name)"
+        try { Stop-Process -Id $p.ProcessId -Force -ErrorAction SilentlyContinue } catch {}
+    }
+    Start-Sleep -Seconds 1
+}
+
+# Retry removal with exponential backoff to handle transient locks
+$maxRetries = 5
+for ($i = 1; $i -le $maxRetries; $i++) {
+    try {
+        Remove-Item -Recurse -Force config/.venv_temp -ErrorAction Stop
+        Write-Host "Removed venv directory."
+        break
+    } catch {
+        if ($i -eq $maxRetries) {
+            Write-Host "⚠️ Failed to remove venv after $maxRetries attempts: $($_.Exception.Message)"
+        } else {
+            Write-Host ("Retry {0}/{1}: waiting and retrying..." -f $i, $maxRetries)
+            Start-Sleep -Seconds (2 * $i)
+        }
+    }
+}
 
 Write-Host "`n✅ postProvisioning completed."
