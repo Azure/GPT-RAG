@@ -12,6 +12,9 @@ param throughput int = 400
 
 param tags object = {}
 
+@description('Container name')
+param containerName string = 'report_jobs'
+
 @description('The default consistency level of the Cosmos DB account.')
 @allowed([
   'Eventual'
@@ -37,9 +40,6 @@ param systemManagedFailover bool = true
 
 @description('The name for the database')
 param databaseName string
-
-@description('The name for the container')
-param containerName string
 
 @description('Maximum autoscale throughput for the container')
 @minValue(1000)
@@ -757,6 +757,31 @@ resource organizationWebsitesContainer 'Microsoft.DocumentDB/databaseAccounts/sq
         maxThroughput: autoscaleMaxThroughput
       }
     }
+  }
+}
+
+resource container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2023-04-15' = {
+  parent: database
+  name: 'report_jobs'
+  properties: {
+    resource: {
+      id: containerName
+      partitionKey: {
+        paths: ['/tenant_id']
+        kind: 'Hash'
+      }
+      uniqueKeyPolicy: {
+        uniqueKeys: [
+          {
+            paths: [
+              '/tenant_id'
+              '/idempotency_key'
+            ]
+          }
+        ]
+      }
+    }
+    options: {}
   }
 }
 
