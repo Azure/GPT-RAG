@@ -100,7 +100,7 @@
     },
     "webAppAADTenantName": {
       "value": "${AZURE_WEBAPP_AAD_TENANT_NAME}"
-    },  
+    },
     "webAppAADChange": {
       "value": "${AZURE_WEBAPP_AAD_CHANGE}"
     },
@@ -181,6 +181,9 @@
     },
     "deploymentTags": {
       "value": {}
+    },
+    "azureServiceBusNamespaceName": {
+      "value": "${AZURE_SERVICEBUS_NAMESPACE_NAME}"
     }
   }
 }

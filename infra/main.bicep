@@ -424,6 +424,9 @@ var searchServiceName = !empty(azureSearchServiceName) ? azureSearchServiceName 
 param azureOpenAiServiceName string = ''
 var openAiServiceName = !empty(azureOpenAiServiceName) ? azureOpenAiServiceName : 'oai0-${resourceToken}'
 
+@description('Front-end App Service Name. Use your own name convention or leave as it is to generate a random name.')
+param azureServiceBusNamespaceName string = ''
+var sbNamespaceName = !empty(azureServiceBusNamespaceName) ? azureServiceBusNamespaceName : 'sb0-${resourceToken}'
 // o1
 var o1ServiceName = 'o1ai0-${resourceToken}'
 // r1
@@ -1904,6 +1907,19 @@ module mcpServer './core/host/functions.bicep' = {
   }
 }
 
+module serviceBus './core/servicebus/servicebus.bicep' = {
+  name: 'servicebus-core'
+  scope: resourceGroup
+  params: {
+    namespaceName: sbNamespaceName
+    location: location
+    queueName: 'report-jobs'
+    maxDeliveryCount: 10
+    defaultMessageTimeToLive: 'P1D'
+    lockDuration: 'PT60S'
+  }
+}
+
 output AZURE_KEY_VAULT_NAME string = keyVault.outputs.name
 output AZURE_ZERO_TRUST string = networkIsolation ? 'TRUE' : 'FALSE'
 output AZURE_VM_NAME string = networkIsolation ? ztVmName : ''
@@ -1938,3 +1954,5 @@ output AZURE_OPEN_AI_SERVICE_NAME string = azureOpenAiServiceName
 output AZURE_VNET_NAME string = azureVnetName
 
 output AZURE_SEARCH_USE_MIS bool = azureSearchUseMIS
+
+output AZURE_SERVICEBUS_NAMESPACE_NAME string = sbNamespaceName
