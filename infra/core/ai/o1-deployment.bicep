@@ -2,7 +2,7 @@ param name string
 param location string = 'eastus2'
 param publicNetworkAccess string = 'Enabled'
 param kind string = 'OpenAI'
-param gpt41Capacity int = 100
+param gpt41Capacity int = 200
 param gpt5nanoCapacity int = 100
 param o4miniCapacity int = 200
 param sku object = {
