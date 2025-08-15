@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 echo "🔧 Running post-provision steps…"
-echo 
+echo
 
 #-------------------------------------------------------------------------------
 # Mirror azd environment variables into your shell environment
@@ -37,7 +37,7 @@ fi
 # Zero Trust Information
 ###############################################################################
 echo
-if [[ "${NETWORK_ISOLATION,,}" == "true" ]]; then
+if [[ "$(echo "${NETWORK_ISOLATION:-false}" | tr '[:upper:]' '[:lower:]')" == "true" ]]; then
   echo "🔒 Zero Trust enabled."
   echo "🚧 NOTE: If app config failed, run the azd provision again - this is due to token timeout restrictions."
   echo "Access to Azure resources is restricted to the VNet."
@@ -45,7 +45,7 @@ if [[ "${NETWORK_ISOLATION,,}" == "true" ]]; then
   echo "If you’re using a local machine, make sure you have a VPN connection to the VNet."
   echo "You can also use the Test VM to access the environment and complete the setup."
   read -p "Are you running this script from inside the VNet or via VPN? [Y/n]: " answer
-  if [[ ! "${answer,,}" =~ ^y ]]; then
+  if [[ ! "$(echo "${answer:-n}" | tr '[:upper:]' '[:lower:]')" =~ ^y ]]; then
     echo "❌ Please run this script from inside the VNet or with VPN access. Exiting."
     exit 0
   fi
@@ -82,7 +82,7 @@ pip install -r config/requirements.txt
 ###############################################################################
 # 1) AI Foundry Setup
 ###############################################################################
-echo 
+echo
 echo "📑 AI Foundry Setup…"
 {
   echo "🚀 Running config.aifoundry.aifoundry_setup…"
@@ -120,10 +120,10 @@ echo "🔍 AI Search setup…"
 ###############################################################################
 # Cleaning up
 ###############################################################################
-echo 
+echo
 echo "🧹 Cleaning Python environment up…"
 deactivate
 rm -rf config/.venv_temp
 
-echo 
+echo
 echo "✅ postProvisioning completed."
