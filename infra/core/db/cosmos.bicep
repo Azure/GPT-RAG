@@ -12,8 +12,8 @@ param throughput int = 400
 
 param tags object = {}
 
-@description('Container name')
-param containerName string = 'report_jobs'
+@description('The name for the container')
+param containerName string
 
 @description('The default consistency level of the Cosmos DB account.')
 @allowed([
