@@ -767,14 +767,14 @@ resource container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/container
     resource: {
       id: 'report_jobs'
       partitionKey: {
-        paths: ['/tenant_id']
+        paths: ['/organization_id']
         kind: 'Hash'
       }
       uniqueKeyPolicy: {
         uniqueKeys: [
           {
             paths: [
-              '/tenant_id'
+              '/organization_id'
               '/idempotency_key'
             ]
           }
