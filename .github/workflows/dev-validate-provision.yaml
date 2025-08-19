@@ -87,6 +87,3 @@ jobs:
 
           # MCP
           AGENT_MODEL: ${{ secrets.AGENT_MODEL }}
-          FILE_SELECTION_MODEL: ${{ secrets.FILE_SELECTION_MODEL }}
-          FILE_SELECTION_REASONING_EFFORT: ${{ secrets.FILE_SELECTION_REASONING_EFFORT }}
-          MODEL_API_VERSION: ${{ secrets.MODEL_API_VERSION }}
