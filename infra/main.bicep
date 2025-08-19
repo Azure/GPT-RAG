@@ -3257,11 +3257,17 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       { name: 'AI_FOUNDRY_COSMOS_DB_CONNECTION', value: aiFoundryProject.outputs.cosmosDBConnection, label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'AI_FOUNDRY_SEARCH_CONNECTION', value: aiFoundryProject.outputs.aiSearchConnection, label: 'gpt-rag', contentType: 'text/plain' }
 
-      // //── Container Apps List & Model Deployments ────────────────────────────
+      // ── Container Apps List & Model Deployments ────────────────────────────
       #disable-next-line BCP318
       { name: 'CONTAINER_APPS', value: string(containerAppsSettings.outputs.containerAppsList), label: 'gpt-rag', contentType: 'application/json' }
       { name: 'MODEL_DEPLOYMENTS', value: string(outputModelDeploymentSettings), label: 'gpt-rag', contentType: 'application/json' }
-      ]
+
+      // ── Service-specific (gpt-rag-ingestion) settings. 
+      //    In future releases, these should be removed here and defined with default values directly in the ingestion service. ─────────────
+      { name: 'CRON_RUN_BLOB_PURGE', value: '0 * * * *', label: 'gpt-rag-ingestion', contentType: 'text/plain' }      
+      { name: 'CRON_RUN_BLOB_INDEX', value: '10 * * * *', label: 'gpt-rag-ingestion', contentType: 'text/plain' }
+
+    ]
     )
   }
 }
