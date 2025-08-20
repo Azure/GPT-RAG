@@ -537,7 +537,6 @@ var mcpCodeInterpreterAgentModelVar = !empty(mcpCodeInterpreterAgentModel) ? mcp
 @description('endpoint service for the agent model')
 var mcpAgentEndpointService = 'r1ai0-${resourceToken}-aiservice'
 
-
 // ---------------------------------------------------------------------
 // ADDITIONAL PARAMETERS FOR THE ORCHESTRATOR SETTINGS (REFACTORED)
 // ---------------------------------------------------------------------
