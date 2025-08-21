@@ -1,5 +1,5 @@
 {
-  "release": "v2.0.3",
+  "release": "v2.0.4",
   "repo": "https://github.com/azure/gpt-rag.git",
   "components": [
     {
@@ -15,7 +15,7 @@
     {
       "name": "gpt-rag-orchestrator",
       "repo": "https://github.com/azure/gpt-rag-orchestrator.git",
-      "tag": "v2.0.2"
+      "tag": "v2.0.3"
     },
     {
       "name": "gpt-rag-ingestion",
