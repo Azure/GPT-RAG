@@ -100,7 +100,7 @@
     },
     "webAppAADTenantName": {
       "value": "${AZURE_WEBAPP_AAD_TENANT_NAME}"
-    },  
+    },
     "webAppAADChange": {
       "value": "${AZURE_WEBAPP_AAD_CHANGE}"
     },
@@ -170,17 +170,11 @@
     "mcpCodeInterpreterAgentModel": {
       "value": "${AGENT_MODEL}"
     },
-    "fileSelectionModel": {
-      "value": "${FILE_SELECTION_MODEL}"
-    },
-    "fileSelectionReasoningEffort": {
-      "value": "${FILE_SELECTION_REASONING_EFFORT}"
-    },
-    "modelApiVersion": {
-      "value": "${MODEL_API_VERSION}"
-    },
     "deploymentTags": {
       "value": {}
+    },
+    "azureServiceBusNamespaceName": {
+      "value": "${AZURE_SERVICEBUS_NAMESPACE_NAME}"
     }
   }
 }

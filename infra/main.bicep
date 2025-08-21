@@ -424,6 +424,9 @@ var searchServiceName = !empty(azureSearchServiceName) ? azureSearchServiceName 
 param azureOpenAiServiceName string = ''
 var openAiServiceName = !empty(azureOpenAiServiceName) ? azureOpenAiServiceName : 'oai0-${resourceToken}'
 
+@description('Front-end App Service Name. Use your own name convention or leave as it is to generate a random name.')
+param azureServiceBusNamespaceName string = ''
+var sbNamespaceName = !empty(azureServiceBusNamespaceName) ? azureServiceBusNamespaceName : 'sb0-${resourceToken}'
 // o1
 var o1ServiceName = 'o1ai0-${resourceToken}'
 // r1
@@ -533,21 +536,6 @@ var mcpCodeInterpreterAgentModelVar = !empty(mcpCodeInterpreterAgentModel) ? mcp
 
 @description('endpoint service for the agent model')
 var mcpAgentEndpointService = 'r1ai0-${resourceToken}-aiservice'
-
-@description('File Selection Model used by the MCP server.')
-@secure()
-param fileSelectionModel string = ''
-var fileSelectionModelVar = !empty(fileSelectionModel) ? fileSelectionModel : ''
-
-@description('File Selection Reasoning Effort used by the MCP server.')
-@secure()
-param fileSelectionReasoningEffort string = ''
-var fileSelectionReasoningEffortVar = !empty(fileSelectionReasoningEffort) ? fileSelectionReasoningEffort : ''
-
-@description('Model API Version used by the MCP server.')
-@secure()
-param modelApiVersion string = ''
-var modelApiVersionVar = !empty(modelApiVersion) ? modelApiVersion : ''
 
 // ---------------------------------------------------------------------
 // ADDITIONAL PARAMETERS FOR THE ORCHESTRATOR SETTINGS (REFACTORED)
@@ -726,6 +714,20 @@ module testvm './core/vm/dsvm.bicep' = if (networkIsolation) {
     // this is the named of the secret to store the vm password in keyvault. It matches what is used on main.parameters.json
     vmUserPasswordKey: vmKeyVaultSecName
     principalId: principalId
+  }
+}
+
+// Services Bus queue
+module serviceBus './core/servicebus/servicebus.bicep' = {
+  name: 'servicebus-core'
+  scope: resourceGroup
+  params: {
+    namespaceName: sbNamespaceName
+    location: location
+    queueName: 'report-jobs'
+    maxDeliveryCount: 10
+    defaultMessageTimeToLive: 'P1D'
+    lockDuration: 'PT60S'
   }
 }
 
@@ -1192,6 +1194,17 @@ module orchestratorSearchAccess './core/security/search-access.bicep' = {
   }
 }
 
+// Give the orchestrator access to  Service Bus Data Receiver
+module orchestratorSbReceiverAccess './core/security/servicebus-access.bicep' = {
+  name: 'rbac-orchestrator-sb-receiver'
+  scope: resourceGroup
+  params: {
+    principalId: orchestrator.outputs.identityPrincipalId
+    namespaceName: sbNamespaceName
+    access: 'Receiver'
+  }
+}
+
 // Give the MCP Resource Token function access to KeyVault
 module mcpServerKeyVaultAccess './core/security/keyvault-access.bicep' = {
   name: 'mcp-server-keyvault-access'
@@ -1486,6 +1499,17 @@ module appserviceCosmosAccess './core/security/cosmos-access.bicep' = {
   params: {
     principalId: frontEnd.outputs.identityPrincipalId
     accountName: cosmosAccount.outputs.name
+  }
+}
+
+// Give the App Service access → Service Bus Data Sender
+module appserviceSeriveBusSenderAccess './core/security/servicebus-access.bicep' = {
+  name: 'rbac-appservice-sb-sender'
+  scope: resourceGroup
+  params: {
+    principalId: frontEnd.outputs.identityPrincipalId
+    namespaceName: sbNamespaceName
+    access: 'Sender'
   }
 }
 
@@ -1845,18 +1869,6 @@ module mcpServer './core/host/functions.bicep' = {
         value: orchestratorTavilyApiKeyVar
       }
       {
-        name: 'FILE_SELECTION_MODEL'
-        value: fileSelectionModelVar
-      }
-      {
-        name: 'FILE_SELECTION_REASONING_EFFORT'
-        value: fileSelectionReasoningEffortVar
-      }
-      {
-        name: 'MODEL_API_VERSION'
-        value: modelApiVersionVar
-      }
-      {
         name: 'AZURE_SEARCH_INDEX'
         value: mcpSearchIndex
       }
@@ -1895,6 +1907,10 @@ module mcpServer './core/host/functions.bicep' = {
       {
         name: 'AZURE_STORAGE_ACCOUNT'
         value: storageAccountName
+      }
+      {
+        name: 'MAIN_STORAGE_CONNECTION_STRING'
+        value: storage.outputs.blobStorageConnectionString
       }
       {
         name: 'LOGLEVEL'
@@ -1938,3 +1954,5 @@ output AZURE_OPEN_AI_SERVICE_NAME string = azureOpenAiServiceName
 output AZURE_VNET_NAME string = azureVnetName
 
 output AZURE_SEARCH_USE_MIS bool = azureSearchUseMIS
+
+output AZURE_SERVICEBUS_NAMESPACE_NAME string = sbNamespaceName
