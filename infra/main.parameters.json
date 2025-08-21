@@ -175,6 +175,15 @@
     },
     "azureServiceBusNamespaceName": {
       "value": "${AZURE_SERVICEBUS_NAMESPACE_NAME}"
+    },
+    "gpt41Capacity": {
+      "value": "${GPT41_CAPACITY}"
+    },
+    "gpt5nanoCapacity": {
+      "value": "${GPT5_NANO_CAPACITY}"
+    },
+    "o4miniCapacity": {
+      "value": "${O4_MINI_CAPACITY}"
     }
   }
 }

@@ -568,6 +568,15 @@ var langsmithProjectVar = !empty(langsmithProject) ? langsmithProject : ''
 param langsmithTracingV2 string = ''
 var langsmithTracingV2Var = !empty(langsmithTracingV2) ? langsmithTracingV2 : ''
 
+@description('Capacity for the gpt-4.1 model')
+param gpt41Capacity int
+
+@description('Capacity for the gpt-5-nano model')
+param gpt5nanoCapacity int
+
+@description('Capacity for the o4-mini model')
+param o4miniCapacity int
+
 @description('Serper API Key used by the orchestrator.')
 @secure()
 param orchestratorSerperApiKey string = ''
@@ -1757,6 +1766,9 @@ module o1Deployment 'core/ai/o1-deployment.bicep' = {
     location: 'eastus2'
     publicNetworkAccess: networkIsolation ? 'Disabled' : 'Enabled'
     tags: tags
+    gpt41Capacity: gpt41Capacity
+    gpt5nanoCapacity: gpt5nanoCapacity
+    o4miniCapacity: o4miniCapacity
   }
 }
 
@@ -1956,3 +1968,6 @@ output AZURE_VNET_NAME string = azureVnetName
 output AZURE_SEARCH_USE_MIS bool = azureSearchUseMIS
 
 output AZURE_SERVICEBUS_NAMESPACE_NAME string = sbNamespaceName
+output GPT41_CAPACITY int = gpt41Capacity
+output GPT5NANO_CAPACITY int = gpt5nanoCapacity
+output O4MINI_CAPACITY int = o4miniCapacity
