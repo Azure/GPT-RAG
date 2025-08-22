@@ -81,6 +81,8 @@ jobs:
           AZURE_FUNCTIONS_WORKER_RUNTIME: "python"
           SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          BRAND_ANALYSIS_MODEL: ${{ secrets.BRAND_ANALYSIS_MODEL }}
+          REASONING_EFFORT: ${{ secrets.REASONING_EFFORT }}
 
           # LangSmith Settings
           LANGCHAIN_API_KEY: ${{ secrets.LANGCHAIN_API_KEY }}

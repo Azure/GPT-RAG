@@ -184,6 +184,12 @@
     },
     "o4miniCapacity": {
       "value": "${O4_MINI_CAPACITY}"
+    },
+    "brandAnalysisModel": {
+      "value": "${BRAND_ANALYSIS_MODEL}"
+    },
+    "reasoningEffortReport": {
+      "value": "${REASONING_EFFORT}"
     }
   }
 }

@@ -590,6 +590,15 @@ var webAppUri = 'https://${appServiceName}.azurewebsites.net'
 
 var pythonEnableInitIndexing = '1'
 
+@description('Model used for brand analysis')
+param brandAnalysisModel string = ''
+var brandAnalysisModelVar = !empty(brandAnalysisModel) ? brandAnalysisModel : ''
+
+@description('Reasoning effort for report')
+param reasoningEffortReport string = ''
+var reasoningEffortReportVar = !empty(reasoningEffortReport) ? reasoningEffortReport : ''
+
+
 // MCP Function app
 @description('MCP Search Index')
 var mcpSearchIndex = 'ragindex-test'
@@ -1094,6 +1103,18 @@ module orchestrator './core/host/functions.bicep' = {
       {
         name: 'MCP_FUNCTION_NAME'
         value: mcpServerFunctionAppName
+      }
+      {
+        name: 'AGENT_ENDPOINT_SERVICE'
+        value: mcpAgentEndpointService
+      }
+      {
+        name: 'BRAND_ANALYSIS_MODEL'
+        value: brandAnalysisModelVar
+      }
+      {
+        name: 'REASONING_EFFORT'
+        value: reasoningEffortReportVar
       }
     ]
   }

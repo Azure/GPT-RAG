@@ -1,6 +1,7 @@
 param name string
 param location string = resourceGroup().location
 param gpt41Capacity int = 500
+param o4MiniCapacity int = 300
 var aiServiceName = '${name}-aiservice'
 
 resource deepseekR1AIService 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
@@ -54,6 +55,29 @@ resource gpt41Deployment 'Microsoft.CognitiveServices/accounts/deployments@2024-
     }
     versionUpgradeOption: 'OnceNewDefaultVersionAvailable'
     currentCapacity: gpt41Capacity
+    raiPolicyName: 'Microsoft.DefaultV2'
+  }
+}
+
+resource o4MiniDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
+  parent: deepseekR1AIService
+  name: 'o4-mini'
+  dependsOn: [
+    accounts_r1ai0_vm2b2htvuuclm_aiservice_name_DeepSeek_V3_0324
+    gpt41Deployment
+  ]
+  sku: {
+    name: 'DataZoneStandard'
+    capacity: o4MiniCapacity
+  }
+  properties: {
+    model: {
+      format: 'OpenAI'
+      name: 'o4-mini'
+      version: '2025-04-16'
+    }
+    versionUpgradeOption: 'OnceNewDefaultVersionAvailable'
+    currentCapacity: o4MiniCapacity
     raiPolicyName: 'Microsoft.DefaultV2'
   }
 }
