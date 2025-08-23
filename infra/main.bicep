@@ -1967,8 +1967,6 @@ module storageEventGrid './core/eventgrid/eventgrid-system-topic.bicep' = {
 }
 
 // Event Grid Subscription for MCP Function
-// TODO: Uncomment after deploying EventGridTrigger function to MCP Function App
-/*
 module mcpEventSubscription './core/eventgrid/eventgrid-subscription.bicep' = {
   name: 'org-files-event-subscription'
   scope: resourceGroup
@@ -1982,7 +1980,7 @@ module mcpEventSubscription './core/eventgrid/eventgrid-subscription.bicep' = {
     fileExtensions: ['.xlsx', '.xls', '.csv']
   }
 }
-*/
+
 
 output AZURE_KEY_VAULT_NAME string = keyVault.outputs.name
 output AZURE_ZERO_TRUST string = networkIsolation ? 'TRUE' : 'FALSE'
