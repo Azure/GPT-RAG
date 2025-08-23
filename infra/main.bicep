@@ -1953,6 +1953,33 @@ module mcpServer './core/host/functions.bicep' = {
   }
 }
 
+// Event Grid System Topic for Storage Account
+module storageEventGrid './core/eventgrid/eventgrid-system-topic.bicep' = {
+  name: 'storage-eventgrid'
+  scope: resourceGroup
+  params: {
+    name: 'storage-events-${resourceToken}'
+    location: location
+    tags: tags
+    topicType: 'Microsoft.Storage.StorageAccounts'
+    source: storage.outputs.id
+  }
+}
+
+// Event Grid Subscription for MCP Function
+module mcpEventSubscription './core/eventgrid/eventgrid-subscription.bicep' = {
+  name: 'org-files-event-subscription'
+  scope: resourceGroup
+  params: {
+    name: 'org-files-event-subscription-${resourceToken}'
+    systemTopicName: storageEventGrid.outputs.name
+    functionAppId: mcpServer.outputs.id
+    eventTypes: ['Microsoft.Storage.BlobCreated', 'Microsoft.Storage.BlobDeleted']
+    subjectBeginsWith: '/blobServices/default/containers/${containerName}/blobs/organization_files/'
+    fileExtensions: ['.xlsx', '.xls', '.csv']
+  }
+}
+
 output AZURE_KEY_VAULT_NAME string = keyVault.outputs.name
 output AZURE_ZERO_TRUST string = networkIsolation ? 'TRUE' : 'FALSE'
 output AZURE_VM_NAME string = networkIsolation ? ztVmName : ''
