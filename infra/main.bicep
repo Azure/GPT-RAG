@@ -1974,6 +1974,7 @@ module mcpEventSubscription './core/eventgrid/eventgrid-subscription.bicep' = {
     name: 'org-files-event-subscription-${resourceToken}'
     systemTopicName: storageEventGrid.outputs.name
     functionAppId: mcpServer.outputs.id
+    functionName: 'EventGridTrigger'
     eventTypes: ['Microsoft.Storage.BlobCreated', 'Microsoft.Storage.BlobDeleted']
     subjectBeginsWith: '/blobServices/default/containers/${containerName}/blobs/organization_files/'
     fileExtensions: ['.xlsx', '.xls', '.csv']

@@ -4,6 +4,9 @@ param systemTopicName string
 @description('The resource ID of the Function App')
 param functionAppId string
 
+@description('The name of the specific function to target')
+param functionName string = 'EventGridTrigger'
+
 @description('Array of event types to subscribe to')
 param eventTypes array = ['Microsoft.Storage.BlobCreated', 'Microsoft.Storage.BlobDeleted']
 
@@ -24,7 +27,9 @@ resource eventSubscription 'Microsoft.EventGrid/systemTopics/eventSubscriptions@
     destination: {
       endpointType: 'AzureFunction'
       properties: {
-        resourceId: functionAppId
+        resourceId: '${functionAppId}/functions/${functionName}'
+        maxEventsPerBatch: 1
+        preferredBatchSizeInKilobytes: 64
       }
     }
     filter: {
