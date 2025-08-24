@@ -1942,10 +1942,6 @@ module mcpServer './core/host/functions.bicep' = {
         value: storageAccountName
       }
       {
-        name: 'MAIN_STORAGE_CONNECTION_STRING'
-        value: storage.outputs.blobStorageConnectionString
-      }
-      {
         name: 'LOGLEVEL'
         value: 'INFO'
       }
