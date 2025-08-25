@@ -595,7 +595,6 @@ var brandAnalysisModelVar = !empty(brandAnalysisModel) ? brandAnalysisModel : ''
 param reasoningEffortReport string = ''
 var reasoningEffortReportVar = !empty(reasoningEffortReport) ? reasoningEffortReport : ''
 
-
 // MCP Function app
 @description('MCP Search Index')
 var mcpSearchIndex = 'ragindex-test'
@@ -762,7 +761,7 @@ module reportJobsQueue './core/storage/queue-service.bicep' = {
   name: 'queue-report-jobs'
   scope: resourceGroup
   params: {
-    storageAccountName: storage.name
+    storageAccountName: storageAccountName
     queueName: 'report-jobs'
   }
 }
@@ -1223,7 +1222,7 @@ module orchestratorQueueRbac './core/security/storage-queue-access.bicep' = {
   name: 'orchestrator-queue-rbac'
   scope: resourceGroup
   params: {
-    storageAccountName: storage.name
+    storageAccountName: storageAccountName
     principalId: orchestrator.outputs.identityPrincipalId // your API App Service MI
     access: 'DataMessageProcessor' // optionally tighten to enqueue-only
   }
@@ -1532,7 +1531,7 @@ module appserviceQueueRbac './core/security/storage-queue-access.bicep' = {
   name: 'appservice-queue-rbac'
   scope: resourceGroup
   params: {
-    storageAccountName: storage.name
+    storageAccountName: storageAccountName
     principalId: frontEnd.outputs.identityPrincipalId // your API App Service MI
     access: 'DataMessageSender' // optionally tighten to enqueue-only
   }
@@ -1972,7 +1971,6 @@ module mcpEventSubscription './core/eventgrid/eventgrid-subscription.bicep' = {
   }
 }
 
-
 output AZURE_KEY_VAULT_NAME string = keyVault.outputs.name
 output AZURE_ZERO_TRUST string = networkIsolation ? 'TRUE' : 'FALSE'
 output AZURE_VM_NAME string = networkIsolation ? ztVmName : ''
@@ -2012,4 +2010,3 @@ output AZURE_REPORTS_JOBS_QUEUE_STORAGE_NAME string = reportJobsQueue.name
 output GPT41_CAPACITY int = gpt41Capacity
 output GPT5NANO_CAPACITY int = gpt5nanoCapacity
 output O4MINI_CAPACITY int = o4miniCapacity
-
