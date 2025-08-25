@@ -902,6 +902,7 @@ module orchestrator './core/host/functions.bicep' = {
     appInsightsConnectionString: appInsights.outputs.connectionString
     appInsightsInstrumentationKey: appInsights.outputs.instrumentationKey
     tags: union(tags, { 'azd-service-name': 'orchestrator' })
+    runtimeVersion: '3.11'
     alwaysOn: true
     functionAppScaleLimit: 2
     numberOfWorkers: 2
