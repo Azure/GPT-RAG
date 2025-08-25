@@ -424,9 +424,6 @@ var searchServiceName = !empty(azureSearchServiceName) ? azureSearchServiceName 
 param azureOpenAiServiceName string = ''
 var openAiServiceName = !empty(azureOpenAiServiceName) ? azureOpenAiServiceName : 'oai0-${resourceToken}'
 
-@description('Front-end App Service Name. Use your own name convention or leave as it is to generate a random name.')
-param azureServiceBusNamespaceName string = ''
-var sbNamespaceName = !empty(azureServiceBusNamespaceName) ? azureServiceBusNamespaceName : 'sb0-${resourceToken}'
 // o1
 var o1ServiceName = 'o1ai0-${resourceToken}'
 // r1
@@ -735,20 +732,6 @@ module testvm './core/vm/dsvm.bicep' = if (networkIsolation) {
   }
 }
 
-// Services Bus queue
-module serviceBus './core/servicebus/servicebus.bicep' = {
-  name: 'servicebus-core'
-  scope: resourceGroup
-  params: {
-    namespaceName: sbNamespaceName
-    location: location
-    queueName: 'report-jobs'
-    maxDeliveryCount: 10
-    defaultMessageTimeToLive: 'P1D'
-    lockDuration: 'PT60S'
-  }
-}
-
 // storage
 
 var containerName = storageContainerName
@@ -772,6 +755,15 @@ module storage './core/storage/storage-account.bicep' = {
       enabled: true
       days: 1
     }
+  }
+}
+
+module reportJobsQueue './core/storage/queue-service.bicep' = {
+  name: 'queue-report-jobs'
+  scope: resourceGroup
+  params: {
+    storageAccountName: storage.name
+    queueName: 'report-jobs'
   }
 }
 
@@ -1225,14 +1217,15 @@ module orchestratorSearchAccess './core/security/search-access.bicep' = {
   }
 }
 
-// Give the orchestrator access to  Service Bus Data Receiver
-module orchestratorSbReceiverAccess './core/security/servicebus-access.bicep' = {
-  name: 'rbac-orchestrator-sb-receiver'
+// Give the orchestrator access to Storage Queue Service as Procesor
+
+module orchestratorQueueRbac './core/security/storage-queue-access.bicep' = {
+  name: 'orchestrator-queue-rbac'
   scope: resourceGroup
   params: {
-    principalId: orchestrator.outputs.identityPrincipalId
-    namespaceName: sbNamespaceName
-    access: 'Receiver'
+    storageAccountName: storage.name
+    principalId: orchestrator.outputs.identityPrincipalId // your API App Service MI
+    access: 'DataMessageProcessor' // optionally tighten to enqueue-only
   }
 }
 
@@ -1533,14 +1526,15 @@ module appserviceCosmosAccess './core/security/cosmos-access.bicep' = {
   }
 }
 
-// Give the App Service access → Service Bus Data Sender
-module appserviceSeriveBusSenderAccess './core/security/servicebus-access.bicep' = {
-  name: 'rbac-appservice-sb-sender'
+// Give the App Service access → Storage Queue Data Sender
+
+module appserviceQueueRbac './core/security/storage-queue-access.bicep' = {
+  name: 'appservice-queue-rbac'
   scope: resourceGroup
   params: {
-    principalId: frontEnd.outputs.identityPrincipalId
-    namespaceName: sbNamespaceName
-    access: 'Sender'
+    storageAccountName: storage.name
+    principalId: frontEnd.outputs.identityPrincipalId // your API App Service MI
+    access: 'DataMessageSender' // optionally tighten to enqueue-only
   }
 }
 
@@ -2014,7 +2008,8 @@ output AZURE_VNET_NAME string = azureVnetName
 
 output AZURE_SEARCH_USE_MIS bool = azureSearchUseMIS
 
-output AZURE_SERVICEBUS_NAMESPACE_NAME string = sbNamespaceName
+output AZURE_REPORTS_JOBS_QUEUE_STORAGE_NAME string = reportJobsQueue.name
 output GPT41_CAPACITY int = gpt41Capacity
 output GPT5NANO_CAPACITY int = gpt5nanoCapacity
 output O4MINI_CAPACITY int = o4miniCapacity
+
