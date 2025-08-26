@@ -19,8 +19,6 @@ Please see [Contributing Guidelines](../CONTRIBUTING.md) before creating your Pu
 
 If applicable, provide a link to the relevant backlog item or issue.
 
-<!-- Example: https://github.com/placerda/gpt-rag-orchestrator/issues/123 -->
-
 ## Is this change disruptive or does it break existing applications?
 
 If deploying this change could impact existing applications, please specify.

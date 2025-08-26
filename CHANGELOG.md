@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.  
 This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to [Semantic Versioning](https://semver.org/).
 
+## [v2.0.5] - 2025-08-26
+### Fixed
+- Resolved VM deployment errors when using CustomScriptExtension under network isolation.
+
 ## [v2.0.4] - 2025-08-21
 ### Added
 - Updated orchestrator to version 2.0.3, which includes NL2SQL docs and improved settings checks.
