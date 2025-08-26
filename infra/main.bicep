@@ -424,9 +424,6 @@ var searchServiceName = !empty(azureSearchServiceName) ? azureSearchServiceName 
 param azureOpenAiServiceName string = ''
 var openAiServiceName = !empty(azureOpenAiServiceName) ? azureOpenAiServiceName : 'oai0-${resourceToken}'
 
-@description('Front-end App Service Name. Use your own name convention or leave as it is to generate a random name.')
-param azureServiceBusNamespaceName string = ''
-var sbNamespaceName = !empty(azureServiceBusNamespaceName) ? azureServiceBusNamespaceName : 'sb0-${resourceToken}'
 // o1
 var o1ServiceName = 'o1ai0-${resourceToken}'
 // r1
@@ -568,6 +565,15 @@ var langsmithProjectVar = !empty(langsmithProject) ? langsmithProject : ''
 param langsmithTracingV2 string = ''
 var langsmithTracingV2Var = !empty(langsmithTracingV2) ? langsmithTracingV2 : ''
 
+@description('Capacity for the gpt-4.1 model')
+param gpt41Capacity int
+
+@description('Capacity for the gpt-5-nano model')
+param gpt5nanoCapacity int
+
+@description('Capacity for the o4-mini model')
+param o4miniCapacity int
+
 @description('Serper API Key used by the orchestrator.')
 @secure()
 param orchestratorSerperApiKey string = ''
@@ -580,6 +586,14 @@ var orchestratorUri = 'https://${orchestratorFunctionAppName}.azurewebsites.net'
 var webAppUri = 'https://${appServiceName}.azurewebsites.net'
 
 var pythonEnableInitIndexing = '1'
+
+@description('Model used for brand analysis')
+param brandAnalysisModel string = ''
+var brandAnalysisModelVar = !empty(brandAnalysisModel) ? brandAnalysisModel : ''
+
+@description('Reasoning effort for report')
+param reasoningEffortReport string = ''
+var reasoningEffortReportVar = !empty(reasoningEffortReport) ? reasoningEffortReport : ''
 
 // MCP Function app
 @description('MCP Search Index')
@@ -717,20 +731,6 @@ module testvm './core/vm/dsvm.bicep' = if (networkIsolation) {
   }
 }
 
-// Services Bus queue
-module serviceBus './core/servicebus/servicebus.bicep' = {
-  name: 'servicebus-core'
-  scope: resourceGroup
-  params: {
-    namespaceName: sbNamespaceName
-    location: location
-    queueName: 'report-jobs'
-    maxDeliveryCount: 10
-    defaultMessageTimeToLive: 'P1D'
-    lockDuration: 'PT60S'
-  }
-}
-
 // storage
 
 var containerName = storageContainerName
@@ -754,6 +754,15 @@ module storage './core/storage/storage-account.bicep' = {
       enabled: true
       days: 1
     }
+  }
+}
+
+module reportJobsQueue './core/storage/queue-service.bicep' = {
+  name: 'queue-report-jobs'
+  scope: resourceGroup
+  params: {
+    storageAccountName: storageAccountName
+    queueName: 'report-jobs'
   }
 }
 
@@ -884,6 +893,7 @@ module orchestrator './core/host/functions.bicep' = {
     appInsightsConnectionString: appInsights.outputs.connectionString
     appInsightsInstrumentationKey: appInsights.outputs.instrumentationKey
     tags: union(tags, { 'azd-service-name': 'orchestrator' })
+    runtimeVersion: '3.11'
     alwaysOn: true
     functionAppScaleLimit: 2
     numberOfWorkers: 2
@@ -1086,6 +1096,18 @@ module orchestrator './core/host/functions.bicep' = {
         name: 'MCP_FUNCTION_NAME'
         value: mcpServerFunctionAppName
       }
+      {
+        name: 'AGENT_ENDPOINT_SERVICE'
+        value: mcpAgentEndpointService
+      }
+      {
+        name: 'BRAND_ANALYSIS_MODEL'
+        value: brandAnalysisModelVar
+      }
+      {
+        name: 'REASONING_EFFORT'
+        value: reasoningEffortReportVar
+      }
     ]
   }
 }
@@ -1194,14 +1216,15 @@ module orchestratorSearchAccess './core/security/search-access.bicep' = {
   }
 }
 
-// Give the orchestrator access to  Service Bus Data Receiver
-module orchestratorSbReceiverAccess './core/security/servicebus-access.bicep' = {
-  name: 'rbac-orchestrator-sb-receiver'
+// Give the orchestrator access to Storage Queue Service as Procesor
+
+module orchestratorQueueRbac './core/security/storage-queue-access.bicep' = {
+  name: 'orchestrator-queue-rbac'
   scope: resourceGroup
   params: {
-    principalId: orchestrator.outputs.identityPrincipalId
-    namespaceName: sbNamespaceName
-    access: 'Receiver'
+    storageAccountName: storageAccountName
+    principalId: orchestrator.outputs.identityPrincipalId // your API App Service MI
+    access: 'DataMessageProcessor' // optionally tighten to enqueue-only
   }
 }
 
@@ -1502,14 +1525,15 @@ module appserviceCosmosAccess './core/security/cosmos-access.bicep' = {
   }
 }
 
-// Give the App Service access → Service Bus Data Sender
-module appserviceSeriveBusSenderAccess './core/security/servicebus-access.bicep' = {
-  name: 'rbac-appservice-sb-sender'
+// Give the App Service access → Storage Queue Data Sender
+
+module appserviceQueueRbac './core/security/storage-queue-access.bicep' = {
+  name: 'appservice-queue-rbac'
   scope: resourceGroup
   params: {
-    principalId: frontEnd.outputs.identityPrincipalId
-    namespaceName: sbNamespaceName
-    access: 'Sender'
+    storageAccountName: storageAccountName
+    principalId: frontEnd.outputs.identityPrincipalId // your API App Service MI
+    access: 'DataMessageSender' // optionally tighten to enqueue-only
   }
 }
 
@@ -1757,6 +1781,9 @@ module o1Deployment 'core/ai/o1-deployment.bicep' = {
     location: 'eastus2'
     publicNetworkAccess: networkIsolation ? 'Disabled' : 'Enabled'
     tags: tags
+    gpt41Capacity: gpt41Capacity
+    gpt5nanoCapacity: gpt5nanoCapacity
+    o4miniCapacity: o4miniCapacity
   }
 }
 
@@ -1909,14 +1936,38 @@ module mcpServer './core/host/functions.bicep' = {
         value: storageAccountName
       }
       {
-        name: 'MAIN_STORAGE_CONNECTION_STRING'
-        value: storage.outputs.blobStorageConnectionString
-      }
-      {
         name: 'LOGLEVEL'
         value: 'INFO'
       }
     ]
+  }
+}
+
+// Event Grid System Topic for Storage Account
+module storageEventGrid './core/eventgrid/eventgrid-system-topic.bicep' = {
+  name: 'storage-eventgrid'
+  scope: resourceGroup
+  params: {
+    name: 'storage-events-${resourceToken}'
+    location: location
+    tags: tags
+    topicType: 'Microsoft.Storage.StorageAccounts'
+    source: storage.outputs.id
+  }
+}
+
+// Event Grid Subscription for MCP Function
+module mcpEventSubscription './core/eventgrid/eventgrid-subscription.bicep' = {
+  name: 'org-files-event-subscription'
+  scope: resourceGroup
+  params: {
+    name: 'org-files-event-subscription-${resourceToken}'
+    systemTopicName: storageEventGrid.outputs.name
+    functionAppId: mcpServer.outputs.id
+    functionName: 'EventGridTrigger'
+    eventTypes: ['Microsoft.Storage.BlobCreated', 'Microsoft.Storage.BlobDeleted']
+    subjectBeginsWith: '/blobServices/default/containers/${containerName}/blobs/organization_files/'
+    fileExtensions: ['.xlsx', '.xls', '.csv']
   }
 }
 
@@ -1955,4 +2006,7 @@ output AZURE_VNET_NAME string = azureVnetName
 
 output AZURE_SEARCH_USE_MIS bool = azureSearchUseMIS
 
-output AZURE_SERVICEBUS_NAMESPACE_NAME string = sbNamespaceName
+output AZURE_REPORTS_JOBS_QUEUE_STORAGE_NAME string = reportJobsQueue.name
+output GPT41_CAPACITY int = gpt41Capacity
+output GPT5NANO_CAPACITY int = gpt5nanoCapacity
+output O4MINI_CAPACITY int = o4miniCapacity

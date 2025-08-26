@@ -76,6 +76,7 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
       alwaysOn: alwaysOn
       ftpsState: 'FtpsOnly'
       minTlsVersion: '1.2'
+      http20Enabled: true
       appCommandLine: appCommandLine
       numberOfWorkers: numberOfWorkers
       minimumElasticInstanceCount: minimumElasticInstanceCount
