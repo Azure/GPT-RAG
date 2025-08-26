@@ -930,7 +930,7 @@ module assignCosmosDBCosmosDbBuiltInDataContributorTestVm 'modules/security/cosm
 }
 
 var _fileUris = [
-  'https://raw.githubusercontent.com/Azure/GPT-RAG/refs/heads/${_manifest.release}/infra/install.ps1'
+  'https://raw.githubusercontent.com/Azure/GPT-RAG/refs/tags/${_manifest.release}/infra/install.ps1'
 ]
 
 resource cse 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = if (deployVM && deploySoftware && _networkIsolation) {
