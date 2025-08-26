@@ -1,7 +1,7 @@
 param name string
 param location string = resourceGroup().location
 param gpt41Capacity int = 500
-param o4MiniCapacity int = 300
+param o4MiniCapacity int = 150
 var aiServiceName = '${name}-aiservice'
 
 resource deepseekR1AIService 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
