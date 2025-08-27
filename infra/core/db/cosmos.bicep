@@ -400,15 +400,15 @@ resource userTokensContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases
   }
 }
 
-resource productsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
+resource products 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
   parent: database
-  name: 'productsContainer'
+  name: 'products'
   properties: {
     resource: {
-      id: 'productsContainer'
+      id: 'products'
       partitionKey: {
         paths: [
-          '/id'
+          '/organization_id'
         ]
         kind: 'Hash'
       }
@@ -417,14 +417,10 @@ resource productsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/c
         indexingMode: 'consistent'
         automatic: true
         includedPaths: [
-          {
-            path: '/*'
-          }
+          { path: '/*' }
         ]
         excludedPaths: [
-          {
-            path: '/"_etag"/?'
-          }
+          { path: '/"_etag"/?' }
         ]
       }
     }
@@ -436,15 +432,15 @@ resource productsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/c
   }
 }
 
-resource brandsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
+resource brands 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
   parent: database
-  name: 'brandsContainer'
+  name: 'brands'
   properties: {
     resource: {
-      id: 'brandsContainer'
+      id: 'brands'
       partitionKey: {
         paths: [
-          '/id'
+          '/organization_id'
         ]
         kind: 'Hash'
       }
@@ -453,14 +449,10 @@ resource brandsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/con
         indexingMode: 'consistent'
         automatic: true
         includedPaths: [
-          {
-            path: '/*'
-          }
+          { path: '/*' }
         ]
         excludedPaths: [
-          {
-            path: '/"_etag"/?'
-          }
+          { path: '/"_etag"/?' }
         ]
       }
     }
@@ -472,15 +464,15 @@ resource brandsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/con
   }
 }
 
-resource competitorsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
+resource competitors 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
   parent: database
-  name: 'competitorsContainer'
+  name: 'competitors'
   properties: {
     resource: {
-      id: 'competitorsContainer'
+      id: 'competitors'
       partitionKey: {
         paths: [
-          '/id'
+          '/organization_id'
         ]
         kind: 'Hash'
       }
@@ -489,50 +481,10 @@ resource competitorsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabase
         indexingMode: 'consistent'
         automatic: true
         includedPaths: [
-          {
-            path: '/*'
-          }
+          { path: '/*' }
         ]
         excludedPaths: [
-          {
-            path: '/"_etag"/?'
-          }
-        ]
-      }
-    }
-    options: {
-      autoscaleSettings: {
-        maxThroughput: autoscaleMaxThroughput
-      }
-    }
-  }
-}
-
-resource brandsCompetitors 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
-  parent: database
-  name: 'brandsCompetitors'
-  properties: {
-    resource: {
-      id: 'brandsCompetitors'
-      partitionKey: {
-        paths: [
-          '/id'
-        ]
-        kind: 'Hash'
-      }
-      analyticalStorageTtl: analyticalStoreTTL
-      indexingPolicy: {
-        indexingMode: 'consistent'
-        automatic: true
-        includedPaths: [
-          {
-            path: '/*'
-          }
-        ]
-        excludedPaths: [
-          {
-            path: '/"_etag"/?'
-          }
+          { path: '/"_etag"/?' }
         ]
       }
     }
