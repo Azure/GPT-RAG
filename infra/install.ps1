@@ -45,7 +45,7 @@ Param (
   [Parameter(Mandatory = $true)]
   [string]
   $release,
-  
+
   [string]
   $azureTenantID,
 
@@ -164,63 +164,51 @@ mkdir C:\github -ea SilentlyContinue
 cd C:\github
 git clone https://github.com/azure/gpt-rag -b $release --depth 1
 
-cd gpt-rag
-
-git config --global --add safe.directory C:/github/gpt-rag
-
 #add azd to path
 $env:Path += ";C:\Program Files\Azure Dev CLI"
 
 write-host "Logging into Azure CLI and AZD";
-az login --identity --tenant $azureTenantID
-azd auth login --managed-identity --tenant-id $azureTenantID
+az login --identity
+azd auth login --managed-identity
 
 write-host "Initializing AZD";
 azd init -e $AzdEnvName --subscription $azureSubscriptionID --location $azureLocation 
 azd env set AZURE_TENANT_ID $azureTenantID
 azd env set AZURE_RESOURCE_GROUP $AzureResourceGroupName
+azd env set AZURE_SUBSCRIPTION_ID $azureSubscriptionID
+azd env set AZURE_LOCATION $azureLocation
+azd env set AZURE_AI_FOUNDRY_LOCATION $azureLocation
+azd env set APP_CONFIG_ENDPOINT "https://appcs-$resourceToken.azconfig.io"
+azd env set NETWORK_ISOLATION true
+azd env set USE_UAI $useUAI
+azd env set RESOURCE_TOKEN $resourceToken
+azd env set DEPLOY_SOFTWARE false
 
-#set variables if not present
-$deploySoftware = $true
-$content = Get-Content .azure\$($AzdEnvName)\.env
+#load the manifest.json
+$manifest = Get-Content "C:\github\gpt-rag\infra\manifest.json" | ConvertFrom-Json
 
-if ($content -notmatch "AZURE_SUBSCRIPTION_ID") {
-  $content += "AZURE_SUBSCRIPTION_ID=$azureSubscriptionID`n"
-}
-if ($content -notmatch "AZURE_LOCATION") {
-  $content += "AZURE_LOCATION=$azureLocation`n"
-}
-if ($content -notmatch "AZURE_AI_FOUNDRY_LOCATION") {
-  $content += "AZURE_AI_FOUNDRY_LOCATION=$azureLocation`n"
-}
-if ($content -notmatch "AZURE_TENANT_ID") {
-  $content += "AZURE_TENANT_ID=$azureTenantID`n"
-}
-if ($content -notmatch "AZURE_RESOURCE_GROUP") {
-  $content += "AZURE_RESOURCE_GROUP=$AzureResourceGroupName`n"
-}
-if ($content -notmatch "APP_CONFIG_ENDPOINT") {
-  $content += "APP_CONFIG_ENDPOINT=https://appcs-$resourceToken.azconfig.io`n"
-}
-if ($content -notmatch "NETWORK_ISOLATION") {
-  $content += "NETWORK_ISOLATION=true`n"
-}
-if ($content -notmatch "USE_UAI") {
-    $content += "USE_UAI=$useUAI`n"
-}
-if ($content -notmatch "RESOURCE_TOKEN") {
-    $content += "RESOURCE_TOKEN=$resourceToken`n"
-}
-if ($content -notmatch "DEPLOY_SOFTWARE") {
-  $content += "DEPLOY_SOFTWARE=false`n"
-}
-else
-{
-  $deploySoftware = $false
-  $content = $content -replace "DEPLOY_SOFTWARE=.*", "DEPLOY_SOFTWARE=false"
-}
+foreach( $repo in $manifest.components) {
+  $repoName = $repo.name
+  $repoUrl = $repo.repo
+  $tag = $repo.tag
+  $release = $repo.release
+  $branch = $release
 
-Set-Content .azure\$($AzdEnvName)\.env $content
+  if (Test-Path "C:\github\$repoName") {
+    write-host "Updating existing repository: $repoName $branch";
+    cd "C:\github\$repoName"
+    git fetch --all
+    git checkout -b $branch
+  } else {
+    write-host "Cloning repository: $repoName from branch: $branch";
+    cd c:\github
+    git clone -b $branch --depth 1 $repoUrl "C:\github\$repoName"
+    copy-item c:\github\gpt-rag\.azure c:\github\$repoName -recurse -container
+    cd "C:\github\$repoName"
+  }
+
+  git config --global --add safe.directory C:/github/$repoName
+}
 
 if ($deploySoftware) {  
   write-host "Restarting the machine to complete installation";

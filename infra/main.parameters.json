@@ -6,12 +6,14 @@
     "environmentName":                     { "value": "${AZURE_ENV_NAME}" },
     "location":                            { "value": "${AZURE_LOCATION}" },
     "aiFoundryLocation":                   { "value": "${AZURE_AI_FOUNDRY_LOCATION}" },
+    "psqlLocation":                        { "value": "${AZURE_PSQL_LOCATION}" },
     "deploymentTags":                      { "value": {} },
     "principalId":                         { "value": "${AZURE_PRINCIPAL_ID}" },
 
     "networkIsolation":                    { "value": "${NETWORK_ISOLATION}" },
     "useUAI":                              { "value": "${USE_UAI}" },
     "useCAppAPIKey":                       { "value": "${USE_CAPP_API_KEY}" },    
+    "useZoneRedundancy":                   { "value": "false" },    
 
     "aiSearchResourceId":                  { "value": null },
     "aiFoundryStorageAccountResourceId":   { "value": null },
@@ -33,6 +35,7 @@
     "greenFieldDeployment":                 { "value": "true" },
     "deployVM":                             { "value": "true" },
     "deploySoftware":                       { "value": "true" },
+    "deployPostgres":                       { "value": "true" },
 
     "aiFoundryAccountName":                  { "value": null },
     "aiFoundryProjectName":                  { "value": null },
@@ -58,6 +61,7 @@
     "solutionStorageAccountName":            { "value": null },
 
     "vmAdminPassword":                       {"value": "$(secretOrRandomPassword)"},  
+    "vmSize":                                { "value": "Standard_D4s_v3" },
 
     "useCMK":                                { "value": "false" },        
 
@@ -187,6 +191,7 @@
             "AppConfigurationDataReader",
             "CognitiveServicesUser",
             "CognitiveServicesOpenAIUser",
+            "CosmosDBBuiltInDataContributor",
             "AcrPull",
             "SearchIndexDataContributor",
             "StorageBlobDataContributor",

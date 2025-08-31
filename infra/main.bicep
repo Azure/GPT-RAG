@@ -66,6 +66,12 @@ param location string = resourceGroup().location
 @description('The Azure region where your AI Foundry resource and project will be created. Defaults to the resource group location.')
 param aiFoundryLocation string = resourceGroup().location
 
+@description('The Azure region where PostgreSQL will be created. Defaults to the resource group location.')
+param psqlLocation string = resourceGroup().location
+
+@description('The Azure region where Cosmos DB will be created. Defaults to the resource group location.')
+param cosmosLocation string = resourceGroup().location
+
 @description('Principal ID for role assignments. This is typically the Object ID of the user or service principal running the deployment.')
 param principalId string
 
@@ -126,6 +132,9 @@ param deployVM bool = true
 
 @description('Deploy Virtual Machine software.')
 param deploySoftware bool = true
+
+@description('Deploy PostgresSQL Flex server.')
+param deployPostgres bool = false
 
 @description('Deploy capability hosts.')
 param deployCapabilityHosts bool = true
@@ -195,6 +204,7 @@ param accountCapHost string = 'caphostacc'
 // ----------------------------------------------------------------------
 param useUAI bool = false // Use User Assigned Identity (UAI)
 param useCAppAPIKey bool = false // Use API Keys to connect to container apps
+param useZoneRedundancy bool = false // Use Zone Redundancy
 
 // ----------------------------------------------------------------------
 // Resource Naming params
@@ -238,6 +248,9 @@ param containerEnvName string = '${const.abbrs.containers.containerAppsEnvironme
 
 @description('Name of the Azure Container Registry for storing Docker images.')
 param containerRegistryName string = '${const.abbrs.containers.containerRegistry}${resourceToken}'
+
+@description('Name of the PostgreSQL.')
+param postgreSQLName string = '${const.abbrs.databases.postgreSQLDatabase}${resourceToken}'
 
 @description('Name of the Cosmos DB account (alias for database operations).')
 param dbAccountName string = '${const.abbrs.databases.cosmosDBDatabase}${resourceToken}'
@@ -392,6 +405,9 @@ var _caEnvSubnetId = _networkIsolation ? '${virtualNetwork.outputs.resourceId}/s
 var _jumpbxSubnetId = _networkIsolation ? '${virtualNetwork.outputs.resourceId}/subnets/jumpbox-subnet' : ''
 #disable-next-line BCP318
 var _agentSubnetId = _networkIsolation ? '${virtualNetwork.outputs.resourceId}/subnets/agent-subnet' : ''
+#disable-next-line BCP318
+var _psqlSubnetId = _networkIsolation ? '${virtualNetwork.outputs.resourceId}/subnets/psql-subnet' : ''
+
 
 // ----------------------------------------------------------------------
 // VM vars
@@ -513,12 +529,17 @@ module virtualNetwork 'br/public:avm/res/network/virtual-network:0.7.0' = if (_n
         name: 'devops-build-agents-subnet'
         addressPrefix: '192.168.4.96/27' // 32 IPs for DevOps build agents
       }
+      {
+        name: 'psql-subnet'
+        addressPrefix: '192.168.2.192/27' // 32 IPs for Databases
+        delegation: 'Microsoft.DBforPostgreSQL/flexibleServers'
+      }
     ]
   }
 }
 
 //  Key Vault to store that password securely
-module testVmKeyVault 'br/public:avm/res/key-vault/vault:0.12.1' = if (deployVM && _networkIsolation && deployVmKeyVault) {
+module testVmKeyVault 'br/public:avm/res/key-vault/vault:0.13.3' = if (deployVM && _networkIsolation && deployVmKeyVault) {
   name: 'vmKeyVault'
   params: {
     name: '${const.abbrs.security.keyVault}testvm-${resourceToken}'
@@ -537,7 +558,7 @@ module testVmKeyVault 'br/public:avm/res/key-vault/vault:0.12.1' = if (deployVM 
 }
 
 // Bastion Host
-module testVmBastionHost 'br/public:avm/res/network/bastion-host:0.6.1' = if (deployVM && _networkIsolation) {
+module testVmBastionHost 'br/public:avm/res/network/bastion-host:0.8.0' = if (deployVM && networkIsolation) {
   name: 'bastionHost'
   params: {
     // Bastion host name
@@ -547,6 +568,7 @@ module testVmBastionHost 'br/public:avm/res/network/bastion-host:0.6.1' = if (de
     location: location
     skuName: 'Standard'
     tags: _tags
+    availabilityZones: useZoneRedundancy ? [1, 2, 3] : []
 
     // Configuration for the Public IP that the module will create
     publicIPAddressObject: {
@@ -555,14 +577,14 @@ module testVmBastionHost 'br/public:avm/res/network/bastion-host:0.6.1' = if (de
       allocationMethod: 'Static'
       skuName: 'Standard'
       skuTier: 'Regional'
-      zones: [1, 2, 3]
+      zones: useZoneRedundancy ? [1, 2, 3] : []
       tags: _tags
     }
   }
 }
 
 //AI Foundry Search User Managed Identity
-module testVmUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (_useUAI) {
+module testVmUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = if (_useUAI) {
   name: '${const.abbrs.security.managedIdentity}${_vmName}'
   params: {
     // Required parameters
@@ -960,7 +982,7 @@ resource cse 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = if (dep
 ///////////////////////////////////////////////////////////////////////////
 
 // AI Foundry Account
-module privateDnsZoneCogSvcs 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (_networkIsolation) {
+module privateDnsZoneCogSvcs 'br/public:avm/res/network/private-dns-zone:0.8.0' = if (_networkIsolation) {
   name: 'dep-cogsvcs-private-dns-zone'
   params: {
     name: 'privatelink.cognitiveservices.azure.com'
@@ -978,7 +1000,7 @@ module privateDnsZoneCogSvcs 'br/public:avm/res/network/private-dns-zone:0.7.1' 
 }
 
 // Open AI
-module privateDnsZoneOpenAi 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (_networkIsolation) {
+module privateDnsZoneOpenAi 'br/public:avm/res/network/private-dns-zone:0.8.0' = if (_networkIsolation) {
   name: 'dep-openai-private-dns-zone'
   params: {
     name: 'privatelink.openai.azure.com'
@@ -996,7 +1018,7 @@ module privateDnsZoneOpenAi 'br/public:avm/res/network/private-dns-zone:0.7.1' =
 }
 
 // AI Services
-module privateDnsZoneAiService 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (_networkIsolation) {
+module privateDnsZoneAiService 'br/public:avm/res/network/private-dns-zone:0.8.0' = if (_networkIsolation) {
   name: 'dep-aiservices-private-dns-zone'
   params: {
     name: 'privatelink.services.ai.azure.com'
@@ -1014,7 +1036,7 @@ module privateDnsZoneAiService 'br/public:avm/res/network/private-dns-zone:0.7.1
 }
 
 // AI Search
-module privateDnsZoneSearch 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (_networkIsolation) {
+module privateDnsZoneSearch 'br/public:avm/res/network/private-dns-zone:0.8.0' = if (_networkIsolation) {
   name: 'dep-search-std-private-dns-zone'
   params: {
     name: 'privatelink.search.windows.net'
@@ -1031,8 +1053,26 @@ module privateDnsZoneSearch 'br/public:avm/res/network/private-dns-zone:0.7.1' =
   }
 }
 
+// PostgreSQL
+module privateDnsZonePostgres 'br/public:avm/res/network/private-dns-zone:0.8.0' = if (_networkIsolation && deployPostgres) {
+  name: 'dep-postgres-std-private-dns-zone'
+  params: {
+    name: 'privatelink.postgres.database.azure.com'
+    location: 'global'
+    tags: _tags
+    virtualNetworkLinks: [
+      {
+        name: '${vnetName}-postgres-std-link'
+        registrationEnabled: false
+        #disable-next-line BCP318
+        virtualNetworkResourceId: virtualNetwork.outputs.resourceId
+      }
+    ]
+  }
+}
+
 // Cosmos DB
-module privateDnsZoneCosmos 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (_networkIsolation) {
+module privateDnsZoneCosmos 'br/public:avm/res/network/private-dns-zone:0.8.0' = if (_networkIsolation) {
   name: 'dep-cosmos-std-private-dns-zone'
   params: {
     name: 'privatelink.documents.azure.com'
@@ -1050,7 +1090,7 @@ module privateDnsZoneCosmos 'br/public:avm/res/network/private-dns-zone:0.7.1' =
 }
 
 // Storage Account
-module privateDnsZoneBlob 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (_networkIsolation) {
+module privateDnsZoneBlob 'br/public:avm/res/network/private-dns-zone:0.8.0' = if (_networkIsolation) {
   name: 'dep-blob-std-private-dns-zone'
   params: {
     name: 'privatelink.blob.${environment().suffixes.storage}'
@@ -1068,7 +1108,7 @@ module privateDnsZoneBlob 'br/public:avm/res/network/private-dns-zone:0.7.1' = i
 }
 
 // Key Vault
-module privateDnsZoneKeyVault 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (_networkIsolation && deployKeyVault) {
+module privateDnsZoneKeyVault 'br/public:avm/res/network/private-dns-zone:0.8.0' = if (_networkIsolation && deployKeyVault) {
   name: 'kv-private-dns-zone'
   params: {
     name: 'privatelink.vaultcore.azure.net'
@@ -1086,7 +1126,7 @@ module privateDnsZoneKeyVault 'br/public:avm/res/network/private-dns-zone:0.7.1'
 }
 
 // Application Configuration
-module privateDnsZoneAppConfig 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (_networkIsolation && deployAppConfig) {
+module privateDnsZoneAppConfig 'br/public:avm/res/network/private-dns-zone:0.8.0' = if (_networkIsolation && deployAppConfig) {
   name: 'appconfig-private-dns-zone'
   params: {
     name: 'privatelink.azconfig.io'
@@ -1104,7 +1144,7 @@ module privateDnsZoneAppConfig 'br/public:avm/res/network/private-dns-zone:0.7.1
 }
 
 // Application Insights
-module privateDnsZoneInsights 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (_networkIsolation && deployAppInsights) {
+module privateDnsZoneInsights 'br/public:avm/res/network/private-dns-zone:0.8.0' = if (_networkIsolation && deployAppInsights) {
   name: 'ai-private-dns-zone'
   params: {
     name: 'privatelink.applicationinsights.io'
@@ -1122,7 +1162,7 @@ module privateDnsZoneInsights 'br/public:avm/res/network/private-dns-zone:0.7.1'
 }
 
 // Container Apps
-module privateDnsZoneContainerApps 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (_networkIsolation) {
+module privateDnsZoneContainerApps 'br/public:avm/res/network/private-dns-zone:0.8.0' = if (_networkIsolation) {
   name: 'dep-containerapps-env-private-dns-zone'
   params: {
     name: 'privatelink.${location}.azurecontainerapps.io'
@@ -1140,7 +1180,7 @@ module privateDnsZoneContainerApps 'br/public:avm/res/network/private-dns-zone:0
 }
 
 // Container Registry
-module privateDnsZoneAcr 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (_networkIsolation && deployContainerRegistry) {
+module privateDnsZoneAcr 'br/public:avm/res/network/private-dns-zone:0.8.0' = if (_networkIsolation && deployContainerRegistry) {
   name: 'acr-private-dns-zone'
   params: {
     name: 'privatelink.azurecr.io'
@@ -1586,7 +1626,7 @@ module aiFoundryValidateExistingResources 'modules/standard-setup/validate-exist
 }
 
 //AI Foundry Search User Managed Identity
-module aiFoundrySearchServiceNameUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (_useUAI) {
+module aiFoundrySearchServiceNameUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = if (_useUAI) {
   name: '${const.abbrs.security.managedIdentity}${aiFoundrySearchServiceName}'
   params: {
     // Required parameters
@@ -1597,7 +1637,7 @@ module aiFoundrySearchServiceNameUAI 'br/public:avm/res/managed-identity/user-as
 }
 
 //AI Foundry Cosmos User Managed Identity
-module aiFoundryCosmosDbNameUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (_useUAI) {
+module aiFoundryCosmosDbNameUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = if (_useUAI) {
   name: '${const.abbrs.security.managedIdentity}${aiFoundryCosmosDbName}'
   params: {
     // Required parameters
@@ -1639,7 +1679,7 @@ module aiFoundryDependencies 'modules/standard-setup/standard-dependent-resource
 }
 
 //AI Foundry Account User Managed Identity
-module aiFoundryUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (_useUAI) {
+module aiFoundryUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = if (_useUAI) {
   name: '${const.abbrs.security.managedIdentity}${aiFoundryAccountName}'
   params: {
     // Required parameters
@@ -1671,7 +1711,7 @@ module aiFoundryAccount 'modules/standard-setup/ai-account-identity.bicep' = {
 }
 
 // AI Foundry Project User Managed Identity
-module aiFoundryProjectUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (_useUAI) {
+module aiFoundryProjectUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = if (_useUAI) {
   name: '${const.abbrs.security.managedIdentity}${aiFoundryProjectName}'
   params: {
     // Required parameters
@@ -1822,12 +1862,13 @@ module aiFoundryConnectionStorage 'modules/standard-setup/connection-storage-acc
 
 // Application Insights
 //////////////////////////////////////////////////////////////////////////
+var appInsightsInvalidLocations = ['westcentralus']
 
 module appInsights 'br/public:avm/res/insights/component:0.6.0' = if (deployAppInsights) {
   name: 'appInsights'
   params: {
     name: appInsightsName
-    location: location
+    location: contains(appInsightsInvalidLocations, location) ? 'eastus' : location
     #disable-next-line BCP318
     workspaceResourceId: logAnalytics.outputs.resourceId
     applicationType:     'web'
@@ -1852,7 +1893,7 @@ resource privateLinkScope 'microsoft.insights/privatelinkscopes@2021-07-01-previ
   ]
 }
 
-module privateDnsZoneAzureMonitor 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (_networkIsolation) {
+module privateDnsZoneAzureMonitor 'br/public:avm/res/network/private-dns-zone:0.8.0' = if (_networkIsolation) {
   name: 'azure-monitor-private-dns-zone'
   params: {
     name: 'privatelink.monitor.azure.com'
@@ -1869,7 +1910,7 @@ module privateDnsZoneAzureMonitor 'br/public:avm/res/network/private-dns-zone:0.
   }
 }
 
-module privateDnsZoneOmsOpsInsights 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (_networkIsolation) {
+module privateDnsZoneOmsOpsInsights 'br/public:avm/res/network/private-dns-zone:0.8.0' = if (_networkIsolation) {
   name: 'oms-opinsights-private-dns-zone'
   params: {
     name: 'privatelink.oms.opinsights.azure.com'
@@ -1886,7 +1927,7 @@ module privateDnsZoneOmsOpsInsights 'br/public:avm/res/network/private-dns-zone:
   }
 }
 
-module privateDnsZoneOdsOpsInsights 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (_networkIsolation) {
+module privateDnsZoneOdsOpsInsights 'br/public:avm/res/network/private-dns-zone:0.8.0' = if (_networkIsolation) {
   name: 'ods-opinsights-private-dns-zone'
   params: {
     name: 'privatelink.ods.opinsights.azure.com'
@@ -1903,7 +1944,7 @@ module privateDnsZoneOdsOpsInsights 'br/public:avm/res/network/private-dns-zone:
   }
 }
 
-module privateDnsZoneAzureAutomation 'br/public:avm/res/network/private-dns-zone:0.7.1' = if (_networkIsolation) {
+module privateDnsZoneAzureAutomation 'br/public:avm/res/network/private-dns-zone:0.8.0' = if (_networkIsolation) {
   name: 'azure-automation-private-dns-zone'
   params: {
     name: 'privatelink.agentsvc.azure.automation.net'
@@ -1993,7 +2034,7 @@ resource privateLinkScopedResources2 'microsoft.insights/privatelinkscopes/scope
 //////////////////////////////////////////////////////////////////////////
 
 //Container Apps Env User Managed Identity
-module containerEnvUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (_useUAI) {
+module containerEnvUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = if (_useUAI) {
   name: '${const.abbrs.security.managedIdentity}${containerEnvName}'
   params: {
     // Required parameters
@@ -2004,7 +2045,7 @@ module containerEnvUAI 'br/public:avm/res/managed-identity/user-assigned-identit
 }
 
 // Container Apps Environment
-module containerEnv 'br/public:avm/res/app/managed-environment:0.9.1' = if (deployContainerEnv) {
+module containerEnv 'br/public:avm/res/app/managed-environment:0.11.3' = if (deployContainerEnv) {
   name: 'containerEnv'
   params: {
     name: containerEnvName
@@ -2012,23 +2053,34 @@ module containerEnv 'br/public:avm/res/app/managed-environment:0.9.1' = if (depl
     tags: _tags
     // log & insights
     #disable-next-line BCP318
-    logAnalyticsWorkspaceResourceId: logAnalytics.outputs.resourceId
+    appLogsConfiguration: {
+      //destination: deployAppInsights ? 'log-analytics' : 'none'
+      //logAnalyticsConfiguration: {
+      //  customerId: appInsights.outputs.applicationId
+      //  sharedKey: appInsights.outputs.instrumentationKey
+      //}
+    }
     #disable-next-line BCP318
     appInsightsConnectionString: appInsights.outputs.connectionString
-    zoneRedundant: false
+    zoneRedundant: useZoneRedundancy
     workloadProfiles: workloadProfiles
     managedIdentities: {
       systemAssigned: _useUAI ? false : true
       #disable-next-line BCP318
       userAssignedResourceIds: _useUAI ? [containerEnvUAI.outputs.resourceId] : []
     }
-    infrastructureSubnetId: _networkIsolation ? _caEnvSubnetId : ''
-    internal: _networkIsolation ? true : false
+    infrastructureSubnetResourceId: networkIsolation ? _caEnvSubnetId : ''
+    internal: networkIsolation ? true : false
+    publicNetworkAccess: networkIsolation ? 'Disabled' : 'Enabled'
   }
+  dependsOn: [
+    appInsights!
+    logAnalytics!
+  ]
 }
 
 //Container Registry User Managed Identity
-module containerRegistryUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (_useUAI) {
+module containerRegistryUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = if (_useUAI) {
   name: '${const.abbrs.security.managedIdentity}${containerRegistryName}'
   params: {
     // Required parameters
@@ -2039,7 +2091,7 @@ module containerRegistryUAI 'br/public:avm/res/managed-identity/user-assigned-id
 }
 
 // Container Registry
-module containerRegistry 'br/public:avm/res/container-registry/registry:0.9.1' = if (deployContainerRegistry) {
+module containerRegistry 'br/public:avm/res/container-registry/registry:0.9.3' = if (deployContainerRegistry) {
   name: 'containerRegistry'
   params: {
     name: containerRegistryName
@@ -2047,6 +2099,7 @@ module containerRegistry 'br/public:avm/res/container-registry/registry:0.9.1' =
     location: location
     acrSku: _networkIsolation ? 'Premium' : 'Basic'
     tags: _tags
+    zoneRedundancy: useZoneRedundancy ? 'Enabled' : 'Disabled'
     managedIdentities: {
       systemAssigned: _useUAI ? false : true
       #disable-next-line BCP318
@@ -2057,7 +2110,7 @@ module containerRegistry 'br/public:avm/res/container-registry/registry:0.9.1' =
 }
 
 //Container Apps User Managed Identity
-module containerAppsUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = [
+module containerAppsUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = [
   for app in containerAppsList: if (_useUAI) {
     name: '${const.abbrs.security.managedIdentity}${app.service_name}'
     params: {
@@ -2071,7 +2124,7 @@ module containerAppsUAI 'br/public:avm/res/managed-identity/user-assigned-identi
 
 // Container Apps
 @batchSize(4)
-module containerApps 'br/public:avm/res/app/container-app:0.17.0' = [
+module containerApps 'br/public:avm/res/app/container-app:0.18.1' = [
   for (app, index) in containerAppsList: if (deployContainerApps) {
     name: empty(app.name) ? '${const.abbrs.containers.containerApp}${resourceToken}-${app.service_name}' : app.name
     params: {
@@ -2142,11 +2195,59 @@ module containerApps 'br/public:avm/res/app/container-app:0.17.0' = [
   }
 ]
 
+// PostgresSQL
+//////////////////////////////////////////////////////////////////////////
+
+//PostgresSQL User Managed Identity
+module postgresUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = if (_useUAI && deployPostgres) {
+  name: '${const.abbrs.security.managedIdentity}${postgreSQLName}'
+  params: {
+    // Required parameters
+    name: '${const.abbrs.security.managedIdentity}${postgreSQLName}'
+    // Non-required parameters
+    location: location
+  }
+}
+
+module pgFlexibleServer 'br/public:avm/res/db-for-postgre-sql/flexible-server:0.3.1' = if (deployPostgres) {
+  name: '${postgreSQLName}'
+  params: {
+    // Required parameters
+    availabilityZone: null
+    location: psqlLocation
+    name: '${postgreSQLName}'
+    skuName: 'Standard_D2s_v3'
+    tier: 'GeneralPurpose'
+    delegatedSubnetResourceId: _networkIsolation ? _psqlSubnetId : null
+    privateDnsZoneArmResourceId: _networkIsolation ? privateDnsZonePostgres.outputs.resourceId : null
+    // Non-required parameters
+    managedIdentities: {
+      systemAssigned: _useUAI ? false : true
+      #disable-next-line BCP318
+      userAssignedResourceIds: _useUAI ? [postgresUAI.outputs.resourceId] : []
+    }
+    administrators: [
+      /*
+      {
+        objectId: principalId
+        principalName: null
+        principalType: 'User'
+      }
+      */
+    ]
+    databases: [
+      {
+        name: 'gptrag'
+      }
+    ]
+  }
+}
+
 // Cosmos DB Account and Database
 //////////////////////////////////////////////////////////////////////////
 
 //Cosmos User Managed Identity
-module cosmosUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (_useUAI) {
+module cosmosUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = if (_useUAI) {
   name: '${const.abbrs.security.managedIdentity}${dbAccountName}'
   params: {
     // Required parameters
@@ -2156,22 +2257,21 @@ module cosmosUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.
   }
 }
 
-module cosmosDBAccount 'br/public:avm/res/document-db/database-account:0.12.0' = if (deployCosmosDb) {
+module cosmosDBAccount 'br/public:avm/res/document-db/database-account:0.15.1' = if (deployCosmosDb) {
   name: 'CosmosDBAccount'
   params: {
     name: dbAccountName
-    location: location
+    location: cosmosLocation
     managedIdentities: {
       systemAssigned: _useUAI ? false : true
       #disable-next-line BCP318
       userAssignedResourceIds: _useUAI ? [cosmosUAI.outputs.resourceId] : []
     }
-
-    locations: [
+    failoverLocations: [
       {
-        locationName: location
+        locationName: cosmosLocation
         failoverPriority: 0
-        isZoneRedundant: false
+        isZoneRedundant: useZoneRedundancy
       }
     ]
     defaultConsistencyLevel: 'Session'
@@ -2216,7 +2316,7 @@ module cosmosDBAccount 'br/public:avm/res/document-db/database-account:0.12.0' =
 // Key Vault
 //////////////////////////////////////////////////////////////////////////
 
-module keyVault 'br/public:avm/res/key-vault/vault:0.12.1' = if (deployKeyVault) {
+module keyVault 'br/public:avm/res/key-vault/vault:0.13.3' = if (deployKeyVault) {
   name: 'keyVault'
   params: {
     name: keyVaultName
@@ -2250,7 +2350,7 @@ resource secret 'Microsoft.KeyVault/vaults/secrets@2024-11-01' = [for (config, i
 // Log Analytics Workspace
 //////////////////////////////////////////////////////////////////////////
 
-module logAnalytics 'br/public:avm/res/operational-insights/workspace:0.11.1' = if (deployLogAnalytics) {
+module logAnalytics 'br/public:avm/res/operational-insights/workspace:0.12.0' = if (deployLogAnalytics) {
   name: 'logAnalytics'
   params: {
     name: logAnalyticsWorkspaceName
@@ -2268,7 +2368,7 @@ module logAnalytics 'br/public:avm/res/operational-insights/workspace:0.11.1' = 
 //////////////////////////////////////////////////////////////////////////
 
 //Search Service User Managed Identity
-module searchServiceUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (_useUAI) {
+module searchServiceUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = if (_useUAI) {
   name: '${const.abbrs.security.managedIdentity}${searchServiceName}'
   params: {
     // Required parameters
@@ -2278,7 +2378,7 @@ module searchServiceUAI 'br/public:avm/res/managed-identity/user-assigned-identi
   }
 }
 
-module searchService 'br/public:avm/res/search/search-service:0.10.0' = if (deploySearchService) {
+module searchService 'br/public:avm/res/search/search-service:0.11.1' = if (deploySearchService) {
   name: 'searchService'
   params: {
     name: searchServiceName
@@ -2338,7 +2438,7 @@ module searchService 'br/public:avm/res/search/search-service:0.10.0' = if (depl
 //////////////////////////////////////////////////////////////////////////
 
 // Storage Account
-module storageAccount 'br/public:avm/res/storage/storage-account:0.19.0' = if (deployStorageAccount) {
+module storageAccount 'br/public:avm/res/storage/storage-account:0.26.2' = if (deployStorageAccount) {
   name: 'storageAccountSolution'
   params: {
     name: storageAccountName
@@ -2598,7 +2698,7 @@ module assignKeyVaultSecretsUserAca 'modules/security/resource-role-assignment.b
 ]
 
 // Bastion Key Vault Service - Key Vault Secrets Officer  -> Executor
-module assignKeyVaultSecretsOffExecutor 'modules/security/resource-role-assignment.bicep' = if (deployVM && _networkIsolation) {
+module assignKeyVaultSecretsOffExecutor 'modules/security/resource-role-assignment.bicep' = if (deployVM && _networkIsolation && deployVmKeyVault) {
   name: 'assignKeyVaultSecretsOffExecutor'
   params: {
     name: 'assignKeyVaultSecretsOffExecutor'
@@ -3040,7 +3140,7 @@ module assignStorageStorageBlobDataReaderAIFoundryProject 'modules/security/reso
 // App Configuration Store
 //////////////////////////////////////////////////////////////////////////
 
-module appConfig 'br/public:avm/res/app-configuration/configuration-store:0.6.3' = if (deployAppConfig) {
+module appConfig 'br/public:avm/res/app-configuration/configuration-store:0.9.1' = if (deployAppConfig) {
   name: 'appConfig'
   params: {
     name: appConfigName
@@ -3143,6 +3243,22 @@ module appConfigKeyVaultPopulate 'modules/app-configuration/app-configuration.bi
   }
 }
 
+module cosmosConfigKeyVaultPopulate 'modules/app-configuration/app-configuration.bicep' = if (deployCosmosDb && deployAppConfig) {
+  name: 'cosmosConfigKeyVaultPopulate'
+  params: {
+    #disable-next-line BCP318
+    storeName: appConfig.outputs.name
+    keyValues: concat(
+      [
+        #disable-next-line BCP318
+      { name: 'COSMOS_DB_ACCOUNT_RESOURCE_ID', value: cosmosDBAccount.outputs.resourceId, label: 'gpt-rag', contentType: 'text/plain' }
+      #disable-next-line BCP318
+      { name: 'COSMOS_DB_ENDPOINT',              value: cosmosDBAccount.outputs.endpoint,            label: 'gpt-rag', contentType: 'text/plain' }
+      ]
+    )
+  }
+}
+
 module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = if (deployAppConfig) {
   name: 'appConfigPopulate'
   params: {
@@ -3175,6 +3291,7 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       #disable-next-line BCP318
       { name: 'APPLICATIONINSIGHTS__INSTRUMENTATIONKEY', value: appInsights.outputs.instrumentationKey, label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'AGENT_STRATEGY', value: 'single_agent_rag', label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AGENT_ID', value: '', label: 'gpt-rag', contentType: 'text/plain' }
 
       //── Resource IDs ─────────────────────────────────────────────────────
       #disable-next-line BCP318
@@ -3189,8 +3306,6 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       { name: 'CONTAINER_ENV_RESOURCE_ID', value: containerEnv.outputs.resourceId, label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'AI_FOUNDRY_ACCOUNT_RESOURCE_ID', value: aiFoundryAccount.outputs.accountID, label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'AI_FOUNDRY_PROJECT_RESOURCE_ID', value: aiFoundryProject.outputs.projectId, label: 'gpt-rag', contentType: 'text/plain' }
-      #disable-next-line BCP318
-      { name: 'COSMOS_DB_ACCOUNT_RESOURCE_ID', value: cosmosDBAccount.outputs.resourceId, label: 'gpt-rag', contentType: 'text/plain'}
       { name: 'AI_FOUNDRY_PROJECT_WORKSPACE_ID', value: aiFoundryFormatProjectWorkspaceId.outputs.projectWorkspaceIdGuid, label: 'gpt-rag', contentType: 'text/plain' }
       #disable-next-line BCP318
       { name: 'SEARCH_SERVICE_UAI_RESOURCE_ID', value: (_useUAI) ? searchServiceUAI.outputs.resourceId : '', label: 'gpt-rag', contentType: 'text/plain' }
@@ -3205,14 +3320,11 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       { name: 'APP_INSIGHTS_NAME', value: appInsightsName, label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'CONTAINER_ENV_NAME', value: containerEnvName, label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'CONTAINER_REGISTRY_NAME', value: containerRegistryName, label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'CONTAINER_REGISTRY_LOGIN_SERVER', value: '${containerRegistryName}.azurecr.io', label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'DATABASE_ACCOUNT_NAME', value: dbAccountName, label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'DATABASE_NAME', value: dbDatabaseName, label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'SEARCH_SERVICE_NAME', value: searchServiceName, label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'STORAGE_ACCOUNT_NAME', value: storageAccountName, label: 'gpt-rag', contentType: 'text/plain' }
-
-      // ── Container Registry ─────────────────-─────────────────────────────
-      #disable-next-line BCP318
-      { name: 'CONTAINER_REGISTRY_LOGIN_SERVER', value: containerRegistry.outputs.loginServer, label: 'gpt-rag', contentType: 'text/plain' }
 
       // ── Feature flagging ─────────────────────────────────────────────────
       { name: 'DEPLOY_APP_CONFIG', value: string(deployAppConfig), label: 'gpt-rag', contentType: 'text/plain' }
@@ -3233,8 +3345,6 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       { name: 'STORAGE_BLOB_ENDPOINT',           value: storageAccount.outputs.primaryBlobEndpoint,  label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'AI_FOUNDRY_ACCOUNT_ENDPOINT',     value: aiFoundryAccount.outputs.accountTarget,      label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'AI_FOUNDRY_PROJECT_ENDPOINT',     value: aiFoundryProject.outputs.endpoint,           label: 'gpt-rag', contentType: 'text/plain' }
-      #disable-next-line BCP318
-      { name: 'COSMOS_DB_ENDPOINT',              value: cosmosDBAccount.outputs.endpoint, label: 'gpt-rag', contentType: 'text/plain'}
       #disable-next-line BCP318
       { name: 'SEARCH_SERVICE_QUERY_ENDPOINT',   value: searchService.outputs.endpoint,              label: 'gpt-rag', contentType: 'text/plain' }
 
