@@ -8,7 +8,7 @@ Prerequisites:
     export APP_CONFIG_ENDPOINT="https://<your-app-config-name>.azconfig.io"
 - The following keys must be present in App Configuration (label: gpt-rag):
     - SUBSCRIPTION_ID
-    - RESOURCE_GROUP_NAME
+    - AZURE_RESOURCE_GROUP
     - CONTAINER_REGISTRY_NAME
     - USE_UAI
     - CONTAINER_APPS (JSON list)
@@ -103,7 +103,7 @@ def main():
 
     # Read global settings
     subscription_id = get_config_value(appconfig, "SUBSCRIPTION_ID")
-    resource_group = get_config_value(appconfig, "RESOURCE_GROUP_NAME")
+    resource_group = get_config_value(appconfig, "AZURE_RESOURCE_GROUP")
     acr_name = get_config_value(appconfig, "CONTAINER_REGISTRY_NAME")
     use_uai = get_config_value(appconfig, "USE_UAI")
     acr_server = f"{acr_name}.azurecr.io"

@@ -3160,7 +3160,7 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
         // ── General / Deployment ─────────────────────────────────────────────
       { name: 'AZURE_TENANT_ID',     value: tenant().tenantId,                        label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'SUBSCRIPTION_ID',     value: subscription().subscriptionId,            label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'RESOURCE_GROUP_NAME', value: resourceGroup().name,                     label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AZURE_RESOURCE_GROUP', value: resourceGroup().name,                     label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'LOCATION',            value: location,                                 label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'ENVIRONMENT_NAME',    value: environmentName,                          label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'DEPLOYMENT_NAME',     value: deployment().name,                        label: 'gpt-rag', contentType: 'text/plain' }
@@ -3281,7 +3281,7 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
 // ──────────────────────────────────────────────────────────────────────
 output TENANT_ID string = tenant().tenantId
 output SUBSCRIPTION_ID string = subscription().subscriptionId
-output RESOURCE_GROUP_NAME string = resourceGroup().name
+output AZURE_RESOURCE_GROUP string = resourceGroup().name
 output LOCATION string = location
 output ENVIRONMENT_NAME string = environmentName
 output DEPLOYMENT_NAME string = deployment().name
