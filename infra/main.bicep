@@ -3158,18 +3158,19 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       _storageContainerNamesSettings,
       [
         // ── General / Deployment ─────────────────────────────────────────────
-      { name: 'AZURE_TENANT_ID',     value: tenant().tenantId,                        label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'SUBSCRIPTION_ID',     value: subscription().subscriptionId,            label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'AZURE_RESOURCE_GROUP', value: resourceGroup().name,                     label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'LOCATION',            value: location,                                 label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'ENVIRONMENT_NAME',    value: environmentName,                          label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'DEPLOYMENT_NAME',     value: deployment().name,                        label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'RESOURCE_TOKEN',      value: resourceToken,                            label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'NETWORK_ISOLATION',   value: string(_networkIsolation),                 label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'USE_UAI',             value: string(_useUAI),                           label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'LOG_LEVEL',           value: 'INFO',                                   label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'ENABLE_CONSOLE_LOGGING', value: 'true',                                label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'PROMPT_SOURCE',         value: 'file',                                 label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AZURE_TENANT_ID',     value: tenant().tenantId,                      label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'SUBSCRIPTION_ID',     value: subscription().subscriptionId,          label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AZURE_RESOURCE_GROUP', value: resourceGroup().name,                  label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'LOCATION',            value: location,                               label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'ENVIRONMENT_NAME',    value: environmentName,                        label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'DEPLOYMENT_NAME',     value: deployment().name,                      label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'RESOURCE_TOKEN',      value: resourceToken,                          label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'NETWORK_ISOLATION',   value: string(_networkIsolation),              label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'USE_UAI',             value: string(_useUAI),                        label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'LOG_LEVEL',           value: 'INFO',                                 label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'ENABLE_CONSOLE_LOGGING', value: 'true',                              label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'PROMPT_SOURCE',       value: 'file',                                 label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'GPT_RAG_RELEASE',     value: _manifest.release,                      label: 'gpt-rag', contentType: 'text/plain' }
       #disable-next-line BCP318
       { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: appInsights.outputs.connectionString,   label: 'gpt-rag', contentType: 'text/plain' }
       #disable-next-line BCP318
@@ -3289,6 +3290,7 @@ output RESOURCE_TOKEN string = resourceToken
 output NETWORK_ISOLATION bool = _networkIsolation
 output USE_UAI bool = _useUAI
 output USE_CAPP_API_KEY bool = _useCAppAPIKey
+output GPT_RAG_RELEASE string = _manifest.release
 
 // ──────────────────────────────────────────────────────────────────────
 // Feature flagging
