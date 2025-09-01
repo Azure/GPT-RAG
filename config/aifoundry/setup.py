@@ -9,7 +9,7 @@ Prerequisites:
     export APP_CONFIG_ENDPOINT="https://<your-app-config-name>.azconfig.io"
 - The following keys must be present in App Configuration (label: gpt-rag):
     - SUBSCRIPTION_ID
-    - RESOURCE_GROUP_NAME
+    - AZURE_RESOURCE_GROUP
     - AI_FOUNDRY_ACCOUNT_NAME
     - MODEL_DEPLOYMENTS (JSON list)
     - KEY_VAULT_URI
@@ -270,7 +270,7 @@ def main() -> None:
         sys.exit(1)
     app_conf = AzureAppConfigurationClient(endpoint, cred)
     subscription_id = cfg(app_conf, "SUBSCRIPTION_ID")
-    resource_group = cfg(app_conf, "RESOURCE_GROUP_NAME")
+    resource_group = cfg(app_conf, "AZURE_RESOURCE_GROUP")
     account_name = cfg(app_conf, "AI_FOUNDRY_ACCOUNT_NAME")
     logging.info(f"Loaded: subscriptionId={subscription_id}, resourceGroupName={resource_group}")
     logging.info(f"Loaded: aiFoundryAccountName={account_name}")
