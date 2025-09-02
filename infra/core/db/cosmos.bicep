@@ -540,7 +540,7 @@ resource categoriesContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases
       id: 'categories'
       partitionKey: {
         paths: [
-          '/id'
+          '/organization_id'
         ]
         kind: 'Hash'
       }
