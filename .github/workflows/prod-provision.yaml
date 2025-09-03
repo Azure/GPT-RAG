@@ -91,3 +91,6 @@ jobs:
 
           # MCP
           AGENT_MODEL: ${{ secrets.AGENT_MODEL }}
+
+          # User Feedback URL
+          USER_FEEDBACK_URL: ${{ secrets.USER_FEEDBACK_URL }}

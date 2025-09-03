@@ -517,6 +517,10 @@ var emailUser = !empty(webAppEmailUser) ? webAppEmailUser : ''
 param webAppInvitationLink string = ''
 var invitationLink = !empty(webAppInvitationLink) ? webAppInvitationLink : ''
 
+@description('User feedback url')
+param webAppUserFeedbackUrl string = ''
+var userFeedbackUrl = !empty(webAppUserFeedbackUrl) ? webAppUserFeedbackUrl : ''
+
 // Orchestrator
 @description('Azure AI Search API Key')
 param azureAiSearchApiKey string = ''
@@ -1466,6 +1470,10 @@ module frontEnd 'core/host/appservice.bicep' = {
         name: 'FINANCIAL_AGENT_CONTAINER'
         value: storageFinancialAgentContainerName
       }
+      {
+        name: 'USER_FEEDBACK_URL'
+        value: userFeedbackUrl
+      } 
     ]
   }
 }
