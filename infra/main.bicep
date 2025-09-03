@@ -1731,6 +1731,21 @@ module deepseekR1Deployment 'core/ai/r1-deployment.bicep' = {
   }
 }
 
+// Create Azure AI Foundry project on the r1 service
+module agentProject 'core/ai/ai-foundry-project.bicep' = {
+  name: 'agentProject'
+  scope: resourceGroup
+  dependsOn: [
+    deepseekR1Deployment
+  ]
+  params: {
+    aiServiceName: '${r1ServiceName}-aiservice'
+    projectName: 'agent-project'
+    location: location
+    tags: tags
+  }
+}
+
 module cognitiveServicesPe './core/network/private-endpoint.bicep' = if (networkIsolation) {
   name: 'cognitiveServicesPe'
   scope: resourceGroup
