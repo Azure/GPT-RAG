@@ -7,6 +7,7 @@
     "location":                            { "value": "${AZURE_LOCATION}" },
     "aiFoundryLocation":                   { "value": "${AZURE_AI_FOUNDRY_LOCATION}" },
     "psqlLocation":                        { "value": "${AZURE_PSQL_LOCATION}" },
+    "cosmosLocation":                        { "value": "${AZURE_COSMOS_LOCATION}" },
     "deploymentTags":                      { "value": {} },
     "principalId":                         { "value": "${AZURE_PRINCIPAL_ID}" },
 
@@ -30,12 +31,15 @@
     "deployKeyVault":                       { "value": "true" },
     "deployVmKeyVault":                     { "value": "${DEPLOY_VM_KEY_VAULT}" },
     "deployLogAnalytics":                   { "value": "true" },
+    "deploySubnets":                        { "value": "true" },
     "deploySearchService":                  { "value": "true" },
     "deployStorageAccount":                 { "value": "true" },
     "greenFieldDeployment":                 { "value": "true" },
-    "deployVM":                             { "value": "true" },
+    "deployVM":                             { "value": "false" },
     "deploySoftware":                       { "value": "true" },
-    "deployPostgres":                       { "value": "true" },
+    "deployPostgres":                       { "value": "false" },
+
+    "sideBySideDeploy":                     { "value": "${SIDE_BY_SIDE}" },
 
     "aiFoundryAccountName":                  { "value": null },
     "aiFoundryProjectName":                  { "value": null },
@@ -63,7 +67,9 @@
     "vmAdminPassword":                       {"value": "$(secretOrRandomPassword)"},  
     "vmSize":                                { "value": "Standard_D4s_v3" },
 
-    "useCMK":                                { "value": "false" },        
+    "useCMK":                                { "value": "false" },
+    "virtualNetworkName":                    { "value": "${VNET_NAME}" },
+    "virtualNetworkResourceGroup":           { "value": "${VNET_RESOURCE_GROUP_NAME}" },
 
     "modelDeploymentList":{
       "value": [
