@@ -1186,13 +1186,12 @@ module orchestratorCosmosAccess './core/security/cosmos-access.bicep' = {
   }
 }
 
-// Give the orchestrator access to AOAI
-module orchestratorOaiAccess './core/security/openai-access.bicep' = {
-  name: 'orchestrator-openai-access'
+// Give the orchestrator access to all AI resources in the resource group
+module orchestratorOaiAccess './core/security/openai-access-rg.bicep' = {
+  name: 'orchestrator-openai-access-rg'
   scope: resourceGroup
   params: {
     principalId: orchestrator.outputs.identityPrincipalId
-    openaiAccountName: openAi.outputs.name
   }
 }
 
