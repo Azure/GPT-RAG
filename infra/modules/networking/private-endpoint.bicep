@@ -7,6 +7,7 @@ param tags object
 param subnetResourceId string
 param privateLinkServiceConnections array = []
 param privateDnsZoneGroup object = {}
+param prefix string = 'nic-'
 
 module privateEndpoint 'br/public:avm/res/network/private-endpoint:0.11.0' = {
   scope: resourceGroup(resourceGroupName)
@@ -17,6 +18,7 @@ module privateEndpoint 'br/public:avm/res/network/private-endpoint:0.11.0' = {
     subnetResourceId: subnetResourceId
     privateLinkServiceConnections: privateLinkServiceConnections
     privateDnsZoneGroup: privateDnsZoneGroup
+    customNetworkInterfaceName: '${prefix}${name}'
   }
 }
 

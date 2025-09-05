@@ -20,26 +20,25 @@
     "aiFoundryStorageAccountResourceId":   { "value": null },
     "aiFoundryCosmosDBAccountResourceId":  { "value": null },
     
+    "deployAiFoundry":                      { "value": "true" },
     "deployAppConfig":                      { "value": "true" },
     "deployAppInsights":                    { "value": "true" },
     "deployCosmosDb":                       { "value": "true" },
     "deployContainerApps":                  { "value": "true" },
     "deployContainerRegistry":              { "value": "true" },
     "deployContainerEnv":                   { "value": "true" },
+    "deployNsgs":                           { "value": "true" },
     "deployMcp":                            { "value": "true" },
     "deployGroundingWithBing":              { "value": "false" },
     "deployKeyVault":                       { "value": "true" },
     "deployVmKeyVault":                     { "value": "${DEPLOY_VM_KEY_VAULT}" },
     "deployLogAnalytics":                   { "value": "true" },
-    "deploySubnets":                        { "value": "true" },
     "deploySearchService":                  { "value": "true" },
     "deployStorageAccount":                 { "value": "true" },
     "greenFieldDeployment":                 { "value": "true" },
-    "deployVM":                             { "value": "false" },
+    "deployVM":                             { "value": "true" },
     "deploySoftware":                       { "value": "true" },
     "deployPostgres":                       { "value": "false" },
-
-    "sideBySideDeploy":                     { "value": "${SIDE_BY_SIDE}" },
 
     "aiFoundryAccountName":                  { "value": null },
     "aiFoundryProjectName":                  { "value": null },
@@ -68,8 +67,11 @@
     "vmSize":                                { "value": "Standard_D4s_v3" },
 
     "useCMK":                                { "value": "false" },
-    "virtualNetworkName":                    { "value": "${VNET_NAME}" },
-    "virtualNetworkResourceGroup":           { "value": "${VNET_RESOURCE_GROUP_NAME}" },
+    "useExistingVNet":                       { "value": "false" },  
+    "deploySubnets":                         { "value": "false" },  
+    "sideBySideDeploy":                      { "value": "${SIDE_BY_SIDE}" }, 
+    "virtualNetworkName":                    { "value": "${VNET_NAME}" }, 
+    "virtualNetworkResourceGroup":           { "value": "${VNET_RESOURCE_GROUP_NAME}" }, 
 
     "modelDeploymentList":{
       "value": [

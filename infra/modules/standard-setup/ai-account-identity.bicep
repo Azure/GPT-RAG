@@ -9,8 +9,6 @@ param useUAI bool = false
 param userAssignedIdentityResourceId string
 param userAssignedIdentityPrincipalId string
 
-import * as const from '../../constants/constants.bicep'
-
 resource account 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' = {
   name: accountName
   location: location

@@ -6,6 +6,7 @@ param resourceGroupName string
 param tags object
 param virtualNetworkResourceId string
 param virtualNetworkLinkName string
+param registrationEnabled bool = false
 
 module privateDnsZone 'br/public:avm/res/network/private-dns-zone:0.8.0' = {
   scope: resourceGroup(resourceGroupName)
@@ -16,7 +17,7 @@ module privateDnsZone 'br/public:avm/res/network/private-dns-zone:0.8.0' = {
     virtualNetworkLinks: [
       {
         name: virtualNetworkLinkName
-        registrationEnabled: false
+        registrationEnabled: registrationEnabled
         #disable-next-line BCP318
         virtualNetworkResourceId: virtualNetworkResourceId
       }
