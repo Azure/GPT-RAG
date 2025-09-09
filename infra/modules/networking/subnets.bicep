@@ -68,7 +68,7 @@ var subnetResourceIds = [for i in range(0,  length(subnets)): {
   }
 ]
 
-output Id string = virtualNetwork.outputs.resourceId
-output Name string = virtualNetwork.outputs.name
-output Location string = virtualNetwork.outputs.location
-output SubnetResourceIds array = useExistingVNet ? subnetResourceIds : virtualNetwork.outputs.subnetResourceIds
+output Id string = (!useExistingVNet && deploySubnets) ? virtualNetwork.outputs.resourceId : null
+output Name string = (!useExistingVNet && deploySubnets) ? virtualNetwork.outputs.name : null
+output Location string = (!useExistingVNet && deploySubnets) ? virtualNetwork.outputs.location : null
+output SubnetResourceIds array = (!useExistingVNet && deploySubnets) ? virtualNetwork.outputs.subnetResourceIds : subnetResourceIds

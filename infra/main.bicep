@@ -441,7 +441,7 @@ var _containerDummyImageName = 'mcr.microsoft.com/azuredocs/containerapps-hellow
 // Networking vars
 // ----------------------------------------------------------------------
 
-var virtualNetworkResourceId = _networkIsolation ? (empty(virtualNetworkName) ? virtualNetwork.outputs.resourceId : existingVirtualNetwork.id) : ''
+var virtualNetworkResourceId = _networkIsolation ? (empty(virtualNetworkName) && !useExistingVNet ? virtualNetwork.outputs.resourceId : existingVirtualNetwork.id) : ''
 
 #disable-next-line BCP318
 var _peSubnetId = _networkIsolation ? '${virtualNetworkResourceId}/subnets/${peSubnetName}' : ''
@@ -584,7 +584,7 @@ var subnets = [
 module virtualNetworkSubnets 'modules/networking/subnets.bicep' = if (_networkIsolation && !empty(virtualNetworkName)) {
   name: 'virtualNetworkSubnetsDeployment'
   params: {
-    vnetName: empty(virtualNetworkName) ? vnetName : virtualNetworkName
+    vnetName: empty(virtualNetworkName) || !useExistingVNet ? vnetName : virtualNetworkName
     location: location
     resourceGroupName: empty(virtualNetworkResourceGroup) ? resourceGroup().name : virtualNetworkResourceGroup  
     tags: _tags
