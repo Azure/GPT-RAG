@@ -1918,6 +1918,10 @@ module mcpServer './core/host/functions.bicep' = {
         value: orchestratorTavilyApiKeyVar
       }
       {
+        name: 'ANTHROPIC_API_KEY'
+        value: orchestratorAnthropicApiKeyVar
+      }
+      {
         name: 'AZURE_SEARCH_INDEX'
         value: mcpSearchIndex
       }
