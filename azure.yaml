@@ -4,21 +4,21 @@ name: azure-gpt-rag
 metadata:
   template: azure-gpt-rag
 services:
-  # dataIngest:
-  #   # project is temporally pulled fro its repo during deployment.
-  #   project: ./.salesfactory/gpt-rag-ingestion
-  #   language: python
-  #   host: function
-  #   hooks:
-  #     postdeploy:
-  #       posix:
-  #         # this path is relative to ./.salesfactory/gpt-rag-ingestion
-  #         run: scripts/postdeploy.sh
-  #         interactive: false
-  #       windows:
-  #         # this path is relative to ./.salesfactory/gpt-rag-ingestion
-  #         run: scripts/postdeploy.ps1
-  #         interactive: false
+  dataIngest:
+    # project is temporally pulled fro its repo during deployment.
+    project: ./.salesfactory/gpt-rag-ingestion
+    language: python
+    host: function
+    hooks:
+      postdeploy:
+        posix:
+          # this path is relative to ./.salesfactory/gpt-rag-ingestion
+          run: scripts/postdeploy.sh
+          interactive: false
+        windows:
+          # this path is relative to ./.salesfactory/gpt-rag-ingestion
+          run: scripts/postdeploy.ps1
+          interactive: false
   orchestrator:
     project: ./.salesfactory/gpt-rag-orchestrator
     language: python
