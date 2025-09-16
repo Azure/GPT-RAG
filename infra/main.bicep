@@ -317,16 +317,16 @@ param speechSynthesisVoiceName string
 param chatGptDeploymentName string = 'chat'
 @description('Embeddings model used to generate vector embeddings. Don\'t forget to check region availability.')
 @allowed(['text-embedding-ada-002', 'text-embedding-3-small'])
-param embeddingsModelName string = 'text-embedding-3-small'
+param embeddingsModelName string = 'text-embedding-ada-002'
 @description('Embeddings model version.')
 @allowed(['1', '2'])
 param embeddingsModelVersion string = '1'
 @description('Embeddings model deployment name.')
-param embeddingsDeploymentName string = 'text-embedding-3-small'
+param embeddingsDeploymentName string = 'text-embedding-ada-002'
 @description('Embeddings model tokens per Minute Rate Limit (thousands). Default quota per model and region: 240')
 @minValue(1)
 @maxValue(240)
-param embeddingsDeploymentCapacity int = 50
+param embeddingsDeploymentCapacity int = 20
 @description('Azure OpenAI API version.')
 @allowed(['2025-04-01-preview'])
 param openaiApiVersion string = '2025-04-01-preview'
@@ -1595,7 +1595,7 @@ module dataIngestion './core/host/functions.bicep' = {
       }
       {
         name: 'AZURE_OPENAI_EMBEDDING_DEPLOYMENT'
-        value: embeddingsDeploymentName
+        value: 'text-embedding-3-small'
       }
       {
         name: 'NUM_TOKENS'
