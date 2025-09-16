@@ -364,11 +364,11 @@ param azureSearchUseMIS bool = false
 
 // chunking
 @description('The number of tokens in each chunk.')
-param chunkNumTokens string = '2048'
+param chunkNumTokens string = '650'
 @description('The minimum chunk size below which chunks will be filtered.')
 param chunkMinSize string = '100'
 @description('The number of tokens to overlap between chunks.')
-param chunkTokenOverlap string = '200'
+param chunkTokenOverlap string = '125'
 
 // storage
 @description('Name of the container where source documents will be stored.')
