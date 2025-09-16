@@ -124,6 +124,9 @@ param deployGroundingWithBing bool = true
 @description('Deploy Azure AI Foundry for building and managing AI models.')
 param deployAiFoundry bool = true
 
+@description('Deploy Azure AI Foundry agent subnet.')
+param deployAiFoundrySubnet bool = true
+
 @description('Deploy Azure App Configuration for centralized feature-flag and configuration management.')
 param deployAppConfig bool = true
 
@@ -1728,6 +1731,7 @@ module aiFoundryAccount 'modules/standard-setup/ai-account-identity.bicep' = if 
     location: aiFoundryLocation
     modelDeployments: modelDeploymentList
     networkIsolation: _networkIsolation
+    deployAiFoundrySubnet : deployAiFoundrySubnet
     agentSubnetId: _agentSubnetId
     useUAI: false
     #disable-next-line BCP318
@@ -2236,7 +2240,6 @@ module pgFlexibleServer 'br/public:avm/res/db-for-postgre-sql/flexible-server:0.
     name: '${postgreSQLName}'
     skuName: 'Standard_D2s_v3'
     tier: 'GeneralPurpose'
-    version: '14'
     highAvailability: contains(postgresHALocations, psqlLocation) ? 'ZoneRedundant' : 'Disabled'
     version: '14'
     delegatedSubnetResourceId: _networkIsolation ? _psqlSubnetId : null

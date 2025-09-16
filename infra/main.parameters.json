@@ -21,6 +21,7 @@
     "aiFoundryCosmosDBAccountResourceId":  { "value": null },
     
     "deployAiFoundry":                      { "value": "true" },
+    "deployAiFoundrySubnet":                { "value": "false" },
     "deployAppConfig":                      { "value": "true" },
     "deployAppInsights":                    { "value": "true" },
     "deployCosmosDb":                       { "value": "true" },
@@ -68,7 +69,7 @@
 
     "useCMK":                                { "value": "false" },
     "useExistingVNet":                       { "value": "false" },  
-    "deploySubnets":                         { "value": "false" },  
+    "deploySubnets":                         { "value": "true" },  
     "sideBySideDeploy":                      { "value": "${SIDE_BY_SIDE}" }, 
     "virtualNetworkName":                    { "value": "${VNET_NAME}" }, 
     "virtualNetworkResourceGroup":           { "value": "${VNET_RESOURCE_GROUP_NAME}" }, 
