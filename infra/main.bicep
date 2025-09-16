@@ -2238,6 +2238,7 @@ module pgFlexibleServer 'br/public:avm/res/db-for-postgre-sql/flexible-server:0.
     tier: 'GeneralPurpose'
     version: '14'
     highAvailability: contains(postgresHALocations, psqlLocation) ? 'ZoneRedundant' : 'Disabled'
+    version: '14'
     delegatedSubnetResourceId: _networkIsolation ? _psqlSubnetId : null
     privateDnsZoneArmResourceId: _networkIsolation ? privateDnsZonePostgres.outputs.resourceId : null
     // Non-required parameters
