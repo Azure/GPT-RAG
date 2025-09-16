@@ -66,3 +66,4 @@ output endpoint string = account.properties.endpoint
 output id string = account.id
 output name string = account.name
 output principalId string = account.identity.principalId
+output key string = account.listKeys().key1

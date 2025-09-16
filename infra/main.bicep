@@ -1566,16 +1566,8 @@ module dataIngestion './core/host/functions.bicep' = {
     numberOfWorkers: 1
     appSettings: [
       {
-        name: 'DOCINT_API_VERSION'
-        value: docintApiVersion
-      }
-      {
         name: 'AZURE_KEY_VAULT_NAME'
         value: keyVault.outputs.name
-      }
-      {
-        name: 'FUNCTION_APP_NAME'
-        value: dataIngestionFunctionAppName
       }
       {
         name: 'AZ_COMPUTER_VISION_ENDPOINT'
@@ -1586,32 +1578,8 @@ module dataIngestion './core/host/functions.bicep' = {
         value: visionIngestion.outputs.aiServiceKey
       }
       {
-        name: 'SEARCH_SERVICE'
+        name: 'AZURE_SEARCH_SERVICE'
         value: searchServiceName
-      }
-      {
-        name: 'SEARCH_INDEX_NAME'
-        value: searchIndex
-      }
-      {
-        name: 'SEARCH_ANALYZER_NAME'
-        value: searchAnalyzerName
-      }
-      {
-        name: 'SEARCH_API_VERSION'
-        value: searchApiVersion
-      }
-      {
-        name: 'SEARCH_INDEX_INTERVAL'
-        value: searchIndexInterval
-      }
-      {
-        name: 'STORAGE_ACCOUNT_NAME'
-        value: storageAccountName
-      }
-      {
-        name: 'STORAGE_CONTAINER'
-        value: containerName
       }
       {
         name: 'AZURE_FORMREC_SERVICE'
@@ -1620,10 +1588,6 @@ module dataIngestion './core/host/functions.bicep' = {
       {
         name: 'AZURE_OPENAI_API_VERSION'
         value: openaiApiVersion
-      }
-      {
-        name: 'AZURE_SEARCH_APPROACH'
-        value: retrievalApproach
       }
       {
         name: 'AZURE_OPENAI_SERVICE_NAME'
@@ -1664,6 +1628,10 @@ module dataIngestion './core/host/functions.bicep' = {
       {
         name: 'LOGLEVEL'
         value: 'INFO'
+      }
+      {
+        name:'COGNITIVE_SERVICES_KEY'
+        value: cognitiveServices.outputs.key
       }
     ]
   }
