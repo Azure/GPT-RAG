@@ -1811,7 +1811,7 @@ module aiFoundryAddProjectCapabilityHost 'modules/standard-setup/add-project-cap
   dependsOn: _capabilityHostDependsAll
 }
 
-module aiFoundryAddProjectCapabilityHostPrivate 'modules/standard-setup/add-project-capability-host-private.bicep' = if(deployAiFoundry && deployCapabilityHosts && _networkIsolation) {
+module aiFoundryAddProjectCapabilityHostPrivate 'modules/standard-setup/add-project-capability-host-private.bicep' = if(deployAiFoundry && deployCapabilityHosts && _networkIsolation && deployAiFoundrySubnet) {
   name: 'capabilityHost-configuration-${resourceToken}-deployment'
   params: {
     accountName: aiFoundryAccount.outputs.accountName
@@ -2560,7 +2560,7 @@ module assignStorageContainersAiFoundryProject 'modules/standard-setup/blob-stor
 }
 
 // AI Foundry Cosmos DB Containers - Cosmos DB Built-in Data Contributor -> AI Foundry Project
-module assignCosmosDBContainersAiFoundryProject 'modules/standard-setup/cosmos-container-role-assignments.bicep' = if (deployAiFoundry && deployCapabilityHosts) {
+module assignCosmosDBContainersAiFoundryProject 'modules/standard-setup/cosmos-container-role-assignments.bicep' = if (deployAiFoundry && deployCapabilityHosts && deployAiFoundrySubnet) {
   name: 'assignCosmosDBContainersAiFoundryProject'
   scope: resourceGroup(_cosmosDBSubscriptionId, _cosmosDBResourceGroupName)
   params: {
@@ -2628,7 +2628,7 @@ module assignStorageContainersAiFoundry 'modules/standard-setup/blob-storage-con
 }
 
 // AI Foundry Cosmos DB Containers - Cosmos DB Built-in Data Contributor -> AI Foundry
-module assignCosmosDBContainersAiFoundry 'modules/standard-setup/cosmos-container-role-assignments.bicep' = if (deployAiFoundry && deployCapabilityHosts) {
+module assignCosmosDBContainersAiFoundry 'modules/standard-setup/cosmos-container-role-assignments.bicep' = if (deployAiFoundry && deployCapabilityHosts && deployAiFoundrySubnet) {
   name: 'assignCosmosDBContainersAiFoundry'
   scope: resourceGroup(_cosmosDBSubscriptionId, _cosmosDBResourceGroupName)
   params: {
