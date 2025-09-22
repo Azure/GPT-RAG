@@ -4,23 +4,25 @@ echo "🔧 Running post-provision steps…"
 echo
 
 #-------------------------------------------------------------------------------
-# Mirror azd environment variables into your shell environment
+# Mirror azd environment variables into process environment
+# This avoids persisting secrets in the User environment (registry)
 #-------------------------------------------------------------------------------
 
-azd env get-values | while IFS='=' read -r key value; do
-  # Skip empty keys
+while IFS='=' read -r key value; do
+  # Skip empty keys or lines without '='
   [[ -z "$key" ]] && continue
 
-  # Strip leading and trailing double quotes
+  # Trim surrounding double quotes from the value (if present)
   value="${value%\"}"
   value="${value#\"}"
 
-  # Export into the current shell session
+  # Export into current shell
   export "$key=$value"
 
-  # Show the mirrored pair
+  # Echo for visibility (you can comment out if secrets appear)
   echo "$key=$value"
-done
+done < <(azd env get-values)
+
 
 
 ###############################################################################
