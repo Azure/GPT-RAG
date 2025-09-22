@@ -4,7 +4,8 @@ echo "🔧 Running post-provision steps…"
 echo
 
 #-------------------------------------------------------------------------------
-# Mirror azd environment variables into your shell environment
+# Mirror azd environment variables into process environment
+# This avoids persisting secrets in the User environment (registry)
 #-------------------------------------------------------------------------------
 
 while IFS='=' read -r key value; do
