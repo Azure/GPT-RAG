@@ -7,13 +7,14 @@ Write-Host "🔧 Running post-provision steps..."
 Write-Host ""
 
 #-------------------------------------------------------------------------------
-# Mirroring azd env variables in system env variables
+# Mirror azd environment variables into process environment
+# This avoids persisting secrets in the User environment (registry)
 #-------------------------------------------------------------------------------
 & azd env get-values | ForEach-Object {
   if ($_ -match '^([^=]+)=(.*)$') {
     $k = $matches[1]
     $v = $matches[2] -replace '^"|"$'
-    [Environment]::SetEnvironmentVariable($k, $v, "User")
+    Set-Item -Path Env:$k -Value $v
   }
 }
 
