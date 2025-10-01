@@ -4,12 +4,11 @@ param location string
 param modelDeployments array
 param networkIsolation bool = false
 param agentSubnetId string
+param deployAiFoundrySubnet bool = true
 
 param useUAI bool = false
 param userAssignedIdentityResourceId string
 param userAssignedIdentityPrincipalId string
-
-import * as const from '../../constants/constants.bicep'
 
 resource account 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' = {
   name: accountName
@@ -28,7 +27,7 @@ resource account 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' = {
     networkAcls: {
       bypass: 'AzureServices'
       defaultAction: networkIsolation ? 'Deny' : 'Allow'
-      virtualNetworkRules: networkIsolation ? [
+      virtualNetworkRules: networkIsolation && deployAiFoundrySubnet ? [
         {
           id: agentSubnetId
           ignoreMissingVnetServiceEndpoint: true
@@ -38,7 +37,7 @@ resource account 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' = {
     }
     publicNetworkAccess: 'Enabled' //this is because the firewall allows the subnets //networkIsolation ? 'Disabled' : 'Enabled'
     #disable-next-line BCP036
-    networkInjections:((networkIsolation) ? [
+    networkInjections:((networkIsolation && deployAiFoundrySubnet) ? [
       {
         scenario: 'agent'
         subnetArmId: agentSubnetId

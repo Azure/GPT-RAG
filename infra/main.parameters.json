@@ -6,23 +6,29 @@
     "environmentName":                     { "value": "${AZURE_ENV_NAME}" },
     "location":                            { "value": "${AZURE_LOCATION}" },
     "aiFoundryLocation":                   { "value": "${AZURE_AI_FOUNDRY_LOCATION}" },
+    "psqlLocation":                        { "value": "${AZURE_PSQL_LOCATION}" },
+    "cosmosLocation":                        { "value": "${AZURE_COSMOS_LOCATION}" },
     "deploymentTags":                      { "value": {} },
     "principalId":                         { "value": "${AZURE_PRINCIPAL_ID}" },
 
     "networkIsolation":                    { "value": "${NETWORK_ISOLATION}" },
     "useUAI":                              { "value": "${USE_UAI}" },
     "useCAppAPIKey":                       { "value": "${USE_CAPP_API_KEY}" },    
+    "useZoneRedundancy":                   { "value": "false" },    
 
     "aiSearchResourceId":                  { "value": null },
     "aiFoundryStorageAccountResourceId":   { "value": null },
     "aiFoundryCosmosDBAccountResourceId":  { "value": null },
     
+    "deployAiFoundry":                      { "value": "true" },
+    "deployAiFoundrySubnet":                { "value": "false" },
     "deployAppConfig":                      { "value": "true" },
     "deployAppInsights":                    { "value": "true" },
     "deployCosmosDb":                       { "value": "true" },
     "deployContainerApps":                  { "value": "true" },
     "deployContainerRegistry":              { "value": "true" },
     "deployContainerEnv":                   { "value": "true" },
+    "deployNsgs":                           { "value": "true" },
     "deployMcp":                            { "value": "true" },
     "deployGroundingWithBing":              { "value": "false" },
     "deployKeyVault":                       { "value": "true" },
@@ -33,6 +39,7 @@
     "greenFieldDeployment":                 { "value": "true" },
     "deployVM":                             { "value": "true" },
     "deploySoftware":                       { "value": "true" },
+    "deployPostgres":                       { "value": "false" },
 
     "aiFoundryAccountName":                  { "value": null },
     "aiFoundryProjectName":                  { "value": null },
@@ -58,8 +65,14 @@
     "solutionStorageAccountName":            { "value": null },
 
     "vmAdminPassword":                       {"value": "$(secretOrRandomPassword)"},  
+    "vmSize":                                { "value": "Standard_D4s_v3" },
 
-    "useCMK":                                { "value": "false" },        
+    "useCMK":                                { "value": "false" },
+    "useExistingVNet":                       { "value": "false" },  
+    "deploySubnets":                         { "value": "true" },  
+    "sideBySideDeploy":                      { "value": "${SIDE_BY_SIDE}" }, 
+    "virtualNetworkName":                    { "value": "${VNET_NAME}" }, 
+    "virtualNetworkResourceGroup":           { "value": "${VNET_RESOURCE_GROUP_NAME}" }, 
 
     "modelDeploymentList":{
       "value": [
@@ -187,6 +200,7 @@
             "AppConfigurationDataReader",
             "CognitiveServicesUser",
             "CognitiveServicesOpenAIUser",
+            "CosmosDBBuiltInDataContributor",
             "AcrPull",
             "SearchIndexDataContributor",
             "StorageBlobDataContributor",
