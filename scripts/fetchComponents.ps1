@@ -4,7 +4,7 @@ if (Test-Path -Path ".\.azure\gpt-rag-ingestion") {
 }
 
 # Clone the repository into the .azure folder
-git clone -b v1.0.0 https://github.com/Azure/gpt-rag-ingestion .\.azure\gpt-rag-ingestion
+git clone -b v1.0.1 https://github.com/Azure/gpt-rag-ingestion .\.azure\gpt-rag-ingestion
 
 # Delete the gpt-rag-orchestrator folder from .azure if it exists
 if (Test-Path -Path ".\.azure\gpt-rag-orchestrator") {
