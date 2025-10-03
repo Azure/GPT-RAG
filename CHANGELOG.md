@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.  
 This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to [Semantic Versioning](https://semver.org/).
 
+## [v2.1.2] – 2025-10-02
+### Changed
+- Fixed a bug in daa ingestion component where the SharePoint ingestion process was unnecessarily re-indexing unchanged files.
+
 ## [v2.1.1] – 2025-09-22
 ### Changed
 - Limit `azd` environment variables to the script process (no longer persisted to the user profile) to reduce secret exposure. Resolves [#378](https://github.com/Azure/GPT-RAG/issues/378).
