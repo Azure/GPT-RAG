@@ -2860,7 +2860,7 @@ module assignAppConfigAppConfigurationDataReaderContainerApps 'modules/security/
 
 // AI Foundry Account - Cognitive Services User -> ContainerApp
 module assignAiFoundryAccountCognitiveServicesUserContainerApps 'modules/security/resource-role-assignment.bicep' = [
-  for (app, i) in containerAppsList: if (deployStorageAccount && contains(
+  for (app, i) in containerAppsList: if (deployAiFoundry && contains(
     app.roles,
     const.roles.CognitiveServicesUser.key
   )) {
@@ -2868,16 +2868,16 @@ module assignAiFoundryAccountCognitiveServicesUserContainerApps 'modules/securit
     params: {
       name: 'assignAIFoundryAccountCognitiveServicesUser-${app.service_name}'
       roleAssignments: [
-        // {
-        //   roleDefinitionId: subscriptionResourceId(
-        //     'Microsoft.Authorization/roleDefinitions',
-        //     const.roles.CognitiveServicesUser.guid
-        //   )
-        //   #disable-next-line BCP318
-        //   principalId: (_useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
-        //   resourceId: aiFoundryAccount.outputs.accountID
-        //   principalType: 'ServicePrincipal'
-        // }
+        {
+          roleDefinitionId: subscriptionResourceId(
+            'Microsoft.Authorization/roleDefinitions',
+            const.roles.CognitiveServicesUser.guid
+          )
+          #disable-next-line BCP318
+          principalId: (_useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
+          resourceId: aiFoundryAccount.outputs.accountID
+          principalType: 'ServicePrincipal'
+        }
       ]
     }
   }
@@ -2885,7 +2885,7 @@ module assignAiFoundryAccountCognitiveServicesUserContainerApps 'modules/securit
 
 // AI Foundry Account - Cognitive Services OpenAI User -> ContainerApp
 module assignAIFoundryCogServOAIUserContainerApps 'modules/security/resource-role-assignment.bicep' = [
-  for (app, i) in containerAppsList: if (deployStorageAccount && contains(
+  for (app, i) in containerAppsList: if (deployAiFoundry && contains(
     app.roles,
     const.roles.CognitiveServicesOpenAIUser.key
   )) {
@@ -2893,16 +2893,16 @@ module assignAIFoundryCogServOAIUserContainerApps 'modules/security/resource-rol
     params: {
       name: 'assignAIFoundryCogServOAIUserContainerApps-${app.service_name}'
       roleAssignments: [
-        // {
-        //   roleDefinitionId: subscriptionResourceId(
-        //     'Microsoft.Authorization/roleDefinitions',
-        //     const.roles.CognitiveServicesOpenAIUser.guid
-        //   )
-        //   #disable-next-line BCP318
-        //   principalId: (_useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
-        //   resourceId: aiFoundryAccount.outputs.accountID
-        //   principalType: 'ServicePrincipal'
-        // }
+        {
+          roleDefinitionId: subscriptionResourceId(
+            'Microsoft.Authorization/roleDefinitions',
+            const.roles.CognitiveServicesOpenAIUser.guid
+          )
+          #disable-next-line BCP318
+          principalId: (_useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
+          resourceId: aiFoundryAccount.outputs.accountID
+          principalType: 'ServicePrincipal'
+        }
       ]
     }
   }
