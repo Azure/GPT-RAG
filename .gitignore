@@ -6,3 +6,4 @@ results/
 **federated_id.json
 **service_connection.json
 *.pyc
+__pycache__/
