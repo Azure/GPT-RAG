@@ -1,0 +1,30 @@
+name: Deploy Documentation
+
+on:
+  push:
+    branches:
+      - docs
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+
+      - name: Install MkDocs and dependencies
+        run: pip install -r requirements-docs.txt
+
+      - name: Deploy to GitHub Pages
+        run: mkdocs gh-deploy --force --clean --remote-branch gh-pages

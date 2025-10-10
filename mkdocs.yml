@@ -1,0 +1,24 @@
+site_name: GPT-RAG
+site_description: Official project documentation
+site_author: Paulo Lacerda
+theme:
+  name: material
+  custom_dir: overrides
+  language: en
+  logo: media/logo.png
+  favicon: favicon.ico
+  palette:
+    scheme: default
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - toc.integrate
+    - content.code.annotate
+    - navigation.top
+
+nav:
+  - Home: index.md
+  - Quick Start: guide.md
+
+extra:
+  generator: false

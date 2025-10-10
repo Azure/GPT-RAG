@@ -1,9 +1,0 @@
-{
-    "blocklistname": "{{BlocklistName}}",
-    "blocklistItems": [
-        {
-            "pattern": "",
-            "isRegex": false
-        }
-    ] 
-}
