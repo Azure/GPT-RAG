@@ -275,6 +275,57 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      📦 Installation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📦 Installation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Setup
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔧 Configuration
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      🚀 Usage
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -310,6 +361,30 @@
           allowfullscreen>
   </iframe>
 </div>
+
+<h2 id="installation">📦 Installation</h2>
+<p>Follow these steps to get GPT-RAG running:</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<ul>
+<li>Python 3.8+</li>
+<li>Git</li>
+<li>Azure subscription</li>
+</ul>
+<h3 id="setup">Setup</h3>
+<pre><code class="language-bash">git clone https://github.com/Azure/GPT-RAG.git
+cd GPT-RAG
+pip install -r requirements.txt
+</code></pre>
+<h2 id="configuration">🔧 Configuration</h2>
+<p>Configure your environment variables:</p>
+<pre><code class="language-bash">export AZURE_OPENAI_API_KEY=&quot;your-key-here&quot;
+export AZURE_OPENAI_ENDPOINT=&quot;your-endpoint-here&quot;
+</code></pre>
+<h2 id="usage">🚀 Usage</h2>
+<p>Run the application:</p>
+<pre><code class="language-bash">python app.py
+</code></pre>
+<p>That's it! Your GPT-RAG application should now be running.</p>
 
 
 
@@ -354,7 +429,7 @@
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.instant", "navigation.tracking", "toc.integrate", "content.code.annotate", "navigation.top"], "search": "../assets/javascripts/workers/search.07f07601.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "toc.integrate", "content.code.annotate", "navigation.top"], "search": "../assets/javascripts/workers/search.07f07601.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
       <script src="../assets/javascripts/bundle.56dfad97.min.js"></script>
