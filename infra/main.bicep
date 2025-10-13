@@ -84,9 +84,11 @@ param deploymentTags object = {}
 @description('Enable network isolation for the deployment. This will restrict public access to resources and require private endpoints where applicable.')
 param networkIsolation bool = false
 
+@description('Use an existing Virtual Network. When false, a new VNet will be created.')
 param useExistingVNet bool = false
-param virtualNetworkName string = ''
-param virtualNetworkResourceGroup string = resourceGroup().name
+
+@description('The full ARM resource ID of an existing Virtual Network. Format: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{vnetName}. Leave empty to create a new VNet.')
+param existingVnetResourceId string = ''
 
 param agentSubnetName string = 'agent-subnet'
 param peSubnetName string = 'pe-subnet'
@@ -100,16 +102,48 @@ param acaEnvironmentSubnetName string = 'aca-environment-subnet'
 param devopsBuildAgentsSubnetName string = 'devops-build-agents-subnet'
 param psqlSubnetName string = 'psql-subnet'
 
-param agentSubnetPrefix string = '192.168.0.0/24' // 256 IPs for AI Foundry agents
-param peSubnetPrefix string = '192.168.1.0/24' // 256 IPs for private endpoints
-param gatewaySubnetPrefix string = '192.168.2.0/26' // 64 IPs for VPN/ExpressRoute gateway (min /26)
-param azureBastionSubnetPrefix string = '192.168.2.64/26' // 64 IPs for Bastion host (min /26)
-param azureFirewallSubnetPrefix string = '192.168.2.128/26' // 64 IPs for Firewall (min /26)
-param azureAppGatewaySubnetPrefix string = '192.168.3.0/24' // 256 IPs for Application Gateway + WAF
-param jumpboxSubnetPrefix string = '192.168.4.0/27' // 32 IPs for jumpbox VMs
-param acaEnvironmentSubnetPrefix string = '192.168.4.64/27' // 32 IPs for Container Apps environment
-param devopsBuildAgentsSubnetPrefix string = '192.168.4.96/27' // 32 IPs for DevOps build agents
-param psqlSubnetPrefix string = '192.168.2.192/27' // 32 IPs for Databases
+@description('Address prefixes for the virtual network.')
+param vnetAddressPrefixes array = [
+  '192.168.0.0/21' // 192.168.0.0 – 192.168.7.255 (2048 IPs total)
+]
+
+//
+// Subnet allocations (non-overlapping, optimized for production workloads)
+// PE subnet increased to /26 to support multiple Private Endpoints without race conditions
+//
+
+@description('AI Foundry Agents subnet — Recommended /24 (256 IPs)')
+param agentSubnetPrefix string = '192.168.0.0/24' // 192.168.0.0–192.168.0.255
+
+@description('Azure Container Apps Environment subnet — /24 (256 IPs)') // Recommended minimum is /23
+param acaEnvironmentSubnetPrefix string = '192.168.1.0/24' // 192.168.1.0–192.168.1.255
+
+@description('Private Endpoints subnet — /26 (64 IPs) — Increased to prevent race conditions during parallel PE creation')
+param peSubnetPrefix string = '192.168.2.0/26' // 192.168.2.0–192.168.2.63
+
+@description('Azure Bastion subnet — Required /26 (64 IPs, CIDR-aligned)')
+param azureBastionSubnetPrefix string = '192.168.2.64/26' // 192.168.2.64–192.168.2.127
+
+@description('Azure Firewall subnet — /26 (64 IPs, CIDR-aligned)')
+param azureFirewallSubnetPrefix string = '192.168.2.128/26' // 192.168.2.128–192.168.2.191
+
+@description('Gateway subnet — Required /26 (64 IPs, CIDR-aligned)')
+param gatewaySubnetPrefix string = '192.168.2.192/26' // 192.168.2.192–192.168.2.255
+
+@description('Application Gateway subnet — /27 (32 IPs)')
+param azureAppGatewaySubnetPrefix string = '192.168.3.0/27' // 192.168.3.0–192.168.3.31
+
+@description('API Management subnet — /27 (32 IPs)')
+param apimSubnetPrefix string = '192.168.3.32/27' // 192.168.3.32–192.168.3.63
+
+@description('Jumpbox subnet — /27 (32 IPs)')
+param jumpboxSubnetPrefix string = '192.168.3.64/27' // 192.168.3.64–192.168.3.95
+
+@description('DevOps Build Agents subnet — /27 (32 IPs)')
+param devopsBuildAgentsSubnetPrefix string = '192.168.3.96/27' // 192.168.3.96–192.168.3.127
+
+@description('Database subnet — /27 (32 IPs)')
+param psqlSubnetPrefix string = '192.168.3.128/27' // 192.168.3.128–192.168.3.159
 
 // ----------------------------------------------------------------------
 // Feature-flagging Params (as booleans with a default of true)
@@ -174,6 +208,9 @@ param sideBySideDeploy bool = true
 
 @description('Deploy Virtual Machine software.')
 param deploySoftware bool = true
+
+@description('Deploy API Management service.')
+param deployApim bool = false
 
 @description('Deploy PostgresSQL Flex server.')
 param deployPostgres bool = false
@@ -315,12 +352,6 @@ param storageAccountName string = '${const.abbrs.storage.storageAccount}${resour
 @description('Name of the Virtual Network to isolate resources and enable private endpoints.')
 param vnetName string = '${const.abbrs.networking.virtualNetwork}${resourceToken}'
 
-@description('Address prefixes for the virtual network.')
-param vnetAddressPrefixes array = [
-  '192.168.0.0/16'
-]
-
-
 // ----------------------------------------------------------------------
 // Azure AI Foundry Service params
 // ----------------------------------------------------------------------
@@ -444,7 +475,13 @@ var _containerDummyImageName = 'mcr.microsoft.com/azuredocs/containerapps-hellow
 // Networking vars
 // ----------------------------------------------------------------------
 
-var virtualNetworkResourceId = _networkIsolation ? (empty(virtualNetworkName) && !useExistingVNet ? virtualNetwork.outputs.resourceId : existingVirtualNetwork.id) : ''
+// Parse existing VNet Resource ID if provided
+var varVnetIdSegments = empty(existingVnetResourceId) ? [''] : split(existingVnetResourceId, '/')
+var varExistingVnetSubscriptionId = length(varVnetIdSegments) >= 3 ? varVnetIdSegments[2] : subscription().subscriptionId
+var varExistingVnetResourceGroupName = length(varVnetIdSegments) >= 5 ? varVnetIdSegments[4] : resourceGroup().name
+var varExistingVnetName = length(varVnetIdSegments) >= 9 ? varVnetIdSegments[8] : ''
+
+var virtualNetworkResourceId = _networkIsolation ? (useExistingVNet ? existingVnetResourceId : virtualNetwork.outputs.resourceId) : ''
 
 #disable-next-line BCP318
 var _peSubnetId = _networkIsolation ? '${virtualNetworkResourceId}/subnets/${peSubnetName}' : ''
@@ -507,10 +544,11 @@ var _useCAppAPIKey  = empty(string(useCAppAPIKey))? false : bool(useCAppAPIKey)
 // Networking
 ///////////////////////////////////////////////////////////////////////////
 
-var subnets = [
+// Base subnets that are always included
+var baseSubnets = [
       {
         name: agentSubnetName
-        addressPrefix: agentSubnetPrefix // 256 IPs for AI Foundry agents
+        addressPrefix: agentSubnetPrefix 
         delegation: 'Microsoft.app/environments'
         serviceEndpoints: [
           'Microsoft.CognitiveServices'
@@ -520,51 +558,46 @@ var subnets = [
       }
       {
         name: peSubnetName
-        addressPrefix: peSubnetPrefix // 256 IPs for private endpoints
+        addressPrefix: peSubnetPrefix 
         serviceEndpoints: [
           'Microsoft.AzureCosmosDB'
-        ]
+        ]        
         delegation: ''
       }
       {
         name: gatewaySubnetName
-        addressPrefix: gatewaySubnetPrefix // 64 IPs for VPN/ExpressRoute gateway (min /26)
+        addressPrefix: gatewaySubnetPrefix 
         delegation: ''
         serviceEndpoints : []
       }
       {
         name: azureBastionSubnetName
-        addressPrefix: azureBastionSubnetPrefix // 64 IPs for Bastion host (min /26)
+        addressPrefix: azureBastionSubnetPrefix 
         delegation: ''
         serviceEndpoints : []
       }
       {
         name: azureFirewallSubnetName
-        addressPrefix: azureFirewallSubnetPrefix // 64 IPs for Firewall (min /26)
+        addressPrefix: azureFirewallSubnetPrefix 
         delegation: ''
         serviceEndpoints : []
       }
       {
         name: azureAppGatewaySubnetName
-        addressPrefix: azureAppGatewaySubnetPrefix // 256 IPs for Application Gateway + WAF
+        addressPrefix: azureAppGatewaySubnetPrefix  
         delegation: ''
         serviceEndpoints : []
       }
       {
         name: jumpboxSubnetName
-        addressPrefix: jumpboxSubnetPrefix // 32 IPs for jumpbox VMs
+        addressPrefix: jumpboxSubnetPrefix 
         natGatewayResourceId: natGateway.id
         delegation: ''
         serviceEndpoints : []
       }
-      // For future use
-      // {
-      //   name: apiManagementSubnetName
-      //   addressPrefix: '192.168.4.32/27' // 32 IPs for API Management
-      // }
       {
         name: acaEnvironmentSubnetName
-        addressPrefix: acaEnvironmentSubnetPrefix // 32 IPs for Container Apps environment
+        addressPrefix: acaEnvironmentSubnetPrefix  
         delegation: 'Microsoft.app/environments'
         serviceEndpoints: [
           'Microsoft.AzureCosmosDB'
@@ -572,24 +605,40 @@ var subnets = [
       }
       {
         name: devopsBuildAgentsSubnetName
-        addressPrefix: devopsBuildAgentsSubnetPrefix // 32 IPs for DevOps build agents
+        addressPrefix: devopsBuildAgentsSubnetPrefix 
         delegation: ''
-        serviceEndpoints : []
-      }
-      {
-        name: psqlSubnetName
-        addressPrefix: psqlSubnetPrefix // 32 IPs for Databases
-        delegation: 'Microsoft.DBforPostgreSQL/flexibleServers'
         serviceEndpoints : []
       }
     ]
 
-module virtualNetworkSubnets 'modules/networking/subnets.bicep' = if (_networkIsolation && !empty(virtualNetworkName)) {
+// Conditional subnet for API Management
+var apimSubnet = deployApim ? [
+  {
+    name: apiManagementSubnetName
+    addressPrefix: apimSubnetPrefix 
+  }
+] : []
+
+// Conditional subnet for PostgreSQL
+var psqlSubnet = deployPostgres ? [
+  {
+    name: psqlSubnetName
+    addressPrefix: psqlSubnetPrefix  
+    delegation: 'Microsoft.DBforPostgreSQL/flexibleServers'
+    serviceEndpoints : []
+  }
+] : []
+
+// Combine all subnets based on feature flags
+var subnets = concat(baseSubnets, apimSubnet, psqlSubnet)
+
+module virtualNetworkSubnets 'modules/networking/subnets.bicep' = if (_networkIsolation && useExistingVNet && deploySubnets) {
   name: 'virtualNetworkSubnetsDeployment'
   params: {
-    vnetName: empty(virtualNetworkName) || !useExistingVNet ? vnetName : virtualNetworkName
+    vnetName: useExistingVNet ? varExistingVnetName : vnetName
     location: location
-    resourceGroupName: empty(virtualNetworkResourceGroup) ? resourceGroup().name : virtualNetworkResourceGroup  
+    resourceGroupName: useExistingVNet ? varExistingVnetResourceGroupName : resourceGroup().name
+    subscriptionId: useExistingVNet ? varExistingVnetSubscriptionId : subscription().subscriptionId
     tags: _tags
     addressPrefixes: vnetAddressPrefixes
     subnets: subnets
@@ -602,7 +651,7 @@ module virtualNetworkSubnets 'modules/networking/subnets.bicep' = if (_networkIs
 
 // VNet
 // Note on IP address sizing: https://learn.microsoft.com/en-us/azure/ai-foundry/agents/how-to/virtual-networks#known-limitations
-module virtualNetwork 'br/public:avm/res/network/virtual-network:0.7.0' = if (_networkIsolation && empty(virtualNetworkName)) {
+module virtualNetwork 'br/public:avm/res/network/virtual-network:0.7.0' = if (_networkIsolation && !useExistingVNet) {
   name: 'virtualNetworkDeployment'
   params: {
     // VNet sized /16 to fit all subnets
@@ -613,11 +662,6 @@ module virtualNetwork 'br/public:avm/res/network/virtual-network:0.7.0' = if (_n
     tags: _tags
     subnets: subnets
   }
-}
-
-resource existingVirtualNetwork 'Microsoft.Network/virtualNetworks@2024-07-01' existing = if (_networkIsolation && !empty(virtualNetworkName)) {
-  name: virtualNetworkName
-  scope: resourceGroup(virtualNetworkResourceGroup)
 }
 
 //  Key Vault to store that password securely
@@ -663,6 +707,12 @@ module testVmBastionHost 'br/public:avm/res/network/bastion-host:0.8.0' = if (de
       tags: _tags
     }
   }
+  dependsOn: [
+    #disable-next-line BCP321
+    !useExistingVNet ? virtualNetwork : null
+    #disable-next-line BCP321
+    useExistingVNet ? virtualNetworkSubnets : null
+  ]
 }
 
 //AI Foundry Search User Managed Identity
@@ -723,6 +773,10 @@ module testVm 'br/public:avm/res/compute/virtual-machine:0.15.0' = if (deployVM 
   dependsOn: [
     testVmKeyVault
     testVmBastionHost
+    #disable-next-line BCP321
+    !useExistingVNet ? virtualNetwork : null
+    #disable-next-line BCP321
+    useExistingVNet ? virtualNetworkSubnets : null
   ]
 }
 
@@ -1069,8 +1123,8 @@ module privateDnsZoneCogSvcs 'modules/networking/private-dns.bicep' = if(_networ
     dnsName: 'privatelink.cognitiveservices.azure.com'
     location: 'global'
     tags: _tags
-    resourceGroupName: empty(virtualNetworkResourceGroup) || sideBySideDeploy ? resourceGroup().name : virtualNetworkResourceGroup
-    virtualNetworkLinkName : '${vnetName}-cogsvcs-link${empty(virtualNetworkName)?'':'-byon'}'
+    resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
+    virtualNetworkLinkName : '${vnetName}-cogsvcs-link${useExistingVNet?'-byon':''}'
     virtualNetworkResourceId: virtualNetworkResourceId
   }
 }
@@ -1082,8 +1136,8 @@ module privateDnsZoneOpenAi 'modules/networking/private-dns.bicep' = if(_network
     dnsName: 'privatelink.openai.azure.com'
     location: 'global'
     tags: _tags
-    resourceGroupName: empty(virtualNetworkResourceGroup) || sideBySideDeploy ? resourceGroup().name : virtualNetworkResourceGroup
-    virtualNetworkLinkName : '${vnetName}-openai-link${empty(virtualNetworkName)?'':'-byon'}'
+    resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
+    virtualNetworkLinkName : '${vnetName}-openai-link${useExistingVNet?'-byon':''}'
     virtualNetworkResourceId: virtualNetworkResourceId
   }
 }
@@ -1095,8 +1149,8 @@ module privateDnsZoneAiServices 'modules/networking/private-dns.bicep' = if (_ne
     dnsName: 'privatelink.services.ai.azure.com'
     location: 'global'
     tags: _tags
-    resourceGroupName: empty(virtualNetworkResourceGroup) || sideBySideDeploy ? resourceGroup().name : virtualNetworkResourceGroup
-    virtualNetworkLinkName : '${vnetName}-aiservices-link${empty(virtualNetworkName)?'':'-byon'}'
+    resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
+    virtualNetworkLinkName : '${vnetName}-aiservices-link${useExistingVNet?'-byon':''}'
     virtualNetworkResourceId: virtualNetworkResourceId
   }
 }
@@ -1108,8 +1162,8 @@ module privateDnsZoneSearch 'modules/networking/private-dns.bicep' = if (_networ
     dnsName: 'privatelink.search.windows.net'
     location: 'global'
     tags: _tags
-    resourceGroupName: empty(virtualNetworkResourceGroup) || sideBySideDeploy ? resourceGroup().name : virtualNetworkResourceGroup
-    virtualNetworkLinkName : '${vnetName}-search-std-link${empty(virtualNetworkName)?'':'-byon'}'
+    resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
+    virtualNetworkLinkName : '${vnetName}-search-std-link${useExistingVNet?'-byon':''}'
     virtualNetworkResourceId: virtualNetworkResourceId
   }
 }
@@ -1121,8 +1175,8 @@ module privateDnsZonePostgres 'modules/networking/private-dns.bicep' = if (_netw
     dnsName: 'privatelink.postgres.database.azure.com'
     location: 'global'
     tags: _tags
-    resourceGroupName: empty(virtualNetworkResourceGroup) || sideBySideDeploy ? resourceGroup().name : virtualNetworkResourceGroup
-    virtualNetworkLinkName : '${vnetName}-postgres-std-link${empty(virtualNetworkName)?'':'-byon'}'
+    resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
+    virtualNetworkLinkName : '${vnetName}-postgres-std-link${useExistingVNet?'-byon':''}'
     virtualNetworkResourceId: virtualNetworkResourceId
   }
 }
@@ -1134,8 +1188,8 @@ module privateDnsZoneCosmos 'modules/networking/private-dns.bicep' = if (_networ
     dnsName: 'privatelink.documents.azure.com'
     location: 'global'
     tags: _tags
-    resourceGroupName: empty(virtualNetworkResourceGroup) || sideBySideDeploy ? resourceGroup().name : virtualNetworkResourceGroup
-    virtualNetworkLinkName : '${vnetName}-cosmos-std-link${empty(virtualNetworkName)?'':'-byon'}'
+    resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
+    virtualNetworkLinkName : '${vnetName}-cosmos-std-link${useExistingVNet?'-byon':''}'
     virtualNetworkResourceId: virtualNetworkResourceId
   }
 }
@@ -1147,8 +1201,8 @@ module privateDnsZoneBlob 'modules/networking/private-dns.bicep' = if (_networkI
     dnsName: 'privatelink.blob.${environment().suffixes.storage}'
     location: 'global'
     tags: _tags
-    resourceGroupName: empty(virtualNetworkResourceGroup) || sideBySideDeploy ? resourceGroup().name : virtualNetworkResourceGroup
-    virtualNetworkLinkName : '${vnetName}-blob-std-link${empty(virtualNetworkName)?'':'-byon'}'
+    resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
+    virtualNetworkLinkName : '${vnetName}-blob-std-link${useExistingVNet?'-byon':''}'
     virtualNetworkResourceId: virtualNetworkResourceId
   }
 }
@@ -1160,8 +1214,8 @@ module privateDnsZoneKeyVault 'modules/networking/private-dns.bicep' = if (_netw
     dnsName: 'privatelink.vaultcore.azure.net'
     location: 'global'
     tags: _tags
-    resourceGroupName: empty(virtualNetworkResourceGroup) || sideBySideDeploy ? resourceGroup().name : virtualNetworkResourceGroup
-    virtualNetworkLinkName : '${vnetName}-kv-link${empty(virtualNetworkName)?'':'-byon'}'
+    resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
+    virtualNetworkLinkName : '${vnetName}-kv-link${useExistingVNet?'-byon':''}'
     virtualNetworkResourceId: virtualNetworkResourceId
   }
 }
@@ -1174,8 +1228,8 @@ module privateDnsZoneAppConfig 'modules/networking/private-dns.bicep' = if (_net
     dnsName: 'privatelink.azconfig.io'
     location: 'global'
     tags: _tags
-    resourceGroupName: empty(virtualNetworkResourceGroup) || sideBySideDeploy ? resourceGroup().name : virtualNetworkResourceGroup
-    virtualNetworkLinkName : '${vnetName}-appcfg-link${empty(virtualNetworkName)?'':'-byon'}'
+    resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
+    virtualNetworkLinkName : '${vnetName}-appcfg-link${useExistingVNet?'-byon':''}'
     virtualNetworkResourceId: virtualNetworkResourceId
   }
 }
@@ -1188,8 +1242,8 @@ module privateDnsZoneInsights 'modules/networking/private-dns.bicep' = if (_netw
     dnsName: 'privatelink.applicationinsights.io'
     location: 'global'
     tags: _tags
-    resourceGroupName: empty(virtualNetworkResourceGroup) || sideBySideDeploy ? resourceGroup().name : virtualNetworkResourceGroup
-    virtualNetworkLinkName : '${vnetName}-appi-link${empty(virtualNetworkName)?'':'-byon'}'
+    resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
+    virtualNetworkLinkName : '${vnetName}-appi-link${useExistingVNet?'-byon':''}'
     virtualNetworkResourceId: virtualNetworkResourceId
   }
 }
@@ -1201,8 +1255,8 @@ module privateDnsZoneContainerApps 'modules/networking/private-dns.bicep' = if (
     dnsName: 'privatelink.${location}.azurecontainerapps.io'
     location: 'global'
     tags: _tags
-    resourceGroupName: empty(virtualNetworkResourceGroup) || sideBySideDeploy ? resourceGroup().name : virtualNetworkResourceGroup
-    virtualNetworkLinkName : '${vnetName}-containerapps-link${empty(virtualNetworkName)?'':'-byon'}'
+    resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
+    virtualNetworkLinkName : '${vnetName}-containerapps-link${useExistingVNet?'-byon':''}'
     virtualNetworkResourceId: virtualNetworkResourceId
   }
 }
@@ -1214,8 +1268,8 @@ module privateDnsZoneAcr 'modules/networking/private-dns.bicep' = if (_networkIs
     dnsName: 'privatelink.${location}.azurecr.io'
     location: 'global'
     tags: _tags
-    resourceGroupName: empty(virtualNetworkResourceGroup) || sideBySideDeploy ? resourceGroup().name : virtualNetworkResourceGroup
-    virtualNetworkLinkName : '${vnetName}-containerregistry-link${empty(virtualNetworkName)?'':'-byon'}'
+    resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
+    virtualNetworkLinkName : '${vnetName}-containerregistry-link${useExistingVNet?'-byon':''}'
     virtualNetworkResourceId: virtualNetworkResourceId
   }
 }
@@ -1230,13 +1284,13 @@ module privateEndpointAIFoundryAccount 'modules/networking/private-endpoint.bice
   name: 'dep-cogsvcs-private-endpoint'
   params: {
     name: '${const.abbrs.networking.privateEndpoint}${aiFoundryAccountName}'
-    resourceGroupName: empty(virtualNetworkResourceGroup) || sideBySideDeploy ? resourceGroup().name : virtualNetworkResourceGroup
+    resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
     location: location
     tags: _tags
     subnetResourceId: _peSubnetId
     privateLinkServiceConnections: [
       {
-        name: 'cogsvcsConnection${empty(virtualNetworkName)?'':'-byon'}'
+        name: 'cogsvcsConnection${useExistingVNet?'-byon':''}'
         properties: {
           privateLinkServiceId: aiFoundryAccount.outputs.accountID
           // for Cognitive Services account the groupId is typically "account"
@@ -1268,6 +1322,10 @@ module privateEndpointAIFoundryAccount 'modules/networking/private-endpoint.bice
   dependsOn: [
     aiFoundryAccount!
     privateDnsZoneCogSvcs!
+    #disable-next-line BCP321
+    !useExistingVNet ? virtualNetwork : null
+    #disable-next-line BCP321
+    useExistingVNet ? virtualNetworkSubnets : null
   ]
 }
 
@@ -1276,13 +1334,13 @@ module privateEndpointSearchDepStd 'modules/networking/private-endpoint.bicep' =
   name: 'dep-search-std-private-endpoint'
   params: {
     name: '${const.abbrs.networking.privateEndpoint}${aiFoundryDependencies.outputs.aiSearchName}'
-    resourceGroupName: empty(virtualNetworkResourceGroup) || sideBySideDeploy ? resourceGroup().name : virtualNetworkResourceGroup
+    resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
     location: empty(aiFoundryLocation) ? location : aiFoundryLocation
     tags: _tags
     subnetResourceId: _peSubnetId
     privateLinkServiceConnections: [
       {
-        name: 'searchStdConnection${empty(virtualNetworkName)?'':'-byon'}'
+        name: 'searchStdConnection${useExistingVNet?'-byon':''}'
         properties: {
           privateLinkServiceId: aiFoundryDependencies.outputs.aiSearchID
           groupIds: ['searchService']
@@ -1303,6 +1361,11 @@ module privateEndpointSearchDepStd 'modules/networking/private-endpoint.bicep' =
   dependsOn: [
     aiFoundryDependencies!
     privateDnsZoneSearch!
+    privateEndpointAIFoundryAccount // Serialize PE operations to avoid conflicts
+    #disable-next-line BCP321
+    !useExistingVNet ? virtualNetwork : null
+    #disable-next-line BCP321
+    useExistingVNet ? virtualNetworkSubnets : null
   ]
 }
 
@@ -1311,13 +1374,13 @@ module privateEndpointCosmosDepStd 'modules/networking/private-endpoint.bicep' =
   name: 'dep-cosmos-std-private-endpoint'
   params: {
     name: '${const.abbrs.networking.privateEndpoint}${aiFoundryDependencies.outputs.cosmosDBName}'
-    resourceGroupName: empty(virtualNetworkResourceGroup) || sideBySideDeploy ? resourceGroup().name : virtualNetworkResourceGroup
+    resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
     location: empty(aiFoundryLocation) ? location : aiFoundryLocation
     tags: _tags
     subnetResourceId: _peSubnetId
     privateLinkServiceConnections: [
       {
-        name: 'cosmosStdConnection${empty(virtualNetworkName)?'':'-byon'}'
+        name: 'cosmosStdConnection${useExistingVNet?'-byon':''}'
         properties: {
           privateLinkServiceId: aiFoundryDependencies.outputs.cosmosDBId
           groupIds: ['Sql']
@@ -1338,6 +1401,7 @@ module privateEndpointCosmosDepStd 'modules/networking/private-endpoint.bicep' =
   dependsOn: [
     aiFoundryDependencies!
     privateDnsZoneCosmos!
+    privateEndpointSearchDepStd // Serialize PE operations to avoid conflicts
   ]
 }
 
@@ -1346,13 +1410,13 @@ module privateEndpointBlobDepStd 'modules/networking/private-endpoint.bicep' = i
   name: 'dep-blob-std-private-endpoint'
   params: {
     name: '${const.abbrs.networking.privateEndpoint}${aiFoundryDependencies.outputs.azureStorageName}'
-    resourceGroupName: empty(virtualNetworkResourceGroup) || sideBySideDeploy ? resourceGroup().name : virtualNetworkResourceGroup
+    resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
     location: empty(aiFoundryLocation) ? location : aiFoundryLocation
     tags: _tags
     subnetResourceId: _peSubnetId
     privateLinkServiceConnections: [
       {
-        name: 'blobStdConnection${empty(virtualNetworkName)?'':'-byon'}'
+        name: 'blobStdConnection${useExistingVNet?'-byon':''}'
         properties: {
           privateLinkServiceId: aiFoundryDependencies.outputs.azureStorageId
           groupIds: ['blob']
@@ -1373,6 +1437,7 @@ module privateEndpointBlobDepStd 'modules/networking/private-endpoint.bicep' = i
   dependsOn: [
     aiFoundryDependencies!
     privateDnsZoneBlob!
+    privateEndpointCosmosDepStd // Serialize PE operations to avoid conflicts
   ]
 }
 
@@ -1381,13 +1446,13 @@ module privateEndpointStorageBlob 'modules/networking/private-endpoint.bicep' = 
   name: 'blob-private-endpoint'
   params: {
     name: '${const.abbrs.networking.privateEndpoint}${storageAccountName}'
-    resourceGroupName: empty(virtualNetworkResourceGroup) || sideBySideDeploy ? resourceGroup().name : virtualNetworkResourceGroup
+    resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
     location: location
     tags: _tags
     subnetResourceId: _peSubnetId
     privateLinkServiceConnections: [
       {
-        name: 'blobConnection${empty(virtualNetworkName)?'':'-byon'}'
+        name: 'blobConnection${useExistingVNet?'-byon':''}'
         properties: {
           #disable-next-line BCP318
           privateLinkServiceId: storageAccount.outputs.resourceId
@@ -1409,6 +1474,7 @@ module privateEndpointStorageBlob 'modules/networking/private-endpoint.bicep' = 
   dependsOn: [
     storageAccount!
     privateDnsZoneBlob!
+    privateEndpointBlobDepStd // Serialize PE operations to avoid conflicts
   ]
 }
 
@@ -1417,13 +1483,13 @@ module privateEndpointCosmos 'modules/networking/private-endpoint.bicep' = if (_
   name: 'cosmos-private-endpoint'
   params: {
     name: '${const.abbrs.networking.privateEndpoint}${dbAccountName}'
-    resourceGroupName: empty(virtualNetworkResourceGroup) || sideBySideDeploy ? resourceGroup().name : virtualNetworkResourceGroup
+    resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
     location: location
     tags: _tags
     subnetResourceId: _peSubnetId
     privateLinkServiceConnections: [
       {
-        name: 'cosmosConnection${empty(virtualNetworkName)?'':'-byon'}'
+        name: 'cosmosConnection${useExistingVNet?'-byon':''}'
         properties: {
           #disable-next-line BCP318
           privateLinkServiceId: cosmosDBAccount.outputs.resourceId
@@ -1445,6 +1511,7 @@ module privateEndpointCosmos 'modules/networking/private-endpoint.bicep' = if (_
   dependsOn: [
     cosmosDBAccount!
     privateDnsZoneCosmos!
+    privateEndpointStorageBlob // Serialize PE operations to avoid conflicts
   ]
 }
 
@@ -1453,13 +1520,13 @@ module privateEndpointSearch 'modules/networking/private-endpoint.bicep' = if (_
   name: 'search-private-endpoint'
   params: {
     name: '${const.abbrs.networking.privateEndpoint}${searchServiceName}'
-    resourceGroupName: empty(virtualNetworkResourceGroup) || sideBySideDeploy ? resourceGroup().name : virtualNetworkResourceGroup
+    resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
     location: location
     tags: _tags
     subnetResourceId: _peSubnetId
     privateLinkServiceConnections: [
       {
-        name: 'searchConnection${empty(virtualNetworkName)?'':'-byon'}'
+        name: 'searchConnection${useExistingVNet?'-byon':''}'
         properties: {
           #disable-next-line BCP318
           privateLinkServiceId: searchService.outputs.resourceId
@@ -1481,6 +1548,7 @@ module privateEndpointSearch 'modules/networking/private-endpoint.bicep' = if (_
   dependsOn: [
     searchService!
     privateDnsZoneSearch!
+    privateEndpointCosmos // Serialize PE operations to avoid conflicts
   ]
 }
 
@@ -1489,13 +1557,13 @@ module privateEndpointKeyVault 'modules/networking/private-endpoint.bicep' = if 
   name: 'kv-private-endpoint'
   params: {
     name: '${const.abbrs.networking.privateEndpoint}${keyVaultName}'
-    resourceGroupName: empty(virtualNetworkResourceGroup) || sideBySideDeploy ? resourceGroup().name : virtualNetworkResourceGroup
+    resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
     location: location
     tags: _tags
     subnetResourceId: _peSubnetId
     privateLinkServiceConnections: [
       {
-        name: 'kvConnection${empty(virtualNetworkName)?'':'-byon'}'
+        name: 'kvConnection${useExistingVNet?'-byon':''}'
         properties: {
           #disable-next-line BCP318
           privateLinkServiceId: keyVault.outputs.resourceId
@@ -1517,6 +1585,7 @@ module privateEndpointKeyVault 'modules/networking/private-endpoint.bicep' = if 
   dependsOn: [
     keyVault!
     privateDnsZoneKeyVault!
+    privateEndpointSearch // Serialize PE operations to avoid conflicts
   ]
 }
 
@@ -1525,13 +1594,13 @@ module privateEndpointAppConfig 'modules/networking/private-endpoint.bicep' = if
   name: 'appconfig-private-endpoint'
   params: {
     name: '${const.abbrs.networking.privateEndpoint}${appConfigName}'
-    resourceGroupName: empty(virtualNetworkResourceGroup) || sideBySideDeploy ? resourceGroup().name : virtualNetworkResourceGroup
+    resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
     location: location
     tags: _tags
     subnetResourceId: _peSubnetId
     privateLinkServiceConnections: [
       {
-        name: 'appConfigConnection${empty(virtualNetworkName)?'':'-byon'}'
+        name: 'appConfigConnection${useExistingVNet?'-byon':''}'
         properties: {
           #disable-next-line BCP318
           privateLinkServiceId: appConfig.outputs.resourceId
@@ -1553,6 +1622,7 @@ module privateEndpointAppConfig 'modules/networking/private-endpoint.bicep' = if
   dependsOn: [
     appConfig!
     privateDnsZoneAppConfig!
+    privateEndpointKeyVault // Serialize PE operations to avoid conflicts
   ]
 }
 
@@ -1561,7 +1631,7 @@ module privateEndpointContainerAppsEnv 'modules/networking/private-endpoint.bice
   name: 'dep-containerapps-env-private-endpoint'
   params: {
     name: '${const.abbrs.networking.privateEndpoint}${containerEnvName}'
-    resourceGroupName: empty(virtualNetworkResourceGroup) || sideBySideDeploy ? resourceGroup().name : virtualNetworkResourceGroup
+    resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
     location: location
     tags: _tags
     subnetResourceId: _peSubnetId
@@ -1589,6 +1659,7 @@ module privateEndpointContainerAppsEnv 'modules/networking/private-endpoint.bice
   dependsOn: [
     containerEnv!
     privateDnsZoneContainerApps!
+    privateEndpointAppConfig // Serialize PE operations to avoid conflicts
   ]
 }
 
@@ -1597,7 +1668,7 @@ module privateEndpointAcr 'modules/networking/private-endpoint.bicep' = if (_net
   name: 'dep-acr-private-endpoint'
   params: {
     name: '${const.abbrs.networking.privateEndpoint}${containerRegistryName}'
-    resourceGroupName: empty(virtualNetworkResourceGroup) || sideBySideDeploy ? resourceGroup().name : virtualNetworkResourceGroup
+    resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
     location: location
     tags: _tags
     subnetResourceId: _peSubnetId
@@ -1625,6 +1696,7 @@ module privateEndpointAcr 'modules/networking/private-endpoint.bicep' = if (_net
   dependsOn: [
     containerRegistry!
     privateDnsZoneAcr!
+    privateEndpointContainerAppsEnv // Serialize PE operations to avoid conflicts
   ]
 }
 
@@ -1708,7 +1780,9 @@ module aiFoundryDependencies 'modules/standard-setup/standard-dependent-resource
   }
   dependsOn: [
     #disable-next-line BCP321
-    (_networkIsolation) ? virtualNetwork : null
+    (_networkIsolation && !useExistingVNet) ? virtualNetwork : null
+    #disable-next-line BCP321
+    (_networkIsolation && useExistingVNet) ? virtualNetworkSubnets : null
   ]
 }
 
@@ -1934,8 +2008,8 @@ module privateDnsZoneAzureMonitor 'modules/networking/private-dns.bicep' = if (_
     dnsName: 'privatelink.monitor.azure.com'
     location: 'global'
     tags: _tags
-    resourceGroupName: empty(virtualNetworkResourceGroup) || sideBySideDeploy ? resourceGroup().name : virtualNetworkResourceGroup
-    virtualNetworkLinkName : '${vnetName}-azure-monitor-link${empty(virtualNetworkName)?'':'-byon'}'
+    resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
+    virtualNetworkLinkName : '${vnetName}-azure-monitor-link${useExistingVNet?'-byon':''}'
     virtualNetworkResourceId: virtualNetworkResourceId
   }
 }
@@ -1946,8 +2020,8 @@ module privateDnsZoneOmsOpsInsights 'modules/networking/private-dns.bicep' = if 
     dnsName: 'privatelink.oms.opinsights.azure.com'
     location: 'global'
     tags: _tags
-    resourceGroupName: empty(virtualNetworkResourceGroup) || sideBySideDeploy ? resourceGroup().name : virtualNetworkResourceGroup
-    virtualNetworkLinkName : '${vnetName}-oms-opinsights-link${empty(virtualNetworkName)?'':'-byon'}'
+    resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
+    virtualNetworkLinkName : '${vnetName}-oms-opinsights-link${useExistingVNet?'-byon':''}'
     virtualNetworkResourceId: virtualNetworkResourceId
   }
 }
@@ -1958,8 +2032,8 @@ module privateDnsZoneOdsOpsInsights 'modules/networking/private-dns.bicep' = if 
     dnsName: 'privatelink.ods.opinsights.azure.com'
     location: 'global'
     tags: _tags
-    resourceGroupName: empty(virtualNetworkResourceGroup) || sideBySideDeploy ? resourceGroup().name : virtualNetworkResourceGroup
-    virtualNetworkLinkName : '${vnetName}-ods-opinsights-link${empty(virtualNetworkName)?'':'-byon'}'
+    resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
+    virtualNetworkLinkName : '${vnetName}-ods-opinsights-link${useExistingVNet?'-byon':''}'
     virtualNetworkResourceId: virtualNetworkResourceId
   }
 }
@@ -1970,8 +2044,8 @@ module privateDnsZoneAzureAutomation 'modules/networking/private-dns.bicep' = if
     dnsName: 'privatelink.agentsvc.azure.automation.net'
     location: 'global'
     tags: _tags
-    resourceGroupName: empty(virtualNetworkResourceGroup) || sideBySideDeploy ? resourceGroup().name : virtualNetworkResourceGroup
-    virtualNetworkLinkName : '${vnetName}-azure-automation-link${empty(virtualNetworkName)?'':'-byon'}'
+    resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
+    virtualNetworkLinkName : '${vnetName}-azure-automation-link${useExistingVNet?'-byon':''}'
     virtualNetworkResourceId: virtualNetworkResourceId
   }
 }
@@ -1981,7 +2055,7 @@ module privateEndpointPrivateLinkScope 'modules/networking/private-endpoint.bice
   params: {
     name: '${const.abbrs.networking.privateEndpoint}${const.abbrs.networking.privateLinkScope}${resourceToken}'
     location: location
-    resourceGroupName: empty(virtualNetworkResourceGroup) || sideBySideDeploy ? resourceGroup().name : virtualNetworkResourceGroup
+    resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
     tags: _tags
     subnetResourceId: _peSubnetId
     privateLinkServiceConnections: [
@@ -2021,6 +2095,7 @@ module privateEndpointPrivateLinkScope 'modules/networking/private-endpoint.bice
   }
   dependsOn: [
     privateLinkScope!
+    privateEndpointAcr // Serialize PE operations to avoid conflicts
   ]
 }
 
@@ -2093,9 +2168,9 @@ module containerEnv 'br/public:avm/res/app/managed-environment:0.11.3' = if (dep
     appInsights!
     logAnalytics!
     #disable-next-line BCP321
-    empty(virtualNetworkName) ? virtualNetwork : null
+    !useExistingVNet ? virtualNetwork : null
     #disable-next-line BCP321
-    !empty(virtualNetworkName) ? virtualNetworkSubnets : null
+    useExistingVNet ? virtualNetworkSubnets : null
   ]
 }
 
@@ -2303,7 +2378,7 @@ module cosmosDBAccount 'br/public:avm/res/document-db/database-account:0.15.1' =
     enableAnalyticalStorage: true
     enableFreeTier: false
     networkRestrictions: {
-      publicNetworkAccess: 'Enabled' //this is because the firewall allows the subnets //_networkIsolation ? 'Disabled' : 'Enabled'
+      publicNetworkAccess: _networkIsolation ? 'Disabled' : 'Enabled'
       virtualNetworkRules: _networkIsolation ? [
         {
           subnetResourceId: _peSubnetId

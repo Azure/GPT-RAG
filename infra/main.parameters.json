@@ -68,11 +68,10 @@
     "vmSize":                                { "value": "Standard_D4s_v3" },
 
     "useCMK":                                { "value": "false" },
-    "useExistingVNet":                       { "value": "false" },  
-    "deploySubnets":                         { "value": "true" },  
+    "useExistingVNet":                       { "value": "${USE_EXISTING_VNET}" },  
+    "deploySubnets":                         { "value": "${DEPLOY_SUBNETS}" },  
     "sideBySideDeploy":                      { "value": "${SIDE_BY_SIDE}" }, 
-    "virtualNetworkName":                    { "value": "${VNET_NAME}" }, 
-    "virtualNetworkResourceGroup":           { "value": "${VNET_RESOURCE_GROUP_NAME}" }, 
+    "existingVnetResourceId":                { "value": "${EXISTING_VNET_RESOURCE_ID}" },     
 
     "modelDeploymentList":{
       "value": [

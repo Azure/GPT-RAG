@@ -3,6 +3,7 @@ targetScope = 'resourceGroup'
 param vnetName string
 param location string
 param resourceGroupName string
+param subscriptionId string = subscription().subscriptionId
 param tags object = {}
 param subnets array = []
 param addressPrefixes array
@@ -14,9 +15,8 @@ param virtualNetworkResourceId string
 
 module virtualNetwork 'br/public:avm/res/network/virtual-network:0.7.0' = if (!useExistingVNet && deploySubnets) {
   name: 'virtualNetworkDeployment'
-  scope: resourceGroup(resourceGroupName)
+  scope: resourceGroup(subscriptionId, resourceGroupName)
   params: {
-    // VNet sized /16 to fit all subnets
     addressPrefixes: addressPrefixes
     name: vnetName
     location: location
@@ -28,7 +28,7 @@ module virtualNetwork 'br/public:avm/res/network/virtual-network:0.7.0' = if (!u
 module nsgsM 'network-security-group.bicep' = [
   for subnet in subnets : if (deploySubnets && deployNsgs) {
     name: '${prefix}${vnetName}-${subnet.name}'
-    scope: resourceGroup(resourceGroupName)
+    scope: resourceGroup(subscriptionId, resourceGroupName)
     params : {
       name: '${prefix}${vnetName}-${subnet.name}'
       location: location
@@ -38,10 +38,11 @@ module nsgsM 'network-security-group.bicep' = [
 
 var invalidNsgSubnets = ['AzureBastionSubnet', 'AzureFirewallSubnet','AppGatewaySubnet']
 
+@batchSize(1)
 module subnetsM 'subnet.bicep' = [
   for i in range(0,  length(subnets)) : if (useExistingVNet && deploySubnets) {
       name: '${subnets[i].name}'
-      scope: resourceGroup(resourceGroupName)
+      scope: resourceGroup(subscriptionId, resourceGroupName)
       params: {
         name: '${vnetName}/${subnets[i].name}'
         addressPrefix: subnets[i].addressPrefix
@@ -67,8 +68,3 @@ var subnetResourceIds = [for i in range(0,  length(subnets)): {
     id : '${virtualNetworkResourceId}/subnets/${subnets[i].name}'
   }
 ]
-
-output Id string = (!useExistingVNet && deploySubnets) ? virtualNetwork.outputs.resourceId : null
-output Name string = (!useExistingVNet && deploySubnets) ? virtualNetwork.outputs.name : null
-output Location string = (!useExistingVNet && deploySubnets) ? virtualNetwork.outputs.location : null
-output SubnetResourceIds array = (!useExistingVNet && deploySubnets) ? virtualNetwork.outputs.subnetResourceIds : subnetResourceIds
