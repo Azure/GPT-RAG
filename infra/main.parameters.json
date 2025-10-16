@@ -15,6 +15,7 @@
     "useUAI":                              { "value": "${USE_UAI}" },
     "useCAppAPIKey":                       { "value": "${USE_CAPP_API_KEY}" },    
     "useZoneRedundancy":                   { "value": "false" },    
+    "enableAgenticRetrieval":              { "value": "${ENABLE_AGENTIC_RETRIEVAL}" },
 
     "aiSearchResourceId":                  { "value": null },
     "aiFoundryStorageAccountResourceId":   { "value": null },
@@ -184,6 +185,7 @@
             "AppConfigurationDataReader",
             "AcrPull",
             "StorageBlobDataReader",
+            "StorageBlobDelegator",
             "KeyVaultSecretsUser"
           ]
         },

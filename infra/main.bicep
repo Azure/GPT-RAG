@@ -218,6 +218,9 @@ param deployPostgres bool = false
 @description('Deploy capability hosts.')
 param deployCapabilityHosts bool = true
 
+@description('Enable agentic retrieval features in Azure AI Search indexes. Requires vectorizer configuration and semantic search.')
+param enableAgenticRetrieval bool = false
+
 // ----------------------------------------------------------------------
 // Reuse Existing Services Parameters
 // Note: Reuse is optional. Leave empty to create new resources
@@ -481,7 +484,7 @@ var varExistingVnetSubscriptionId = length(varVnetIdSegments) >= 3 ? varVnetIdSe
 var varExistingVnetResourceGroupName = length(varVnetIdSegments) >= 5 ? varVnetIdSegments[4] : resourceGroup().name
 var varExistingVnetName = length(varVnetIdSegments) >= 9 ? varVnetIdSegments[8] : ''
 
-var virtualNetworkResourceId = _networkIsolation ? (useExistingVNet ? existingVnetResourceId : virtualNetwork.outputs.resourceId) : ''
+var virtualNetworkResourceId = _networkIsolation ? (useExistingVNet ? existingVnetResourceId : virtualNetwork!.outputs.resourceId) : ''
 
 #disable-next-line BCP318
 var _peSubnetId = _networkIsolation ? '${virtualNetworkResourceId}/subnets/${peSubnetName}' : ''
@@ -1056,7 +1059,7 @@ module assignAiFoundryAccountAzureAiProjectManagerTestVm 'modules/security/resou
           'Microsoft.Authorization/roleDefinitions',
           const.roles.AzureAIProjectManager.guid
         )
-        resourceId: aiFoundryAccount.outputs.accountID
+        resourceId: aiFoundryAccount!.outputs.accountID
         principalType: 'ServicePrincipal'
       }
       {
@@ -1066,7 +1069,7 @@ module assignAiFoundryAccountAzureAiProjectManagerTestVm 'modules/security/resou
           'Microsoft.Authorization/roleDefinitions',
           const.roles.CognitiveServicesContributor.guid
         )
-        resourceId: aiFoundryAccount.outputs.accountID
+        resourceId: aiFoundryAccount!.outputs.accountID
         principalType: 'ServicePrincipal'
       }
     ]
@@ -1292,7 +1295,7 @@ module privateEndpointAIFoundryAccount 'modules/networking/private-endpoint.bice
       {
         name: 'cogsvcsConnection${useExistingVNet?'-byon':''}'
         properties: {
-          privateLinkServiceId: aiFoundryAccount.outputs.accountID
+          privateLinkServiceId: aiFoundryAccount!.outputs.accountID
           // for Cognitive Services account the groupId is typically "account"
           groupIds: ['account']
         }
@@ -1851,7 +1854,7 @@ module aiFoundryProject 'modules/standard-setup/ai-project-identity.bicep' = if(
     azureStorageSubscriptionId: aiFoundryDependencies.outputs.azureStorageSubscriptionId
     azureStorageResourceGroupName: aiFoundryDependencies.outputs.azureStorageResourceGroupName
 
-    accountName: aiFoundryAccount.outputs.accountName
+    accountName: aiFoundryAccount!.outputs.accountName
 
     useUAI: false
     #disable-next-line BCP318
@@ -1865,7 +1868,7 @@ module aiFoundryProject 'modules/standard-setup/ai-project-identity.bicep' = if(
 module aiFoundryFormatProjectWorkspaceId 'modules/standard-setup/format-project-workspace-id.bicep' = if(deployAiFoundry) {
   name: 'format-project-workspace-id-${resourceToken}-deployment'
   params: {
-    projectWorkspaceId: aiFoundryProject.outputs.projectWorkspaceId
+    projectWorkspaceId: aiFoundryProject!.outputs.projectWorkspaceId
   }
 }
 
@@ -1873,11 +1876,11 @@ module aiFoundryFormatProjectWorkspaceId 'modules/standard-setup/format-project-
 module aiFoundryAddProjectCapabilityHost 'modules/standard-setup/add-project-capability-host.bicep' = if(deployAiFoundry && deployCapabilityHosts && !_networkIsolation) {
   name: 'capabilityHost-configuration-${resourceToken}-deployment'
   params: {
-    accountName: aiFoundryAccount.outputs.accountName
-    projectName: aiFoundryProject.outputs.projectName
-    cosmosDBConnection: aiFoundryProject.outputs.cosmosDBConnection
-    azureStorageConnection: aiFoundryProject.outputs.azureStorageConnection
-    aiSearchConnection: aiFoundryProject.outputs.aiSearchConnection
+    accountName: aiFoundryAccount!.outputs.accountName
+    projectName: aiFoundryProject!.outputs.projectName
+    cosmosDBConnection: aiFoundryProject!.outputs.cosmosDBConnection
+    azureStorageConnection: aiFoundryProject!.outputs.azureStorageConnection
+    aiSearchConnection: aiFoundryProject!.outputs.aiSearchConnection
 
     projectCapHost: projectCapHost
     accountCapHost: accountCapHost
@@ -1888,11 +1891,11 @@ module aiFoundryAddProjectCapabilityHost 'modules/standard-setup/add-project-cap
 module aiFoundryAddProjectCapabilityHostPrivate 'modules/standard-setup/add-project-capability-host-private.bicep' = if(deployAiFoundry && deployCapabilityHosts && _networkIsolation && deployAiFoundrySubnet) {
   name: 'capabilityHost-configuration-${resourceToken}-deployment'
   params: {
-    accountName: aiFoundryAccount.outputs.accountName
-    projectName: aiFoundryProject.outputs.projectName
-    cosmosDBConnection: aiFoundryProject.outputs.cosmosDBConnection
-    azureStorageConnection: aiFoundryProject.outputs.azureStorageConnection
-    aiSearchConnection: aiFoundryProject.outputs.aiSearchConnection
+    accountName: aiFoundryAccount!.outputs.accountName
+    projectName: aiFoundryProject!.outputs.projectName
+    cosmosDBConnection: aiFoundryProject!.outputs.cosmosDBConnection
+    azureStorageConnection: aiFoundryProject!.outputs.azureStorageConnection
+    aiSearchConnection: aiFoundryProject!.outputs.aiSearchConnection
 
     projectCapHost: projectCapHost
   }
@@ -1923,8 +1926,8 @@ var _capabilityHostDependsAll = _networkIsolation
 module aiFoundryBingConnection 'modules/standard-setup/ai-foundry-bing-search-tool.bicep' = if (deployAiFoundry && deployGroundingWithBing) {
   name: '${bingSearchName}-connection'
   params: {
-    account_name: aiFoundryAccount.outputs.accountName
-    project_name: aiFoundryProject.outputs.projectName
+    account_name: aiFoundryAccount!.outputs.accountName
+    project_name: aiFoundryProject!.outputs.projectName
     bingSearchName: bingSearchName
   }
 }
@@ -1932,8 +1935,8 @@ module aiFoundryBingConnection 'modules/standard-setup/ai-foundry-bing-search-to
 module aiFoundryConnectionSearch 'modules/standard-setup/connection-ai-search.bicep' = if (deployAiFoundry && deploySearchService) {
   name: 'connection-ai-search-${resourceToken}'
   params: {
-    aiFoundryName: aiFoundryAccount.outputs.accountName
-    aiProjectName: aiFoundryProject.outputs.projectName
+    aiFoundryName: aiFoundryAccount!.outputs.accountName
+    aiProjectName: aiFoundryProject!.outputs.projectName
     #disable-next-line BCP318
     connectedResourceName: searchService.outputs.name
   }
@@ -2488,7 +2491,7 @@ module searchService 'br/public:avm/res/search/search-service:0.11.1' = if (depl
     // SKU & capacity
     sku: 'standard'
     replicaCount: 1
-    semanticSearch: 'disabled'
+    semanticSearch: enableAgenticRetrieval ? 'standard' : 'disabled'
 
     // Identity & Auth
     managedIdentities: {
@@ -2588,7 +2591,7 @@ module assignStorageAccountAiFoundryProject 'modules/standard-setup/azure-storag
   scope: resourceGroup(_azureStorageSubscriptionId, _azureStorageResourceGroupName)
   params: {
     azureStorageName: aiFoundryDependencies.outputs.azureStorageName
-    projectPrincipalId: aiFoundryProject.outputs.projectPrincipalId
+    projectPrincipalId: aiFoundryProject!.outputs.projectPrincipalId
   }
 }
 
@@ -2598,7 +2601,7 @@ module assignCosmosDBAiFoundryProject 'modules/standard-setup/cosmosdb-account-r
   scope: resourceGroup(_cosmosDBSubscriptionId, _cosmosDBResourceGroupName)
   params: {
     cosmosDBName: aiFoundryDependencies.outputs.cosmosDBName
-    projectPrincipalId: aiFoundryProject.outputs.projectPrincipalId
+    projectPrincipalId: aiFoundryProject!.outputs.projectPrincipalId
   }
   dependsOn: [
     assignStorageAccountAiFoundryProject
@@ -2612,7 +2615,7 @@ module assignSearchAiFoundryProject 'modules/standard-setup/ai-search-role-assig
   scope: resourceGroup(_aiSearchServiceSubscriptionId, _aiSearchServiceResourceGroupName)
   params: {
     aiSearchName: aiFoundryDependencies.outputs.aiSearchName
-    projectPrincipalId: aiFoundryProject.outputs.projectPrincipalId
+    projectPrincipalId: aiFoundryProject!.outputs.projectPrincipalId
   }
   dependsOn: [
     assignCosmosDBAiFoundryProject
@@ -2621,13 +2624,13 @@ module assignSearchAiFoundryProject 'modules/standard-setup/ai-search-role-assig
 }
 
 // AI Foundry Storage Account - Storage Blob Data Owner (workspace-limited) -> AI Foundry Project
-module assignStorageContainersAiFoundryProject 'modules/standard-setup/blob-storage-container-role-assignments.bicep' = if (deployAiFoundry && deployCapabilityHosts) {
+module assignStorageContainersAiFoundryProject 'modules/standard-setup/blob-storage-container-role-assignments.bicep' = if (deployAiFoundry) {
   name: 'assignStorageContainersAiFoundryProject'
   scope: resourceGroup(_azureStorageSubscriptionId, _azureStorageResourceGroupName)
   params: {
-    aiProjectPrincipalId: aiFoundryProject.outputs.projectPrincipalId
+    aiProjectPrincipalId: aiFoundryProject!.outputs.projectPrincipalId
     storageName: aiFoundryDependencies.outputs.azureStorageName
-    workspaceId: aiFoundryFormatProjectWorkspaceId.outputs.projectWorkspaceIdGuid
+    workspaceId: aiFoundryFormatProjectWorkspaceId!.outputs.projectWorkspaceIdGuid
   }
   dependsOn: [
     
@@ -2635,13 +2638,13 @@ module assignStorageContainersAiFoundryProject 'modules/standard-setup/blob-stor
 }
 
 // AI Foundry Cosmos DB Containers - Cosmos DB Built-in Data Contributor -> AI Foundry Project
-module assignCosmosDBContainersAiFoundryProject 'modules/standard-setup/cosmos-container-role-assignments.bicep' = if (deployAiFoundry && deployCapabilityHosts && deployAiFoundrySubnet) {
+module assignCosmosDBContainersAiFoundryProject 'modules/standard-setup/cosmos-container-role-assignments.bicep' = if (deployAiFoundry) {
   name: 'assignCosmosDBContainersAiFoundryProject'
   scope: resourceGroup(_cosmosDBSubscriptionId, _cosmosDBResourceGroupName)
   params: {
     cosmosAccountName: aiFoundryDependencies.outputs.cosmosDBName
-    projectWorkspaceId: aiFoundryFormatProjectWorkspaceId.outputs.projectWorkspaceIdGuid
-    projectPrincipalId: aiFoundryProject.outputs.projectPrincipalId
+    projectWorkspaceId: aiFoundryFormatProjectWorkspaceId!.outputs.projectWorkspaceIdGuid
+    projectPrincipalId: aiFoundryProject!.outputs.projectPrincipalId
   }
   dependsOn: [
     aiFoundryAddProjectCapabilityHost
@@ -2655,7 +2658,7 @@ module assignStorageAccountAiFoundry 'modules/standard-setup/azure-storage-accou
   scope: resourceGroup(_azureStorageSubscriptionId, _azureStorageResourceGroupName)
   params: {
     azureStorageName: aiFoundryDependencies.outputs.azureStorageName
-    projectPrincipalId: aiFoundryAccount.outputs.accountPrincipalId
+    projectPrincipalId: aiFoundryAccount!.outputs.accountPrincipalId
   }
 }
 
@@ -2665,7 +2668,7 @@ module assignCosmosDBAiFoundry 'modules/standard-setup/cosmosdb-account-role-ass
   scope: resourceGroup(_cosmosDBSubscriptionId, _cosmosDBResourceGroupName)
   params: {
     cosmosDBName: aiFoundryDependencies.outputs.cosmosDBName
-    projectPrincipalId: aiFoundryAccount.outputs.accountPrincipalId
+    projectPrincipalId: aiFoundryAccount!.outputs.accountPrincipalId
   }
   dependsOn: [
     assignStorageAccountAiFoundry
@@ -2679,7 +2682,7 @@ module assignSearchAiFoundry 'modules/standard-setup/ai-search-role-assignments.
   scope: resourceGroup(_aiSearchServiceSubscriptionId, _aiSearchServiceResourceGroupName)
   params: {
     aiSearchName: aiFoundryDependencies.outputs.aiSearchName
-    projectPrincipalId: aiFoundryAccount.outputs.accountPrincipalId
+    projectPrincipalId: aiFoundryAccount!.outputs.accountPrincipalId
   }
   dependsOn: [
     aiFoundryDependencies!
@@ -2688,13 +2691,13 @@ module assignSearchAiFoundry 'modules/standard-setup/ai-search-role-assignments.
 }
 
 // AI Foundry Storage Account - Storage Blob Data Owner (workspace-limited) -> AI Foundry
-module assignStorageContainersAiFoundry 'modules/standard-setup/blob-storage-container-role-assignments.bicep' = if (deployAiFoundry && deployCapabilityHosts) {
+module assignStorageContainersAiFoundry 'modules/standard-setup/blob-storage-container-role-assignments.bicep' = if (deployAiFoundry) {
   name: 'assignStorageContainersAiFoundry'
   scope: resourceGroup(_azureStorageSubscriptionId, _azureStorageResourceGroupName)
   params: {
-    aiProjectPrincipalId: aiFoundryAccount.outputs.accountPrincipalId
+    aiProjectPrincipalId: aiFoundryAccount!.outputs.accountPrincipalId
     storageName: aiFoundryDependencies.outputs.azureStorageName
-    workspaceId: aiFoundryFormatProjectWorkspaceId.outputs.projectWorkspaceIdGuid
+    workspaceId: aiFoundryFormatProjectWorkspaceId!.outputs.projectWorkspaceIdGuid
   }
   dependsOn: [
     aiFoundryDependencies!
@@ -2703,13 +2706,13 @@ module assignStorageContainersAiFoundry 'modules/standard-setup/blob-storage-con
 }
 
 // AI Foundry Cosmos DB Containers - Cosmos DB Built-in Data Contributor -> AI Foundry
-module assignCosmosDBContainersAiFoundry 'modules/standard-setup/cosmos-container-role-assignments.bicep' = if (deployAiFoundry && deployCapabilityHosts && deployAiFoundrySubnet) {
+module assignCosmosDBContainersAiFoundry 'modules/standard-setup/cosmos-container-role-assignments.bicep' = if (deployAiFoundry) {
   name: 'assignCosmosDBContainersAiFoundry'
   scope: resourceGroup(_cosmosDBSubscriptionId, _cosmosDBResourceGroupName)
   params: {
     cosmosAccountName: aiFoundryDependencies.outputs.cosmosDBName
-    projectWorkspaceId: aiFoundryFormatProjectWorkspaceId.outputs.projectWorkspaceIdGuid
-    projectPrincipalId: aiFoundryAccount.outputs.accountPrincipalId
+    projectWorkspaceId: aiFoundryFormatProjectWorkspaceId!.outputs.projectWorkspaceIdGuid
+    projectPrincipalId: aiFoundryAccount!.outputs.accountPrincipalId
   }
   dependsOn: [
     aiFoundryAddProjectCapabilityHost
@@ -2888,7 +2891,7 @@ module assignAiFoundryAccountAzureAiProjectManagerExecutor 'modules/security/res
           'Microsoft.Authorization/roleDefinitions',
           const.roles.AzureAIProjectManager.guid
         )
-        resourceId: aiFoundryAccount.outputs.accountID
+        resourceId: aiFoundryAccount!.outputs.accountID
         principalType: principalType
       }
     ]
@@ -2904,6 +2907,26 @@ module assignCosmosDBCosmosDbBuiltInDataContributorExecutor 'modules/security/co
     principalId: principalId
     roleDefinitionGuid: const.roles.CosmosDBBuiltInDataContributor.guid
     scopePath: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${resourceGroup().name}/providers/Microsoft.DocumentDB/databaseAccounts/${dbAccountName}/dbs/${dbDatabaseName}'
+  }
+}
+
+// Search Service - Search Index Data Reader -> Executor
+module assignSearchSearchIndexDataReaderExecutor 'modules/security/resource-role-assignment.bicep' = if (deploySearchService) {
+  name: 'assignSearchSearchIndexDataReaderExecutor'
+  params: {
+    name: 'assignSearchSearchIndexDataReaderExecutor'
+    roleAssignments: [
+      {
+        principalId: principalId
+        roleDefinitionId: subscriptionResourceId(
+          'Microsoft.Authorization/roleDefinitions',
+          const.roles.SearchIndexDataReader.guid
+        )
+        #disable-next-line BCP318
+        resourceId: searchService.outputs.resourceId
+        principalType: principalType
+      }
+    ]
   }
 }
 
@@ -2950,7 +2973,7 @@ module assignAiFoundryAccountCognitiveServicesUserContainerApps 'modules/securit
           )
           #disable-next-line BCP318
           principalId: (_useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
-          resourceId: aiFoundryAccount.outputs.accountID
+          resourceId: aiFoundryAccount!.outputs.accountID
           principalType: 'ServicePrincipal'
         }
       ]
@@ -2975,13 +2998,33 @@ module assignAIFoundryCogServOAIUserContainerApps 'modules/security/resource-rol
           )
           #disable-next-line BCP318
           principalId: (_useUAI) ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
-          resourceId: aiFoundryAccount.outputs.accountID
+          resourceId: aiFoundryAccount!.outputs.accountID
           principalType: 'ServicePrincipal'
         }
       ]
     }
   }
 ]
+
+// AI Foundry Account - Cognitive Services User -> Search Service (for agentic retrieval vectorizers)
+module assignAiFoundryAccountCognitiveServicesUserSearch 'modules/security/resource-role-assignment.bicep' = if (deployAiFoundry && deploySearchService) {
+  name: 'assignAiFoundryAccountCognitiveServicesUserSearch'
+  params: {
+    name: 'assignAiFoundryAccountCognitiveServicesUserSearch'
+    roleAssignments: [
+      {
+        #disable-next-line BCP318
+        principalId: (_useUAI) ? searchServiceUAI.outputs.principalId : searchService.outputs.systemAssignedMIPrincipalId!
+        roleDefinitionId: subscriptionResourceId(
+          'Microsoft.Authorization/roleDefinitions',
+          const.roles.CognitiveServicesUser.guid
+        )
+        resourceId: aiFoundryAccount!.outputs.accountID
+        principalType: 'ServicePrincipal'
+      }
+    ]
+  }
+}
 
 // Azure Container Registry Service - AcrPull -> ContainerApp
 module assignCrAcrPullContainerApps 'modules/security/resource-role-assignment.bicep' = [
@@ -3148,6 +3191,32 @@ module assignStorageStorageBlobDataReaderAca 'modules/security/resource-role-ass
   }
 ]
 
+// Storage Account - Storage Blob Data Delegator -> ContainerApp
+module assignStorageStorageBlobDataDelegatorAca 'modules/security/resource-role-assignment.bicep' = [
+  for (app, i) in containerAppsList: if (deployStorageAccount && contains(
+    app.roles,
+    const.roles.StorageBlobDelegator.key
+  )) {
+    name: 'assignStorageStorageBlobDataDelegatorAca-${app.service_name}'
+    params: {
+      name: 'assignStorageStorageBlobDataDelegatorAca-${app.service_name}'
+      roleAssignments: [
+        {
+          roleDefinitionId: subscriptionResourceId(
+            'Microsoft.Authorization/roleDefinitions',
+            const.roles.StorageBlobDelegator.guid
+          )
+          #disable-next-line BCP318
+          principalId: (_useUAI)  ? containerAppsUAI[i].outputs.principalId : containerApps[i].outputs.systemAssignedMIPrincipalId!
+          #disable-next-line BCP318
+          resourceId: storageAccount.outputs.resourceId
+          principalType: 'ServicePrincipal'
+        }
+      ]
+    }
+  }
+]
+
 // Storage Account - Storage Blob Data Reader -> Search Service
 module assignStorageStorageBlobDataReaderSearch 'modules/security/resource-role-assignment.bicep' = if (deployStorageAccount && deploySearchService) {
   name: 'assignStorageStorageBlobDataReaderSearch'
@@ -3216,7 +3285,7 @@ module assignStorageStorageBlobDataReaderAIFoundryProject 'modules/security/reso
     name: 'assignStorageStorageBlobDataReaderAIFoundryProject'
     roleAssignments: [
       {
-        principalId: aiFoundryProject.outputs.projectPrincipalId
+        principalId: aiFoundryProject!.outputs.projectPrincipalId
         roleDefinitionId: subscriptionResourceId(
           'Microsoft.Authorization/roleDefinitions',
           const.roles.StorageBlobDataReader.guid
@@ -3311,7 +3380,7 @@ var _storageContainerNamesSettings = [
   }
 ]
 
-var outputModelDeploymentSettings = [
+var _modelDeploymentSettings = [
   for modelDeployment in modelDeploymentList: { 
     canonical_name: modelDeployment.canonical_name 
     capacity: modelDeployment.capacity
@@ -3380,7 +3449,8 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       { name: 'ENVIRONMENT_NAME',    value: environmentName,                        label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'DEPLOYMENT_NAME',     value: deployment().name,                      label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'RESOURCE_TOKEN',      value: resourceToken,                          label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'NETWORK_ISOLATION',   value: string(_networkIsolation),              label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'ENABLE_AGENTIC_RETRIEVAL', value: toLower(string(enableAgenticRetrieval)), label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'NETWORK_ISOLATION',   value: toLower(string(_networkIsolation)),     label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'USE_UAI',             value: string(_useUAI),                        label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'LOG_LEVEL',           value: 'INFO',                                 label: 'gpt-rag', contentType: 'text/plain' }
       { name: 'ENABLE_CONSOLE_LOGGING', value: 'true',                              label: 'gpt-rag', contentType: 'text/plain' }
@@ -3404,9 +3474,9 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       { name: 'LOG_ANALYTICS_RESOURCE_ID', value: logAnalytics.outputs.resourceId, label: 'gpt-rag', contentType: 'text/plain' }
       #disable-next-line BCP318
       { name: 'CONTAINER_ENV_RESOURCE_ID', value: containerEnv.outputs.resourceId, label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'AI_FOUNDRY_ACCOUNT_RESOURCE_ID', value: (deployAiFoundry) ? aiFoundryAccount.outputs.accountID : '', label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'AI_FOUNDRY_PROJECT_RESOURCE_ID', value: (deployAiFoundry) ? aiFoundryProject.outputs.projectId : '', label: 'gpt-rag', contentType: 'text/plain' }
-      { name: 'AI_FOUNDRY_PROJECT_WORKSPACE_ID', value: (deployAiFoundry) ? aiFoundryFormatProjectWorkspaceId.outputs.projectWorkspaceIdGuid : '', label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AI_FOUNDRY_ACCOUNT_RESOURCE_ID', value: (deployAiFoundry) ? aiFoundryAccount!.outputs.accountID : '', label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AI_FOUNDRY_PROJECT_RESOURCE_ID', value: (deployAiFoundry) ? aiFoundryProject!.outputs.projectId : '', label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'AI_FOUNDRY_PROJECT_WORKSPACE_ID', value: (deployAiFoundry) ? aiFoundryFormatProjectWorkspaceId!.outputs.projectWorkspaceIdGuid : '', label: 'gpt-rag', contentType: 'text/plain' }
       #disable-next-line BCP318
       { name: 'SEARCH_SERVICE_UAI_RESOURCE_ID', value: (_useUAI) ? searchServiceUAI.outputs.resourceId : '', label: 'gpt-rag', contentType: 'text/plain' }
       #disable-next-line BCP318
@@ -3470,7 +3540,7 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       // ── Container Apps List & Model Deployments ────────────────────────────
       #disable-next-line BCP318
       { name: 'CONTAINER_APPS', value: string(containerAppsSettings.outputs.containerAppsList), label: 'gpt-rag', contentType: 'application/json' }
-      { name: 'MODEL_DEPLOYMENTS', value: string(outputModelDeploymentSettings), label: 'gpt-rag', contentType: 'application/json' }
+      { name: 'MODEL_DEPLOYMENTS', value: string(_modelDeploymentSettings), label: 'gpt-rag', contentType: 'application/json' }
 
       // ── Service-specific (gpt-rag-ingestion) settings. 
       //    In future releases, these should be removed here and defined with default values directly in the ingestion service. ─────────────

@@ -9,6 +9,8 @@ results/
 **service_connection.json
 __pycache__/
 *.pyc
+.logs/
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

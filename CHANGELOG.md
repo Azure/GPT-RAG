@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.  
 This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to [Semantic Versioning](https://semver.org/).
 
+## [v2.2.0] – 2025-10-16
+### Added
+- Bring your own VNet. [#370](https://github.com/Azure/GPT-RAG/issues/370).
+- Agentic Retrieval. [#359](https://github.com/Azure/GPT-RAG/issues/359).
+
+### Fixed
+- Citation links opens up new chat windows instead of rendering files [#387](https://github.com/Azure/GPT-RAG/issues/387)
+
 ## [v2.1.1] – 2025-09-22
 ### Changed
 - Limit `azd` environment variables to the script process (no longer persisted to the user profile) to reduce secret exposure. Resolves [#378](https://github.com/Azure/GPT-RAG/issues/378).
