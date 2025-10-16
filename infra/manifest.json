@@ -24,8 +24,7 @@
     {
       "name": "gpt-rag-ingestion",
       "repo": "https://github.com/azure/gpt-rag-ingestion.git",
-      "tag": "v2.0.4",
-      "release": "release/2.0.4"
+      "tag": "v2.0.5"
     }
   ]
 }
