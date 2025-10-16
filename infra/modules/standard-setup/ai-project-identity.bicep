@@ -20,8 +20,6 @@ param useUAI bool = false
 param userAssignedIdentityResourceId string
 param userAssignedIdentityPrincipalId string
 
-import * as const from '../../constants/constants.bicep'
-
 resource searchService 'Microsoft.Search/searchServices@2024-06-01-preview' existing = {
   name: aiSearchName
   scope: resourceGroup(aiSearchServiceSubscriptionId, aiSearchServiceResourceGroupName)

@@ -1,14 +1,17 @@
 {
-    
     "SEARCH_API_VERSION": "2025-05-01-preview",
     "SEARCH_ANALYZER_NAME": "standard.lucene",
     "EMBEDDINGS_VECTOR_DIMENSIONS": "3072",
-
     "SEARCH_RAG_INDEX_NAME": "ragindex-{{RESOURCE_TOKEN}}",
-
     "SEARCH_QUERIES_INDEX_NAME": "nl2sql-{{RESOURCE_TOKEN}}-queries",
-
     "SEARCH_TABLES_INDEX_NAME": "nl2sql-{{RESOURCE_TOKEN}}-tables",
-
-    "SEARCH_MEASURES_INDEX_NAME": "nl2sql-{{RESOURCE_TOKEN}}-measures"
+    "SEARCH_MEASURES_INDEX_NAME": "nl2sql-{{RESOURCE_TOKEN}}-measures",
+    "ENABLE_AGENTIC_RETRIEVAL": "{{ENABLE_AGENTIC_RETRIEVAL | default('false')}}",
+    {% if GPT_MODEL_INFO %}
+    "GPT_MODEL_DEPLOYMENT_NAME": "{{GPT_MODEL_INFO.deployment_name}}",
+    "GPT_MODEL_NAME": "{{GPT_MODEL_INFO.model_name}}"
+    {% else %}
+    "GPT_MODEL_DEPLOYMENT_NAME": "",
+    "GPT_MODEL_NAME": ""
+    {% endif %}
 }

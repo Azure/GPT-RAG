@@ -99,7 +99,7 @@ azd provision
 2. Open a terminal in the VM and run:
 
    ```shell
-   cd C:\github.com\gpt-rag
+   cd C:\github\gpt-rag
    .\scripts\postProvision.ps1
    ```
 

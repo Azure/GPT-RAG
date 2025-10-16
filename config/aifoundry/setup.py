@@ -261,13 +261,8 @@ def main() -> None:
     validate_json_file(RAI_BLOCKLIST_JSON_FILE)
     endpoint = os.environ["APP_CONFIG_ENDPOINT"]
     cred = get_azure_credential()
-    try:
-        scope = f"{endpoint}/.default"
-        cred.get_token(scope)
-    except ClientAuthenticationError as e:
-        logging.error("❗️ Authentication failed: %s", e)
-        logging.error("ℹ️ Aborting configuration due to missing credentials.")
-        sys.exit(1)
+    # Removed explicit token test - let Azure SDK handle authentication lazily
+    # The token will be obtained when actually needed by the App Configuration client
     app_conf = AzureAppConfigurationClient(endpoint, cred)
     subscription_id = cfg(app_conf, "SUBSCRIPTION_ID")
     resource_group = cfg(app_conf, "AZURE_RESOURCE_GROUP")

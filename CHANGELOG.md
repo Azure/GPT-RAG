@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.  
 This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to [Semantic Versioning](https://semver.org/).
 
+## [v2.2.0] – 2025-10-16
+### Added
+- Bring your own VNet. [#370](https://github.com/Azure/GPT-RAG/issues/370).
+- Agentic Retrieval. [#359](https://github.com/Azure/GPT-RAG/issues/359).
+
+### Fixed
+- Citation links opens up new chat windows instead of rendering files [#387](https://github.com/Azure/GPT-RAG/issues/387)
 ## [v2.1.2] – 2025-10-02
 ### Changed
 - Fixed a bug in daa ingestion component where the SharePoint ingestion process was unnecessarily re-indexing unchanged files.
