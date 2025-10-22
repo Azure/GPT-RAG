@@ -289,63 +289,48 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#table-of-contents" class="md-nav__link">
+  <a href="#quick-start-basic-deployment" class="md-nav__link">
     <span class="md-ellipsis">
-      📋 Table of Contents
+      Quick Start - Basic Deployment
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="📋 Table of Contents">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#enterprise-deployment-zero-trust" class="md-nav__link">
+    <span class="md-ellipsis">
+      Enterprise Deployment - Zero Trust
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Enterprise Deployment - Zero Trust">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-basic-architecture-no-network-isolation" class="md-nav__link">
+  <a href="#before-provisioning" class="md-nav__link">
     <span class="md-ellipsis">
-      1. Basic Architecture (No Network Isolation) ⚙️
+      Before Provisioning
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-zero-trust-architecture-zta" class="md-nav__link">
+  <a href="#provision-infrastructure" class="md-nav__link">
     <span class="md-ellipsis">
-      2. Zero-Trust Architecture (ZTA) 🔒
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="2. Zero-Trust Architecture (ZTA) 🔒">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1-before-provisioning" class="md-nav__link">
-    <span class="md-ellipsis">
-      1) Before Provisioning
+      Provision Infrastructure
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-provision-the-infrastructure" class="md-nav__link">
+  <a href="#post-provision-configuration" class="md-nav__link">
     <span class="md-ellipsis">
-      2) Provision the Infrastructure
+      Post-Provision Configuration
     </span>
   </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3-post-provision-steps-vnet-access-required" class="md-nav__link">
-    <span class="md-ellipsis">
-      3) Post-Provision Steps (VNet access required)
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
         
@@ -526,26 +511,17 @@
 
 <h1 id="deployment-guide">🚀 Deployment Guide</h1>
 <p>Choose your preferred deployment method based on project requirements and environment constraints.</p>
-<h2 id="table-of-contents">📋 Table of Contents</h2>
-<ul>
-<li><a href="#1-basic-architecture-no-network-isolation-️">1. Basic Architecture (No Network Isolation)</a></li>
-<li><a href="#2-zero-trust-architecture-zta-">2. Zero-Trust Architecture (ZTA)</a></li>
-<li><a href="#1-before-provisioning">Before Provisioning</a></li>
-<li><a href="#2-provision-the-infrastructure">Provision the Infrastructure</a></li>
-<li><a href="#3-post-provision-steps-vnet-access-required">Post-Provision Steps</a></li>
-</ul>
-<hr />
 <blockquote>
 <p>[!TIP]
 You can change parameter values in <code>main.parameters.json</code> or set them with <code>azd env set</code> before running <code>azd provision</code>. This applies only to parameters that support environment variable substitution.</p>
 </blockquote>
-<h3 id="1-basic-architecture-no-network-isolation">1. Basic Architecture (No Network Isolation) ⚙️</h3>
+<h2 id="quick-start-basic-deployment">Quick Start - Basic Deployment</h2>
 <p>Quick setup for demos without network isolation.</p>
 <pre><code class="language-shell">azd init -t azure/gpt-rag
 azd provision
 </code></pre>
 <p>Demo video:</p>
-<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; margin-bottom: 20px; background: #f5f5f5; border-radius: 8px;">
+<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; margin: 0 auto 20px auto; border-radius: 8px; max-width: 600px;">
   <iframe src="https://www.youtube.com/embed/nZMDtaDQuP4?rel=0&modestbranding=1" 
           style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; border-radius: 8px;" 
           title="GPT-RAG Tutorial" 
@@ -556,16 +532,16 @@ azd provision
   </iframe>
 </div>
 
-<h3 id="2-zero-trust-architecture-zta">2. Zero-Trust Architecture (ZTA) 🔒</h3>
+<h2 id="enterprise-deployment-zero-trust">Enterprise Deployment - Zero Trust</h2>
 <p>For deployments that <strong>require network isolation</strong>.</p>
-<h4 id="1-before-provisioning">1) Before Provisioning</h4>
+<h3 id="before-provisioning">Before Provisioning</h3>
 <p>Enable network isolation in your environment:</p>
 <pre><code class="language-shell">azd env set NETWORK_ISOLATION true
 </code></pre>
-<h4 id="2-provision-the-infrastructure">2) Provision the Infrastructure</h4>
+<h3 id="provision-infrastructure">Provision Infrastructure</h3>
 <pre><code class="language-shell">azd provision
 </code></pre>
-<h4 id="3-post-provision-steps-vnet-access-required">3) Post-Provision Steps <em>(VNet access required)</em></h4>
+<h3 id="post-provision-configuration">Post-Provision Configuration</h3>
 <blockquote>
 <p>[!NOTE]
 The Bicep template provisions a <strong>Jumpbox VM</strong> by default. You can connect to it to perform the post-provision steps, deploy services, and run tests.</p>

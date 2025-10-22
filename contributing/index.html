@@ -13,8 +13,6 @@
       
       
       
-        <link rel="prev" href="../ochestrator/">
-      
       
       
       <link rel="icon" href="../favicon.ico">
@@ -22,7 +20,7 @@
     
     
       
-        <title>User Feedback - GPT-RAG</title>
+        <title>Contributing - GPT-RAG</title>
       
     
     
@@ -72,7 +70,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#user-feedback-configuration" class="md-skip">
+        <a href="#contributing" class="md-skip">
           Skip to content
         </a>
       
@@ -107,7 +105,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              User Feedback
+              Contributing
             
           </span>
         </div>
@@ -342,19 +340,17 @@
       
   
   
-    
   
   
-  
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
         
           
           <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
@@ -368,7 +364,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             Configuration
@@ -379,30 +375,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    User Feedback
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../userfeedback/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -411,53 +387,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#feedback-types" class="md-nav__link">
-    <span class="md-ellipsis">
-      Feedback Types
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuration-settings" class="md-nav__link">
-    <span class="md-ellipsis">
-      Configuration Settings
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#default-values" class="md-nav__link">
-    <span class="md-ellipsis">
-      Default Values
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -485,35 +414,94 @@
                   
 
 
-<h1 id="user-feedback-configuration">User Feedback Configuration</h1>
-<p>GPT-RAG includes a <strong>User Feedback Loop</strong> feature that lets users evaluate assistant responses through the UI. Feedback is sent to the backend, processed by the orchestrator, and stored in <strong>Cosmos DB</strong> for analysis and continuous improvement.</p>
-<p><img alt="Feedback stored in Cosmos DB" src="../media/feedback_stored_in_cosmos_db.png" />
-<em>User feedback stored in Cosmos DB</em></p>
-<p>By default, <strong>basic feedback</strong> (thumbs up/down) is enabled, while <strong>detailed ratings</strong> (star rating and comments) are disabled. Administrators control these options through <strong>Azure App Configuration</strong>.</p>
-<h2 id="feedback-types">Feedback Types</h2>
-<p>When enabled, users can provide <strong>star ratings</strong> and text comments for richer feedback that captures both satisfaction and reasoning.</p>
-<p><img alt="User feedback with rating" src="../media/user_feedback_with_rating.png" />
-<em>User providing rating and comment feedback</em></p>
-<h2 id="configuration-settings">Configuration Settings</h2>
-<p>The behavior of the feedback loop is controlled by key-values in <strong>Azure App Configuration</strong>:</p>
+<h1 id="contributing">Contributing</h1>
+<p>We appreciate contributions and suggestions for this project! Before contributing, you'll need to sign a Contributor License Agreement (CLA) to confirm that you have the rights to, and do, grant us permission to use your contribution. More details can be found at <a href="https://cla.opensource.microsoft.com">Microsoft CLA</a>.</p>
+<p>This project adheres to the <a href="https://opensource.microsoft.com/codeofconduct/">Microsoft Open Source Code of Conduct</a>. For more information, please visit the <a href="https://opensource.microsoft.com/codeofconduct/faq/">Code of Conduct FAQ</a> or contact <a href="mailto:opencode@microsoft.com">opencode@microsoft.com</a> with any questions or comments.</p>
+<p>Below, you'll find details on how our code update process works and instructions on how to contribute.</p>
+<h2 id="contribution-guidelines">Contribution Guidelines</h2>
+<p>To maintain project quality, the following items will be considered during the PR review.</p>
+<blockquote>
+<p>[!IMPORTANT]
+Adhering to these best practices will streamline the review process.</p>
+</blockquote>
 <ul>
-<li><strong>ENABLE_USER_FEEDBACK</strong> → Default: <code>true</code>
-  Controls whether the feedback feature is available at all.</li>
+<li>
+<p><strong>Target the <code>develop</code> Branch:</strong> Always direct your pull request to the <code>develop</code> branch to ensure that changes are properly integrated into the project's development workflow.</p>
+</li>
+<li>
+<p><strong>Keep Pull Requests Small:</strong> Aim to make your pull requests as focused and concise as possible. This makes it easier to review and ensures quicker integration into the codebase.</p>
+</li>
+<li>
+<p><strong>Associate with Prioritized Issues:</strong> Ensure that each pull request is linked to a specific, prioritized issue in the project backlog. This helps maintain alignment with project goals and ensures that work is being done on tasks of the highest importance.</p>
+</li>
+<li>
+<p><strong>Include Documentation:</strong> Every new feature or functionality must be accompanied by clear documentation explaining its purpose and configuration. This ensures others can use it independently in a self-service manner.</p>
+</li>
+<li>
+<p><strong>Bugs and Documentation Corrections:</strong> Pull requests that address bugs or correct documentation do not need to be associated with prioritized issues. These can be submitted directly to maintain the quality and accuracy of the project.</p>
+</li>
+<li>
+<p><strong>Multi-Repo Dependencies:</strong> If your pull request has dependencies on updates in other repositories, make sure to mention this in the pull request description. Additionally, create a corresponding pull request in the other repository to ensure synchronized updates across all related projects.</p>
+</li>
 </ul>
-<p><img alt="Enable user feedback" src="../media/enable_user_feedback.png" />
-<BR><em>Key to enable or disable user feedback globally</em></p>
-<ul>
-<li><strong>USER_FEEDBACK_RATING</strong> → Default: <code>false</code>
-  Controls whether users can provide detailed feedback with ratings and comments.</li>
-</ul>
-<p><img alt="Enable user feedback rating" src="../media/enable_user_feedback_rating.png" />
-<BR><em>Key to enable or disable detailed rating feedback</em></p>
-<h2 id="default-values">Default Values</h2>
-<ul>
-<li><code>ENABLE_USER_FEEDBACK = true</code></li>
-<li><code>USER_FEEDBACK_RATING = false</code></li>
-</ul>
-<p>This means feedback is collected by default, but <strong>star ratings and comments</strong> must be explicitly enabled by setting <code>USER_FEEDBACK_RATING</code> to <code>true</code>.</p>
+<h2 id="code-update-workflow">Code Update Workflow</h2>
+<p>We use a simplified version of the <a href="https://blog.scottlowe.org/2015/01/27/using-fork-branch-git-workflow/">Fork and Branch Workflow</a> alongside <a href="https://nvie.com/posts/a-successful-git-branching-model/">Git Flow</a> for branching strategy. The <code>main</code> branch always contains deployment-ready code, while the <code>develop</code> branch serves as our integration branch.</p>
+<p>Contributors create feature branches from <code>develop</code> in their forks. Once changes are completed, they submit a pull request to the <code>develop</code> branch in the upstream repository. After review and approval, reviewers merge the changes into <code>develop</code>. Weekly, maintainers group these changes into a pull request from <code>develop</code> to <code>main</code> for final review and merging.</p>
+<h3 id="step-by-step-process-overview">Step-by-Step Process Overview</h3>
+<p>This section outlines the contribution process, highlighting the key actions for both contributors and reviewers. The accompanying diagram visually represents the workflow.</p>
+<p><img alt="git workflow" src="../media/contributing-workflow.png" /></p>
+<h4 id="contributor">Contributor</h4>
+<ol>
+<li><strong>Fork the Repository</strong>: Create a copy of the original repository in your GitHub account.</li>
+<li><strong>Clone Locally</strong>: Download the forked repository to your machine.</li>
+<li><strong>Add Upstream</strong>: Link the original repository as "upstream" to keep your fork synced.</li>
+<li><strong>Create a Feature Branch</strong>: Start a new branch for your changes.</li>
+<li><strong>Commit and Push Changes</strong>: Implement your changes and push them to your GitHub fork.</li>
+<li><strong>Open a Pull Request</strong>: Submit your changes for review. If approved, they’ll be merged into the <code>develop</code> branch and later into <code>main</code> based on the project’s release process.</li>
+<li><strong>Keep Your Fork Updated</strong>: Regularly sync your fork with the original repository to stay current.</li>
+</ol>
+<h2 id="contributors-step-by-step-guide">Contributor's Step-by-Step Guide</h2>
+<p>Here’s an example of how to implement a feature called <code>conversation-metadata</code> in the <code>gpt-rag-orchestrator</code> repository. The process is similar for other repositories, such as <code>gpt-rag-ingestion</code>.</p>
+<ol>
+<li><strong>Create a Fork</strong> by clicking the <strong>Fork</strong> button on the repository page on GitHub. Be sure to include all branches.</li>
+</ol>
+<p><code>https://github.com/placerda/gpt-rag-orchestrator.git</code></p>
+<ol>
+<li><strong>Clone Your Fork Locally</strong> using the standard clone command.</li>
+</ol>
+<p><code>git clone https://github.com/placerda/gpt-rag-orchestrator.git</code></p>
+<ol>
+<li><strong>Set Upstream Remote</strong>: Link the original repository as "upstream" for future use.</li>
+</ol>
+<p><code>git remote add upstream git@github.com:Azure/gpt-rag-orchestrator.git</code></p>
+<ol>
+<li><strong>Create a Feature Branch</strong> in your forked repository.</li>
+</ol>
+<p><code>git checkout -b feature/conversation-metadata</code></p>
+<ol>
+<li><strong>Make Changes Locally</strong>: Modify the code in your local clone. Commit your changes and push them to your fork on GitHub.</li>
+</ol>
+<p><code>bash
+   git add .
+   git commit -m 'Implemented conversation metadata'
+   git push origin feature/conversation-metadata</code></p>
+<ol>
+<li><strong>Create a Pull Request</strong>: Go to your fork on GitHub and click "Pull Request." This request, aimed at the <code>develop</code> branch, will be reviewed and potentially merged by the repository maintainers.</li>
+</ol>
+<p><strong>Done!</strong> Now, wait for the review and approval of your pull request. Changes may be requested.</p>
+<h4 id="keeping-your-fork-updated">Keeping Your Fork Updated</h4>
+<p>It’s recommended that you update your local clone after your pull request is approved. Follow these steps:</p>
+<pre><code class="language-bash">git pull upstream main
+git push origin main
+git pull upstream develop
+git push origin develop
+</code></pre>
+<h4 id="cleaning-your-repo-after-pr-acceptance">Cleaning Your Repo After PR Acceptance</h4>
+<p>Once your changes are merged, you can delete the feature branch from your local clone using these commands:</p>
+<pre><code class="language-bash">git switch develop
+git branch -d feature/conversation-metadata
+git push --delete origin feature/conversation-metadata
+</code></pre>
 
 
 
