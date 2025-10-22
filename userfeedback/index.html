@@ -13,21 +13,23 @@
       
       
       
+        <link rel="prev" href="../ochestrator/">
       
       
-      <link rel="icon" href="/favicon.ico">
+      
+      <link rel="icon" href="../favicon.ico">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.34">
     
     
       
-        <title>GPT-RAG</title>
+        <title>User Feedback - GPT-RAG</title>
       
     
     
-      <link rel="stylesheet" href="/assets/stylesheets/main.35f28582.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.35f28582.min.css">
       
         
-        <link rel="stylesheet" href="/assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -46,7 +48,7 @@
       
     
     
-    <script>__md_scope=new URL("/",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -69,6 +71,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#configuring-user-feedback-loop" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -81,9 +88,9 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="/." title="GPT-RAG" class="md-header__button md-logo" aria-label="GPT-RAG" data-md-component="logo">
+    <a href=".." title="GPT-RAG" class="md-header__button md-logo" aria-label="GPT-RAG" data-md-component="logo">
       
-  <img src="/media/logo.png" alt="logo">
+  <img src="../media/logo.png" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -100,7 +107,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              
+              User Feedback
             
           </span>
         </div>
@@ -177,9 +184,9 @@
 
 <nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="/." title="GPT-RAG" class="md-nav__button md-logo" aria-label="GPT-RAG" data-md-component="logo">
+    <a href=".." title="GPT-RAG" class="md-nav__button md-logo" aria-label="GPT-RAG" data-md-component="logo">
       
-  <img src="/media/logo.png" alt="logo">
+  <img src="../media/logo.png" alt="logo">
 
     </a>
     GPT-RAG
@@ -194,7 +201,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/." class="md-nav__link">
+      <a href=".." class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -214,7 +221,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/whatisnew/" class="md-nav__link">
+      <a href="../whatisnew/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -234,7 +241,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/deploy/" class="md-nav__link">
+      <a href="../deploy/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -289,7 +296,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/architecture/" class="md-nav__link">
+      <a href="../architecture/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -310,7 +317,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/ochestrator/" class="md-nav__link">
+      <a href="../ochestrator/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -335,17 +342,19 @@
       
   
   
+    
   
   
+  
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
           <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
@@ -359,7 +368,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             Configuration
@@ -370,10 +379,30 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="/userfeedback/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    User Feedback
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -382,6 +411,53 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#user-feedback-with-rating" class="md-nav__link">
+    <span class="md-ellipsis">
+      User Feedback with Rating
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-in-app-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration in App Configuration
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#default-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Default Settings
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -406,8 +482,51 @@
             <div class="md-content" data-md-component="content">
               <article class="md-content__inner md-typeset">
                 
-  <h1>404 - Not found</h1>
+                  
 
+
+<h1 id="configuring-user-feedback-loop">Configuring User Feedback Loop</h1>
+<p>GPT-RAG includes a <strong>User Feedback Loop</strong> feature that lets users evaluate the assistant’s responses through the UI. Feedback—whether a simple thumbs up/down or a detailed rating with comments—is sent to the application backend, forwarded to the orchestrator for processing, and then stored in <strong>Cosmos DB</strong>. This data can be queried and analyzed to improve answer quality, track performance, and support continuous learning.</p>
+<p><img alt="Feedback stored in Cosmos DB" src="../media/feedback_stored_in_cosmos_db.png" />
+<em>User feedback stored in Cosmos DB</em></p>
+<p>By default, <strong>basic feedback</strong> (thumbs up/down) is enabled, while <strong>feedback with ratings</strong> (star rating and text comments) is disabled. Administrators can enable or disable these options through configuration in the <strong>Azure App Configuration</strong> store.</p>
+<h4 id="user-feedback-with-rating">User Feedback with Rating</h4>
+<p>When enabled, users can provide a <strong>star rating</strong> and a free-text comment. This richer evaluation captures not only whether the response was useful but also <strong>why</strong> the user rated it that way.</p>
+<p><img alt="User feedback with rating" src="../media/user_feedback_with_rating.png" />
+<em>User providing rating and comment feedback</em></p>
+<h4 id="configuration-in-app-configuration">Configuration in App Configuration</h4>
+<p>The behavior of the feedback loop is controlled by key-values in <strong>Azure App Configuration</strong>:</p>
+<ul>
+<li><strong>ENABLE_USER_FEEDBACK</strong> → Default: <code>true</code>
+  Controls whether the feedback feature is available at all.</li>
+</ul>
+<p><img alt="Enable user feedback" src="../media/enable_user_feedback.png" />
+<BR><em>Key to enable or disable user feedback globally</em></p>
+<ul>
+<li><strong>USER_FEEDBACK_RATING</strong> → Default: <code>false</code>
+  Controls whether users can provide detailed feedback with ratings and comments.</li>
+</ul>
+<p><img alt="Enable user feedback rating" src="../media/enable_user_feedback_rating.png" />
+<BR><em>Key to enable or disable detailed rating feedback</em></p>
+<h4 id="default-settings">Default Settings</h4>
+<ul>
+<li><code>ENABLE_USER_FEEDBACK = true</code></li>
+<li><code>USER_FEEDBACK_RATING = false</code></li>
+</ul>
+<p>This means feedback is collected by default, but <strong>star ratings and comments</strong> must be explicitly enabled by setting <code>USER_FEEDBACK_RATING</code> to <code>true</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
               </article>
             </div>
           
@@ -439,10 +558,10 @@
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "/", "features": ["navigation.tracking", "toc.integrate", "content.code.annotate", "navigation.top"], "search": "/assets/javascripts/workers/search.07f07601.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "toc.integrate", "content.code.annotate", "navigation.top"], "search": "../assets/javascripts/workers/search.07f07601.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="/assets/javascripts/bundle.56dfad97.min.js"></script>
+      <script src="../assets/javascripts/bundle.56dfad97.min.js"></script>
       
     
   </body>
