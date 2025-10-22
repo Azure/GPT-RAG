@@ -343,8 +343,26 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#deploy-gpt-rag-services" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deploy GPT-RAG Services
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Permissions
+    </span>
+  </a>
   
 </li>
       
@@ -521,27 +539,23 @@
 <h1 id="deployment-guide">🚀 Deployment Guide</h1>
 <p>Choose your preferred deployment method based on project requirements and environment constraints.</p>
 <blockquote>
-<p>You can change parameter values in <code>main.parameters.json</code> or set them with <code>azd env set</code> before running <code>azd provision</code>. This applies only to parameters that support environment variable substitution.</p>
+<p><strong>Note:</strong> You can change parameter values in <code>main.parameters.json</code> or set them with <code>azd env set</code> before running <code>azd provision</code>. This applies only to parameters that support environment variable substitution.</p>
 </blockquote>
 <h2 id="prerequisites">Prerequisites</h2>
-<details markdown="block">
-<summary>Expand to view prerequisites</summary>
+<p>???+ info "Expand to view prerequisites"</p>
+<pre><code>To deploy this template, the user or service principal requires the following permissions on the target Resource Group:
 
-To deploy this template, the user or service principal requires the following permissions on the target Resource Group:
-
-* An Azure subscription.
-* An Azure user with **Contributor** and **User Access Admin** permissions on the target resource group.
+* An Azure subscription
+* An Azure user with **Contributor** and **User Access Admin** permissions on the target resource group
 
 In addition, the machine or environment used for deployment should have:
 
-- Azure Developer CLI: [Install azd](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd)
-- PowerShell 7+ (Windows only): [Install PowerShell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4#installing-the-msi-package)
-- Git: [Download Git](https://git-scm.com/downloads)
-- Python 3.12: [Download Python](https://www.python.org/downloads/release/python-3120/)
-- An Azure AI Services resource created or agreement to Responsible AI terms in the portal
-
-</details>
-
+* **Azure Developer CLI**: [Install azd](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd)
+* **PowerShell 7+** (Windows only): [Install PowerShell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4#installing-the-msi-package)
+* **Git**: [Download Git](https://git-scm.com/downloads)
+* **Python 3.12**: [Download Python](https://www.python.org/downloads/release/python-3120/)
+* **Azure AI Services** resource created or agreement to Responsible AI terms in the portal
+</code></pre>
 <h2 id="quick-start-basic-deployment">Quick Start - Basic Deployment</h2>
 <p>Quick setup for demos without network isolation.</p>
 <pre><code class="language-shell">azd init -t azure/gpt-rag
@@ -598,6 +612,432 @@ azd provision
 <ol>
 <li>When prompted, select the <strong>same Subscription, Resource Group, and Location</strong> as the original provisioning so <code>azd</code> correctly links to your environment.</li>
 </ol>
+<h3 id="deploy-gpt-rag-services">Deploy GPT-RAG Services</h3>
+<p>Once the GPT-RAG infrastructure is provisioned, you can deploy the services.</p>
+<p>To deploy <strong>all services at once</strong>, navigate to the <code>gpt-rag</code> directory (with azd environment configured) and run:</p>
+<pre><code class="language-shell">azd deploy
+</code></pre>
+<p>This command deploys each service in sequence.</p>
+<p>If you prefer to <strong>deploy a single service</strong>—for example, when updating only that service—navigate to the corresponding service repository and follow the instructions in its <strong>"How to Deploy"</strong> section.</p>
+<h2 id="permissions">Permissions</h2>
+<p><strong>AI Foundry Role and AI Search Assignments</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Resource</th>
+<th style="text-align: left;">Role</th>
+<th style="text-align: left;">Assignee</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">GenAI App Search Service</td>
+<td style="text-align: left;">Search Index Data Reader</td>
+<td style="text-align: left;">AI Foundry Project</td>
+<td style="text-align: left;">Read index data</td>
+</tr>
+<tr>
+<td style="text-align: left;">GenAI App Search Service</td>
+<td style="text-align: left;">Search Service Contributor</td>
+<td style="text-align: left;">AI Foundry Project</td>
+<td style="text-align: left;">Create AI search connection</td>
+</tr>
+<tr>
+<td style="text-align: left;">GenAI App Storage Account</td>
+<td style="text-align: left;">Storage Blob Data Reader</td>
+<td style="text-align: left;">AI Foundry Account</td>
+<td style="text-align: left;">Read blob data</td>
+</tr>
+<tr>
+<td style="text-align: left;">GenAI App Storage Account</td>
+<td style="text-align: left;">Storage Blob Data Reader</td>
+<td style="text-align: left;">Search Service</td>
+<td style="text-align: left;">Read blob data for search integration</td>
+</tr>
+<tr>
+<td style="text-align: left;">AI Foundry Storage Account</td>
+<td style="text-align: left;">Storage Blob Data Contributor</td>
+<td style="text-align: left;">AI Foundry Project</td>
+<td style="text-align: left;">Enable agent to store/retrieve blob artifacts in customer storage</td>
+</tr>
+<tr>
+<td style="text-align: left;">AI Foundry Storage Account Containers</td>
+<td style="text-align: left;">Storage Blob Data Owner (workspace)</td>
+<td style="text-align: left;">AI Foundry Project</td>
+<td style="text-align: left;">Scoped owner access to workspace containers for session-specific data</td>
+</tr>
+<tr>
+<td style="text-align: left;">AI Foundry Cosmos DB Account</td>
+<td style="text-align: left;">Cosmos DB Operator</td>
+<td style="text-align: left;">AI Foundry Project</td>
+<td style="text-align: left;">Control-plane operations for enterprise memory database (threads)</td>
+</tr>
+<tr>
+<td style="text-align: left;">AI Foundry Cosmos DB Containers</td>
+<td style="text-align: left;">Cosmos DB Built-in Data Contributor</td>
+<td style="text-align: left;">AI Foundry Project</td>
+<td style="text-align: left;">Read/write conversation threads within enterprise memory containers</td>
+</tr>
+<tr>
+<td style="text-align: left;">AI Foundry Search Service</td>
+<td style="text-align: left;">Search Service Contributor</td>
+<td style="text-align: left;">AI Foundry Project</td>
+<td style="text-align: left;">Create/update indexes for vector search workflows</td>
+</tr>
+<tr>
+<td style="text-align: left;">AI Foundry Search Service</td>
+<td style="text-align: left;">Search Index Data Contributor</td>
+<td style="text-align: left;">AI Foundry Project</td>
+<td style="text-align: left;">Read/write index data for embedding-based queries</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Container App Role Assignments</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Resource</th>
+<th style="text-align: left;">Role</th>
+<th style="text-align: left;">Assignee</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">GenAI App Configuration Store</td>
+<td style="text-align: left;">App Configuration Data Reader</td>
+<td style="text-align: left;">ContainerApp: orchestrator</td>
+<td style="text-align: left;">Read configuration data</td>
+</tr>
+<tr>
+<td style="text-align: left;">GenAI App Configuration Store</td>
+<td style="text-align: left;">App Configuration Data Reader</td>
+<td style="text-align: left;">ContainerApp: frontend</td>
+<td style="text-align: left;">Read configuration data</td>
+</tr>
+<tr>
+<td style="text-align: left;">GenAI App Configuration Store</td>
+<td style="text-align: left;">App Configuration Data Reader</td>
+<td style="text-align: left;">ContainerApp: dataingest</td>
+<td style="text-align: left;">Read configuration data</td>
+</tr>
+<tr>
+<td style="text-align: left;">GenAI App Configuration Store</td>
+<td style="text-align: left;">App Configuration Data Reader</td>
+<td style="text-align: left;">ContainerApp: mcp</td>
+<td style="text-align: left;">Read configuration data</td>
+</tr>
+<tr>
+<td style="text-align: left;">GenAI App Container Registry</td>
+<td style="text-align: left;">AcrPull</td>
+<td style="text-align: left;">ContainerApp: mcp</td>
+<td style="text-align: left;">Pull container images</td>
+</tr>
+<tr>
+<td style="text-align: left;">GenAI App Container Registry</td>
+<td style="text-align: left;">AcrPull</td>
+<td style="text-align: left;">ContainerApp: orchestrator</td>
+<td style="text-align: left;">Pull container images</td>
+</tr>
+<tr>
+<td style="text-align: left;">GenAI App Container Registry</td>
+<td style="text-align: left;">AcrPull</td>
+<td style="text-align: left;">ContainerApp: frontend</td>
+<td style="text-align: left;">Pull container images</td>
+</tr>
+<tr>
+<td style="text-align: left;">GenAI App Container Registry</td>
+<td style="text-align: left;">AcrPull</td>
+<td style="text-align: left;">ContainerApp: dataingest</td>
+<td style="text-align: left;">Pull container images</td>
+</tr>
+<tr>
+<td style="text-align: left;">GenAI App Key Vault</td>
+<td style="text-align: left;">Key Vault Secrets User</td>
+<td style="text-align: left;">ContainerApp: orchestrator</td>
+<td style="text-align: left;">Read secrets</td>
+</tr>
+<tr>
+<td style="text-align: left;">GenAI App Key Vault</td>
+<td style="text-align: left;">Key Vault Secrets User</td>
+<td style="text-align: left;">ContainerApp: frontend</td>
+<td style="text-align: left;">Read secrets</td>
+</tr>
+<tr>
+<td style="text-align: left;">GenAI App Key Vault</td>
+<td style="text-align: left;">Key Vault Secrets User</td>
+<td style="text-align: left;">ContainerApp: dataingest</td>
+<td style="text-align: left;">Read secrets</td>
+</tr>
+<tr>
+<td style="text-align: left;">GenAI App Key Vault</td>
+<td style="text-align: left;">Key Vault Secrets User</td>
+<td style="text-align: left;">ContainerApp: mcp</td>
+<td style="text-align: left;">Read secrets</td>
+</tr>
+<tr>
+<td style="text-align: left;">GenAI App Search Service</td>
+<td style="text-align: left;">Search Index Data Reader</td>
+<td style="text-align: left;">ContainerApp: orchestrator</td>
+<td style="text-align: left;">Read index data</td>
+</tr>
+<tr>
+<td style="text-align: left;">GenAI App Search Service</td>
+<td style="text-align: left;">Search Index Data Contributor</td>
+<td style="text-align: left;">ContainerApp: dataingest</td>
+<td style="text-align: left;">Read/write index data</td>
+</tr>
+<tr>
+<td style="text-align: left;">GenAI App Search Service</td>
+<td style="text-align: left;">Search Index Data Contributor</td>
+<td style="text-align: left;">ContainerApp: mcp</td>
+<td style="text-align: left;">Read/write index data</td>
+</tr>
+<tr>
+<td style="text-align: left;">GenAI App Storage Account</td>
+<td style="text-align: left;">Storage Blob Data Reader</td>
+<td style="text-align: left;">ContainerApp: orchestrator</td>
+<td style="text-align: left;">Read blob data</td>
+</tr>
+<tr>
+<td style="text-align: left;">GenAI App Storage Account</td>
+<td style="text-align: left;">Storage Blob Data Reader</td>
+<td style="text-align: left;">ContainerApp: frontend</td>
+<td style="text-align: left;">Read blob data</td>
+</tr>
+<tr>
+<td style="text-align: left;">GenAI App Storage Account</td>
+<td style="text-align: left;">Storage Blob Data Contributor</td>
+<td style="text-align: left;">ContainerApp: dataingest</td>
+<td style="text-align: left;">Read/write blob data</td>
+</tr>
+<tr>
+<td style="text-align: left;">GenAI App Storage Account</td>
+<td style="text-align: left;">Storage Blob Data Contributor</td>
+<td style="text-align: left;">ContainerApp: mcp</td>
+<td style="text-align: left;">Read/write blob data</td>
+</tr>
+<tr>
+<td style="text-align: left;">GenAI App Storage Account</td>
+<td style="text-align: left;">Storage Queue Data Contributor</td>
+<td style="text-align: left;">ContainerApp: mcp</td>
+<td style="text-align: left;">Read/write storage queue data</td>
+</tr>
+<tr>
+<td style="text-align: left;">GenAI App Cosmos DB</td>
+<td style="text-align: left;">Cosmos DB Built-in Data Contributor</td>
+<td style="text-align: left;">ContainerApp: orchestrator</td>
+<td style="text-align: left;">Read/write Cosmos DB data</td>
+</tr>
+<tr>
+<td style="text-align: left;">AI Foundry Account</td>
+<td style="text-align: left;">Cognitive Services User</td>
+<td style="text-align: left;">ContainerApp: orchestrator</td>
+<td style="text-align: left;">Access Cognitive Services operations</td>
+</tr>
+<tr>
+<td style="text-align: left;">AI Foundry Account</td>
+<td style="text-align: left;">Cognitive Services User</td>
+<td style="text-align: left;">ContainerApp: dataingest</td>
+<td style="text-align: left;">Access Cognitive Services operations</td>
+</tr>
+<tr>
+<td style="text-align: left;">AI Foundry Account</td>
+<td style="text-align: left;">Cognitive Services OpenAI User</td>
+<td style="text-align: left;">ContainerApp: orchestrator</td>
+<td style="text-align: left;">Use OpenAI APIs</td>
+</tr>
+<tr>
+<td style="text-align: left;">AI Foundry Account</td>
+<td style="text-align: left;">Cognitive Services OpenAI User</td>
+<td style="text-align: left;">ContainerApp: dataingest</td>
+<td style="text-align: left;">Use OpenAI APIs</td>
+</tr>
+<tr>
+<td style="text-align: left;">AI Foundry Account</td>
+<td style="text-align: left;">Cognitive Services User</td>
+<td style="text-align: left;">ContainerApp: mcp</td>
+<td style="text-align: left;">Access Cognitive Services</td>
+</tr>
+<tr>
+<td style="text-align: left;">AI Foundry Account</td>
+<td style="text-align: left;">Cognitive Services OpenAI User</td>
+<td style="text-align: left;">ContainerApp: mcp</td>
+<td style="text-align: left;">Use OpenAI APIs</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Executor Role Assignments</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Resource</th>
+<th style="text-align: left;">Role</th>
+<th style="text-align: left;">Assignee</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">GenAI App Configuration Store</td>
+<td style="text-align: left;">App Configuration Data Owner</td>
+<td style="text-align: left;">Executor</td>
+<td style="text-align: left;">Full control over configuration settings</td>
+</tr>
+<tr>
+<td style="text-align: left;">GenAI App Container Registry</td>
+<td style="text-align: left;">AcrPush</td>
+<td style="text-align: left;">Executor</td>
+<td style="text-align: left;">Push container images</td>
+</tr>
+<tr>
+<td style="text-align: left;">GenAI App Key Vault</td>
+<td style="text-align: left;">Key Vault Contributor</td>
+<td style="text-align: left;">Executor</td>
+<td style="text-align: left;">Manage Key Vault settings</td>
+</tr>
+<tr>
+<td style="text-align: left;">GenAI App Key Vault</td>
+<td style="text-align: left;">Key Vault Secrets Officer</td>
+<td style="text-align: left;">Executor</td>
+<td style="text-align: left;">Create Key Vault secrets</td>
+</tr>
+<tr>
+<td style="text-align: left;">GenAI App Search Service</td>
+<td style="text-align: left;">Search Service Contributor</td>
+<td style="text-align: left;">Executor</td>
+<td style="text-align: left;">Create/update search service elements</td>
+</tr>
+<tr>
+<td style="text-align: left;">GenAI App Search Service</td>
+<td style="text-align: left;">Search Index Data Contributor</td>
+<td style="text-align: left;">Executor</td>
+<td style="text-align: left;">Read/write search index data</td>
+</tr>
+<tr>
+<td style="text-align: left;">GenAI App Storage Account</td>
+<td style="text-align: left;">Storage Blob Data Contributor</td>
+<td style="text-align: left;">Executor</td>
+<td style="text-align: left;">Read/write blob data</td>
+</tr>
+<tr>
+<td style="text-align: left;">GenAI App Cosmos DB</td>
+<td style="text-align: left;">Cosmos DB Built-in Data Contributor</td>
+<td style="text-align: left;">Executor</td>
+<td style="text-align: left;">Read/write Cosmos DB data</td>
+</tr>
+<tr>
+<td style="text-align: left;">AI Foundry Project</td>
+<td style="text-align: left;">Azure AI Project Manager</td>
+<td style="text-align: left;">Executor</td>
+<td style="text-align: left;">Manage AI Foundry projects and assign roles</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Jumpbox VM Role Assignments</strong></p>
+<table>
+<thead>
+<tr>
+<th>Resource</th>
+<th>Role</th>
+<th>Assignee</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GenAI App Container Apps</td>
+<td>Container Apps Contributor</td>
+<td>Jumpbox VM</td>
+<td>Full control over Container Apps (deploy/manage apps)</td>
+</tr>
+<tr>
+<td>Azure Managed Identity</td>
+<td>Managed Identity Operator</td>
+<td>Jumpbox VM</td>
+<td>Assign and manage user-assigned managed identities</td>
+</tr>
+<tr>
+<td>GenAI App Container Registry</td>
+<td>Container Registry Repository Writer</td>
+<td>Jumpbox VM</td>
+<td>Write to specific repositories</td>
+</tr>
+<tr>
+<td>GenAI App Container Registry</td>
+<td>Container Registry Tasks Contributor</td>
+<td>Jumpbox VM</td>
+<td>Manage ACR tasks</td>
+</tr>
+<tr>
+<td>GenAI App Container Registry</td>
+<td>Container Registry Data Access Configuration Administrator</td>
+<td>Jumpbox VM</td>
+<td>Manage data access configuration for ACR</td>
+</tr>
+<tr>
+<td>GenAI App Container Registry</td>
+<td>AcrPush</td>
+<td>Jumpbox VM</td>
+<td>Push container images</td>
+</tr>
+<tr>
+<td>GenAI App Configuration Store</td>
+<td>App Configuration Data Owner</td>
+<td>Jumpbox VM</td>
+<td>Full control over configuration settings</td>
+</tr>
+<tr>
+<td>GenAI App Key Vault</td>
+<td>Key Vault Contributor</td>
+<td>Jumpbox VM</td>
+<td>Manage Key Vault settings</td>
+</tr>
+<tr>
+<td>GenAI App Key Vault</td>
+<td>Key Vault Secrets Officer</td>
+<td>Jumpbox VM</td>
+<td>Create Key Vault secrets</td>
+</tr>
+<tr>
+<td>GenAI App Search Service</td>
+<td>Search Service Contributor</td>
+<td>Jumpbox VM</td>
+<td>Create/update search service elements</td>
+</tr>
+<tr>
+<td>GenAI App Search Service</td>
+<td>Search Index Data Contributor</td>
+<td>Jumpbox VM</td>
+<td>Read/write search index data</td>
+</tr>
+<tr>
+<td>GenAI App Storage Account</td>
+<td>Storage Blob Data Contributor</td>
+<td>Jumpbox VM</td>
+<td>Read/write blob data</td>
+</tr>
+<tr>
+<td>AI Foundry Account</td>
+<td>Azure AI Project Manager</td>
+<td>Jumpbox VM</td>
+<td>Manage AI Foundry projects and assign roles</td>
+</tr>
+<tr>
+<td>AI Foundry Account</td>
+<td>Cognitive Services Contributor</td>
+<td>Jumpbox VM</td>
+<td>Manage Cognitive Services resources</td>
+</tr>
+<tr>
+<td>GenAI App Cosmos DB</td>
+<td>Cosmos DB Built-in Data Contributor</td>
+<td>Jumpbox VM</td>
+<td>Read/write Cosmos DB data</td>
+</tr>
+</tbody>
+</table>
 
 
 
