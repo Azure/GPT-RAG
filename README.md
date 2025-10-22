@@ -17,8 +17,13 @@ description: GPT-RAG core is a Retrieval-Augmented Generation pattern running in
 
 # GPT-RAG Solution Accelerator
 
-GPT-RAG provides templates to deploy Azure resources for Retrieval-Augmented Generation (RAG) solutions, creating a secure, scalable, and enterprise-ready environment based on proven architecture patterns. It combines Zero-Trust security, Responsible AI, and high availability. More information is available in the [official GPT-RAG documentation](https://azure.github.io/GPT-RAG/).
+GPT-RAG provides architecture templates and deployment assets to build and integrate Azure resources for **Retrieval-Augmented Generation (RAG)** solutions. It delivers a secure, scalable, and enterprise-grade environment based on proven Azure architecture patterns, integrating **Zero-Trust security**, **Responsible AI practices**, and **observability**. Setup and usage guidance are available in the [official GPT-RAG documentation](https://azure.github.io/GPT-RAG/).
 
-## Trademarks
+### Contributing
+
+We appreciate contributions! See the [contribution guidelines](./CONTRIBUTING.md) for details on the CLA, code of conduct, and pull requests.
+
+
+### Trademarks
 
 This project may contain trademarks or logos. Authorized use of Microsoft trademarks or logos must follow [Microsoft’s Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general). Modified versions must not imply sponsorship or cause confusion. Third-party trademarks are subject to their own policies.
