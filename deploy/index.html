@@ -542,14 +542,18 @@
 <p><strong>Note:</strong> You can change parameter values in <code>main.parameters.json</code> or set them with <code>azd env set</code> before running <code>azd provision</code>. This applies only to parameters that support environment variable substitution.</p>
 </blockquote>
 <h2 id="prerequisites">Prerequisites</h2>
-<p><strong>Required Permissions:</strong>
-   - Azure subscription with <strong>Contributor</strong> and <strong>User Access Admin</strong> roles
-   - Agreement to Responsible AI terms for Azure AI Services</p>
-<p><strong>Required Tools:</strong>
-   - <a href="https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd">Azure Developer CLI</a>
-   - <a href="https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4#installing-the-msi-package">PowerShell 7+</a> (Windows only)
-   - <a href="https://git-scm.com/downloads">Git</a>
-   - <a href="https://www.python.org/downloads/release/python-3120/">Python 3.12</a></p>
+<p><strong>Required Permissions:</strong></p>
+<ul>
+<li>Azure subscription with <strong>Contributor</strong> and <strong>User Access Admin</strong> roles</li>
+<li>Agreement to Responsible AI terms for Azure AI Services</li>
+</ul>
+<p><strong>Required Tools:</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd">Azure Developer CLI</a></li>
+<li><a href="https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4#installing-the-msi-package">PowerShell 7+</a> (Windows only)</li>
+<li><a href="https://git-scm.com/downloads">Git</a></li>
+<li><a href="https://www.python.org/downloads/release/python-3120/">Python 3.12</a></li>
+</ul>
 <h2 id="quick-start-basic-deployment">Quick Start - Basic Deployment</h2>
 <p>Quick setup for demos without network isolation.</p>
 <pre><code class="language-shell">azd init -t azure/gpt-rag
