@@ -10,7 +10,6 @@ theme:
   palette:
     scheme: default
   features:
-    - navigation.instant
     - navigation.tracking
     - toc.integrate
     - content.code.annotate
@@ -18,7 +17,11 @@ theme:
 
 nav:
   - Home: index.md
-  - Quick Start: guide.md
-
+  - What's New: whatisnew.md
+  - Deployment Guide: deploy.md
+  - Architecture: architecture.md
+    - Orchestrator: ochestrator.md
+  - Configuration:
+    - User Feedback: userfeedback.md
 extra:
   generator: false
