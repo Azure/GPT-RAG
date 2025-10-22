@@ -6,20 +6,15 @@ Choose your preferred deployment method based on project requirements and enviro
 
 ## Prerequisites
 
-???+ info "Expand to view prerequisites"
+**Required Permissions:**
+- Azure subscription with **Contributor** and **User Access Admin** roles
+- Agreement to Responsible AI terms for Azure AI Services
 
-    To deploy this template, the user or service principal requires the following permissions on the target Resource Group:
-
-    * An Azure subscription
-    * An Azure user with **Contributor** and **User Access Admin** permissions on the target resource group
-
-    In addition, the machine or environment used for deployment should have:
-
-    * **Azure Developer CLI**: [Install azd](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd)
-    * **PowerShell 7+** (Windows only): [Install PowerShell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4#installing-the-msi-package)
-    * **Git**: [Download Git](https://git-scm.com/downloads)
-    * **Python 3.12**: [Download Python](https://www.python.org/downloads/release/python-3120/)
-    * **Azure AI Services** resource created or agreement to Responsible AI terms in the portal
+**Required Tools:**
+- [Azure Developer CLI](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd)
+- [PowerShell 7+](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4#installing-the-msi-package) (Windows only)
+- [Git](https://git-scm.com/downloads)
+- [Python 3.12](https://www.python.org/downloads/release/python-3120/)
 
 ## Quick Start - Basic Deployment
 
