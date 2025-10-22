@@ -2,7 +2,6 @@
 
 Choose your preferred deployment method based on project requirements and environment constraints.
 
-> [!TIP]
 > You can change parameter values in `main.parameters.json` or set them with `azd env set` before running `azd provision`. This applies only to parameters that support environment variable substitution.
 
 ## Quick Start - Basic Deployment
@@ -16,7 +15,7 @@ azd provision
 
 Demo video:
 
-<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; margin: 0 auto 20px auto; border-radius: 8px; max-width: 600px;">
+<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; margin: 0 auto 20px auto; border-radius: 8px;">
   <iframe src="https://www.youtube.com/embed/nZMDtaDQuP4?rel=0&modestbranding=1" 
           style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; border-radius: 8px;" 
           title="GPT-RAG Tutorial" 
@@ -27,7 +26,7 @@ Demo video:
   </iframe>
 </div>
 
-## Enterprise Deployment - Zero Trust
+## Zero Trust Deployment
 
 For deployments that **require network isolation**.
 
@@ -47,7 +46,6 @@ azd provision
 
 ### Post-Provision Configuration
 
-> [!NOTE]
 > The Bicep template provisions a **Jumpbox VM** by default. You can connect to it to perform the post-provision steps, deploy services, and run tests.
 
 **Option A – Using the deployed Jumpbox VM**

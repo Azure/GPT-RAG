@@ -10,7 +10,6 @@ Below, you'll find details on how our code update process works and instructions
 
 To maintain project quality, the following items will be considered during the PR review.
 
-> [!IMPORTANT]
 > Adhering to these best practices will streamline the review process.
 
 - **Target the `develop` Branch:** Always direct your pull request to the `develop` branch to ensure that changes are properly integrated into the project's development workflow.

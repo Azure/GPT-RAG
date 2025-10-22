@@ -23,7 +23,7 @@ Introduces a mechanism for end-users to provide thumbs-up or thumbs-down feedbac
 * How to configure it: [User Feedback Configuration](userfeedback.md)
 * Demo video:
 
-<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; margin: 0 auto 20px auto; border-radius: 8px; max-width: 600px;">
+<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; margin: 0 auto 20px auto; border-radius: 8px;">
   <iframe src="https://www.youtube.com/embed/t2EkzJ9P8HA?rel=0&modestbranding=1" 
           style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; border-radius: 8px;" 
           title="User Feedback" 
