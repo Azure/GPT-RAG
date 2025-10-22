@@ -19,7 +19,8 @@ nav:
   - Home: index.md
   - What's New: whatisnew.md
   - Deployment Guide: deploy.md
-  - Architecture: architecture.md
+  - Architecture:
+    - Overview: architecture.md
     - Orchestrator: ochestrator.md
   - Configuration:
     - User Feedback: userfeedback.md
