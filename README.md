@@ -21,8 +21,7 @@ GPT-RAG provides architecture templates and deployment assets to build and integ
 
 ### Contributing
 
-We appreciate contributions! See the [contribution guidelines](./CONTRIBUTING.md) for details on the CLA, code of conduct, and pull requests.
-
+We welcome contributions! See the [contribution guidelines](./CONTRIBUTING.md) for details on how to contribute.
 
 ### Trademarks
 
