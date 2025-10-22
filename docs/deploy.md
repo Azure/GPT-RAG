@@ -2,20 +2,10 @@
 
 Choose your preferred deployment method based on project requirements and environment constraints.
 
-## 📋 Table of Contents
-
-- [1. Basic Architecture (No Network Isolation)](#1-basic-architecture-no-network-isolation-️)
-- [2. Zero-Trust Architecture (ZTA)](#2-zero-trust-architecture-zta-)
-  - [Before Provisioning](#1-before-provisioning)
-  - [Provision the Infrastructure](#2-provision-the-infrastructure)
-  - [Post-Provision Steps](#3-post-provision-steps-vnet-access-required)
-
----
-
 > [!TIP]
 > You can change parameter values in `main.parameters.json` or set them with `azd env set` before running `azd provision`. This applies only to parameters that support environment variable substitution.
 
-### 1. Basic Architecture (No Network Isolation) ⚙️
+## Quick Start - Basic Deployment
 
 Quick setup for demos without network isolation.
 
@@ -26,7 +16,7 @@ azd provision
 
 Demo video:
 
-<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; margin-bottom: 20px; background: #f5f5f5; border-radius: 8px;">
+<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; margin: 0 auto 20px auto; border-radius: 8px; max-width: 600px;">
   <iframe src="https://www.youtube.com/embed/nZMDtaDQuP4?rel=0&modestbranding=1" 
           style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; border-radius: 8px;" 
           title="GPT-RAG Tutorial" 
@@ -37,11 +27,11 @@ Demo video:
   </iframe>
 </div>
 
-### 2. Zero-Trust Architecture (ZTA) 🔒
+## Enterprise Deployment - Zero Trust
 
 For deployments that **require network isolation**.
 
-#### 1) Before Provisioning
+### Before Provisioning
 
 Enable network isolation in your environment:
 
@@ -49,13 +39,13 @@ Enable network isolation in your environment:
 azd env set NETWORK_ISOLATION true
 ```
 
-#### 2) Provision the Infrastructure
+### Provision Infrastructure
 
 ```shell
 azd provision
 ```
 
-#### 3) Post-Provision Steps *(VNet access required)*
+### Post-Provision Configuration
 
 > [!NOTE]
 > The Bicep template provisions a **Jumpbox VM** by default. You can connect to it to perform the post-provision steps, deploy services, and run tests.

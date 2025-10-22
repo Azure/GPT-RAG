@@ -20,6 +20,6 @@ Built from the ground up with Zero-Trust security principles and Infrastructure 
 | **[MCP Server](https://github.com/Azure/gpt-rag-mcp)**            | Implements the Model Context Protocol for tool hosting and business logic integration.  |
 
 
-## 🤝 Contributing
+## Contributing
 
-We welcome contributions from the community! Check our [Contribution Guidelines](https://github.com/Azure/GPT-RAG/blob/main/CONTRIBUTING.md) for CLA, code of conduct, and PR guidelines.
+We welcome contributions from the community! Check our [Contribution Guidelines](contributing.md) for CLA, code of conduct, and PR guidelines.

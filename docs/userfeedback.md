@@ -1,20 +1,20 @@
-# Configuring User Feedback Loop
+# User Feedback Configuration
 
-GPT-RAG includes a **User Feedback Loop** feature that lets users evaluate the assistant’s responses through the UI. Feedback—whether a simple thumbs up/down or a detailed rating with comments—is sent to the application backend, forwarded to the orchestrator for processing, and then stored in **Cosmos DB**. This data can be queried and analyzed to improve answer quality, track performance, and support continuous learning.
+GPT-RAG includes a **User Feedback Loop** feature that lets users evaluate assistant responses through the UI. Feedback is sent to the backend, processed by the orchestrator, and stored in **Cosmos DB** for analysis and continuous improvement.
 
 ![Feedback stored in Cosmos DB](media/feedback_stored_in_cosmos_db.png)
 *User feedback stored in Cosmos DB*
 
-By default, **basic feedback** (thumbs up/down) is enabled, while **feedback with ratings** (star rating and text comments) is disabled. Administrators can enable or disable these options through configuration in the **Azure App Configuration** store.
+By default, **basic feedback** (thumbs up/down) is enabled, while **detailed ratings** (star rating and comments) are disabled. Administrators control these options through **Azure App Configuration**.
 
-#### User Feedback with Rating
+## Feedback Types
 
-When enabled, users can provide a **star rating** and a free-text comment. This richer evaluation captures not only whether the response was useful but also **why** the user rated it that way.
+When enabled, users can provide **star ratings** and text comments for richer feedback that captures both satisfaction and reasoning.
 
 ![User feedback with rating](media/user_feedback_with_rating.png)
 *User providing rating and comment feedback*
 
-#### Configuration in App Configuration
+## Configuration Settings
 
 The behavior of the feedback loop is controlled by key-values in **Azure App Configuration**:
 
@@ -30,7 +30,7 @@ The behavior of the feedback loop is controlled by key-values in **Azure App Con
 ![Enable user feedback rating](media/enable_user_feedback_rating.png)
 <BR>*Key to enable or disable detailed rating feedback*
 
-#### Default Settings
+## Default Values
 
 * `ENABLE_USER_FEEDBACK = true`
 * `USER_FEEDBACK_RATING = false`
