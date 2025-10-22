@@ -7,14 +7,14 @@ Choose your preferred deployment method based on project requirements and enviro
 ## Prerequisites
 
 **Required Permissions:**
-- Azure subscription with **Contributor** and **User Access Admin** roles
-- Agreement to Responsible AI terms for Azure AI Services
+   - Azure subscription with **Contributor** and **User Access Admin** roles
+   - Agreement to Responsible AI terms for Azure AI Services
 
 **Required Tools:**
-- [Azure Developer CLI](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd)
-- [PowerShell 7+](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4#installing-the-msi-package) (Windows only)
-- [Git](https://git-scm.com/downloads)
-- [Python 3.12](https://www.python.org/downloads/release/python-3120/)
+   - [Azure Developer CLI](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd)
+   - [PowerShell 7+](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4#installing-the-msi-package) (Windows only)
+   - [Git](https://git-scm.com/downloads)
+   - [Python 3.12](https://www.python.org/downloads/release/python-3120/)
 
 ## Quick Start - Basic Deployment
 
