@@ -289,6 +289,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#quick-start-basic-deployment" class="md-nav__link">
     <span class="md-ellipsis">
       Quick Start - Basic Deployment
@@ -514,6 +523,25 @@
 <blockquote>
 <p>You can change parameter values in <code>main.parameters.json</code> or set them with <code>azd env set</code> before running <code>azd provision</code>. This applies only to parameters that support environment variable substitution.</p>
 </blockquote>
+<h2 id="prerequisites">Prerequisites</h2>
+<details markdown="block">
+<summary>Expand to view prerequisites</summary>
+
+To deploy this template, the user or service principal requires the following permissions on the target Resource Group:
+
+* An Azure subscription.
+* An Azure user with **Contributor** and **User Access Admin** permissions on the target resource group.
+
+In addition, the machine or environment used for deployment should have:
+
+- Azure Developer CLI: [Install azd](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd)
+- PowerShell 7+ (Windows only): [Install PowerShell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4#installing-the-msi-package)
+- Git: [Download Git](https://git-scm.com/downloads)
+- Python 3.12: [Download Python](https://www.python.org/downloads/release/python-3120/)
+- An Azure AI Services resource created or agreement to Responsible AI terms in the portal
+
+</details>
+
 <h2 id="quick-start-basic-deployment">Quick Start - Basic Deployment</h2>
 <p>Quick setup for demos without network isolation.</p>
 <pre><code class="language-shell">azd init -t azure/gpt-rag
