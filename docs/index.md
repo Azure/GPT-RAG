@@ -2,13 +2,15 @@
 
 # GPT-RAG Solution Accelerator
 
-GPT-RAG is an enterprise-grade accelerator for building Retrieval-Augmented Generation (RAG) solutions on Azure. It provides a secure, modular, and scalable foundation to develop GenAI conversational assistants and data-driven applications using Azure OpenAI, AI Search, and AI Foundry. Designed with Zero-Trust principles and Infrastructure as Code (IaC), GPT-RAG enables faster time-to-value by combining enterprise security, flexible orchestration, and multimodal support for text, image, and voice experiences.
+## Overview
 
-## 🏗️ Architecture
+GPT-RAG is a powerful, enterprise-ready accelerator that transforms how organizations build Retrieval-Augmented Generation (RAG) solutions on Azure. By leveraging Azure OpenAI, AI Search, and AI Foundry, it delivers a secure, modular foundation for creating intelligent conversational assistants and data-driven applications.
 
 ![Zero Trust Architecture](media/architecture-zero-trust.png)
 
-### Core Components
+Built from the ground up with Zero-Trust security principles and Infrastructure as Code (IaC), GPT-RAG accelerates your journey to production-ready AI solutions. Whether you're working with text, images, or voice, this comprehensive platform combines enterprise-grade security, intelligent orchestration, and multimodal capabilities to deliver exceptional user experiences faster than ever.
+
+## Core Components
 
 | Component                                                         | Description                                                                             |
 | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
@@ -17,16 +19,7 @@ GPT-RAG is an enterprise-grade accelerator for building Retrieval-Augmented Gene
 | **[Data Ingestion](https://github.com/Azure/gpt-rag-ingestion)**  | Extracts, chunks, and indexes enterprise data for optimized retrieval.                  |
 | **[MCP Server](https://github.com/Azure/gpt-rag-mcp)**            | Implements the Model Context Protocol for tool hosting and business logic integration.  |
 
-## 🔐 Security and Compliance
-
-GPT-RAG follows Microsoft’s **Zero-Trust** principles:
-
-* Network isolation via **Private Endpoints** and **VNet Integration**
-* Secrets stored in **Azure Key Vault**
-* Role-based access with **Managed Identities**
-* Full auditability via **Azure Monitor** and **Application Insights**
 
 ## 🤝 Contributing
 
-We welcome community contributions!
-Please review our [Contribution Page](https://github.com/Azure/GPT-RAG/blob/main/CONTRIBUTING.md) for the Contributor License Agreement (CLA), code of conduct, and PR guidelines.
+We welcome contributions from the community! Check our [Contribution Guidelines](https://github.com/Azure/GPT-RAG/blob/main/CONTRIBUTING.md) for CLA, code of conduct, and PR guidelines.

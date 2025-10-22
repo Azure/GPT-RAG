@@ -1,4 +1,6 @@
-### October 2025 — Release 2.2.0
+### October 2025
+
+**Release 2.2.0**
 
 **Agentic Retrieval and Network Flexibility**
 
@@ -14,7 +16,9 @@ This release introduces major enhancements to support more flexible and enterpri
 
 ---
 
-### September 2025 — Release 2.1.0
+### September 2025
+
+**Release 2.1.0**
 
 **User Feedback Loop**
 
