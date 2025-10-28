@@ -20,7 +20,7 @@
         { "name": "length",                         "type": "Edm.Int32",                "searchable": false, "retrievable": true },
         { "name": "title",                          "type": "Edm.String",               "searchable": true,  "retrievable": true,  "filterable": true, "analyzer": "{{SEARCH_ANALYZER_NAME}}" },
         { "name": "category",                       "type": "Edm.String",               "searchable": true,  "retrievable": true,  "filterable": true, "analyzer": "{{SEARCH_ANALYZER_NAME}}" },
-        { "name": "filepath",                       "type": "Edm.String",               "searchable": false, "retrievable": true },
+        { "name": "filepath",                       "type": "Edm.String",               "searchable":true,   "retrievable": true,  "filterable": true, "analyzer":"standard"},
         { "name": "url",                            "type": "Edm.String",               "searchable": false, "retrievable": true },
         { "name": "summary",                        "type": "Edm.String",               "searchable": true,  "retrievable": true },
         { "name": "relatedImages",                  "type": "Collection(Edm.String)",   "searchable": false, "retrievable": true },

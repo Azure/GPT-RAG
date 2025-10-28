@@ -24,6 +24,7 @@ import os
 import sys
 import json
 import logging
+import time
 
 from azure.identity import (
     ManagedIdentityCredential,
@@ -51,20 +52,26 @@ def get_credentials():
     return ChainedTokenCredential(ManagedIdentityCredential(), AzureCliCredential())
 
 
-def get_config_value(appconfig, key, required=True):
-    """Fetch a single setting from App Configuration; exit if missing."""
-    try:
-        setting = appconfig.get_configuration_setting(key=key, label="gpt-rag")
-        value = setting.value
-    except Exception as e:
-        logging.error(f"Failed to fetch '{key}': {e}")
-        if required:
-            sys.exit(1)
-        return None
-    if required and not value:
-        logging.error(f"Key '{key}' not found or empty in App Configuration")
-        sys.exit(1)
-    return value
+def get_config_value(appconfig, key, required=True, max_retries=3):
+    for attempt in range(max_retries):
+        try:
+            setting = appconfig.get_configuration_setting(key=key, label="gpt-rag")
+            return setting.value
+        except Exception as e:
+            if attempt == max_retries - 1:
+                logging.error(f"Failed to fetch '{key}' after {max_retries} attempts: {e}")
+                if required:
+                    sys.exit(1)
+                return None
+            else:
+                logging.warning(f"Attempt {attempt + 1} failed for '{key}', retrying...")
+                time.sleep(2)
+                # Recreate credential on retry
+                credential = ChainedTokenCredential(
+                    ManagedIdentityCredential(),
+                    AzureCliCredential()
+                )
+                appconfig._credential = credential
 
 
 def update_container_app_registry(client, resource_group, name, acr_server, use_uai, app):
