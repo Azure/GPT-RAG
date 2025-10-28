@@ -93,18 +93,34 @@ module foundryAccount 'br/public:avm/res/cognitive-services/account:0.13.1' = {
           useMicrosoftManagedNetwork: false
         }
       : null
-    privateEndpoints: privateNetworkingEnabled
-      ? [
-          {
-            privateDnsZoneGroup: {
-              privateDnsZoneGroupConfigs: privateDnsZoneResourceIdValues
-            }
-            subnetResourceId: privateEndpointSubnetResourceId!
-          }
-        ]
-      : []
+    privateEndpoints: []
     enableTelemetry: enableTelemetry
     roleAssignments: roleAssignments
+  }
+}
+
+
+// Private Endpoint separado com dependência explícita
+module privateEndpoint 'br/public:avm/res/network/private-endpoint:0.9.1' = if (privateNetworkingEnabled) {
+  name: take('pep.${name}.account', 64)
+  dependsOn: [foundryAccount!]
+  params: {
+    name: 'pep-${name}-account-0'
+    location: location
+    tags: tags
+    subnetResourceId: privateEndpointSubnetResourceId!
+    privateLinkServiceConnections: [
+      {
+        name: 'pep-${name}-account-0'
+        properties: {
+          privateLinkServiceId: foundryAccount.outputs.resourceId
+          groupIds: ['account']
+        }
+      }
+    ]
+    privateDnsZoneGroup: {
+      privateDnsZoneGroupConfigs: privateDnsZoneResourceIdValues
+    }
   }
 }
 

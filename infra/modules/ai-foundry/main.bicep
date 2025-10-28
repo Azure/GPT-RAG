@@ -106,6 +106,8 @@ module foundryAccount 'modules/account.bicep' = {
   }
 }
 
+
+
 module keyVault 'modules/keyVault.bicep' = if (includeAssociatedResources) {
   name: take('module.keyVault.${resourcesName}', 64)
   params: {
