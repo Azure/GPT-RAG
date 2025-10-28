@@ -7,6 +7,11 @@ This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres 
 ### Changed
 - Deploying AI Foundry using a customized Azure Verified Module (no waiting deployment script)
 
+## [v2.2.1] – 2025-10-21
+### Added
+- Added more troubleshooting logs.
+### Fixed
+- Citations [387](https://github.com/Azure/GPT-RAG/issues/387)
 
 ## [v2.2.0] – 2025-10-16
 ### Added
