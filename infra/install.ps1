@@ -172,7 +172,8 @@ az login --identity
 azd auth login --managed-identity
 
 write-host "Initializing AZD";
-azd init -e $AzdEnvName --subscription $azureSubscriptionID --location $azureLocation 
+cd C:\github\gpt-rag\
+azd init -e $AzdEnvName --subscription $azureSubscriptionID --location $azureLocation
 azd env set AZURE_TENANT_ID $azureTenantID
 azd env set AZURE_RESOURCE_GROUP $AzureResourceGroupName
 azd env set AZURE_SUBSCRIPTION_ID $azureSubscriptionID
@@ -198,7 +199,7 @@ foreach( $repo in $manifest.components) {
     write-host "Updating existing repository: $repoName $branch";
     cd "C:\github\$repoName"
     git fetch --all
-    git checkout -b $branch
+    git switch $branch
   } else {
     write-host "Cloning repository: $repoName from branch: $branch";
     cd c:\github
