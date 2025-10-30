@@ -75,6 +75,8 @@ Start-Transcript -Path C:\WindowsAzure\Logs\CMFAI_CustomScriptExtension.txt -App
 
 Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 
+$env:Path += ";C:\ProgramData\chocolatey\bin"
+
 # Variable specifying the drive you want to extend  
 $drive_letter = "C"  
 # Script to get the partition sizes and then resize the volume  
@@ -151,7 +153,7 @@ $install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code
 
 $install_content += "Unregister-ScheduledTask -TaskName 'MyOneTimeSelfDeletingTask' -Confirm `$false`n"
 
-Set-Content "c:\temp\LoginInstall.ps1" $install_content
+mkdir C:\temp -ea SilentlyContinue
 
 #create a one time self-deleting task to run after login - this will install docker desktop and WSL
 $Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -File C:\temp\LoginInstall.ps1"
