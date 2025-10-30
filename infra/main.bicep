@@ -632,9 +632,9 @@ module testVm 'br/public:avm/res/compute/virtual-machine:0.15.0' = if (deployVM 
       userAssignedResourceIds: _useUAI ? [testVmUAI.outputs.resourceId] : []
     }
     imageReference: {
-      publisher: 'microsoft-dsvm'
-      offer: 'dsvm-win-2022'
-      sku: 'winserver-2022'
+      publisher: 'MicrosoftWindowsDesktop'
+      offer:     'windows-11'
+      sku:       'win11-23h2-pro' 
       version: 'latest'
     }
     encryptionAtHost: false  // Enable encryption at host for security - requires a feature enablement
@@ -907,6 +907,27 @@ module assignSearchSearchIndexDataContributorTestVm 'modules/security/resource-r
         )
         #disable-next-line BCP318
         resourceId: searchService.outputs.resourceId
+        principalType: 'ServicePrincipal'
+      }
+    ]
+  }
+}
+
+// Cognitive Services Contributor -> TestVm (for RAI Blocklists)
+module assignCognitiveServicesContributorTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deployAiFoundry && _networkIsolation) {
+  name: 'assignCognitiveServicesContributorTestVm'
+  params: {
+    name: 'assignCognitiveServicesContributorTestVm'
+    roleAssignments: [
+      {
+        roleDefinitionId: subscriptionResourceId(
+          'Microsoft.Authorization/roleDefinitions',
+          const.roles.CognitiveServicesContributor.guid
+        )
+        #disable-next-line BCP318
+        principalId: (_useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId!
+        #disable-next-line BCP318
+        resourceId: aiFoundryAccountResourceId
         principalType: 'ServicePrincipal'
       }
     ]

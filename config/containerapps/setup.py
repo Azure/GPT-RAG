@@ -35,6 +35,34 @@ from azure.appconfiguration import AzureAppConfigurationClient
 from azure.mgmt.appcontainers import ContainerAppsAPIClient
 
 
+POLL_TIMEOUT_SECONDS = int(os.getenv("CONTAINER_APP_POLL_TIMEOUT_SECONDS", "600"))
+
+
+def _get_desired_identity(app, app_name, use_uai):
+    """Return the identity string/resource id we expect to use for registry auth."""
+    if use_uai.lower() == "true":
+        uai_dict = getattr(app.identity, "user_assigned_identities", None)
+        if not uai_dict:
+            logging.error(f"No user-assigned identity found for app '{app_name}'.")
+            return None
+        return next(iter(uai_dict.keys()), None)
+    return "system"
+
+
+def _registry_matches(app, server, desired_identity):
+    registries = getattr(app.configuration, "registries", None) or []
+    for reg in registries:
+        reg_server = reg.get("server") if isinstance(reg, dict) else getattr(reg, "server", None)
+        if reg_server != server:
+            continue
+        reg_identity = reg.get("identity") if isinstance(reg, dict) else getattr(reg, "identity", None)
+        if desired_identity == "system" and reg_identity in (None, "system"):
+            return True
+        if desired_identity and reg_identity == desired_identity:
+            return True
+    return False
+
+
 def configure_logging():
     """Configure logging for Azure SDKs and the script."""
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)-8s %(message)s")
@@ -76,24 +104,30 @@ def get_config_value(appconfig, key, required=True, max_retries=3):
 
 def update_container_app_registry(client, resource_group, name, acr_server, use_uai, app):
     """Update the registry configuration for a single container app."""
-    if use_uai.lower() == "true":
-        uai_dict = getattr(app.identity, "user_assigned_identities", None)
-        if not uai_dict:
-            logging.error(f"No user-assigned identity found for app '{name}'.")
-            return False
-        uai_resource_id = next(iter(uai_dict.keys()), None)
-        if not uai_resource_id:
-            logging.error(f"Could not extract resource_id from user-assigned identities for app '{name}'.")
-            return False
-        app.configuration.registries = [
-            {"server": acr_server, "identity": uai_resource_id}
-        ]
-    else:
-        app.configuration.registries = [
-            {"server": acr_server, "identity": "system"}
-        ]
+    desired_identity = _get_desired_identity(app, name, use_uai)
+    if not desired_identity:
+        return False
+
+    if _registry_matches(app, acr_server, desired_identity):
+        logging.info(f"Registry already configured for app '{name}', skipping update.")
+        return True
+
+    app.configuration.registries = [
+        {"server": acr_server, "identity": desired_identity}
+    ]
     poller = client.container_apps.begin_create_or_update(resource_group, name, app)
-    poller.result()  # wait for completion
+    try:
+        poller.result(timeout=POLL_TIMEOUT_SECONDS)
+    except Exception as exc:  # noqa: BLE001 - surface timeout text but continue
+        message = str(exc).lower()
+        if "timeout" in message or "did not complete" in message:
+            logging.info(
+                "Container App '%s' did not finish provisioning within %s seconds; moving to the next app.",
+                name,
+                POLL_TIMEOUT_SECONDS,
+            )
+            return False
+        raise
     return True
 
 
