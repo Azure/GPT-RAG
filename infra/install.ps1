@@ -15,9 +15,8 @@ It will:
       – Notepad++
   • Extend the C: drive to its maximum supported size
   • Enable and update WSL and schedule a one-time login task to:
-      – Install Docker Desktop
       – Install GitHub Desktop
-      – Start Docker
+      – Install VS Code extensions
   • Add key VS Code extensions: Bicep, Azure Functions, Python, Containers & PowerShell
   • Clone the GPT-RAG repositories (specific tags for gpt-rag, orchestrator, ingestion, UI, MCP)
   • Configure Git safe directories
@@ -127,24 +126,17 @@ else
 }
 #>
 
-write-host "Enabling WSL";
-Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux, VirtualMachinePlatform -NoRestart
-
-write-host "Updating WSL #1";
-#https://learn.microsoft.com/en-us/windows/wsl/install-on-server
-Invoke-WebRequest -Uri "https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi" -OutFile ".\wsl_update_x64.msi"
-Start-Process "msiexec.exe" -ArgumentList "/i .\wsl_update_x64.msi /quiet" -NoNewWindow -Wait
-
 write-host "Updating WSL #2";
 wsl.exe --update
 
-$install_content = "wsl.exe --update`n"
-$install_content += "choco install docker-desktop -y --ignoredetectedreboot --force`n"
-$install_content += "choco install github-desktop -y --ignoredetectedreboot --force`n"
-$install_content += "stop-process -name `"dockerd`" -force`n"
-$install_content += "start-process `"C:\Program Files\docker\Docker\Docker Desktop.exe`"`n"
+# Garante que a pasta C:\temp existe antes de criar o LoginInstall.ps1
+mkdir C:\temp -ea SilentlyContinue
 
-#install extenstions
+# --- Removed Docker Desktop installation/start. Only WSL update + GitHub Desktop + VS Code extensions ---
+$install_content = "wsl.exe --update`n"
+$install_content += "choco install github-desktop -y --ignoredetectedreboot --force`n"
+
+# install extensions
 $install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-azuretools.vscode-bicep`",`"--force`" -wait`n"
 $install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-azuretools.vscode-azurefunctions`",`"--force`" -wait`n"
 $install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-python.python`",`"--force`" -wait`n"
@@ -153,9 +145,17 @@ $install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code
 
 $install_content += "Unregister-ScheduledTask -TaskName 'MyOneTimeSelfDeletingTask' -Confirm `$false`n"
 
+Set-Content "C:\temp\LoginInstall.ps1" $install_content
+
+#create a one time self-deleting task to run after login - this will run WSL update, install GitHub Desktop and VS Code extensions
+$Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -File C:\temp\LoginInstall.ps1"
+$Trigger = New-ScheduledTaskTrigger -AtLogOn
+#$Settings = New-ScheduledTaskSettingsSet -DeleteExpiredTaskAfter 00:00:30
+Register-ScheduledTask -TaskName "MyOneTimeSelfDeletingTask" -Action $Action -Trigger $Trigger -User "testvmuser" #-Settings $Settings
+
 mkdir C:\temp -ea SilentlyContinue
 
-#create a one time self-deleting task to run after login - this will install docker desktop and WSL
+#create a one time self-deleting task to run after login - this will run WSL update, install GitHub Desktop and VS Code extensions
 $Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -File C:\temp\LoginInstall.ps1"
 $Trigger = New-ScheduledTaskTrigger -AtLogOn
 #$Settings = New-ScheduledTaskSettingsSet -DeleteExpiredTaskAfter 00:00:30

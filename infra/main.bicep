@@ -556,25 +556,6 @@ module virtualNetwork 'br/public:avm/res/network/virtual-network:0.7.0' = if (_n
   }
 }
 
-//  Key Vault to store that password securely
-module testVmKeyVault 'br/public:avm/res/key-vault/vault:0.13.3' = if (deployVM && _networkIsolation && deployVmKeyVault) {
-  name: 'vmKeyVault'
-  params: {
-    name: '${const.abbrs.security.keyVault}testvm-${resourceToken}'
-    location: location
-    publicNetworkAccess: 'Enabled' //can't get to bastion without this public.
-    sku: 'standard'
-    enableRbacAuthorization: true
-    tags: _tags
-    secrets: (deployVmKeyVault) ? [
-      {
-        name: _vmKeyVaultSecName
-        value: vmAdminPassword
-      }
-    ] : []
-  }
-}
-
 // Bastion Host
 module testVmBastionHost 'br/public:avm/res/network/bastion-host:0.8.0' = if (deployVM && networkIsolation) {
   name: 'bastionHost'
@@ -632,12 +613,12 @@ module testVm 'br/public:avm/res/compute/virtual-machine:0.15.0' = if (deployVM 
       userAssignedResourceIds: _useUAI ? [testVmUAI.outputs.resourceId] : []
     }
     imageReference: {
-      publisher: 'MicrosoftWindowsDesktop'
-      offer:     'windows-11'
-      sku:       'win11-23h2-pro' 
+      publisher: 'microsoft-dsvm'
+      offer: 'dsvm-win-2022'
+      sku: 'winserver-2022'
       version: 'latest'
     }
-    encryptionAtHost: false  // Enable encryption at host for security - requires a feature enablement
+    encryptionAtHost: false 
     vmSize: vmSize
     osDisk: {
       caching: 'ReadWrite'
@@ -663,7 +644,6 @@ module testVm 'br/public:avm/res/compute/virtual-machine:0.15.0' = if (deployVM 
     ]
   }
   dependsOn: [
-    testVmKeyVault
     testVmBastionHost
     #disable-next-line BCP321
     !useExistingVNet ? virtualNetwork : null
@@ -2220,26 +2200,6 @@ module assignKeyVaultSecretsUserAca 'modules/security/resource-role-assignment.b
     }
   }
 ]
-
-// Bastion Key Vault Service - Key Vault Secrets Officer  -> Executor
-module assignKeyVaultSecretsOffExecutor 'modules/security/resource-role-assignment.bicep' = if (deployVM && _networkIsolation && deployVmKeyVault) {
-  name: 'assignKeyVaultSecretsOffExecutor'
-  params: {
-    name: 'assignKeyVaultSecretsOffExecutor'
-    roleAssignments: [
-      {
-        principalId: principalId
-        roleDefinitionId: subscriptionResourceId(
-          'Microsoft.Authorization/roleDefinitions',
-          const.roles.KeyVaultSecretsOfficer.guid
-        )
-        #disable-next-line BCP318
-        resourceId: testVmKeyVault.outputs.resourceId
-        principalType: principalType
-      }
-    ]
-  }
-}
 
 // Search Service - Search Service Contributor -> Executor
 module assignSearchSearchServiceContributorExecutor 'modules/security/resource-role-assignment.bicep' = if (deploySearchService) {
