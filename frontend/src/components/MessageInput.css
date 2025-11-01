@@ -1,0 +1,90 @@
+.message-input-container {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.message-input {
+  flex: 1;
+  padding: 14px 16px;
+  border: 2px solid var(--azure-gray-300);
+  border-radius: 12px;
+  font-size: 15px;
+  font-family: inherit;
+  resize: none;
+  min-height: 48px;
+  max-height: 200px;
+  transition: all 0.2s ease;
+  line-height: 1.5;
+}
+
+.message-input:focus {
+  outline: none;
+  border-color: var(--azure-blue);
+  box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.1);
+}
+
+.message-input:disabled {
+  background-color: var(--azure-gray-100);
+  cursor: not-allowed;
+}
+
+.message-input::placeholder {
+  color: var(--azure-gray-500);
+}
+
+.send-button {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--azure-blue) 0%, var(--azure-purple) 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.send-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.send-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.send-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 768px) {
+  .message-input {
+    font-size: 14px;
+    padding: 12px 14px;
+  }
+
+  .send-button {
+    width: 44px;
+    height: 44px;
+  }
+}
+

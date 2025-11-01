@@ -1,0 +1,125 @@
+.chat-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  height: calc(100vh - 64px);
+}
+
+.messages-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.empty-state-icon {
+  margin-bottom: 24px;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.empty-state-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--azure-gray-900);
+  margin-bottom: 12px;
+  animation: fadeInUp 0.6s ease-out 0.1s backwards;
+}
+
+.empty-state-description {
+  font-size: 16px;
+  color: var(--azure-gray-600);
+  max-width: 600px;
+  line-height: 1.6;
+  margin-bottom: 32px;
+  animation: fadeInUp 0.6s ease-out 0.2s backwards;
+}
+
+.empty-state-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  max-width: 700px;
+  animation: fadeInUp 0.6s ease-out 0.3s backwards;
+}
+
+.suggestion-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background-color: white;
+  border: 1px solid var(--azure-gray-200);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  color: var(--azure-gray-700);
+}
+
+.suggestion-card:hover {
+  border-color: var(--azure-blue);
+  background-color: var(--azure-gray-50);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.suggestion-icon {
+  font-size: 20px;
+}
+
+.input-area {
+  border-top: 1px solid var(--azure-gray-200);
+  background-color: white;
+  padding: 20px 24px;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .messages-area {
+    padding: 16px;
+  }
+
+  .empty-state-title {
+    font-size: 24px;
+  }
+
+  .empty-state-description {
+    font-size: 14px;
+  }
+
+  .suggestion-card {
+    font-size: 13px;
+    padding: 10px 16px;
+  }
+
+  .input-area {
+    padding: 16px;
+  }
+}
+

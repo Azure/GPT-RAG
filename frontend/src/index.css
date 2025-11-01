@@ -1,0 +1,82 @@
+:root {
+  /* Microsoft Azure color palette */
+  --azure-blue: #0078d4;
+  --azure-dark-blue: #005a9e;
+  --azure-light-blue: #50e6ff;
+  --azure-purple: #5e5ce6;
+  --azure-gray-50: #fafafa;
+  --azure-gray-100: #f3f2f1;
+  --azure-gray-200: #e1dfdd;
+  --azure-gray-300: #d2d0ce;
+  --azure-gray-400: #c8c6c4;
+  --azure-gray-500: #a19f9d;
+  --azure-gray-600: #8a8886;
+  --azure-gray-700: #605e5c;
+  --azure-gray-800: #323130;
+  --azure-gray-900: #201f1e;
+  
+  --success-green: #107c10;
+  --error-red: #d13438;
+  --warning-orange: #f7630c;
+  
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--azure-gray-50);
+  color: var(--azure-gray-900);
+}
+
+code {
+  font-family: 'Courier New', Courier, monospace;
+  background-color: var(--azure-gray-100);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--azure-gray-100);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--azure-gray-400);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--azure-gray-500);
+}
+
+/* Selection styling */
+::selection {
+  background-color: var(--azure-light-blue);
+  color: var(--azure-gray-900);
+}
+

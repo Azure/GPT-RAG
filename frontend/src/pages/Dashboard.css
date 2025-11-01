@@ -1,0 +1,337 @@
+.dashboard {
+  min-height: 100vh;
+  background-color: var(--azure-gray-50);
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-header {
+  background: linear-gradient(135deg, var(--azure-blue) 0%, var(--azure-purple) 100%);
+  color: white;
+  padding: 0 32px;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 72px;
+}
+
+.dashboard-header-left .logo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.dashboard-header-left h1 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+}
+
+.dashboard-header-left p {
+  font-size: 13px;
+  margin: 0;
+  opacity: 0.9;
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background-color: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+  background-color: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
+}
+
+.dashboard-content {
+  flex: 1;
+  padding: 40px;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 80px 20px;
+  animation: fadeIn 0.6s ease-out;
+}
+
+.empty-icon {
+  margin-bottom: 32px;
+  animation: float 3s ease-in-out infinite;
+}
+
+.empty-state h2 {
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--azure-gray-900);
+  margin: 0 0 12px 0;
+}
+
+.empty-state p {
+  font-size: 16px;
+  color: var(--azure-gray-600);
+  max-width: 500px;
+  margin: 0 0 32px 0;
+  line-height: 1.6;
+}
+
+.cta-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 32px;
+  background: linear-gradient(135deg, var(--azure-blue) 0%, var(--azure-purple) 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cta-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0, 120, 212, 0.3);
+}
+
+.environment-view {
+  animation: fadeIn 0.6s ease-out;
+}
+
+.environment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  padding: 24px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.env-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.env-info h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--azure-gray-900);
+}
+
+.env-badge {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.env-badge.deployed {
+  background-color: rgba(16, 124, 16, 0.1);
+  color: var(--success-green);
+}
+
+.env-badge.deploying {
+  background-color: rgba(0, 120, 212, 0.1);
+  color: var(--azure-blue);
+}
+
+.env-badge.failed {
+  background-color: rgba(209, 52, 56, 0.1);
+  color: var(--error-red);
+}
+
+.btn-chat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, var(--azure-blue) 0%, var(--azure-purple) 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-chat:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 120, 212, 0.3);
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 24px;
+}
+
+.dashboard-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--azure-gray-200);
+}
+
+.dashboard-card h3 {
+  margin: 0 0 20px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--azure-gray-900);
+}
+
+.action-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.action-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px;
+  background: transparent;
+  border: 2px solid var(--azure-gray-200);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.action-item:hover {
+  border-color: var(--azure-blue);
+  background-color: rgba(0, 120, 212, 0.02);
+  transform: translateY(-2px);
+}
+
+.action-item svg {
+  flex-shrink: 0;
+  color: var(--azure-blue);
+}
+
+.action-item strong {
+  display: block;
+  font-size: 15px;
+  color: var(--azure-gray-900);
+  margin-bottom: 4px;
+}
+
+.action-item p {
+  font-size: 13px;
+  color: var(--azure-gray-600);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.detail-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--azure-gray-200);
+}
+
+.detail-item:last-child {
+  border-bottom: none;
+}
+
+.detail-item span {
+  font-size: 14px;
+  color: var(--azure-gray-600);
+}
+
+.detail-item strong {
+  font-size: 14px;
+  color: var(--azure-gray-900);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@media (max-width: 1024px) {
+  .dashboard-header {
+    padding: 0 20px;
+  }
+
+  .dashboard-content {
+    padding: 24px 20px;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-header {
+    height: auto;
+    padding: 16px 20px;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .dashboard-header-left h1 {
+    font-size: 18px;
+  }
+
+  .environment-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .empty-state h2 {
+    font-size: 24px;
+  }
+}
+

@@ -1,0 +1,156 @@
+.feedback-buttons {
+  display: inline-flex;
+  align-items: center;
+}
+
+.feedback-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.feedback-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background-color: transparent;
+  border: 1px solid var(--azure-gray-300);
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--azure-gray-600);
+  transition: all 0.2s ease;
+}
+
+.feedback-btn:hover {
+  background-color: var(--azure-gray-100);
+  border-color: var(--azure-gray-400);
+  color: var(--azure-gray-700);
+}
+
+.feedback-btn.thumbs-up:hover {
+  background-color: rgba(16, 124, 16, 0.1);
+  border-color: var(--success-green);
+  color: var(--success-green);
+}
+
+.feedback-btn.thumbs-down:hover {
+  background-color: rgba(209, 52, 56, 0.1);
+  border-color: var(--error-red);
+  color: var(--error-red);
+}
+
+.feedback-form {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  margin-bottom: 8px;
+  background-color: white;
+  border: 1px solid var(--azure-gray-300);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: var(--shadow-lg);
+  min-width: 300px;
+  z-index: 10;
+  animation: slideUp 0.2s ease-out;
+}
+
+.feedback-form-header h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--azure-gray-900);
+}
+
+.rating-stars {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.star-btn {
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: var(--azure-gray-300);
+  transition: all 0.2s ease;
+  padding: 0;
+  line-height: 1;
+}
+
+.star-btn:hover,
+.star-btn.active {
+  color: #f7630c;
+  transform: scale(1.1);
+}
+
+.feedback-comment {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--azure-gray-300);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  resize: vertical;
+  margin-bottom: 12px;
+}
+
+.feedback-comment:focus {
+  outline: none;
+  border-color: var(--azure-blue);
+}
+
+.feedback-form-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.feedback-cancel-btn,
+.feedback-submit-btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.feedback-cancel-btn {
+  background-color: transparent;
+  border: 1px solid var(--azure-gray-300);
+  color: var(--azure-gray-700);
+}
+
+.feedback-cancel-btn:hover {
+  background-color: var(--azure-gray-100);
+}
+
+.feedback-submit-btn {
+  background: linear-gradient(135deg, var(--azure-blue) 0%, var(--azure-purple) 100%);
+  border: none;
+  color: white;
+}
+
+.feedback-submit-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.feedback-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
