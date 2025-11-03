@@ -613,9 +613,9 @@ module testVm 'br/public:avm/res/compute/virtual-machine:0.15.0' = if (deployVM 
       userAssignedResourceIds: _useUAI ? [testVmUAI.outputs.resourceId] : []
     }
     imageReference: {
-      publisher: 'microsoft-dsvm'
-      offer: 'dsvm-win-2022'
-      sku: 'winserver-2022'
+      publisher: 'MicrosoftWindowsDesktop'
+      offer: 'windows-11'
+      sku: 'win11-22h2-pro'
       version: 'latest'
     }
     encryptionAtHost: false 
