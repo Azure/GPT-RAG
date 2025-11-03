@@ -65,20 +65,20 @@ if ($missing.Count -gt 0) {
 #-------------------------------------------------------------------------------
 # Setup Python environment
 #-------------------------------------------------------------------------------
-Write-Host "📦 Creating temporary venv..."
-python -m venv --without-pip config/.venv_temp
+# Write-Host "📦 Creating temporary venv..."
+# python -m venv --without-pip config/.venv_temp
 
-# Activate the venv
-& config/.venv_temp/Scripts/Activate.ps1
+# # Activate the venv
+# & config/.venv_temp/Scripts/Activate.ps1
 
-Write-Host "⬇️ Manually bootstrapping pip..."
-Invoke-WebRequest -Uri "https://bootstrap.pypa.io/get-pip.py" -UseBasicParsing |
-    Select-Object -ExpandProperty Content |
-    & python
+# Write-Host "⬇️ Manually bootstrapping pip..."
+# Invoke-WebRequest -Uri "https://bootstrap.pypa.io/get-pip.py" -UseBasicParsing |
+#     Select-Object -ExpandProperty Content |
+#     & python
 
-Write-Host "⬇️ Installing requirements..."
-& python -m pip install --upgrade pip
-& python -m pip install -r config/requirements.txt
+# Write-Host "⬇️ Installing requirements..."
+# & python -m pip install --upgrade pip
+# & python -m pip install -r config/requirements.txt
 
 #-------------------------------------------------------------------------------
 # 1) AI Foundry Setup
@@ -131,41 +131,41 @@ if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
 #-------------------------------------------------------------------------------
 # Cleaning up
 #-------------------------------------------------------------------------------
-Write-Host "`n🧹 Cleaning Python environment up..."
-if (Get-Command deactivate -ErrorAction SilentlyContinue) { deactivate }
-# Try to stop any python processes that reference the temporary venv to avoid file locks
-$venvPattern = "config\\.venv_temp"
-try {
-    $procs = Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -and ($_.CommandLine -match $venvPattern) }
-} catch {
-    # Fallback if Get-CimInstance isn't available for some reason
-    $procs = @()
-}
+# Write-Host "`n🧹 Cleaning Python environment up..."
+# if (Get-Command deactivate -ErrorAction SilentlyContinue) { deactivate }
+# # Try to stop any python processes that reference the temporary venv to avoid file locks
+# $venvPattern = "config\\.venv_temp"
+# try {
+#     $procs = Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -and ($_.CommandLine -match $venvPattern) }
+# } catch {
+#     # Fallback if Get-CimInstance isn't available for some reason
+#     $procs = @()
+# }
 
-if ($procs -and $procs.Count -gt 0) {
-    Write-Host "Stopping processes referencing venv:"
-    foreach ($p in $procs) {
-        Write-Host "  Stopping pid $($p.ProcessId) - $($p.Name)"
-        try { Stop-Process -Id $p.ProcessId -Force -ErrorAction SilentlyContinue } catch {}
-    }
-    Start-Sleep -Seconds 1
-}
+# if ($procs -and $procs.Count -gt 0) {
+#     Write-Host "Stopping processes referencing venv:"
+#     foreach ($p in $procs) {
+#         Write-Host "  Stopping pid $($p.ProcessId) - $($p.Name)"
+#         try { Stop-Process -Id $p.ProcessId -Force -ErrorAction SilentlyContinue } catch {}
+#     }
+#     Start-Sleep -Seconds 1
+# }
 
-# Retry removal with exponential backoff to handle transient locks
-$maxRetries = 5
-for ($i = 1; $i -le $maxRetries; $i++) {
-    try {
-        Remove-Item -Recurse -Force config/.venv_temp -ErrorAction Stop
-        Write-Host "Removed venv directory."
-        break
-    } catch {
-        if ($i -eq $maxRetries) {
-            Write-Host "⚠️ Failed to remove venv after $maxRetries attempts: $($_.Exception.Message)"
-        } else {
-            Write-Host ("Retry {0}/{1}: waiting and retrying..." -f $i, $maxRetries)
-            Start-Sleep -Seconds (2 * $i)
-        }
-    }
-}
+# # Retry removal with exponential backoff to handle transient locks
+# $maxRetries = 5
+# for ($i = 1; $i -le $maxRetries; $i++) {
+#     try {
+#         Remove-Item -Recurse -Force config/.venv_temp -ErrorAction Stop
+#         Write-Host "Removed venv directory."
+#         break
+#     } catch {
+#         if ($i -eq $maxRetries) {
+#             Write-Host "⚠️ Failed to remove venv after $maxRetries attempts: $($_.Exception.Message)"
+#         } else {
+#             Write-Host ("Retry {0}/{1}: waiting and retrying..." -f $i, $maxRetries)
+#             Start-Sleep -Seconds (2 * $i)
+#         }
+#     }
+# }
 
 Write-Host "`n✅ postProvisioning completed."

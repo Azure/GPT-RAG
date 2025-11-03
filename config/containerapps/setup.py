@@ -34,13 +34,10 @@ from azure.identity import (
 )
 from azure.appconfiguration import AzureAppConfigurationClient
 from azure.mgmt.appcontainers import ContainerAppsAPIClient
-from azure.mgmt.containerregistry import ContainerRegistryManagementClient
-from azure.mgmt.containerregistry.models import NetworkRuleBypassOptions
 
 
 POLL_TIMEOUT_SECONDS = int(os.getenv("CONTAINER_APP_POLL_TIMEOUT_SECONDS", "600"))
-MAX_WORKERS = int(os.getenv("CONTAINER_APP_MAX_WORKERS", "4"))  # Número de apps a processar em paralelo
-
+MAX_WORKERS = int(os.getenv("CONTAINER_APP_MAX_WORKERS", "2"))   
 
 def _get_desired_identity(app, app_name, use_uai):
     """Return the identity string/resource id we expect to use for registry auth."""
@@ -112,9 +109,24 @@ def configure_logging():
 
 
 def get_credentials():
-    """Return a chained credential for Azure authentication."""
-    logging.debug("Creating chained credential (ManagedIdentity → AzureCLI)")
-    return ChainedTokenCredential(ManagedIdentityCredential(), AzureCliCredential())
+    """Return a ChainedTokenCredential for Azure authentication (CLI → ManagedIdentity)."""
+    logging.info("🔐 Creating ChainedTokenCredential (CLI → ManagedIdentity)...")
+    
+    try:
+        # Create chained credential with CLI first, then Managed Identity
+        credential = ChainedTokenCredential(
+            AzureCliCredential(),
+            ManagedIdentityCredential()
+        )
+        
+        # Test the credential
+        token = credential.get_token("https://management.azure.com/.default")
+        logging.info("✅ ChainedTokenCredential validated successfully")
+        return credential
+        
+    except Exception as e:
+        logging.error(f"❌ ChainedTokenCredential failed: {e}")
+        sys.exit(1)
 
 
 def get_config_value(appconfig, key, required=True, max_retries=3):
@@ -141,68 +153,17 @@ def get_config_value(appconfig, key, required=True, max_retries=3):
             else:
                 logging.warning(f"Attempt {attempt + 1}/{max_retries} failed for '{key}': {e}. Retrying...")
                 time.sleep(2)
-                # Recreate credential on retry
-                credential = ChainedTokenCredential(
-                    ManagedIdentityCredential(),
-                    AzureCliCredential()
-                )
-                appconfig._credential = credential
 
 
-def enable_acr_trusted_services(subscription_id, resource_group, acr_name):
-    """Enable trusted services access for Azure Container Registry."""
-    logging.info(f"Enabling trusted services for ACR '{acr_name}'...")
-    
-    try:
-        cred = get_credentials()
-        acr_client = ContainerRegistryManagementClient(cred, subscription_id)
-        
-        # Get current registry
-        logging.debug(f"Fetching current ACR configuration for '{acr_name}'")
-        registry = acr_client.registries.get(resource_group, acr_name)
-        
-        # Check if already enabled
-        if registry.network_rule_set and registry.network_rule_set.default_action == "Deny":
-            if hasattr(registry.network_rule_set, 'bypass') and registry.network_rule_set.bypass == NetworkRuleBypassOptions.AZURE_SERVICES:
-                logging.info(f"✓ Trusted services already enabled for ACR '{acr_name}'")
-                return True
-        
-        # Update network rule set to allow trusted services
-        logging.info(f"Updating ACR '{acr_name}' to allow trusted services...")
-        
-        if not registry.network_rule_set:
-            from azure.mgmt.containerregistry.models import NetworkRuleSet
-            registry.network_rule_set = NetworkRuleSet(default_action="Allow")
-        
-        registry.network_rule_set.bypass = NetworkRuleBypassOptions.AZURE_SERVICES
-        
-        # Update the registry
-        poller = acr_client.registries.begin_update(
-            resource_group,
-            acr_name,
-            registry
-        )
-        poller.result(timeout=300)  # 5 minutes timeout
-        
-        logging.info(f"✅ Successfully enabled trusted services for ACR '{acr_name}'")
-        return True
-        
-    except Exception as e:
-        logging.error(f"Failed to enable trusted services for ACR '{acr_name}': {e}", exc_info=True)
-        return False
-
-
-def update_single_container_app(subscription_id, resource_group, name, acr_server, use_uai):
-    """Update a single container app registry configuration (to be run in parallel)."""
+def update_single_container_app(subscription_id, resource_group, name, acr_server, use_uai, shared_credential):
+    """Update a single container app registry configuration."""
     start_time = time.time()
     logging.info(f"[{name}] Starting Container App update process")
     logging.debug(f"[{name}] Parameters: subscription={subscription_id}, rg={resource_group}, acr={acr_server}")
     
     try:
-        # Create a new client for each thread to avoid shared state issues
-        logging.debug(f"[{name}] Creating credentials and API client")
-        cred = get_credentials()
-        client = ContainerAppsAPIClient(cred, subscription_id)
+        # Use the shared credential instead of creating a new one for each thread
+        client = ContainerAppsAPIClient(shared_credential, subscription_id)
         
         logging.info(f"[{name}] Associating ACR '{acr_server}'...")
         
@@ -279,9 +240,11 @@ def main():
     logging.info(f"Max Workers: {MAX_WORKERS}")
     logging.info(f"Poll Timeout: {POLL_TIMEOUT_SECONDS}s")
 
-    logging.debug("Creating App Configuration client")
-    cred = get_credentials()
-    appconfig = AzureAppConfigurationClient(endpoint, cred)
+    # Create and test credentials once
+    logging.debug("Creating and testing shared credential")
+    shared_credential = get_credentials()
+    
+    appconfig = AzureAppConfigurationClient(endpoint, shared_credential)
 
     # Read global settings
     logging.info("Fetching configuration from App Configuration...")
@@ -296,11 +259,6 @@ def main():
     logging.info(f"  Resource Group: {resource_group}")
     logging.info(f"  ACR Server: {acr_server}")
     logging.info(f"  Use UAI: {use_uai}")
-
-    # Enable trusted services for ACR BEFORE processing container apps
-    logging.info("")
-    enable_acr_trusted_services(subscription_id, resource_group, acr_name)
-    logging.info("")
 
     # Read and parse the list of container apps
     logging.debug("Fetching CONTAINER_APPS list")
@@ -320,36 +278,53 @@ def main():
         return
     
     logging.info(f"Found {len(app_names)} container apps to process: {', '.join(app_names)}")
-    logging.info(f"Processing with {MAX_WORKERS} parallel workers...")
-    logging.info("-"*60)
     
-    # Process apps in parallel
-    results = []
-    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        logging.debug("Submitting tasks to thread pool")
-        futures = {
-            executor.submit(
-                update_single_container_app,
-                subscription_id,
-                resource_group,
-                name,
-                acr_server,
-                use_uai
-            ): name
-            for name in app_names
-        }
+    if MAX_WORKERS == 2:
+        logging.info("Processing apps ...")
+        logging.info("-"*60)
         
-        completed_count = 0
-        for future in as_completed(futures):
-            completed_count += 1
-            name = futures[future]
+        # Process sequentially
+        results = []
+        for i, name in enumerate(app_names, 1):
+            logging.info(f"Processing {i}/{len(app_names)}: {name}")
             try:
-                app_name, success, message = future.result()
-                results.append((app_name, success, message))
-                logging.info(f"Progress: {completed_count}/{len(app_names)} apps processed")
+                result = update_single_container_app(subscription_id, resource_group, name, acr_server, use_uai, shared_credential)
+                results.append(result)
             except Exception as e:
-                logging.error(f"Unexpected error processing '{name}': {e}", exc_info=True)
+                logging.error(f"Failed to process {name}: {e}")
                 results.append((name, False, str(e)))
+    else:
+        logging.info(f"Processing with {MAX_WORKERS} parallel workers...")
+        logging.info("-"*60)
+        
+        # Process in parallel with shared credential
+        results = []
+        with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+            logging.debug("Submitting tasks to thread pool")
+            futures = {
+                executor.submit(
+                    update_single_container_app,
+                    subscription_id,
+                    resource_group,
+                    name,
+                    acr_server,
+                    use_uai,
+                    shared_credential
+                ): name
+                for name in app_names
+            }
+            
+            completed_count = 0
+            for future in as_completed(futures):
+                completed_count += 1
+                name = futures[future]
+                try:
+                    app_name, success, message = future.result()
+                    results.append((app_name, success, message))
+                    logging.info(f"Progress: {completed_count}/{len(app_names)} apps processed")
+                except Exception as e:
+                    logging.error(f"Unexpected error processing '{name}': {e}", exc_info=True)
+                    results.append((name, False, str(e)))
     
     # Summary
     overall_elapsed = time.time() - overall_start
