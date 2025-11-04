@@ -127,6 +127,17 @@ Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-L
 # Enable Virtual Machine Platform (required for WSL2)
 Enable-WindowsOptionalFeature -Online -FeatureName VirtualMachinePlatform -NoRestart
 
+write-host "Enabling WSL";
+Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux, VirtualMachinePlatform -NoRestart
+
+write-host "Updating WSL #1";
+#https://learn.microsoft.com/en-us/windows/wsl/install-on-server
+Invoke-WebRequest -Uri "https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi" -OutFile ".\wsl_update_x64.msi"
+Start-Process "msiexec.exe" -ArgumentList "/i .\wsl_update_x64.msi /quiet" -NoNewWindow -Wait
+
+write-host "Updating WSL #2";
+wsl.exe --update
+
 write-host "Installing Docker Desktop (includes WSL2 setup)";
 choco install docker-desktop -y --ignoredetectedreboot --force
 

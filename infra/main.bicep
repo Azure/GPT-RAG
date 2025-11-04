@@ -326,9 +326,6 @@ param databaseContainersList array
 // VM params
 // ----------------------------------------------------------------------
 
-@description('The name of the VM Key Vault Secret. If left empty, a random name will be generated.')
-param vmKeyVaultSecName string = ''
-
 @description('The name of the Test VM. If left empty, a random name will be generated.')
 param vmName string = ''
 
@@ -401,7 +398,6 @@ var _agentSubnetId = _networkIsolation ? '${virtualNetworkResourceId}/subnets/${
 // VM vars
 // ----------------------------------------------------------------------
 
-var _vmKeyVaultSecName = !empty(vmKeyVaultSecName) ? vmKeyVaultSecName : 'vmUserInitialPassword'
 var _vmBaseName = !empty(vmName) ? vmName : 'testvm${resourceToken}'
 var _vmName = substring(_vmBaseName, 0, 15)
 var _vmUserName = !empty(vmUserName) ? vmUserName : 'testvmuser'
@@ -614,8 +610,8 @@ module testVm 'br/public:avm/res/compute/virtual-machine:0.15.0' = if (deployVM 
     }
     imageReference: {
       publisher: 'MicrosoftWindowsDesktop'
-      offer: 'windows-11'
-      sku: 'win11-22h2-pro'
+      offer:     'windows-11'
+      sku:       'win11-25h2-pro' 
       version: 'latest'
     }
     encryptionAtHost: false 
@@ -1110,11 +1106,11 @@ module privateDnsZoneContainerApps 'modules/networking/private-dns.bicep' = if (
   }
 }
 
-// Container Registry
+// Container Registry (login server zone - GLOBAL)
 module privateDnsZoneAcr 'modules/networking/private-dns.bicep' = if (_networkIsolation && deployContainerRegistry)  {
   name: 'containerregistry-private-dns-zone'
   params: {
-    dnsName: 'privatelink.${location}.azurecr.io'
+    dnsName: 'privatelink.azurecr.io'  
     location: 'global'
     tags: _tags
     resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
@@ -1122,6 +1118,21 @@ module privateDnsZoneAcr 'modules/networking/private-dns.bicep' = if (_networkIs
     virtualNetworkResourceId: virtualNetworkResourceId
   }
 }
+
+// Container Registry (data endpoint zone - REGIONAL)
+module privateDnsZoneAcrData 'modules/networking/private-dns.bicep' = if (_networkIsolation && deployContainerRegistry) {
+  name: 'containerregistry-data-private-dns-zone'
+  params: {
+    dnsName: 'privatelink.${location}.data.azurecr.io' 
+    location: 'global'
+    tags: _tags
+    resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
+    virtualNetworkLinkName : '${vnetName}-containerregistry-data-link${useExistingVNet?'-byon':''}'
+    virtualNetworkResourceId: virtualNetworkResourceId
+  }
+}
+
+
 
 // Private Endpoints.
 ///////////////////////////////////////////////////////////////////////////
@@ -1359,21 +1370,28 @@ module privateEndpointAcr 'modules/networking/private-endpoint.bicep' = if (_net
     subnetResourceId: _peSubnetId
     privateLinkServiceConnections: [
       {
-        name: 'acrConnection'
+        name: '${containerRegistryName}-connection'
         properties: {
-          #disable-next-line BCP318
-          privateLinkServiceId: containerRegistry.outputs.resourceId
-          groupIds: ['registry']
+          privateLinkServiceId: containerRegistry!.outputs.resourceId
+          groupIds: [
+            'registry' 
+          ]
         }
       }
     ]
     privateDnsZoneGroup: {
-      name: 'acrDnsZoneGroup'
       privateDnsZoneGroupConfigs: [
         {
-          name: 'acrARecord'
-          #disable-next-line BCP318
-          privateDnsZoneResourceId: privateDnsZoneAcr.outputs.resourceId
+          name: 'acr-registry-config'
+          properties: {
+            privateDnsZoneId: privateDnsZoneAcr!.outputs.resourceId
+          }
+        }
+        {
+          name: 'acr-data-config' 
+          properties: {
+            privateDnsZoneId: privateDnsZoneAcrData!.outputs.resourceId
+          }
         }
       ]
     }
@@ -1381,6 +1399,7 @@ module privateEndpointAcr 'modules/networking/private-endpoint.bicep' = if (_net
   dependsOn: [
     containerRegistry!
     privateDnsZoneAcr!
+    privateDnsZoneAcrData!  
     privateEndpointContainerAppsEnv // Serialize PE operations to avoid conflicts
   ]
 }
