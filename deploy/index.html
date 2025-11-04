@@ -535,7 +535,7 @@
 </ul>
 <h2 id="quick-start-basic-deployment">Quick Start - Basic Deployment</h2>
 <p>Quick setup for demos without network isolation.</p>
-<pre><code class="language-shell">azd init -t azure/gpt-rag
+<pre><code>azd init -t azure/gpt-rag
 azd provision
 </code></pre>
 <p>Demo video:</p>
@@ -554,10 +554,10 @@ azd provision
 <p>For deployments that <strong>require network isolation</strong>.</p>
 <h3 id="before-provisioning">Before Provisioning</h3>
 <p>Enable network isolation in your environment:</p>
-<pre><code class="language-shell">azd env set NETWORK_ISOLATION true
+<pre><code>azd env set NETWORK_ISOLATION true
 </code></pre>
 <h3 id="provision-infrastructure">Provision Infrastructure</h3>
-<pre><code class="language-shell">azd provision
+<pre><code>azd provision
 </code></pre>
 <h3 id="post-provision-configuration">Post-Provision Configuration</h3>
 <blockquote>
@@ -568,23 +568,19 @@ azd provision
 <li>Connect via <strong>Azure Bastion</strong>.</li>
 <li>Open a terminal in the VM and run:</li>
 </ol>
-<p><code>shell
-   cd C:\github\gpt-rag
+<p><code>cd C:\github\gpt-rag
    .\scripts\postProvision.ps1</code></p>
 <p><strong>Option B – From your local machine (must have VNet access)</strong></p>
 <ol>
 <li>From the <code>gpt-rag</code> directory, run:</li>
 </ol>
-<p><code>shell
-   .\scripts\postProvision.ps1</code></p>
+<p><code>.\scripts\postProvision.ps1</code></p>
 <p>or (Bash)</p>
-<p><code>shell
-   .\scripts\postProvision.sh</code></p>
+<p><code>.\scripts\postProvision.sh</code></p>
 <ol>
 <li>If you have re-initialized or cloned the repo again, refresh your <code>azd</code> environment so it points to the <strong>existing</strong> deployment:</li>
 </ol>
-<p><code>shell
-   azd init -t azure/gpt-rag
+<p><code>azd init -t azure/gpt-rag
    azd env refresh</code></p>
 <ol>
 <li>When prompted, select the <strong>same Subscription, Resource Group, and Location</strong> as the original provisioning so <code>azd</code> correctly links to your environment.</li>
@@ -592,7 +588,7 @@ azd provision
 <h3 id="deploy-gpt-rag-services">Deploy GPT-RAG Services</h3>
 <p>Once the GPT-RAG infrastructure is provisioned, you can deploy the services.</p>
 <p>To deploy <strong>all services at once</strong>, navigate to the <code>gpt-rag</code> directory (with azd environment configured) and run:</p>
-<pre><code class="language-shell">azd deploy
+<pre><code>azd deploy
 </code></pre>
 <p>This command deploys each service in sequence.</p>
 <p>If you prefer to <strong>deploy a single service</strong>—for example, when updating only that service—navigate to the corresponding service repository and follow the instructions in its <strong>"How to Deploy"</strong> section.</p>
