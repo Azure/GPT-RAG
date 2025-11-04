@@ -22,7 +22,7 @@ Choose your preferred deployment method based on project requirements and enviro
 
 Quick setup for demos without network isolation.
 
-```shell
+```
 azd init -t azure/gpt-rag
 azd provision
 ```
@@ -48,13 +48,13 @@ For deployments that **require network isolation**.
 
 Enable network isolation in your environment:
 
-```shell
+```
 azd env set NETWORK_ISOLATION true
 ```
 
 ### Provision Infrastructure
 
-```shell
+```
 azd provision
 ```
 
@@ -67,7 +67,7 @@ azd provision
 1. Connect via **Azure Bastion**.
 2. Open a terminal in the VM and run:
 
-   ```shell
+   ```
    cd C:\github\gpt-rag
    .\scripts\postProvision.ps1
    ```
@@ -76,19 +76,19 @@ azd provision
 
 1. From the `gpt-rag` directory, run:
 
-   ```shell
+   ```
    .\scripts\postProvision.ps1
    ```
 
    or (Bash)
 
-   ```shell
+   ```
    .\scripts\postProvision.sh
    ```
 
 2. If you have re-initialized or cloned the repo again, refresh your `azd` environment so it points to the **existing** deployment:
 
-   ```shell
+   ```
    azd init -t azure/gpt-rag
    azd env refresh
    ```
@@ -101,7 +101,7 @@ Once the GPT-RAG infrastructure is provisioned, you can deploy the services.
 
 To deploy **all services at once**, navigate to the `gpt-rag` directory (with azd environment configured) and run:
 
-```shell
+```
 azd deploy
 ```
 

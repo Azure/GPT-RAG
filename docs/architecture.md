@@ -2,6 +2,8 @@
 
 ![Zero Trust Architecture](media/architecture-zero-trust.png)
 
+[Download Visio Diagram](media/GPT-RAG.vsdx)
+
 ## Key Capabilities
 
 - **Enterprise-Grade Security**  
