@@ -24,7 +24,7 @@ resource connection 'Microsoft.CognitiveServices/accounts/connections@2025-04-01
   parent: aiFoundry
   properties: {
     category: 'AzureStorageAccount'
-    target: existingStorage.id
+    target: existingStorage.properties.primaryEndpoints.blob
     authType: 'AAD'
     isSharedToAll: true
     metadata: {
