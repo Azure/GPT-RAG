@@ -1384,13 +1384,13 @@ module privateEndpointAcr 'modules/networking/private-endpoint.bicep' = if (_net
         {
           name: 'acr-registry-config'
           properties: {
-            privateDnsZoneId: privateDnsZoneAcr!.outputs.resourceId
+            privateDnsZoneResourceId: privateDnsZoneAcr!.outputs.resourceId
           }
         }
         {
           name: 'acr-data-config' 
           properties: {
-            privateDnsZoneId: privateDnsZoneAcrData!.outputs.resourceId
+            privateDnsZoneResourceId: privateDnsZoneAcrData!.outputs.resourceId
           }
         }
       ]
