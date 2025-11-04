@@ -315,6 +315,8 @@ param containerAppsList array
 @description('Workload profiles.')
 param workloadProfiles array = []
 
+param acrDnsSuffix string = (environment().name == 'AzureUSGovernment' ? 'azurecr.us' : environment().name == 'AzureChinaCloud'   ? 'azurecr.cn' : 'azurecr.io')
+
 // ----------------------------------------------------------------------
 // Cosmos DB Database params
 // ----------------------------------------------------------------------
@@ -338,6 +340,19 @@ param vmAdminPassword string
 
 @description('Size of the test VM')
 param vmSize string = 'Standard_D4s_v3'
+
+@description('Image SKU (e.g., win11-25h2-ent, win11-23h2-ent, 2022-datacenter).')
+param vmImageSku string = 'win11-25h2-ent'
+
+@description('Image publisher (Windows 11: MicrosoftWindowsDesktop, Windows Server: MicrosoftWindowsServer).')
+param vmImagePublisher string = 'MicrosoftWindowsDesktop'
+
+@description('Image offer (Windows 11: windows-11, Windows Server: WindowsServer).')
+param vmImageOffer string = 'windows-11'
+
+@description('Image version (use latest unless you need a pinned build).')
+param vmImageVersion string = 'latest'
+
 
 // ----------------------------------------------------------------------
 // Storage Account params
@@ -372,6 +387,7 @@ var _networkIsolation = empty(string(networkIsolation)) ? false : bool(networkIs
 // ----------------------------------------------------------------------
 
 var _containerDummyImageName = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+var acrRegion = toLower(location)
 
 // ----------------------------------------------------------------------
 // Networking vars
@@ -609,10 +625,10 @@ module testVm 'br/public:avm/res/compute/virtual-machine:0.15.0' = if (deployVM 
       userAssignedResourceIds: _useUAI ? [testVmUAI.outputs.resourceId] : []
     }
     imageReference: {
-      publisher: 'MicrosoftWindowsDesktop'
-      offer:     'windows-11'
-      sku:       'win11-25h2-pro' 
-      version: 'latest'
+      publisher: vmImagePublisher
+      offer:     vmImageOffer
+      sku:       vmImageSku
+      version:   vmImageVersion
     }
     encryptionAtHost: false 
     vmSize: vmSize
@@ -1106,31 +1122,43 @@ module privateDnsZoneContainerApps 'modules/networking/private-dns.bicep' = if (
   }
 }
 
+
 // Container Registry (login server zone - GLOBAL)
-module privateDnsZoneAcr 'modules/networking/private-dns.bicep' = if (_networkIsolation && deployContainerRegistry)  {
+module privateDnsZoneAcr 'modules/networking/private-dns.bicep' = if (_networkIsolation && deployContainerRegistry) {
   name: 'containerregistry-private-dns-zone'
   params: {
-    dnsName: 'privatelink.azurecr.io'  
+    dnsName: 'privatelink.${acrDnsSuffix}'
     location: 'global'
     tags: _tags
     resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
-    virtualNetworkLinkName : '${vnetName}-containerregistry-link${useExistingVNet?'-byon':''}'
+    virtualNetworkLinkName: '${vnetName}-containerregistry-link${useExistingVNet?'-byon':''}'
     virtualNetworkResourceId: virtualNetworkResourceId
   }
+  dependsOn: [
+    virtualNetwork!
+    virtualNetworkSubnets!
+  ]
 }
 
 // Container Registry (data endpoint zone - REGIONAL)
 module privateDnsZoneAcrData 'modules/networking/private-dns.bicep' = if (_networkIsolation && deployContainerRegistry) {
   name: 'containerregistry-data-private-dns-zone'
   params: {
-    dnsName: 'privatelink.${location}.data.azurecr.io' 
+    dnsName: 'privatelink.${acrRegion}.data.${acrDnsSuffix}'
     location: 'global'
     tags: _tags
     resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
-    virtualNetworkLinkName : '${vnetName}-containerregistry-data-link${useExistingVNet?'-byon':''}'
+    virtualNetworkLinkName: '${vnetName}-containerregistry-data-link${useExistingVNet?'-byon':''}'
     virtualNetworkResourceId: virtualNetworkResourceId
   }
+  dependsOn: [
+    virtualNetwork!
+    virtualNetworkSubnets!
+  ]
 }
+
+
+
 
 
 
@@ -1380,18 +1408,15 @@ module privateEndpointAcr 'modules/networking/private-endpoint.bicep' = if (_net
       }
     ]
     privateDnsZoneGroup: {
+      name: 'acrDnsZoneGroup'
       privateDnsZoneGroupConfigs: [
         {
-          name: 'acr-registry-config'
-          properties: {
-            privateDnsZoneResourceId: privateDnsZoneAcr!.outputs.resourceId
-          }
+          name: 'acr-login-server'
+          privateDnsZoneResourceId: privateDnsZoneAcr!.outputs.resourceId
         }
         {
-          name: 'acr-data-config' 
-          properties: {
-            privateDnsZoneResourceId: privateDnsZoneAcrData!.outputs.resourceId
-          }
+          name: 'acr-data-endpoint'
+          privateDnsZoneResourceId: privateDnsZoneAcrData!.outputs.resourceId
         }
       ]
     }
@@ -2075,15 +2100,14 @@ module searchService 'br/public:avm/res/search/search-service:0.11.1' = if (depl
     }
     sharedPrivateLinkResources: _networkIsolation
       ? [
-          // Storage (blob)
-          {
-            groupId: 'blob'
-            #disable-next-line BCP318
-            privateLinkResourceId: storageAccount.outputs.resourceId
-            requestMessage: 'Automated link for Storage'
-            provisioningState: 'Succeeded'
-            status: 'Approved'
-          }
+          // {
+          //   groupId: 'blob'
+          //   #disable-next-line BCP318
+          //   privateLinkResourceId: storageAccount.outputs.resourceId
+          //   requestMessage: 'Automated link for Storage'
+          //   provisioningState: 'Succeeded'
+          //   status: 'Approved'
+          // }
         ]
       : []
   }

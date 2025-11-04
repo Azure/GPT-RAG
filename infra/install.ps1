@@ -153,11 +153,11 @@ $dockerPath = "C:\Program Files\Docker\Docker\Docker Desktop.exe"
 Set-ItemProperty -Path $regPath -Name "Docker Desktop" -Value $dockerPath
 
 # install extensions
-# $install_content = "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-azuretools.vscode-bicep`",`"--force`" -wait`n"
-# $install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-azuretools.vscode-azurefunctions`",`"--force`" -wait`n"
+$install_content = "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-azuretools.vscode-bicep`",`"--force`" -wait`n"
 $install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-python.python`",`"--force`" -wait`n"
 $install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-vscode-remote.remote-containers`",`"--force`" -wait`n"
 $install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-vscode-powershell`",`"--force`" -wait`n"
+# $install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-azuretools.vscode-azurefunctions`",`"--force`" -wait`n"
 
 $install_content += "Unregister-ScheduledTask -TaskName 'MyOneTimeSelfDeletingTask' -Confirm `$false`n"
 
@@ -227,6 +227,7 @@ foreach( $repo in $manifest.components) {
 # Always reboot to complete Docker Desktop and WSL2 setup
 write-host "Installation completed successfully!";
 write-host "Rebooting in 30 seconds to complete setup...";
-shutdown /r /t 30 /c "Rebooting to complete Docker Desktop installation"
+$runTime = (Get-Date).AddMinutes(1).ToString("HH:mm")
+schtasks /create /tn "FinishSetupReboot" /sc once /st $runTime /tr "shutdown /r /t 0 /c 'Rebooting after CSE setup'" /ru SYSTEM /f
 
 Stop-Transcript

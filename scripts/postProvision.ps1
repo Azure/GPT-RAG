@@ -65,20 +65,20 @@ if ($missing.Count -gt 0) {
 #-------------------------------------------------------------------------------
 # Setup Python environment
 #-------------------------------------------------------------------------------
-# Write-Host "📦 Creating temporary venv..."
-# python -m venv --without-pip config/.venv_temp
+Write-Host "📦 Creating temporary venv..."
+python -m venv --without-pip config/.venv_temp
 
-# # Activate the venv
-# & config/.venv_temp/Scripts/Activate.ps1
+# Activate the venv
+& config/.venv_temp/Scripts/Activate.ps1
 
-# Write-Host "⬇️ Manually bootstrapping pip..."
-# Invoke-WebRequest -Uri "https://bootstrap.pypa.io/get-pip.py" -UseBasicParsing |
-#     Select-Object -ExpandProperty Content |
-#     & python
+Write-Host "⬇️ Manually bootstrapping pip..."
+Invoke-WebRequest -Uri "https://bootstrap.pypa.io/get-pip.py" -UseBasicParsing |
+    Select-Object -ExpandProperty Content |
+    & python
 
-# Write-Host "⬇️ Installing requirements..."
-# & python -m pip install --upgrade pip
-# & python -m pip install -r config/requirements.txt
+Write-Host "⬇️ Installing requirements..."
+& python -m pip install --upgrade pip
+& python -m pip install -r config/requirements.txt
 
 #-------------------------------------------------------------------------------
 # 1) AI Foundry Setup
