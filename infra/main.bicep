@@ -983,7 +983,16 @@ resource cse 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = if (dep
   }
   dependsOn: [
     testVm
-    appConfigPopulate //the script and vm will need all the app config values to be populated before running
+    appConfigPopulate
+    assignContainerAppsTestVm
+    assignManagedIdentityOperatorTestVm
+    assignContainerRegistryTestVm
+    assignAppConfigAppConfigurationDataReaderTestVm
+    assignSearchSearchServiceContributorTestVm
+    assignSearchSearchIndexDataContributorTestVm
+    assignCognitiveServicesContributorTestVm
+    assignStorageStorageBlobDataContributorTestVm
+    assignCosmosDBCosmosDbBuiltInDataContributorTestVm
   ]
 }
 
@@ -1140,11 +1149,13 @@ module privateDnsZoneAcr 'modules/networking/private-dns.bicep' = if (_networkIs
   ]
 }
 
-// Container Registry (data endpoint zone - REGIONAL)
+var _acrRegion = toLower(location)
+
+// ACR data endpoint private DNS zone (regional)
 module privateDnsZoneAcrData 'modules/networking/private-dns.bicep' = if (_networkIsolation && deployContainerRegistry) {
   name: 'containerregistry-data-private-dns-zone'
   params: {
-    dnsName: 'privatelink.${acrRegion}.data.${acrDnsSuffix}'
+    dnsName: 'privatelink.${_acrRegion}.data.${acrDnsSuffix}'
     location: 'global'
     tags: _tags
     resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
@@ -1156,9 +1167,6 @@ module privateDnsZoneAcrData 'modules/networking/private-dns.bicep' = if (_netwo
     virtualNetworkSubnets!
   ]
 }
-
-
-
 
 
 
@@ -1387,7 +1395,6 @@ module privateEndpointContainerAppsEnv 'modules/networking/private-endpoint.bice
   ]
 }
 
-// Container Registry
 module privateEndpointAcr 'modules/networking/private-endpoint.bicep' = if (_networkIsolation && deployContainerRegistry) {
   name: 'dep-acr-private-endpoint'
   params: {
@@ -1398,12 +1405,10 @@ module privateEndpointAcr 'modules/networking/private-endpoint.bicep' = if (_net
     subnetResourceId: _peSubnetId
     privateLinkServiceConnections: [
       {
-        name: '${containerRegistryName}-connection'
+        name: '${containerRegistryName}-registry-connection'
         properties: {
           privateLinkServiceId: containerRegistry!.outputs.resourceId
-          groupIds: [
-            'registry' 
-          ]
+          groupIds: ['registry'] 
         }
       }
     ]
@@ -1411,12 +1416,12 @@ module privateEndpointAcr 'modules/networking/private-endpoint.bicep' = if (_net
       name: 'acrDnsZoneGroup'
       privateDnsZoneGroupConfigs: [
         {
-          name: 'acr-login-server'
-          privateDnsZoneResourceId: privateDnsZoneAcr!.outputs.resourceId
+          name: 'acr-login'
+          privateDnsZoneResourceId: privateDnsZoneAcr!.outputs.resourceId // privatelink.azurecr.io
         }
         {
-          name: 'acr-data-endpoint'
-          privateDnsZoneResourceId: privateDnsZoneAcrData!.outputs.resourceId
+          name: 'acr-data'
+          privateDnsZoneResourceId: privateDnsZoneAcrData!.outputs.resourceId // privatelink.<region>.data.azurecr.io
         }
       ]
     }
@@ -1424,10 +1429,12 @@ module privateEndpointAcr 'modules/networking/private-endpoint.bicep' = if (_net
   dependsOn: [
     containerRegistry!
     privateDnsZoneAcr!
-    privateDnsZoneAcrData!  
-    privateEndpointContainerAppsEnv // Serialize PE operations to avoid conflicts
+    privateDnsZoneAcrData!
+    privateEndpointContainerAppsEnv
   ]
 }
+
+
 
 // Azure Application Gateway
 //////////////////////////////////////////////////////////////////////////
