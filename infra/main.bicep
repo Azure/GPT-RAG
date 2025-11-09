@@ -339,7 +339,7 @@ param vmUserName string = ''
 param vmAdminPassword string
 
 @description('Size of the test VM')
-param vmSize string = 'Standard_D4s_v3'
+param vmSize string = 'Standard_D8s_v5'
 
 @description('Image SKU (e.g., win11-25h2-ent, win11-23h2-ent, 2022-datacenter).')
 param vmImageSku string = 'win11-25h2-ent'
@@ -387,7 +387,6 @@ var _networkIsolation = empty(string(networkIsolation)) ? false : bool(networkIs
 // ----------------------------------------------------------------------
 
 var _containerDummyImageName = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
-var acrRegion = toLower(location)
 
 // ----------------------------------------------------------------------
 // Networking vars
@@ -1132,7 +1131,7 @@ module privateDnsZoneContainerApps 'modules/networking/private-dns.bicep' = if (
 }
 
 
-// Container Registry (login server zone - GLOBAL)
+// Container Registry 
 module privateDnsZoneAcr 'modules/networking/private-dns.bicep' = if (_networkIsolation && deployContainerRegistry) {
   name: 'containerregistry-private-dns-zone'
   params: {
@@ -1149,26 +1148,17 @@ module privateDnsZoneAcr 'modules/networking/private-dns.bicep' = if (_networkIs
   ]
 }
 
-var _acrRegion = toLower(location)
-
-// ACR data endpoint private DNS zone (regional)
-module privateDnsZoneAcrData 'modules/networking/private-dns.bicep' = if (_networkIsolation && deployContainerRegistry) {
-  name: 'containerregistry-data-private-dns-zone'
-  params: {
-    dnsName: 'privatelink.${_acrRegion}.data.${acrDnsSuffix}'
-    location: 'global'
-    tags: _tags
-    resourceGroupName: useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name
-    virtualNetworkLinkName: '${vnetName}-containerregistry-data-link${useExistingVNet?'-byon':''}'
-    virtualNetworkResourceId: virtualNetworkResourceId
-  }
-  dependsOn: [
-    virtualNetwork!
-    virtualNetworkSubnets!
-  ]
-}
-
-
+// module privateDnsAcrDataRecord 'modules/networking/private-dns-a-record.bicep' = if (_networkIsolation && deployContainerRegistry) {
+//   scope: resourceGroup(useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name)
+//   name: 'acr-data-a-record'
+//   params: {
+//     zoneName: 'privatelink.${acrDnsSuffix}'
+//     zoneResourceId: privateDnsZoneAcr!.outputs.resourceId
+//     recordName: '${containerRegistryName}.${location}.data'
+//     privateEndpointResourceId: privateEndpointAcr!.outputs.resourceId
+//     ttl: 3600
+//   }
+// }
 
 // Private Endpoints.
 ///////////////////////////////////////////////////////////////////////////
@@ -1416,12 +1406,8 @@ module privateEndpointAcr 'modules/networking/private-endpoint.bicep' = if (_net
       name: 'acrDnsZoneGroup'
       privateDnsZoneGroupConfigs: [
         {
-          name: 'acr-login'
+          name: 'acr'
           privateDnsZoneResourceId: privateDnsZoneAcr!.outputs.resourceId // privatelink.azurecr.io
-        }
-        {
-          name: 'acr-data'
-          privateDnsZoneResourceId: privateDnsZoneAcrData!.outputs.resourceId // privatelink.<region>.data.azurecr.io
         }
       ]
     }
@@ -1429,11 +1415,9 @@ module privateEndpointAcr 'modules/networking/private-endpoint.bicep' = if (_net
   dependsOn: [
     containerRegistry!
     privateDnsZoneAcr!
-    privateDnsZoneAcrData!
     privateEndpointContainerAppsEnv
   ]
 }
-
 
 
 // Azure Application Gateway
@@ -1855,6 +1839,7 @@ module containerRegistry 'br/public:avm/res/container-registry/registry:0.9.3' =
       userAssignedResourceIds: _useUAI ? [containerRegistryUAI.outputs.resourceId] : []
     }
     exportPolicyStatus: 'enabled'
+    dataEndpointEnabled: _networkIsolation ? true : false    
   }
 }
 

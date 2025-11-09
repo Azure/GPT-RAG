@@ -138,6 +138,10 @@ Start-Process "msiexec.exe" -ArgumentList "/i .\wsl_update_x64.msi /quiet" -NoNe
 write-host "Updating WSL #2";
 wsl.exe --update
 
+# Set WSL2 as default version
+write-host "Setting WSL2 as default version";
+wsl.exe --set-default-version 2
+
 write-host "Installing Docker Desktop (includes WSL2 setup)";
 choco install docker-desktop -y --ignoredetectedreboot --force
 
@@ -148,28 +152,23 @@ $newPath = $oldPath + ";C:\Program Files\Docker\Docker\resources\bin"
 $env:PATH = $newPath
 
 write-host "Configuring Docker Desktop to start with Windows";
-$regPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
+$regPath = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run"
 $dockerPath = "C:\Program Files\Docker\Docker\Docker Desktop.exe"
 Set-ItemProperty -Path $regPath -Name "Docker Desktop" -Value $dockerPath
 
 # install extensions
-$install_content = "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-azuretools.vscode-bicep`",`"--force`" -wait`n"
-$install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-python.python`",`"--force`" -wait`n"
-$install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-vscode-remote.remote-containers`",`"--force`" -wait`n"
-$install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-vscode-powershell`",`"--force`" -wait`n"
+# $install_content = "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-azuretools.vscode-bicep`",`"--force`" -wait`n"
+# $install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-python.python`",`"--force`" -wait`n"
+# $install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-vscode-remote.remote-containers`",`"--force`" -wait`n"
+# $install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-vscode-powershell`",`"--force`" -wait`n"
 # $install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-azuretools.vscode-azurefunctions`",`"--force`" -wait`n"
-
-$install_content += "Unregister-ScheduledTask -TaskName 'MyOneTimeSelfDeletingTask' -Confirm `$false`n"
-
-mkdir C:\temp -ea SilentlyContinue
-
-Set-Content "C:\temp\LoginInstall.ps1" $install_content
-
+# $install_content += "Unregister-ScheduledTask -TaskName 'MyOneTimeSelfDeletingTask' -Confirm `$false`n"
+# mkdir C:\temp -ea SilentlyContinue
+# Set-Content "C:\temp\LoginInstall.ps1" $install_content
 #create a one time self-deleting task to run after login - this will run WSL update, install VS Code extensions
-$Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -File C:\temp\LoginInstall.ps1"
-$Trigger = New-ScheduledTaskTrigger -AtLogOn
-#$Settings = New-ScheduledTaskSettingsSet -DeleteExpiredTaskAfter 00:00:30
-Register-ScheduledTask -TaskName "MyOneTimeSelfDeletingTask" -Action $Action -Trigger $Trigger -User "testvmuser" #-Settings $Settings
+# $Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -File C:\temp\LoginInstall.ps1"
+# $Trigger = New-ScheduledTaskTrigger -AtLogOn
+# Register-ScheduledTask -TaskName "MyOneTimeSelfDeletingTask" -Action $Action -Trigger $Trigger -User "testvmuser" #-Settings $Settings
 
 write-host "Downloading GPT-RAG repository";
 mkdir C:\github -ea SilentlyContinue
