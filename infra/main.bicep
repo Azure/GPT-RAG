@@ -1148,18 +1148,6 @@ module privateDnsZoneAcr 'modules/networking/private-dns.bicep' = if (_networkIs
   ]
 }
 
-// module privateDnsAcrDataRecord 'modules/networking/private-dns-a-record.bicep' = if (_networkIsolation && deployContainerRegistry) {
-//   scope: resourceGroup(useExistingVNet && !sideBySideDeploy ? varExistingVnetResourceGroupName : resourceGroup().name)
-//   name: 'acr-data-a-record'
-//   params: {
-//     zoneName: 'privatelink.${acrDnsSuffix}'
-//     zoneResourceId: privateDnsZoneAcr!.outputs.resourceId
-//     recordName: '${containerRegistryName}.${location}.data'
-//     privateEndpointResourceId: privateEndpointAcr!.outputs.resourceId
-//     ttl: 3600
-//   }
-// }
-
 // Private Endpoints.
 ///////////////////////////////////////////////////////////////////////////
 
