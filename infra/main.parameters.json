@@ -66,7 +66,7 @@
     "solutionStorageAccountName":            { "value": null },
 
     "vmAdminPassword":                       {"value": "$(secretOrRandomPassword)"},  
-    "vmSize":                                { "value": "Standard_D4s_v3" },
+    "vmSize":                                { "value": "Standard_D8s_v5" },
 
     "useCMK":                                { "value": "false" },
     "useExistingVNet":                       { "value": "${USE_EXISTING_VNET}" },  
@@ -78,23 +78,31 @@
       "value": [
         {
           "name": "chat",
-          "model": "gpt-4o",
-          "modelFormat": "OpenAI",          
-          "type": "GlobalStandard",
-          "version": "2024-11-20",
-          "apiVersion": "2025-01-01-preview",
-          "capacity": 40,
-          "canonical_name": "CHAT_DEPLOYMENT_NAME"
+          "model": {
+            "format": "OpenAI",
+            "name": "gpt-4o",
+            "version": "2024-11-20"
+          },
+          "sku": {
+            "name": "GlobalStandard",
+            "capacity": 40
+          },
+          "canonical_name": "CHAT_DEPLOYMENT_NAME",
+          "apiVersion": "2025-01-01-preview"
         },
         {
           "name": "text-embedding",
-          "model": "text-embedding-3-large",
-          "modelFormat": "OpenAI",
-          "type": "Standard",
-          "version": "1",          
-          "apiVersion": "2025-01-01-preview",
-          "capacity": 40,
-          "canonical_name": "EMBEDDING_DEPLOYMENT_NAME"
+          "model": {
+            "format": "OpenAI",
+            "name": "text-embedding-3-large",
+            "version": "1"
+          },
+          "sku": {
+            "name": "Standard",
+            "capacity": 40
+          },
+          "canonical_name": "EMBEDDING_DEPLOYMENT_NAME",
+          "apiVersion": "2025-01-01-preview"
         }
       ]
     },

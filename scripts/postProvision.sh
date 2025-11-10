@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-echo "🔧 Running post-provision steps…"
+echo "🔧 Running post-provision steps..."
 echo
 
 #-------------------------------------------------------------------------------
@@ -18,16 +18,31 @@ while IFS='=' read -r key value; do
 
   # Export into current shell
   export "$key=$value"
-
-  # Echo for visibility (you can comment out if secrets appear)
-  echo "$key=$value"
 done < <(azd env get-values)
 
+#-------------------------------------------------------------------------------
+# Zero Trust Information
+#-------------------------------------------------------------------------------
+echo
+if [[ "$(echo "${NETWORK_ISOLATION:-false}" | tr '[:upper:]' '[:lower:]')" == "true" ]]; then
+  echo "🔒 Zero Trust enabled."
+  echo "🚧 NOTE: If app config failed, run the azd provision again - this is due to token timeout restrictions."
+  echo "Access to Azure resources is restricted to the VNet."
+  echo "Ensure you run scripts/postProvision.sh from within the VNet."
+  echo "If you are using a local machine, make sure you have a VPN connection to the VNet."
+  echo "You can also use the Test VM to access the environment and complete the setup."
+  read -p "Are you running this script from inside the VNet or via VPN? [Y/n]: " answer
+  if [[ ! "$(echo "${answer:-y}" | tr '[:upper:]' '[:lower:]')" =~ ^(y|yes)$ ]]; then
+    echo "❌ Please run this script from inside the VNet or with VPN access. Exiting."
+    exit 0
+  fi
+else
+  echo "🚧 Provisioning basic architecture."
+fi
 
-
-###############################################################################
+#-------------------------------------------------------------------------------
 # Container APP API Keys Warning
-###############################################################################
+#-------------------------------------------------------------------------------
 echo
 if [[ "${USE_CAPP_API_KEY,,}" == "true" ]]; then
   echo "🔑 Using API Key for Container Apps access."

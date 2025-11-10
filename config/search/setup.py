@@ -110,7 +110,7 @@ def prepare_context_and_render(template_name: str, template_dir: str, label_filt
                 if model.get("canonical_name") == "EMBEDDING_DEPLOYMENT_NAME":
                     embedding_info = {
                         "deployment_name": model.get("name", "text-embedding"),
-                        "model_name": model.get("model", "text-embedding-3-large"), 
+                        "model_name": model.get("model", {}).get("name", "text-embedding-3-large") if isinstance(model.get("model"), dict) else model.get("model", "text-embedding-3-large"),
                         "endpoint": model.get("endpoint", ""),
                         "api_version": model.get("apiVersion", "2025-01-01-preview")
                     }
@@ -138,9 +138,9 @@ def prepare_context_and_render(template_name: str, template_dir: str, label_filt
             for model in model_deployments:
                 if model.get("canonical_name") == "CHAT_DEPLOYMENT_NAME":
                     gpt_info = {
-                        "deployment_name": model.get("name"),        # Dynamic from MODEL_DEPLOYMENTS
-                        "model_name": model.get("model"),           # Dynamic from MODEL_DEPLOYMENTS
-                        "endpoint": model.get("endpoint", ""),      # Dynamic from MODEL_DEPLOYMENTS
+                        "deployment_name": model.get("name"),
+                        "model_name": model.get("model", {}).get("name") if isinstance(model.get("model"), dict) else model.get("model"),
+                        "endpoint": model.get("endpoint", ""),
                         "api_version": model.get("apiVersion", "2025-01-01-preview")
                     }
                     logging.info(f"✅ Found GPT model: {gpt_info['deployment_name']} ({gpt_info['model_name']}) at {gpt_info['endpoint']}")
@@ -236,24 +236,40 @@ def prepare_context_and_render(template_name: str, template_dir: str, label_filt
     return result, context
 
 # ── Azure Search API Call ─────────────────────────────────────────────────--
-def call_search_api(endpoint: str, api_version: str, rtype: str, rname: str, method: str, cred: ChainedTokenCredential, body: Any = None) -> bool:
-    try:
-        token = cred.get_token("https://search.azure.com/.default").token
-        headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
-        url = f"{endpoint}/{rtype}/{rname}?api-version={api_version}"
-        resp = getattr(requests, method.lower())(url, headers=headers, json=body)
-        if method.lower() == "delete" and resp.status_code == 404:
-            logging.info(f"✅ {rtype.capitalize()} '{rname}' does not exist; skipping deletion.")
-            return True
-        if resp.status_code >= 400:
-            logging.warning(f"❗️ {method.upper()} {rtype}/{rname} failed {resp.status_code}: {resp.text}")
-            return False
-        else:
-            logging.info(f"✅ {method.upper()} {rtype}/{rname} succeeded ({resp.status_code})")
-            return True
-    except Exception as e:
-        logging.error(f"❗️ Exception during {method.upper()} {rtype}/{rname}: {e}")
-        return False
+def call_search_api(endpoint: str, api_version: str, rtype: str, rname: str, method: str, cred: ChainedTokenCredential, body: Any = None, max_retries: int = 3) -> bool:
+    """
+    Call Azure Search REST API with retry logic for authentication failures.
+    """
+    for attempt in range(max_retries):
+        try:
+            # Get fresh token on each attempt
+            token = cred.get_token("https://search.azure.com/.default").token
+            headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+            url = f"{endpoint}/{rtype}/{rname}?api-version={api_version}"
+            resp = getattr(requests, method.lower())(url, headers=headers, json=body)
+            
+            if method.lower() == "delete" and resp.status_code == 404:
+                logging.info(f"✅ {rtype.capitalize()} '{rname}' does not exist; skipping deletion.")
+                return True
+            
+            if resp.status_code >= 400:
+                logging.warning(f"❗️ {method.upper()} {rtype}/{rname} failed {resp.status_code}: {resp.text}")
+                return False
+            else:
+                logging.info(f"✅ {method.upper()} {rtype}/{rname} succeeded ({resp.status_code})")
+                return True
+                
+        except Exception as e:
+            if attempt == max_retries - 1:
+                logging.error(f"❗️ Exception during {method.upper()} {rtype}/{rname}: {e}")
+                return False
+            else:
+                logging.warning(f"⚠️ Attempt {attempt + 1}/{max_retries} failed for {method.upper()} {rtype}/{rname}: {e}")
+                logging.warning(f"    Retrying in 2 seconds...")
+                time.sleep(2)
+                # Continue to next attempt - cred.get_token() will be called again
+
+    return False  # Should never reach here, but just in case
 
 # ── Resource Provisioning ─────────────────────────────────────────────────--
 def provision_datasources(defs: dict, context: dict, cred: ChainedTokenCredential, ds_to_indexers: dict, search_endpoint: str, api_version: str):

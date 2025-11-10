@@ -10,14 +10,12 @@ It will:
       – Git
       – Node.js
       – Python 3.11
-      – Azure Developer CLI (azd) v1.14.100
+      – Azure Developer CLI (azd) v1.20.3
       – PowerShell Core
       – Notepad++
   • Extend the C: drive to its maximum supported size
   • Enable and update WSL and schedule a one-time login task to:
-      – Install Docker Desktop
-      – Install GitHub Desktop
-      – Start Docker
+      – Install VS Code extensions
   • Add key VS Code extensions: Bicep, Azure Functions, Python, Containers & PowerShell
   • Clone the GPT-RAG repositories (specific tags for gpt-rag, orchestrator, ingestion, UI, MCP)
   • Configure Git safe directories
@@ -36,7 +34,7 @@ Parameters:
   -useUAI                 : Enable UAI integration flag
 
 Prerequisites:
-  • Windows Server 2019+ or Windows 10/11 with admin rights
+  • Windows 11 with admin rights
   • Internet access for downloads
   • Local user "testvmuser" for scheduled tasks
 #>
@@ -75,6 +73,8 @@ Start-Transcript -Path C:\WindowsAzure\Logs\CMFAI_CustomScriptExtension.txt -App
 
 Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 
+$env:Path += ";C:\ProgramData\chocolatey\bin"
+
 # Variable specifying the drive you want to extend  
 $drive_letter = "C"  
 # Script to get the partition sizes and then resize the volume  
@@ -84,46 +84,48 @@ Resize-Partition -DriveLetter $drive_letter -Size $size.SizeMax
 write-host "Installing Visual Studio Code";
 choco upgrade vscode -y --ignoredetectedreboot --force
 
-if (choco list --lo -r -e azure-cli) {
-  Write-Host "'azure-cli' is installed"
-  write-host "Uninstalling Azure CLI";
-  choco uninstall azure-cli -y --ignoredetectedreboot --force
+write-host "Installing Azure CLI (forced, user-visible install)";
+choco install azure-cli -y --ignoredetectedreboot --force
 
-  write-host "Installing Azure CLI";
-  choco install azure-cli -y --ignoredetectedreboot --force
-}
+# Add Azure CLI to PATH (bypass 1024-char limit)
+$oldPath = [Environment]::GetEnvironmentVariable("Path", [EnvironmentVariableTarget]::Machine)
+$newPath = $oldPath + ";C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin"
+[Environment]::SetEnvironmentVariable("Path", $newPath, [EnvironmentVariableTarget]::Machine)
+$env:PATH = $newPath  # makes 'az' available immediately in this session
 
 write-host "Installing GIT";
 choco upgrade git -y --ignoredetectedreboot --force
-
-write-host "Installing NODEJS";
-choco upgrade nodejs -y --ignoredetectedreboot --force
+# Add Git to PATH
+$oldPath = [Environment]::GetEnvironmentVariable("Path", [EnvironmentVariableTarget]::Machine)
+$newPath = $oldPath + ";C:\Program Files\Git\cmd"
+[Environment]::SetEnvironmentVariable("Path", $newPath, [EnvironmentVariableTarget]::Machine)
+$env:PATH = $newPath  # makes 'git' available immediately in this session
 
 write-host "Installing Python311";
 choco install python311 -y --ignoredetectedreboot --force
 #choco install visualstudio2022enterprise -y --ignoredetectedreboot --force
+
 write-host "Installing AZD";
-choco install azd -y --ignoredetectedreboot --force --version 1.14.100
+choco install azd -y --ignoredetectedreboot --force
+# Add AZD to PATH
+$oldPath = [Environment]::GetEnvironmentVariable("Path", [EnvironmentVariableTarget]::Machine)
+$newPath = $oldPath + ";C:\Program Files\Azure Dev CLI" 
+[Environment]::SetEnvironmentVariable("Path", $newPath, [EnvironmentVariableTarget]::Machine) 
 
 write-host "Installing Powershell Core";
 choco install powershell-core -y --ignoredetectedreboot --force
 
-write-host "Installing Chrome";
+# write-host "Installing Chrome";
 #choco install googlechrome -y --ignoredetectedreboot --force
 
 write-host "Installing Notepad++";
 choco install notepadplusplus -y --ignoredetectedreboot --force
 
-<#
-if (choco list --lo -r -e github-desktop) {
-  Write-Host "'github-desktop' is installed"
-}
-else
-{
-  write-host "Installing Github Desktop";
-  choco install github-desktop -y --ignoredetectedreboot --force
-}
-#>
+write-host "Enabling WSL";
+# Enable WSL feature
+Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux -NoRestart
+# Enable Virtual Machine Platform (required for WSL2)
+Enable-WindowsOptionalFeature -Online -FeatureName VirtualMachinePlatform -NoRestart
 
 write-host "Enabling WSL";
 Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux, VirtualMachinePlatform -NoRestart
@@ -136,28 +138,37 @@ Start-Process "msiexec.exe" -ArgumentList "/i .\wsl_update_x64.msi /quiet" -NoNe
 write-host "Updating WSL #2";
 wsl.exe --update
 
-$install_content = "wsl.exe --update`n"
-$install_content += "choco install docker-desktop -y --ignoredetectedreboot --force`n"
-$install_content += "choco install github-desktop -y --ignoredetectedreboot --force`n"
-$install_content += "stop-process -name `"dockerd`" -force`n"
-$install_content += "start-process `"C:\Program Files\docker\Docker\Docker Desktop.exe`"`n"
+# Set WSL2 as default version
+write-host "Setting WSL2 as default version";
+wsl.exe --set-default-version 2
 
-#install extenstions
-$install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-azuretools.vscode-bicep`",`"--force`" -wait`n"
-$install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-azuretools.vscode-azurefunctions`",`"--force`" -wait`n"
-$install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-python.python`",`"--force`" -wait`n"
-$install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-vscode-remote.remote-containers`",`"--force`" -wait`n"
-$install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-vscode-powershell`",`"--force`" -wait`n"
+write-host "Installing Docker Desktop (includes WSL2 setup)";
+choco install docker-desktop -y --ignoredetectedreboot --force
 
-$install_content += "Unregister-ScheduledTask -TaskName 'MyOneTimeSelfDeletingTask' -Confirm `$false`n"
+# Add Docker to PATH
+$oldPath = [Environment]::GetEnvironmentVariable("Path", [EnvironmentVariableTarget]::Machine)
+$newPath = $oldPath + ";C:\Program Files\Docker\Docker\resources\bin"
+[Environment]::SetEnvironmentVariable("Path", $newPath, [EnvironmentVariableTarget]::Machine)
+$env:PATH = $newPath
 
-Set-Content "c:\temp\LoginInstall.ps1" $install_content
+write-host "Configuring Docker Desktop to start with Windows";
+$regPath = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run"
+$dockerPath = "C:\Program Files\Docker\Docker\Docker Desktop.exe"
+Set-ItemProperty -Path $regPath -Name "Docker Desktop" -Value $dockerPath
 
-#create a one time self-deleting task to run after login - this will install docker desktop and WSL
-$Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -File C:\temp\LoginInstall.ps1"
-$Trigger = New-ScheduledTaskTrigger -AtLogOn
-#$Settings = New-ScheduledTaskSettingsSet -DeleteExpiredTaskAfter 00:00:30
-Register-ScheduledTask -TaskName "MyOneTimeSelfDeletingTask" -Action $Action -Trigger $Trigger -User "testvmuser" #-Settings $Settings
+# install extensions
+# $install_content = "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-azuretools.vscode-bicep`",`"--force`" -wait`n"
+# $install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-python.python`",`"--force`" -wait`n"
+# $install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-vscode-remote.remote-containers`",`"--force`" -wait`n"
+# $install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-vscode-powershell`",`"--force`" -wait`n"
+# $install_content += "Start-Process `"C:\Program Files\Microsoft VS Code\bin\code.cmd`" -ArgumentList `"--install-extension`",`"ms-azuretools.vscode-azurefunctions`",`"--force`" -wait`n"
+# $install_content += "Unregister-ScheduledTask -TaskName 'MyOneTimeSelfDeletingTask' -Confirm `$false`n"
+# mkdir C:\temp -ea SilentlyContinue
+# Set-Content "C:\temp\LoginInstall.ps1" $install_content
+#create a one time self-deleting task to run after login - this will run WSL update, install VS Code extensions
+# $Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -File C:\temp\LoginInstall.ps1"
+# $Trigger = New-ScheduledTaskTrigger -AtLogOn
+# Register-ScheduledTask -TaskName "MyOneTimeSelfDeletingTask" -Action $Action -Trigger $Trigger -User "testvmuser" #-Settings $Settings
 
 write-host "Downloading GPT-RAG repository";
 mkdir C:\github -ea SilentlyContinue
@@ -170,6 +181,8 @@ $env:Path += ";C:\Program Files\Azure Dev CLI"
 write-host "Logging into Azure CLI and AZD";
 az login --identity
 azd auth login --managed-identity
+
+cd C:\github\gpt-rag\
 
 write-host "Initializing AZD";
 azd init -e $AzdEnvName --subscription $azureSubscriptionID --location $azureLocation 
@@ -210,9 +223,10 @@ foreach( $repo in $manifest.components) {
   git config --global --add safe.directory C:/github/$repoName
 }
 
-if ($deploySoftware) {  
-  write-host "Restarting the machine to complete installation";
-  shutdown /r
-}
+# Always reboot to complete Docker Desktop and WSL2 setup
+write-host "Installation completed successfully!";
+write-host "Rebooting in 30 seconds to complete setup...";
+$runTime = (Get-Date).AddMinutes(1).ToString("HH:mm")
+schtasks /create /tn "FinishSetupReboot" /sc once /st $runTime /tr "shutdown /r /t 0 /c 'Rebooting after CSE setup'" /ru SYSTEM /f
 
 Stop-Transcript
