@@ -3,9 +3,10 @@
 All notable changes to this project will be documented in this file.  
 This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to [Semantic Versioning](https://semver.org/).
 
-## [v2.2.2] – 2025-10-28
+## [v2.2.2] – 2025-11-09
 ### Changed
-- Deploying AI Foundry using a customized Azure Verified Module (no waiting deployment script)
+- Updated infra templates to create the **data** private endpoint for Azure Container Registry when in network isolation mode.
+- Updated Bastion configuration to retrieve credentials from Key Vault. Users can now simply reset the `testvmuser` password to access the VM for the first time.
 
 ## [v2.2.1] – 2025-10-21
 ### Added
