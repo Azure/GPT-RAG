@@ -1,0 +1,796 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Official project documentation">
+      
+      
+        <meta name="author" content="Paulo Lacerda">
+      
+      
+      
+      
+      
+      <link rel="icon" href="../favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.34">
+    
+    
+      
+        <title>Orchestrator visual guide - GPT-RAG</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.35f28582.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#orchestrator-start-your-code-reading-with-visuals" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="GPT-RAG" class="md-header__button md-logo" aria-label="GPT-RAG" data-md-component="logo">
+      
+  <img src="../media/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            GPT-RAG
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Orchestrator visual guide
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="GPT-RAG" class="md-nav__button md-logo" aria-label="GPT-RAG" data-md-component="logo">
+      
+  <img src="../media/logo.png" alt="logo">
+
+    </a>
+    GPT-RAG
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../whatisnew/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    What's New
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deploy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Deployment Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Architecture
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Architecture
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Configuration
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Configuration
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../userfeedback/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    User Feedback
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<p><img alt="SingleAgentRAGStrategy keeping remote project_client" src="../media/funny-orchestrator-v2.png" /></p>
+<h1 id="orchestrator-start-your-code-reading-with-visuals">Orchestrator: Start Your Code Reading with Visuals</h1>
+<p><em>A picture is worth a thousand words.</em><br />
+Yet many engineers write another thousand words instead of drawing a single useful diagram.<br />
+Let’s reverse this evolution — with visuals.</p>
+<p>Starting with diagrams — with a bit of simplification and abstraction — can significantly accelerate the comprehension of complex codebases. This is especially true when the data flow spans multiple execution environments (local machine (or VM on cloud), remote AI Foundry, Azure cloud resources), where the initial orientation can otherwise be challenging.</p>
+<hr />
+<h3 id="why-this-article-exists">Why This Article Exists</h3>
+<p>When I started reading the code, I struggled:</p>
+<ul>
+<li>Where is the entry point?</li>
+<li>What calls what?</li>
+<li>What runs locally and what in the cloud?</li>
+<li>What is the big picture (helicopter view)?</li>
+<li>Which design patterns are applied?</li>
+<li>What is the role of the Orchestrator in the data flow?</li>
+</ul>
+<p>If you have ever felt <strong>dazed and confused by a codebase with many layers of abstraction</strong>, this is for you.
+If you prefer talking for hours about a diagram instead of drawing it, just leave.</p>
+<h3 id="target-audience">Target Audience</h3>
+<p>Folks with an <em>engineering mindset</em> who want to <em>understand before modifying.</em></p>
+<h3 id="hardware-recommendation">Hardware Recommendation</h3>
+<p>Use a large monitor (32-inch or larger). Diagrams require space.</p>
+<blockquote>
+<p>Note: Each diagram is available in multiple formats (<code>.png</code>, <code>.jpg</code>, <code>.svg</code>).
+While SVG is technically the optimal and resolution-independent format,
+some operating systems and PDF export workflows do not reliably render SVG.
+To ensure accessibility and consistent viewing experience across different
+environments, alternative formats are provided.</p>
+</blockquote>
+<hr />
+<h2 id="start-with-the-glossary">Start With the Glossary</h2>
+<p>The glossary is a shared language. Without clear and standardized terminology, people cannot meaningfully discuss ideas — they end up talking past each other. Shared terms are the foundation of shared understanding.</p>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Definition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Ask</strong></td>
+<td>What the user says in natural language. It is the raw user message before any system processing.</td>
+</tr>
+<tr>
+<td><strong>Query</strong></td>
+<td>The Ask transformed into a form suitable for retrieval (for example, converted to an embedding vector). The embedding vector is used to retrieve grounding document chunks from a vector database. Note: The Query is not part of the Prompt. Note: In practice, Ask and Query are often used interchangeably.</td>
+</tr>
+<tr>
+<td><strong>Prompt</strong></td>
+<td>The final constructed input sent to the language model. It may include the user’s Ask, retrieved document chunks, dialogue history, and system instructions.</td>
+</tr>
+<tr>
+<td><strong>Request</strong></td>
+<td>The HTTPS API call sent to the model endpoint to generate a Response.</td>
+</tr>
+<tr>
+<td><strong>Response</strong></td>
+<td>The output returned by the model after processing a Request.</td>
+</tr>
+<tr>
+<td><strong>Message</strong></td>
+<td>A single user, assistant, or system message in a Conversation. It can be an Ask, a Response, or a system/instruction message that may be included when constructing a Prompt.</td>
+</tr>
+<tr>
+<td><strong>Turn</strong></td>
+<td>A pair of Ask + Response.</td>
+</tr>
+<tr>
+<td><strong>Interaction</strong></td>
+<td>Another word for Turn. One full cycle of Ask → Response.</td>
+</tr>
+<tr>
+<td><strong>Conversation</strong></td>
+<td>A sequence of Interactions over time (many Turns), with the history persisted and reused as context.</td>
+</tr>
+<tr>
+<td><strong>Dialogue</strong></td>
+<td>The communication pattern of exchanging messages. A Conversation is an instance of a Dialogue sustained over time.</td>
+</tr>
+<tr>
+<td><strong>Thread</strong></td>
+<td>A platform-specific (AI Foundry) object that persists the Conversation History, identified by a thread ID.</td>
+</tr>
+<tr>
+<td>---</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="conversation-is-a-sequence-of-turns-interactions">Conversation is a Sequence of Turns (Interactions)</h2>
+<p>Each user Ask and system Response adds one turn to the conversation.</p>
+<pre><code>Conversation
+  ├── Turn #1
+  │      Ask
+  │      Response
+  ├── Turn #2
+  │      Ask
+  │      Response
+  └── ...
+</code></pre>
+<hr />
+<h2 id="retrieving-grounding-chunks">Retrieving Grounding Chunks</h2>
+<p>Grounding Chunks are critical because they anchor the model’s answer in factual, domain-correct information instead of relying on the model’s general knowledge or guesswork.
+Note: Retrieval is based solely on the Ask. No other parts of the Prompt are used. The only input used for retrieval is the Ask.</p>
+<pre><code>-----------------------------
+Ask (user text)
+   |
+   | The Ask is converted into an embedding vector.
+   |
+   v
+Query (the embedding vector used for retrieval)
+   |
+   | retrieval from a vector database
+   |
+   v
+Grounding Chunks
+-----------------------------
+</code></pre>
+<hr />
+<h2 id="constructing-and-processing-the-prompt">Constructing and Processing the Prompt</h2>
+<p>The Prompt is fed into the LLM model, which in turn generates the Response.</p>
+<pre><code>-----------------------------
+Prompt = System prompt
+       + Conversation History
+       + Ask
+       + Grounding Chunks
+       + Instructions
+       + Formatting Rules
+-----------------------------
+   |
+   | LLM takes Prompt
+   |
+   v
+Response (LLM output)
+   |
+   | AI Foundry maintains Conversation History
+   | inside Thread objects
+   |
+   v
+Conversation grows by one Turn (Ask + Response)
+</code></pre>
+<hr />
+<h2 id="example-of-a-real-prompt">Example of a Real Prompt</h2>
+<p>Note: Grounding chunks are not part of the Conversation History. This can feel counter-intuitive, because they appear in the prompt alongside the user message, but they are inserted only at runtime to support retrieval. They are not stored or carried forward as part of the dialogue context (Conversation History).</p>
+<pre><code>-----------------------------------------------------------
+SYSTEM:
+You are a helpful customer support assistant.
+
+CONVERSATION HISTORY:
+&quot;&quot;&quot;
+USER ASK: How do I know my account is active?
+RESPONSE: You can sign in.
+USER ASK: Do you notify me before expiration date?
+RESPONSE: Yes, we will text you.
+&quot;&quot;&quot;
+
+USER ASK:
+How do I renew my business account?
+
+RETRIEVED CONTEXT:
+Document: Renewal Policy Guide
+To renew the business account, the user must log in, navigate to 'Billing', select 'Account Renewal', and submit updated documents.
+
+INSTRUCTIONS:
+Answer using the context above. If the answer is not in the context, say you don’t know.
+
+FORMATTING RULES:
+Respond in Markdown.
+-----------------------------------------------------------
+</code></pre>
+<hr />
+<h1 id="orchestrator-core-responsibilities-collaboration">Orchestrator: Core Responsibilities &amp; Collaboration</h1>
+<p>The entry point is in src/main.py: <code>orchestrator_endpoint()</code>.
+In what follows we will consider the Single-Agent RAG Strategy.</p>
+<pre><code>@app.post(
+    &quot;/orchestrator&quot;,
+    dependencies=[Depends(validate_auth)], 
+    summary=&quot;Ask orchestrator a question&quot;,
+    response_description=&quot;Returns the orchestrator’s response in real time, streamed via SSE.&quot;,
+    responses=ORCHESTRATOR_RESPONSES
+)
+async def orchestrator_endpoint(
+    body: OrchestratorRequest,
+    x_api_key: Optional[str] = Header(None, alias=&quot;X-API-KEY&quot;),
+    dapr_api_token: Optional[str] = Header(None, alias=&quot;dapr-api-token&quot;),
+):
+</code></pre>
+<h2 id="essential-tasks-of-the-orchestrator">Essential Tasks of the Orchestrator</h2>
+<p>The <code>Orchestrator</code> class serves as the <strong>conversation state manager</strong> and <strong>strategy coordinator</strong>. Its core responsibilities are:</p>
+<ol>
+<li><strong>Conversation Lifecycle Management</strong>: Creates, loads, and persists conversation documents in the CosmosDB.</li>
+<li><strong>Strategy Delegation</strong>: Routes processing to appropriate agent strategies via factory pattern (<code>AgentStrategyFactory</code>).</li>
+<li><strong>State Coordination</strong>: Ensures conversation state is properly synchronized between database and strategy</li>
+<li><strong>Response Streaming</strong>: Coordinates real-time response delivery while maintaining state consistency</li>
+</ol>
+<h2 id="collaboration-pattern">Collaboration Pattern</h2>
+<pre><code>------------------------------------------------------------------
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   Orchestrator  │◄──►│   CosmosDBClient │    │ AgentStrategy   │
+│                 │    │                  │    │   Factory       │
+│ - Load/Save     │    │ - get_document() │    │                 │
+│ - Stream coord. │    │ - update_doc()   │    │ - get_strategy()│
+│ - State mgmt.   │    │ - create_doc()   │    └─────────────────┘
+└─────────────────┘    └──────────────────┘              │
+         │                                               │
+         │              ┌────────────────────────────────▼──┐
+         └─────────────►│        BaseAgentStrategy          │
+                        │                                   │
+                        │ - initiate_agent_flow()           │
+                        │ - conversation (property)         │
+                        │ - user_context (property)         │
+                        └───────────────────────────────────┘
+------------------------------------------------------------------
+</code></pre>
+<h2 id="strategy-setup-streaming-response-lifecycle">Strategy Setup + Streaming Response Lifecycle</h2>
+<p>Note the (read and update) points of conversation persistency maintenance (in green).</p>
+<!-- Offer alternative formats as small inline links/icons above or below -->
+
+<p><a href="../media/orchestrator-strategy/orchestrator-strategy.drawio.svg">🟦 SVG</a> ·
+<a href="../media/orchestrator-strategy/orchestrator-strategy.drawio.png">🟨 PNG</a> ·
+<a href="../media/orchestrator-strategy/orchestrator-strategy.jpg">🟥 JPG</a></p>
+<p><img alt="Orchestrator Strategy Setup and Streaming" src="../media/orchestrator-strategy/orchestrator-strategy.drawio.svg" /></p>
+<h2 id="singleagentragstrategy-remotely-controls-objects-in-the-ai-foundry"><code>SingleAgentRAGStrategy</code> remotely controls objects in the AI Foundry</h2>
+<p>Essentials:
+- The entry point for the selected Strategy is the method <code>agentic_strategy.initiate_agent_flow()</code>.</p>
+<pre><code># orchestrator.py
+# line 76
+      # 3) Stream all chunks from the strategy
+      try:
+          yield f&quot;{self.conversation_id} &quot;
+          async for chunk in self.agentic_strategy.initiate_agent_flow(ask):
+              yield chunk
+      finally:
+          # 4) Persist whatever the strategy has updated (e.g. thread_id)
+          await self.database_client.update_document(self.database_container, self.agentic_strategy.conversation)
+</code></pre>
+<ul>
+<li>Note that the strategy object incarnated from the <code>SingleAgentRAGStrategy</code> class is running locally (or on a VM in the cloud) and readily controls the sequence of activities behind the AI Foundry wall.</li>
+<li>To that end, the strategy object is using the <code>project_client</code> object as a local proxy (which you may think of as a remote TV control).</li>
+<li>The strategy object does not handle grounding or LLM calls; these are delegated to the AI Foundry.</li>
+<li>The entire RAG pattern is exercised inside of the AI Foundry.</li>
+</ul>
+<p><img alt="SingleAgentRAGStrategy keeping remote project_client" src="../media/remote_control.png" /></p>
+<hr />
+<p>The strategy object <code>SingleAgentRAGStrategy</code>
+- creates a new agent by specifying instructions and a toolbox,
+- retrieves the <code>Thread</code> object based on the thread_id which was retrieved from the CosmosDB,
+- creates a new message from the user's Ask and attaches it to the Thread object,
+- finally calls the project_client.agents.runs.stream() which triggers the RAG pipeline inside of the AI Foundry realm.</p>
+<hr />
+<p>Note that <code>Thread</code> objects keep the entire <strong>history of conversations</strong>.
+There are two levels of history persistence
+- one in CosmosDB,
+- another one in Thread objects.</p>
+<p><code>Orchestrator</code> keeps a history (using CosmosDB) identified by <code>conversation_id</code> which arrives in the HTTP Request payload.
+One of the attributes stored in the CosmosDB is <code>thread_id</code> which points to the <code>Thread</code> object which resides inside of the AI Foundry.
+AI Foundry maintains its own internal persistency in the Thread objects.</p>
+<hr />
+<p>The strategy object triggers the RAG pipeline execution inside of AI Foundry with the proxy <code>project_client</code>:</p>
+<pre><code>project_client.agents.runs.stream(
+    thread_id=thread.id,
+    agent_id=agent.id,
+    ...
+)
+</code></pre>
+<p>Here is what it does:
+- Takes the user's Ask.
+- Queries your Azure AI Search index using the <code>AzureAISearchTool</code>.
+- Retrieves relevant document Chunks.
+- Creates the Prompt (see above for an example).
+- Previously retrieved Chunks are included into the Prompt to ground the Response.
+- Prompt is fed into LLM which generates Response.
+- The Response is enhanced by citations and references to the grounding documents.</p>
+<hr />
+<!-- Offer alternative formats as small inline links/icons above or below -->
+<p><a href="../media/orchestrator-single-agent-strategy/orchestrator-single-agent-strategy.drawio.svg">🟦 SVG</a> ·
+<a href="../media/orchestrator-single-agent-strategy/orchestrator-single-agent-strategy.drawio.png">🟨 PNG</a> ·
+<a href="../media/orchestrator-single-agent-strategy/orchestrator-single-agent-strategy.jpg">🟥 JPG</a></p>
+<p><img alt="Single Agent RAG Strategy Internal Flow" src="../media/orchestrator-single-agent-strategy/orchestrator-single-agent-strategy.drawio.svg" /></p>
+<h2 id="detailed-singleagentragstrategyinitiate_agent_flow-for-gurus">Detailed <code>SingleAgentRAGStrategy.initiate_agent_flow()</code> for Gurus</h2>
+<p>The sequence diagram above is intended to illustrate the core concepts and design patterns present in the codebase.
+The visualization deliberately simplifies reality through abstraction and by omitting less relevant details.</p>
+<p>In contrast, the following diagram remains closely aligned with the actual implementation.
+I acknowledge the argument that directly reading the code may, in some cases, be more effective.
+However, if you wish to uncover the inner workings behind the AI Foundry orchestration, I recommend using a large display and taking the time to explore the diagram in depth.</p>
+<p>I should note that the detailed diagram below is the outcome of several iterative discussions with ChatGPT and GitHub Copilot.</p>
+<!-- Offer alternative formats as small inline links/icons above or below -->
+<p><a href="../media/single_agent_strategy/initiate_agent_flow/initiate_agent_flow.svg">🟦 SVG</a> ·
+<a href="../media/single_agent_strategy/initiate_agent_flow/initiate_agent_flow.png">🟨 PNG</a></p>
+<p><img alt="Initiate Agent Flow" src="../media/single_agent_strategy/initiate_agent_flow/initiate_agent_flow.svg" /></p>
+<h2 id="ai-foundry-whats-really-happening-behind-the-scenes">AI Foundry: What’s Really Happening Behind the Scenes</h2>
+<p>The purpose of the following diagram is to reveal the internal workings of the AI Foundry at a deeper level, including its collaboration with Azure AI Search and Bing Search. The entry point for this process is the <code>project_client.agents.runs.stream()</code> method.</p>
+<p>The detailed diagram is a result of several iterative discussions with ChatGPT and GitHub Copilot.</p>
+<!-- Offer alternative formats as small inline links/icons above or below -->
+<p><a href="../media/single_agent_strategy/enhanced_version_of_STEP_4/enhanced_version_of_STEP_4.svg">🟦 SVG</a> ·
+<a href="../media/single_agent_strategy/enhanced_version_of_STEP_4/enhanced_version_of_STEP_4.png">🟨 PNG</a></p>
+<p><img alt="Enhanced Streaming Phase" src="../media/single_agent_strategy/enhanced_version_of_STEP_4/enhanced_version_of_STEP_4.svg" /></p>
+<hr />
+<h2 id="how-to-read-these-diagrams">How to Read These Diagrams</h2>
+<ul>
+<li>Left → Right = Components</li>
+<li>Top → Bottom = Time</li>
+<li>Solid Arrows = Calls</li>
+<li>Dashed Arrows = Returns / Streams</li>
+<li>Background Colors = Logical Stages</li>
+</ul>
+<blockquote>
+<p>Read the diagram <strong>before</strong> reading the code.</p>
+</blockquote>
+<hr />
+<h2 id="link-to-the-repository">Link to the Repository</h2>
+<blockquote>
+<p><strong>Repository:</strong><br />
+https://github.com/Azure/gpt-rag-orchestrator</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>File</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Orchestrator entry</td>
+<td><code>main.py</code></td>
+<td>FastAPI route + request handling</td>
+</tr>
+<tr>
+<td>Orchestrator implementation</td>
+<td><code>orchestration/orchestrator.py</code></td>
+<td>Maintains Conversation History + runs streaming pipeline</td>
+</tr>
+<tr>
+<td>Strategy factory</td>
+<td><code>strategies/agent_strategy_factory.py</code></td>
+<td>Selects the execution strategy</td>
+</tr>
+<tr>
+<td>Single-Agent RAG Strategy</td>
+<td><code>strategies/single_agent_rag_strategy.py</code></td>
+<td>Implements flow to Azure AI Foundry</td>
+</tr>
+</tbody>
+</table>
+<hr />
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <div style="
+  background-color: var(--md-primary-fg-color);
+  color: var(--md-primary-bg-color);
+  text-align: center;
+  font-size: 0.95em;
+  padding: 1em 0;
+">
+  © 2025 GPT-RAG — powered by ❤️ and coffee ☕
+</div>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "toc.integrate", "content.code.annotate", "navigation.top"], "search": "../assets/javascripts/workers/search.07f07601.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.56dfad97.min.js"></script>
+      
+    
+  </body>
+</html>
