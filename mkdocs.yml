@@ -21,7 +21,11 @@ nav:
   - Deployment Guide: deploy.md
   - Architecture:
     - Overview: architecture.md
+  - Services:
+    - Orchestrator: ochestrator.md
   - Configuration:
     - User Feedback: userfeedback.md
+  - Meet the Team: team.md
+  - Contributing: contributing.md    
 extra:
   generator: false

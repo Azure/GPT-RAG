@@ -6,6 +6,18 @@ This project adheres to the [Microsoft Open Source Code of Conduct](https://open
 
 Below, you'll find details on how our code update process works and instructions on how to contribute.
 
+## 🤝 Contributors
+
+Contributions include code, feedback, design ideas, documentation, and collaboration.
+
+### Ways to Contribute
+- **Issues:** Report bugs, propose enhancements, or share feature requests.
+- **Comments:** Engage in discussions, help others, and review proposals.
+- **Documentation:** Improve guides and clarity for new users.
+- **Design:** Contribute to open design discussions and new patterns.
+- **Tests:** Strengthen reliability through unit and integration tests.
+- **Code:** Submit fixes, enhancements, or new modules via pull requests.
+
 ## Contribution Guidelines
 
 To maintain project quality, the following items will be considered during the PR review.
@@ -24,78 +36,130 @@ To maintain project quality, the following items will be considered during the P
 
 - **Multi-Repo Dependencies:** If your pull request has dependencies on updates in other repositories, make sure to mention this in the pull request description. Additionally, create a corresponding pull request in the other repository to ensure synchronized updates across all related projects.
 
-
 ## Code Update Workflow
 
 We use a simplified version of the [Fork and Branch Workflow](https://blog.scottlowe.org/2015/01/27/using-fork-branch-git-workflow/) alongside [Git Flow](https://nvie.com/posts/a-successful-git-branching-model/) for branching strategy. The `main` branch always contains deployment-ready code, while the `develop` branch serves as our integration branch.
 
 Contributors create feature branches from `develop` in their forks. Once changes are completed, they submit a pull request to the `develop` branch in the upstream repository. After review and approval, reviewers merge the changes into `develop`. Weekly, maintainers group these changes into a pull request from `develop` to `main` for final review and merging.
 
-### Step-by-Step Process Overview
+### Process Overview
 
-This section outlines the contribution process, highlighting the key actions for both contributors and reviewers. The accompanying diagram visually represents the workflow.
+This section outlines the contribution process, highlighting the key actions for both contributors and maintainers. The accompanying diagram visually represents the workflow.
 
 ![git workflow](media/contributing-workflow.png)
 
-#### Contributor
+1) **Fork the Repository**
+   
+   Create a copy of the GPT-RAG upstream repository under your own GitHub account.
 
-1. **Fork the Repository**: Create a copy of the original repository in your GitHub account.
-2. **Clone Locally**: Download the forked repository to your machine.
-3. **Add Upstream**: Link the original repository as "upstream" to keep your fork synced.
-4. **Create a Feature Branch**: Start a new branch for your changes.
-5. **Commit and Push Changes**: Implement your changes and push them to your GitHub fork.
-6. **Open a Pull Request**: Submit your changes for review. If approved, they’ll be merged into the `develop` branch and later into `main` based on the project’s release process.
-7. **Keep Your Fork Updated**: Regularly sync your fork with the original repository to stay current.
+2) **Clone Locally**
 
-## Contributor's Step-by-Step Guide
+   Download your forked repository to your local machine.
 
-Here’s an example of how to implement a feature called `conversation-metadata` in the `gpt-rag-orchestrator` repository. The process is similar for other repositories, such as `gpt-rag-ingestion`.
+3) **Add Upstream** 
 
-1. **Create a Fork** by clicking the **Fork** button on the repository page on GitHub. Be sure to include all branches.
+Link the original GPT-RAG upstream repository as `upstream` to keep your fork synchronized.
 
-   `https://github.com/placerda/gpt-rag-orchestrator.git`
+4) **Create a Feature Branch**
 
-2. **Clone Your Fork Locally** using the standard clone command.
+From your fork’s `develop` branch, create a feature branch for your change (e.g., `feature/feature_x`).
 
-   `git clone https://github.com/placerda/gpt-rag-orchestrator.git`
+5) **Commit and Push Changes**
 
-3. **Set Upstream Remote**: Link the original repository as "upstream" for future use.
+Implement your updates locally, commit, and push them to your fork on GitHub.
 
-   `git remote add upstream git@github.com:Azure/gpt-rag-orchestrator.git`
+6) **Open and Merge the Pull Request to `develop`**
 
-4. **Create a Feature Branch** in your forked repository.
+Open a PR from your feature branch in your fork to the upstream repository’s `develop` branch.
 
-   `git checkout -b feature/conversation-metadata`
+7) **Sync with Upstream `develop`**
 
-5. **Make Changes Locally**: Modify the code in your local clone. Commit your changes and push them to your fork on GitHub.
+After your PR is merged, update your fork’s `develop` branch with the latest changes from the upstream.
+
+8) **Create a Release Branch**
+
+When the `develop` branch is ready for release, create a branch named `release/x.y.z` from your fork’s `develop`. This branch will be tested and validated before merging to `main`.
+
+9) **Open a Pull Request to Upstream `main`**
+
+Once the release is validated, open a PR from your release branch to the upstream `main`. After the merge, maintainers will create a version tag (e.g., `v2.0.1`).
+
+10) **Sync Your Fork**
+
+Finally, update both your fork’s `main` and `develop` branches to reflect the latest upstream state.
+
+### Step-by-Step
+
+Here’s an example of implementing a feature called `conversation-metadata` in the `gpt-rag-orchestrator` repository.
+
+1) **Create a Fork**
+
+   ```bash
+   https://github.com/placerda/gpt-rag-orchestrator.git
+   ```
+
+2) **Clone Your Fork Locally**
+
+   ```bash
+   git clone https://github.com/placerda/gpt-rag-orchestrator.git
+   ```
+
+3) **Set Upstream Remote**
+
+   ```bash
+   git remote add upstream git@github.com:Azure/gpt-rag-orchestrator.git
+   ```
+
+4) **Create a Feature Branch**
+
+   ```bash
+   git checkout -b feature/conversation-metadata develop
+   ```
+
+5) **Make and Push Your Changes**
 
    ```bash
    git add .
-   git commit -m 'Implemented conversation metadata'
+   git commit -m "Implemented conversation metadata"
    git push origin feature/conversation-metadata
    ```
 
-6. **Create a Pull Request**: Go to your fork on GitHub and click "Pull Request." This request, aimed at the `develop` branch, will be reviewed and potentially merged by the repository maintainers.
+6) **Open and Merge the Pull Request to `develop`**
 
-   **Done!** Now, wait for the review and approval of your pull request. Changes may be requested.
- 
-#### Keeping Your Fork Updated
+   * **6a. Create the PR:**
+     Go to your fork on GitHub → click **New Pull Request** →
+     Base: `Azure/gpt-rag-orchestrator` → `develop`
+     Compare: `placerda/gpt-rag-orchestrator` → `feature/conversation-metadata`
+   * **6b. Maintainer Review:**
+     The maintainers will review, request changes if needed, and merge the PR into the upstream `develop`.
 
-It’s recommended that you update your local clone after your pull request is approved. Follow these steps:
+7) **Sync Your Fork’s `develop`**
+
+   ```bash
+   git fetch upstream
+   git checkout develop
+   git merge upstream/develop
+   git push origin develop
+   ```
+
+8) **Create a Release Branch**
+
+   ```bash
+   git checkout -b release/2.0.1 develop
+   git push origin release/2.0.1
+   ```
+
+9) **Open a Pull Request to Upstream `main`**
+
+   * Base: `Azure/gpt-rag-orchestrator` → `main`
+   * Compare: `placerda/gpt-rag-orchestrator` → `release/2.0.1`
+   * After review and merge, maintainers tag the release (e.g., `v2.0.1`).
+
+10) **Sync Your Fork After Tag Creation**
 
 ```bash
-git pull upstream main
+git fetch upstream
+git checkout main
+git merge upstream/main
 git push origin main
-git pull upstream develop
-git push origin develop
-```
-
-#### Cleaning Your Repo After PR Acceptance
-
-Once your changes are merged, you can delete the feature branch from your local clone using these commands:
-
-```bash
-git switch develop
-git branch -d feature/conversation-metadata
-git push --delete origin feature/conversation-metadata
 ```
