@@ -24,8 +24,12 @@ Quick setup for demos without network isolation.
 
 ```
 azd init -t azure/gpt-rag
+az login
+azd auth login
 azd provision
 ```
+
+> Add `--tenant` for `az` or `--tenant-id` for `azd` if you want a specific tenant.
 
 Demo video:
 
@@ -52,6 +56,17 @@ Enable network isolation in your environment:
 azd env set NETWORK_ISOLATION true
 ```
 
+Make sure you’re signed in with your Azure user account:
+
+```
+
+az login
+azd auth login
+
+```
+
+> Add `--tenant` for `az` or `--tenant-id` for `azd` if you want a specific tenant.
+
 ### Provision Infrastructure
 
 ```
@@ -64,9 +79,24 @@ azd provision
 
 **Option A – Using the deployed Jumpbox VM**
 
-1. Reset the VM password in the Azure Portal (required on first access if not set in deployment parameters): Go to your VM resource → **Support + troubleshooting** → **Reset password** → Set new credentials.
-2. Connect via **Azure Bastion**.
-3. Open a terminal in the VM and run:
+Reset the VM password in the Azure Portal (required on first access if not set in deployment parameters): <br>Go to your VM resource → **Support + troubleshooting** → **Reset password** → Set new credentials.
+
+> Note: default username is `testvmuser`
+
+Connect via **Azure Bastion**.
+
+Once connected, authenticate with the VM’s Managed Identity:
+
+```
+
+az login --identity
+azd auth login --with-managed-identity
+
+```
+
+> Add `--tenant` for `az` or `--tenant-id` for `azd` if you want a specific tenant.
+
+Open a terminal in the VM and run:
 
 ```
 cd c:\github\gpt-rag
