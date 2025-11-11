@@ -64,38 +64,33 @@ azd provision
 
 **Option A – Using the deployed Jumpbox VM**
 
-1. Connect via **Azure Bastion**.
-2. Open a terminal in the VM and run:
+1. Reset the VM password in the Azure Portal (required on first access if not set in deployment parameters): Go to your VM resource → **Support + troubleshooting** → **Reset password** → Set new credentials.
+2. Connect via **Azure Bastion**.
+3. Open a terminal in the VM and run:
 
-   ```
-   cd C:\github\gpt-rag
-   .\scripts\postProvision.ps1
-   ```
+```
+cd c:\github\gpt-rag
+.\scripts\postProvision.ps1
+```
 
 **Option B – From your local machine (must have VNet access)**
 
-1. From the `gpt-rag` directory, run:
+From the `gpt-rag` directory, run:
 
-   ```
-   .\scripts\postProvision.ps1
-   ```
+```
+.\scripts\postProvision.ps1
+```
 
    or (Bash)
 
-   ```
-   .\scripts\postProvision.sh
-   ```
+```
+.\scripts\postProvision.sh
+```
 
-2. If you have re-initialized or cloned the repo again, refresh your `azd` environment so it points to the **existing** deployment:
+> Note: If you have re-initialized or cloned the gpt-rag repo again, refresh your `azd` environment before running postProvision script so it points to the **existing** deployment:
+> `azd init -t azure/gpt-rag` then `azd env refresh`. When prompted, select the **same Subscription, Resource Group, and Location** as the original provisioning so `azd` correctly links to your environment.
 
-   ```
-   azd init -t azure/gpt-rag
-   azd env refresh
-   ```
-
-3. When prompted, select the **same Subscription, Resource Group, and Location** as the original provisioning so `azd` correctly links to your environment.
-
-### Deploy GPT-RAG Services
+## Deploy GPT-RAG Services
 
 Once the GPT-RAG infrastructure is provisioned, you can deploy the services.
 
