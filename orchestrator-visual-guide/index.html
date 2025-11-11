@@ -20,7 +20,7 @@
     
     
       
-        <title>Orchestrator visual guide - GPT-RAG</title>
+        <title>Orchestrator: Start Your Code Reading with Visuals - GPT-RAG</title>
       
     
     
@@ -105,7 +105,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Orchestrator visual guide
+              Orchestrator: Start Your Code Reading with Visuals
             
           </span>
         </div>
@@ -336,7 +336,7 @@
             
   
   <span class="md-ellipsis">
-    Configuration
+    Services
   </span>
   
 
@@ -345,6 +345,69 @@
         
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Services
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ochestrator/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Orchestrator
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Configuration
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             Configuration
           </label>
@@ -378,6 +441,46 @@
   
 
     
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../team/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Meet the Team
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
   </ul>
 </nav>
                   </div>
@@ -393,181 +496,22 @@
                   
 
 
-<p><img alt="SingleAgentRAGStrategy keeping remote project_client" src="../media/funny-orchestrator-v2.png" /></p>
 <h1 id="orchestrator-start-your-code-reading-with-visuals">Orchestrator: Start Your Code Reading with Visuals</h1>
 <p><em>A picture is worth a thousand words.</em><br />
 Yet many engineers write another thousand words instead of drawing a single useful diagram.<br />
 Let’s reverse this evolution — with visuals.</p>
-<p>Starting with diagrams — with a bit of simplification and abstraction — can significantly accelerate the comprehension of complex codebases. This is especially true when the data flow spans multiple execution environments (local machine (or VM on cloud), remote AI Foundry, Azure cloud resources), where the initial orientation can otherwise be challenging.</p>
-<hr />
-<h3 id="why-this-article-exists">Why This Article Exists</h3>
+<p>Starting with diagrams — with a bit of simplification and abstraction — can significantly accelerate the comprehension of complex codebases. This is especially true when the data flow spans multiple execution environments (container app, AI Foundry, Azure cloud resources), where the initial orientation can otherwise be challenging.</p>
+<h2 id="why-this-article-exists">Why This Article Exists</h2>
 <p>When I started reading the code, I struggled:</p>
 <ul>
 <li>Where is the entry point?</li>
 <li>What calls what?</li>
-<li>What runs locally and what in the cloud?</li>
-<li>What is the big picture (helicopter view)?</li>
-<li>Which design patterns are applied?</li>
 <li>What is the role of the Orchestrator in the data flow?</li>
 </ul>
-<p>If you have ever felt <strong>dazed and confused by a codebase with many layers of abstraction</strong>, this is for you.
-If you prefer talking for hours about a diagram instead of drawing it, just leave.</p>
-<h3 id="target-audience">Target Audience</h3>
-<p>Folks with an <em>engineering mindset</em> who want to <em>understand before modifying.</em></p>
-<h3 id="hardware-recommendation">Hardware Recommendation</h3>
-<p>Use a large monitor (32-inch or larger). Diagrams require space.</p>
-<blockquote>
-<p>Note: Each diagram is available in multiple formats (<code>.png</code>, <code>.jpg</code>, <code>.svg</code>).
-While SVG is technically the optimal and resolution-independent format,
-some operating systems and PDF export workflows do not reliably render SVG.
-To ensure accessibility and consistent viewing experience across different
-environments, alternative formats are provided.</p>
-</blockquote>
-<hr />
-<h2 id="start-with-the-glossary">Start With the Glossary</h2>
-<p>The glossary is a shared language. Without clear and standardized terminology, people cannot meaningfully discuss ideas — they end up talking past each other. Shared terms are the foundation of shared understanding.</p>
-<table>
-<thead>
-<tr>
-<th>Term</th>
-<th>Definition</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Ask</strong></td>
-<td>What the user says in natural language. It is the raw user message before any system processing.</td>
-</tr>
-<tr>
-<td><strong>Query</strong></td>
-<td>The Ask transformed into a form suitable for retrieval (for example, converted to an embedding vector). The embedding vector is used to retrieve grounding document chunks from a vector database. Note: The Query is not part of the Prompt. Note: In practice, Ask and Query are often used interchangeably.</td>
-</tr>
-<tr>
-<td><strong>Prompt</strong></td>
-<td>The final constructed input sent to the language model. It may include the user’s Ask, retrieved document chunks, dialogue history, and system instructions.</td>
-</tr>
-<tr>
-<td><strong>Request</strong></td>
-<td>The HTTPS API call sent to the model endpoint to generate a Response.</td>
-</tr>
-<tr>
-<td><strong>Response</strong></td>
-<td>The output returned by the model after processing a Request.</td>
-</tr>
-<tr>
-<td><strong>Message</strong></td>
-<td>A single user, assistant, or system message in a Conversation. It can be an Ask, a Response, or a system/instruction message that may be included when constructing a Prompt.</td>
-</tr>
-<tr>
-<td><strong>Turn</strong></td>
-<td>A pair of Ask + Response.</td>
-</tr>
-<tr>
-<td><strong>Interaction</strong></td>
-<td>Another word for Turn. One full cycle of Ask → Response.</td>
-</tr>
-<tr>
-<td><strong>Conversation</strong></td>
-<td>A sequence of Interactions over time (many Turns), with the history persisted and reused as context.</td>
-</tr>
-<tr>
-<td><strong>Dialogue</strong></td>
-<td>The communication pattern of exchanging messages. A Conversation is an instance of a Dialogue sustained over time.</td>
-</tr>
-<tr>
-<td><strong>Thread</strong></td>
-<td>A platform-specific (AI Foundry) object that persists the Conversation History, identified by a thread ID.</td>
-</tr>
-<tr>
-<td>---</td>
-<td></td>
-</tr>
-</tbody>
-</table>
-<h2 id="conversation-is-a-sequence-of-turns-interactions">Conversation is a Sequence of Turns (Interactions)</h2>
-<p>Each user Ask and system Response adds one turn to the conversation.</p>
-<pre><code>Conversation
-  ├── Turn #1
-  │      Ask
-  │      Response
-  ├── Turn #2
-  │      Ask
-  │      Response
-  └── ...
-</code></pre>
-<hr />
-<h2 id="retrieving-grounding-chunks">Retrieving Grounding Chunks</h2>
-<p>Grounding Chunks are critical because they anchor the model’s answer in factual, domain-correct information instead of relying on the model’s general knowledge or guesswork.
-Note: Retrieval is based solely on the Ask. No other parts of the Prompt are used. The only input used for retrieval is the Ask.</p>
-<pre><code>-----------------------------
-Ask (user text)
-   |
-   | The Ask is converted into an embedding vector.
-   |
-   v
-Query (the embedding vector used for retrieval)
-   |
-   | retrieval from a vector database
-   |
-   v
-Grounding Chunks
------------------------------
-</code></pre>
-<hr />
-<h2 id="constructing-and-processing-the-prompt">Constructing and Processing the Prompt</h2>
-<p>The Prompt is fed into the LLM model, which in turn generates the Response.</p>
-<pre><code>-----------------------------
-Prompt = System prompt
-       + Conversation History
-       + Ask
-       + Grounding Chunks
-       + Instructions
-       + Formatting Rules
------------------------------
-   |
-   | LLM takes Prompt
-   |
-   v
-Response (LLM output)
-   |
-   | AI Foundry maintains Conversation History
-   | inside Thread objects
-   |
-   v
-Conversation grows by one Turn (Ask + Response)
-</code></pre>
-<hr />
-<h2 id="example-of-a-real-prompt">Example of a Real Prompt</h2>
-<p>Note: Grounding chunks are not part of the Conversation History. This can feel counter-intuitive, because they appear in the prompt alongside the user message, but they are inserted only at runtime to support retrieval. They are not stored or carried forward as part of the dialogue context (Conversation History).</p>
-<pre><code>-----------------------------------------------------------
-SYSTEM:
-You are a helpful customer support assistant.
-
-CONVERSATION HISTORY:
-&quot;&quot;&quot;
-USER ASK: How do I know my account is active?
-RESPONSE: You can sign in.
-USER ASK: Do you notify me before expiration date?
-RESPONSE: Yes, we will text you.
-&quot;&quot;&quot;
-
-USER ASK:
-How do I renew my business account?
-
-RETRIEVED CONTEXT:
-Document: Renewal Policy Guide
-To renew the business account, the user must log in, navigate to 'Billing', select 'Account Renewal', and submit updated documents.
-
-INSTRUCTIONS:
-Answer using the context above. If the answer is not in the context, say you don’t know.
-
-FORMATTING RULES:
-Respond in Markdown.
------------------------------------------------------------
-</code></pre>
-<hr />
-<h1 id="orchestrator-core-responsibilities-collaboration">Orchestrator: Core Responsibilities &amp; Collaboration</h1>
-<p>The entry point is in src/main.py: <code>orchestrator_endpoint()</code>.
+<p>If you have ever felt <strong>dazed and confused by a codebase with many layers of abstraction</strong>, this is for you.</p>
+<p>If you prefer talking for hours about a diagram instead of drawing it, just leave.</p>
+<h2 id="core-architecture-flow">Core Architecture &amp; Flow</h2>
+<p>The orchestrator's entry point is in src/main.py: <code>orchestrator_endpoint()</code>.
 In what follows we will consider the Single-Agent RAG Strategy.</p>
 <pre><code>@app.post(
     &quot;/orchestrator&quot;,
@@ -590,69 +534,33 @@ async def orchestrator_endpoint(
 <li><strong>State Coordination</strong>: Ensures conversation state is properly synchronized between database and strategy</li>
 <li><strong>Response Streaming</strong>: Coordinates real-time response delivery while maintaining state consistency</li>
 </ol>
-<h2 id="collaboration-pattern">Collaboration Pattern</h2>
-<pre><code>------------------------------------------------------------------
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Orchestrator  │◄──►│   CosmosDBClient │    │ AgentStrategy   │
-│                 │    │                  │    │   Factory       │
-│ - Load/Save     │    │ - get_document() │    │                 │
-│ - Stream coord. │    │ - update_doc()   │    │ - get_strategy()│
-│ - State mgmt.   │    │ - create_doc()   │    └─────────────────┘
-└─────────────────┘    └──────────────────┘              │
-         │                                               │
-         │              ┌────────────────────────────────▼──┐
-         └─────────────►│        BaseAgentStrategy          │
-                        │                                   │
-                        │ - initiate_agent_flow()           │
-                        │ - conversation (property)         │
-                        │ - user_context (property)         │
-                        └───────────────────────────────────┘
-------------------------------------------------------------------
-</code></pre>
-<h2 id="strategy-setup-streaming-response-lifecycle">Strategy Setup + Streaming Response Lifecycle</h2>
-<p>Note the (read and update) points of conversation persistency maintenance (in green).</p>
-<!-- Offer alternative formats as small inline links/icons above or below -->
-
-<p><a href="../media/orchestrator-strategy/orchestrator-strategy.drawio.svg">🟦 SVG</a> ·
-<a href="../media/orchestrator-strategy/orchestrator-strategy.drawio.png">🟨 PNG</a> ·
-<a href="../media/orchestrator-strategy/orchestrator-strategy.jpg">🟥 JPG</a></p>
-<p><img alt="Orchestrator Strategy Setup and Streaming" src="../media/orchestrator-strategy/orchestrator-strategy.drawio.svg" /></p>
-<h2 id="singleagentragstrategy-remotely-controls-objects-in-the-ai-foundry"><code>SingleAgentRAGStrategy</code> remotely controls objects in the AI Foundry</h2>
-<p>Essentials:
-- The entry point for the selected Strategy is the method <code>agentic_strategy.initiate_agent_flow()</code>.</p>
-<pre><code># orchestrator.py
-# line 76
-      # 3) Stream all chunks from the strategy
-      try:
-          yield f&quot;{self.conversation_id} &quot;
-          async for chunk in self.agentic_strategy.initiate_agent_flow(ask):
-              yield chunk
-      finally:
-          # 4) Persist whatever the strategy has updated (e.g. thread_id)
-          await self.database_client.update_document(self.database_container, self.agentic_strategy.conversation)
-</code></pre>
+<h2 id="single-agent-strategy">Single Agent Strategy</h2>
+<p>This section explores how the Single-Agent RAG Strategy orchestrates the entire request-response lifecycle, from receiving a user's question to delivering a grounded, streamed answer. The diagrams below illustrate the conversation lifecycle, state management, and the interaction between the Orchestrator container app and AI Foundry services.</p>
+<p><a href="../media/orchestrator_strategy/orchestrator-strategy.drawio.svg">🟦 SVG</a> ·
+<a href="../media/orchestrator_strategy/orchestrator-strategy.drawio.png">🟨 PNG</a> ·
+<a href="../media/orchestrator_strategy/orchestrator-strategy.jpg">🟥 JPG</a></p>
+<p><img alt="Orchestrator Strategy Setup and Streaming" src="../media/orchestrator_strategy/orchestrator-strategy.drawio.svg" /></p>
+<p>The entry point for the selected Strategy is the method <code>agentic_strategy.initiate_agent_flow()</code>.</p>
+<p>The strategy object instantiated from the <code>SingleAgentRAGStrategy</code> class runs in the container app and controls the sequence of activities behind the AI Foundry wall. It uses the <code>project_client</code> object as a local proxy (think of it as a remote TV control) to orchestrate operations. The strategy object doesn't handle grounding or LLM calls directly—these are delegated to the AI Foundry agent where the entire RAG pattern is executed.</p>
+<p>The strategy object <code>SingleAgentRAGStrategy</code></p>
 <ul>
-<li>Note that the strategy object incarnated from the <code>SingleAgentRAGStrategy</code> class is running locally (or on a VM in the cloud) and readily controls the sequence of activities behind the AI Foundry wall.</li>
-<li>To that end, the strategy object is using the <code>project_client</code> object as a local proxy (which you may think of as a remote TV control).</li>
-<li>The strategy object does not handle grounding or LLM calls; these are delegated to the AI Foundry.</li>
-<li>The entire RAG pattern is exercised inside of the AI Foundry.</li>
+<li>
+<p>creates a new agent by specifying instructions and a toolbox,</p>
+</li>
+<li>
+<p>retrieves the <code>Thread</code> object based on the thread_id which was retrieved from the CosmosDB,</p>
+</li>
+<li>
+<p>creates a new message from the user's Ask and attaches it to the Thread object,</p>
+</li>
+<li>
+<p>finally calls the project_client.agents.runs.stream() which triggers the RAG pipeline inside of the AI Foundry realm.</p>
+</li>
 </ul>
-<p><img alt="SingleAgentRAGStrategy keeping remote project_client" src="../media/remote_control.png" /></p>
-<hr />
-<p>The strategy object <code>SingleAgentRAGStrategy</code>
-- creates a new agent by specifying instructions and a toolbox,
-- retrieves the <code>Thread</code> object based on the thread_id which was retrieved from the CosmosDB,
-- creates a new message from the user's Ask and attaches it to the Thread object,
-- finally calls the project_client.agents.runs.stream() which triggers the RAG pipeline inside of the AI Foundry realm.</p>
-<hr />
-<p>Note that <code>Thread</code> objects keep the entire <strong>history of conversations</strong>.
-There are two levels of history persistence
-- one in CosmosDB,
-- another one in Thread objects.</p>
+<p>Note that <code>Thread</code> objects keep the entire <strong>history of conversations</strong>. There are two levels of history persistence: one in CosmosDB and another in Thread objects.</p>
 <p><code>Orchestrator</code> keeps a history (using CosmosDB) identified by <code>conversation_id</code> which arrives in the HTTP Request payload.
 One of the attributes stored in the CosmosDB is <code>thread_id</code> which points to the <code>Thread</code> object which resides inside of the AI Foundry.
 AI Foundry maintains its own internal persistency in the Thread objects.</p>
-<hr />
 <p>The strategy object triggers the RAG pipeline execution inside of AI Foundry with the proxy <code>project_client</code>:</p>
 <pre><code>project_client.agents.runs.stream(
     thread_id=thread.id,
@@ -660,56 +568,39 @@ AI Foundry maintains its own internal persistency in the Thread objects.</p>
     ...
 )
 </code></pre>
-<p>Here is what it does:
-- Takes the user's Ask.
-- Queries your Azure AI Search index using the <code>AzureAISearchTool</code>.
-- Retrieves relevant document Chunks.
-- Creates the Prompt (see above for an example).
-- Previously retrieved Chunks are included into the Prompt to ground the Response.
-- Prompt is fed into LLM which generates Response.
-- The Response is enhanced by citations and references to the grounding documents.</p>
-<hr />
+<p>Here is what it does:</p>
+<ul>
+<li>
+<p>Takes the user's Ask.</p>
+</li>
+<li>
+<p>Queries your Azure AI Search index using the <code>AzureAISearchTool</code>.</p>
+</li>
+<li>
+<p>Retrieves relevant document Chunks.</p>
+</li>
+<li>
+<p>Creates the Prompt.</p>
+</li>
+<li>
+<p>Previously retrieved Chunks are included into the Prompt to ground the Response.</p>
+</li>
+<li>
+<p>Prompt is fed into LLM which generates Response.</p>
+</li>
+<li>
+<p>The Response is enhanced by citations and references to the grounding documents.</p>
+</li>
+</ul>
+<h3 id="single-agent-strategy-internal-flow">Single Agent Strategy Internal Flow</h3>
 <!-- Offer alternative formats as small inline links/icons above or below -->
-<p><a href="../media/orchestrator-single-agent-strategy/orchestrator-single-agent-strategy.drawio.svg">🟦 SVG</a> ·
-<a href="../media/orchestrator-single-agent-strategy/orchestrator-single-agent-strategy.drawio.png">🟨 PNG</a> ·
-<a href="../media/orchestrator-single-agent-strategy/orchestrator-single-agent-strategy.jpg">🟥 JPG</a></p>
-<p><img alt="Single Agent RAG Strategy Internal Flow" src="../media/orchestrator-single-agent-strategy/orchestrator-single-agent-strategy.drawio.svg" /></p>
-<h2 id="detailed-singleagentragstrategyinitiate_agent_flow-for-gurus">Detailed <code>SingleAgentRAGStrategy.initiate_agent_flow()</code> for Gurus</h2>
+<p><a href="../media/orchestrator_single_agent_strategy/orchestrator-single-agent-strategy.drawio.svg">🟦 SVG</a> ·
+<a href="../media/orchestrator_single_agent_strategy/orchestrator-single-agent-strategy.drawio.png">🟨 PNG</a> ·
+<a href="../media/orchestrator_single_agent_strategy/orchestrator-single-agent-strategy.jpg">🟥 JPG</a></p>
+<p><img alt="Single Agent RAG Strategy Internal Flow" src="../media/orchestrator_single_agent_strategy/orchestrator-single-agent-strategy.drawio.png" /></p>
 <p>The sequence diagram above is intended to illustrate the core concepts and design patterns present in the codebase.
 The visualization deliberately simplifies reality through abstraction and by omitting less relevant details.</p>
-<p>In contrast, the following diagram remains closely aligned with the actual implementation.
-I acknowledge the argument that directly reading the code may, in some cases, be more effective.
-However, if you wish to uncover the inner workings behind the AI Foundry orchestration, I recommend using a large display and taking the time to explore the diagram in depth.</p>
-<p>I should note that the detailed diagram below is the outcome of several iterative discussions with ChatGPT and GitHub Copilot.</p>
-<!-- Offer alternative formats as small inline links/icons above or below -->
-<p><a href="../media/single_agent_strategy/initiate_agent_flow/initiate_agent_flow.svg">🟦 SVG</a> ·
-<a href="../media/single_agent_strategy/initiate_agent_flow/initiate_agent_flow.png">🟨 PNG</a></p>
-<p><img alt="Initiate Agent Flow" src="../media/single_agent_strategy/initiate_agent_flow/initiate_agent_flow.svg" /></p>
-<h2 id="ai-foundry-whats-really-happening-behind-the-scenes">AI Foundry: What’s Really Happening Behind the Scenes</h2>
-<p>The purpose of the following diagram is to reveal the internal workings of the AI Foundry at a deeper level, including its collaboration with Azure AI Search and Bing Search. The entry point for this process is the <code>project_client.agents.runs.stream()</code> method.</p>
-<p>The detailed diagram is a result of several iterative discussions with ChatGPT and GitHub Copilot.</p>
-<!-- Offer alternative formats as small inline links/icons above or below -->
-<p><a href="../media/single_agent_strategy/enhanced_version_of_STEP_4/enhanced_version_of_STEP_4.svg">🟦 SVG</a> ·
-<a href="../media/single_agent_strategy/enhanced_version_of_STEP_4/enhanced_version_of_STEP_4.png">🟨 PNG</a></p>
-<p><img alt="Enhanced Streaming Phase" src="../media/single_agent_strategy/enhanced_version_of_STEP_4/enhanced_version_of_STEP_4.svg" /></p>
-<hr />
-<h2 id="how-to-read-these-diagrams">How to Read These Diagrams</h2>
-<ul>
-<li>Left → Right = Components</li>
-<li>Top → Bottom = Time</li>
-<li>Solid Arrows = Calls</li>
-<li>Dashed Arrows = Returns / Streams</li>
-<li>Background Colors = Logical Stages</li>
-</ul>
-<blockquote>
-<p>Read the diagram <strong>before</strong> reading the code.</p>
-</blockquote>
-<hr />
-<h2 id="link-to-the-repository">Link to the Repository</h2>
-<blockquote>
-<p><strong>Repository:</strong><br />
-https://github.com/Azure/gpt-rag-orchestrator</p>
-</blockquote>
+<h2 id="links-to-the-code">Links to the code</h2>
 <table>
 <thead>
 <tr>
@@ -721,27 +612,26 @@ https://github.com/Azure/gpt-rag-orchestrator</p>
 <tbody>
 <tr>
 <td>Orchestrator entry</td>
-<td><code>main.py</code></td>
+<td><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/main/src/main.py"><code>main.py</code></a></td>
 <td>FastAPI route + request handling</td>
 </tr>
 <tr>
 <td>Orchestrator implementation</td>
-<td><code>orchestration/orchestrator.py</code></td>
+<td><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/main/src/orchestration/orchestrator.py"><code>orchestration/orchestrator.py</code></a></td>
 <td>Maintains Conversation History + runs streaming pipeline</td>
 </tr>
 <tr>
 <td>Strategy factory</td>
-<td><code>strategies/agent_strategy_factory.py</code></td>
+<td><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/main/src/strategies/agent_strategy_factory.py"><code>strategies/agent_strategy_factory.py</code></a></td>
 <td>Selects the execution strategy</td>
 </tr>
 <tr>
 <td>Single-Agent RAG Strategy</td>
-<td><code>strategies/single_agent_rag_strategy.py</code></td>
+<td><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/main/src/strategies/single_agent_rag_strategy.py"><code>strategies/single_agent_rag_strategy.py</code></a></td>
 <td>Implements flow to Azure AI Foundry</td>
 </tr>
 </tbody>
 </table>
-<hr />
 
 
 
