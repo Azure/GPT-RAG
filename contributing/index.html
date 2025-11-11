@@ -663,10 +663,10 @@
 <p>6) <strong>Open and Merge the Pull Request to <code>develop</code></strong></p>
 <p>Open a PR from your feature branch in your fork to the upstream repository’s <code>develop</code> branch.</p>
 <p>7) <strong>Sync with Upstream <code>develop</code></strong></p>
-<p>After your PR is merged, update your fork’s <code>develop</code> branch with the latest changes from the upstream.</p>
-<p>8) <strong>Create a Release Branch</strong></p>
-<p>When the <code>develop</code> branch is ready for release, create a branch named <code>release/x.y.z</code> from your fork’s <code>develop</code>. This branch will be tested and validated before merging to <code>main</code>.</p>
-<p>9) <strong>Open a Pull Request to Upstream <code>main</code></strong></p>
+<p>After your PR is merged, update your fork's <code>develop</code> branch with the latest changes from the upstream.</p>
+<p>8) <strong>Create a Release Branch</strong> <em>(Maintainers)</em></p>
+<p>When the <code>develop</code> branch is ready for release, create a branch named <code>release/x.y.z</code> from your fork's <code>develop</code>. This branch will be tested and validated before merging to <code>main</code>.</p>
+<p>9) <strong>Open a Pull Request to Upstream <code>main</code></strong> <em>(Maintainers)</em></p>
 <p>Once the release is validated, open a PR from your release branch to the upstream <code>main</code>. After the merge, maintainers will create a version tag (e.g., <code>v2.0.1</code>).</p>
 <p>10) <strong>Sync Your Fork</strong></p>
 <p>Finally, update both your fork’s <code>main</code> and <code>develop</code> branches to reflect the latest upstream state.</p>
@@ -704,11 +704,11 @@
    git checkout develop
    git merge upstream/develop
    git push origin develop</code></p>
-<p>8) <strong>Create a Release Branch</strong></p>
+<p>8) <strong>Create a Release Branch</strong> <em>(Maintainers)</em></p>
 <p><code>bash
    git checkout -b release/2.0.1 develop
    git push origin release/2.0.1</code></p>
-<p>9) <strong>Open a Pull Request to Upstream <code>main</code></strong></p>
+<p>9) <strong>Open a Pull Request to Upstream <code>main</code></strong> <em>(Maintainers)</em></p>
 <ul>
 <li>Base: <code>Azure/gpt-rag-orchestrator</code> → <code>main</code></li>
 <li>Compare: <code>placerda/gpt-rag-orchestrator</code> → <code>release/2.0.1</code></li>
