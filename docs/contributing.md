@@ -74,13 +74,13 @@ Open a PR from your feature branch in your fork to the upstream repository’s `
 
 7) **Sync with Upstream `develop`**
 
-After your PR is merged, update your fork’s `develop` branch with the latest changes from the upstream.
+After your PR is merged, update your fork's `develop` branch with the latest changes from the upstream.
 
-8) **Create a Release Branch**
+8) **Create a Release Branch** *(Maintainers)*
 
-When the `develop` branch is ready for release, create a branch named `release/x.y.z` from your fork’s `develop`. This branch will be tested and validated before merging to `main`.
+When the `develop` branch is ready for release, create a branch named `release/x.y.z` from your fork's `develop`. This branch will be tested and validated before merging to `main`.
 
-9) **Open a Pull Request to Upstream `main`**
+9) **Open a Pull Request to Upstream `main`** *(Maintainers)*
 
 Once the release is validated, open a PR from your release branch to the upstream `main`. After the merge, maintainers will create a version tag (e.g., `v2.0.1`).
 
@@ -142,14 +142,14 @@ Here’s an example of implementing a feature called `conversation-metadata` in 
    git push origin develop
    ```
 
-8) **Create a Release Branch**
+8) **Create a Release Branch** *(Maintainers)*
 
    ```bash
    git checkout -b release/2.0.1 develop
    git push origin release/2.0.1
    ```
 
-9) **Open a Pull Request to Upstream `main`**
+9) **Open a Pull Request to Upstream `main`** *(Maintainers)*
 
    * Base: `Azure/gpt-rag-orchestrator` → `main`
    * Compare: `placerda/gpt-rag-orchestrator` → `release/2.0.1`
