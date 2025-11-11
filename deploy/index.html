@@ -639,8 +639,13 @@
 <h2 id="quick-start-basic-deployment">Quick Start - Basic Deployment</h2>
 <p>Quick setup for demos without network isolation.</p>
 <pre><code>azd init -t azure/gpt-rag
+az login
+azd auth login
 azd provision
 </code></pre>
+<blockquote>
+<p>Add <code>--tenant</code> for <code>az</code> or <code>--tenant-id</code> for <code>azd</code> if you want a specific tenant.</p>
+</blockquote>
 <p>Demo video:</p>
 <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; margin: 0 auto 20px auto; border-radius: 8px;">
   <iframe src="https://www.youtube.com/embed/nZMDtaDQuP4?rel=0&modestbranding=1" 
@@ -659,6 +664,15 @@ azd provision
 <p>Enable network isolation in your environment:</p>
 <pre><code>azd env set NETWORK_ISOLATION true
 </code></pre>
+<p>Make sure you’re signed in with your Azure user account:</p>
+<pre><code>
+az login
+azd auth login
+
+</code></pre>
+<blockquote>
+<p>Add <code>--tenant</code> for <code>az</code> or <code>--tenant-id</code> for <code>azd</code> if you want a specific tenant.</p>
+</blockquote>
 <h3 id="provision-infrastructure">Provision Infrastructure</h3>
 <pre><code>azd provision
 </code></pre>
@@ -667,11 +681,21 @@ azd provision
 <p>The Bicep template provisions a <strong>Jumpbox VM</strong> by default. You can connect to it to perform the post-provision steps, deploy services, and run tests.</p>
 </blockquote>
 <p><strong>Option A – Using the deployed Jumpbox VM</strong></p>
-<ol>
-<li>Reset the VM password in the Azure Portal (required on first access if not set in deployment parameters): Go to your VM resource → <strong>Support + troubleshooting</strong> → <strong>Reset password</strong> → Set new credentials.</li>
-<li>Connect via <strong>Azure Bastion</strong>.</li>
-<li>Open a terminal in the VM and run:</li>
-</ol>
+<p>Reset the VM password in the Azure Portal (required on first access if not set in deployment parameters): <br>Go to your VM resource → <strong>Support + troubleshooting</strong> → <strong>Reset password</strong> → Set new credentials.</p>
+<blockquote>
+<p>Note: default username is <code>testvmuser</code></p>
+</blockquote>
+<p>Connect via <strong>Azure Bastion</strong>.</p>
+<p>Once connected, authenticate with the VM’s Managed Identity:</p>
+<pre><code>
+az login --identity
+azd auth login --with-managed-identity
+
+</code></pre>
+<blockquote>
+<p>Add <code>--tenant</code> for <code>az</code> or <code>--tenant-id</code> for <code>azd</code> if you want a specific tenant.</p>
+</blockquote>
+<p>Open a terminal in the VM and run:</p>
 <pre><code>cd c:\github\gpt-rag
 .\scripts\postProvision.ps1
 </code></pre>
