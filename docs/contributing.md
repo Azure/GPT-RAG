@@ -6,6 +6,12 @@ This project adheres to the [Microsoft Open Source Code of Conduct](https://open
 
 Below, you'll find details on how our code update process works and instructions on how to contribute.
 
+## 📝 Join Our Contributors
+
+Interested in contributing to GPT-RAG? We'd love to have you on board! Please fill out our contributor form to get started:
+
+**Apply to Contribute → [http://aka.ms/gpt-rag-contributing](http://aka.ms/gpt-rag-contributing)**
+
 ## 🤝 Contributors
 
 Contributions include code, feedback, design ideas, documentation, and collaboration.

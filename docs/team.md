@@ -111,8 +111,8 @@
 
 <div class="team-grid">
   <div class="team-card">
-    <a href="https://github.com/RameshJajula" target="_blank">
-      <img src="https://github.com/RameshJajula.png" alt="Ramesh Jajula">
+    <a href="https://github.com/RameshJGenAI" target="_blank">
+      <img src="https://github.com/RameshJGenAI.png" alt="Ramesh Jajula">
       <sub><b>Ramesh Jajula</b></sub>
     </a>
   </div>
@@ -129,7 +129,6 @@
     </a>
   </div>
   <div class="team-card">
-    <a href="https://github.com/saurabhsingh3" target="_blank">
       <img src="https://github.com/saurabhsingh3.png" alt="Varun Nambiar">
       <sub><b>Varun Nambiar</b></sub>
     </a>
