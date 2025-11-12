@@ -1,20 +1,6 @@
-# Contributing
+We appreciate contributions and suggestions for this project!
 
-We appreciate contributions and suggestions for this project! Before contributing, you'll need to sign a Contributor License Agreement (CLA) to confirm that you have the rights to, and do, grant us permission to use your contribution. More details can be found at [Microsoft CLA](https://cla.opensource.microsoft.com).
-
-This project adheres to the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information, please visit the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any questions or comments.
-
-Below, you'll find details on how our code update process works and instructions on how to contribute.
-
-## 📝 Join Our Contributors
-
-Interested in contributing to GPT-RAG? We'd love to have you on board! Please fill out our contributor form to get started:
-
-**Apply to Contribute → [http://aka.ms/gpt-rag-contributing](http://aka.ms/gpt-rag-contributing)**
-
-## 🤝 Contributors
-
-Contributions include code, feedback, design ideas, documentation, and collaboration.
+> While anyone can submit pull requests at any time, we created a **[contributor form](http://aka.ms/gpt-rag-contributing)** to help match volunteers with areas where we need the most help. It's optional but helps us better organize and direct contributions!
 
 ### Ways to Contribute
 - **Issues:** Report bugs, propose enhancements, or share feature requests.
@@ -23,6 +9,7 @@ Contributions include code, feedback, design ideas, documentation, and collabora
 - **Design:** Contribute to open design discussions and new patterns.
 - **Tests:** Strengthen reliability through unit and integration tests.
 - **Code:** Submit fixes, enhancements, or new modules via pull requests.
+
 
 ## Contribution Guidelines
 
@@ -169,3 +156,9 @@ git checkout main
 git merge upstream/main
 git push origin main
 ```
+
+## Legal and Code of Conduct
+
+Before contributing, you'll need to sign a Contributor License Agreement (CLA) to confirm that you have the rights to, and do, grant us permission to use your contribution. More details can be found at [Microsoft CLA](https://cla.opensource.microsoft.com).
+
+This project adheres to the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information, please visit the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any questions or comments.
