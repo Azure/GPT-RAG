@@ -113,6 +113,14 @@ $oldPath = [Environment]::GetEnvironmentVariable("Path", [EnvironmentVariableTar
 $newPath = $oldPath + ";C:\Program Files\Azure Dev CLI" 
 [Environment]::SetEnvironmentVariable("Path", $newPath, [EnvironmentVariableTarget]::Machine) 
 
+
+write-host "Installing AZD";
+choco install azd -y --ignoredetectedreboot --force
+# Add AZD to PATH
+$oldPath = [Environment]::GetEnvironmentVariable("Path", [EnvironmentVariableTarget]::Machine)
+$newPath = $oldPath + ";C:\Program Files\Azure Dev CLI" 
+[Environment]::SetEnvironmentVariable("Path", $newPath, [EnvironmentVariableTarget]::Machine) 
+
 write-host "Installing Powershell Core";
 choco install powershell-core -y --ignoredetectedreboot --force
 
@@ -174,7 +182,7 @@ Set-ItemProperty -Path $regPath -Name "Docker Desktop" -Value $dockerPath
 write-host "Downloading GPT-RAG repository";
 mkdir C:\github -ea SilentlyContinue
 cd C:\github
-git clone https://github.com/azure/gpt-rag -b $release --depth 1
+git clone https://github.com/azure/gpt-rag -b $tag --depth 1
 
 #add azd to path
 $env:Path += ";C:\Program Files\Azure Dev CLI"
@@ -205,18 +213,16 @@ foreach( $repo in $manifest.components) {
   $repoName = $repo.name
   $repoUrl = $repo.repo
   $tag = $repo.tag
-  $release = $repo.release
-  $branch = $release
 
   if (Test-Path "C:\github\$repoName") {
     write-host "Updating existing repository: $repoName $branch";
     cd "C:\github\$repoName"
     git fetch --all
-    git checkout -b $branch
+    git checkout -b $tag
   } else {
-    write-host "Cloning repository: $repoName from branch: $branch";
+    write-host "Cloning repository: $repoName from tag: $tag";
     cd c:\github
-    git clone -b $branch --depth 1 $repoUrl "C:\github\$repoName"
+    git clone -b $tag --depth 1 $repoUrl "C:\github\$repoName"
     copy-item c:\github\gpt-rag\.azure c:\github\$repoName -recurse -container
     cd "C:\github\$repoName"
   }
