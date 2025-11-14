@@ -129,12 +129,14 @@
     </a>
   </div>
   <div class="team-card">
-      <img src="https://github.com/saurabhsingh3.png" alt="Varun Nambiar">
-      <sub><b>Varun Nambiar</b></sub>
+    <a href="https://github.com/varunb17" target="_blank">
+      <img src="https://github.com/varunb17.png" alt="Varun Nambia">
+      <sub><b>Varun Nambia</b></sub>
     </a>
-  </div>
+  </div>  
 </div>
 
+ 
 ---
 
 <div class="section-title">Founders</div>
