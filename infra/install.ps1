@@ -106,7 +106,8 @@ choco install python311 -y --ignoredetectedreboot --force
 #choco install visualstudio2022enterprise -y --ignoredetectedreboot --force
 
 write-host "Installing AZD";
-choco install azd -y --ignoredetectedreboot --force
+powershell -NoProfile -ExecutionPolicy Bypass -Command "Invoke-RestMethod 'https://aka.ms/install-azd.ps1' | Invoke-Expression"
+# choco install azd -y --ignoredetectedreboot --force
 # Add AZD to PATH
 $oldPath = [Environment]::GetEnvironmentVariable("Path", [EnvironmentVariableTarget]::Machine)
 $newPath = $oldPath + ";C:\Program Files\Azure Dev CLI" 

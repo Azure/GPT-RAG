@@ -7,6 +7,7 @@ param projectIdentityPrincipalId string
 @description('Required. The project workspace ID.')
 param projectWorkspaceId string
 
+#disable-next-line BCP081
 resource storageAccount 'Microsoft.Storage/storageAccounts@2025-01-01' existing = {
   name: storageAccountName
   scope: resourceGroup()

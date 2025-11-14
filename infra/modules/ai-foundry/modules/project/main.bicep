@@ -38,22 +38,27 @@ import { lockType } from 'br/public:avm/utl/types/avm-common-types:0.6.0'
 param lock lockType?
 
 @description('Optional. Tags to be applied to the resources.')
+#disable-next-line BCP081
 param tags resourceInput<'Microsoft.Resources/resourceGroups@2025-04-01'>.tags = {}
 
+#disable-next-line BCP081
 resource foundryAccount 'Microsoft.CognitiveServices/accounts@2025-06-01' existing = {
   name: accountName
 }
 
+#disable-next-line BCP081
 resource storageAccount 'Microsoft.Storage/storageAccounts@2025-01-01' existing = if (!empty(storageAccountConnection)) {
   name: storageAccountConnection!.resourceName
   scope: resourceGroup(storageAccountConnection!.subscriptionId, storageAccountConnection!.resourceGroupName)
 }
 
+#disable-next-line BCP081
 resource aiSearch 'Microsoft.Search/searchServices@2025-05-01' existing = if (!empty(aiSearchConnection)) {
   name: aiSearchConnection!.resourceName
   scope: resourceGroup(aiSearchConnection!.subscriptionId, aiSearchConnection!.resourceGroupName)
 }
 
+#disable-next-line BCP081
 resource cosmosDb 'Microsoft.DocumentDB/databaseAccounts@2025-04-15' existing = if (!empty(cosmosDbConnection)) {
   name: cosmosDbConnection!.resourceName
   scope: resourceGroup(cosmosDbConnection!.subscriptionId, cosmosDbConnection!.resourceGroupName)
@@ -221,9 +226,9 @@ resource capabilityHost 'Microsoft.CognitiveServices/accounts/projects/capabilit
   ]
   properties: {
     capabilityHostKind: 'Agents'
-    threadStorageConnections: ['${cosmosDbConnectionResource.name}']
-    vectorStoreConnections: ['${aiSearchConnectionResource.name}']
-    storageConnections: ['${storageAccountConnectionResource.name}']
+    threadStorageConnections: [cosmosDbConnectionResource.name]
+    vectorStoreConnections: [aiSearchConnectionResource.name]
+    storageConnections: [storageAccountConnectionResource.name]
     tags: tags
   }
 }
