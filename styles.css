@@ -1,0 +1,22 @@
+.md-button--pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
+
+  padding: 0.25em 0.75em;
+  font-size: 0.70rem;
+  font-weight: 500;
+
+  background-color: #f6f8fa;
+  color: #0969da;
+  border: 1px solid #d0d7de;
+  border-radius: 999px;
+
+  text-decoration: none;
+  line-height: 1.2;
+}
+
+.md-button--pill:hover {
+  background-color: #eef1f4;
+  border-color: #c5ccd3;
+}

@@ -50,6 +50,8 @@
       
     
     
+      <link rel="stylesheet" href="../styles.css">
+    
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -521,7 +523,7 @@
             
   
   <span class="md-ellipsis">
-    Configuration
+    How-to Guides
   </span>
   
 
@@ -531,7 +533,7 @@
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
-            Configuration
+            How-to Guides
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -638,11 +640,11 @@
 </ul>
 <h2 id="quick-start-basic-deployment">Quick Start - Basic Deployment</h2>
 <p>Quick setup for demos without network isolation.</p>
-<pre><code>azd init -t azure/gpt-rag
+<div class="highlight"><pre><span></span><code>azd init -t azure/gpt-rag
 az login
 azd auth login
 azd provision
-</code></pre>
+</code></pre></div>
 <blockquote>
 <p>Add <code>--tenant</code> for <code>az</code> or <code>--tenant-id</code> for <code>azd</code> if you want a specific tenant.</p>
 </blockquote>
@@ -662,20 +664,18 @@ azd provision
 <p>For deployments that <strong>require network isolation</strong>.</p>
 <h3 id="before-provisioning">Before Provisioning</h3>
 <p>Enable network isolation in your environment:</p>
-<pre><code>azd env set NETWORK_ISOLATION true
-</code></pre>
+<div class="highlight"><pre><span></span><code>azd env set NETWORK_ISOLATION true
+</code></pre></div>
 <p>Make sure you’re signed in with your Azure user account:</p>
-<pre><code>
-az login
+<div class="highlight"><pre><span></span><code>az login
 azd auth login
-
-</code></pre>
+</code></pre></div>
 <blockquote>
 <p>Add <code>--tenant</code> for <code>az</code> or <code>--tenant-id</code> for <code>azd</code> if you want a specific tenant.</p>
 </blockquote>
 <h3 id="provision-infrastructure">Provision Infrastructure</h3>
-<pre><code>azd provision
-</code></pre>
+<div class="highlight"><pre><span></span><code>azd provision
+</code></pre></div>
 <h3 id="post-provision-configuration">Post-Provision Configuration</h3>
 <blockquote>
 <p>The Bicep template provisions a <strong>Jumpbox VM</strong> by default. You can connect to it to perform the post-provision steps, deploy services, and run tests.</p>
@@ -687,25 +687,23 @@ azd auth login
 </blockquote>
 <p>Connect via <strong>Azure Bastion</strong>.</p>
 <p>Once connected, authenticate with the VM’s Managed Identity:</p>
-<pre><code>
-az login --identity
+<div class="highlight"><pre><span></span><code>az login --identity
 azd auth login --with-managed-identity
-
-</code></pre>
+</code></pre></div>
 <blockquote>
 <p>Add <code>--tenant</code> for <code>az</code> or <code>--tenant-id</code> for <code>azd</code> if you want a specific tenant.</p>
 </blockquote>
 <p>Open a terminal in the VM and run:</p>
-<pre><code>cd c:\github\gpt-rag
+<div class="highlight"><pre><span></span><code>cd c:\github\gpt-rag
 .\scripts\postProvision.ps1
-</code></pre>
+</code></pre></div>
 <p><strong>Option B – From your local machine (must have VNet access)</strong></p>
 <p>From the <code>gpt-rag</code> directory, run:</p>
-<pre><code>.\scripts\postProvision.ps1
-</code></pre>
+<div class="highlight"><pre><span></span><code>.\scripts\postProvision.ps1
+</code></pre></div>
 <p>or (Bash)</p>
-<pre><code>.\scripts\postProvision.sh
-</code></pre>
+<div class="highlight"><pre><span></span><code>.\scripts\postProvision.sh
+</code></pre></div>
 <blockquote>
 <p>Note: If you have re-initialized or cloned the gpt-rag repo again, refresh your <code>azd</code> environment before running postProvision script so it points to the <strong>existing</strong> deployment:
 <code>azd init -t azure/gpt-rag</code> then <code>azd env refresh</code>. When prompted, select the <strong>same Subscription, Resource Group, and Location</strong> as the original provisioning so <code>azd</code> correctly links to your environment.</p>
@@ -713,8 +711,8 @@ azd auth login --with-managed-identity
 <h2 id="deploy-gpt-rag-services">Deploy GPT-RAG Services</h2>
 <p>Once the GPT-RAG infrastructure is provisioned, you can deploy the services.</p>
 <p>To deploy <strong>all services at once</strong>, navigate to the <code>gpt-rag</code> directory (with azd environment configured) and run:</p>
-<pre><code>azd deploy
-</code></pre>
+<div class="highlight"><pre><span></span><code>azd deploy
+</code></pre></div>
 <p>This command deploys each service in sequence.</p>
 <p>If you prefer to <strong>deploy a single service</strong>—for example, when updating only that service—navigate to the corresponding service repository and follow the instructions in its <strong>"How to Deploy"</strong> section.</p>
 <h2 id="permissions">Permissions</h2>
@@ -1180,7 +1178,7 @@ azd auth login --with-managed-identity
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "toc.integrate", "content.code.annotate", "navigation.top"], "search": "../assets/javascripts/workers/search.07f07601.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.icon", "content.iconify", "navigation.tracking", "toc.integrate", "content.code.annotate", "navigation.top"], "search": "../assets/javascripts/workers/search.07f07601.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
       <script src="../assets/javascripts/bundle.56dfad97.min.js"></script>

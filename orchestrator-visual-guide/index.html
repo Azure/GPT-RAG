@@ -46,6 +46,8 @@
       
     
     
+      <link rel="stylesheet" href="../styles.css">
+    
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -399,7 +401,7 @@
             
   
   <span class="md-ellipsis">
-    Configuration
+    How-to Guides
   </span>
   
 
@@ -409,7 +411,7 @@
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
-            Configuration
+            How-to Guides
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -512,8 +514,8 @@ Let’s reverse this evolution — with visuals.</p>
 <p>If you prefer talking for hours about a diagram instead of drawing it, just leave.</p>
 <h2 id="core-architecture-flow">Core Architecture &amp; Flow</h2>
 <p>The orchestrator's entry point is in src/main.py: <code>orchestrator_endpoint()</code>.
-In what follows we will consider the Single-Agent RAG Strategy.</p>
-<pre><code>@app.post(
+In what follows we will consider the Single-Agent RAG Strategy.
+<div class="highlight"><pre><span></span><code>@app.post(
     &quot;/orchestrator&quot;,
     dependencies=[Depends(validate_auth)], 
     summary=&quot;Ask orchestrator a question&quot;,
@@ -525,7 +527,7 @@ async def orchestrator_endpoint(
     x_api_key: Optional[str] = Header(None, alias=&quot;X-API-KEY&quot;),
     dapr_api_token: Optional[str] = Header(None, alias=&quot;dapr-api-token&quot;),
 ):
-</code></pre>
+</code></pre></div></p>
 <h2 id="essential-tasks-of-the-orchestrator">Essential Tasks of the Orchestrator</h2>
 <p>The <code>Orchestrator</code> class serves as the <strong>conversation state manager</strong> and <strong>strategy coordinator</strong>. Its core responsibilities are:</p>
 <ol>
@@ -561,14 +563,14 @@ async def orchestrator_endpoint(
 <p><code>Orchestrator</code> keeps a history (using CosmosDB) identified by <code>conversation_id</code> which arrives in the HTTP Request payload.
 One of the attributes stored in the CosmosDB is <code>thread_id</code> which points to the <code>Thread</code> object which resides inside of the AI Foundry.
 AI Foundry maintains its own internal persistency in the Thread objects.</p>
-<p>The strategy object triggers the RAG pipeline execution inside of AI Foundry with the proxy <code>project_client</code>:</p>
-<pre><code>project_client.agents.runs.stream(
+<p>The strategy object triggers the RAG pipeline execution inside of AI Foundry with the proxy <code>project_client</code>:
+<div class="highlight"><pre><span></span><code>project_client.agents.runs.stream(
     thread_id=thread.id,
     agent_id=agent.id,
     ...
 )
-</code></pre>
-<p>Here is what it does:</p>
+</code></pre></div>
+Here is what it does:</p>
 <ul>
 <li>
 <p>Takes the user's Ask.</p>
@@ -676,7 +678,7 @@ The visualization deliberately simplifies reality through abstraction and by omi
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "toc.integrate", "content.code.annotate", "navigation.top"], "search": "../assets/javascripts/workers/search.07f07601.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.icon", "content.iconify", "navigation.tracking", "toc.integrate", "content.code.annotate", "navigation.top"], "search": "../assets/javascripts/workers/search.07f07601.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
       <script src="../assets/javascripts/bundle.56dfad97.min.js"></script>

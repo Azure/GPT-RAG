@@ -48,6 +48,8 @@
       
     
     
+      <link rel="stylesheet" href="../styles.css">
+    
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -401,7 +403,7 @@
             
   
   <span class="md-ellipsis">
-    Configuration
+    How-to Guides
   </span>
   
 
@@ -411,7 +413,7 @@
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
-            Configuration
+            How-to Guides
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -663,22 +665,22 @@
 <h3 id="step-by-step">Step-by-Step</h3>
 <p>Here’s an example of implementing a feature called <code>conversation-metadata</code> in the <code>gpt-rag-orchestrator</code> repository.</p>
 <p>1) <strong>Create a Fork</strong></p>
-<p><code>bash
-   https://github.com/placerda/gpt-rag-orchestrator.git</code></p>
+<div class="highlight"><pre><span></span><code>https://github.com/placerda/gpt-rag-orchestrator.git
+</code></pre></div>
 <p>2) <strong>Clone Your Fork Locally</strong></p>
-<p><code>bash
-   git clone https://github.com/placerda/gpt-rag-orchestrator.git</code></p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/placerda/gpt-rag-orchestrator.git
+</code></pre></div>
 <p>3) <strong>Set Upstream Remote</strong></p>
-<p><code>bash
-   git remote add upstream git@github.com:Azure/gpt-rag-orchestrator.git</code></p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>remote<span class="w"> </span>add<span class="w"> </span>upstream<span class="w"> </span>git@github.com:Azure/gpt-rag-orchestrator.git
+</code></pre></div>
 <p>4) <strong>Create a Feature Branch</strong></p>
-<p><code>bash
-   git checkout -b feature/conversation-metadata develop</code></p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>feature/conversation-metadata<span class="w"> </span>develop
+</code></pre></div>
 <p>5) <strong>Make and Push Your Changes</strong></p>
-<p><code>bash
-   git add .
-   git commit -m "Implemented conversation metadata"
-   git push origin feature/conversation-metadata</code></p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>add<span class="w"> </span>.
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Implemented conversation metadata&quot;</span>
+git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>feature/conversation-metadata
+</code></pre></div>
 <p>6) <strong>Open and Merge the Pull Request to <code>develop</code></strong></p>
 <ul>
 <li><strong>6a. Create the PR:</strong>
@@ -689,15 +691,15 @@
      The maintainers will review, request changes if needed, and merge the PR into the upstream <code>develop</code>.</li>
 </ul>
 <p>7) <strong>Sync Your Fork’s <code>develop</code></strong></p>
-<p><code>bash
-   git fetch upstream
-   git checkout develop
-   git merge upstream/develop
-   git push origin develop</code></p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>fetch<span class="w"> </span>upstream
+git<span class="w"> </span>checkout<span class="w"> </span>develop
+git<span class="w"> </span>merge<span class="w"> </span>upstream/develop
+git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>develop
+</code></pre></div>
 <p>8) <strong>Create a Release Branch</strong> <em>(Maintainers)</em></p>
-<p><code>bash
-   git checkout -b release/2.0.1 develop
-   git push origin release/2.0.1</code></p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>release/2.0.1<span class="w"> </span>develop
+git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>release/2.0.1
+</code></pre></div>
 <p>9) <strong>Open a Pull Request to Upstream <code>main</code></strong> <em>(Maintainers)</em></p>
 <ul>
 <li>Base: <code>Azure/gpt-rag-orchestrator</code> → <code>main</code></li>
@@ -705,11 +707,11 @@
 <li>After review and merge, maintainers tag the release (e.g., <code>v2.0.1</code>).</li>
 </ul>
 <p>10) <strong>Sync Your Fork After Tag Creation</strong></p>
-<pre><code class="language-bash">git fetch upstream
-git checkout main
-git merge upstream/main
-git push origin main
-</code></pre>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>fetch<span class="w"> </span>upstream
+git<span class="w"> </span>checkout<span class="w"> </span>main
+git<span class="w"> </span>merge<span class="w"> </span>upstream/main
+git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>main
+</code></pre></div>
 <h2 id="legal-and-code-of-conduct">Legal and Code of Conduct</h2>
 <p>Before contributing, you'll need to sign a Contributor License Agreement (CLA) to confirm that you have the rights to, and do, grant us permission to use your contribution. More details can be found at <a href="https://cla.opensource.microsoft.com">Microsoft CLA</a>.</p>
 <p>This project adheres to the <a href="https://opensource.microsoft.com/codeofconduct/">Microsoft Open Source Code of Conduct</a>. For more information, please visit the <a href="https://opensource.microsoft.com/codeofconduct/faq/">Code of Conduct FAQ</a> or contact <a href="mailto:opencode@microsoft.com">opencode@microsoft.com</a> with any questions or comments.</p>
@@ -757,7 +759,7 @@ git push origin main
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "toc.integrate", "content.code.annotate", "navigation.top"], "search": "../assets/javascripts/workers/search.07f07601.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.icon", "content.iconify", "navigation.tracking", "toc.integrate", "content.code.annotate", "navigation.top"], "search": "../assets/javascripts/workers/search.07f07601.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
       <script src="../assets/javascripts/bundle.56dfad97.min.js"></script>
