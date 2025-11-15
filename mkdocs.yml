@@ -1,6 +1,7 @@
 site_name: GPT-RAG
 site_description: Official project documentation
 site_author: Paulo Lacerda
+repo_url: https://github.com/azure/gpt-rag
 theme:
   name: material
   custom_dir: overrides
