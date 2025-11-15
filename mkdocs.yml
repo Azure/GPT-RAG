@@ -10,11 +10,23 @@ theme:
   palette:
     scheme: default
   features:
+    - content.icon
+    - content.iconify
     - navigation.tracking
     - toc.integrate
     - content.code.annotate
     - navigation.top
-
+plugins:
+  - search
+  - macros
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - pymdownx.superfences
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
 nav:
   - Home: index.md
   - What's New: whatisnew.md
@@ -23,9 +35,11 @@ nav:
     - Overview: architecture.md
   - Services:
     - Orchestrator: ochestrator.md
-  - Configuration:
+  - How-to Guides:
     - User Feedback: userfeedback.md
   - Meet the Team: team.md
   - Contributing: contributing.md    
 extra:
   generator: false
+extra_css:
+  - styles.css

@@ -3,7 +3,7 @@
 GPT-RAG includes a **User Feedback Loop** feature that lets users evaluate assistant responses through the UI. Feedback is sent to the backend, processed by the orchestrator, and stored in **Cosmos DB** for analysis and continuous improvement.
 
 ![Feedback stored in Cosmos DB](media/feedback_stored_in_cosmos_db.png)
-*User feedback stored in Cosmos DB*
+<br>*User feedback stored in Cosmos DB*
 
 By default, **basic feedback** (thumbs up/down) is enabled, while **detailed ratings** (star rating and comments) are disabled. Administrators control these options through **Azure App Configuration**.
 
@@ -12,7 +12,7 @@ By default, **basic feedback** (thumbs up/down) is enabled, while **detailed rat
 When enabled, users can provide **star ratings** and text comments for richer feedback that captures both satisfaction and reasoning.
 
 ![User feedback with rating](media/user_feedback_with_rating.png)
-*User providing rating and comment feedback*
+<br>*User providing rating and comment feedback*
 
 ## Configuration Settings
 

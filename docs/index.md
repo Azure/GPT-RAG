@@ -1,14 +1,15 @@
 <img src="media/logo.png" alt="Enterprise RAG Logo" width="80" align="left"/>
 
-# GPT-RAG Solution Accelerator
+# GPT-RAG Solution Accelerator 
 
-## Overview
+GPT-RAG is an enterprise-grade accelerator for building robust Retrieval-Augmented Generation (RAG) solutions on Azure. It provides a modular and secure foundation that integrates Azure OpenAI, AI Search, AI Foundry, and modern orchestration patterns to power intelligent assistants and data-driven applications across the enterprise.
 
-GPT-RAG is a powerful, enterprise-ready accelerator that transforms how organizations build Retrieval-Augmented Generation (RAG) solutions on Azure. By leveraging Azure OpenAI, AI Search, and AI Foundry, it delivers a secure, modular foundation for creating intelligent conversational assistants and data-driven applications. [View the source code on GitHub](https://github.com/Azure/gpt-rag).
+Designed with Zero-Trust security and Infrastructure as Code (IaC) principles from the ground up, GPT-RAG accelerates production deployments while ensuring consistency, governance, and operational excellence. It supports text, image, and voice scenarios, enabling organizations to rapidly create rich multimodal experiences.
+
+[Latest Stable Release {{ latest_release("azure/gpt-rag") }} :material-tag:](https://github.com/azure/gpt-rag/releases/latest){ .md-button--pill }
 
 ![Zero Trust Architecture](media/architecture-zero-trust.png)
-
-Built from the ground up with Zero-Trust security principles and Infrastructure as Code (IaC), GPT-RAG accelerates your journey to production-ready AI solutions. Whether you're working with text, images, or voice, this comprehensive platform combines enterprise-grade security, intelligent orchestration, and multimodal capabilities to deliver exceptional user experiences faster than ever.
+*Zero-Trust Architecture*
 
 ## Core Services
 
