@@ -4,6 +4,7 @@ param storageAccountName string
 @description('Required. The principal ID of the project identity.')
 param projectIdentityPrincipalId string
 
+#disable-next-line BCP081
 resource storageAccount 'Microsoft.Storage/storageAccounts@2025-01-01' existing = {
   name: storageAccountName
   scope: resourceGroup()

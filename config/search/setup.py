@@ -86,7 +86,10 @@ def prepare_context_and_render(template_name: str, template_dir: str, label_filt
         logging.error("APP_CONFIG_ENDPOINT not set")
         return None, {}
 
-    cred = ChainedTokenCredential(AzureCliCredential(),ManagedIdentityCredential())
+    cred = ChainedTokenCredential(
+            AzureCliCredential(process_timeout=30),
+            ManagedIdentityCredential(process_timeout=30)
+        )
     try:
         ac_client = AzureAppConfigurationClient(ac_endpoint, cred)
     except Exception as e:
