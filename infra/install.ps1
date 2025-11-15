@@ -104,6 +104,35 @@ if (-not $azdExe) {
 $env:PATH = "$(Split-Path $azdExe);$env:PATH"
 Write-Host "Updated PATH for this session: $env:PATH"
 
+$azdDir = Split-Path $azdExe
+
+try {
+    $machinePath = [Environment]::GetEnvironmentVariable("Path", "Machine")
+    if ($machinePath -notlike "*$azdDir*") {
+        [Environment]::SetEnvironmentVariable("Path", "$machinePath;$azdDir", "Machine")
+        Write-Host "Added $azdDir to MACHINE Path"
+    } else {
+        Write-Host "AZD directory already present in MACHINE Path"
+    }
+} catch {
+    Write-Host "Failed to update MACHINE Path: $_" -ForegroundColor Yellow
+}
+
+try {
+    $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+    if ($userPath -and $userPath -notlike "*$azdDir*") {
+        [Environment]::SetEnvironmentVariable("Path", "$userPath;$azdDir", "User")
+        Write-Host "Added $azdDir to USER Path"
+    } elseif (-not $userPath) {
+        [Environment]::SetEnvironmentVariable("Path", $azdDir, "User")
+        Write-Host "Initialized USER Path with AZD directory"
+    } else {
+        Write-Host "AZD directory already present in USER Path"
+    }
+} catch {
+    Write-Host "Failed to update USER Path: $_" -ForegroundColor Yellow
+}
+
 
 # ------------------------------
 # Install PowerShell Core, Notepad++, WSL, Docker
