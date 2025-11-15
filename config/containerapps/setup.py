@@ -115,10 +115,10 @@ def get_credentials():
     try:
         # Create chained credential with CLI first, then Managed Identity
         credential = ChainedTokenCredential(
-            AzureCliCredential(),
-            ManagedIdentityCredential()
+            AzureCliCredential(process_timeout=30),
+            ManagedIdentityCredential(process_timeout=30)
         )
-        
+
         # Test the credential
         token = credential.get_token("https://management.azure.com/.default")
         logging.info("✅ ChainedTokenCredential validated successfully")

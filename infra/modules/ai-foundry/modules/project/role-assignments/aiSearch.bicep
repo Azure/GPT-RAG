@@ -4,6 +4,7 @@ param aiSearchName string
 @description('Required. The principal ID of the project identity.')
 param projectIdentityPrincipalId string
 
+#disable-next-line BCP081
 resource aiSearch 'Microsoft.Search/searchServices@2025-05-01' existing = {
   name: aiSearchName
   scope: resourceGroup()

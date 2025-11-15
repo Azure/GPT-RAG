@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.  
 This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to [Semantic Versioning](https://semver.org/).
 
+## [v2.2.3] – 2025-11-15
+### Fixed
+- Intermittent AI Foundry post provisioning setup authentication timeout by increasing `AzureCliCredential` and `ManagedIdentityCredential` process timeout to 30 seconds in `config/aifoundry/setup.py`
+- Compatibility with older AZD versions by removing string interpolation syntax from capability host connection arrays in AI Foundry project module (infra/modules/ai-foundry/modules/project/main.bicep lines 229-231)
+### Changed
+- Suppressed BCP081 warnings for future-dated API versions (2025-01-01, 2025-04-01, 2025-05-01, 2025-06-01) in AI Foundry project module by adding #disable-next-line directives
+- Improved PR and Issue templates
+- Moved documentation to https://aka.ms/gpt-rag-docs
+- Bumped **gpt-rag-mcp** to **v0.2.3**
+
 ## [v2.2.2] – 2025-11-09
 ### Changed
 - Updated infra templates to create the **data** private endpoint for Azure Container Registry when in network isolation mode.
