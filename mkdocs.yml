@@ -32,6 +32,9 @@ nav:
   - Home: index.md
   - What's New: whatisnew.md
   - Deployment Guide: deploy.md
+  - Quick Start Guides:
+    - Simple RAG: simple-rag-quickstart.md
+    - NL2SQL: nl2sql-quickstart.md
   - Architecture:
     - Overview: architecture.md
   - Services:
