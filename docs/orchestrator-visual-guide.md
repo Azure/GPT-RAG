@@ -56,6 +56,64 @@ This section explores how the Single-Agent RAG Strategy orchestrates the entire 
 
 ![Orchestrator Strategy Setup and Streaming](./media/orchestrator_strategy/orchestrator-strategy.drawio.svg)
 
+You will have noticed the use of the Factory Design Pattern (`AgentStrategyFactory`) for the various Strategies, ensuring that all of them comply with the same `BaseAgentStrategy` interface.
+For the sake of clarity, I have abstracted away the different roles of the `Orchestrator` class and the `Orchestrator` object.
+```
+------------------------------------------------------------------
+┌────────────────────────────────────────────────────────────────┐
+│                         Orchestrator                           │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  - conversation_id: str                                  │  │
+│  │  - database_client: CosmosDBClient     <<reference>>     │  │
+│  │  - agentic_strategy: BaseAgentStrategy ───────────────┐  │  │
+│  │                                                       │  │  │
+│  │  + create()                                           │  │  │
+│  │  + stream_response()                                  │  │  │
+│  │  + save_feedback()                                    │  │  │
+│  └──────────────────────────────────────────────────────────┘  │
+└─────────────────────┬──────────────────────────────────────────┘
+                      │                                    │
+                      │ uses (delegation)                  │ 
+                      ▼                                    │
+           ┌──────────────────────┐                        │  
+           │ AgentStrategyFactory │ <<factory>>            │
+           ├──────────────────────┤                        │
+           │ + get_strategy(key)  │                        │
+           └──────────┬───────────┘                        │
+                      │                                    │
+                      │ instantiates                       │
+                      ▼                                    │
+        ┌─────────────────────────────┐                    │
+        │    BaseAgentStrategy        │ <<abstract>> ◄─────┘
+        ├─────────────────────────────┤
+        │ # strategy_type             │
+        │ # conversation: Dict        │
+        │ # user_context: Dict        │
+        │ # credential                │
+        │ # project_client            │
+        ├─────────────────────────────┤
+        │ + initiate_agent_flow()*    │ * = abstract method
+        │ # _read_prompt()            │
+        └──────────────┬──────────────┘
+                       │
+                       │ inheritance (IS-A)
+         ┌─────────────┼─────────────────────────┐
+         │             │                         │
+         ▼             ▼                         ▼
+┌────────────────┐ ┌──────────────┐  ┌─────────────────┐
+│ SingleAgent    │ │  NL2SQL      │  │  McpStrategy    │
+│ RAGStrategy    │ │  Strategy    │  │                 │
+├────────────────┤ ├──────────────┤  ├─────────────────┤
+│ - tools_list   │ │ - nl2sql     │  │ - kernel        │
+│ - ai_search    │ │   _plugin    │  │ - agent         │
+│ - event_handler│ │ - terminator │  │                 │
+├────────────────┤ ├──────────────┤  ├─────────────────┤
+│ + initiate_    │ │ + initiate_  │  │ + initiate_     │
+│   agent_flow() │ │   agent_flow │  │   agent_flow()  │
+└────────────────┘ └──────────────┘  └─────────────────┘
+------------------------------------------------------------------
+```
+
 The entry point for the selected Strategy is the method `agentic_strategy.initiate_agent_flow()`.
 
 The strategy object instantiated from the `SingleAgentRAGStrategy` class runs in the container app and controls the sequence of activities behind the AI Foundry wall. It uses the `project_client` object as a local proxy (think of it as a remote TV control) to orchestrate operations. The strategy object doesn't handle grounding or LLM calls directly—these are delegated to the AI Foundry agent where the entire RAG pattern is executed.
