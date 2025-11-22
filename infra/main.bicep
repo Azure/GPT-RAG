@@ -925,6 +925,28 @@ module assignCognitiveServicesContributorTestVm 'modules/security/resource-role-
   }
 }
 
+
+// AI Foundry Account - Cognitive Services OpenAI User -> TestVm (for app testing)
+module assignAIFoundryCogServOAIUserTestVm  'modules/security/resource-role-assignment.bicep' = if (deployAiFoundry) {
+  name: 'assignAIFoundryCogServOAIUserTestVm'
+  params: {
+    name: 'assignAIFoundryCogServOAIUserTestVm'
+    roleAssignments: [
+      {
+        #disable-next-line BCP318
+        principalId: (_useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId!
+        roleDefinitionId: subscriptionResourceId(
+          'Microsoft.Authorization/roleDefinitions',
+          const.roles.CognitiveServicesOpenAIUser.guid
+        )
+        #disable-next-line BCP318
+        resourceId: aiFoundryAccountResourceId
+        principalType: 'ServicePrincipal'
+      }
+    ]
+  }
+}
+
 // Storage Account - Storage Blob Data Contributor -> TestVm
 module assignStorageStorageBlobDataContributorTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deployStorageAccount && _networkIsolation) {
   name: 'assignStorageStorageBlobDataContributorTestVm'
@@ -2310,6 +2332,26 @@ module assignSearchSearchIndexDataReaderExecutor 'modules/security/resource-role
         )
         #disable-next-line BCP318
         resourceId: searchService.outputs.resourceId
+        principalType: principalType
+      }
+    ]
+  }
+}
+
+// AI Foundry Account - Cognitive Services OpenAI User -> Executor
+module assignAIFoundryCogServOAIUserExecutor 'modules/security/resource-role-assignment.bicep' = if (deployAiFoundry) {
+  name: 'assignAIFoundryCogServOAIUserExecutor'
+  params: {
+    name: 'assignAIFoundryCogServOAIUserExecutor'
+    roleAssignments: [
+      {
+        principalId: principalId
+        roleDefinitionId: subscriptionResourceId(
+          'Microsoft.Authorization/roleDefinitions',
+          const.roles.CognitiveServicesOpenAIUser.guid
+        )
+        #disable-next-line BCP318
+        resourceId: aiFoundryAccountResourceId
         principalType: principalType
       }
     ]
