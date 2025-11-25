@@ -6,7 +6,7 @@ This quickstart enables a public access solution which is for testing purposes o
 
 ## Prerequisites
 
-✅ **You must have:**
+**You must have:**
 - GPT-RAG solution deployed (`azd provision` and `azd deploy` completed)
 - Azure subscription with permissions to create SQL resources
 - Access to Azure Portal
@@ -14,14 +14,14 @@ This quickstart enables a public access solution which is for testing purposes o
 ## What You'll Accomplish
 
 By the end of this guide:
-- ✅ Create Azure SQL Database with AdventureWorksLT sample data
-- ✅ Configure networking and firewall rules
-- ✅ Store database credentials securely in Key Vault
-- ✅ Register your SQL database as a datasource
-- ✅ Upload table metadata and example queries to blob storage
-- ✅ Enable automated ingestion with CRON scheduling
-- ✅ Enable NL2SQL strategy
-- ✅ Ask questions in natural language and get SQL results
+- Create Azure SQL Database with AdventureWorksLT sample data
+- Configure networking and firewall rules
+- Store database credentials securely in Key Vault
+- Register your SQL database as a datasource
+- Upload table metadata and example queries to blob storage
+- Enable automated ingestion with CRON scheduling
+- Enable NL2SQL strategy
+- Ask questions in natural language and get SQL results
 
 ---
 
@@ -40,7 +40,7 @@ By the end of this guide:
 2. **Create SQL Database Server:**
    - **Server name:** `sql-gptrag-demo-<unique>` (must be globally unique)
    - **Location:** Same region as GPT-RAG (optional - any region works, but same region reduces latency)
-   - **Authentication method:** ✅ **Use SQL authentication** (for simplicity in this example but Entra also works great)
+   - **Authentication method:** **Use SQL authentication** (simpler for this quickstart; Entra ID authentication is also supported)
    - **Server admin login:** `sqladmin`
    - **Password:** Create a strong password (save this!)
    - Click **OK**
@@ -56,17 +56,17 @@ By the end of this guide:
 ### B. Configure Networking
 
 5. **Networking tab:**
-   - **Connectivity method:** ✅ **Public endpoint**
+   - **Connectivity method:** **Public endpoint**
    - **Firewall rules:**
-     - ✅ **Allow Azure services and resources to access this server** - **YES** (CRITICAL!)
-     - ✅ **Add current client IP address** - **YES** (for your testing)
+     - **Allow Azure services and resources to access this server** - **YES** (CRITICAL!)
+     - **Add current client IP address** - **YES** (for your testing)
    - **Connection policy:** Default
    - **Encrypted connections:** TLS 1.2 (default)
 
 ### C. Add Sample Data
 
 6. **Additional settings tab:**
-   - **Use existing data:** ✅ **Sample (AdventureWorksLT)**
+   - **Use existing data:** **Sample (AdventureWorksLT)**
    - **Collation:** Default
    - **Enable Microsoft Defender:** Not needed for demo
 
@@ -82,11 +82,11 @@ After deployment completes:
 
 **Azure Portal → SQL servers → `sql-gptrag-demo-<unique>` → Security → Networking**
 
-(Not: SQL databases → adventureworks-demo - that's the wrong place!)
+(Note: SQL databases → adventureworks-demo - that's the wrong place!)
 
 Verify these settings:
-- ✅ **Public network access:** Selected networks
-- ✅ **Exceptions:** ☑️ **Allow Azure services and resources to access this server** (checked)
+- **Public network access:** Selected networks
+- **Exceptions:** ☑️ **Allow Azure services and resources to access this server** (checked)
 
 The "Allow Azure services" checkbox creates a special firewall rule (`0.0.0.0 - 0.0.0.0`) that permits any Azure service in your subscription to connect.
 
@@ -104,7 +104,7 @@ FROM SalesLT.Product
 ORDER BY ListPrice DESC
 ```
 
-✅ **If you see results, your database is ready!**
+**If you see results, your database is ready!**
 
 ### F. Gather Connection Info
 
@@ -211,10 +211,10 @@ Paste this JSON, replacing `<your-sql-server-name>` with the **server name you c
 - Add `.database.windows.net` to the end
 
 **⚠️ CRITICAL RULES:**
-- ✅ Use `uid` (NOT `username`)
-- ❌ DO NOT include `password` field
-- ❌ DO NOT include `connection_info` field
-- ✅ The `id` must match Key Vault secret prefix (`adventureworks` → `adventureworks-secret`)
+- Use `uid` (NOT `username`)
+- DO NOT include `password` field
+- DO NOT include `connection_info` field
+- The `id` must match Key Vault secret prefix (`adventureworks` → `adventureworks-secret`)
 
 Click **Save**.
 
@@ -293,17 +293,17 @@ The system uses **AI Search for semantic table discovery** instead of live datab
 3. Then calls `GetSchemaInfo` to retrieve detailed column information
 
 **Benefits of this approach:**
-- ✅ **Fast semantic search** - Find relevant tables using natural language ("revenue data" matches "SalesOrderHeader")
-- ✅ **Control what's exposed** - Only include tables relevant to end users (exclude admin/audit tables)
-- ✅ **Add business context** - Descriptions help the AI understand table purpose beyond raw schema
-- ✅ **Avoid token limits** - Don't send 500 table schemas to GPT-4 every query
+- **Fast semantic search** - Find relevant tables using natural language ("revenue data" matches "SalesOrderHeader")
+- **Control what's exposed** - Only include tables relevant to end users (exclude admin/audit tables)
+- **Add business context** - Descriptions help the AI understand table purpose beyond raw schema
+- **Avoid token limits** - Don't send 500 table schemas to GPT-4 every query
 
 **⚠️ Schema updates:**
 - If you add/drop columns or tables later, create new JSON files and upload them
 - The automated ingestion will detect changes and re-index automatically
 
-> [!NOTE]
-> Column descriptions are are not specified here because the column names are sufficiently descriptive for the LLM
+!!! note
+    Column descriptions are not specified here because the column names are sufficiently descriptive for the LLM
 
 **Create these files on your local machine:**
 
@@ -503,9 +503,9 @@ Get-Content run-log.json | ConvertFrom-Json | ConvertTo-Json -Depth 10
 3. "What product categories exist?"
 
 **Expected response:**
-- ✅ Natural language answer with data
-- ✅ Shows SQL query that was executed
-- ✅ Cites the datasource
+- Natural language answer with data
+- Shows SQL query that was executed
+- Cites the datasource
 
 ---
 

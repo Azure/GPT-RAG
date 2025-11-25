@@ -6,7 +6,7 @@ This quickstart enables a public access solution which is for testing purposes o
 
 ## Prerequisites
 
-✅ **You must have:**
+**You must have:**
 - Azure subscription with permissions to create resources
 - Azure Developer CLI (azd): 1.21.1+
 - Azure CLI (az): 2.79.0+
@@ -17,13 +17,13 @@ This quickstart enables a public access solution which is for testing purposes o
 ## What You'll Accomplish
 
 By the end of this guide:
-- ✅ Deploy complete GPT-RAG infrastructure (~20 Azure resources)
-- ✅ Upload documents to Azure Blob Storage
-- ✅ Enable automated document ingestion and indexing
-- ✅ Configure AI Foundry search connection
-- ✅ Generate embeddings with text-embedding-3-large
-- ✅ Ask questions about your documents using GPT-4o
-- ✅ Get answers grounded in your data with citations
+- Deploy complete GPT-RAG infrastructure (~20 Azure resources)
+- Upload documents to Azure Blob Storage
+- Enable automated document ingestion and indexing
+- Configure AI Foundry search connection
+- Generate embeddings with text-embedding-3-large
+- Ask questions about your documents using GPT-4o
+- Get answers grounded in your data with citations
 
 ---
 
@@ -42,9 +42,9 @@ azd init -t azure/gpt-rag
 1. **Environment name** - Choose a short name (e.g., `myrag`, `demorag`)
 2. **Azure subscription** - Select from list
 3. **Azure region** - Choose wisely:
-   - ✅ **East US 2** - Best OpenAI quota availability
-   - ✅ **West US** - Good quota, lower latency for West Coast
-   - ✅ **East US** - Backup option if East US 2 full
+   - **East US 2** - Best OpenAI quota availability
+   - **West US** - Good quota, lower latency for West Coast
+   - **East US** - Backup option if East US 2 full
    - ⚠️ **North Europe, West Europe** - Often quota-constrained
 
 **💡 Note:** If you have quota limitations, see the Troubleshooting section at the end for how to adjust model capacity.
@@ -68,18 +68,18 @@ azd provision
 ```
 
 **What this creates (~20 Azure resources):**
-- ✅ **Resource Group** - Container for all resources
-- ✅ **Storage Accounts** - For documents and job logs
-- ✅ **AI Search Services (2)** - Main index (srch-*) and AI Foundry index (srch-aif-*)
-- ✅ **AI Foundry** - Hub and project for agent orchestration
-- ✅ **OpenAI Models** - GPT-4o and text-embedding-3-large deployments
-- ✅ **Container Registry** - Stores Docker images
-- ✅ **Container Apps (4)** - Frontend, orchestrator, ingestion, MCP
-- ✅ **App Configuration** - Centralized configuration store
-- ✅ **Key Vault** - Secrets management
-- ✅ **Cosmos DB** - Agent state and metadata
-- ✅ **Log Analytics** - Monitoring and diagnostics
-- ✅ **Managed Identities** - Secure service-to-service auth
+- **Resource Group** - Container for all resources
+- **Storage Accounts** - For documents and job logs
+- **AI Search Services (2)** - Main index (srch-*) and AI Foundry index (srch-aif-*)
+- **AI Foundry** - Hub and project for agent orchestration
+- **OpenAI Models** - GPT-4o and text-embedding-3-large deployments
+- **Container Registry** - Stores Docker images
+- **Container Apps (4)** - Frontend, orchestrator, ingestion, MCP
+- **App Configuration** - Centralized configuration store
+- **Key Vault** - Secrets management
+- **Cosmos DB** - Agent state and metadata
+- **Log Analytics** - Monitoring and diagnostics
+- **Managed Identities** - Secure service-to-service auth
 
 ⏳ **Wait ~27 minutes for provisioning to complete.**
 
@@ -140,13 +140,13 @@ azd deploy
 **Azure Portal → Storage accounts → st`<prefix>` → Containers → documents → Upload**
 
 **Supported formats:**
-- ✅ **PDF** - Most common (OCR with Document Intelligence)
-- ✅ **Word** (.docx) - Extracts text and tables
-- ✅ **PowerPoint** (.pptx) - Extracts slides and speaker notes
-- ✅ **Excel** (.xlsx) - Extracts sheets and data (v4.0+)
-- ✅ **Text** (.txt, .md) - Direct text ingestion
-- ✅ **Images** (.jpg, .png, .bmp, .tiff) - OCR extraction
-- ✅ **HTML** - Web page content extraction
+- **PDF** - Most common (OCR with Document Intelligence)
+- **Word** (.docx) - Extracts text and tables
+- **PowerPoint** (.pptx) - Extracts slides and speaker notes
+- **Excel** (.xlsx) - Extracts sheets and data (v4.0+)
+- **Text** (.txt, .md) - Direct text ingestion
+- **Images** (.jpg, .png, .bmp, .tiff) - OCR extraction
+- **HTML** - Web page content extraction
 
 **What happens after upload:**
 1. File stored in `documents` container
@@ -160,14 +160,14 @@ azd deploy
 ### B. Trigger Document Indexing
 
 The indexing service runs automatically:
-- ✅ **On container startup** (immediate first run)
-- ✅ **Hourly on CRON** (at :10 minutes past the hour)
+- **On container startup** (immediate first run)
+- **Hourly on CRON** (at :10 minutes past the hour)
 
 **Option 1: Wait for next CRON run** (up to 60 minutes)
 
 **Option 2: Force immediate indexing by restarting:**
 
-**Azure Portal → Container Apps → ca-`<prefix>`-dataingest
+**Azure Portal → Container Apps → ca-`<prefix>`-dataingest**
 
 1. Click **Stop**
 2. Wait 10 seconds
@@ -180,7 +180,7 @@ The indexing service runs automatically:
 
 **Azure Portal → AI Search → srch-`<prefix>` → Indexes → ragindex-`<prefix>`**
 
-- ✅ **Document count > 0** (indicates chunks were indexed)
+- **Document count > 0** (indicates chunks were indexed)
 
 ---
 
@@ -204,7 +204,7 @@ The orchestrator needs the connection ID for the main search service.
 5. Click **+ New connection**
 6. Select **Azure AI Search**
 7. Select **srch-`<prefix>`** (NOT srch-aif-*)
-8. **Authentication:** ✅ **Microsoft Entra ID** (NOT API Key)
+8. **Authentication:** **Microsoft Entra ID** (NOT API Key)
 9. **Connection name:** Use the resource name (e.g., `srchqitxxnnt4igs6`)
 10. Click **Save**
 
@@ -232,13 +232,13 @@ After saving, the connection details page shows the connection ID.
 3. Click the key → Click **Edit**
 4. **Value field:** Paste the connection ID you copied from AI Foundry
 5. Verify:
-   - ✅ **Content type:** `text/plain`
-   - ✅ **Label:** `gpt-rag`
+   - **Content type:** `text/plain`
+   - **Label:** `gpt-rag`
 6. Click **Apply** → Click **Save**
 
 ### B. Restart Orchestrator
 
-**Azure Portal → Container Apps → ca-`<prefix>`-orchestrator
+**Azure Portal → Container Apps → ca-`<prefix>`-orchestrator**
 
 1. Click **Deactivate**
 2. Wait 10 seconds
@@ -260,10 +260,10 @@ Copy the **Application URL** and open it in your browser. You should see the GPT
 3. "What does the document say about [specific topic]?"
 
 **Expected response:**
-- ✅ Natural language answer based on your document
-- ✅ **Citations** showing which chunks were used
-- ✅ **Source references** with page numbers (if PDF)
-- ✅ Response generated by GPT-4o using retrieved context
+- Natural language answer based on your document
+- **Citations** showing which chunks were used
+- **Source references** with page numbers (if PDF)
+- Response generated by GPT-4o using retrieved context
 
 ---
 
@@ -351,7 +351,7 @@ azd provision
 ServiceInvocationException: Error at: project_client.agents.threads.create()
 ```
 
-**Root cause:** AI Foundry capability host lacks vector store connections (immutable configuration).
+**Root cause:** AI Foundry capabilities host lacks vector store connections (immutable configuration).
 
 **Workaround:**
 1. Check orchestrator logs: `ca-<prefix>-orchestrator` → Logs → Console logs
