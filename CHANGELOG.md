@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.  
 This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to [Semantic Versioning](https://semver.org/).
 
+
+## [v2.2.4] – 2025-11-26
+### Fixed
+- Fixed a bug in data ingestion component where the Blob storage ingestion process was re-indexing unchanged files when AI Search index had more than 1,000 chunks. Fixed in gpt-rag-ingestion v2.0.6.
+### Changed
+- Small update in `scripts/postProvision.sh` to make the Container Apps API Key check more robust by always converting the `USE_CAPP_API_KEY` variable to lowercase, even when it is unset.
+
+
+
 ## [v2.2.3] – 2025-11-15
 ### Fixed
 - Intermittent AI Foundry post provisioning setup authentication timeout by increasing `AzureCliCredential` and `ManagedIdentityCredential` process timeout to 30 seconds in `config/aifoundry/setup.py`
@@ -33,7 +42,7 @@ This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres 
 - Citation links opens up new chat windows instead of rendering files [#387](https://github.com/Azure/GPT-RAG/issues/387)
 ## [v2.1.2] – 2025-10-02
 ### Changed
-- Fixed a bug in daa ingestion component where the SharePoint ingestion process was unnecessarily re-indexing unchanged files.
+- Fixed a bug in data ingestion component where the SharePoint ingestion process was unnecessarily re-indexing unchanged files.
 
 ## [v2.1.1] – 2025-09-22
 ### Changed
