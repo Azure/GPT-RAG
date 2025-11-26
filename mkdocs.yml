@@ -35,9 +35,11 @@ nav:
   - Architecture:
     - Overview: architecture.md
   - Services:
-    - Orchestrator: ochestrator.md
+    - Orchestrator: services_ochestrator.md
+    - Ingestion: services_ingestion.md    
   - How-to Guides:
-    - User Feedback: userfeedback.md
+    - User Feedback: howto_userfeedback.md
+    - Sharepoint Connector: howto_sharepoint_connector.md
   - Meet the Team: team.md
   - Contributing: contributing.md    
 extra:

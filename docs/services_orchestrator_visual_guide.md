@@ -4,7 +4,7 @@
 Yet many engineers write another thousand words instead of drawing a single useful diagram.  
 Let’s reverse this evolution — with visuals.
 
-Starting with diagrams — with a bit of simplification and abstraction — can significantly accelerate the comprehension of complex codebases. This is especially true when the data flow spans multiple execution environments (container app, AI Foundry, Azure cloud resources), where the initial orientation can otherwise be challenging.
+Starting with diagrams — with a bit of simplification and abstraction — can significantly accelerate the comprehension of complex codebases. This is especially true when the data flow spans multiple execution environments (container app, Microsoft Foundry, Azure cloud resources), where the initial orientation can otherwise be challenging.
 
 ## Why This Article Exists
 
@@ -48,17 +48,13 @@ The `Orchestrator` class serves as the **conversation state manager** and **stra
 
 ## Single Agent Strategy
 
-This section explores how the Single-Agent RAG Strategy orchestrates the entire request-response lifecycle, from receiving a user's question to delivering a grounded, streamed answer. The diagrams below illustrate the conversation lifecycle, state management, and the interaction between the Orchestrator container app and AI Foundry services.
-
-[🟦 SVG](./media/orchestrator_strategy/orchestrator-strategy.drawio.svg) ·
-[🟨 PNG](./media/orchestrator_strategy/orchestrator-strategy.drawio.png) ·
-[🟥 JPG](./media/orchestrator_strategy/orchestrator-strategy.jpg)
+This section explores how the Single-Agent RAG Strategy orchestrates the entire request-response lifecycle, from receiving a user's question to delivering a grounded, streamed answer. The diagrams below illustrate the conversation lifecycle, state management, and the interaction between the Orchestrator container app and Microsoft Foundry services.
 
 ![Orchestrator Strategy Setup and Streaming](./media/orchestrator_strategy/orchestrator-strategy.drawio.svg)
 
 The entry point for the selected Strategy is the method `agentic_strategy.initiate_agent_flow()`.
 
-The strategy object instantiated from the `SingleAgentRAGStrategy` class runs in the container app and controls the sequence of activities behind the AI Foundry wall. It uses the `project_client` object as a local proxy (think of it as a remote TV control) to orchestrate operations. The strategy object doesn't handle grounding or LLM calls directly—these are delegated to the AI Foundry agent where the entire RAG pattern is executed.
+The strategy object instantiated from the `SingleAgentRAGStrategy` class runs in the container app and controls the sequence of activities behind the Microsoft Foundry wall. It uses the `project_client` object as a local proxy (think of it as a remote TV control) to orchestrate operations. The strategy object doesn't handle grounding or LLM calls directly—these are delegated to the Microsoft Foundry agent where the entire RAG pattern is executed.
 
 The strategy object `SingleAgentRAGStrategy`
 
@@ -68,15 +64,15 @@ The strategy object `SingleAgentRAGStrategy`
 
 - creates a new message from the user's Ask and attaches it to the Thread object,
 
-- finally calls the project_client.agents.runs.stream() which triggers the RAG pipeline inside of the AI Foundry realm.
+- finally calls the project_client.agents.runs.stream() which triggers the RAG pipeline inside of the Microsoft Foundry realm.
 
 Note that `Thread` objects keep the entire **history of conversations**. There are two levels of history persistence: one in CosmosDB and another in Thread objects.
 
 `Orchestrator` keeps a history (using CosmosDB) identified by `conversation_id` which arrives in the HTTP Request payload.
-One of the attributes stored in the CosmosDB is `thread_id` which points to the `Thread` object which resides inside of the AI Foundry.
-AI Foundry maintains its own internal persistency in the Thread objects.
+One of the attributes stored in the CosmosDB is `thread_id` which points to the `Thread` object which resides inside of the Microsoft Foundry.
+Microsoft Foundry maintains its own internal persistency in the Thread objects.
 
-The strategy object triggers the RAG pipeline execution inside of AI Foundry with the proxy `project_client`:
+The strategy object triggers the RAG pipeline execution inside of Microsoft Foundry with the proxy `project_client`:
 ```
 project_client.agents.runs.stream(
     thread_id=thread.id,
@@ -102,11 +98,6 @@ Here is what it does:
 
 ### Single Agent Strategy Internal Flow
 
-<!-- Offer alternative formats as small inline links/icons above or below -->
-[🟦 SVG](./media/orchestrator_single_agent_strategy/orchestrator-single-agent-strategy.drawio.svg) ·
-[🟨 PNG](./media/orchestrator_single_agent_strategy/orchestrator-single-agent-strategy.drawio.png) ·
-[🟥 JPG](./media/orchestrator_single_agent_strategy/orchestrator-single-agent-strategy.jpg)
-
 ![Single Agent RAG Strategy Internal Flow](./media/orchestrator_single_agent_strategy/orchestrator-single-agent-strategy.drawio.png)
 
 The sequence diagram above is intended to illustrate the core concepts and design patterns present in the codebase.
@@ -119,4 +110,4 @@ The visualization deliberately simplifies reality through abstraction and by omi
 | Orchestrator entry | [`main.py`](https://github.com/Azure/gpt-rag-orchestrator/blob/main/src/main.py) | FastAPI route + request handling |
 | Orchestrator implementation | [`orchestration/orchestrator.py`](https://github.com/Azure/gpt-rag-orchestrator/blob/main/src/orchestration/orchestrator.py) | Maintains Conversation History + runs streaming pipeline |
 | Strategy factory | [`strategies/agent_strategy_factory.py`](https://github.com/Azure/gpt-rag-orchestrator/blob/main/src/strategies/agent_strategy_factory.py) | Selects the execution strategy |
-| Single-Agent RAG Strategy | [`strategies/single_agent_rag_strategy.py`](https://github.com/Azure/gpt-rag-orchestrator/blob/main/src/strategies/single_agent_rag_strategy.py) | Implements flow to Azure AI Foundry |
+| Single-Agent RAG Strategy | [`strategies/single_agent_rag_strategy.py`](https://github.com/Azure/gpt-rag-orchestrator/blob/main/src/strategies/single_agent_rag_strategy.py) | Implements flow to Azure Microsoft Foundry |

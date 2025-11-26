@@ -29,6 +29,18 @@ To maintain project quality, the following items will be considered during the P
 
 - **Multi-Repo Dependencies:** If your pull request has dependencies on updates in other repositories, make sure to mention this in the pull request description. Additionally, create a corresponding pull request in the other repository to ensure synchronized updates across all related projects.
 
+### Documentation
+
+All project documentation is centralized in MkDocs and hosted at [https://aka.ms/gpt-rag-docs](https://aka.ms/gpt-rag-docs). When contributing to documentation:
+
+- **Use AI Tools Wisely:** GitHub Copilot and similar tools can help generate documentation, but always review and refine the output. Avoid excessive use of emojis, dashes, bullets, and images. Keep documentation clean, clear, and professional.
+
+- **Focus on Clarity:** Prioritize straightforward language and well-structured content. Documentation should be easy to read.
+
+- **Follow Existing Patterns:** Review existing documentation pages to maintain consistency in style, formatting, and tone.
+
+- **Test Your Changes:** Preview your documentation locally using MkDocs before submitting to ensure proper rendering.
+
 ## Code Update Workflow
 
 We use a simplified version of the [Fork and Branch Workflow](https://blog.scottlowe.org/2015/01/27/using-fork-branch-git-workflow/) alongside [Git Flow](https://nvie.com/posts/a-successful-git-branching-model/) for branching strategy. The `main` branch always contains deployment-ready code, while the `develop` branch serves as our integration branch.
@@ -39,7 +51,7 @@ Contributors create feature branches from `develop` in their forks. Once changes
 
 This section outlines the contribution process, highlighting the key actions for both contributors and maintainers. The accompanying diagram visually represents the workflow.
 
-![git workflow](media/contributing-workflow.png)
+![git workflow](media/contributing_workflow.png)
 
 1) **Fork the Repository**
    
@@ -88,13 +100,13 @@ Here’s an example of implementing a feature called `conversation-metadata` in 
 1) **Create a Fork**
 
    ```bash
-   https://github.com/placerda/gpt-rag-orchestrator.git
+   https://github.com/<your-github-user>/gpt-rag-orchestrator.git
    ```
 
 2) **Clone Your Fork Locally**
 
    ```bash
-   git clone https://github.com/placerda/gpt-rag-orchestrator.git
+   git clone https://github.com/<your-github-user>/gpt-rag-orchestrator.git
    ```
 
 3) **Set Upstream Remote**
@@ -122,7 +134,7 @@ Here’s an example of implementing a feature called `conversation-metadata` in 
    * **6a. Create the PR:**
      Go to your fork on GitHub → click **New Pull Request** →
      Base: `Azure/gpt-rag-orchestrator` → `develop`
-     Compare: `placerda/gpt-rag-orchestrator` → `feature/conversation-metadata`
+     Compare: `<your-github-user>/gpt-rag-orchestrator` → `feature/conversation-metadata`
    * **6b. Maintainer Review:**
      The maintainers will review, request changes if needed, and merge the PR into the upstream `develop`.
 
@@ -145,7 +157,7 @@ Here’s an example of implementing a feature called `conversation-metadata` in 
 9) **Open a Pull Request to Upstream `main`** *(Maintainers)*
 
    * Base: `Azure/gpt-rag-orchestrator` → `main`
-   * Compare: `placerda/gpt-rag-orchestrator` → `release/2.0.1`
+   * Compare: `<your-github-user>/gpt-rag-orchestrator` → `release/2.0.1`
    * After review and merge, maintainers tag the release (e.g., `v2.0.1`).
 
 10) **Sync Your Fork After Tag Creation**
@@ -156,6 +168,8 @@ git checkout main
 git merge upstream/main
 git push origin main
 ```
+
+> **Note for Documentation Contributions:** When contributing to documentation, target the `docs` branch instead of `develop`. It is recommended to create a dedicated clone specifically for documentation work to avoid mixing documentation changes with code updates. This keeps documentation workflows separate and simplifies the review process.
 
 ## Legal and Code of Conduct
 
