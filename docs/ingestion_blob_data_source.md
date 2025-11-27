@@ -86,7 +86,33 @@ Logs
 
 > If nothing returns, run `Logs | where message contains "blob-storage-indexer" | take 20` to inspect the raw log format.
 
-### Items in Specific Run
+### Purge Summary Stats
+
+Inspect the most recent purge runs and their cleanup metrics:
+
+```kql
+let Logs = union isfuzzy=true traces, AppTraces;
+Logs
+| where message contains "blob-storage-purger"
+    and message contains "Summary:"
+| extend payload = parse_json(extract('\\{.*', 0, message))
+| extend runStartedAt  = todatetime(payload.runStartedAt),
+                 runFinishedAt = todatetime(payload.runFinishedAt)
+| project
+        timestamp,
+        runStartedAt,
+        runFinishedAt,
+        durationSeconds           = datetime_diff("second", runFinishedAt, runStartedAt),
+        blobDocumentsCount        = toint(payload.blobDocumentsCount),
+        indexParentsCountBefore   = toint(payload.indexParentsCountBefore),
+        indexChunkDocumentsBefore = toint(payload.indexChunkDocumentsBefore),
+        indexParentsPurged        = toint(payload.indexParentsPurged),
+        indexChunkDocumentsDeleted= toint(payload.indexChunkDocumentsDeleted),
+        indexParentsCountAfter    = toint(payload.indexParentsCountAfter)
+| order by timestamp desc
+```
+
+### Items in Specific Indexer Run
 
 List all files processed during a particular run:
 
@@ -128,7 +154,7 @@ Logs
 | order by timestamp desc
 ```
 
-### Recent Errors
+### Recent Indexer Errors
 
 View recent warnings and errors:
 
