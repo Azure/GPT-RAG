@@ -320,7 +320,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../simple-rag-quickstart/" class="md-nav__link">
+      <a href="../quickstart_simple_rag/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -341,7 +341,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../nl2sql-quickstart/" class="md-nav__link">
+      <a href="../quickstart_nl2sql/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -654,7 +654,8 @@ async def orchestrator_endpoint(
 <a href="../media/orchestrator_strategy/orchestrator-strategy.jpg">🟥 JPG</a></p>
 <p><img alt="Orchestrator Strategy Setup and Streaming" src="../media/orchestrator_strategy/orchestrator-strategy.drawio.svg" /></p>
 <p>You will have noticed the use of the Factory Design Pattern (<code>AgentStrategyFactory</code>) for the various Strategies, ensuring that all of them comply with the same <code>BaseAgentStrategy</code> interface.
-For the sake of clarity, I have abstracted away the different roles of the <code>Orchestrator</code> class and the <code>Orchestrator</code> object.
+For the sake of clarity, I have abstracted away the different roles of the <code>Orchestrator</code> class and the <code>Orchestrator</code> object.</p>
+<div class="no-wrap">
 <div class="highlight"><pre><span></span><code>------------------------------------------------------------------
 ┌────────────────────────────────────────────────────────────────┐
 │                         Orchestrator                           │
@@ -708,7 +709,9 @@ For the sake of clarity, I have abstracted away the different roles of the <code
 │   agent_flow() │ │   agent_flow │  │   agent_flow()  │
 └────────────────┘ └──────────────┘  └─────────────────┘
 ------------------------------------------------------------------
-</code></pre></div></p>
+</code></pre></div>
+</div>
+
 <p>The entry point for the selected Strategy is the method <code>agentic_strategy.initiate_agent_flow()</code>.</p>
 <p>The strategy object instantiated from the <code>SingleAgentRAGStrategy</code> class runs in the container app and controls the sequence of activities behind the AI Foundry wall. It uses the <code>project_client</code> object as a local proxy (think of it as a remote TV control) to orchestrate operations. The strategy object doesn't handle grounding or LLM calls directly—these are delegated to the AI Foundry agent where the entire RAG pattern is executed.</p>
 <p>The strategy object <code>SingleAgentRAGStrategy</code></p>

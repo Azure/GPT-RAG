@@ -13,7 +13,7 @@
       
       
       
-        <link rel="prev" href="../simple-rag-quickstart/">
+        <link rel="prev" href="../quickstart_simple_rag/">
       
       
         <link rel="next" href="../architecture/">
@@ -326,7 +326,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../simple-rag-quickstart/" class="md-nav__link">
+      <a href="../quickstart_simple_rag/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -356,17 +356,6 @@
         
       
       
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    NL2SQL
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -376,277 +365,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
-    <span class="md-ellipsis">
-      Prerequisites
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#what-youll-accomplish" class="md-nav__link">
-    <span class="md-ellipsis">
-      What You'll Accomplish
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-1-create-azure-sql-database-5-10-min" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 1: Create Azure SQL Database (5-10 min)
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Step 1: Create Azure SQL Database (5-10 min)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#a-create-sql-server" class="md-nav__link">
-    <span class="md-ellipsis">
-      A. Create SQL Server
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#b-configure-networking" class="md-nav__link">
-    <span class="md-ellipsis">
-      B. Configure Networking
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#c-add-sample-data" class="md-nav__link">
-    <span class="md-ellipsis">
-      C. Add Sample Data
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#d-verify-firewall-configuration-post-deployment" class="md-nav__link">
-    <span class="md-ellipsis">
-      D. Verify Firewall Configuration (Post-Deployment)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#e-test-connection" class="md-nav__link">
-    <span class="md-ellipsis">
-      E. Test Connection
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#f-gather-connection-info" class="md-nav__link">
-    <span class="md-ellipsis">
-      F. Gather Connection Info
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-2-find-your-gpt-rag-resources-3-min" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 2: Find Your GPT-RAG Resources (3 min)
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-3-store-password-in-key-vault-3-min" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 3: Store Password in Key Vault (3 min)
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-4-grant-container-app-access-to-key-vault-2-min" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 4: Grant Container App Access to Key Vault (2 min)
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-5-register-database-in-cosmos-db-3-min" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 5: Register Database in Cosmos DB (3 min)
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-6-create-metadata-json-files-5-min" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 6: Create Metadata JSON Files (5 min)
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Step 6: Create Metadata JSON Files (5 min)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#a-create-local-folder-structure" class="md-nav__link">
-    <span class="md-ellipsis">
-      A. Create Local Folder Structure
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#b-create-example-query-files" class="md-nav__link">
-    <span class="md-ellipsis">
-      B. Create Example Query Files
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#c-create-table-metadata-files" class="md-nav__link">
-    <span class="md-ellipsis">
-      C. Create Table Metadata Files
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-7-upload-files-to-blob-storage-3-min" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 7: Upload Files to Blob Storage (3 min)
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-8-enable-automated-ingestion-3-min" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 8: Enable Automated Ingestion (3 min)
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-9-enable-nl2sql-strategy-2-min" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 9: Enable NL2SQL Strategy (2 min)
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-10-wait-for-initial-ingestion-2-3-min" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 10: Wait for Initial Ingestion (2-3 min)
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-11-test-it-2-min" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 11: Test It! (2 min)
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#what-you-just-enabled" class="md-nav__link">
-    <span class="md-ellipsis">
-      What You Just Enabled 🪄
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="What You Just Enabled 🪄">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#automated-metadata-management" class="md-nav__link">
-    <span class="md-ellipsis">
-      🧠 Automated Metadata Management
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#advanced-query-capabilities-already-working" class="md-nav__link">
-    <span class="md-ellipsis">
-      🧩 Advanced Query Capabilities (Already working!)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#enabling-zero-trust-architecture" class="md-nav__link">
-    <span class="md-ellipsis">
-      🔐 Enabling Zero Trust Architecture
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
       
     </li>
   
@@ -909,105 +627,119 @@
 
 <h1 id="nl2sql-quick-start-guide">NL2SQL Quick Start Guide</h1>
 <p>Get public access natural language querying of your Azure SQL Database working in <strong>30 minutes</strong> using <strong>automated blob storage ingestion</strong>.</p>
+<blockquote>
 <p>This quickstart enables a public access solution which is for testing purposes only!</p>
-<h2 id="prerequisites">Prerequisites</h2>
-<p><strong>You must have:</strong>
-- GPT-RAG solution deployed (<code>azd provision</code> and <code>azd deploy</code> completed)
-- Azure subscription with permissions to create SQL resources
-- Access to Azure Portal</p>
-<h2 id="what-youll-accomplish">What You'll Accomplish</h2>
-<p>By the end of this guide:
-- Create Azure SQL Database with AdventureWorksLT sample data
-- Configure networking and firewall rules
-- Store database credentials securely in Key Vault
-- Register your SQL database as a datasource
-- Upload table metadata and example queries to blob storage
-- Enable automated ingestion with CRON scheduling
-- Enable NL2SQL strategy
-- Ask questions in natural language and get SQL results</p>
+</blockquote>
+<p><strong>Prerequisites</strong></p>
+<p><strong>You must have:</strong></p>
+<ul>
+<li>GPT-RAG solution deployed (<code>azd provision</code> and <code>azd deploy</code> completed)</li>
+<li>Azure subscription with permissions to create SQL resources</li>
+<li>Access to Azure Portal</li>
+</ul>
+<p><strong>What You'll Accomplish</strong></p>
+<p>By the end of this guide:</p>
+<ul>
+<li>Create Azure SQL Database with AdventureWorksLT sample data</li>
+<li>Configure networking and firewall rules</li>
+<li>Store database credentials securely in Key Vault</li>
+<li>Register your SQL database as a datasource</li>
+<li>Upload table metadata and example queries to blob storage</li>
+<li>Enable automated ingestion with CRON scheduling</li>
+<li>Enable NL2SQL strategy</li>
+<li>Ask questions in natural language and get SQL results</li>
+</ul>
 <hr />
-<h2 id="step-1-create-azure-sql-database-5-10-min">Step 1: Create Azure SQL Database (5-10 min)</h2>
-<h3 id="a-create-sql-server">A. Create SQL Server</h3>
+<p><strong>Step 1: Create Azure SQL Database (5-10 min)</strong></p>
+<p><strong>A. Create SQL Server</strong></p>
 <p><strong>Azure Portal → Create a resource → SQL Database</strong></p>
 <ol>
-<li><strong>Basics tab:</strong></li>
+<li>
+<p><strong>Basics tab:</strong></p>
+<ul>
 <li><strong>Subscription:</strong> Your subscription</li>
 <li><strong>Resource group:</strong> Same as your GPT-RAG deployment (or create new)</li>
 <li><strong>Database name:</strong> <code>adventureworks-demo</code></li>
-<li>
-<p><strong>Server:</strong> Click <strong>Create new</strong></p>
+<li><strong>Server:</strong> Click <strong>Create new</strong></li>
+</ul>
 </li>
 <li>
 <p><strong>Create SQL Database Server:</strong></p>
-</li>
+<ul>
 <li><strong>Server name:</strong> <code>sql-gptrag-demo-&lt;unique&gt;</code> (must be globally unique)</li>
 <li><strong>Location:</strong> Same region as GPT-RAG (optional - any region works, but same region reduces latency)</li>
 <li><strong>Authentication method:</strong> <strong>Use SQL authentication</strong> (simpler for this quickstart; Entra ID authentication is also supported)</li>
 <li><strong>Server admin login:</strong> <code>sqladmin</code></li>
 <li><strong>Password:</strong> Create a strong password (save this!)</li>
-<li>
-<p>Click <strong>OK</strong></p>
+<li>Click <strong>OK</strong></li>
+</ul>
 </li>
 <li>
 <p><strong>Compute + storage:</strong></p>
-</li>
+<ul>
 <li>Click <strong>Configure database</strong></li>
 <li>Select <strong>Basic</strong> (cheapest for testing - $5/month)</li>
-<li>
-<p>Click <strong>Apply</strong></p>
+<li>Click <strong>Apply</strong></li>
+</ul>
 </li>
 <li>
 <p><strong>Backup storage redundancy:</strong></p>
-</li>
+<ul>
 <li>Select <strong>Locally-redundant backup storage</strong> (cheapest)</li>
-</ol>
-<h3 id="b-configure-networking">B. Configure Networking</h3>
-<ol>
-<li><strong>Networking tab:</strong></li>
-<li><strong>Connectivity method:</strong> <strong>Public endpoint</strong></li>
-<li><strong>Firewall rules:</strong><ul>
-<li><strong>Allow Azure services and resources to access this server</strong> - <strong>YES</strong> (CRITICAL!)</li>
-<li><strong>Add current client IP address</strong> - <strong>YES</strong> (for your testing)</li>
 </ul>
 </li>
+</ol>
+<p><strong>B. Configure Networking</strong></p>
+<ol>
+<li><strong>Networking tab:</strong><ul>
+<li><strong>Connectivity method:</strong> <strong>Public endpoint</strong></li>
+<li><strong>Firewall rules:</strong></li>
+<li><strong>Allow Azure services and resources to access this server</strong> - <strong>YES</strong> (CRITICAL!)</li>
+<li><strong>Add current client IP address</strong> - <strong>YES</strong> (for your testing)</li>
 <li><strong>Connection policy:</strong> Default</li>
 <li><strong>Encrypted connections:</strong> TLS 1.2 (default)</li>
+</ul>
+</li>
 </ol>
-<h3 id="c-add-sample-data">C. Add Sample Data</h3>
+<p><strong>C. Add Sample Data</strong></p>
 <ol>
-<li><strong>Additional settings tab:</strong></li>
+<li>
+<p><strong>Additional settings tab:</strong></p>
+<ul>
 <li><strong>Use existing data:</strong> <strong>Sample (AdventureWorksLT)</strong></li>
 <li><strong>Collation:</strong> Default</li>
-<li>
-<p><strong>Enable Microsoft Defender:</strong> Not needed for demo</p>
+<li><strong>Enable Microsoft Defender:</strong> Not needed for demo</li>
+</ul>
 </li>
 <li>
 <p>Click <strong>Review + create</strong> → <strong>Create</strong></p>
 </li>
 </ol>
 <p>⏳ <strong>Wait 3-5 minutes for deployment to complete.</strong></p>
-<h3 id="d-verify-firewall-configuration-post-deployment">D. Verify Firewall Configuration (Post-Deployment)</h3>
+<p><strong>D. Verify Firewall Configuration (Post-Deployment)</strong></p>
 <p>After deployment completes:</p>
 <p><strong>⚠️ Important:</strong> Go to the <strong>SQL Server</strong> resource (not the database):</p>
 <p><strong>Azure Portal → SQL servers → <code>sql-gptrag-demo-&lt;unique&gt;</code> → Security → Networking</strong></p>
 <p>(Note: SQL databases → adventureworks-demo - that's the wrong place!)</p>
-<p>Verify these settings:
-- <strong>Public network access:</strong> Selected networks
-- <strong>Exceptions:</strong> ☑️ <strong>Allow Azure services and resources to access this server</strong> (checked)</p>
+<p>Verify these settings:</p>
+<ul>
+<li><strong>Public network access:</strong> Selected networks</li>
+<li><strong>Exceptions:</strong> ☑️ <strong>Allow Azure services and resources to access this server</strong> (checked)</li>
+</ul>
 <p>The "Allow Azure services" checkbox creates a special firewall rule (<code>0.0.0.0 - 0.0.0.0</code>) that permits any Azure service in your subscription to connect.</p>
-<h3 id="e-test-connection">E. Test Connection</h3>
+<p><strong>E. Test Connection</strong></p>
 <p><strong>Using Azure Portal Query Editor:</strong></p>
 <ol>
 <li>Go to your SQL Database → <strong>Query editor</strong></li>
 <li>Login with <strong>SQL authentication</strong> (sqladmin / your password)</li>
-<li>Run test query:</li>
-</ol>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">TOP</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="n">ProductID</span><span class="p">,</span><span class="w"> </span><span class="n">Name</span><span class="p">,</span><span class="w"> </span><span class="n">ListPrice</span><span class="w"> </span>
+<li>Run test query:
+    <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">TOP</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="n">ProductID</span><span class="p">,</span><span class="w"> </span><span class="n">Name</span><span class="p">,</span><span class="w"> </span><span class="n">ListPrice</span><span class="w"> </span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">SalesLT</span><span class="p">.</span><span class="n">Product</span><span class="w"> </span>
 <span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">ListPrice</span><span class="w"> </span><span class="k">DESC</span>
-</code></pre></div>
+</code></pre></div></li>
+</ol>
 <p><strong>If you see results, your database is ready!</strong></p>
-<h3 id="f-gather-connection-info">F. Gather Connection Info</h3>
+<p><strong>F. Gather Connection Info</strong></p>
 <p>Save these details (you'll need them later):</p>
 <div class="highlight"><pre><span></span><code>Server: &lt;your-sql-server-name&gt;.database.windows.net
 Database: adventureworks-demo
@@ -1015,7 +747,7 @@ Username: sqladmin
 Password: &lt;your-password&gt;
 </code></pre></div>
 <hr />
-<h2 id="step-2-find-your-gpt-rag-resources-3-min">Step 2: Find Your GPT-RAG Resources (3 min)</h2>
+<p><strong>Step 2: Find Your GPT-RAG Resources (3 min)</strong></p>
 <p>Locate these in your resource group (they have your deployment suffix):</p>
 <div class="highlight"><pre><span></span><code>Key Vault: kv-&lt;suffix&gt;
 Cosmos DB: cosmos-&lt;suffix&gt;
@@ -1031,7 +763,7 @@ Storage Account: st&lt;suffix&gt; (note: no dash in storage account names)
 <span class="n">az</span> <span class="n">resource</span> <span class="n">list</span> <span class="n">-g</span> <span class="p">&lt;</span><span class="n">your-rg</span><span class="p">&gt;</span> <span class="p">-</span><span class="n">-query</span> <span class="s2">&quot;[].name&quot;</span> <span class="n">-o</span> <span class="n">table</span>
 </code></pre></div></p>
 <hr />
-<h2 id="step-3-store-password-in-key-vault-3-min">Step 3: Store Password in Key Vault (3 min)</h2>
+<p><strong>Step 3: Store Password in Key Vault (3 min)</strong></p>
 <p><strong>CRITICAL:</strong> Secret name MUST be <code>{datasource-id}-secret</code></p>
 <div class="highlight"><pre><span></span><code><span class="c"># Using the password you created in Step 1</span>
 <span class="c"># If your datasource id will be &quot;adventureworks&quot;</span>
@@ -1049,7 +781,7 @@ Storage Account: st&lt;suffix&gt; (note: no dash in storage account names)
   <span class="p">-</span><span class="n">-query</span> <span class="s2">&quot;value&quot;</span> <span class="n">-o</span> <span class="n">tsv</span>
 </code></pre></div></p>
 <hr />
-<h2 id="step-4-grant-container-app-access-to-key-vault-2-min">Step 4: Grant Container App Access to Key Vault (2 min)</h2>
+<p><strong>Step 4: Grant Container App Access to Key Vault (2 min)</strong></p>
 <div class="highlight"><pre><span></span><code><span class="c"># Get orchestrator&#39;s managed identity</span>
 <span class="nv">$principalId</span> <span class="p">=</span> <span class="n">az</span> <span class="n">containerapp</span> <span class="n">show</span> <span class="p">`</span>
   <span class="p">-</span><span class="n">-name</span> <span class="s2">&quot;ca-&lt;your-suffix&gt;-orchestrator&quot;</span> <span class="p">`</span>
@@ -1063,7 +795,7 @@ Storage Account: st&lt;suffix&gt; (note: no dash in storage account names)
   <span class="p">-</span><span class="n">-scope</span> <span class="s2">&quot;/subscriptions/&lt;sub-id&gt;/resourceGroups/&lt;rg&gt;/providers/Microsoft.KeyVault/vaults/kv-&lt;your-suffix&gt;&quot;</span>
 </code></pre></div>
 <hr />
-<h2 id="step-5-register-database-in-cosmos-db-3-min">Step 5: Register Database in Cosmos DB (3 min)</h2>
+<p><strong>Step 5: Register Database in Cosmos DB (3 min)</strong></p>
 <p><strong>Azure Portal → Cosmos DB → cosmos-<code>&lt;suffix&gt;</code> → Data Explorer → ragdata database → datasources container → New Item</strong></p>
 <p>Paste this JSON, replacing <code>&lt;your-sql-server-name&gt;</code> with the <strong>server name you created in Step 1</strong> (e.g., <code>sql-gptrag-demo-xyz123</code>):</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
@@ -1078,40 +810,47 @@ Storage Account: st&lt;suffix&gt; (note: no dash in storage account names)
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
-<p><strong>💡 How to find your server name:</strong>
-- Azure Portal → SQL servers → Look for the server you just created
-- Copy the name (e.g., <code>sql-gptrag-demo-ragpace</code>)
-- Add <code>.database.windows.net</code> to the end</p>
-<p><strong>⚠️ CRITICAL RULES:</strong>
-- Use <code>uid</code> (NOT <code>username</code>)
-- DO NOT include <code>password</code> field
-- DO NOT include <code>connection_info</code> field
-- The <code>id</code> must match Key Vault secret prefix (<code>adventureworks</code> → <code>adventureworks-secret</code>)</p>
+<p><strong>💡 How to find your server name:</strong></p>
+<ul>
+<li>Azure Portal → SQL servers → Look for the server you just created</li>
+<li>Copy the name (e.g., <code>sql-gptrag-demo-ragpace</code>)</li>
+<li>Add <code>.database.windows.net</code> to the end</li>
+</ul>
+<p><strong>⚠️ CRITICAL RULES:</strong></p>
+<ul>
+<li>Use <code>uid</code> (NOT <code>username</code>)</li>
+<li>DO NOT include <code>password</code> field</li>
+<li>DO NOT include <code>connection_info</code> field</li>
+<li>The <code>id</code> must match Key Vault secret prefix (<code>adventureworks</code> → <code>adventureworks-secret</code>)</li>
+</ul>
 <p>Click <strong>Save</strong>.</p>
 <hr />
-<h2 id="step-6-create-metadata-json-files-5-min">Step 6: Create Metadata JSON Files (5 min)</h2>
-<p><strong>What you'll do in this step:</strong>
-- Create JSON files on your <strong>local machine</strong> (in your working directory)
-- These files describe your database tables and example queries
-- In <strong>Step 7</strong>, you'll upload these files to Azure Blob Storage
-- The automated ingestion system will then index them into AI Search</p>
-<h3 id="a-create-local-folder-structure">A. Create Local Folder Structure</h3>
+<p><strong>Step 6: Create Metadata JSON Files (5 min)</strong></p>
+<p><strong>What you'll do in this step:</strong></p>
+<ul>
+<li>Create JSON files on your <strong>local machine</strong> (in your working directory)</li>
+<li>These files describe your database tables and example queries</li>
+<li>In <strong>Step 7</strong>, you'll upload these files to Azure Blob Storage</li>
+<li>The automated ingestion system will then index them into AI Search</li>
+</ul>
+<p><strong>A. Create Local Folder Structure</strong></p>
 <p>On your local machine, create folders to organize the metadata files:</p>
 <div class="highlight"><pre><span></span><code><span class="n">mkdir</span> <span class="n">blob-upload</span>
 <span class="n">mkdir</span> <span class="n">blob-upload</span><span class="p">\</span><span class="n">queries</span>
 <span class="n">mkdir</span> <span class="n">blob-upload</span><span class="p">\</span><span class="n">tables</span>
 </code></pre></div>
-<h3 id="b-create-example-query-files">B. Create Example Query Files</h3>
-<p><strong>Why example queries?</strong> They help the AI understand your database patterns and generate better SQL. The system uses these as few-shot examples when translating natural language to SQL.</p>
-<blockquote>
-<p>📝 <strong>Note:</strong> We're only adding 3 queries here for quick setup. <strong>Ideally, add 10-20 diverse examples</strong> covering:
-- Simple queries (counts, filters)
-- Complex joins across multiple tables
-- Aggregations (SUM, AVG, GROUP BY)
-- Date/time filtering
-- Common business questions your users ask</p>
+<p><strong>B. Create Example Query Files</strong></p>
+<p><strong>Why example queries?</strong> </p>
+<p>They help the AI understand your database patterns and generate better SQL. The system uses these as few-shot examples when translating natural language to SQL.</p>
+<p>📝 <strong>Note:</strong> We're only adding 3 queries here for quick setup. <strong>Ideally, add 10-20 diverse examples</strong> covering:</p>
+<ul>
+<li>Simple queries (counts, filters)</li>
+<li>Complex joins across multiple tables</li>
+<li>Aggregations (SUM, AVG, GROUP BY)</li>
+<li>Date/time filtering</li>
+<li>Common business questions your users ask </li>
+</ul>
 <p>More examples = better SQL generation accuracy!</p>
-</blockquote>
 <p><strong>Create these files on your local machine:</strong></p>
 <p>Create <code>blob-upload\queries\how_many_products.json</code>:
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
@@ -1137,20 +876,26 @@ Storage Account: st&lt;suffix&gt; (note: no dash in storage account names)
 <span class="w">    </span><span class="nt">&quot;datasource&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;adventureworks&quot;</span>
 <span class="p">}</span>
 </code></pre></div></p>
-<h3 id="c-create-table-metadata-files">C. Create Table Metadata Files</h3>
+<p><strong>C. Create Table Metadata Files</strong></p>
 <p><strong>Why table metadata?</strong> </p>
-<p>The system uses <strong>AI Search for semantic table discovery</strong> instead of live database introspection. When users ask questions, the system:
-1. Searches your table metadata using embeddings (vector search)
-2. Finds the most relevant tables based on descriptions
-3. Then calls <code>GetSchemaInfo</code> to retrieve detailed column information</p>
-<p><strong>Benefits of this approach:</strong>
-- <strong>Fast semantic search</strong> - Find relevant tables using natural language ("revenue data" matches "SalesOrderHeader")
-- <strong>Control what's exposed</strong> - Only include tables relevant to end users (exclude admin/audit tables)
-- <strong>Add business context</strong> - Descriptions help the AI understand table purpose beyond raw schema
-- <strong>Avoid token limits</strong> - Don't send 500 table schemas to GPT-4 every query</p>
-<p><strong>⚠️ Schema updates:</strong>
-- If you add/drop columns or tables later, create new JSON files and upload them
-- The automated ingestion will detect changes and re-index automatically</p>
+<p>The system uses <strong>AI Search for semantic table discovery</strong> instead of live database introspection. When users ask questions, the system:</p>
+<ol>
+<li>Searches your table metadata using embeddings (vector search)</li>
+<li>Finds the most relevant tables based on descriptions</li>
+<li>Then calls <code>GetSchemaInfo</code> to retrieve detailed column information</li>
+</ol>
+<p><strong>Benefits of this approach:</strong></p>
+<ul>
+<li><strong>Fast semantic search</strong> - Find relevant tables using natural language ("revenue data" matches "SalesOrderHeader")</li>
+<li><strong>Control what's exposed</strong> - Only include tables relevant to end users (exclude admin/audit tables)</li>
+<li><strong>Add business context</strong> - Descriptions help the AI understand table purpose beyond raw schema</li>
+<li><strong>Avoid token limits</strong> - Don't send 500 table schemas to GPT-4 every query</li>
+</ul>
+<p><strong>⚠️ Schema updates:</strong></p>
+<ul>
+<li>If you add/drop columns or tables later, create new JSON files and upload them</li>
+<li>The automated ingestion will detect changes and re-index automatically</li>
+</ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Column descriptions are not specified here because the column names are sufficiently descriptive for the LLM</p>
@@ -1178,7 +923,7 @@ Storage Account: st&lt;suffix&gt; (note: no dash in storage account names)
 <span class="p">}</span>
 </code></pre></div></p>
 <hr />
-<h2 id="step-7-upload-files-to-blob-storage-3-min">Step 7: Upload Files to Blob Storage (3 min)</h2>
+<p><strong>Step 7: Upload Files to Blob Storage (3 min)</strong></p>
 <p><strong>What this step does:</strong>
 - Uploads the local JSON files you created in Step 6 to Azure Blob Storage
 - Files go into the <code>nl2sql</code> container (this container already exists from your deployment)
@@ -1208,7 +953,7 @@ tables/saleslt_productcategory.json
 tables/saleslt_customer.json
 </code></pre></div></p>
 <hr />
-<h2 id="step-8-enable-automated-ingestion-3-min">Step 8: Enable Automated Ingestion (3 min)</h2>
+<p><strong>Step 8: Enable Automated Ingestion (3 min)</strong></p>
 <p><strong>Azure Portal → App Configuration → appcs-<code>&lt;suffix&gt;</code> → Configuration explorer</strong></p>
 <p>Click <strong>+ Create</strong> to add a new key-value:</p>
 <p><strong>Key:</strong> <code>CRON_RUN_NL2SQL_INDEX</code><br />
@@ -1216,26 +961,32 @@ tables/saleslt_customer.json
 <strong>Label:</strong> <code>gpt-rag-ingestion</code><br />
 <strong>Content type:</strong> <code>text/plain</code></p>
 <p>Click <strong>Apply</strong>.</p>
-<p><strong>What this does:</strong>
-- Runs the NL2SQL indexer job every 15 minutes
-- Scans the <code>nl2sql</code> container for new/changed files
-- Automatically indexes them into AI Search
-- Generates embeddings for semantic search
-- Skips unchanged files (smart change detection)</p>
-<p><strong>Alternative schedules:</strong>
-- <code>*/5 * * * *</code> - Every 5 minutes (faster updates)
-- <code>*/2 * * * *</code> - Every 2 minutes (testing/development only)
-- <code>0 * * * *</code> - Every hour on the hour
-- <code>0 0 * * *</code> - Once daily at midnight</p>
-<p><strong>Cost considerations:</strong>
-- CRON schedules are free - they're just timers, not separate compute
-- The Container App runs 24/7 regardless of schedule (~$30-50/month)
-- Each run generates embeddings via Azure OpenAI (~$0.001 per run)
-- Smart change detection skips unchanged files (saves costs)
-- <strong>Recommended for production:</strong> <code>*/15 * * * *</code> balances responsiveness with costs (~$3-5/month in embeddings)
-- <strong>For testing:</strong> Use <code>*/2 * * * *</code> to see results faster, then change to <code>*/15 * * * *</code></p>
+<p><strong>What this does:</strong></p>
+<ul>
+<li>Runs the NL2SQL indexer job every 15 minutes</li>
+<li>Scans the <code>nl2sql</code> container for new/changed files</li>
+<li>Automatically indexes them into AI Search</li>
+<li>Generates embeddings for semantic search</li>
+<li>Skips unchanged files (smart change detection)</li>
+</ul>
+<p><strong>Alternative schedules:</strong></p>
+<ul>
+<li><code>*/5 * * * *</code> - Every 5 minutes (faster updates)</li>
+<li><code>*/2 * * * *</code> - Every 2 minutes (testing/development only)</li>
+<li><code>0 * * * *</code> - Every hour on the hour</li>
+<li><code>0 0 * * *</code> - Once daily at midnight</li>
+</ul>
+<p><strong>Cost considerations:</strong></p>
+<ul>
+<li>CRON schedules are free - they're just timers, not separate compute</li>
+<li>The Container App runs 24/7 regardless of schedule (~$30-50/month)</li>
+<li>Each run generates embeddings via Azure OpenAI (~$0.001 per run)</li>
+<li>Smart change detection skips unchanged files (saves costs)</li>
+<li><strong>Recommended for production:</strong> <code>*/15 * * * *</code> balances responsiveness with costs (~$3-5/month in embeddings)</li>
+<li><strong>For testing:</strong> Use <code>*/2 * * * *</code> to see results faster, then change to <code>*/15 * * * *</code></li>
+</ul>
 <hr />
-<h2 id="step-9-enable-nl2sql-strategy-2-min">Step 9: Enable NL2SQL Strategy (2 min)</h2>
+<p><strong>Step 9: Enable NL2SQL Strategy (2 min)</strong></p>
 <p><strong>Azure Portal → App Configuration → appcs-<code>&lt;suffix&gt;</code> → Configuration explorer</strong></p>
 <ol>
 <li>Search for key: <code>AGENT_STRATEGY</code></li>
@@ -1244,15 +995,19 @@ tables/saleslt_customer.json
 <li>Click <strong>Apply</strong></li>
 </ol>
 <hr />
-<h2 id="step-10-wait-for-initial-ingestion-2-3-min">Step 10: Wait for Initial Ingestion (2-3 min)</h2>
-<p>The data ingestion Container App runs the indexer job:
-- <strong>On startup</strong> (happens once when container starts)
-- <strong>Every 15 minutes</strong> (based on CRON schedule)</p>
+<p><strong>Step 10: Wait for Initial Ingestion (2-3 min)</strong></p>
+<p>The data ingestion Container App runs the indexer job:</p>
+<ul>
+<li><strong>On startup</strong> (happens once when container starts)</li>
+<li><strong>Every 15 minutes</strong> (based on CRON schedule)</li>
+</ul>
 <p><strong>Option 1: Wait for next CRON run</strong> (up to 15 minutes, or 2 minutes if you used <code>*/2 * * * *</code> for testing)</p>
-<p><strong>How it works:</strong>
-- The Container App runs the indexer on startup (immediate first run)
-- Then runs on the CRON schedule you configured
-- CRON runs at the next matching time (e.g., if schedule is <code>*/15 * * * *</code>, next run is at :00, :15, :30, or :45)</p>
+<p><strong>How it works:</strong></p>
+<ul>
+<li>The Container App runs the indexer on startup (immediate first run)</li>
+<li>Then runs on the CRON schedule you configured</li>
+<li>CRON runs at the next matching time (e.g., if schedule is <code>*/15 * * * *</code>, next run is at :00, :15, :30, or :45)</li>
+</ul>
 <p><strong>Option 2: Force immediate ingestion by restarting the container:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="n">az</span> <span class="n">containerapp</span> <span class="n">revision</span> <span class="n">restart</span> <span class="p">`</span>
   <span class="p">-</span><span class="n">-name</span> <span class="s2">&quot;ca-&lt;your-suffix&gt;-dataingest&quot;</span> <span class="p">`</span>
@@ -1288,48 +1043,55 @@ tables/saleslt_customer.json
 
 <span class="nb">Get-Content</span> <span class="n">run-log</span><span class="p">.</span><span class="n">json</span> <span class="p">|</span> <span class="nb">ConvertFrom-Json</span> <span class="p">|</span> <span class="nb">ConvertTo-Json</span> <span class="n">-Depth</span> <span class="n">10</span>
 </code></pre></div></p>
-<p><strong>Look for:</strong>
-- <code>"success": 3</code> (for queries)
-- <code>"success": 3</code> (for tables)
-- <code>"failed": 0</code>
-- <code>"skipped": 0</code> (first run - nothing skipped yet)
-- <code>"vectorsGenerated": 6</code> (embeddings created)</p>
-<p><strong>On subsequent runs:</strong>
-- Files with no changes will show <code>"skipped": 6</code> and <code>"candidates": 0</code>
-- Only new or modified files will be re-indexed
-- This smart change detection saves costs and time</p>
+<p><strong>Look for:</strong></p>
+<ul>
+<li><code>"success": 3</code> (for queries)</li>
+<li><code>"success": 3</code> (for tables)</li>
+<li><code>"failed": 0</code></li>
+<li><code>"skipped": 0</code> (first run - nothing skipped yet)</li>
+<li><code>"vectorsGenerated": 6</code> (embeddings created)</li>
+</ul>
+<p><strong>On subsequent runs:</strong></p>
+<ul>
+<li>Files with no changes will show <code>"skipped": 6</code> and <code>"candidates": 0</code></li>
+<li>Only new or modified files will be re-indexed</li>
+<li>This smart change detection saves costs and time</li>
+</ul>
 <hr />
-<h2 id="step-11-test-it-2-min">Step 11: Test It! (2 min)</h2>
+<p><strong>Step 11: Test It! (2 min)</strong></p>
 <p><strong>Navigate to your UI:</strong> <code>https://ca-&lt;suffix&gt;-frontend.livelyglacier-&lt;random&gt;.eastus2.azurecontainerapps.io</code></p>
-<p><strong>Try these questions:</strong>
-1. "How many products are in the database?"
-2. "Show me the top 5 most expensive products"
-3. "What product categories exist?"</p>
-<p><strong>Expected response:</strong>
-- Natural language answer with data
-- Shows SQL query that was executed
-- Cites the datasource</p>
+<p><strong>Try these questions:</strong></p>
+<ol>
+<li>"How many products are in the database?"</li>
+<li>"Show me the top 5 most expensive products"</li>
+<li>"What product categories exist?"</li>
+</ol>
+<p><strong>Expected response:</strong></p>
+<ul>
+<li>Natural language answer with data</li>
+<li>Shows SQL query that was executed</li>
+<li>Cites the datasource</li>
+</ul>
 <hr />
-<h2 id="what-you-just-enabled">What You Just Enabled 🪄</h2>
-<p><strong>Congratulations!</strong> You've set up an automated NL2SQL ingestion pipeline. Your system now:</p>
-<h3 id="automated-metadata-management">🧠 Automated Metadata Management</h3>
-<p><strong><code>Change detection</code></strong> - Only re-indexes modified files (checks ETag and lastModified)
-<strong><code>Smart scheduling</code></strong> - Runs every 15 minutes, can be adjusted
-<strong><code>Startup sync</code></strong> - Runs once on container startup for immediate availability
-<strong><code>Detailed logging</code></strong> - Per-file and per-run logs in blob storage
-<strong><code>Scalable</code></strong> - Handles hundreds of tables and queries efficiently</p>
-<h3 id="advanced-query-capabilities-already-working">🧩 Advanced Query Capabilities (Already working!)</h3>
-<p><strong><code>Complex JOINs</code></strong> - "Show me orders with customer names and product details" automatically generates multi-table joins
-<strong><code>Aggregations</code></strong> - "What's the average order value by product category?" generates GROUP BY with AVG/SUM/COUNT
-<strong><code>Date filtering</code></strong> - "Show orders from last 30 days" uses DATEADD and date functions
-<strong><code>Subqueries</code></strong> - Handles nested queries when needed for complex business logic
-<strong><code>Pattern matching</code></strong> - "Find customers whose email contains 'adventure'" uses LIKE operators</p>
-<h3 id="enabling-zero-trust-architecture">🔐 Enabling Zero Trust Architecture</h3>
+<p><strong>Congratulations!</strong> You've set up an automated NL2SQL ingestion pipeline.</p>
+<p><strong>What You Just Enabled 🪄</strong></p>
+<p><strong>🧠 Automated Metadata Management</strong></p>
+<p><strong><code>Change detection</code></strong> - Only re-indexes modified files (checks ETag and lastModified)</p>
+<p><strong><code>Smart scheduling</code></strong> - Runs every 15 minutes, can be adjusted</p>
+<p><strong><code>Startup sync</code></strong> - Runs once on container startup for immediate availability</p>
+<p><strong><code>Detailed logging</code></strong> - Per-file and per-run logs in blob storage</p>
+<p><strong><code>Scalable</code></strong> - Handles hundreds of tables and queries efficiently</p>
+<p><strong>🧩 Advanced Query Capabilities (Already working!)</strong></p>
+<p><strong><code>Complex JOINs</code></strong> - "Show me orders with customer names and product details" automatically generates multi-table joins</p>
+<p><strong><code>Aggregations</code></strong> - "What's the average order value by product category?" generates GROUP BY with AVG/SUM/COUNT</p>
+<p><strong><code>Date filtering</code></strong> - "Show orders from last 30 days" uses DATEADD and date functions</p>
+<p><strong><code>Subqueries</code></strong> - Handles nested queries when needed for complex business logic</p>
+<p><strong><code>Pattern matching</code></strong> - "Find customers whose email contains 'adventure'" uses LIKE operators</p>
+<p><strong>🔐 Enabling Zero Trust Architecture</strong></p>
 <p>The guide used <strong>SQL authentication</strong> for simplicity, but production deployments support:</p>
-<p><strong><code>Azure AD authentication</code></strong> - No passwords, just managed identities
-<strong><code>Private Endpoints</code></strong> - Database never exposed to internet
-<strong><code>VNet integration</code></strong> - Container Apps and SQL in same private network
-<strong><code>Conditional Access</code></strong> - MFA and device compliance requirements</p>
+<p><strong><code>Azure AD authentication</code></strong> - No passwords, just managed identities</p>
+<p><strong><code>Private Endpoints</code></strong> - Database never exposed to internet</p>
+<p><strong><code>VNet integration</code></strong> - Container Apps and SQL in same private network</p>
 <hr />
 
 

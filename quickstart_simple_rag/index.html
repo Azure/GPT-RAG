@@ -16,7 +16,7 @@
         <link rel="prev" href="../deploy/">
       
       
-        <link rel="next" href="../nl2sql-quickstart/">
+        <link rel="next" href="../quickstart_nl2sql/">
       
       
       <link rel="icon" href="../favicon.ico">
@@ -335,17 +335,6 @@
         
       
       
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Simple RAG
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -355,331 +344,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
-    <span class="md-ellipsis">
-      Prerequisites
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#what-youll-accomplish" class="md-nav__link">
-    <span class="md-ellipsis">
-      What You'll Accomplish
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-1-initialize-gpt-rag-project-5-min" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 1: Initialize GPT-RAG Project (5 min)
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-2-authenticate-azure-clis-2-min" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 2: Authenticate Azure CLIs (2 min)
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-3-provision-infrastructure-30-min" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 3: Provision Infrastructure (30 min)
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-4-start-docker-and-deploy-services-35-min" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 4: Start Docker and Deploy Services (35 min)
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Step 4: Start Docker and Deploy Services (35 min)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#a-start-docker-desktop" class="md-nav__link">
-    <span class="md-ellipsis">
-      A. Start Docker Desktop
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#b-deploy-services" class="md-nav__link">
-    <span class="md-ellipsis">
-      B. Deploy Services
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-5-upload-documents-and-verify-indexing-10-min" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 5: Upload Documents and Verify Indexing (10 min)
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Step 5: Upload Documents and Verify Indexing (10 min)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#a-upload-your-documents" class="md-nav__link">
-    <span class="md-ellipsis">
-      A. Upload Your Documents
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#b-trigger-document-indexing" class="md-nav__link">
-    <span class="md-ellipsis">
-      B. Trigger Document Indexing
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#c-verify-indexing-completed" class="md-nav__link">
-    <span class="md-ellipsis">
-      C. Verify Indexing Completed
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-6-configure-ai-foundry-search-connection-for-public-access-rag-5-min" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 6: Configure AI Foundry Search Connection for Public Access RAG (5 min)
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Step 6: Configure AI Foundry Search Connection for Public Access RAG (5 min)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#a-why-two-search-services" class="md-nav__link">
-    <span class="md-ellipsis">
-      A. Why Two Search Services?
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#b-add-search-connection-in-ai-foundry" class="md-nav__link">
-    <span class="md-ellipsis">
-      B. Add Search Connection in AI Foundry
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#c-copy-connection-id" class="md-nav__link">
-    <span class="md-ellipsis">
-      C. Copy Connection ID
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-7-update-app-configuration-and-restart-orchestrator-5-min" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 7: Update App Configuration and Restart Orchestrator (5 min)
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Step 7: Update App Configuration and Restart Orchestrator (5 min)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#a-update-app-configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      A. Update App Configuration
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#b-restart-orchestrator" class="md-nav__link">
-    <span class="md-ellipsis">
-      B. Restart Orchestrator
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-8-access-frontend-and-test-3-min" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 8: Access Frontend and Test! (3 min)
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#troubleshooting-common-issues" class="md-nav__link">
-    <span class="md-ellipsis">
-      Troubleshooting Common Issues
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Troubleshooting Common Issues">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#issue-1-quota-exceeded-errors" class="md-nav__link">
-    <span class="md-ellipsis">
-      Issue 1: Quota Exceeded Errors
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#issue-2-serviceinvocationexception-error" class="md-nav__link">
-    <span class="md-ellipsis">
-      Issue 2: "ServiceInvocationException" Error
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#issue-3-no-documents-indexed" class="md-nav__link">
-    <span class="md-ellipsis">
-      Issue 3: No Documents Indexed
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#what-you-just-enabled" class="md-nav__link">
-    <span class="md-ellipsis">
-      What You Just Enabled 🪄
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="What You Just Enabled 🪄">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#intelligent-document-understanding" class="md-nav__link">
-    <span class="md-ellipsis">
-      🧠 Intelligent Document Understanding
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#grounded-response-generation" class="md-nav__link">
-    <span class="md-ellipsis">
-      🎯 Grounded Response Generation
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#automated-ingestion-pipeline" class="md-nav__link">
-    <span class="md-ellipsis">
-      🔄 Automated Ingestion Pipeline
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#enterprise-ready-architecture" class="md-nav__link">
-    <span class="md-ellipsis">
-      🔐 Enterprise-Ready Architecture
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#user-friendly-interface" class="md-nav__link">
-    <span class="md-ellipsis">
-      🎨 User-Friendly Interface
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
       
     </li>
   
@@ -693,7 +357,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../nl2sql-quickstart/" class="md-nav__link">
+      <a href="../quickstart_nl2sql/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -964,25 +628,28 @@
 <h1 id="simple-rag-quick-start-guide">Simple RAG Quick Start Guide</h1>
 <p>Get document-based AI question answering working in <strong>60 minutes</strong> using <strong>GPT-RAG's automated deployment</strong>.</p>
 <p>This quickstart enables a public access solution which is for testing purposes only!</p>
-<h2 id="prerequisites">Prerequisites</h2>
-<p><strong>You must have:</strong>
-- Azure subscription with permissions to create resources
-- Azure Developer CLI (azd): 1.21.1+
-- Azure CLI (az): 2.79.0+
-- PowerShell 7.5+
-- Docker Desktop installed and running
-- Git &amp; Python 3.11+</p>
-<h2 id="what-youll-accomplish">What You'll Accomplish</h2>
-<p>By the end of this guide:
-- Deploy complete GPT-RAG infrastructure (~20 Azure resources)
-- Upload documents to Azure Blob Storage
-- Enable automated document ingestion and indexing
-- Configure AI Foundry search connection
-- Generate embeddings with text-embedding-3-large
-- Ask questions about your documents using GPT-4o
-- Get answers grounded in your data with citations</p>
-<hr />
-<h2 id="step-1-initialize-gpt-rag-project-5-min">Step 1: Initialize GPT-RAG Project (5 min)</h2>
+<p><strong>Prerequisites</strong></p>
+<p><strong>You must have:</strong></p>
+<ul>
+<li>Azure subscription with permissions to create resources</li>
+<li>Azure Developer CLI (azd): 1.21.1+</li>
+<li>Azure CLI (az): 2.79.0+</li>
+<li>PowerShell 7.5+</li>
+<li>Docker Desktop installed and running</li>
+<li>Git &amp; Python 3.11+</li>
+</ul>
+<p><strong>What You'll Accomplish</strong></p>
+<p>By the end of this guide:</p>
+<ul>
+<li>Deploy complete GPT-RAG infrastructure (~20 Azure resources)</li>
+<li>Upload documents to Azure Blob Storage</li>
+<li>Enable automated document ingestion and indexing</li>
+<li>Configure AI Foundry search connection</li>
+<li>Generate embeddings with text-embedding-3-large</li>
+<li>Ask questions about your documents using GPT-4o</li>
+<li>Get answers grounded in your data with citations</li>
+</ul>
+<p><strong>Step 1: Initialize GPT-RAG Project (5 min)</strong></p>
 <div class="highlight"><pre><span></span><code><span class="c"># Create fresh directory</span>
 <span class="n">mkdir</span> <span class="n">C</span><span class="p">:\</span><span class="n">MyCode</span><span class="p">\</span><span class="n">my-gpt-rag</span>
 <span class="nb">cd </span><span class="n">C</span><span class="p">:\</span><span class="n">MyCode</span><span class="p">\</span><span class="n">my-gpt-rag</span>
@@ -990,38 +657,44 @@
 <span class="c"># Initialize from template</span>
 <span class="n">azd</span> <span class="n">init</span> <span class="n">-t</span> <span class="n">azure</span><span class="p">/</span><span class="n">gpt-rag</span>
 </code></pre></div>
-<p><strong>You'll be prompted for:</strong>
-1. <strong>Environment name</strong> - Choose a short name (e.g., <code>myrag</code>, <code>demorag</code>)
-2. <strong>Azure subscription</strong> - Select from list
-3. <strong>Azure region</strong> - Choose wisely:
-   - <strong>East US 2</strong> - Best OpenAI quota availability
-   - <strong>West US</strong> - Good quota, lower latency for West Coast
-   - <strong>East US</strong> - Backup option if East US 2 full
-   - ⚠️ <strong>North Europe, West Europe</strong> - Often quota-constrained</p>
+<p><strong>You'll be prompted for:</strong></p>
+<ol>
+<li><strong>Environment name</strong> - Choose a short name (e.g., <code>myrag</code>, <code>demorag</code>)</li>
+<li><strong>Azure subscription</strong> - Select from list</li>
+<li><strong>Azure region</strong> - Choose wisely:<ul>
+<li><strong>East US 2</strong> - Best OpenAI quota availability</li>
+<li><strong>West US</strong> - Good quota, lower latency for West Coast</li>
+<li><strong>East US</strong> - Backup option if East US 2 full</li>
+<li>⚠️ <strong>North Europe, West Europe</strong> - Often quota-constrained</li>
+</ul>
+</li>
+</ol>
 <p><strong>💡 Note:</strong> If you have quota limitations, see the Troubleshooting section at the end for how to adjust model capacity.</p>
 <hr />
-<h2 id="step-2-authenticate-azure-clis-2-min">Step 2: Authenticate Azure CLIs (2 min)</h2>
+<p><strong>Step 2: Authenticate Azure CLIs (2 min)</strong></p>
 <div class="highlight"><pre><span></span><code><span class="c"># Login to Azure CLI (yes, both required)</span>
 <span class="n">az</span> <span class="n">login</span>
 <span class="n">azd</span> <span class="n">auth</span> <span class="n">login</span>
 </code></pre></div>
 <hr />
-<h2 id="step-3-provision-infrastructure-30-min">Step 3: Provision Infrastructure (30 min)</h2>
+<p><strong>Step 3: Provision Infrastructure (30 min)</strong></p>
 <div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">provision</span>
 </code></pre></div>
-<p><strong>What this creates (~20 Azure resources):</strong>
-- <strong>Resource Group</strong> - Container for all resources
-- <strong>Storage Accounts</strong> - For documents and job logs
-- <strong>AI Search Services (2)</strong> - Main index (srch-<em>) and AI Foundry index (srch-aif-</em>)
-- <strong>AI Foundry</strong> - Hub and project for agent orchestration
-- <strong>OpenAI Models</strong> - GPT-4o and text-embedding-3-large deployments
-- <strong>Container Registry</strong> - Stores Docker images
-- <strong>Container Apps (4)</strong> - Frontend, orchestrator, ingestion, MCP
-- <strong>App Configuration</strong> - Centralized configuration store
-- <strong>Key Vault</strong> - Secrets management
-- <strong>Cosmos DB</strong> - Agent state and metadata
-- <strong>Log Analytics</strong> - Monitoring and diagnostics
-- <strong>Managed Identities</strong> - Secure service-to-service auth</p>
+<p><strong>What this creates (~20 Azure resources):</strong></p>
+<ul>
+<li><strong>Resource Group</strong> - Container for all resources</li>
+<li><strong>Storage Accounts</strong> - For documents and job logs</li>
+<li><strong>AI Search Services (2)</strong> - Main index (srch-<em>) and AI Foundry index (srch-aif-</em>)</li>
+<li><strong>AI Foundry</strong> - Hub and project for agent orchestration</li>
+<li><strong>OpenAI Models</strong> - GPT-4o and text-embedding-3-large deployments</li>
+<li><strong>Container Registry</strong> - Stores Docker images</li>
+<li><strong>Container Apps (4)</strong> - Frontend, orchestrator, ingestion, MCP</li>
+<li><strong>App Configuration</strong> - Centralized configuration store</li>
+<li><strong>Key Vault</strong> - Secrets management</li>
+<li><strong>Cosmos DB</strong> - Agent state and metadata</li>
+<li><strong>Log Analytics</strong> - Monitoring and diagnostics</li>
+<li><strong>Managed Identities</strong> - Secure service-to-service auth</li>
+</ul>
 <p>⏳ <strong>Wait ~27 minutes for provisioning to complete.</strong></p>
 <p><strong>Save your resource prefix:</strong></p>
 <p>After provisioning completes, you'll see output like:
@@ -1029,64 +702,78 @@
 </code></pre></div></p>
 <p><strong>Keep this prefix handy</strong> - you'll use it to identify your resources in Azure Portal.</p>
 <hr />
-<h2 id="step-4-start-docker-and-deploy-services-35-min">Step 4: Start Docker and Deploy Services (35 min)</h2>
+<p><strong>Step 4: Start Docker and Deploy Services (35 min)</strong></p>
 <p><strong>⚠️ CRITICAL:</strong> Docker must be running before <code>azd deploy</code>!</p>
-<h3 id="a-start-docker-desktop">A. Start Docker Desktop</h3>
-<h3 id="b-deploy-services">B. Deploy Services</h3>
+<p><strong>A. Start Docker Desktop</strong></p>
+<p><strong>B. Deploy Services</strong></p>
 <div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">deploy</span>
 </code></pre></div>
-<p><strong>What this does:</strong>
-1. <strong>Clones 4 service repositories</strong> from GitHub:
-   - <code>gpt-rag-frontend</code> - React web interface
-   - <code>gpt-rag-orchestrator</code> - Agent orchestration and RAG logic
-   - <code>gpt-rag-ingestion</code> - Document processing and indexing
-   - <code>gpt-rag-mcp</code> - Model Context Protocol integration</p>
+<p><strong>What this does:</strong></p>
 <ol>
-<li><strong>Builds Docker images locally</strong>:</li>
+<li>
+<p><strong>Clones 4 service repositories</strong> from GitHub:</p>
+<ul>
+<li><code>gpt-rag-frontend</code> - React web interface</li>
+<li><code>gpt-rag-orchestrator</code> - Agent orchestration and RAG logic</li>
+<li><code>gpt-rag-ingestion</code> - Document processing and indexing</li>
+<li><code>gpt-rag-mcp</code> - Model Context Protocol integration</li>
+</ul>
+</li>
+<li>
+<p><strong>Builds Docker images locally</strong>:</p>
+<ul>
 <li>Creates containers for each service</li>
 <li>Tags them with version info</li>
-<li>
-<p>Requires ~5-10 GB disk space</p>
+<li>Requires ~5-10 GB disk space</li>
+</ul>
 </li>
 <li>
 <p><strong>Pushes images to Azure Container Registry</strong>:</p>
-</li>
+<ul>
 <li>Uploads to <code>cr{prefix}.azurecr.io</code></li>
-<li>
-<p>Typically 1-2 GB total</p>
+<li>Typically 1-2 GB total</li>
+</ul>
 </li>
 <li>
 <p><strong>Deploys to Container Apps</strong>:</p>
-</li>
+<ul>
 <li>Creates 4 container apps</li>
 <li>Configures networking, secrets, environment variables</li>
 <li>Sets up auto-scaling rules</li>
+</ul>
+</li>
 </ol>
 <p>⏳ <strong>Wait ~30 minutes for deployment to complete.</strong></p>
 <hr />
-<h2 id="step-5-upload-documents-and-verify-indexing-10-min">Step 5: Upload Documents and Verify Indexing (10 min)</h2>
-<h3 id="a-upload-your-documents">A. Upload Your Documents</h3>
+<p><strong>Step 5: Upload Documents and Verify Indexing (10 min)</strong></p>
+<p><strong>A. Upload Your Documents</strong></p>
 <p><strong>Azure Portal → Storage accounts → st<code>&lt;prefix&gt;</code> → Containers → documents → Upload</strong></p>
-<p><strong>Supported formats:</strong>
-- <strong>PDF</strong> - Most common (OCR with Document Intelligence)
-- <strong>Word</strong> (.docx) - Extracts text and tables
-- <strong>PowerPoint</strong> (.pptx) - Extracts slides and speaker notes
-- <strong>Excel</strong> (.xlsx) - Extracts sheets and data (v4.0+)
-- <strong>Text</strong> (.txt, .md) - Direct text ingestion
-- <strong>Images</strong> (.jpg, .png, .bmp, .tiff) - OCR extraction
-- <strong>HTML</strong> - Web page content extraction</p>
-<p><strong>What happens after upload:</strong>
-1. File stored in <code>documents</code> container
-2. Ingestion service monitors for new files
-3. On next CRON run or restart, files are processed
-4. Azure Document Intelligence extracts text (OCR for images/PDFs)
-5. Text chunked into semantic segments
-6. Embeddings generated with text-embedding-3-large
-7. Chunks uploaded to AI Search index <code>ragindex-{prefix}</code></p>
-<h3 id="b-trigger-document-indexing">B. Trigger Document Indexing</h3>
-<p>The indexing service runs automatically:
-- <strong>On container startup</strong> (immediate first run)
-- <strong>Hourly on CRON</strong> (at :10 minutes past the hour)</p>
+<p><strong>Supported formats:</strong></p>
+<ul>
+<li><strong>PDF</strong> - Most common (OCR with Document Intelligence)</li>
+<li><strong>Word</strong> (.docx) - Extracts text and tables</li>
+<li><strong>PowerPoint</strong> (.pptx) - Extracts slides and speaker notes</li>
+<li><strong>Excel</strong> (.xlsx) - Extracts sheets and data (v4.0+)</li>
+<li><strong>Text</strong> (.txt, .md) - Direct text ingestion</li>
+<li><strong>Images</strong> (.jpg, .png, .bmp, .tiff) - OCR extraction</li>
+<li><strong>HTML</strong> - Web page content extraction</li>
+</ul>
+<p><strong>What happens after upload:</strong></p>
+<ol>
+<li>File stored in <code>documents</code> container</li>
+<li>Ingestion service monitors for new files</li>
+<li>On next CRON run or restart, files are processed</li>
+<li>Azure Document Intelligence extracts text (OCR for images/PDFs)</li>
+<li>Text chunked into semantic segments</li>
+<li>Embeddings generated with text-embedding-3-large</li>
+<li>Chunks uploaded to AI Search index <code>ragindex-{prefix}</code></li>
+</ol>
+<p><strong>B. Trigger Document Indexing</strong></p>
+<p>The indexing service runs automatically:</p>
+<ul>
+<li><strong>On container startup</strong> (immediate first run)</li>
+<li><strong>Hourly on CRON</strong> (at :10 minutes past the hour)</li>
+</ul>
 <p><strong>Option 1: Wait for next CRON run</strong> (up to 60 minutes)</p>
 <p><strong>Option 2: Force immediate indexing by restarting:</strong></p>
 <p><strong>Azure Portal → Container Apps → ca-<code>&lt;prefix&gt;</code>-dataingest</strong></p>
@@ -1096,77 +783,31 @@
 <li>Click <strong>Start</strong></li>
 </ol>
 <p><strong>Why restart?</strong> The indexer runs on CRON schedule (hourly at :10 past). Restarting triggers it to run immediately instead of waiting up to an hour.</p>
-<h3 id="c-verify-indexing-completed">C. Verify Indexing Completed</h3>
+<p><strong>C. Verify Indexing Completed</strong></p>
 <p><strong>Azure Portal → AI Search → srch-<code>&lt;prefix&gt;</code> → Indexes → ragindex-<code>&lt;prefix&gt;</code></strong></p>
 <ul>
 <li><strong>Document count &gt; 0</strong> (indicates chunks were indexed)</li>
 </ul>
 <hr />
-<h2 id="step-6-configure-ai-foundry-search-connection-for-public-access-rag-5-min">Step 6: Configure AI Foundry Search Connection for Public Access RAG (5 min)</h2>
-<p><strong>⚠️ CRITICAL STEP:</strong> The deployment creates two AI Search services. You must configure AI Foundry to use the correct one for public access!</p>
-<h3 id="a-why-two-search-services">A. Why Two Search Services?</h3>
-<ul>
-<li><strong>srch-<code>&lt;prefix&gt;</code></strong> - Main search service with your indexed documents (use this one!)</li>
-<li><strong>srch-aif-<code>&lt;prefix&gt;</code></strong> - AI Foundry's empty search service (created by default, ignore)</li>
-</ul>
-<p>The orchestrator needs the connection ID for the main search service.</p>
-<h3 id="b-add-search-connection-in-ai-foundry">B. Add Search Connection in AI Foundry</h3>
-<ol>
-<li><strong>Azure Portal → AI services → aif-<code>&lt;prefix&gt;</code> → Overview</strong></li>
-<li>Click the <strong>"View in Azure AI Foundry"</strong> link (opens ai.azure.com)</li>
-<li>Should land in your project (likely named <strong>aifoundry-default-project</strong>)</li>
-<li>Left menu → <strong>Connected resources</strong> or <strong>Connections</strong></li>
-<li>Click <strong>+ New connection</strong></li>
-<li>Select <strong>Azure AI Search</strong></li>
-<li>Select <strong>srch-<code>&lt;prefix&gt;</code></strong> (NOT srch-aif-*)</li>
-<li><strong>Authentication:</strong> <strong>Microsoft Entra ID</strong> (NOT API Key)</li>
-<li><strong>Connection name:</strong> Use the resource name (e.g., <code>srchqitxxnnt4igs6</code>)</li>
-<li>Click <strong>Save</strong></li>
-</ol>
-<h3 id="c-copy-connection-id">C. Copy Connection ID</h3>
-<p>After saving, the connection details page shows the connection ID.</p>
-<p><strong>Example:</strong>
-<div class="highlight"><pre><span></span><code>/subscriptions/f94c002c-2212-4bfb-b7a4-f8898b7ea4e5/resourceGroups/rg-demorag/providers/Microsoft.CognitiveServices/accounts/aif-qitxxnnt4igs6/projects/aifoundry-default-project/connections/srchqitxxnnt4igs6
-</code></pre></div></p>
-<p><strong>Copy this entire connection ID</strong> - you'll paste it in the next step.</p>
-<hr />
-<h2 id="step-7-update-app-configuration-and-restart-orchestrator-5-min">Step 7: Update App Configuration and Restart Orchestrator (5 min)</h2>
-<h3 id="a-update-app-configuration">A. Update App Configuration</h3>
-<p><strong>Azure Portal → App Configuration → appcs-<code>&lt;prefix&gt;</code> → Configuration explorer</strong></p>
-<ol>
-<li>Find key: <strong>SEARCH_CONNECTION_ID</strong></li>
-<li>Filter by label: <strong>gpt-rag</strong></li>
-<li>Click the key → Click <strong>Edit</strong></li>
-<li><strong>Value field:</strong> Paste the connection ID you copied from AI Foundry</li>
-<li>Verify:</li>
-<li><strong>Content type:</strong> <code>text/plain</code></li>
-<li><strong>Label:</strong> <code>gpt-rag</code></li>
-<li>Click <strong>Apply</strong> → Click <strong>Save</strong></li>
-</ol>
-<h3 id="b-restart-orchestrator">B. Restart Orchestrator</h3>
-<p><strong>Azure Portal → Container Apps → ca-<code>&lt;prefix&gt;</code>-orchestrator</strong></p>
-<ol>
-<li>Click <strong>Deactivate</strong></li>
-<li>Wait 10 seconds</li>
-<li>Click <strong>Activate</strong></li>
-</ol>
-<p><strong>Why restart?</strong> Container apps read configuration from App Configuration at startup. Restarting loads the new SEARCH_CONNECTION_ID value you just updated.</p>
-<hr />
-<h2 id="step-8-access-frontend-and-test-3-min">Step 8: Access Frontend and Test! (3 min)</h2>
+<p><strong>Step 6: Access Frontend and Test! (3 min)</strong></p>
 <p><strong>Azure Portal → Container Apps → ca-<code>&lt;prefix&gt;</code>-frontend → Overview</strong></p>
 <p>Copy the <strong>Application URL</strong> and open it in your browser. You should see the GPT-RAG chat interface.</p>
-<p><strong>Try these test questions:</strong>
-1. "What is this document about?"
-2. "Summarize the key points from my document"
-3. "What does the document say about [specific topic]?"</p>
-<p><strong>Expected response:</strong>
-- Natural language answer based on your document
-- <strong>Citations</strong> showing which chunks were used
-- <strong>Source references</strong> with page numbers (if PDF)
-- Response generated by GPT-4o using retrieved context</p>
+<p><strong>Try these test questions:</strong></p>
+<ol>
+<li>"What is this document about?"</li>
+<li>"Summarize the key points from my document"</li>
+<li>"What does the document say about [specific topic]?"</li>
+</ol>
+<p><strong>Expected response:</strong></p>
+<ul>
+<li>Natural language answer based on your document</li>
+<li><strong>Citations</strong> showing which chunks were used</li>
+<li><strong>Source references</strong> with page numbers (if PDF)</li>
+<li>Response generated by GPT-4o using retrieved context</li>
+</ul>
 <hr />
-<h2 id="troubleshooting-common-issues">Troubleshooting Common Issues</h2>
-<h3 id="issue-1-quota-exceeded-errors">Issue 1: Quota Exceeded Errors</h3>
+<p><strong>Troubleshooting Common Issues</strong></p>
+<p><strong>Issue 1: Quota Exceeded Errors</strong></p>
 <p><strong>Error during provision:</strong>
 <div class="highlight"><pre><span></span><code>Deployment failed: Quota exceeded for model gpt-4o
 </code></pre></div></p>
@@ -1202,11 +843,13 @@
 <span class="w">  </span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div>
-<p><strong>Capacity guidelines:</strong>
-- <strong>8 TPM</strong> - Good for testing/demos (supports ~5-10 users)
-- <strong>16 TPM</strong> - Better for development (supports ~15-20 users)
-- <strong>40 TPM</strong> - Production (default, supports ~50+ users)
-- <strong>Minimum: 4 TPM</strong> - Will work but responses may be slower</p>
+<p><strong>Capacity guidelines:</strong></p>
+<ul>
+<li><strong>8 TPM</strong> - Good for testing/demos (supports ~5-10 users)</li>
+<li><strong>16 TPM</strong> - Better for development (supports ~15-20 users)</li>
+<li><strong>40 TPM</strong> - Production (default, supports ~50+ users)</li>
+<li><strong>Minimum: 4 TPM</strong> - Will work but responses may be slower</li>
+</ul>
 <p><strong>Solution B: Check Available Quota</strong></p>
 <div class="highlight"><pre><span></span><code><span class="c"># List your OpenAI resources and regions</span>
 <span class="n">az</span> <span class="n">cognitiveservices</span> <span class="n">account</span> <span class="n">list</span> <span class="p">`</span>
@@ -1224,60 +867,65 @@
 <span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">AZURE_LOCATION</span> <span class="n">eastus</span>
 <span class="n">azd</span> <span class="n">provision</span>
 </code></pre></div>
-<h3 id="issue-2-serviceinvocationexception-error">Issue 2: "ServiceInvocationException" Error</h3>
+<p><strong>Issue 2: "ServiceInvocationException" Error</strong></p>
 <p><strong>Error message:</strong>
 <div class="highlight"><pre><span></span><code>ServiceInvocationException: Error at: project_client.agents.threads.create()
 </code></pre></div></p>
 <p><strong>Root cause:</strong> AI Foundry capabilities host lacks vector store connections (immutable configuration).</p>
-<p><strong>Workaround:</strong>
-1. Check orchestrator logs: <code>ca-&lt;prefix&gt;-orchestrator</code> → Logs → Console logs
-2. Verify SEARCH_CONNECTION_ID is correctly set in App Configuration
-3. Try restarting orchestrator again
-4. If persists, check AI Foundry Connections page for connection status</p>
+<p><strong>Workaround:</strong></p>
+<ol>
+<li>Check orchestrator logs: <code>ca-&lt;prefix&gt;-orchestrator</code> → Logs → Console logs</li>
+<li>Verify SEARCH_CONNECTION_ID is correctly set in App Configuration</li>
+<li>Try restarting orchestrator again</li>
+<li>If persists, check AI Foundry Connections page for connection status</li>
+</ol>
 <p><strong>Note:</strong> This is a known issue with the current GPT-RAG template. The AI Foundry agent infrastructure may need manual configuration.</p>
-<h3 id="issue-3-no-documents-indexed">Issue 3: No Documents Indexed</h3>
-<p><strong>Symptoms:</strong>
-- AI Search index shows 0 documents
-- Answers are generic, not grounded in your data</p>
-<p><strong>Checks:</strong>
-1. <strong>Verify upload:</strong> Storage account → <code>documents</code> container → your file should be there
-2. <strong>Check indexer logs:</strong> <code>ca-&lt;prefix&gt;-dataingest</code> → Logs → Look for errors
-3. <strong>Verify format:</strong> Ensure file is supported (PDF, DOCX, TXT, etc.)
-4. <strong>Restart indexer:</strong> Deactivate/Activate <code>ca-&lt;prefix&gt;-dataingest</code></p>
+<p><strong>Issue 3: No Documents Indexed</strong></p>
+<p><strong>Symptoms:</strong></p>
+<ul>
+<li>AI Search index shows 0 documents</li>
+<li>Answers are generic, not grounded in your data</li>
+</ul>
+<p><strong>Checks:</strong></p>
+<ol>
+<li><strong>Verify upload:</strong> Storage account → <code>documents</code> container → your file should be there</li>
+<li><strong>Check indexer logs:</strong> <code>ca-&lt;prefix&gt;-dataingest</code> → Logs → Look for errors</li>
+<li><strong>Verify format:</strong> Ensure file is supported (PDF, DOCX, TXT, etc.)</li>
+<li><strong>Restart indexer:</strong> Deactivate/Activate <code>ca-&lt;prefix&gt;-dataingest</code></li>
+</ol>
 <hr />
-<h2 id="what-you-just-enabled">What You Just Enabled 🪄</h2>
-<p><strong>Congratulations!</strong> You've deployed a production-ready RAG system. Your solution now provides:</p>
-<h3 id="intelligent-document-understanding">🧠 Intelligent Document Understanding</h3>
-<p><strong><code>Semantic chunking</code></strong> - Documents split into meaningful segments (not arbitrary 512-char blocks)
-<strong><code>Vector embeddings</code></strong> - text-embedding-3-large generates 3072-dimensional embeddings
-<strong><code>Hybrid search</code></strong> - Combines keyword (BM25) and semantic (vector) search for best results
-<strong><code>OCR extraction</code></strong> - Azure Document Intelligence handles PDFs, images, scanned documents
-<strong><code>Multi-format support</code></strong> - PDF, Word, PowerPoint, Excel, text, images, HTML</p>
-<h3 id="grounded-response-generation">🎯 Grounded Response Generation</h3>
-<p><strong><code>Retrieval-Augmented Generation (RAG)</code></strong> - GPT-4o generates answers using retrieved document chunks
-<strong><code>Citation tracking</code></strong> - Every answer links back to source documents and specific passages
-<strong><code>Relevance filtering</code></strong> - Only high-confidence matches are sent to GPT-4o (reduces hallucination)
-<strong><code>Context windowing</code></strong> - Smart selection of most relevant chunks (handles long documents)</p>
-<h3 id="automated-ingestion-pipeline">🔄 Automated Ingestion Pipeline</h3>
-<p><strong><code>Change detection</code></strong> - Only re-indexes modified files (checks ETag and lastModified)
-<strong><code>CRON scheduling</code></strong> - Runs hourly at :10 past (configurable)
-<strong><code>Startup sync</code></strong> - Indexes on container start for immediate availability
-<strong><code>Detailed logging</code></strong> - Per-file and per-run logs in blob storage
-<strong><code>Error handling</code></strong> - Failed files logged without blocking successful files</p>
-<h3 id="enterprise-ready-architecture">🔐 Enterprise-Ready Architecture</h3>
-<p><strong><code>Managed identities</code></strong> - No passwords stored, secure service-to-service auth
-<strong><code>Role-based access</code></strong> - Uses Azure RBAC for all resources
-<strong><code>Centralized config</code></strong> - App Configuration for runtime settings (no redeployment needed)
-<strong><code>Secrets management</code></strong> - Key Vault for sensitive data
-<strong><code>Monitoring</code></strong> - Log Analytics and Application Insights built-in
-<strong><code>Scalability</code></strong> - Container Apps auto-scale based on load</p>
-<h3 id="user-friendly-interface">🎨 User-Friendly Interface</h3>
-<p><strong><code>React frontend</code></strong> - Modern, responsive chat interface
-<strong><code>Real-time responses</code></strong> - Streaming GPT-4o responses (see text appear live)
-<strong><code>Citation preview</code></strong> - Click citations to see source context
-<strong><code>Multi-turn conversations</code></strong> - Maintains context across questions
-<strong><code>Feedback loop</code></strong> - Users can rate answers for quality tracking</p>
-<hr />
+<p><strong>Congratulations!</strong> You've deployed a production-ready RAG system. </p>
+<p><strong>What You Just Enabled 🪄</strong></p>
+<p><strong>🧠 Intelligent Document Understanding</strong></p>
+<p><strong><code>Semantic chunking</code></strong> - Documents split into meaningful segments (not arbitrary 512-char blocks)</p>
+<p><strong><code>Vector embeddings</code></strong> - text-embedding-3-large generates 3072-dimensional embeddings</p>
+<p><strong><code>Hybrid search</code></strong> - Combines keyword (BM25) and semantic (vector) search for best results</p>
+<p><strong><code>OCR extraction</code></strong> - Azure Document Intelligence handles PDFs, images, scanned documents</p>
+<p><strong><code>Multi-format support</code></strong> - PDF, Word, PowerPoint, Excel, text, images, HTML</p>
+<p><strong>🎯 Grounded Response Generation</strong></p>
+<p><strong><code>Retrieval-Augmented Generation (RAG)</code></strong> - GPT-4o generates answers using retrieved document chunks</p>
+<p><strong><code>Citation tracking</code></strong> - Every answer links back to source documents and specific passages</p>
+<p><strong><code>Relevance filtering</code></strong> - Only high-confidence matches are sent to GPT-4o (reduces hallucination)</p>
+<p><strong><code>Context windowing</code></strong> - Smart selection of most relevant chunks (handles long documents)</p>
+<p><strong>🔄 Automated Ingestion Pipeline</strong></p>
+<p><strong><code>Change detection</code></strong> - Only re-indexes modified files (checks ETag and lastModified)</p>
+<p><strong><code>CRON scheduling</code></strong> - Runs hourly at :10 past (configurable)</p>
+<p><strong><code>Startup sync</code></strong> - Indexes on container start for immediate availability</p>
+<p><strong><code>Detailed logging</code></strong> - Per-file and per-run logs in blob storage</p>
+<p><strong><code>Error handling</code></strong> - Failed files logged without blocking successful files</p>
+<p><strong>🔐 Enterprise-Ready Architecture</strong></p>
+<p><strong><code>Managed identities</code></strong> - No passwords stored, secure service-to-service auth</p>
+<p><strong><code>Role-based access</code></strong> - Uses Azure RBAC for all resources</p>
+<p><strong><code>Centralized config</code></strong> - App Configuration for runtime settings (no redeployment needed)</p>
+<p><strong><code>Secrets management</code></strong> - Key Vault for sensitive data</p>
+<p><strong><code>Monitoring</code></strong> - Log Analytics and Application Insights built-in</p>
+<p><strong><code>Scalability</code></strong> - Container Apps auto-scale based on load</p>
+<p><strong>🎨 User-Friendly Interface</strong></p>
+<p><strong><code>Web UI</code></strong> - Modern, responsive chat interface</p>
+<p><strong><code>Real-time responses</code></strong> - Streaming responses </p>
+<p><strong><code>Citation preview</code></strong> - Click citations to see source context</p>
+<p><strong><code>Multi-turn conversations</code></strong> - Maintains context across questions</p>
+<p><strong><code>Feedback loop</code></strong> - Users can rate answers for quality tracking</p>
 
 
 
