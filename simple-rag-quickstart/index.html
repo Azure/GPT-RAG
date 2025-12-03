@@ -1,0 +1,1332 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Official project documentation">
+      
+      
+        <meta name="author" content="Paulo Lacerda">
+      
+      
+      
+        <link rel="prev" href="../deploy/">
+      
+      
+        <link rel="next" href="../nl2sql-quickstart/">
+      
+      
+      <link rel="icon" href="../favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.34">
+    
+    
+      
+        <title>Simple RAG - GPT-RAG</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.35f28582.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../styles.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#simple-rag-quick-start-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="GPT-RAG" class="md-header__button md-logo" aria-label="GPT-RAG" data-md-component="logo">
+      
+  <img src="../media/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            GPT-RAG
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Simple RAG
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/azure/gpt-rag" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="GPT-RAG" class="md-nav__button md-logo" aria-label="GPT-RAG" data-md-component="logo">
+      
+  <img src="../media/logo.png" alt="logo">
+
+    </a>
+    GPT-RAG
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/azure/gpt-rag" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../whatisnew/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    What's New
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deploy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Deployment Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Quick Start Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Quick Start Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Simple RAG
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Simple RAG
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-youll-accomplish" class="md-nav__link">
+    <span class="md-ellipsis">
+      What You'll Accomplish
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-initialize-gpt-rag-project-5-min" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 1: Initialize GPT-RAG Project (5 min)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-authenticate-azure-clis-2-min" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 2: Authenticate Azure CLIs (2 min)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-provision-infrastructure-30-min" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 3: Provision Infrastructure (30 min)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-start-docker-and-deploy-services-35-min" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 4: Start Docker and Deploy Services (35 min)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4: Start Docker and Deploy Services (35 min)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-start-docker-desktop" class="md-nav__link">
+    <span class="md-ellipsis">
+      A. Start Docker Desktop
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-deploy-services" class="md-nav__link">
+    <span class="md-ellipsis">
+      B. Deploy Services
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-upload-documents-and-verify-indexing-10-min" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 5: Upload Documents and Verify Indexing (10 min)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 5: Upload Documents and Verify Indexing (10 min)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-upload-your-documents" class="md-nav__link">
+    <span class="md-ellipsis">
+      A. Upload Your Documents
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-trigger-document-indexing" class="md-nav__link">
+    <span class="md-ellipsis">
+      B. Trigger Document Indexing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#c-verify-indexing-completed" class="md-nav__link">
+    <span class="md-ellipsis">
+      C. Verify Indexing Completed
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-configure-ai-foundry-search-connection-for-public-access-rag-5-min" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 6: Configure AI Foundry Search Connection for Public Access RAG (5 min)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 6: Configure AI Foundry Search Connection for Public Access RAG (5 min)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-why-two-search-services" class="md-nav__link">
+    <span class="md-ellipsis">
+      A. Why Two Search Services?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-add-search-connection-in-ai-foundry" class="md-nav__link">
+    <span class="md-ellipsis">
+      B. Add Search Connection in AI Foundry
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#c-copy-connection-id" class="md-nav__link">
+    <span class="md-ellipsis">
+      C. Copy Connection ID
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-update-app-configuration-and-restart-orchestrator-5-min" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 7: Update App Configuration and Restart Orchestrator (5 min)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 7: Update App Configuration and Restart Orchestrator (5 min)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-update-app-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      A. Update App Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-restart-orchestrator" class="md-nav__link">
+    <span class="md-ellipsis">
+      B. Restart Orchestrator
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-access-frontend-and-test-3-min" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 8: Access Frontend and Test! (3 min)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting-common-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting Common Issues
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting Common Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#issue-1-quota-exceeded-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Issue 1: Quota Exceeded Errors
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issue-2-serviceinvocationexception-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      Issue 2: "ServiceInvocationException" Error
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issue-3-no-documents-indexed" class="md-nav__link">
+    <span class="md-ellipsis">
+      Issue 3: No Documents Indexed
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-just-enabled" class="md-nav__link">
+    <span class="md-ellipsis">
+      What You Just Enabled 🪄
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What You Just Enabled 🪄">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intelligent-document-understanding" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧠 Intelligent Document Understanding
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#grounded-response-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      🎯 Grounded Response Generation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#automated-ingestion-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔄 Automated Ingestion Pipeline
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#enterprise-ready-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔐 Enterprise-Ready Architecture
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#user-friendly-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      🎨 User-Friendly Interface
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../nl2sql-quickstart/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    NL2SQL
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Architecture
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Architecture
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Services
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Services
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ochestrator/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Orchestrator
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    How-to Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            How-to Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../userfeedback/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    User Feedback
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../team/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Meet the Team
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="simple-rag-quick-start-guide">Simple RAG Quick Start Guide</h1>
+<p>Get document-based AI question answering working in <strong>60 minutes</strong> using <strong>GPT-RAG's automated deployment</strong>.</p>
+<p>This quickstart enables a public access solution which is for testing purposes only!</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<p><strong>You must have:</strong>
+- Azure subscription with permissions to create resources
+- Azure Developer CLI (azd): 1.21.1+
+- Azure CLI (az): 2.79.0+
+- PowerShell 7.5+
+- Docker Desktop installed and running
+- Git &amp; Python 3.11+</p>
+<h2 id="what-youll-accomplish">What You'll Accomplish</h2>
+<p>By the end of this guide:
+- Deploy complete GPT-RAG infrastructure (~20 Azure resources)
+- Upload documents to Azure Blob Storage
+- Enable automated document ingestion and indexing
+- Configure AI Foundry search connection
+- Generate embeddings with text-embedding-3-large
+- Ask questions about your documents using GPT-4o
+- Get answers grounded in your data with citations</p>
+<hr />
+<h2 id="step-1-initialize-gpt-rag-project-5-min">Step 1: Initialize GPT-RAG Project (5 min)</h2>
+<div class="highlight"><pre><span></span><code><span class="c"># Create fresh directory</span>
+<span class="n">mkdir</span> <span class="n">C</span><span class="p">:\</span><span class="n">MyCode</span><span class="p">\</span><span class="n">my-gpt-rag</span>
+<span class="nb">cd </span><span class="n">C</span><span class="p">:\</span><span class="n">MyCode</span><span class="p">\</span><span class="n">my-gpt-rag</span>
+
+<span class="c"># Initialize from template</span>
+<span class="n">azd</span> <span class="n">init</span> <span class="n">-t</span> <span class="n">azure</span><span class="p">/</span><span class="n">gpt-rag</span>
+</code></pre></div>
+<p><strong>You'll be prompted for:</strong>
+1. <strong>Environment name</strong> - Choose a short name (e.g., <code>myrag</code>, <code>demorag</code>)
+2. <strong>Azure subscription</strong> - Select from list
+3. <strong>Azure region</strong> - Choose wisely:
+   - <strong>East US 2</strong> - Best OpenAI quota availability
+   - <strong>West US</strong> - Good quota, lower latency for West Coast
+   - <strong>East US</strong> - Backup option if East US 2 full
+   - ⚠️ <strong>North Europe, West Europe</strong> - Often quota-constrained</p>
+<p><strong>💡 Note:</strong> If you have quota limitations, see the Troubleshooting section at the end for how to adjust model capacity.</p>
+<hr />
+<h2 id="step-2-authenticate-azure-clis-2-min">Step 2: Authenticate Azure CLIs (2 min)</h2>
+<div class="highlight"><pre><span></span><code><span class="c"># Login to Azure CLI (yes, both required)</span>
+<span class="n">az</span> <span class="n">login</span>
+<span class="n">azd</span> <span class="n">auth</span> <span class="n">login</span>
+</code></pre></div>
+<hr />
+<h2 id="step-3-provision-infrastructure-30-min">Step 3: Provision Infrastructure (30 min)</h2>
+<div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">provision</span>
+</code></pre></div>
+<p><strong>What this creates (~20 Azure resources):</strong>
+- <strong>Resource Group</strong> - Container for all resources
+- <strong>Storage Accounts</strong> - For documents and job logs
+- <strong>AI Search Services (2)</strong> - Main index (srch-<em>) and AI Foundry index (srch-aif-</em>)
+- <strong>AI Foundry</strong> - Hub and project for agent orchestration
+- <strong>OpenAI Models</strong> - GPT-4o and text-embedding-3-large deployments
+- <strong>Container Registry</strong> - Stores Docker images
+- <strong>Container Apps (4)</strong> - Frontend, orchestrator, ingestion, MCP
+- <strong>App Configuration</strong> - Centralized configuration store
+- <strong>Key Vault</strong> - Secrets management
+- <strong>Cosmos DB</strong> - Agent state and metadata
+- <strong>Log Analytics</strong> - Monitoring and diagnostics
+- <strong>Managed Identities</strong> - Secure service-to-service auth</p>
+<p>⏳ <strong>Wait ~27 minutes for provisioning to complete.</strong></p>
+<p><strong>Save your resource prefix:</strong></p>
+<p>After provisioning completes, you'll see output like:
+<div class="highlight"><pre><span></span><code>Resource prefix: y5sbzlaazfxok
+</code></pre></div></p>
+<p><strong>Keep this prefix handy</strong> - you'll use it to identify your resources in Azure Portal.</p>
+<hr />
+<h2 id="step-4-start-docker-and-deploy-services-35-min">Step 4: Start Docker and Deploy Services (35 min)</h2>
+<p><strong>⚠️ CRITICAL:</strong> Docker must be running before <code>azd deploy</code>!</p>
+<h3 id="a-start-docker-desktop">A. Start Docker Desktop</h3>
+<h3 id="b-deploy-services">B. Deploy Services</h3>
+<div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">deploy</span>
+</code></pre></div>
+<p><strong>What this does:</strong>
+1. <strong>Clones 4 service repositories</strong> from GitHub:
+   - <code>gpt-rag-frontend</code> - React web interface
+   - <code>gpt-rag-orchestrator</code> - Agent orchestration and RAG logic
+   - <code>gpt-rag-ingestion</code> - Document processing and indexing
+   - <code>gpt-rag-mcp</code> - Model Context Protocol integration</p>
+<ol>
+<li><strong>Builds Docker images locally</strong>:</li>
+<li>Creates containers for each service</li>
+<li>Tags them with version info</li>
+<li>
+<p>Requires ~5-10 GB disk space</p>
+</li>
+<li>
+<p><strong>Pushes images to Azure Container Registry</strong>:</p>
+</li>
+<li>Uploads to <code>cr{prefix}.azurecr.io</code></li>
+<li>
+<p>Typically 1-2 GB total</p>
+</li>
+<li>
+<p><strong>Deploys to Container Apps</strong>:</p>
+</li>
+<li>Creates 4 container apps</li>
+<li>Configures networking, secrets, environment variables</li>
+<li>Sets up auto-scaling rules</li>
+</ol>
+<p>⏳ <strong>Wait ~30 minutes for deployment to complete.</strong></p>
+<hr />
+<h2 id="step-5-upload-documents-and-verify-indexing-10-min">Step 5: Upload Documents and Verify Indexing (10 min)</h2>
+<h3 id="a-upload-your-documents">A. Upload Your Documents</h3>
+<p><strong>Azure Portal → Storage accounts → st<code>&lt;prefix&gt;</code> → Containers → documents → Upload</strong></p>
+<p><strong>Supported formats:</strong>
+- <strong>PDF</strong> - Most common (OCR with Document Intelligence)
+- <strong>Word</strong> (.docx) - Extracts text and tables
+- <strong>PowerPoint</strong> (.pptx) - Extracts slides and speaker notes
+- <strong>Excel</strong> (.xlsx) - Extracts sheets and data (v4.0+)
+- <strong>Text</strong> (.txt, .md) - Direct text ingestion
+- <strong>Images</strong> (.jpg, .png, .bmp, .tiff) - OCR extraction
+- <strong>HTML</strong> - Web page content extraction</p>
+<p><strong>What happens after upload:</strong>
+1. File stored in <code>documents</code> container
+2. Ingestion service monitors for new files
+3. On next CRON run or restart, files are processed
+4. Azure Document Intelligence extracts text (OCR for images/PDFs)
+5. Text chunked into semantic segments
+6. Embeddings generated with text-embedding-3-large
+7. Chunks uploaded to AI Search index <code>ragindex-{prefix}</code></p>
+<h3 id="b-trigger-document-indexing">B. Trigger Document Indexing</h3>
+<p>The indexing service runs automatically:
+- <strong>On container startup</strong> (immediate first run)
+- <strong>Hourly on CRON</strong> (at :10 minutes past the hour)</p>
+<p><strong>Option 1: Wait for next CRON run</strong> (up to 60 minutes)</p>
+<p><strong>Option 2: Force immediate indexing by restarting:</strong></p>
+<p><strong>Azure Portal → Container Apps → ca-<code>&lt;prefix&gt;</code>-dataingest</strong></p>
+<ol>
+<li>Click <strong>Stop</strong></li>
+<li>Wait 10 seconds</li>
+<li>Click <strong>Start</strong></li>
+</ol>
+<p><strong>Why restart?</strong> The indexer runs on CRON schedule (hourly at :10 past). Restarting triggers it to run immediately instead of waiting up to an hour.</p>
+<h3 id="c-verify-indexing-completed">C. Verify Indexing Completed</h3>
+<p><strong>Azure Portal → AI Search → srch-<code>&lt;prefix&gt;</code> → Indexes → ragindex-<code>&lt;prefix&gt;</code></strong></p>
+<ul>
+<li><strong>Document count &gt; 0</strong> (indicates chunks were indexed)</li>
+</ul>
+<hr />
+<h2 id="step-6-configure-ai-foundry-search-connection-for-public-access-rag-5-min">Step 6: Configure AI Foundry Search Connection for Public Access RAG (5 min)</h2>
+<p><strong>⚠️ CRITICAL STEP:</strong> The deployment creates two AI Search services. You must configure AI Foundry to use the correct one for public access!</p>
+<h3 id="a-why-two-search-services">A. Why Two Search Services?</h3>
+<ul>
+<li><strong>srch-<code>&lt;prefix&gt;</code></strong> - Main search service with your indexed documents (use this one!)</li>
+<li><strong>srch-aif-<code>&lt;prefix&gt;</code></strong> - AI Foundry's empty search service (created by default, ignore)</li>
+</ul>
+<p>The orchestrator needs the connection ID for the main search service.</p>
+<h3 id="b-add-search-connection-in-ai-foundry">B. Add Search Connection in AI Foundry</h3>
+<ol>
+<li><strong>Azure Portal → AI services → aif-<code>&lt;prefix&gt;</code> → Overview</strong></li>
+<li>Click the <strong>"View in Azure AI Foundry"</strong> link (opens ai.azure.com)</li>
+<li>Should land in your project (likely named <strong>aifoundry-default-project</strong>)</li>
+<li>Left menu → <strong>Connected resources</strong> or <strong>Connections</strong></li>
+<li>Click <strong>+ New connection</strong></li>
+<li>Select <strong>Azure AI Search</strong></li>
+<li>Select <strong>srch-<code>&lt;prefix&gt;</code></strong> (NOT srch-aif-*)</li>
+<li><strong>Authentication:</strong> <strong>Microsoft Entra ID</strong> (NOT API Key)</li>
+<li><strong>Connection name:</strong> Use the resource name (e.g., <code>srchqitxxnnt4igs6</code>)</li>
+<li>Click <strong>Save</strong></li>
+</ol>
+<h3 id="c-copy-connection-id">C. Copy Connection ID</h3>
+<p>After saving, the connection details page shows the connection ID.</p>
+<p><strong>Example:</strong>
+<div class="highlight"><pre><span></span><code>/subscriptions/f94c002c-2212-4bfb-b7a4-f8898b7ea4e5/resourceGroups/rg-demorag/providers/Microsoft.CognitiveServices/accounts/aif-qitxxnnt4igs6/projects/aifoundry-default-project/connections/srchqitxxnnt4igs6
+</code></pre></div></p>
+<p><strong>Copy this entire connection ID</strong> - you'll paste it in the next step.</p>
+<hr />
+<h2 id="step-7-update-app-configuration-and-restart-orchestrator-5-min">Step 7: Update App Configuration and Restart Orchestrator (5 min)</h2>
+<h3 id="a-update-app-configuration">A. Update App Configuration</h3>
+<p><strong>Azure Portal → App Configuration → appcs-<code>&lt;prefix&gt;</code> → Configuration explorer</strong></p>
+<ol>
+<li>Find key: <strong>SEARCH_CONNECTION_ID</strong></li>
+<li>Filter by label: <strong>gpt-rag</strong></li>
+<li>Click the key → Click <strong>Edit</strong></li>
+<li><strong>Value field:</strong> Paste the connection ID you copied from AI Foundry</li>
+<li>Verify:</li>
+<li><strong>Content type:</strong> <code>text/plain</code></li>
+<li><strong>Label:</strong> <code>gpt-rag</code></li>
+<li>Click <strong>Apply</strong> → Click <strong>Save</strong></li>
+</ol>
+<h3 id="b-restart-orchestrator">B. Restart Orchestrator</h3>
+<p><strong>Azure Portal → Container Apps → ca-<code>&lt;prefix&gt;</code>-orchestrator</strong></p>
+<ol>
+<li>Click <strong>Deactivate</strong></li>
+<li>Wait 10 seconds</li>
+<li>Click <strong>Activate</strong></li>
+</ol>
+<p><strong>Why restart?</strong> Container apps read configuration from App Configuration at startup. Restarting loads the new SEARCH_CONNECTION_ID value you just updated.</p>
+<hr />
+<h2 id="step-8-access-frontend-and-test-3-min">Step 8: Access Frontend and Test! (3 min)</h2>
+<p><strong>Azure Portal → Container Apps → ca-<code>&lt;prefix&gt;</code>-frontend → Overview</strong></p>
+<p>Copy the <strong>Application URL</strong> and open it in your browser. You should see the GPT-RAG chat interface.</p>
+<p><strong>Try these test questions:</strong>
+1. "What is this document about?"
+2. "Summarize the key points from my document"
+3. "What does the document say about [specific topic]?"</p>
+<p><strong>Expected response:</strong>
+- Natural language answer based on your document
+- <strong>Citations</strong> showing which chunks were used
+- <strong>Source references</strong> with page numbers (if PDF)
+- Response generated by GPT-4o using retrieved context</p>
+<hr />
+<h2 id="troubleshooting-common-issues">Troubleshooting Common Issues</h2>
+<h3 id="issue-1-quota-exceeded-errors">Issue 1: Quota Exceeded Errors</h3>
+<p><strong>Error during provision:</strong>
+<div class="highlight"><pre><span></span><code>Deployment failed: Quota exceeded for model gpt-4o
+</code></pre></div></p>
+<p><strong>Background:</strong> The default deployment requires 80 TPM total (40 for GPT-4o + 40 for text-embedding-3-large). Many subscriptions don't have this quota available.</p>
+<p><strong>Solution A: Reduce Model Capacity</strong></p>
+<p>Edit <code>infra/main.parameters.json</code> BEFORE running <code>azd provision</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;modelDeploymentList&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;chat&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;format&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;OpenAI&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;gpt-4o&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-11-20&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;sku&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GlobalStandard&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;capacity&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text-embedding&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;format&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;OpenAI&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text-embedding-3-large&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;sku&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Standard&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;capacity&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Capacity guidelines:</strong>
+- <strong>8 TPM</strong> - Good for testing/demos (supports ~5-10 users)
+- <strong>16 TPM</strong> - Better for development (supports ~15-20 users)
+- <strong>40 TPM</strong> - Production (default, supports ~50+ users)
+- <strong>Minimum: 4 TPM</strong> - Will work but responses may be slower</p>
+<p><strong>Solution B: Check Available Quota</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c"># List your OpenAI resources and regions</span>
+<span class="n">az</span> <span class="n">cognitiveservices</span> <span class="n">account</span> <span class="n">list</span> <span class="p">`</span>
+  <span class="p">-</span><span class="n">-subscription</span> <span class="s2">&quot;&lt;your-subscription-id&gt;&quot;</span> <span class="p">`</span>
+  <span class="p">-</span><span class="n">-query</span> <span class="s2">&quot;[?kind==&#39;OpenAI&#39;].{Name:name, ResourceGroup:resourceGroup, Location:location}&quot;</span> <span class="p">`</span>
+  <span class="n">-o</span> <span class="n">table</span>
+</code></pre></div>
+<p><strong>Check quota in Azure Portal:</strong>
+- Go to any OpenAI resource → Quotas
+- Look at TPM (Tokens Per Minute) for gpt-4o and text-embedding-3-large
+- Note which regions have available quota</p>
+<p><strong>Solution C: Try Different Region</strong></p>
+<p>If you've already started provisioning, delete the failed resource group and try a different region:</p>
+<div class="highlight"><pre><span></span><code><span class="n">az</span> <span class="nb">group </span><span class="n">delete</span> <span class="p">-</span><span class="n">-name</span> <span class="p">&lt;</span><span class="n">your-rg</span><span class="p">&gt;</span> <span class="p">-</span><span class="n">-yes</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">AZURE_LOCATION</span> <span class="n">eastus</span>
+<span class="n">azd</span> <span class="n">provision</span>
+</code></pre></div>
+<h3 id="issue-2-serviceinvocationexception-error">Issue 2: "ServiceInvocationException" Error</h3>
+<p><strong>Error message:</strong>
+<div class="highlight"><pre><span></span><code>ServiceInvocationException: Error at: project_client.agents.threads.create()
+</code></pre></div></p>
+<p><strong>Root cause:</strong> AI Foundry capabilities host lacks vector store connections (immutable configuration).</p>
+<p><strong>Workaround:</strong>
+1. Check orchestrator logs: <code>ca-&lt;prefix&gt;-orchestrator</code> → Logs → Console logs
+2. Verify SEARCH_CONNECTION_ID is correctly set in App Configuration
+3. Try restarting orchestrator again
+4. If persists, check AI Foundry Connections page for connection status</p>
+<p><strong>Note:</strong> This is a known issue with the current GPT-RAG template. The AI Foundry agent infrastructure may need manual configuration.</p>
+<h3 id="issue-3-no-documents-indexed">Issue 3: No Documents Indexed</h3>
+<p><strong>Symptoms:</strong>
+- AI Search index shows 0 documents
+- Answers are generic, not grounded in your data</p>
+<p><strong>Checks:</strong>
+1. <strong>Verify upload:</strong> Storage account → <code>documents</code> container → your file should be there
+2. <strong>Check indexer logs:</strong> <code>ca-&lt;prefix&gt;-dataingest</code> → Logs → Look for errors
+3. <strong>Verify format:</strong> Ensure file is supported (PDF, DOCX, TXT, etc.)
+4. <strong>Restart indexer:</strong> Deactivate/Activate <code>ca-&lt;prefix&gt;-dataingest</code></p>
+<hr />
+<h2 id="what-you-just-enabled">What You Just Enabled 🪄</h2>
+<p><strong>Congratulations!</strong> You've deployed a production-ready RAG system. Your solution now provides:</p>
+<h3 id="intelligent-document-understanding">🧠 Intelligent Document Understanding</h3>
+<p><strong><code>Semantic chunking</code></strong> - Documents split into meaningful segments (not arbitrary 512-char blocks)
+<strong><code>Vector embeddings</code></strong> - text-embedding-3-large generates 3072-dimensional embeddings
+<strong><code>Hybrid search</code></strong> - Combines keyword (BM25) and semantic (vector) search for best results
+<strong><code>OCR extraction</code></strong> - Azure Document Intelligence handles PDFs, images, scanned documents
+<strong><code>Multi-format support</code></strong> - PDF, Word, PowerPoint, Excel, text, images, HTML</p>
+<h3 id="grounded-response-generation">🎯 Grounded Response Generation</h3>
+<p><strong><code>Retrieval-Augmented Generation (RAG)</code></strong> - GPT-4o generates answers using retrieved document chunks
+<strong><code>Citation tracking</code></strong> - Every answer links back to source documents and specific passages
+<strong><code>Relevance filtering</code></strong> - Only high-confidence matches are sent to GPT-4o (reduces hallucination)
+<strong><code>Context windowing</code></strong> - Smart selection of most relevant chunks (handles long documents)</p>
+<h3 id="automated-ingestion-pipeline">🔄 Automated Ingestion Pipeline</h3>
+<p><strong><code>Change detection</code></strong> - Only re-indexes modified files (checks ETag and lastModified)
+<strong><code>CRON scheduling</code></strong> - Runs hourly at :10 past (configurable)
+<strong><code>Startup sync</code></strong> - Indexes on container start for immediate availability
+<strong><code>Detailed logging</code></strong> - Per-file and per-run logs in blob storage
+<strong><code>Error handling</code></strong> - Failed files logged without blocking successful files</p>
+<h3 id="enterprise-ready-architecture">🔐 Enterprise-Ready Architecture</h3>
+<p><strong><code>Managed identities</code></strong> - No passwords stored, secure service-to-service auth
+<strong><code>Role-based access</code></strong> - Uses Azure RBAC for all resources
+<strong><code>Centralized config</code></strong> - App Configuration for runtime settings (no redeployment needed)
+<strong><code>Secrets management</code></strong> - Key Vault for sensitive data
+<strong><code>Monitoring</code></strong> - Log Analytics and Application Insights built-in
+<strong><code>Scalability</code></strong> - Container Apps auto-scale based on load</p>
+<h3 id="user-friendly-interface">🎨 User-Friendly Interface</h3>
+<p><strong><code>React frontend</code></strong> - Modern, responsive chat interface
+<strong><code>Real-time responses</code></strong> - Streaming GPT-4o responses (see text appear live)
+<strong><code>Citation preview</code></strong> - Click citations to see source context
+<strong><code>Multi-turn conversations</code></strong> - Maintains context across questions
+<strong><code>Feedback loop</code></strong> - Users can rate answers for quality tracking</p>
+<hr />
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <div style="
+  background-color: var(--md-primary-fg-color);
+  color: var(--md-primary-bg-color);
+  text-align: center;
+  font-size: 0.95em;
+  padding: 1em 0;
+">
+  © 2025 GPT-RAG — powered by ❤️ and coffee ☕
+</div>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.icon", "content.iconify", "navigation.tracking", "toc.integrate", "content.code.annotate", "navigation.top"], "search": "../assets/javascripts/workers/search.07f07601.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.56dfad97.min.js"></script>
+      
+    
+  </body>
+</html>
