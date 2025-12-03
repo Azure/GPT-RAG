@@ -2,26 +2,28 @@
 
 Get public access natural language querying of your Azure SQL Database working in **30 minutes** using **automated blob storage ingestion**.
 
-This quickstart enables a public access solution which is for testing purposes only!
+> This quickstart enables a public access solution which is for testing purposes only!
 
 **Prerequisites**
 
 **You must have:**
-- GPT-RAG solution deployed (`azd provision` and `azd deploy` completed)
-- Azure subscription with permissions to create SQL resources
-- Access to Azure Portal
+
+  - GPT-RAG solution deployed (`azd provision` and `azd deploy` completed)
+  - Azure subscription with permissions to create SQL resources
+  - Access to Azure Portal
 
 **What You'll Accomplish**
 
 By the end of this guide:
-- Create Azure SQL Database with AdventureWorksLT sample data
-- Configure networking and firewall rules
-- Store database credentials securely in Key Vault
-- Register your SQL database as a datasource
-- Upload table metadata and example queries to blob storage
-- Enable automated ingestion with CRON scheduling
-- Enable NL2SQL strategy
-- Ask questions in natural language and get SQL results
+
+  - Create Azure SQL Database with AdventureWorksLT sample data
+  - Configure networking and firewall rules
+  - Store database credentials securely in Key Vault
+  - Register your SQL database as a datasource
+  - Upload table metadata and example queries to blob storage
+  - Enable automated ingestion with CRON scheduling
+  - Enable NL2SQL strategy
+  - Ask questions in natural language and get SQL results
 
 ---
 
@@ -31,44 +33,44 @@ By the end of this guide:
 
 **Azure Portal → Create a resource → SQL Database**
 
-1. **Basics tab:**
-   - **Subscription:** Your subscription
-   - **Resource group:** Same as your GPT-RAG deployment (or create new)
-   - **Database name:** `adventureworks-demo`
-   - **Server:** Click **Create new**
+  1. **Basics tab:**
+    - **Subscription:** Your subscription
+    - **Resource group:** Same as your GPT-RAG deployment (or create new)
+    - **Database name:** `adventureworks-demo`
+    - **Server:** Click **Create new**
 
-2. **Create SQL Database Server:**
-   - **Server name:** `sql-gptrag-demo-<unique>` (must be globally unique)
-   - **Location:** Same region as GPT-RAG (optional - any region works, but same region reduces latency)
-   - **Authentication method:** **Use SQL authentication** (simpler for this quickstart; Entra ID authentication is also supported)
-   - **Server admin login:** `sqladmin`
-   - **Password:** Create a strong password (save this!)
-   - Click **OK**
+  2. **Create SQL Database Server:**
+    - **Server name:** `sql-gptrag-demo-<unique>` (must be globally unique)
+    - **Location:** Same region as GPT-RAG (optional - any region works, but same region reduces latency)
+    - **Authentication method:** **Use SQL authentication** (simpler for this quickstart; Entra ID authentication is also supported)
+    - **Server admin login:** `sqladmin`
+    - **Password:** Create a strong password (save this!)
+    - Click **OK**
 
-3. **Compute + storage:**
-   - Click **Configure database**
-   - Select **Basic** (cheapest for testing - $5/month)
-   - Click **Apply**
+  3. **Compute + storage:**
+    - Click **Configure database**
+    - Select **Basic** (cheapest for testing - $5/month)
+    - Click **Apply**
 
-4. **Backup storage redundancy:**
-   - Select **Locally-redundant backup storage** (cheapest)
+  4. **Backup storage redundancy:**
+    - Select **Locally-redundant backup storage** (cheapest)
 
 **B. Configure Networking**
 
-5. **Networking tab:**
-   - **Connectivity method:** **Public endpoint**
-   - **Firewall rules:**
-     - **Allow Azure services and resources to access this server** - **YES** (CRITICAL!)
-     - **Add current client IP address** - **YES** (for your testing)
-   - **Connection policy:** Default
-   - **Encrypted connections:** TLS 1.2 (default)
+  5. **Networking tab:**
+    - **Connectivity method:** **Public endpoint**
+    - **Firewall rules:**
+      - **Allow Azure services and resources to access this server** - **YES** (CRITICAL!)
+      - **Add current client IP address** - **YES** (for your testing)
+    - **Connection policy:** Default
+    - **Encrypted connections:** TLS 1.2 (default)
 
 **C. Add Sample Data**
 
-6. **Additional settings tab:**
-   - **Use existing data:** **Sample (AdventureWorksLT)**
-   - **Collation:** Default
-   - **Enable Microsoft Defender:** Not needed for demo
+  6. **Additional settings tab:**
+    - **Use existing data:** **Sample (AdventureWorksLT)**
+    - **Collation:** Default
+    - **Enable Microsoft Defender:** Not needed for demo
 
 7. Click **Review + create** → **Create**
 
@@ -85,8 +87,9 @@ After deployment completes:
 (Note: SQL databases → adventureworks-demo - that's the wrong place!)
 
 Verify these settings:
-- **Public network access:** Selected networks
-- **Exceptions:** ☑️ **Allow Azure services and resources to access this server** (checked)
+
+  - **Public network access:** Selected networks
+  - **Exceptions:** ☑️ **Allow Azure services and resources to access this server** (checked)
 
 The "Allow Azure services" checkbox creates a special firewall rule (`0.0.0.0 - 0.0.0.0`) that permits any Azure service in your subscription to connect.
 
@@ -94,15 +97,14 @@ The "Allow Azure services" checkbox creates a special firewall rule (`0.0.0.0 - 
 
 **Using Azure Portal Query Editor:**
 
-1. Go to your SQL Database → **Query editor**
-2. Login with **SQL authentication** (sqladmin / your password)
-3. Run test query:
-
-```sql
-SELECT TOP 5 ProductID, Name, ListPrice 
-FROM SalesLT.Product 
-ORDER BY ListPrice DESC
-```
+  1. Go to your SQL Database → **Query editor**
+  2. Login with **SQL authentication** (sqladmin / your password)
+  3. Run test query:
+    ```sql
+    SELECT TOP 5 ProductID, Name, ListPrice 
+    FROM SalesLT.Product 
+    ORDER BY ListPrice DESC
+    ```
 
 **If you see results, your database is ready!**
 
@@ -206,15 +208,17 @@ Paste this JSON, replacing `<your-sql-server-name>` with the **server name you c
 ```
 
 **💡 How to find your server name:**
-- Azure Portal → SQL servers → Look for the server you just created
-- Copy the name (e.g., `sql-gptrag-demo-ragpace`)
-- Add `.database.windows.net` to the end
+
+  - Azure Portal → SQL servers → Look for the server you just created
+  - Copy the name (e.g., `sql-gptrag-demo-ragpace`)
+  - Add `.database.windows.net` to the end
 
 **⚠️ CRITICAL RULES:**
-- Use `uid` (NOT `username`)
-- DO NOT include `password` field
-- DO NOT include `connection_info` field
-- The `id` must match Key Vault secret prefix (`adventureworks` → `adventureworks-secret`)
+
+  - Use `uid` (NOT `username`)
+  - DO NOT include `password` field
+  - DO NOT include `connection_info` field
+  - The `id` must match Key Vault secret prefix (`adventureworks` → `adventureworks-secret`)
 
 Click **Save**.
 
@@ -223,10 +227,11 @@ Click **Save**.
 **Step 6: Create Metadata JSON Files (5 min)**
 
 **What you'll do in this step:**
-- Create JSON files on your **local machine** (in your working directory)
-- These files describe your database tables and example queries
-- In **Step 7**, you'll upload these files to Azure Blob Storage
-- The automated ingestion system will then index them into AI Search
+
+  - Create JSON files on your **local machine** (in your working directory)
+  - These files describe your database tables and example queries
+  - In **Step 7**, you'll upload these files to Azure Blob Storage
+  - The automated ingestion system will then index them into AI Search
 
 **A. Create Local Folder Structure**
 
@@ -240,16 +245,19 @@ mkdir blob-upload\tables
 
 **B. Create Example Query Files**
 
-**Why example queries?** They help the AI understand your database patterns and generate better SQL. The system uses these as few-shot examples when translating natural language to SQL.
+**Why example queries?** 
 
-> 📝 **Note:** We're only adding 3 queries here for quick setup. **Ideally, add 10-20 diverse examples** covering:
-> - Simple queries (counts, filters)
-> - Complex joins across multiple tables
-> - Aggregations (SUM, AVG, GROUP BY)
-> - Date/time filtering
-> - Common business questions your users ask
-> 
-> More examples = better SQL generation accuracy!
+They help the AI understand your database patterns and generate better SQL. The system uses these as few-shot examples when translating natural language to SQL.
+
+📝 **Note:** We're only adding 3 queries here for quick setup. **Ideally, add 10-20 diverse examples** covering:
+
+  - Simple queries (counts, filters)
+  - Complex joins across multiple tables
+  - Aggregations (SUM, AVG, GROUP BY)
+  - Date/time filtering
+  - Common business questions your users ask 
+
+More examples = better SQL generation accuracy!
 
 **Create these files on your local machine:**
 
@@ -288,19 +296,22 @@ Create `blob-upload\queries\product_categories.json`:
 **Why table metadata?** 
 
 The system uses **AI Search for semantic table discovery** instead of live database introspection. When users ask questions, the system:
-1. Searches your table metadata using embeddings (vector search)
-2. Finds the most relevant tables based on descriptions
-3. Then calls `GetSchemaInfo` to retrieve detailed column information
+
+  1. Searches your table metadata using embeddings (vector search)
+  2. Finds the most relevant tables based on descriptions
+  3. Then calls `GetSchemaInfo` to retrieve detailed column information
 
 **Benefits of this approach:**
-- **Fast semantic search** - Find relevant tables using natural language ("revenue data" matches "SalesOrderHeader")
-- **Control what's exposed** - Only include tables relevant to end users (exclude admin/audit tables)
-- **Add business context** - Descriptions help the AI understand table purpose beyond raw schema
-- **Avoid token limits** - Don't send 500 table schemas to GPT-4 every query
+
+  - **Fast semantic search** - Find relevant tables using natural language ("revenue data" matches "SalesOrderHeader")
+  - **Control what's exposed** - Only include tables relevant to end users (exclude admin/audit tables)
+  - **Add business context** - Descriptions help the AI understand table purpose beyond raw schema
+  - **Avoid token limits** - Don't send 500 table schemas to GPT-4 every query
 
 **⚠️ Schema updates:**
-- If you add/drop columns or tables later, create new JSON files and upload them
-- The automated ingestion will detect changes and re-index automatically
+
+  - If you add/drop columns or tables later, create new JSON files and upload them
+  - The automated ingestion will detect changes and re-index automatically
 
 !!! note
     Column descriptions are not specified here because the column names are sufficiently descriptive for the LLM
@@ -390,25 +401,28 @@ Click **+ Create** to add a new key-value:
 Click **Apply**.
 
 **What this does:**
-- Runs the NL2SQL indexer job every 15 minutes
-- Scans the `nl2sql` container for new/changed files
-- Automatically indexes them into AI Search
-- Generates embeddings for semantic search
-- Skips unchanged files (smart change detection)
+
+  - Runs the NL2SQL indexer job every 15 minutes
+  - Scans the `nl2sql` container for new/changed files
+  - Automatically indexes them into AI Search
+  - Generates embeddings for semantic search
+  - Skips unchanged files (smart change detection)
 
 **Alternative schedules:**
-- `*/5 * * * *` - Every 5 minutes (faster updates)
-- `*/2 * * * *` - Every 2 minutes (testing/development only)
-- `0 * * * *` - Every hour on the hour
-- `0 0 * * *` - Once daily at midnight
+
+  - `*/5 * * * *` - Every 5 minutes (faster updates)
+  - `*/2 * * * *` - Every 2 minutes (testing/development only)
+  - `0 * * * *` - Every hour on the hour
+  - `0 0 * * *` - Once daily at midnight
 
 **Cost considerations:**
-- CRON schedules are free - they're just timers, not separate compute
-- The Container App runs 24/7 regardless of schedule (~$30-50/month)
-- Each run generates embeddings via Azure OpenAI (~$0.001 per run)
-- Smart change detection skips unchanged files (saves costs)
-- **Recommended for production:** `*/15 * * * *` balances responsiveness with costs (~$3-5/month in embeddings)
-- **For testing:** Use `*/2 * * * *` to see results faster, then change to `*/15 * * * *`
+
+  - CRON schedules are free - they're just timers, not separate compute
+  - The Container App runs 24/7 regardless of schedule (~$30-50/month)
+  - Each run generates embeddings via Azure OpenAI (~$0.001 per run)
+  - Smart change detection skips unchanged files (saves costs)
+  - **Recommended for production:** `*/15 * * * *` balances responsiveness with costs (~$3-5/month in embeddings)
+  - **For testing:** Use `*/2 * * * *` to see results faster, then change to `*/15 * * * *`
 
 ---
 
@@ -426,15 +440,17 @@ Click **Apply**.
 **Step 10: Wait for Initial Ingestion (2-3 min)**
 
 The data ingestion Container App runs the indexer job:
-- **On startup** (happens once when container starts)
-- **Every 15 minutes** (based on CRON schedule)
+
+  - **On startup** (happens once when container starts)
+  - **Every 15 minutes** (based on CRON schedule)
 
 **Option 1: Wait for next CRON run** (up to 15 minutes, or 2 minutes if you used `*/2 * * * *` for testing)
 
 **How it works:**
-- The Container App runs the indexer on startup (immediate first run)
-- Then runs on the CRON schedule you configured
-- CRON runs at the next matching time (e.g., if schedule is `*/15 * * * *`, next run is at :00, :15, :30, or :45)
+
+  - The Container App runs the indexer on startup (immediate first run)
+  - Then runs on the CRON schedule you configured
+  - CRON runs at the next matching time (e.g., if schedule is `*/15 * * * *`, next run is at :00, :15, :30, or :45)
 
 **Option 2: Force immediate ingestion by restarting the container:**
 
@@ -480,16 +496,18 @@ Get-Content run-log.json | ConvertFrom-Json | ConvertTo-Json -Depth 10
 ```
 
 **Look for:**
-- `"success": 3` (for queries)
-- `"success": 3` (for tables)
-- `"failed": 0`
-- `"skipped": 0` (first run - nothing skipped yet)
-- `"vectorsGenerated": 6` (embeddings created)
+
+  - `"success": 3` (for queries)
+  - `"success": 3` (for tables)
+  - `"failed": 0`
+  - `"skipped": 0` (first run - nothing skipped yet)
+  - `"vectorsGenerated": 6` (embeddings created)
 
 **On subsequent runs:**
-- Files with no changes will show `"skipped": 6` and `"candidates": 0`
-- Only new or modified files will be re-indexed
-- This smart change detection saves costs and time
+
+  - Files with no changes will show `"skipped": 6` and `"candidates": 0`
+  - Only new or modified files will be re-indexed
+  - This smart change detection saves costs and time
 
 ---
 
@@ -498,36 +516,45 @@ Get-Content run-log.json | ConvertFrom-Json | ConvertTo-Json -Depth 10
 **Navigate to your UI:** `https://ca-<suffix>-frontend.livelyglacier-<random>.eastus2.azurecontainerapps.io`
 
 **Try these questions:**
-1. "How many products are in the database?"
-2. "Show me the top 5 most expensive products"
-3. "What product categories exist?"
+
+  1. "How many products are in the database?"
+  2. "Show me the top 5 most expensive products"
+  3. "What product categories exist?"
 
 **Expected response:**
-- Natural language answer with data
-- Shows SQL query that was executed
-- Cites the datasource
+
+  - Natural language answer with data
+  - Shows SQL query that was executed
+  - Cites the datasource
 
 ---
 
+**Congratulations!** You've set up an automated NL2SQL ingestion pipeline.
 
 **What You Just Enabled 🪄**
-
-**Congratulations!** You've set up an automated NL2SQL ingestion pipeline. Your system now:
 
 **🧠 Automated Metadata Management**
 
 **`Change detection`** - Only re-indexes modified files (checks ETag and lastModified)
+
 **`Smart scheduling`** - Runs every 15 minutes, can be adjusted
+
 **`Startup sync`** - Runs once on container startup for immediate availability
+
 **`Detailed logging`** - Per-file and per-run logs in blob storage
+
 **`Scalable`** - Handles hundreds of tables and queries efficiently
 
 **🧩 Advanced Query Capabilities (Already working!)**
 
 **`Complex JOINs`** - "Show me orders with customer names and product details" automatically generates multi-table joins
+
 **`Aggregations`** - "What's the average order value by product category?" generates GROUP BY with AVG/SUM/COUNT
+
 **`Date filtering`** - "Show orders from last 30 days" uses DATEADD and date functions
+
 **`Subqueries`** - Handles nested queries when needed for complex business logic
+
 **`Pattern matching`** - "Find customers whose email contains 'adventure'" uses LIKE operators
 
 **🔐 Enabling Zero Trust Architecture**
@@ -535,10 +562,9 @@ Get-Content run-log.json | ConvertFrom-Json | ConvertTo-Json -Depth 10
 The guide used **SQL authentication** for simplicity, but production deployments support:
 
 **`Azure AD authentication`** - No passwords, just managed identities
-**`Private Endpoints`** - Database never exposed to internet
-**`VNet integration`** - Container Apps and SQL in same private network
-**`Conditional Access`** - MFA and device compliance requirements
 
+**`Private Endpoints`** - Database never exposed to internet
+
+**`VNet integration`** - Container Apps and SQL in same private network
 
 ---
-
