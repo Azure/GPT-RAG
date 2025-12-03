@@ -20,3 +20,9 @@
   background-color: #eef1f4;
   border-color: #c5ccd3;
 }
+
+.no-wrap code {
+  white-space: pre !important;
+  font-family: monospace !important;
+  font-size: 0.65rem;
+}

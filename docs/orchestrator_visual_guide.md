@@ -58,6 +58,8 @@ This section explores how the Single-Agent RAG Strategy orchestrates the entire 
 
 You will have noticed the use of the Factory Design Pattern (`AgentStrategyFactory`) for the various Strategies, ensuring that all of them comply with the same `BaseAgentStrategy` interface.
 For the sake of clarity, I have abstracted away the different roles of the `Orchestrator` class and the `Orchestrator` object.
+
+<div class="no-wrap">
 ```
 ------------------------------------------------------------------
 ┌────────────────────────────────────────────────────────────────┐
@@ -113,6 +115,7 @@ For the sake of clarity, I have abstracted away the different roles of the `Orch
 └────────────────┘ └──────────────┘  └─────────────────┘
 ------------------------------------------------------------------
 ```
+</div>
 
 The entry point for the selected Strategy is the method `agentic_strategy.initiate_agent_flow()`.
 

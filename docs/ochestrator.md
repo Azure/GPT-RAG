@@ -11,7 +11,7 @@ The Orchestrator is the core engine of GPT-RAG, managing multi-agent workflows a
 
 ## Getting Started
 
-New to the Orchestrator? Check out our [Orchestrator Visual Guide](orchestrator-visual-guide.md) for a visual walkthrough of the architecture and key components.
+New to the Orchestrator? Check out our [Orchestrator Visual Guide](orchestrator_visual_guide.md) for a visual walkthrough of the architecture and key components.
 
 ## Repository
 

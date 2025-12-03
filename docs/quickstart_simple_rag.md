@@ -4,17 +4,17 @@ Get document-based AI question answering working in **60 minutes** using **GPT-R
 
 This quickstart enables a public access solution which is for testing purposes only!
 
-## Prerequisites
+**Prerequisites**
 
 **You must have:**
-- Azure subscription with permissions to create resources
-- Azure Developer CLI (azd): 1.21.1+
-- Azure CLI (az): 2.79.0+
-- PowerShell 7.5+
-- Docker Desktop installed and running
-- Git & Python 3.11+
+    - Azure subscription with permissions to create resources
+    - Azure Developer CLI (azd): 1.21.1+
+    - Azure CLI (az): 2.79.0+
+    - PowerShell 7.5+
+    - Docker Desktop installed and running
+    - Git & Python 3.11+
 
-## What You'll Accomplish
+**What You'll Accomplish**
 
 By the end of this guide:
 - Deploy complete GPT-RAG infrastructure (~20 Azure resources)
@@ -27,7 +27,7 @@ By the end of this guide:
 
 ---
 
-## Step 1: Initialize GPT-RAG Project (5 min)
+**Step 1: Initialize GPT-RAG Project (5 min)**
 
 ```powershell
 # Create fresh directory
@@ -51,7 +51,7 @@ azd init -t azure/gpt-rag
 
 ---
 
-## Step 2: Authenticate Azure CLIs (2 min)
+**Step 2: Authenticate Azure CLIs (2 min)**
 
 ```powershell
 # Login to Azure CLI (yes, both required)
@@ -61,7 +61,7 @@ azd auth login
 
 ---
 
-## Step 3: Provision Infrastructure (30 min)
+**Step 3: Provision Infrastructure (30 min)**
 
 ```powershell
 azd provision
@@ -94,14 +94,14 @@ Resource prefix: y5sbzlaazfxok
 
 ---
 
-## Step 4: Start Docker and Deploy Services (35 min)
+**Step 4: Start Docker and Deploy Services (35 min)**
 
 **⚠️ CRITICAL:** Docker must be running before `azd deploy`!
 
-### A. Start Docker Desktop
+**A. Start Docker Desktop**
 
 
-### B. Deploy Services
+**B. Deploy Services**
 
 ```powershell
 azd deploy
@@ -133,9 +133,9 @@ azd deploy
 
 ---
 
-## Step 5: Upload Documents and Verify Indexing (10 min)
+**Step 5: Upload Documents and Verify Indexing (10 min)**
 
-### A. Upload Your Documents
+**A. Upload Your Documents**
 
 **Azure Portal → Storage accounts → st`<prefix>` → Containers → documents → Upload**
 
@@ -157,7 +157,7 @@ azd deploy
 6. Embeddings generated with text-embedding-3-large
 7. Chunks uploaded to AI Search index `ragindex-{prefix}`
 
-### B. Trigger Document Indexing
+**B. Trigger Document Indexing**
 
 The indexing service runs automatically:
 - **On container startup** (immediate first run)
@@ -175,7 +175,7 @@ The indexing service runs automatically:
 
 **Why restart?** The indexer runs on CRON schedule (hourly at :10 past). Restarting triggers it to run immediately instead of waiting up to an hour.
 
-### C. Verify Indexing Completed
+**C. Verify Indexing Completed**
 
 
 **Azure Portal → AI Search → srch-`<prefix>` → Indexes → ragindex-`<prefix>`**
@@ -184,18 +184,18 @@ The indexing service runs automatically:
 
 ---
 
-## Step 6: Configure AI Foundry Search Connection for Public Access RAG (5 min)
+**Step 6: Configure AI Foundry Search Connection for Public Access RAG (5 min)**
 
 **⚠️ CRITICAL STEP:** The deployment creates two AI Search services. You must configure AI Foundry to use the correct one for public access!
 
-### A. Why Two Search Services?
+**A. Why Two Search Services?**
 
 - **srch-`<prefix>`** - Main search service with your indexed documents (use this one!)
 - **srch-aif-`<prefix>`** - AI Foundry's empty search service (created by default, ignore)
 
 The orchestrator needs the connection ID for the main search service.
 
-### B. Add Search Connection in AI Foundry
+**B. Add Search Connection in AI Foundry**
 
 1. **Azure Portal → AI services → aif-`<prefix>` → Overview**
 2. Click the **"View in Azure AI Foundry"** link (opens ai.azure.com)
@@ -208,7 +208,7 @@ The orchestrator needs the connection ID for the main search service.
 9. **Connection name:** Use the resource name (e.g., `srchqitxxnnt4igs6`)
 10. Click **Save**
 
-### C. Copy Connection ID
+**C. Copy Connection ID**
 
 After saving, the connection details page shows the connection ID.
 
@@ -221,9 +221,9 @@ After saving, the connection details page shows the connection ID.
 
 ---
 
-## Step 7: Update App Configuration and Restart Orchestrator (5 min)
+**Step 7: Update App Configuration and Restart Orchestrator (5 min)**
 
-### A. Update App Configuration
+**A. Update App Configuration**
 
 **Azure Portal → App Configuration → appcs-`<prefix>` → Configuration explorer**
 
@@ -236,7 +236,7 @@ After saving, the connection details page shows the connection ID.
    - **Label:** `gpt-rag`
 6. Click **Apply** → Click **Save**
 
-### B. Restart Orchestrator
+**B. Restart Orchestrator**
 
 **Azure Portal → Container Apps → ca-`<prefix>`-orchestrator**
 
@@ -248,7 +248,7 @@ After saving, the connection details page shows the connection ID.
 
 ---
 
-## Step 8: Access Frontend and Test! (3 min)
+**Step 8: Access Frontend and Test! (3 min)**
 
 **Azure Portal → Container Apps → ca-`<prefix>`-frontend → Overview**
 
@@ -267,9 +267,9 @@ Copy the **Application URL** and open it in your browser. You should see the GPT
 
 ---
 
-## Troubleshooting Common Issues
+**Troubleshooting Common Issues**
 
-### Issue 1: Quota Exceeded Errors
+**Issue 1: Quota Exceeded Errors**
 
 **Error during provision:**
 ```
@@ -344,7 +344,7 @@ azd env set AZURE_LOCATION eastus
 azd provision
 ```
 
-### Issue 2: "ServiceInvocationException" Error
+**Issue 2: "ServiceInvocationException" Error**
 
 **Error message:**
 ```
@@ -361,7 +361,7 @@ ServiceInvocationException: Error at: project_client.agents.threads.create()
 
 **Note:** This is a known issue with the current GPT-RAG template. The AI Foundry agent infrastructure may need manual configuration.
 
-### Issue 3: No Documents Indexed
+**Issue 3: No Documents Indexed**
 
 **Symptoms:**
 - AI Search index shows 0 documents
@@ -377,11 +377,11 @@ ServiceInvocationException: Error at: project_client.agents.threads.create()
 
 ---
 
-## What You Just Enabled 🪄
+**What You Just Enabled 🪄**
 
 **Congratulations!** You've deployed a production-ready RAG system. Your solution now provides:
 
-### 🧠 Intelligent Document Understanding
+**🧠 Intelligent Document Understanding**
 
 **`Semantic chunking`** - Documents split into meaningful segments (not arbitrary 512-char blocks)
 **`Vector embeddings`** - text-embedding-3-large generates 3072-dimensional embeddings
@@ -389,14 +389,14 @@ ServiceInvocationException: Error at: project_client.agents.threads.create()
 **`OCR extraction`** - Azure Document Intelligence handles PDFs, images, scanned documents
 **`Multi-format support`** - PDF, Word, PowerPoint, Excel, text, images, HTML
 
-### 🎯 Grounded Response Generation
+**🎯 Grounded Response Generation**
 
 **`Retrieval-Augmented Generation (RAG)`** - GPT-4o generates answers using retrieved document chunks
 **`Citation tracking`** - Every answer links back to source documents and specific passages
 **`Relevance filtering`** - Only high-confidence matches are sent to GPT-4o (reduces hallucination)
 **`Context windowing`** - Smart selection of most relevant chunks (handles long documents)
 
-### 🔄 Automated Ingestion Pipeline
+**🔄 Automated Ingestion Pipeline**
 
 **`Change detection`** - Only re-indexes modified files (checks ETag and lastModified)
 **`CRON scheduling`** - Runs hourly at :10 past (configurable)
@@ -404,7 +404,7 @@ ServiceInvocationException: Error at: project_client.agents.threads.create()
 **`Detailed logging`** - Per-file and per-run logs in blob storage
 **`Error handling`** - Failed files logged without blocking successful files
 
-### 🔐 Enterprise-Ready Architecture
+**🔐 Enterprise-Ready Architecture**
 
 **`Managed identities`** - No passwords stored, secure service-to-service auth
 **`Role-based access`** - Uses Azure RBAC for all resources
@@ -413,7 +413,7 @@ ServiceInvocationException: Error at: project_client.agents.threads.create()
 **`Monitoring`** - Log Analytics and Application Insights built-in
 **`Scalability`** - Container Apps auto-scale based on load
 
-### 🎨 User-Friendly Interface
+**🎨 User-Friendly Interface**
 
 **`React frontend`** - Modern, responsive chat interface
 **`Real-time responses`** - Streaming GPT-4o responses (see text appear live)

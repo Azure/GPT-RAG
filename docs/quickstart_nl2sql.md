@@ -4,14 +4,14 @@ Get public access natural language querying of your Azure SQL Database working i
 
 This quickstart enables a public access solution which is for testing purposes only!
 
-## Prerequisites
+**Prerequisites**
 
 **You must have:**
 - GPT-RAG solution deployed (`azd provision` and `azd deploy` completed)
 - Azure subscription with permissions to create SQL resources
 - Access to Azure Portal
 
-## What You'll Accomplish
+**What You'll Accomplish**
 
 By the end of this guide:
 - Create Azure SQL Database with AdventureWorksLT sample data
@@ -25,9 +25,9 @@ By the end of this guide:
 
 ---
 
-## Step 1: Create Azure SQL Database (5-10 min)
+**Step 1: Create Azure SQL Database (5-10 min)**
 
-### A. Create SQL Server
+**A. Create SQL Server**
 
 **Azure Portal → Create a resource → SQL Database**
 
@@ -53,7 +53,7 @@ By the end of this guide:
 4. **Backup storage redundancy:**
    - Select **Locally-redundant backup storage** (cheapest)
 
-### B. Configure Networking
+**B. Configure Networking**
 
 5. **Networking tab:**
    - **Connectivity method:** **Public endpoint**
@@ -63,7 +63,7 @@ By the end of this guide:
    - **Connection policy:** Default
    - **Encrypted connections:** TLS 1.2 (default)
 
-### C. Add Sample Data
+**C. Add Sample Data**
 
 6. **Additional settings tab:**
    - **Use existing data:** **Sample (AdventureWorksLT)**
@@ -74,7 +74,7 @@ By the end of this guide:
 
 ⏳ **Wait 3-5 minutes for deployment to complete.**
 
-### D. Verify Firewall Configuration (Post-Deployment)
+**D. Verify Firewall Configuration (Post-Deployment)**
 
 After deployment completes:
 
@@ -90,7 +90,7 @@ Verify these settings:
 
 The "Allow Azure services" checkbox creates a special firewall rule (`0.0.0.0 - 0.0.0.0`) that permits any Azure service in your subscription to connect.
 
-### E. Test Connection
+**E. Test Connection**
 
 **Using Azure Portal Query Editor:**
 
@@ -106,7 +106,7 @@ ORDER BY ListPrice DESC
 
 **If you see results, your database is ready!**
 
-### F. Gather Connection Info
+**F. Gather Connection Info**
 
 Save these details (you'll need them later):
 
@@ -119,7 +119,7 @@ Password: <your-password>
 
 ---
 
-## Step 2: Find Your GPT-RAG Resources (3 min)
+**Step 2: Find Your GPT-RAG Resources (3 min)**
 
 Locate these in your resource group (they have your deployment suffix):
 
@@ -142,7 +142,7 @@ az resource list -g <your-rg> --query "[].name" -o table
 
 ---
 
-## Step 3: Store Password in Key Vault (3 min)
+**Step 3: Store Password in Key Vault (3 min)**
 
 **CRITICAL:** Secret name MUST be `{datasource-id}-secret`
 
@@ -167,7 +167,7 @@ az keyvault secret show `
 
 ---
 
-## Step 4: Grant Container App Access to Key Vault (2 min)
+**Step 4: Grant Container App Access to Key Vault (2 min)**
 
 ```powershell
 # Get orchestrator's managed identity
@@ -185,7 +185,7 @@ az role assignment create `
 
 ---
 
-## Step 5: Register Database in Cosmos DB (3 min)
+**Step 5: Register Database in Cosmos DB (3 min)**
 
 **Azure Portal → Cosmos DB → cosmos-`<suffix>` → Data Explorer → ragdata database → datasources container → New Item**
 
@@ -220,7 +220,7 @@ Click **Save**.
 
 ---
 
-## Step 6: Create Metadata JSON Files (5 min)
+**Step 6: Create Metadata JSON Files (5 min)**
 
 **What you'll do in this step:**
 - Create JSON files on your **local machine** (in your working directory)
@@ -228,7 +228,7 @@ Click **Save**.
 - In **Step 7**, you'll upload these files to Azure Blob Storage
 - The automated ingestion system will then index them into AI Search
 
-### A. Create Local Folder Structure
+**A. Create Local Folder Structure**
 
 On your local machine, create folders to organize the metadata files:
 
@@ -238,7 +238,7 @@ mkdir blob-upload\queries
 mkdir blob-upload\tables
 ```
 
-### B. Create Example Query Files
+**B. Create Example Query Files**
 
 **Why example queries?** They help the AI understand your database patterns and generate better SQL. The system uses these as few-shot examples when translating natural language to SQL.
 
@@ -283,7 +283,7 @@ Create `blob-upload\queries\product_categories.json`:
 }
 ```
 
-### C. Create Table Metadata Files
+**C. Create Table Metadata Files**
 
 **Why table metadata?** 
 
@@ -336,7 +336,7 @@ Create `blob-upload\tables\saleslt_customer.json`:
 
 ---
 
-## Step 7: Upload Files to Blob Storage (3 min)
+**Step 7: Upload Files to Blob Storage (3 min)**
 
 **What this step does:**
 - Uploads the local JSON files you created in Step 6 to Azure Blob Storage
@@ -376,7 +376,7 @@ tables/saleslt_customer.json
 
 ---
 
-## Step 8: Enable Automated Ingestion (3 min)
+**Step 8: Enable Automated Ingestion (3 min)**
 
 **Azure Portal → App Configuration → appcs-`<suffix>` → Configuration explorer**
 
@@ -412,7 +412,7 @@ Click **Apply**.
 
 ---
 
-## Step 9: Enable NL2SQL Strategy (2 min)
+**Step 9: Enable NL2SQL Strategy (2 min)**
 
 **Azure Portal → App Configuration → appcs-`<suffix>` → Configuration explorer**
 
@@ -423,7 +423,7 @@ Click **Apply**.
 
 ---
 
-## Step 10: Wait for Initial Ingestion (2-3 min)
+**Step 10: Wait for Initial Ingestion (2-3 min)**
 
 The data ingestion Container App runs the indexer job:
 - **On startup** (happens once when container starts)
@@ -493,7 +493,7 @@ Get-Content run-log.json | ConvertFrom-Json | ConvertTo-Json -Depth 10
 
 ---
 
-## Step 11: Test It! (2 min)
+**Step 11: Test It! (2 min)**
 
 **Navigate to your UI:** `https://ca-<suffix>-frontend.livelyglacier-<random>.eastus2.azurecontainerapps.io`
 
@@ -510,11 +510,11 @@ Get-Content run-log.json | ConvertFrom-Json | ConvertTo-Json -Depth 10
 ---
 
 
-## What You Just Enabled 🪄
+**What You Just Enabled 🪄**
 
 **Congratulations!** You've set up an automated NL2SQL ingestion pipeline. Your system now:
 
-### 🧠 Automated Metadata Management
+**🧠 Automated Metadata Management**
 
 **`Change detection`** - Only re-indexes modified files (checks ETag and lastModified)
 **`Smart scheduling`** - Runs every 15 minutes, can be adjusted
@@ -522,7 +522,7 @@ Get-Content run-log.json | ConvertFrom-Json | ConvertTo-Json -Depth 10
 **`Detailed logging`** - Per-file and per-run logs in blob storage
 **`Scalable`** - Handles hundreds of tables and queries efficiently
 
-### 🧩 Advanced Query Capabilities (Already working!)
+**🧩 Advanced Query Capabilities (Already working!)**
 
 **`Complex JOINs`** - "Show me orders with customer names and product details" automatically generates multi-table joins
 **`Aggregations`** - "What's the average order value by product category?" generates GROUP BY with AVG/SUM/COUNT
@@ -530,7 +530,7 @@ Get-Content run-log.json | ConvertFrom-Json | ConvertTo-Json -Depth 10
 **`Subqueries`** - Handles nested queries when needed for complex business logic
 **`Pattern matching`** - "Find customers whose email contains 'adventure'" uses LIKE operators
 
-### 🔐 Enabling Zero Trust Architecture
+**🔐 Enabling Zero Trust Architecture**
 
 The guide used **SQL authentication** for simplicity, but production deployments support:
 
