@@ -19,7 +19,7 @@ theme:
     - navigation.top
 plugins:
   - search
-  - macros
+  # - macros
 markdown_extensions:
   - admonition
   - attr_list
@@ -32,6 +32,9 @@ nav:
   - Home: index.md
   - What's New: whatisnew.md
   - Deployment Guide: deploy.md
+  - Quick Start Guides:
+    - Simple RAG: quickstart_simple_rag.md
+    - NL2SQL: quickstart_nl2sql.md
   - Architecture:
     - Overview: architecture.md
   - Services:
