@@ -44,7 +44,7 @@ For detailed setup instructions, including app registration, permissions, and da
 
 The indexer uses **three tiers of parallelism** to balance speed and service limits:
 
-### 1. Collection Discovery (Unlimited Parallelism)
+### 1. Collection Discovery (All Lists in Parallel)
 
 <div class="no-wrap">
 ```
@@ -64,7 +64,7 @@ The indexer uses **three tiers of parallelism** to balance speed and service lim
 </div>
 
 
-### 2. Item Processing (Controlled: ≤ 8 Workers)
+### 2. Item Processing (Controlled: ≤ 4 Workers)
 
 <div class="no-wrap">
 ```
@@ -104,7 +104,7 @@ The indexer uses **three tiers of parallelism** to balance speed and service lim
 **Why this design?**
 
 - **Unlimited collections**: Graph API paging is fast and cheap.
-- **8 item workers**: Balances SharePoint/AI Search load with throughput.
+- **4 item workers**: Balances SharePoint/AI Search load with throughput.
 - **2 embedding slots**: Prevents Azure OpenAI rate limits (429 errors) while keeping other workers busy with downloads, freshness checks, and chunking.
     
     

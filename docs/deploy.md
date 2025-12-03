@@ -98,7 +98,7 @@ Using the Jumpbox VM
 
    ```powershell
    az login --identity
-   azd auth login --with-managed-identity
+   azd auth login --managed-identity
    ```
 
    > Add `--tenant` for `az` or `--tenant-id` for `azd` if you want a specific tenant.
