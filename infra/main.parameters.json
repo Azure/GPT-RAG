@@ -22,7 +22,7 @@
     "aiFoundryCosmosDBAccountResourceId":  { "value": null },
     
     "deployAiFoundry":                      { "value": "true" },
-    "deployAiFoundrySubnet":                { "value": "false" },
+    "deployAiFoundrySubnet":                { "value": "true" },
     "deployAppConfig":                      { "value": "true" },
     "deployAppInsights":                    { "value": "true" },
     "deployCosmosDb":                       { "value": "true" },
