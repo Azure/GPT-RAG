@@ -19,7 +19,7 @@ theme:
     - navigation.top
 plugins:
   - search
-  # - macros
+  - macros
 markdown_extensions:
   - admonition
   - attr_list
