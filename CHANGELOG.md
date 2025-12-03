@@ -3,13 +3,17 @@
 All notable changes to this project will be documented in this file.  
 This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to [Semantic Versioning](https://semver.org/).
 
+## [v2.2.5] – 2025-12-02
+### Fixed
+- Fixed Issue [#406](https://github.com/Azure/GPT-RAG/issues/406) by updating networking and private endpoint configuration to prevent the `cosmos_vnet_blocked` error in Cosmos DB private-only setups.
+### Changed
+- Automated the creation and registration of the Azure AI Search connection, removing the need for the previous manual workaround.
 
 ## [v2.2.4] – 2025-11-26
 ### Fixed
 - Fixed a bug in data ingestion component where the Blob storage ingestion process was re-indexing unchanged files when AI Search index had more than 1,000 chunks. Fixed in gpt-rag-ingestion v2.0.6.
 ### Changed
 - Small update in `scripts/postProvision.sh` to make the Container Apps API Key check more robust by always converting the `USE_CAPP_API_KEY` variable to lowercase, even when it is unset.
-
 
 
 ## [v2.2.3] – 2025-11-15
