@@ -466,8 +466,6 @@ var baseSubnets = [
         serviceEndpoints: [
           'Microsoft.CognitiveServices'
         ]
-        // privateEndpointNetworkPolicies: 'Disabled'
-        // privateLinkServiceNetworkPolicies: 'Enabled'
       }
       {
         name: peSubnetName
@@ -522,7 +520,8 @@ var baseSubnets = [
         delegation: ''
         serviceEndpoints : []
       }
-    ]
+]
+
 
 // Conditional subnet for API Management
 var apimSubnet = deployApim ? [
@@ -927,7 +926,7 @@ module assignCognitiveServicesContributorTestVm 'modules/security/resource-role-
 
 
 // AI Foundry Account - Cognitive Services OpenAI User -> TestVm (for app testing)
-module assignAIFoundryCogServOAIUserTestVm  'modules/security/resource-role-assignment.bicep' = if (deployAiFoundry) {
+module assignAIFoundryCogServOAIUserTestVm  'modules/security/resource-role-assignment.bicep' = if (deployAiFoundry && deployVM && _networkIsolation) {
   name: 'assignAIFoundryCogServOAIUserTestVm'
   params: {
     name: 'assignAIFoundryCogServOAIUserTestVm'
@@ -1553,6 +1552,7 @@ module aiFoundry 'modules/ai-foundry/main.bicep' = if (deployAiFoundry) {
   ]
 }
 
+
 var varPeSubnetId = empty(existingVnetResourceId!)
   ? '${virtualNetworkResourceId}/subnets/pe-subnet'
   : '${existingVnetResourceId!}/subnets/pe-subnet'
@@ -1614,6 +1614,62 @@ module bingSearchConnection 'modules/bing-search/main.bicep' = if (deployAiFound
   }
   dependsOn: [
     aiFoundry!
+  ]
+}
+
+// AI Foundry Connections
+//////////////////////////////////////////////////////////////////////////
+
+// Bing Search Connection
+module aiFoundryBingConnection 'modules/ai-foundry/connection-bing-search-tool.bicep' = if (deployAiFoundry && deployGroundingWithBing) {
+  name: '${bingSearchName}-connection'
+  params: {
+    account_name: aiFoundry!.outputs.aiServicesName
+    project_name: aiFoundry!.outputs.aiProjectName
+    bingSearchName: bingSearchName
+  }
+  dependsOn: [
+    aiFoundry!
+  ]
+}
+
+// AI Search Connection
+module aiFoundryConnectionSearch 'modules/ai-foundry/connection-ai-search.bicep' = if (deployAiFoundry && deploySearchService) {
+  name: 'connection-ai-search-${resourceToken}'
+  params: {
+    aiFoundryName: aiFoundry!.outputs.aiServicesName
+    aiProjectName: aiFoundry!.outputs.aiProjectName
+    connectedResourceName: searchService!.outputs.name
+  }
+  dependsOn: [
+    aiFoundry!
+    searchService!
+  ]
+}
+
+// Application Insights Connection
+module aiFoundryConnectionInsights 'modules/ai-foundry/connection-application-insights.bicep' = if (deployAiFoundry && deployAppInsights) {
+  name: 'connection-appinsights-${resourceToken}'
+  params: {
+    aiFoundryName: aiFoundry!.outputs.aiServicesName
+    connectedResourceName: appInsights!.outputs.name
+  }
+  dependsOn: [
+    aiFoundry!
+    appInsights!
+  ]
+}
+
+// Storage Account Connection
+module aiFoundryConnectionStorage 'modules/ai-foundry/connection-storage-account.bicep' = if (deployAiFoundry && deployStorageAccount) {
+  name: 'connection-storage-account-${resourceToken}'
+  params: {
+    aiFoundryName: aiFoundry!.outputs.aiServicesName
+    connectedResourceName: storageAccount!.outputs.name
+  }
+  dependsOn: [
+    aiFoundry!
+    storageAccount!
   ]
 }
 
