@@ -1,8 +1,22 @@
 # Blob Data Source
 
-The **Blob Data Source** ingests documents from Azure Blob Storage into Azure AI Search and keeps the index synchronized when files are updated or removed.
+The **Blob Data Source** ingests documents from the **`documents` container** in your Azure Storage Account into Azure AI Search and keeps the index synchronized when files are updated or removed. It is designed for production-scale document processing with incremental updates, smart freshness detection, and automated cleanup.
+
+## How it Works
+
+The Blob Data Source operates through **two independent jobs** that can be scheduled separately for optimal resource usage and data freshness.
+
+**Indexing job** (`blob-storage-indexer`) scans the configured blob container (optionally filtered by `BLOB_PREFIX`) and processes documents into searchable chunks. It uses **smart freshness detection** by comparing each blob's `last_modified` timestamp with the indexed version, skipping unchanged files to save processing time and costs. For each new or modified file, the indexer downloads the blob, chunks it using Azure Document Intelligence, deletes any existing chunks for that file (by `parent_id`), and uploads new chunks with stable, search-safe IDs. Each chunk document sets `source = "blob"` to enable cleanup operations, and when available in blob metadata, includes `metadata_security_id` for security trimming scenarios.
+
+**Purging job** (`blob-storage-purger`) maintains index hygiene by removing orphaned documents. It compares parent documents in blob storage with parent documents in the AI Search index (where `source == "blob"`), identifies chunks belonging to files that no longer exist in storage, and deletes them in batches. The job waits briefly after deletion to ensure accurate document counts, as Azure AI Search uses eventual consistency for index statistics.
+
+**Files are processed in parallel** using a configurable semaphore (`INDEXER_MAX_CONCURRENCY`, default: 4) to balance throughput with service limits. Each file goes through download → security metadata extraction → document chunking → chunk conversion → batch upload. Batch uploads use `INDEXER_BATCH_SIZE` (default: 500) to optimize AI Search API calls while staying within request size limits.
+
+**Supported formats** include PDF, Word (.docx), PowerPoint (.pptx), Excel (.xlsx), text (.txt, .md), images (.jpg, .png, .bmp, .tiff), and HTML. OCR extraction is performed automatically for PDFs and images using Azure Document Intelligence.
 
 ## Ingestion Flow
+
+**Indexing Job**
 
 <div class="no-wrap">
 ```
@@ -71,23 +85,8 @@ The **Blob Data Source** ingests documents from Azure Blob Storage into Azure AI
 │  └──────────────────────┘  └──────────────────────┘  └──────────────────────┘  │
 │                                                                                │
 └────────────────────────────────────────────────────────────────────────────────┘
-
-```    
-
-## How it Works
-
-* **Indexing**
-    * Scans the configured blob container (optionally filtered by `BLOB_PREFIX`)
-    * Skips unchanged files
-    * For each changed file:
-          * Replaces existing chunks (by `parent_id`)
-          * Uploads new chunks with stable, search-safe IDs
-    * Each chunk document sets `source = "blob"` and, when available in blob metadata, includes `metadata_security_id`
-
-* **Purging**
-    * Compares storage parents with index parents (`source == "blob"`)
-    * Deletes chunk documents for parents no longer present in storage
-    * Waits briefly after deletion to ensure accurate document counts (Azure AI Search uses eventual consistency)
+```
+</div>
 
 ## Scheduling
 
@@ -112,7 +111,8 @@ On startup, if a CRON is configured, the corresponding job is scheduled and also
 * `SEARCH_SERVICE_QUERY_ENDPOINT` and `SEARCH_RAG_INDEX_NAME`: target index
 * `BLOB_PREFIX` *(optional)*: restricts the scan scope
 * `JOBS_LOG_CONTAINER` *(default: jobs)*: container for logs
-* `INDEXER_MAX_CONCURRENCY` and `INDEXER_BATCH_SIZE` *(optional)*: performance tuning; defaults: `4` (concurrency) and `500` (batch size)
+* `INDEXER_MAX_CONCURRENCY`: concurrency, defaults: `4`.
+* `INDEXER_BATCH_SIZE`: batch size, defaults: `500`
 
 >   
 > `INDEXER_MAX_CONCURRENCY` controls how many files are processed in parallel (download → chunk → upload). `INDEXER_BATCH_SIZE` controls how many chunk documents are sent in each upload call to Azure AI Search. Increase these to raise throughput, but watch for throttling (HTTP 429), timeouts, and memory usage; lower them if you see retries or instability. The default batch size (500) follows common guidance to keep batches reasonable (typically ≤ 1000).
@@ -133,7 +133,7 @@ Both jobs write logs to the configured jobs container. Logs are grouped by job t
 
 The blob storage indexer emits structured Application Insights events (`RUN-*`, `ITEM-*`) with JSON payloads embedded in the `message` field.
 
-### Latest Job Runs
+**Latest Job Runs**
 
 View recent indexing jobs with key metrics:
 
@@ -156,9 +156,7 @@ Logs
 | order by timestamp desc
 ```
 
-> If nothing returns, run `Logs | where message contains "blob-storage-indexer" | take 20` to inspect the raw log format.
-
-### Purge Summary Stats
+**Purge Summary Stats**
 
 Inspect the most recent purge runs and their cleanup metrics:
 
@@ -184,7 +182,7 @@ Logs
 | order by timestamp desc
 ```
 
-### Items in Specific Indexer Run
+**Items in Specific Indexer Run**
 
 List all files processed during a particular run:
 
@@ -205,7 +203,7 @@ Logs
 | order by timestamp desc
 ```
 
-### File Indexing History
+**File Indexing History**
 
 Track processing history for a specific file:
 
@@ -226,7 +224,7 @@ Logs
 | order by timestamp desc
 ```
 
-### Recent Indexer Errors
+**Recent Indexer Errors**
 
 View recent warnings and errors:
 

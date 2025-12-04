@@ -2,6 +2,19 @@
 
 The SharePoint connector keeps Azure AI Search synchronized with both structured list data and rich documents stored in SharePoint Online. It is designed for production-scale ingestion jobs where resiliency, incremental freshness, and search-ready chunking matter.
 
+## How it Works
+
+The SharePoint connector ingests both **generic lists** (structured metadata) and **document libraries** (files like PDFs, Word, PowerPoint) into Azure AI Search. It uses **smart freshness detection** by comparing SharePoint's last modified timestamp with the indexed version, skipping unchanged items to save processing time. The connector processes all collections in parallel but controls worker concurrency and OpenAI API calls to avoid rate limits.
+
+**Generic lists** are indexed by reading item fields from Microsoft Graph API. You can control which fields get embedded using the optional `includeFields` configuration. Lookup columns are automatically resolved and cached per list, except for hidden system lists like `AppPrincipals`, `UserInfo`, or taxonomy stores. List item attachments are currently **not** downloaded.
+
+**Document libraries** download files (default: `pdf`, `docx`, `pptx`) and chunk them using Azure Document Intelligence. Each chunk gets a zero-based ID (`c00000`, `c00001`, etc.) which enables accurate freshness checks—if SharePoint's `lastModifiedDateTime` hasn't changed since the last index run, the file is skipped without reprocessing.
+
+**Permissions** are handled by calling `get_item_permission_object_ids` using Graph **beta** `/permissions` endpoint to capture explicit Entra user/group IDs for each item. Only GUID-backed identities (users, groups, app registrations, devices) are stored.
+
+For detailed setup instructions, including app registration, permissions, and data source configuration, see the [SharePoint Connector Setup Guide](howto_sharepoint_connector.md).
+
+
 ## Ingestion Flow
 
 <div class="no-wrap">
@@ -27,7 +40,7 @@ The SharePoint connector keeps Azure AI Search synchronized with both structured
 │  │  │  • Custom Fields │              │  • Office Files (docx/pptx)  │     │   │
 │  │  │  • Lookup Fields │              │  • PDFs                      │     │   │
 │  │  │  • List Items    │              │  • Binary Content            │     │   │
-│  │  └─────────┬────────┘              └──────────┬───────────────────┘     │   │
+│  │  └─────────┬────────┘              └───────────┬──────────────────┘     │   │
 │  │            │                                   │                        │   │
 │  └────────────┼───────────────────────────────────┼────────────────────────┘   │
 │               │                                   │                            │
@@ -70,52 +83,15 @@ The SharePoint connector keeps Azure AI Search synchronized with both structured
 │  └──────────────────────┘  └──────────────────────┘  └──────────────────────┘  │
 │                                                                                │
 └────────────────────────────────────────────────────────────────────────────────┘
-
 ```
-
-## Why This Connector
-
-- **Unified coverage** – Mix generic lists (metadata-driven knowledge) and document libraries (files) in the same run.
-- **Smart freshness** – Per-item timestamps (1 s tolerance) avoid reprocessing unchanged bodies or files.
-- **Parallel but safe** – Unlimited collection discovery with controlled workers and AOAI throttling maximizes throughput.
-- **Document-first search** – Files are chunked with Document Intelligence, embeddings generated, and zero-based chunk IDs ensure incremental updates compare correctly.
-- **Security trimming** – Each item resolves Microsoft Graph permissions and stores Entra object IDs for search filtering.
-- **Operational insight** – Detailed run summaries (`documentLibraryStats`, `itemsDiscovered`, ...) plus optional per-item blob logs.
-
-Choose this connector when:
-
-- SharePoint is the source of truth for policies, contracts, or curated knowledge lists.
-- You need incremental crawls several times a day without flooding Azure OpenAI or AI Search.
-- Governance requires honoring SharePoint ACLs inside the search index.
-
-
-## What Gets Ingested
-
-### Generic Lists
-- Item fields are read from Graph (`fields` payload).
-- Optional `includeFields` controls what is embedded.
-- Lookup columns are resolved (cached per list) unless they target hidden system lists (e.g., `AppPrincipals`, `UserInfo`, taxonomy caches).
-- Attachments in generic lists are **not** downloaded.
-
-### Document Libraries
-- Files (default extensions: `pdf, docx, pptx`) are downloaded and chunked through Document Intelligence.
-- Chunk IDs now start at 0, enabling `_get_body_lastmod_by_id` to detect unchanged files accurately.
-- Freshness compares SharePoint `lastModifiedDateTime` vs. the indexed parent; stale files land in `documentLibraryStats.skippedNotNewer`.
-
-### Permissions
-- Each item calls `get_item_permission_object_ids` (Graph **beta** `/permissions`) to capture explicit Entra user/group IDs.
-- Only GUID-backed identities (users/groups/app registrations/devices) are stored.
-
-## Configuration
-
-For detailed setup instructions, including app registration, permissions, and data source configuration, see the [SharePoint Connector Setup Guide](howto_sharepoint_connector.md).
+</div>
 
 
 ## Processing Pipeline
 
 The indexer uses **three tiers of parallelism** to balance speed and service limits:
 
-### 1. Collection Discovery (All Lists in Parallel)
+**1. Collection Discovery (All Lists in Parallel)**
 
 <div class="no-wrap">
 ```
@@ -135,7 +111,7 @@ The indexer uses **three tiers of parallelism** to balance speed and service lim
 </div>
 
 
-### 2. Item Processing (Controlled: ≤ 4 Workers)
+**2. Item Processing (Controlled: ≤ 4 Workers)**
 
 <div class="no-wrap">
 ```
@@ -155,7 +131,7 @@ The indexer uses **three tiers of parallelism** to balance speed and service lim
 ```
 </div>
 
-### 3. Embedding Generation (Throttled: ≤ 2 Concurrent)
+**3. Embedding Generation (Throttled: ≤ 2 Concurrent)**
 
 <div class="no-wrap">
 ```
@@ -171,15 +147,8 @@ The indexer uses **three tiers of parallelism** to balance speed and service lim
     (workers skip this if freshness = unchanged)
 ```
 </div>
-
-**Why this design?**
-
-- **Unlimited collections**: Graph API paging is fast and cheap.
-- **4 item workers**: Balances SharePoint/AI Search load with throughput.
-- **2 embedding slots**: Prevents Azure OpenAI rate limits (429 errors) while keeping other workers busy with downloads, freshness checks, and chunking.
-    
-    
-### Parallelism At a Glance
+  
+**Parallelism At a Glance**
 
 | Layer | Control | Default | Notes |
 |-------|---------|---------|-------|
@@ -190,7 +159,7 @@ The indexer uses **three tiers of parallelism** to balance speed and service lim
 | Collection timeout | `asyncio.wait_for` | 7200 s | Cancels stuck lists.
 
 
-## Freshness & Deduplication
+**Freshness & Deduplication**
 
 - **Body documents (generic lists)**: Fetches chunk `c00000` from the index. If SharePoint's `Modified` timestamp isn't newer, the item is skipped (`skippedNoChange`) without reprocessing.
 - **Document library files**: Each file gets a parent key with the file name; chunk `0` stores the file's last modified time. Unchanged files increment `documentLibraryStats.skippedNotNewer`.
@@ -204,38 +173,32 @@ The indexer uses **three tiers of parallelism** to balance speed and service lim
 | Concurrency | `INDEXER_MAX_CONCURRENCY` | 4 | Item workers across all lists.
 |  | `AOAI_MAX_CONCURRENCY` | 2 | Embedding throttle.
 |  | `INDEXER_BATCH_SIZE` | 500 | Upload/delete batch size in AI Search.
-| Timeouts | `INDEXER_ITEM_TIMEOUT_SECONDS` | 600 | Per-item budget.
-|  | `LIST_GATHER_TIMEOUT_SECONDS` | 7200 | Per-list budget.
-|  | `HTTP_TOTAL_TIMEOUT_SECONDS` | 120 | Graph calls.
-|  | `BLOB_OP_TIMEOUT_SECONDS` | 20 | Blob writes.
-| Retries | `AOAI_BACKOFF_MAX_SECONDS` | 60 | Max wait between AOAI retries.
-|  | `AOAI_MAX_RATE_LIMIT_ATTEMPTS` | 8 | Rate limit (429) retries for embeddings.
-|  | `AOAI_MAX_TRANSIENT_ATTEMPTS` | 8 | Network/timeout retries for embeddings.
-| Documents | `SHAREPOINT_FILES_FORMAT` | `pdf,docx,pptx` | Allowed extensions.
+| Timeouts | `INDEXER_ITEM_TIMEOUT_SECONDS` | 600 | Per-item budget. Cancels stuck workers.
+|  | `LIST_GATHER_TIMEOUT_SECONDS` | 7200 | Per-list budget. Aborts entire list if exceeded.
+|  | `HTTP_TOTAL_TIMEOUT_SECONDS` | 120 | Graph API calls timeout.
+|  | `BLOB_OP_TIMEOUT_SECONDS` | 20 | Blob storage writes timeout.
+| Retries | `AOAI_BACKOFF_MAX_SECONDS` | 60 | Max wait between AOAI retries (exponential backoff + jitter).
+|  | `AOAI_MAX_RATE_LIMIT_ATTEMPTS` | 8 | Rate limit (429) retries for embeddings. Respects `Retry-After` headers.
+|  | `AOAI_MAX_TRANSIENT_ATTEMPTS` | 8 | Network/timeout retries for embeddings. Fatal errors bubble immediately.
+|  | `GRAPH_RETRY_ATTEMPTS` | 6 | Microsoft Graph GET retries for throttling/transient failures. Max 30s backoff.
+|  | `SEARCH_RETRY_ATTEMPTS` | 8 | Azure AI Search upload/delete retries (1s → 30s backoff). Honors `Retry-After`.
+| Documents | `SHAREPOINT_FILES_FORMAT` | `pdf,docx,pptx` | Allowed file extensions for document libraries.
 | Logging | `JOBS_LOG_CONTAINER` | `jobs` | Blob container for logs.
 |  | `DISABLE_STORAGE_LOGS` | unset | Set to `true/1` to skip blob logging.
 
-> Tune `AOAI_MAX_CONCURRENCY` only if you confirmed higher TPM quotas. If Graph throttles (429), reduce `INDEXER_MAX_CONCURRENCY`.
+> **Tuning notes**: Increase `AOAI_MAX_CONCURRENCY` only if you confirmed higher TPM quotas. If Graph throttles (429), reduce `INDEXER_MAX_CONCURRENCY`. Document Intelligence chunker performs best-effort retries internally; failed items (e.g., 503 errors) can be retried on next run.
 
 
-## Error Handling & Retries
-
-- **Azure OpenAI**: Rate limit errors (429) retry up to `AOAI_MAX_RATE_LIMIT_ATTEMPTS` (default: 8) respecting `Retry-After` headers; transient errors (network/timeout) retry up to `AOAI_MAX_TRANSIENT_ATTEMPTS` (default: 8) with exponential backoff + jitter; fatal errors bubble immediately.
-- **Azure AI Search**: Upload/delete operations retry up to eight times (1 s → 30 s backoff) and honor `Retry-After`.
-- **Microsoft Graph**: `GET` helper retries 6 times for throttling or transient failures, max 30 s backoff; client errors surface immediately.
-- **Document Intelligence**: Chunker performs best-effort retries internally; if it fails (e.g., 503), the item is marked failed and can be retried on the next job run.
-- **Timeouts**: Item-level timeouts cancel stuck workers; collection timeout aborts the entire list.
-
-
-## Logging & Observability
+## Observability
 
 The indexer writes logs to **two destinations**: **Application Insights** (always active) and **Azure Blob Storage** (optional).
 
-### Application Insights
+**Application Insights**
 
 All indexer activity flows to Application Insights automatically. Below are the four most requested queries:
 
-#### 1. Latest indexer runs
+**1. Latest indexer runs**
+
 ```kql
 let Logs = union isfuzzy=true traces, AppTraces;
 Logs
@@ -255,7 +218,8 @@ Logs
 | order by timestamp desc
 ```
 
-#### 2. All items indexed in a specific run
+**2. All items indexed in a specific run**
+
 ```kql
 let TargetRunId = '20251121T212623Z';
 let Logs = union isfuzzy=true traces, AppTraces;
@@ -274,7 +238,8 @@ Logs
 | order by timestamp desc
 ```
 
-#### 3. Indexing history for a specific item with details
+**3. Indexing history for a specific item with details**
+
 ```kql
 let TargetParent = '/m365x03100047.sharepoint.com/SalesAndMarketing/1be0da74-2b71-45e0-a9d3-1ffafa7d0ba7/15';
 let Logs = union isfuzzy=true traces, AppTraces;
@@ -292,7 +257,8 @@ Logs
 | order by timestamp desc
 ```
 
-#### 4. Recent errors (all error events)
+**4. Recent errors (all error events)**
+
 ```kql
 let Logs = union isfuzzy=true traces, AppTraces;
 Logs
@@ -312,7 +278,7 @@ Logs
 | order by timestamp desc
 ```
 
-### Blob Storage Logs (Optional)
+**Blob Storage Logs (Optional)**
 
 Blob logging is **enabled by default** but gracefully degrades if unavailable. To disable, set the **app setting** (not environment variable):
 ```
@@ -323,7 +289,7 @@ DISABLE_STORAGE_LOGS = true
 
 When enabled, logs are written to the blob container specified by the `JOBS_LOG_CONTAINER` app setting (default: `jobs`):
 
-#### Per-Item Logs: `jobs/sharepoint-indexer/files/{sanitized_parent_id}.json`
+**Per-Item Logs: `jobs/sharepoint-indexer/files/{sanitized_parent_id}.json`**
 
 Each processed item generates a JSON log with:
 
@@ -353,7 +319,7 @@ Example:
 }
 ```
 
-#### Run Summaries: `jobs/sharepoint-indexer/runs/{runId}.{status}.json`
+**Run Summaries: `jobs/sharepoint-indexer/runs/{runId}.{status}.json`**
 Each job execution creates stage-specific snapshots:
 - **`{runId}.started.json`**: Job initialization (collections count, start time)
 - **`{runId}.finishing.json`**: Mid-execution snapshot with partial stats
@@ -383,7 +349,6 @@ Example final summary:
 }
 ```
 
-
 ## Metrics Reference
 
 | Counter | Meaning | Source |
@@ -406,11 +371,3 @@ Example final summary:
 - **Application Insights**: Query `traces` (run-level) or `customMetrics` (time-series) for historical analysis.
 
 - **Dashboards**: Combine `items_discovered`, `items_indexed`, and `documentLibraryStats` to visualize workload vs. actual changes each run.
-
-
-## Operational Tips
-
-- Re-run jobs freely: unchanged content is cheap thanks to freshness checks and chunk-0 comparisons.
-- Watch `documentLibraryStats.skippedNotNewer` to confirm zero-based chunking is working (high number = steady state).
-- If you see repeated lookup fetch 404s in logs, verify your list doesn’t target additional hidden lists and extend the skip allowlist if necessary.
-- For persistent Document Intelligence 503s, capture `apim-request-id` from logs and open an Azure support ticket.

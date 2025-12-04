@@ -19,7 +19,7 @@ theme:
     - navigation.top
 plugins:
   - search
-  # - macros
+  - macros
 markdown_extensions:
   - admonition
   - attr_list
@@ -38,8 +38,12 @@ nav:
   - Architecture:
     - Overview: architecture.md
   - Services:
-    - Orchestrator: services_ochestrator.md
-    - Ingestion: services_ingestion.md    
+    - Orchestrator: services_orchestrator.md
+    - Ingestion:
+        - Overview: services_ingestion.md
+        - Blob: ingestion_blob_data_source.md
+        - Sharepoint: ingestion_sharepoint_source.md
+        - NL2SQL: ingestion_nl2sql_data_source.md
   - How-to Guides:
     - User Feedback: howto_userfeedback.md
     - Sharepoint Connector: howto_sharepoint_connector.md
