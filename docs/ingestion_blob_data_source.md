@@ -2,6 +2,78 @@
 
 The **Blob Data Source** ingests documents from Azure Blob Storage into Azure AI Search and keeps the index synchronized when files are updated or removed.
 
+## Ingestion Flow
+
+<div class="no-wrap">
+```
+┌────────────────────────────────────────────────────────────────────────────────┐
+│                      BLOB STORAGE INGESTION FLOW                               │
+│                                                                                │
+│  ┌────────────────────┐           ┌─────────────────────────────────────────┐  │
+│  │  Azure Blob        │           │      Index State Cache                  │  │
+│  │  Storage           │           │  • Load existing timestamps             │  │
+│  │  • Source Container│◄──────────│  • Build parent_id → lastModified map   │  │
+│  │  • Blob Metadata   │           │  • Detect already-indexed docs          │  │
+│  │  • Security IDs    │           │    (incremental updates)                │  │
+│  └─────────┬──────────┘           └─────────────────────────────────────────┘  │
+│            │                                                                   │
+│            │ List Blobs + Filter by Prefix                                     │
+│            v                                                                   │
+│  ┌─────────────────────────────────────────────────────────────────────────┐   │
+│  │                      Freshness Check                                    │   │
+│  │                                                                         │   │
+│  │  For each blob:                                                         │   │
+│  │    • Compare blob.last_modified vs indexed timestamp                    │   │
+│  │    • Skip if blob.last_modified ≤ indexed timestamp                     │   │
+│  │    • Queue for processing if blob is newer or not indexed               │   │
+│  └───────────────────────────────┬─────────────────────────────────────────┘   │
+│                                  │                                             │
+└──────────────────────────────────┼─────────────────────────────────────────────┘
+                                   │
+                                   v
+┌────────────────────────────────────────────────────────────────────────────────┐
+│                          PROCESSING PIPELINE                                   │
+│                                                                                │
+│  ┌──────────────────────────────────────────────────────────────────────────┐  │
+│  │                    blob_storage_indexer.py                               │  │
+│  │                                                                          │  │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │  │
+│  │  │  Download    │  │  Security    │  │  Document    │  │  Chunk       │  │  │
+│  │  │  Blob        │─>│  Metadata    │─>│  Chunker     │─>│  Conversion  │  │  │
+│  │  │  (Binary)    │  │  Extraction  │  │  (PDF/Docs)  │  │  to Search   │  │  │
+│  │  └──────────────┘  └──────────────┘  └──────────────┘  └──────┬───────┘  │  │
+│  │                                                               │          │  │
+│  │  ┌──────────────┐  ┌──────────────┐                           │          │  │
+│  │  │  Index       │  │  Delete Old  │◄──────────────────────────┘          │  │
+│  │  │  Batch       │◄─│  Parent Docs │  (Remove existing chunks)            │  │
+│  │  │  Upload      │  │  by parent_id│                                      │  │
+│  │  └──────────────┘  └──────────────┘                                      │  │
+│  │                                                                          │  │
+│  └──────────────────────────────────────────────────────────────────────────┘  │
+│                                                                                │
+│  • Parallel Processing: Configurable semaphore (INDEXER_MAX_CONCURRENCY)       │
+│  • Batch Size: 500 docs per AI Search batch (INDEXER_BATCH_SIZE)               │
+│  • Error Handling: Per-blob try/catch with individual file logs                │
+│                                                                                │
+└────────────────────────────────────────────────────────────────────────────────┘
+                                   │
+                                   v
+┌────────────────────────────────────────────────────────────────────────────────┐
+│                            OUTPUT & STORAGE                                    │
+│                                                                                │
+│  ┌──────────────────────┐  ┌──────────────────────┐  ┌──────────────────────┐  │
+│  │  Azure AI Search     │  │  Azure Blob Storage  │  │    Telemetry         │  │
+│  │  • Indexed Chunks    │  │  • Run Summaries     │  │  • App Insights      │  │
+│  │  • Vector Embeddings │  │  • Per-File Logs     │  │  • Structured Logs   │  │
+│  │  • Security IDs      │  │  • Processing State  │  │  • Performance       │  │
+│  │  • Metadata          │  │  (jobs container)    │  │  • Error Tracking    │  │
+│  │  source=blob         │  │                      │  │                      │  │
+│  └──────────────────────┘  └──────────────────────┘  └──────────────────────┘  │
+│                                                                                │
+└────────────────────────────────────────────────────────────────────────────────┘
+
+```    
+
 ## How it Works
 
 * **Indexing**

@@ -22,7 +22,7 @@ This release introduces major enhancements to support more flexible and enterpri
 
 Introduces a mechanism for end-users to provide thumbs-up or thumbs-down feedback on assistant responses, storing these signals alongside conversation history to continuously improve response quality.
 
-* How to configure it: [User Feedback Configuration](userfeedback.md)
+* How to configure it: [User Feedback Configuration](howto_userfeedback.md)
 * Demo video:
 
 <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; margin: 0 auto 20px auto; border-radius: 8px;">

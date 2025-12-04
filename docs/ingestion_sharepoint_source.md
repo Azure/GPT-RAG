@@ -2,6 +2,77 @@
 
 The SharePoint connector keeps Azure AI Search synchronized with both structured list data and rich documents stored in SharePoint Online. It is designed for production-scale ingestion jobs where resiliency, incremental freshness, and search-ready chunking matter.
 
+## Ingestion Flow
+
+<div class="no-wrap">
+```
+┌────────────────────────────────────────────────────────────────────────────────┐
+│                         SHAREPOINT INGESTION FLOW                              │
+│                                                                                │
+│  ┌────────────────────┐           ┌─────────────────────────────────────────┐  │
+│  │  Microsoft Graph   │           │         Cosmos DB                       │  │
+│  │  API Client        │           │  • Site Configurations                  │  │
+│  │  • Site Discovery  │<──────────│  • List/Library Specs                   │  │
+│  │  • List/Library    │           │  • Field Mappings                       │  │
+│  │  • Permissions     │           │  • Category Metadata                    │  │
+│  └─────────┬──────────┘           └─────────────────────────────────────────┘  │
+│            │                                                                   │
+│            │ Pull Items + Metadata                                             │
+│            v                                                                   │
+│  ┌─────────────────────────────────────────────────────────────────────────┐   │
+│  │                    SharePoint Collections                               │   │
+│  │                                                                         │   │
+│  │  ┌──────────────────┐              ┌──────────────────────────────┐     │   │
+│  │  │  Generic Lists   │              │  Document Libraries          │     │   │
+│  │  │  • Custom Fields │              │  • Office Files (docx/pptx)  │     │   │
+│  │  │  • Lookup Fields │              │  • PDFs                      │     │   │
+│  │  │  • List Items    │              │  • Binary Content            │     │   │
+│  │  └─────────┬────────┘              └──────────┬───────────────────┘     │   │
+│  │            │                                   │                        │   │
+│  └────────────┼───────────────────────────────────┼────────────────────────┘   │
+│               │                                   │                            │
+└───────────────┼───────────────────────────────────┼────────────────────────────┘
+                │                                   │
+                v                                   v
+┌────────────────────────────────────────────────────────────────────────────────┐
+│                          PROCESSING PIPELINE                                   │
+│                                                                                │
+│  ┌──────────────────────────────────────────────────────────────────────────┐  │
+│  │                    sharepoint_indexer.py                                 │  │
+│  │                                                                          │  │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │  │
+│  │  │  Freshness   │  │  Security    │  │  Lookup      │  │  Content     │  │  │
+│  │  │  Check       │─>│  Permissions │─>│  Field       │─>│  Extraction  │  │  │
+│  │  │  (Last Mod)  │  │  Resolution  │  │  Resolution  │  │  + Chunking  │  │  │
+│  │  └──────────────┘  └──────────────┘  └──────────────┘  └──────┬───────┘  │  │
+│  │                                                               │          │  │
+│  │  ┌──────────────┐  ┌──────────────┐                           │          │  │
+│  │  │  Azure       │  │  Document    │<──────────────────────────┘          │  │
+│  │  │  OpenAI      │<─│  Chunker     │  (For attachments)                   │  │
+│  │  │  Embeddings  │  │  (PDFs/Docs) │                                      │  │
+│  │  └──────┬───────┘  └──────────────┘                                      │  │
+│  │         │                                                                │  │
+│  └─────────┼────────────────────────────────────────────────────────────────┘  │
+│            │                                                                   │
+└────────────┼───────────────────────────────────────────────────────────────────┘
+             │
+             v
+┌────────────────────────────────────────────────────────────────────────────────┐
+│                            OUTPUT & STORAGE                                    │
+│                                                                                │
+│  ┌──────────────────────┐  ┌──────────────────────┐  ┌──────────────────────┐  │
+│  │  Azure AI Search     │  │  Azure Blob Storage  │  │    Telemetry         │  │
+│  │  • Indexed Chunks    │  │  • Run Summaries     │  │  • App Insights      │  │
+│  │  • Vector Embeddings │  │  • Item Logs         │  │  • Structured Logs   │  │
+│  │  • Security IDs      │  │  • Processing State  │  │  • Performance       │  │
+│  │  • Metadata          │  │                      │  │  • Error Tracking    │  │
+│  │  source=sharepoint   │  │                      │  │                      │  │
+│  └──────────────────────┘  └──────────────────────┘  └──────────────────────┘  │
+│                                                                                │
+└────────────────────────────────────────────────────────────────────────────────┘
+
+```
+
 ## Why This Connector
 
 - **Unified coverage** – Mix generic lists (metadata-driven knowledge) and document libraries (files) in the same run.

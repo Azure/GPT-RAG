@@ -28,7 +28,7 @@ These scenarios extend the GPT-RAG Agentic Orchestrator's ability to convert use
 
 ---
 
-## Agent Orchestration Strategies
+## Agent Orchestration
 
 The orchestrator employs a multi-agent system to process queries and manage conversations. The current implementation uses a single strategy, NL2SQL, which consists of a team of agents working together in a fixed sequence.
 
