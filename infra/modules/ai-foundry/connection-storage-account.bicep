@@ -11,7 +11,7 @@ param aiFoundryName string
 param connectedResourceName string
 
 @description('Optional. The name to assign to the Storage connection.')
-param storageConnectionName string = '${aiFoundryName}-storage-connection'
+param storageConnectionName string = '${connectedResourceName}-storage-connection'
 
 // Reference existing AI Foundry account
 resource aiFoundry 'Microsoft.CognitiveServices/accounts@2025-06-01' existing = {
