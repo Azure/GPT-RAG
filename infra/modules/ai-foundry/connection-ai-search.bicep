@@ -14,7 +14,7 @@ param aiProjectName string
 param connectedResourceName string
 
 @description('Optional. The name to assign to the AI Search connection.')
-param aiSearchConnectionName string = '${aiFoundryName}-search-connection'
+param aiSearchConnectionName string = '${connectedResourceName}-connection'
 
 // Reference existing AI Foundry account
 resource aiFoundry 'Microsoft.CognitiveServices/accounts@2025-06-01' existing = {
