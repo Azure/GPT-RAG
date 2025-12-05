@@ -3004,7 +3004,7 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
 
       // ── Connections ───────────────────────────────────────────────────────
       #disable-next-line BCP318
-      { name: 'SEARCH_CONNECTION_ID', value: deploySearchService && deployAiFoundry ? '/subscriptions/${subscription().subscriptionId}/resourceGroups/${resourceGroup().name}/providers/Microsoft.CognitiveServices/accounts/${aiFoundry!.outputs.aiServicesName}/projects/${aiFoundry!.outputs.aiProjectName}/connections/${aiFoundry!.outputs.aiSearchName}' : '', label: 'gpt-rag', contentType: 'text/plain' }
+      { name: 'SEARCH_CONNECTION_ID', value: deploySearchService && deployAiFoundry ? aiFoundryConnectionSearch.outputs.searchConnectionId : '', label: 'gpt-rag', contentType: 'text/plain' }
       #disable-next-line BCP318
       { name: 'BING_CONNECTION_ID', value: deployGroundingWithBing && deployAiFoundry ? bingSearchConnection!.outputs.bingConnectionId : '', label: 'gpt-rag', contentType: 'text/plain' }
 

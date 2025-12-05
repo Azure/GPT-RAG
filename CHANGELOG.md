@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.  
 This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to [Semantic Versioning](https://semver.org/).
 
+## [v2.2.6] – 2025-12-05
+### Fixed
+* Fixed Issue [#409](https://github.com/Azure/GPT-RAG/issues/409) by updating the main Bicep template to ensure the `SEARCH_CONNECTION_ID` app setting points to the correct AI Search connection ID. It was previously pointing to the AI Foundry AI Search dependency.
+
 ## [v2.2.5] – 2025-12-02
 ### Fixed
 - Fixed Issue [#406](https://github.com/Azure/GPT-RAG/issues/406) by updating networking and private endpoint configuration to prevent the `cosmos_vnet_blocked` error in Cosmos DB private-only setups.
