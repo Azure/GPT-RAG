@@ -41,6 +41,7 @@ nav:
     - Orchestrator: ochestrator.md
   - How-to Guides:
     - User Feedback: userfeedback.md
+    - Real-time voice interaction: realtime_voice.md
   - Meet the Team: team.md
   - Contributing: contributing.md    
 extra:
