@@ -2414,6 +2414,26 @@ module assignAIFoundryCogServOAIUserExecutor 'modules/security/resource-role-ass
   }
 }
 
+// AI Foundry Account - Cognitive Services  User -> Executor
+module assignAIFoundryCogServUserExecutor 'modules/security/resource-role-assignment.bicep' = if (deployAiFoundry) {
+  name: 'assignAIFoundryCogServUserExecutor'
+  params: {
+    name: 'assignAIFoundryCogServUserExecutor'
+    roleAssignments: [
+      {
+        principalId: principalId
+        roleDefinitionId: subscriptionResourceId(
+          'Microsoft.Authorization/roleDefinitions',
+          const.roles.CognitiveServicesUser.guid
+        )
+        #disable-next-line BCP318
+        resourceId: aiFoundryAccountResourceId
+        principalType: principalType
+      }
+    ]
+  }
+}
+
 // App Configuration Settings Service - App Configuration Data Reader -> ContainerApp
 module assignAppConfigAppConfigurationDataReaderContainerApps 'modules/security/resource-role-assignment.bicep' = [
   for (app, i) in containerAppsList: if (deployAppConfig && contains(

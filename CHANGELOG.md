@@ -3,9 +3,20 @@
 All notable changes to this project will be documented in this file.  
 This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to [Semantic Versioning](https://semver.org/).
 
+## [v2.3.0] – 2025-12-15
+### Added
+- Support for **SharePoint Lists** in the ingestion component.
+- Refactored **Single Agent Strategy** to simplify citation handling. [#161]
+- Simplified **MCP Strategy**. [#159]
+### Changed
+- Improved robustness of **Blob Storage indexing** in the ingestion pipeline.
+- Enhanced **data ingestion logging** for better observability and troubleshooting.
+### Tested
+- Compatibility with **Azure direct models for inference** in the orchestration layer.
+
 ## [v2.2.6] – 2025-12-05
 ### Fixed
-* Fixed Issue [#409](https://github.com/Azure/GPT-RAG/issues/409) by updating the main Bicep template to ensure the `SEARCH_CONNECTION_ID` app setting points to the correct AI Search connection ID. It was previously pointing to the AI Foundry AI Search dependency.
+- Fixed Issue [#409](https://github.com/Azure/GPT-RAG/issues/409) by updating the main Bicep template to ensure the `SEARCH_CONNECTION_ID` app setting points to the correct AI Search connection ID. It was previously pointing to the AI Foundry AI Search dependency.
 
 ## [v2.2.5] – 2025-12-02
 ### Fixed
