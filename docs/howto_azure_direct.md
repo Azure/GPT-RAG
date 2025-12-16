@@ -58,5 +58,5 @@ If you already provisioned GPT-RAG (or you prefer managing models manually), you
 
 <a id="bing-grounding-citations-behavior-by-model-type"></a>
 
-> **Note on Bing Grounding citations**: The Bing Grounding Tool may emit citation placeholders like &#x3010;0:0&#x2020;source&#x3011; in the answer text. With OpenAI / Azure OpenAI models, the response also includes `url_citation` annotations, so GPT-RAG can render proper Markdown links. With most Azure Direct models, annotations are missing, so placeholders are removed and citations are not linked.
+> **Note on Bing Grounding citations**: The Bing Grounding Tool may emit placeholders like &#x3010;0:0&#x2020;source&#x3011;. With OpenAI / Azure OpenAI models, responses include `url_citation` annotations so GPT-RAG can render links. With other Azure Direct models, annotations may be missing, so placeholders are removed.
 

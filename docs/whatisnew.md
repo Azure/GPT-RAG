@@ -1,5 +1,19 @@
 > 📌 [Check out what's coming next](https://github.com/orgs/Azure/projects/536/views/6)  (Azure org only)
 
+### December 2025
+
+**[Release 2.3.0](https://github.com/Azure/GPT-RAG/tree/v2.3.0) - SharePoint Lists and Azure Direct Models**
+
+This release adds two major capabilities:
+
+**Azure Direct Models (Azure AI Foundry)**
+  You can use Azure AI Foundry “Direct from Azure” models (for example, Mistral, DeepSeek, Grok, Llama, etc.) through the Foundry inference APIs with Entra ID authentication.
+  How to configure it: [Azure Direct Models](howto_azure_direct.md)
+
+**SharePoint Lists (structured ingestion)**
+  The SharePoint connector now covers both SharePoint Online document libraries (files like PDFs/Office docs) and generic lists (structured fields) so your Azure AI Search index stays in sync with list items and documents.
+  How to configure it: [SharePoint Data Source](ingestion_sharepoint_source.md) and [SharePoint Connector Setup Guide](howto_sharepoint_connector.md)
+
 ### October 2025
 
 **[Release 2.2.0](https://github.com/Azure/GPT-RAG/tree/v2.2.1) - Agentic Retrieval and Network Flexibility**
