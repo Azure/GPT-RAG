@@ -1,4 +1,4 @@
-# Azure Direct Models (Microsoft Foundry)
+# Azure Direct Models
 
 **Azure Direct Models** are models hosted and exposed by **Azure AI Foundry** that you call **directly** via the **Foundry inference APIs**, using **Microsoft Entra ID–based authentication**, instead of Azure OpenAI–specific APIs. This page explains how to switch GPT-RAG’s default inference model (by default, `gpt-4o`) to a different model. 
 
