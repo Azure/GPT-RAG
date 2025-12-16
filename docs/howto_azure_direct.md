@@ -1,14 +1,10 @@
 # Azure Direct Models (Microsoft Foundry)
 
-This page explains what **Azure Direct Models** are and how to switch GPT-RAG’s default inference model (by default, `gpt-4o`) to a different model. **Azure Direct Models** are models hosted and exposed by **Azure AI Foundry** that you call **directly** via the **Foundry inference APIs**, using **Microsoft Entra ID–based authentication**, instead of Azure OpenAI–specific APIs.
-
-**Azure Direct Models**
-
-**Azure Direct Models** are models hosted and exposed by **Azure AI Foundry** that you call **directly** via the **Foundry inference APIs**, using **Microsoft Entra ID–based authentication**, instead of Azure OpenAI–specific APIs.
+**Azure Direct Models** are models hosted and exposed by **Azure AI Foundry** that you call **directly** via the **Foundry inference APIs**, using **Microsoft Entra ID–based authentication**, instead of Azure OpenAI–specific APIs. This page explains how to switch GPT-RAG’s default inference model (by default, `gpt-4o`) to a different model. 
 
 This enables you to:
 
-- Use **non–Azure OpenAI models** (for example, Mistral, DeepSeek, Grok, Llama, etc.) from Azure.
+- Use **non–Azure OpenAI models** (for example, Mistral, DeepSeek, Grok, etc.) from Azure.
 - Standardize on Foundry inference APIs with Entra ID identity-based access.
 
 <a id="how-to-find-which-models-you-can-use"></a>
@@ -17,9 +13,7 @@ This enables you to:
 
 In practice, model availability depends on what’s enabled/available for your tenant/subscription/region and what appears in the Azure AI Foundry model catalog.
 
-To discover **Azure Direct** models, open the **Model catalog** in Azure AI Foundry and select the collection:
-
-- **Direct from Azure**
+To discover **Azure Direct** models, open the **Model catalog** in Azure AI Foundry and select the collection: **Direct from Azure**.
 
 Use the image below as reference (catalog + collection filter):
 
@@ -64,7 +58,7 @@ Change `format`, `name`, and `version` to match the model you selected in the ca
 
 **Models tested**
 
-I tested the end-to-end flow with these models (examples):
+I tested the end-to-end flow with these models:
 
 - `DeepSeek-V3.1`
 - `DeepSeek-V3-0324`
