@@ -795,21 +795,16 @@
 
 
 <h1 id="azure-direct-models-microsoft-foundry">Azure Direct Models (Microsoft Foundry)</h1>
-<p>This page explains what <strong>Azure Direct Models</strong> are and how to switch GPT-RAG’s default inference model (by default, <code>gpt-4o</code>) to a different model. <strong>Azure Direct Models</strong> are models hosted and exposed by <strong>Azure AI Foundry</strong> that you call <strong>directly</strong> via the <strong>Foundry inference APIs</strong>, using <strong>Microsoft Entra ID–based authentication</strong>, instead of Azure OpenAI–specific APIs.</p>
-<p><strong>Azure Direct Models</strong></p>
-<p><strong>Azure Direct Models</strong> are models hosted and exposed by <strong>Azure AI Foundry</strong> that you call <strong>directly</strong> via the <strong>Foundry inference APIs</strong>, using <strong>Microsoft Entra ID–based authentication</strong>, instead of Azure OpenAI–specific APIs.</p>
+<p><strong>Azure Direct Models</strong> are models hosted and exposed by <strong>Azure AI Foundry</strong> that you call <strong>directly</strong> via the <strong>Foundry inference APIs</strong>, using <strong>Microsoft Entra ID–based authentication</strong>, instead of Azure OpenAI–specific APIs. This page explains how to switch GPT-RAG’s default inference model (by default, <code>gpt-4o</code>) to a different model. </p>
 <p>This enables you to:</p>
 <ul>
-<li>Use <strong>non–Azure OpenAI models</strong> (for example, Mistral, DeepSeek, Grok, Llama, etc.) from Azure.</li>
+<li>Use <strong>non–Azure OpenAI models</strong> (for example, Mistral, DeepSeek, Grok, etc.) from Azure.</li>
 <li>Standardize on Foundry inference APIs with Entra ID identity-based access.</li>
 </ul>
 <p><a id="how-to-find-which-models-you-can-use"></a></p>
 <p><strong>How to find which models you can use</strong></p>
 <p>In practice, model availability depends on what’s enabled/available for your tenant/subscription/region and what appears in the Azure AI Foundry model catalog.</p>
-<p>To discover <strong>Azure Direct</strong> models, open the <strong>Model catalog</strong> in Azure AI Foundry and select the collection:</p>
-<ul>
-<li><strong>Direct from Azure</strong></li>
-</ul>
+<p>To discover <strong>Azure Direct</strong> models, open the <strong>Model catalog</strong> in Azure AI Foundry and select the collection: <strong>Direct from Azure</strong>.</p>
 <p>Use the image below as reference (catalog + collection filter):</p>
 <p><img alt="Azure AI Foundry catalog - Direct from Azure" src="../media/howto_azure_direct.png" /></p>
 <p><a id="how-to-switch-gpt-rags-default-model"></a></p>
@@ -840,7 +835,7 @@
 <span class="p">}</span>
 </code></pre></div>
 <p><strong>Models tested</strong></p>
-<p>I tested the end-to-end flow with these models (examples):</p>
+<p>I tested the end-to-end flow with these models:</p>
 <ul>
 <li><code>DeepSeek-V3.1</code></li>
 <li><code>DeepSeek-V3-0324</code></li>
