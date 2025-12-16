@@ -1,6 +1,6 @@
 # 🎯 Orchestrator
 
-The Orchestrator is the core engine of GPT-RAG, managing multi-agent workflows and retrieval operations using Semantic Kernel and Azure AI services.
+The Orchestrator is the core engine of GPT-RAG, managing multi-agent workflows and retrieval operations using Semantic Kernel and Azure AI services. [GitHub Repository](https://github.com/Azure/gpt-rag-orchestrator).
 
 ## Key Features
 
@@ -9,7 +9,7 @@ The Orchestrator is the core engine of GPT-RAG, managing multi-agent workflows a
 - **Semantic Kernel Integration:** Built on Microsoft's Semantic Kernel framework
 - **Extensible Architecture:** Easy to customize and extend
 
-## Getting Started
+## Visual Guide
 
 New to the Orchestrator? Check out our [Orchestrator Visual Guide](orchestrator_visual_guide.md) for a visual walkthrough of the architecture and key components.
 

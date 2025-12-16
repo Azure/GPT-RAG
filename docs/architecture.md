@@ -1,6 +1,6 @@
 ## 🏛️ Architecture
 
-![Zero Trust Architecture](media/architecture-zero-trust.png)
+![Zero Trust Architecture](media/architecture_zero_trust.png)
 
 [Download Visio Diagram](media/GPT-RAG.vsdx)
 
