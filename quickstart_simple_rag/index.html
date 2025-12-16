@@ -813,7 +813,7 @@
 <li>Deploy complete GPT-RAG infrastructure (~20 Azure resources)</li>
 <li>Upload documents to Azure Blob Storage</li>
 <li>Enable automated document ingestion and indexing</li>
-<li>Configure AI Foundry search connection</li>
+<li>Configure Foundry search connection</li>
 <li>Generate embeddings with text-embedding-3-large</li>
 <li>Ask questions about your documents using GPT-4o</li>
 <li>Get answers grounded in your data with citations</li>
@@ -853,8 +853,8 @@
 <ul>
 <li><strong>Resource Group</strong> - Container for all resources</li>
 <li><strong>Storage Accounts</strong> - For documents and job logs</li>
-<li><strong>AI Search Services (2)</strong> - Main index (srch-<em>) and AI Foundry index (srch-aif-</em>)</li>
-<li><strong>AI Foundry</strong> - Hub and project for agent orchestration</li>
+<li><strong>AI Search Services (2)</strong> - Main index (srch-<em>) and Foundry index (srch-aif-</em>)</li>
+<li><strong>Microsoft Foundry</strong> - Foundry Account and project for agent orchestration</li>
 <li><strong>OpenAI Models</strong> - GPT-4o and text-embedding-3-large deployments</li>
 <li><strong>Container Registry</strong> - Stores Docker images</li>
 <li><strong>Container Apps (4)</strong> - Frontend, orchestrator, ingestion, MCP</li>
@@ -1040,15 +1040,15 @@
 <p><strong>Error message:</strong>
 <div class="highlight"><pre><span></span><code>ServiceInvocationException: Error at: project_client.agents.threads.create()
 </code></pre></div></p>
-<p><strong>Root cause:</strong> AI Foundry capabilities host lacks vector store connections (immutable configuration).</p>
+<p><strong>Root cause:</strong> Foundry capabilities host lacks vector store connections (immutable configuration).</p>
 <p><strong>Workaround:</strong></p>
 <ol>
 <li>Check orchestrator logs: <code>ca-&lt;prefix&gt;-orchestrator</code> → Logs → Console logs</li>
 <li>Verify SEARCH_CONNECTION_ID is correctly set in App Configuration</li>
 <li>Try restarting orchestrator again</li>
-<li>If persists, check AI Foundry Connections page for connection status</li>
+<li>If persists, check Foundry Connections page for connection status</li>
 </ol>
-<p><strong>Note:</strong> This is a known issue with the current GPT-RAG template. The AI Foundry agent infrastructure may need manual configuration.</p>
+<p><strong>Note:</strong> This is a known issue with the current GPT-RAG template. The Foundry agent infrastructure may need manual configuration.</p>
 <p><strong>Issue 3: No Documents Indexed</strong></p>
 <p><strong>Symptoms:</strong></p>
 <ul>
