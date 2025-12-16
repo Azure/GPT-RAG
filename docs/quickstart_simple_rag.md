@@ -22,7 +22,7 @@ By the end of this guide:
   - Deploy complete GPT-RAG infrastructure (~20 Azure resources)
   - Upload documents to Azure Blob Storage
   - Enable automated document ingestion and indexing
-  - Configure AI Foundry search connection
+  - Configure Foundry search connection
   - Generate embeddings with text-embedding-3-large
   - Ask questions about your documents using GPT-4o
   - Get answers grounded in your data with citations
@@ -72,8 +72,8 @@ azd provision
 
   - **Resource Group** - Container for all resources
   - **Storage Accounts** - For documents and job logs
-  - **AI Search Services (2)** - Main index (srch-*) and AI Foundry index (srch-aif-*)
-  - **AI Foundry** - Hub and project for agent orchestration
+  - **AI Search Services (2)** - Main index (srch-*) and Foundry index (srch-aif-*)
+  - **Microsoft Foundry** - Foundry Account and project for agent orchestration
   - **OpenAI Models** - GPT-4o and text-embedding-3-large deployments
   - **Container Registry** - Stores Docker images
   - **Container Apps (4)** - Frontend, orchestrator, ingestion, MCP
@@ -295,16 +295,16 @@ azd provision
 ServiceInvocationException: Error at: project_client.agents.threads.create()
 ```
 
-**Root cause:** AI Foundry capabilities host lacks vector store connections (immutable configuration).
+**Root cause:** Foundry capabilities host lacks vector store connections (immutable configuration).
 
 **Workaround:**
 
   1. Check orchestrator logs: `ca-<prefix>-orchestrator` → Logs → Console logs
   2. Verify SEARCH_CONNECTION_ID is correctly set in App Configuration
   3. Try restarting orchestrator again
-  4. If persists, check AI Foundry Connections page for connection status
+  4. If persists, check Foundry Connections page for connection status
 
-**Note:** This is a known issue with the current GPT-RAG template. The AI Foundry agent infrastructure may need manual configuration.
+**Note:** This is a known issue with the current GPT-RAG template. The Foundry agent infrastructure may need manual configuration.
 
 **Issue 3: No Documents Indexed**
 

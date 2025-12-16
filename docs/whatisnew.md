@@ -6,8 +6,8 @@
 
 This release adds two major capabilities:
 
-**Azure Direct Models (Azure AI Foundry)**
-  You can use Azure AI Foundry “Direct from Azure” models (for example, Mistral, DeepSeek, Grok, Llama, etc.) through the Foundry inference APIs with Entra ID authentication.
+**Azure Direct Models (Microsoft Foundry)**
+  You can use Microsoft Foundry “Direct from Azure” models (for example, Mistral, DeepSeek, Grok, Llama, etc.) through the Foundry inference APIs with Entra ID authentication.
   How to configure it: [Azure Direct Models](howto_azure_direct.md)
 
 **SharePoint Lists (structured ingestion)**
