@@ -1,0 +1,1800 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Official project documentation">
+      
+      
+        <meta name="author" content="Paulo Lacerda">
+      
+      
+      
+        <link rel="prev" href="../howto_userfeedback/">
+      
+      
+        <link rel="next" href="../team/">
+      
+      
+      <link rel="icon" href="../favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.34">
+    
+    
+      
+        <title>Sharepoint Connector - GPT-RAG</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.35f28582.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../styles.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#sharepoint-setup-preview-release" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="GPT-RAG" class="md-header__button md-logo" aria-label="GPT-RAG" data-md-component="logo">
+      
+  <img src="../media/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            GPT-RAG
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Sharepoint Connector
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/azure/gpt-rag" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="GPT-RAG" class="md-nav__button md-logo" aria-label="GPT-RAG" data-md-component="logo">
+      
+  <img src="../media/logo.png" alt="logo">
+
+    </a>
+    GPT-RAG
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/azure/gpt-rag" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../whatisnew/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    What's New
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deploy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Deployment Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Quick Start Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Quick Start Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart_simple_rag/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Simple RAG
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart_nl2sql/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    NL2SQL
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Architecture
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Architecture
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Services
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Services
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_orchestrator/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Orchestrator
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Ingestion
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            Ingestion
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_ingestion/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_blob_data_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Blob
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_sharepoint_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Sharepoint
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_nl2sql_data_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    NL2SQL
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    How-to Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            How-to Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_azure_direct/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Azure Direct Models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_userfeedback/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    User Feedback
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Sharepoint Connector
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Sharepoint Connector
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#exploring-sharepoint-with-graph-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exploring SharePoint with Graph API
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#app-registration" class="md-nav__link">
+    <span class="md-ellipsis">
+      App Registration
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ingestion-job" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ingestion Job
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-ingestion-job" class="md-nav__link">
+    <span class="md-ellipsis">
+      Run Ingestion Job
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Validation
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../team/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Meet the Team
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="sharepoint-setup-preview-release">SharePoint Setup (Preview Release)</h1>
+<p>This section explains how to configure SharePoint as a data source for the GPT-RAG Azure AI Search Index, using the <code>Sites.Selected</code> permission to limit access to specific site collections.</p>
+<p>The configuration process involves the following steps:</p>
+<ol>
+<li><strong><a href="#exploring-sharepoint-with-graph-api">Exploring SharePoint with Graph API</a></strong>: Navigate and discover SharePoint site information using Microsoft Graph API.</li>
+<li><strong><a href="#app-registration">App Registration</a></strong>: Create an Azure Entra ID application to enable the solution to connect to SharePoint via Graph API.</li>
+<li><strong><a href="#ingestion-job">Ingestion Job</a></strong>: Configure the data sources to define which SharePoint sites, lists, and drives will be indexed.</li>
+<li><strong><a href="#run-ingestion-job">Run Job</a></strong>: Enable and schedule the ingestion jobs using CRON expressions in App Configuration.</li>
+<li><strong><a href="#validation">Validation</a></strong>: Test and verify that the SharePoint content is being successfully indexed.</li>
+</ol>
+<blockquote>
+<p>Using <code>Sites.Selected</code> ensures that your application only has access to the SharePoint sites you've explicitly granted permissions to, enhancing security by limiting access scope</p>
+</blockquote>
+<h2 id="exploring-sharepoint-with-graph-api">Exploring SharePoint with Graph API</h2>
+<p>Before configuring the ingestion job, you need to understand your SharePoint site structure. This section shows you how to use Microsoft Graph API to discover site information, lists, columns, items, and permissions.</p>
+<p><strong>Prerequisites</strong></p>
+<ul>
+<li>Access to <a href="https://developer.microsoft.com/graph/graph-explorer">Microsoft Graph Explorer</a></li>
+<li>A user account with access to the SharePoint site you want to explore</li>
+<li>Basic understanding of your SharePoint site URL structure</li>
+</ul>
+<p><strong>Understanding SharePoint Site URLs</strong></p>
+<p>A typical SharePoint site URL follows this pattern:</p>
+<div class="highlight"><pre><span></span><code>https://{siteDomain}/sites/{siteName}
+</code></pre></div>
+<p>For example: <code>https://contoso.sharepoint.com/sites/SalesAndMarketing</code></p>
+<ul>
+<li><strong>siteDomain</strong>: <code>contoso.sharepoint.com</code></li>
+<li><strong>siteName</strong>: <code>SalesAndMarketing</code></li>
+</ul>
+<p><strong>1. Get Site Information</strong></p>
+<p>Retrieve basic information about your SharePoint site, including the site ID which you'll need for subsequent queries.</p>
+<p><strong>Endpoint (Generic)</strong></p>
+<div class="highlight"><pre><span></span><code><span class="err">GET https://graph.microsoft.com/v1.0/sites/{siteDomain}:/sites/{siteName}</span>
+</code></pre></div>
+<p><strong>Example</strong></p>
+<div class="highlight"><pre><span></span><code><span class="err">GET https://graph.microsoft.com/v1.0/sites/m365x03100047.sharepoint.com:/sites/SalesAndMarketing</span>
+</code></pre></div>
+<p><strong>Response</strong></p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;m365x03100047.sharepoint.com,9f1d115d-9c87-4f37-ba8e-e73ad39c3405,7a3700a7-3a8a-4942-9089-ad84ce9f5837&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Sales and Marketing&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SalesAndMarketing&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;webUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://m365x03100047.sharepoint.com/sites/SalesAndMarketing&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<blockquote>
+<p>💡 <strong>Save the <code>id</code> value</strong> - this is your <code>{siteId}</code> for all subsequent queries.</p>
+</blockquote>
+<p><strong>2. Get Site Lists</strong></p>
+<p>Retrieve all lists and document libraries from the site. This includes both standard SharePoint lists and document libraries.</p>
+<p><strong>Endpoint (Generic)</strong></p>
+<div class="highlight"><pre><span></span><code><span class="err">GET https://graph.microsoft.com/v1.0/sites/{siteId}/lists</span>
+</code></pre></div>
+<p><strong>Example</strong></p>
+<div class="highlight"><pre><span></span><code><span class="err">GET https://graph.microsoft.com/v1.0/sites/m365x03100047.sharepoint.com,9f1d115d-9c87-4f37-ba8e-e73ad39c3405,7a3700a7-3a8a-4942-9089-ad84ce9f5837/lists</span>
+</code></pre></div>
+<p><strong>Response</strong></p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;7691f86f-8bdc-40eb-bcf5-7a23d0e9006c&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Product List&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Product List&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;list&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;template&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;genericList&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1be0da74-2b71-45e0-a9d3-1ffafa7d0ba7&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Shared Documents&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Shared Documents&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;list&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;template&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;documentLibrary&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<blockquote>
+<p>💡 <strong>List Type Information</strong>: The <code>list.template</code> property indicates the type of list:
+- <code>"genericList"</code>: Standard SharePoint list
+- <code>"documentLibrary"</code>: Document library for file storage</p>
+<p>Save the <code>id</code> value as your <code>{listId}</code> for the list you want to ingest.</p>
+</blockquote>
+<p><strong>3. Get List Columns</strong></p>
+<p>Retrieve all columns (fields) from a specific list. This information is essential for configuring which fields to include in your ingestion job.</p>
+<p><strong>Endpoint (Generic)</strong></p>
+<div class="highlight"><pre><span></span><code><span class="err">GET https://graph.microsoft.com/v1.0/sites/{siteId}/lists/{listId}/columns</span>
+</code></pre></div>
+<p><strong>Example</strong></p>
+<div class="highlight"><pre><span></span><code><span class="err">GET https://graph.microsoft.com/v1.0/sites/m365x03100047.sharepoint.com,9f1d115d-9c87-4f37-ba8e-e73ad39c3405,7a3700a7-3a8a-4942-9089-ad84ce9f5837/lists/7691f86f-8bdc-40eb-bcf5-7a23d0e9006c/columns</span>
+</code></pre></div>
+<p><strong>Response</strong></p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Title&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Title&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;columnGroup&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Custom Columns&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Code_x0020_Name&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Code Name&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;columnGroup&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Custom Columns&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Product_x0020_Line&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Product Line&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;columnGroup&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Custom Columns&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<blockquote>
+<p>💡 <strong>Column Names</strong>: Use the <code>name</code> property (not <code>displayName</code>) when configuring the <code>includeFields</code> array in your data source configuration. Note that spaces in column names are encoded as <code>_x0020_</code>.</p>
+</blockquote>
+<p><strong>4. Get List Items</strong></p>
+<p>Query the actual items within a list. Use the <code>expand=fields</code> parameter to see the field values.</p>
+<p><strong>Endpoint (Generic)</strong></p>
+<div class="highlight"><pre><span></span><code><span class="err">GET https://graph.microsoft.com/v1.0/sites/{siteId}/lists/{listId}/items?expand=fields</span>
+</code></pre></div>
+<p><strong>Example</strong></p>
+<div class="highlight"><pre><span></span><code><span class="err">GET https://graph.microsoft.com/v1.0/sites/m365x03100047.sharepoint.com,9f1d115d-9c87-4f37-ba8e-e73ad39c3405,7a3700a7-3a8a-4942-9089-ad84ce9f5837/lists/7691f86f-8bdc-40eb-bcf5-7a23d0e9006c/items?expand=fields</span>
+</code></pre></div>
+<p><strong>Response</strong></p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;fields&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;Title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Product A&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;Code_x0020_Name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PROD-A&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;Product_x0020_Line&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Electronics&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;Modified&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-01-15T10:30:00Z&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;fields&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;Title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Product B&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;Code_x0020_Name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PROD-B&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;Product_x0020_Line&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Home Goods&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;Modified&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-01-16T14:20:00Z&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<blockquote>
+<p>💡 <strong>Testing Your Configuration</strong>: Use this endpoint to verify that your filter expressions and field selections will return the expected data before configuring the ingestion job.</p>
+</blockquote>
+<p><strong>5. Get Item Permissions</strong></p>
+<p>View who has access to specific list items. This helps you understand the permission structure before ingestion.</p>
+<p><strong>Endpoint (Generic)</strong></p>
+<blockquote>
+<p>⚠️ <strong>Note</strong>: The permissions endpoint requires the beta version of the Graph API (<code>/beta/</code> instead of <code>/v1.0/</code>), as permissions are not fully available in v1.0.</p>
+</blockquote>
+<div class="highlight"><pre><span></span><code><span class="err">GET https://graph.microsoft.com/beta/sites/{siteId}/lists/{listId}/items/{itemId}/permissions</span>
+</code></pre></div>
+<p><strong>Example</strong></p>
+<div class="highlight"><pre><span></span><code><span class="err">GET https://graph.microsoft.com/beta/sites/m365x03100047.sharepoint.com,9f1d115d-9c87-4f37-ba8e-e73ad39c3405,7a3700a7-3a8a-4942-9089-ad84ce9f5837/lists/7691f86f-8bdc-40eb-bcf5-7a23d0e9006c/items/3/permissions</span>
+</code></pre></div>
+<p><strong>Response</strong></p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;roles&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;read&quot;</span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;grantedToIdentities&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;user&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;John Doe&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;john.doe@contoso.com&quot;</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<blockquote>
+<p>💡 <strong>Permission Insights</strong>: This information helps you understand who can access the content you're planning to ingest. Ensure that the ingestion app registration has appropriate permissions to access this content.</p>
+</blockquote>
+<p><strong>Quick Reference: Generic Endpoints</strong></p>
+<p>Copy these generic endpoints to use in Graph Explorer:</p>
+<div class="highlight"><pre><span></span><code><span class="err"># 1. Get Site Info</span>
+<span class="err">GET https://graph.microsoft.com/v1.0/sites/{siteDomain}:/sites/{siteName}</span>
+
+<span class="err"># 2. Get Site Lists</span>
+<span class="err">GET https://graph.microsoft.com/v1.0/sites/{siteId}/lists</span>
+
+<span class="err"># 3. Get List Columns</span>
+<span class="err">GET https://graph.microsoft.com/v1.0/sites/{siteId}/lists/{listId}/columns</span>
+
+<span class="err"># 4. Get List Items</span>
+<span class="err">GET https://graph.microsoft.com/v1.0/sites/{siteId}/lists/{listId}/items?expand=fields</span>
+
+<span class="err"># 5. Get Item Permissions (beta API)</span>
+<span class="err">GET https://graph.microsoft.com/beta/sites/{siteId}/lists/{listId}/items/{itemId}/permissions</span>
+</code></pre></div>
+<p><strong>What to Collect</strong></p>
+<p>As you explore your SharePoint site, collect the following information for your ingestion configuration:</p>
+<table>
+<thead>
+<tr>
+<th>Information</th>
+<th>Graph API Property</th>
+<th>Used In Configuration As</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Site ID</td>
+<td><code>id</code> from <code>/sites/{siteDomain}:/sites/{siteName}</code></td>
+<td><code>siteId</code></td>
+</tr>
+<tr>
+<td>Site Domain</td>
+<td>Part of your SharePoint URL</td>
+<td><code>siteDomain</code></td>
+</tr>
+<tr>
+<td>Site Name</td>
+<td>Part of your SharePoint URL</td>
+<td><code>siteName</code></td>
+</tr>
+<tr>
+<td>List ID</td>
+<td><code>id</code> from <code>/sites/{siteId}/lists</code></td>
+<td><code>listId</code></td>
+</tr>
+<tr>
+<td>List Name</td>
+<td><code>name</code> from <code>/sites/{siteId}/lists</code></td>
+<td><code>listName</code></td>
+</tr>
+<tr>
+<td>List Type</td>
+<td><code>list.template</code> from <code>/sites/{siteId}/lists</code></td>
+<td><code>listType</code></td>
+</tr>
+<tr>
+<td>Column Names</td>
+<td><code>name</code> from <code>/sites/{siteId}/lists/{listId}/columns</code></td>
+<td><code>includeFields</code> array</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Now that you understand how to explore your SharePoint structure, proceed to the App Registration section to create the necessary Azure Entra ID application.</p>
+</blockquote>
+<h2 id="app-registration">App Registration</h2>
+<p><strong>Prerequisites</strong></p>
+<p>Before you begin, ensure you have the appropriate roles for each step:</p>
+<table>
+<thead>
+<tr>
+<th>Steps</th>
+<th>Required Role(s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Register the app and assign <code>Sites.Selected</code>.</strong></td>
+<td>Global Administrator, Application Administrator, or Cloud Application Administrator.</td>
+</tr>
+<tr>
+<td><strong>Grant admin consent for <code>Sites.Selected</code>.</strong></td>
+<td>Global Administrator or Application Administrator.</td>
+</tr>
+<tr>
+<td><strong>Retrieve the SharePoint site ID via Microsoft Graph.</strong></td>
+<td>SharePoint Administrator, Global Administrator, or a user with access to the site.</td>
+</tr>
+<tr>
+<td><strong>Assign site permissions via Microsoft Graph.</strong></td>
+<td>SharePoint Administrator or Global Administrator.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Procedure</strong></p>
+<ol>
+<li>
+<p><strong>Register an Application in Azure Entra ID</strong></p>
+<ul>
+<li><strong>Sign in to the Azure Portal</strong>: Go to <a href="https://portal.azure.com/">Azure Portal</a>.</li>
+<li><strong>Register a New Application</strong>:<ul>
+<li>Navigate to <strong>Azure Active Directory</strong> &gt; <strong>App registrations</strong> &gt; <strong>New registration</strong>.</li>
+<li><strong>Name</strong>: Enter a name for your application (e.g., <code>SharePointDataIngestionApp</code>).</li>
+<li><strong>Supported Account Types</strong>: Choose <strong>Accounts in this organizational directory only</strong>.</li>
+<li><strong>Redirect URI</strong>: Leave this field empty.</li>
+<li>Click <strong>Register</strong>.</li>
+</ul>
+</li>
+</ul>
+<p><img alt="Register Application" src="../media/sharepoint_register_app.png" /></p>
+<ul>
+<li><strong>Record Application IDs</strong>:<ul>
+<li><em>Save the </em><em>Application ID</em><em> and </em><em>Tenant ID</em><em> for later use.</em></li>
+</ul>
+</li>
+</ul>
+<p><img alt="Register Application" src="../media/sharepoint_record_app_id.png" /></p>
+</li>
+<li>
+<p><strong>Configure API Permissions</strong></p>
+<ul>
+<li>
+<p><strong>Navigate to API Permissions</strong>:</p>
+<ul>
+<li>In your registered application, go to <strong>API permissions</strong> &gt; <strong>Add a permission</strong>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Add Microsoft Graph Permissions</strong>:</p>
+<ul>
+<li>Select <strong>Microsoft Graph</strong> &gt; <strong>Application permissions</strong>.</li>
+<li>Search for and add the following permission:</li>
+<li><strong><code>Sites.Selected</code></strong></li>
+</ul>
+</li>
+<li>
+<p>Click <strong>Add permissions</strong>.</p>
+</li>
+<li>
+<p><strong>Grant Admin Consent</strong>:</p>
+<ul>
+<li>Click <strong>Grant admin consent for [Your Tenant Name]</strong>.</li>
+<li>Confirm the action when prompted.</li>
+</ul>
+</li>
+</ul>
+<p><img alt="Grant Admin Consent" src="../media/sharepoint_site_selected_app.png" />
+  <em>Granting admin consent for <code>Sites.Selected</code> permission</em></p>
+</li>
+<li>
+<p><strong>Assign Access to Specific Site Collections</strong></p>
+<p>The <code>Sites.Selected</code> permission requires you to explicitly grant the application access to specific site collections. This step must be performed using the Microsoft Graph API.</p>
+<blockquote>
+<p>Currently, assigning site permissions using <code>Sites.Selected</code> cannot be done through the Azure Portal. You need to use Microsoft Graph API or PowerShell.</p>
+</blockquote>
+<ul>
+<li>
+<p><strong>Gather Site Information</strong>:</p>
+</li>
+<li>
+<p><strong>Site URL</strong>: Navigate to the SharePoint site you wish to index and note its URL (e.g., <code>https://yourdomain.sharepoint.com/sites/YourSiteName</code>).</p>
+</li>
+<li><strong>Site ID</strong>: You can retrieve the Site ID using Microsoft Graph API.</li>
+</ul>
+<p><img alt="Getting site URL" src="../media/sharepoint_site_url.png" />
+  <em>Getting site URL</em></p>
+<ul>
+<li>
+<p><strong>Retrieve Site ID</strong>:</p>
+<ul>
+<li>
+<p><strong>Use Microsoft Graph Explorer</strong>:</p>
+</li>
+<li>
+<p>Go to <a href="https://developer.microsoft.com/graph/graph-explorer">Microsoft Graph Explorer</a>.</p>
+</li>
+<li>Sign in with an account that has access to the site.</li>
+<li>
+<p>Make a <code>GET</code> request to:</p>
+<div class="highlight"><pre><span></span><code><span class="err">GET https://graph.microsoft.com/v1.0/sites/{hostname}:/{server-relative-path}</span>
+</code></pre></div>
+<p>Replace <code>{hostname}</code> with your SharePoint domain (e.g., <code>yourdomain.sharepoint.com</code>) and <code>{server-relative-path}</code> with the site path (e.g., <code>/sites/YourSiteName</code>).</p>
+</li>
+<li>
+<p><strong>Example</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="err">GET https://graph.microsoft.com/v1.0/sites/yourdomain.sharepoint.com:/sites/YourSiteName</span>
+</code></pre></div>
+</li>
+<li>
+<p>The response will include the <code>id</code> of the site.</p>
+</li>
+</ul>
+</li>
+</ul>
+<p><img alt="Getting site ID" src="../media/sharepoint_site_id.png" />
+  <em>Getting site ID</em>    </p>
+<ul>
+<li>
+<p><strong>Grant the Application Access to the Site</strong>:</p>
+<ul>
+<li>
+<p><strong>Make a <code>POST</code> Request to Grant Permissions</strong>:</p>
+</li>
+<li>
+<p>In Microsoft Graph Explorer, make a <code>POST</code> request to:</p>
+<div class="highlight"><pre><span></span><code><span class="err">POST https://graph.microsoft.com/v1.0/sites/{site-id}/permissions</span>
+</code></pre></div>
+<p>Replace <code>{site-id}</code> with the ID obtained in the previous step.</p>
+</li>
+<li>
+<p><strong>Request Body</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;roles&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;read&quot;</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;grantedToIdentities&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;application&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;your_application_id&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Your Application Name&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<ul>
+<li>Replace <code>your_application_id</code> with your application's <strong>Client ID</strong>.</li>
+<li>Replace <code>Your Application Name</code> with your application's name.</li>
+<li>The <code>"roles"</code> can be <code>"read"</code> or <code>"write"</code> depending on your needs.</li>
+</ul>
+</li>
+<li>
+<p><strong>Example</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;roles&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;read&quot;</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;grantedToIdentities&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;application&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;12345678-90ab-cdef-1234-567890abcdef&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SharePointDataIngestionApp&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Run the Query</strong> and ensure you receive a <code>201 Created</code> response.</p>
+</li>
+<li>
+<p><strong>Repeat</strong> the permission assignment for each site you wish to index.</p>
+</li>
+</ul>
+<p><img alt="Assign Site Permissions" src="../media/sharepoint_site_permissions_created.png" />
+        <em>Assigning site permissions via Microsoft Graph Explorer</em></p>
+<ul>
+<li><strong>If you encounter a permission denied error when trying to assign site permissions</strong>:</li>
+</ul>
+<p>If you encounter a permission error, like the one shown in the next screen, it may be necessary to grant permissions to your user.</p>
+<p><img alt="Assign Site Permissions" src="../media/sharepoint_site_permissions_403.png" />
+  <em>Permission error when assigning permissions</em></p>
+<p>If this is the case, grant the required permissions as shown in the next image.</p>
+<p><img alt="Assign Site Permissions" src="../media/sharepoint_site_permissions_403_02.png" />
+  <em>Adding consent for user to apply permissions</em></p>
+</li>
+<li>
+<p><strong>Create a Client Secret</strong></p>
+<ul>
+<li>
+<p><strong>Navigate to Certificates &amp; Secrets</strong>:</p>
+<ul>
+<li>Under the <strong>Manage</strong> section of your application, select <strong>Certificates &amp; secrets</strong>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Add a New Client Secret</strong>:</p>
+<ul>
+<li>Under <strong>Client secrets</strong>, click on <strong>New client secret</strong>.</li>
+<li><strong>Description</strong>: Provide a description for the client secret (e.g., <code>SharePointClientSecret</code>).</li>
+<li><strong>Expires</strong>: Choose an appropriate expiration period that suits your needs.</li>
+<li>Click <strong>Add</strong>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Record the Client Secret Value</strong>:</p>
+<ul>
+<li><em>Copy and securely store the </em><em>Client Secret Value</em><em> for later use.</em></li>
+</ul>
+<blockquote>
+<p><strong>Note</strong>: Do not copy the "Secret ID" as it is not required.</p>
+</blockquote>
+</li>
+</ul>
+<p><img alt="Register Application" src="../media/sharepoint_secret_app.png" /></p>
+<blockquote>
+<p>Done! You have completed the necessary permissions for SharePoint. Now, to complete the configuration in your Function App:</p>
+</blockquote>
+</li>
+<li>
+<p><strong>Gather SharePoint Site Information</strong></p>
+<ul>
+<li><strong>Site Domain</strong>: The domain of your SharePoint site (e.g., <code>yourdomain.sharepoint.com</code>).</li>
+<li><strong>Site Name</strong>: The name of your SharePoint site (e.g., <code>YourSiteName</code>).</li>
+<li><strong>Site Folder</strong>: Folder path to index (e.g., <code>/Shared Documents/General</code>). Leave empty for root.</li>
+<li><strong>File Formats</strong>: Specify the file formats to index (e.g., <code>pdf,docx,pptx</code>).</li>
+</ul>
+</li>
+<li>
+<p><strong>Update App Settings</strong></p>
+<ul>
+<li>
+<p><strong>Navigate to App Configuration</strong>:</p>
+<ul>
+<li>In the Azure Portal, go to your <strong>App Configuration</strong> &gt; <strong>Configuration Explorer</strong>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Set the Following App Settings with <code>gpt-rag-ingestion</code> label</strong>:</p>
+</li>
+</ul>
+<div class="highlight"><pre><span></span><code>SHAREPOINT_TENANT_ID=your_actual_tenant_id
+SHAREPOINT_CLIENT_ID=your_actual_client_id
+SHAREPOINT_CLIENT_SECRET_NAME=sharepoint_keyvault_secret_name (Default to sharepointClientSecret)
+SHAREPOINT_FILES_FORMAT=&quot;pdf,docx&quot;
+</code></pre></div>
+<ul>
+<li>
+<p>Replace placeholders with the actual values obtained from previous steps.</p>
+</li>
+<li>
+<p><strong>Add SharePoint Client Secret to KeyVault</strong>:</p>
+<ul>
+<li>Add the SharePoint client secret value to the GPT-RAG Key Vault. You can use <strong>sharepointClientSecret</strong> as the secret name, or if you choose a custom name, make sure to add it to the <code>SHAREPOINT_CLIENT_SECRET_NAME</code> environment variable.</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>Leave <code>SHAREPOINT_FILES_FORMAT</code> empty to include the following default extensions: vtt, xlsx, xls, pdf, png, jpeg, jpg, bmp, tiff, docx, pptx.</p>
+</blockquote>
+<ul>
+<li>
+<p><strong>Save and Restart</strong>:</p>
+<ul>
+<li>Click <strong>Save</strong> to apply the changes.</li>
+</ul>
+<blockquote>
+<p>Done! You have completed the SharePoint configuration procedure.</p>
+</blockquote>
+</li>
+</ul>
+</li>
+</ol>
+<p><strong>Additional Information:</strong></p>
+<ul>
+<li>
+<p><strong>Removing Permissions</strong>:</p>
+<p>If you need to revoke the application's access to a site, you can delete the permission via Microsoft Graph API:</p>
+<div class="highlight"><pre><span></span><code>DELETE https://graph.microsoft.com/v1.0/sites/{site-id}/permissions/{permission-id}
+</code></pre></div>
+<ul>
+<li>You can obtain the <code>permission-id</code> by listing the permissions:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>GET https://graph.microsoft.com/v1.0/sites/{site-id}/permissions
+</code></pre></div>
+</li>
+<li>
+<p><strong>Understanding <code>Sites.Selected</code> Permission</strong>:</p>
+<ul>
+<li>The <code>Sites.Selected</code> permission by itself does not grant access to any SharePoint site collections.</li>
+<li>It allows your application to access only the site collections that you explicitly grant it access to.</li>
+<li>This approach adheres to the principle of least privilege, enhancing security.</li>
+</ul>
+</li>
+</ul>
+<p>Here is the <strong>fully regenerated section</strong>, now phrased to clearly indicate that this is a <strong>job configuration</strong> section. You can replace your entire Ingestion Job section with the content below.</p>
+<h2 id="ingestion-job">Ingestion Job</h2>
+<p>This section explains how to configure the <strong>SharePoint ingestion jobs</strong> that run inside the <strong>Container App</strong>.</p>
+<p><strong>Procedure</strong></p>
+<p><strong>1 Add Cosmos DB Data Source Configuration</strong></p>
+<p>Each SharePoint site to be indexed must be stored as a document in the <code>datasources</code> container within Cosmos DB.</p>
+<p>Only the <strong>lists explicitly included</strong> in this configuration will be indexed.
+If none are defined, <strong>no SharePoint content from the site will be processed</strong>.</p>
+<blockquote>
+<p>⚠️ Before finalizing this configuration, you must retrieve required values such as <code>siteId</code>, <code>siteName</code>, <code>listId</code>, <code>listName</code>, and <code>listType</code> from Microsoft Graph API.
+Step 2 provides a <strong>complete step-by-step</strong> guide to obtain this information.
+Once collected, return to this step and complete the configuration document.</p>
+<p>💡 <strong>Important:</strong> In this context, a <strong>list</strong> may represent either:</p>
+<ul>
+<li>a <strong>standard SharePoint list</strong> (e.g., “Product List”), or</li>
+<li>a <strong>document library</strong> (e.g., “Shared Documents”).
+  Both are returned by the <code>/lists</code> endpoint and can be indexed by the ingestion job.
+  When a list is a <strong>document library</strong>, the ingestion job uses the list item’s <code>driveItem</code> relationship to download the underlying file.</li>
+</ul>
+</blockquote>
+<p>Data Source JSON Schema</p>
+<div class="highlight"><pre><span></span><code>{
+  &quot;id&quot;: &quot;datasource-id&quot;,
+  &quot;siteId&quot;: &quot;unique-site-identifier&quot;,
+  &quot;siteDomain&quot;: &quot;yourcompany.sharepoint.com&quot;,
+  &quot;siteName&quot;: &quot;SiteName&quot;,
+  &quot;description&quot;: &quot;Human-readable description&quot;,
+  &quot;type&quot;: &quot;sharepoint_site&quot;,
+  &quot;category&quot;: &quot;Default category for all items (optional)&quot;,
+
+  &quot;lists&quot;: [
+    {
+      &quot;listId&quot;: &quot;list-unique-identifier&quot;,             // GUID obtained from Graph API
+      &quot;listName&quot;: &quot;ListName&quot;,                         // classic list or document library
+      &quot;listType&quot;: &quot;genericList&quot;,                      // &quot;genericList&quot; or &quot;documentLibrary&quot;
+      &quot;category&quot;: &quot;Optional category override&quot;,
+      &quot;filter&quot;: &quot;OData filter expression (optional)&quot;, // e.g., &quot;fields/Status eq &#39;Published&#39;&quot;
+      &quot;includeFields&quot;: [&quot;Title&quot;, &quot;Description&quot;]       // optional, if empty include all fields, if documentLibrary do not include fields.
+    }
+  ]
+}
+</code></pre></div>
+<p>Behavior Rules</p>
+<table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>includeFields</code> empty</td>
+<td>All fields are included</td>
+</tr>
+<tr>
+<td>Always include <code>Modified</code></td>
+<td>Required for incremental updates</td>
+</tr>
+<tr>
+<td>Include <code>Attachments</code> if needed</td>
+<td>Used for classic list attachments (not the main file in a document library)</td>
+</tr>
+<tr>
+<td>Lists not declared</td>
+<td>Not indexed</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>🔎 For <strong>document libraries</strong>, each file is represented as a list item with a <code>driveItem</code> relationship.
+The ingestion job resolves the corresponding file for each item via <code>driveItem</code> and downloads its content for indexing.</p>
+</blockquote>
+<p><strong>2 Retrieve SharePoint Site and Lists (Microsoft Graph)</strong></p>
+<p>Use these steps to gather the required values for the Cosmos DB configuration.</p>
+<p><strong>2.1 Sign in and verify permissions</strong></p>
+<p>The <strong>user performing this lookup</strong> must have delegated Microsoft Graph permissions to access the site</p>
+<p><strong>2.2 Get the <code>siteId</code> and confirm the <code>siteName</code></strong></p>
+<p>You will need both the <strong><code>siteId</code></strong> and <strong><code>siteName</code></strong> to complete your data source configuration.</p>
+<p>The <code>siteDomain</code> and <code>siteName</code> are segments of the SharePoint site URL. Example:</p>
+<div class="highlight"><pre><span></span><code>https://contoso.sharepoint.com/sites/SalesAndMarketing
+       └──────────────────────┘       └──────────────┘
+            siteDomain                    siteName
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Example value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>siteDomain</td>
+<td><code>contoso.sharepoint.com</code></td>
+</tr>
+<tr>
+<td>siteName</td>
+<td><code>SalesAndMarketing</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Request</strong></p>
+<div class="highlight"><pre><span></span><code><span class="err">GET https://graph.microsoft.com/v1.0/sites/{siteDomain}:/sites/{siteName}</span>
+</code></pre></div>
+<p><strong>Example</strong></p>
+<div class="highlight"><pre><span></span><code><span class="err">GET https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com:/sites/SalesAndMarketing</span>
+</code></pre></div>
+<p><strong>Expected response</strong></p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;contoso.sharepoint.com,2b4e3b7f-1a23-4d56-89ab-123456789abc,abcdef12-3456-7890-abcd-ef0123456789&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SalesAndMarketing&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Sales and Marketing&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Use the values as follows:</strong></p>
+<table>
+<thead>
+<tr>
+<th>JSON field</th>
+<th>Data Source field</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td><code>siteId</code></td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td><code>siteName</code></td>
+</tr>
+</tbody>
+</table>
+<p>Example mapping:</p>
+<div class="highlight"><pre><span></span><code>&quot;siteId&quot;: &quot;contoso.sharepoint.com,2b4e3b7f-1a23-4d56-89ab-123456789abc,abcdef12-3456-7890-abcd-ef0123456789&quot;,
+&quot;siteName&quot;: &quot;SalesAndMarketing&quot;,
+&quot;siteDomain&quot;: &quot;contoso.sharepoint.com&quot;
+</code></pre></div>
+<p><strong>2.3 List SharePoint Lists and obtain <code>listName</code></strong></p>
+<div class="highlight"><pre><span></span><code><span class="err">GET https://graph.microsoft.com/v1.0/sites/{siteId}/lists</span>
+</code></pre></div>
+<p>This endpoint returns:</p>
+<ul>
+<li><strong>Standard lists</strong> (e.g., “Product List”), and</li>
+<li><strong>Document libraries</strong> (e.g., “Shared Documents”), because document libraries are implemented as lists.</li>
+</ul>
+<p>You can distinguish them with the <code>list.template</code> property:</p>
+<div class="highlight"><pre><span></span><code>&quot;list&quot;: {
+  &quot;template&quot;: &quot;genericList&quot;      // standard list
+}
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>&quot;list&quot;: {
+  &quot;template&quot;: &quot;documentLibrary&quot;  // document library
+}
+</code></pre></div>
+<p>Example result:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c3d8f2c9-1234-4567-89ab-1c2d3e4f5a6b&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Policies&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Policies&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;list&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;template&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;genericList&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Use <strong><code>name</code></strong> as <code>listName</code> in the Cosmos DB configuration.</p>
+<p>Optional — view fields for a specific list:</p>
+<div class="highlight"><pre><span></span><code><span class="err">GET https://graph.microsoft.com/v1.0/sites/{siteId}/lists/{listId}/columns</span>
+</code></pre></div>
+<p><strong>2.4 Access document files from document libraries</strong></p>
+<p>When a list is a <strong>document library</strong> (<code>template = "documentLibrary"</code>), each <strong>file</strong> appears as a list item that has a <code>driveItem</code> relationship.</p>
+<p>To retrieve list items and see their associated file:</p>
+<div class="highlight"><pre><span></span><code><span class="err">GET https://graph.microsoft.com/v1.0/sites/{siteId}/lists/{listId}/items?expand=fields,driveItem</span>
+</code></pre></div>
+<p>For file items, the response will include:</p>
+<div class="highlight"><pre><span></span><code>{
+  &quot;id&quot;: &quot;3&quot;,
+  &quot;fields&quot;: {
+    &quot;Title&quot;: &quot;Policy 2025&quot;,
+    &quot;FileLeafRef&quot;: &quot;Policy-2025.pdf&quot;
+  },
+  &quot;driveItem&quot;: {
+    &quot;id&quot;: &quot;01ABCDEF1234567890&quot;,
+    &quot;name&quot;: &quot;Policy-2025.pdf&quot;,
+    &quot;file&quot;: {
+      &quot;mimeType&quot;: &quot;application/pdf&quot;
+    }
+  }
+}
+</code></pre></div>
+<p>To download the actual document content for indexing, the ingestion job can call:</p>
+<div class="highlight"><pre><span></span><code><span class="err">GET https://graph.microsoft.com/v1.0/sites/{siteId}/lists/{listId}/items/{itemId}/driveItem/content</span>
+</code></pre></div>
+<p>This returns the binary content of the file (PDF, DOCX, etc.), which can then be processed and indexed.</p>
+<blockquote>
+<p>✅ The ingestion job does <strong>not</strong> need a separate <code>drives</code> configuration.
+It resolves files for document libraries directly from list items via the <code>driveItem</code> relationship.</p>
+</blockquote>
+<p><strong>Example Cosmos DB Data Source Entry</strong></p>
+<div class="highlight"><pre><span></span><code>{
+  &quot;id&quot;: &quot;contoso-marketing-site&quot;,
+  &quot;siteId&quot;: &quot;m365x03100047.sharepoint.com,9f1d115d-9c87-4f37-ba8e-e73ad39c3405,7a3700a7-3a8a-4942-9089-ad84ce9f5837&quot;,
+  &quot;description&quot;: &quot;Contoso Marketing Site&quot;,
+  &quot;type&quot;: &quot;sharepoint_site&quot;,
+  &quot;category&quot;: &quot;Marketing&quot;,
+  &quot;siteDomain&quot;: &quot;m365x03100047.sharepoint.com&quot;,
+  &quot;siteName&quot;: &quot;SalesAndMarketing&quot;,
+
+  &quot;lists&quot;: [
+    {
+      &quot;listId&quot;: &quot;1be0da74-2b71-45e0-a9d3-1ffafa7d0ba7&quot;,
+      &quot;listName&quot;: &quot;Shared Documents&quot;,
+      &quot;listType&quot;: &quot;documentLibrary&quot;,
+      &quot;category&quot;: &quot;Contoso Documents&quot;,
+      &quot;filter&quot;: &quot;&quot;,
+    },
+    {
+      &quot;listId&quot;: &quot;7691f86f-8bdc-40eb-bcf5-7a23d0e9006c&quot;,
+      &quot;listName&quot;: &quot;Product List&quot;,
+      &quot;listType&quot;: &quot;genericList&quot;,
+      &quot;category&quot;: &quot;Contoso Products&quot;,
+      &quot;filter&quot;: &quot;&quot;,
+      &quot;includeFields&quot;: [&quot;Title&quot;, &quot;Code_x0020_Name&quot;, &quot;Product_x0020_Line&quot;, &quot;Notes&quot;, &quot;Country&quot;]
+    }
+  ]
+}
+</code></pre></div>
+<h2 id="run-ingestion-job">Run Ingestion Job</h2>
+<p>The SharePoint ingestion process is executed by <strong>scheduled jobs running inside the Container App</strong>. These jobs are responsible for:</p>
+<ul>
+<li><strong>Indexing</strong> new or updated SharePoint content</li>
+<li><strong>Purging</strong> deleted or removed content from the Azure AI Search index</li>
+</ul>
+<p>Execution frequency is controlled by <strong>CRON expressions</strong> defined in <strong>App Configuration Settings</strong> under the label <code>gpt-rag-ingestion</code>.</p>
+<ol>
+<li>
+<p><strong>Update App Settings</strong></p>
+<ul>
+<li>
+<p><strong>Navigate to App Configuration</strong>:</p>
+<ul>
+<li>In the Azure Portal, go to your <strong>App Configuration</strong> &gt; <strong>Configuration Explorer</strong>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Set the Following App Settings with <code>gpt-rag-ingestion</code> label</strong>:</p>
+</li>
+</ul>
+<div class="highlight"><pre><span></span><code>SHAREPOINT_CONNECTOR_ENABLED=true
+CRON_RUN_SHAREPOINT_INDEX=0 0 * * * *
+CRON_RUN_SHAREPOINT_PURGE=0 0 */6 * * *
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CRON_RUN_SHAREPOINT_INDEX</code></td>
+<td>Defines how often the indexing job runs</td>
+</tr>
+<tr>
+<td><code>CRON_RUN_SHAREPOINT_PURGE</code></td>
+<td>Defines how often the purge job runs</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>CRON Format</strong>: <code>{second} {minute} {hour} {day} {month} {day-of-week}</code></p>
+</blockquote>
+</li>
+</ol>
+<h2 id="validation">Validation</h2>
+<ol>
+<li>
+<p><strong>Test Data Ingestion</strong></p>
+<ul>
+<li>
+<p><strong>Trigger the Ingestion Process</strong>:</p>
+<ul>
+<li>Wait for the data ingestion scheduled run.</li>
+</ul>
+</li>
+<li>
+<p><strong>Monitor Logs</strong>:</p>
+<ul>
+<li>Check the Function App logs to verify that the SharePoint connector is running without errors.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Verify Indexed Data</strong></p>
+<ul>
+<li>
+<p><strong>Check Azure AI Index</strong>:</p>
+<ul>
+<li>Go to your Azure AI Index to confirm that the SharePoint data has been successfully indexed.</li>
+</ul>
+</li>
+<li>
+<p><strong>Perform Search Queries</strong>:</p>
+<ul>
+<li>Execute search queries to ensure that content from the specific SharePoint sites is retrievable.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <div style="
+  background-color: var(--md-primary-fg-color);
+  color: var(--md-primary-bg-color);
+  text-align: center;
+  font-size: 0.95em;
+  padding: 1em 0;
+">
+  © 2025 GPT-RAG — powered by ❤️ and coffee ☕
+</div>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.icon", "content.iconify", "navigation.tracking", "toc.integrate", "content.code.annotate", "navigation.top"], "search": "../assets/javascripts/workers/search.07f07601.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.56dfad97.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,1151 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Official project documentation">
+      
+      
+        <meta name="author" content="Paulo Lacerda">
+      
+      
+      
+        <link rel="prev" href="../services_ingestion/">
+      
+      
+        <link rel="next" href="../ingestion_sharepoint_source/">
+      
+      
+      <link rel="icon" href="../favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.34">
+    
+    
+      
+        <title>Blob - GPT-RAG</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.35f28582.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../styles.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#blob-data-source" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="GPT-RAG" class="md-header__button md-logo" aria-label="GPT-RAG" data-md-component="logo">
+      
+  <img src="../media/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            GPT-RAG
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Blob
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/azure/gpt-rag" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="GPT-RAG" class="md-nav__button md-logo" aria-label="GPT-RAG" data-md-component="logo">
+      
+  <img src="../media/logo.png" alt="logo">
+
+    </a>
+    GPT-RAG
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/azure/gpt-rag" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../whatisnew/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    What's New
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deploy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Deployment Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Quick Start Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Quick Start Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart_simple_rag/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Simple RAG
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart_nl2sql/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    NL2SQL
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Architecture
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Architecture
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Services
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Services
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_orchestrator/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Orchestrator
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Ingestion
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            Ingestion
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_ingestion/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Blob
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Blob
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      How it Works
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ingestion-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ingestion Flow
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scheduling" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scheduling
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Settings
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logs
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#observability" class="md-nav__link">
+    <span class="md-ellipsis">
+      Observability
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_sharepoint_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Sharepoint
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_nl2sql_data_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    NL2SQL
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    How-to Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            How-to Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_azure_direct/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Azure Direct Models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_userfeedback/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    User Feedback
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_sharepoint_connector/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Sharepoint Connector
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../team/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Meet the Team
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="blob-data-source">Blob Data Source</h1>
+<p>The <strong>Blob Data Source</strong> ingests documents from the <strong><code>documents</code> container</strong> in your Azure Storage Account into Azure AI Search and keeps the index synchronized when files are updated or removed. It is designed for production-scale document processing with incremental updates, smart freshness detection, and automated cleanup.</p>
+<h2 id="how-it-works">How it Works</h2>
+<p>The Blob Data Source operates through <strong>two independent jobs</strong> that can be scheduled separately for optimal resource usage and data freshness.</p>
+<p><strong>Indexing job</strong> (<code>blob-storage-indexer</code>) scans the configured blob container (optionally filtered by <code>BLOB_PREFIX</code>) and processes documents into searchable chunks. It uses <strong>smart freshness detection</strong> by comparing each blob's <code>last_modified</code> timestamp with the indexed version, skipping unchanged files to save processing time and costs. For each new or modified file, the indexer downloads the blob, chunks it using Azure Document Intelligence, deletes any existing chunks for that file (by <code>parent_id</code>), and uploads new chunks with stable, search-safe IDs. Each chunk document sets <code>source = "blob"</code> to enable cleanup operations, and when available in blob metadata, includes <code>metadata_security_id</code> for security trimming scenarios.</p>
+<p><strong>Purging job</strong> (<code>blob-storage-purger</code>) maintains index hygiene by removing orphaned documents. It compares parent documents in blob storage with parent documents in the AI Search index (where <code>source == "blob"</code>), identifies chunks belonging to files that no longer exist in storage, and deletes them in batches. The job waits briefly after deletion to ensure accurate document counts, as Azure AI Search uses eventual consistency for index statistics.</p>
+<p><strong>Files are processed in parallel</strong> using a configurable semaphore (<code>INDEXER_MAX_CONCURRENCY</code>, default: 4) to balance throughput with service limits. Each file goes through download → security metadata extraction → document chunking → chunk conversion → batch upload. Batch uploads use <code>INDEXER_BATCH_SIZE</code> (default: 500) to optimize AI Search API calls while staying within request size limits.</p>
+<p><strong>Supported formats</strong> include PDF, Word (.docx), PowerPoint (.pptx), Excel (.xlsx), text (.txt, .md), images (.jpg, .png, .bmp, .tiff), and HTML. OCR extraction is performed automatically for PDFs and images using Azure Document Intelligence.</p>
+<h2 id="ingestion-flow">Ingestion Flow</h2>
+<p><strong>Indexing Job</strong></p>
+<div class="no-wrap">
+<div class="highlight"><pre><span></span><code>┌────────────────────────────────────────────────────────────────────────────────┐
+│                      BLOB STORAGE INGESTION FLOW                               │
+│                                                                                │
+│  ┌────────────────────┐           ┌─────────────────────────────────────────┐  │
+│  │  Azure Blob        │           │      Index State Cache                  │  │
+│  │  Storage           │           │  • Load existing timestamps             │  │
+│  │  • Source Container│◄──────────│  • Build parent_id → lastModified map   │  │
+│  │  • Blob Metadata   │           │  • Detect already-indexed docs          │  │
+│  │  • Security IDs    │           │    (incremental updates)                │  │
+│  └─────────┬──────────┘           └─────────────────────────────────────────┘  │
+│            │                                                                   │
+│            │ List Blobs + Filter by Prefix                                     │
+│            v                                                                   │
+│  ┌─────────────────────────────────────────────────────────────────────────┐   │
+│  │                      Freshness Check                                    │   │
+│  │                                                                         │   │
+│  │  For each blob:                                                         │   │
+│  │    • Compare blob.last_modified vs indexed timestamp                    │   │
+│  │    • Skip if blob.last_modified ≤ indexed timestamp                     │   │
+│  │    • Queue for processing if blob is newer or not indexed               │   │
+│  └───────────────────────────────┬─────────────────────────────────────────┘   │
+│                                  │                                             │
+└──────────────────────────────────┼─────────────────────────────────────────────┘
+                                   │
+                                   v
+┌────────────────────────────────────────────────────────────────────────────────┐
+│                          PROCESSING PIPELINE                                   │
+│                                                                                │
+│  ┌──────────────────────────────────────────────────────────────────────────┐  │
+│  │                    blob_storage_indexer.py                               │  │
+│  │                                                                          │  │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │  │
+│  │  │  Download    │  │  Security    │  │  Document    │  │  Chunk       │  │  │
+│  │  │  Blob        │─&gt;│  Metadata    │─&gt;│  Chunker     │─&gt;│  Conversion  │  │  │
+│  │  │  (Binary)    │  │  Extraction  │  │  (PDF/Docs)  │  │  to Search   │  │  │
+│  │  └──────────────┘  └──────────────┘  └──────────────┘  └──────┬───────┘  │  │
+│  │                                                               │          │  │
+│  │  ┌──────────────┐  ┌──────────────┐                           │          │  │
+│  │  │  Index       │  │  Delete Old  │◄──────────────────────────┘          │  │
+│  │  │  Batch       │◄─│  Parent Docs │  (Remove existing chunks)            │  │
+│  │  │  Upload      │  │  by parent_id│                                      │  │
+│  │  └──────────────┘  └──────────────┘                                      │  │
+│  │                                                                          │  │
+│  └──────────────────────────────────────────────────────────────────────────┘  │
+│                                                                                │
+│  • Parallel Processing: Configurable semaphore (INDEXER_MAX_CONCURRENCY)       │
+│  • Batch Size: 500 docs per AI Search batch (INDEXER_BATCH_SIZE)               │
+│  • Error Handling: Per-blob try/catch with individual file logs                │
+│                                                                                │
+└────────────────────────────────────────────────────────────────────────────────┘
+                                   │
+                                   v
+┌────────────────────────────────────────────────────────────────────────────────┐
+│                            OUTPUT &amp; STORAGE                                    │
+│                                                                                │
+│  ┌──────────────────────┐  ┌──────────────────────┐  ┌──────────────────────┐  │
+│  │  Azure AI Search     │  │  Azure Blob Storage  │  │    Telemetry         │  │
+│  │  • Indexed Chunks    │  │  • Run Summaries     │  │  • App Insights      │  │
+│  │  • Vector Embeddings │  │  • Per-File Logs     │  │  • Structured Logs   │  │
+│  │  • Security IDs      │  │  • Processing State  │  │  • Performance       │  │
+│  │  • Metadata          │  │  (jobs container)    │  │  • Error Tracking    │  │
+│  │  source=blob         │  │                      │  │                      │  │
+│  └──────────────────────┘  └──────────────────────┘  └──────────────────────┘  │
+│                                                                                │
+└────────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div>
+</div>
+
+<h2 id="scheduling">Scheduling</h2>
+<p>Jobs are enabled through CRON expressions:</p>
+<ul>
+<li><code>CRON_RUN_BLOB_INDEX</code>: runs the indexing job</li>
+<li><code>CRON_RUN_BLOB_PURGE</code>: runs the purge job</li>
+<li>Leave unset to disable</li>
+</ul>
+<p>The scheduler uses <code>SCHEDULER_TIMEZONE</code> (IANA format, e.g., <code>Europe/Berlin</code>), falling back to the host machine’s timezone if not specified.
+On startup, if a CRON is configured, the corresponding job is scheduled and also triggered once immediately.</p>
+<p><strong>Examples:</strong></p>
+<ul>
+<li><code>0 * * * *</code> → hourly</li>
+<li><code>*/15 * * * *</code> → every 15 minutes</li>
+<li><code>0 0 * * *</code> → daily at midnight</li>
+</ul>
+<h2 id="settings">Settings</h2>
+<ul>
+<li><code>STORAGE_ACCOUNT_NAME</code> and <code>DOCUMENTS_STORAGE_CONTAINER</code>: source location</li>
+<li><code>SEARCH_SERVICE_QUERY_ENDPOINT</code> and <code>SEARCH_RAG_INDEX_NAME</code>: target index</li>
+<li><code>BLOB_PREFIX</code> <em>(optional)</em>: restricts the scan scope</li>
+<li><code>JOBS_LOG_CONTAINER</code> <em>(default: jobs)</em>: container for logs</li>
+<li><code>INDEXER_MAX_CONCURRENCY</code>: concurrency, defaults: <code>4</code>.</li>
+<li><code>INDEXER_BATCH_SIZE</code>: batch size, defaults: <code>500</code></li>
+</ul>
+<blockquote>
+<p><code>INDEXER_MAX_CONCURRENCY</code> controls how many files are processed in parallel (download → chunk → upload). <code>INDEXER_BATCH_SIZE</code> controls how many chunk documents are sent in each upload call to Azure AI Search. Increase these to raise throughput, but watch for throttling (HTTP 429), timeouts, and memory usage; lower them if you see retries or instability. The default batch size (500) follows common guidance to keep batches reasonable (typically ≤ 1000).</p>
+</blockquote>
+<h2 id="logs">Logs</h2>
+<p>Both jobs write logs to the configured jobs container. Logs are grouped by job type:</p>
+<ul>
+<li>
+<p><strong>Indexer (<code>blob-storage-indexer</code>)</strong></p>
+<ul>
+<li>Per-file logs and per-run summaries under <code>files/</code> and <code>runs/</code></li>
+<li>Summaries include: <code>sourceFiles</code>, <code>candidates</code>, <code>success/failed</code>, <code>totalChunksUploaded</code></li>
+</ul>
+</li>
+<li>
+<p><strong>Purger (<code>blob-storage-purger</code>)</strong></p>
+<ul>
+<li>Per-run summaries under <code>runs/</code></li>
+<li>Summaries include: <code>blobDocumentsCount</code>, <code>indexParentsCountBefore/After</code>, <code>indexChunkDocumentsBefore</code>, <code>indexParentsPurged</code>, <code>indexChunkDocumentsDeleted</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="observability">Observability</h2>
+<p>The blob storage indexer emits structured Application Insights events (<code>RUN-*</code>, <code>ITEM-*</code>) with JSON payloads embedded in the <code>message</code> field.</p>
+<p><strong>Latest Job Runs</strong></p>
+<p>View recent indexing jobs with key metrics:</p>
+<div class="highlight"><pre><span></span><code><span class="n">let</span><span class="w"> </span><span class="n">Logs</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">union</span><span class="w"> </span><span class="n">isfuzzy</span><span class="p">=</span><span class="n">true</span><span class="w"> </span><span class="n">traces</span><span class="p">,</span><span class="w"> </span><span class="n">AppTraces</span><span class="p">;</span>
+<span class="n">Logs</span>
+<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="k">contains</span><span class="w"> </span><span class="s">&quot;RUN-COMPLETE&quot;</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="k">contains</span><span class="w"> </span><span class="s">&quot;blob-storage-indexer&quot;</span>
+<span class="p">|</span><span class="w"> </span><span class="k">extend</span><span class="w"> </span><span class="n">payload</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">parse_json</span><span class="p">(</span><span class="n">extract</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\\</span><span class="s">{.*&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">message</span><span class="p">))</span>
+<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">event</span><span class="p">)</span><span class="w"> </span><span class="p">==</span><span class="w"> </span><span class="s">&quot;RUN-COMPLETE&quot;</span>
+<span class="p">|</span><span class="w"> </span><span class="k">project</span><span class="w"> </span><span class="n">timestamp</span><span class="p">,</span>
+<span class="w">          </span><span class="n">runId</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">runId</span><span class="p">),</span>
+<span class="w">          </span><span class="n">status</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">status</span><span class="p">),</span>
+<span class="w">          </span><span class="n">sourceFiles</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">toint</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">sourceFiles</span><span class="p">),</span>
+<span class="w">          </span><span class="n">itemsDiscovered</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">toint</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">itemsDiscovered</span><span class="p">),</span>
+<span class="w">          </span><span class="n">indexedItems</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">toint</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">indexedItems</span><span class="p">),</span>
+<span class="w">          </span><span class="n">skippedNoChange</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">toint</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">skippedNoChange</span><span class="p">),</span>
+<span class="w">          </span><span class="n">failed</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">toint</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">failed</span><span class="p">),</span>
+<span class="w">          </span><span class="n">totalChunksUploaded</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">toint</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">totalChunksUploaded</span><span class="p">),</span>
+<span class="w">          </span><span class="n">durationSeconds</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">todouble</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">durationSeconds</span><span class="p">)</span>
+<span class="p">|</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="n">desc</span>
+</code></pre></div>
+<p><strong>Purge Summary Stats</strong></p>
+<p>Inspect the most recent purge runs and their cleanup metrics:</p>
+<div class="highlight"><pre><span></span><code><span class="n">let</span><span class="w"> </span><span class="n">Logs</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">union</span><span class="w"> </span><span class="n">isfuzzy</span><span class="p">=</span><span class="n">true</span><span class="w"> </span><span class="n">traces</span><span class="p">,</span><span class="w"> </span><span class="n">AppTraces</span><span class="p">;</span>
+<span class="n">Logs</span>
+<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="k">contains</span><span class="w"> </span><span class="s">&quot;blob-storage-purger&quot;</span>
+<span class="w">    </span><span class="k">and</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="k">contains</span><span class="w"> </span><span class="s">&quot;Summary:&quot;</span>
+<span class="p">|</span><span class="w"> </span><span class="k">extend</span><span class="w"> </span><span class="n">payload</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">parse_json</span><span class="p">(</span><span class="n">extract</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\\</span><span class="s">{.*&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">message</span><span class="p">))</span>
+<span class="p">|</span><span class="w"> </span><span class="k">extend</span><span class="w"> </span><span class="n">runStartedAt</span><span class="w">  </span><span class="p">=</span><span class="w"> </span><span class="n">todatetime</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">runStartedAt</span><span class="p">),</span>
+<span class="w">                 </span><span class="n">runFinishedAt</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">todatetime</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">runFinishedAt</span><span class="p">)</span>
+<span class="p">|</span><span class="w"> </span><span class="k">project</span>
+<span class="w">        </span><span class="n">timestamp</span><span class="p">,</span>
+<span class="w">        </span><span class="n">runStartedAt</span><span class="p">,</span>
+<span class="w">        </span><span class="n">runFinishedAt</span><span class="p">,</span>
+<span class="w">        </span><span class="n">durationSeconds</span><span class="w">           </span><span class="p">=</span><span class="w"> </span><span class="n">datetime_diff</span><span class="p">(</span><span class="s">&quot;second&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">runFinishedAt</span><span class="p">,</span><span class="w"> </span><span class="n">runStartedAt</span><span class="p">),</span>
+<span class="w">        </span><span class="n">blobDocumentsCount</span><span class="w">        </span><span class="p">=</span><span class="w"> </span><span class="n">toint</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">blobDocumentsCount</span><span class="p">),</span>
+<span class="w">        </span><span class="n">indexParentsCountBefore</span><span class="w">   </span><span class="p">=</span><span class="w"> </span><span class="n">toint</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">indexParentsCountBefore</span><span class="p">),</span>
+<span class="w">        </span><span class="n">indexChunkDocumentsBefore</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">toint</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">indexChunkDocumentsBefore</span><span class="p">),</span>
+<span class="w">        </span><span class="n">indexParentsPurged</span><span class="w">        </span><span class="p">=</span><span class="w"> </span><span class="n">toint</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">indexParentsPurged</span><span class="p">),</span>
+<span class="w">        </span><span class="n">indexChunkDocumentsDeleted</span><span class="p">=</span><span class="w"> </span><span class="n">toint</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">indexChunkDocumentsDeleted</span><span class="p">),</span>
+<span class="w">        </span><span class="n">indexParentsCountAfter</span><span class="w">    </span><span class="p">=</span><span class="w"> </span><span class="n">toint</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">indexParentsCountAfter</span><span class="p">)</span>
+<span class="p">|</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="n">desc</span>
+</code></pre></div>
+<p><strong>Items in Specific Indexer Run</strong></p>
+<p>List all files processed during a particular run:</p>
+<div class="highlight"><pre><span></span><code><span class="n">let</span><span class="w"> </span><span class="n">TargetRunId</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&#39;20251121T231125Z&#39;</span><span class="p">;</span>
+<span class="n">let</span><span class="w"> </span><span class="n">Logs</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">union</span><span class="w"> </span><span class="n">isfuzzy</span><span class="p">=</span><span class="n">true</span><span class="w"> </span><span class="n">traces</span><span class="p">,</span><span class="w"> </span><span class="n">AppTraces</span><span class="p">;</span>
+<span class="n">Logs</span>
+<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="k">contains</span><span class="w"> </span><span class="s">&quot;ITEM-COMPLETE&quot;</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="k">contains</span><span class="w"> </span><span class="s">&quot;blob-storage-indexer&quot;</span>
+<span class="p">|</span><span class="w"> </span><span class="k">extend</span><span class="w"> </span><span class="n">payload</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">parse_json</span><span class="p">(</span><span class="n">extract</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\\</span><span class="s">{.*&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">message</span><span class="p">))</span>
+<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">event</span><span class="p">)</span><span class="w"> </span><span class="p">==</span><span class="w"> </span><span class="s">&quot;ITEM-COMPLETE&quot;</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">runId</span><span class="p">)</span><span class="w"> </span><span class="p">==</span><span class="w"> </span><span class="n">TargetRunId</span>
+<span class="p">|</span><span class="w"> </span><span class="k">project</span><span class="w"> </span><span class="n">timestamp</span><span class="p">,</span>
+<span class="w">          </span><span class="n">blobName</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">blobName</span><span class="p">),</span>
+<span class="w">          </span><span class="n">parentId</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">parentId</span><span class="p">),</span>
+<span class="w">          </span><span class="n">status</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">status</span><span class="p">),</span>
+<span class="w">          </span><span class="n">totalChunks</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">toint</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">totalChunks</span><span class="p">),</span>
+<span class="w">          </span><span class="n">contentType</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">contentType</span><span class="p">),</span>
+<span class="w">          </span><span class="n">fileUrl</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">fileUrl</span><span class="p">)</span>
+<span class="p">|</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="n">desc</span>
+</code></pre></div>
+<p><strong>File Indexing History</strong></p>
+<p>Track processing history for a specific file:</p>
+<div class="highlight"><pre><span></span><code><span class="n">let</span><span class="w"> </span><span class="n">TargetParent</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&#39;/documents/employee_handbook.pdf&#39;</span><span class="p">;</span>
+<span class="n">let</span><span class="w"> </span><span class="n">Logs</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">union</span><span class="w"> </span><span class="n">isfuzzy</span><span class="p">=</span><span class="n">true</span><span class="w"> </span><span class="n">traces</span><span class="p">,</span><span class="w"> </span><span class="n">AppTraces</span><span class="p">;</span>
+<span class="n">Logs</span>
+<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="k">contains</span><span class="w"> </span><span class="s">&quot;ITEM-COMPLETE&quot;</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="k">contains</span><span class="w"> </span><span class="s">&quot;blob-storage-indexer&quot;</span>
+<span class="p">|</span><span class="w"> </span><span class="k">extend</span><span class="w"> </span><span class="n">payload</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">parse_json</span><span class="p">(</span><span class="n">extract</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\\</span><span class="s">{.*&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">message</span><span class="p">))</span>
+<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">event</span><span class="p">)</span><span class="w"> </span><span class="p">==</span><span class="w"> </span><span class="s">&quot;ITEM-COMPLETE&quot;</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">parentId</span><span class="p">)</span><span class="w"> </span><span class="p">==</span><span class="w"> </span><span class="n">TargetParent</span>
+<span class="p">|</span><span class="w"> </span><span class="k">project</span><span class="w"> </span><span class="n">timestamp</span><span class="p">,</span>
+<span class="w">          </span><span class="n">runId</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">runId</span><span class="p">),</span>
+<span class="w">          </span><span class="n">blobName</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">blobName</span><span class="p">),</span>
+<span class="w">          </span><span class="n">status</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">status</span><span class="p">),</span>
+<span class="w">          </span><span class="n">totalChunks</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">toint</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">totalChunks</span><span class="p">),</span>
+<span class="w">          </span><span class="n">contentType</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">contentType</span><span class="p">),</span>
+<span class="w">          </span><span class="n">fileUrl</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">fileUrl</span><span class="p">)</span>
+<span class="p">|</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="n">desc</span>
+</code></pre></div>
+<p><strong>Recent Indexer Errors</strong></p>
+<p>View recent warnings and errors:</p>
+<div class="highlight"><pre><span></span><code><span class="n">let</span><span class="w"> </span><span class="n">Logs</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">union</span><span class="w"> </span><span class="n">isfuzzy</span><span class="p">=</span><span class="n">true</span><span class="w"> </span><span class="n">traces</span><span class="p">,</span><span class="w"> </span><span class="n">AppTraces</span><span class="p">;</span>
+<span class="n">Logs</span>
+<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">severityLevel</span><span class="w"> </span><span class="p">&gt;=</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="k">contains</span><span class="w"> </span><span class="s">&quot;blob-storage-indexer&quot;</span>
+<span class="p">|</span><span class="w"> </span><span class="k">extend</span><span class="w"> </span><span class="n">payload</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">parse_json</span><span class="p">(</span><span class="n">extract</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\\</span><span class="s">{.*&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">message</span><span class="p">))</span>
+<span class="p">|</span><span class="w"> </span><span class="k">project</span><span class="w"> </span><span class="n">timestamp</span><span class="p">,</span>
+<span class="w">          </span><span class="n">severityLevel</span><span class="p">,</span>
+<span class="w">          </span><span class="n">event</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">event</span><span class="p">),</span>
+<span class="w">          </span><span class="n">runId</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">runId</span><span class="p">),</span>
+<span class="w">          </span><span class="n">blobName</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">blobName</span><span class="p">),</span>
+<span class="w">          </span><span class="n">parentId</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">parentId</span><span class="p">),</span>
+<span class="w">          </span><span class="n">error</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">error</span><span class="p">),</span>
+<span class="w">          </span><span class="n">message</span>
+<span class="p">|</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="n">desc</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <div style="
+  background-color: var(--md-primary-fg-color);
+  color: var(--md-primary-bg-color);
+  text-align: center;
+  font-size: 0.95em;
+  padding: 1em 0;
+">
+  © 2025 GPT-RAG — powered by ❤️ and coffee ☕
+</div>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.icon", "content.iconify", "navigation.tracking", "toc.integrate", "content.code.annotate", "navigation.top"], "search": "../assets/javascripts/workers/search.07f07601.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.56dfad97.min.js"></script>
+      
+    
+  </body>
+</html>

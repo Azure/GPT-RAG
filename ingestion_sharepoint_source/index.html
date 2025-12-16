@@ -1,0 +1,1433 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Official project documentation">
+      
+      
+        <meta name="author" content="Paulo Lacerda">
+      
+      
+      
+        <link rel="prev" href="../ingestion_blob_data_source/">
+      
+      
+        <link rel="next" href="../ingestion_nl2sql_data_source/">
+      
+      
+      <link rel="icon" href="../favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.34">
+    
+    
+      
+        <title>Sharepoint - GPT-RAG</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.35f28582.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../styles.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#sharepoint-data-source" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="GPT-RAG" class="md-header__button md-logo" aria-label="GPT-RAG" data-md-component="logo">
+      
+  <img src="../media/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            GPT-RAG
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Sharepoint
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/azure/gpt-rag" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="GPT-RAG" class="md-nav__button md-logo" aria-label="GPT-RAG" data-md-component="logo">
+      
+  <img src="../media/logo.png" alt="logo">
+
+    </a>
+    GPT-RAG
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/azure/gpt-rag" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../whatisnew/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    What's New
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deploy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Deployment Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Quick Start Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Quick Start Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart_simple_rag/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Simple RAG
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart_nl2sql/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    NL2SQL
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Architecture
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Architecture
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Services
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Services
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_orchestrator/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Orchestrator
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Ingestion
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            Ingestion
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_ingestion/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_blob_data_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Blob
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Sharepoint
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Sharepoint
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      How it Works
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ingestion-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ingestion Flow
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#processing-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      Processing Pipeline
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#settings-cheat-sheet" class="md-nav__link">
+    <span class="md-ellipsis">
+      Settings Cheat Sheet
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#observability" class="md-nav__link">
+    <span class="md-ellipsis">
+      Observability
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#metrics-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      Metrics Reference
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_nl2sql_data_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    NL2SQL
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    How-to Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            How-to Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_azure_direct/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Azure Direct Models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_userfeedback/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    User Feedback
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_sharepoint_connector/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Sharepoint Connector
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../team/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Meet the Team
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="sharepoint-data-source">SharePoint Data Source</h1>
+<p>The SharePoint connector keeps Azure AI Search synchronized with both structured list data and rich documents stored in SharePoint Online. It is designed for production-scale ingestion jobs where resiliency, incremental freshness, and search-ready chunking matter.</p>
+<h2 id="how-it-works">How it Works</h2>
+<p>The SharePoint connector ingests both <strong>generic lists</strong> (structured metadata) and <strong>document libraries</strong> (files like PDFs, Word, PowerPoint) into Azure AI Search. It uses <strong>smart freshness detection</strong> by comparing SharePoint's last modified timestamp with the indexed version, skipping unchanged items to save processing time. The connector processes all collections in parallel but controls worker concurrency and OpenAI API calls to avoid rate limits.</p>
+<p><strong>Generic lists</strong> are indexed by reading item fields from Microsoft Graph API. You can control which fields get embedded using the optional <code>includeFields</code> configuration. Lookup columns are automatically resolved and cached per list, except for hidden system lists like <code>AppPrincipals</code>, <code>UserInfo</code>, or taxonomy stores. List item attachments are currently <strong>not</strong> downloaded.</p>
+<p><strong>Document libraries</strong> download files (default: <code>pdf</code>, <code>docx</code>, <code>pptx</code>) and chunk them using Azure Document Intelligence. Each chunk gets a zero-based ID (<code>c00000</code>, <code>c00001</code>, etc.) which enables accurate freshness checks—if SharePoint's <code>lastModifiedDateTime</code> hasn't changed since the last index run, the file is skipped without reprocessing.</p>
+<p><strong>Permissions</strong> are handled by calling <code>get_item_permission_object_ids</code> using Graph <strong>beta</strong> <code>/permissions</code> endpoint to capture explicit Entra user/group IDs for each item. Only GUID-backed identities (users, groups, app registrations, devices) are stored.</p>
+<p>For detailed setup instructions, including app registration, permissions, and data source configuration, see the <a href="../howto_sharepoint_connector/">SharePoint Connector Setup Guide</a>.</p>
+<h2 id="ingestion-flow">Ingestion Flow</h2>
+<div class="no-wrap">
+<div class="highlight"><pre><span></span><code>┌────────────────────────────────────────────────────────────────────────────────┐
+│                         SHAREPOINT INGESTION FLOW                              │
+│                                                                                │
+│  ┌────────────────────┐           ┌─────────────────────────────────────────┐  │
+│  │  Microsoft Graph   │           │         Cosmos DB                       │  │
+│  │  API Client        │           │  • Site Configurations                  │  │
+│  │  • Site Discovery  │&lt;──────────│  • List/Library Specs                   │  │
+│  │  • List/Library    │           │  • Field Mappings                       │  │
+│  │  • Permissions     │           │  • Category Metadata                    │  │
+│  └─────────┬──────────┘           └─────────────────────────────────────────┘  │
+│            │                                                                   │
+│            │ Pull Items + Metadata                                             │
+│            v                                                                   │
+│  ┌─────────────────────────────────────────────────────────────────────────┐   │
+│  │                    SharePoint Collections                               │   │
+│  │                                                                         │   │
+│  │  ┌──────────────────┐              ┌──────────────────────────────┐     │   │
+│  │  │  Generic Lists   │              │  Document Libraries          │     │   │
+│  │  │  • Custom Fields │              │  • Office Files (docx/pptx)  │     │   │
+│  │  │  • Lookup Fields │              │  • PDFs                      │     │   │
+│  │  │  • List Items    │              │  • Binary Content            │     │   │
+│  │  └─────────┬────────┘              └───────────┬──────────────────┘     │   │
+│  │            │                                   │                        │   │
+│  └────────────┼───────────────────────────────────┼────────────────────────┘   │
+│               │                                   │                            │
+└───────────────┼───────────────────────────────────┼────────────────────────────┘
+                │                                   │
+                v                                   v
+┌────────────────────────────────────────────────────────────────────────────────┐
+│                          PROCESSING PIPELINE                                   │
+│                                                                                │
+│  ┌──────────────────────────────────────────────────────────────────────────┐  │
+│  │                    sharepoint_indexer.py                                 │  │
+│  │                                                                          │  │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │  │
+│  │  │  Freshness   │  │  Security    │  │  Lookup      │  │  Content     │  │  │
+│  │  │  Check       │─&gt;│  Permissions │─&gt;│  Field       │─&gt;│  Extraction  │  │  │
+│  │  │  (Last Mod)  │  │  Resolution  │  │  Resolution  │  │  + Chunking  │  │  │
+│  │  └──────────────┘  └──────────────┘  └──────────────┘  └──────┬───────┘  │  │
+│  │                                                               │          │  │
+│  │  ┌──────────────┐  ┌──────────────┐                           │          │  │
+│  │  │  Azure       │  │  Document    │&lt;──────────────────────────┘          │  │
+│  │  │  OpenAI      │&lt;─│  Chunker     │  (For attachments)                   │  │
+│  │  │  Embeddings  │  │  (PDFs/Docs) │                                      │  │
+│  │  └──────┬───────┘  └──────────────┘                                      │  │
+│  │         │                                                                │  │
+│  └─────────┼────────────────────────────────────────────────────────────────┘  │
+│            │                                                                   │
+└────────────┼───────────────────────────────────────────────────────────────────┘
+             │
+             v
+┌────────────────────────────────────────────────────────────────────────────────┐
+│                            OUTPUT &amp; STORAGE                                    │
+│                                                                                │
+│  ┌──────────────────────┐  ┌──────────────────────┐  ┌──────────────────────┐  │
+│  │  Azure AI Search     │  │  Azure Blob Storage  │  │    Telemetry         │  │
+│  │  • Indexed Chunks    │  │  • Run Summaries     │  │  • App Insights      │  │
+│  │  • Vector Embeddings │  │  • Item Logs         │  │  • Structured Logs   │  │
+│  │  • Security IDs      │  │  • Processing State  │  │  • Performance       │  │
+│  │  • Metadata          │  │                      │  │  • Error Tracking    │  │
+│  │  source=sharepoint   │  │                      │  │                      │  │
+│  └──────────────────────┘  └──────────────────────┘  └──────────────────────┘  │
+│                                                                                │
+└────────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div>
+</div>
+
+<h2 id="processing-pipeline">Processing Pipeline</h2>
+<p>The indexer uses <strong>three tiers of parallelism</strong> to balance speed and service limits:</p>
+<p><strong>1. Collection Discovery (All Lists in Parallel)</strong></p>
+<div class="no-wrap">
+<div class="highlight"><pre><span></span><code>┌───────────────────────────────────────────────────────────────┐
+│  Cosmos datasources (type: sharepoint_site)                   │
+└───────────┬────────────────────────┬───────────────────┬──────┘
+            │                        │                   │
+            ▼                        ▼                   ▼
+      ┌──────────┐             ┌──────────┐         ┌──────────┐
+      │  List A  │             │  List B  │   ...   │  List N  │   ← All lists start simultaneously
+      └─────┬────┘             └─────┬────┘         └─────┬────┘
+            │                        │                    │
+            └────────────────────────┴────────────────────┘
+                             │
+                             ▼ (fetch items via Graph API)
+</code></pre></div>
+</div>
+
+<p><strong>2. Item Processing (Controlled: ≤ 4 Workers)</strong></p>
+<div class="no-wrap">
+<div class="highlight"><pre><span></span><code>┌──────────────────────────────────────────────────────────────────┐
+│  Global Worker Pool (INDEXER_MAX_CONCURRENCY = 4)                │
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐                 │
+│  │Worker 1 │ │Worker 2 │ │Worker 3 │ │  ...4   │                 │
+│  └────┬────┘ └────┬────┘ └────┬────┘ └────┬────┘                 │
+└───────┼───────────┼───────────┼───────────┼──────────────────────┘
+        │           │           │           │
+        ▼           ▼           ▼           ▼
+   ┌─────────────────────────────────────────────────────────┐
+   │ Per-Item: freshness → process → upload                  │
+   │ • Body (generic lists): list fields → text → embedding  │
+   │ • Files (document libraries): download → chunk → embed  │
+   └─────────────────────────────────────────────────────────┘
+</code></pre></div>
+</div>
+
+<p><strong>3. Embedding Generation (Throttled: ≤ 2 Concurrent)</strong></p>
+<div class="no-wrap">
+<div class="highlight"><pre><span></span><code>┌────────────────────────────────────────────────────────┐
+│  AOAI Embedding Gate (AOAI_MAX_CONCURRENCY = 2)        │
+│  ┌──────────┐ ┌──────────┐                             │
+│  │  Slot 1  │ │  Slot 2  │  ← Only 2 embeddings run    │
+│  └──────────┘ └──────────┘     at the same time        │
+└────────────────────────────────────────────────────────┘
+         ▲              ▲
+         │              │
+    Workers queue here when embedding is needed
+    (workers skip this if freshness = unchanged)
+</code></pre></div>
+</div>
+
+<p><strong>Parallelism At a Glance</strong></p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Control</th>
+<th>Default</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Collection enumeration</td>
+<td><code>asyncio.gather</code></td>
+<td>Unlimited</td>
+<td>Each list runs independently.</td>
+</tr>
+<tr>
+<td>Item workers</td>
+<td>Semaphore</td>
+<td><code>INDEXER_MAX_CONCURRENCY = 4</code></td>
+<td>Covers body + file work.</td>
+</tr>
+<tr>
+<td>Embeddings</td>
+<td>Semaphore</td>
+<td><code>AOAI_MAX_CONCURRENCY = 2</code></td>
+<td>Applies to both bodies and files.</td>
+</tr>
+<tr>
+<td>Item timeout</td>
+<td><code>asyncio.wait_for</code></td>
+<td>600 s</td>
+<td>Cancels sluggish items.</td>
+</tr>
+<tr>
+<td>Collection timeout</td>
+<td><code>asyncio.wait_for</code></td>
+<td>7200 s</td>
+<td>Cancels stuck lists.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Freshness &amp; Deduplication</strong></p>
+<ul>
+<li><strong>Body documents (generic lists)</strong>: Fetches chunk <code>c00000</code> from the index. If SharePoint's <code>Modified</code> timestamp isn't newer, the item is skipped (<code>skippedNoChange</code>) without reprocessing.</li>
+<li><strong>Document library files</strong>: Each file gets a parent key with the file name; chunk <code>0</code> stores the file's last modified time. Unchanged files increment <code>documentLibraryStats.skippedNotNewer</code>.</li>
+<li><strong>1-second tolerance</strong>: An item is reindexed only if SharePoint's timestamp is &gt;1 second newer than the index. This prevents unnecessary work when clocks differ slightly between SharePoint and Azure AI Search.</li>
+</ul>
+<h2 id="settings-cheat-sheet">Settings Cheat Sheet</h2>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Setting</th>
+<th>Default</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Concurrency</td>
+<td><code>INDEXER_MAX_CONCURRENCY</code></td>
+<td>4</td>
+<td>Item workers across all lists.</td>
+</tr>
+<tr>
+<td></td>
+<td><code>AOAI_MAX_CONCURRENCY</code></td>
+<td>2</td>
+<td>Embedding throttle.</td>
+</tr>
+<tr>
+<td></td>
+<td><code>INDEXER_BATCH_SIZE</code></td>
+<td>500</td>
+<td>Upload/delete batch size in AI Search.</td>
+</tr>
+<tr>
+<td>Timeouts</td>
+<td><code>INDEXER_ITEM_TIMEOUT_SECONDS</code></td>
+<td>600</td>
+<td>Per-item budget. Cancels stuck workers.</td>
+</tr>
+<tr>
+<td></td>
+<td><code>LIST_GATHER_TIMEOUT_SECONDS</code></td>
+<td>7200</td>
+<td>Per-list budget. Aborts entire list if exceeded.</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HTTP_TOTAL_TIMEOUT_SECONDS</code></td>
+<td>120</td>
+<td>Graph API calls timeout.</td>
+</tr>
+<tr>
+<td></td>
+<td><code>BLOB_OP_TIMEOUT_SECONDS</code></td>
+<td>20</td>
+<td>Blob storage writes timeout.</td>
+</tr>
+<tr>
+<td>Retries</td>
+<td><code>AOAI_BACKOFF_MAX_SECONDS</code></td>
+<td>60</td>
+<td>Max wait between AOAI retries (exponential backoff + jitter).</td>
+</tr>
+<tr>
+<td></td>
+<td><code>AOAI_MAX_RATE_LIMIT_ATTEMPTS</code></td>
+<td>8</td>
+<td>Rate limit (429) retries for embeddings. Respects <code>Retry-After</code> headers.</td>
+</tr>
+<tr>
+<td></td>
+<td><code>AOAI_MAX_TRANSIENT_ATTEMPTS</code></td>
+<td>8</td>
+<td>Network/timeout retries for embeddings. Fatal errors bubble immediately.</td>
+</tr>
+<tr>
+<td></td>
+<td><code>GRAPH_RETRY_ATTEMPTS</code></td>
+<td>6</td>
+<td>Microsoft Graph GET retries for throttling/transient failures. Max 30s backoff.</td>
+</tr>
+<tr>
+<td></td>
+<td><code>SEARCH_RETRY_ATTEMPTS</code></td>
+<td>8</td>
+<td>Azure AI Search upload/delete retries (1s → 30s backoff). Honors <code>Retry-After</code>.</td>
+</tr>
+<tr>
+<td>Documents</td>
+<td><code>SHAREPOINT_FILES_FORMAT</code></td>
+<td><code>pdf,docx,pptx</code></td>
+<td>Allowed file extensions for document libraries.</td>
+</tr>
+<tr>
+<td>Logging</td>
+<td><code>JOBS_LOG_CONTAINER</code></td>
+<td><code>jobs</code></td>
+<td>Blob container for logs.</td>
+</tr>
+<tr>
+<td></td>
+<td><code>DISABLE_STORAGE_LOGS</code></td>
+<td>unset</td>
+<td>Set to <code>true/1</code> to skip blob logging.</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Tuning notes</strong>: Increase <code>AOAI_MAX_CONCURRENCY</code> only if you confirmed higher TPM quotas. If Graph throttles (429), reduce <code>INDEXER_MAX_CONCURRENCY</code>. Document Intelligence chunker performs best-effort retries internally; failed items (e.g., 503 errors) can be retried on next run.</p>
+</blockquote>
+<h2 id="observability">Observability</h2>
+<p>The indexer writes logs to <strong>two destinations</strong>: <strong>Application Insights</strong> (always active) and <strong>Azure Blob Storage</strong> (optional).</p>
+<p><strong>Application Insights</strong></p>
+<p>All indexer activity flows to Application Insights automatically. Below are the four most requested queries:</p>
+<p><strong>1. Latest indexer runs</strong></p>
+<div class="highlight"><pre><span></span><code><span class="n">let</span><span class="w"> </span><span class="n">Logs</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">union</span><span class="w"> </span><span class="n">isfuzzy</span><span class="p">=</span><span class="n">true</span><span class="w"> </span><span class="n">traces</span><span class="p">,</span><span class="w"> </span><span class="n">AppTraces</span><span class="p">;</span>
+<span class="n">Logs</span>
+<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="k">contains</span><span class="w"> </span><span class="s">&quot;RUN-COMPLETE&quot;</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="k">contains</span><span class="w"> </span><span class="s">&quot;sharepoint-indexer&quot;</span>
+<span class="p">|</span><span class="w"> </span><span class="k">extend</span><span class="w"> </span><span class="n">payload</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">parse_json</span><span class="p">(</span><span class="n">extract</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\\</span><span class="s">{.*&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">message</span><span class="p">))</span>
+<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">event</span><span class="p">)</span><span class="w"> </span><span class="p">==</span><span class="w"> </span><span class="s">&quot;RUN-COMPLETE&quot;</span>
+<span class="p">|</span><span class="w"> </span><span class="k">extend</span><span class="w"> </span><span class="n">indexerType</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">extract</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\\</span><span class="s">[([^</span><span class="se">\\</span><span class="s">]]+)</span><span class="se">\\</span><span class="s">]&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">message</span><span class="p">)</span>
+<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">indexerType</span><span class="w"> </span><span class="n">endswith</span><span class="w"> </span><span class="s">&quot;-indexer&quot;</span><span class="w">  </span><span class="c">// Filtra apenas indexers</span>
+<span class="p">|</span><span class="w"> </span><span class="k">project</span><span class="w"> </span><span class="n">timestamp</span><span class="p">,</span>
+<span class="w">          </span><span class="n">indexerType</span><span class="p">,</span>
+<span class="w">          </span><span class="n">runId</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">runId</span><span class="p">),</span>
+<span class="w">          </span><span class="n">status</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">status</span><span class="p">),</span>
+<span class="w">          </span><span class="n">itemsDiscovered</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">toint</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">itemsDiscovered</span><span class="p">),</span>
+<span class="w">          </span><span class="n">itemsIndexed</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">toint</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">itemsIndexed</span><span class="p">),</span>
+<span class="w">          </span><span class="n">itemsFailed</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">toint</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">itemsFailed</span><span class="p">),</span>
+<span class="w">          </span><span class="n">durationSeconds</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">todouble</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">durationSeconds</span><span class="p">)</span>
+<span class="p">|</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="n">desc</span>
+</code></pre></div>
+<p><strong>2. All items indexed in a specific run</strong></p>
+<div class="highlight"><pre><span></span><code><span class="n">let</span><span class="w"> </span><span class="n">TargetRunId</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&#39;20251121T212623Z&#39;</span><span class="p">;</span>
+<span class="n">let</span><span class="w"> </span><span class="n">Logs</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">union</span><span class="w"> </span><span class="n">isfuzzy</span><span class="p">=</span><span class="n">true</span><span class="w"> </span><span class="n">traces</span><span class="p">,</span><span class="w"> </span><span class="n">AppTraces</span><span class="p">;</span>
+<span class="n">Logs</span>
+<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="k">contains</span><span class="w"> </span><span class="s">&quot;ITEM-COMPLETE&quot;</span>
+<span class="p">|</span><span class="w"> </span><span class="k">extend</span><span class="w"> </span><span class="n">payload</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">parse_json</span><span class="p">(</span><span class="n">extract</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\\</span><span class="s">{.*&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">message</span><span class="p">))</span>
+<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">event</span><span class="p">)</span><span class="w"> </span><span class="p">==</span><span class="w"> </span><span class="s">&quot;ITEM-COMPLETE&quot;</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">runId</span><span class="p">)</span><span class="w"> </span><span class="p">==</span><span class="w"> </span><span class="n">TargetRunId</span>
+<span class="p">|</span><span class="w"> </span><span class="k">project</span><span class="w"> </span><span class="n">timestamp</span><span class="p">,</span>
+<span class="w">          </span><span class="n">collection</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">collection</span><span class="p">),</span>
+<span class="w">          </span><span class="n">itemId</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">itemId</span><span class="p">),</span>
+<span class="w">          </span><span class="n">parentId</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">parentId</span><span class="p">),</span>
+<span class="w">          </span><span class="n">status</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">status</span><span class="p">),</span>
+<span class="w">          </span><span class="n">attachmentChunks</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">toint</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">attachmentChunks</span><span class="p">),</span>
+<span class="w">          </span><span class="n">totalChunks</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">toint</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">totalChunks</span><span class="p">),</span>
+<span class="w">          </span><span class="n">webUrl</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">webUrl</span><span class="p">)</span>
+<span class="p">|</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="n">desc</span>
+</code></pre></div>
+<p><strong>3. Indexing history for a specific item with details</strong></p>
+<div class="highlight"><pre><span></span><code><span class="n">let</span><span class="w"> </span><span class="n">TargetParent</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&#39;/m365x03100047.sharepoint.com/SalesAndMarketing/1be0da74-2b71-45e0-a9d3-1ffafa7d0ba7/15&#39;</span><span class="p">;</span>
+<span class="n">let</span><span class="w"> </span><span class="n">Logs</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">union</span><span class="w"> </span><span class="n">isfuzzy</span><span class="p">=</span><span class="n">true</span><span class="w"> </span><span class="n">traces</span><span class="p">,</span><span class="w"> </span><span class="n">AppTraces</span><span class="p">;</span>
+<span class="n">Logs</span>
+<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="k">contains</span><span class="w"> </span><span class="s">&quot;ITEM-COMPLETE&quot;</span>
+<span class="p">|</span><span class="w"> </span><span class="k">extend</span><span class="w"> </span><span class="n">payload</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">parse_json</span><span class="p">(</span><span class="n">extract</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\\</span><span class="s">{.*&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">message</span><span class="p">))</span>
+<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">event</span><span class="p">)</span><span class="w"> </span><span class="p">==</span><span class="w"> </span><span class="s">&quot;ITEM-COMPLETE&quot;</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">parentId</span><span class="p">)</span><span class="w"> </span><span class="p">==</span><span class="w"> </span><span class="n">TargetParent</span>
+<span class="p">|</span><span class="w"> </span><span class="k">project</span><span class="w"> </span><span class="n">timestamp</span><span class="p">,</span>
+<span class="w">          </span><span class="n">runId</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">runId</span><span class="p">),</span>
+<span class="w">          </span><span class="n">collection</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">collection</span><span class="p">),</span>
+<span class="w">          </span><span class="n">status</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">status</span><span class="p">),</span>
+<span class="w">          </span><span class="n">attachmentChunks</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">toint</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">attachmentChunks</span><span class="p">),</span>
+<span class="w">          </span><span class="n">totalChunks</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">toint</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">totalChunks</span><span class="p">),</span>
+<span class="w">          </span><span class="n">webUrl</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">webUrl</span><span class="p">)</span>
+<span class="p">|</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="n">desc</span>
+</code></pre></div>
+<p><strong>4. Recent errors (all error events)</strong></p>
+<div class="highlight"><pre><span></span><code><span class="n">let</span><span class="w"> </span><span class="n">Logs</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">union</span><span class="w"> </span><span class="n">isfuzzy</span><span class="p">=</span><span class="n">true</span><span class="w"> </span><span class="n">traces</span><span class="p">,</span><span class="w"> </span><span class="n">AppTraces</span><span class="p">;</span>
+<span class="n">Logs</span>
+<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">severityLevel</span><span class="w"> </span><span class="p">&gt;=</span><span class="w"> </span><span class="mi">3</span><span class="w">  </span><span class="c">// 3=Warning, 4=Error</span>
+<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="k">contains</span><span class="w"> </span><span class="s">&quot;sharepoint-indexer&quot;</span>
+<span class="p">|</span><span class="w"> </span><span class="k">extend</span><span class="w"> </span><span class="n">payload</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">parse_json</span><span class="p">(</span><span class="n">extract</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\\</span><span class="s">{.*&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">message</span><span class="p">))</span>
+<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">isnotempty</span><span class="p">(</span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">event</span><span class="p">))</span>
+<span class="p">|</span><span class="w"> </span><span class="k">project</span><span class="w"> </span><span class="n">timestamp</span><span class="p">,</span>
+<span class="w">          </span><span class="n">severityLevel</span><span class="p">,</span>
+<span class="w">          </span><span class="n">event</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">event</span><span class="p">),</span>
+<span class="w">          </span><span class="n">runId</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">runId</span><span class="p">),</span>
+<span class="w">          </span><span class="n">collection</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">collection</span><span class="p">),</span>
+<span class="w">          </span><span class="n">itemId</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">itemId</span><span class="p">),</span>
+<span class="w">          </span><span class="n">parentId</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">parentId</span><span class="p">),</span>
+<span class="w">          </span><span class="n">error</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">error</span><span class="p">),</span>
+<span class="w">          </span><span class="n">message</span>
+<span class="p">|</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="n">desc</span>
+</code></pre></div>
+<p><strong>Blob Storage Logs (Optional)</strong></p>
+<p>Blob logging is <strong>enabled by default</strong> but gracefully degrades if unavailable. To disable, set the <strong>app setting</strong> (not environment variable):
+<div class="highlight"><pre><span></span><code>DISABLE_STORAGE_LOGS = true
+</code></pre></div></p>
+<blockquote>
+<p><strong>Note</strong>: Azure Functions/Container Apps use <strong>Application Settings</strong>, not shell environment variables. Set this in the Azure Portal under Configuration → Application Settings.</p>
+</blockquote>
+<p>When enabled, logs are written to the blob container specified by the <code>JOBS_LOG_CONTAINER</code> app setting (default: <code>jobs</code>):</p>
+<p><strong>Per-Item Logs: <code>jobs/sharepoint-indexer/files/{sanitized_parent_id}.json</code></strong></p>
+<p>Each processed item generates a JSON log with:</p>
+<ul>
+<li>
+<p><strong>Status</strong>: <code>success</code>, <code>skipped-no-change</code>, or <code>error</code></p>
+</li>
+<li>
+<p><strong>Freshness details</strong>: <code>incomingLastMod</code>, <code>existingLastMod</code>, <code>freshnessReason</code></p>
+</li>
+<li>
+<p><strong>Document library metadata</strong>: <code>documentLibraryFileName</code>, <code>documentLibraryUrl</code> (if applicable)</p>
+</li>
+<li>
+<p><strong>Chunks processed</strong>: Count of chunks uploaded for this item</p>
+</li>
+<li>
+<p><strong>Errors</strong>: Full exception details if the item failed</p>
+</li>
+</ul>
+<p>Example:
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;indexerType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sharepoint-indexer&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;collection&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;contoso.sharepoint.com/sites/engineering/Documents&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;itemId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;42&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;parent_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;contoso_engineering_abc123_42&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;runId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;20251121T143022Z&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;success&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;incomingLastMod&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-11-21T14:30:22Z&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;existingLastMod&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-11-20T10:15:00Z&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;freshnessReason&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;newer-by-ms=102382000&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;chunks&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p><strong>Run Summaries: <code>jobs/sharepoint-indexer/runs/{runId}.{status}.json</code></strong>
+Each job execution creates stage-specific snapshots:
+- <strong><code>{runId}.started.json</code></strong>: Job initialization (collections count, start time)
+- <strong><code>{runId}.finishing.json</code></strong>: Mid-execution snapshot with partial stats
+- <strong><code>{runId}.finished.json</code></strong>: Final authoritative summary (or <code>.failed.json</code>/<code>.cancelled.json</code>)
+- <strong><code>latest.json</code></strong>: Pointer to the most recent run (best-effort; may lag on immutable containers)</p>
+<p>Example final summary:
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;indexerType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sharepoint-indexer&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;runId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;20251121T143022Z&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;runStartedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-11-21T14:30:22Z&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;runFinishedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-11-21T14:35:18Z&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;finished&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;collections&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;itemsDiscovered&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">84</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;candidateItems&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;indexedItems&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;skippedNoChange&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">72</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;failed&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;documentLibraryStats&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;candidates&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">9</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;skippedNotNewer&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;skippedExtNotAllowed&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;uploadedChunks&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">18</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<h2 id="metrics-reference">Metrics Reference</h2>
+<table>
+<thead>
+<tr>
+<th>Counter</th>
+<th>Meaning</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>items_discovered</code></td>
+<td>Items enumerated from SharePoint</td>
+<td>Run summary + App Insights</td>
+</tr>
+<tr>
+<td><code>items_candidates</code></td>
+<td>Items deemed newer than index</td>
+<td>Run summary + App Insights</td>
+</tr>
+<tr>
+<td><code>items_indexed</code></td>
+<td>Body documents uploaded</td>
+<td>Run summary + App Insights</td>
+</tr>
+<tr>
+<td><code>items_skipped_nochange</code></td>
+<td>Bodies skipped by freshness</td>
+<td>Run summary + App Insights</td>
+</tr>
+<tr>
+<td><code>items_failed</code></td>
+<td>Errors/timeouts</td>
+<td>Run summary + App Insights</td>
+</tr>
+<tr>
+<td><code>body_docs_uploaded</code></td>
+<td>Count of body documents uploaded (≤ items_indexed)</td>
+<td>Run summary</td>
+</tr>
+<tr>
+<td><code>att_candidates</code></td>
+<td>Document-library files considered</td>
+<td><code>documentLibraryStats.candidates</code></td>
+</tr>
+<tr>
+<td><code>att_skipped_not_newer</code></td>
+<td>Files skipped (index already has newer/equal version)</td>
+<td><code>documentLibraryStats.skippedNotNewer</code></td>
+</tr>
+<tr>
+<td><code>att_skipped_ext_not_allowed</code></td>
+<td>Files ignored due to extension filter</td>
+<td><code>documentLibraryStats.skippedExtNotAllowed</code></td>
+</tr>
+<tr>
+<td><code>att_uploaded_chunks</code></td>
+<td>Total chunks pushed for document libraries</td>
+<td><code>documentLibraryStats.uploadedChunks</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Where to find them:</strong></p>
+<ul>
+<li>
+<p><strong>Blob storage</strong>: <code>jobs/sharepoint-indexer/runs/latest.json</code> for the most recent run.</p>
+</li>
+<li>
+<p><strong>Application Insights</strong>: Query <code>traces</code> (run-level) or <code>customMetrics</code> (time-series) for historical analysis.</p>
+</li>
+<li>
+<p><strong>Dashboards</strong>: Combine <code>items_discovered</code>, <code>items_indexed</code>, and <code>documentLibraryStats</code> to visualize workload vs. actual changes each run.</p>
+</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <div style="
+  background-color: var(--md-primary-fg-color);
+  color: var(--md-primary-bg-color);
+  text-align: center;
+  font-size: 0.95em;
+  padding: 1em 0;
+">
+  © 2025 GPT-RAG — powered by ❤️ and coffee ☕
+</div>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.icon", "content.iconify", "navigation.tracking", "toc.integrate", "content.code.annotate", "navigation.top"], "search": "../assets/javascripts/workers/search.07f07601.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.56dfad97.min.js"></script>
+      
+    
+  </body>
+</html>

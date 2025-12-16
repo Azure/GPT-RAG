@@ -324,9 +324,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#quick-start-basic-deployment" class="md-nav__link">
+  <a href="#basic-deployment" class="md-nav__link">
     <span class="md-ellipsis">
-      Quick Start - Basic Deployment
+      Basic Deployment
     </span>
   </a>
   
@@ -339,39 +339,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Zero Trust Deployment">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#before-provisioning" class="md-nav__link">
-    <span class="md-ellipsis">
-      Before Provisioning
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#provision-infrastructure" class="md-nav__link">
-    <span class="md-ellipsis">
-      Provision Infrastructure
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#post-provision-configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      Post-Provision Configuration
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
@@ -380,6 +347,21 @@
       Deploy GPT-RAG Services
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Deploy GPT-RAG Services">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#deploy-individual-services" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deploy Individual Services
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -589,7 +571,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../ochestrator/" class="md-nav__link">
+      <a href="../services_orchestrator/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -598,6 +580,133 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Ingestion
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            Ingestion
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_ingestion/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_blob_data_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Blob
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_sharepoint_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Sharepoint
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_nl2sql_data_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    NL2SQL
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -652,11 +761,53 @@
   
   
     <li class="md-nav__item">
-      <a href="../userfeedback/" class="md-nav__link">
+      <a href="../howto_azure_direct/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Azure Direct Models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_userfeedback/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
     User Feedback
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_sharepoint_connector/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Sharepoint Connector
   </span>
   
 
@@ -749,7 +900,7 @@
 <li><a href="https://git-scm.com/downloads">Git</a></li>
 <li><a href="https://www.python.org/downloads/release/python-3120/">Python 3.12</a></li>
 </ul>
-<h2 id="quick-start-basic-deployment">Quick Start - Basic Deployment</h2>
+<h2 id="basic-deployment">Basic Deployment</h2>
 <p>Quick setup for demos without network isolation.</p>
 <div class="highlight"><pre><span></span><code>azd init -t azure/gpt-rag
 az login
@@ -773,7 +924,7 @@ azd provision
 
 <h2 id="zero-trust-deployment">Zero Trust Deployment</h2>
 <p>For deployments that <strong>require network isolation</strong>.</p>
-<h3 id="before-provisioning">Before Provisioning</h3>
+<p><strong>Before Provisioning</strong></p>
 <p>Enable network isolation in your environment:</p>
 <div class="highlight"><pre><span></span><code>azd env set NETWORK_ISOLATION true
 </code></pre></div>
@@ -784,119 +935,124 @@ azd auth login
 <blockquote>
 <p>Add <code>--tenant</code> for <code>az</code> or <code>--tenant-id</code> for <code>azd</code> if you want a specific tenant.</p>
 </blockquote>
-<h3 id="provision-infrastructure">Provision Infrastructure</h3>
+<p><strong>Provision Infrastructure</strong></p>
 <div class="highlight"><pre><span></span><code>azd provision
 </code></pre></div>
-<h3 id="post-provision-configuration">Post-Provision Configuration</h3>
-<blockquote>
-<p>The Bicep template provisions a <strong>Jumpbox VM</strong> by default. You can connect to it to perform the post-provision steps, deploy services, and run tests.</p>
-</blockquote>
-<p><strong>Option A – Using the deployed Jumpbox VM</strong></p>
-<p>Reset the VM password in the Azure Portal (required on first access if not set in deployment parameters): <br>Go to your VM resource → <strong>Support + troubleshooting</strong> → <strong>Reset password</strong> → Set new credentials.</p>
-<blockquote>
-<p>Note: default username is <code>testvmuser</code></p>
-</blockquote>
-<p>Connect via <strong>Azure Bastion</strong>.</p>
-<p>Once connected, authenticate with the VM’s Managed Identity:</p>
-<div class="highlight"><pre><span></span><code>az login --identity
-azd auth login --with-managed-identity
+<p><strong>Post-Provision Configuration</strong></p>
+<p>After provisioning completes, you'll be prompted whether your machine has VNet access.</p>
+<ul>
+<li>If you have VNet access:</li>
+</ul>
+<p>Answer <code>Y</code> when prompted. The post-provision script will run automatically and complete the configuration.</p>
+<ul>
+<li>If you don't have VNet access:</li>
+</ul>
+<p>Answer <code>N</code> when prompted. You'll need to use the provisioned Jumpbox VM to complete the post-provision steps.</p>
+<p>Using the Jumpbox VM</p>
+<p>1) <strong>Reset the VM password</strong> in the Azure Portal (required on first access if not set in deployment parameters):</p>
+<ul>
+<li>Go to your VM resource → <strong>Support + troubleshooting</strong> → <strong>Reset password</strong> → Set new credentials</li>
+<li>Default username is <code>testvmuser</code></li>
+</ul>
+<p>2) <strong>Connect via Azure Bastion</strong></p>
+<p>3) <strong>Authenticate with the VM's Managed Identity:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="n">az</span> <span class="n">login</span> <span class="p">-</span><span class="n">-identity</span>
+<span class="n">azd</span> <span class="n">auth</span> <span class="n">login</span> <span class="p">-</span><span class="n">-managed-identity</span>
 </code></pre></div>
 <blockquote>
 <p>Add <code>--tenant</code> for <code>az</code> or <code>--tenant-id</code> for <code>azd</code> if you want a specific tenant.</p>
 </blockquote>
-<p>Open a terminal in the VM and run:</p>
-<div class="highlight"><pre><span></span><code>cd c:\github\gpt-rag
-.\scripts\postProvision.ps1
-</code></pre></div>
-<p><strong>Option B – From your local machine (must have VNet access)</strong></p>
-<p>From the <code>gpt-rag</code> directory, run:</p>
-<div class="highlight"><pre><span></span><code>.\scripts\postProvision.ps1
-</code></pre></div>
-<p>or (Bash)</p>
-<div class="highlight"><pre><span></span><code>.\scripts\postProvision.sh
-</code></pre></div>
+<p>4) <strong>Run the post-provision script:</strong></p>
+<p>PowerShell:
+   <div class="highlight"><pre><span></span><code><span class="nb">cd </span><span class="n">c</span><span class="p">:\</span><span class="n">github</span><span class="p">\</span><span class="n">gpt-rag</span>
+<span class="p">.\</span><span class="n">scripts</span><span class="p">\</span><span class="n">postProvision</span><span class="p">.</span><span class="n">ps1</span>
+</code></pre></div></p>
+<p>Bash:
+   <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/mnt/c/github/gpt-rag
+./scripts/postProvision.sh
+</code></pre></div></p>
 <blockquote>
-<p>Note: If you have re-initialized or cloned the gpt-rag repo again, refresh your <code>azd</code> environment before running postProvision script so it points to the <strong>existing</strong> deployment:
+<p><strong>Note:</strong> If you have re-initialized or cloned the gpt-rag repo again, refresh your <code>azd</code> environment before running the postProvision script so it points to the <strong>existing</strong> deployment:
 <code>azd init -t azure/gpt-rag</code> then <code>azd env refresh</code>. When prompted, select the <strong>same Subscription, Resource Group, and Location</strong> as the original provisioning so <code>azd</code> correctly links to your environment.</p>
 </blockquote>
 <h2 id="deploy-gpt-rag-services">Deploy GPT-RAG Services</h2>
+<blockquote>
+<p><strong>Note:</strong> For Zero Trust deployments with network isolation, ensure you have VNet connectivity either through the Jumpbox VM or via VPN before deploying services. If using the Jumpbox VM, the repositories are located in the <code>c:\github</code> directory.</p>
+</blockquote>
 <p>Once the GPT-RAG infrastructure is provisioned, you can deploy the services.</p>
 <p>To deploy <strong>all services at once</strong>, navigate to the <code>gpt-rag</code> directory (with azd environment configured) and run:</p>
 <div class="highlight"><pre><span></span><code>azd deploy
 </code></pre></div>
 <p>This command deploys each service in sequence.</p>
-<p>If you prefer to <strong>deploy a single service</strong>—for example, when updating only that service—navigate to the corresponding service repository and follow the instructions in its <strong>"How to Deploy"</strong> section.</p>
+<p>If you prefer to <strong>deploy a single service</strong>, for example, when updating only that service, you can deploy it individually. Below is an example using the orchestrator service. The same approach applies to other services (frontend, dataingest, mcp).</p>
+<h3 id="deploy-individual-services">Deploy Individual Services</h3>
+<p>Make sure you're logged in to Azure:</p>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>login
+</code></pre></div>
+<p><strong>Example: Deploying the Orchestrator</strong></p>
+<p><strong>Using azd (recommended):</strong></p>
+<p>Initialize the template:
+<div class="highlight"><pre><span></span><code>azd<span class="w"> </span>init<span class="w"> </span>-t<span class="w"> </span>azure/gpt-rag-orchestrator<span class="w"> </span>
+</code></pre></div></p>
+<blockquote>
+<p><strong>Important:</strong> Use the <strong>same environment name</strong> with <code>azd init</code> as in the infrastructure deployment to keep components consistent.</p>
+</blockquote>
+<p>Update environment variables then deploy:
+<div class="highlight"><pre><span></span><code>azd<span class="w"> </span>env<span class="w"> </span>refresh
+azd<span class="w"> </span>deploy<span class="w"> </span>
+</code></pre></div></p>
+<blockquote>
+<p><strong>Important:</strong> Run <code>azd env refresh</code> with the <strong>same subscription</strong> and <strong>resource group</strong> used in the infrastructure deployment.</p>
+</blockquote>
+<p><strong>Using a shell script:</strong></p>
+<p>Clone the repository, set the App Configuration endpoint, and run the deployment script.</p>
+<p>PowerShell (Windows):
+<div class="highlight"><pre><span></span><code><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">://</span><span class="n">github</span><span class="p">.</span><span class="n">com</span><span class="p">/</span><span class="n">Azure</span><span class="p">/</span><span class="n">gpt-rag-orchestrator</span><span class="p">.</span><span class="n">git</span>
+<span class="nv">$env:APP_CONFIG_ENDPOINT</span> <span class="p">=</span> <span class="s2">&quot;https://&lt;your-app-config-name&gt;.azconfig.io&quot;</span>
+<span class="nb">cd </span><span class="n">gpt-rag-orchestrator</span>
+<span class="p">.\</span><span class="n">scripts</span><span class="p">\</span><span class="n">deploy</span><span class="p">.</span><span class="n">ps1</span>
+</code></pre></div></p>
+<p>Bash (Linux/macOS):
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/Azure/gpt-rag-orchestrator.git
+<span class="nb">export</span><span class="w"> </span><span class="nv">APP_CONFIG_ENDPOINT</span><span class="o">=</span><span class="s2">&quot;https://&lt;your-app-config-name&gt;.azconfig.io&quot;</span>
+<span class="nb">cd</span><span class="w"> </span>gpt-rag-orchestrator
+./scripts/deploy.sh
+</code></pre></div></p>
 <h2 id="permissions">Permissions</h2>
-<p><strong>AI Foundry Role and AI Search Assignments</strong></p>
+<p><strong>Microsoft Foundry Role and AI Search Assignments</strong></p>
 <table>
 <thead>
 <tr>
-<th style="text-align: left;">Resource</th>
-<th style="text-align: left;">Role</th>
-<th style="text-align: left;">Assignee</th>
-<th style="text-align: left;">Description</th>
+<th>Resource</th>
+<th>Role</th>
+<th>Assignee</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;">GenAI App Search Service</td>
-<td style="text-align: left;">Search Index Data Reader</td>
-<td style="text-align: left;">AI Foundry Project</td>
-<td style="text-align: left;">Read index data</td>
+<td>GenAI App Search Service</td>
+<td>Search Index Data Reader</td>
+<td>Microsoft Foundry Project</td>
+<td>Read index data</td>
 </tr>
 <tr>
-<td style="text-align: left;">GenAI App Search Service</td>
-<td style="text-align: left;">Search Service Contributor</td>
-<td style="text-align: left;">AI Foundry Project</td>
-<td style="text-align: left;">Create AI search connection</td>
+<td>GenAI App Search Service</td>
+<td>Search Service Contributor</td>
+<td>Microsoft Foundry Project</td>
+<td>Create AI Search connection</td>
 </tr>
 <tr>
-<td style="text-align: left;">GenAI App Storage Account</td>
-<td style="text-align: left;">Storage Blob Data Reader</td>
-<td style="text-align: left;">AI Foundry Account</td>
-<td style="text-align: left;">Read blob data</td>
+<td>GenAI App Storage Account</td>
+<td>Storage Blob Data Reader</td>
+<td>Microsoft Foundry Project</td>
+<td>Read blob data</td>
 </tr>
 <tr>
-<td style="text-align: left;">GenAI App Storage Account</td>
-<td style="text-align: left;">Storage Blob Data Reader</td>
-<td style="text-align: left;">Search Service</td>
-<td style="text-align: left;">Read blob data for search integration</td>
-</tr>
-<tr>
-<td style="text-align: left;">AI Foundry Storage Account</td>
-<td style="text-align: left;">Storage Blob Data Contributor</td>
-<td style="text-align: left;">AI Foundry Project</td>
-<td style="text-align: left;">Enable agent to store/retrieve blob artifacts in customer storage</td>
-</tr>
-<tr>
-<td style="text-align: left;">AI Foundry Storage Account Containers</td>
-<td style="text-align: left;">Storage Blob Data Owner (workspace)</td>
-<td style="text-align: left;">AI Foundry Project</td>
-<td style="text-align: left;">Scoped owner access to workspace containers for session-specific data</td>
-</tr>
-<tr>
-<td style="text-align: left;">AI Foundry Cosmos DB Account</td>
-<td style="text-align: left;">Cosmos DB Operator</td>
-<td style="text-align: left;">AI Foundry Project</td>
-<td style="text-align: left;">Control-plane operations for enterprise memory database (threads)</td>
-</tr>
-<tr>
-<td style="text-align: left;">AI Foundry Cosmos DB Containers</td>
-<td style="text-align: left;">Cosmos DB Built-in Data Contributor</td>
-<td style="text-align: left;">AI Foundry Project</td>
-<td style="text-align: left;">Read/write conversation threads within enterprise memory containers</td>
-</tr>
-<tr>
-<td style="text-align: left;">AI Foundry Search Service</td>
-<td style="text-align: left;">Search Service Contributor</td>
-<td style="text-align: left;">AI Foundry Project</td>
-<td style="text-align: left;">Create/update indexes for vector search workflows</td>
-</tr>
-<tr>
-<td style="text-align: left;">AI Foundry Search Service</td>
-<td style="text-align: left;">Search Index Data Contributor</td>
-<td style="text-align: left;">AI Foundry Project</td>
-<td style="text-align: left;">Read/write index data for embedding-based queries</td>
+<td>Microsoft Foundry Account</td>
+<td>Cognitive Services User</td>
+<td>Search Service</td>
+<td>Allow Search Service to access vectorizers</td>
 </tr>
 </tbody>
 </table>
@@ -904,174 +1060,168 @@ azd auth login --with-managed-identity
 <table>
 <thead>
 <tr>
-<th style="text-align: left;">Resource</th>
-<th style="text-align: left;">Role</th>
-<th style="text-align: left;">Assignee</th>
-<th style="text-align: left;">Description</th>
+<th>Resource</th>
+<th>Role</th>
+<th>Assignee</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;">GenAI App Configuration Store</td>
-<td style="text-align: left;">App Configuration Data Reader</td>
-<td style="text-align: left;">ContainerApp: orchestrator</td>
-<td style="text-align: left;">Read configuration data</td>
+<td>GenAI App Configuration Store</td>
+<td>App Configuration Data Reader</td>
+<td>ContainerApp: orchestrator</td>
+<td>Read configuration data</td>
 </tr>
 <tr>
-<td style="text-align: left;">GenAI App Configuration Store</td>
-<td style="text-align: left;">App Configuration Data Reader</td>
-<td style="text-align: left;">ContainerApp: frontend</td>
-<td style="text-align: left;">Read configuration data</td>
+<td>GenAI App Configuration Store</td>
+<td>App Configuration Data Reader</td>
+<td>ContainerApp: frontend</td>
+<td>Read configuration data</td>
 </tr>
 <tr>
-<td style="text-align: left;">GenAI App Configuration Store</td>
-<td style="text-align: left;">App Configuration Data Reader</td>
-<td style="text-align: left;">ContainerApp: dataingest</td>
-<td style="text-align: left;">Read configuration data</td>
+<td>GenAI App Configuration Store</td>
+<td>App Configuration Data Reader</td>
+<td>ContainerApp: dataingest</td>
+<td>Read configuration data</td>
 </tr>
 <tr>
-<td style="text-align: left;">GenAI App Configuration Store</td>
-<td style="text-align: left;">App Configuration Data Reader</td>
-<td style="text-align: left;">ContainerApp: mcp</td>
-<td style="text-align: left;">Read configuration data</td>
+<td>GenAI App Configuration Store</td>
+<td>App Configuration Data Reader</td>
+<td>ContainerApp: mcp</td>
+<td>Read configuration data</td>
 </tr>
 <tr>
-<td style="text-align: left;">GenAI App Container Registry</td>
-<td style="text-align: left;">AcrPull</td>
-<td style="text-align: left;">ContainerApp: mcp</td>
-<td style="text-align: left;">Pull container images</td>
+<td>GenAI App Container Registry</td>
+<td>AcrPull</td>
+<td>ContainerApp: orchestrator</td>
+<td>Pull container images</td>
 </tr>
 <tr>
-<td style="text-align: left;">GenAI App Container Registry</td>
-<td style="text-align: left;">AcrPull</td>
-<td style="text-align: left;">ContainerApp: orchestrator</td>
-<td style="text-align: left;">Pull container images</td>
+<td>GenAI App Container Registry</td>
+<td>AcrPull</td>
+<td>ContainerApp: frontend</td>
+<td>Pull container images</td>
 </tr>
 <tr>
-<td style="text-align: left;">GenAI App Container Registry</td>
-<td style="text-align: left;">AcrPull</td>
-<td style="text-align: left;">ContainerApp: frontend</td>
-<td style="text-align: left;">Pull container images</td>
+<td>GenAI App Container Registry</td>
+<td>AcrPull</td>
+<td>ContainerApp: dataingest</td>
+<td>Pull container images</td>
 </tr>
 <tr>
-<td style="text-align: left;">GenAI App Container Registry</td>
-<td style="text-align: left;">AcrPull</td>
-<td style="text-align: left;">ContainerApp: dataingest</td>
-<td style="text-align: left;">Pull container images</td>
+<td>GenAI App Container Registry</td>
+<td>AcrPull</td>
+<td>ContainerApp: mcp</td>
+<td>Pull container images</td>
 </tr>
 <tr>
-<td style="text-align: left;">GenAI App Key Vault</td>
-<td style="text-align: left;">Key Vault Secrets User</td>
-<td style="text-align: left;">ContainerApp: orchestrator</td>
-<td style="text-align: left;">Read secrets</td>
+<td>GenAI App Key Vault</td>
+<td>Key Vault Secrets User</td>
+<td>ContainerApp: orchestrator</td>
+<td>Read secrets</td>
 </tr>
 <tr>
-<td style="text-align: left;">GenAI App Key Vault</td>
-<td style="text-align: left;">Key Vault Secrets User</td>
-<td style="text-align: left;">ContainerApp: frontend</td>
-<td style="text-align: left;">Read secrets</td>
+<td>GenAI App Key Vault</td>
+<td>Key Vault Secrets User</td>
+<td>ContainerApp: frontend</td>
+<td>Read secrets</td>
 </tr>
 <tr>
-<td style="text-align: left;">GenAI App Key Vault</td>
-<td style="text-align: left;">Key Vault Secrets User</td>
-<td style="text-align: left;">ContainerApp: dataingest</td>
-<td style="text-align: left;">Read secrets</td>
+<td>GenAI App Key Vault</td>
+<td>Key Vault Secrets User</td>
+<td>ContainerApp: dataingest</td>
+<td>Read secrets</td>
 </tr>
 <tr>
-<td style="text-align: left;">GenAI App Key Vault</td>
-<td style="text-align: left;">Key Vault Secrets User</td>
-<td style="text-align: left;">ContainerApp: mcp</td>
-<td style="text-align: left;">Read secrets</td>
+<td>GenAI App Key Vault</td>
+<td>Key Vault Secrets User</td>
+<td>ContainerApp: mcp</td>
+<td>Read secrets</td>
 </tr>
 <tr>
-<td style="text-align: left;">GenAI App Search Service</td>
-<td style="text-align: left;">Search Index Data Reader</td>
-<td style="text-align: left;">ContainerApp: orchestrator</td>
-<td style="text-align: left;">Read index data</td>
+<td>GenAI App Search Service</td>
+<td>Search Index Data Reader</td>
+<td>ContainerApp: orchestrator</td>
+<td>Read index data</td>
 </tr>
 <tr>
-<td style="text-align: left;">GenAI App Search Service</td>
-<td style="text-align: left;">Search Index Data Contributor</td>
-<td style="text-align: left;">ContainerApp: dataingest</td>
-<td style="text-align: left;">Read/write index data</td>
+<td>GenAI App Search Service</td>
+<td>Search Index Data Contributor</td>
+<td>ContainerApp: dataingest</td>
+<td>Read/write index data</td>
 </tr>
 <tr>
-<td style="text-align: left;">GenAI App Search Service</td>
-<td style="text-align: left;">Search Index Data Contributor</td>
-<td style="text-align: left;">ContainerApp: mcp</td>
-<td style="text-align: left;">Read/write index data</td>
+<td>GenAI App Search Service</td>
+<td>Search Index Data Contributor</td>
+<td>ContainerApp: mcp</td>
+<td>Read/write index data</td>
 </tr>
 <tr>
-<td style="text-align: left;">GenAI App Storage Account</td>
-<td style="text-align: left;">Storage Blob Data Reader</td>
-<td style="text-align: left;">ContainerApp: orchestrator</td>
-<td style="text-align: left;">Read blob data</td>
+<td>GenAI App Storage Account</td>
+<td>Storage Blob Data Reader</td>
+<td>ContainerApp: orchestrator</td>
+<td>Read blob data</td>
 </tr>
 <tr>
-<td style="text-align: left;">GenAI App Storage Account</td>
-<td style="text-align: left;">Storage Blob Data Reader</td>
-<td style="text-align: left;">ContainerApp: frontend</td>
-<td style="text-align: left;">Read blob data</td>
+<td>GenAI App Storage Account</td>
+<td>Storage Blob Data Reader</td>
+<td>ContainerApp: frontend</td>
+<td>Read blob data</td>
 </tr>
 <tr>
-<td style="text-align: left;">GenAI App Storage Account</td>
-<td style="text-align: left;">Storage Blob Data Contributor</td>
-<td style="text-align: left;">ContainerApp: dataingest</td>
-<td style="text-align: left;">Read/write blob data</td>
+<td>GenAI App Storage Account</td>
+<td>Storage Blob Data Contributor</td>
+<td>ContainerApp: dataingest</td>
+<td>Read/write blob data</td>
 </tr>
 <tr>
-<td style="text-align: left;">GenAI App Storage Account</td>
-<td style="text-align: left;">Storage Blob Data Contributor</td>
-<td style="text-align: left;">ContainerApp: mcp</td>
-<td style="text-align: left;">Read/write blob data</td>
+<td>GenAI App Storage Account</td>
+<td>Storage Blob Data Contributor</td>
+<td>ContainerApp: mcp</td>
+<td>Read/write blob data</td>
 </tr>
 <tr>
-<td style="text-align: left;">GenAI App Storage Account</td>
-<td style="text-align: left;">Storage Queue Data Contributor</td>
-<td style="text-align: left;">ContainerApp: mcp</td>
-<td style="text-align: left;">Read/write storage queue data</td>
+<td>GenAI App Cosmos DB</td>
+<td>Cosmos DB Built-in Data Contributor</td>
+<td>ContainerApp: orchestrator</td>
+<td>Read/write Cosmos DB data</td>
 </tr>
 <tr>
-<td style="text-align: left;">GenAI App Cosmos DB</td>
-<td style="text-align: left;">Cosmos DB Built-in Data Contributor</td>
-<td style="text-align: left;">ContainerApp: orchestrator</td>
-<td style="text-align: left;">Read/write Cosmos DB data</td>
+<td>Microsoft Foundry Account</td>
+<td>Cognitive Services User</td>
+<td>ContainerApp: orchestrator</td>
+<td>Access Cognitive Services</td>
 </tr>
 <tr>
-<td style="text-align: left;">AI Foundry Account</td>
-<td style="text-align: left;">Cognitive Services User</td>
-<td style="text-align: left;">ContainerApp: orchestrator</td>
-<td style="text-align: left;">Access Cognitive Services operations</td>
+<td>Microsoft Foundry Account</td>
+<td>Cognitive Services User</td>
+<td>ContainerApp: dataingest</td>
+<td>Access Cognitive Services</td>
 </tr>
 <tr>
-<td style="text-align: left;">AI Foundry Account</td>
-<td style="text-align: left;">Cognitive Services User</td>
-<td style="text-align: left;">ContainerApp: dataingest</td>
-<td style="text-align: left;">Access Cognitive Services operations</td>
+<td>Microsoft Foundry Account</td>
+<td>Cognitive Services User</td>
+<td>ContainerApp: mcp</td>
+<td>Access Cognitive Services</td>
 </tr>
 <tr>
-<td style="text-align: left;">AI Foundry Account</td>
-<td style="text-align: left;">Cognitive Services OpenAI User</td>
-<td style="text-align: left;">ContainerApp: orchestrator</td>
-<td style="text-align: left;">Use OpenAI APIs</td>
+<td>Microsoft Foundry Account</td>
+<td>Cognitive Services OpenAI User</td>
+<td>ContainerApp: orchestrator</td>
+<td>Use OpenAI APIs</td>
 </tr>
 <tr>
-<td style="text-align: left;">AI Foundry Account</td>
-<td style="text-align: left;">Cognitive Services OpenAI User</td>
-<td style="text-align: left;">ContainerApp: dataingest</td>
-<td style="text-align: left;">Use OpenAI APIs</td>
+<td>Microsoft Foundry Account</td>
+<td>Cognitive Services OpenAI User</td>
+<td>ContainerApp: dataingest</td>
+<td>Use OpenAI APIs</td>
 </tr>
 <tr>
-<td style="text-align: left;">AI Foundry Account</td>
-<td style="text-align: left;">Cognitive Services User</td>
-<td style="text-align: left;">ContainerApp: mcp</td>
-<td style="text-align: left;">Access Cognitive Services</td>
-</tr>
-<tr>
-<td style="text-align: left;">AI Foundry Account</td>
-<td style="text-align: left;">Cognitive Services OpenAI User</td>
-<td style="text-align: left;">ContainerApp: mcp</td>
-<td style="text-align: left;">Use OpenAI APIs</td>
+<td>Microsoft Foundry Account</td>
+<td>Cognitive Services OpenAI User</td>
+<td>ContainerApp: mcp</td>
+<td>Use OpenAI APIs</td>
 </tr>
 </tbody>
 </table>
@@ -1079,66 +1229,78 @@ azd auth login --with-managed-identity
 <table>
 <thead>
 <tr>
-<th style="text-align: left;">Resource</th>
-<th style="text-align: left;">Role</th>
-<th style="text-align: left;">Assignee</th>
-<th style="text-align: left;">Description</th>
+<th>Resource</th>
+<th>Role</th>
+<th>Assignee</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;">GenAI App Configuration Store</td>
-<td style="text-align: left;">App Configuration Data Owner</td>
-<td style="text-align: left;">Executor</td>
-<td style="text-align: left;">Full control over configuration settings</td>
+<td>GenAI App Configuration Store</td>
+<td>App Configuration Data Owner</td>
+<td>Executor</td>
+<td>Full control over configuration settings</td>
 </tr>
 <tr>
-<td style="text-align: left;">GenAI App Container Registry</td>
-<td style="text-align: left;">AcrPush</td>
-<td style="text-align: left;">Executor</td>
-<td style="text-align: left;">Push container images</td>
+<td>GenAI App Container Registry</td>
+<td>AcrPush</td>
+<td>Executor</td>
+<td>Push container images</td>
 </tr>
 <tr>
-<td style="text-align: left;">GenAI App Key Vault</td>
-<td style="text-align: left;">Key Vault Contributor</td>
-<td style="text-align: left;">Executor</td>
-<td style="text-align: left;">Manage Key Vault settings</td>
+<td>GenAI App Container Registry</td>
+<td>AcrPull</td>
+<td>Executor</td>
+<td>Pull container images</td>
 </tr>
 <tr>
-<td style="text-align: left;">GenAI App Key Vault</td>
-<td style="text-align: left;">Key Vault Secrets Officer</td>
-<td style="text-align: left;">Executor</td>
-<td style="text-align: left;">Create Key Vault secrets</td>
+<td>GenAI App Key Vault</td>
+<td>Key Vault Contributor</td>
+<td>Executor</td>
+<td>Manage Key Vault settings</td>
 </tr>
 <tr>
-<td style="text-align: left;">GenAI App Search Service</td>
-<td style="text-align: left;">Search Service Contributor</td>
-<td style="text-align: left;">Executor</td>
-<td style="text-align: left;">Create/update search service elements</td>
+<td>GenAI App Key Vault</td>
+<td>Key Vault Secrets Officer</td>
+<td>Executor</td>
+<td>Create Key Vault secrets</td>
 </tr>
 <tr>
-<td style="text-align: left;">GenAI App Search Service</td>
-<td style="text-align: left;">Search Index Data Contributor</td>
-<td style="text-align: left;">Executor</td>
-<td style="text-align: left;">Read/write search index data</td>
+<td>GenAI App Search Service</td>
+<td>Search Service Contributor</td>
+<td>Executor</td>
+<td>Create/update search service elements</td>
 </tr>
 <tr>
-<td style="text-align: left;">GenAI App Storage Account</td>
-<td style="text-align: left;">Storage Blob Data Contributor</td>
-<td style="text-align: left;">Executor</td>
-<td style="text-align: left;">Read/write blob data</td>
+<td>GenAI App Search Service</td>
+<td>Search Index Data Contributor</td>
+<td>Executor</td>
+<td>Read/write search index data</td>
 </tr>
 <tr>
-<td style="text-align: left;">GenAI App Cosmos DB</td>
-<td style="text-align: left;">Cosmos DB Built-in Data Contributor</td>
-<td style="text-align: left;">Executor</td>
-<td style="text-align: left;">Read/write Cosmos DB data</td>
+<td>GenAI App Search Service</td>
+<td>Search Index Data Reader</td>
+<td>Executor</td>
+<td>Read index data</td>
 </tr>
 <tr>
-<td style="text-align: left;">AI Foundry Project</td>
-<td style="text-align: left;">Azure AI Project Manager</td>
-<td style="text-align: left;">Executor</td>
-<td style="text-align: left;">Manage AI Foundry projects and assign roles</td>
+<td>GenAI App Storage Account</td>
+<td>Storage Blob Data Contributor</td>
+<td>Executor</td>
+<td>Read/write blob data</td>
+</tr>
+<tr>
+<td>GenAI App Cosmos DB</td>
+<td>Cosmos DB Built-in Data Contributor</td>
+<td>Executor</td>
+<td>Read/write Cosmos DB data</td>
+</tr>
+<tr>
+<td>Microsoft Foundry Account</td>
+<td>Cognitive Services OpenAI User</td>
+<td>Executor</td>
+<td>Use OpenAI APIs</td>
 </tr>
 </tbody>
 </table>
@@ -1157,19 +1319,19 @@ azd auth login --with-managed-identity
 <td>GenAI App Container Apps</td>
 <td>Container Apps Contributor</td>
 <td>Jumpbox VM</td>
-<td>Full control over Container Apps (deploy/manage apps)</td>
+<td>Full control over Container Apps</td>
 </tr>
 <tr>
 <td>Azure Managed Identity</td>
 <td>Managed Identity Operator</td>
 <td>Jumpbox VM</td>
-<td>Assign and manage user-assigned managed identities</td>
+<td>Assign and manage user-assigned identities</td>
 </tr>
 <tr>
 <td>GenAI App Container Registry</td>
 <td>Container Registry Repository Writer</td>
 <td>Jumpbox VM</td>
-<td>Write to specific repositories</td>
+<td>Write to ACR repositories</td>
 </tr>
 <tr>
 <td>GenAI App Container Registry</td>
@@ -1181,7 +1343,7 @@ azd auth login --with-managed-identity
 <td>GenAI App Container Registry</td>
 <td>Container Registry Data Access Configuration Administrator</td>
 <td>Jumpbox VM</td>
-<td>Manage data access configuration for ACR</td>
+<td>Manage ACR data access configuration</td>
 </tr>
 <tr>
 <td>GenAI App Container Registry</td>
@@ -1226,22 +1388,22 @@ azd auth login --with-managed-identity
 <td>Read/write blob data</td>
 </tr>
 <tr>
-<td>AI Foundry Account</td>
-<td>Azure AI Project Manager</td>
+<td>GenAI App Cosmos DB</td>
+<td>Cosmos DB Built-in Data Contributor</td>
 <td>Jumpbox VM</td>
-<td>Manage AI Foundry projects and assign roles</td>
+<td>Read/write Cosmos DB data</td>
 </tr>
 <tr>
-<td>AI Foundry Account</td>
+<td>Microsoft Foundry Account</td>
 <td>Cognitive Services Contributor</td>
 <td>Jumpbox VM</td>
 <td>Manage Cognitive Services resources</td>
 </tr>
 <tr>
-<td>GenAI App Cosmos DB</td>
-<td>Cosmos DB Built-in Data Contributor</td>
+<td>Microsoft Foundry Account</td>
+<td>Cognitive Services OpenAI User</td>
 <td>Jumpbox VM</td>
-<td>Read/write Cosmos DB data</td>
+<td>Use OpenAI APIs</td>
 </tr>
 </tbody>
 </table>
