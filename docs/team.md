@@ -103,39 +103,6 @@
     </a>
   </div>
 </div>
-
----
-
-<div class="section-title">Champions</div>
-<div class="section-desc">Community advocates helping users succeed, sharing knowledge, and growing the GPT-RAG ecosystem.</div>
-
-<div class="team-grid">
-  <div class="team-card">
-    <a href="https://github.com/RameshJGenAI" target="_blank">
-      <img src="https://github.com/RameshJGenAI.png" alt="Ramesh Jajula">
-      <sub><b>Ramesh Jajula</b></sub>
-    </a>
-  </div>
-  <div class="team-card">
-    <a href="https://github.com/Vinod-Chekkala" target="_blank">
-      <img src="https://github.com/Vinod-Chekkala.png" alt="Vinod Kumar Chekkala">
-      <sub><b>Vinod Chekkala</b></sub>
-    </a>
-  </div>
-  <div class="team-card">
-    <a href="https://github.com/v-sisaurabh" target="_blank">
-      <img src="https://github.com/v-sisaurabh.png" alt="Saurabh Singh">
-      <sub><b>Saurabh Singh</b></sub>
-    </a>
-  </div>
-  <div class="team-card">
-    <a href="https://github.com/varunb17" target="_blank">
-      <img src="https://github.com/varunb17.png" alt="Varun Nambia">
-      <sub><b>Varun Nambia</b></sub>
-    </a>
-  </div>  
-</div>
-
  
 ---
 
@@ -206,6 +173,40 @@
   </div>
 
 </div>
+
+---
+
+<div class="section-title">Champions</div>
+<div class="section-desc">Community advocates helping users succeed, sharing knowledge, and growing the GPT-RAG ecosystem.</div>
+
+<div class="team-grid">
+  <div class="team-card">
+    <a href="https://github.com/RameshJGenAI" target="_blank">
+      <img src="https://github.com/RameshJGenAI.png" alt="Ramesh Jajula">
+      <sub><b>Ramesh Jajula</b></sub>
+    </a>
+  </div>
+  <div class="team-card">
+    <a href="https://github.com/Vinod-Chekkala" target="_blank">
+      <img src="https://github.com/Vinod-Chekkala.png" alt="Vinod Kumar Chekkala">
+      <sub><b>Vinod Chekkala</b></sub>
+    </a>
+  </div>
+  <div class="team-card">
+    <a href="https://github.com/v-sisaurabh" target="_blank">
+      <img src="https://github.com/v-sisaurabh.png" alt="Saurabh Singh">
+      <sub><b>Saurabh Singh</b></sub>
+    </a>
+  </div>
+  <div class="team-card">
+    <a href="https://github.com/varunb17" target="_blank">
+      <img src="https://github.com/varunb17.png" alt="Varun Nambia">
+      <sub><b>Varun Nambia</b></sub>
+    </a>
+  </div>  
+</div>
+
+---
 
 <div class="call-to-action">
   <p>Every contribution matters! Whether it's code, docs, ideas, or feedback — you help make GPT-RAG better.</p>

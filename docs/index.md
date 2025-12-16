@@ -7,6 +7,7 @@ GPT-RAG is an enterprise-grade accelerator for building robust Retrieval-Augment
 Designed with Zero-Trust security and Infrastructure as Code (IaC) principles from the ground up, GPT-RAG accelerates production deployments while ensuring consistency, governance, and operational excellence. It supports text, image, and voice scenarios, enabling organizations to rapidly create rich multimodal experiences.
 
 [Latest Stable Release {{ latest_release("azure/gpt-rag") }} :material-tag:](https://github.com/azure/gpt-rag/releases/latest){ .md-button--pill }
+[Preview Release {{ latest_release_candidate("azure/gpt-rag") }} :material-tag: ]({{ latest_release_candidate_url("azure/gpt-rag") }}){ data-md-color-accent="orange" .md-button--pill .md-button--pill--rc }
 
 ![Zero Trust Architecture](media/architecture_zero_trust.png)
 *Zero-Trust Architecture*

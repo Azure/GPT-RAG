@@ -1,4 +1,4 @@
-# SharePoint Setup
+# SharePoint Setup (Preview Release)
 
 This section explains how to configure SharePoint as a data source for the GPT-RAG Azure AI Search Index, using the `Sites.Selected` permission to limit access to specific site collections.
 
