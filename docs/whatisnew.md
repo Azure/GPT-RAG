@@ -10,7 +10,7 @@ This release adds two major capabilities:
   You can use Microsoft Foundry “Direct from Azure” models (for example, Mistral, DeepSeek, Grok, Llama, etc.) through the Foundry inference APIs with Entra ID authentication.
   How to configure it: [Azure Direct Models](howto_azure_direct.md)
 
-**SharePoint Lists (structured ingestion)**
+**SharePoint Lists**
   The SharePoint connector now covers both SharePoint Online document libraries (files like PDFs/Office docs) and generic lists (structured fields) so your Azure AI Search index stays in sync with list items and documents.
   How to configure it: [SharePoint Data Source](ingestion_sharepoint_source.md) and [SharePoint Connector Setup Guide](howto_sharepoint_connector.md)
 
