@@ -2,7 +2,7 @@
 
 # GPT-RAG Solution Accelerator 
 
-GPT-RAG is an enterprise-grade accelerator for building robust Retrieval-Augmented Generation (RAG) solutions on Azure. It provides a modular and secure foundation that integrates Azure OpenAI, AI Search, Microsoft Foundry, and modern orchestration patterns to power intelligent assistants and data-driven applications across the enterprise.
+GPT-RAG is an enterprise-grade accelerator for building conversational AI assistants that answer user questions using Retrieval-Augmented Generation (RAG) on Azure. It provides a modular and secure foundation that integrates Azure OpenAI, AI Search, Microsoft Foundry, and modern orchestration patterns to power intelligent assistants and data-driven applications across the enterprise.
 
 Designed with Zero-Trust security and Infrastructure as Code (IaC) principles from the ground up, GPT-RAG accelerates production deployments while ensuring consistency, governance, and operational excellence. It supports text, image, and voice scenarios, enabling organizations to rapidly create rich multimodal experiences.
 
