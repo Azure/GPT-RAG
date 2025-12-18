@@ -1,14 +1,14 @@
 # Azure Direct Models
 
-Azure Direct Models are models hosted and exposed by Microsoft Foundry that you call directly via the Foundry inference APIs, using Microsoft Entra ID–based authentication, instead of Azure OpenAI–specific APIs. This page explains how to switch GPT-RAG’s default inference model (by default, `gpt-4o`) to a different model.
+Azure Direct Models are hosted and exposed by Microsoft Foundry. You call them via the Foundry inference APIs using Microsoft Entra ID–based authentication, instead of Azure OpenAI–specific APIs. This page explains how to switch GPT-RAG’s default inference model (currently, `gpt-4o`) to a different model.
 
-With Azure Direct Models, you can use non–Azure OpenAI models (for example, Mistral, DeepSeek, Grok, etc.) from Azure, while standardizing on Foundry inference APIs with Entra ID identity-based access.
+With Azure Direct Models, you can use non–Azure OpenAI models (for example, Mistral, DeepSeek, Grok, etc.) from Azure, while standardizing on Foundry inference APIs and Entra ID authentication.
 
 <a id="how-to-find-which-models-you-can-use"></a>
 
 **How to find which models you can use**
 
-Model availability depends on what’s enabled for your tenant, subscription, and region. The easiest way to see what you can use is the  [Foundry Model Catalog](https://ai.azure.com/explore/models). In the catalog, select the `Direct from Azure` collection to focus on Azure Direct models.
+Model availability depends on what’s enabled for your tenant, subscription, and region. The easiest way to see what you can use is the [Foundry Model Catalog](https://ai.azure.com/explore/models). In the catalog, select the `Direct from Azure` collection to focus on Azure Direct models.
 
 ![Microsoft Foundry catalog - Direct from Azure](media/howto_azure_direct.png)
 
@@ -58,5 +58,5 @@ If you already provisioned GPT-RAG (or you prefer managing models manually), you
 
 <a id="bing-grounding-citations-behavior-by-model-type"></a>
 
-> **Note on Bing Grounding citations**: The Bing Grounding Tool may emit placeholders like &#x3010;0:0&#x2020;source&#x3011;. With OpenAI / Azure OpenAI models, responses include `url_citation` annotations so GPT-RAG can render links. With other Azure Direct models, annotations may be missing, so placeholders are removed.
+> **Note on Bing Grounding citations**: The Bing Grounding tool may emit placeholder markers like &#x3010;0:0&#x2020;source&#x3011;. With OpenAI and Azure OpenAI models, responses include `url_citation` annotations so GPT-RAG can render clickable links. With some Azure Direct models, these annotations may be missing; in that case, GPT-RAG strips the placeholder markers and no clickable citations are shown.
 
