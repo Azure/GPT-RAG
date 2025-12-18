@@ -852,22 +852,32 @@
 </blockquote>
 <h3 id="december-2025">December 2025</h3>
 <p><strong><a href="https://github.com/Azure/GPT-RAG/tree/v2.3.0">Release 2.3.0</a> - SharePoint Lists and Azure Direct Models</strong></p>
-<p>This release adds two major capabilities:</p>
-<p><strong>Azure Direct Models (Microsoft Foundry)</strong>
-  You can use Microsoft Foundry “Direct from Azure” models (for example, Mistral, DeepSeek, Grok, Llama, etc.) through the Foundry inference APIs with Entra ID authentication.
-  How to configure it: <a href="../howto_azure_direct/">Azure Direct Models</a></p>
-<p><strong>SharePoint Lists</strong>
-  The SharePoint connector now covers both SharePoint Online document libraries (files like PDFs/Office docs) and generic lists (structured fields) so your Azure AI Search index stays in sync with list items and documents.
-  How to configure it: <a href="../ingestion_sharepoint_source/">SharePoint Data Source</a> and <a href="../howto_sharepoint_connector/">SharePoint Connector Setup Guide</a></p>
+<p><strong>Azure Direct Models (Microsoft Foundry)</strong></p>
+<p>You can use Microsoft Foundry “Direct from Azure” models (for example, Mistral, DeepSeek, Grok, Llama, etc.) through the Foundry inference APIs with Entra ID authentication. <a href="https://github.com/Azure/GPT-RAG/issues/296">#296</a></p>
+<p>How to configure it: <a href="../howto_azure_direct/">Azure Direct Models</a></p>
+<p>Demo Video:</p>
+<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; margin: 0 auto 20px auto; border-radius: 8px;">
+  <iframe src="https://www.youtube.com/embed/P87o8UwiTHw?rel=0&modestbranding=1" 
+          style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; border-radius: 8px;" 
+          title="User Feedback" 
+          frameborder="0" 
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+          allowfullscreen>
+  </iframe>
+</div>
+
+<p><strong>SharePoint Lists</strong></p>
+<p>The SharePoint connector now covers both SharePoint Online document libraries (files like PDFs/Office docs) and generic lists (structured fields) so your Azure AI Search index stays in sync with list items and documents. <a href="https://github.com/Azure/GPT-RAG/issues/369">#369</a></p>
+<p>How to configure it: <a href="../ingestion_sharepoint_source/">SharePoint Data Source</a> and <a href="../howto_sharepoint_connector/">SharePoint Connector Setup Guide</a></p>
+<hr />
 <h3 id="october-2025">October 2025</h3>
 <p><strong><a href="https://github.com/Azure/GPT-RAG/tree/v2.2.1">Release 2.2.0</a> - Agentic Retrieval and Network Flexibility</strong></p>
 <p>This release introduces major enhancements to support more flexible and enterprise-ready deployments.</p>
-<p><strong>Bring Your Own VNet</strong>
-  Enables organizations to deploy GPT-RAG within their existing virtual network, maintaining full control over network boundaries, DNS, and routing policies.
-  <a href="https://github.com/Azure/GPT-RAG/issues/370">#370</a></p>
-<p><strong>Agentic Retrieval</strong>
-  Adds intelligent, agent-driven retrieval orchestration that dynamically selects and combines information sources for more grounded and context-aware responses.
-  <a href="https://github.com/Azure/GPT-RAG/issues/359">#359</a></p>
+<p><strong>Bring Your Own VNet</strong></p>
+<p>Enables organizations to deploy GPT-RAG within their existing virtual network, maintaining full control over network boundaries, DNS, and routing policies. <a href="https://github.com/Azure/GPT-RAG/issues/370">#370</a></p>
+<p><strong>Agentic Retrieval</strong></p>
+<p>Adds intelligent, agent-driven retrieval orchestration that dynamically selects and combines information sources for more grounded and context-aware responses. <a href="https://github.com/Azure/GPT-RAG/issues/359">#359</a></p>
 <hr />
 <h3 id="september-2025">September 2025</h3>
 <p><strong><a href="https://github.com/Azure/GPT-RAG/tree/v2.1.2">Release 2.1.0</a> - User Feedback Loop</strong></p>

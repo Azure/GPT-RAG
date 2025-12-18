@@ -795,11 +795,11 @@
 
 
 <h1 id="azure-direct-models">Azure Direct Models</h1>
-<p>Azure Direct Models are models hosted and exposed by Microsoft Foundry that you call directly via the Foundry inference APIs, using Microsoft Entra ID–based authentication, instead of Azure OpenAI–specific APIs. This page explains how to switch GPT-RAG’s default inference model (by default, <code>gpt-4o</code>) to a different model.</p>
-<p>With Azure Direct Models, you can use non–Azure OpenAI models (for example, Mistral, DeepSeek, Grok, etc.) from Azure, while standardizing on Foundry inference APIs with Entra ID identity-based access.</p>
+<p>Azure Direct Models are hosted and exposed by Microsoft Foundry. You call them via the Foundry inference APIs using Microsoft Entra ID–based authentication, instead of Azure OpenAI–specific APIs. This page explains how to switch GPT-RAG’s default inference model (currently, <code>gpt-4o</code>) to a different model.</p>
+<p>With Azure Direct Models, you can use non–Azure OpenAI models (for example, Mistral, DeepSeek, Grok, etc.) from Azure, while standardizing on Foundry inference APIs and Entra ID authentication.</p>
 <p><a id="how-to-find-which-models-you-can-use"></a></p>
 <p><strong>How to find which models you can use</strong></p>
-<p>Model availability depends on what’s enabled for your tenant, subscription, and region. The easiest way to see what you can use is the  <a href="https://ai.azure.com/explore/models">Foundry Model Catalog</a>. In the catalog, select the <code>Direct from Azure</code> collection to focus on Azure Direct models.</p>
+<p>Model availability depends on what’s enabled for your tenant, subscription, and region. The easiest way to see what you can use is the <a href="https://ai.azure.com/explore/models">Foundry Model Catalog</a>. In the catalog, select the <code>Direct from Azure</code> collection to focus on Azure Direct models.</p>
 <p><img alt="Microsoft Foundry catalog - Direct from Azure" src="../media/howto_azure_direct.png" /></p>
 <p><a id="how-to-switch-gpt-rags-default-model"></a></p>
 <p><strong>Switch chat model</strong></p>
@@ -831,7 +831,7 @@
 <p>If you already provisioned GPT-RAG (or you prefer managing models manually), you can still switch models. First, create/select the model deployment in Microsoft Foundry (Model catalog → <code>Direct from Azure</code>). Then take the deployment name you created/selected and set it as <code>CHAT_DEPLOYMENT_NAME</code> in Azure App Configuration. Finally, restart the orchestrator Container App so it picks up the new value.</p>
 <p><a id="bing-grounding-citations-behavior-by-model-type"></a></p>
 <blockquote>
-<p><strong>Note on Bing Grounding citations</strong>: The Bing Grounding Tool may emit placeholders like &#x3010;0:0&#x2020;source&#x3011;. With OpenAI / Azure OpenAI models, responses include <code>url_citation</code> annotations so GPT-RAG can render links. With other Azure Direct models, annotations may be missing, so placeholders are removed.</p>
+<p><strong>Note on Bing Grounding citations</strong>: The Bing Grounding tool may emit placeholder markers like &#x3010;0:0&#x2020;source&#x3011;. With OpenAI and Azure OpenAI models, responses include <code>url_citation</code> annotations so GPT-RAG can render clickable links. With some Azure Direct models, these annotations may be missing; in that case, GPT-RAG strips the placeholder markers and no clickable citations are shown.</p>
 </blockquote>
 
 
