@@ -84,9 +84,16 @@
     <a href="https://github.com/vladborys" target="_blank">
       <img src="https://github.com/vladborys.png" alt="Vlad Borys">
       <sub><b>Vlad Borys</b></sub>
-      <sub>Pull Request Reviewer</sub>
+      <sub>Reviewer</sub>
     </a>
   </div>
+  <div class="team-card">
+    <a href="https://github.com/gbecerra1982" target="_blank">
+      <img src="https://github.com/gbecerra1982.png" alt="Gonzalo Becerra">
+      <sub><b>Gonzalo Becerra</b></sub>
+      <sub>Reviewer</sub>      
+    </a>
+  </div>  
 </div>
 
 ---
