@@ -1,4 +1,4 @@
-# SharePoint Setup (Preview Release)
+# SharePoint Setup (Pre-release)
 
 This section explains how to configure SharePoint as a data source for the GPT-RAG Azure AI Search Index, using the `Sites.Selected` permission to limit access to specific site collections.
 
@@ -431,6 +431,8 @@ Before you begin, ensure you have the appropriate roles for each step:
 
 
       - **If you encounter a permission denied error when trying to assign site permissions**:
+
+      > **Note**: The permission/consent shown in the next screens is for the **signed-in user account** performing the operation (e.g., in Graph Explorer / Azure Portal) so they are allowed to grant site permissions to the application. It is **not** an additional permission being added to the **App Registration** itself. Ensure the signed-in user has the required **administrative role(s)** (e.g., SharePoint Administrator or Global Administrator, as described above) to be able to grant these permissions.
 
       If you encounter a permission error, like the one shown in the next screen, it may be necessary to grant permissions to your user.
 
