@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#sharepoint-setup-preview-release" class="md-skip">
+        <a href="#sharepoint-setup-pre-release" class="md-skip">
           Skip to content
         </a>
       
@@ -869,7 +869,7 @@
   
 
 
-<h1 id="sharepoint-setup-preview-release">SharePoint Setup (Preview Release)</h1>
+<h1 id="sharepoint-setup-pre-release">SharePoint Setup (Pre-release)</h1>
 <p>This section explains how to configure SharePoint as a data source for the GPT-RAG Azure AI Search Index, using the <code>Sites.Selected</code> permission to limit access to specific site collections.</p>
 <p>The configuration process involves the following steps:</p>
 <ol>
@@ -1317,6 +1317,9 @@
 <ul>
 <li><strong>If you encounter a permission denied error when trying to assign site permissions</strong>:</li>
 </ul>
+<blockquote>
+<p><strong>Note</strong>: The permission/consent shown in the next screens is for the <strong>signed-in user account</strong> performing the operation (e.g., in Graph Explorer / Azure Portal) so they are allowed to grant site permissions to the application. It is <strong>not</strong> an additional permission being added to the <strong>App Registration</strong> itself. Ensure the signed-in user has the required <strong>administrative role(s)</strong> (e.g., SharePoint Administrator or Global Administrator, as described above) to be able to grant these permissions.</p>
+</blockquote>
 <p>If you encounter a permission error, like the one shown in the next screen, it may be necessary to grant permissions to your user.</p>
 <p><img alt="Assign Site Permissions" src="../media/sharepoint_site_permissions_403.png" />
   <em>Permission error when assigning permissions</em></p>
