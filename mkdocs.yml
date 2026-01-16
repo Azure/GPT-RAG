@@ -53,3 +53,5 @@ nav:
   - Contributing: contributing.md    
 extra:
   generator: false
+extra_css:
+  - styles.css  

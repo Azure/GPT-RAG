@@ -1,10 +1,10 @@
-# Authentication and Document level Security
+# Authentication and Document Security
 
 This page explains how authentication works in GPT-RAG, from the Chainlit UI sign-in to calling Azure AI Search with permission trimming. The key idea is intentionally simple: the UI forwards a single user token to the orchestrator, and the orchestrator takes responsibility for producing the correct “user context” token required by Azure AI Search.
 
 Key takeaway: the orchestrator receives an API token and then performs an On-Behalf-Of exchange to obtain a separate token for Azure AI Search. The two tokens have different audiences and are not interchangeable.
 
-**Prerequisites**
+## Prerequisites
 
 Microsoft Entra ID must be configured to allow an On-Behalf-Of exchange. That means the orchestrator must be a confidential client and needs access to a client secret.
 
@@ -16,7 +16,7 @@ Tenant consent must be granted for the Azure AI Search delegated permission. If 
 
 Microsoft Graph delegated permissions such as `User.Read` are not required for this flow. The UI must request an access token for the orchestrator API. If the UI sends a token whose audience is Microsoft Graph, the orchestrator rejects it and the exchange cannot succeed.
 
-**How it works**
+## How it works
 
 <div class="no-wrap">
 ```
@@ -85,7 +85,7 @@ x-ms-query-source-authorization: Bearer <search_user_access_token>
 
 Do not send the API token in `x-ms-query-source-authorization`. Azure AI Search expects a token issued for `https://search.azure.com`.
 
-**Setup**
+## Setup
 
 This procedure configures Microsoft Entra ID so the UI can sign users in and the orchestrator can perform an On-Behalf-Of exchange.
 
