@@ -46,11 +46,10 @@ nav:
         - NL2SQL: ingestion_nl2sql_data_source.md
   - How-to Guides:
     - Azure Direct Models: howto_azure_direct.md
+    - Authentication and Document Security: howto_authentication.md
     - User Feedback: howto_userfeedback.md
     - Sharepoint Connector: howto_sharepoint_connector.md
   - Meet the Team: team.md
   - Contributing: contributing.md    
 extra:
   generator: false
-extra_css:
-  - styles.css
