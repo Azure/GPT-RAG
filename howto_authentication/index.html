@@ -50,6 +50,8 @@
       
     
     
+      <link rel="stylesheet" href="../styles.css">
+    
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -74,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#authentication-and-document-level-security" class="md-skip">
+        <a href="#authentication-and-document-security" class="md-skip">
           Skip to content
         </a>
       
@@ -691,6 +693,17 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Authentication and Document Security
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -700,6 +713,52 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      How it works
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Setup
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -813,16 +872,16 @@
   
 
 
-<h1 id="authentication-and-document-level-security">Authentication and Document level Security</h1>
+<h1 id="authentication-and-document-security">Authentication and Document Security</h1>
 <p>This page explains how authentication works in GPT-RAG, from the Chainlit UI sign-in to calling Azure AI Search with permission trimming. The key idea is intentionally simple: the UI forwards a single user token to the orchestrator, and the orchestrator takes responsibility for producing the correct “user context” token required by Azure AI Search.</p>
 <p>Key takeaway: the orchestrator receives an API token and then performs an On-Behalf-Of exchange to obtain a separate token for Azure AI Search. The two tokens have different audiences and are not interchangeable.</p>
-<p><strong>Prerequisites</strong></p>
+<h2 id="prerequisites">Prerequisites</h2>
 <p>Microsoft Entra ID must be configured to allow an On-Behalf-Of exchange. That means the orchestrator must be a confidential client and needs access to a client secret.</p>
 <p>The UI must forward the signed-in user’s access token to the orchestrator in the <code>Authorization</code> header. Without a user token, the orchestrator cannot acquire the delegated Azure AI Search token.</p>
 <p>Your Azure AI Search index must be configured for permission trimming, and your indexed documents must include the required security metadata fields.</p>
 <p>Tenant consent must be granted for the Azure AI Search delegated permission. If consent is missing, the On-Behalf-Of exchange fails. In this repo, the only supported fallback is to run without authentication by setting <code>ALLOW_ANONYMOUS</code> to <code>true</code>.</p>
 <p>Microsoft Graph delegated permissions such as <code>User.Read</code> are not required for this flow. The UI must request an access token for the orchestrator API. If the UI sends a token whose audience is Microsoft Graph, the orchestrator rejects it and the exchange cannot succeed.</p>
-<p><strong>How it works</strong></p>
+<h2 id="how-it-works">How it works</h2>
 <div class="no-wrap">
 <div class="highlight"><pre><span></span><code>    +---------------------------+                 +----------------------------------+
     |  Microsoft Entra ID       |                 |  Azure AI Search                 |
@@ -879,7 +938,7 @@
 <div class="highlight"><pre><span></span><code>x-ms-query-source-authorization: Bearer &lt;search_user_access_token&gt;
 </code></pre></div>
 <p>Do not send the API token in <code>x-ms-query-source-authorization</code>. Azure AI Search expects a token issued for <code>https://search.azure.com</code>.</p>
-<p><strong>Setup</strong></p>
+<h2 id="setup">Setup</h2>
 <p>This procedure configures Microsoft Entra ID so the UI can sign users in and the orchestrator can perform an On-Behalf-Of exchange.</p>
 <p>1) Create one App Registration in Microsoft Entra ID. Use the same application identity for the UI and the orchestrator.</p>
 <p>2) In the App Registration, add a Web platform redirect URI for the Chainlit callback endpoint.</p>
