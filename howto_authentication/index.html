@@ -24,7 +24,7 @@
     
     
       
-        <title>Authentication and Document Security - GPT-RAG</title>
+        <title>Auth & Doc Security - GPT-RAG</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#authentication-and-document-security" class="md-skip">
+        <a href="#authentication-and-document-level-security" class="md-skip">
           Skip to content
         </a>
       
@@ -111,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Authentication and Document Security
+              Auth & Doc Security
             
           </span>
         </div>
@@ -697,7 +697,7 @@
           
   
   <span class="md-ellipsis">
-    Authentication and Document Security
+    Auth & Doc Security
   </span>
   
 
@@ -708,7 +708,7 @@
         
   
   <span class="md-ellipsis">
-    Authentication and Document Security
+    Auth & Doc Security
   </span>
   
 
@@ -730,18 +730,18 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
+  <a href="#concepts" class="md-nav__link">
     <span class="md-ellipsis">
-      Prerequisites
+      Concepts
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-it-works" class="md-nav__link">
+  <a href="#prerequisites" class="md-nav__link">
     <span class="md-ellipsis">
-      How it works
+      Prerequisites
     </span>
   </a>
   
@@ -872,28 +872,29 @@
   
 
 
-<h1 id="authentication-and-document-security">Authentication and Document Security</h1>
-<p>This page explains how authentication works in GPT-RAG, from the Chainlit UI sign-in to calling Azure AI Search with permission trimming. The key idea is intentionally simple: the UI forwards a single user token to the orchestrator, and the orchestrator takes responsibility for producing the correct “user context” token required by Azure AI Search.</p>
-<p>Key takeaway: the orchestrator receives an API token and then performs an On-Behalf-Of exchange to obtain a separate token for Azure AI Search. The two tokens have different audiences and are not interchangeable.</p>
-<h2 id="prerequisites">Prerequisites</h2>
-<p>Microsoft Entra ID must be configured to allow an On-Behalf-Of exchange. That means the orchestrator must be a confidential client and needs access to a client secret.</p>
-<p>The UI must forward the signed-in user’s access token to the orchestrator in the <code>Authorization</code> header. Without a user token, the orchestrator cannot acquire the delegated Azure AI Search token.</p>
-<p>Your Azure AI Search index must be configured for permission trimming, and your indexed documents must include the required security metadata fields.</p>
-<p>Tenant consent must be granted for the Azure AI Search delegated permission. If consent is missing, the On-Behalf-Of exchange fails. In this repo, the only supported fallback is to run without authentication by setting <code>ALLOW_ANONYMOUS</code> to <code>true</code>.</p>
-<p>Microsoft Graph delegated permissions such as <code>User.Read</code> are not required for this flow. The UI must request an access token for the orchestrator API. If the UI sends a token whose audience is Microsoft Graph, the orchestrator rejects it and the exchange cannot succeed.</p>
-<h2 id="how-it-works">How it works</h2>
+<h1 id="authentication-and-document-level-security">Authentication and Document-Level Security</h1>
+<p>This page explains how authentication works in GPT-RAG, from the GPT-RAG UI sign-in to querying Azure AI Search with document-level access control enabled (POSIX-like ACL / RBAC scopes). The key idea is intentionally simple: when authentication is configured, the UI forwards a single user token to the orchestrator, and the orchestrator takes responsibility for producing the correct “user context” token required by Azure AI Search.</p>
+<blockquote>
+<p>In OAuth mode, the orchestrator receives a user access token (for the orchestrator API) and then performs an On-Behalf-Of (OBO) exchange to obtain a separate token for Azure AI Search. The two tokens have different audiences and are not interchangeable.</p>
+</blockquote>
+<h2 id="concepts">Concepts</h2>
+<p>GPT-RAG uses Microsoft Entra ID authentication end-to-end, and Azure <a href="https://learn.microsoft.com/en-us/azure/search/search-document-level-access-overview">AI Search document-level access control (POSIX-like ACL / RBAC scopes)</a> relies on three related steps:</p>
+<p>1) The UI signs the user in and sends an access token to the orchestrator. This token is meant for the orchestrator API.</p>
+<p>2) The orchestrator validates the incoming token (signature, issuer, and audience) and extracts the user identity (for example, user object ID). This is how the orchestrator knows which user is calling.</p>
+<p>3) When the orchestrator queries Azure AI Search with document-level security enabled, it must send a different delegated token whose audience is Azure AI Search. The orchestrator obtains that token by performing an On-Behalf-Of exchange with Entra ID.</p>
+<p>The diagram below shows where each token is used. Azure AI Search receives the orchestrator credential (to authorize the call) and a separate “query source authorization” token (to enforce document-level access control).</p>
 <div class="no-wrap">
 <div class="highlight"><pre><span></span><code>    +---------------------------+                 +----------------------------------+
     |  Microsoft Entra ID       |                 |  Azure AI Search                 |
-    |  Tenant                   |                 |  Index with permission trimming  |
+    |  Tenant                   |                 |  Index with ACL/RBAC enforcement |
     |                           |                 |  permissionFilterOption=enabled  |
     +---------------------------+                 +----------------------------------+
             ^                                                      ^
             |                                                      |
-            | (4) Search user token                                | (6) Search query
+            | (4) user access                                      | (6) Search query
             |  aud: https://search.azure.com                       |   Authorization: (orchestrator identity)
-            |  scope: https://search.azure.com/user_impersonation
-            |                                                      | x-ms-query-source-authorization: (search user token)
+            |  scope: https://search.azure.com/user_impersonation  |   x-ms-query-source-authorization: (user access token)
+            |                                                      |
             |                                                      |
             |                                                      |
     +---------------------------+         (3) OBO exchange         |
@@ -901,7 +902,7 @@
     |  Container App            |   to Entra ID token endpoint
     |                           |
     |  Validates API token      |   Inputs
-    |  Uses client secret       |   - incoming user token
+    |  Uses client secret       |   - incoming user access token
     |  Uses MI or admin key     |   - client id and client secret
     +---------------------------+   - requested scope for Search
                         ^
@@ -928,107 +929,166 @@
 </code></pre></div>
 </div>
 
-<p><strong>Which token goes where</strong></p>
-<p>After the user signs in, the UI forwards the API access token to the orchestrator.</p>
-<div class="highlight"><pre><span></span><code>Authorization: Bearer &lt;api_access_token&gt;
+<p>When authentication is configured (OAuth enabled), the UI includes the user access token for the orchestrator API on calls to the orchestrator. This is the token shown as (2) in the diagram. If OAuth is not configured and the UI is running in anonymous mode, the UI calls the orchestrator without an <code>Authorization</code> header. In OAuth mode, the UI sends the token like this:</p>
+<div class="highlight"><pre><span></span><code>Authorization: Bearer &lt;orchestrator_api_user_access_token&gt;
 </code></pre></div>
-<p>When the orchestrator calls Azure AI Search with permission trimming enabled, it sends two independent credentials:</p>
-<p>1) The orchestrator authenticates the request using its own identity.</p>
-<p>2) The orchestrator includes a delegated user token for Azure AI Search, produced via On-Behalf-Of.</p>
+<p>On the orchestrator side, this user access token is validated before any downstream call is made. The orchestrator verifies the token signature and issuer using the tenant signing keys (JWKS), checks the expected audience for the orchestrator API, and extracts the user identity (for example, user object ID). That identity can be used to enforce access to the orchestrator itself.</p>
+<p>To query Azure AI Search with document-level access control enabled, the orchestrator performs an On-Behalf-Of (OBO) exchange using the incoming user access token as the user assertion. This returns a delegated user token whose audience is Azure AI Search. The orchestrator includes that token in the header below when running queries.</p>
 <div class="highlight"><pre><span></span><code>x-ms-query-source-authorization: Bearer &lt;search_user_access_token&gt;
 </code></pre></div>
-<p>Do not send the API token in <code>x-ms-query-source-authorization</code>. Azure AI Search expects a token issued for <code>https://search.azure.com</code>.</p>
+<p>Document-level access control is enforced by Azure AI Search when the index is configured for document permissions (see <code>permissionFilterOption</code> in the index definition) and documents include permission metadata. </p>
+<p>GPT-RAG uses these field names consistently across ingestion paths:</p>
+<div class="highlight"><pre><span></span><code>metadata_security_user_ids
+metadata_security_group_ids
+metadata_security_rbac_scope
+</code></pre></div>
+<p>For GPT-RAG, the document-level access control model is POSIX-style ACL plus RBAC scopes. Each document can carry ACL metadata such as user and group object IDs. When applicable, a document can also carry an RBAC scope such as a storage container resource ID.</p>
+<p>GPT-RAG ingestion is responsible for collecting and attaching the permission metadata for each document automatically. This repo does not rely on the built-in Azure AI Search indexers for permission extraction. Permissions are handled by the pipeline implemented in <code>gpt-rag-ingestion</code>.</p>
+<p>When ACL and RBAC scope metadata are present, Azure AI Search evaluates them as alternatives. Access is granted when any one permission type matches: userIds, groupIds, or rbacScope.</p>
+<p>In normal usage, userIds and groupIds contain Microsoft Entra ID object IDs as strings. They also support special values.</p>
+<pre><code>- `["all"]` makes every caller match this ACL type.
+
+- `["none"]` and `[]` mean no caller matches this ACL type.
+</code></pre>
+<p>These values only apply to that ACL type. For example, userIds set to <code>["none"]</code> does not block access through groupIds or RBAC scope.</p>
+<p>RBAC scopes are applied at the storage container level. When RBAC is used for a document, users must have the appropriate Azure role assignment on the container scope, typically Storage Blob Data Reader.</p>
+<p>In test environments, if you do not want Azure AI Search to enforce document permissions, set <code>permissionFilterOption</code> to <code>disabled</code> in the index definition. This is the default.</p>
+<p>Azure AI Search enforces limits for document permission fields. The <code>userIds</code> and <code>groupIds</code> fields accept up to 32 values each. The <code>rbacScope</code> field is limited to five distinct values across the entire index.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<p><strong>For user authentication</strong>
+- A Microsoft Entra ID App Registration used by both the UI and the orchestrator. The UI uses it to sign users in and request an access token for the orchestrator API. The orchestrator then validates that token and uses the app's client secret to perform the On-Behalf-Of (OBO) token exchange when the Azure AI Search index is configured for document-level access control.
+- You have permissions in the tenant to create or update the App Registration, add API permissions.</p>
+<p><strong>For document-level security</strong>
+- User authentication is configured.
+- Your Azure AI Search index is configured for document-level access control and includes the required document permission fields. *
+- Your documents are indexed with the correct security metadata for each document (user object IDs, group object IDs, and RBAC scope). **
+- Tenant admin consent is granted for the Azure AI Search delegated permission <code>user_impersonation</code> in the App Registration.</p>
+<p>* If you use the GPT-RAG provisioning workflow, it already creates the index with this configuration.</p>
+<p>** If you use gpt-rag data ingetion pipeline documents are automatically indexed with ACL when they're set in the blobs metadata fields</p>
 <h2 id="setup">Setup</h2>
-<p>This procedure configures Microsoft Entra ID so the UI can sign users in and the orchestrator can perform an On-Behalf-Of exchange.</p>
-<p>1) Create one App Registration in Microsoft Entra ID. Use the same application identity for the UI and the orchestrator.</p>
-<p>2) In the App Registration, add a Web platform redirect URI for the Chainlit callback endpoint.</p>
+<p><strong>1) Create one App Registration in Microsoft Entra ID.</strong></p>
+<p>After creating it, go to the <strong>App Registration Overview</strong> page and copy the Application (client) ID and the Directory (tenant) ID. You will use them later as <code>OAUTH_AZURE_AD_CLIENT_ID</code> and <code>OAUTH_AZURE_AD_TENANT_ID</code>.</p>
+<p>If you plan to use group-based access control, in the <strong>App Registration</strong> go to <strong>Manage &gt; Token configuration</strong> and add a <code>groups</code> claim. </p>
+<p>If users belong to many groups, Entra may emit an overage indicator instead of the full group list, which typically requires resolving membership via Microsoft Graph.</p>
+<p><strong>2) In the App Registration, go to Manage &gt; Authentication.</strong></p>
+<p><strong>Under Platform configurations &gt; Web, add the frontend redirect URI.</strong></p>
 <div class="highlight"><pre><span></span><code>https://&lt;YOUR-APP-URL&gt;/auth/oauth/azure-ad/callback
 </code></pre></div>
-<p>3) Expose an API for the orchestrator and create one delegated scope.</p>
-<div class="highlight"><pre><span></span><code>api://&lt;OAUTH_AZURE_AD_CLIENT_ID&gt;
-api://&lt;OAUTH_AZURE_AD_CLIENT_ID&gt;/user_impersonation
+<p><strong>3) In the App Registration, go to Manage &gt; Expose an API.</strong> </p>
+<p>Set the Application ID URI to <code>api://&lt;OAUTH_AZURE_AD_CLIENT_ID&gt;</code>.</p>
+<p>Then create a delegated scope named <code>user_impersonation</code> and add this scope to the app.</p>
+<div class="highlight"><pre><span></span><code>api://&lt;OAUTH_AZURE_AD_CLIENT_ID&gt;/user_impersonation
 </code></pre></div>
-<p>4) Create a client secret. The orchestrator uses it to authenticate as a confidential client during the On-Behalf-Of exchange.</p>
-<p>5) Grant the Azure AI Search delegated permission <code>user_impersonation</code>, then grant tenant consent.</p>
-<p>If you configure this in the portal, the navigation usually looks like this.</p>
-<div class="highlight"><pre><span></span><code>API permissions
-  Add a permission
+<p><strong>4) In the App Registration, go to Manage &gt; Certificates &amp; secrets.</strong></p>
+<p><strong>Create a new client secret and copy the secret value.</strong></p>
+<p>You can only copy the secret value once. Store it securely (for example, in Key Vault) and use it later for the orchestrator configuration.</p>
+<p><strong>5) Add the Azure AI Search delegated permission <code>user_impersonation</code> and grant tenant consent.</strong></p>
+<p>In the App Registration, go to <strong>Manage &gt; API permissions</strong>.</p>
+<div class="highlight"><pre><span></span><code>Add a permission
     APIs my organization uses
-      Azure Cognitive Search
-        Delegated permissions
-          user_impersonation
-  Grant admin consent
+        Azure Cognitive Search
+            Delegated permissions
+                user_impersonation
+
+Grant admin consent
 </code></pre></div>
-<p>If Azure Cognitive Search does not appear in the picker for your tenant, configure the permission using CLI. First, discover the Azure AI Search resource application id and the scope id for <code>user_impersonation</code>.</p>
+<p>CLI alternative if Azure Cognitive Search does not appear in the picker. First, discover the Azure AI Search resource application ID and the scope ID.</p>
 <div class="highlight"><pre><span></span><code>az rest --method GET --url &quot;https://graph.microsoft.com/v1.0/servicePrincipals?$filter=servicePrincipalNames/any(s:s eq &#39;https://search.azure.com&#39;)&amp;$select=appId,displayName,oauth2PermissionScopes&quot; --query &quot;value[0].{resourceAppId:appId,scopeId:oauth2PermissionScopes[?value==&#39;user_impersonation&#39;].id | [0],name:displayName}&quot;
 </code></pre></div>
-<p>Then add the permission to your App Registration and grant consent.</p>
-<div class="highlight"><pre><span></span><code>az ad app permission add --id &lt;OAUTH_AZURE_AD_CLIENT_ID&gt; --api &lt;SEARCH_RESOURCE_APP_ID&gt; --api-permissions &lt;SCOPE_ID&gt;=Scope
-az ad app permission admin-consent --id &lt;OAUTH_AZURE_AD_CLIENT_ID&gt;
+<p>Then add the permission and grant consent.</p>
+<div class="highlight"><pre><span></span><code>az ad app permission add --id &lt;replace-by-app-client-id&gt; --api &lt;SEARCH_RESOURCE_APP_ID&gt; --api-permissions &lt;SCOPE_ID&gt;=Scope
+az ad app permission admin-consent --id &lt;replace-by-app-client-id&gt;
 </code></pre></div>
-<p>You can validate configured permissions with the following command.</p>
-<div class="highlight"><pre><span></span><code>az ad app permission list --id &lt;OAUTH_AZURE_AD_CLIENT_ID&gt;
+<p>Validate the configured permissions.</p>
+<div class="highlight"><pre><span></span><code>az ad app permission list --id &lt;replace-by-app-client-id&gt;
 </code></pre></div>
-<p><strong>Group-based trimming</strong></p>
-<p>If your indexed documents include group object ids in <code>metadata_security_group_ids</code>, Azure AI Search needs group identifiers for the querying user. The most straightforward setup is to configure the App Registration to emit a <code>groups</code> claim in access tokens.</p>
-<p>If users belong to many groups, Entra may emit a group overage indicator instead of the full group list. In that case, group membership must be resolved via Microsoft Graph. GPT-RAG tries to avoid that dependency, so keep group sets small where possible.</p>
-<p><strong>Permission trimming fields in Azure AI Search</strong></p>
-<p>Permission trimming works when the index is configured for it and when each document contains security metadata in fields that Azure AI Search recognizes. To enable trimming, set <code>permissionFilterOption</code> to <code>enabled</code> in the index definition.</p>
-<p>The index must include one field for each permission filter type.</p>
+<p><strong>6) Configure the following app configuration settings used by the authentication flow.</strong></p>
+<p>GPT-RAG authentication settings are configured in <strong>Azure App Configuration</strong>. Create the keys below in App Configuration and apply the <strong>gpt-rag</strong> label. For non-secret settings, store the value as plain text. For secret settings, store the value in <strong>Key Vault</strong> and add the key in App Configuration as a <strong>Key Vault reference</strong> (also under the <strong>gpt-rag</strong> label).</p>
+<p>At a minimum, you only need to set the settings marked as <strong>Required</strong> in the table below. The remaining settings are optional and only needed if you want to customize behavior.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Required</th>
+<th>Secret?</th>
+<th>What it controls</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>OAUTH_AZURE_AD_CLIENT_ID</code></td>
+<td>Yes (for OAuth)</td>
+<td>No</td>
+<td>Entra App Registration application (client) ID used by the UI OAuth provider to request tokens for the orchestrator API.</td>
+</tr>
+<tr>
+<td><code>OAUTH_AZURE_AD_TENANT_ID</code></td>
+<td>Yes (for OAuth)</td>
+<td>No</td>
+<td>Entra tenant ID used to validate/target the tenant for the OAuth flow (single-tenant by default).</td>
+</tr>
+<tr>
+<td><code>OAUTH_AZURE_AD_CLIENT_SECRET</code></td>
+<td>Yes (for OAuth)</td>
+<td>Yes</td>
+<td>Client secret used by the app for confidential-client flows (for example, completing the OAuth code flow and performing the OBO exchange). Store as a Key Vault secret and reference it from App Configuration (or from App Settings if you bypass App Configuration).</td>
+</tr>
+<tr>
+<td><code>CHAINLIT_AUTH_SECRET</code></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Secret used by Chainlit to sign its session JWT. If missing, the UI generates a temporary value (sessions reset on restart). Store as a Key Vault secret and reference it from App Configuration (or from App Settings if you bypass App Configuration).</td>
+</tr>
+<tr>
+<td><code>CHAINLIT_URL</code></td>
+<td>No</td>
+<td>No</td>
+<td>Public base URL of the UI. Used to build the OAuth redirect/callback URL (and normalized without a trailing slash).</td>
+</tr>
+<tr>
+<td><code>OAUTH_AZURE_AD_SCOPES</code></td>
+<td>No</td>
+<td>No</td>
+<td>Scopes requested during interactive login. If omitted, the UI defaults to the orchestrator API scope plus OpenID Connect scopes. Setting this explicitly helps avoid accidentally getting Microsoft Graph tokens.</td>
+</tr>
+<tr>
+<td><code>OAUTH_AZURE_AD_ENABLE_SINGLE_TENANT</code></td>
+<td>No</td>
+<td>No</td>
+<td>Defaults to <code>true</code>. When <code>true</code>, the UI enforces single-tenant behavior for the OAuth flow. Set to <code>false</code> only for multi-tenant scenarios.</td>
+</tr>
+<tr>
+<td><code>ALLOW_ANONYMOUS</code></td>
+<td>No</td>
+<td>No</td>
+<td>When <code>true</code>, the UI runs without OAuth (anonymous mode). Defaults to <code>true</code> locally when OAuth is not configured.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>7) Configure the Azure AI Search index for document-level access control and ensure your documents include permission metadata.</strong></p>
+<p>In the index definition, set <code>permissionFilterOption</code> to <code>enabled</code>.</p>
+<p>These are the Azure AI Search index fields used by AI Search:</p>
 <div class="highlight"><pre><span></span><code>metadata_security_user_ids   Collection(Edm.String)   permissionFilter=userIds
 metadata_security_group_ids  Collection(Edm.String)   permissionFilter=groupIds
 metadata_security_rbac_scope Edm.String               permissionFilter=rbacScope
 </code></pre></div>
-<p>Azure AI Search enforces limits for permission filter fields. The <code>userIds</code> and <code>groupIds</code> fields accept up to 32 values each. The <code>rbacScope</code> field is limited to five distinct values across the entire index. The fields should also be marked as <code>filterable=true</code>.</p>
-<p><strong>How GPT-RAG populates permission fields</strong></p>
-<p>GPT-RAG uses the same field names across ingestion paths.</p>
-<p>Blob ingestion reads <code>metadata_security_user_ids</code> and <code>metadata_security_group_ids</code> from blob metadata when present. If more than 32 values are supplied, ingestion removes duplicates and truncates to 32 to avoid indexing failures.</p>
-<p>Blob ingestion also sets <code>metadata_security_rbac_scope</code> to the container resource id when it can compute it. SharePoint ingestion populates user and group fields and does not set <code>metadata_security_rbac_scope</code>.</p>
-<p><strong>Blob metadata keys and accepted formats</strong></p>
-<p>For Blob Storage ingestion, GPT-RAG reads two optional metadata keys from each blob. If they are missing or empty, ingestion still succeeds and documents are indexed with empty ACL arrays.</p>
+<p>During Blob Storage ingestion, the GPT-RAG ingestion pipeline reads the following blob metadata keys and adds them to the corresponding documents in the index. If you want to specify which users or groups can access a document, set these metadata fields on each blob.</p>
 <div class="highlight"><pre><span></span><code>metadata_security_user_ids
 metadata_security_group_ids
 </code></pre></div>
-<p>Values can be provided as a JSON array, a Python-style list, or a comma-separated string. JSON is recommended because it is unambiguous.</p>
-<p>Examples for <code>metadata_security_user_ids</code>.</p>
+<blockquote>
+<p>Note: For SharePoint ingestion, you don't need any additional steps. The GPT-RAG ingestion pipeline typically derives the user and group ACLs from the source SharePoint document or list item permissions and populates the same fields automatically.</p>
+</blockquote>
+<p>Examples of how to populate <code>metadata_security_user_ids</code> and <code>metadata_security_group_ids</code>.</p>
 <div class="highlight"><pre><span></span><code>[&quot;11111111-1111-1111-1111-111111111111&quot;]
 [&quot;11111111-1111-1111-1111-111111111111&quot;,&quot;22222222-2222-2222-2222-222222222222&quot;]
 11111111-1111-1111-1111-111111111111,22222222-2222-2222-2222-222222222222
 [&#39;11111111-1111-1111-1111-111111111111&#39;,&#39;22222222-2222-2222-2222-222222222222&#39;]
 </code></pre></div>
-<p>Examples for <code>metadata_security_group_ids</code>.</p>
-<div class="highlight"><pre><span></span><code>[&quot;aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa&quot;]
-[&quot;aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa&quot;,&quot;bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb&quot;]
-aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa,bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb
-</code></pre></div>
-<p>User ids must be Entra user object ids. Group ids must be Entra group object ids.</p>
-<p><strong>RBAC scope for Blob ingestion</strong></p>
-<p>For Blob Storage ingestion, <code>metadata_security_rbac_scope</code> should be the Azure resource id of the container.</p>
-<div class="highlight"><pre><span></span><code>/subscriptions/&lt;subscriptionId&gt;/resourceGroups/&lt;resourceGroup&gt;/providers/Microsoft.Storage/storageAccounts/&lt;storageAccount&gt;/blobServices/default/containers/&lt;container&gt;
-</code></pre></div>
-<p>The blob indexer computes this value from configuration when possible. If you want to set it explicitly, use <code>DOCUMENTS_STORAGE_CONTAINER_RESOURCE_ID</code>. Otherwise, the indexer attempts to build it using <code>SUBSCRIPTION_ID</code> or <code>AZURE_SUBSCRIPTION_ID</code>, together with <code>AZURE_RESOURCE_GROUP</code>.</p>
-<p><strong>Configuration keys used by this repo</strong></p>
-<p>Required keys.</p>
-<div class="highlight"><pre><span></span><code>OAUTH_AZURE_AD_CLIENT_ID
-OAUTH_AZURE_AD_TENANT_ID
-OAUTH_AZURE_AD_CLIENT_SECRET
-CHAINLIT_AUTH_SECRET
-</code></pre></div>
-<p>Optional keys.</p>
-<div class="highlight"><pre><span></span><code>CHAINLIT_URL
-OAUTH_AZURE_AD_SCOPES
-OAUTH_AZURE_AD_ENABLE_SINGLE_TENANT
-ALLOW_ANONYMOUS
-</code></pre></div>
-<p><strong>Scopes used by this repo</strong></p>
-<p>Interactive login commonly includes <code>openid</code>, <code>profile</code>, and <code>offline_access</code>. If <code>OAUTH_AZURE_AD_SCOPES</code> is not set, the default is the orchestrator API scope plus those OpenID Connect scopes.</p>
-<div class="highlight"><pre><span></span><code>api://&lt;CLIENT_ID&gt;/user_impersonation,openid,profile,offline_access
-</code></pre></div>
-<p>If you add Microsoft Graph scopes such as <code>User.Read</code> to the interactive login request, Entra may issue a Microsoft Graph access token. That is not the token the orchestrator needs for the On-Behalf-Of exchange to Azure AI Search. When Graph is required, prefer backend-to-Graph calls using application permissions.</p>
-<p>Refresh-token exchange behaves differently. MSAL rejects reserved OpenID Connect scopes during refresh. For refresh flows, GPT-RAG requests only the API scope.</p>
-<p><strong>Local development</strong></p>
-<p>If you have not configured OAuth, you can run in anonymous mode by setting <code>ALLOW_ANONYMOUS</code> to <code>true</code>.</p>
-<p>If you want to load configuration locally from Azure App Configuration, set <code>APP_CONFIG_ENDPOINT</code> and authenticate using <code>az login</code>.</p>
+<blockquote>
+<p>Note: For Blob Storage ingestion, the GPT-RAG ingestion pipeline will populate <code>metadata_security_rbac_scope</code> automatically. The value is the Azure resource ID of the container, for example:
+<em>/subscriptions/\&lt;subscriptionId&gt;/resourceGroups/\&lt;resourceGroup&gt;/providers/Microsoft.Storage/storageAccounts/\&lt;storageAccount&gt;/blobServices/default/containers/\&lt;container&gt;</em></p>
+</blockquote>
 
 
 
