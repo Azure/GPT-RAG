@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.  
 This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to [Semantic Versioning](https://semver.org/).
 
+## [v2.4.0] – 2026-01-15
+### Added
+- Document-level security enforcement for GPT-RAG using Azure AI Search native ACL/RBAC trimming with end-user identity propagation via `x-ms-query-source-authorization`.
+	Includes permission-aware indexing metadata (userIds/groupIds/rbacScope), safe-by-default behavior for requests without a valid user token, and optional elevated-read debugging support.
+### Changed
+- Bumped chat model to gpt-5-mini.
+
 ## [v2.3.0] – 2025-12-15
 ### Added
 - Support for **SharePoint Lists** in the ingestion component.
