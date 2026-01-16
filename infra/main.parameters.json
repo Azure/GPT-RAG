@@ -80,8 +80,8 @@
           "name": "chat",
           "model": {
             "format": "OpenAI",
-            "name": "gpt-4o",
-            "version": "2024-11-20"
+            "name": "gpt-5-mini",
+            "version": "2025-08-07"
           },
           "sku": {
             "name": "GlobalStandard",

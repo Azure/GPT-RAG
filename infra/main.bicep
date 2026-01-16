@@ -1498,10 +1498,10 @@ module aiFoundry 'modules/ai-foundry/main.bicep' = if (deployAiFoundry) {
           {
             model: {
               format: 'OpenAI'
-              name: 'gpt-4o'
-              version: '2024-11-20'
+              name: 'gpt-5-mini'
+              version: '2025-08-07'
             }
-            name: 'gpt-4o'
+            name: 'gpt-5-mini'
             sku: {
               name: 'GlobalStandard'
               capacity: 10

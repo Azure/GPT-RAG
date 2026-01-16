@@ -51,7 +51,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 TEMPLATE_NAME = "search.j2"
 VARS_TEMPLATE = "search.settings.j2"
 LABEL_FILTER = "gpt-rag"
-AGENTIC_API_VERSION = "2025-08-01-preview"
+KNOWLEDGE_API_VERSION = "2025-11-01-preview"
 
 # ── App Config Loader ───────────────────────────────────────────────────────
 def load_appconfig_settings(ac_client: AzureAppConfigurationClient, label_filter: Optional[str] = None) -> Dict[str, Any]:
@@ -140,13 +140,33 @@ def prepare_context_and_render(template_name: str, template_dir: str, label_filt
             # Find the GPT model by canonical_name (same approach as embedding model)
             for model in model_deployments:
                 if model.get("canonical_name") == "CHAT_DEPLOYMENT_NAME":
+                    model_obj = model.get("model")
+                    if isinstance(model_obj, dict):
+                        model_name = model_obj.get("name")
+                        model_format = model_obj.get("format")
+                    else:
+                        model_name = model_obj
+                        model_format = None
+
                     gpt_info = {
                         "deployment_name": model.get("name"),
-                        "model_name": model.get("model", {}).get("name") if isinstance(model.get("model"), dict) else model.get("model"),
+                        "model_name": model_name,
+                        "model_format": model_format,
                         "endpoint": model.get("endpoint", ""),
                         "api_version": model.get("apiVersion", "2025-01-01-preview")
                     }
-                    logging.info(f"✅ Found GPT model: {gpt_info['deployment_name']} ({gpt_info['model_name']}) at {gpt_info['endpoint']}")
+
+                    model_format_l = (gpt_info.get("model_format") or "").lower()
+                    if model_format_l != "openai":
+                        logging.info(
+                            "ℹ️ CHAT_DEPLOYMENT_NAME ignored because model.format is not OpenAI "
+                            f"(format='{gpt_info.get('model_format')}', model='{gpt_info.get('model_name')}')"
+                        )
+                        return {}
+
+                    logging.info(
+                        f"✅ Found GPT model: {gpt_info['deployment_name']} ({gpt_info['model_name']}, format={gpt_info.get('model_format')}) at {gpt_info['endpoint']}"
+                    )
                     return gpt_info
             
             logging.warning("❗️ GPT model with canonical_name 'CHAT_DEPLOYMENT_NAME' not found in MODEL_DEPLOYMENTS")
@@ -158,29 +178,22 @@ def prepare_context_and_render(template_name: str, template_dir: str, label_filt
 
     # Add embedding model info to context for agentic retrieval
     embedding_model_info = extract_embedding_model_info(context)
-    if embedding_model_info:
-        context["EMBEDDING_MODEL_INFO"] = embedding_model_info
+    context["EMBEDDING_MODEL_INFO"] = embedding_model_info or {}
 
     # Add GPT model info to context for knowledge agents
     gpt_model_info = extract_gpt_model_info(context)
-    if gpt_model_info:
-        context["GPT_MODEL_INFO"] = gpt_model_info
+    context["GPT_MODEL_INFO"] = gpt_model_info or {}
 
-    # Debug logging for agentic retrieval
-    agentic_enabled = context.get("ENABLE_AGENTIC_RETRIEVAL", "false")
-    if isinstance(agentic_enabled, str):
-        context["ENABLE_AGENTIC_RETRIEVAL"] = agentic_enabled.lower()
-        agentic_enabled = agentic_enabled.lower()    
-    logging.info(f"🔍 ENABLE_AGENTIC_RETRIEVAL = '{agentic_enabled}' (type: {type(agentic_enabled)})")
-    if embedding_model_info:
-        logging.info(f"🔍 EMBEDDING_MODEL_INFO = {embedding_model_info}")
+    # Debug logging
+    if context.get("EMBEDDING_MODEL_INFO"):
+        logging.info(f"🔍 EMBEDDING_MODEL_INFO = {context['EMBEDDING_MODEL_INFO']}")
     else:
         logging.warning("❗️ EMBEDDING_MODEL_INFO is empty - vectorizers will not be configured")
-    
-    if gpt_model_info:
-        logging.info(f"🔍 GPT_MODEL_INFO = {gpt_model_info}")
+
+    if context.get("GPT_MODEL_INFO"):
+        logging.info(f"🔍 GPT_MODEL_INFO = {context['GPT_MODEL_INFO']}")
     else:
-        logging.warning("❗️ GPT_MODEL_INFO is empty - knowledge agents will use defaults")
+        logging.info("ℹ️ GPT_MODEL_INFO is empty")
 
     env = Environment(
         loader=FileSystemLoader(template_dir),
@@ -313,84 +326,76 @@ def provision_indexers(defs: dict, context: dict, cred: ChainedTokenCredential, 
         call_search_api(search_endpoint, api_version, "indexers", name, "delete", cred)
         call_search_api(search_endpoint, api_version, "indexers", name, "put", cred, body)
 
-def provision_knowledge_sources(defs: dict, context: dict, cred: ChainedTokenCredential, search_endpoint: str):
-    """
-    Creates knowledge sources for agentic retrieval using the 2025-08-01-preview API.
-    Only creates knowledge sources if they are defined in the template.
-    Note: Cleanup is handled separately in cleanup_agentic_resources()
-    """
-    knowledge_sources = defs.get("knowledgeSources", [])
-    if not knowledge_sources:
-        logging.info("🧠 No knowledge sources defined in template; skipping creation")
-        return
-
-    logging.info("🧠 Creating knowledge sources for agentic retrieval...")
-    
-    success_count = 0
-    for ks in knowledge_sources:
-        ks_name = ks["name"]
-        body = {k: v for k, v in ks.items() if k != "name"}
-        
-        # Create knowledge source (cleanup already done in cleanup_agentic_resources)
-        success = call_search_api(search_endpoint, AGENTIC_API_VERSION, "knowledgeSources", ks_name, "put", cred, body)
-        if success:
-            success_count += 1
-            logging.info(f"✅ Created knowledge source '{ks_name}'")
-        else:
-            logging.error(f"❗️ Failed to create knowledge source '{ks_name}'")
-
-    logging.info(f"🧠 Knowledge sources creation completed: {success_count}/{len(knowledge_sources)} successful")
-
-def provision_knowledge_agents(defs: dict, context: dict, cred: ChainedTokenCredential, search_endpoint: str):
-    """
-    Creates knowledge agents for agentic retrieval using the 2025-08-01-preview API.
-    Only creates knowledge agents if they are defined in the template.
-    Note: Cleanup is handled separately in cleanup_agentic_resources()
-    """
-    knowledge_agents = defs.get("knowledgeAgents", [])
-    if not knowledge_agents:
-        logging.info("🤖 No knowledge agents defined in template; skipping creation")
-        return
-
-    logging.info("🤖 Creating knowledge agents for agentic retrieval...")
-    
-    success_count = 0
-    for agent in knowledge_agents:
-        agent_name = agent["name"]
-        body = {k: v for k, v in agent.items() if k != "name"}
-        
-        # Create knowledge agent (cleanup already done in cleanup_agentic_resources)
-        success = call_search_api(search_endpoint, AGENTIC_API_VERSION, "agents", agent_name, "put", cred, body)
-        if success:
-            success_count += 1
-            logging.info(f"✅ Created knowledge agent '{agent_name}'")
-        else:
-            logging.error(f"❗️ Failed to create knowledge agent '{agent_name}'")
-
-    logging.info(f"🤖 Knowledge agents creation completed: {success_count}/{len(knowledge_agents)} successful")
-
-def cleanup_agentic_resources(defs: dict, context: dict, cred: ChainedTokenCredential, search_endpoint: str):
-    """
-    Clean up agentic retrieval resources in the correct order:
-    1. Delete knowledge agents first (they reference knowledge sources)
-    2. Delete knowledge sources (they reference indexes)
+def cleanup_knowledge_resources(defs: dict, context: dict, cred: ChainedTokenCredential, search_endpoint: str):
+    """Clean up knowledge base resources in the correct order:
+    1) Delete knowledge bases (they reference knowledge sources)
+    2) Delete knowledge sources (they reference indexes)
     This ensures indexes can be deleted without conflicts.
     """
-    # Step 1: Delete all knowledge agents that will be recreated
-    knowledge_agents = defs.get("knowledgeAgents", [])
-    if knowledge_agents:
-        logging.info("🧹 Cleaning up existing knowledge agents...")
-        for agent in knowledge_agents:
-            agent_name = agent["name"]
-            call_search_api(search_endpoint, AGENTIC_API_VERSION, "agents", agent_name, "delete", cred)
-    
-    # Step 2: Delete all knowledge sources that will be recreated
+
+    knowledge_bases = defs.get("knowledgeBases", [])
+    if knowledge_bases:
+        logging.info("🧹 Cleaning up existing knowledge bases...")
+        for kb in knowledge_bases:
+            kb_name = kb["name"]
+            call_search_api(search_endpoint, KNOWLEDGE_API_VERSION, "knowledgebases", kb_name, "delete", cred)
+
     knowledge_sources = defs.get("knowledgeSources", [])
     if knowledge_sources:
         logging.info("🧹 Cleaning up existing knowledge sources...")
         for ks in knowledge_sources:
             ks_name = ks["name"]
-            call_search_api(search_endpoint, AGENTIC_API_VERSION, "knowledgeSources", ks_name, "delete", cred)
+            call_search_api(search_endpoint, KNOWLEDGE_API_VERSION, "knowledgesources", ks_name, "delete", cred)
+
+
+def provision_knowledge_sources(defs: dict, context: dict, cred: ChainedTokenCredential, search_endpoint: str):
+    """Create or update knowledge sources (2025-11-01-preview).
+
+    Knowledge sources are top-level objects. For searchIndex knowledge sources, the referenced index must already exist.
+    """
+
+    knowledge_sources = defs.get("knowledgeSources", [])
+    if not knowledge_sources:
+        logging.info("🧠 No knowledge sources defined in template; skipping creation")
+        return
+
+    logging.info("🧠 Creating knowledge sources (2025-11-01-preview)...")
+    success_count = 0
+    for ks in knowledge_sources:
+        ks_name = ks["name"]
+        body = ks
+        success = call_search_api(search_endpoint, KNOWLEDGE_API_VERSION, "knowledgesources", ks_name, "put", cred, body)
+        if success:
+            success_count += 1
+        else:
+            logging.error(f"❗️ Failed to create knowledge source '{ks_name}'")
+
+    logging.info(f"🧠 Knowledge sources creation completed: {success_count}/{len(knowledge_sources)} successful")
+
+
+def provision_knowledge_bases(defs: dict, context: dict, cred: ChainedTokenCredential, search_endpoint: str):
+    """Create or update knowledge bases (2025-11-01-preview).
+
+    This repo uses outputMode=extractiveData and retrievalReasoningEffort=minimal so it doesn't depend on an LLM.
+    """
+
+    knowledge_bases = defs.get("knowledgeBases", [])
+    if not knowledge_bases:
+        logging.info("📚 No knowledge bases defined in template; skipping creation")
+        return
+
+    logging.info("📚 Creating knowledge bases (2025-11-01-preview)...")
+    success_count = 0
+    for kb in knowledge_bases:
+        kb_name = kb["name"]
+        body = kb
+        success = call_search_api(search_endpoint, KNOWLEDGE_API_VERSION, "knowledgebases", kb_name, "put", cred, body)
+        if success:
+            success_count += 1
+        else:
+            logging.error(f"❗️ Failed to create knowledge base '{kb_name}'")
+
+    logging.info(f"📚 Knowledge bases creation completed: {success_count}/{len(knowledge_bases)} successful")
 
 # ── Main Provisioning to AI Search elements (datasources, indexes, skillset and indexers) ─────────────────────
 def execute_setup(defs: Optional[dict], context: dict):
@@ -412,8 +417,8 @@ def execute_setup(defs: Optional[dict], context: dict):
         logging.error("❗️ SEARCH_API_VERSION not found in search.env; skipping Azure Search setup.")
         return
     
-    # Step 1: Clean up agentic resources in correct order (agents -> sources)
-    cleanup_agentic_resources(defs, context, cred, search_endpoint)
+    # Step 1: Clean up knowledge base resources in correct order (KB -> KS)
+    cleanup_knowledge_resources(defs, context, cred, search_endpoint)
     
     # Step 2: Provision standard search resources (now indexes can be deleted safely)
     provision_datasources(defs, context, cred, ds_to_indexers, search_endpoint, api_version)
@@ -421,9 +426,9 @@ def execute_setup(defs: Optional[dict], context: dict):
     provision_skillsets(defs, context, cred, search_endpoint, api_version)
     provision_indexers(defs, context, cred, search_endpoint, api_version)
     
-    # Step 3: Provision agentic resources (sources -> agents)
+    # Step 3: Provision knowledge base resources (KS -> KB)
     provision_knowledge_sources(defs, context, cred, search_endpoint)
-    provision_knowledge_agents(defs, context, cred, search_endpoint)
+    provision_knowledge_bases(defs, context, cred, search_endpoint)
     
     logging.info("All components have been provisioned.")
 

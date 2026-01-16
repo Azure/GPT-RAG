@@ -1,13 +1,13 @@
 {
-  "tag": "v2.3.0",
-  "release": "release/2.3.0",
+  "tag": "v2.4.0",
+  "release": "release/2.4.0",
   "repo": "https://github.com/azure/gpt-rag.git",
   "components": [
     {
       "name": "gpt-rag-ui",
       "repo": "https://github.com/azure/gpt-rag-ui.git",
-      "tag": "v2.1.1",
-      "release": "release/2.1.1"
+      "tag": "v2.2.0",
+      "release": "release/2.2.0"
     },
     {
       "name": "gpt-rag-mcp",
@@ -18,14 +18,14 @@
     {
       "name": "gpt-rag-orchestrator",
       "repo": "https://github.com/azure/gpt-rag-orchestrator.git",
-      "tag": "v2.3.0",
-      "release": "release/2.3.0"
+      "tag": "v2.4.0",
+      "release": "release/2.4.0"
     },
     {
       "name": "gpt-rag-ingestion",
       "repo": "https://github.com/azure/gpt-rag-ingestion.git",
-      "tag": "v2.1.0",
-      "release": "release/2.1.0"
+      "tag": "v2.2.0",
+      "release": "release/2.2.0"
     }
   ]
 }
