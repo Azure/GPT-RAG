@@ -13,10 +13,10 @@
       
       
       
-        <link rel="prev" href="../services_orchestrator/">
+        <link rel="prev" href="../howto_azure_direct/">
       
       
-        <link rel="next" href="../ingestion_blob_data_source/">
+        <link rel="next" href="../howto_userfeedback/">
       
       
       <link rel="icon" href="../favicon.ico">
@@ -24,7 +24,7 @@
     
     
       
-        <title>Overview - GPT-RAG</title>
+        <title>Authentication and Document Security - GPT-RAG</title>
       
     
     
@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#key-features" class="md-skip">
+        <a href="#authentication-and-document-level-security" class="md-skip">
           Skip to content
         </a>
       
@@ -109,7 +109,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Overview
+              Authentication and Document Security
             
           </span>
         </div>
@@ -431,19 +431,17 @@
       
   
   
-    
   
   
-  
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
           <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
@@ -457,7 +455,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             Services
@@ -489,19 +487,17 @@
                 
   
   
-    
   
   
-  
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" >
         
           
           <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
@@ -515,7 +511,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_6_2">
             <span class="md-nav__icon md-icon"></span>
             Ingestion
@@ -526,28 +522,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Overview
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../services_ingestion/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -556,60 +534,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#key-features" class="md-nav__link">
-    <span class="md-ellipsis">
-      Key Features
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#data-sources" class="md-nav__link">
-    <span class="md-ellipsis">
-      Data sources
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#how-to-deploy-the-data-ingestion-service" class="md-nav__link">
-    <span class="md-ellipsis">
-      How to deploy the data ingestion service
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#observability" class="md-nav__link">
-    <span class="md-ellipsis">
-      Observability
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -697,17 +621,19 @@
       
   
   
+    
   
   
+  
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
         
           
           <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
@@ -721,7 +647,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             How-to Guides
@@ -753,10 +679,19 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../howto_authentication/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -765,6 +700,7 @@
   
 
       </a>
+      
     </li>
   
 
@@ -877,218 +813,163 @@
   
 
 
-  <h1>Overview</h1>
-
-<p>The <strong>GPT-RAG Data Ingestion</strong> service automates the processing of diverse document types, such as PDFs, images, spreadsheets, transcripts, and SharePoint files, preparing them for indexing in Azure AI Search. It uses intelligent chunking strategies tailored to each format, generates text and image embeddings, and enables rich, multimodal retrieval experiences for agent-based RAG applications.</p>
-<h2 id="key-features">Key Features</h2>
-<ul>
-<li><strong>Multi-Format Processing</strong>: Handles PDFs, images, spreadsheets, transcripts, and SharePoint content</li>
-<li><strong>Intelligent Chunking</strong>: Format-specific chunking strategies for optimal retrieval</li>
-<li><strong>Multimodal Embeddings</strong>: Generates both text and image embeddings</li>
-<li><strong>Automated Workflows</strong>: Scans sources, processes content, and indexes documents automatically</li>
-<li><strong>Scheduled Execution</strong>: CRON-based scheduler for continuous data ingestion</li>
-<li><strong>Multiple Data Sources</strong>: Supports Blob Storage, SharePoint, and NL2SQL metadata</li>
-</ul>
-<h2 id="data-sources">Data sources</h2>
-<ul>
-<li><a href="../ingestion_blob_data_source/">Blob Storage</a></li>
-<li><a href="../ingestion_nl2sql_data_source/">NL2SQL Metadata</a></li>
-<li><a href="../ingestion_sharepoint_source/">SharePoint</a></li>
-</ul>
-<h2 id="how-to-deploy-the-data-ingestion-service">How to deploy the data ingestion service</h2>
+<h1 id="authentication-and-document-level-security">Authentication and Document level Security</h1>
+<p>This page explains how authentication works in GPT-RAG, from the Chainlit UI sign-in to calling Azure AI Search with permission trimming. The key idea is intentionally simple: the UI forwards a single user token to the orchestrator, and the orchestrator takes responsibility for producing the correct “user context” token required by Azure AI Search.</p>
+<p>Key takeaway: the orchestrator receives an API token and then performs an On-Behalf-Of exchange to obtain a separate token for Azure AI Search. The two tokens have different audiences and are not interchangeable.</p>
 <p><strong>Prerequisites</strong></p>
-<p>Provision the infrastructure first by following the <a href="../deploy/">Deployment Guide</a>. This ensures all required Azure resources (e.g., Container App, Storage, AI Search) are in place before deploying the data ingestion service.</p>
-<p><strong>Required Tools:</strong></p>
-<ul>
-<li><a href="https://learn.microsoft.com/cli/azure/install-azure-cli">Azure CLI</a></li>
-<li><a href="https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd">Azure Developer CLI</a> (optional, if using azd)</li>
-<li><a href="https://git-scm.com/downloads">Git</a></li>
-<li><a href="https://www.python.org/downloads/release/python-3120/">Python 3.12</a></li>
-<li><a href="https://docs.docker.com/get-docker/">Docker CLI</a></li>
-<li><a href="https://code.visualstudio.com/download">VS Code</a> (recommended)</li>
-</ul>
-<p><strong>Required Permissions (for customization):</strong></p>
-<table>
-<thead>
-<tr>
-<th>Resource</th>
-<th>Role</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>App Configuration Store</td>
-<td>App Configuration Data Owner</td>
-<td>Full control over configuration settings</td>
-</tr>
-<tr>
-<td>Container Registry</td>
-<td>AcrPush</td>
-<td>Push and pull container images</td>
-</tr>
-<tr>
-<td>AI Search Service</td>
-<td>Search Index Data Contributor</td>
-<td>Read and write index data</td>
-</tr>
-<tr>
-<td>Storage Account</td>
-<td>Storage Blob Data Contributor</td>
-<td>Read and write blob data</td>
-</tr>
-<tr>
-<td>Cosmos DB</td>
-<td>Cosmos DB Built-in Data Contributor</td>
-<td>Read and write documents in Cosmos DB</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Required Permissions (for deployment):</strong></p>
-<table>
-<thead>
-<tr>
-<th>Resource</th>
-<th>Role</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>App Configuration</td>
-<td>App Configuration Data Reader</td>
-<td>Read config</td>
-</tr>
-<tr>
-<td>Container Registry</td>
-<td>AcrPush</td>
-<td>Push images</td>
-</tr>
-<tr>
-<td>Container App</td>
-<td>Azure Container Apps Contributor</td>
-<td>Manage Container Apps</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Deployment steps</strong></p>
-<p>Make sure you're logged in to Azure before anything else:</p>
-<div class="highlight"><pre><span></span><code>az<span class="w"> </span>login
+<p>Microsoft Entra ID must be configured to allow an On-Behalf-Of exchange. That means the orchestrator must be a confidential client and needs access to a client secret.</p>
+<p>The UI must forward the signed-in user’s access token to the orchestrator in the <code>Authorization</code> header. Without a user token, the orchestrator cannot acquire the delegated Azure AI Search token.</p>
+<p>Your Azure AI Search index must be configured for permission trimming, and your indexed documents must include the required security metadata fields.</p>
+<p>Tenant consent must be granted for the Azure AI Search delegated permission. If consent is missing, the On-Behalf-Of exchange fails. In this repo, the only supported fallback is to run without authentication by setting <code>ALLOW_ANONYMOUS</code> to <code>true</code>.</p>
+<p>Microsoft Graph delegated permissions such as <code>User.Read</code> are not required for this flow. The UI must request an access token for the orchestrator API. If the UI sends a token whose audience is Microsoft Graph, the orchestrator rejects it and the exchange cannot succeed.</p>
+<p><strong>How it works</strong></p>
+<div class="no-wrap">
+<div class="highlight"><pre><span></span><code>    +---------------------------+                 +----------------------------------+
+    |  Microsoft Entra ID       |                 |  Azure AI Search                 |
+    |  Tenant                   |                 |  Index with permission trimming  |
+    |                           |                 |  permissionFilterOption=enabled  |
+    +---------------------------+                 +----------------------------------+
+            ^                                                      ^
+            |                                                      |
+            | (4) Search user token                                | (6) Search query
+            |  aud: https://search.azure.com                       |   Authorization: (orchestrator identity)
+            |  scope: https://search.azure.com/user_impersonation
+            |                                                      | x-ms-query-source-authorization: (search user token)
+            |                                                      |
+            |                                                      |
+    +---------------------------+         (3) OBO exchange         |
+    |  Orchestrator             |----------------------------------+
+    |  Container App            |   to Entra ID token endpoint
+    |                           |
+    |  Validates API token      |   Inputs
+    |  Uses client secret       |   - incoming user token
+    |  Uses MI or admin key     |   - client id and client secret
+    +---------------------------+   - requested scope for Search
+                        ^
+                        |
+                        | (2) API token
+                        |     aud: api://&lt;CLIENT_ID&gt;
+                        |     scope: api://&lt;CLIENT_ID&gt;/user_impersonation
+                        |
+    +---------------------------+
+    |  Frontend                 |
+    |  Container App            |
+    |  Chainlit OAuth           |
+    +---------------------------+
+                        ^
+                        |
+                        | (1) User sign-in
+                        |     Entra issues API token
+                        |
+    +---------------------------+
+    |  App Registration         |
+    |  Single registration for  |
+    |  UI and orchestrator      |
+    +---------------------------+
 </code></pre></div>
-<p>Clone this repository.</p>
-<p><strong>If you used <code>azd provision</code></strong></p>
-<p>Just run:</p>
-<div class="highlight"><pre><span></span><code>azd<span class="w"> </span>env<span class="w"> </span>refresh
-azd<span class="w"> </span>deploy<span class="w"> </span>
+</div>
+
+<p><strong>Which token goes where</strong></p>
+<p>After the user signs in, the UI forwards the API access token to the orchestrator.</p>
+<div class="highlight"><pre><span></span><code>Authorization: Bearer &lt;api_access_token&gt;
 </code></pre></div>
-<blockquote>
-<p>Make sure you use the <strong>same</strong> subscription, resource group, environment name, and location from <code>azd provision</code>.</p>
-</blockquote>
-<p><strong>If you did </strong>not<strong> use <code>azd provision</code></strong></p>
-<p>You need to set the App Configuration endpoint and run the deploy script.</p>
-<p><strong>Bash (Linux/macOS):</strong></p>
-<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">APP_CONFIG_ENDPOINT</span><span class="o">=</span><span class="s2">&quot;https://&lt;your-app-config-name&gt;.azconfig.io&quot;</span>
-./scripts/deploy.sh
+<p>When the orchestrator calls Azure AI Search with permission trimming enabled, it sends two independent credentials:</p>
+<p>1) The orchestrator authenticates the request using its own identity.</p>
+<p>2) The orchestrator includes a delegated user token for Azure AI Search, produced via On-Behalf-Of.</p>
+<div class="highlight"><pre><span></span><code>x-ms-query-source-authorization: Bearer &lt;search_user_access_token&gt;
 </code></pre></div>
-<p><strong>PowerShell (Windows):</strong></p>
-<div class="highlight"><pre><span></span><code><span class="nv">$env:APP_CONFIG_ENDPOINT</span> <span class="p">=</span> <span class="s2">&quot;https://&lt;your-app-config-name&gt;.azconfig.io&quot;</span>
-<span class="p">.\</span><span class="n">scripts</span><span class="p">\</span><span class="n">deploy</span><span class="p">.</span><span class="n">ps1</span>
+<p>Do not send the API token in <code>x-ms-query-source-authorization</code>. Azure AI Search expects a token issued for <code>https://search.azure.com</code>.</p>
+<p><strong>Setup</strong></p>
+<p>This procedure configures Microsoft Entra ID so the UI can sign users in and the orchestrator can perform an On-Behalf-Of exchange.</p>
+<p>1) Create one App Registration in Microsoft Entra ID. Use the same application identity for the UI and the orchestrator.</p>
+<p>2) In the App Registration, add a Web platform redirect URI for the Chainlit callback endpoint.</p>
+<div class="highlight"><pre><span></span><code>https://&lt;YOUR-APP-URL&gt;/auth/oauth/azure-ad/callback
 </code></pre></div>
-<h2 id="observability">Observability</h2>
-<p>Monitor ingestion job execution and performance using Application Insights. The following query retrieves detailed metrics for completed ingestion runs, including indexing and purging operations.</p>
-<p><strong>Application Insights Query</strong></p>
-<p>Navigate to your Application Insights resource in the Azure Portal, go to <strong>Logs</strong>, and run the following query:</p>
-<div class="highlight"><pre><span></span><code><span class="n">let</span><span class="w"> </span><span class="n">Logs</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">union</span><span class="w"> </span><span class="n">isfuzzy</span><span class="p">=</span><span class="n">true</span><span class="w"> </span><span class="n">traces</span><span class="p">,</span><span class="w"> </span><span class="n">AppTraces</span><span class="p">;</span>
-<span class="n">Logs</span>
-<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="k">contains</span><span class="w"> </span><span class="s">&quot;RUN-COMPLETE&quot;</span>
-<span class="p">|</span><span class="w"> </span><span class="k">extend</span><span class="w"> </span><span class="n">payload</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">parse_json</span><span class="p">(</span><span class="n">extract</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\\</span><span class="s">{.*&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">message</span><span class="p">))</span>
-<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">event</span><span class="p">)</span><span class="w"> </span><span class="p">==</span><span class="w"> </span><span class="s">&quot;RUN-COMPLETE&quot;</span>
-<span class="p">|</span><span class="w"> </span><span class="k">extend</span><span class="w"> </span><span class="n">indexerType</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">extract</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\\</span><span class="s">[([^</span><span class="se">\\</span><span class="s">]]+)</span><span class="se">\\</span><span class="s">]&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">message</span><span class="p">)</span>
-<span class="p">|</span><span class="w"> </span><span class="k">project</span><span class="w"> </span><span class="n">timestamp</span><span class="p">,</span>
-<span class="w">          </span><span class="n">indexerType</span><span class="p">,</span>
-<span class="w">          </span><span class="n">runId</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">runId</span><span class="p">),</span>
-<span class="w">          </span><span class="n">status</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">status</span><span class="p">),</span>
-<span class="w">          </span><span class="n">collectionsSeen</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">toint</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">collectionsSeen</span><span class="p">),</span>
-<span class="w">          </span><span class="c">// Indexer columns (work on items)</span>
-<span class="w">          </span><span class="n">itemsDiscovered</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">toint</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">itemsDiscovered</span><span class="p">),</span>
-<span class="w">          </span><span class="n">itemsIndexed</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">toint</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">itemsIndexed</span><span class="p">),</span>
-<span class="w">          </span><span class="n">itemsFailed</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">toint</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">itemsFailed</span><span class="p">),</span>
-<span class="w">          </span><span class="c">// Purger columns (work on chunks)</span>
-<span class="w">          </span><span class="n">chunksChecked</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">toint</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">chunksChecked</span><span class="p">),</span>
-<span class="w">          </span><span class="n">chunksDeleted</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">toint</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">chunksDeleted</span><span class="p">),</span>
-<span class="w">          </span><span class="n">chunksFailedDelete</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">toint</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">chunksFailedDelete</span><span class="p">),</span>
-<span class="w">          </span><span class="c">// Common</span>
-<span class="w">          </span><span class="n">durationSeconds</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">todouble</span><span class="p">(</span><span class="n">payload</span><span class="err">.</span><span class="n">durationSeconds</span><span class="p">)</span>
-<span class="p">|</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="n">desc</span>
+<p>3) Expose an API for the orchestrator and create one delegated scope.</p>
+<div class="highlight"><pre><span></span><code>api://&lt;OAUTH_AZURE_AD_CLIENT_ID&gt;
+api://&lt;OAUTH_AZURE_AD_CLIENT_ID&gt;/user_impersonation
 </code></pre></div>
-<p><strong>Query Fields</strong></p>
-<p>This query returns the following metrics for each ingestion run:</p>
-<table>
-<thead>
-<tr>
-<th>Column</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>timestamp</code></td>
-<td>When the job completed</td>
-</tr>
-<tr>
-<td><code>indexerType</code></td>
-<td>Type of indexer (e.g., Blob, SharePoint, NL2SQL)</td>
-</tr>
-<tr>
-<td><code>runId</code></td>
-<td>Unique identifier for the run</td>
-</tr>
-<tr>
-<td><code>status</code></td>
-<td>Job completion status</td>
-</tr>
-<tr>
-<td><code>collectionsSeen</code></td>
-<td>Number of collections processed</td>
-</tr>
-<tr>
-<td><code>itemsDiscovered</code></td>
-<td>Total items found during scan</td>
-</tr>
-<tr>
-<td><code>itemsIndexed</code></td>
-<td>Items successfully indexed</td>
-</tr>
-<tr>
-<td><code>itemsFailed</code></td>
-<td>Items that failed to index</td>
-</tr>
-<tr>
-<td><code>chunksChecked</code></td>
-<td>Chunks verified during purge</td>
-</tr>
-<tr>
-<td><code>chunksScanned</code></td>
-<td>Total chunks scanned</td>
-</tr>
-<tr>
-<td><code>chunksDeleted</code></td>
-<td>Chunks removed from index</td>
-</tr>
-<tr>
-<td><code>chunksFailedDelete</code></td>
-<td>Chunks that failed deletion</td>
-</tr>
-<tr>
-<td><code>searchPages</code></td>
-<td>Number of search result pages processed</td>
-</tr>
-<tr>
-<td><code>durationSeconds</code></td>
-<td>Total execution time in seconds</td>
-</tr>
-</tbody>
-</table>
+<p>4) Create a client secret. The orchestrator uses it to authenticate as a confidential client during the On-Behalf-Of exchange.</p>
+<p>5) Grant the Azure AI Search delegated permission <code>user_impersonation</code>, then grant tenant consent.</p>
+<p>If you configure this in the portal, the navigation usually looks like this.</p>
+<div class="highlight"><pre><span></span><code>API permissions
+  Add a permission
+    APIs my organization uses
+      Azure Cognitive Search
+        Delegated permissions
+          user_impersonation
+  Grant admin consent
+</code></pre></div>
+<p>If Azure Cognitive Search does not appear in the picker for your tenant, configure the permission using CLI. First, discover the Azure AI Search resource application id and the scope id for <code>user_impersonation</code>.</p>
+<div class="highlight"><pre><span></span><code>az rest --method GET --url &quot;https://graph.microsoft.com/v1.0/servicePrincipals?$filter=servicePrincipalNames/any(s:s eq &#39;https://search.azure.com&#39;)&amp;$select=appId,displayName,oauth2PermissionScopes&quot; --query &quot;value[0].{resourceAppId:appId,scopeId:oauth2PermissionScopes[?value==&#39;user_impersonation&#39;].id | [0],name:displayName}&quot;
+</code></pre></div>
+<p>Then add the permission to your App Registration and grant consent.</p>
+<div class="highlight"><pre><span></span><code>az ad app permission add --id &lt;OAUTH_AZURE_AD_CLIENT_ID&gt; --api &lt;SEARCH_RESOURCE_APP_ID&gt; --api-permissions &lt;SCOPE_ID&gt;=Scope
+az ad app permission admin-consent --id &lt;OAUTH_AZURE_AD_CLIENT_ID&gt;
+</code></pre></div>
+<p>You can validate configured permissions with the following command.</p>
+<div class="highlight"><pre><span></span><code>az ad app permission list --id &lt;OAUTH_AZURE_AD_CLIENT_ID&gt;
+</code></pre></div>
+<p><strong>Group-based trimming</strong></p>
+<p>If your indexed documents include group object ids in <code>metadata_security_group_ids</code>, Azure AI Search needs group identifiers for the querying user. The most straightforward setup is to configure the App Registration to emit a <code>groups</code> claim in access tokens.</p>
+<p>If users belong to many groups, Entra may emit a group overage indicator instead of the full group list. In that case, group membership must be resolved via Microsoft Graph. GPT-RAG tries to avoid that dependency, so keep group sets small where possible.</p>
+<p><strong>Permission trimming fields in Azure AI Search</strong></p>
+<p>Permission trimming works when the index is configured for it and when each document contains security metadata in fields that Azure AI Search recognizes. To enable trimming, set <code>permissionFilterOption</code> to <code>enabled</code> in the index definition.</p>
+<p>The index must include one field for each permission filter type.</p>
+<div class="highlight"><pre><span></span><code>metadata_security_user_ids   Collection(Edm.String)   permissionFilter=userIds
+metadata_security_group_ids  Collection(Edm.String)   permissionFilter=groupIds
+metadata_security_rbac_scope Edm.String               permissionFilter=rbacScope
+</code></pre></div>
+<p>Azure AI Search enforces limits for permission filter fields. The <code>userIds</code> and <code>groupIds</code> fields accept up to 32 values each. The <code>rbacScope</code> field is limited to five distinct values across the entire index. The fields should also be marked as <code>filterable=true</code>.</p>
+<p><strong>How GPT-RAG populates permission fields</strong></p>
+<p>GPT-RAG uses the same field names across ingestion paths.</p>
+<p>Blob ingestion reads <code>metadata_security_user_ids</code> and <code>metadata_security_group_ids</code> from blob metadata when present. If more than 32 values are supplied, ingestion removes duplicates and truncates to 32 to avoid indexing failures.</p>
+<p>Blob ingestion also sets <code>metadata_security_rbac_scope</code> to the container resource id when it can compute it. SharePoint ingestion populates user and group fields and does not set <code>metadata_security_rbac_scope</code>.</p>
+<p><strong>Blob metadata keys and accepted formats</strong></p>
+<p>For Blob Storage ingestion, GPT-RAG reads two optional metadata keys from each blob. If they are missing or empty, ingestion still succeeds and documents are indexed with empty ACL arrays.</p>
+<div class="highlight"><pre><span></span><code>metadata_security_user_ids
+metadata_security_group_ids
+</code></pre></div>
+<p>Values can be provided as a JSON array, a Python-style list, or a comma-separated string. JSON is recommended because it is unambiguous.</p>
+<p>Examples for <code>metadata_security_user_ids</code>.</p>
+<div class="highlight"><pre><span></span><code>[&quot;11111111-1111-1111-1111-111111111111&quot;]
+[&quot;11111111-1111-1111-1111-111111111111&quot;,&quot;22222222-2222-2222-2222-222222222222&quot;]
+11111111-1111-1111-1111-111111111111,22222222-2222-2222-2222-222222222222
+[&#39;11111111-1111-1111-1111-111111111111&#39;,&#39;22222222-2222-2222-2222-222222222222&#39;]
+</code></pre></div>
+<p>Examples for <code>metadata_security_group_ids</code>.</p>
+<div class="highlight"><pre><span></span><code>[&quot;aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa&quot;]
+[&quot;aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa&quot;,&quot;bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb&quot;]
+aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa,bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb
+</code></pre></div>
+<p>User ids must be Entra user object ids. Group ids must be Entra group object ids.</p>
+<p><strong>RBAC scope for Blob ingestion</strong></p>
+<p>For Blob Storage ingestion, <code>metadata_security_rbac_scope</code> should be the Azure resource id of the container.</p>
+<div class="highlight"><pre><span></span><code>/subscriptions/&lt;subscriptionId&gt;/resourceGroups/&lt;resourceGroup&gt;/providers/Microsoft.Storage/storageAccounts/&lt;storageAccount&gt;/blobServices/default/containers/&lt;container&gt;
+</code></pre></div>
+<p>The blob indexer computes this value from configuration when possible. If you want to set it explicitly, use <code>DOCUMENTS_STORAGE_CONTAINER_RESOURCE_ID</code>. Otherwise, the indexer attempts to build it using <code>SUBSCRIPTION_ID</code> or <code>AZURE_SUBSCRIPTION_ID</code>, together with <code>AZURE_RESOURCE_GROUP</code>.</p>
+<p><strong>Configuration keys used by this repo</strong></p>
+<p>Required keys.</p>
+<div class="highlight"><pre><span></span><code>OAUTH_AZURE_AD_CLIENT_ID
+OAUTH_AZURE_AD_TENANT_ID
+OAUTH_AZURE_AD_CLIENT_SECRET
+CHAINLIT_AUTH_SECRET
+</code></pre></div>
+<p>Optional keys.</p>
+<div class="highlight"><pre><span></span><code>CHAINLIT_URL
+OAUTH_AZURE_AD_SCOPES
+OAUTH_AZURE_AD_ENABLE_SINGLE_TENANT
+ALLOW_ANONYMOUS
+</code></pre></div>
+<p><strong>Scopes used by this repo</strong></p>
+<p>Interactive login commonly includes <code>openid</code>, <code>profile</code>, and <code>offline_access</code>. If <code>OAUTH_AZURE_AD_SCOPES</code> is not set, the default is the orchestrator API scope plus those OpenID Connect scopes.</p>
+<div class="highlight"><pre><span></span><code>api://&lt;CLIENT_ID&gt;/user_impersonation,openid,profile,offline_access
+</code></pre></div>
+<p>If you add Microsoft Graph scopes such as <code>User.Read</code> to the interactive login request, Entra may issue a Microsoft Graph access token. That is not the token the orchestrator needs for the On-Behalf-Of exchange to Azure AI Search. When Graph is required, prefer backend-to-Graph calls using application permissions.</p>
+<p>Refresh-token exchange behaves differently. MSAL rejects reserved OpenID Connect scopes during refresh. For refresh flows, GPT-RAG requests only the API scope.</p>
+<p><strong>Local development</strong></p>
+<p>If you have not configured OAuth, you can run in anonymous mode by setting <code>ALLOW_ANONYMOUS</code> to <code>true</code>.</p>
+<p>If you want to load configuration locally from Azure App Configuration, set <code>APP_CONFIG_ENDPOINT</code> and authenticate using <code>az login</code>.</p>
 
 
 
