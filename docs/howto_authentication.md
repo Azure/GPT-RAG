@@ -213,7 +213,7 @@ At a minimum, you only need to set the settings marked as **Required** in the ta
 
 In the index definition, set `permissionFilterOption` to `enabled`.
 
-These are the Azure AI Search index fields used by AI Search:
+These are the Azure AI Search index fields used for document-level access control:
 
 ```
 metadata_security_user_ids   Collection(Edm.String)   permissionFilter=userIds
@@ -241,4 +241,4 @@ Examples of how to populate `metadata_security_user_ids` and `metadata_security_
 ```
 
 > Note: For Blob Storage ingestion, the GPT-RAG ingestion pipeline will populate `metadata_security_rbac_scope` automatically. The value is the Azure resource ID of the container, for example:
-*/subscriptions/\<subscriptionId\>/resourceGroups/\<resourceGroup\>/providers/Microsoft.Storage/storageAccounts/\<storageAccount\>/blobServices/default/containers/\<container\>*
+*/subscriptions/<subscriptionId\>/resourceGroups/<resourceGroup\>/providers/Microsoft.Storage/storageAccounts/<storageAccount\>/blobServices/default/containers/<container\>*
