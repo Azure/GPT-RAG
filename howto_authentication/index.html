@@ -1067,7 +1067,7 @@ az ad app permission admin-consent --id &lt;replace-by-app-client-id&gt;
 </table>
 <p><strong>7) Configure the Azure AI Search index for document-level access control and ensure your documents include permission metadata.</strong></p>
 <p>In the index definition, set <code>permissionFilterOption</code> to <code>enabled</code>.</p>
-<p>These are the Azure AI Search index fields used by AI Search:</p>
+<p>These are the Azure AI Search index fields used for document-level access control:</p>
 <div class="highlight"><pre><span></span><code>metadata_security_user_ids   Collection(Edm.String)   permissionFilter=userIds
 metadata_security_group_ids  Collection(Edm.String)   permissionFilter=groupIds
 metadata_security_rbac_scope Edm.String               permissionFilter=rbacScope
@@ -1087,7 +1087,7 @@ metadata_security_group_ids
 </code></pre></div>
 <blockquote>
 <p>Note: For Blob Storage ingestion, the GPT-RAG ingestion pipeline will populate <code>metadata_security_rbac_scope</code> automatically. The value is the Azure resource ID of the container, for example:
-<em>/subscriptions/\&lt;subscriptionId&gt;/resourceGroups/\&lt;resourceGroup&gt;/providers/Microsoft.Storage/storageAccounts/\&lt;storageAccount&gt;/blobServices/default/containers/\&lt;container&gt;</em></p>
+<em>/subscriptions/&lt;subscriptionId&gt;/resourceGroups/&lt;resourceGroup&gt;/providers/Microsoft.Storage/storageAccounts/&lt;storageAccount&gt;/blobServices/default/containers/&lt;container&gt;</em></p>
 </blockquote>
 
 
