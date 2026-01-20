@@ -5,8 +5,7 @@ This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres 
 
 ## [v2.4.1] - 2026-01-20
 ### Changed
-- Bumped ingestion component version to include reliability improvements for large spreadsheet ingestion by adding robust retry with exponential backoff for Azure OpenAI calls (handles 429/Retry-After and is configurable via `OPENAI_RETRY_*` and `OPENAI_SDK_MAX_RETRIES`).
-- Standardized on the container best practice of using a non-privileged port (8080) instead of a privileged port (80), reducing the risk of runtime/permission friction and improving stability of long-running ingestion workloads.
+- Bumped ingestion component version to include reliability improvements for large spreadsheet ingestion.
 
 
 ## [v2.4.0] - 2026-01-15
