@@ -1935,14 +1935,14 @@ module containerApps 'br/public:avm/res/app/container-app:0.18.1' = [
       workloadProfileName: app.profile_name
 
       ingressExternal: app.external
-      ingressTargetPort: 80
+      ingressTargetPort: 8080
       ingressTransport: 'auto'
       ingressAllowInsecure: false
 
       dapr: {
         enabled: true
         appId: app.service_name
-        appPort: 80
+        appPort: 8080
         appProtocol: 'http'
       }
 

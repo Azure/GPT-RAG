@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.  
 This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to [Semantic Versioning](https://semver.org/).
 
+## [v2.4.2] - 2026-02-04
+### Fixed
+- Updated the Docker image to install Microsoft's current public signing key, fixing build failures caused by SHA-1 signature rejection in newer Debian/apt verification policies (orchestrator).
+- Fixed Docker builds on ARM-based machines by explicitly setting the target platform to `linux/amd64`, preventing Azure Container Apps deployment failures.
+### Changed
+- Updated the Docker base image.
+- Standardized on the container best practice of using a non-privileged port (`8080`) instead of a privileged port (`80`), reducing the risk of runtime/permission friction and improving stability of long-running ingestion workloads.
+- Bumped `aiohttp` to `3.13.3`.
+
 ## [v2.4.1] - 2026-01-20
 ### Changed
 - Bumped ingestion component version to include reliability improvements for large spreadsheet ingestion.
