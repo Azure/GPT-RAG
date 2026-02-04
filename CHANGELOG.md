@@ -8,7 +8,7 @@ This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres 
 - Updated the Docker image to install Microsoft's current public signing key, fixing build failures caused by SHA-1 signature rejection in newer Debian/apt verification policies (orchestrator).
 - Fixed Docker builds on ARM-based machines by explicitly setting the target platform to `linux/amd64`, preventing Azure Container Apps deployment failures.
 ### Changed
-- Pinned the Docker base image to `mcr.microsoft.com/devcontainers/python:3.12-bookworm` in ui, orchestrator and ingestion to ensure stable package verification behavior across environments.
+- Updated the Docker base image.
 - Standardized on the container best practice of using a non-privileged port (`8080`) instead of a privileged port (`80`), reducing the risk of runtime/permission friction and improving stability of long-running ingestion workloads.
 - Bumped `aiohttp` to `3.13.3`.
 
