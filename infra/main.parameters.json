@@ -143,19 +143,41 @@
       "value": [
         {
           "name": "conversations",
-          "canonical_name": "CONVERSATIONS_DATABASE_CONTAINER"
+          "canonical_name": "CONVERSATIONS_DATABASE_CONTAINER",
+          "partitionKey": "/principal_id",
+          "indexingPolicy": {
+            "compositeIndexes": [
+              [
+                { "path": "/isDeleted", "order": "Ascending" },
+                { "path": "/_ts", "order": "Descending" }
+              ],
+              [
+                { "path": "/isDeleted", "order": "Ascending" },
+                { "path": "/name", "order": "Ascending" },
+                { "path": "/_ts", "order": "Descending" }
+              ]
+            ]
+          }
         },
         {
           "name": "datasources",
-          "canonical_name": "DATASOURCES_DATABASE_CONTAINER"
+          "canonical_name": "DATASOURCES_DATABASE_CONTAINER",
+          "partitionKey": "/id"
         },
         {
           "name": "prompts",
-          "canonical_name": "PROMPTS_CONTAINER"
+          "canonical_name": "PROMPTS_CONTAINER",
+          "partitionKey": "/id"
         },
         {
           "name": "mcp",
-          "canonical_name": "MCP_CONTAINER"
+          "canonical_name": "MCP_CONTAINER",
+          "partitionKey": "/id"
+        },
+        {
+          "name": "chainlit_users",
+          "canonical_name": "USERS_DATABASE_CONTAINER",
+          "partitionKey": "/identifier"
         }
       ]
     },
@@ -192,6 +214,7 @@
           "roles": [
             "AppConfigurationDataReader",
             "AcrPull",
+            "CosmosDBBuiltInDataContributor",
             "StorageBlobDataReader",
             "StorageBlobDelegator",
             "KeyVaultSecretsUser"
