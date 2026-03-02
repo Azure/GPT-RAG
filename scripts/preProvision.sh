@@ -5,7 +5,17 @@
 YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
 GREEN='\033[0;32m'
+CYAN='\033[0;36m'
 NC='\033[0m' # No Color
+
+###############################################################################
+# Initialize infrastructure submodule
+###############################################################################
+echo "${CYAN}Initializing infrastructure submodule...${NC}"
+git submodule update --init --recursive
+if [ $? -ne 0 ]; then
+    echo "${YELLOW}Warning: Failed to initialize submodule. If infra folder is empty, provisioning will fail.${NC}"
+fi
 
 ###############################################################################
 # 1) Network Isolation Warning
