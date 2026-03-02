@@ -4,6 +4,13 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+# Initialize infrastructure submodule
+Write-Host "Initializing infrastructure submodule..." -ForegroundColor Cyan
+git submodule update --init --recursive
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Warning: Failed to initialize submodule. If infra folder is empty, provisioning will fail." -ForegroundColor Yellow
+}
+
 # Helper to match truthy values (1, true, t)
 function Is-Truthy($value) {
     if (-not $value) { return $false }
