@@ -18,15 +18,20 @@ if [ $? -ne 0 ]; then
 fi
 
 ###############################################################################
-# Override submodule manifest with project-level manifest
+# Override submodule files with project-level overrides
 ###############################################################################
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-ROOT_MANIFEST="$SCRIPT_DIR/../manifest.json"
-INFRA_MANIFEST="$SCRIPT_DIR/../infra/manifest.json"
-if [ -f "$ROOT_MANIFEST" ]; then
-    echo "${CYAN}Applying project manifest to infra...${NC}"
-    cp -f "$ROOT_MANIFEST" "$INFRA_MANIFEST"
-fi
+PROJECT_ROOT="$SCRIPT_DIR/.."
+INFRA_DIR="$PROJECT_ROOT/infra"
+
+for FILE_NAME in manifest.json main.parameters.json; do
+    SRC="$PROJECT_ROOT/$FILE_NAME"
+    DST="$INFRA_DIR/$FILE_NAME"
+    if [ -f "$SRC" ]; then
+        echo "${CYAN}Applying project $FILE_NAME to infra...${NC}"
+        cp -f "$SRC" "$DST"
+    fi
+done
 
 ###############################################################################
 # 1) Network Isolation Warning

@@ -11,12 +11,17 @@ if ($LASTEXITCODE -ne 0) {
     Write-Host "Warning: Failed to initialize submodule. If infra folder is empty, provisioning will fail." -ForegroundColor Yellow
 }
 
-# Override submodule manifest with project-level manifest
-$rootManifest = Join-Path $PSScriptRoot ".." "manifest.json"
-$infraManifest = Join-Path $PSScriptRoot ".." "infra" "manifest.json"
-if (Test-Path $rootManifest) {
-    Write-Host "Applying project manifest to infra..." -ForegroundColor Cyan
-    Copy-Item -Path $rootManifest -Destination $infraManifest -Force
+# Override submodule files with project-level overrides
+$projectRoot = Join-Path $PSScriptRoot ".."
+$infraDir = Join-Path $projectRoot "infra"
+
+foreach ($fileName in @("manifest.json", "main.parameters.json")) {
+    $src = Join-Path $projectRoot $fileName
+    $dst = Join-Path $infraDir $fileName
+    if (Test-Path $src) {
+        Write-Host "Applying project $fileName to infra..." -ForegroundColor Cyan
+        Copy-Item -Path $src -Destination $dst -Force
+    }
 }
 
 # Helper to match truthy values (1, true, t)
