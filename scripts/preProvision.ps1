@@ -4,8 +4,28 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+# Initialize infrastructure submodule
+Write-Host "Initializing infrastructure submodule..." -ForegroundColor Cyan
+git submodule update --init --recursive
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Warning: Failed to initialize submodule. If infra folder is empty, provisioning will fail." -ForegroundColor Yellow
+}
+
+# Override submodule files with project-level overrides
+$projectRoot = Join-Path $PSScriptRoot ".."
+$infraDir = Join-Path $projectRoot "infra"
+
+foreach ($fileName in @("manifest.json", "main.parameters.json")) {
+    $src = Join-Path $projectRoot $fileName
+    $dst = Join-Path $infraDir $fileName
+    if (Test-Path $src) {
+        Write-Host "Applying project $fileName to infra..." -ForegroundColor Cyan
+        Copy-Item -Path $src -Destination $dst -Force
+    }
+}
+
 # Helper to match truthy values (1, true, t)
-function Is-Truthy($value) {
+function Test-Truthy($value) {
     if (-not $value) { return $false }
     return $value -match '^(1|true|t)$'
 }
@@ -16,9 +36,9 @@ $networkIsolation = $env:AZURE_NETWORK_ISOLATION
 if (-not $networkIsolation) { $networkIsolation = $env:NETWORK_ISOLATION }
 $skipWarning = $env:AZURE_SKIP_NETWORK_ISOLATION_WARNING
 
-if (Is-Truthy $skipWarning) { exit 0 }
+if (Test-Truthy $skipWarning) { exit 0 }
 
-if (Is-Truthy $networkIsolation) {
+if (Test-Truthy $networkIsolation) {
     Write-Host "Warning!" -ForegroundColor Yellow -NoNewline
     Write-Host " Network isolation is enabled." -ForegroundColor Yellow
     Write-Host " - After provisioning, you must switch to the" -NoNewline

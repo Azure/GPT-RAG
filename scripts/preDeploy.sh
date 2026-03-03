@@ -31,7 +31,7 @@ find_repo_root() {
   local p
   if ! p="$(cd "$start" 2>/dev/null && pwd -P)"; then return 1; fi
   while :; do
-    if [ "$(basename "$p")" = "gpt-rag" ] || [ -f "$p/infra/manifest.json" ]; then
+    if [ "$(basename "$p")" = "gpt-rag" ] || [ -f "$p/manifest.json" ]; then
       printf "%s" "$p"; return 0
     fi
     local parent; parent="$(dirname "$p")"
@@ -98,7 +98,7 @@ fi
 repo_root="$(find_repo_root "$start_dir")" || { red "Run this from inside a gpt-rag repo."; exit 1; }
 command -v git >/dev/null 2>&1 || { red "Git not found in PATH."; exit 1; }
 
-manifest_path="$repo_root/infra/manifest.json"
+manifest_path="$repo_root/manifest.json"
 [ -f "$manifest_path" ] || { red "manifest.json not found at $manifest_path"; exit 1; }
 command -v jq >/dev/null 2>&1 || { red "jq is required to parse $manifest_path. Please install jq."; exit 1; }
 

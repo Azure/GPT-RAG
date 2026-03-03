@@ -24,7 +24,7 @@ if (-not (Docker-Ready)) {
 function Find-RepoRoot([string]$start) {
   $p = (Resolve-Path $start).Path
   while ($true) {
-    if ((Split-Path $p -Leaf) -ieq 'gpt-rag' -or (Test-Path (Join-Path $p 'infra\manifest.json'))) { return $p }
+    if ((Split-Path $p -Leaf) -ieq 'gpt-rag' -or (Test-Path (Join-Path $p 'manifest.json'))) { return $p }
     $parent = Split-Path -Parent $p
     if ($parent -eq $p -or [string]::IsNullOrEmpty($parent)) { break }
     $p = $parent
@@ -101,7 +101,7 @@ $repoRoot = Find-RepoRoot $start
 if (-not $repoRoot) { Write-Error "Run this from inside a gpt-rag repo."; exit 1 }
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) { Write-Error "Git not found in PATH."; exit 1 }
 
-$manifestPath = Join-Path $repoRoot 'infra\manifest.json'
+$manifestPath = Join-Path $repoRoot 'manifest.json'
 if (-not (Test-Path -LiteralPath $manifestPath)) { Write-Error "manifest.json not found at $manifestPath"; exit 1 }
 
 $manifest   = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json

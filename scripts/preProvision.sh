@@ -5,7 +5,33 @@
 YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
 GREEN='\033[0;32m'
+CYAN='\033[0;36m'
 NC='\033[0m' # No Color
+
+###############################################################################
+# Initialize infrastructure submodule
+###############################################################################
+echo "${CYAN}Initializing infrastructure submodule...${NC}"
+git submodule update --init --recursive
+if [ $? -ne 0 ]; then
+    echo "${YELLOW}Warning: Failed to initialize submodule. If infra folder is empty, provisioning will fail.${NC}"
+fi
+
+###############################################################################
+# Override submodule files with project-level overrides
+###############################################################################
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_ROOT="$SCRIPT_DIR/.."
+INFRA_DIR="$PROJECT_ROOT/infra"
+
+for FILE_NAME in manifest.json main.parameters.json; do
+    SRC="$PROJECT_ROOT/$FILE_NAME"
+    DST="$INFRA_DIR/$FILE_NAME"
+    if [ -f "$SRC" ]; then
+        echo "${CYAN}Applying project $FILE_NAME to infra...${NC}"
+        cp -f "$SRC" "$DST"
+    fi
+done
 
 ###############################################################################
 # 1) Network Isolation Warning

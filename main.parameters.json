@@ -10,6 +10,7 @@
     "cosmosLocation":                        { "value": "${AZURE_COSMOS_LOCATION}" },
     "deploymentTags":                      { "value": {} },
     "principalId":                         { "value": "${AZURE_PRINCIPAL_ID}" },
+    "appConfigLabel":                      { "value": "gpt-rag" },
 
     "networkIsolation":                    { "value": "${NETWORK_ISOLATION}" },
     "useUAI":                              { "value": "${USE_UAI}" },
