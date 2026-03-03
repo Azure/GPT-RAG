@@ -1,3 +1,4 @@
 [submodule "infra"]
 	path = infra
-	url = git@github.com:Azure/bicep-ptn-aiml-landing-zone.git
+	url = https://github.com/Azure/bicep-ptn-aiml-landing-zone.git
+	ignore = dirty
