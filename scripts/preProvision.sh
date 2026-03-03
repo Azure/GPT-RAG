@@ -18,6 +18,17 @@ if [ $? -ne 0 ]; then
 fi
 
 ###############################################################################
+# Override submodule manifest with project-level manifest
+###############################################################################
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+ROOT_MANIFEST="$SCRIPT_DIR/../manifest.json"
+INFRA_MANIFEST="$SCRIPT_DIR/../infra/manifest.json"
+if [ -f "$ROOT_MANIFEST" ]; then
+    echo "${CYAN}Applying project manifest to infra...${NC}"
+    cp -f "$ROOT_MANIFEST" "$INFRA_MANIFEST"
+fi
+
+###############################################################################
 # 1) Network Isolation Warning
 ###############################################################################
 
