@@ -7,6 +7,15 @@ This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres 
 ### Changed
 - Migrated `infra` folder to external submodule [bicep-ptn-aiml-landing-zone](https://github.com/Azure/bicep-ptn-aiml-landing-zone) pinned to v1.0.0.
 
+## [v2.4.2] - 2026-02-04
+### Fixed
+- Updated the Docker image to install Microsoft's current public signing key, fixing build failures caused by SHA-1 signature rejection in newer Debian/apt verification policies (orchestrator).
+- Fixed Docker builds on ARM-based machines by explicitly setting the target platform to `linux/amd64`, preventing Azure Container Apps deployment failures.
+### Changed
+- Updated the Docker base image.
+- Standardized on the container best practice of using a non-privileged port (`8080`) instead of a privileged port (`80`), reducing the risk of runtime/permission friction and improving stability of long-running ingestion workloads.
+- Bumped `aiohttp` to `3.13.3`.
+
 ## [v2.4.1] - 2026-01-20
 ### Changed
 - Bumped ingestion component version to include reliability improvements for large spreadsheet ingestion.
