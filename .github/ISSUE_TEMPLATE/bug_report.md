@@ -15,6 +15,7 @@ assignees: ''
   - [ ] gpt-rag-orchestrator — version/tag: `...`
   - [ ] gpt-rag-ingestion — version/tag: `...`
   - [ ] gpt-rag-ui — version/tag: `...`
+  - [ ] gpt-rag-mcp — version/tag: `...`
 
 ## Deployment Context
 - **Install type:** Fresh install / Upgrade (from `vA.B.C` → `vX.Y.Z`)
