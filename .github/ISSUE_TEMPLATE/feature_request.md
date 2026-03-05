@@ -10,7 +10,7 @@ assignees: ''
 ## Summary
 A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
 
-## Why are we doing this?
+## Why will we implement this?
 - **Problem / opportunity:** `...`
 - **Business value / outcome:** `...`
 - **Success metrics (how we know it worked):** `...`

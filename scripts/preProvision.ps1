@@ -5,15 +5,45 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 # Initialize infrastructure submodule
-Write-Host "Initializing infrastructure submodule..." -ForegroundColor Cyan
-git submodule update --init --recursive
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "Warning: Failed to initialize submodule. If infra folder is empty, provisioning will fail." -ForegroundColor Yellow
-}
-
-# Override submodule files with project-level overrides
 $projectRoot = Join-Path $PSScriptRoot ".."
 $infraDir = Join-Path $projectRoot "infra"
+$mainBicep = Join-Path $infraDir "main.bicep"
+
+Write-Host "Initializing infrastructure submodule..." -ForegroundColor Cyan
+git submodule update --init --recursive 2>$null
+
+# Fallback: when the repo was scaffolded via 'azd init' (ZIP download), the git
+# index has no submodule gitlink entries, so 'git submodule update' silently does
+# nothing and infra/ remains empty.  Detect that case and clone the landing-zone
+# repo directly.
+if (-not (Test-Path $mainBicep)) {
+    Write-Host "Submodule content not found. Cloning infra repo directly (azd init scenario)..." -ForegroundColor Cyan
+
+    # Extract infra repo URL and branch from .gitmodules
+    $gitmodulesPath = Join-Path $projectRoot ".gitmodules"
+    $infraUrl = $null
+    $infraRef = "main"  # safe default
+    if (Test-Path $gitmodulesPath) {
+        $urlMatch = Select-String -Path $gitmodulesPath -Pattern 'url\s*=\s*(.+)' | Select-Object -First 1
+        if ($urlMatch) { $infraUrl = $urlMatch.Matches.Groups[1].Value.Trim() }
+        $branchMatch = Select-String -Path $gitmodulesPath -Pattern 'branch\s*=\s*(.+)' | Select-Object -First 1
+        if ($branchMatch) { $infraRef = $branchMatch.Matches.Groups[1].Value.Trim() }
+    }
+    if (-not $infraUrl) {
+        Write-Host "Error: Could not determine infra repository URL from .gitmodules." -ForegroundColor Red
+        exit 1
+    }
+    Write-Host "  Infra repo: $infraUrl @ $infraRef (from .gitmodules)" -ForegroundColor Cyan
+
+    # Remove the empty infra directory and clone at the correct tag
+    if (Test-Path $infraDir) { Remove-Item -Path $infraDir -Recurse -Force }
+    git clone --depth 1 --branch $infraRef $infraUrl $infraDir
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Error: Failed to clone infra repository ($infraUrl @ $infraRef)." -ForegroundColor Red
+        exit 1
+    }
+    Write-Host "Infrastructure submodule cloned successfully." -ForegroundColor Green
+}
 
 foreach ($fileName in @("manifest.json", "main.parameters.json")) {
     $src = Join-Path $projectRoot $fileName
