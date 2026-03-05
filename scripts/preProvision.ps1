@@ -37,7 +37,7 @@ if (-not (Test-Path $mainBicep)) {
 
     # Remove the empty infra directory and clone at the correct tag
     if (Test-Path $infraDir) { Remove-Item -Path $infraDir -Recurse -Force }
-    git clone --depth 1 --branch $infraRef $infraUrl $infraDir
+    git -c advice.detachedHead=false clone --depth 1 --branch $infraRef $infraUrl $infraDir
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Error: Failed to clone infra repository ($infraUrl @ $infraRef)." -ForegroundColor Red
         exit 1

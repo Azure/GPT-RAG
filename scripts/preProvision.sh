@@ -45,7 +45,7 @@ if [ ! -f "$MAIN_BICEP" ]; then
 
     # Remove the empty infra directory and clone at the correct tag
     rm -rf "$INFRA_DIR"
-    git clone --depth 1 --branch "$INFRA_REF" "$INFRA_URL" "$INFRA_DIR"
+    git -c advice.detachedHead=false clone --depth 1 --branch "$INFRA_REF" "$INFRA_URL" "$INFRA_DIR"
     if [ $? -ne 0 ]; then
         echo "${YELLOW}Error: Failed to clone infra repository ($INFRA_URL @ $INFRA_REF).${NC}"
         exit 1
