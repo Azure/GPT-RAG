@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.  
 This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to [Semantic Versioning](https://semver.org/).
 
+## [v2.5.1] - 2026-03-06
+### Changed
+- Updated `infra` submodule to external [bicep-ptn-aiml-landing-zone](https://github.com/Azure/bicep-ptn-aiml-landing-zone) tag `v1.0.1`.
+- Bumped `gpt-rag-orchestrator` to `v2.4.2`.
+- Bumped `gpt-rag-ui` to `v2.2.2`.
+- Bumped `gpt-rag-ingestion` to `v2.2.3`.
+
 ## [v2.5.0] - 2026-03-02
 ### Changed
 - Migrated `infra` folder to external submodule [bicep-ptn-aiml-landing-zone](https://github.com/Azure/bicep-ptn-aiml-landing-zone) pinned to v1.0.0.
