@@ -149,21 +149,23 @@ jq -c '.components[]' "$manifest_path" | while IFS= read -r comp; do
   target="$base_dir/$name"
   cyan "Deploying $name ($ref_type:$ref) -> $target"
 
-  rm -rf "$target" 2>/dev/null || true
-
-  if [ "$ref_type" = "branch" ]; then
-    if ! git clone --depth 1 --branch "$ref" --quiet "$repo" "$target" >/dev/null 2>&1; then
-      red "$name: git clone failed."; had_errors=1; continue
-    fi
+  if [ -d "$target" ]; then
+    yellow "  ℹ️  '$name' already exists at $target, skipping clone."
   else
-    if ! git clone --depth 1 --quiet "$repo" "$target" >/dev/null 2>&1; then
-      red "$name: git clone failed."; had_errors=1; continue
-    fi
-    if ! git -C "$target" fetch --tags --force --depth 1 --quiet origin "$ref" >/dev/null 2>&1; then
-      red "$name: git fetch tag failed."; had_errors=1; continue
-    fi
-    if ! git -C "$target" -c advice.detachedHead=false checkout -q -f "$ref" >/dev/null 2>&1; then
-      red "$name: git checkout tag failed."; had_errors=1; continue
+    if [ "$ref_type" = "branch" ]; then
+      if ! git clone --depth 1 --branch "$ref" --quiet "$repo" "$target" >/dev/null 2>&1; then
+        red "$name: git clone failed."; had_errors=1; continue
+      fi
+    else
+      if ! git clone --depth 1 --quiet "$repo" "$target" >/dev/null 2>&1; then
+        red "$name: git clone failed."; had_errors=1; continue
+      fi
+      if ! git -C "$target" fetch --tags --force --depth 1 --quiet origin "$ref" >/dev/null 2>&1; then
+        red "$name: git fetch tag failed."; had_errors=1; continue
+      fi
+      if ! git -C "$target" -c advice.detachedHead=false checkout -q -f "$ref" >/dev/null 2>&1; then
+        red "$name: git checkout tag failed."; had_errors=1; continue
+      fi
     fi
   fi
 
