@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
+
+# Ensure the temporary venv is always cleaned up, even on early exits.
+# Cleanup failures must never cause the post-provision hook to report failure.
+cleanup() {
+  deactivate 2>/dev/null || true
+  rm -rf config/.venv_temp 2>/dev/null || true
+}
+trap cleanup EXIT
+
 echo "🔧 Running post-provision steps..."
 echo
 
@@ -140,8 +149,12 @@ echo "🔍 AI Search setup…"
 ###############################################################################
 echo
 echo "🧹 Cleaning Python environment up…"
-deactivate
-rm -rf config/.venv_temp
+# `deactivate` only restores shell variables (PATH, PS1) — it deletes nothing.
+# Since the script is ending, there is nothing to restore. We skip it and
+# go straight to removing the venv directory.
+# python3's shutil.rmtree handles locked files and open __pycache__ handles
+# (common on macOS with Python 3.12+) without raising, unlike `rm -rf`.
+python3 -c "import shutil; shutil.rmtree('config/.venv_temp', ignore_errors=True)"
 
 echo
 echo "✅ postProvisioning completed."
