@@ -1,5 +1,5 @@
 {
-  "tag": "v2.5.1",
+  "tag": "v2.5.2",
   "repo": "https://github.com/azure/gpt-rag.git",  
   "install_script": "https://raw.githubusercontent.com/Azure/bicep-ptn-aiml-landing-zone/refs/tags/v1.0.1/install.ps1",
   "components": [
