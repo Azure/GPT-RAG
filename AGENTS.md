@@ -3,7 +3,7 @@
 **GPT-RAG** is an enterprise-grade Retrieval-Augmented Generation (RAG) solution accelerator on Azure. It follows a multi-repo architecture with this repository (`Azure/gpt-rag`) serving as the **platform and configuration core**, while four runtime component repositories handle orchestration, data ingestion, user interface, and MCP tool hosting.
 
 - **Documentation**: [azure.github.io/GPT-RAG](https://azure.github.io/GPT-RAG/)
-- **Current Release**: v2.5.1 (manifest-defined component versions below)
+- **Current Release**: v2.5.2 (manifest-defined component versions below)
 
 ---
 
@@ -80,7 +80,7 @@
 
 ## Component Repositories
 
-This repository acts as the **platform/configuration core**. Runtime application components are declared in `manifest.json` and deployed as sibling repos. Current manifest versions (v2.5.1 release):
+This repository acts as the **platform/configuration core**. Runtime application components are declared in `manifest.json` and deployed as sibling repos. Current manifest versions (v2.5.2 release):
 
 | Component | Repository | Version | Container App |
 |---|---|---|---|

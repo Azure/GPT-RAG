@@ -142,22 +142,24 @@ foreach ($c in $manifest.components) {
   $target = Join-Path $baseDir $name
   Write-Host ("Deploying {0} ({1}:{2}) -> {3}" -f $name, $refType, $ref, $target) -ForegroundColor Cyan
 
-  if (Test-Path -LiteralPath $target) { Remove-Item -Recurse -Force -LiteralPath $target }
-
-  try {
-    if ($refType -eq 'branch') {
-      git clone --depth 1 --branch $ref --no-progress -q $repo $target 1>$null 2>$null
-    } else {
-      git clone --depth 1 --no-progress -q $repo $target 1>$null 2>$null
-      git -C $target fetch --tags --force --depth 1 --no-progress -q origin $ref 1>$null 2>$null
-      git -C $target -c advice.detachedHead=false checkout -q -f $ref 1>$null 2>$null
+  if (Test-Path -LiteralPath $target) {
+    Write-Host ("  ℹ️  '{0}' already exists at {1}, skipping clone." -f $name, $target) -ForegroundColor Yellow
+  } else {
+    try {
+      if ($refType -eq 'branch') {
+        git clone --depth 1 --branch $ref --no-progress -q $repo $target 1>$null 2>$null
+      } else {
+        git clone --depth 1 --no-progress -q $repo $target 1>$null 2>$null
+        git -C $target fetch --tags --force --depth 1 --no-progress -q origin $ref 1>$null 2>$null
+        git -C $target -c advice.detachedHead=false checkout -q -f $ref 1>$null 2>$null
+      }
+      git config --global --add safe.directory ($target -replace '\\','/') 1>$null 2>$null
     }
-    git config --global --add safe.directory ($target -replace '\\','/') 1>$null 2>$null
-  }
-  catch {
-    Write-Error ("{0}: git operation failed. {1}" -f $name, $_.Exception.Message)
-    $hadErrors = $true
-    continue
+    catch {
+      Write-Error ("{0}: git operation failed. {1}" -f $name, $_.Exception.Message)
+      $hadErrors = $true
+      continue
+    }
   }
 
   # Copy shared azd env into the freshly cloned project
