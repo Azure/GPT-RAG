@@ -5,6 +5,17 @@ on:
     branches:
       - docs
 
+  # Rebuild when a new stable release or pre-release is published,
+  # since the home page shows release metadata baked at build time.
+  release:
+    types:
+      - published
+      - released
+      - prereleased
+
+  # Allow triggering a rebuild manually from the Actions UI.
+  workflow_dispatch:
+
 permissions:
   contents: write
 
@@ -17,6 +28,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: docs
 
       - name: Set up Python
         uses: actions/setup-python@v5
