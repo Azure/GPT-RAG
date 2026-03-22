@@ -528,6 +528,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#available-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Available Strategies
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#visual-guide" class="md-nav__link">
     <span class="md-ellipsis">
       Visual Guide
@@ -873,16 +882,55 @@
 
 
 <h1 id="orchestrator">🎯 Orchestrator</h1>
-<p>The Orchestrator is the core engine of GPT-RAG, managing multi-agent workflows and retrieval operations using Semantic Kernel and Azure AI services. <a href="https://github.com/Azure/gpt-rag-orchestrator">GitHub Repository</a>.</p>
+<p>The Orchestrator is the core engine of GPT-RAG, an agentic orchestration layer built on the Microsoft Agent Framework and Azure AI Foundry Agent Service. It coordinates agent-based RAG workflows — each agent has a defined role — to generate accurate, context-aware responses for complex user queries. <a href="https://github.com/Azure/gpt-rag-orchestrator">GitHub Repository</a>.</p>
 <h2 id="key-features">Key Features</h2>
 <ul>
-<li><strong>Multi-Agent Workflows:</strong> Coordinates multiple AI agents for complex tasks</li>
-<li><strong>Context Retrieval:</strong> Intelligent retrieval from Azure AI Search</li>
-<li><strong>Semantic Kernel Integration:</strong> Built on Microsoft's Semantic Kernel framework</li>
-<li><strong>Extensible Architecture:</strong> Easy to customize and extend</li>
+<li><strong>Strategy-Based Architecture:</strong> Pluggable orchestration strategies selected via Azure App Configuration (<code>AGENT_STRATEGY</code>).</li>
+<li><strong>Context Retrieval:</strong> Intelligent retrieval from Azure AI Search with citation support.</li>
+<li><strong>Microsoft Agent Framework:</strong> Built on the Microsoft Agent Framework.</li>
+<li><strong>Conversation Persistence:</strong> Maintains conversation history in Cosmos DB with real-time SSE streaming.</li>
+<li><strong>Extensible Design:</strong> Easy to add new strategies by extending <code>BaseAgentStrategy</code>.</li>
 </ul>
+<h2 id="available-strategies">Available Strategies</h2>
+<p>The Orchestrator supports multiple strategies. The active strategy is set via the <code>AGENT_STRATEGY</code> key in Azure App Configuration. The default is <code>maf_lite</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Strategy</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>maf_lite</code></td>
+<td>MAF Lite <strong>(default)</strong></td>
+<td>Microsoft Agent Framework with direct Azure OpenAI model access. Lightweight — no Agent Service dependency. Includes user profile memory and optional agentic search.</td>
+</tr>
+<tr>
+<td><code>maf_agent_service</code></td>
+<td>MAF + Agent Service</td>
+<td>Microsoft Agent Framework with Azure AI Foundry Agent Service for server-side thread management and tool orchestration. Includes user profile memory and optional agentic search.</td>
+</tr>
+<tr>
+<td><code>single_agent_rag</code></td>
+<td>Single Agent RAG</td>
+<td>Uses Azure AI Agents SDK with Agent Service for agentic RAG. Supports dynamic routing, streaming via event handlers, and pre-warming for low-latency first responses.</td>
+</tr>
+<tr>
+<td><code>mcp</code></td>
+<td>MCP</td>
+<td>Model Context Protocol strategy using Semantic Kernel. Connects to an MCP server for tool orchestration and passes user context via HTTP headers.</td>
+</tr>
+<tr>
+<td><code>nl2sql</code></td>
+<td>NL2SQL</td>
+<td>Natural language to SQL translation using a multi-agent pipeline (Triage → SQL Query → Synthesizer) with Semantic Kernel and Agent Service.</td>
+</tr>
+</tbody>
+</table>
 <h2 id="visual-guide">Visual Guide</h2>
-<p>New to the Orchestrator? Check out our <a href="../orchestrator_visual_guide/">Orchestrator Visual Guide</a> for a visual walkthrough of the architecture and key components.</p>
+<p>New to the Orchestrator? Check out the <a href="../orchestrator_visual_guide/">Orchestrator Visual Guide</a> for a visual walkthrough of the architecture and key components.</p>
 <h2 id="repository">Repository</h2>
 <p>🔗 <a href="https://github.com/Azure/gpt-rag-orchestrator">GitHub Repository</a></p>
 

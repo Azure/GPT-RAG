@@ -815,7 +815,7 @@ Let’s reverse this evolution — with visuals.</p>
 <p>If you prefer talking for hours about a diagram instead of drawing it, just leave.</p>
 <h2 id="core-architecture-flow">Core Architecture &amp; Flow</h2>
 <p>The orchestrator's entry point is in src/main.py: <code>orchestrator_endpoint()</code>.
-In what follows we will consider the Single-Agent RAG Strategy.
+The Orchestrator supports multiple pluggable strategies (see table below). In the sections that follow, we use the <strong>Single Agent RAG Strategy</strong> as an illustrative example to walk through the architecture.
 <div class="highlight"><pre><span></span><code>@app.post(
     &quot;/orchestrator&quot;,
     dependencies=[Depends(validate_auth)], 
@@ -837,7 +837,51 @@ async def orchestrator_endpoint(
 <li><strong>State Coordination</strong>: Ensures conversation state is properly synchronized between database and strategy</li>
 <li><strong>Response Streaming</strong>: Coordinates real-time response delivery while maintaining state consistency</li>
 </ol>
-<h2 id="single-agent-strategy">Single Agent Strategy</h2>
+<h2 id="available-strategies">Available Strategies</h2>
+<p>The active strategy is set via the <code>AGENT_STRATEGY</code> key in Azure App Configuration. The default is <code>maf_lite</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Strategy</th>
+<th>Back-End</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>maf_lite</code></td>
+<td>MAF Lite <strong>(default)</strong></td>
+<td>Direct Azure OpenAI</td>
+<td>Microsoft Agent Framework with direct model access. Lightweight — no Agent Service dependency. Includes user profile memory and optional agentic search.</td>
+</tr>
+<tr>
+<td><code>maf_agent_service</code></td>
+<td>MAF + Agent Service</td>
+<td>Agent Service V2</td>
+<td>Microsoft Agent Framework with Azure AI Foundry Agent Service for server-side thread management. Includes user profile memory and optional agentic search.</td>
+</tr>
+<tr>
+<td><code>single_agent_rag</code></td>
+<td>Single Agent RAG</td>
+<td>Agent Service V2</td>
+<td>Azure AI Agents SDK with streaming event handlers, dynamic routing, and pre-warming for low-latency first responses.</td>
+</tr>
+<tr>
+<td><code>mcp</code></td>
+<td>MCP</td>
+<td>MCP Server</td>
+<td>Model Context Protocol strategy using Semantic Kernel. Connects to an MCP server and passes user context via HTTP headers.</td>
+</tr>
+<tr>
+<td><code>nl2sql</code></td>
+<td>NL2SQL</td>
+<td>Agent Service V2</td>
+<td>Multi-agent pipeline (Triage → SQL Query → Synthesizer) for natural language to SQL translation using Semantic Kernel.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="single-agent-strategy-deep-dive">Single Agent Strategy (Deep Dive)</h2>
 <p>This section explores how the Single-Agent RAG Strategy orchestrates the entire request-response lifecycle, from receiving a user's question to delivering a grounded, streamed answer. The diagrams below illustrate the conversation lifecycle, state management, and the interaction between the Orchestrator container app and Microsoft Foundry services.</p>
 <p><img alt="Orchestrator Strategy Setup and Streaming" src="../media/orchestrator_strategy/orchestrator-strategy.drawio.svg" /></p>
 <p>You will have noticed the use of the Factory Design Pattern (<code>AgentStrategyFactory</code>) for the various Strategies, ensuring that all of them comply with the same <code>BaseAgentStrategy</code> interface.
@@ -881,20 +925,21 @@ For the sake of clarity, I have abstracted away the different roles of the <code
         └──────────────┬──────────────┘
                        │
                        │ inheritance (IS-A)
-         ┌─────────────┼─────────────────────────┐
-         │             │                         │
-         ▼             ▼                         ▼
-┌────────────────┐ ┌──────────────┐  ┌─────────────────┐
-│ SingleAgent    │ │  NL2SQL      │  │  McpStrategy    │
-│ RAGStrategy    │ │  Strategy    │  │                 │
-├────────────────┤ ├──────────────┤  ├─────────────────┤
-│ - tools_list   │ │ - nl2sql     │  │ - kernel        │
-│ - ai_search    │ │   _plugin    │  │ - agent         │
-│ - event_handler│ │ - terminator │  │                 │
-├────────────────┤ ├──────────────┤  ├─────────────────┤
-│ + initiate_    │ │ + initiate_  │  │ + initiate_     │
-│   agent_flow() │ │   agent_flow │  │   agent_flow()  │
-└────────────────┘ └──────────────┘  └─────────────────┘
+         ┌──────────┬──────────┼──────────┬──────────┐
+         │          │          │          │          │
+         ▼          ▼          ▼          ▼          ▼
+┌──────────────┐┌──────────────┐┌──────────────┐┌──────────────┐┌──────────────┐
+│ MafLite      ││ MafAgent     ││ SingleAgent  ││ McpStrategy  ││ NL2SQL       │
+│ Strategy     ││ Service      ││ RAGStrategy  ││              ││ Strategy     │
+│              ││ Strategy     ││              ││              ││              │
+├──────────────┤├──────────────┤├──────────────┤├──────────────┤├──────────────┤
+│- chat_client ││- chat_client ││- tools_list  ││- kernel      ││- nl2sql      │
+│  (OpenAI)    ││  (AgentSvc)  ││- ai_search   ││- agent       ││  _plugin     │
+│- user_memory ││- user_memory ││- event_handlr││              ││- terminator  │
+├──────────────┤├──────────────┤├──────────────┤├──────────────┤├──────────────┤
+│+ initiate_   ││+ initiate_   ││+ initiate_   ││+ initiate_   ││+ initiate_   │
+│  agent_flow()││  agent_flow()││  agent_flow()││  agent_flow()││  agent_flow()│
+└──────────────┘└──────────────┘└──────────────┘└──────────────┘└──────────────┘
 ------------------------------------------------------------------
 </code></pre></div>
 </div>
@@ -973,7 +1018,7 @@ The visualization deliberately simplifies reality through abstraction and by omi
 <tr>
 <td>Orchestrator implementation</td>
 <td><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/main/src/orchestration/orchestrator.py"><code>orchestration/orchestrator.py</code></a></td>
-<td>Maintains Conversation History + runs streaming pipeline</td>
+<td>Conversation history + streaming pipeline</td>
 </tr>
 <tr>
 <td>Strategy factory</td>
@@ -981,9 +1026,34 @@ The visualization deliberately simplifies reality through abstraction and by omi
 <td>Selects the execution strategy</td>
 </tr>
 <tr>
-<td>Single-Agent RAG Strategy</td>
-<td><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/main/src/strategies/single_agent_rag_strategy.py"><code>strategies/single_agent_rag_strategy.py</code></a></td>
-<td>Implements flow to Azure Microsoft Foundry</td>
+<td>Base strategy</td>
+<td><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/main/src/strategies/base_agent_strategy.py"><code>strategies/base_agent_strategy.py</code></a></td>
+<td>Abstract base class for all strategies</td>
+</tr>
+<tr>
+<td>MAF Lite</td>
+<td><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/main/src/strategies/maf_lite_strategy.py"><code>strategies/maf_lite_strategy.py</code></a></td>
+<td>MAF + direct Azure OpenAI (default)</td>
+</tr>
+<tr>
+<td>MAF + Agent Service</td>
+<td><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/main/src/strategies/maf_agent_service_strategy.py"><code>strategies/maf_agent_service_strategy.py</code></a></td>
+<td>MAF + Agent Service V2</td>
+</tr>
+<tr>
+<td>Single Agent RAG</td>
+<td><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/main/src/strategies/single_agent_rag_strategy_v2.py"><code>strategies/single_agent_rag_strategy_v2.py</code></a></td>
+<td>Azure AI Agents SDK + Agent Service V2</td>
+</tr>
+<tr>
+<td>MCP</td>
+<td><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/main/src/strategies/mcp_strategy.py"><code>strategies/mcp_strategy.py</code></a></td>
+<td>Model Context Protocol via Semantic Kernel</td>
+</tr>
+<tr>
+<td>NL2SQL</td>
+<td><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/main/src/strategies/nl2sql_strategy.py"><code>strategies/nl2sql_strategy.py</code></a></td>
+<td>Multi-agent NL2SQL pipeline</td>
 </tr>
 </tbody>
 </table>
