@@ -25,7 +25,7 @@ GPT-RAG is built on a Zero-Trust architecture to ensure that all components oper
 
 ## Architecture
 
-![Zero Trust Architecture](media/architecture-zero-trust.png)
+![Zero Trust Architecture](media/architecture_zero_trust.png)
 *Zero-Trust Architecture*
 
 ## AI Agent Capabilities
