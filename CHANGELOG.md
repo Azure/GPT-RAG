@@ -3,9 +3,14 @@
 All notable changes to this project will be documented in this file.  
 This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [v2.5.3] - 2026-03-24
 ### Changed
-- Updated default chat model to `gpt-5-nano` (`2025-08-07`) and increased deployment capacity to `100`.
+- Updated default chat model from `gpt-5-mini` to `gpt-5-nano` (`2025-08-07`), increased deployment capacity to `100`, and set API version to `2025-12-01-preview`.
+- Updated `infra` submodule to [bicep-ptn-aiml-landing-zone](https://github.com/Azure/bicep-ptn-aiml-landing-zone) tag `v1.0.2`.
+- Bumped `gpt-rag-ui` to `v2.2.3`.
+- Bumped `gpt-rag-orchestrator` to `v2.5.0`.
+### Added
+- Added repository development and release instructions (`.github/copilot-instructions.md`).
 
 ## [v2.5.2] - 2026-03-16
 ### Changed

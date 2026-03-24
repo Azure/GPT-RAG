@@ -135,6 +135,12 @@ Examples:
 - Follow **Semantic Versioning**
 - Every release MUST update `CHANGELOG.md`
 
+### IMPORTANT: No `[Unreleased]` Section on `main`
+
+- The `main` branch MUST NEVER contain an `[Unreleased]` section in `CHANGELOG.md`.
+- When creating a release branch, the `[Unreleased]` header MUST be replaced with the versioned header `## [vX.Y.Z] - YYYY-MM-DD`.
+- The `develop` branch MAY use `[Unreleased]` as a staging area for upcoming changes, but it MUST be converted before merging into `main`.
+
 ---
 
 ### Version Header Format
