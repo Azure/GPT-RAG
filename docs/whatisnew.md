@@ -1,5 +1,27 @@
 > 📌 [Check out what's coming next](https://github.com/orgs/Azure/projects/536/views/6)  (Azure org only)
 
+### March 2026
+
+**[Release 2.5.3](https://github.com/Azure/GPT-RAG/tree/v2.5.3) - New Orchestration Strategies, Infrastructure Overhaul, and Multimodality**
+
+**New Orchestration Strategies** 
+
+The orchestrator now supports four strategy options: 
+
+**Microsoft Agent Framework**, the new default, provides lightweight orchestration with direct Azure OpenAI access and no Agent Service dependency. 
+
+**Agent Service v2** uses Azure AI Foundry Agent Service v2 for managed orchestration. 
+
+**Multimodal** adds image understanding support for multimodality scenarios. 
+
+**Agent Service + Agent Framework** combines Agent Service v2 with the Microsoft Agent Framework for advanced scenarios.  
+
+**Infrastructure as External Bicep Module**
+
+Bicep infrastructure extracted to the external [`bicep-ptn-aiml-landing-zone`](https://github.com/Azure/bicep-ptn-aiml-landing-zone) module for better maintainability and reuse. Deploy scripts hardened. [#424](https://github.com/Azure/GPT-RAG/pull/424)
+
+---
+
 ### January 2026
 
 **[Release 2.4.0](https://github.com/Azure/GPT-RAG/tree/v2.4.0) - Authentication and Document-Level Security**
