@@ -8,7 +8,7 @@
 
 The orchestrator now supports new agentic strategies: 
 
-- **Microsoft Agent Framework**, the new default, provides lightweight orchestration with direct Azure OpenAI access and no Agent Service dependency. 
+- **Microsoft Agent Framework**, provides lightweight orchestration with direct Foundry models access and no Agent Service dependency. 
 
 - **Agent Service v2** uses Azure AI Foundry Agent Service v2 for managed orchestration. 
 
