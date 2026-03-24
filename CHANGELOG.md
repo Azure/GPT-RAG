@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.  
 This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+### Changed
+- Updated default chat model to `gpt-5-nano` (`2025-08-07`) and increased deployment capacity to `100`.
+
 ## [v2.5.2] - 2026-03-16
 ### Changed
 - Updated pre-deployment behavior to skip cloning a component repository when it already exists locally, improving repeat deployment workflows and avoiding unnecessary clone failures. Closes [#428](https://github.com/Azure/GPT-RAG/issues/428).
