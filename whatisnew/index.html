@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#january-2026" class="md-skip">
+        <a href="#march-2026" class="md-skip">
           Skip to content
         </a>
       
@@ -289,6 +289,15 @@
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#march-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      March 2026
+    </span>
+  </a>
+  
+</li>
       
         <li class="md-nav__item">
   <a href="#january-2026" class="md-nav__link">
@@ -880,6 +889,27 @@
 <blockquote>
 <p>📌 <a href="https://github.com/orgs/Azure/projects/536/views/6">Check out what's coming next</a>  (Azure org only)</p>
 </blockquote>
+<h3 id="march-2026">March 2026</h3>
+<p><strong><a href="https://github.com/Azure/GPT-RAG/tree/v2.5.3">Release 2.5.3</a> - New Orchestration Strategies, Infrastructure Overhaul, and Multimodality</strong></p>
+<p><strong>New Orchestration Strategies</strong> </p>
+<p>The orchestrator now supports new agentic strategies: </p>
+<ul>
+<li>
+<p><strong>Microsoft Agent Framework</strong>, the new default, provides lightweight orchestration with direct Azure OpenAI access and no Agent Service dependency. </p>
+</li>
+<li>
+<p><strong>Agent Service v2</strong> uses Azure AI Foundry Agent Service v2 for managed orchestration. </p>
+</li>
+<li>
+<p><strong>Multimodal</strong> adds image understanding support for multimodality scenarios. </p>
+</li>
+<li>
+<p><strong>Agent Service + Agent Framework</strong> combines Agent Service v2 with the Microsoft Agent Framework for advanced scenarios.  </p>
+</li>
+</ul>
+<p><strong>Infrastructure as External Bicep Module</strong></p>
+<p>Bicep infrastructure extracted to the external <a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone"><code>bicep-ptn-aiml-landing-zone</code></a> module for better maintainability and reuse. Deploy scripts hardened. <a href="https://github.com/Azure/GPT-RAG/pull/424">#424</a></p>
+<hr />
 <h3 id="january-2026">January 2026</h3>
 <p><strong><a href="https://github.com/Azure/GPT-RAG/tree/v2.4.0">Release 2.4.0</a> - Authentication and Document-Level Security</strong></p>
 <p>This release introduces Microsoft Entra ID authentication in the frontend, with orchestrator-side user identity validation, plus RBAC-based access control and document-level authorization in retrieval workflows. It propagates user identity context through ingestion and orchestration so <a href="https://learn.microsoft.com/en-us/azure/search/search-query-access-control-rbac-enforcement">Azure AI Search can enforce fine-grained ACL/RBAC</a> permissions end-to-end. <a href="https://github.com/Azure/GPT-RAG/pull/417">#417</a></p>
