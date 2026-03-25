@@ -8,13 +8,13 @@
 
 The orchestrator now supports new agentic strategies: 
 
-- **Microsoft Agent Framework**, provides lightweight orchestration with direct Foundry models access and no Agent Service dependency. 
-
 - **Agent Service v2** uses Azure AI Foundry Agent Service v2 for managed orchestration. 
 
-- **Multimodal** adds image understanding support for multimodality scenarios. 
+- **Microsoft Agent Framework**, Lightweight orchestration with direct Foundry access, no Agent Service.
 
-- **Agent Service + Agent Framework** combines Agent Service v2 with the Microsoft Agent Framework for advanced scenarios.  
+- **Agent Service + Agent Framework** combines Agent Service v2 with the Microsoft Agent Framework for advanced scenarios. 
+
+- **Multimodal** adds image understanding support for multimodality scenarios.  
 
 **Infrastructure as External Bicep Module**
 
