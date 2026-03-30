@@ -1,0 +1,56 @@
+name: Block PRs to main
+
+# This workflow blocks pull requests that target the main branch.
+# Contributors must target the develop branch instead.
+# Uses pull_request_target for security (does not check out PR code).
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  block:
+    name: Block PR to main
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Post comment on open or reopen
+        if: github.event.action == 'opened' || github.event.action == 'reopened'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = `## ⛔ Pull requests to \`main\` are not allowed
+
+            Thank you for your contribution! However, this repository uses \`develop\` as the integration branch.
+
+            **Please change the base branch of this pull request from \`main\` to \`develop\`.**
+
+            You can do this by:
+            1. Clicking **Edit** at the top-right of this PR
+            2. Changing the base branch from \`main\` to \`develop\`
+
+            For more information, see our [Contributing Guide](https://azure.github.io/GPT-RAG/contributing/).
+
+            ---
+            *This is an automated message.*`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: body
+            });
+
+      - name: Fail the workflow
+        run: |
+          echo "::error::Pull requests to the main branch are not allowed. Please change the base branch to develop."
+          exit 1
