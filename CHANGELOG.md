@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.  
 This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to [Semantic Versioning](https://semver.org/).
 
+## [v2.6.0] - 2026-03-31
+### Changed
+- Updated `infra` submodule to [bicep-ptn-aiml-landing-zone](https://github.com/Azure/bicep-ptn-aiml-landing-zone) tag `v1.0.4`.
+- Bumped `gpt-rag-ui` to `v2.3.0`.
+- Bumped `gpt-rag-orchestrator` to `v2.6.0`.
+- Bumped `gpt-rag-ingestion` to `v2.2.4`.
+- Added explicit `partitionKey` to all Cosmos DB container definitions, including `/principal_id` for `conversations` container.
+- Added `conversation-documents` storage container.
+- Added `conversationId` filterable field to search index.
+- Removed standalone MCP Container App from default deployment (consolidated into orchestrator).
+
 ## [v2.5.3] - 2026-03-24
 ### Changed
 - Updated default chat model from `gpt-5-mini` to `gpt-5-nano` (`2025-08-07`), increased deployment capacity to `100`, and set API version to `2025-12-01-preview`.
