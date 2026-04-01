@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.  
 This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to [Semantic Versioning](https://semver.org/).
 
+## [v2.6.2] - 2026-04-01
+### Changed
+- Bumped `gpt-rag-orchestrator` to `v2.6.1`.
+
 ## [v2.6.1] - 2026-04-01
 ### Fixed
 - Fixed Zero Trust provisioning failure caused by jumpbox Custom Script Extension using incorrect release tag. Replaced `install_script` URL field with `ailz_tag` in `manifest.json`, allowing the install script URL and release parameter to be derived from the landing zone tag.
