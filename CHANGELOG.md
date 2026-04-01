@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.  
 This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to [Semantic Versioning](https://semver.org/).
 
+## [v2.6.1] - 2026-04-01
+### Fixed
+- Fixed Zero Trust provisioning failure caused by jumpbox Custom Script Extension using incorrect release tag. Replaced `install_script` URL field with `ailz_tag` in `manifest.json`, allowing the install script URL and release parameter to be derived from the landing zone tag.
+
+### Changed
+- Updated `infra` submodule to [bicep-ptn-aiml-landing-zone](https://github.com/Azure/bicep-ptn-aiml-landing-zone) tag `v1.0.5`.
+- Bumped `gpt-rag-ui` to `v2.3.1`.
+- Bumped `gpt-rag-ingestion` to `v2.2.5`.
+
 ## [v2.6.0] - 2026-03-31
 ### Changed
 - Updated `infra` submodule to [bicep-ptn-aiml-landing-zone](https://github.com/Azure/bicep-ptn-aiml-landing-zone) tag `v1.0.4`.
