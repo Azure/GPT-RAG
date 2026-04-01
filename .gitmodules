@@ -1,5 +1,5 @@
 [submodule "infra"]
 	path = infra
 	url = https://github.com/Azure/bicep-ptn-aiml-landing-zone.git
-	branch = v1.0.4
+	branch = v1.0.5
 	ignore = dirty

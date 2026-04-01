@@ -1,12 +1,12 @@
 {
-  "tag": "v2.6.0",
+  "tag": "v2.6.1",
   "repo": "https://github.com/azure/gpt-rag.git",  
-  "install_script": "https://raw.githubusercontent.com/Azure/bicep-ptn-aiml-landing-zone/refs/tags/v1.0.4/install.ps1",
+  "ailz_tag": "v1.0.5",
   "components": [
     {
       "name": "gpt-rag-ui",
       "repo": "https://github.com/azure/gpt-rag-ui.git",
-      "tag": "v2.3.0"
+      "tag": "v2.3.1"
     },
     {
       "name": "gpt-rag-orchestrator",
@@ -16,7 +16,7 @@
     {
       "name": "gpt-rag-ingestion",
       "repo": "https://github.com/azure/gpt-rag-ingestion.git",
-      "tag": "v2.2.4"
+      "tag": "v2.2.5"
     }
   ]
 }
