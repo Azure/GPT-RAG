@@ -1,5 +1,18 @@
 > 📌 [Check out what's coming next](https://github.com/orgs/Azure/projects/536/views/6)  (Azure org only)
 
+### April 2026
+
+**[Release 2.6.1](https://github.com/Azure/GPT-RAG/tree/v2.6.1) - Conversation History and Multimodal Improvements**
+
+**Conversation History**
+Users can now list, resume, and delete past conversations directly from a sidebar in the chat UI.
+
+**Multimodal Improvements**
+
+Images now appear inline between response steps instead of grouped at the bottom, with improved validation accuracy.
+
+---
+
 ### March 2026
 
 **[Release 2.5.3](https://github.com/Azure/GPT-RAG/tree/v2.5.3) - New Orchestration Strategies, Infrastructure Overhaul, and Multimodality**
