@@ -5,6 +5,7 @@
 **[Release 2.6.1](https://github.com/Azure/GPT-RAG/tree/v2.6.1) - Conversation History and Multimodal Improvements**
 
 **Conversation History**
+
 Users can now list, resume, and delete past conversations directly from a sidebar in the chat UI.
 
 **Multimodal Improvements**
