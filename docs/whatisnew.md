@@ -2,6 +2,22 @@
 
 ### April 2026
 
+**[Release 2.6.3](https://github.com/Azure/GPT-RAG/tree/v2.6.3) - Ingestion Overhaul, Admin Dashboard, and Cost Optimization**
+
+**Ingestion Admin Dashboard**
+
+A new React-based admin dashboard is available at `/dashboard` for monitoring and managing ingestion jobs. It provides paginated job and file tables, search, filters, and the ability to unblock stuck files. Processing timings are displayed as stacked color bars showing each phase (download, analysis, chunking, index upload), and per-file cost estimates break down spending by service.
+
+**Content Understanding Integration**
+
+Document analysis now uses Azure AI Foundry Content Understanding (`prebuilt-layout`) by default instead of Document Intelligence, resulting in approximately 69% cost reduction per page.
+
+**Reliability and Large File Handling**
+
+Files that fail during ingestion are now tracked per attempt. After exceeding the maximum retries (default 3), the file is automatically blocked, preventing repeated reprocessing and unnecessary document analysis costs. Stale jobs stuck after a container crash are auto-recovered after 2 hours. Additionally, large PDFs exceeding the analysis page limit (default 300 pages) are split automatically, and a memory guard skips oversized files to prevent OOM crashes.
+
+---
+
 **[Release 2.6.1](https://github.com/Azure/GPT-RAG/tree/v2.6.1) - Conversation History and Multimodal Improvements**
 
 **Conversation History**
