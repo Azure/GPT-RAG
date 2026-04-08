@@ -13,10 +13,10 @@
       
       
       
-        <link rel="prev" href="../architecture/">
+        <link rel="prev" href="../howto_sharepoint_connector/">
       
       
-        <link rel="next" href="../services_ingestion/">
+        <link rel="next" href="../team/">
       
       
       <link rel="icon" href="../favicon.ico">
@@ -24,7 +24,7 @@
     
     
       
-        <title>Orchestrator - GPT-RAG</title>
+        <title>Troubleshooting - GPT-RAG</title>
       
     
     
@@ -75,11 +75,6 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
-        
-        <a href="#orchestrator" class="md-skip">
-          Skip to content
-        </a>
-      
     </div>
     <div data-md-component="announce">
       
@@ -111,7 +106,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Orchestrator
+              Troubleshooting
             
           </span>
         </div>
@@ -433,19 +428,17 @@
       
   
   
-    
   
   
-  
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
           <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
@@ -459,7 +452,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             Services
@@ -470,30 +463,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Orchestrator
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../services_orchestrator/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -502,62 +475,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#key-features" class="md-nav__link">
-    <span class="md-ellipsis">
-      Key Features
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#available-strategies" class="md-nav__link">
-    <span class="md-ellipsis">
-      Available Strategies
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#visual-guide" class="md-nav__link">
-    <span class="md-ellipsis">
-      Visual Guide
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#repository" class="md-nav__link">
-    <span class="md-ellipsis">
-      Repository
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -701,17 +618,19 @@
       
   
   
+    
   
   
+  
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
         
           
           <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
@@ -725,7 +644,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             How-to Guides
@@ -820,10 +739,17 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../troubleshooting/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -832,6 +758,7 @@
   
 
       </a>
+      
     </li>
   
 
@@ -902,58 +829,57 @@
   
 
 
-<h1 id="orchestrator">🎯 Orchestrator</h1>
-<p>The Orchestrator is the core engine of GPT-RAG, an agentic orchestration layer built on the Microsoft Agent Framework and Azure AI Foundry Agent Service. It coordinates agent-based RAG workflows — each agent has a defined role — to generate accurate, context-aware responses for complex user queries. <a href="https://github.com/Azure/gpt-rag-orchestrator">GitHub Repository</a>.</p>
-<h2 id="key-features">Key Features</h2>
-<ul>
-<li><strong>Strategy-Based Architecture:</strong> Pluggable orchestration strategies selected via Azure App Configuration (<code>AGENT_STRATEGY</code>).</li>
-<li><strong>Context Retrieval:</strong> Intelligent retrieval from Azure AI Search with citation support.</li>
-<li><strong>Microsoft Agent Framework:</strong> Built on the Microsoft Agent Framework.</li>
-<li><strong>Conversation Persistence:</strong> Maintains conversation history in Cosmos DB with real-time SSE streaming.</li>
-<li><strong>Extensible Design:</strong> Easy to add new strategies by extending <code>BaseAgentStrategy</code>.</li>
-</ul>
-<h2 id="available-strategies">Available Strategies</h2>
-<p>The Orchestrator supports multiple strategies. The active strategy is set via the <code>AGENT_STRATEGY</code> key in Azure App Configuration. The default is <code>maf_lite</code>.</p>
-<table>
-<thead>
-<tr>
-<th>Key</th>
-<th>Strategy</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>maf_lite</code></td>
-<td>MAF Lite <strong>(default)</strong></td>
-<td>Microsoft Agent Framework with direct Azure OpenAI model access. Lightweight — no Agent Service dependency. Includes user profile memory and optional agentic search.</td>
-</tr>
-<tr>
-<td><code>maf_agent_service</code></td>
-<td>MAF + Agent Service</td>
-<td>Microsoft Agent Framework with Azure AI Foundry Agent Service for server-side thread management and tool orchestration. Includes user profile memory and optional agentic search.</td>
-</tr>
-<tr>
-<td><code>single_agent_rag</code></td>
-<td>Single Agent RAG</td>
-<td>Uses Azure AI Agents SDK with Agent Service for agentic RAG. Supports dynamic routing, streaming via event handlers, and pre-warming for low-latency first responses.</td>
-</tr>
-<tr>
-<td><code>mcp</code></td>
-<td>MCP</td>
-<td>Model Context Protocol strategy using Semantic Kernel. Connects to an MCP server for tool orchestration and passes user context via HTTP headers.</td>
-</tr>
-<tr>
-<td><code>nl2sql</code></td>
-<td>NL2SQL</td>
-<td>Natural language to SQL translation using a multi-agent pipeline (Triage → SQL Query → Synthesizer) with Semantic Kernel and Agent Service.</td>
-</tr>
-</tbody>
-</table>
-<h2 id="visual-guide">Visual Guide</h2>
-<p>New to the Orchestrator? Check out the <a href="../orchestrator_visual_guide/">Orchestrator Visual Guide</a> for a visual walkthrough of the architecture and key components.</p>
-<h2 id="repository">Repository</h2>
-<p>🔗 <a href="https://github.com/Azure/gpt-rag-orchestrator">GitHub Repository</a></p>
+  <h1>Troubleshooting</h1>
+
+<p>This page covers common issues, debugging tools, and how to inspect logs in GPT-RAG.</p>
+<p><strong>Showing Response Time Statistics in the Chat UI</strong></p>
+<p>The GPT-RAG UI includes a built-in option to display response time after each agent answer. To enable it, set the <code>SHOW_STATISTICS</code> application setting to <code>true</code> in your Container App (or App Configuration). Once enabled, each response in the chat will show timing information, helping you identify slow responses and compare performance across different queries or configurations.</p>
+<p><strong>Enabling Debug Logging</strong></p>
+<p>To increase log verbosity for any GPT-RAG component (orchestrator, ingestion, or UI), set the <code>LOG_LEVEL</code> environment variable to <code>DEBUG</code> in the corresponding Container App. For example, in the Azure Portal go to your Container App → Environment variables → set <code>LOG_LEVEL</code> = <code>DEBUG</code>. After restarting the container, the application will emit detailed logs including internal function calls, SDK diagnostics, and step-by-step execution traces. Remember to revert to <code>INFO</code> or <code>WARNING</code> after troubleshooting to avoid excessive log volume and cost.</p>
+<p><strong>Viewing Logs in Application Insights</strong></p>
+<p>All GPT-RAG components send telemetry to Application Insights. Open your Application Insights resource in the Azure Portal and go to <strong>Logs</strong> to run KQL queries.</p>
+<p>To find recent errors across all components:</p>
+<div class="highlight"><pre><span></span><code><span class="n">traces</span>
+<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="p">&gt;</span><span class="w"> </span><span class="n">ago</span><span class="p">(</span><span class="mi">1</span><span class="n">h</span><span class="p">)</span>
+<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">severityLevel</span><span class="w"> </span><span class="p">&gt;=</span><span class="w"> </span><span class="mi">3</span>
+<span class="p">|</span><span class="w"> </span><span class="k">project</span><span class="w"> </span><span class="n">timestamp</span><span class="p">,</span><span class="w"> </span><span class="n">message</span><span class="p">,</span><span class="w"> </span><span class="n">cloud_RoleName</span><span class="p">,</span><span class="w"> </span><span class="n">severityLevel</span>
+<span class="p">|</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="n">desc</span>
+<span class="p">|</span><span class="w"> </span><span class="k">take</span><span class="w"> </span><span class="mi">50</span>
+</code></pre></div>
+<p>To see errors specifically in the orchestrator:</p>
+<div class="highlight"><pre><span></span><code><span class="n">traces</span>
+<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="p">&gt;</span><span class="w"> </span><span class="n">ago</span><span class="p">(</span><span class="mi">24</span><span class="n">h</span><span class="p">)</span>
+<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">cloud_RoleName</span><span class="w"> </span><span class="k">contains</span><span class="w"> </span><span class="s">&quot;orchestrator&quot;</span>
+<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">severityLevel</span><span class="w"> </span><span class="p">&gt;=</span><span class="w"> </span><span class="mi">3</span>
+<span class="p">|</span><span class="w"> </span><span class="k">project</span><span class="w"> </span><span class="n">timestamp</span><span class="p">,</span><span class="w"> </span><span class="n">message</span><span class="p">,</span><span class="w"> </span><span class="n">operation_Id</span>
+<span class="p">|</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="n">desc</span>
+</code></pre></div>
+<p>To trace a single request end-to-end using its operation ID (you can get this from a previous query or from the UI response headers):</p>
+<div class="highlight"><pre><span></span><code><span class="n">traces</span>
+<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">operation_Id</span><span class="w"> </span><span class="p">==</span><span class="w"> </span><span class="s">&quot;YOUR_OPERATION_ID&quot;</span>
+<span class="p">|</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="n">asc</span>
+<span class="p">|</span><span class="w"> </span><span class="k">project</span><span class="w"> </span><span class="n">timestamp</span><span class="p">,</span><span class="w"> </span><span class="n">message</span><span class="p">,</span><span class="w"> </span><span class="n">severityLevel</span><span class="p">,</span><span class="w"> </span><span class="n">cloud_RoleName</span>
+</code></pre></div>
+<p>To check for rate-limit (429) or throttling issues in ingestion:</p>
+<div class="highlight"><pre><span></span><code><span class="n">traces</span>
+<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="p">&gt;</span><span class="w"> </span><span class="n">ago</span><span class="p">(</span><span class="mi">24</span><span class="n">h</span><span class="p">)</span>
+<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">cloud_RoleName</span><span class="w"> </span><span class="k">contains</span><span class="w"> </span><span class="s">&quot;ingest&quot;</span>
+<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="k">contains</span><span class="w"> </span><span class="s">&quot;429&quot;</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="k">contains</span><span class="w"> </span><span class="s">&quot;throttl&quot;</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="k">contains</span><span class="w"> </span><span class="s">&quot;rate limit&quot;</span>
+<span class="p">|</span><span class="w"> </span><span class="k">project</span><span class="w"> </span><span class="n">timestamp</span><span class="p">,</span><span class="w"> </span><span class="n">message</span>
+<span class="p">|</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="n">desc</span>
+</code></pre></div>
+<p>To view exceptions with stack traces:</p>
+<div class="highlight"><pre><span></span><code><span class="n">exceptions</span>
+<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="p">&gt;</span><span class="w"> </span><span class="n">ago</span><span class="p">(</span><span class="mi">24</span><span class="n">h</span><span class="p">)</span>
+<span class="p">|</span><span class="w"> </span><span class="k">project</span><span class="w"> </span><span class="n">timestamp</span><span class="p">,</span><span class="w"> </span><span class="n">problemId</span><span class="p">,</span><span class="w"> </span><span class="n">outerMessage</span><span class="p">,</span><span class="w"> </span><span class="n">details</span><span class="p">,</span><span class="w"> </span><span class="n">cloud_RoleName</span>
+<span class="p">|</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="n">desc</span>
+<span class="p">|</span><span class="w"> </span><span class="k">take</span><span class="w"> </span><span class="mi">20</span>
+</code></pre></div>
+<p><strong>Known Issues and Fixes</strong></p>
+<p>Below is a list of commonly reported issues that have been resolved. If you encounter one of these, make sure you are running the version that includes the fix.</p>
+<p><strong>OOM container restarts during parallel ingestion</strong> — Ingestion containers could run out of memory when processing multiple large files concurrently. Fixed by adding memory guards, temp-file downloads for large PDFs, and lowering default concurrency. See <a href="https://github.com/Azure/gpt-rag/issues/438">#438</a>.</p>
+<p><strong>Re-indexing caused by embedding retry issues</strong> — Transient embedding failures could cause documents to be unnecessarily re-indexed. Fixed in ingestion v2.2.5. See <a href="https://github.com/Azure/gpt-rag/issues/437">#437</a>.</p>
+<p><strong>All documents re-indexed when permissionFilterOption is enabled</strong> — Enabling document-level security caused a full re-index instead of incremental updates. Fixed in ingestion v2.2.5. See <a href="https://github.com/Azure/gpt-rag/issues/436">#436</a>.</p>
 
 
 

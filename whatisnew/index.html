@@ -828,6 +828,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -899,6 +920,14 @@
 <p>📌 <a href="https://github.com/orgs/Azure/projects/536/views/6">Check out what's coming next</a>  (Azure org only)</p>
 </blockquote>
 <h3 id="april-2026">April 2026</h3>
+<p><strong><a href="https://github.com/Azure/GPT-RAG/tree/v2.6.3">Release 2.6.3</a> - Ingestion Overhaul, Admin Dashboard, and Cost Optimization</strong></p>
+<p><strong>Ingestion Admin Dashboard</strong></p>
+<p>A new React-based admin dashboard is available at <code>/dashboard</code> for monitoring and managing ingestion jobs. It provides paginated job and file tables, search, filters, and the ability to unblock stuck files. Processing timings are displayed as stacked color bars showing each phase (download, analysis, chunking, index upload), and per-file cost estimates break down spending by service.</p>
+<p><strong>Content Understanding Integration</strong></p>
+<p>Document analysis now uses Azure AI Foundry Content Understanding (<code>prebuilt-layout</code>) by default instead of Document Intelligence, resulting in approximately 69% cost reduction per page.</p>
+<p><strong>Reliability and Large File Handling</strong></p>
+<p>Files that fail during ingestion are now tracked per attempt. After exceeding the maximum retries (default 3), the file is automatically blocked, preventing repeated reprocessing and unnecessary document analysis costs. Stale jobs stuck after a container crash are auto-recovered after 2 hours. Additionally, large PDFs exceeding the analysis page limit (default 300 pages) are split automatically, and a memory guard skips oversized files to prevent OOM crashes.</p>
+<hr />
 <p><strong><a href="https://github.com/Azure/GPT-RAG/tree/v2.6.1">Release 2.6.1</a> - Conversation History and Multimodal Improvements</strong></p>
 <p><strong>Conversation History</strong></p>
 <p>Users can now list, resume, and delete past conversations directly from a sidebar in the chat UI.</p>
