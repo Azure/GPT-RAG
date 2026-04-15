@@ -26,7 +26,25 @@ GPT-RAG is built on a Zero-Trust architecture to ensure that all components oper
 ## Architecture
 
 ![Zero Trust Architecture](media/architecture_zero_trust.png)
-*Zero-Trust Architecture*
+*Zero-Trust Architecture — full deployment with all optional modules enabled*
+
+### Required vs. Optional Modules
+
+The diagram above shows a complete deployment. In practice, many components are optional. The table below clarifies what is needed for a minimal deployment versus what can be added incrementally.
+
+| Component | Required | Notes |
+|-----------|----------|-------|
+| **Azure OpenAI** | ✅ Required | Core LLM for generation |
+| **Azure AI Search** | ✅ Required | Retrieval index |
+| **gpt-rag-orchestrator** | ✅ Required | Query orchestration and agent logic |
+| **gpt-rag-ingestion** | ✅ Required | Document chunking and indexing pipeline |
+| **gpt-rag-ui** | ⬜ Optional | Reference chat UI — bring your own front-end instead |
+| **Zero-Trust / AI Landing Zone** | ⬜ Optional | Recommended for production; not needed for PoC/dev |
+| **Document-level security (ACL/RBAC)** | ⬜ Optional | Enable when per-user data trimming is required |
+| **SharePoint / Lists connector** | ⬜ Optional | Add when SharePoint is a data source |
+| **NL2SQL / MCP strategies** | ⬜ Optional | Advanced agent strategies; enable per use case |
+
+> **Start small.** A working RAG solution requires only the four core components. Add optional modules as your requirements evolve.
 
 ## AI Agent Capabilities
 
