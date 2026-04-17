@@ -2,7 +2,7 @@
 
 ### April 2026
 
-**[Release 2.6.3](https://github.com/Azure/GPT-RAG/tree/v2.6.3) - Ingestion Overhaul, Admin Dashboard, and Cost Optimization**
+**[Release 2.6.4](https://github.com/Azure/GPT-RAG/tree/v2.6.4) - Ingestion Enhancements, Ingestion Admin Dashboard, and Cost Optimization**
 
 **Ingestion Admin Dashboard**
 
