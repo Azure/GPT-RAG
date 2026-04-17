@@ -4,6 +4,18 @@
 
 **[Release 2.6.4](https://github.com/Azure/GPT-RAG/tree/v2.6.4) - Ingestion Enhancements, Ingestion Admin Dashboard, and Cost Optimization**
 
+**Ingestion Admin Dashboard**
+
+A new React-based admin dashboard is available at `/dashboard` for monitoring and managing ingestion jobs. It provides paginated job and file tables, search, filters, and the ability to unblock stuck files. Processing timings are displayed as stacked color bars showing each phase (download, analysis, chunking, index upload), and per-file cost estimates break down spending by service.
+
+**Content Understanding Integration**
+
+Document analysis now uses Azure AI Foundry Content Understanding (`prebuilt-layout`) by default instead of Document Intelligence, resulting in approximately 69% cost reduction per page.
+
+**Reliability and Large File Handling**
+
+Files that fail during ingestion are now tracked per attempt. After exceeding the maximum retries (default 3), the file is automatically blocked, preventing repeated reprocessing and unnecessary document analysis costs. Stale jobs stuck after a container crash are auto-recovered after 2 hours. Additionally, large PDFs exceeding the analysis page limit (default 300 pages) are split automatically, and a memory guard skips oversized files to prevent OOM crashes.
+
 * Demo video:
 
 <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; margin: 0 auto 20px auto; border-radius: 8px;">
@@ -16,30 +28,6 @@
           allowfullscreen>
   </iframe>
 </div>
-
-<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; margin: 0 auto 20px auto; border-radius: 8px;">
-  <iframe src="https://www.youtube.com/embed/P87o8UwiTHw?rel=0&modestbranding=1" 
-          style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; border-radius: 8px;" 
-          title="User Feedback" 
-          frameborder="0" 
-          loading="lazy"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-          allowfullscreen>
-  </iframe>
-</div>
-
-
-**Ingestion Admin Dashboard**
-
-A new React-based admin dashboard is available at `/dashboard` for monitoring and managing ingestion jobs. It provides paginated job and file tables, search, filters, and the ability to unblock stuck files. Processing timings are displayed as stacked color bars showing each phase (download, analysis, chunking, index upload), and per-file cost estimates break down spending by service.
-
-**Content Understanding Integration**
-
-Document analysis now uses Azure AI Foundry Content Understanding (`prebuilt-layout`) by default instead of Document Intelligence, resulting in approximately 69% cost reduction per page.
-
-**Reliability and Large File Handling**
-
-Files that fail during ingestion are now tracked per attempt. After exceeding the maximum retries (default 3), the file is automatically blocked, preventing repeated reprocessing and unnecessary document analysis costs. Stale jobs stuck after a container crash are auto-recovered after 2 hours. Additionally, large PDFs exceeding the analysis page limit (default 300 pages) are split automatically, and a memory guard skips oversized files to prevent OOM crashes.
 
 ---
 
