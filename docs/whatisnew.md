@@ -4,6 +4,31 @@
 
 **[Release 2.6.4](https://github.com/Azure/GPT-RAG/tree/v2.6.4) - Ingestion Enhancements, Ingestion Admin Dashboard, and Cost Optimization**
 
+* Demo video:
+
+<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; margin: 0 auto 20px auto; border-radius: 8px;">
+  <iframe src="https://www.youtube.com/embed/BRwGaBAIICg?rel=0&modestbranding=1" 
+          style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; border-radius: 8px;" 
+          title="User Feedback" 
+          frameborder="0" 
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+          allowfullscreen>
+  </iframe>
+</div>
+
+<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; margin: 0 auto 20px auto; border-radius: 8px;">
+  <iframe src="https://www.youtube.com/embed/P87o8UwiTHw?rel=0&modestbranding=1" 
+          style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; border-radius: 8px;" 
+          title="User Feedback" 
+          frameborder="0" 
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+          allowfullscreen>
+  </iframe>
+</div>
+
+
 **Ingestion Admin Dashboard**
 
 A new React-based admin dashboard is available at `/dashboard` for monitoring and managing ingestion jobs. It provides paginated job and file tables, search, filters, and the ability to unblock stuck files. Processing timings are displayed as stacked color bars showing each phase (download, analysis, chunking, index upload), and per-file cost estimates break down spending by service.
