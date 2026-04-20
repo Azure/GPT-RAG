@@ -56,3 +56,5 @@ extra:
   generator: false
 extra_css:
   - styles.css  
+extra_javascript:
+  - javascripts/source-facts-refresh.js
