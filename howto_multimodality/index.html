@@ -1,0 +1,1476 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Official project documentation">
+      
+      
+        <meta name="author" content="Paulo Lacerda">
+      
+      
+      
+        <link rel="prev" href="../howto_authentication/">
+      
+      
+        <link rel="next" href="../howto_userfeedback/">
+      
+      
+      <link rel="icon" href="../favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.34">
+    
+    
+      
+        <title>Multimodality - GPT-RAG</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.35f28582.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../styles.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#ingestion" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="GPT-RAG" class="md-header__button md-logo" aria-label="GPT-RAG" data-md-component="logo">
+      
+  <img src="../media/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            GPT-RAG
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Multimodality
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/azure/gpt-rag" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="GPT-RAG" class="md-nav__button md-logo" aria-label="GPT-RAG" data-md-component="logo">
+      
+  <img src="../media/logo.png" alt="logo">
+
+    </a>
+    GPT-RAG
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/azure/gpt-rag" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../whatisnew/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    What's New
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deploy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Deployment Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Quick Start Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Quick Start Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart_simple_rag/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Simple RAG
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart_nl2sql/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    NL2SQL
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Architecture
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Architecture
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Services
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Services
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_orchestrator/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Orchestrator
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Ingestion
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            Ingestion
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_ingestion/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_blob_data_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Blob
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_sharepoint_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Sharepoint
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_nl2sql_data_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    NL2SQL
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    How-to Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            How-to Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_azure_direct/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Azure Direct Models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_authentication/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Auth & Doc Security
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Multimodality
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Multimodality
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#ingestion" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ingestion
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#orchestrator" class="md-nav__link">
+    <span class="md-ellipsis">
+      Orchestrator
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_userfeedback/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    User Feedback
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_sharepoint_connector/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Sharepoint Connector
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../team/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Meet the Team
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+  <h1>Multimodality</h1>
+
+<p>GPT-RAG supports end-to-end multimodal processing: from document ingestion (extracting figures and generating captions) through orchestration (retrieving and presenting images alongside text to a vision-capable model). This page covers both sides.</p>
+<blockquote>
+<p>Multimodal processing is opt-in. When disabled (the default), the ingestion pipeline ignores figures and the orchestrator works with text only.</p>
+</blockquote>
+<p>The feature spans two components:</p>
+<ul>
+<li><strong>Ingestion</strong> (<code>gpt-rag-ingestion</code>) — extracts figures from documents, generates captions, creates caption embeddings, and stores everything in Azure AI Search.</li>
+<li><strong>Orchestrator</strong> (<code>gpt-rag-orchestrator</code>) — retrieves chunks with their images from the search index, downloads figures from blob storage, and sends multimodal content (text + base64 images) to a vision-capable model so the answer can reference and embed diagrams, charts, and photos.</li>
+</ul>
+<hr />
+<h2 id="ingestion">Ingestion</h2>
+<p>The multimodal ingestion pipeline goes through four steps: document analysis, figure extraction, caption generation, and chunk attachment. The first two steps differ depending on the analysis backend; the last two are shared.</p>
+<p><strong>Analysis backends: Content Understanding vs Document Intelligence</strong></p>
+<p>GPT-RAG supports two Azure AI services for document analysis. The choice is controlled by the <code>USE_DOCUMENT_INTELLIGENCE</code> setting in App Configuration (default <code>false</code>).</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Content Understanding (default)</th>
+<th>Document Intelligence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Setting</strong></td>
+<td><code>USE_DOCUMENT_INTELLIGENCE=false</code></td>
+<td><code>USE_DOCUMENT_INTELLIGENCE=true</code></td>
+</tr>
+<tr>
+<td><strong>What it does</strong></td>
+<td>Analyzes the document and returns structured markdown with inline figure references (<code>![caption](figures/X.Y)</code>) plus figure metadata (IDs, bounding regions, page associations). Does <strong>not</strong> provide figure image bytes — only metadata.</td>
+<td>Analyzes the document and returns structured markdown with <code>&lt;figure&gt;</code> tags plus figure metadata. Also exposes a server-side <code>get_figure</code> API that returns the actual figure image bytes on demand.</td>
+</tr>
+<tr>
+<td><strong>How figures are extracted</strong></td>
+<td><strong>Locally</strong>, from the original source file. The pipeline downloads the source document and uses format-specific extraction: PyMuPDF for PDFs (page rendering + bounding-box crop), ZIP media extraction for DOCX (<code>word/media/</code>) and PPTX (<code>ppt/media/</code>).</td>
+<td><strong>Server-side</strong>, via the <code>get_figure(model_id, result_id, figure_id)</code> API call. Document Intelligence crops and returns the figure image directly — no local file processing needed.</td>
+</tr>
+<tr>
+<td><strong>Bounding regions</strong></td>
+<td>Returned for native PDFs; often missing for scanned PDFs. When missing, the pipeline falls back to full-page rendering and maps figures to pages using the figure ID convention <code>X.Y</code> (where <code>X</code> = page number).</td>
+<td>Typically returned for all figure types. The server-side API handles cropping internally.</td>
+</tr>
+<tr>
+<td><strong>Cost model</strong></td>
+<td>Per-page analysis pricing (Content Understanding)</td>
+<td>Per-page analysis pricing (Document Intelligence)</td>
+</tr>
+<tr>
+<td><strong>When to use</strong></td>
+<td>Default choice. Broader format support, lower cost for most workloads.</td>
+<td>When you need the DI-specific <code>get_figure</code> API or other DI-only features (e.g., key-value extraction, custom models).</td>
+</tr>
+</tbody>
+</table>
+<p>Both backends produce the same downstream result: figure metadata that the pipeline uses to extract images, generate captions, and populate the search index. From step 3 onward the flow is identical regardless of which backend was used.</p>
+<p><strong>The four pipeline steps</strong></p>
+<ol>
+<li>
+<p><strong>Document analysis</strong> — the document is sent to the chosen analysis service, which returns structured markdown content with figure references embedded inline at the position where each figure appears in the source document. Content Understanding uses <code>![caption](figures/X.Y)</code> markdown syntax (normalized to <code>&lt;figureX.Y&gt;</code> tags internally); Document Intelligence uses <code>&lt;figure&gt;</code> XML tags directly.</p>
+</li>
+<li>
+<p><strong>Figure extraction</strong> — for each detected figure, the pipeline obtains the image bytes. With Content Understanding this means local extraction from the source file (PDF: PyMuPDF render + crop; DOCX/PPTX: ZIP media extraction). With Document Intelligence this means a server-side API call (<code>get_figure</code>). Either way, the result is PNG image bytes per figure.</p>
+</li>
+<li>
+<p><strong>Caption generation</strong> — each extracted figure image is sent to a vision-capable Azure OpenAI model (e.g. <code>gpt-4o</code>, <code>gpt-4o-mini</code>) which generates a natural-language description optimized for retrieval.</p>
+</li>
+<li>
+<p><strong>Chunk attachment</strong> — figure references (<code>&lt;figureX.Y&gt;</code> tags) are naturally distributed across text chunks because they appear inline in the markdown content. Each chunk only gets the figures that fall within its text region. The pipeline uploads the figure image to blob storage, attaches the blob URL and caption to the chunk, and generates an embedding vector for the caption.</p>
+</li>
+</ol>
+<p>The result in Azure AI Search is that each chunk document may contain:</p>
+<ul>
+<li><code>relatedImages</code> — an array of blob URLs pointing to the extracted figure images</li>
+<li><code>imageCaptions</code> — a combined text description of all figures in that chunk</li>
+<li><code>captionVector</code> — an embedding vector for the combined caption, enabling semantic search over visual content</li>
+</ul>
+<div class="no-wrap">
+<div class="highlight"><pre><span></span><code>Source Document (PDF, DOCX, PPTX)
+    │
+    ▼
+Analysis Service
+    ├─ Content Understanding (default)     ├─ Document Intelligence
+    │  Returns: markdown + figure metadata │  Returns: markdown + figure metadata
+    │  No image bytes                      │  + get_figure API for image bytes
+    ▼                                      ▼
+Figure Extraction                     Figure Extraction
+    ├─ PDF: PyMuPDF render + crop          └─ DI get_figure API call
+    ├─ DOCX: word/media/ ZIP extraction
+    └─ PPTX: ppt/media/ ZIP extraction
+    │                                      │
+    ▼──────────────────────────────────────▼
+Caption Generation (Azure OpenAI vision model)
+    │  Returns: natural-language description per figure
+    ▼
+Chunk Assembly
+    │  Each chunk gets: text + figure URLs + captions + caption embedding
+    ▼
+Azure AI Search Index
+    Fields: content, contentVector, relatedImages, imageCaptions, captionVector
+</code></pre></div>
+</div>
+
+<p><strong>How figures relate to chunks</strong>: the analysis service embeds figure references at the exact position in the markdown where the figure appears in the document. When the text is split into chunks, each chunk inherits only the figure references that fell within its text region. A chunk covering pages 4–6 will only contain figures from those pages. Figures are never duplicated across chunks.</p>
+<p><strong>Fallback behavior for scanned PDFs (Content Understanding path)</strong>: when Content Understanding does not return <code>boundingRegions</code> for a figure (common with scanned documents), the pipeline renders the entire page and maps figures to pages using the figure ID convention <code>X.Y</code>, where <code>X</code> is the page number and <code>Y</code> is the figure index on that page. Multiple figures on the same page will reference the same full-page render but receive separate captions. This fallback does not apply to the Document Intelligence path, which handles cropping server-side.</p>
+<p><strong>Supported formats</strong></p>
+<table>
+<thead>
+<tr>
+<th>Format</th>
+<th>Figure extraction method</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>PDF</strong></td>
+<td>PyMuPDF page rendering + bounding-box crop</td>
+<td>Falls back to full-page render when no bounding regions</td>
+</tr>
+<tr>
+<td><strong>DOCX</strong></td>
+<td>ZIP extraction from <code>word/media/</code></td>
+<td>Images mapped to figures by document order</td>
+</tr>
+<tr>
+<td><strong>PPTX</strong></td>
+<td>ZIP extraction from <code>ppt/media/</code></td>
+<td>Images mapped to figures by document order</td>
+</tr>
+<tr>
+<td><strong>Images</strong> (PNG, JPEG, BMP, TIFF)</td>
+<td>Processed as single-page documents</td>
+<td>The entire image is treated as one figure</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Configuration</strong> — all settings are configured in Azure App Configuration with the <code>gpt-rag</code> label.</p>
+<p><em>Required settings for multimodal processing:</em></p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MULTIMODAL</code></td>
+<td><code>true</code></td>
+<td>Master switch — enables multimodal chunking. When <code>false</code> (default), figures are ignored.</td>
+</tr>
+<tr>
+<td><code>VISION_DEPLOYMENT_NAME</code></td>
+<td>e.g. <code>gpt-4o-mini</code></td>
+<td>Azure OpenAI deployment name for the vision-capable model used to generate figure captions. Must support image input. If not set, falls back to <code>CHAT_DEPLOYMENT_NAME</code>, which may not support vision.</td>
+</tr>
+</tbody>
+</table>
+<p><em>Related settings (typically pre-configured):</em></p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CHAT_DEPLOYMENT_NAME</code></td>
+<td><em>(required)</em></td>
+<td>Primary Azure OpenAI deployment for text completions. Used as fallback for vision if <code>VISION_DEPLOYMENT_NAME</code> is not set.</td>
+</tr>
+<tr>
+<td><code>EMBEDDING_DEPLOYMENT_NAME</code></td>
+<td><em>(required)</em></td>
+<td>Azure OpenAI deployment for generating embedding vectors (used for caption vectors).</td>
+</tr>
+<tr>
+<td><code>STORAGE_ACCOUNT_NAME</code></td>
+<td><em>(required)</em></td>
+<td>Azure Storage account where figure images are uploaded.</td>
+</tr>
+<tr>
+<td><code>DOCUMENTS_IMAGES_STORAGE_CONTAINER</code></td>
+<td><code>documents-images</code></td>
+<td>Blob container for extracted figure images.</td>
+</tr>
+<tr>
+<td><code>MINIMUM_FIGURE_AREA_PERCENTAGE</code></td>
+<td><code>4.0</code></td>
+<td>Minimum figure area as a percentage of the page. Figures smaller than this threshold are skipped to avoid extracting decorative elements, logos, or tiny icons.</td>
+</tr>
+</tbody>
+</table>
+<p><em>Analysis service settings:</em></p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USE_DOCUMENT_INTELLIGENCE</code></td>
+<td><code>false</code></td>
+<td>Selects the analysis backend. When <code>false</code> (default), uses Content Understanding — figure images are extracted locally from the source file using PyMuPDF (PDF) or ZIP media extraction (DOCX/PPTX). When <code>true</code>, uses Document Intelligence — figure images are retrieved server-side via the <code>get_figure</code> API, with no local extraction needed. See the comparison table above for details.</td>
+</tr>
+<tr>
+<td><code>AI_FOUNDRY_ACCOUNT_ENDPOINT</code></td>
+<td><em>(required)</em></td>
+<td>Azure AI Foundry endpoint used by both Content Understanding and Document Intelligence.</td>
+</tr>
+<tr>
+<td><code>CONTENT_UNDERSTANDING_ANALYZER</code></td>
+<td><code>prebuilt-layout</code></td>
+<td>Content Understanding analyzer name (only used when <code>USE_DOCUMENT_INTELLIGENCE=false</code>).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Setup</strong></p>
+<p><strong>1) Ensure you have a vision-capable Azure OpenAI deployment.</strong></p>
+<p>The model must support image input for caption generation to work. Recommended models: <code>gpt-4o</code>, <code>gpt-4o-mini</code>. You can check your deployments with:</p>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>cognitiveservices<span class="w"> </span>account<span class="w"> </span>deployment<span class="w"> </span>list<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--name<span class="w"> </span>&lt;your-ai-services-name&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--resource-group<span class="w"> </span>&lt;your-resource-group&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--query<span class="w"> </span><span class="s2">&quot;[].{name:name, model:properties.model.name}&quot;</span><span class="w"> </span>-o<span class="w"> </span>table
+</code></pre></div>
+<p>If you don't have a vision-capable deployment, create one in the Azure portal under your Azure AI Services resource &gt; Model deployments.</p>
+<p><strong>2) Configure the App Configuration settings.</strong></p>
+<p>Set the following keys in Azure App Configuration with the <code>gpt-rag</code> label:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Enable multimodal processing</span>
+az<span class="w"> </span>appconfig<span class="w"> </span>kv<span class="w"> </span><span class="nb">set</span><span class="w"> </span>--name<span class="w"> </span>&lt;your-appconfig-name&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--key<span class="w"> </span>MULTIMODAL<span class="w"> </span>--value<span class="w"> </span><span class="nb">true</span><span class="w"> </span>--label<span class="w"> </span>gpt-rag<span class="w"> </span>--yes
+
+<span class="c1"># Set the vision model deployment name</span>
+az<span class="w"> </span>appconfig<span class="w"> </span>kv<span class="w"> </span><span class="nb">set</span><span class="w"> </span>--name<span class="w"> </span>&lt;your-appconfig-name&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--key<span class="w"> </span>VISION_DEPLOYMENT_NAME<span class="w"> </span>--value<span class="w"> </span>gpt-4o-mini<span class="w"> </span>--label<span class="w"> </span>gpt-rag<span class="w"> </span>--yes
+</code></pre></div>
+<p><strong>3) Verify the <code>documents-images</code> blob container exists.</strong></p>
+<p>The pipeline uploads extracted figure images to this container. It is typically created during GPT-RAG provisioning. If missing, create it:</p>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>storage<span class="w"> </span>container<span class="w"> </span>create<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--account-name<span class="w"> </span>&lt;your-storage-account&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--name<span class="w"> </span>documents-images<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--auth-mode<span class="w"> </span>login
+</code></pre></div>
+<p><strong>4) Redeploy the data ingestion container app</strong> to pick up the new configuration, then re-process your documents.</p>
+<p>When multimodal is enabled and a document contains figures, the container app logs will show:</p>
+<div class="highlight"><pre><span></span><code>[multimodal_chunker][filename.pdf] Pre-extracted 12 figure image(s) from source document.
+[multimodal_chunker][filename.pdf] Generating caption for figure 1.1.
+[multimodal_chunker][filename.pdf] Attached 4 figures to chunk 0.
+</code></pre></div>
+<p><strong>Troubleshooting</strong></p>
+<p><strong>Empty captions ("No caption available.")</strong>
+The vision model deployment does not support image input, or the deployment name is incorrect. Check that <code>VISION_DEPLOYMENT_NAME</code> points to a model like <code>gpt-4o</code> or <code>gpt-4o-mini</code>. If not set, the pipeline falls back to <code>CHAT_DEPLOYMENT_NAME</code>, which may not support vision.</p>
+<p><strong>Figures not appearing in search results</strong>
+Check that <code>MULTIMODAL</code> is set to <code>true</code> in App Configuration with the <code>gpt-rag</code> label. Also verify the document was re-indexed after enabling multimodal (existing documents need to be re-processed).</p>
+<p><strong>Scanned PDFs produce full-page images instead of cropped figures</strong>
+This is expected behavior. When Content Understanding does not return <code>boundingRegions</code> (common with scanned documents), the pipeline renders the full page for each figure. The captions are still generated individually per figure, so the semantic content is preserved even though the image is a full-page render.</p>
+<p><strong>Figure images not uploaded to blob storage</strong>
+Check that the <code>documents-images</code> container exists in your storage account and that the container app's managed identity has <code>Storage Blob Data Contributor</code> on the storage account.</p>
+<p><strong>Some figures are skipped</strong>
+Figures smaller than <code>MINIMUM_FIGURE_AREA_PERCENTAGE</code> of the page area (default 4%) are automatically skipped. This filters out decorative elements, logos, and small icons. Adjust the threshold in App Configuration if needed.</p>
+<hr />
+<h2 id="orchestrator">Orchestrator</h2>
+<p>Once the ingestion pipeline has populated the Azure AI Search index with text chunks, figure blob URLs, image captions, and caption embeddings, the orchestrator can leverage all of that at query time to produce answers that include diagrams, charts, and photos from the original documents.</p>
+<p>The multimodal orchestrator strategy (<code>MultimodalStrategy</code>) is a specialized RAG flow built on top of the Microsoft Agent Framework (MAF). It extends the standard text-only approach with vision capabilities. When a user sends a question, the strategy goes through five stages:</p>
+<ol>
+<li>
+<p><strong>Intent classification</strong> — a lightweight LLM call determines whether the message is a greeting/small talk or a real question. If it is a greeting, the search step is skipped entirely and the model responds conversationally.</p>
+</li>
+<li>
+<p><strong>Dual-vector hybrid search</strong> — the <code>MultimodalSearchContextProvider</code> queries Azure AI Search using the user's question. The search combines keyword matching with two vector queries in parallel: one against <code>contentVector</code> (text embeddings) and one against <code>captionVector</code> (image-caption embeddings). This means a user asking "show me the rocker arm diagram" can match documents not only by text content but also by what their figures depict. Semantic ranking is applied when configured.</p>
+</li>
+<li>
+<p><strong>Image retrieval and filtering</strong> — for each search result, the provider reads the <code>relatedImages</code> field (blob URLs) and the <code>imageCaptions</code> field. It selects relevant figures using a two-stage filter:</p>
+</li>
+<li><strong>Heuristic filter</strong> — a fast keyword-based check against the figure path, caption, surrounding text, and user query. Decorative elements (logos, cartoons, footers) are dropped; procedural content (diagrams, assembly steps, cross-sections) is kept.</li>
+<li><strong>Vision-based classifier</strong> (optional) — each candidate image is sent to the vision model with a classification prompt. The model returns <code>KEEP</code> or <code>SKIP</code>. This catches cases the heuristic misses.</li>
+</ol>
+<p>Selected images are downloaded from Azure Blob Storage in parallel and encoded as base64.</p>
+<ol>
+<li>
+<p><strong>Multimodal context assembly</strong> — the provider builds a structured JSON payload where text and images are interleaved in document order. Each image appears at the same position it occupied in the original document, preceded by a label (<code>📎 Image (embed once only): &lt;path&gt;</code>) and an image hint derived from its caption. The companion <code>MultimodalChatClient</code> detects this structured payload and converts it to OpenAI's vision content format (<code>[{"type": "text", ...}, {"type": "image_url", ...}]</code>).</p>
+</li>
+<li>
+<p><strong>Streaming response with guardrails</strong> — the agent streams the model's answer, then applies two post-processing steps:</p>
+</li>
+<li><strong>Deduplication</strong> — removes any duplicate <code>![alt](path)</code> markdown image references, keeping only the first occurrence.</li>
+<li><strong>Post-response image validation</strong> (optional) — each image the model chose to embed is re-evaluated by the vision model. Images classified as decorative or irrelevant are stripped from the final answer.</li>
+</ol>
+<p>The result is an answer that cites document sources, embeds relevant figures inline next to the text they illustrate, and avoids decorative or off-topic images.</p>
+<div class="no-wrap">
+<div class="highlight"><pre><span></span><code>User Question
+    │
+    ▼
+Intent Classifier (greeting → skip search)
+    │
+    ▼ (question)
+Azure AI Search (keyword + contentVector + captionVector)
+    │  Returns: chunks with text, figure blob URLs, captions
+    ▼
+Image Selection (heuristic + optional vision classifier)
+    │  Downloads figure PNGs from Blob Storage → base64
+    ▼
+Multimodal Context Assembly (text + images interleaved)
+    │  JSON payload with MULTIMODAL_PREFIX marker
+    ▼
+MultimodalChatClient → OpenAI vision format
+    │  Sends: [text parts, image_url parts] to vision model
+    ▼
+Streaming Response + Post-processing
+    │  Dedup images, optional validation guardrail
+    ▼
+Final Answer (text with inline ![Figure](path) references)
+</code></pre></div>
+</div>
+
+<p><strong>User profile memory</strong>: the strategy also maintains a per-user profile stored in Cosmos DB. The <code>UserProfileMemory</code> plugin extracts facts about the user from conversations (e.g., preferences, context) and injects them as context in subsequent sessions. This enables personalized answers across sessions.</p>
+<p><strong>Conversation history</strong>: the strategy sends the last N messages (configurable via <code>CHAT_HISTORY_MAX_MESSAGES</code>) to the model for multi-turn context. Image markdown from previous assistant messages is stripped to prevent stale figure references from leaking into the current context.</p>
+<p><strong>Configuration</strong> — the multimodal strategy is activated by setting <code>AGENT_STRATEGY</code> to <code>multimodal</code> in Azure App Configuration (with the <code>gpt-rag</code> label). All other settings below also go in App Configuration with the same label.</p>
+<p><em>Selecting the strategy:</em></p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AGENT_STRATEGY</code></td>
+<td><code>multimodal</code></td>
+<td>Activates the multimodal orchestrator strategy. Other valid values: <code>maf_lite</code>, <code>single_agent_rag</code>, <code>mcp</code>, <code>nl2sql</code>, <code>maf_agent_service</code>.</td>
+</tr>
+</tbody>
+</table>
+<p><em>Core model and search settings (shared with other strategies, typically already configured):</em></p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Example</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AI_FOUNDRY_ACCOUNT_ENDPOINT</code></td>
+<td><code>https://aif-xxx.cognitiveservices.azure.com/</code></td>
+<td>Azure AI Foundry endpoint for the OpenAI client.</td>
+</tr>
+<tr>
+<td><code>CHAT_DEPLOYMENT_NAME</code></td>
+<td><code>gpt-4o</code></td>
+<td>The vision-capable model deployment used for answering. Must support image input.</td>
+</tr>
+<tr>
+<td><code>EMBEDDING_DEPLOYMENT_NAME</code></td>
+<td><code>text-embedding-3-large</code></td>
+<td>Embedding model for hybrid vector search.</td>
+</tr>
+<tr>
+<td><code>SEARCH_SERVICE_QUERY_ENDPOINT</code></td>
+<td><code>https://search-xxx.search.windows.net</code></td>
+<td>Azure AI Search endpoint.</td>
+</tr>
+<tr>
+<td><code>SEARCH_RAG_INDEX_NAME</code></td>
+<td><code>ragindex</code></td>
+<td>Name of the search index populated by the ingestion pipeline.</td>
+</tr>
+<tr>
+<td><code>SEARCH_RAGINDEX_TOP_K</code></td>
+<td><code>3</code></td>
+<td>Number of documents to retrieve per query.</td>
+</tr>
+<tr>
+<td><code>SEARCH_SEMANTIC_SEARCH_CONFIG</code></td>
+<td><code>my-semantic-config</code></td>
+<td>Semantic ranker configuration name (optional, but recommended).</td>
+</tr>
+</tbody>
+</table>
+<p><em>Multimodal-specific settings:</em></p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MULTIMODAL_MAX_IMAGES</code></td>
+<td><code>10</code></td>
+<td>Maximum total images sent to the model per request (across all retrieved documents).</td>
+</tr>
+<tr>
+<td><code>MULTIMODAL_MAX_IMAGES_PER_DOC</code></td>
+<td><code>5</code></td>
+<td>Maximum images extracted from a single search result document.</td>
+</tr>
+<tr>
+<td><code>MULTIMODAL_MAX_CONTENT_CHARS</code></td>
+<td><code>4000</code></td>
+<td>Maximum characters of text content displayed per document. Figures beyond this cutoff are still included as appended images.</td>
+</tr>
+<tr>
+<td><code>MULTIMODAL_CLASSIFY_IMAGES</code></td>
+<td><code>true</code></td>
+<td>When enabled, each candidate image is sent to the vision model for a KEEP/SKIP classification before being included in the context. Adds latency but significantly improves image relevance.</td>
+</tr>
+<tr>
+<td><code>MULTIMODAL_IMAGE_CLASSIFICATION_TIMEOUT_SECONDS</code></td>
+<td><code>15</code></td>
+<td>Timeout for each image classification call.</td>
+</tr>
+<tr>
+<td><code>MULTIMODAL_IMAGE_CLASSIFICATION_CONCURRENCY</code></td>
+<td><code>2</code></td>
+<td>How many image classification calls run in parallel.</td>
+</tr>
+<tr>
+<td><code>MULTIMODAL_VALIDATE_RESPONSE_IMAGES</code></td>
+<td><code>true</code></td>
+<td>When enabled, images the model chose to embed in its response are re-validated by the vision model. Decorative or irrelevant images are stripped from the final answer.</td>
+</tr>
+<tr>
+<td><code>MULTIMODAL_IMAGE_VALIDATION_TIMEOUT_SECONDS</code></td>
+<td><code>15</code></td>
+<td>Timeout for each post-response image validation call.</td>
+</tr>
+</tbody>
+</table>
+<p><em>Other relevant settings:</em></p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CHAT_HISTORY_MAX_MESSAGES</code></td>
+<td><code>10</code></td>
+<td>Number of recent conversation messages included as context for multi-turn conversations.</td>
+</tr>
+<tr>
+<td><code>MAX_COMPLETION_TOKENS</code></td>
+<td><code>4096</code></td>
+<td>Hard cap on output tokens for the main agent response.</td>
+</tr>
+<tr>
+<td><code>REASONING_EFFORT</code></td>
+<td><code>medium</code></td>
+<td>Reasoning effort level for models that support it (e.g., <code>gpt-5-mini</code>). Values: <code>low</code>, <code>medium</code>, <code>high</code>.</td>
+</tr>
+<tr>
+<td><code>OPENAI_API_VERSION</code></td>
+<td><code>2025-04-01-preview</code></td>
+<td>Azure OpenAI API version.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Setup</strong> — setting up multimodal orchestration assumes you have already completed the ingestion-side setup (Part 1 above) and have documents with figures indexed in Azure AI Search.</p>
+<p><strong>1) Set the orchestration strategy to multimodal.</strong></p>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>appconfig<span class="w"> </span>kv<span class="w"> </span><span class="nb">set</span><span class="w"> </span>--name<span class="w"> </span>&lt;your-appconfig-name&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--key<span class="w"> </span>AGENT_STRATEGY<span class="w"> </span>--value<span class="w"> </span>multimodal<span class="w"> </span>--label<span class="w"> </span>gpt-rag<span class="w"> </span>--yes
+</code></pre></div>
+<p><strong>2) Ensure <code>CHAT_DEPLOYMENT_NAME</code> points to a vision-capable model.</strong></p>
+<p>The orchestrator uses the same model for answering, intent classification, image classification, and image validation. It must support image input (e.g., <code>gpt-4o</code>, <code>gpt-4o-mini</code>).</p>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>appconfig<span class="w"> </span>kv<span class="w"> </span><span class="nb">set</span><span class="w"> </span>--name<span class="w"> </span>&lt;your-appconfig-name&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--key<span class="w"> </span>CHAT_DEPLOYMENT_NAME<span class="w"> </span>--value<span class="w"> </span>gpt-4o<span class="w"> </span>--label<span class="w"> </span>gpt-rag<span class="w"> </span>--yes
+</code></pre></div>
+<p><strong>3) Verify search index fields exist.</strong></p>
+<p>The multimodal orchestrator expects these fields in the search index (created by the ingestion pipeline when <code>MULTIMODAL=true</code>):</p>
+<ul>
+<li><code>contentVector</code> — text embedding vector</li>
+<li><code>captionVector</code> — image-caption embedding vector</li>
+<li><code>relatedImages</code> — array of blob URLs pointing to figure images</li>
+<li><code>imageCaptions</code> — concatenated caption text for all figures in the chunk</li>
+</ul>
+<p>If these fields are missing, re-run the ingestion pipeline with multimodal enabled.</p>
+<p><strong>4) (Optional) Tune image filtering behavior.</strong></p>
+<p>If the model is embedding too many irrelevant images, enable both classification and validation:</p>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>appconfig<span class="w"> </span>kv<span class="w"> </span><span class="nb">set</span><span class="w"> </span>--name<span class="w"> </span>&lt;your-appconfig-name&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--key<span class="w"> </span>MULTIMODAL_CLASSIFY_IMAGES<span class="w"> </span>--value<span class="w"> </span><span class="nb">true</span><span class="w"> </span>--label<span class="w"> </span>gpt-rag<span class="w"> </span>--yes
+
+az<span class="w"> </span>appconfig<span class="w"> </span>kv<span class="w"> </span><span class="nb">set</span><span class="w"> </span>--name<span class="w"> </span>&lt;your-appconfig-name&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--key<span class="w"> </span>MULTIMODAL_VALIDATE_RESPONSE_IMAGES<span class="w"> </span>--value<span class="w"> </span><span class="nb">true</span><span class="w"> </span>--label<span class="w"> </span>gpt-rag<span class="w"> </span>--yes
+</code></pre></div>
+<p>If latency is a concern and your documents contain mostly relevant figures, you can disable classification (<code>false</code>) and rely on the heuristic filter alone.</p>
+<p><strong>5) Redeploy the orchestrator container app</strong> to pick up the new configuration.</p>
+<p><strong>Customizing the system prompt</strong> — the multimodal strategy reads its system prompt from <code>src/prompts/multimodal/main.txt</code>. This prompt controls how the model handles citations, image embedding, language policy, and answer formatting. You can edit this file to adjust behavior — for example, changing citation style, adding domain-specific instructions, or modifying image embedding rules.</p>
+<p>The prompt is loaded once and cached for the lifetime of the strategy instance. Redeploying the container app picks up changes.</p>
+<p><strong>Troubleshooting</strong></p>
+<p><strong>Images not appearing in answers</strong>
+Verify that the search index contains <code>relatedImages</code> and <code>captionVector</code> fields with data. Check that <code>AGENT_STRATEGY</code> is set to <code>multimodal</code> (not <code>maf_lite</code> or another strategy). Confirm that <code>CHAT_DEPLOYMENT_NAME</code> points to a vision-capable model.</p>
+<p><strong>Too many irrelevant images in answers (cartoons, logos, decorative art)</strong>
+Enable both <code>MULTIMODAL_CLASSIFY_IMAGES</code> and <code>MULTIMODAL_VALIDATE_RESPONSE_IMAGES</code>. The classifier filters images before they reach the model; the validator catches any the model still chose to embed. You can also increase <code>MULTIMODAL_IMAGE_CLASSIFICATION_CONCURRENCY</code> to reduce the latency impact.</p>
+<p><strong>High latency on image-heavy documents</strong>
+Image classification and validation add LLM calls per image. Reduce <code>MULTIMODAL_MAX_IMAGES</code> or <code>MULTIMODAL_MAX_IMAGES_PER_DOC</code> to limit the number of images processed. You can also disable <code>MULTIMODAL_CLASSIFY_IMAGES</code> if your documents are mostly technical (the heuristic filter may be sufficient).</p>
+<p><strong>Model ignores images or lists filenames as plain text instead of embedding them</strong>
+This is a prompt-following issue. The system prompt in <code>src/prompts/multimodal/main.txt</code> contains detailed instructions for inline image embedding. If the model consistently ignores them, try a more capable model (e.g., switch from <code>gpt-4o-mini</code> to <code>gpt-4o</code>), or simplify the prompt instructions.</p>
+<p><strong>User profile not persisting across sessions</strong>
+The profile is stored in the Cosmos DB conversations container. Check that the container exists and that the orchestrator's managed identity has read/write access. Look for <code>post_flow_cleanup failed</code> in the logs.</p>
+<p><strong>Intent classifier always returns "question" (search runs on greetings)</strong>
+Check the logs for <code>intent_classification</code> entries. If the classifier is failing (timeout or error), it defaults to <code>question</code>. Ensure the model endpoint is reachable and the deployment supports low-token completions.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <div style="
+  background-color: var(--md-primary-fg-color);
+  color: var(--md-primary-bg-color);
+  text-align: center;
+  font-size: 0.95em;
+  padding: 1em 0;
+">
+  © 2025 GPT-RAG — powered by ❤️ and coffee ☕
+</div>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.icon", "content.iconify", "navigation.tracking", "toc.integrate", "content.code.annotate", "navigation.top"], "search": "../assets/javascripts/workers/search.07f07601.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.56dfad97.min.js"></script>
+      
+        <script src="../javascripts/source-facts-refresh.js"></script>
+      
+    
+  </body>
+</html>
