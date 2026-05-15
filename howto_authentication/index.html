@@ -1016,6 +1016,9 @@ metadata_security_rbac_scope
 <p><strong>Under Platform configurations &gt; Web, add the frontend redirect URI.</strong></p>
 <div class="highlight"><pre><span></span><code>https://&lt;YOUR-APP-URL&gt;/auth/oauth/azure-ad/callback
 </code></pre></div>
+<p>or</p>
+<div class="highlight"><pre><span></span><code>https://&lt;YOUR-APP-URL&gt;/.auth/login/aad/callback
+</code></pre></div>
 <p><strong>3) In the App Registration, go to Manage &gt; Expose an API.</strong> </p>
 <p>Set the Application ID URI to <code>api://&lt;OAUTH_AZURE_AD_CLIENT_ID&gt;</code>.</p>
 <p>Then create a delegated scope named <code>user_impersonation</code> and add this scope to the app.</p>
