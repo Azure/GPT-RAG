@@ -141,6 +141,12 @@ If users belong to many groups, Entra may emit an overage indicator instead of t
 https://<YOUR-APP-URL>/auth/oauth/azure-ad/callback
 ```
 
+or
+
+```
+https://<YOUR-APP-URL>/.auth/login/aad/callback
+```
+
 **3) In the App Registration, go to Manage > Expose an API.** 
 
 Set the Application ID URI to `api://<OAUTH_AZURE_AD_CLIENT_ID>`.
