@@ -1,5 +1,26 @@
 > 📌 [Check out what's coming next](https://github.com/orgs/Azure/projects/536/views/6)  (Azure org only)
 
+### May 2026
+
+**[Release 2.7.0](https://github.com/Azure/GPT-RAG/tree/v2.7.0) - AI Landing Zone v2.0 bump**
+
+The underlying Azure AI Landing Zone Bicep module has been upgraded from v1.0.7 to v2.0.2 — a major-version baseline update. Default behavior is unchanged for existing operators; all new capabilities are opt-in via `azd env set`.
+
+Highlights of what v2 brings to GPT-RAG operators:
+
+- **IP allow-listing** (`allowedIpRanges`): uniform CIDR allow-list applied across Storage, Key Vault, App Configuration, Container Registry, Cosmos DB, AI Search, and the AI Foundry storage account.
+- **BYO Private DNS zones / observability / hub-and-spoke** parameters for integration with an existing Azure Landing Zone hub.
+- **Pre-flight validation hook** that catches parameter contradictions before reaching ARM.
+- **Cosmos `enableAnalyticalStorage` fix** — the implicit `true` default that caused intermittent provisioning failures is gone; now an explicit opt-in via `enableCosmosAnalyticalStorage`.
+
+See the [v2-migration guide](https://github.com/Azure/bicep-ptn-aiml-landing-zone/blob/v2.0.0/docs/v2-migration.md) and the [parameterization reference](https://azure.github.io/AI-Landing-Zones/bicep/parameterization) for the full v2 surface. No GPT-RAG component bumps in this release.
+
+**[Release 2.6.7](https://github.com/Azure/GPT-RAG/tree/v2.6.7) - Per-conversation file uploads**
+
+Users can now upload files directly through the chat interface. Documents are persisted to a per-conversation storage container, chunked and indexed into Azure AI Search with a `conversationId` field, and retrieved by the orchestrator with a filter that mixes conversation-private content with shared/global content. Implemented across coordinated component releases: `gpt-rag-ingestion` v2.3.4, `gpt-rag-orchestrator` v2.6.3, `gpt-rag-ui` v2.3.2.
+
+---
+
 ### April 2026
 
 **[Release 2.6.4](https://github.com/Azure/GPT-RAG/tree/v2.6.4) - Ingestion Enhancements, Ingestion Admin Dashboard, and Cost Optimization**
