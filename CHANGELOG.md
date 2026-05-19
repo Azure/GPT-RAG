@@ -34,8 +34,10 @@ Validated end-to-end in `swedencentral` (subscription `mcaps-paulolacerda`) in t
 
 | Topology | `NETWORK_ISOLATION` | `DEPLOYMENT_MODE` | Result |
 |---|---|---|---|
-| Basic single-RG (Env-A) | `false` | `standalone` | ✅ provision + deploy + smoke test (chat + file upload) |
-| Network-isolated single-RG (Env-B) | `true` | `standalone` | ✅ provision + deploy; private endpoints created; container apps reached Running state |
+| Basic single-RG (Env-A) | `false` | `standalone` | ✅ provision (9m08s) + deploy (~14m) + smoke test (frontend HTTP 200, 3 container apps Running) |
+| Network-isolated single-RG (Env-B) | `true` | `standalone` | 🟡 infra provisions correctly (30+ resources including VNet, all private endpoints, AI Foundry-bundled Cosmos/KV/Storage); validation of the final AI Foundry account create step was **inconclusive** due to an Azure platform sync issue (ARM control plane never receives the `Succeeded` notification from the AIServices backend; Resource Health reports the account as `Available`). Observed in two consecutive runs. Not a v2.0.2 regression — the Bicep template emits valid ARM. |
+
+**Network-isolation caveat:** Operators deploying with `NETWORK_ISOLATION=true` in `swedencentral` may observe the `azd provision` step hanging on the `Microsoft.CognitiveServices/accounts/aif-<token>` deployment for an extended period (1h+) while the resource is in fact already created and healthy. If observed, verify the resource via Resource Health and consider switching region (e.g., `eastus2`) until the platform-side fix lands. Tracking via Azure Support is recommended for affected operators.
 
 Hub-and-spoke topology (a separate v2.0.0 capability) is **not** exercised by this release — operators integrating with an existing ALZ hub should follow the [hub-spoke runbook](https://github.com/Azure/bicep-ptn-aiml-landing-zone/blob/v2.0.0/docs/runbook-hub-spoke.md).
 
