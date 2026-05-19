@@ -13,6 +13,8 @@
     "appConfigLabel":                      { "value": "gpt-rag" },
 
     "networkIsolation":                    { "value": "${NETWORK_ISOLATION}" },
+    "allowedIpRanges":                     { "value": [] },
+    "deploymentMode":                      { "value": "${DEPLOYMENT_MODE=standalone}" },
     "useUAI":                              { "value": "${USE_UAI}" },
     "useCAppAPIKey":                       { "value": "${USE_CAPP_API_KEY}" },    
     "useZoneRedundancy":                   { "value": "false" },    
@@ -27,6 +29,7 @@
     "deployAppConfig":                      { "value": "true" },
     "deployAppInsights":                    { "value": "true" },
     "deployCosmosDb":                       { "value": "true" },
+    "enableCosmosAnalyticalStorage":        { "value": "${ENABLE_COSMOS_ANALYTICAL_STORAGE=false}" },
     "deployContainerApps":                  { "value": "true" },
     "deployContainerRegistry":              { "value": "true" },
     "deployContainerEnv":                   { "value": "true" },

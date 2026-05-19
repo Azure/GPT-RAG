@@ -67,6 +67,26 @@ for FILE_NAME in manifest.json main.parameters.json; do
 done
 
 ###############################################################################
+# AI Landing Zone v2.0.0+ preflight validation
+# https://github.com/Azure/bicep-ptn-aiml-landing-zone/blob/v2.0.0/scripts/Invoke-PreflightChecks.ps1
+###############################################################################
+
+PREFLIGHT_SCRIPT="$INFRA_DIR/scripts/Invoke-PreflightChecks.ps1"
+if [ -f "$PREFLIGHT_SCRIPT" ] && [ "$PREFLIGHT_SKIP" != "true" ] && [ "$PREFLIGHT_SKIP" != "1" ]; then
+    if command -v pwsh >/dev/null 2>&1; then
+        echo "${CYAN}Running landing-zone preflight checks...${NC}"
+        pwsh -NoProfile -File "$PREFLIGHT_SCRIPT"
+        PREFLIGHT_EXIT=$?
+        if [ $PREFLIGHT_EXIT -ne 0 ]; then
+            echo "${YELLOW}Preflight checks failed. Fix the reported parameter issues, or set PREFLIGHT_SKIP=true to bypass.${NC}"
+            exit $PREFLIGHT_EXIT
+        fi
+    else
+        echo "${CYAN}Skipping preflight checks (pwsh not installed; install PowerShell 7 to enable).${NC}"
+    fi
+fi
+
+###############################################################################
 # 1) Network Isolation Warning
 ###############################################################################
 
