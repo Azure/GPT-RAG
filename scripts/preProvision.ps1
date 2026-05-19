@@ -54,6 +54,12 @@ foreach ($fileName in @("manifest.json", "main.parameters.json")) {
     }
 }
 
+# Helper to match truthy values (1, true, t)
+function Test-Truthy($value) {
+    if (-not $value) { return $false }
+    return $value -match '^(1|true|t)$'
+}
+
 # AI Landing Zone v2.0.0+ preflight validation (parameter contradictions, BYO IDs, IP ranges, etc.)
 # https://github.com/Azure/bicep-ptn-aiml-landing-zone/blob/v2.0.0/scripts/Invoke-PreflightChecks.ps1
 $preflightScript = Join-Path $infraDir "scripts/Invoke-PreflightChecks.ps1"
@@ -64,12 +70,6 @@ if ((Test-Path $preflightScript) -and (-not (Test-Truthy $env:PREFLIGHT_SKIP))) 
         Write-Host "Preflight checks failed. Fix the reported parameter issues, or set PREFLIGHT_SKIP=true to bypass." -ForegroundColor Red
         exit $LASTEXITCODE
     }
-}
-
-# Helper to match truthy values (1, true, t)
-function Test-Truthy($value) {
-    if (-not $value) { return $false }
-    return $value -match '^(1|true|t)$'
 }
 
 # 1) Network Isolation Warning
