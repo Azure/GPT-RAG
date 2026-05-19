@@ -3,12 +3,25 @@
 All notable changes to this project will be documented in this file.  
 This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to [Semantic Versioning](https://semver.org/).
 
-## [v2.6.6] - 2026-04-20
+## [v2.6.7] - 2026-05-19
 ### Added
-- **Multimodal figure/image extraction for Content Understanding** ([Azure/GPT-RAG#446](https://github.com/Azure/GPT-RAG/issues/446)): When using Content Understanding as the document analysis backend (`USE_DOCUMENT_INTELLIGENCE=false`), the multimodal chunker now extracts figures from documents, uploads them to the `documents-images` blob container, generates captions using a vision-capable model, and populates `relatedImages`, `imageCaptions`, and `captionVector` fields in the search index — achieving full multimodal parity with the Document Intelligence path. Supports PDF (PyMuPDF page rendering with bounding-box crop), DOCX (`word/media/` ZIP extraction), and PPTX (`ppt/media/` ZIP extraction). The `ContentUnderstandingClient` now parses and returns figure and page metadata from the API response instead of discarding it. New dependencies: `PyMuPDF`, `python-docx`, `python-pptx`.
+- **Per-conversation file upload from the chat UI** ([#401](https://github.com/Azure/GPT-RAG/issues/401)): Users can now upload files directly through the GPT-RAG chat interface. Uploaded documents are persisted to the conversation-documents storage container (declared in v2.6.0) under conversations/<conversationId>/<recordId>/<filename>, chunked and indexed in Azure AI Search tagged with the per-chunk conversationId field (also declared in v2.6.0), and retrieved by the orchestrator with a conversationId eq '<cid>' or conversationId eq 'NaN' filter so retrieval mixes conversation-private documents with shared/global documents. Implemented across three coordinated component PRs:
+  - gpt-rag-ingestion [v2.3.4](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.3.4) ([#183](https://github.com/Azure/gpt-rag-ingestion/pull/183)): new POST /ingest-documents endpoint that authenticates via DATA_INGEST_APP_APIKEY, persists the original bytes, and indexes the chunks with camelCase conversationId.
+  - gpt-rag-orchestrator [v2.6.3](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.6.3) ([#188](https://github.com/Azure/gpt-rag-orchestrator/pull/188)): conversation-scoped retrieval filter across all strategies.
+  - gpt-rag-ui [v2.3.2](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.3.2) ([#51](https://github.com/Azure/gpt-rag-ui/pull/51)): Chainlit spontaneous_file_upload paperclip wired to the new ingestion endpoint, surfaced only when authentication is configured.
 
 ### Changed
-- Bumped `gpt-rag-ingestion` to `v2.3.3`.
+- Bumped gpt-rag-ui to 2.3.2.
+- Bumped gpt-rag-orchestrator to 2.6.3.
+- Bumped gpt-rag-ingestion to 2.3.4.
+
+## [v2.6.6] - 2026-04-20
+### Added
+- **Multimodal figure/image extraction for Content Understanding** ([Azure/GPT-RAG#446](https://github.com/Azure/GPT-RAG/issues/446)): When using Content Understanding as the document analysis backend (USE_DOCUMENT_INTELLIGENCE=false), the multimodal chunker now extracts figures from documents, uploads them to the documents-images blob container, generates captions using a vision-capable model, and populates 
+elatedImages, imageCaptions, and captionVector fields in the search index ΓÇö achieving full multimodal parity with the Document Intelligence path. Supports PDF (PyMuPDF page rendering with bounding-box crop), DOCX (word/media/ ZIP extraction), and PPTX (ppt/media/ ZIP extraction). The ContentUnderstandingClient now parses and returns figure and page metadata from the API response instead of discarding it. New dependencies: PyMuPDF, python-docx, python-pptx.
+
+### Changed
+- Bumped gpt-rag-ingestion to 2.3.3.
 
 ### Tested Service Versions
 
