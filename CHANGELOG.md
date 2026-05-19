@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.  
 This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to [Semantic Versioning](https://semver.org/).
 
+## [v2.6.6] - 2026-05-19
+### Added
+- **Per-conversation file upload from the chat UI** ([#401](https://github.com/Azure/GPT-RAG/issues/401)): Users can now upload files directly through the GPT-RAG chat interface. Uploaded documents are persisted to the new `conversation-documents` storage container (declared in v2.6.0) under `conversations/<conversationId>/<recordId>/<filename>`, chunked and indexed in Azure AI Search tagged with the per-chunk `conversationId` field (also declared in v2.6.0), and retrieved by the orchestrator with a `conversationId eq '<cid>' or conversationId eq 'NaN'` filter so retrieval mixes conversation-private documents with shared/global documents. Implemented across three coordinated component PRs:
+  - `gpt-rag-ingestion` [v2.3.4](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.3.4) ([#183](https://github.com/Azure/gpt-rag-ingestion/pull/183)): new `POST /ingest-documents` endpoint that authenticates via `DATA_INGEST_APP_APIKEY`, persists the original bytes, and indexes the chunks with camelCase `conversationId`.
+  - `gpt-rag-orchestrator` [v2.6.3](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.6.3) ([#188](https://github.com/Azure/gpt-rag-orchestrator/pull/188)): conversation-scoped retrieval filter across all strategies.
+  - `gpt-rag-ui` [v2.3.2](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.3.2) ([#51](https://github.com/Azure/gpt-rag-ui/pull/51)): Chainlit `spontaneous_file_upload` paperclip wired to the new ingestion endpoint, surfaced only when authentication is configured.
+
+### Changed
+- Bumped `gpt-rag-ui` to `v2.3.2`.
+- Bumped `gpt-rag-orchestrator` to `v2.6.3`.
+- Bumped `gpt-rag-ingestion` to `v2.3.4`.
+
 ## [v2.6.5] - 2026-04-18
 ### Fixed
 - **OpenTelemetry version pinning** (orchestrator): Pinned `azure-monitor-opentelemetry==1.8.7`, `azure-monitor-opentelemetry-exporter==1.0.0b49`, `opentelemetry-instrumentation-httpx==0.61b0`, and `opentelemetry-instrumentation-fastapi==0.61b0` in `requirements.txt`. Unpinned versions caused non-deterministic Docker builds where an older exporter (referencing the removed `LogData` class) could be paired with `opentelemetry-sdk>=1.39.0`, crashing the container on startup with `ImportError: cannot import name 'LogData' from 'opentelemetry.sdk._logs'`. ([#445](https://github.com/Azure/GPT-RAG/issues/445))
