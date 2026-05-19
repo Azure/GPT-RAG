@@ -949,6 +949,7 @@
 <p>Choose your preferred deployment method based on project requirements and environment constraints.</p>
 <blockquote>
 <p><strong>Note:</strong> You can change parameter values in <code>main.parameters.json</code> or set them with <code>azd env set</code> before running <code>azd provision</code>. This applies only to parameters that support environment variable substitution.</p>
+<p><strong>Underlying infrastructure:</strong> GPT-RAG provisions the <strong><a href="https://azure.github.io/AI-Landing-Zones/bicep/parameterization">Azure AI Landing Zone (AILZ) Bicep module</a></strong> as its infrastructure foundation. For the full list of parameters, opt-in features (IP allow-lists, BYO Private DNS / Log Analytics, hub-and-spoke integration, etc.), and the v2 migration path, see the <a href="https://azure.github.io/AI-Landing-Zones/bicep/parameterization">AILZ parameterization reference</a> and the <a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/blob/v2.0.0/docs/v2-migration.md">v2-migration guide</a>.</p>
 </blockquote>
 <h2 id="prerequisites">Prerequisites</h2>
 <p><strong>Required Permissions:</strong></p>

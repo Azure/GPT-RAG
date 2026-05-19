@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#april-2026" class="md-skip">
+        <a href="#may-2026" class="md-skip">
           Skip to content
         </a>
       
@@ -289,6 +289,15 @@
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#may-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      May 2026
+    </span>
+  </a>
+  
+</li>
       
         <li class="md-nav__item">
   <a href="#april-2026" class="md-nav__link">
@@ -940,6 +949,20 @@
 <blockquote>
 <p>📌 <a href="https://github.com/orgs/Azure/projects/536/views/6">Check out what's coming next</a>  (Azure org only)</p>
 </blockquote>
+<h3 id="may-2026">May 2026</h3>
+<p><strong><a href="https://github.com/Azure/GPT-RAG/tree/v2.7.0">Release 2.7.0</a> - AI Landing Zone v2.0 bump</strong></p>
+<p>The underlying Azure AI Landing Zone Bicep module has been upgraded from v1.0.7 to v2.0.2 — a major-version baseline update. Default behavior is unchanged for existing operators; all new capabilities are opt-in via <code>azd env set</code>.</p>
+<p>Highlights of what v2 brings to GPT-RAG operators:</p>
+<ul>
+<li><strong>IP allow-listing</strong> (<code>allowedIpRanges</code>): uniform CIDR allow-list applied across Storage, Key Vault, App Configuration, Container Registry, Cosmos DB, AI Search, and the AI Foundry storage account.</li>
+<li><strong>BYO Private DNS zones / observability / hub-and-spoke</strong> parameters for integration with an existing Azure Landing Zone hub.</li>
+<li><strong>Pre-flight validation hook</strong> that catches parameter contradictions before reaching ARM.</li>
+<li><strong>Cosmos <code>enableAnalyticalStorage</code> fix</strong> — the implicit <code>true</code> default that caused intermittent provisioning failures is gone; now an explicit opt-in via <code>enableCosmosAnalyticalStorage</code>.</li>
+</ul>
+<p>See the <a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/blob/v2.0.0/docs/v2-migration.md">v2-migration guide</a> and the <a href="https://azure.github.io/AI-Landing-Zones/bicep/parameterization">parameterization reference</a> for the full v2 surface. No GPT-RAG component bumps in this release.</p>
+<p><strong><a href="https://github.com/Azure/GPT-RAG/tree/v2.6.7">Release 2.6.7</a> - Per-conversation file uploads</strong></p>
+<p>Users can now upload files directly through the chat interface. Documents are persisted to a per-conversation storage container, chunked and indexed into Azure AI Search with a <code>conversationId</code> field, and retrieved by the orchestrator with a filter that mixes conversation-private content with shared/global content. Implemented across coordinated component releases: <code>gpt-rag-ingestion</code> v2.3.4, <code>gpt-rag-orchestrator</code> v2.6.3, <code>gpt-rag-ui</code> v2.3.2.</p>
+<hr />
 <h3 id="april-2026">April 2026</h3>
 <p><strong><a href="https://github.com/Azure/GPT-RAG/tree/v2.6.4">Release 2.6.4</a> - Ingestion Enhancements, Ingestion Admin Dashboard, and Cost Optimization</strong></p>
 <p><strong>Ingestion Admin Dashboard</strong></p>
