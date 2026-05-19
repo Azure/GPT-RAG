@@ -70,7 +70,7 @@
     "solutionStorageAccountName":            { "value": null },
 
     "vmAdminPassword":                       {"value": "$(secretOrRandomPassword)"},  
-    "vmSize":                                { "value": "Standard_D8s_v5" },
+    "vmSize":                                { "value": "${VM_SIZE=Standard_D2s_v3}" },
 
     "useCMK":                                { "value": "false" },
     "useExistingVNet":                       { "value": "${USE_EXISTING_VNET}" },  

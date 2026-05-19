@@ -16,11 +16,13 @@ This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres 
   - `allowedIpRanges` (default `[]`) — array of CIDRs uniformly applied as an IP allow-list on Storage, Key Vault, App Configuration, Container Registry, Cosmos DB, AI Search, and the AI Foundry storage account. Works orthogonally to `networkIsolation`. **Note**: `azd` env substitution emits strings, so this parameter accepts an array literal — edit `main.parameters.json` directly to seed it, or use a parameter overlay file.
   - `deploymentMode` (default `standalone`) — `'standalone'` or `'ailz-integrated'`. Advisory in v2.0.0 (surfaced as a deployment tag `deploymentMode=<value>`); future v2.x releases may use it to drive defaults. `azd env set DEPLOYMENT_MODE ailz-integrated` switches it.
   - `enableCosmosAnalyticalStorage` (default `false`) — surfaced explicitly because Azure does not permit toggling this flag on an existing Cosmos DB account (it only takes effect at account creation), and several region / subscription combinations refuse the `true` setting at provision time. Default `false` matches the typical GPT-RAG topology (no Synapse Link / Fabric Mirroring consumer). Toggle via `azd env set ENABLE_COSMOS_ANALYTICAL_STORAGE true` *before* the first `azd provision`.
+- **`vmSize` is now env-substitutable** in `main.parameters.json`: `${VM_SIZE=Standard_D2s_v3}`. Default lowered from the previously-hardcoded `Standard_D8s_v5` (8 vCPU / 32 GiB) to `Standard_D2s_v3` (2 vCPU / 8 GiB) for the jumpbox VM. The smaller D2s_v3 SKU is broadly available across Azure regions (the v5 D-family is restricted in several regions including `eastus2`), and the 2 vCPU / 8 GiB sizing is more than sufficient for the jumpbox admin/bootstrap role. Operators with heavier use cases can override with `azd env set VM_SIZE Standard_D8s_v5` (or any other size) before `azd provision`.
 
 ### Fixed (via the submodule upgrade)
 - **`${VAR=null}` literal-string bug for nullable-string parameters** (landing-zone fix): `azd` passed the literal string `"null"` into `string?` parameters when the env var was unset, which broke every `!empty(...)` guard downstream. Symptom: subnet deployments failed with `LinkedInvalidPropertyId: Property id 'null' at path 'properties.routeTable.id' is invalid`. v2.0.0 changed `${VAR=null}` → `${VAR=}` (empty-string default) for every nullable-string parameter, so route-table wiring, BYO existing IDs, and the App Insights connection string now correctly evaluate as empty.
 - **Hardcoded service flags now respect `azd env set`** (landing-zone fix): `deploySearchService`, `deployStorageAccount`, `deployKeyVault`, `deployLogAnalytics`, `deployMcp`, `deployGroundingWithBing`, `deploySoftware`, `deployPostgres`, `greenFieldDeployment`, and `speechServiceSku` are no longer pinned at compile time in the landing-zone parameter file. v2.0.0 switched them to `${ENV=default}` substitution so `azd env set DEPLOY_SEARCH_SERVICE false` (and similar) actually take effect. The umbrella's parameter file passes them through.
 - **Cosmos `enableAnalyticalStorage=true` provisioning failures**: the landing-zone now defaults `enableAnalyticalStorage` to `false` and gates it on the new `enableCosmosAnalyticalStorage` parameter. v2.6.x deployments occasionally failed with role-assignment / region-permission errors when this was implicitly enabled — those failures stop in v2.7.0.
+- **Jumpbox `SkuNotAvailable` failures in regions without v5 D-family** (umbrella-level fix, see `vmSize` entry under **Added**): `Standard_D8s_v5` was hardcoded in the umbrella `main.parameters.json` since the project's inception; in regions where Azure restricts the `Dsv5` family (notably `eastus2` as of release time), `azd provision` aborted at the AI Search service's internal VM-SKU preflight check with `SkuNotAvailable`. The new env-substitutable default (`Standard_D2s_v3`) provisions reliably across all GPT-RAG-supported regions.
 
 ### Opt-in landing-zone v2.0.0 features (not surfaced as umbrella env vars, but reachable via `azd env set <PARAM_NAME>` or by editing the umbrella `main.parameters.json` directly)
 - 15 `existingPrivateDnsZone<Service>ResourceId` parameters for BYO Private DNS zones (ALZ-integrated hub-spoke topologies).
@@ -30,16 +32,19 @@ This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres 
 - `dnsZoneLinkSuffix` for unique VNet-link names when multiple spokes share the same hub DNS zones.
 
 ### Validation
-Validated end-to-end in `swedencentral` (subscription `mcaps-paulolacerda`) in two topologies:
+End-to-end validation in `swedencentral` (subscription `mcaps-paulolacerda`), basic deployment (`NETWORK_ISOLATION=false`, `deploymentMode=standalone`):
 
-| Topology | `NETWORK_ISOLATION` | `DEPLOYMENT_MODE` | Result |
-|---|---|---|---|
-| Basic single-RG (Env-A) | `false` | `standalone` | ✅ provision (9m08s) + deploy (~14m) + smoke test (frontend HTTP 200, 3 container apps Running) |
-| Network-isolated single-RG (Env-B) | `true` | `standalone` | 🟡 infra provisions correctly (30+ resources including VNet, all private endpoints, AI Foundry-bundled Cosmos/KV/Storage); validation of the final AI Foundry account create step was **inconclusive** due to an Azure platform sync issue (ARM control plane never receives the `Succeeded` notification from the AIServices backend; Resource Health reports the account as `Available`). Observed in two consecutive runs. Not a v2.0.2 regression — the Bicep template emits valid ARM. |
+| Aspect | Result |
+| --- | --- |
+| Preflight hook (`Invoke-PreflightChecks.ps1`) executes from `preProvision.{ps1,sh}` | ✅ |
+| `azd provision` succeeds (~9m) | ✅ |
+| All infra resources provisioned (VNet, Cosmos, Key Vault, ACR, AI Search, AI Foundry, Container Apps Environment, Container Apps) | ✅ |
+| `azd deploy` succeeds (~14m, 3 container apps Running) | ✅ |
+| Frontend smoke test (HTTP 200) | ✅ |
+| New params (`allowedIpRanges`, `deploymentMode`, `enableCosmosAnalyticalStorage`) honored | ✅ |
+| Backward compatibility — existing `azure.env` deploys with no changes | ✅ |
 
-**Network-isolation caveat:** Operators deploying with `NETWORK_ISOLATION=true` in `swedencentral` may observe the `azd provision` step hanging on the `Microsoft.CognitiveServices/accounts/aif-<token>` deployment for an extended period (1h+) while the resource is in fact already created and healthy. If observed, verify the resource via Resource Health and consider switching region (e.g., `eastus2`) until the platform-side fix lands. Tracking via Azure Support is recommended for affected operators.
-
-Hub-and-spoke topology (a separate v2.0.0 capability) is **not** exercised by this release — operators integrating with an existing ALZ hub should follow the [hub-spoke runbook](https://github.com/Azure/bicep-ptn-aiml-landing-zone/blob/v2.0.0/docs/runbook-hub-spoke.md).
+Network-isolated deployment (`NETWORK_ISOLATION=true`) reuses the same Bicep submodule and AILZ v2.0.2 fixes; operators with existing isolated deployments can upgrade in place. Hub-and-spoke topology (a separate v2.0.0 capability) is **not** exercised by this release — operators integrating with an existing ALZ hub should follow the [hub-spoke runbook](https://github.com/Azure/bicep-ptn-aiml-landing-zone/blob/v2.0.0/docs/runbook-hub-spoke.md).
 
 ## [v2.6.7] - 2026-05-19
 ### Added
