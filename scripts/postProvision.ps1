@@ -329,33 +329,45 @@ Set-GptRagAppConfiguration -Endpoint (Get-RequiredEnvValue 'APP_CONFIG_ENDPOINT'
 #-------------------------------------------------------------------------------
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $env:PYTHONPATH = if ($env:PYTHONPATH) { "$repoRoot;$($env:PYTHONPATH)" } else { $repoRoot }
+$env:GPT_RAG_REPO_ROOT = $repoRoot
+Set-Location $repoRoot
+
+function Invoke-PythonModule {
+    param([Parameter(Mandatory = $true)][string]$ModuleName)
+    & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['GPT_RAG_REPO_ROOT']); runpy.run_module('$ModuleName', run_name='__main__')"
+}
 
 Write-Host "🐍 Checking Python venv support..."
 & python -c "import venv" 2>$null
-if ($LASTEXITCODE -ne 0) {
-    Write-Error @"
-The selected Python interpreter does not support 'venv'.
-Network-isolated post-provisioning requires a full Python installation with venv support.
-If this is the AI Landing Zone jumpbox Python, track/fix the upstream jumpbox Python contract:
-https://github.com/Azure/bicep-ptn-aiml-landing-zone/issues/67
-"@
-    exit 1
+$venvSupported = ($LASTEXITCODE -eq 0)
+if ($venvSupported) {
+    Write-Host "📦 Creating temporary venv..."
+    python -m venv --without-pip config/.venv_temp
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+    # Activate the venv
+    & config/.venv_temp/Scripts/Activate.ps1
+
+    Write-Host "⬇️ Manually bootstrapping pip..."
+    Invoke-WebRequest -Uri "https://bootstrap.pypa.io/get-pip.py" -UseBasicParsing |
+        Select-Object -ExpandProperty Content |
+        & python
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+} else {
+    Write-Host "⚠️ Python venv is unavailable; using the current Python interpreter and site-packages."
+    Write-Host "   This matches the AI Landing Zone jumpbox Python contract used by other solution accelerators."
+    & python -m pip --version
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Python pip is required for post-provisioning but is not available on the selected interpreter."
+        exit 1
+    }
 }
-
-Write-Host "📦 Creating temporary venv..."
-python -m venv --without-pip config/.venv_temp
-
-# Activate the venv
-& config/.venv_temp/Scripts/Activate.ps1
-
-Write-Host "⬇️ Manually bootstrapping pip..."
-Invoke-WebRequest -Uri "https://bootstrap.pypa.io/get-pip.py" -UseBasicParsing |
-    Select-Object -ExpandProperty Content |
-    & python
 
 Write-Host "⬇️ Installing requirements..."
 & python -m pip install --upgrade pip
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 & python -m pip install -r config/requirements.txt
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 #-------------------------------------------------------------------------------
 # 1) AI Foundry Setup
@@ -363,7 +375,7 @@ Write-Host "⬇️ Installing requirements..."
 if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
     Write-Host "`n📑 AI Foundry Setup..."
     Write-Host "🚀 Running config.aifoundry.setup..."
-    & python -m config.aifoundry.setup
+    Invoke-PythonModule -ModuleName 'config.aifoundry.setup'
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     Write-Host "✅ AI Foundry setup script finished."
 } else {
@@ -376,7 +388,7 @@ if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
 if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
     Write-Host "`n🔍 ContainerApp setup..."
     Write-Host "🚀 Running config.containerapps.setup..."
-    & python -m config.containerapps.setup
+    Invoke-PythonModule -ModuleName 'config.containerapps.setup'
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     Write-Host "✅ Container Apps setup script finished."
 } else {
@@ -389,7 +401,7 @@ if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
 if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
     Write-Host "🔍 AI Search setup..."
     Write-Host "🚀 Running config.search.setup..."
-    & python -m config.search.setup
+    Invoke-PythonModule -ModuleName 'config.search.setup'
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     Write-Host "✅ Search setup script finished."
 } else {
