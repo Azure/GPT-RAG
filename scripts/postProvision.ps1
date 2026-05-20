@@ -31,9 +31,19 @@ if ($env:NETWORK_ISOLATION -and $env:NETWORK_ISOLATION.ToLower() -eq 'true') {
 
     $runningFromJumpbox = $env:RUN_FROM_JUMPBOX -and $env:RUN_FROM_JUMPBOX.ToLower() -eq 'true'
     if (-not $runningFromJumpbox) {
-        $answer = Read-Host "Are you running this script from inside the VNet or via VPN? [Y/n]"
-        if ($answer.ToLower() -notmatch '^(y|yes)$') {
-            Write-Host "❌ Please run this script from inside the VNet or with VPN access. Exiting."
+        if ($env:RUN_FROM_JUMPBOX -and $env:RUN_FROM_JUMPBOX.ToLower() -match '^(false|0|no|skip)$') {
+            Write-Host "⏭️ RUN_FROM_JUMPBOX=$($env:RUN_FROM_JUMPBOX); skipping data-plane post-provisioning."
+            exit 0
+        }
+        if ([Environment]::UserInteractive -and -not [Console]::IsInputRedirected) {
+            $answer = Read-Host "Are you running this script from inside the VNet or via VPN? [Y/n]"
+            if ($answer.ToLower() -notmatch '^(y|yes)$') {
+                Write-Host "❌ Please run this script from inside the VNet or with VPN access. Exiting."
+                exit 0
+            }
+        } else {
+            Write-Host "⏭️ Non-interactive shell outside the VNet; skipping data-plane post-provisioning."
+            Write-Host "   Re-run from the jumpbox with RUN_FROM_JUMPBOX=true."
             exit 0
         }
     }
