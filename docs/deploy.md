@@ -86,7 +86,7 @@ azd auth login
 **Provision Infrastructure**
 
 ```
-azd env set AZURE_SKIP_NETWORK_ISOLATION_WARNING true   # optional for automation
+azd env set AZURE_SKIP_NETWORK_ISOLATION_WARNING true   # optional for automation; skips the local post-provision prompt
 azd provision
 ```
 
