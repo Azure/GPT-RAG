@@ -1008,7 +1008,7 @@ azd auth login
 <p>Add <code>--tenant</code> for <code>az</code> or <code>--tenant-id</code> for <code>azd</code> if you want a specific tenant.</p>
 </blockquote>
 <p><strong>Provision Infrastructure</strong></p>
-<div class="highlight"><pre><span></span><code>azd env set AZURE_SKIP_NETWORK_ISOLATION_WARNING true   # optional for automation
+<div class="highlight"><pre><span></span><code>azd env set AZURE_SKIP_NETWORK_ISOLATION_WARNING true   # optional for automation; skips the local post-provision prompt
 azd provision
 </code></pre></div>
 <p><strong>Post-Provision Configuration</strong></p>
