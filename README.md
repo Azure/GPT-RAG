@@ -23,6 +23,14 @@ For full documentation, visit the **[GPT-RAG documentation site](https://azure.g
 
 GPT-RAG is built on a Zero-Trust architecture to ensure that all components operate within a controlled, isolated environment. Network access is tightly governed, and communication between services follows least-privilege principles.
 
+## Network-isolated deployments
+
+When deploying with `NETWORK_ISOLATION=true`, run `azd provision` from your workstation, then run `scripts/postProvision.ps1` and `azd deploy` from the provisioned jumpbox or another host with VNet access. The deployment hook now treats `NETWORK_ISOLATION` as the source of truth: workstation deploys are blocked for isolated environments unless `RUN_FROM_JUMPBOX=true` is set inside the VNet.
+
+Component image builds use Azure Container Registry remote builds in isolated environments, so Docker does not need to be installed on the jumpbox. Set `ACR_TASK_AGENT_POOL` to the landing-zone ACR task agent pool name (for example `build-pool`) before deploying from the jumpbox.
+
+For unattended provisioning, set `AZURE_SKIP_NETWORK_ISOLATION_WARNING=true` to skip only the provisioning warning prompt. Do not use `AZURE_ZERO_TRUST`; it is no longer part of the deployment flow.
+
 ## Architecture
 
 ![Zero Trust Architecture](media/architecture_zero_trust.png)
