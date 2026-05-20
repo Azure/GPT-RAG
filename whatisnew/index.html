@@ -958,6 +958,7 @@
 <li><strong>BYO Private DNS zones / observability / hub-and-spoke</strong> parameters for integration with an existing Azure Landing Zone hub.</li>
 <li><strong>Pre-flight validation hook</strong> that catches parameter contradictions before reaching ARM.</li>
 <li><strong>Cosmos <code>enableAnalyticalStorage</code> fix</strong> — the implicit <code>true</code> default that caused intermittent provisioning failures is gone; now an explicit opt-in via <code>enableCosmosAnalyticalStorage</code>.</li>
+<li><strong>Network-isolated deployment procedure clarified</strong> — workstations run only <code>azd provision</code>; <code>postProvision</code> and <code>azd deploy</code> run from the jumpbox/VNet with <code>RUN_FROM_JUMPBOX=true</code>, using ACR remote builds so Docker is not required on the VM.</li>
 </ul>
 <p>See the <a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/blob/v2.0.0/docs/v2-migration.md">v2-migration guide</a> and the <a href="https://azure.github.io/AI-Landing-Zones/bicep/parameterization">parameterization reference</a> for the full v2 surface. No GPT-RAG component bumps in this release.</p>
 <p><strong><a href="https://github.com/Azure/GPT-RAG/tree/v2.6.7">Release 2.6.7</a> - Per-conversation file uploads</strong></p>

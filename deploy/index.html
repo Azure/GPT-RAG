@@ -992,6 +992,12 @@ azd provision
 <p>Enable network isolation in your environment:</p>
 <div class="highlight"><pre><span></span><code>azd env set NETWORK_ISOLATION true
 </code></pre></div>
+<p>Optional v2 parameters can be set before provisioning:</p>
+<div class="highlight"><pre><span></span><code>azd<span class="w"> </span>env<span class="w"> </span><span class="nb">set</span><span class="w"> </span>DEPLOYMENT_MODE<span class="w"> </span>standalone
+azd<span class="w"> </span>env<span class="w"> </span><span class="nb">set</span><span class="w"> </span>VM_SIZE<span class="w"> </span>Standard_D2s_v3
+azd<span class="w"> </span>env<span class="w"> </span><span class="nb">set</span><span class="w"> </span>ENABLE_COSMOS_ANALYTICAL_STORAGE<span class="w"> </span><span class="nb">false</span>
+</code></pre></div>
+<p><code>ALLOWED_IP_RANGES</code> is also available for CIDR allow-listing, but because it is an array parameter, prefer editing <code>main.parameters.json</code> or using a parameter overlay rather than storing a complex array in the azd environment.</p>
 <p>Make sure you’re signed in with your Azure user account:</p>
 <div class="highlight"><pre><span></span><code>az login
 azd auth login
@@ -1000,18 +1006,11 @@ azd auth login
 <p>Add <code>--tenant</code> for <code>az</code> or <code>--tenant-id</code> for <code>azd</code> if you want a specific tenant.</p>
 </blockquote>
 <p><strong>Provision Infrastructure</strong></p>
-<div class="highlight"><pre><span></span><code>azd provision
+<div class="highlight"><pre><span></span><code>azd env set AZURE_SKIP_NETWORK_ISOLATION_WARNING true   # optional for automation
+azd provision
 </code></pre></div>
 <p><strong>Post-Provision Configuration</strong></p>
-<p>After provisioning completes, you'll be prompted whether your machine has VNet access.</p>
-<ul>
-<li>If you have VNet access:</li>
-</ul>
-<p>Answer <code>Y</code> when prompted. The post-provision script will run automatically and complete the configuration.</p>
-<ul>
-<li>If you don't have VNet access:</li>
-</ul>
-<p>Answer <code>N</code> when prompted. You'll need to use the provisioned Jumpbox VM to complete the post-provision steps.</p>
+<p>With <code>NETWORK_ISOLATION=true</code>, data-plane configuration must run from inside the VNet. A workstation should only run <code>azd provision</code>; if it does not have VNet/VPN access, the local post-provision hook will skip data-plane work and tell you to continue from the jumpbox.</p>
 <p>Using the Jumpbox VM</p>
 <p>1) <strong>Reset the VM password</strong> in the Azure Portal (required on first access if not set in deployment parameters):</p>
 <ul>
@@ -1028,7 +1027,8 @@ azd auth login
 </blockquote>
 <p>4) <strong>Run the post-provision script:</strong></p>
 <p>PowerShell:
-   <div class="highlight"><pre><span></span><code><span class="nb">cd </span><span class="n">c</span><span class="p">:\</span><span class="n">github</span><span class="p">\</span><span class="n">gpt-rag</span>
+   <div class="highlight"><pre><span></span><code><span class="nb">cd </span><span class="n">C</span><span class="p">:\</span><span class="n">github</span><span class="p">\</span><span class="n">GPT-RAG</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">RUN_FROM_JUMPBOX</span> <span class="n">true</span>
 <span class="p">.\</span><span class="n">scripts</span><span class="p">\</span><span class="n">postProvision</span><span class="p">.</span><span class="n">ps1</span>
 </code></pre></div></p>
 <p>Bash:
@@ -1041,13 +1041,18 @@ azd auth login
 </blockquote>
 <h2 id="deploy-gpt-rag-services">Deploy GPT-RAG Services</h2>
 <blockquote>
-<p><strong>Note:</strong> For Zero Trust deployments with network isolation, ensure you have VNet connectivity either through the Jumpbox VM or via VPN before deploying services. If using the Jumpbox VM, the repositories are located in the <code>c:\github</code> directory.</p>
+<p><strong>Note:</strong> For Zero Trust deployments with network isolation, deploy services from the jumpbox or another host with VNet connectivity. If using the jumpbox VM, the repositories are located in the <code>C:\github</code> directory.</p>
 </blockquote>
 <p>Once the GPT-RAG infrastructure is provisioned, you can deploy the services.</p>
 <p>To deploy <strong>all services at once</strong>, navigate to the <code>gpt-rag</code> directory (with azd environment configured) and run:</p>
-<div class="highlight"><pre><span></span><code>azd deploy
+<div class="highlight"><pre><span></span><code><span class="nb">cd </span><span class="n">C</span><span class="p">:\</span><span class="n">github</span><span class="p">\</span><span class="n">GPT-RAG</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">RUN_FROM_JUMPBOX</span> <span class="n">true</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">ACR_TASK_AGENT_POOL</span> <span class="n">build-pool</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">BUILD_MODE</span> <span class="n">acr-task</span>
+<span class="n">azd</span> <span class="n">deploy</span>
 </code></pre></div>
-<p>This command deploys each service in sequence.</p>
+<p>This command deploys each service in sequence. Docker is not required on the jumpbox for network-isolated deployments; component scripts use Azure Container Registry remote builds (<code>az acr build</code>) against the private ACR task agent pool.</p>
+<p>The deploy hook uses <code>NETWORK_ISOLATION</code> as the source of truth. When <code>NETWORK_ISOLATION=true</code>, <code>azd deploy</code> fails fast unless it is running from the VNet with <code>RUN_FROM_JUMPBOX=true</code>; the older <code>AZURE_ZERO_TRUST</code> variable is not used.</p>
 <p>If you prefer to <strong>deploy a single service</strong>, for example, when updating only that service, you can deploy it individually. Below is an example using the orchestrator service. The same approach applies to other services (frontend, dataingest, mcp).</p>
 <h3 id="deploy-individual-services">Deploy Individual Services</h3>
 <p>Make sure you're logged in to Azure:</p>
