@@ -965,17 +965,20 @@
 <li><a href="https://www.python.org/downloads/release/python-3120/">Python 3.12</a></li>
 </ul>
 <h2 id="basic-deployment">Basic Deployment</h2>
-<p>Quick setup for demos without network isolation.</p>
+<p>Quick setup for demos without network isolation. In this mode, the workstation can run the full flow: provision, post-provision configuration, and service deployment.</p>
 <div class="highlight"><pre><span></span><code>azd init -t azure/gpt-rag
 az login
 azd auth login
+azd env set NETWORK_ISOLATION false
 azd provision
+azd deploy
 </code></pre></div>
 <blockquote>
 <p>Add <code>--tenant</code> for <code>az</code> or <code>--tenant-id</code> for <code>azd</code> if you want a specific tenant.</p>
 </blockquote>
 <p><code>azd provision</code> runs GPT-RAG preflight checks before Azure Resource Manager deployment starts. These checks validate the selected region, jumpbox VM SKU restrictions, provider/location support for AI Search, Cosmos DB, Container Apps, and AI Foundry/Cognitive Services, and Azure OpenAI model quota for the configured deployments. If model quota is insufficient, the hook fails early and suggests candidate regions when possible.</p>
 <p>Some transient Azure capacity failures are not exposed by reliable pre-create APIs. For example, Cosmos DB can still fail later with regional high-demand <code>ServiceUnavailable</code>; the preflight reports this limitation explicitly. Use <code>GPT_RAG_REGIONAL_PREFLIGHT_SKIP=true</code> only to bypass GPT-RAG regional checks, or <code>PREFLIGHT_SKIP=true</code> to bypass all preflight hooks.</p>
+<p>For the basic flow, the <code>postProvision</code> hook runs locally after <code>azd provision</code> and configures GPT-RAG data-plane resources such as App Configuration and search setup. Then <code>azd deploy</code> deploys the frontend, orchestrator, and ingestion services.</p>
 <p>Demo video:</p>
 <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; margin: 0 auto 20px auto; border-radius: 8px;">
   <iframe src="https://www.youtube.com/embed/nZMDtaDQuP4?rel=0&modestbranding=1" 
@@ -990,6 +993,34 @@ azd provision
 
 <h2 id="zero-trust-deployment">Zero Trust Deployment</h2>
 <p>For deployments that <strong>require network isolation</strong>.</p>
+<p>Network-isolated deployments use a two-host flow:</p>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Where to run</th>
+<th>Command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Provision infrastructure</td>
+<td>Workstation</td>
+<td><code>azd provision</code></td>
+</tr>
+<tr>
+<td>Configure data-plane resources</td>
+<td>Jumpbox or VNet-connected host</td>
+<td><code>scripts/postProvision.ps1</code></td>
+</tr>
+<tr>
+<td>Deploy services</td>
+<td>Jumpbox or VNet-connected host</td>
+<td><code>azd deploy</code></td>
+</tr>
+</tbody>
+</table>
+<p>Do not run <code>azd deploy</code> from the workstation when <code>NETWORK_ISOLATION=true</code>. The deploy hook blocks that path because private resources and the private ACR build pool are reachable only from inside the VNet.</p>
 <p><strong>Before Provisioning</strong></p>
 <p>Enable network isolation in your environment:</p>
 <div class="highlight"><pre><span></span><code>azd env set NETWORK_ISOLATION true
@@ -1049,6 +1080,7 @@ azd provision
 <p>To deploy <strong>all services at once</strong>, navigate to the <code>gpt-rag</code> directory (with azd environment configured) and run:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd </span><span class="n">C</span><span class="p">:\</span><span class="n">github</span><span class="p">\</span><span class="n">GPT-RAG</span>
 <span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">RUN_FROM_JUMPBOX</span> <span class="n">true</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">NETWORK_ISOLATION</span> <span class="n">true</span>
 <span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">ACR_TASK_AGENT_POOL</span> <span class="n">build-pool</span>
 <span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">BUILD_MODE</span> <span class="n">acr-task</span>
 <span class="n">azd</span> <span class="n">deploy</span>
