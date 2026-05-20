@@ -3,11 +3,6 @@
 try { [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false) } catch {}
 $ProgressPreference = 'SilentlyContinue'   # hide PS progress bars
 
-if ($env:AZURE_ZERO_TRUST -eq "TRUE") {
-  $c = Read-Host -Prompt "Zero Trust enabled. Confirm resources are reachable (VM+Bastion)? [Y/n]"
-  if ($c -ne "Y" -and $c -ne "y" -and $c) { exit 0 }
-}
-
 function Docker-Ready {
   try {
     $null = & docker info 2>$null
@@ -115,6 +110,12 @@ foreach ($prop in $globalEnv.PSObject.Properties) {
 }
 
 $networkIsolation = "$($globalEnv.NETWORK_ISOLATION)".ToLowerInvariant() -eq 'true'
+$runningFromJumpbox = "$($env:RUN_FROM_JUMPBOX)".ToLowerInvariant() -eq 'true'
+if ($networkIsolation -and -not $runningFromJumpbox) {
+  Write-Error "NETWORK_ISOLATION=true deployments must run from the jumpbox/VNet. Provision from the workstation, then run azd deploy from the jumpbox with RUN_FROM_JUMPBOX=true."
+  exit 4
+}
+
 if (-not (Docker-Ready)) {
   if ($networkIsolation -or $globalEnv.ACR_TASK_AGENT_POOL) {
     Write-Host "Docker is not available; component deploys will use ACR remote builds." -ForegroundColor Yellow

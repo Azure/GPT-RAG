@@ -11,20 +11,6 @@ green()  { printf "\033[32m%s\033[0m\n" "$*"; }
 yellow() { printf "\033[33m%s\033[0m\n" "$*"; }
 red()    { printf "\033[31m%s\033[0m\n" "$*"; }
 
-# ---------- Zero Trust prompt ----------
-if [ "${AZURE_ZERO_TRUST:-}" = "TRUE" ]; then
-  read -r -p "Zero Trust enabled. Confirm resources are reachable (VM+Bastion)? [Y/n] " c
-  if [ -n "$c" ] && [ "$c" != "Y" ] && [ "$c" != "y" ]; then
-    exit 0
-  fi
-fi
-
-# ---------- Docker preflight (hard stop with exact message) ----------
-if ! docker info >/dev/null 2>&1; then
-  echo "Docker daemon is not running. Start Docker Desktop and try again"
-  exit 11
-fi
-
 # ---------- Helpers ----------
 find_repo_root() {
   local start="$1"
@@ -108,6 +94,21 @@ dot_azure="$repo_root/.azure"
 # ---------- Global env & RG early check ----------
 global_rg="$(get_azd_value "$repo_root" "AZURE_RESOURCE_GROUP")"
 global_sub="$(get_azd_value "$repo_root" "AZURE_SUBSCRIPTION_ID")"
+network_isolation="$(get_azd_value "$repo_root" "NETWORK_ISOLATION" | tr '[:upper:]' '[:lower:]')"
+acr_task_agent_pool="$(get_azd_value "$repo_root" "ACR_TASK_AGENT_POOL")"
+
+if [ "$network_isolation" = "true" ] && [ "$(printf "%s" "${RUN_FROM_JUMPBOX:-}" | tr '[:upper:]' '[:lower:]')" != "true" ]; then
+  red "NETWORK_ISOLATION=true deployments must run from the jumpbox/VNet. Provision from the workstation, then run azd deploy from the jumpbox with RUN_FROM_JUMPBOX=true."
+  exit 4
+fi
+
+if ! docker info >/dev/null 2>&1; then
+  if [ "$network_isolation" = "true" ] || [ -n "$acr_task_agent_pool" ]; then
+    yellow "Docker is not available; component deploys will use ACR remote builds."
+  else
+    yellow "Docker daemon is not running; component deploy scripts will fall back to ACR remote builds where supported."
+  fi
+fi
 
 [ -n "$global_rg" ] || { red "AZURE_RESOURCE_GROUP not found in env."; exit 2; }
 if ! rg_exists "$global_rg" "${global_sub:-}"; then
