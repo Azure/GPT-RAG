@@ -15,12 +15,6 @@ function Docker-Ready {
   } catch { return $false }
 }
 
-# Hard preflight: require Docker daemon
-if (-not (Docker-Ready)) {
-  Write-Host "Docker daemon is not running. Start Docker Desktop and try again"
-  exit 11
-}
-
 function Find-RepoRoot([string]$start) {
   $p = (Resolve-Path $start).Path
   while ($true) {
@@ -110,6 +104,24 @@ $dotAzure   = Join-Path $repoRoot '.azure'
 $globalEnv  = Get-AzdEnv -projectPath $repoRoot
 $globalRG   = $globalEnv.AZURE_RESOURCE_GROUP
 $globalSub  = $globalEnv.AZURE_SUBSCRIPTION_ID
+
+# Make azd outputs available to component deploy scripts. In network-isolated
+# deployments the jumpbox intentionally has no Docker, so components need
+# ACR_TASK_AGENT_POOL/NETWORK_ISOLATION to select remote ACR builds.
+foreach ($prop in $globalEnv.PSObject.Properties) {
+  if ($null -ne $prop.Value -and "$($prop.Value)" -ne '') {
+    Set-Item -Path "Env:$($prop.Name)" -Value "$($prop.Value)"
+  }
+}
+
+$networkIsolation = "$($globalEnv.NETWORK_ISOLATION)".ToLowerInvariant() -eq 'true'
+if (-not (Docker-Ready)) {
+  if ($networkIsolation -or $globalEnv.ACR_TASK_AGENT_POOL) {
+    Write-Host "Docker is not available; component deploys will use ACR remote builds." -ForegroundColor Yellow
+  } else {
+    Write-Host "Docker daemon is not running; component deploy scripts will fall back to ACR remote builds where supported." -ForegroundColor Yellow
+  }
+}
 
 # Global RG check once (fail early)
 if (-not $globalRG) { Write-Error "AZURE_RESOURCE_GROUP not found in env."; exit 2 }

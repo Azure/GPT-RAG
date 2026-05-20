@@ -24,15 +24,18 @@ Write-Host ""
 Write-Host ""
 if ($env:NETWORK_ISOLATION -and $env:NETWORK_ISOLATION.ToLower() -eq 'true') {
     Write-Host "🔒 Zero Trust enabled."
-    Write-Host "🚧 NOTE: If app config failed, run the azd provision again - this is due to token timeout restrictions."
     Write-Host "Access to Azure resources is restricted to the VNet."
     Write-Host "Ensure you run scripts/postProvision.ps1 from within the VNet."
     Write-Host "If you are using a local machine, make sure you have a VPN connection to the VNet."
     Write-Host "You can also use the Test VM to access the environment and complete the setup."
-    $answer = Read-Host "Are you running this script from inside the VNet or via VPN? [Y/n]"
-    if ($answer.ToLower() -notmatch '^(y|yes)$') {
-        Write-Host "❌ Please run this script from inside the VNet or with VPN access. Exiting."
-        exit 0
+
+    $runningFromJumpbox = $env:RUN_FROM_JUMPBOX -and $env:RUN_FROM_JUMPBOX.ToLower() -eq 'true'
+    if (-not $runningFromJumpbox) {
+        $answer = Read-Host "Are you running this script from inside the VNet or via VPN? [Y/n]"
+        if ($answer.ToLower() -notmatch '^(y|yes)$') {
+            Write-Host "❌ Please run this script from inside the VNet or with VPN access. Exiting."
+            exit 0
+        }
     }
 } else {
     Write-Host "🚧 Provisioning basic architecture."
@@ -59,12 +62,28 @@ foreach ($v in $requiredVars) {
     if (-not $val) { $missing += $v; Write-Host "  $v=<missing>" -ForegroundColor Yellow } else { Write-Host "  $v=$val" }
 }
 if ($missing.Count -gt 0) {
-    Write-Host "⚠️  Missing required variables: $($missing -join ', '). Skipping configuration steps that depend on them." -ForegroundColor Yellow
+    Write-Error "Missing required variables: $($missing -join ', ')."
+    exit 1
 }
 
 #-------------------------------------------------------------------------------
 # Setup Python environment
 #-------------------------------------------------------------------------------
+$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+$env:PYTHONPATH = if ($env:PYTHONPATH) { "$repoRoot;$($env:PYTHONPATH)" } else { $repoRoot }
+
+Write-Host "🐍 Checking Python venv support..."
+& python -c "import venv" 2>$null
+if ($LASTEXITCODE -ne 0) {
+    Write-Error @"
+The selected Python interpreter does not support 'venv'.
+Network-isolated post-provisioning requires a full Python installation with venv support.
+If this is the AI Landing Zone jumpbox Python, track/fix the upstream jumpbox Python contract:
+https://github.com/Azure/bicep-ptn-aiml-landing-zone/issues/67
+"@
+    exit 1
+}
+
 Write-Host "📦 Creating temporary venv..."
 python -m venv --without-pip config/.venv_temp
 
@@ -85,13 +104,10 @@ Write-Host "⬇️ Installing requirements..."
 #-------------------------------------------------------------------------------
 if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
     Write-Host "`n📑 AI Foundry Setup..."
-    try {
-        Write-Host "🚀 Running config.aifoundry.setup..."
-        & python -m config.aifoundry.setup
-        Write-Host "✅ AI Foundry setup script finished."
-    } catch {
-        Write-Host "❗ Error during AI Foundry setup. Skipping it."
-    }
+    Write-Host "🚀 Running config.aifoundry.setup..."
+    & python -m config.aifoundry.setup
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    Write-Host "✅ AI Foundry setup script finished."
 } else {
     Write-Host "⏭️  Skipping AI Foundry setup (missing APP_CONFIG_ENDPOINT)."
 }
@@ -101,13 +117,10 @@ if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
 #-------------------------------------------------------------------------------
 if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
     Write-Host "`n🔍 ContainerApp setup..."
-    try {
-        Write-Host "🚀 Running config.containerapps.setup..."
-        & python -m config.containerapps.setup
-        Write-Host "✅ Container Apps setup script finished."
-    } catch {
-        Write-Host "❗ Error during Container Apps setup. Skipping it."
-    }
+    Write-Host "🚀 Running config.containerapps.setup..."
+    & python -m config.containerapps.setup
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    Write-Host "✅ Container Apps setup script finished."
 } else {
     Write-Host "⏭️  Skipping Container Apps setup (missing APP_CONFIG_ENDPOINT)."
 }
@@ -117,13 +130,10 @@ if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
 #-------------------------------------------------------------------------------
 if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
     Write-Host "🔍 AI Search setup..."
-    try {
-        Write-Host "🚀 Running config.search.setup..."
-        & python -m config.search.setup
-        Write-Host "✅ Search setup script finished."
-    } catch {
-        Write-Host "❗ Error during Search setup. Skipping it."
-    }
+    Write-Host "🚀 Running config.search.setup..."
+    & python -m config.search.setup
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    Write-Host "✅ Search setup script finished."
 } else {
     Write-Host "⏭️  Skipping Search setup (missing APP_CONFIG_ENDPOINT)."
 }
