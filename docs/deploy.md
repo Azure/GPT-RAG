@@ -22,13 +22,15 @@ Choose your preferred deployment method based on project requirements and enviro
 
 ## Basic Deployment
 
-Quick setup for demos without network isolation.
+Quick setup for demos without network isolation. In this mode, the workstation can run the full flow: provision, post-provision configuration, and service deployment.
 
 ```
 azd init -t azure/gpt-rag
 az login
 azd auth login
+azd env set NETWORK_ISOLATION false
 azd provision
+azd deploy
 ```
 
 > Add `--tenant` for `az` or `--tenant-id` for `azd` if you want a specific tenant.
@@ -36,6 +38,8 @@ azd provision
 `azd provision` runs GPT-RAG preflight checks before Azure Resource Manager deployment starts. These checks validate the selected region, jumpbox VM SKU restrictions, provider/location support for AI Search, Cosmos DB, Container Apps, and AI Foundry/Cognitive Services, and Azure OpenAI model quota for the configured deployments. If model quota is insufficient, the hook fails early and suggests candidate regions when possible.
 
 Some transient Azure capacity failures are not exposed by reliable pre-create APIs. For example, Cosmos DB can still fail later with regional high-demand `ServiceUnavailable`; the preflight reports this limitation explicitly. Use `GPT_RAG_REGIONAL_PREFLIGHT_SKIP=true` only to bypass GPT-RAG regional checks, or `PREFLIGHT_SKIP=true` to bypass all preflight hooks.
+
+For the basic flow, the `postProvision` hook runs locally after `azd provision` and configures GPT-RAG data-plane resources such as App Configuration and search setup. Then `azd deploy` deploys the frontend, orchestrator, and ingestion services.
 
 Demo video:
 
@@ -53,6 +57,16 @@ Demo video:
 ## Zero Trust Deployment
 
 For deployments that **require network isolation**.
+
+Network-isolated deployments use a two-host flow:
+
+| Phase | Where to run | Command |
+| --- | --- | --- |
+| Provision infrastructure | Workstation | `azd provision` |
+| Configure data-plane resources | Jumpbox or VNet-connected host | `scripts/postProvision.ps1` |
+| Deploy services | Jumpbox or VNet-connected host | `azd deploy` |
+
+Do not run `azd deploy` from the workstation when `NETWORK_ISOLATION=true`. The deploy hook blocks that path because private resources and the private ACR build pool are reachable only from inside the VNet.
 
 **Before Provisioning**
 
@@ -141,6 +155,7 @@ To deploy **all services at once**, navigate to the `gpt-rag` directory (with az
 ```powershell
 cd C:\github\GPT-RAG
 azd env set RUN_FROM_JUMPBOX true
+azd env set NETWORK_ISOLATION true
 azd env set ACR_TASK_AGENT_POOL build-pool
 azd env set BUILD_MODE acr-task
 azd deploy
