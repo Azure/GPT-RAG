@@ -130,7 +130,13 @@ function Set-GptRagAppConfiguration {
     )
 
     Write-Host "⚙️ Populating GPT-RAG App Configuration settings (label=$Label)..."
-    az config set extension.use_dynamic_install=yes_without_prompt 2>$null | Out-Null
+    $previousErrorActionPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = 'Continue'
+        az config set extension.use_dynamic_install=yes_without_prompt 2>$null | Out-Null
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
 
     $resourceGroup = Get-RequiredEnvValue 'AZURE_RESOURCE_GROUP'
     $subscriptionId = Get-OptionalEnvValue 'AZURE_SUBSCRIPTION_ID'
