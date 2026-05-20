@@ -58,6 +58,16 @@ Enable network isolation in your environment:
 azd env set NETWORK_ISOLATION true
 ```
 
+Optional v2 parameters can be set before provisioning:
+
+```shell
+azd env set DEPLOYMENT_MODE standalone
+azd env set VM_SIZE Standard_D2s_v3
+azd env set ENABLE_COSMOS_ANALYTICAL_STORAGE false
+```
+
+`ALLOWED_IP_RANGES` is also available for CIDR allow-listing, but because it is an array parameter, prefer editing `main.parameters.json` or using a parameter overlay rather than storing a complex array in the azd environment.
+
 Make sure you’re signed in with your Azure user account:
 
 ```
@@ -72,20 +82,13 @@ azd auth login
 **Provision Infrastructure**
 
 ```
+azd env set AZURE_SKIP_NETWORK_ISOLATION_WARNING true   # optional for automation
 azd provision
 ```
 
 **Post-Provision Configuration**
 
-After provisioning completes, you'll be prompted whether your machine has VNet access.
-
-- If you have VNet access:
-
-Answer `Y` when prompted. The post-provision script will run automatically and complete the configuration.
-
-- If you don't have VNet access:
-
-Answer `N` when prompted. You'll need to use the provisioned Jumpbox VM to complete the post-provision steps.
+With `NETWORK_ISOLATION=true`, data-plane configuration must run from inside the VNet. A workstation should only run `azd provision`; if it does not have VNet/VPN access, the local post-provision hook will skip data-plane work and tell you to continue from the jumpbox.
 
 Using the Jumpbox VM
 
@@ -109,7 +112,8 @@ Using the Jumpbox VM
 
    PowerShell:
    ```powershell
-   cd c:\github\gpt-rag
+   cd C:\github\GPT-RAG
+   azd env set RUN_FROM_JUMPBOX true
    .\scripts\postProvision.ps1
    ```
 
@@ -124,17 +128,23 @@ Using the Jumpbox VM
 
 ## Deploy GPT-RAG Services
 
-> **Note:** For Zero Trust deployments with network isolation, ensure you have VNet connectivity either through the Jumpbox VM or via VPN before deploying services. If using the Jumpbox VM, the repositories are located in the `c:\github` directory.
+> **Note:** For Zero Trust deployments with network isolation, deploy services from the jumpbox or another host with VNet connectivity. If using the jumpbox VM, the repositories are located in the `C:\github` directory.
 
 Once the GPT-RAG infrastructure is provisioned, you can deploy the services.
 
 To deploy **all services at once**, navigate to the `gpt-rag` directory (with azd environment configured) and run:
 
-```
+```powershell
+cd C:\github\GPT-RAG
+azd env set RUN_FROM_JUMPBOX true
+azd env set ACR_TASK_AGENT_POOL build-pool
+azd env set BUILD_MODE acr-task
 azd deploy
 ```
 
-This command deploys each service in sequence.
+This command deploys each service in sequence. Docker is not required on the jumpbox for network-isolated deployments; component scripts use Azure Container Registry remote builds (`az acr build`) against the private ACR task agent pool.
+
+The deploy hook uses `NETWORK_ISOLATION` as the source of truth. When `NETWORK_ISOLATION=true`, `azd deploy` fails fast unless it is running from the VNet with `RUN_FROM_JUMPBOX=true`; the older `AZURE_ZERO_TRUST` variable is not used.
 
 If you prefer to **deploy a single service**, for example, when updating only that service, you can deploy it individually. Below is an example using the orchestrator service. The same approach applies to other services (frontend, dataingest, mcp).
 
