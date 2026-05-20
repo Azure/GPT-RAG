@@ -956,7 +956,7 @@
 <ul>
 <li><strong>IP allow-listing</strong> (<code>allowedIpRanges</code>): uniform CIDR allow-list applied across Storage, Key Vault, App Configuration, Container Registry, Cosmos DB, AI Search, and the AI Foundry storage account.</li>
 <li><strong>BYO Private DNS zones / observability / hub-and-spoke</strong> parameters for integration with an existing Azure Landing Zone hub.</li>
-<li><strong>Pre-flight validation hook</strong> that catches parameter contradictions before reaching ARM.</li>
+<li><strong>Pre-flight validation hooks</strong> that catch parameter contradictions before reaching ARM and fail fast when the selected GPT-RAG region lacks required VM SKU support, provider/location support, or Azure OpenAI model quota. The preflight is explicit about limits Azure does not expose reliably before creation, such as transient Cosmos DB high-demand capacity.</li>
 <li><strong>Cosmos <code>enableAnalyticalStorage</code> fix</strong> — the implicit <code>true</code> default that caused intermittent provisioning failures is gone; now an explicit opt-in via <code>enableCosmosAnalyticalStorage</code>.</li>
 <li><strong>Network-isolated deployment procedure clarified</strong> — workstations run only <code>azd provision</code>; <code>postProvision</code> and <code>azd deploy</code> run from the jumpbox/VNet with <code>RUN_FROM_JUMPBOX=true</code>, using ACR remote builds so Docker is not required on the VM.</li>
 </ul>
