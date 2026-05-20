@@ -1,4 +1,4 @@
-# Works from ...\gpt-rag or any subfolder
+﻿# Works from ...\gpt-rag or any subfolder
 # PowerShell 7+ recommended
 try { [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false) } catch {}
 $ProgressPreference = 'SilentlyContinue'   # hide PS progress bars
