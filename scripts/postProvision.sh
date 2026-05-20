@@ -29,21 +29,45 @@ while IFS='=' read -r key value; do
   export "$key=$value"
 done < <(azd env get-values)
 
+is_truthy() {
+  case "$(echo "${1:-}" | tr '[:upper:]' '[:lower:]')" in
+    1|true|t|yes|y) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
 #-------------------------------------------------------------------------------
 # Zero Trust Information
 #-------------------------------------------------------------------------------
 echo
-if [[ "$(echo "${NETWORK_ISOLATION:-false}" | tr '[:upper:]' '[:lower:]')" == "true" ]]; then
+if is_truthy "${NETWORK_ISOLATION:-false}"; then
   echo "🔒 Zero Trust enabled."
-  echo "🚧 NOTE: If app config failed, run the azd provision again - this is due to token timeout restrictions."
   echo "Access to Azure resources is restricted to the VNet."
   echo "Ensure you run scripts/postProvision.sh from within the VNet."
   echo "If you are using a local machine, make sure you have a VPN connection to the VNet."
   echo "You can also use the Test VM to access the environment and complete the setup."
-  read -p "Are you running this script from inside the VNet or via VPN? [Y/n]: " answer
-  if [[ ! "$(echo "${answer:-y}" | tr '[:upper:]' '[:lower:]')" =~ ^(y|yes)$ ]]; then
-    echo "❌ Please run this script from inside the VNet or with VPN access. Exiting."
-    exit 0
+
+  if ! is_truthy "${RUN_FROM_JUMPBOX:-false}"; then
+    if [[ "$(echo "${RUN_FROM_JUMPBOX:-}" | tr '[:upper:]' '[:lower:]')" =~ ^(false|0|no|skip)$ ]]; then
+      echo "⏭️ RUN_FROM_JUMPBOX=${RUN_FROM_JUMPBOX}; skipping data-plane post-provisioning."
+      exit 0
+    fi
+    if is_truthy "${AZURE_SKIP_NETWORK_ISOLATION_WARNING:-false}"; then
+      echo "⏭️ AZURE_SKIP_NETWORK_ISOLATION_WARNING=${AZURE_SKIP_NETWORK_ISOLATION_WARNING}; skipping local data-plane post-provisioning."
+      echo "   Re-run from the jumpbox with RUN_FROM_JUMPBOX=true."
+      exit 0
+    fi
+    if [[ -t 0 ]]; then
+      read -p "Are you running this script from inside the VNet or via VPN? [Y/n]: " answer
+      if [[ ! "$(echo "${answer:-n}" | tr '[:upper:]' '[:lower:]')" =~ ^(y|yes)$ ]]; then
+        echo "❌ Please run this script from inside the VNet or with VPN access. Exiting."
+        exit 0
+      fi
+    else
+      echo "⏭️ Non-interactive shell outside the VNet; skipping data-plane post-provisioning."
+      echo "   Re-run from the jumpbox with RUN_FROM_JUMPBOX=true."
+      exit 0
+    fi
   fi
 else
   echo "🚧 Provisioning basic architecture."
@@ -53,30 +77,10 @@ fi
 # Container APP API Keys Warning
 #-------------------------------------------------------------------------------
 echo
-if [[ "$(echo "${USE_CAPP_API_KEY:-false}" | tr '[:upper:]' '[:lower:]')" == "true" ]]; then
+if is_truthy "${USE_CAPP_API_KEY:-false}"; then
   echo "🔑 Using API Key for Container Apps access."
   echo "⚠️ IMPORTANT: Each App API Key was initialized with resourceToken."
   echo "    Please update to a custom API key ASAP."
-fi
-
-###############################################################################
-# Zero Trust Information
-###############################################################################
-echo
-if [[ "$(echo "${NETWORK_ISOLATION:-false}" | tr '[:upper:]' '[:lower:]')" == "true" ]]; then
-  echo "🔒 Zero Trust enabled."
-  echo "🚧 NOTE: If app config failed, run the azd provision again - this is due to token timeout restrictions."
-  echo "Access to Azure resources is restricted to the VNet."
-  echo "Ensure you run scripts/postProvision.sh from within the VNet."
-  echo "If you’re using a local machine, make sure you have a VPN connection to the VNet."
-  echo "You can also use the Test VM to access the environment and complete the setup."
-  read -p "Are you running this script from inside the VNet or via VPN? [Y/n]: " answer
-  if [[ ! "$(echo "${answer:-n}" | tr '[:upper:]' '[:lower:]')" =~ ^y ]]; then
-    echo "❌ Please run this script from inside the VNet or with VPN access. Exiting."
-    exit 0
-  fi
-else
-  echo "🚧 Provisioning basic architecture."
 fi
 
 ###############################################################################

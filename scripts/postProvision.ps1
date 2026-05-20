@@ -21,18 +21,28 @@ Write-Host ""
 #-------------------------------------------------------------------------------
 # Zero Trust Information
 #-------------------------------------------------------------------------------
+function Test-Truthy {
+    param([AllowNull()][string]$Value)
+    return -not [string]::IsNullOrWhiteSpace($Value) -and $Value -match '^(1|true|t|yes|y)$'
+}
+
 Write-Host ""
-if ($env:NETWORK_ISOLATION -and $env:NETWORK_ISOLATION.ToLower() -eq 'true') {
+if (Test-Truthy $env:NETWORK_ISOLATION) {
     Write-Host "🔒 Zero Trust enabled."
     Write-Host "Access to Azure resources is restricted to the VNet."
     Write-Host "Ensure you run scripts/postProvision.ps1 from within the VNet."
     Write-Host "If you are using a local machine, make sure you have a VPN connection to the VNet."
     Write-Host "You can also use the Test VM to access the environment and complete the setup."
 
-    $runningFromJumpbox = $env:RUN_FROM_JUMPBOX -and $env:RUN_FROM_JUMPBOX.ToLower() -eq 'true'
+    $runningFromJumpbox = Test-Truthy $env:RUN_FROM_JUMPBOX
     if (-not $runningFromJumpbox) {
         if ($env:RUN_FROM_JUMPBOX -and $env:RUN_FROM_JUMPBOX.ToLower() -match '^(false|0|no|skip)$') {
             Write-Host "⏭️ RUN_FROM_JUMPBOX=$($env:RUN_FROM_JUMPBOX); skipping data-plane post-provisioning."
+            exit 0
+        }
+        if (Test-Truthy $env:AZURE_SKIP_NETWORK_ISOLATION_WARNING) {
+            Write-Host "⏭️ AZURE_SKIP_NETWORK_ISOLATION_WARNING=$($env:AZURE_SKIP_NETWORK_ISOLATION_WARNING); skipping local data-plane post-provisioning."
+            Write-Host "   Re-run from the jumpbox with RUN_FROM_JUMPBOX=true."
             exit 0
         }
         if ([Environment]::UserInteractive -and -not [Console]::IsInputRedirected) {
