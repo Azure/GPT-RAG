@@ -96,13 +96,25 @@ function Get-OptionalEnvValue {
     return $value
 }
 
+function Invoke-NativeCommand {
+    param([Parameter(Mandatory = $true)][scriptblock]$Command)
+
+    $previousErrorActionPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = 'Continue'
+        & $Command
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+}
+
 function Invoke-AzTsv {
     param(
         [Parameter(Mandatory = $true)][string[]]$Arguments,
         [Parameter(Mandatory = $true)][string]$Description,
         [switch]$Required
     )
-    $output = & az @Arguments -o tsv 2>$null
+    $output = Invoke-NativeCommand { & az @Arguments -o tsv 2>$null }
     if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($output)) {
         if ($Required) {
             Write-Error "Failed to resolve $Description."
@@ -130,13 +142,7 @@ function Set-GptRagAppConfiguration {
     )
 
     Write-Host "⚙️ Populating GPT-RAG App Configuration settings (label=$Label)..."
-    $previousErrorActionPreference = $ErrorActionPreference
-    try {
-        $ErrorActionPreference = 'Continue'
-        az config set extension.use_dynamic_install=yes_without_prompt 2>$null | Out-Null
-    } finally {
-        $ErrorActionPreference = $previousErrorActionPreference
-    }
+    Invoke-NativeCommand { az config set extension.use_dynamic_install=yes_without_prompt 2>$null | Out-Null }
 
     $resourceGroup = Get-RequiredEnvValue 'AZURE_RESOURCE_GROUP'
     $subscriptionId = Get-OptionalEnvValue 'AZURE_SUBSCRIPTION_ID'
@@ -318,15 +324,17 @@ function Set-GptRagAppConfiguration {
     $tempFile = Join-Path ([System.IO.Path]::GetTempPath()) "gpt-rag-appconfig-$([Guid]::NewGuid().ToString('N')).json"
     try {
         $flatSettings | ConvertTo-Json -Depth 50 | Set-Content -LiteralPath $tempFile -Encoding UTF8
-        $importOutput = az appconfig kv import `
-            --endpoint $Endpoint `
-            --source file `
-            --format json `
-            --path $tempFile `
-            --label $Label `
-            --content-type 'text/plain' `
-            --auth-mode login `
-            --yes 2>&1
+        $importOutput = Invoke-NativeCommand {
+            az appconfig kv import `
+                --endpoint $Endpoint `
+                --source file `
+                --format json `
+                --path $tempFile `
+                --label $Label `
+                --content-type 'text/plain' `
+                --auth-mode login `
+                --yes 2>&1
+        }
         if ($LASTEXITCODE -ne 0) {
             Write-Error "Failed to import GPT-RAG App Configuration settings: $importOutput"
             exit 1
@@ -350,15 +358,15 @@ Set-Location $repoRoot
 
 function Invoke-PythonModule {
     param([Parameter(Mandatory = $true)][string]$ModuleName)
-    & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['GPT_RAG_REPO_ROOT']); runpy.run_module('$ModuleName', run_name='__main__')"
+    Invoke-NativeCommand { & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['GPT_RAG_REPO_ROOT']); runpy.run_module('$ModuleName', run_name='__main__')" }
 }
 
 Write-Host "🐍 Checking Python venv support..."
-& python -c "import venv" 2>$null
+Invoke-NativeCommand { & python -c "import venv" 2>$null }
 $venvSupported = ($LASTEXITCODE -eq 0)
 if ($venvSupported) {
     Write-Host "📦 Creating temporary venv..."
-    python -m venv --without-pip config/.venv_temp
+    Invoke-NativeCommand { python -m venv --without-pip config/.venv_temp }
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
     # Activate the venv
@@ -372,7 +380,7 @@ if ($venvSupported) {
 } else {
     Write-Host "⚠️ Python venv is unavailable; using the current Python interpreter and site-packages."
     Write-Host "   This matches the AI Landing Zone jumpbox Python contract used by other solution accelerators."
-    & python -m pip --version
+    Invoke-NativeCommand { & python -m pip --version }
     if ($LASTEXITCODE -ne 0) {
         Write-Error "Python pip is required for post-provisioning but is not available on the selected interpreter."
         exit 1
@@ -380,9 +388,9 @@ if ($venvSupported) {
 }
 
 Write-Host "⬇️ Installing requirements..."
-& python -m pip install --upgrade pip
+Invoke-NativeCommand { & python -m pip install --upgrade pip }
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-& python -m pip install -r config/requirements.txt
+Invoke-NativeCommand { & python -m pip install -r config/requirements.txt }
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 #-------------------------------------------------------------------------------
