@@ -66,6 +66,264 @@ if ($missing.Count -gt 0) {
     exit 1
 }
 
+function Get-RequiredEnvValue {
+    param([Parameter(Mandatory = $true)][string]$Name)
+    $value = [Environment]::GetEnvironmentVariable($Name)
+    if ([string]::IsNullOrWhiteSpace($value)) {
+        Write-Error "Missing required environment variable '$Name'."
+        exit 1
+    }
+    return $value
+}
+
+function Get-OptionalEnvValue {
+    param(
+        [Parameter(Mandatory = $true)][string]$Name,
+        [string]$Default = ''
+    )
+    $value = [Environment]::GetEnvironmentVariable($Name)
+    if ([string]::IsNullOrWhiteSpace($value)) { return $Default }
+    return $value
+}
+
+function Invoke-AzTsv {
+    param(
+        [Parameter(Mandatory = $true)][string[]]$Arguments,
+        [Parameter(Mandatory = $true)][string]$Description,
+        [switch]$Required
+    )
+    $output = & az @Arguments -o tsv 2>$null
+    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($output)) {
+        if ($Required) {
+            Write-Error "Failed to resolve $Description."
+            exit 1
+        }
+        return ''
+    }
+    return ($output | Select-Object -First 1).Trim()
+}
+
+function Get-AppConfigResourceName {
+    param([Parameter(Mandatory = $true)][string]$Endpoint)
+    return (($Endpoint -replace '^https?://', '') -replace '\.azconfig\.io/?$', '')
+}
+
+function ConvertTo-FlatJsonString {
+    param([Parameter(Mandatory = $true)]$Value)
+    return ($Value | ConvertTo-Json -Depth 50 -Compress)
+}
+
+function Set-GptRagAppConfiguration {
+    param(
+        [Parameter(Mandatory = $true)][string]$Endpoint,
+        [Parameter(Mandatory = $true)][string]$Label
+    )
+
+    Write-Host "⚙️ Populating GPT-RAG App Configuration settings (label=$Label)..."
+    az config set extension.use_dynamic_install=yes_without_prompt 2>$null | Out-Null
+
+    $resourceGroup = Get-RequiredEnvValue 'AZURE_RESOURCE_GROUP'
+    $subscriptionId = Get-OptionalEnvValue 'AZURE_SUBSCRIPTION_ID'
+    if (-not $subscriptionId) {
+        $subscriptionId = Invoke-AzTsv -Arguments @('account', 'show', '--query', 'id') -Description 'current subscription id' -Required
+    }
+
+    $tenantId = Get-OptionalEnvValue 'AZURE_TENANT_ID'
+    if (-not $tenantId) {
+        $tenantId = Invoke-AzTsv -Arguments @('account', 'show', '--query', 'tenantId') -Description 'current tenant id' -Required
+    }
+
+    $resourceToken = Get-OptionalEnvValue 'RESOURCE_TOKEN'
+    if (-not $resourceToken -and $Endpoint -match 'appcs-?([a-z0-9]{8,})\.azconfig\.io') {
+        $resourceToken = $matches[1]
+    }
+    if (-not $resourceToken) {
+        Write-Error "RESOURCE_TOKEN could not be resolved; cannot populate GPT-RAG App Configuration deterministically."
+        exit 1
+    }
+
+    $location = Get-OptionalEnvValue 'AZURE_LOCATION' (Get-OptionalEnvValue 'LOCATION')
+    $environmentName = Get-OptionalEnvValue 'AZURE_ENV_NAME' (Get-OptionalEnvValue 'ENVIRONMENT_NAME')
+    $deploymentName = Get-OptionalEnvValue 'DEPLOYMENT_NAME'
+    $release = Get-OptionalEnvValue 'RELEASE'
+
+    $appConfigName = Get-AppConfigResourceName -Endpoint $Endpoint
+    $nameSuffix = $resourceToken
+    $acrName = "cr$nameSuffix"
+    $keyVaultName = "kv-$nameSuffix"
+    $storageName = "st$nameSuffix"
+    $cosmosName = "cosmos-$nameSuffix"
+    $databaseName = "cosmos-db$nameSuffix"
+    $searchName = "srch-$nameSuffix"
+    $foundryName = "aif-$nameSuffix"
+    $foundryProjectName = 'aifoundry-default-project'
+    $foundryStorageName = "staif$nameSuffix"
+    $appInsightsName = "appi-$nameSuffix"
+    $logAnalyticsName = "log-$nameSuffix"
+    $containerEnvName = "cae-$nameSuffix"
+
+    $frontendAppName = "ca-$nameSuffix-frontend"
+    $orchestratorAppName = "ca-$nameSuffix-orchestrator"
+    $dataIngestAppName = "ca-$nameSuffix-dataingest"
+
+    $resourceGroupId = "/subscriptions/$subscriptionId/resourceGroups/$resourceGroup"
+    $keyVaultResourceId = "$resourceGroupId/providers/Microsoft.KeyVault/vaults/$keyVaultName"
+    $storageResourceId = "$resourceGroupId/providers/Microsoft.Storage/storageAccounts/$storageName"
+    $cosmosResourceId = "$resourceGroupId/providers/Microsoft.DocumentDB/databaseAccounts/$cosmosName"
+    $searchResourceId = "$resourceGroupId/providers/Microsoft.Search/searchServices/$searchName"
+    $foundryResourceId = "$resourceGroupId/providers/Microsoft.CognitiveServices/accounts/$foundryName"
+    $foundryProjectResourceId = "$foundryResourceId/projects/$foundryProjectName"
+    $containerEnvResourceId = "$resourceGroupId/providers/Microsoft.App/managedEnvironments/$containerEnvName"
+    $appInsightsResourceId = "$resourceGroupId/providers/Microsoft.Insights/components/$appInsightsName"
+    $logAnalyticsResourceId = "$resourceGroupId/providers/Microsoft.OperationalInsights/workspaces/$logAnalyticsName"
+
+    $frontendFqdn = Invoke-AzTsv -Arguments @('containerapp', 'show', '-g', $resourceGroup, '-n', $frontendAppName, '--query', 'properties.configuration.ingress.fqdn') -Description "$frontendAppName FQDN" -Required
+    $orchestratorFqdn = Invoke-AzTsv -Arguments @('containerapp', 'show', '-g', $resourceGroup, '-n', $orchestratorAppName, '--query', 'properties.configuration.ingress.fqdn') -Description "$orchestratorAppName FQDN" -Required
+    $dataIngestFqdn = Invoke-AzTsv -Arguments @('containerapp', 'show', '-g', $resourceGroup, '-n', $dataIngestAppName, '--query', 'properties.configuration.ingress.fqdn') -Description "$dataIngestAppName FQDN" -Required
+
+    $frontendPrincipalId = Invoke-AzTsv -Arguments @('containerapp', 'show', '-g', $resourceGroup, '-n', $frontendAppName, '--query', 'identity.principalId') -Description "$frontendAppName principal id"
+    $orchestratorPrincipalId = Invoke-AzTsv -Arguments @('containerapp', 'show', '-g', $resourceGroup, '-n', $orchestratorAppName, '--query', 'identity.principalId') -Description "$orchestratorAppName principal id"
+    $dataIngestPrincipalId = Invoke-AzTsv -Arguments @('containerapp', 'show', '-g', $resourceGroup, '-n', $dataIngestAppName, '--query', 'identity.principalId') -Description "$dataIngestAppName principal id"
+    $containerEnvPrincipalId = Invoke-AzTsv -Arguments @('resource', 'show', '--ids', $containerEnvResourceId, '--query', 'identity.principalId') -Description 'Container Apps Environment principal id'
+    $searchPrincipalId = Invoke-AzTsv -Arguments @('resource', 'show', '--ids', $searchResourceId, '--query', 'identity.principalId') -Description 'Search service principal id'
+
+    $appInsightsConnectionString = Invoke-AzTsv -Arguments @('resource', 'show', '--ids', $appInsightsResourceId, '--query', 'properties.ConnectionString') -Description 'Application Insights connection string'
+    $appInsightsInstrumentationKey = Invoke-AzTsv -Arguments @('resource', 'show', '--ids', $appInsightsResourceId, '--query', 'properties.InstrumentationKey') -Description 'Application Insights instrumentation key'
+
+    $containerApps = @(
+        [ordered]@{ name = $orchestratorAppName; serviceName = 'orchestrator'; canonical_name = 'ORCHESTRATOR_APP'; principalId = $orchestratorPrincipalId; fqdn = $orchestratorFqdn },
+        [ordered]@{ name = $frontendAppName; serviceName = 'frontend'; canonical_name = 'FRONTEND_APP'; principalId = $frontendPrincipalId; fqdn = $frontendFqdn },
+        [ordered]@{ name = $dataIngestAppName; serviceName = 'dataingest'; canonical_name = 'DATA_INGEST_APP'; principalId = $dataIngestPrincipalId; fqdn = $dataIngestFqdn }
+    )
+
+    $modelDeployments = @(
+        [ordered]@{ canonical_name = 'CHAT_DEPLOYMENT_NAME'; capacity = 100; model = [ordered]@{ format = 'OpenAI'; name = 'gpt-5-nano'; version = '2025-08-07' }; name = 'chat'; version = '2025-08-07'; apiVersion = '2025-12-01-preview'; endpoint = "https://$foundryName.openai.azure.com/" },
+        [ordered]@{ canonical_name = 'EMBEDDING_DEPLOYMENT_NAME'; capacity = 100; model = [ordered]@{ format = 'OpenAI'; name = 'text-embedding-3-large'; version = '1' }; name = 'text-embedding'; version = '1'; apiVersion = '2025-01-01-preview'; endpoint = "https://$foundryName.openai.azure.com/" }
+    )
+
+    $settings = [ordered]@{
+        AZURE_TENANT_ID = $tenantId
+        SUBSCRIPTION_ID = $subscriptionId
+        AZURE_RESOURCE_GROUP = $resourceGroup
+        LOCATION = $location
+        ENVIRONMENT_NAME = $environmentName
+        DEPLOYMENT_NAME = $deploymentName
+        RESOURCE_TOKEN = $resourceToken
+        ENABLE_AGENTIC_RETRIEVAL = (Get-OptionalEnvValue 'ENABLE_AGENTIC_RETRIEVAL' 'false')
+        NETWORK_ISOLATION = (Get-OptionalEnvValue 'NETWORK_ISOLATION' 'false')
+        USE_UAI = (Get-OptionalEnvValue 'USE_UAI' 'false')
+        USE_CAPP_API_KEY = (Get-OptionalEnvValue 'USE_CAPP_API_KEY' 'false')
+        LOG_LEVEL = 'INFO'
+        ENABLE_CONSOLE_LOGGING = 'true'
+        RELEASE = $release
+        APPLICATIONINSIGHTS_CONNECTION_STRING = $appInsightsConnectionString
+        APPLICATIONINSIGHTS__INSTRUMENTATIONKEY = $appInsightsInstrumentationKey
+
+        KEY_VAULT_RESOURCE_ID = $keyVaultResourceId
+        STORAGE_ACCOUNT_RESOURCE_ID = $storageResourceId
+        APP_INSIGHTS_RESOURCE_ID = $appInsightsResourceId
+        LOG_ANALYTICS_RESOURCE_ID = $logAnalyticsResourceId
+        CONTAINER_ENV_RESOURCE_ID = $containerEnvResourceId
+        AI_FOUNDRY_ACCOUNT_RESOURCE_ID = $foundryResourceId
+        AI_FOUNDRY_PROJECT_RESOURCE_ID = $foundryProjectResourceId
+        SEARCH_SERVICE_UAI_RESOURCE_ID = ''
+        SEARCH_SERVICE_RESOURCE_ID = $searchResourceId
+        AZURE_SPEECH_RESOURCE_ID = (Get-OptionalEnvValue 'AZURE_SPEECH_RESOURCE_ID')
+        COSMOS_DB_ACCOUNT_RESOURCE_ID = $cosmosResourceId
+
+        AI_FOUNDRY_ACCOUNT_NAME = $foundryName
+        AI_FOUNDRY_PROJECT_NAME = $foundryProjectName
+        AI_FOUNDRY_STORAGE_ACCOUNT_NAME = $foundryStorageName
+        APP_CONFIG_NAME = $appConfigName
+        APP_INSIGHTS_NAME = $appInsightsName
+        CONTAINER_ENV_NAME = $containerEnvName
+        CONTAINER_REGISTRY_NAME = $acrName
+        CONTAINER_REGISTRY_LOGIN_SERVER = "$acrName.azurecr.io"
+        DATABASE_ACCOUNT_NAME = $cosmosName
+        DATABASE_NAME = $databaseName
+        SEARCH_SERVICE_NAME = $searchName
+        AZURE_SPEECH_RESOURCE_NAME = (Get-OptionalEnvValue 'AZURE_SPEECH_RESOURCE_NAME')
+        AZURE_SPEECH_REGION = (Get-OptionalEnvValue 'AZURE_SPEECH_REGION')
+        STORAGE_ACCOUNT_NAME = $storageName
+
+        DEPLOY_APP_CONFIG = (Get-OptionalEnvValue 'DEPLOY_APP_CONFIG' 'true')
+        DEPLOY_KEY_VAULT = (Get-OptionalEnvValue 'DEPLOY_KEY_VAULT' 'true')
+        DEPLOY_LOG_ANALYTICS = (Get-OptionalEnvValue 'DEPLOY_LOG_ANALYTICS' 'true')
+        DEPLOY_APP_INSIGHTS = (Get-OptionalEnvValue 'DEPLOY_APP_INSIGHTS' 'true')
+        DEPLOY_SEARCH_SERVICE = (Get-OptionalEnvValue 'DEPLOY_SEARCH_SERVICE' 'true')
+        DEPLOY_SPEECH_SERVICE = (Get-OptionalEnvValue 'DEPLOY_SPEECH_SERVICE' 'false')
+        DEPLOY_STORAGE_ACCOUNT = (Get-OptionalEnvValue 'DEPLOY_STORAGE_ACCOUNT' 'true')
+        DEPLOY_COSMOS_DB = (Get-OptionalEnvValue 'DEPLOY_COSMOS_DB' 'true')
+        DEPLOY_CONTAINER_APPS = (Get-OptionalEnvValue 'DEPLOY_CONTAINER_APPS' 'true')
+        DEPLOY_CONTAINER_REGISTRY = (Get-OptionalEnvValue 'DEPLOY_CONTAINER_REGISTRY' 'true')
+        DEPLOY_CONTAINER_ENV = (Get-OptionalEnvValue 'DEPLOY_CONTAINER_ENV' 'true')
+
+        KEY_VAULT_URI = "https://$keyVaultName.vault.azure.net/"
+        STORAGE_BLOB_ENDPOINT = "https://$storageName.blob.core.windows.net/"
+        AI_FOUNDRY_ACCOUNT_ENDPOINT = "https://$foundryName.cognitiveservices.azure.com/"
+        AI_FOUNDRY_PROJECT_ENDPOINT = "https://$foundryName.services.ai.azure.com/api/projects/$foundryProjectName"
+        SEARCH_SERVICE_QUERY_ENDPOINT = "https://$searchName.search.windows.net"
+        AZURE_SPEECH_ENDPOINT = (Get-OptionalEnvValue 'AZURE_SPEECH_ENDPOINT')
+        COSMOS_DB_ENDPOINT = "https://$cosmosName.documents.azure.com:443/"
+
+        SEARCH_CONNECTION_ID = ''
+        BING_CONNECTION_ID = ''
+        CONTAINER_ENV_PRINCIPAL_ID = $containerEnvPrincipalId
+        SEARCH_SERVICE_PRINCIPAL_ID = $searchPrincipalId
+
+        ORCHESTRATOR_APP_ENDPOINT = "https://$orchestratorFqdn"
+        FRONTEND_APP_ENDPOINT = "https://$frontendFqdn"
+        DATA_INGEST_APP_ENDPOINT = "https://$dataIngestFqdn"
+        ORCHESTRATOR_APP_NAME = $orchestratorAppName
+        FRONTEND_APP_NAME = $frontendAppName
+        DATA_INGEST_APP_NAME = $dataIngestAppName
+
+        CHAT_DEPLOYMENT_NAME = 'chat'
+        EMBEDDING_DEPLOYMENT_NAME = 'text-embedding'
+        CONVERSATIONS_DATABASE_CONTAINER = 'conversations'
+        DATASOURCES_DATABASE_CONTAINER = 'datasources'
+        PROMPTS_CONTAINER = 'prompts'
+        MCP_CONTAINER = 'mcp'
+        DOCUMENTS_IMAGES_STORAGE_CONTAINER = 'documents-images'
+        DOCUMENTS_STORAGE_CONTAINER = 'documents'
+        CONVERSATION_CACHE_STORAGE_CONTAINER = 'conversation-cache'
+        CONVERSATION_DOCUMENTS_STORAGE_CONTAINER = 'conversation-documents'
+        NL2SQL_STORAGE_CONTAINER = 'nl2sql'
+        CONTAINER_APPS = (ConvertTo-FlatJsonString $containerApps)
+        MODEL_DEPLOYMENTS = (ConvertTo-FlatJsonString $modelDeployments)
+    }
+
+    $flatSettings = [ordered]@{}
+    foreach ($key in $settings.Keys) {
+        $value = $settings[$key]
+        $flatSettings[$key] = if ($null -eq $value) { '' } else { "$value" }
+    }
+
+    $tempFile = Join-Path ([System.IO.Path]::GetTempPath()) "gpt-rag-appconfig-$([Guid]::NewGuid().ToString('N')).json"
+    try {
+        $flatSettings | ConvertTo-Json -Depth 50 | Set-Content -LiteralPath $tempFile -Encoding UTF8
+        $importOutput = az appconfig kv import `
+            --endpoint $Endpoint `
+            --source file `
+            --format json `
+            --path $tempFile `
+            --label $Label `
+            --content-type 'text/plain' `
+            --auth-mode login `
+            --yes 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            Write-Error "Failed to import GPT-RAG App Configuration settings: $importOutput"
+            exit 1
+        }
+    } finally {
+        Remove-Item -LiteralPath $tempFile -Force -ErrorAction SilentlyContinue
+    }
+
+    Write-Host "✅ GPT-RAG App Configuration populated ($($flatSettings.Count) keys)."
+}
+
+Set-GptRagAppConfiguration -Endpoint (Get-RequiredEnvValue 'APP_CONFIG_ENDPOINT') -Label 'gpt-rag'
+
 #-------------------------------------------------------------------------------
 # Setup Python environment
 #-------------------------------------------------------------------------------
