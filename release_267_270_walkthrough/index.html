@@ -13,10 +13,10 @@
       
       
       
-        <link rel="prev" href="../howto_multimodality/">
+        <link rel="prev" href="../whatisnew/">
       
       
-        <link rel="next" href="../howto_sharepoint_connector/">
+        <link rel="next" href="../deploy/">
       
       
       <link rel="icon" href="../favicon.ico">
@@ -24,7 +24,7 @@
     
     
       
-        <title>User Feedback - GPT-RAG</title>
+        <title>Release Walkthrough - GPT-RAG</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#user-feedback-configuration" class="md-skip">
+        <a href="#release-walkthrough-file-uploads-and-ai-landing-zone-v2" class="md-skip">
           Skip to content
         </a>
       
@@ -111,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              User Feedback
+              Release Walkthrough
             
           </span>
         </div>
@@ -266,10 +266,30 @@
       
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../release_267_270_walkthrough/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Release Walkthrough
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -278,6 +298,296 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-executive-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Executive summary
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-what-to-show-first" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. What to show first
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-per-conversation-file-uploads" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Per-conversation file uploads
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Per-conversation file uploads">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      What changed
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-it-matters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why it matters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#architecture-talking-points" class="md-nav__link">
+    <span class="md-ellipsis">
+      Architecture talking points
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#demo-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      Demo script
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-ai-landing-zone-v2-foundation" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. AI Landing Zone v2 foundation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. AI Landing Zone v2 foundation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-changed_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      What changed
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-to-highlight" class="md-nav__link">
+    <span class="md-ellipsis">
+      What to highlight
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#operator-value" class="md-nav__link">
+    <span class="md-ellipsis">
+      Operator value
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-regional-preflight-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Regional preflight checks
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Regional preflight checks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-changed_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      What changed
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#checks-to-mention" class="md-nav__link">
+    <span class="md-ellipsis">
+      Checks to mention
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#important-limitation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Important limitation
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-basic-deployment-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. Basic deployment path
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Basic deployment path">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-to-explain" class="md-nav__link">
+    <span class="md-ellipsis">
+      What to explain
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-network-isolation-deployment-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      7. Network Isolation deployment path
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Network Isolation deployment path">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#workstation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Workstation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#jumpbox" class="md-nav__link">
+    <span class="md-ellipsis">
+      Jumpbox
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-not-to-do" class="md-nav__link">
+    <span class="md-ellipsis">
+      What not to do
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-docker-free-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      8. Docker-free deployment
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Docker-free deployment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-changed_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      What changed
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-it-matters_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why it matters
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-validation-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      9. Validation status
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-recommended-walkthrough-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      10. Recommended walkthrough order
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -643,19 +953,17 @@
       
   
   
-    
   
   
-  
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
         
           
           <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
@@ -669,7 +977,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             How-to Guides
@@ -743,30 +1051,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    User Feedback
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../howto_userfeedback/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -775,53 +1063,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#feedback-types" class="md-nav__link">
-    <span class="md-ellipsis">
-      Feedback Types
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuration-settings" class="md-nav__link">
-    <span class="md-ellipsis">
-      Configuration Settings
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#default-values" class="md-nav__link">
-    <span class="md-ellipsis">
-      Default Values
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -934,35 +1175,202 @@
   
 
 
-<h1 id="user-feedback-configuration">User Feedback Configuration</h1>
-<p>GPT-RAG includes a <strong>User Feedback Loop</strong> feature that lets users evaluate assistant responses through the UI. Feedback is sent to the backend, processed by the orchestrator, and stored in <strong>Cosmos DB</strong> for analysis and continuous improvement.</p>
-<p><img alt="Feedback stored in Cosmos DB" src="../media/feedback_stored_in_cosmos_db.png" />
-<br><em>User feedback stored in Cosmos DB</em></p>
-<p>By default, <strong>basic feedback</strong> (thumbs up/down) is enabled, while <strong>detailed ratings</strong> (star rating and comments) are disabled. Administrators control these options through <strong>Azure App Configuration</strong>.</p>
-<h2 id="feedback-types">Feedback Types</h2>
-<p>When enabled, users can provide <strong>star ratings</strong> and text comments for richer feedback that captures both satisfaction and reasoning.</p>
-<p><img alt="User feedback with rating" src="../media/user_feedback_with_rating.png" />
-<br><em>User providing rating and comment feedback</em></p>
-<h2 id="configuration-settings">Configuration Settings</h2>
-<p>The behavior of the feedback loop is controlled by key-values in <strong>Azure App Configuration</strong>:</p>
+<h1 id="release-walkthrough-file-uploads-and-ai-landing-zone-v2">Release walkthrough: file uploads and AI Landing Zone v2</h1>
+<p>Use this page as a guided walkthrough for the latest GPT-RAG updates around per-conversation file uploads, deployment hardening, and the Azure AI Landing Zone v2 foundation.</p>
+<h2 id="1-executive-summary">1. Executive summary</h2>
+<p>GPT-RAG now has two important improvements for real deployments:</p>
+<ol>
+<li><strong>Per-conversation file uploads</strong>: users can upload documents directly in the chat and ask questions over those files in the current conversation.</li>
+<li><strong>Deployment reliability improvements</strong>: GPT-RAG now uses the Azure AI Landing Zone v2 foundation, adds preflight validation, clarifies the Network Isolation flow, and supports Docker-free remote builds with Azure Container Registry.</li>
+</ol>
+<p>The user-facing result is simple: users get a richer chat experience, while operators get a clearer and safer deployment path.</p>
+<h2 id="2-what-to-show-first">2. What to show first</h2>
+<p>Start on the <strong>What's New</strong> page and point out:</p>
 <ul>
-<li><strong>ENABLE_USER_FEEDBACK</strong> → Default: <code>true</code>
-  Controls whether the feedback feature is available at all.</li>
+<li><strong>Release 2.6.7 — Per-conversation file uploads</strong></li>
+<li><strong>Release 2.7.0 — AI Landing Zone v2.0 bump and deployment hardening</strong></li>
 </ul>
-<p><img alt="Enable user feedback" src="../media/enable_user_feedback.png" />
-<BR><em>Key to enable or disable user feedback globally</em></p>
+<p>Then move to this walkthrough to explain the story end-to-end.</p>
+<h2 id="3-per-conversation-file-uploads">3. Per-conversation file uploads</h2>
+<h3 id="what-changed">What changed</h3>
+<p>Users can upload files directly through the chat UI. GPT-RAG ingests the uploaded file, indexes its chunks in Azure AI Search, and scopes those chunks to the active conversation.</p>
+<h3 id="why-it-matters">Why it matters</h3>
 <ul>
-<li><strong>USER_FEEDBACK_RATING</strong> → Default: <code>false</code>
-  Controls whether users can provide detailed feedback with ratings and comments.</li>
+<li>Users can ask questions about a file without making it part of the global corpus.</li>
+<li>Uploaded content is isolated by <code>conversationId</code>.</li>
+<li>The orchestrator retrieves both conversation-private chunks and shared/global chunks when answering.</li>
+<li>Citations can point back to the uploaded file content.</li>
 </ul>
-<p><img alt="Enable user feedback rating" src="../media/enable_user_feedback_rating.png" />
-<BR><em>Key to enable or disable detailed rating feedback</em></p>
-<h2 id="default-values">Default Values</h2>
+<h3 id="architecture-talking-points">Architecture talking points</h3>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>What to explain</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>UI</td>
+<td>The chat interface exposes file upload when the user is authenticated or the configured access mode allows it.</td>
+</tr>
+<tr>
+<td>Ingestion</td>
+<td>Uploaded files are persisted and chunked, then written to Azure AI Search with a <code>conversationId</code>.</td>
+</tr>
+<tr>
+<td>Orchestrator</td>
+<td>Retrieval filters include the current conversation plus shared/global content.</td>
+</tr>
+<tr>
+<td>Storage/Search</td>
+<td>Original files and indexed chunks remain separate from the global ingestion flow.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="demo-script">Demo script</h3>
+<ol>
+<li>Open GPT-RAG.</li>
+<li>Start a new conversation.</li>
+<li>Upload a small document.</li>
+<li>Ask a question whose answer is only in that document.</li>
+<li>Point out that the answer is grounded in the uploaded file.</li>
+<li>Start or switch to another conversation and explain that private uploaded chunks are scoped by conversation.</li>
+</ol>
+<h2 id="4-ai-landing-zone-v2-foundation">4. AI Landing Zone v2 foundation</h2>
+<h3 id="what-changed_1">What changed</h3>
+<p>GPT-RAG now consumes the newer Azure AI Landing Zone Bicep foundation. This brings a more robust infrastructure baseline and a clearer path for enterprise scenarios.</p>
+<h3 id="what-to-highlight">What to highlight</h3>
 <ul>
-<li><code>ENABLE_USER_FEEDBACK = true</code></li>
-<li><code>USER_FEEDBACK_RATING = false</code></li>
+<li><strong>IP allow-listing</strong> through <code>allowedIpRanges</code>.</li>
+<li><strong>Bring-your-own Private DNS zones</strong> for hub-and-spoke or enterprise landing zone integration.</li>
+<li><strong>Bring-your-own observability</strong> with existing Log Analytics and Application Insights.</li>
+<li><strong>Deployment mode</strong> parameterization for standalone versus landing-zone-integrated topologies.</li>
+<li><strong>Preflight validation</strong> before ARM deployment reaches late failures.</li>
 </ul>
-<p>This means feedback is collected by default, but <strong>star ratings and comments</strong> must be explicitly enabled by setting <code>USER_FEEDBACK_RATING</code> to <code>true</code>.</p>
+<h3 id="operator-value">Operator value</h3>
+<p>The upgrade reduces the chance of failing late in provisioning and gives platform teams more control over networking, DNS, and observability integration.</p>
+<h2 id="5-regional-preflight-checks">5. Regional preflight checks</h2>
+<h3 id="what-changed_2">What changed</h3>
+<p>Before provisioning, GPT-RAG now validates whether the selected region can support the important deployment prerequisites.</p>
+<h3 id="checks-to-mention">Checks to mention</h3>
+<ul>
+<li>Azure CLI subscription matches the <code>azd</code> environment.</li>
+<li>Region is supported by required resource providers.</li>
+<li>Jumpbox VM SKU is available.</li>
+<li>Azure AI Search, Cosmos DB, Container Apps, and AI Foundry/Cognitive Services are supported in the selected region.</li>
+<li>Azure OpenAI deployment quota is sufficient for the configured models.</li>
+</ul>
+<h3 id="important-limitation">Important limitation</h3>
+<p>Some Azure capacity issues are transient and are not exposed by a reliable pre-create API. Cosmos DB high-demand <code>ServiceUnavailable</code> is the main example. The preflight is explicit about that limitation.</p>
+<h2 id="6-basic-deployment-path">6. Basic deployment path</h2>
+<p>Use this path for a simple environment without Network Isolation.</p>
+<div class="highlight"><pre><span></span><code>azd<span class="w"> </span>init<span class="w"> </span>-t<span class="w"> </span>azure/gpt-rag
+az<span class="w"> </span>login
+azd<span class="w"> </span>auth<span class="w"> </span>login
+azd<span class="w"> </span>env<span class="w"> </span><span class="nb">set</span><span class="w"> </span>NETWORK_ISOLATION<span class="w"> </span><span class="nb">false</span>
+azd<span class="w"> </span>provision
+azd<span class="w"> </span>deploy
+</code></pre></div>
+<h3 id="what-to-explain">What to explain</h3>
+<ul>
+<li>The workstation can run the full flow.</li>
+<li><code>postProvision</code> runs locally after <code>azd provision</code>.</li>
+<li>Component images can be built locally with Docker or remotely with ACR when configured.</li>
+</ul>
+<h2 id="7-network-isolation-deployment-path">7. Network Isolation deployment path</h2>
+<p>Network Isolation uses a two-host flow.</p>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Where it runs</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>azd provision</code></td>
+<td>Workstation</td>
+<td>Creates the private infrastructure.</td>
+</tr>
+<tr>
+<td><code>scripts/postProvision.ps1</code></td>
+<td>Jumpbox or VNet-connected host</td>
+<td>Data-plane resources are private.</td>
+</tr>
+<tr>
+<td><code>azd deploy</code></td>
+<td>Jumpbox or VNet-connected host</td>
+<td>Private ACR and private Container Apps are reachable only inside the VNet.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="workstation">Workstation</h3>
+<div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">NETWORK_ISOLATION</span> <span class="n">true</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">AZURE_SKIP_NETWORK_ISOLATION_WARNING</span> <span class="n">true</span>
+<span class="n">azd</span> <span class="n">provision</span>
+</code></pre></div>
+<h3 id="jumpbox">Jumpbox</h3>
+<div class="highlight"><pre><span></span><code><span class="nb">cd </span><span class="n">C</span><span class="p">:\</span><span class="n">github</span><span class="p">\</span><span class="n">GPT-RAG</span>
+<span class="n">az</span> <span class="n">login</span> <span class="p">-</span><span class="n">-identity</span>
+<span class="n">azd</span> <span class="n">auth</span> <span class="n">login</span> <span class="p">-</span><span class="n">-managed-identity</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">RUN_FROM_JUMPBOX</span> <span class="n">true</span>
+<span class="p">.\</span><span class="n">scripts</span><span class="p">\</span><span class="n">postProvision</span><span class="p">.</span><span class="n">ps1</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">ACR_TASK_AGENT_POOL</span> <span class="n">build-pool</span>
+<span class="n">azd</span> <span class="n">deploy</span>
+</code></pre></div>
+<h3 id="what-not-to-do">What not to do</h3>
+<p>Do not run <code>azd deploy</code> from the workstation when <code>NETWORK_ISOLATION=true</code>. The deployment hook blocks this intentionally.</p>
+<p><code>BUILD_MODE</code> normally does not need to be set. When <code>NETWORK_ISOLATION=true</code> or <code>ACR_TASK_AGENT_POOL</code> is set, component scripts infer ACR remote build.</p>
+<h2 id="8-docker-free-deployment">8. Docker-free deployment</h2>
+<h3 id="what-changed_3">What changed</h3>
+<p>Component deployment can use Azure Container Registry remote builds, so Docker does not need to be installed on the jumpbox for network-isolated deployments.</p>
+<h3 id="why-it-matters_1">Why it matters</h3>
+<ul>
+<li>Easier jumpbox setup.</li>
+<li>Fewer local dependencies.</li>
+<li>Builds run inside the private ACR build path.</li>
+<li>The same deploy command works for the operator.</li>
+</ul>
+<h2 id="9-validation-status">9. Validation status</h2>
+<p>The current flow was validated in both modes:</p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Basic deployment</td>
+<td>Provision, post-provision, deploy, and smoke checks completed successfully.</td>
+</tr>
+<tr>
+<td>Network Isolation</td>
+<td>Workstation provision, jumpbox post-provision, private ACR Tasks deploy, and smoke checks completed successfully.</td>
+</tr>
+</tbody>
+</table>
+<p>Smoke checks included:</p>
+<ul>
+<li>Frontend returns HTTP 200.</li>
+<li>Data ingestion returns HTTP 200.</li>
+<li>Orchestrator root returns the expected HTTP 404.</li>
+<li>Container Apps are <code>Succeeded</code> and <code>Running</code>.</li>
+</ul>
+<h2 id="10-recommended-walkthrough-order">10. Recommended walkthrough order</h2>
+<ol>
+<li>Start with <strong>What's New</strong> to show the two release themes.</li>
+<li>Open this walkthrough page.</li>
+<li>Explain file upload from a user perspective.</li>
+<li>Explain the architecture path: UI → ingestion → storage/search → orchestrator.</li>
+<li>Explain the AI Landing Zone v2 operator value.</li>
+<li>Show the <strong>Deployment Guide</strong> and compare Basic versus Network Isolation.</li>
+<li>Emphasize the new regional preflight checks and Docker-free ACR remote build flow.</li>
+<li>Close with validation: both Basic and Network Isolation paths were tested end-to-end.</li>
+</ol>
 
 
 
