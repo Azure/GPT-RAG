@@ -68,6 +68,19 @@ Network-isolated deployments use a two-host flow:
 
 Do not run `azd deploy` from the workstation when `NETWORK_ISOLATION=true`. The deploy hook blocks that path because private resources and the private ACR build pool are reachable only from inside the VNet.
 
+### Network Isolation runbook
+
+Use this runbook for a clean network-isolated deployment:
+
+1. On your workstation, create or select the azd environment and enable network isolation.
+2. Still on your workstation, run `azd provision`. This creates the infrastructure and then stops before local data-plane configuration.
+3. Connect to the jumpbox through Azure Bastion, or use another machine with VNet/VPN access.
+4. On the jumpbox, authenticate with the VM managed identity.
+5. On the jumpbox, run `scripts/postProvision.ps1` with `RUN_FROM_JUMPBOX=true`.
+6. On the jumpbox, run `azd deploy` with `RUN_FROM_JUMPBOX=true` and `ACR_TASK_AGENT_POOL=build-pool`.
+
+`BUILD_MODE` is normally not required. Component deploy scripts automatically use ACR remote builds when `NETWORK_ISOLATION=true` or when `ACR_TASK_AGENT_POOL` is set.
+
 **Before Provisioning**
 
 Enable network isolation in your environment:
@@ -157,7 +170,6 @@ cd C:\github\GPT-RAG
 azd env set RUN_FROM_JUMPBOX true
 azd env set NETWORK_ISOLATION true
 azd env set ACR_TASK_AGENT_POOL build-pool
-azd env set BUILD_MODE acr-task
 azd deploy
 ```
 
