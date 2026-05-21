@@ -339,6 +339,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Zero Trust Deployment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#network-isolation-runbook" class="md-nav__link">
+    <span class="md-ellipsis">
+      Network Isolation runbook
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1021,6 +1036,17 @@ azd deploy
 </tbody>
 </table>
 <p>Do not run <code>azd deploy</code> from the workstation when <code>NETWORK_ISOLATION=true</code>. The deploy hook blocks that path because private resources and the private ACR build pool are reachable only from inside the VNet.</p>
+<h3 id="network-isolation-runbook">Network Isolation runbook</h3>
+<p>Use this runbook for a clean network-isolated deployment:</p>
+<ol>
+<li>On your workstation, create or select the azd environment and enable network isolation.</li>
+<li>Still on your workstation, run <code>azd provision</code>. This creates the infrastructure and then stops before local data-plane configuration.</li>
+<li>Connect to the jumpbox through Azure Bastion, or use another machine with VNet/VPN access.</li>
+<li>On the jumpbox, authenticate with the VM managed identity.</li>
+<li>On the jumpbox, run <code>scripts/postProvision.ps1</code> with <code>RUN_FROM_JUMPBOX=true</code>.</li>
+<li>On the jumpbox, run <code>azd deploy</code> with <code>RUN_FROM_JUMPBOX=true</code> and <code>ACR_TASK_AGENT_POOL=build-pool</code>.</li>
+</ol>
+<p><code>BUILD_MODE</code> is normally not required. Component deploy scripts automatically use ACR remote builds when <code>NETWORK_ISOLATION=true</code> or when <code>ACR_TASK_AGENT_POOL</code> is set.</p>
 <p><strong>Before Provisioning</strong></p>
 <p>Enable network isolation in your environment:</p>
 <div class="highlight"><pre><span></span><code>azd env set NETWORK_ISOLATION true
@@ -1082,7 +1108,6 @@ azd provision
 <span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">RUN_FROM_JUMPBOX</span> <span class="n">true</span>
 <span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">NETWORK_ISOLATION</span> <span class="n">true</span>
 <span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">ACR_TASK_AGENT_POOL</span> <span class="n">build-pool</span>
-<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">BUILD_MODE</span> <span class="n">acr-task</span>
 <span class="n">azd</span> <span class="n">deploy</span>
 </code></pre></div>
 <p>This command deploys each service in sequence. Docker is not required on the jumpbox for network-isolated deployments; component scripts use Azure Container Registry remote builds (<code>az acr build</code>) against the private ACR task agent pool.</p>
