@@ -31,6 +31,7 @@ markdown_extensions:
 nav:
   - Home: index.md
   - What's New: whatisnew.md
+  - Release Walkthrough: release_267_270_walkthrough.md
   - Deployment Guide: deploy.md
   - Quick Start Guides:
     - Simple RAG: quickstart_simple_rag.md
