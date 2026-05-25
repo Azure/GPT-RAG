@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.  
 This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to [Semantic Versioning](https://semver.org/).
 
+## [v2.7.2] - 2026-05-25
+
+### Changed
+- **Bumped `gpt-rag-orchestrator` to [v2.6.4](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.6.4)** to consume the Agent Service startup warmup fix for default basic deployments.
+
+### Fixed
+- **Default `maf_lite` startup no longer creates Agent Service agents**: the orchestrator startup warmup is now strategy-aware, skips Agent Service entirely for the default `maf_lite` strategy, limits reusable startup agent creation to `single_agent_rag`, and reuses any existing `gpt-rag-agent-v2` by name before creating one. Fixes [Azure/GPT-RAG#456](https://github.com/Azure/GPT-RAG/issues/456).
+
 ## [v2.7.1] - 2026-05-25
 
 ### Changed
