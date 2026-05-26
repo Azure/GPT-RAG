@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.  
 This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to [Semantic Versioning](https://semver.org/).
 
+## [v2.7.4] - 2026-05-26
+
+### Changed
+- **Bumped component releases for deploy image verification**: `gpt-rag-ui` to [v2.3.5](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.3.5), `gpt-rag-orchestrator` to [v2.6.6](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.6.6), and `gpt-rag-ingestion` to [v2.3.6](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.3.6).
+
+### Fixed
+- **Docker-free deploy no longer fails on revision restart race**: service deploy scripts now treat `az containerapp update --image` as the revision rollout and verify the configured image instead of immediately restarting the latest revision, avoiding transient Container Apps `Not Found` failures while preserving ACR remote builds. Fixes [Azure/GPT-RAG#449](https://github.com/Azure/GPT-RAG/issues/449).
+
 ## [v2.7.3] - 2026-05-25
 
 ### Changed
