@@ -698,6 +698,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../howto_app_gateway/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Application Gateway
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../howto_authentication/" class="md-nav__link">
         
   
@@ -938,8 +959,8 @@ async def orchestrator_endpoint(
 <tr>
 <td><code>nl2sql</code></td>
 <td>NL2SQL</td>
-<td>Agent Service V2</td>
-<td>Multi-agent pipeline (Triage → SQL Query → Synthesizer) for natural language to SQL translation using Semantic Kernel.</td>
+<td>Direct Azure OpenAI + local tools</td>
+<td>Microsoft Agent Framework <code>ChatAgent</code> flow for triage, SQL generation, and answer synthesis, with local metadata lookup, SQL validation, and execution.</td>
 </tr>
 </tbody>
 </table>
@@ -1115,7 +1136,7 @@ The visualization deliberately simplifies reality through abstraction and by omi
 <tr>
 <td>NL2SQL</td>
 <td><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/main/src/strategies/nl2sql_strategy.py"><code>strategies/nl2sql_strategy.py</code></a></td>
-<td>Multi-agent NL2SQL pipeline</td>
+<td>MAF <code>ChatAgent</code> + local NL2SQL tool flow</td>
 </tr>
 </tbody>
 </table>
