@@ -13,10 +13,10 @@
       
       
       
-        <link rel="prev" href="../ingestion_nl2sql_data_source/">
+        <link rel="prev" href="../deploy/">
       
       
-        <link rel="next" href="../howto_app_gateway/">
+        <link rel="next" href="../installation_zero_trust/">
       
       
       <link rel="icon" href="../favicon.ico">
@@ -24,7 +24,7 @@
     
     
       
-        <title>Azure Direct Models - GPT-RAG</title>
+        <title>Standard - GPT-RAG</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#azure-direct-models" class="md-skip">
+        <a href="#standard-installation" class="md-skip">
           Skip to content
         </a>
       
@@ -111,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Azure Direct Models
+              Standard
             
           </span>
         </div>
@@ -306,17 +306,19 @@
       
   
   
+    
   
   
+  
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
           <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
@@ -330,7 +332,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             Installation
@@ -341,10 +343,28 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../installation/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Standard
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -353,6 +373,42 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#standard-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Standard installation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick path
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -727,19 +783,17 @@
       
   
   
-    
   
   
-  
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
         
           
           <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
@@ -753,7 +807,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_9">
             <span class="md-nav__icon md-icon"></span>
             How-to Guides
@@ -764,19 +818,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../howto_azure_direct/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -785,7 +830,6 @@
   
 
       </a>
-      
     </li>
   
 
@@ -982,45 +1026,25 @@
   
 
 
-<h1 id="azure-direct-models">Azure Direct Models</h1>
-<p>Azure Direct Models are hosted and exposed by Microsoft Foundry. You call them via the Foundry inference APIs using Microsoft Entra ID–based authentication, instead of Azure OpenAI–specific APIs. This page explains how to switch GPT-RAG’s default inference model (currently, <code>gpt-4o</code>) to a different model.</p>
-<p>With Azure Direct Models, you can use non–Azure OpenAI models (for example, Mistral, DeepSeek, Grok, etc.) from Azure, while standardizing on Foundry inference APIs and Entra ID authentication.</p>
-<p><a id="how-to-find-which-models-you-can-use"></a></p>
-<p><strong>How to find which models you can use</strong></p>
-<p>Model availability depends on what’s enabled for your tenant, subscription, and region. The easiest way to see what you can use is the <a href="https://ai.azure.com/explore/models">Foundry Model Catalog</a>. In the catalog, select the <code>Direct from Azure</code> collection to focus on Azure Direct models.</p>
-<p><img alt="Microsoft Foundry catalog - Direct from Azure" src="../media/howto_azure_direct.png" /></p>
-<p><a id="how-to-switch-gpt-rags-default-model"></a></p>
-<p><strong>Switch chat model</strong></p>
-<p>GPT-RAG provisions with a default model (currently, <code>gpt-4o</code>). Most commonly, you change the model at provisioning time. If the solution is already deployed, you can switch the chat model by updating the runtime configuration.</p>
-<p><strong>Provisioning time</strong></p>
-<p>Before you run <code>azd provision</code>, set the model in the <a href="https://github.com/Azure/GPT-RAG/blob/main/infra/main.parameters.json"><code>infra/main.parameters.json</code></a> file (this file is used by the infrastructure provisioning step).</p>
-<p>In <code>infra/main.parameters.json</code>, update the <code>model</code> section.</p>
-<p>Example (default)</p>
-<div class="highlight"><pre><span></span><code><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;format&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;OpenAI&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;gpt-4o&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-11-20&quot;</span>
-<span class="p">}</span>
+  <h1>Standard</h1>
+
+<h2 id="standard-installation">Standard installation</h2>
+<p>Use this page for a standard GPT-RAG deployment without private network isolation. The authoritative step-by-step flow is the <a href="../deploy/#basic-deployment">Basic Deployment</a> section of the Deployment Guide; this page exists as a short installation entry point.</p>
+<h2 id="quick-path">Quick path</h2>
+<ul>
+<li><strong>Initialize the template:</strong> run <code>azd init -t azure/gpt-rag</code> in a clean working directory.</li>
+<li><strong>Authenticate:</strong> run <code>az login</code> and <code>azd auth login</code> before provisioning.</li>
+<li><strong>Select public/basic mode:</strong> set <code>NETWORK_ISOLATION=false</code> for a non-isolated deployment.</li>
+<li><strong>Provision and deploy:</strong> run <code>azd provision</code>, then <code>azd deploy</code>.</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">init</span> <span class="n">-t</span> <span class="n">azure</span><span class="p">/</span><span class="n">gpt-rag</span>
+<span class="n">az</span> <span class="n">login</span>
+<span class="n">azd</span> <span class="n">auth</span> <span class="n">login</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">NETWORK_ISOLATION</span> <span class="n">false</span>
+<span class="n">azd</span> <span class="n">provision</span>
+<span class="n">azd</span> <span class="n">deploy</span>
 </code></pre></div>
-<p>Example (Grok)</p>
-<p>Change <code>format</code>, <code>name</code>, and <code>version</code> to match the model you selected in the catalog.</p>
-<div class="highlight"><pre><span></span><code><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;format&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;xAI&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;grok-4-fast-non-reasoning&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span>
-<span class="p">}</span>
-</code></pre></div>
-<p><strong>Models tested</strong></p>
-<p>I tested the end-to-end flow with these models (non-exhaustive list): <code>DeepSeek-V3.1</code>, <code>DeepSeek-V3-0324</code>, <code>mistral-small-2503</code>, <code>grok-4-fast-non-reasoning</code>, and <code>grok-4</code>.</p>
-<blockquote>
-<p>Note: available names/versions can change over time. Treat the Microsoft Foundry model catalog (collection <code>Direct from Azure</code>) as the source of truth.</p>
-</blockquote>
-<p><strong>After the solution is deployed</strong></p>
-<p>If you already provisioned GPT-RAG (or you prefer managing models manually), you can still switch models. First, create/select the model deployment in Microsoft Foundry (Model catalog → <code>Direct from Azure</code>). Then take the deployment name you created/selected and set it as <code>CHAT_DEPLOYMENT_NAME</code> in Azure App Configuration. Finally, restart the orchestrator Container App so it picks up the new value.</p>
-<p><a id="bing-grounding-citations-behavior-by-model-type"></a></p>
-<blockquote>
-<p><strong>Note on Bing Grounding citations</strong>: The Bing Grounding tool may emit placeholder markers like &#x3010;0:0&#x2020;source&#x3011;. With OpenAI and Azure OpenAI models, responses include <code>url_citation</code> annotations so GPT-RAG can render clickable links. With some Azure Direct models, these annotations may be missing; in that case, GPT-RAG strips the placeholder markers and no clickable citations are shown.</p>
-</blockquote>
+<p>For required permissions, tools, preflight checks, regional quota notes, and service deployment details, continue with the <a href="../deploy/">Deployment Guide</a>.</p>
 
 
 
