@@ -1,8 +1,6 @@
 # 🚀 Deployment Guide
 
-Choose your preferred deployment method based on project requirements and environment constraints.
-
-Looking for the short installation entry points? Use [Standard installation](installation.md) for basic deployments or [Zero Trust installation](installation_zero_trust.md) for network-isolated deployments.
+Use this page as the canonical installation guide. Start with **Basic Deployment** for a simple environment, or **Zero Trust Deployment** when network isolation is required.
 
 > **Note:** You can change parameter values in `main.parameters.json` or set them with `azd env set` before running `azd provision`. This applies only to parameters that support environment variable substitution.
 
