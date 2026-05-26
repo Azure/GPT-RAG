@@ -1,80 +1,84 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="1040" viewBox="0 0 1100 1040" role="img" aria-labelledby="title desc">
   <title id="title">GPT-RAG modular architecture layers</title>
   <desc id="desc">Layered architecture view showing required baseline services, recommended support services, and optional add-ons for Zero Trust, operations, public ingress, existing platform integration, and scenario capabilities.</desc>
   <defs>
     <style>
-      .title { font: 700 28px 'Segoe UI', Arial, sans-serif; fill: #14345f; }
-      .subtitle { font: 400 16px 'Segoe UI', Arial, sans-serif; fill: #4c607a; }
-      .layer-title { font: 700 18px 'Segoe UI', Arial, sans-serif; fill: #14345f; }
-      .label { font: 700 13px 'Segoe UI', Arial, sans-serif; fill: #ffffff; }
-      .box-title { font: 700 14px 'Segoe UI', Arial, sans-serif; fill: #14345f; }
-      .box-text { font: 400 12px 'Segoe UI', Arial, sans-serif; fill: #485a72; }
-      .param { font: 600 11px 'Consolas', 'Courier New', monospace; fill: #5c3c87; }
-      .legend { font: 600 13px 'Segoe UI', Arial, sans-serif; fill: #33465f; }
+      .title { font: 700 30px 'Segoe UI', Arial, sans-serif; fill: #14345f; }
+      .subtitle { font: 400 17px 'Segoe UI', Arial, sans-serif; fill: #4c607a; }
+      .layer-title { font: 700 21px 'Segoe UI', Arial, sans-serif; fill: #14345f; }
+      .label { font: 700 15px 'Segoe UI', Arial, sans-serif; fill: #ffffff; }
+      .chip { font: 700 15px 'Segoe UI', Arial, sans-serif; fill: #15345b; }
+      .box-text { font: 400 15px 'Segoe UI', Arial, sans-serif; fill: #485a72; }
+      .param { font: 700 14px 'Consolas', 'Courier New', monospace; fill: #5c3c87; }
+      .legend { font: 600 15px 'Segoe UI', Arial, sans-serif; fill: #33465f; }
     </style>
   </defs>
-  <rect width="1280" height="820" fill="#f7faff"/>
-  <text x="50" y="55" class="title">Modular architecture layers</text>
-  <text x="50" y="82" class="subtitle">Start with the baseline, then add layers only when the customer scenario requires them.</text>
 
-  <rect x="52" y="112" width="24" height="16" rx="4" fill="#3f7dc7"/>
-  <text x="86" y="125" class="legend">Required baseline</text>
-  <rect x="232" y="112" width="24" height="16" rx="4" fill="#4a9f6f"/>
-  <text x="266" y="125" class="legend">Recommended/default support</text>
-  <rect x="498" y="112" width="24" height="16" rx="4" fill="#7b5fc7"/>
-  <text x="532" y="125" class="legend">Optional security/integration layer</text>
-  <rect x="800" y="112" width="24" height="16" rx="4" fill="#d9822b"/>
-  <text x="834" y="125" class="legend">Optional capability/cost layer</text>
+  <rect width="1100" height="1040" fill="#f7faff"/>
+  <text x="48" y="58" class="title">Modular architecture layers</text>
+  <text x="48" y="88" class="subtitle">Start with the baseline, then add layers only when the customer scenario requires them.</text>
 
-  <rect x="70" y="160" width="1140" height="118" rx="20" fill="#eaf3ff" stroke="#3f7dc7" stroke-width="2"/>
-  <rect x="92" y="184" width="138" height="30" rx="15" fill="#3f7dc7"/>
-  <text x="112" y="204" class="label">Required</text>
-  <text x="260" y="204" class="layer-title">Basic GPT-RAG runtime and data path</text>
-  <rect x="260" y="228" width="122" height="34" rx="10" fill="#ffffff" stroke="#87aee7"/>
-  <text x="285" y="250" class="box-title">Frontend</text>
-  <rect x="398" y="228" width="138" height="34" rx="10" fill="#ffffff" stroke="#87aee7"/>
-  <text x="423" y="250" class="box-title">Orchestrator</text>
-  <rect x="552" y="228" width="118" height="34" rx="10" fill="#ffffff" stroke="#87aee7"/>
-  <text x="580" y="250" class="box-title">Ingestion</text>
-  <rect x="686" y="228" width="118" height="34" rx="10" fill="#ffffff" stroke="#87aee7"/>
-  <text x="715" y="250" class="box-title">AI Search</text>
-  <rect x="820" y="228" width="126" height="34" rx="10" fill="#ffffff" stroke="#87aee7"/>
-  <text x="844" y="250" class="box-title">AI Foundry</text>
-  <rect x="962" y="228" width="92" height="34" rx="10" fill="#ffffff" stroke="#87aee7"/>
-  <text x="984" y="250" class="box-title">Storage</text>
-  <rect x="1070" y="228" width="108" height="34" rx="10" fill="#ffffff" stroke="#87aee7"/>
-  <text x="1092" y="250" class="box-title">Cosmos DB</text>
+  <rect x="50" y="118" width="22" height="16" rx="4" fill="#3f7dc7"/>
+  <text x="84" y="132" class="legend">Required baseline</text>
+  <rect x="250" y="118" width="22" height="16" rx="4" fill="#4a9f6f"/>
+  <text x="284" y="132" class="legend">Recommended/default support</text>
+  <rect x="548" y="118" width="22" height="16" rx="4" fill="#7b5fc7"/>
+  <text x="582" y="132" class="legend">Optional security/integration</text>
+  <rect x="838" y="118" width="22" height="16" rx="4" fill="#d9822b"/>
+  <text x="872" y="132" class="legend">Optional capability/cost</text>
 
-  <rect x="70" y="304" width="1140" height="104" rx="20" fill="#eef8f2" stroke="#4a9f6f" stroke-width="2"/>
-  <rect x="92" y="328" width="160" height="30" rx="15" fill="#4a9f6f"/>
-  <text x="112" y="348" class="label">Default support</text>
-  <text x="282" y="348" class="layer-title">Configuration, security, deployment, and observability</text>
-  <text x="282" y="380" class="box-text">App Configuration, Key Vault, managed identities/RBAC, Container Apps, Container Registry, Log Analytics, and Application Insights.</text>
+  <rect x="60" y="164" width="980" height="128" rx="22" fill="#eaf3ff" stroke="#3f7dc7" stroke-width="2.5"/>
+  <rect x="86" y="190" width="138" height="34" rx="17" fill="#3f7dc7"/>
+  <text x="118" y="213" class="label">Required</text>
+  <text x="252" y="213" class="layer-title">Basic GPT-RAG runtime and data path</text>
+  <rect x="242" y="242" width="92" height="36" rx="11" fill="#ffffff" stroke="#87aee7"/>
+  <text x="257" y="265" class="chip">Frontend</text>
+  <rect x="346" y="242" width="124" height="36" rx="11" fill="#ffffff" stroke="#87aee7"/>
+  <text x="366" y="265" class="chip">Orchestrator</text>
+  <rect x="482" y="242" width="102" height="36" rx="11" fill="#ffffff" stroke="#87aee7"/>
+  <text x="503" y="265" class="chip">Ingestion</text>
+  <rect x="596" y="242" width="102" height="36" rx="11" fill="#ffffff" stroke="#87aee7"/>
+  <text x="619" y="265" class="chip">AI Search</text>
+  <rect x="710" y="242" width="108" height="36" rx="11" fill="#ffffff" stroke="#87aee7"/>
+  <text x="730" y="265" class="chip">AI Foundry</text>
+  <rect x="830" y="242" width="90" height="36" rx="11" fill="#ffffff" stroke="#87aee7"/>
+  <text x="851" y="265" class="chip">Storage</text>
+  <rect x="932" y="242" width="100" height="36" rx="11" fill="#ffffff" stroke="#87aee7"/>
+  <text x="950" y="265" class="chip">Cosmos DB</text>
 
-  <rect x="70" y="434" width="1140" height="104" rx="20" fill="#f3efff" stroke="#7b5fc7" stroke-width="2"/>
-  <rect x="92" y="458" width="150" height="30" rx="15" fill="#7b5fc7"/>
-  <text x="112" y="478" class="label">Optional</text>
-  <text x="282" y="478" class="layer-title">Zero Trust / network isolation</text>
-  <text x="282" y="510" class="box-text">VNet, subnets, private endpoints, Private DNS, NSGs, Azure Firewall, restricted public access, and private service surfaces.</text>
-  <text x="930" y="510" class="param">NETWORK_ISOLATION=true</text>
+  <rect x="60" y="322" width="980" height="116" rx="22" fill="#eef8f2" stroke="#4a9f6f" stroke-width="2.5"/>
+  <rect x="86" y="348" width="172" height="34" rx="17" fill="#4a9f6f"/>
+  <text x="111" y="371" class="label">Default support</text>
+  <text x="286" y="371" class="layer-title">Configuration, security, deployment, and observability</text>
+  <text x="286" y="402" class="box-text">App Configuration, Key Vault, managed identities/RBAC, Container Apps, Container Registry,</text>
+  <text x="286" y="425" class="box-text">Log Analytics, and Application Insights.</text>
 
-  <rect x="70" y="564" width="548" height="126" rx="20" fill="#fff7ec" stroke="#d9822b" stroke-width="2"/>
-  <rect x="92" y="588" width="150" height="30" rx="15" fill="#d9822b"/>
-  <text x="112" y="608" class="label">Optional</text>
-  <text x="264" y="608" class="layer-title">Operations and private build path</text>
-  <text x="92" y="640" class="box-text">Jumpbox, Bastion, NAT Gateway, VM software bootstrap, and ACR Task Agent Pool for private image builds.</text>
-  <text x="92" y="670" class="param">DEPLOY_JUMPBOX / DEPLOY_BASTION / DEPLOY_NAT_GATEWAY / DEPLOY_ACR_TASK_AGENT_POOL</text>
+  <rect x="60" y="468" width="980" height="124" rx="22" fill="#f3efff" stroke="#7b5fc7" stroke-width="2.5"/>
+  <rect x="86" y="494" width="138" height="34" rx="17" fill="#7b5fc7"/>
+  <text x="119" y="517" class="label">Optional</text>
+  <text x="252" y="517" class="layer-title">Zero Trust / network isolation</text>
+  <text x="252" y="548" class="box-text">VNet, subnets, private endpoints, Private DNS, NSGs, Azure Firewall, restricted public access,</text>
+  <text x="252" y="571" class="box-text">and private service surfaces.</text>
+  <text x="760" y="571" class="param">NETWORK_ISOLATION=true</text>
 
-  <rect x="662" y="564" width="548" height="126" rx="20" fill="#fff7ec" stroke="#d9822b" stroke-width="2"/>
-  <rect x="684" y="588" width="150" height="30" rx="15" fill="#d9822b"/>
-  <text x="704" y="608" class="label">Optional</text>
-  <text x="856" y="608" class="layer-title">Entry and platform integration</text>
-  <text x="684" y="640" class="box-text">Application Gateway WAF public ingress, existing VNet/DNS/observability, and hub-spoke AI Landing Zone integration.</text>
-  <text x="684" y="670" class="param">publicIngress.enabled / DEPLOYMENT_MODE=ailz-integrated / EXISTING_* / HUB_INTEGRATION_*</text>
+  <rect x="60" y="622" width="980" height="122" rx="22" fill="#fff7ec" stroke="#d9822b" stroke-width="2.5"/>
+  <rect x="86" y="648" width="138" height="34" rx="17" fill="#d9822b"/>
+  <text x="119" y="671" class="label">Optional</text>
+  <text x="252" y="671" class="layer-title">Operations and private build path</text>
+  <text x="252" y="702" class="box-text">Jumpbox, Bastion, NAT Gateway, VM bootstrap, and ACR Task Agent Pool for private builds.</text>
+  <text x="252" y="730" class="param">DEPLOY_JUMPBOX / DEPLOY_BASTION / DEPLOY_NAT_GATEWAY / DEPLOY_ACR_TASK_AGENT_POOL</text>
 
-  <rect x="70" y="716" width="1140" height="70" rx="20" fill="#fff4f0" stroke="#d66f53" stroke-width="2"/>
-  <rect x="92" y="737" width="150" height="30" rx="15" fill="#d66f53"/>
-  <text x="112" y="757" class="label">Scenario add-ons</text>
-  <text x="282" y="745" class="box-title">Voice, Bing grounding, agentic retrieval, NL2SQL/PostgreSQL, MCP/tool hosting, and other use-case capabilities</text>
-  <text x="282" y="768" class="param">DEPLOY_SPEECH_SERVICE / DEPLOY_GROUNDING_WITH_BING / ENABLE_AGENTIC_RETRIEVAL / DEPLOY_POSTGRES / DEPLOY_MCP</text>
+  <rect x="60" y="774" width="980" height="122" rx="22" fill="#fff7ec" stroke="#d9822b" stroke-width="2.5"/>
+  <rect x="86" y="800" width="138" height="34" rx="17" fill="#d9822b"/>
+  <text x="119" y="823" class="label">Optional</text>
+  <text x="252" y="823" class="layer-title">Entry and platform integration</text>
+  <text x="252" y="854" class="box-text">Application Gateway WAF, existing VNet/DNS/observability, and hub-spoke AI Landing Zone integration.</text>
+  <text x="252" y="882" class="param">publicIngress.enabled / DEPLOYMENT_MODE=ailz-integrated / EXISTING_* / HUB_INTEGRATION_*</text>
+
+  <rect x="60" y="920" width="980" height="96" rx="22" fill="#fff4f0" stroke="#d66f53" stroke-width="2.5"/>
+  <rect x="86" y="946" width="178" height="34" rx="17" fill="#d66f53"/>
+  <text x="111" y="969" class="label">Scenario add-ons</text>
+  <text x="286" y="956" class="box-text">Voice, Bing grounding, agentic retrieval, NL2SQL/PostgreSQL, and MCP tool hosting.</text>
+  <text x="286" y="984" class="param">DEPLOY_SPEECH_SERVICE / DEPLOY_GROUNDING_WITH_BING / ENABLE_AGENTIC_RETRIEVAL</text>
+  <text x="286" y="1006" class="param">DEPLOY_POSTGRES / DEPLOY_MCP</text>
 </svg>

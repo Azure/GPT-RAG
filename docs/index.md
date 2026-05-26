@@ -15,10 +15,12 @@ Designed with Zero-Trust security and Infrastructure as Code (IaC) principles fr
 
 GPT-RAG can start as a basic deployment and expand into Zero Trust, public ingress, existing-platform integration, or optional AI capabilities as needed. See the [Architecture](architecture.md) page for the required-vs-optional matrix.
 
-![Modular architecture layers](media/architecture_modular_layers.svg)
-
 ![Zero Trust Architecture](media/architecture_zero_trust.png)
 *Full Zero Trust reference architecture. This is the complete network-isolated view, not the minimum basic deployment.*
+
+The complementary modular view below separates the basic deployment from optional add-on layers.
+
+![Modular architecture layers](media/architecture_modular_layers.svg)
 
 ## Runtime Services
 

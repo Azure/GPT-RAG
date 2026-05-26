@@ -2,6 +2,18 @@
 
 GPT-RAG is modular. The full Zero Trust diagram shows a hardened, full-capability reference architecture; it is not the minimum footprint required to evaluate or run the accelerator. Start with the **Basic Deployment** baseline, then add network isolation, enterprise integration, public ingress, or AI capabilities only when the scenario requires them.
 
+## Full Zero Trust reference
+
+The existing architecture diagram remains the full network-isolated reference view. Use it when discussing hardened deployments, while the complementary diagrams below explain the baseline and optional layers.
+
+![Zero Trust Architecture](media/architecture_zero_trust.png)
+
+[Download Visio Diagram](media/GPT-RAG.vsdx)
+
+---
+
+## Complementary modular views
+
 !!! note "How to read these diagrams"
     Solid blue components are part of the basic GPT-RAG deployment path. Green components are recommended/default platform support. Purple and orange components are optional add-ons controlled by deployment parameters.
 
@@ -10,6 +22,8 @@ GPT-RAG is modular. The full Zero Trust diagram shows a hardened, full-capabilit
 The baseline corresponds to the [Basic Deployment](deploy.md#basic-deployment) flow with `NETWORK_ISOLATION=false`. It focuses on the default application and data path: users access the frontend, the orchestrator coordinates AI and retrieval, ingestion indexes enterprise content, and shared platform services provide configuration, secrets, identity, storage, search, and conversation state.
 
 ![Modular architecture layers](media/architecture_modular_layers.svg)
+
+## Component matrix
 
 | Layer | Posture | Controlled by | Include when |
 | --- | --- | --- | --- |
@@ -23,14 +37,6 @@ The baseline corresponds to the [Basic Deployment](deploy.md#basic-deployment) f
 | Application Gateway WAF public ingress | Optional entry layer | `publicIngress.enabled` | Exposing one private Container App through controlled public HTTPS/WAF. See [Application Gateway](howto_app_gateway.md). |
 | Existing platform / AI Landing Zone integration | Optional enterprise integration | `DEPLOYMENT_MODE=ailz-integrated`, `USE_EXISTING_VNET`, `EXISTING_*_RESOURCE_ID`, `HUB_INTEGRATION_*` | Reusing central network, DNS, observability, Bastion, NAT, or hub-spoke resources. |
 | Scenario capabilities | Optional feature add-ons | `DEPLOY_SPEECH_SERVICE`, `DEPLOY_GROUNDING_WITH_BING`, `ENABLE_AGENTIC_RETRIEVAL`, `DEPLOY_POSTGRES`, `DEPLOY_MCP` | Enabling voice, Bing grounding, agentic retrieval, NL2SQL/PostgreSQL, or MCP/tool-hosting scenarios. |
-
-## Full Zero Trust reference
-
-The following diagram is the full network-isolated reference view. Use it when discussing hardened deployments, not as the default minimum deployment.
-
-![Zero Trust Architecture](media/architecture_zero_trust.png)
-
-[Download Visio Diagram](media/GPT-RAG.vsdx)
 
 ## Key Capabilities
 
