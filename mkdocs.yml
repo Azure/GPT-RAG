@@ -47,6 +47,7 @@ nav:
         - NL2SQL: ingestion_nl2sql_data_source.md
   - How-to Guides:
     - Azure Direct Models: howto_azure_direct.md
+    - Application Gateway: howto_app_gateway.md
     - Auth & Doc Security: howto_authentication.md
     - Multimodality: howto_multimodality.md
     - User Feedback: howto_userfeedback.md
