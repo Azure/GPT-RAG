@@ -15,7 +15,7 @@ The existing architecture diagram remains the full network-isolated reference vi
 ## Complementary modular views
 
 !!! note "How to read these diagrams"
-    Solid blue components are part of the basic GPT-RAG deployment path. Green components are recommended/default platform support. Purple and orange components are optional add-ons. Deployment switches are intentionally kept out of the diagram and listed in the component matrix below.
+    The modular view is organized around **Basic Deployment**, **Common platform services**, and **Zero Trust additions**. Orange chips identify resources controlled by deployment toggles or scenario flags that can be omitted; the exact switches are listed in the component matrix below.
 
 ![Basic Deployment architecture](media/architecture_basic_deployment.svg)
 
