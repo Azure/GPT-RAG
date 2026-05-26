@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="1040" viewBox="0 0 1100 1040" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="970" viewBox="0 0 1100 970" role="img" aria-labelledby="title desc">
   <title id="title">GPT-RAG modular architecture layers</title>
   <desc id="desc">Layered architecture view showing required baseline services, recommended support services, and optional add-ons for Zero Trust, operations, public ingress, existing platform integration, and scenario capabilities.</desc>
   <defs>
@@ -9,12 +9,11 @@
       .label { font: 700 15px 'Segoe UI', Arial, sans-serif; fill: #ffffff; }
       .chip { font: 700 15px 'Segoe UI', Arial, sans-serif; fill: #15345b; }
       .box-text { font: 400 15px 'Segoe UI', Arial, sans-serif; fill: #485a72; }
-      .param { font: 700 14px 'Consolas', 'Courier New', monospace; fill: #5c3c87; }
       .legend { font: 600 15px 'Segoe UI', Arial, sans-serif; fill: #33465f; }
     </style>
   </defs>
 
-  <rect width="1100" height="1040" fill="#f7faff"/>
+  <rect width="1100" height="970" fill="#f7faff"/>
   <text x="48" y="58" class="title">Modular architecture layers</text>
   <text x="48" y="88" class="subtitle">Start with the baseline, then add layers only when the customer scenario requires them.</text>
 
@@ -53,32 +52,28 @@
   <text x="286" y="402" class="box-text">App Configuration, Key Vault, managed identities/RBAC, Container Apps, Container Registry,</text>
   <text x="286" y="425" class="box-text">Log Analytics, and Application Insights.</text>
 
-  <rect x="60" y="468" width="980" height="124" rx="22" fill="#f3efff" stroke="#7b5fc7" stroke-width="2.5"/>
+  <rect x="60" y="468" width="980" height="106" rx="22" fill="#f3efff" stroke="#7b5fc7" stroke-width="2.5"/>
   <rect x="86" y="494" width="138" height="34" rx="17" fill="#7b5fc7"/>
   <text x="119" y="517" class="label">Optional</text>
   <text x="252" y="517" class="layer-title">Zero Trust / network isolation</text>
   <text x="252" y="548" class="box-text">VNet, subnets, private endpoints, Private DNS, NSGs, Azure Firewall, restricted public access,</text>
   <text x="252" y="571" class="box-text">and private service surfaces.</text>
-  <text x="760" y="571" class="param">NETWORK_ISOLATION=true</text>
 
-  <rect x="60" y="622" width="980" height="122" rx="22" fill="#fff7ec" stroke="#d9822b" stroke-width="2.5"/>
-  <rect x="86" y="648" width="138" height="34" rx="17" fill="#d9822b"/>
-  <text x="119" y="671" class="label">Optional</text>
-  <text x="252" y="671" class="layer-title">Operations and private build path</text>
-  <text x="252" y="702" class="box-text">Jumpbox, Bastion, NAT Gateway, VM bootstrap, and ACR Task Agent Pool for private builds.</text>
-  <text x="252" y="730" class="param">DEPLOY_JUMPBOX / DEPLOY_BASTION / DEPLOY_NAT_GATEWAY / DEPLOY_ACR_TASK_AGENT_POOL</text>
+  <rect x="60" y="604" width="980" height="104" rx="22" fill="#fff7ec" stroke="#d9822b" stroke-width="2.5"/>
+  <rect x="86" y="630" width="138" height="34" rx="17" fill="#d9822b"/>
+  <text x="119" y="653" class="label">Optional</text>
+  <text x="252" y="653" class="layer-title">Operations and private build path</text>
+  <text x="252" y="684" class="box-text">Jumpbox, Bastion, NAT Gateway, VM bootstrap, and ACR Task Agent Pool for private builds.</text>
 
-  <rect x="60" y="774" width="980" height="122" rx="22" fill="#fff7ec" stroke="#d9822b" stroke-width="2.5"/>
-  <rect x="86" y="800" width="138" height="34" rx="17" fill="#d9822b"/>
-  <text x="119" y="823" class="label">Optional</text>
-  <text x="252" y="823" class="layer-title">Entry and platform integration</text>
-  <text x="252" y="854" class="box-text">Application Gateway WAF, existing VNet/DNS/observability, and hub-spoke AI Landing Zone integration.</text>
-  <text x="252" y="882" class="param">publicIngress.enabled / DEPLOYMENT_MODE=ailz-integrated / EXISTING_* / HUB_INTEGRATION_*</text>
+  <rect x="60" y="738" width="980" height="104" rx="22" fill="#fff7ec" stroke="#d9822b" stroke-width="2.5"/>
+  <rect x="86" y="764" width="138" height="34" rx="17" fill="#d9822b"/>
+  <text x="119" y="787" class="label">Optional</text>
+  <text x="252" y="787" class="layer-title">Entry and platform integration</text>
+  <text x="252" y="818" class="box-text">Application Gateway WAF, existing VNet/DNS/observability, and hub-spoke AI Landing Zone integration.</text>
 
-  <rect x="60" y="920" width="980" height="96" rx="22" fill="#fff4f0" stroke="#d66f53" stroke-width="2.5"/>
-  <rect x="86" y="946" width="178" height="34" rx="17" fill="#d66f53"/>
-  <text x="111" y="969" class="label">Scenario add-ons</text>
-  <text x="286" y="956" class="box-text">Voice, Bing grounding, agentic retrieval, NL2SQL/PostgreSQL, and MCP tool hosting.</text>
-  <text x="286" y="984" class="param">DEPLOY_SPEECH_SERVICE / DEPLOY_GROUNDING_WITH_BING / ENABLE_AGENTIC_RETRIEVAL</text>
-  <text x="286" y="1006" class="param">DEPLOY_POSTGRES / DEPLOY_MCP</text>
+  <rect x="60" y="872" width="980" height="76" rx="22" fill="#fff4f0" stroke="#d66f53" stroke-width="2.5"/>
+  <rect x="86" y="893" width="178" height="34" rx="17" fill="#d66f53"/>
+  <text x="111" y="916" class="label">Scenario add-ons</text>
+  <text x="286" y="904" class="box-text">Voice, Bing grounding, agentic retrieval, NL2SQL/PostgreSQL, MCP tool hosting,</text>
+  <text x="286" y="927" class="box-text">and other use-case capabilities.</text>
 </svg>
