@@ -474,7 +474,16 @@
         <li class="md-nav__item">
   <a href="#architecture" class="md-nav__link">
     <span class="md-ellipsis">
-      🏛️ Architecture
+      Architecture
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#full-zero-trust-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      Full Zero Trust reference
     </span>
   </a>
   
@@ -944,14 +953,96 @@
 
   <h1>Overview</h1>
 
-<h2 id="architecture">🏛️ Architecture</h2>
+<h2 id="architecture">Architecture</h2>
+<p>GPT-RAG is modular. The full Zero Trust diagram shows a hardened, full-capability reference architecture; it is not the minimum footprint required to evaluate or run the accelerator. Start with the <strong>Basic Deployment</strong> baseline, then add network isolation, enterprise integration, public ingress, or AI capabilities only when the scenario requires them.</p>
+<div class="admonition note">
+<p class="admonition-title">How to read these diagrams</p>
+<p>Solid blue components are part of the basic GPT-RAG deployment path. Green components are recommended/default platform support. Purple and orange components are optional add-ons controlled by deployment parameters.</p>
+</div>
+<p><img alt="Basic Deployment architecture" src="../media/architecture_basic_deployment.svg" /></p>
+<p>The baseline corresponds to the <a href="../deploy/#basic-deployment">Basic Deployment</a> flow with <code>NETWORK_ISOLATION=false</code>. It focuses on the default application and data path: users access the frontend, the orchestrator coordinates AI and retrieval, ingestion indexes enterprise content, and shared platform services provide configuration, secrets, identity, storage, search, and conversation state.</p>
+<p><img alt="Modular architecture layers" src="../media/architecture_modular_layers.svg" /></p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Posture</th>
+<th>Controlled by</th>
+<th>Include when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Frontend, orchestrator, ingestion</td>
+<td>Required baseline</td>
+<td><code>manifest.json</code> components and <code>containerAppsList</code></td>
+<td>Running the default GPT-RAG web, orchestration, and ingestion services.</td>
+</tr>
+<tr>
+<td>AI Foundry / Azure OpenAI, AI Search, Storage, Cosmos DB</td>
+<td>Required for default RAG</td>
+<td><code>deployAiFoundry</code>, <code>modelDeploymentList</code>, <code>deploySearchService</code>, <code>deployStorageAccount</code>, <code>deployCosmosDb</code></td>
+<td>Running the standard RAG experience with indexed content, conversations, prompts, and model deployments.</td>
+</tr>
+<tr>
+<td>App Configuration, Key Vault, managed identity / RBAC</td>
+<td>Required platform baseline</td>
+<td><code>deployAppConfig</code>, <code>deployKeyVault</code>, <code>useUAI</code>, service role lists</td>
+<td>Centralizing runtime settings and secrets without hard-coded credentials.</td>
+</tr>
+<tr>
+<td>Container Apps, Container Registry</td>
+<td>Required for service deployment</td>
+<td><code>deployContainerApps</code>, <code>deployContainerEnv</code>, <code>deployContainerRegistry</code></td>
+<td>Hosting and deploying the GPT-RAG runtime services.</td>
+</tr>
+<tr>
+<td>Log Analytics and Application Insights</td>
+<td>Recommended/default support</td>
+<td><code>deployLogAnalytics</code>, <code>deployAppInsights</code>, <code>EXISTING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID</code>, <code>EXISTING_APPLICATION_INSIGHTS_RESOURCE_ID</code></td>
+<td>Capturing diagnostics and app telemetry, or reusing enterprise observability.</td>
+</tr>
+<tr>
+<td>Zero Trust networking</td>
+<td>Optional security add-on</td>
+<td><code>NETWORK_ISOLATION=true</code>, <code>allowedIpRanges</code>, Private DNS settings</td>
+<td>Requiring private endpoints, private DNS, VNet integration, NSGs, and controlled public access.</td>
+</tr>
+<tr>
+<td>Jumpbox, Bastion, NAT Gateway, ACR Task Agent Pool, Azure Firewall</td>
+<td>Optional operations/build layer</td>
+<td><code>DEPLOY_JUMPBOX</code>, <code>DEPLOY_BASTION</code>, <code>DEPLOY_NAT_GATEWAY</code>, <code>DEPLOY_ACR_TASK_AGENT_POOL</code>, <code>DEPLOY_AZURE_FIREWALL</code></td>
+<td>Operating from inside the VNet, building images privately, or controlling egress in isolated deployments.</td>
+</tr>
+<tr>
+<td>Application Gateway WAF public ingress</td>
+<td>Optional entry layer</td>
+<td><code>publicIngress.enabled</code></td>
+<td>Exposing one private Container App through controlled public HTTPS/WAF. See <a href="../howto_app_gateway/">Application Gateway</a>.</td>
+</tr>
+<tr>
+<td>Existing platform / AI Landing Zone integration</td>
+<td>Optional enterprise integration</td>
+<td><code>DEPLOYMENT_MODE=ailz-integrated</code>, <code>USE_EXISTING_VNET</code>, <code>EXISTING_*_RESOURCE_ID</code>, <code>HUB_INTEGRATION_*</code></td>
+<td>Reusing central network, DNS, observability, Bastion, NAT, or hub-spoke resources.</td>
+</tr>
+<tr>
+<td>Scenario capabilities</td>
+<td>Optional feature add-ons</td>
+<td><code>DEPLOY_SPEECH_SERVICE</code>, <code>DEPLOY_GROUNDING_WITH_BING</code>, <code>ENABLE_AGENTIC_RETRIEVAL</code>, <code>DEPLOY_POSTGRES</code>, <code>DEPLOY_MCP</code></td>
+<td>Enabling voice, Bing grounding, agentic retrieval, NL2SQL/PostgreSQL, or MCP/tool-hosting scenarios.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="full-zero-trust-reference">Full Zero Trust reference</h2>
+<p>The following diagram is the full network-isolated reference view. Use it when discussing hardened deployments, not as the default minimum deployment.</p>
 <p><img alt="Zero Trust Architecture" src="../media/architecture_zero_trust.png" /></p>
 <p><a href="../media/GPT-RAG.vsdx">Download Visio Diagram</a></p>
 <h2 id="key-capabilities">Key Capabilities</h2>
 <ul>
 <li>
 <p><strong>Enterprise-Grade Security</strong><br />
-  Zero-Trust architecture with private endpoints, Azure Key Vault integration, and comprehensive monitoring.</p>
+  Optional Zero Trust architecture with private endpoints, Azure Key Vault integration, and comprehensive monitoring.</p>
 </li>
 <li>
 <p><strong>Flexible &amp; Customizable</strong><br />
