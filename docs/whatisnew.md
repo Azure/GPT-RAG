@@ -2,6 +2,14 @@
 
 ### May 2026
 
+**[Release 2.7.5](https://github.com/Azure/GPT-RAG/tree/v2.7.5) - Existing-platform deployment, NL2SQL, and conversation rename fixes**
+
+GPT-RAG now exposes the AI Landing Zone existing-platform parameters from the root `main.parameters.json`, so operators can integrate with shared Private DNS Zones, observability, hub networking, existing jumpbox/Bastion/NAT resources, Private Endpoint placement, ACR Task agent pools, speech resources, and policy-managed DNS without editing the infra submodule.
+
+Runtime component updates in this release move NL2SQL to Microsoft Agent Framework with direct model calls and local NL2SQL tool execution, removing Semantic Kernel Agent Service agent creation from that path. The chat UI also persists conversation renames by calling the orchestrator conversation update API.
+
+---
+
 **[Release 2.7.0](https://github.com/Azure/GPT-RAG/tree/v2.7.0) - AI Landing Zone v2.0 bump**
 
 The underlying Azure AI Landing Zone Bicep module has been upgraded from v1.0.7 to v2.0.2 — a major-version baseline update. Default behavior is unchanged for existing operators; all new capabilities are opt-in via `azd env set`.

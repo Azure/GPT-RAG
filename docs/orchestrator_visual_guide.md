@@ -56,7 +56,7 @@ The active strategy is set via the `AGENT_STRATEGY` key in Azure App Configurati
 | `maf_agent_service` | MAF + Agent Service | Agent Service V2 | Microsoft Agent Framework with Azure AI Foundry Agent Service for server-side thread management. Includes user profile memory and optional agentic search. |
 | `single_agent_rag` | Single Agent RAG | Agent Service V2 | Azure AI Agents SDK with streaming event handlers, dynamic routing, and pre-warming for low-latency first responses. |
 | `mcp` | MCP | MCP Server | Model Context Protocol strategy using Semantic Kernel. Connects to an MCP server and passes user context via HTTP headers. |
-| `nl2sql` | NL2SQL | Agent Service V2 | Multi-agent pipeline (Triage → SQL Query → Synthesizer) for natural language to SQL translation using Semantic Kernel. |
+| `nl2sql` | NL2SQL | Direct Azure OpenAI + local tools | Microsoft Agent Framework `ChatAgent` flow for triage, SQL generation, and answer synthesis, with local metadata lookup, SQL validation, and execution. |
 
 ## Single Agent Strategy (Deep Dive)
 
@@ -189,4 +189,4 @@ The visualization deliberately simplifies reality through abstraction and by omi
 | MAF + Agent Service | [`strategies/maf_agent_service_strategy.py`](https://github.com/Azure/gpt-rag-orchestrator/blob/main/src/strategies/maf_agent_service_strategy.py) | MAF + Agent Service V2 |
 | Single Agent RAG | [`strategies/single_agent_rag_strategy_v2.py`](https://github.com/Azure/gpt-rag-orchestrator/blob/main/src/strategies/single_agent_rag_strategy_v2.py) | Azure AI Agents SDK + Agent Service V2 |
 | MCP | [`strategies/mcp_strategy.py`](https://github.com/Azure/gpt-rag-orchestrator/blob/main/src/strategies/mcp_strategy.py) | Model Context Protocol via Semantic Kernel |
-| NL2SQL | [`strategies/nl2sql_strategy.py`](https://github.com/Azure/gpt-rag-orchestrator/blob/main/src/strategies/nl2sql_strategy.py) | Multi-agent NL2SQL pipeline |
+| NL2SQL | [`strategies/nl2sql_strategy.py`](https://github.com/Azure/gpt-rag-orchestrator/blob/main/src/strategies/nl2sql_strategy.py) | MAF `ChatAgent` + local NL2SQL tool flow |
