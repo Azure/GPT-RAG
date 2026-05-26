@@ -33,6 +33,9 @@ nav:
   - What's New: whatisnew.md
   - Release Walkthrough: release_267_270_walkthrough.md
   - Deployment Guide: deploy.md
+  - Installation:
+    - Standard: installation.md
+    - Zero Trust: installation_zero_trust.md
   - Quick Start Guides:
     - Simple RAG: quickstart_simple_rag.md
     - NL2SQL: quickstart_nl2sql.md

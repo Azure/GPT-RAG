@@ -2,6 +2,8 @@
 
 Choose your preferred deployment method based on project requirements and environment constraints.
 
+Looking for the short installation entry points? Use [Standard installation](installation.md) for basic deployments or [Zero Trust installation](installation_zero_trust.md) for network-isolated deployments.
+
 > **Note:** You can change parameter values in `main.parameters.json` or set them with `azd env set` before running `azd provision`. This applies only to parameters that support environment variable substitution.
 
 > **Underlying infrastructure:** GPT-RAG provisions the **[Azure AI Landing Zone (AILZ) Bicep module](https://azure.github.io/AI-Landing-Zones/bicep/parameterization)** as its infrastructure foundation. For the full list of parameters, opt-in features (IP allow-lists, BYO Private DNS / Log Analytics, hub-and-spoke integration, etc.), and the v2 migration path, see the [AILZ parameterization reference](https://azure.github.io/AI-Landing-Zones/bicep/parameterization) and the [v2-migration guide](https://github.com/Azure/bicep-ptn-aiml-landing-zone/blob/v2.0.0/docs/v2-migration.md).
