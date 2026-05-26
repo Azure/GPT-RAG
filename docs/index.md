@@ -11,17 +11,23 @@ Designed with Zero-Trust security and Infrastructure as Code (IaC) principles fr
 [Pre-release {{ rc_tag }} :material-tag: ]({{ latest_release_candidate_url("azure/gpt-rag") }}){ data-md-color-accent="orange" .md-button--pill .md-button--pill--rc }
 {% endif %}
 
-![Zero Trust Architecture](media/architecture_zero_trust.png)
-*Zero-Trust Architecture*
+## Architecture at a glance
 
-## Core Services
+GPT-RAG can start as a basic deployment and expand into Zero Trust, public ingress, existing-platform integration, or optional AI capabilities as needed. See the [Architecture](architecture.md) page for the required-vs-optional matrix.
+
+![Modular architecture layers](media/architecture_modular_layers.svg)
+
+![Zero Trust Architecture](media/architecture_zero_trust.png)
+*Full Zero Trust reference architecture. This is the complete network-isolated view, not the minimum basic deployment.*
+
+## Runtime Services
 
 | Services                                                          | Description                                                                             |
 | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
 | **[Orchestrator](https://github.com/Azure/gpt-rag-orchestrator)** | Manages agentic workflows with Microsoft Agent Framework, Azure AI, and strategy-specific integrations. |
 | **[Web UI](https://github.com/Azure/gpt-rag-ui)**                 | User interface for chat interactions, supports streaming and custom themes.             |
 | **[Data Ingestion](https://github.com/Azure/gpt-rag-ingestion)**  | Extracts, chunks, and indexes enterprise data for optimized retrieval.                  |
-| **[MCP Server](https://github.com/Azure/gpt-rag-mcp)**            | Implements the Model Context Protocol for tool hosting and business logic integration.  |
+| **[MCP Server](https://github.com/Azure/gpt-rag-mcp)**            | Optional Model Context Protocol service for tool hosting and business logic integration. |
 
 
 ## Contributing

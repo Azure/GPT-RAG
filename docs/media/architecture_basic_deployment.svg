@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-labelledby="title desc">
+  <title id="title">GPT-RAG Basic Deployment architecture</title>
+  <desc id="desc">Baseline GPT-RAG architecture for NETWORK_ISOLATION=false showing frontend, orchestrator, ingestion, AI Foundry, search, storage, Cosmos DB, App Configuration, Key Vault, identity, observability, Container Apps, and Container Registry.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#385a8d"/>
+    </marker>
+    <style>
+      .title { font: 700 28px 'Segoe UI', Arial, sans-serif; fill: #14345f; }
+      .subtitle { font: 400 16px 'Segoe UI', Arial, sans-serif; fill: #4c607a; }
+      .zone-title { font: 700 16px 'Segoe UI', Arial, sans-serif; fill: #14345f; }
+      .box-title { font: 700 15px 'Segoe UI', Arial, sans-serif; fill: #12385f; }
+      .box-text { font: 400 12px 'Segoe UI', Arial, sans-serif; fill: #43536b; }
+      .note { font: 600 13px 'Segoe UI', Arial, sans-serif; fill: #7a4a00; }
+      .arrow { stroke: #385a8d; stroke-width: 2.5; fill: none; marker-end: url(#arrow); }
+      .soft-arrow { stroke: #6f7f99; stroke-width: 2; stroke-dasharray: 6 5; fill: none; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect width="1280" height="720" fill="#f7faff"/>
+  <text x="50" y="55" class="title">Basic Deployment baseline</text>
+  <text x="50" y="82" class="subtitle">Default evaluation/runtime view with NETWORK_ISOLATION=false. Optional Zero Trust networking is not shown in this baseline.</text>
+
+  <rect x="48" y="112" width="1184" height="560" rx="24" fill="#ffffff" stroke="#d8e3f5" stroke-width="2"/>
+
+  <rect x="82" y="148" width="200" height="116" rx="18" fill="#eaf3ff" stroke="#4d89d8" stroke-width="2"/>
+  <text x="112" y="185" class="box-title">Users</text>
+  <text x="112" y="211" class="box-text">Browser or client</text>
+  <text x="112" y="233" class="box-text">Chat and uploads</text>
+
+  <rect x="350" y="132" width="530" height="170" rx="20" fill="#edf7ff" stroke="#3f7dc7" stroke-width="2"/>
+  <text x="378" y="163" class="zone-title">Application runtime - Azure Container Apps</text>
+  <rect x="380" y="188" width="135" height="76" rx="14" fill="#ffffff" stroke="#4d89d8" stroke-width="2"/>
+  <text x="405" y="218" class="box-title">Frontend</text>
+  <text x="403" y="242" class="box-text">Web UI</text>
+  <rect x="560" y="188" width="145" height="76" rx="14" fill="#ffffff" stroke="#4d89d8" stroke-width="2"/>
+  <text x="586" y="218" class="box-title">Orchestrator</text>
+  <text x="582" y="242" class="box-text">Agent workflow</text>
+  <rect x="750" y="188" width="105" height="76" rx="14" fill="#ffffff" stroke="#4d89d8" stroke-width="2"/>
+  <text x="772" y="218" class="box-title">Ingestion</text>
+  <text x="772" y="242" class="box-text">Indexing</text>
+
+  <rect x="940" y="148" width="230" height="116" rx="18" fill="#eef8f2" stroke="#4a9f6f" stroke-width="2"/>
+  <text x="970" y="185" class="box-title">Container Registry</text>
+  <text x="970" y="211" class="box-text">Service images</text>
+  <text x="970" y="233" class="box-text">Used by deploy scripts</text>
+
+  <path class="arrow" d="M282 206 C310 206, 330 226, 377 226"/>
+  <path class="arrow" d="M515 226 L558 226"/>
+  <path class="arrow" d="M705 226 L748 226"/>
+  <path class="soft-arrow" d="M940 206 C906 206, 890 226, 856 226"/>
+
+  <rect x="82" y="344" width="330" height="236" rx="20" fill="#f2f7ff" stroke="#94b8e8" stroke-width="2"/>
+  <text x="112" y="378" class="zone-title">Configuration and security</text>
+  <rect x="112" y="405" width="125" height="64" rx="12" fill="#ffffff" stroke="#86aee5"/>
+  <text x="129" y="433" class="box-title">App Config</text>
+  <text x="127" y="454" class="box-text">Runtime settings</text>
+  <rect x="260" y="405" width="125" height="64" rx="12" fill="#ffffff" stroke="#86aee5"/>
+  <text x="283" y="433" class="box-title">Key Vault</text>
+  <text x="286" y="454" class="box-text">Secrets</text>
+  <rect x="112" y="490" width="273" height="64" rx="12" fill="#ffffff" stroke="#86aee5"/>
+  <text x="151" y="518" class="box-title">Managed identity and RBAC</text>
+  <text x="163" y="539" class="box-text">No credentials hard-coded in services</text>
+
+  <rect x="464" y="344" width="365" height="236" rx="20" fill="#fff7ec" stroke="#dfaa57" stroke-width="2"/>
+  <text x="494" y="378" class="zone-title">Data and AI baseline</text>
+  <rect x="494" y="405" width="145" height="64" rx="12" fill="#ffffff" stroke="#dfaa57"/>
+  <text x="518" y="433" class="box-title">AI Foundry</text>
+  <text x="516" y="454" class="box-text">Models / OpenAI</text>
+  <rect x="660" y="405" width="140" height="64" rx="12" fill="#ffffff" stroke="#dfaa57"/>
+  <text x="690" y="433" class="box-title">AI Search</text>
+  <text x="684" y="454" class="box-text">Indexes</text>
+  <rect x="494" y="490" width="145" height="64" rx="12" fill="#ffffff" stroke="#dfaa57"/>
+  <text x="532" y="518" class="box-title">Storage</text>
+  <text x="521" y="539" class="box-text">Documents</text>
+  <rect x="660" y="490" width="140" height="64" rx="12" fill="#ffffff" stroke="#dfaa57"/>
+  <text x="692" y="518" class="box-title">Cosmos DB</text>
+  <text x="679" y="539" class="box-text">State / metadata</text>
+
+  <rect x="880" y="344" width="290" height="236" rx="20" fill="#eef8f2" stroke="#68ad82" stroke-width="2"/>
+  <text x="910" y="378" class="zone-title">Recommended support</text>
+  <rect x="910" y="405" width="230" height="64" rx="12" fill="#ffffff" stroke="#68ad82"/>
+  <text x="950" y="433" class="box-title">Application Insights</text>
+  <text x="953" y="454" class="box-text">Application telemetry</text>
+  <rect x="910" y="490" width="230" height="64" rx="12" fill="#ffffff" stroke="#68ad82"/>
+  <text x="958" y="518" class="box-title">Log Analytics</text>
+  <text x="957" y="539" class="box-text">Central diagnostics</text>
+
+  <path class="soft-arrow" d="M620 302 C600 325, 585 357, 567 405"/>
+  <path class="soft-arrow" d="M800 264 C775 310, 740 352, 730 405"/>
+  <path class="soft-arrow" d="M632 264 C620 310, 620 350, 620 405"/>
+  <path class="soft-arrow" d="M560 264 C490 308, 390 356, 322 405"/>
+  <path class="soft-arrow" d="M704 264 C790 318, 900 350, 1024 405"/>
+
+  <rect x="82" y="606" width="1088" height="42" rx="14" fill="#fff4db" stroke="#e6b24f"/>
+  <text x="112" y="632" class="note">Not in this baseline view: private endpoints, Private DNS, Azure Firewall, jumpbox/Bastion, NAT Gateway, ACR private build pool, and Application Gateway WAF.</text>
+</svg>
