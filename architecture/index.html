@@ -499,9 +499,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#component-matrix" class="md-nav__link">
+  <a href="#deployment-component-table" class="md-nav__link">
     <span class="md-ellipsis">
-      Component matrix
+      Deployment component table
     </span>
   </a>
   
@@ -981,13 +981,13 @@
 <h2 id="complementary-modular-views">Complementary modular views</h2>
 <div class="admonition note">
 <p class="admonition-title">How to read these diagrams</p>
-<p>The modular view is organized around <strong>Basic Deployment</strong>, <strong>Common platform services</strong>, and <strong>Zero Trust additions</strong>. Orange chips identify resources controlled by deployment toggles or scenario flags that can be omitted; the exact switches are listed in the component matrix below.</p>
+<p>The modular view is organized around <strong>Basic Deployment</strong>, <strong>Common platform services</strong>, and <strong>Zero Trust additions</strong>. Solid-color chips are standard resources, dashed orange chips are default-on or BYO-capable parameters, and solid orange chips are opt-in add-ons.</p>
 </div>
 <p><img alt="Basic Deployment architecture" src="../media/architecture_basic_deployment.svg" /></p>
 <p>The baseline corresponds to the <a href="../deploy/#basic-deployment">Basic Deployment</a> flow with <code>NETWORK_ISOLATION=false</code>. It focuses on the default application and data path: users access the frontend, the orchestrator coordinates AI and retrieval, ingestion indexes enterprise content, and shared platform services provide configuration, secrets, identity, storage, search, and conversation state.</p>
 <p><img alt="Modular architecture layers" src="../media/architecture_modular_layers.svg" /></p>
-<p>Use the matrix below for the deployment parameters behind each layer, and the <a href="../deploy/">Deployment Guide</a> for the full <code>azd env set</code> flows.</p>
-<h2 id="component-matrix">Component matrix</h2>
+<p>Use the table below for the deployment parameters behind each layer, and the <a href="../deploy/">Deployment Guide</a> for the full <code>azd env set</code> flows.</p>
+<h2 id="deployment-component-table">Deployment component table</h2>
 <table>
 <thead>
 <tr>
@@ -1005,40 +1005,46 @@
 <td>Running the default GPT-RAG web, orchestration, and ingestion services.</td>
 </tr>
 <tr>
-<td>AI Foundry / Azure OpenAI, AI Search, Storage, Cosmos DB</td>
-<td>Required for default RAG</td>
-<td><code>deployAiFoundry</code>, <code>modelDeploymentList</code>, <code>deploySearchService</code>, <code>deployStorageAccount</code>, <code>deployCosmosDb</code></td>
-<td>Running the standard RAG experience with indexed content, conversations, prompts, and model deployments.</td>
+<td>AI Foundry account, project, and model deployments</td>
+<td>Required AI control plane</td>
+<td><code>deployAiFoundry</code>, <code>deployAfProject</code>, <code>deployAAfAgentSvc</code>, <code>modelDeploymentList</code></td>
+<td>Provisioning Azure AI Foundry / Azure OpenAI and the model deployments used by GPT-RAG.</td>
 </tr>
 <tr>
-<td>App Configuration, Key Vault, managed identity / RBAC</td>
+<td>AI Foundry associated resources</td>
+<td>Default-created or BYO-capable</td>
+<td><code>aiSearchResourceId</code>, <code>aiFoundryStorageAccountResourceId</code>, <code>aiFoundryCosmosDBAccountResourceId</code>, <code>keyVaultResourceId</code>, <code>aiFoundryStorageSku</code></td>
+<td>Letting the AI Foundry module create its required Storage, Search, Cosmos DB, and Key Vault resources, or reusing existing ones.</td>
+</tr>
+<tr>
+<td>RAG workload data services</td>
+<td>Required for default RAG, parameter-controlled</td>
+<td><code>deploySearchService</code>, <code>deployStorageAccount</code>, <code>deployCosmosDb</code>, <code>storageAccountContainersList</code>, <code>databaseContainersList</code></td>
+<td>Running the standard indexed-document, conversation-state, and file-storage data path. Disable only for a customized topology that replaces those dependencies.</td>
+</tr>
+<tr>
+<td>App Configuration, managed identity / RBAC, Container Apps, Container Registry</td>
 <td>Required platform baseline</td>
-<td><code>deployAppConfig</code>, <code>deployKeyVault</code>, <code>useUAI</code>, service role lists</td>
-<td>Centralizing runtime settings and secrets without hard-coded credentials.</td>
+<td><code>deployAppConfig</code>, <code>deployContainerApps</code>, <code>deployContainerEnv</code>, <code>deployContainerRegistry</code>, <code>useUAI</code>, service role lists</td>
+<td>Hosting the runtime services and centralizing runtime settings without hard-coded credentials.</td>
 </tr>
 <tr>
-<td>Container Apps, Container Registry</td>
-<td>Required for service deployment</td>
-<td><code>deployContainerApps</code>, <code>deployContainerEnv</code>, <code>deployContainerRegistry</code></td>
-<td>Hosting and deploying the GPT-RAG runtime services.</td>
+<td>Workload Key Vault and observability</td>
+<td>Default support, parameter-controlled or reusable</td>
+<td><code>deployKeyVault</code>, <code>deployLogAnalytics</code>, <code>deployAppInsights</code>, <code>EXISTING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID</code>, <code>EXISTING_APPLICATION_INSIGHTS_RESOURCE_ID</code>, <code>EXISTING_APPLICATION_INSIGHTS_CONNECTION_STRING</code></td>
+<td>Storing workload secrets and capturing telemetry. Application Insights is created or wired only when an effective Log Analytics workspace is available.</td>
 </tr>
 <tr>
-<td>Log Analytics and Application Insights</td>
-<td>Recommended/default support</td>
-<td><code>deployLogAnalytics</code>, <code>deployAppInsights</code>, <code>EXISTING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID</code>, <code>EXISTING_APPLICATION_INSIGHTS_RESOURCE_ID</code></td>
-<td>Capturing diagnostics and app telemetry, or reusing enterprise observability.</td>
+<td>Zero Trust private networking</td>
+<td>Optional security posture</td>
+<td><code>networkIsolation</code>, <code>allowedIpRanges</code>, <code>useExistingVNet</code>, <code>deploySubnets</code>, <code>policyManagedPrivateDns</code>, <code>EXISTING_PRIVATE_DNS_ZONE_*</code></td>
+<td>Requiring private endpoints, private DNS, VNet integration, NSGs, and internal Container Apps ingress.</td>
 </tr>
 <tr>
-<td>Zero Trust networking</td>
-<td>Optional security add-on</td>
-<td><code>NETWORK_ISOLATION=true</code>, <code>allowedIpRanges</code>, Private DNS settings</td>
-<td>Requiring private endpoints, private DNS, VNet integration, NSGs, and controlled public access.</td>
-</tr>
-<tr>
-<td>Jumpbox, Bastion, NAT Gateway, ACR Task Agent Pool, Azure Firewall</td>
-<td>Optional operations/build layer</td>
-<td><code>DEPLOY_JUMPBOX</code>, <code>DEPLOY_BASTION</code>, <code>DEPLOY_NAT_GATEWAY</code>, <code>DEPLOY_ACR_TASK_AGENT_POOL</code>, <code>DEPLOY_AZURE_FIREWALL</code></td>
-<td>Operating from inside the VNet, building images privately, or controlling egress in isolated deployments.</td>
+<td>Azure Firewall, Jumpbox, Bastion, NAT Gateway, private ACR build pool</td>
+<td>Zero Trust operations/build options</td>
+<td><code>DEPLOY_AZURE_FIREWALL</code>, <code>DEPLOY_JUMPBOX</code>, <code>DEPLOY_BASTION</code>, <code>DEPLOY_NAT_GATEWAY</code>, <code>DEPLOY_ACR_TASK_AGENT_POOL</code>, <code>EXISTING_JUMPBOX_RESOURCE_ID</code>, <code>EXISTING_BASTION_RESOURCE_ID</code>, <code>EXISTING_NAT_GATEWAY_RESOURCE_ID</code></td>
+<td>Operating from inside the VNet, reusing central access/egress resources, or enabling a private ACR Task agent pool. In GPT-RAG, the ACR agent pool defaults to off and is opt-in.</td>
 </tr>
 <tr>
 <td>Application Gateway WAF public ingress</td>
@@ -1055,8 +1061,8 @@
 <tr>
 <td>Scenario capabilities</td>
 <td>Optional feature add-ons</td>
-<td><code>DEPLOY_SPEECH_SERVICE</code>, <code>DEPLOY_GROUNDING_WITH_BING</code>, <code>ENABLE_AGENTIC_RETRIEVAL</code>, <code>DEPLOY_POSTGRES</code>, <code>DEPLOY_MCP</code></td>
-<td>Enabling voice, Bing grounding, agentic retrieval, NL2SQL/PostgreSQL, or MCP/tool-hosting scenarios.</td>
+<td><code>DEPLOY_SPEECH_SERVICE</code>, <code>DEPLOY_GROUNDING_WITH_BING</code>, <code>ENABLE_AGENTIC_RETRIEVAL</code></td>
+<td>Enabling voice, Bing grounding, or agentic retrieval scenarios. MCP/tool-hosting and NL2SQL application behavior are configured outside the Bicep-deployed infrastructure shown in this diagram.</td>
 </tr>
 </tbody>
 </table>
