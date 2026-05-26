@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.  
 This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to [Semantic Versioning](https://semver.org/).
 
+## [v2.7.5] - 2026-05-26
+
+### Added
+- **Existing-platform deployment parameters surfaced:** `main.parameters.json` now passes through AI Landing Zone v2.0.2 settings for BYO Private DNS zones, shared observability, hub integration, existing jumpbox/Bastion/NAT resources, Private Endpoint placement, ACR Task agent pools, speech resources, and policy-managed private DNS. This allows GPT-RAG deployments to integrate with existing enterprise landing zones without editing the infra submodule. Fixes [Azure/GPT-RAG#452](https://github.com/Azure/GPT-RAG/issues/452) and [Azure/GPT-RAG#453](https://github.com/Azure/GPT-RAG/issues/453).
+
+### Changed
+- **Bumped component releases for NL2SQL and conversation rename fixes:** `gpt-rag-ui` to [v2.3.7](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.3.7) and `gpt-rag-orchestrator` to [v2.6.8](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.6.8).
+
+### Fixed
+- **NL2SQL no longer depends on Semantic Kernel Agent Service creation:** the orchestrator release now uses Microsoft Agent Framework with direct model calls and local NL2SQL tool execution, eliminating the `AgentsOperations.create_agent` failure and reducing per-request setup latency. Fixes [Azure/GPT-RAG#461](https://github.com/Azure/GPT-RAG/issues/461) and [Azure/GPT-RAG#462](https://github.com/Azure/GPT-RAG/issues/462).
+- **Conversation rename persists after refresh:** the UI release now sends Chainlit rename events to the orchestrator conversation update API. Fixes [Azure/GPT-RAG#435](https://github.com/Azure/GPT-RAG/issues/435).
+
 ## [v2.7.4] - 2026-05-26
 
 ### Changed
