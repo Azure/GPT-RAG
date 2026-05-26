@@ -981,7 +981,7 @@
 <h2 id="complementary-modular-views">Complementary modular views</h2>
 <div class="admonition note">
 <p class="admonition-title">How to read these diagrams</p>
-<p>Solid blue components are part of the basic GPT-RAG deployment path. Green components are recommended/default platform support. Purple and orange components are optional add-ons. Deployment switches are intentionally kept out of the diagram and listed in the component matrix below.</p>
+<p>The modular view is organized around <strong>Basic Deployment</strong>, <strong>Common platform services</strong>, and <strong>Zero Trust additions</strong>. Orange chips identify resources controlled by deployment toggles or scenario flags that can be omitted; the exact switches are listed in the component matrix below.</p>
 </div>
 <p><img alt="Basic Deployment architecture" src="../media/architecture_basic_deployment.svg" /></p>
 <p>The baseline corresponds to the <a href="../deploy/#basic-deployment">Basic Deployment</a> flow with <code>NETWORK_ISOLATION=false</code>. It focuses on the default application and data path: users access the frontend, the orchestrator coordinates AI and retrieval, ingestion indexes enterprise content, and shared platform services provide configuration, secrets, identity, storage, search, and conversation state.</p>
