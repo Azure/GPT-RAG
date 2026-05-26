@@ -6,10 +6,10 @@ This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres 
 ## [v2.7.4] - 2026-05-26
 
 ### Changed
-- **Bumped component releases for deploy image verification**: `gpt-rag-ui` to [v2.3.5](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.3.5), `gpt-rag-orchestrator` to [v2.6.6](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.6.6), and `gpt-rag-ingestion` to [v2.3.6](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.3.6).
+- **Bumped component releases for deploy image verification**: `gpt-rag-ui` to [v2.3.6](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.3.6), `gpt-rag-orchestrator` to [v2.6.7](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.6.7), and `gpt-rag-ingestion` to [v2.3.7](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.3.7).
 
 ### Fixed
-- **Docker-free deploy no longer fails on revision restart race**: service deploy scripts now treat `az containerapp update --image` as the revision rollout and verify the configured image instead of immediately restarting the latest revision, avoiding transient Container Apps `Not Found` failures while preserving ACR remote builds. Fixes [Azure/GPT-RAG#449](https://github.com/Azure/GPT-RAG/issues/449).
+- **Docker-free deploy no longer fails on revision restart race or Azure CLI warning output**: service deploy scripts now treat `az containerapp update --image` as the revision rollout, verify the configured image instead of immediately restarting the latest revision, and filter warning/progress output before consuming Azure CLI TSV values. Fixes [Azure/GPT-RAG#449](https://github.com/Azure/GPT-RAG/issues/449).
 
 ## [v2.7.3] - 2026-05-25
 
