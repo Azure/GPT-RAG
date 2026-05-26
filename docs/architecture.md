@@ -15,13 +15,15 @@ The existing architecture diagram remains the full network-isolated reference vi
 ## Complementary modular views
 
 !!! note "How to read these diagrams"
-    Solid blue components are part of the basic GPT-RAG deployment path. Green components are recommended/default platform support. Purple and orange components are optional add-ons controlled by deployment parameters.
+    Solid blue components are part of the basic GPT-RAG deployment path. Green components are recommended/default platform support. Purple and orange components are optional add-ons. Deployment switches are intentionally kept out of the diagram and listed in the component matrix below.
 
 ![Basic Deployment architecture](media/architecture_basic_deployment.svg)
 
 The baseline corresponds to the [Basic Deployment](deploy.md#basic-deployment) flow with `NETWORK_ISOLATION=false`. It focuses on the default application and data path: users access the frontend, the orchestrator coordinates AI and retrieval, ingestion indexes enterprise content, and shared platform services provide configuration, secrets, identity, storage, search, and conversation state.
 
 ![Modular architecture layers](media/architecture_modular_layers.svg)
+
+Use the matrix below for the deployment parameters behind each layer, and the [Deployment Guide](deploy.md) for the full `azd env set` flows.
 
 ## Component matrix
 
