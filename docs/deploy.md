@@ -157,6 +157,30 @@ Using the Jumpbox VM
 > **Note:** If you have re-initialized or cloned the gpt-rag repo again, refresh your `azd` environment before running the postProvision script so it points to the **existing** deployment:
 > `azd init -t azure/gpt-rag` then `azd env refresh`. When prompted, select the **same Subscription, Resource Group, and Location** as the original provisioning so `azd` correctly links to your environment.
 
+## Existing Platform / AI Landing Zone Integrated
+
+Use these settings when GPT-RAG must deploy into an existing enterprise platform, such as a hub-spoke network with centrally managed Private DNS Zones, Log Analytics, Application Insights, Bastion, NAT Gateway, or Azure Firewall.
+
+**Core mode:** set `DEPLOYMENT_MODE` to `ailz-integrated`, then pass the existing resource IDs that your platform team owns. The default remains `standalone`, so basic deployments do not require these settings.
+
+```powershell
+azd env set DEPLOYMENT_MODE ailz-integrated
+azd env set USE_EXISTING_VNET true
+azd env set EXISTING_VNET_RESOURCE_ID "/subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.Network/virtualNetworks/<vnet>"
+```
+
+**Existing Private DNS Zones:** set the zone resource IDs for services already managed by the platform. Common values include `EXISTING_PRIVATE_DNS_ZONE_OPENAI_RESOURCE_ID`, `EXISTING_PRIVATE_DNS_ZONE_AISERVICES_RESOURCE_ID`, `EXISTING_PRIVATE_DNS_ZONE_SEARCH_RESOURCE_ID`, `EXISTING_PRIVATE_DNS_ZONE_COSMOS_RESOURCE_ID`, `EXISTING_PRIVATE_DNS_ZONE_BLOB_RESOURCE_ID`, `EXISTING_PRIVATE_DNS_ZONE_KEYVAULT_RESOURCE_ID`, `EXISTING_PRIVATE_DNS_ZONE_APPCONFIG_RESOURCE_ID`, `EXISTING_PRIVATE_DNS_ZONE_CONTAINERAPPS_RESOURCE_ID`, `EXISTING_PRIVATE_DNS_ZONE_ACR_RESOURCE_ID`, and Azure Monitor / App Insights zone IDs.
+
+```powershell
+azd env set EXISTING_PRIVATE_DNS_ZONE_SEARCH_RESOURCE_ID "/subscriptions/<sub>/resourceGroups/<dns-rg>/providers/Microsoft.Network/privateDnsZones/privatelink.search.windows.net"
+azd env set EXISTING_PRIVATE_DNS_ZONE_OPENAI_RESOURCE_ID "/subscriptions/<sub>/resourceGroups/<dns-rg>/providers/Microsoft.Network/privateDnsZones/privatelink.openai.azure.com"
+azd env set DNS_ZONE_LINK_SUFFIX "<unique-spoke-name>"
+```
+
+**Shared platform resources:** set `EXISTING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID`, `EXISTING_APPLICATION_INSIGHTS_RESOURCE_ID`, `EXISTING_APPLICATION_INSIGHTS_CONNECTION_STRING`, `HUB_INTEGRATION_HUB_VNET_RESOURCE_ID`, `HUB_INTEGRATION_EGRESS_NEXT_HOP_IP`, or `HUB_INTEGRATION_EXISTING_ROUTE_TABLE_RESOURCE_ID` when those resources are centrally managed.
+
+**Spoke resource switches:** use `DEPLOY_JUMPBOX`, `DEPLOY_BASTION`, `DEPLOY_NAT_GATEWAY`, `EXISTING_JUMPBOX_RESOURCE_ID`, `EXISTING_BASTION_RESOURCE_ID`, `EXISTING_NAT_GATEWAY_RESOURCE_ID`, `DEPLOY_AZURE_FIREWALL`, and `DEPLOY_ACR_TASK_AGENT_POOL` to align GPT-RAG with the platform topology. These are optional and preserve the default standalone behavior when unset.
+
 ## Deploy GPT-RAG Services
 
 > **Note:** For Zero Trust deployments with network isolation, deploy services from the jumpbox or another host with VNet connectivity. If using the jumpbox VM, the repositories are located in the `C:\github` directory.
