@@ -56,8 +56,7 @@
   <rect x="86" y="494" width="138" height="34" rx="17" fill="#7b5fc7"/>
   <text x="119" y="517" class="label">Optional</text>
   <text x="252" y="517" class="layer-title">Zero Trust / network isolation</text>
-  <text x="252" y="548" class="box-text">VNet, subnets, private endpoints, Private DNS, NSGs, Azure Firewall, restricted public access,</text>
-  <text x="252" y="571" class="box-text">and private service surfaces.</text>
+  <text x="252" y="558" class="box-text">VNet, subnets, private endpoints, Private DNS, NSGs, Azure Firewall, and private service surfaces.</text>
 
   <rect x="60" y="604" width="980" height="104" rx="22" fill="#fff7ec" stroke="#d9822b" stroke-width="2.5"/>
   <rect x="86" y="630" width="138" height="34" rx="17" fill="#d9822b"/>
@@ -68,7 +67,7 @@
   <rect x="60" y="738" width="980" height="104" rx="22" fill="#fff7ec" stroke="#d9822b" stroke-width="2.5"/>
   <rect x="86" y="764" width="138" height="34" rx="17" fill="#d9822b"/>
   <text x="119" y="787" class="label">Optional</text>
-  <text x="252" y="787" class="layer-title">Entry and platform integration</text>
+  <text x="252" y="787" class="layer-title">Ingress and existing platform</text>
   <text x="252" y="818" class="box-text">Application Gateway WAF, existing VNet/DNS/observability, and hub-spoke AI Landing Zone integration.</text>
 
   <rect x="60" y="872" width="980" height="76" rx="22" fill="#fff4f0" stroke="#d66f53" stroke-width="2.5"/>
