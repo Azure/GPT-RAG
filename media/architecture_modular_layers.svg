@@ -73,43 +73,49 @@
   <text x="374" y="558" class="chip" fill="#7a4300">Log Analytics</text>
   <rect x="486" y="538" width="110" height="30" rx="10" fill="#f7fffa" stroke="#7dbb99"/>
   <text x="504" y="558" class="chip" fill="#14345f">App Insights</text>
+  <rect x="608" y="538" width="124" height="30" rx="10" fill="#fff7ec" stroke="#d9822b" stroke-width="2"/>
+  <text x="626" y="558" class="chip" fill="#7a4300">BYO VNet/DNS</text>
+  <rect x="744" y="538" width="132" height="30" rx="10" fill="#fff7ec" stroke="#d9822b" stroke-width="2"/>
+  <text x="762" y="558" class="chip" fill="#7a4300">BYO monitoring</text>
 
   <rect x="60" y="608" width="980" height="178" rx="22" fill="#f3efff" stroke="#7b5fc7" stroke-width="2.5"/>
   <rect x="86" y="634" width="136" height="34" rx="17" fill="#7b5fc7"/>
   <text x="113" y="657" class="label">Zero Trust</text>
   <text x="250" y="657" class="section-title">Network isolation additions (NETWORK_ISOLATION=true)</text>
   <text x="250" y="686" class="section-text">Private service access and controlled network paths added on top of Basic and Common services.</text>
-  <rect x="250" y="706" width="102" height="30" rx="10" fill="#fbf9ff" stroke="#a790e5"/>
-  <text x="269" y="726" class="chip" fill="#14345f">VNet/Subnets</text>
-  <rect x="364" y="706" width="130" height="30" rx="10" fill="#fbf9ff" stroke="#a790e5"/>
-  <text x="382" y="726" class="chip" fill="#14345f">Private Endpoints</text>
-  <rect x="506" y="706" width="110" height="30" rx="10" fill="#fbf9ff" stroke="#a790e5"/>
-  <text x="526" y="726" class="chip" fill="#14345f">Private DNS</text>
-  <rect x="628" y="706" width="62" height="30" rx="10" fill="#fbf9ff" stroke="#a790e5"/>
-  <text x="646" y="726" class="chip" fill="#14345f">NSGs</text>
-  <rect x="702" y="706" width="150" height="30" rx="10" fill="#fbf9ff" stroke="#a790e5"/>
-  <text x="720" y="726" class="chip" fill="#14345f">Private app ingress</text>
+  <rect x="250" y="706" width="116" height="30" rx="10" fill="#fbf9ff" stroke="#a790e5"/>
+  <text x="268" y="726" class="chip" fill="#14345f">VNet/Subnets</text>
+  <rect x="378" y="706" width="142" height="30" rx="10" fill="#fbf9ff" stroke="#a790e5"/>
+  <text x="396" y="726" class="chip" fill="#14345f">Private Endpoints</text>
+  <rect x="532" y="706" width="118" height="30" rx="10" fill="#fbf9ff" stroke="#a790e5"/>
+  <text x="550" y="726" class="chip" fill="#14345f">Private DNS</text>
+  <rect x="662" y="706" width="68" height="30" rx="10" fill="#fbf9ff" stroke="#a790e5"/>
+  <text x="681" y="726" class="chip" fill="#14345f">NSGs</text>
+  <rect x="742" y="706" width="162" height="30" rx="10" fill="#fbf9ff" stroke="#a790e5"/>
+  <text x="760" y="726" class="chip" fill="#14345f">Private app ingress</text>
   <rect x="250" y="744" width="114" height="30" rx="10" fill="#fff7ec" stroke="#d9822b" stroke-width="2"/>
   <text x="269" y="764" class="chip" fill="#7a4300">Azure Firewall</text>
   <rect x="378" y="744" width="144" height="30" rx="10" fill="#fff7ec" stroke="#d9822b" stroke-width="2"/>
   <text x="396" y="764" class="chip" fill="#7a4300">ACR private build</text>
   <rect x="536" y="744" width="196" height="30" rx="10" fill="#fff7ec" stroke="#d9822b" stroke-width="2"/>
   <text x="554" y="764" class="chip" fill="#7a4300">Jumpbox / Bastion / NAT</text>
+  <rect x="746" y="744" width="146" height="30" rx="10" fill="#fff7ec" stroke="#d9822b" stroke-width="2"/>
+  <text x="764" y="764" class="chip" fill="#7a4300">App Gateway WAF</text>
+  <rect x="906" y="744" width="112" height="30" rx="10" fill="#fff7ec" stroke="#d9822b" stroke-width="2"/>
+  <text x="924" y="764" class="chip" fill="#7a4300">Hub-spoke</text>
 
   <rect x="60" y="816" width="980" height="118" rx="22" fill="#fff4f0" stroke="#d66f53" stroke-width="2.5"/>
   <rect x="86" y="842" width="178" height="34" rx="17" fill="#d66f53"/>
   <text x="111" y="865" class="label">Scenario add-ons</text>
-  <text x="286" y="858" class="section-title">Optional capabilities and integration entry points</text>
-  <rect x="286" y="878" width="170" height="30" rx="10" fill="#fff7ec" stroke="#d9822b" stroke-width="2"/>
-  <text x="304" y="898" class="chip" fill="#7a4300">Application Gateway</text>
-  <rect x="470" y="878" width="158" height="30" rx="10" fill="#fff7ec" stroke="#d9822b" stroke-width="2"/>
-  <text x="488" y="898" class="chip" fill="#7a4300">Existing platform</text>
-  <rect x="642" y="878" width="80" height="30" rx="10" fill="#fff7ec" stroke="#d9822b" stroke-width="2"/>
-  <text x="661" y="898" class="chip" fill="#7a4300">Speech</text>
-  <rect x="736" y="878" width="136" height="30" rx="10" fill="#fff7ec" stroke="#d9822b" stroke-width="2"/>
-  <text x="755" y="898" class="chip" fill="#7a4300">Bing grounding</text>
-  <rect x="886" y="878" width="102" height="30" rx="10" fill="#fff7ec" stroke="#d9822b" stroke-width="2"/>
-  <text x="905" y="898" class="chip" fill="#7a4300">MCP tools</text>
+  <text x="286" y="858" class="section-title">Optional scenario capabilities</text>
+  <rect x="286" y="878" width="80" height="30" rx="10" fill="#fff7ec" stroke="#d9822b" stroke-width="2"/>
+  <text x="305" y="898" class="chip" fill="#7a4300">Speech</text>
+  <rect x="380" y="878" width="136" height="30" rx="10" fill="#fff7ec" stroke="#d9822b" stroke-width="2"/>
+  <text x="399" y="898" class="chip" fill="#7a4300">Bing grounding</text>
+  <rect x="530" y="878" width="154" height="30" rx="10" fill="#fff7ec" stroke="#d9822b" stroke-width="2"/>
+  <text x="548" y="898" class="chip" fill="#7a4300">NL2SQL/Postgres</text>
+  <rect x="698" y="878" width="102" height="30" rx="10" fill="#fff7ec" stroke="#d9822b" stroke-width="2"/>
+  <text x="717" y="898" class="chip" fill="#7a4300">MCP tools</text>
 
   <rect x="60" y="948" width="980" height="20" rx="10" fill="#fff7ec" stroke="#d9822b"/>
   <text x="82" y="963" class="note">Orange chips are controlled by deploy toggles or scenario flags and can be omitted; see the component matrix below for exact switches.</text>
