@@ -377,6 +377,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#existing-platform-ai-landing-zone-integrated" class="md-nav__link">
+    <span class="md-ellipsis">
+      Existing Platform / AI Landing Zone Integrated
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#deploy-gpt-rag-services" class="md-nav__link">
     <span class="md-ellipsis">
       Deploy GPT-RAG Services
@@ -1118,6 +1127,20 @@ azd provision
 <p><strong>Note:</strong> If you have re-initialized or cloned the gpt-rag repo again, refresh your <code>azd</code> environment before running the postProvision script so it points to the <strong>existing</strong> deployment:
 <code>azd init -t azure/gpt-rag</code> then <code>azd env refresh</code>. When prompted, select the <strong>same Subscription, Resource Group, and Location</strong> as the original provisioning so <code>azd</code> correctly links to your environment.</p>
 </blockquote>
+<h2 id="existing-platform-ai-landing-zone-integrated">Existing Platform / AI Landing Zone Integrated</h2>
+<p>Use these settings when GPT-RAG must deploy into an existing enterprise platform, such as a hub-spoke network with centrally managed Private DNS Zones, Log Analytics, Application Insights, Bastion, NAT Gateway, or Azure Firewall.</p>
+<p><strong>Core mode:</strong> set <code>DEPLOYMENT_MODE</code> to <code>ailz-integrated</code>, then pass the existing resource IDs that your platform team owns. The default remains <code>standalone</code>, so basic deployments do not require these settings.</p>
+<div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">DEPLOYMENT_MODE</span> <span class="n">ailz-integrated</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">USE_EXISTING_VNET</span> <span class="n">true</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">EXISTING_VNET_RESOURCE_ID</span> <span class="s2">&quot;/subscriptions/&lt;sub&gt;/resourceGroups/&lt;rg&gt;/providers/Microsoft.Network/virtualNetworks/&lt;vnet&gt;&quot;</span>
+</code></pre></div>
+<p><strong>Existing Private DNS Zones:</strong> set the zone resource IDs for services already managed by the platform. Common values include <code>EXISTING_PRIVATE_DNS_ZONE_OPENAI_RESOURCE_ID</code>, <code>EXISTING_PRIVATE_DNS_ZONE_AISERVICES_RESOURCE_ID</code>, <code>EXISTING_PRIVATE_DNS_ZONE_SEARCH_RESOURCE_ID</code>, <code>EXISTING_PRIVATE_DNS_ZONE_COSMOS_RESOURCE_ID</code>, <code>EXISTING_PRIVATE_DNS_ZONE_BLOB_RESOURCE_ID</code>, <code>EXISTING_PRIVATE_DNS_ZONE_KEYVAULT_RESOURCE_ID</code>, <code>EXISTING_PRIVATE_DNS_ZONE_APPCONFIG_RESOURCE_ID</code>, <code>EXISTING_PRIVATE_DNS_ZONE_CONTAINERAPPS_RESOURCE_ID</code>, <code>EXISTING_PRIVATE_DNS_ZONE_ACR_RESOURCE_ID</code>, and Azure Monitor / App Insights zone IDs.</p>
+<div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">EXISTING_PRIVATE_DNS_ZONE_SEARCH_RESOURCE_ID</span> <span class="s2">&quot;/subscriptions/&lt;sub&gt;/resourceGroups/&lt;dns-rg&gt;/providers/Microsoft.Network/privateDnsZones/privatelink.search.windows.net&quot;</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">EXISTING_PRIVATE_DNS_ZONE_OPENAI_RESOURCE_ID</span> <span class="s2">&quot;/subscriptions/&lt;sub&gt;/resourceGroups/&lt;dns-rg&gt;/providers/Microsoft.Network/privateDnsZones/privatelink.openai.azure.com&quot;</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">DNS_ZONE_LINK_SUFFIX</span> <span class="s2">&quot;&lt;unique-spoke-name&gt;&quot;</span>
+</code></pre></div>
+<p><strong>Shared platform resources:</strong> set <code>EXISTING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID</code>, <code>EXISTING_APPLICATION_INSIGHTS_RESOURCE_ID</code>, <code>EXISTING_APPLICATION_INSIGHTS_CONNECTION_STRING</code>, <code>HUB_INTEGRATION_HUB_VNET_RESOURCE_ID</code>, <code>HUB_INTEGRATION_EGRESS_NEXT_HOP_IP</code>, or <code>HUB_INTEGRATION_EXISTING_ROUTE_TABLE_RESOURCE_ID</code> when those resources are centrally managed.</p>
+<p><strong>Spoke resource switches:</strong> use <code>DEPLOY_JUMPBOX</code>, <code>DEPLOY_BASTION</code>, <code>DEPLOY_NAT_GATEWAY</code>, <code>EXISTING_JUMPBOX_RESOURCE_ID</code>, <code>EXISTING_BASTION_RESOURCE_ID</code>, <code>EXISTING_NAT_GATEWAY_RESOURCE_ID</code>, <code>DEPLOY_AZURE_FIREWALL</code>, and <code>DEPLOY_ACR_TASK_AGENT_POOL</code> to align GPT-RAG with the platform topology. These are optional and preserve the default standalone behavior when unset.</p>
 <h2 id="deploy-gpt-rag-services">Deploy GPT-RAG Services</h2>
 <blockquote>
 <p><strong>Note:</strong> For Zero Trust deployments with network isolation, deploy services from the jumpbox or another host with VNet connectivity. If using the jumpbox VM, the repositories are located in the <code>C:\github</code> directory.</p>
