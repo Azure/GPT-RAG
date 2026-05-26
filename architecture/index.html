@@ -490,6 +490,24 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#complementary-modular-views" class="md-nav__link">
+    <span class="md-ellipsis">
+      Complementary modular views
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#component-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      Component matrix
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#key-capabilities" class="md-nav__link">
     <span class="md-ellipsis">
       Key Capabilities
@@ -955,6 +973,12 @@
 
 <h2 id="architecture">Architecture</h2>
 <p>GPT-RAG is modular. The full Zero Trust diagram shows a hardened, full-capability reference architecture; it is not the minimum footprint required to evaluate or run the accelerator. Start with the <strong>Basic Deployment</strong> baseline, then add network isolation, enterprise integration, public ingress, or AI capabilities only when the scenario requires them.</p>
+<h2 id="full-zero-trust-reference">Full Zero Trust reference</h2>
+<p>The existing architecture diagram remains the full network-isolated reference view. Use it when discussing hardened deployments, while the complementary diagrams below explain the baseline and optional layers.</p>
+<p><img alt="Zero Trust Architecture" src="../media/architecture_zero_trust.png" /></p>
+<p><a href="../media/GPT-RAG.vsdx">Download Visio Diagram</a></p>
+<hr />
+<h2 id="complementary-modular-views">Complementary modular views</h2>
 <div class="admonition note">
 <p class="admonition-title">How to read these diagrams</p>
 <p>Solid blue components are part of the basic GPT-RAG deployment path. Green components are recommended/default platform support. Purple and orange components are optional add-ons controlled by deployment parameters.</p>
@@ -962,6 +986,7 @@
 <p><img alt="Basic Deployment architecture" src="../media/architecture_basic_deployment.svg" /></p>
 <p>The baseline corresponds to the <a href="../deploy/#basic-deployment">Basic Deployment</a> flow with <code>NETWORK_ISOLATION=false</code>. It focuses on the default application and data path: users access the frontend, the orchestrator coordinates AI and retrieval, ingestion indexes enterprise content, and shared platform services provide configuration, secrets, identity, storage, search, and conversation state.</p>
 <p><img alt="Modular architecture layers" src="../media/architecture_modular_layers.svg" /></p>
+<h2 id="component-matrix">Component matrix</h2>
 <table>
 <thead>
 <tr>
@@ -1034,10 +1059,6 @@
 </tr>
 </tbody>
 </table>
-<h2 id="full-zero-trust-reference">Full Zero Trust reference</h2>
-<p>The following diagram is the full network-isolated reference view. Use it when discussing hardened deployments, not as the default minimum deployment.</p>
-<p><img alt="Zero Trust Architecture" src="../media/architecture_zero_trust.png" /></p>
-<p><a href="../media/GPT-RAG.vsdx">Download Visio Diagram</a></p>
 <h2 id="key-capabilities">Key Capabilities</h2>
 <ul>
 <li>
