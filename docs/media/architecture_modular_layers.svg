@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="980" viewBox="0 0 1100 980" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="1160" viewBox="0 0 1100 1160" role="img" aria-labelledby="title desc">
   <title id="title">GPT-RAG Basic and Zero Trust deployment layers</title>
-  <desc id="desc">Comparison of Basic Deployment, common platform services, Zero Trust network isolation additions, and deploy-toggle resources that can be omitted.</desc>
+  <desc id="desc">Comparison of standard Basic deployment resources, common platform resources, Zero Trust private networking additions, default-on configurable resources, and opt-in add-ons.</desc>
   <defs>
     <style>
       .title { font: 700 30px 'Segoe UI', Arial, sans-serif; fill: #14345f; }
@@ -8,115 +8,130 @@
       .section-title { font: 700 22px 'Segoe UI', Arial, sans-serif; fill: #14345f; }
       .section-text { font: 400 15px 'Segoe UI', Arial, sans-serif; fill: #485a72; }
       .label { font: 700 15px 'Segoe UI', Arial, sans-serif; fill: #ffffff; }
-      .chip { font: 700 14px 'Segoe UI', Arial, sans-serif; }
+      .chip { font: 700 13px 'Segoe UI', Arial, sans-serif; }
       .card-title { font: 700 15px 'Segoe UI', Arial, sans-serif; fill: #14345f; }
-      .legend { font: 600 14px 'Segoe UI', Arial, sans-serif; fill: #33465f; }
-      .note { font: 600 13px 'Segoe UI', Arial, sans-serif; fill: #5b4a23; }
+      .legend { font: 600 13px 'Segoe UI', Arial, sans-serif; fill: #33465f; }
+      .note { font: 600 12px 'Segoe UI', Arial, sans-serif; fill: #5b4a23; }
     </style>
   </defs>
 
-  <rect width="1100" height="980" fill="#f7faff"/>
+  <rect width="1100" height="1160" fill="#f7faff"/>
   <text x="48" y="58" class="title">Basic vs Zero Trust deployment layers</text>
-  <text x="48" y="88" class="subtitle">Basic deploys the runtime and shared platform; Zero Trust adds private networking.</text>
+  <text x="48" y="88" class="subtitle">Basic deploys the standard RAG runtime; Zero Trust adds private networking and controlled access paths.</text>
 
   <rect x="50" y="116" width="22" height="16" rx="4" fill="#3f7dc7"/>
-  <text x="84" y="130" class="legend">Basic Deployment</text>
-  <rect x="250" y="116" width="22" height="16" rx="4" fill="#4a9f6f"/>
-  <text x="284" y="130" class="legend">Common platform</text>
-  <rect x="456" y="116" width="22" height="16" rx="4" fill="#7b5fc7"/>
-  <text x="490" y="130" class="legend">Zero Trust additions</text>
-  <rect x="690" y="116" width="22" height="16" rx="4" fill="#d9822b"/>
-  <text x="724" y="130" class="legend">Deploy-toggle / optional</text>
+  <text x="84" y="130" class="legend">Basic baseline</text>
+  <rect x="230" y="116" width="22" height="16" rx="4" fill="#4a9f6f"/>
+  <text x="264" y="130" class="legend">Common platform</text>
+  <rect x="426" y="116" width="22" height="16" rx="4" fill="#7b5fc7"/>
+  <text x="460" y="130" class="legend">Zero Trust additions</text>
+  <rect x="660" y="113" width="28" height="20" rx="6" fill="#fffaf3" stroke="#d9822b" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="700" y="130" class="legend">Default-on / BYO configurable</text>
+  <rect x="910" y="113" width="28" height="20" rx="6" fill="#ffe2bc" stroke="#d9822b" stroke-width="2"/>
+  <text x="950" y="130" class="legend">Opt-in add-on</text>
 
-  <rect x="60" y="158" width="980" height="214" rx="22" fill="#eaf3ff" stroke="#3f7dc7" stroke-width="2.5"/>
+  <rect x="60" y="158" width="980" height="356" rx="22" fill="#eaf3ff" stroke="#3f7dc7" stroke-width="2.5"/>
   <rect x="86" y="184" width="136" height="34" rx="17" fill="#3f7dc7"/>
   <text x="122" y="207" class="label">Basic</text>
-  <text x="250" y="207" class="section-title">Basic Deployment (NETWORK_ISOLATION=false)</text>
-  <text x="250" y="236" class="section-text">Default runtime apps plus the RAG data path used to evaluate and run GPT-RAG.</text>
+  <text x="250" y="207" class="section-title">Basic deployment</text>
+  <text x="250" y="236" class="section-text">Default public deployment for the standard GPT-RAG evaluation and runtime path.</text>
 
   <rect x="90" y="260" width="360" height="82" rx="16" fill="#ffffff" stroke="#9ebff0"/>
   <text x="114" y="286" class="card-title">Runtime apps</text>
   <rect x="114" y="300" width="86" height="30" rx="10" fill="#f8fbff" stroke="#87aee7"/>
-  <text x="133" y="320" class="chip" fill="#14345f">Frontend</text>
+  <text x="132" y="320" class="chip" fill="#14345f">Frontend</text>
   <rect x="214" y="300" width="116" height="30" rx="10" fill="#f8fbff" stroke="#87aee7"/>
   <text x="234" y="320" class="chip" fill="#14345f">Orchestrator</text>
   <rect x="344" y="300" width="94" height="30" rx="10" fill="#f8fbff" stroke="#87aee7"/>
   <text x="362" y="320" class="chip" fill="#14345f">Ingestion</text>
 
   <rect x="470" y="260" width="540" height="82" rx="16" fill="#ffffff" stroke="#9ebff0"/>
-  <text x="494" y="286" class="card-title">Default RAG data services</text>
-  <rect x="494" y="300" width="102" height="30" rx="10" fill="#f8fbff" stroke="#87aee7"/>
-  <text x="513" y="320" class="chip" fill="#14345f">AI Foundry</text>
-  <rect x="610" y="300" width="92" height="30" rx="10" fill="#fff7ec" stroke="#d9822b" stroke-width="2"/>
-  <text x="629" y="320" class="chip" fill="#7a4300">AI Search</text>
-  <rect x="716" y="300" width="84" height="30" rx="10" fill="#fff7ec" stroke="#d9822b" stroke-width="2"/>
-  <text x="737" y="320" class="chip" fill="#7a4300">Storage</text>
-  <rect x="814" y="300" width="100" height="30" rx="10" fill="#f8fbff" stroke="#87aee7"/>
-  <text x="832" y="320" class="chip" fill="#14345f">Cosmos DB</text>
+  <text x="494" y="286" class="card-title">RAG workload data path</text>
+  <rect x="494" y="300" width="116" height="30" rx="10" fill="#fffaf3" stroke="#d9822b" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="513" y="320" class="chip" fill="#7a4300">RAG AI Search</text>
+  <rect x="624" y="300" width="112" height="30" rx="10" fill="#fffaf3" stroke="#d9822b" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="644" y="320" class="chip" fill="#7a4300">RAG Storage</text>
+  <rect x="750" y="300" width="126" height="30" rx="10" fill="#fffaf3" stroke="#d9822b" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="768" y="320" class="chip" fill="#7a4300">App Cosmos DB</text>
 
-  <rect x="60" y="402" width="980" height="176" rx="22" fill="#eef8f2" stroke="#4a9f6f" stroke-width="2.5"/>
-  <rect x="86" y="428" width="136" height="34" rx="17" fill="#4a9f6f"/>
-  <text x="120" y="451" class="label">Common</text>
-  <text x="250" y="451" class="section-title">Common platform services for Basic and Zero Trust</text>
-  <text x="250" y="480" class="section-text">Configuration, identity, hosting, secrets, images, and telemetry shared by both deployment modes.</text>
-  <rect x="250" y="500" width="144" height="30" rx="10" fill="#f7fffa" stroke="#7dbb99"/>
-  <text x="269" y="520" class="chip" fill="#14345f">App Configuration</text>
-  <rect x="406" y="500" width="180" height="30" rx="10" fill="#f7fffa" stroke="#7dbb99"/>
-  <text x="423" y="520" class="chip" fill="#14345f">Managed identity/RBAC</text>
-  <rect x="598" y="500" width="128" height="30" rx="10" fill="#f7fffa" stroke="#7dbb99"/>
-  <text x="616" y="520" class="chip" fill="#14345f">Container Apps</text>
-  <rect x="738" y="500" width="148" height="30" rx="10" fill="#f7fffa" stroke="#7dbb99"/>
-  <text x="756" y="520" class="chip" fill="#14345f">Container Registry</text>
-  <rect x="250" y="538" width="92" height="30" rx="10" fill="#fff7ec" stroke="#d9822b" stroke-width="2"/>
-  <text x="271" y="558" class="chip" fill="#7a4300">Key Vault</text>
-  <rect x="356" y="538" width="118" height="30" rx="10" fill="#fff7ec" stroke="#d9822b" stroke-width="2"/>
-  <text x="374" y="558" class="chip" fill="#7a4300">Log Analytics</text>
-  <rect x="486" y="538" width="110" height="30" rx="10" fill="#f7fffa" stroke="#7dbb99"/>
-  <text x="504" y="558" class="chip" fill="#14345f">App Insights</text>
-  <rect x="608" y="538" width="124" height="30" rx="10" fill="#fff7ec" stroke="#d9822b" stroke-width="2"/>
-  <text x="626" y="558" class="chip" fill="#7a4300">BYO VNet/DNS</text>
-  <rect x="744" y="538" width="132" height="30" rx="10" fill="#fff7ec" stroke="#d9822b" stroke-width="2"/>
-  <text x="762" y="558" class="chip" fill="#7a4300">BYO monitoring</text>
+  <rect x="90" y="364" width="920" height="112" rx="16" fill="#ffffff" stroke="#9ebff0"/>
+  <text x="114" y="390" class="card-title">AI Foundry and associated resources</text>
+  <rect x="114" y="404" width="150" height="30" rx="10" fill="#f8fbff" stroke="#87aee7"/>
+  <text x="132" y="424" class="chip" fill="#14345f">AI Foundry account</text>
+  <rect x="278" y="404" width="106" height="30" rx="10" fill="#f8fbff" stroke="#87aee7"/>
+  <text x="298" y="424" class="chip" fill="#14345f">AI Project</text>
+  <rect x="398" y="404" width="140" height="30" rx="10" fill="#f8fbff" stroke="#87aee7"/>
+  <text x="416" y="424" class="chip" fill="#14345f">Model deployments</text>
+  <rect x="552" y="404" width="154" height="30" rx="10" fill="#fffaf3" stroke="#d9822b" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="570" y="424" class="chip" fill="#7a4300">Foundry Storage</text>
+  <rect x="720" y="404" width="148" height="30" rx="10" fill="#fffaf3" stroke="#d9822b" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="738" y="424" class="chip" fill="#7a4300">Foundry Search</text>
+  <rect x="114" y="442" width="164" height="30" rx="10" fill="#fffaf3" stroke="#d9822b" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="132" y="462" class="chip" fill="#7a4300">Foundry Cosmos DB</text>
+  <rect x="292" y="442" width="152" height="30" rx="10" fill="#fffaf3" stroke="#d9822b" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="310" y="462" class="chip" fill="#7a4300">Foundry Key Vault</text>
 
-  <rect x="60" y="608" width="980" height="178" rx="22" fill="#f3efff" stroke="#7b5fc7" stroke-width="2.5"/>
-  <rect x="86" y="634" width="136" height="34" rx="17" fill="#7b5fc7"/>
-  <text x="113" y="657" class="label">Zero Trust</text>
-  <text x="250" y="657" class="section-title">Network isolation additions (NETWORK_ISOLATION=true)</text>
-  <text x="250" y="686" class="section-text">Private service access and controlled network paths added on top of Basic and Common services.</text>
-  <rect x="250" y="706" width="116" height="30" rx="10" fill="#fbf9ff" stroke="#a790e5"/>
-  <text x="268" y="726" class="chip" fill="#14345f">VNet/Subnets</text>
-  <rect x="378" y="706" width="142" height="30" rx="10" fill="#fbf9ff" stroke="#a790e5"/>
-  <text x="396" y="726" class="chip" fill="#14345f">Private Endpoints</text>
-  <rect x="532" y="706" width="118" height="30" rx="10" fill="#fbf9ff" stroke="#a790e5"/>
-  <text x="550" y="726" class="chip" fill="#14345f">Private DNS</text>
-  <rect x="662" y="706" width="68" height="30" rx="10" fill="#fbf9ff" stroke="#a790e5"/>
-  <text x="681" y="726" class="chip" fill="#14345f">NSGs</text>
-  <rect x="742" y="706" width="162" height="30" rx="10" fill="#fbf9ff" stroke="#a790e5"/>
-  <text x="760" y="726" class="chip" fill="#14345f">Private app ingress</text>
-  <rect x="250" y="744" width="114" height="30" rx="10" fill="#fff7ec" stroke="#d9822b" stroke-width="2"/>
-  <text x="269" y="764" class="chip" fill="#7a4300">Azure Firewall</text>
-  <rect x="378" y="744" width="144" height="30" rx="10" fill="#fff7ec" stroke="#d9822b" stroke-width="2"/>
-  <text x="396" y="764" class="chip" fill="#7a4300">ACR private build</text>
-  <rect x="536" y="744" width="196" height="30" rx="10" fill="#fff7ec" stroke="#d9822b" stroke-width="2"/>
-  <text x="554" y="764" class="chip" fill="#7a4300">Jumpbox / Bastion / NAT</text>
-  <rect x="746" y="744" width="146" height="30" rx="10" fill="#fff7ec" stroke="#d9822b" stroke-width="2"/>
-  <text x="764" y="764" class="chip" fill="#7a4300">App Gateway WAF</text>
-  <rect x="906" y="744" width="112" height="30" rx="10" fill="#fff7ec" stroke="#d9822b" stroke-width="2"/>
-  <text x="924" y="764" class="chip" fill="#7a4300">Hub-spoke</text>
+  <rect x="60" y="542" width="980" height="190" rx="22" fill="#eef8f2" stroke="#4a9f6f" stroke-width="2.5"/>
+  <rect x="86" y="568" width="136" height="34" rx="17" fill="#4a9f6f"/>
+  <text x="120" y="591" class="label">Common</text>
+  <text x="250" y="591" class="section-title">Common platform services for Basic and Zero Trust</text>
+  <text x="250" y="620" class="section-text">Configuration, identity, hosting, images, secrets, and telemetry shared by both deployment modes.</text>
+  <rect x="250" y="640" width="144" height="30" rx="10" fill="#f7fffa" stroke="#7dbb99"/>
+  <text x="268" y="660" class="chip" fill="#14345f">App Configuration</text>
+  <rect x="408" y="640" width="178" height="30" rx="10" fill="#f7fffa" stroke="#7dbb99"/>
+  <text x="426" y="660" class="chip" fill="#14345f">Managed identity/RBAC</text>
+  <rect x="600" y="640" width="166" height="30" rx="10" fill="#f7fffa" stroke="#7dbb99"/>
+  <text x="618" y="660" class="chip" fill="#14345f">Container Apps Env</text>
+  <rect x="780" y="640" width="128" height="30" rx="10" fill="#f7fffa" stroke="#7dbb99"/>
+  <text x="798" y="660" class="chip" fill="#14345f">Container Apps</text>
+  <rect x="250" y="678" width="148" height="30" rx="10" fill="#f7fffa" stroke="#7dbb99"/>
+  <text x="268" y="698" class="chip" fill="#14345f">Container Registry</text>
+  <rect x="412" y="678" width="132" height="30" rx="10" fill="#fffaf3" stroke="#d9822b" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="430" y="698" class="chip" fill="#7a4300">Workload KV</text>
+  <rect x="558" y="678" width="204" height="30" rx="10" fill="#fffaf3" stroke="#d9822b" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="576" y="698" class="chip" fill="#7a4300">Log Analytics + App Insights</text>
+  <rect x="776" y="678" width="154" height="30" rx="10" fill="#fffaf3" stroke="#d9822b" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="794" y="698" class="chip" fill="#7a4300">BYO observability</text>
 
-  <rect x="60" y="816" width="980" height="118" rx="22" fill="#fff4f0" stroke="#d66f53" stroke-width="2.5"/>
-  <rect x="86" y="842" width="178" height="34" rx="17" fill="#d66f53"/>
-  <text x="111" y="865" class="label">Scenario add-ons</text>
-  <text x="286" y="858" class="section-title">Optional scenario capabilities</text>
-  <rect x="286" y="878" width="80" height="30" rx="10" fill="#fff7ec" stroke="#d9822b" stroke-width="2"/>
-  <text x="305" y="898" class="chip" fill="#7a4300">Speech</text>
-  <rect x="380" y="878" width="136" height="30" rx="10" fill="#fff7ec" stroke="#d9822b" stroke-width="2"/>
-  <text x="399" y="898" class="chip" fill="#7a4300">Bing grounding</text>
-  <rect x="530" y="878" width="154" height="30" rx="10" fill="#fff7ec" stroke="#d9822b" stroke-width="2"/>
-  <text x="548" y="898" class="chip" fill="#7a4300">NL2SQL/Postgres</text>
-  <rect x="698" y="878" width="102" height="30" rx="10" fill="#fff7ec" stroke="#d9822b" stroke-width="2"/>
-  <text x="717" y="898" class="chip" fill="#7a4300">MCP tools</text>
+  <rect x="60" y="760" width="980" height="210" rx="22" fill="#f3efff" stroke="#7b5fc7" stroke-width="2.5"/>
+  <rect x="86" y="786" width="136" height="34" rx="17" fill="#7b5fc7"/>
+  <text x="113" y="809" class="label">Zero Trust</text>
+  <text x="250" y="809" class="section-title">Zero Trust private networking</text>
+  <text x="250" y="838" class="section-text">Adds private service access, private DNS, internal app ingress, and controlled network paths.</text>
+  <rect x="250" y="858" width="116" height="30" rx="10" fill="#fbf9ff" stroke="#a790e5"/>
+  <text x="268" y="878" class="chip" fill="#14345f">VNet/Subnets</text>
+  <rect x="380" y="858" width="142" height="30" rx="10" fill="#fbf9ff" stroke="#a790e5"/>
+  <text x="398" y="878" class="chip" fill="#14345f">Private endpoints</text>
+  <rect x="536" y="858" width="118" height="30" rx="10" fill="#fbf9ff" stroke="#a790e5"/>
+  <text x="554" y="878" class="chip" fill="#14345f">Private DNS</text>
+  <rect x="668" y="858" width="68" height="30" rx="10" fill="#fbf9ff" stroke="#a790e5"/>
+  <text x="687" y="878" class="chip" fill="#14345f">NSGs</text>
+  <rect x="750" y="858" width="166" height="30" rx="10" fill="#fbf9ff" stroke="#a790e5"/>
+  <text x="768" y="878" class="chip" fill="#14345f">Internal app ingress</text>
+  <rect x="250" y="896" width="118" height="30" rx="10" fill="#fffaf3" stroke="#d9822b" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="268" y="916" class="chip" fill="#7a4300">Azure Firewall</text>
+  <rect x="382" y="896" width="198" height="30" rx="10" fill="#fffaf3" stroke="#d9822b" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="400" y="916" class="chip" fill="#7a4300">Jumpbox / Bastion / NAT</text>
+  <rect x="594" y="896" width="178" height="30" rx="10" fill="#ffe2bc" stroke="#d9822b" stroke-width="2"/>
+  <text x="612" y="916" class="chip" fill="#7a4300">Private ACR build pool</text>
+  <rect x="786" y="896" width="146" height="30" rx="10" fill="#ffe2bc" stroke="#d9822b" stroke-width="2"/>
+  <text x="804" y="916" class="chip" fill="#7a4300">App Gateway WAF</text>
+  <rect x="250" y="934" width="188" height="30" rx="10" fill="#ffe2bc" stroke="#d9822b" stroke-width="2"/>
+  <text x="268" y="954" class="chip" fill="#7a4300">BYO VNet / DNS zones</text>
+  <rect x="452" y="934" width="142" height="30" rx="10" fill="#ffe2bc" stroke="#d9822b" stroke-width="2"/>
+  <text x="470" y="954" class="chip" fill="#7a4300">Hub-spoke</text>
 
-  <rect x="60" y="948" width="980" height="20" rx="10" fill="#fff7ec" stroke="#d9822b"/>
-  <text x="82" y="963" class="note">Orange chips are controlled by deploy toggles or scenario flags and can be omitted; see the component matrix below for exact switches.</text>
+  <rect x="60" y="998" width="980" height="118" rx="22" fill="#fff4f0" stroke="#d66f53" stroke-width="2.5"/>
+  <rect x="86" y="1024" width="178" height="34" rx="17" fill="#d66f53"/>
+  <text x="111" y="1047" class="label">Scenario add-ons</text>
+  <text x="286" y="1040" class="section-title">Optional AI capabilities</text>
+  <rect x="286" y="1060" width="80" height="30" rx="10" fill="#ffe2bc" stroke="#d9822b" stroke-width="2"/>
+  <text x="305" y="1080" class="chip" fill="#7a4300">Speech</text>
+  <rect x="380" y="1060" width="136" height="30" rx="10" fill="#ffe2bc" stroke="#d9822b" stroke-width="2"/>
+  <text x="399" y="1080" class="chip" fill="#7a4300">Bing grounding</text>
+  <rect x="530" y="1060" width="146" height="30" rx="10" fill="#ffe2bc" stroke="#d9822b" stroke-width="2"/>
+  <text x="548" y="1080" class="chip" fill="#7a4300">Agentic retrieval</text>
+
+  <rect x="60" y="1130" width="980" height="20" rx="10" fill="#fff7ec" stroke="#d9822b"/>
+  <text x="82" y="1145" class="note">Dashed orange = default-on or BYO-capable parameter; solid orange = opt-in add-on. Exact parameter names are listed in the Architecture page table.</text>
 </svg>

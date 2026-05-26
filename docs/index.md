@@ -13,7 +13,7 @@ Designed with Zero-Trust security and Infrastructure as Code (IaC) principles fr
 
 ## Architecture at a glance
 
-GPT-RAG can start as a basic deployment and expand into Zero Trust, public ingress, existing-platform integration, or optional AI capabilities as needed. See the [Architecture](architecture.md) page for the required-vs-optional matrix.
+GPT-RAG can start as a basic deployment and expand into Zero Trust, public ingress, existing-platform integration, or optional AI capabilities as needed. See the [Architecture](architecture.md) page for the required-vs-configurable deployment table.
 
 ![Zero Trust Architecture](media/architecture_zero_trust.png)
 *Full Zero Trust reference architecture. This is the complete network-isolated view, not the minimum basic deployment.*
