@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.  
 This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to [Semantic Versioning](https://semver.org/).
 
+## [v2.7.7] - 2026-05-27
+
+### Changed
+- **Grouped dependency refresh across GPT-RAG components:** bumped `requests` in the core configuration tooling to 2.33.0 and updated the service manifest to consume `gpt-rag-ui` [v2.3.8](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.3.8), `gpt-rag-orchestrator` [v2.6.10](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.6.10), and `gpt-rag-ingestion` [v2.3.8](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.3.8). `gpt-rag-mcp` [v0.3.7](https://github.com/Azure/gpt-rag-mcp/releases/tag/v0.3.7) was released in the same dependency refresh batch; the MCP server remains an optional component and is not listed in the default deployment manifest.
+
+### Validation
+The following component versions were validated together for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.8 |
+| gpt-rag-orchestrator | v2.6.10 |
+| gpt-rag-ingestion | v2.3.8 |
+| gpt-rag-mcp | v0.3.7 |
+| infra (landing zone) | v2.0.2 |
+
 ## [v2.7.6] - 2026-05-27
 
 ### Changed
