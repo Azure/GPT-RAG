@@ -5,9 +5,9 @@ The Orchestrator is the core engine of GPT-RAG, an agentic orchestration layer b
 ## Key Features
 
 - **Strategy-Based Architecture:** Pluggable orchestration strategies selected via Azure App Configuration (`AGENT_STRATEGY`).
-- **Context Retrieval:** Intelligent retrieval from Azure AI Search with citation support.
+- **Context Retrieval:** Intelligent retrieval from Azure AI Search with citation support and conservative retrieval-needed triage for local MAF strategies.
 - **Microsoft Agent Framework:** Built on the Microsoft Agent Framework.
-- **Conversation Persistence:** Maintains conversation history in Cosmos DB with real-time SSE streaming.
+- **Conversation Persistence:** Maintains conversation history in Cosmos DB with real-time SSE streaming and bounded persisted history compaction.
 - **Extensible Design:** Easy to add new strategies by extending `BaseAgentStrategy`.
 
 ## Available Strategies
@@ -21,6 +21,20 @@ The Orchestrator supports multiple strategies. The active strategy is set via th
 | `single_agent_rag` | Single Agent RAG | Uses Azure AI Agents SDK with Agent Service for agentic RAG. Supports dynamic routing, streaming via event handlers, and pre-warming for low-latency first responses. |
 | `mcp` | MCP | Model Context Protocol strategy using Semantic Kernel. Connects to an MCP server for tool orchestration and passes user context via HTTP headers. |
 | `nl2sql` | NL2SQL | Natural language to SQL translation using Microsoft Agent Framework `ChatAgent` with local metadata lookup, SQL validation, and query execution. No Semantic Kernel or Agent Service agent creation is used in this path. |
+
+## Conversation History and Retrieval Controls
+
+Long-running chats are handled in two places: the model prompt receives only a recent history window, while the Cosmos DB conversation document is compacted before persistence so it keeps useful recent context without growing indefinitely. The default `maf_lite` strategy and the `multimodal` strategy also classify each turn as a greeting, retrieval-needed question, or no-retrieval follow-up; transformations such as "format that answer as a table" or "translate the previous answer" can skip Azure AI Search while still using the recent chat history.
+
+| App Configuration key | Default | Purpose |
+|-----------------------|---------|---------|
+| `CHAT_HISTORY_MAX_MESSAGES` | `10` | Recent messages sent to the response model. |
+| `CONVERSATION_HISTORY_COMPACTION_ENABLED` | `true` | Enables compaction before saving a conversation document to Cosmos DB. |
+| `CONVERSATION_HISTORY_MAX_PERSISTED_MESSAGES` | `200` | Maximum recent messages kept in the persisted conversation document. |
+| `CONVERSATION_HISTORY_MAX_BYTES` | `1500000` | Serialized size target for the persisted conversation document. |
+| `RETRIEVAL_INTENT_HISTORY_MESSAGES` | `4` | Recent messages sent only to the retrieval-needed classifier. |
+| `RETRIEVAL_INTENT_HISTORY_MAX_CHARS` | `4000` | Character budget for classifier history. |
+| `ENABLE_NO_RETRIEVAL_FOLLOWUP_DETECTION` | `true` | Allows no-retrieval follow-ups to skip Azure AI Search; ambiguous turns still retrieve. |
 
 ## Visual Guide
 

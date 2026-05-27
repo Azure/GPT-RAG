@@ -2,6 +2,12 @@
 
 ### May 2026
 
+**[Release 2.7.6](https://github.com/Azure/GPT-RAG/tree/v2.7.6) - Long conversation handling and retrieval triage**
+
+GPT-RAG now consumes `gpt-rag-orchestrator` v2.6.9. The orchestrator bounds persisted conversation documents before saving to Cosmos DB, keeping recent messages and question metadata while preventing very long chats from growing indefinitely. The default local MAF path also classifies greetings, retrieval-needed questions, and no-retrieval follow-ups so transformations of the previous answer can skip unnecessary Azure AI Search calls.
+
+---
+
 **[Release 2.7.5](https://github.com/Azure/GPT-RAG/tree/v2.7.5) - Existing-platform deployment, NL2SQL, and conversation rename fixes**
 
 GPT-RAG now exposes the AI Landing Zone existing-platform parameters from the root `main.parameters.json`, so operators can integrate with shared Private DNS Zones, observability, hub networking, existing jumpbox/Bastion/NAT resources, Private Endpoint placement, ACR Task agent pools, speech resources, and policy-managed DNS without editing the infra submodule.
