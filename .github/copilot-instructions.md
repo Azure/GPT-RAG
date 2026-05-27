@@ -78,6 +78,28 @@ When preparing a release branch:
 - Update `CHANGELOG.md`
 - Ensure the repository reflects a releasable state
 - Do NOT introduce new feature work
+- For GPT-RAG umbrella releases, the GitHub Release notes MUST include a
+  `Tested Service Versions` section with a Markdown table listing every
+  validated runtime component from `manifest.json` `components[]` plus
+  `infra (landing zone)` from `manifest.json` `ailz_tag`.
+- The `Tested Service Versions` table MUST be updated for every release,
+  even if only one component changed, so operators know the exact validated
+  combination.
+
+Example:
+
+```md
+## Tested Service Versions
+
+The following component versions were validated together for this release:
+
+| Component | Version |
+|-----------|---------|
+| gpt-rag-ui | vX.Y.Z |
+| gpt-rag-orchestrator | vX.Y.Z |
+| gpt-rag-ingestion | vX.Y.Z |
+| infra (landing zone) | vX.Y.Z |
+```
 
 ---
 
