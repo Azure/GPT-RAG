@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.  
 This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to [Semantic Versioning](https://semver.org/).
 
+## [v2.7.6] - 2026-05-27
+
+### Changed
+- **Bumped `gpt-rag-orchestrator` to [v2.6.9](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.6.9)** to consume long conversation history compaction and retrieval-needed triage improvements.
+
+### Fixed
+- **Long conversations no longer grow persisted Cosmos DB documents indefinitely:** the orchestrator now compacts persisted conversation documents by serialized size and message count while keeping recent messages and question metadata. It also skips unnecessary Azure AI Search calls for no-retrieval follow-ups such as formatting, translation, summarization, or rephrasing. Fixes [Azure/GPT-RAG#448](https://github.com/Azure/GPT-RAG/issues/448).
+
 ## [v2.7.5] - 2026-05-26
 
 ### Added
