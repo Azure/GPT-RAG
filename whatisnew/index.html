@@ -991,6 +991,9 @@
 <p>📌 <a href="https://github.com/orgs/Azure/projects/536/views/6">Check out what's coming next</a>  (Azure org only)</p>
 </blockquote>
 <h3 id="may-2026">May 2026</h3>
+<p><strong><a href="https://github.com/Azure/GPT-RAG/tree/v2.7.6">Release 2.7.6</a> - Long conversation handling and retrieval triage</strong></p>
+<p>GPT-RAG now consumes <code>gpt-rag-orchestrator</code> v2.6.9. The orchestrator bounds persisted conversation documents before saving to Cosmos DB, keeping recent messages and question metadata while preventing very long chats from growing indefinitely. The default local MAF path also classifies greetings, retrieval-needed questions, and no-retrieval follow-ups so transformations of the previous answer can skip unnecessary Azure AI Search calls.</p>
+<hr />
 <p><strong><a href="https://github.com/Azure/GPT-RAG/tree/v2.7.5">Release 2.7.5</a> - Existing-platform deployment, NL2SQL, and conversation rename fixes</strong></p>
 <p>GPT-RAG now exposes the AI Landing Zone existing-platform parameters from the root <code>main.parameters.json</code>, so operators can integrate with shared Private DNS Zones, observability, hub networking, existing jumpbox/Bastion/NAT resources, Private Endpoint placement, ACR Task agent pools, speech resources, and policy-managed DNS without editing the infra submodule.</p>
 <p>Runtime component updates in this release move NL2SQL to Microsoft Agent Framework with direct model calls and local NL2SQL tool execution, removing Semantic Kernel Agent Service agent creation from that path. The chat UI also persists conversation renames by calling the orchestrator conversation update API.</p>

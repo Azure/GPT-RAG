@@ -557,6 +557,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#conversation-history-and-retrieval-controls" class="md-nav__link">
+    <span class="md-ellipsis">
+      Conversation History and Retrieval Controls
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#visual-guide" class="md-nav__link">
     <span class="md-ellipsis">
       Visual Guide
@@ -969,9 +978,9 @@
 <h2 id="key-features">Key Features</h2>
 <ul>
 <li><strong>Strategy-Based Architecture:</strong> Pluggable orchestration strategies selected via Azure App Configuration (<code>AGENT_STRATEGY</code>).</li>
-<li><strong>Context Retrieval:</strong> Intelligent retrieval from Azure AI Search with citation support.</li>
+<li><strong>Context Retrieval:</strong> Intelligent retrieval from Azure AI Search with citation support and conservative retrieval-needed triage for local MAF strategies.</li>
 <li><strong>Microsoft Agent Framework:</strong> Built on the Microsoft Agent Framework.</li>
-<li><strong>Conversation Persistence:</strong> Maintains conversation history in Cosmos DB with real-time SSE streaming.</li>
+<li><strong>Conversation Persistence:</strong> Maintains conversation history in Cosmos DB with real-time SSE streaming and bounded persisted history compaction.</li>
 <li><strong>Extensible Design:</strong> Easy to add new strategies by extending <code>BaseAgentStrategy</code>.</li>
 </ul>
 <h2 id="available-strategies">Available Strategies</h2>
@@ -1009,6 +1018,54 @@
 <td><code>nl2sql</code></td>
 <td>NL2SQL</td>
 <td>Natural language to SQL translation using Microsoft Agent Framework <code>ChatAgent</code> with local metadata lookup, SQL validation, and query execution. No Semantic Kernel or Agent Service agent creation is used in this path.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="conversation-history-and-retrieval-controls">Conversation History and Retrieval Controls</h2>
+<p>Long-running chats are handled in two places: the model prompt receives only a recent history window, while the Cosmos DB conversation document is compacted before persistence so it keeps useful recent context without growing indefinitely. The default <code>maf_lite</code> strategy and the <code>multimodal</code> strategy also classify each turn as a greeting, retrieval-needed question, or no-retrieval follow-up; transformations such as "format that answer as a table" or "translate the previous answer" can skip Azure AI Search while still using the recent chat history.</p>
+<table>
+<thead>
+<tr>
+<th>App Configuration key</th>
+<th>Default</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CHAT_HISTORY_MAX_MESSAGES</code></td>
+<td><code>10</code></td>
+<td>Recent messages sent to the response model.</td>
+</tr>
+<tr>
+<td><code>CONVERSATION_HISTORY_COMPACTION_ENABLED</code></td>
+<td><code>true</code></td>
+<td>Enables compaction before saving a conversation document to Cosmos DB.</td>
+</tr>
+<tr>
+<td><code>CONVERSATION_HISTORY_MAX_PERSISTED_MESSAGES</code></td>
+<td><code>200</code></td>
+<td>Maximum recent messages kept in the persisted conversation document.</td>
+</tr>
+<tr>
+<td><code>CONVERSATION_HISTORY_MAX_BYTES</code></td>
+<td><code>1500000</code></td>
+<td>Serialized size target for the persisted conversation document.</td>
+</tr>
+<tr>
+<td><code>RETRIEVAL_INTENT_HISTORY_MESSAGES</code></td>
+<td><code>4</code></td>
+<td>Recent messages sent only to the retrieval-needed classifier.</td>
+</tr>
+<tr>
+<td><code>RETRIEVAL_INTENT_HISTORY_MAX_CHARS</code></td>
+<td><code>4000</code></td>
+<td>Character budget for classifier history.</td>
+</tr>
+<tr>
+<td><code>ENABLE_NO_RETRIEVAL_FOLLOWUP_DETECTION</code></td>
+<td><code>true</code></td>
+<td>Allows no-retrieval follow-ups to skip Azure AI Search; ambiguous turns still retrieve.</td>
 </tr>
 </tbody>
 </table>
