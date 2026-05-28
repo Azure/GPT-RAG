@@ -6,6 +6,22 @@
 All notable changes to this project will be documented in this file.  
 This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to [Semantic Versioning](https://semver.org/).
 
+## [v2.7.9] - 2026-05-28
+
+### Fixed
+- **Ingestion Managed Identity authentication in Azure Container Apps:** bumped `gpt-rag-ingestion` to [v2.4.1](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.1), updating `azure-identity` so `/ingest-documents` can authenticate sync Content Understanding, Blob Storage, and embedding paths with user-assigned Managed Identity.
+
+### Validation
+The following component versions were validated together for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.9 |
+| gpt-rag-orchestrator | v2.6.11 |
+| gpt-rag-ingestion | v2.4.1 |
+| gpt-rag-mcp | v0.3.8 |
+| infra (landing zone) | v2.0.2 |
+
 ## [v2.7.8] - 2026-05-28
 
 ### Changed
