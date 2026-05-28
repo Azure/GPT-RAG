@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.  
 This format follows [Keep a Changelog](https://keepachangelog.com/) and adheres to [Semantic Versioning](https://semver.org/).
 
+## [v2.7.10] - 2026-05-28
+
+### Fixed
+- **Ingestion Managed Identity client ID fallback in Azure Container Apps:** bumped `gpt-rag-ingestion` to [v2.4.2](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.2), preserving App Configuration precedence for `AZURE_CLIENT_ID` while falling back to the Container Apps-injected environment variable when the key is absent. This completes the fix for `/ingest-documents` returning HTTP 200 with `indexedChunks: 0` due to user-assigned Managed Identity token acquisition failures.
+
+### Validation
+The following component versions were validated together for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.9 |
+| gpt-rag-orchestrator | v2.6.11 |
+| gpt-rag-ingestion | v2.4.2 |
+| gpt-rag-mcp | v0.3.8 |
+| infra (landing zone) | v2.0.2 |
+
 ## [v2.7.9] - 2026-05-28
 
 ### Fixed
