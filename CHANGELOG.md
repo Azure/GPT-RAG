@@ -2,8 +2,23 @@
 
 ## [Unreleased]
 
+
+## [v2.7.11] - 2026-05-29
+
 ### Changed
 - **Regional preflight: warn about Azure AI Search transient capacity.** `scripts/Invoke-GptRagRegionalPreflight.ps1` now adds a Warn next to the existing PASS for Azure AI Search, mirroring the Cosmos DB pattern. The PASS still confirms regional provider/SKU support, but operators are now explicitly told that pre-create capacity (`InsufficientResourcesAvailable`) is not exposed by a reliable quota API and provisioning may still fail on transient regional saturation. Closes [#470](https://github.com/Azure/GPT-RAG/issues/470).
+
+### Validation
+The following component versions were validated together for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.9 |
+| gpt-rag-orchestrator | v2.6.11 |
+| gpt-rag-ingestion | v2.4.2 |
+| gpt-rag-mcp | v0.3.8 |
+| infra (landing zone) | v2.0.2 |
+
 
 
 All notable changes to this project will be documented in this file.  
