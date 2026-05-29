@@ -2,11 +2,28 @@
 
 ## [Unreleased]
 
+
+## [v2.7.12] - 2026-05-29
+
 ### Changed
 - **Landing zone submodule bumped to `v2.0.3`.** `manifest.json` `ailz_tag` and `.gitmodules` `branch` updated. v2.0.3 extends `infra/scripts/Invoke-PreflightChecks.ps1` with regional readiness checks (subscription drift, provider/location, AI Search & Cosmos capacity warnings, jumpbox VM SKU, model quota) — all driven by `main.parameters.json`, so they are now available to every consumer of the landing zone.
 
 ### Removed
-- **`scripts/Invoke-GptRagRegionalPreflight.ps1` deleted; invocation removed from `scripts/preProvision.{ps1,sh}`.** Every check the GPT-RAG-specific preflight performed (region match, jumpbox VM SKU, provider/location support for AI Search/Cosmos/Container Apps/AI Foundry, transient capacity warnings, OpenAI model quota) is now performed by the landing-zone preflight in v2.0.3. The legacy `GPT_RAG_REGIONAL_PREFLIGHT_SKIP` env var is no longer needed — use `PREFLIGHT_SKIP=true` to bypass everything, or `LZ_PREFLIGHT_REGIONAL_SKIP=true` to bypass only the regional block while keeping parameter/topology/CIDR/BYO checks. Closes the duplication tracked in [Azure/bicep-ptn-aiml-landing-zone#72](https://github.com/Azure/bicep-ptn-aiml-landing-zone/issues/72).
+- **`scripts/Invoke-GptRagRegionalPreflight.ps1` deleted; invocation removed from `scripts/preProvision.{ps1,sh}`.** Every check the GPT-RAG-specific preflight performed (region match, jumpbox VM SKU, provider/location support for AI Search/Cosmos/Container Apps/AI Foundry, transient capacity warnings, OpenAI model quota) is now performed by the landing-zone preflight in v2.0.3. The legacy `GPT_RAG_REGIONAL_PREFLIGHT_SKIP` env var is no longer recognized — use `PREFLIGHT_SKIP=true` to bypass everything, or `LZ_PREFLIGHT_REGIONAL_SKIP=true` to bypass only the regional block while keeping parameter/topology/CIDR/BYO checks. Closes the duplication tracked in [Azure/bicep-ptn-aiml-landing-zone#72](https://github.com/Azure/bicep-ptn-aiml-landing-zone/issues/72).
+
+### Validation
+The following component versions were validated together for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.9 |
+| gpt-rag-orchestrator | v2.6.11 |
+| gpt-rag-ingestion | v2.4.2 |
+| gpt-rag-mcp | v0.3.8 |
+| infra (landing zone) | v2.0.3 |
+
+End-to-end validated in `swedencentral` with `NETWORK_ISOLATION=false`: full `azd provision` (preflight emitted the expected regional readiness block from the landing zone) + `azd deploy` succeeded; health endpoints (frontend `/`, orchestrator `/docs`, ingestion `/readyz`) returned HTTP 200.
+
 
 ## [v2.7.11] - 2026-05-29
 
