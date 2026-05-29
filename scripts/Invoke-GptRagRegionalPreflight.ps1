@@ -244,7 +244,10 @@ $deployAiFoundry = Convert-ToBool (Resolve-ParameterValue $parameters.deployAiFo
 
 if ($location) {
     if ($deployVm -and $vmSize) { Test-VmSku -Location $location -VmSize $vmSize }
-    if ($deploySearch) { Test-ProviderLocation -ProviderNamespace 'Microsoft.Search' -ResourceType 'searchServices' -Location $location -DisplayName 'Azure AI Search' }
+    if ($deploySearch) {
+        Test-ProviderLocation -ProviderNamespace 'Microsoft.Search' -ResourceType 'searchServices' -Location $location -DisplayName 'Azure AI Search'
+        Add-Check Warn 'Azure AI Search capacity' "Azure AI Search transient regional capacity (for example InsufficientResourcesAvailable) is not exposed by a reliable pre-create quota API; this preflight validates provider/location support only."
+    }
     if ($deployCosmos) {
         Test-ProviderLocation -ProviderNamespace 'Microsoft.DocumentDB' -ResourceType 'databaseAccounts' -Location $cosmosLocation -DisplayName 'Azure Cosmos DB'
         Add-Check Warn 'Azure Cosmos DB capacity' "Cosmos DB transient regional capacity (for example high-demand ServiceUnavailable) is not exposed by a reliable pre-create quota API; this preflight validates provider/location support only."
