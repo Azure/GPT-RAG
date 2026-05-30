@@ -67,24 +67,12 @@ for FILE_NAME in manifest.json main.parameters.json; do
 done
 
 ###############################################################################
-# GPT-RAG regional readiness preflight, then AI Landing Zone v2.0.0+ preflight validation
-# https://github.com/Azure/bicep-ptn-aiml-landing-zone/blob/v2.0.0/scripts/Invoke-PreflightChecks.ps1
+# AI Landing Zone v2.0.4+ preflight validation
+# https://github.com/Azure/bicep-ptn-aiml-landing-zone/blob/v2.0.4/scripts/Invoke-PreflightChecks.ps1
+# Covers parameter/topology/BYO/IP checks plus regional readiness (subscription
+# drift, provider/location, AI Search & Cosmos capacity warnings, jumpbox VM SKU,
+# model quota).
 ###############################################################################
-
-GPT_RAG_REGIONAL_PREFLIGHT_SCRIPT="$SCRIPT_DIR/Invoke-GptRagRegionalPreflight.ps1"
-if [ -f "$GPT_RAG_REGIONAL_PREFLIGHT_SCRIPT" ] && [ "$PREFLIGHT_SKIP" != "true" ] && [ "$PREFLIGHT_SKIP" != "1" ]; then
-    if command -v pwsh >/dev/null 2>&1; then
-        pwsh -NoProfile -File "$GPT_RAG_REGIONAL_PREFLIGHT_SCRIPT" -ProjectRoot "$PROJECT_ROOT" -ParametersPath "$INFRA_DIR/main.parameters.json"
-        GPT_RAG_PREFLIGHT_EXIT=$?
-        if [ $GPT_RAG_PREFLIGHT_EXIT -ne 0 ]; then
-            echo "${YELLOW}GPT-RAG regional preflight failed. Fix the reported region, SKU, or quota issues; or set GPT_RAG_REGIONAL_PREFLIGHT_SKIP=true to bypass only these regional checks.${NC}"
-            exit $GPT_RAG_PREFLIGHT_EXIT
-        fi
-    else
-        echo "${YELLOW}Error: PowerShell 7 (pwsh) is required for GPT-RAG regional preflight checks. Install pwsh, set PREFLIGHT_SKIP=true to bypass all preflight checks, or set GPT_RAG_REGIONAL_PREFLIGHT_SKIP=true to bypass only regional checks.${NC}"
-        exit 1
-    fi
-fi
 
 PREFLIGHT_SCRIPT="$INFRA_DIR/scripts/Invoke-PreflightChecks.ps1"
 if [ -f "$PREFLIGHT_SCRIPT" ] && [ "$PREFLIGHT_SKIP" != "true" ] && [ "$PREFLIGHT_SKIP" != "1" ]; then
