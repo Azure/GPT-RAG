@@ -3,6 +3,14 @@
 ## [Unreleased]
 
 
+## [v2.7.13] - 2026-05-30
+
+### Changed
+- **Landing zone submodule bumped to `v2.0.6`.** `manifest.json` `ailz_tag` and `.gitmodules` `branch` updated. v2.0.5 added `acrTaskConfig` so consumers can opt into ACR Tasks remote builds at provision time, and v2.0.6 flipped `deployVmKeyVault` default from `true` to `false` (the parameter never actually gated a resource — only the `DEPLOY_VM_KEY_VAULT` azd output, which is preserved for backward compatibility). No GPT-RAG parameters change; this is a passthrough bump that picks up the upstream fixes and keeps the umbrella aligned with the latest landing zone.
+
+### Validation
+End-to-end validated on Azure with the Zero-Trust topology (`NETWORK_ISOLATION=true`).
+
 ## [v2.7.12] - 2026-05-29
 
 ### Changed

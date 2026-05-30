@@ -1,7 +1,7 @@
 {
-  "tag": "v2.7.12",
+  "tag": "v2.7.13",
   "repo": "https://github.com/azure/gpt-rag.git",  
-  "ailz_tag": "v2.0.4",
+  "ailz_tag": "v2.0.6",
   "components": [
     {
       "name": "gpt-rag-ui",
