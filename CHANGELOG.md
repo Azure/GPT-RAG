@@ -22,7 +22,7 @@ The following component versions were validated together for this release:
 | gpt-rag-mcp | v0.3.8 |
 | infra (landing zone) | v2.0.4 |
 
-End-to-end validated in `swedencentral` with `NETWORK_ISOLATION=false`: full `azd provision` (preflight emitted the regional readiness block from the landing zone without the v2.0.3 parser error) + `azd deploy` succeeded; health endpoints (frontend `/`, orchestrator `/docs`, ingestion `/readyz`) returned HTTP 200.
+End-to-end validated in `francecentral` with `NETWORK_ISOLATION=false` (env `gptrag-0530260731`, RG `rg-gptrag-0530260731`): full `azd provision` (preflight emitted the regional readiness block from the landing zone v2.0.4 without the v2.0.3 parser error — 3 transient capacity warnings, 0 failures; provisioning completed in 27m05s) + `azd deploy` succeeded. Health endpoints returned HTTP 200: frontend `/`, orchestrator `/docs`, ingestion `/readyz`, and ingestion `/api/version`. Initial run in `swedencentral` proved the preflight fix worked (the script ran past the previously-failing line 950) but provisioning aborted at AI Foundry model deployment due to a regional `text-embedding-3-large` quota exhaustion (independent of this release); the validation was therefore completed in `francecentral`.
 
 
 ## [v2.7.11] - 2026-05-29
