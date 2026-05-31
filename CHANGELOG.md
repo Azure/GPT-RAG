@@ -6,7 +6,11 @@
 ## [v2.7.13] - 2026-05-30
 
 ### Changed
-- **Landing zone submodule bumped to `v2.0.6`.** `manifest.json` `ailz_tag` and `.gitmodules` `branch` updated. v2.0.5 added `acrTaskConfig` so consumers can opt into ACR Tasks remote builds at provision time, and v2.0.6 flipped `deployVmKeyVault` default from `true` to `false` (the parameter never actually gated a resource — only the `DEPLOY_VM_KEY_VAULT` azd output, which is preserved for backward compatibility). No GPT-RAG parameters change; this is a passthrough bump that picks up the upstream fixes and keeps the umbrella aligned with the latest landing zone.
+- **Landing zone submodule bumped to `v2.0.7`.** `manifest.json` `ailz_tag` and `.gitmodules` `branch` updated. The bump picks up three upstream changes:
+  - v2.0.5 added `acrTaskConfig` so consumers can opt into ACR Tasks remote builds at provision time.
+  - v2.0.6 flipped `deployVmKeyVault` default from `true` to `false` (the parameter never actually gated a resource — only the `DEPLOY_VM_KEY_VAULT` azd output, which is preserved for backward compatibility).
+  - v2.0.7 ([Azure/bicep-ptn-aiml-landing-zone#78](https://github.com/Azure/bicep-ptn-aiml-landing-zone/issues/78)) fixes a ZTA race where placeholder Container Apps tried to pull `mcr.microsoft.com/dotnet/samples:aspnetapp-9.0` before the Azure Firewall's `AllowMicrosoftContainerRegistry` application rule had been deployed. The `aca-environment-subnet` UDR routes egress through the firewall, so the pull was denied (`EOF`) and `azd provision` aborted in ZTA — leaving the firewall policy with zero rule collection groups. v2.0.7 adds the missing `dependsOn`, ensuring the MCR allow rule is in place before any container app is created. Basic mode and AI-LZ-integrated topologies that do not deploy a local firewall are unaffected.
+  No GPT-RAG parameters change; this is a passthrough bump that picks up the upstream fixes and unblocks ZTA deployments.
 
 ### Validation
 End-to-end validated on Azure with the Zero-Trust topology (`NETWORK_ISOLATION=true`).
