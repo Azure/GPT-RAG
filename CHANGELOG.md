@@ -3,13 +3,14 @@
 ## [Unreleased]
 
 
-## [v2.7.13] - 2026-05-30
+## [v2.7.13] - 2026-05-31
 
 ### Changed
-- **Landing zone submodule bumped to `v2.0.7`.** `manifest.json` `ailz_tag` and `.gitmodules` `branch` updated. The bump picks up three upstream changes:
-  - v2.0.5 added `acrTaskConfig` so consumers can opt into ACR Tasks remote builds at provision time.
+- **Landing zone submodule bumped to `v2.0.8`.** `manifest.json` `ailz_tag` and `.gitmodules` `branch` updated. The bump rolls up four upstream releases:
+  - v2.0.5 added `acrTaskConfig` so consumers can opt into ACR Tasks remote builds at provision time, and added `packages.microsoft.com` to the default ACR Tasks OS package allow-list ([Azure/bicep-ptn-aiml-landing-zone#68](https://github.com/Azure/bicep-ptn-aiml-landing-zone/issues/68)).
   - v2.0.6 flipped `deployVmKeyVault` default from `true` to `false` (the parameter never actually gated a resource — only the `DEPLOY_VM_KEY_VAULT` azd output, which is preserved for backward compatibility).
-  - v2.0.7 ([Azure/bicep-ptn-aiml-landing-zone#78](https://github.com/Azure/bicep-ptn-aiml-landing-zone/issues/78)) fixes a ZTA race where placeholder Container Apps tried to pull `mcr.microsoft.com/dotnet/samples:aspnetapp-9.0` before the Azure Firewall's `AllowMicrosoftContainerRegistry` application rule had been deployed. The `aca-environment-subnet` UDR routes egress through the firewall, so the pull was denied (`EOF`) and `azd provision` aborted in ZTA — leaving the firewall policy with zero rule collection groups. v2.0.7 adds the missing `dependsOn`, ensuring the MCR allow rule is in place before any container app is created. Basic mode and AI-LZ-integrated topologies that do not deploy a local firewall are unaffected.
+  - v2.0.7 ([Azure/bicep-ptn-aiml-landing-zone#78](https://github.com/Azure/bicep-ptn-aiml-landing-zone/issues/78)) added a `dependsOn` between Container Apps and `firewallPolicyDefaultRuleCollectionGroup` as defence-in-depth so the placeholder MCR pull cannot race the firewall's `AllowMicrosoftContainerRegistry` rule.
+  - v2.0.8 ([Azure/bicep-ptn-aiml-landing-zone#80](https://github.com/Azure/bicep-ptn-aiml-landing-zone/issues/80) / [#81](https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/81)) is the actual ZTA fix: Azure Firewall rejects `ApplicationRule.targetFqdns: []` at the ARM request-validation layer with `BadRequest: "The request is invalid."`, so the whole `DefaultRuleCollectionGroup` failed in ~0.3s and the firewall stayed empty whenever an optional feature was disabled. With the GPT-RAG default `DEPLOY_ACR_TASK_AGENT_POOL=false`, three rules (`AllowAcrTasks`, `AllowAcrTaskDevRuntimes`, `AllowAcrTaskOsPackages`) shipped with empty targets, which blocked every ZTA `azd provision` on v2.0.4-v2.0.7. v2.0.8 wraps the rule list in `filter(..., r => !empty(r.targetFqdns))` so empty rules are omitted from the ARM payload. The downstream symptom — Container Apps failing to pull `mcr.microsoft.com/dotnet/samples:aspnetapp-9.0` because the `aca-environment-subnet` UDR forces egress through a firewall with zero rules — is fully resolved by this fix.
   No GPT-RAG parameters change; this is a passthrough bump that picks up the upstream fixes and unblocks ZTA deployments.
 
 ### Validation
