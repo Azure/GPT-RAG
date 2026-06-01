@@ -3,6 +3,14 @@
 ## [Unreleased]
 
 
+## [v2.7.14] - 2026-06-01
+
+### Changed
+- **Landing zone submodule bumped to `v2.0.12`.** `manifest.json` `ailz_tag`, `.gitmodules` `branch`, and the recorded `infra/` submodule gitlink were updated to consume the upstream Windows jumpbox CSE timeout fix for Zero Trust deployments ([Azure/bicep-ptn-aiml-landing-zone#82](https://github.com/Azure/bicep-ptn-aiml-landing-zone/issues/82)) plus the Windows PowerShell 5.1 parser, Git clone watchdog, and non-interactive `azd init` hotfixes discovered during GPT-RAG validation. The landing zone now self-limits `install.ps1` under the platform's fixed 90-minute Custom Script Extension window: Chocolatey installs are capped with `--execution-timeout=600`, downloads and `azd` calls are bounded, optional bootstrap steps are skipped when the wall-clock budget is low, win-acme staging is non-fatal, component clone/update loops run through the bounded watchdog path, and `AZD_SKIP_FIRST_RUN=true` prevents azd first-run tooling prompts from blocking the jumpbox CSE. No GPT-RAG parameter changes are required; this release only advances the pinned landing zone so new GPT-RAG deployments fetch the fixed bootstrap script.
+
+### Validation
+End-to-end Azure validation pending.
+
 ## [v2.7.13] - 2026-05-31
 
 ### Changed
