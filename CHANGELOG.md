@@ -1,7 +1,40 @@
 # Changelog
 
-## [Unreleased]
+## [v2.8.1] - 2026-06-04
 
+### Changed
+- **Landing zone submodule bumped to `v2.0.14` and Dapr declared explicitly for GPT-RAG Container Apps.** `manifest.json` `ailz_tag`, `.gitmodules` `branch`, and the recorded `infra/` submodule gitlink now consume the upstream Dapr opt-in change from [Azure/bicep-ptn-aiml-landing-zone#86](https://github.com/Azure/bicep-ptn-aiml-landing-zone/issues/86). Because GPT-RAG uses Dapr for inter-container service invocation, `main.parameters.json` now sets `dapr.enabled=true` for the orchestrator, frontend, and data ingestion Container Apps, preserving the current runtime behavior while allowing the landing zone default to remain Dapr-disabled for external apps.
+
+### Validation
+The following component versions were validated together for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.9 |
+| gpt-rag-orchestrator | v2.8.0 |
+| gpt-rag-ingestion | v2.4.2 |
+| infra (landing zone) | v2.0.14 |
+
+Validated the updated parameters and landing zone integration with JSON parsing, `az bicep build --file infra\main.bicep`, and `azd provision --preview --no-prompt` in env `gptrag-0604261534`, resource group `rg-gptrag-0604261534`, region `eastus2`. Confirmed `main.parameters.json` sets `dapr.enabled=true` for `orchestrator`, `frontend`, and `dataingest`.
+
+
+## [v2.8.0] - 2026-06-02
+
+### Changed
+- **Orchestrator bumped to `v2.8.0` for Foundry Agent Service v2 reusable agents.** The `single_agent_rag` and `maf_agent_service` strategies now use declarative/versioned Foundry prompt agents through `AIProjectClient.agents.create_version()` and `PromptAgentDefinition`, creating a reusable agent once per deterministic definition fingerprint and reusing it on subsequent requests. This removes the old ephemeral per-request Agent Service creation pattern and fixes the per-run `reasoning` payload rejection by baking reasoning effort into the prompt-agent definition. Implements [Azure/GPT-RAG#477](https://github.com/Azure/GPT-RAG/issues/477).
+- **Landing zone submodule bumped to `v2.0.13`.** `manifest.json` `ailz_tag`, `.gitmodules` `branch`, and the recorded `infra/` submodule gitlink now consume the Foundry Agent Service v2 Cosmos RBAC fix. The AI Foundry project managed identity receives data-plane access to the capability-host `agent-definitions-v1` and `run-state-v1` containers required by declarative/versioned agents, so fresh deployments do not require manual Cosmos role assignments.
+
+### Validation
+The following component versions were validated together for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.9 |
+| gpt-rag-orchestrator | v2.8.0 |
+| gpt-rag-ingestion | v2.4.2 |
+| infra (landing zone) | v2.0.13 |
+
+End-to-end validated on Azure in env `gptrag-0602260836`, resource group `rg-gptrag-0602260836`, region `swedencentral`, with `AGENT_STRATEGY=single_agent_rag`. The orchestrator image built from commit `b0b9ae1` was deployed to Container Apps revision `ca-m53sdv7aincme-orchestrator--0000002` and received 100% traffic. Azure logs confirmed the new Foundry path: `Prompt agent 'gptrag-single-agent-rag-b622680c09' not found; creating once via create_version`, then `Created prompt agent ... (version=1)`, followed by request-time `Index Empty Check Result: False`, `Routing to Azure AI Agents SDK`, and `Streaming from Foundry prompt agent (Responses)`. Two live `/orchestrator` POST requests returned HTTP 200 with no `invalid_payload` run-time reasoning error and no Cosmos DB 403.
 
 ## [v2.7.14] - 2026-06-01
 
