@@ -1,9 +1,21 @@
 # Changelog
 
-## [Unreleased]
+## [v2.8.1] - 2026-06-04
 
 ### Changed
 - **Landing zone submodule bumped to `v2.0.14` and Dapr declared explicitly for GPT-RAG Container Apps.** `manifest.json` `ailz_tag`, `.gitmodules` `branch`, and the recorded `infra/` submodule gitlink now consume the upstream Dapr opt-in change from [Azure/bicep-ptn-aiml-landing-zone#86](https://github.com/Azure/bicep-ptn-aiml-landing-zone/issues/86). Because GPT-RAG uses Dapr for inter-container service invocation, `main.parameters.json` now sets `dapr.enabled=true` for the orchestrator, frontend, and data ingestion Container Apps, preserving the current runtime behavior while allowing the landing zone default to remain Dapr-disabled for external apps.
+
+### Validation
+The following component versions were validated together for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.9 |
+| gpt-rag-orchestrator | v2.8.0 |
+| gpt-rag-ingestion | v2.4.2 |
+| infra (landing zone) | v2.0.14 |
+
+Validated the updated parameters and landing zone integration with JSON parsing, `az bicep build --file infra\main.bicep`, and `azd provision --preview --no-prompt` in env `gptrag-0604261534`, resource group `rg-gptrag-0604261534`, region `eastus2`. Confirmed `main.parameters.json` sets `dapr.enabled=true` for `orchestrator`, `frontend`, and `dataingest`.
 
 
 ## [v2.8.0] - 2026-06-02
