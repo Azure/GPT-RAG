@@ -249,6 +249,9 @@
           "min_replicas": 1,
           "max_replicas": 1,
           "canonical_name": "ORCHESTRATOR_APP",
+          "dapr": {
+            "enabled": true
+          },
           "roles": [
             "AppConfigurationDataReader",
             "CognitiveServicesUser",
@@ -267,7 +270,10 @@
           "profile_name": "main",
           "min_replicas": 1,
           "max_replicas": 1,
-          "canonical_name": "FRONTEND_APP",          
+          "canonical_name": "FRONTEND_APP",
+          "dapr": {
+            "enabled": true
+          },
           "roles": [
             "AppConfigurationDataReader",
             "AcrPull",
@@ -286,6 +292,9 @@
           "cpu": "1.0",
           "memory": "3.0Gi",
           "canonical_name": "DATA_INGEST_APP",
+          "dapr": {
+            "enabled": true
+          },
           "roles": [
             "AppConfigurationDataReader",
             "CognitiveServicesUser",
