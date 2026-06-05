@@ -1,5 +1,22 @@
 # Changelog
 
+## [v2.8.2] - 2026-06-04
+
+### Fixed
+- **Uploaded documents now work end-to-end in authenticated chat (issue #478):** GPT-RAG now pins updated UI, orchestrator, and ingestion components that preserve the uploader identity during ingestion and propagate the active conversation id during retrieval. This lets uploaded files be indexed with the correct ACL metadata and retrieved by the `single_agent_rag` strategy in the same chat conversation.
+
+### Validation
+The following component versions were validated together for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.10 |
+| gpt-rag-orchestrator | v2.8.1 |
+| gpt-rag-ingestion | v2.4.3 |
+| infra (landing zone) | v2.0.14 |
+
+Validated the component pins and manifest update, then confirmed the document upload flow in a deployed Azure validation environment: authenticated upload is available in the UI, ingestion returns indexed chunks without warnings, and uploaded content is available to chat retrieval for the active conversation.
+
 ## [v2.8.1] - 2026-06-04
 
 ### Changed
@@ -16,7 +33,6 @@ The following component versions were validated together for this release:
 | infra (landing zone) | v2.0.14 |
 
 Validated the updated parameters and landing zone integration with JSON parsing, `az bicep build --file infra\main.bicep`, and `azd provision --preview --no-prompt` in env `gptrag-0604261534`, resource group `rg-gptrag-0604261534`, region `eastus2`. Confirmed `main.parameters.json` sets `dapr.enabled=true` for `orchestrator`, `frontend`, and `dataingest`.
-
 
 ## [v2.8.0] - 2026-06-02
 
