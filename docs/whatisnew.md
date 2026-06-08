@@ -1,6 +1,22 @@
 > 📌 [Check out what's coming next](https://github.com/orgs/Azure/projects/536/views/6)  (Azure org only)
 
+### June 2026
+
+**[Release 2.8.2](https://github.com/Azure/GPT-RAG/tree/v2.8.2) - Authenticated uploads and Foundry Agent Service reuse**
+
+GPT-RAG now pins `gpt-rag-ui` v2.3.10, `gpt-rag-orchestrator` v2.8.1, `gpt-rag-ingestion` v2.4.3, and AI Landing Zone v2.0.14. Uploaded documents now work end-to-end in authenticated chat: the uploader identity is preserved during ingestion, the active conversation id is propagated during retrieval, and uploaded chunks are indexed with the correct ACL metadata so `single_agent_rag` can retrieve them in the same chat conversation.
+
+The June release train also moves the orchestrator to the Foundry Agent Service v2 create-once/reuse model and updates the landing zone for the Cosmos DB data-plane RBAC assignments required by declarative/versioned Foundry agents. GPT-RAG now explicitly enables Dapr for the orchestrator, frontend, and ingestion Container Apps after the landing zone made Dapr opt-in by default.
+
+---
+
 ### May 2026
+
+**[Release 2.7.14](https://github.com/Azure/GPT-RAG/tree/v2.7.14) - Landing zone hardening and ingestion identity fixes**
+
+The late-May patch train hardens GPT-RAG deployments by rolling the AI Landing Zone forward to v2.0.12, including fixes for network-isolated deployments, firewall rule generation, Container Apps image pulls, and bounded Windows jumpbox bootstrap execution. It also completes the ingestion Managed Identity fix so Azure Container Apps can acquire user-assigned identity tokens reliably and avoid `/ingest-documents` returning HTTP 200 with `indexedChunks: 0`.
+
+---
 
 **[Release 2.7.6](https://github.com/Azure/GPT-RAG/tree/v2.7.6) - Long conversation handling and retrieval triage**
 
