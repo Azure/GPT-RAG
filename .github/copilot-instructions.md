@@ -78,6 +78,10 @@ When preparing a release branch:
 - Update `CHANGELOG.md`
 - Ensure the repository reflects a releasable state
 - Do NOT introduce new feature work
+- **GitHub Release titles MUST be exactly the tag name** (for example,
+  `v2.8.0`). Never prefix release titles with the product or service name (for
+  example, do not use `GPT-RAG v2.8.0`, `GPT-RAG Orchestrator v2.8.0`, or
+  `gpt-rag-ui v2.8.0`).
 - **MANDATORY for EVERY GPT-RAG umbrella release — no exceptions.** The
   published GitHub Release notes (the `gh release create` / `gh release edit`
   body, NOT just the `CHANGELOG.md`) MUST include a `## Component versions`
