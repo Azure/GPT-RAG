@@ -78,28 +78,71 @@ When preparing a release branch:
 - Update `CHANGELOG.md`
 - Ensure the repository reflects a releasable state
 - Do NOT introduce new feature work
-- For GPT-RAG umbrella releases, the GitHub Release notes MUST include a
-  `Tested Service Versions` section with a Markdown table listing every
-  validated runtime component from `manifest.json` `components[]` plus
-  `infra (landing zone)` from `manifest.json` `ailz_tag`.
-- The `Tested Service Versions` table MUST be updated for every release,
-  even if only one component changed, so operators know the exact validated
-  combination.
+- **GitHub Release titles MUST be exactly the tag name** (for example,
+  `v2.8.0`). Never prefix release titles with the product or service name (for
+  example, do not use `GPT-RAG v2.8.0`, `GPT-RAG Orchestrator v2.8.0`, or
+  `gpt-rag-ui v2.8.0`).
+- **MANDATORY for EVERY GPT-RAG umbrella release — no exceptions.** The
+  published GitHub Release notes (the `gh release create` / `gh release edit`
+  body, NOT just the `CHANGELOG.md`) MUST include a `## Component versions`
+  section with a Markdown table listing every validated runtime component
+  from `manifest.json` `components[]` plus `infra / AI Landing Zone` from
+  `manifest.json` `ailz_tag`. This is required even for a patch release where
+  only the landing-zone pin changed and the runtime component versions are
+  unchanged — always restate the full validated combination so operators see
+  the exact set without cross-referencing other releases.
+- Read the versions directly from `manifest.json` at release time (`tag` for
+  each entry in `components[]`, and `ailz_tag` for the landing zone). Do not
+  hand-copy from a previous release.
+- Place the `## Component versions` table immediately after the `## Changed`
+  section and before `## Validation`, matching the existing published
+  releases (e.g. `v2.8.0`, `v2.8.1`).
+- The same table is ALSO added to `CHANGELOG.md` under the release heading
+  (as the `### Validation` component table). The GitHub Release notes and the
+  changelog must agree.
 
-Example:
+Required GitHub Release notes skeleton:
 
 ```md
-## Tested Service Versions
+## Changed
+- <what changed in this release>
 
-The following component versions were validated together for this release:
+## Component versions
 
 | Component | Version |
-|-----------|---------|
+| --- | --- |
 | gpt-rag-ui | vX.Y.Z |
 | gpt-rag-orchestrator | vX.Y.Z |
 | gpt-rag-ingestion | vX.Y.Z |
-| infra (landing zone) | vX.Y.Z |
+| infra / AI Landing Zone | vX.Y.Z |
+
+## Validation
+- <commands / Azure env used to validate>
 ```
+
+- **MANDATORY — never leak personal Azure environment or resource group names
+  in published GitHub Release notes.** The `## Validation` section (and any
+  other prose) MUST NOT contain the maintainer's `azd` environment names
+  (`gptrag-MMDDYYHHMM`, e.g. `gptrag-0601261130`) or resource group names
+  (`rg-gptrag-MMDDYYHHMM`). These are private, throwaway validation
+  environments and are noise to operators. Use generic phrasing instead:
+  "a validation environment", "a fresh Basic deployment", or "the validation
+  resource group". Region names (`swedencentral`, `francecentral`) and
+  feature flags (`NETWORK_ISOLATION=false`, `BUILD_MODE=acr-task`) are fine to
+  keep — only the `gptrag-*` / `rg-gptrag-*` tokens must be stripped. Before
+  publishing or editing any release, grep the body for `gptrag-\d{10}` and
+  remove every match.
+
+- **Preserve markdown formatting when editing release notes via the API.**
+  `gh release view <tag> --json body -q .body` returns the body as a
+  PowerShell **array of lines**; passing that array straight into
+  `[regex]::Replace` coerces it to a single string joined with spaces and
+  **flattens the whole release** (headings, bullets, and table rows collapse
+  into one paragraph). Always rejoin the array on newlines first (e.g.
+  `[string]::Join([char]10, $arr)`), edit with `Get-Content -Raw`, write back
+  with `Set-Content -NoNewline`, and republish with `gh release edit <tag> --notes-file <file>`. After editing, re-fetch and
+  confirm the body still has the expected line count and that `## ` headings
+  start at the beginning of a line.
 
 ---
 
@@ -169,3 +212,30 @@ Examples:
 
 ```md
 ## [vX.Y.Z] - YYYY-MM-DD
+```
+
+---
+
+## Documentation Consistency (Mandatory)
+
+Documentation must always reflect the **current, shipped** implementation.
+Whenever a change in this repository (or in a runtime component it pins via
+`manifest.json`) has a user-visible effect — a new or renamed feature, a new
+App Configuration key, a new/changed deployment parameter or default, a
+changed deploy flow, a new component version, or a breaking change — the
+matching documentation MUST be updated **in the same change set**, not
+deferred.
+
+- **User-facing docs live in the `gpt-rag-docs` repo** (the `docs` branch of
+  `Azure/gpt-rag`), published with MkDocs Material to
+  https://azure.github.io/GPT-RAG/. Update the relevant page there on the
+  `docs` branch (or a feature branch off it). Register new pages under `nav:`
+  in `mkdocs.yml`.
+- **Do not duplicate** product docs into this repo or into service-repo
+  READMEs — keep READMEs short and link to the published site instead.
+- **If unsure whether a doc page is affected, check**: search the docs source
+  for the feature / config-key / parameter name you changed and update every
+  page that references it.
+- A change with a user-visible effect is **not complete** until its docs are
+  updated or you have confirmed no page is affected. Treat drift between the
+  published site and the implementation as a bug.
