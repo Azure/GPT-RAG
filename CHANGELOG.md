@@ -1,5 +1,22 @@
 # Changelog
 
+## [v2.8.3] - 2026-06-10
+
+### Fixed
+- **Foundry Agent Service v2 create-once regression on `single_agent_rag` (issue [#484](https://github.com/Azure/GPT-RAG/issues/484)):** Bumps `gpt-rag-orchestrator` from `v2.8.1` to `v2.8.2`, which restores the migration to declarative/versioned Foundry prompt agents (`AIProjectClient.agents.create_version()` with `PromptAgentDefinition`). The fix coexists with the conversation-scoped retrieval introduced in v2.8.2, so `single_agent_rag` and `maf_agent_service` now reuse definition-fingerprinted prompt agents end-to-end without regressing per-conversation document upload retrieval.
+
+### Validation
+The following component versions were validated together for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.10 |
+| gpt-rag-orchestrator | v2.8.2 |
+| gpt-rag-ingestion | v2.4.3 |
+| infra (landing zone) | v2.0.14 |
+
+Validated by re-running the orchestrator suite (166 tests passed locally) and confirming the `single_agent_rag` agent path on a deployed Azure validation environment using the published `v2.8.2` orchestrator image.
+
 ## [v2.8.2] - 2026-06-04
 
 ### Fixed
