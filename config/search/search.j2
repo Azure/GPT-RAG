@@ -14,6 +14,14 @@
         { "name": "metadata_security_group_ids",    "type": "Collection(Edm.String)",   "searchable": false, "retrievable": true, "filterable": true, "permissionFilter": "groupIds" },
         { "name": "metadata_security_user_ids",     "type": "Collection(Edm.String)",   "searchable": false, "retrievable": true, "filterable": true, "permissionFilter": "userIds" },
         { "name": "metadata_security_rbac_scope",   "type": "Edm.String",               "searchable": false, "retrievable": true, "filterable": true, "permissionFilter": "rbacScope" },
+        {
+          "name": "custom_metadata",
+          "type": "Collection(Edm.ComplexType)",
+          "fields": [
+            { "name": "key",   "type": "Edm.String", "searchable": false, "retrievable": true, "filterable": true, "facetable": true },
+            { "name": "value", "type": "Edm.String", "searchable": true,  "retrievable": true, "filterable": true, "facetable": true }
+          ]
+        },
         { "name": "chunk_id",                       "type": "Edm.Int32",                "searchable": false, "retrievable": true },
         { "name": "content",                        "type": "Edm.String",               "searchable": true,  "retrievable": true, "analyzer": "{{SEARCH_ANALYZER_NAME}}" },
         { "name": "imageCaptions",                  "type": "Edm.String",               "searchable": true,  "retrievable": true, "analyzer": "{{SEARCH_ANALYZER_NAME}}" },
