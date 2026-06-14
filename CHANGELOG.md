@@ -1,5 +1,29 @@
 # Changelog
 
+## [Unreleased]
+
+## [v2.9.1] - 2026-06-14
+
+### Changed
+- **Component bumps that complete the `custom_metadata` ship of [#487](https://github.com/Azure/GPT-RAG/issues/487) and add a DX warning for stale `APP_CONFIG_ENDPOINT`:**
+    - `gpt-rag-orchestrator` `v2.8.2` → [`v2.8.3`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.3).
+    - `gpt-rag-ingestion` `v2.4.3` → [`v2.4.4`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.4). Activates blob storage user-defined metadata extraction into the AI Search `custom_metadata` field that v2.9.0 added to the index schema, so retrievers can now actually filter by user-defined blob tags. Also restores the Content Understanding multimodal extraction path (PDF page/region rendering and Office embedded image extraction) that regressed in the v2.4.x line.
+    - `gpt-rag-ui` `v2.3.10` → [`v2.3.11`](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.3.11).
+- **Deploy scripts warn when `APP_CONFIG_ENDPOINT` diverges (issue [#491](https://github.com/Azure/GPT-RAG/issues/491)):** All three components' `scripts/deploy.ps1` and `scripts/deploy.sh` now read both the shell `APP_CONFIG_ENDPOINT` and the azd env value and, when both are present and disagree (trimmed, case-insensitive), print a yellow warning that shows both values, states which one is being used (the shell value still wins, preserving existing precedence for jumpbox and CI flows), and tells the operator how to clear the shell override (`Remove-Item env:APP_CONFIG_ENDPOINT` in PowerShell, `unset APP_CONFIG_ENDPOINT` in bash). When only one source is set, the previous behavior is unchanged. A matching troubleshooting note is published on the docs site (#492).
+
+### Validation
+
+The following component versions were validated together for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.11 |
+| gpt-rag-orchestrator | v2.8.3 |
+| gpt-rag-ingestion | v2.4.4 |
+| infra (landing zone) | v2.0.16 |
+
+The deploy-script warning change is diagnostic-only (no provisioned-resource behavior change) and was validated by the per-component release pipelines (`pytest` in orchestrator: 166 passed; `pytest tests/` in ingestion: 7 passed). The full `azd provision`/`azd deploy` regression was already executed for the same component combination during the v2.9.0 release in a validation environment in `swedencentral` (Standard mode, fresh deployment); only patch-level component bumps are pinned here, so a fresh `azd up` was not re-executed for v2.9.1.
+
 ## [v2.9.0] - 2026-06-14
 
 ### Added
