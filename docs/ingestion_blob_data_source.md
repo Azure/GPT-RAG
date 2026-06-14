@@ -117,6 +117,101 @@ On startup, if a CRON is configured, the corresponding job is scheduled and also
 >   
 > `INDEXER_MAX_CONCURRENCY` controls how many files are processed in parallel (download → chunk → upload). `INDEXER_BATCH_SIZE` controls how many chunk documents are sent in each upload call to Azure AI Search. Increase these to raise throughput, but watch for throttling (HTTP 429), timeouts, and memory usage; lower them if you see retries or instability. The default batch size (500) follows common guidance to keep batches reasonable (typically ≤ 1000).
 
+## Custom blob metadata
+
+Any custom metadata you set on a blob is automatically captured during ingestion and indexed in Azure AI Search as key/value pairs in the `custom_metadata` field. This lets you tag documents with arbitrary attributes (department, owner, project, classification, etc.) and then filter or facet on them at query time, without changing the document content and without any configuration.
+
+This behavior is always on. There is no setting to enable or disable it.
+
+### Index field
+
+Every chunk in the RAG index carries a `custom_metadata` collection of `{key, value}` pairs:
+
+```json
+{
+  "name": "custom_metadata",
+  "type": "Collection(Edm.ComplexType)",
+  "fields": [
+    { "name": "key",   "type": "Edm.String", "searchable": false, "retrievable": true, "filterable": true, "facetable": true },
+    { "name": "value", "type": "Edm.String", "searchable": true,  "retrievable": true, "filterable": true, "facetable": true }
+  ]
+}
+```
+
+`key` is filterable and facetable so you can use it for exact matches and tag discovery. `value` is also searchable, so full-text search over tag values is available when needed.
+
+### Flow
+
+```mermaid
+flowchart LR
+  Upload[az storage blob upload<br/>--metadata key=value] --> Blob[Azure Blob Storage<br/>blob.metadata]
+  Blob --> Indexer[blob-storage-indexer]
+  Indexer -->|filter reserved keys<br/>lowercase keys<br/>drop empty values| Field[custom_metadata<br/>Collection&lt;ComplexType&gt;]
+  Field --> Index[Azure AI Search<br/>RAG index]
+```
+
+### Tagging a blob
+
+Set metadata at upload time, or update it on an existing blob:
+
+```bash
+az storage blob upload \
+  --container-name documents \
+  --file report.pdf \
+  --metadata department=finance owner=alice project=q4-review \
+  --auth-mode login
+
+az storage blob metadata update \
+  --container-name documents \
+  --name report.pdf \
+  --metadata department=finance owner=alice \
+  --auth-mode login
+```
+
+The next time the indexer processes the blob (because the blob is new or its `last_modified` changed), each pair becomes one entry in `custom_metadata` on every chunk produced for the file.
+
+### Filtering search results by tag
+
+Use the OData `$filter` syntax for complex collections:
+
+```text
+$filter=custom_metadata/any(m: m/key eq 'department' and m/value eq 'finance')
+```
+
+Combine multiple tags with `and`:
+
+```text
+$filter=custom_metadata/any(m: m/key eq 'department' and m/value eq 'finance')
+    and custom_metadata/any(m: m/key eq 'owner' and m/value eq 'alice')
+```
+
+### Discovering which tags exist
+
+Use a facet over `custom_metadata/key` to list all tag names currently in the corpus, with counts:
+
+```text
+facet=custom_metadata/key,count:50
+```
+
+You can also facet on `custom_metadata/value` to discover the distinct values used for a specific tag.
+
+### Rules and limits
+
+- **Reserved keys are filtered out.** Keys reserved for document-level security are written to their own typed fields and never appear in `custom_metadata`: `metadata_security_user_ids`, `metadata_security_group_ids`, `metadata_security_id`, `metadata_security_rbac_scope`.
+- **Keys are lowercase.** Azure Blob Storage stores metadata names case-insensitively, so keys land in the index in lowercase. Query filters and facets must use the lowercase form.
+- **Empty values are dropped.** Keys with `None` or empty string values are not indexed.
+- **Blob metadata size limit.** Azure Blob Storage caps total metadata at 8 KB per blob (names plus values combined). Plan tag sets within that budget.
+- **Tag values are strings.** Numbers, dates, and booleans are stored as strings. Cast them in your query layer if you need typed comparisons.
+
+### Operating an existing deployment
+
+Documents that were indexed before this change return `custom_metadata: []` until they are reingested. To roll the change out on an existing environment:
+
+1. **Reapply the index schema.** Adding `custom_metadata` is an additive operation on Azure AI Search, so existing documents and other fields are preserved.
+2. **Reingest the blobs that should expose tags.** The simplest way is to update each blob's metadata (which bumps `last_modified` and makes the indexer pick it up on the next run), or to clear the relevant entries from the index state so the freshness check reprocesses them.
+
+New deployments require no extra step. The field is part of the index schema and every newly indexed blob is tagged automatically.
+
 ## Logs
 
 Both jobs write logs to the configured jobs container. Logs are grouped by job type:
