@@ -956,6 +956,7 @@ azd<span class="w"> </span>deploy<span class="w"> </span>&lt;component&gt;
 <li>Open a fresh terminal when switching between azd environments.</li>
 <li>If you must set <code>APP_CONFIG_ENDPOINT</code> manually (for example, on a jumpbox or in CI), confirm it matches <code>azd env get-value APP_CONFIG_ENDPOINT</code> before deploying.</li>
 </ul>
+<p>The component deploy scripts also print a yellow warning when the shell <code>APP_CONFIG_ENDPOINT</code> and the active azd env disagree, starting with GPT-RAG <a href="https://github.com/Azure/GPT-RAG/releases/tag/v2.9.1">v2.9.1</a> (orchestrator v2.8.3, ingestion v2.4.4, ui v2.3.11). See <a href="https://github.com/Azure/GPT-RAG/issues/491">#491</a> for context.</p>
 <p><strong>Known Issues and Fixes</strong></p>
 <p>Below is a list of commonly reported issues that have been resolved. If you encounter one of these, make sure you are running the version that includes the fix.</p>
 <p><strong>OOM container restarts during parallel ingestion</strong> — Ingestion containers could run out of memory when processing multiple large files concurrently. Fixed by adding memory guards, temp-file downloads for large PDFs, and lowering default concurrency. See <a href="https://github.com/Azure/gpt-rag/issues/438">#438</a>.</p>
