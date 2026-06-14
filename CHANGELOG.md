@@ -1,9 +1,24 @@
 # Changelog
 
-## [Unreleased]
+## [v2.9.0] - 2026-06-14
 
 ### Added
-- **`custom_metadata` field on the RAG search index (issue [#487](https://github.com/Azure/GPT-RAG/issues/487)):** Adds a `Collection(Edm.ComplexType)` `custom_metadata` field with `{key, value}` subfields to the RAG index schema in `config/search/search.j2`. The field is filterable and facetable so retrievers can target documents by user-defined blob tags (for example, `$filter=custom_metadata/any(m: m/key eq 'department' and m/value eq 'finance')`). Not included in the semantic configuration's `prioritizedKeywordsFields` to avoid biasing ranking. Pairs with the matching extraction in `gpt-rag-ingestion` (issue [#487](https://github.com/Azure/GPT-RAG/issues/487)); operators must reapply the index schema and reingest existing documents to populate the field.
+- **`custom_metadata` field on the RAG search index (issue [#487](https://github.com/Azure/GPT-RAG/issues/487)):** Adds a `Collection(Edm.ComplexType)` `custom_metadata` field with `{key, value}` subfields to the RAG index schema in `config/search/search.j2`. The field is filterable and facetable so retrievers can target documents by user-defined blob tags (for example, `$filter=custom_metadata/any(m: m/key eq 'department' and m/value eq 'finance')`). Not included in the semantic configuration's `prioritizedKeywordsFields` to avoid biasing ranking. **Partial ship in v2.9.0:** the index schema is updated, but the matching blob-tag extraction in `gpt-rag-ingestion` is still on a feature branch and is not pinned by this release (`gpt-rag-ingestion` remains at `v2.4.3`). Until a future release bumps the ingestion component, the field exists on the index but stays empty, so operators filtering by `custom_metadata` will see zero results. Operators must also reapply the index schema after upgrading.
+
+### Changed
+- **Landing zone submodule bumped to `v2.0.16`.** `manifest.json` `ailz_tag`, `.gitmodules` `branch`, and the recorded `infra/` submodule gitlink now consume [`Azure/bicep-ptn-aiml-landing-zone` v2.0.16](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.0.16). v2.0.16 includes the fix for [#94](https://github.com/Azure/bicep-ptn-aiml-landing-zone/issues/94) — Foundry Agent Service v2 Cosmos data-plane RBAC is now scoped at the database level so lazily created agent containers no longer fail authorization (this unblocks fresh provisioning in `swedencentral` and other regions where the previous account-scope assignment was insufficient) — and the preflight warning for [#93](https://github.com/Azure/bicep-ptn-aiml-landing-zone/issues/93), which downgrades `enableCosmosAnalyticalStorage=true` in regions where analytical storage is restricted from a hard failure to a `WARN` so deployments succeed with analytical storage disabled.
+
+### Validation
+The following component versions were validated together for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.10 |
+| gpt-rag-orchestrator | v2.8.2 |
+| gpt-rag-ingestion | v2.4.3 |
+| infra (landing zone) | v2.0.16 |
+
+Validated by running `azd provision --no-prompt` and `azd deploy --no-prompt` in a fresh Standard-mode validation environment in `swedencentral` (regression check for the landing-zone #94 fix), then confirming the three Container Apps (orchestrator, ingestion, frontend) respond on their HTTPS ingress endpoints.
 
 ## [v2.8.3] - 2026-06-10
 
