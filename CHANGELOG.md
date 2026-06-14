@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- **`custom_metadata` field on the RAG search index (issue [#487](https://github.com/Azure/GPT-RAG/issues/487)):** Adds a `Collection(Edm.ComplexType)` `custom_metadata` field with `{key, value}` subfields to the RAG index schema in `config/search/search.j2`. The field is filterable and facetable so retrievers can target documents by user-defined blob tags (for example, `$filter=custom_metadata/any(m: m/key eq 'department' and m/value eq 'finance')`). Not included in the semantic configuration's `prioritizedKeywordsFields` to avoid biasing ranking. Pairs with the matching extraction in `gpt-rag-ingestion` (issue [#487](https://github.com/Azure/GPT-RAG/issues/487)); operators must reapply the index schema and reingest existing documents to populate the field.
+
 ## [v2.8.3] - 2026-06-10
 
 ### Fixed
