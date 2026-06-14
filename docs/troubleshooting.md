@@ -68,6 +68,36 @@ exceptions
 ```
 
 
+**Deploy fails after switching azd environments (stale `APP_CONFIG_ENDPOINT`)**
+
+If `azd deploy <component>` fails right after starting with an Azure CLI error saying the App Configuration resource does not exist or cannot be found, and the message references an `https://<name>.azconfig.io` endpoint that does not match your current environment, the most likely cause is a stale `APP_CONFIG_ENDPOINT` environment variable left over from a previous deployment.
+
+The component deploy scripts (`scripts/deploy.ps1` and `scripts/deploy.sh`) prefer the value of `APP_CONFIG_ENDPOINT` from your shell over the value stored in the active `azd` environment. When the previous App Configuration was deleted or recreated (for example, after tearing down an azd env and provisioning a new one), the stale value silently wins and the deploy targets a resource that no longer exists.
+
+Clear the variable from your shell and let `azd env` provide the correct value:
+
+PowerShell:
+
+```powershell
+Remove-Item env:APP_CONFIG_ENDPOINT -ErrorAction SilentlyContinue
+azd env get-values | Out-Null  # optional, confirms the active env
+azd deploy <component>
+```
+
+Bash:
+
+```bash
+unset APP_CONFIG_ENDPOINT
+azd env get-values >/dev/null  # optional
+azd deploy <component>
+```
+
+To avoid this in the future:
+
+- Open a fresh terminal when switching between azd environments.
+- If you must set `APP_CONFIG_ENDPOINT` manually (for example, on a jumpbox or in CI), confirm it matches `azd env get-value APP_CONFIG_ENDPOINT` before deploying.
+
+
 **Known Issues and Fixes**
 
 Below is a list of commonly reported issues that have been resolved. If you encounter one of these, make sure you are running the version that includes the fix.
