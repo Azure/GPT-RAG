@@ -8,6 +8,7 @@ The **GPT-RAG Data Ingestion** service automates the processing of diverse docum
 - **Automated Workflows**: Scans sources, processes content, and indexes documents automatically
 - **Scheduled Execution**: CRON-based scheduler for continuous data ingestion
 - **Multiple Data Sources**: Supports Blob Storage, SharePoint, and NL2SQL metadata
+- **Custom Metadata Tagging**: Blob metadata is automatically indexed into the `custom_metadata` field so documents can be filtered and faceted by tag. See [Custom blob metadata](ingestion_blob_data_source.md#custom-blob-metadata).
 
 ## Data sources
 
