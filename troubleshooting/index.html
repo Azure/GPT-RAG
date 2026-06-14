@@ -937,6 +937,25 @@
 <span class="p">|</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="n">desc</span>
 <span class="p">|</span><span class="w"> </span><span class="k">take</span><span class="w"> </span><span class="mi">20</span>
 </code></pre></div>
+<p><strong>Deploy fails after switching azd environments (stale <code>APP_CONFIG_ENDPOINT</code>)</strong></p>
+<p>If <code>azd deploy &lt;component&gt;</code> fails right after starting with an Azure CLI error saying the App Configuration resource does not exist or cannot be found, and the message references an <code>https://&lt;name&gt;.azconfig.io</code> endpoint that does not match your current environment, the most likely cause is a stale <code>APP_CONFIG_ENDPOINT</code> environment variable left over from a previous deployment.</p>
+<p>The component deploy scripts (<code>scripts/deploy.ps1</code> and <code>scripts/deploy.sh</code>) prefer the value of <code>APP_CONFIG_ENDPOINT</code> from your shell over the value stored in the active <code>azd</code> environment. When the previous App Configuration was deleted or recreated (for example, after tearing down an azd env and provisioning a new one), the stale value silently wins and the deploy targets a resource that no longer exists.</p>
+<p>Clear the variable from your shell and let <code>azd env</code> provide the correct value:</p>
+<p>PowerShell:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">Remove-Item</span> <span class="n">env</span><span class="p">:</span><span class="n">APP_CONFIG_ENDPOINT</span> <span class="n">-ErrorAction</span> <span class="n">SilentlyContinue</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">get-values</span> <span class="p">|</span> <span class="nb">Out-Null</span>  <span class="c"># optional, confirms the active env</span>
+<span class="n">azd</span> <span class="n">deploy</span> <span class="p">&lt;</span><span class="n">component</span><span class="p">&gt;</span>
+</code></pre></div>
+<p>Bash:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">unset</span><span class="w"> </span>APP_CONFIG_ENDPOINT
+azd<span class="w"> </span>env<span class="w"> </span>get-values<span class="w"> </span>&gt;/dev/null<span class="w">  </span><span class="c1"># optional</span>
+azd<span class="w"> </span>deploy<span class="w"> </span>&lt;component&gt;
+</code></pre></div>
+<p>To avoid this in the future:</p>
+<ul>
+<li>Open a fresh terminal when switching between azd environments.</li>
+<li>If you must set <code>APP_CONFIG_ENDPOINT</code> manually (for example, on a jumpbox or in CI), confirm it matches <code>azd env get-value APP_CONFIG_ENDPOINT</code> before deploying.</li>
+</ul>
 <p><strong>Known Issues and Fixes</strong></p>
 <p>Below is a list of commonly reported issues that have been resolved. If you encounter one of these, make sure you are running the version that includes the fix.</p>
 <p><strong>OOM container restarts during parallel ingestion</strong> — Ingestion containers could run out of memory when processing multiple large files concurrently. Fixed by adding memory guards, temp-file downloads for large PDFs, and lowering default concurrency. See <a href="https://github.com/Azure/gpt-rag/issues/438">#438</a>.</p>
