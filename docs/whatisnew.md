@@ -4,7 +4,12 @@
 
 **[Release 2.9.1](https://github.com/Azure/GPT-RAG/tree/v2.9.1) - Authenticated uploads, Foundry Agent Service v2 stabilization, and Sweden Central unblocked**
 
-The June release train makes per-conversation uploads work end-to-end in authenticated chat: the uploader identity is preserved during ingestion, the active conversation id flows through retrieval, and uploaded chunks are indexed with ACL metadata so `single_agent_rag` can return them inside the same conversation. The same train stabilizes the orchestrator on the Foundry Agent Service v2 create-once/reuse model, with the landing zone now provisioning the Cosmos DB data-plane RBAC assignments that declarative and versioned Foundry agents require, and Dapr explicitly enabled on the orchestrator, frontend, and ingestion Container Apps after the landing zone switched Dapr to opt-in. The late-June updates also unblock `swedencentral` deployments by fixing the Cosmos analytical storage preflight warning and scoping the Foundry Cosmos data-plane role assignment at the database level, expose the new `custom_metadata` field on RAG search results so retrieval can surface arbitrary blob metadata, and add a defensive warning to the deploy scripts when `APP_CONFIG_ENDPOINT` drifts from the active azd environment.
+The June release train delivers four themes:
+
+- **Authenticated per-conversation uploads end-to-end.** The uploader identity is preserved during ingestion, the active conversation id flows through retrieval, and uploaded chunks are indexed with ACL metadata so `single_agent_rag` can return them inside the same conversation.
+- **Foundry Agent Service v2 stabilization.** The orchestrator moves to the create-once/reuse model, the landing zone provisions the Cosmos DB data-plane RBAC that declarative and versioned Foundry agents require, and Dapr is explicitly enabled on the orchestrator, frontend, and ingestion Container Apps after the landing zone switched Dapr to opt-in.
+- **Sweden Central unblocked.** Late-June fixes scope the Foundry Cosmos data-plane role assignment at the database level and turn the Cosmos analytical storage preflight into a regional warning instead of a hard failure.
+- **Quality of life.** RAG search results expose a new `custom_metadata` field so retrieval can surface arbitrary blob metadata, and the deploy scripts now warn when `APP_CONFIG_ENDPOINT` drifts from the active azd environment.
 
 ---
 
