@@ -404,3 +404,53 @@ High-level flow:
 - **Responsible AI** policies and blocklists applied to all model deployments.
 
 ---
+
+## Engineering Standards
+
+### Clean Code and Modularity
+
+This repository is the platform & configuration core. Its Python lives under
+`config/` (post-provision modules: `aifoundry`, `containerapps`, `search`) and
+its lifecycle hooks live under `scripts/` (`preProvision`, `postProvision`,
+`preDeploy` in both `.ps1` and `.sh`). Keep this code modular and easy to
+evolve, and avoid letting any module or hook become a catch-all for unrelated
+behavior.
+
+- Keep each module and file focused on a single, clear responsibility. Add new
+  post-provision behavior as a focused module under `config/<area>/` rather
+  than expanding an unrelated one.
+- Prefer small, cohesive functions. Use clear, intent-revealing names so the
+  code reads without excessive comments; comment only non-obvious decisions.
+- Reuse existing config/util helpers before adding new ones. Avoid duplication
+  and speculative abstractions; extract only when code is genuinely repeated
+  or a file is mixing concerns.
+- Keep the `search` setup driven by its Jinja templates and data rather than
+  branching logic — extend the templates/inputs instead of hardcoding
+  datasource/index/skillset/indexer shapes in code.
+- Prefer typed, explicit data contracts (type hints, dataclasses, or Pydantic
+  models) for anything crossing a boundary (App Config keys, manifest entries,
+  rendered Search payloads).
+- Surface errors clearly and consistently through logging. Do not swallow
+  exceptions or add silent fallbacks that hide a failed provisioning step;
+  never use `print` for diagnostics — use the configured logger.
+
+### Hooks and Cross-Cutting Changes
+
+- Keep `.ps1` and `.sh` lifecycle hooks behaviorally in sync — a change to one
+  must be mirrored in the other.
+- Do not edit files under `infra/` by hand; that folder is populated from the
+  `bicep-ptn-aiml-landing-zone` submodule and any change is lost on the next
+  provision.
+- A new runtime config key is a cross-repo contract: add the parameter/value
+  in infra, publish it to **App Configuration** (label `gpt-rag`), and have
+  the consuming service read it from App Config — never as a code constant.
+  Keep `manifest.json` (`components[]`) and `.gitmodules` (`ailz_tag`) as the
+  authoritative pins that connect the repos.
+
+### Documentation
+
+Any user-visible change (new feature, new config key, deploy-flow change,
+breaking change) must be reflected in the GPT-RAG docs site (`gpt-rag-docs`,
+the `docs` branch) in the same change set — see the project documentation
+rules. Keep this repo's README short and link to the docs site instead of
+duplicating content.
