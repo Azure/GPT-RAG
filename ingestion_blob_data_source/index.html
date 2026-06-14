@@ -654,6 +654,84 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#custom-blob-metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      Custom blob metadata
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Custom blob metadata">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#index-field" class="md-nav__link">
+    <span class="md-ellipsis">
+      Index field
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Flow
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tagging-a-blob" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tagging a blob
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filtering-search-results-by-tag" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filtering search results by tag
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#discovering-which-tags-exist" class="md-nav__link">
+    <span class="md-ellipsis">
+      Discovering which tags exist
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rules-and-limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      Rules and limits
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#operating-an-existing-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      Operating an existing deployment
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#logs" class="md-nav__link">
     <span class="md-ellipsis">
       Logs
@@ -1090,6 +1168,71 @@ On startup, if a CRON is configured, the corresponding job is scheduled and also
 <blockquote>
 <p><code>INDEXER_MAX_CONCURRENCY</code> controls how many files are processed in parallel (download → chunk → upload). <code>INDEXER_BATCH_SIZE</code> controls how many chunk documents are sent in each upload call to Azure AI Search. Increase these to raise throughput, but watch for throttling (HTTP 429), timeouts, and memory usage; lower them if you see retries or instability. The default batch size (500) follows common guidance to keep batches reasonable (typically ≤ 1000).</p>
 </blockquote>
+<h2 id="custom-blob-metadata">Custom blob metadata</h2>
+<p>Any custom metadata you set on a blob is automatically captured during ingestion and indexed in Azure AI Search as key/value pairs in the <code>custom_metadata</code> field. This lets you tag documents with arbitrary attributes (department, owner, project, classification, etc.) and then filter or facet on them at query time, without changing the document content and without any configuration.</p>
+<p>This behavior is always on. There is no setting to enable or disable it.</p>
+<h3 id="index-field">Index field</h3>
+<p>Every chunk in the RAG index carries a <code>custom_metadata</code> collection of <code>{key, value}</code> pairs:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;custom_metadata&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Collection(Edm.ComplexType)&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;fields&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;key&quot;</span><span class="p">,</span><span class="w">   </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Edm.String&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;searchable&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;retrievable&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;filterable&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;facetable&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;value&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Edm.String&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;searchable&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">  </span><span class="nt">&quot;retrievable&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;filterable&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;facetable&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>key</code> is filterable and facetable so you can use it for exact matches and tag discovery. <code>value</code> is also searchable, so full-text search over tag values is available when needed.</p>
+<h3 id="flow">Flow</h3>
+<div class="highlight"><pre><span></span><code>flowchart LR
+  Upload[az storage blob upload&lt;br/&gt;--metadata key=value] --&gt; Blob[Azure Blob Storage&lt;br/&gt;blob.metadata]
+  Blob --&gt; Indexer[blob-storage-indexer]
+  Indexer --&gt;|filter reserved keys&lt;br/&gt;lowercase keys&lt;br/&gt;drop empty values| Field[custom_metadata&lt;br/&gt;Collection&amp;lt;ComplexType&amp;gt;]
+  Field --&gt; Index[Azure AI Search&lt;br/&gt;RAG index]
+</code></pre></div>
+<h3 id="tagging-a-blob">Tagging a blob</h3>
+<p>Set metadata at upload time, or update it on an existing blob:</p>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>storage<span class="w"> </span>blob<span class="w"> </span>upload<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--container-name<span class="w"> </span>documents<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--file<span class="w"> </span>report.pdf<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--metadata<span class="w"> </span><span class="nv">department</span><span class="o">=</span>finance<span class="w"> </span><span class="nv">owner</span><span class="o">=</span>alice<span class="w"> </span><span class="nv">project</span><span class="o">=</span>q4-review<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--auth-mode<span class="w"> </span>login
+
+az<span class="w"> </span>storage<span class="w"> </span>blob<span class="w"> </span>metadata<span class="w"> </span>update<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--container-name<span class="w"> </span>documents<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--name<span class="w"> </span>report.pdf<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--metadata<span class="w"> </span><span class="nv">department</span><span class="o">=</span>finance<span class="w"> </span><span class="nv">owner</span><span class="o">=</span>alice<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--auth-mode<span class="w"> </span>login
+</code></pre></div>
+<p>The next time the indexer processes the blob (because the blob is new or its <code>last_modified</code> changed), each pair becomes one entry in <code>custom_metadata</code> on every chunk produced for the file.</p>
+<h3 id="filtering-search-results-by-tag">Filtering search results by tag</h3>
+<p>Use the OData <code>$filter</code> syntax for complex collections:</p>
+<div class="highlight"><pre><span></span><code>$filter=custom_metadata/any(m: m/key eq &#39;department&#39; and m/value eq &#39;finance&#39;)
+</code></pre></div>
+<p>Combine multiple tags with <code>and</code>:</p>
+<div class="highlight"><pre><span></span><code>$filter=custom_metadata/any(m: m/key eq &#39;department&#39; and m/value eq &#39;finance&#39;)
+    and custom_metadata/any(m: m/key eq &#39;owner&#39; and m/value eq &#39;alice&#39;)
+</code></pre></div>
+<h3 id="discovering-which-tags-exist">Discovering which tags exist</h3>
+<p>Use a facet over <code>custom_metadata/key</code> to list all tag names currently in the corpus, with counts:</p>
+<div class="highlight"><pre><span></span><code>facet=custom_metadata/key,count:50
+</code></pre></div>
+<p>You can also facet on <code>custom_metadata/value</code> to discover the distinct values used for a specific tag.</p>
+<h3 id="rules-and-limits">Rules and limits</h3>
+<ul>
+<li><strong>Reserved keys are filtered out.</strong> Keys reserved for document-level security are written to their own typed fields and never appear in <code>custom_metadata</code>: <code>metadata_security_user_ids</code>, <code>metadata_security_group_ids</code>, <code>metadata_security_id</code>, <code>metadata_security_rbac_scope</code>.</li>
+<li><strong>Keys are lowercase.</strong> Azure Blob Storage stores metadata names case-insensitively, so keys land in the index in lowercase. Query filters and facets must use the lowercase form.</li>
+<li><strong>Empty values are dropped.</strong> Keys with <code>None</code> or empty string values are not indexed.</li>
+<li><strong>Blob metadata size limit.</strong> Azure Blob Storage caps total metadata at 8 KB per blob (names plus values combined). Plan tag sets within that budget.</li>
+<li><strong>Tag values are strings.</strong> Numbers, dates, and booleans are stored as strings. Cast them in your query layer if you need typed comparisons.</li>
+</ul>
+<h3 id="operating-an-existing-deployment">Operating an existing deployment</h3>
+<p>Documents that were indexed before this change return <code>custom_metadata: []</code> until they are reingested. To roll the change out on an existing environment:</p>
+<ol>
+<li><strong>Reapply the index schema.</strong> Adding <code>custom_metadata</code> is an additive operation on Azure AI Search, so existing documents and other fields are preserved.</li>
+<li><strong>Reingest the blobs that should expose tags.</strong> The simplest way is to update each blob's metadata (which bumps <code>last_modified</code> and makes the indexer pick it up on the next run), or to clear the relevant entries from the index state so the freshness check reprocesses them.</li>
+</ol>
+<p>New deployments require no extra step. The field is part of the index schema and every newly indexed blob is tagged automatically.</p>
 <h2 id="logs">Logs</h2>
 <p>Both jobs write logs to the configured jobs container. Logs are grouped by job type:</p>
 <ul>
