@@ -1,5 +1,25 @@
 # Changelog
 
+## [v2.9.0] - 2026-06-14
+
+### Added
+- **`custom_metadata` field on the RAG search index (issue [#487](https://github.com/Azure/GPT-RAG/issues/487)):** Adds a `Collection(Edm.ComplexType)` `custom_metadata` field with `{key, value}` subfields to the RAG index schema in `config/search/search.j2`. The field is filterable and facetable so retrievers can target documents by user-defined blob tags (for example, `$filter=custom_metadata/any(m: m/key eq 'department' and m/value eq 'finance')`). Not included in the semantic configuration's `prioritizedKeywordsFields` to avoid biasing ranking. **Partial ship in v2.9.0:** the index schema is updated, but the matching blob-tag extraction in `gpt-rag-ingestion` is still on a feature branch and is not pinned by this release (`gpt-rag-ingestion` remains at `v2.4.3`). Until a future release bumps the ingestion component, the field exists on the index but stays empty, so operators filtering by `custom_metadata` will see zero results. Operators must also reapply the index schema after upgrading.
+
+### Changed
+- **Landing zone submodule bumped to `v2.0.16`.** `manifest.json` `ailz_tag`, `.gitmodules` `branch`, and the recorded `infra/` submodule gitlink now consume [`Azure/bicep-ptn-aiml-landing-zone` v2.0.16](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.0.16). v2.0.16 includes the fix for [#94](https://github.com/Azure/bicep-ptn-aiml-landing-zone/issues/94) — Foundry Agent Service v2 Cosmos data-plane RBAC is now scoped at the database level so lazily created agent containers no longer fail authorization (this unblocks fresh provisioning in `swedencentral` and other regions where the previous account-scope assignment was insufficient) — and the preflight warning for [#93](https://github.com/Azure/bicep-ptn-aiml-landing-zone/issues/93), which downgrades `enableCosmosAnalyticalStorage=true` in regions where analytical storage is restricted from a hard failure to a `WARN` so deployments succeed with analytical storage disabled.
+
+### Validation
+The following component versions were validated together for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.10 |
+| gpt-rag-orchestrator | v2.8.2 |
+| gpt-rag-ingestion | v2.4.3 |
+| infra (landing zone) | v2.0.16 |
+
+Validated by running `azd provision --no-prompt` and `azd deploy --no-prompt` in a fresh Standard-mode validation environment in `swedencentral` (regression check for the landing-zone #94 fix), then confirming the three Container Apps (orchestrator, ingestion, frontend) respond on their HTTPS ingress endpoints.
+
 ## [v2.8.3] - 2026-06-10
 
 ### Fixed
@@ -97,6 +117,15 @@ End-to-end validated on Azure in two complementary topologies. The Zero-Trust pa
   No GPT-RAG parameters change; this is a passthrough bump that picks up the upstream fixes and unblocks ZTA deployments.
 
 ### Validation
+The following component versions were validated together for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.9 |
+| gpt-rag-orchestrator | v2.6.11 |
+| gpt-rag-ingestion | v2.4.2 |
+| infra (landing zone) | v2.0.8 |
+
 End-to-end validated on Azure with the Zero-Trust topology (`NETWORK_ISOLATION=true`).
 
 ## [v2.7.12] - 2026-05-29
@@ -214,6 +243,15 @@ The following component versions were validated together for this release:
 ### Fixed
 - **Long conversations no longer grow persisted Cosmos DB documents indefinitely:** the orchestrator now compacts persisted conversation documents by serialized size and message count while keeping recent messages and question metadata. It also skips unnecessary Azure AI Search calls for no-retrieval follow-ups such as formatting, translation, summarization, or rephrasing. Fixes [Azure/GPT-RAG#448](https://github.com/Azure/GPT-RAG/issues/448).
 
+### Validation
+The following component versions were validated together for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.7 |
+| gpt-rag-orchestrator | v2.6.9 |
+| gpt-rag-ingestion | v2.3.7 |
+| infra (landing zone) | v2.0.2 |
 ## [v2.7.5] - 2026-05-26
 
 ### Added
@@ -226,6 +264,15 @@ The following component versions were validated together for this release:
 - **NL2SQL no longer depends on Semantic Kernel Agent Service creation:** the orchestrator release now uses Microsoft Agent Framework with direct model calls and local NL2SQL tool execution, eliminating the `AgentsOperations.create_agent` failure and reducing per-request setup latency. Fixes [Azure/GPT-RAG#461](https://github.com/Azure/GPT-RAG/issues/461) and [Azure/GPT-RAG#462](https://github.com/Azure/GPT-RAG/issues/462).
 - **Conversation rename persists after refresh:** the UI release now sends Chainlit rename events to the orchestrator conversation update API. Fixes [Azure/GPT-RAG#435](https://github.com/Azure/GPT-RAG/issues/435).
 
+### Validation
+The following component versions were validated together for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.7 |
+| gpt-rag-orchestrator | v2.6.8 |
+| gpt-rag-ingestion | v2.3.7 |
+| infra (landing zone) | v2.0.2 |
 ## [v2.7.4] - 2026-05-26
 
 ### Changed
@@ -234,6 +281,15 @@ The following component versions were validated together for this release:
 ### Fixed
 - **Docker-free deploy no longer fails on revision restart race or Azure CLI warning output**: service deploy scripts now treat `az containerapp update --image` as the revision rollout, verify the configured image instead of immediately restarting the latest revision, and filter warning/progress output before consuming Azure CLI TSV values. Fixes [Azure/GPT-RAG#449](https://github.com/Azure/GPT-RAG/issues/449).
 
+### Validation
+The following component versions were validated together for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.6 |
+| gpt-rag-orchestrator | v2.6.7 |
+| gpt-rag-ingestion | v2.3.7 |
+| infra (landing zone) | v2.0.2 |
 ## [v2.7.3] - 2026-05-25
 
 ### Changed
@@ -242,6 +298,15 @@ The following component versions were validated together for this release:
 ### Fixed
 - **Component deploy no longer requires local Docker Desktop**: service deploy scripts now select ACR remote builds before probing Docker, support explicit `BUILD_MODE=acr-task`/`USE_DOCKER=false`, configure Container App registry identity, and restart the latest revision after image updates. Fixes [Azure/GPT-RAG#449](https://github.com/Azure/GPT-RAG/issues/449).
 
+### Validation
+The following component versions were validated together for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.4 |
+| gpt-rag-orchestrator | v2.6.5 |
+| gpt-rag-ingestion | v2.3.5 |
+| infra (landing zone) | v2.0.2 |
 ## [v2.7.2] - 2026-05-25
 
 ### Changed
@@ -250,6 +315,15 @@ The following component versions were validated together for this release:
 ### Fixed
 - **Default `maf_lite` startup no longer creates Agent Service agents**: the orchestrator startup warmup is now strategy-aware, skips Agent Service entirely for the default `maf_lite` strategy, limits reusable startup agent creation to `single_agent_rag`, and reuses any existing `gpt-rag-agent-v2` by name before creating one. Fixes [Azure/GPT-RAG#456](https://github.com/Azure/GPT-RAG/issues/456).
 
+### Validation
+The following component versions were validated together for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.3 |
+| gpt-rag-orchestrator | v2.6.4 |
+| gpt-rag-ingestion | v2.3.4 |
+| infra (landing zone) | v2.0.2 |
 ## [v2.7.1] - 2026-05-25
 
 ### Changed
@@ -258,6 +332,15 @@ The following component versions were validated together for this release:
 ### Fixed
 - **WSL/Linux UI component deploy failure**: `gpt-rag-ui` now ships repository line-ending attributes that keep `scripts/deploy.sh` and `scripts/preProvision.sh` checked out with LF endings, preventing `$'\r': command not found` and `set: pipefail` failures during `azd deploy`. Fixes [Azure/GPT-RAG#451](https://github.com/Azure/GPT-RAG/issues/451).
 
+### Validation
+The following component versions were validated together for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.3 |
+| gpt-rag-orchestrator | v2.6.3 |
+| gpt-rag-ingestion | v2.3.4 |
+| infra (landing zone) | v2.0.2 |
 ## [v2.7.0] - 2026-05-19
 
 > v2.7.0 bumps the **AI Landing Zone** Bicep module submodule from **v1.0.7 → v2.0.2**. This is a major-version submodule upgrade that brings several new capabilities (IP allow-lists, BYO Private DNS zones, BYO Log Analytics + App Insights, hub-and-spoke composability, deployment-mode preset, pre-flight validation hook) and a handful of bug fixes (most notably the `${VAR=null}` string-default bug that affected route-table wiring, the hardcoded service-flag defaults that ignored `azd env set` overrides, and two v2.0.0-only template-validation regressions in the AI Foundry account Private Endpoint emission and the AI Foundry-bundled sub-modules' PE subnet propagation — fixed in v2.0.1 and v2.0.2 respectively). Default behavior is **unchanged** for existing GPT-RAG operators — all new landing-zone capabilities are opt-in. See the [v2-migration guide](https://github.com/Azure/bicep-ptn-aiml-landing-zone/blob/v2.0.0/docs/v2-migration.md) and the [parameterization reference](https://azure.github.io/AI-Landing-Zones/bicep/parameterization) for details.
@@ -291,6 +374,15 @@ The following component versions were validated together for this release:
 - `dnsZoneLinkSuffix` for unique VNet-link names when multiple spokes share the same hub DNS zones.
 
 ### Validation
+The following component versions were validated together for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.2 |
+| gpt-rag-orchestrator | v2.6.3 |
+| gpt-rag-ingestion | v2.3.4 |
+| infra (landing zone) | v2.0.2 |
+
 End-to-end validation in `swedencentral` (subscription `mcaps-paulolacerda`), basic deployment (`NETWORK_ISOLATION=false`, `deploymentMode=standalone`):
 
 | Aspect | Result |
