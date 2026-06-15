@@ -2,6 +2,28 @@
 
 ## [Unreleased]
 
+## [v2.9.2] - 2026-06-15
+
+### Changed
+- **Component patch bumps absorbing Dependabot dependency refreshes:**
+    - `gpt-rag-orchestrator` `v2.8.3` → [`v2.8.5`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.5). Refreshes `/evaluations` deps (`uvicorn`, `httpx`, `openai`, `azure-monitor-opentelemetry-exporter`) and runtime deps (`sqlparse`, `tiktoken`). The `semantic-kernel` 1.43.0 bump ([orchestrator#214](https://github.com/Azure/gpt-rag-orchestrator/pull/214)) was reverted in `v2.8.5` because it conflicts with the pinned `azure-ai-projects==2.0.0b3` and breaks the runtime image; it will be re-evaluated together with the `azure-ai-projects` upgrade.
+    - `gpt-rag-ingestion` `v2.4.4` → [`v2.4.6`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.6). Refreshes `requests`, `azure-appconfiguration`, `pymupdf`, `uvicorn`, plus `/frontend` packages (`@tailwindcss/typography`, `typescript-eslint`). The `react-dom`/`@types/react-dom` major bump to 19.x ([ingestion#212](https://github.com/Azure/gpt-rag-ingestion/pull/212)) was reverted in `v2.4.6` because it breaks the `@radix-ui` chain in the admin dashboard frontend; it will be re-evaluated with a coordinated Radix UI upgrade.
+    - `gpt-rag-ui` `v2.3.11` → [`v2.3.13`](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.3.13). Refreshes `fastapi`, `aiohttp`, `azure-storage-blob`, `tenacity`. The `opentelemetry-instrumentation-httpx` bump to 0.63b1 ([ui#67](https://github.com/Azure/gpt-rag-ui/pull/67)) was reverted in `v2.3.13` because it conflicts with `azure-monitor-opentelemetry==1.6.10`; it will be re-evaluated when `azure-monitor-opentelemetry` is upgraded.
+- **AI landing zone pin bumped to [`v2.0.17`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.0.17):** Adds the `appRuntimeConfigurationMode` parameter (`appConfig` | `containerEnv` | `none`) gating the runtime configuration plane independently of `deployAppConfig` ([Azure/bicep-ptn-aiml-landing-zone#89](https://github.com/Azure/bicep-ptn-aiml-landing-zone/issues/89)) and makes the Container Apps Dapr sidecar opt-in. Default behavior (`appConfig` mode, no Dapr) is unchanged for existing GPT-RAG consumers.
+
+### Validation
+
+The following component versions were validated together for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v2.8.5 |
+| gpt-rag-ingestion | v2.4.6 |
+| infra (landing zone) | v2.0.17 |
+
+A fresh `azd up` was executed in a validation environment in `swedencentral` (Standard mode, `NETWORK_ISOLATION=false`) against the v2.9.2 manifest to confirm provision and deploy succeed end-to-end with the new component pins and the new landing-zone tag. An initial run surfaced incompatible Dependabot bumps in the three components above; those bumps were reverted in `v2.8.5` / `v2.4.6` / `v2.3.13` and the validation was re-run successfully on the fixed pins. All component-level changes are dependency refreshes only (no behavior changes), and the landing-zone change is opt-in with a backward-compatible default, so the validated combination above is the recommended upgrade path from v2.9.1.
+
 ## [v2.9.1] - 2026-06-14
 
 ### Changed
