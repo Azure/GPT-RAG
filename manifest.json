@@ -6,17 +6,17 @@
     {
       "name": "gpt-rag-ui",
       "repo": "https://github.com/azure/gpt-rag-ui.git",
-      "tag": "v2.3.12"
+      "tag": "v2.3.13"
     },
     {
       "name": "gpt-rag-orchestrator",
       "repo": "https://github.com/azure/gpt-rag-orchestrator.git",
-      "tag": "v2.8.4"
+      "tag": "v2.8.5"
     },
     {
       "name": "gpt-rag-ingestion",
       "repo": "https://github.com/azure/gpt-rag-ingestion.git",
-      "tag": "v2.4.5"
+      "tag": "v2.4.6"
     }
   ]
 }
