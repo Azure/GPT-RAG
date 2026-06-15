@@ -1,7 +1,7 @@
 # general
 
-azure-identity==1.21.0
-azure-appconfiguration==1.7.1
+azure-identity==1.25.3
+azure-appconfiguration==1.8.1
 
 # app container apps
 
@@ -13,6 +13,6 @@ azure-mgmt-cognitiveservices==13.6.0
 
 # search
 
-requests==2.33.0
+requests==2.34.2
 azure-keyvault-secrets==4.9.0
 jinja2==3.1.6
