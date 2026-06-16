@@ -1,6 +1,23 @@
 # Changelog
 
-## [Unreleased]
+## [v2.9.3] - 2026-06-16
+
+### Changed
+
+- **AI landing zone pin bumped to [`v2.0.18`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.0.18):** Removes the non-actionable `SEARCH_CAPACITY`, `COSMOS_CAPACITY`, and `ACA_WORKLOAD_PROFILE_CAPACITY` preflight warnings for transient regional capacity pools that Azure does not expose through reliable pre-create APIs. The regional preflight remains focused on checks it can validate before ARM deployment starts, including provider/location support, jumpbox VM SKU availability, and Azure OpenAI model quota.
+
+### Validation
+
+The following component versions were validated together for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v2.8.5 |
+| gpt-rag-ingestion | v2.4.6 |
+| infra (landing zone) | v2.0.18 |
+
+The release updates only the AI Landing Zone pin from v2.0.17 to v2.0.18. The pinned `infra/scripts/Invoke-PreflightChecks.ps1` was parsed with the PowerShell parser, and the v2.0.18 preflight was checked to confirm it no longer emits the non-actionable transient capacity warnings while preserving provider/location, jumpbox VM SKU, and Azure OpenAI model quota checks.
 
 ## [v2.9.2] - 2026-06-15
 
