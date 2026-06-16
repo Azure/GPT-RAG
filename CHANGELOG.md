@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **AI landing zone pin bumped to [`v2.0.18`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.0.18):** Removes the non-actionable `SEARCH_CAPACITY`, `COSMOS_CAPACITY`, and `ACA_WORKLOAD_PROFILE_CAPACITY` preflight warnings for transient regional capacity pools that Azure does not expose through reliable pre-create APIs. The regional preflight remains focused on checks it can validate before ARM deployment starts, including provider/location support, jumpbox VM SKU availability, and Azure OpenAI model quota.
+
 ## [v2.9.2] - 2026-06-15
 
 ### Changed
