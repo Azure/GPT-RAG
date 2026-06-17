@@ -4,8 +4,11 @@
 
 ### Changed
 
-- **Orchestrator pin bumped to [`v2.8.6`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.6):** Fixes follow-up turns in `single_agent_rag` by resuming the stable Foundry conversation object, reuses the configured prompt agent through `AGENT_ID`, restores shared document retrieval when `conversationId` is null, and changes the reasoning-model defaults to `MAX_COMPLETION_TOKENS=8000` and `REASONING_EFFORT=low`.
-- **AI landing zone pin bumped to [`v2.0.19`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.0.19):** The AI Foundry project resource now honors the parameterized `aiFoundryProjectName` instead of hardcoding `aifoundry-default-project`. When the display name is not supplied, it defaults to the same generated project name.
+- **Orchestrator pin bumped to [`v2.8.6`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.6):** This release includes the fix for [`Azure/GPT-RAG#505`](https://github.com/Azure/GPT-RAG/issues/505), where `single_agent_rag` follow-up turns could fail with `400 No tool call found for function call output`. The orchestrator now resumes follow-up turns from the stable Foundry conversation object instead of creating a mismatched thread/run context.
+- **Foundry prompt agent reuse is now stable:** `single_agent_rag` now honors `AGENT_ID` when resolving the Foundry prompt agent. This prevents config-only changes, such as changing `REASONING_EFFORT`, from creating duplicate prompt agents instead of reusing the intended one.
+- **Reasoning-model defaults were adjusted for GPT-5 reasoning models:** `MAX_COMPLETION_TOKENS` now defaults to `8000` and `REASONING_EFFORT` now defaults to `low`, reducing the chance that models such as `gpt-5-nano` spend the output budget on internal reasoning and return an empty answer with a `max_tokens` / length finish.
+- **Shared document retrieval was fixed for global chunks:** Some shared indexed chunks are not tied to a specific chat conversation and can be stored with `conversationId = null`. Retrieval now includes those global chunks instead of filtering them out, so shared documents remain available to chats that should see them.
+- **AI landing zone pin bumped to [`v2.0.19`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.0.19):** This closes [`Azure/bicep-ptn-aiml-landing-zone#101`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/issues/101). The AI Foundry project resource now honors the parameterized `aiFoundryProjectName` instead of hardcoding `aifoundry-default-project`. When the project name is not supplied, it uses the generated resource name pattern, and when the display name is not supplied, it defaults to that same generated project name.
 
 ### Validation
 
