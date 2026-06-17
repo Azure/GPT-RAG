@@ -1,5 +1,25 @@
 # Changelog
 
+## [v2.9.4] - 2026-06-17
+
+### Changed
+
+- **Orchestrator pin bumped to [`v2.8.6`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.6):** Fixes follow-up turns in `single_agent_rag` by resuming the stable Foundry conversation object, reuses the configured prompt agent through `AGENT_ID`, restores shared document retrieval when `conversationId` is null, and changes the reasoning-model defaults to `MAX_COMPLETION_TOKENS=8000` and `REASONING_EFFORT=low`.
+- **AI landing zone pin bumped to [`v2.0.19`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.0.19):** The AI Foundry project resource now honors the parameterized `aiFoundryProjectName` instead of hardcoding `aifoundry-default-project`. When the display name is not supplied, it defaults to the same generated project name.
+
+### Validation
+
+The following component versions were validated together for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v2.8.6 |
+| gpt-rag-ingestion | v2.4.6 |
+| infra (landing zone) | v2.0.19 |
+
+The orchestrator changes were validated in a live Azure environment by confirming `single_agent_rag` follow-up turns succeed, reuse the configured Foundry prompt agent, and run with the updated reasoning defaults. The landing-zone change was validated with `az bicep build --file main.bicep`, and this release verifies the aggregate manifest pins to the published `v2.8.6` and `v2.0.19` component releases.
+
 ## [v2.9.3] - 2026-06-16
 
 ### Changed
