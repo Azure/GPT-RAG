@@ -25,9 +25,13 @@ The orchestrator changes were validated in a live Azure environment by confirmin
 
 ## [v2.9.3] - 2026-06-16
 
+### User and operator impact
+
+This release makes GPT-RAG preflight output quieter and more useful. Operators should no longer see warnings for transient regional capacity pools that Azure does not expose through reliable pre-create APIs. The preflight still checks the things it can validate before deployment, such as provider/location support, jumpbox VM SKU availability, and Azure OpenAI model quota.
+
 ### Changed
 
-- **AI landing zone pin bumped to [`v2.0.18`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.0.18):** Removes the non-actionable `SEARCH_CAPACITY`, `COSMOS_CAPACITY`, and `ACA_WORKLOAD_PROFILE_CAPACITY` preflight warnings for transient regional capacity pools that Azure does not expose through reliable pre-create APIs. The regional preflight remains focused on checks it can validate before ARM deployment starts, including provider/location support, jumpbox VM SKU availability, and Azure OpenAI model quota.
+- **AI Landing Zone pin bumped to [`v2.0.18`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.0.18):** Removes the non-actionable `SEARCH_CAPACITY`, `COSMOS_CAPACITY`, and `ACA_WORKLOAD_PROFILE_CAPACITY` warnings. These checks could not reliably tell an operator what to fix before deployment, so they were more distracting than helpful.
 
 ### Validation
 
@@ -40,16 +44,25 @@ The following component versions were validated together for this release:
 | gpt-rag-ingestion | v2.4.6 |
 | infra (landing zone) | v2.0.18 |
 
-The release updates only the AI Landing Zone pin from v2.0.17 to v2.0.18. The pinned `infra/scripts/Invoke-PreflightChecks.ps1` was parsed with the PowerShell parser, and the v2.0.18 preflight was checked to confirm it no longer emits the non-actionable transient capacity warnings while preserving provider/location, jumpbox VM SKU, and Azure OpenAI model quota checks.
+- Confirmed `manifest.json` pins GPT-RAG `v2.9.3` and AI Landing Zone `v2.0.18`.
+- Confirmed the `infra` submodule resolves to the published `v2.0.18` tag.
+- Parsed `infra/scripts/Invoke-PreflightChecks.ps1` with the PowerShell parser.
+- Confirmed the pinned preflight script no longer emits `SEARCH_CAPACITY`, `COSMOS_CAPACITY`, or `ACA_WORKLOAD_PROFILE_CAPACITY` findings while preserving the actionable provider/location, VM SKU, and Azure OpenAI quota checks.
 
 ## [v2.9.2] - 2026-06-15
 
+### User and operator impact
+
+This release refreshes component dependencies while keeping the validated deployment path stable. Three incompatible dependency bumps were found during validation and reverted before release, so operators get the safe patch updates without pulling in broken runtime or frontend dependency chains.
+
+It also moves GPT-RAG to AI Landing Zone [`v2.0.17`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.0.17), which adds more control over how Container Apps receive runtime configuration. Existing deployments keep the same default behavior.
+
 ### Changed
-- **Component patch bumps absorbing Dependabot dependency refreshes:**
-    - `gpt-rag-orchestrator` `v2.8.3` → [`v2.8.5`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.5). Refreshes `/evaluations` deps (`uvicorn`, `httpx`, `openai`, `azure-monitor-opentelemetry-exporter`) and runtime deps (`sqlparse`, `tiktoken`). The `semantic-kernel` 1.43.0 bump ([orchestrator#214](https://github.com/Azure/gpt-rag-orchestrator/pull/214)) was reverted in `v2.8.5` because it conflicts with the pinned `azure-ai-projects==2.0.0b3` and breaks the runtime image; it will be re-evaluated together with the `azure-ai-projects` upgrade.
-    - `gpt-rag-ingestion` `v2.4.4` → [`v2.4.6`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.6). Refreshes `requests`, `azure-appconfiguration`, `pymupdf`, `uvicorn`, plus `/frontend` packages (`@tailwindcss/typography`, `typescript-eslint`). The `react-dom`/`@types/react-dom` major bump to 19.x ([ingestion#212](https://github.com/Azure/gpt-rag-ingestion/pull/212)) was reverted in `v2.4.6` because it breaks the `@radix-ui` chain in the admin dashboard frontend; it will be re-evaluated with a coordinated Radix UI upgrade.
-    - `gpt-rag-ui` `v2.3.11` → [`v2.3.13`](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.3.13). Refreshes `fastapi`, `aiohttp`, `azure-storage-blob`, `tenacity`. The `opentelemetry-instrumentation-httpx` bump to 0.63b1 ([ui#67](https://github.com/Azure/gpt-rag-ui/pull/67)) was reverted in `v2.3.13` because it conflicts with `azure-monitor-opentelemetry==1.6.10`; it will be re-evaluated when `azure-monitor-opentelemetry` is upgraded.
-- **AI landing zone pin bumped to [`v2.0.17`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.0.17):** Adds the `appRuntimeConfigurationMode` parameter (`appConfig` | `containerEnv` | `none`) gating the runtime configuration plane independently of `deployAppConfig` ([Azure/bicep-ptn-aiml-landing-zone#89](https://github.com/Azure/bicep-ptn-aiml-landing-zone/issues/89)) and makes the Container Apps Dapr sidecar opt-in. Default behavior (`appConfig` mode, no Dapr) is unchanged for existing GPT-RAG consumers.
+
+- **Orchestrator pin bumped from `v2.8.3` to [`v2.8.5`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.5):** Refreshes `/evaluations` and runtime dependencies. The `semantic-kernel` 1.43.0 bump was reverted in [`Azure/gpt-rag-orchestrator#214`](https://github.com/Azure/gpt-rag-orchestrator/pull/214) because it conflicts with the pinned `azure-ai-projects==2.0.0b3` and breaks the runtime image.
+- **Ingestion pin bumped from `v2.4.4` to [`v2.4.6`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.6):** Refreshes Python and frontend dependencies. The React 19 `react-dom` / `@types/react-dom` bump was reverted in [`Azure/gpt-rag-ingestion#212`](https://github.com/Azure/gpt-rag-ingestion/pull/212) because it breaks the current Radix UI dependency chain in the admin dashboard frontend.
+- **UI pin bumped from `v2.3.11` to [`v2.3.13`](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.3.13):** Refreshes Python dependencies. The `opentelemetry-instrumentation-httpx` 0.63b1 bump was reverted in [`Azure/gpt-rag-ui#67`](https://github.com/Azure/gpt-rag-ui/pull/67) because it conflicts with `azure-monitor-opentelemetry==1.6.10`.
+- **AI Landing Zone pin bumped to [`v2.0.17`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.0.17):** Adds `appRuntimeConfigurationMode` for choosing how Container Apps receive runtime configuration: `appConfig`, `containerEnv`, or `none` ([issue #89](https://github.com/Azure/bicep-ptn-aiml-landing-zone/issues/89), [PR #97](https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/97)). It also makes the Container Apps Dapr sidecar opt-in ([PR #90](https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/90)). GPT-RAG keeps the existing `appConfig` behavior by default.
 
 ### Validation
 
@@ -62,16 +75,24 @@ The following component versions were validated together for this release:
 | gpt-rag-ingestion | v2.4.6 |
 | infra (landing zone) | v2.0.17 |
 
-A fresh `azd up` was executed in a validation environment in `swedencentral` (Standard mode, `NETWORK_ISOLATION=false`) against the v2.9.2 manifest to confirm provision and deploy succeed end-to-end with the new component pins and the new landing-zone tag. An initial run surfaced incompatible Dependabot bumps in the three components above; those bumps were reverted in `v2.8.5` / `v2.4.6` / `v2.3.13` and the validation was re-run successfully on the fixed pins. All component-level changes are dependency refreshes only (no behavior changes), and the landing-zone change is opt-in with a backward-compatible default, so the validated combination above is the recommended upgrade path from v2.9.1.
+A fresh `azd up` was run in a Standard-mode validation environment with `NETWORK_ISOLATION=false` against the v2.9.2 manifest. The first run found the incompatible dependency bumps listed above. Those bumps were reverted in `gpt-rag-orchestrator` `v2.8.5`, `gpt-rag-ingestion` `v2.4.6`, and `gpt-rag-ui` `v2.3.13`, then validation was re-run successfully on the fixed pins.
+
+This is the recommended upgrade path from v2.9.1 because the component changes are dependency refreshes only and the landing-zone runtime configuration change is opt-in with a backward-compatible default.
 
 ## [v2.9.1] - 2026-06-14
 
+### User and operator impact
+
+This release completes the `custom_metadata` feature started in v2.9.0. Blob user-defined metadata can now be extracted during ingestion and stored on Azure AI Search chunks, so retrievers can filter by blob tags such as department, document type, or business unit.
+
+It also makes deployment troubleshooting easier. If a shell-level `APP_CONFIG_ENDPOINT` disagrees with the active azd environment, the deploy scripts now warn clearly before deploying with the shell value.
+
 ### Changed
-- **Component bumps that complete the `custom_metadata` ship of [#487](https://github.com/Azure/GPT-RAG/issues/487) and add a DX warning for stale `APP_CONFIG_ENDPOINT`:**
-    - `gpt-rag-orchestrator` `v2.8.2` → [`v2.8.3`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.3).
-    - `gpt-rag-ingestion` `v2.4.3` → [`v2.4.4`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.4). Activates blob storage user-defined metadata extraction into the AI Search `custom_metadata` field that v2.9.0 added to the index schema, so retrievers can now actually filter by user-defined blob tags. Also restores the Content Understanding multimodal extraction path (PDF page/region rendering and Office embedded image extraction) that regressed in the v2.4.x line.
-    - `gpt-rag-ui` `v2.3.10` → [`v2.3.11`](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.3.11).
-- **Deploy scripts warn when `APP_CONFIG_ENDPOINT` diverges (issue [#491](https://github.com/Azure/GPT-RAG/issues/491)):** All three components' `scripts/deploy.ps1` and `scripts/deploy.sh` now read both the shell `APP_CONFIG_ENDPOINT` and the azd env value and, when both are present and disagree (trimmed, case-insensitive), print a yellow warning that shows both values, states which one is being used (the shell value still wins, preserving existing precedence for jumpbox and CI flows), and tells the operator how to clear the shell override (`Remove-Item env:APP_CONFIG_ENDPOINT` in PowerShell, `unset APP_CONFIG_ENDPOINT` in bash). When only one source is set, the previous behavior is unchanged. A matching troubleshooting note is published on the docs site (#492).
+
+- **Orchestrator pin bumped from `v2.8.2` to [`v2.8.3`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.3):** Adds the deploy-time `APP_CONFIG_ENDPOINT` drift warning for orchestrator deployments ([Azure/GPT-RAG#491](https://github.com/Azure/GPT-RAG/issues/491)).
+- **Ingestion pin bumped from `v2.4.3` to [`v2.4.4`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.4):** Completes [`Azure/GPT-RAG#487`](https://github.com/Azure/GPT-RAG/issues/487) by extracting user-defined blob metadata into the `custom_metadata` search field added in v2.9.0. It also restores the Content Understanding multimodal extraction path for PDF page/region rendering and Office embedded image extraction.
+- **UI pin bumped from `v2.3.10` to [`v2.3.11`](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.3.11):** Adds the same deploy-time `APP_CONFIG_ENDPOINT` drift warning for UI deployments.
+- **Deploy scripts now warn when configuration sources disagree:** The component deploy scripts compare the shell `APP_CONFIG_ENDPOINT` with the active azd environment value. If both exist and differ, the scripts show a yellow warning, say which value will be used, and show how to clear the shell override. Shell precedence is unchanged, so existing jumpbox and CI flows keep working. The matching docs update was published in [`Azure/GPT-RAG#492`](https://github.com/Azure/GPT-RAG/pull/492).
 
 ### Validation
 
@@ -84,15 +105,39 @@ The following component versions were validated together for this release:
 | gpt-rag-ingestion | v2.4.4 |
 | infra (landing zone) | v2.0.16 |
 
-The deploy-script warning change is diagnostic-only (no provisioned-resource behavior change) and was validated by the per-component release pipelines (`pytest` in orchestrator: 166 passed; `pytest tests/` in ingestion: 7 passed). The full `azd provision`/`azd deploy` regression was already executed for the same component combination during the v2.9.0 release in a validation environment in `swedencentral` (Standard mode, fresh deployment); only patch-level component bumps are pinned here, so a fresh `azd up` was not re-executed for v2.9.1.
+- The deploy-script warning is diagnostic only. It does not change provisioned resources.
+- Orchestrator validation: `pytest`, 166 tests passed.
+- Ingestion validation: `pytest tests/`, 7 tests passed for blob metadata extraction.
+- UI validation: no automated test suite in this repo, deploy-script behavior was validated through the shared script change used across the components.
+- A fresh `azd provision` and `azd deploy` regression was already completed for the same infrastructure baseline during v2.9.0 validation, so v2.9.1 did not repeat a full `azd up`.
 
 ## [v2.9.0] - 2026-06-14
 
+### User and operator impact
+
+This release prepares GPT-RAG for metadata-based retrieval and unblocks fresh Foundry Agent Service v2 deployments in regions where Cosmos DB data-plane RBAC needed a narrower scope.
+
+Operators get the new `custom_metadata` field on the RAG search index, but v2.9.0 is only the schema half of the feature. The field exists after the index schema is reapplied, but it is not populated until the ingestion component is upgraded in a later release. If you filter on `custom_metadata` with only v2.9.0 installed, expect zero matches.
+
 ### Added
-- **`custom_metadata` field on the RAG search index (issue [#487](https://github.com/Azure/GPT-RAG/issues/487)):** Adds a `Collection(Edm.ComplexType)` `custom_metadata` field with `{key, value}` subfields to the RAG index schema in `config/search/search.j2`. The field is filterable and facetable so retrievers can target documents by user-defined blob tags (for example, `$filter=custom_metadata/any(m: m/key eq 'department' and m/value eq 'finance')`). Not included in the semantic configuration's `prioritizedKeywordsFields` to avoid biasing ranking. **Partial ship in v2.9.0:** the index schema is updated, but the matching blob-tag extraction in `gpt-rag-ingestion` is still on a feature branch and is not pinned by this release (`gpt-rag-ingestion` remains at `v2.4.3`). Until a future release bumps the ingestion component, the field exists on the index but stays empty, so operators filtering by `custom_metadata` will see zero results. Operators must also reapply the index schema after upgrading.
+
+- **`custom_metadata` field on the RAG search index** ([Azure/GPT-RAG#487](https://github.com/Azure/GPT-RAG/issues/487)): Adds a filterable and facetable `Collection(Edm.ComplexType)` field with `{key, value}` subfields to `config/search/search.j2`. This lets retrievers target documents by user-defined blob metadata once ingestion support is pinned, for example:
+
+  ```text
+  custom_metadata/any(m: m/key eq 'department' and m/value eq 'finance')
+  ```
+
+  The field is not included in semantic ranking prioritized keyword fields, so metadata filters do not bias semantic ranking.
 
 ### Changed
-- **Landing zone submodule bumped to `v2.0.16`.** `manifest.json` `ailz_tag`, `.gitmodules` `branch`, and the recorded `infra/` submodule gitlink now consume [`Azure/bicep-ptn-aiml-landing-zone` v2.0.16](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.0.16). v2.0.16 includes the fix for [#94](https://github.com/Azure/bicep-ptn-aiml-landing-zone/issues/94) — Foundry Agent Service v2 Cosmos data-plane RBAC is now scoped at the database level so lazily created agent containers no longer fail authorization (this unblocks fresh provisioning in `swedencentral` and other regions where the previous account-scope assignment was insufficient) — and the preflight warning for [#93](https://github.com/Azure/bicep-ptn-aiml-landing-zone/issues/93), which downgrades `enableCosmosAnalyticalStorage=true` in regions where analytical storage is restricted from a hard failure to a `WARN` so deployments succeed with analytical storage disabled.
+
+- **AI Landing Zone pin bumped to [`v2.0.16`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.0.16):**
+  - Fixes Foundry Agent Service v2 Cosmos DB data-plane RBAC by scoping the role assignment at the database level instead of a fixed list of containers ([issue #94](https://github.com/Azure/bicep-ptn-aiml-landing-zone/issues/94), [PR #95](https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/95)). This allows lazily-created Foundry Agent Service v2 containers to work without authorization failures.
+  - Changes the Cosmos analytical storage regional check from a hard failure to a warning when `enableCosmosAnalyticalStorage=true` targets a region where account creation can reject analytical storage ([issue #93](https://github.com/Azure/bicep-ptn-aiml-landing-zone/issues/93), [PR #96](https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/96)).
+
+### Docs
+
+- Backfilled mandatory component version tables in historical GitHub releases and matching changelog sections so operators can see the validated component combination for each umbrella release.
 
 ### Validation
 The following component versions were validated together for this release:
@@ -104,7 +149,9 @@ The following component versions were validated together for this release:
 | gpt-rag-ingestion | v2.4.3 |
 | infra (landing zone) | v2.0.16 |
 
-Validated by running `azd provision --no-prompt` and `azd deploy --no-prompt` in a fresh Standard-mode validation environment in `swedencentral` (regression check for the landing-zone #94 fix), then confirming the three Container Apps (orchestrator, ingestion, frontend) respond on their HTTPS ingress endpoints.
+- Ran `azd provision --no-prompt` and `azd deploy --no-prompt` in a fresh Standard-mode validation environment.
+- Confirmed the landing-zone [`#94`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/issues/94) fix by completing provision and deploy with the v2.0.16 infrastructure pin.
+- Confirmed the deployed frontend, ingestion, and orchestrator Container Apps responded on their HTTPS ingress endpoints.
 
 ## [v2.8.3] - 2026-06-10
 
