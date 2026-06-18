@@ -1,5 +1,32 @@
 # Changelog
 
+## [v2.9.8] - 2026-06-18
+
+### User and operator impact
+
+Patch release that bumps the ingestion pin from [`v2.4.7`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.7) to [`v2.4.8`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.8). No other component changed: orchestrator, UI, and AI Landing Zone pins are identical to v2.9.7. This release exists purely to fix the **Configuration tab** in the ingestion operator dashboard, which rendered blank in v2.9.7 (ingestion v2.4.7). Operators who turned on `ENABLE_DASHBOARD=true` on the ingestion app are the main beneficiaries: the Configuration tab now loads as documented, with no other behavior change.
+
+### Changed
+
+- **Ingestion pin bumped to [`v2.4.8`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.8):** Fixes [`Azure/gpt-rag-ingestion#242`](https://github.com/Azure/gpt-rag-ingestion/issues/242). The ingestion `GET /api/config` endpoint returned a `sections` array but did not return the flat `settings` list and `authEnabled` flag the typed frontend `ConfigResponse` reads. With `res.settings` undefined the Configuration tab in the ingestion dashboard crashed with `TypeError: undefined is not iterable` and rendered nothing. The endpoint now returns both the grouped `sections` and a flat `settings` list (built from the same per-setting reader so the two views stay in lock-step), plus `authEnabled` derived from the same `_auth_enabled()` helper used elsewhere. The `sections` shape is unchanged, the allow-list and denylist are unchanged, the `Admin` app role gating is unchanged. Pure bug fix.
+
+- **Orchestrator pin unchanged:** [`v2.8.9`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.9).
+- **UI pin unchanged:** [`v2.3.13`](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.3.13).
+- **Infra (AI Landing Zone) pin unchanged:** [`v2.0.20`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.0.20).
+
+### Validation
+
+The following component versions are pinned for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v2.8.9 |
+| gpt-rag-ingestion | v2.4.8 |
+| infra (landing zone) | v2.0.20 |
+
+The fix was validated in the ingestion repo: `pytest` full suite passes (26 of 26, +1 focused test asserting the flat `settings` array exists and equals the flattened section settings, and that `authEnabled` reflects `_auth_enabled()` both on and off). No other component behavior is changed by this release.
+
 ## [v2.9.7] - 2026-06-18
 
 ### User and operator impact
