@@ -1,5 +1,43 @@
 # Changelog
 
+## [v2.9.6] - 2026-06-18
+
+### User and operator impact
+
+This release ships a **built-in operator dashboard** at `/dashboard` on both the orchestrator and ingestion services, plus a **Configuration tab** that lets admins tune common runtime settings from the browser without restarting containers or going to the Azure portal. Everything is **opt-in and off by default**, so existing deployments are byte-for-byte unchanged until you turn it on. When enabled and Entra authentication is configured, dashboard pages require the `Admin` app role.
+
+For operators on existing deployments the upgrade is safe and quiet. To try the new dashboards, set `ENABLE_DASHBOARD=true` in App Configuration for the orchestrator and/or the ingestion app. To start editing settings from the UI, also assign your users the `Admin` Entra app role on those apps.
+
+### Changed
+
+- **Orchestrator pin bumped to [`v2.8.9`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.9):**
+  - **Operator dashboard at `/dashboard` ([`Azure/GPT-RAG#511`](https://github.com/Azure/GPT-RAG/issues/511)).** Three tabs: *Overview* (today / 7-day / 30-day conversation counts, a conversations-over-time chart, average user turns, active users), *Conversations* (paginated newest-first list with a detail dialog that renders the full message history), and *Configuration* (see below). Reads come from the existing Cosmos conversation container — no new storage. Overview queries are cached in-process for 60 seconds so refreshes stay cheap.
+  - **Configuration tab ([`Azure/GPT-RAG#512`](https://github.com/Azure/GPT-RAG/issues/512)).** Curated, sectioned view of the common runtime settings (agent strategy, reasoning effort, temperature and top_p, max completion tokens, conversation history compaction, retrieval and search toggles, multimodal classifier, etc.). Each field has the right control (dropdown, slider, number, toggle) and an accessible info tooltip reachable by keyboard. Two safety nets protect writes: an explicit allow-list of editable keys and a denylist that rejects any key whose name matches sensitive suffixes (`_APIKEY`, `_SECRET`, `_PASSWORD`, `_CONNECTION_STRING`, `_TOKEN`, ...) or specific keys like `KEY_VAULT_URI`. Buttons are honest about what they do: *Reload settings cache* refreshes the in-process App Configuration cache, and *Apply changes* is a soft restart that refreshes the cache and returns a clear status — we deliberately did not ship a button labeled "Restart" that does not actually restart the container.
+  - **Where values are written.** Accepted writes go to App Configuration under the `gpt-rag-orchestrator` label, so it is easy to filter in the Azure portal who wrote what.
+  - **Access control.** Every `/api/dashboard/*` route (except `/api/dashboard/version`) requires the caller's bearer token to include the `Admin` Entra app role when auth is on. The `/dashboard` HTML page itself is open so the SPA can load and render a clear access-denied state on 403.
+
+- **Ingestion pin bumped to [`v2.4.7`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.7):**
+  - **Run job now from the dashboard ([`Azure/GPT-RAG#510`](https://github.com/Azure/GPT-RAG/issues/510)).** Admins can trigger any of the scheduled ingestion jobs (blob, sharepoint, sharepoint purge, others) on demand from the Jobs tab with a single click. The UI surfaces success and failure clearly, and the action is admin-only when auth is on.
+  - **Configuration tab ([`Azure/GPT-RAG#512`](https://github.com/Azure/GPT-RAG/issues/512)).** Same shape as the orchestrator tab, but for ingestion settings (chunking, cron schedules for the recurring jobs, retrieval-side flags, etc.). When you change a `CRON_RUN_*` schedule and apply, the scheduler **reschedules the affected job in place** — no restart needed, no drift between the value in App Configuration and the value the scheduler is using. Cron strings are validated server-side with the same parser the scheduler uses at startup.
+  - **Where values are written.** Accepted writes go to App Configuration under the `gpt-rag-ingestion` label.
+  - **Same safety model as the orchestrator.** Opt-in via `ENABLE_DASHBOARD=true`, gated by the `Admin` app role when auth is on, allow-list plus suffix-based denylist on writes, honest action buttons.
+
+- **UI pin unchanged:** [`v2.3.13`](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.3.13).
+- **Infra (AI Landing Zone) pin unchanged:** [`v2.0.19`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.0.19).
+
+### Validation
+
+The following component versions were validated together for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v2.8.9 |
+| gpt-rag-ingestion | v2.4.7 |
+| infra (landing zone) | v2.0.19 |
+
+Validated end-to-end in a live Azure environment with a fresh Standard (non-network-isolated) deployment provisioned and deployed through the standard `azd` flow. Both Container Apps were confirmed running the new image tags. With `ENABLE_DASHBOARD=false` (the default), the `/dashboard` URL returns `404` on both apps and no dashboard API routes are registered — confirming the new feature is fully off for existing deployments. With `ENABLE_DASHBOARD=true` and a user holding the `Admin` Entra app role, the Overview, Conversations, and Configuration tabs load on both apps; a value edited and applied from the Configuration tab is visible at the next request and is persisted in App Configuration under the expected per-app label; an ingestion cron change applied from the UI takes effect on the running scheduler without a restart. Component testing for each change is covered in the linked component releases.
+
 ## [v2.9.5] - 2026-06-18
 
 ### User and operator impact
