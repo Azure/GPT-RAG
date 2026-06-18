@@ -1,5 +1,34 @@
 # Changelog
 
+## [v2.9.5] - 2026-06-18
+
+### User and operator impact
+
+This release bumps the orchestrator pin from `v2.8.6` to [`v2.8.8`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.8), picking up two orchestrator releases. Existing deployments keep the same default behavior: the new metadata-in-context feature is off by default and the diagnostics change adds log markers only. Operators who hit empty-answer situations under RBAC now get a clear log signal to act on, and operators who want the model to use indexed document metadata can opt in with new configuration keys.
+
+### Changed
+
+- **Orchestrator pin bumped to [`v2.8.8`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.8) (covers `v2.8.7` and `v2.8.8`):**
+  - **Retrieval diagnostics ([`v2.8.7`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.7)):** Retrieval now emits greppable log markers at every swallow point so empty-answer-under-RBAC situations ([`Azure/GPT-RAG#508`](https://github.com/Azure/GPT-RAG/issues/508)) are diagnosable from logs. Search container or Application Insights logs for `[Retrieval][AUTH_FAILURE]` (level `ERROR`, emitted on AI Search 401/403, typically a Managed Identity missing the `Search Index Data Reader` role) and `[Retrieval][ERROR]` (level `WARNING`, other retrieval failures). Each record carries structured fields (`retrieval_status`, `retrieval_index`, `retrieval_credential_type`). This is diagnostics-only: no API or behavior change.
+  - **Optional document metadata in LLM context ([`v2.8.8`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.8), [`Azure/GPT-RAG#506`](https://github.com/Azure/GPT-RAG/issues/506)):** Retrieval can now optionally prepend each retrieved document's indexed `custom_metadata` as a compact `[Document metadata]` block so the model can use it when answering, across all three retrieval paths. The change is additive and orchestrator-only — no ingestion, embedding, or vector changes. It is **off by default**, so existing deployments are byte-for-byte unchanged unless they opt in. New configuration keys:
+    - `SEARCH_INCLUDE_METADATA_IN_CONTEXT` (bool, default `false`) — master switch. When `false`, the metadata field is not even selected from the index.
+    - `SEARCH_METADATA_MAX_CHARS` (int, default `500`) — caps the rendered metadata block size per document.
+    - `SEARCH_METADATA_ALLOWED_KEYS` (CSV, default empty = all keys) — optional allow-list of metadata keys to include.
+  - **Before enabling metadata-in-context:** the index must have been created with the #487-era schema that contains the `custom_metadata` field. Older indexes lack the field, and Azure AI Search rejects the whole query with a `400` if a selected field is missing — which is why the feature is gated and default-off. Re-index or confirm the field exists before turning it on. Enabling it adds prompt tokens bounded by roughly `SEARCH_METADATA_MAX_CHARS` × `top_k`; use the max-chars cap and the key allow-list to keep token cost in check.
+
+### Validation
+
+The following component versions were validated together for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v2.8.8 |
+| gpt-rag-ingestion | v2.4.6 |
+| infra (landing zone) | v2.0.19 |
+
+This release was validated in a live Azure environment with a fresh Standard (non-network-isolated) deployment provisioned and deployed through the standard `azd` flow. The orchestrator Container App was confirmed running the `v2.8.8` image, and a basic `single_agent_rag` chat returned a normal, non-empty answer — confirming the default-off metadata behavior leaves existing deployments unchanged. The aggregate manifest was confirmed to pin GPT-RAG `v2.9.5`, orchestrator `v2.8.8`, and AI Landing Zone `v2.0.19`.
+
 ## [v2.9.4] - 2026-06-17
 
 ### Changed
