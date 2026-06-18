@@ -1,5 +1,32 @@
 # Changelog
 
+## [v2.9.9] - 2026-06-18
+
+### User and operator impact
+
+Patch release that bumps the ingestion pin from [`v2.4.8`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.8) to [`v2.4.9`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.9). No other component changed: orchestrator, UI, and AI Landing Zone pins are identical to v2.9.8. This release finishes the **Configuration tab** fix started in v2.9.8: that release fixed the missing top-level `settings` array, but the tab still rendered blank because each section was missing the `title` and `keys` fields the typed frontend `ConfigSection` reads. Operators who turned on `ENABLE_DASHBOARD=true` on the ingestion app are the main beneficiaries: the Configuration tab now actually renders, with no other behavior change.
+
+### Changed
+
+- **Ingestion pin bumped to [`v2.4.9`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.9):** Follow-up fix to [`Azure/gpt-rag-ingestion#242`](https://github.com/Azure/gpt-rag-ingestion/issues/242). v2.4.8 added the top-level `settings` array but `GET /api/config` was still emitting each section as `{id, label, settings}` while the frontend `ConfigSection` reads `{id, title, keys}`. `section.keys.map(...)` therefore crashed with `TypeError: undefined is not iterable` and the tab still rendered nothing. The endpoint now also emits `title` (mirror of `label`) and `keys` (ordered list of setting keys, matching the nested `settings` order) on every section. The legacy `label` and nested `settings` fields stay, so no other callers are affected.
+
+- **Orchestrator pin unchanged:** [`v2.8.9`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.9).
+- **UI pin unchanged:** [`v2.3.13`](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.3.13).
+- **Infra (AI Landing Zone) pin unchanged:** [`v2.0.20`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.0.20).
+
+### Validation
+
+The following component versions are pinned for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v2.8.9 |
+| gpt-rag-ingestion | v2.4.9 |
+| bicep-ptn-aiml-landing-zone | v2.0.20 |
+
+Validated by upgrading an existing v2.9.8 sandbox: rebuilt the ingestion image at the v2.4.9 tag, redeployed the ingestion container app, confirmed `GET /api/version` returns `2.4.9` and `GET /api/config` returns every section with both `label`/`settings` (legacy) and `title`/`keys` (frontend contract). The operator dashboard Configuration tab now loads as documented.
+
 ## [v2.9.8] - 2026-06-18
 
 ### User and operator impact
