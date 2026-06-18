@@ -1,5 +1,28 @@
 # Changelog
 
+## [v2.9.7] - 2026-06-18
+
+### User and operator impact
+
+Patch release that bumps the AI Landing Zone pin from [`v2.0.19`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.0.19) to [`v2.0.20`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.0.20). No component code changed: orchestrator, ingestion, and UI pins are identical to v2.9.6. This release exists purely to pick up the AI Landing Zone preflight fix that prevents misleading "all checks passed" reports when regional OpenAI model quota is actually insufficient. Operators provisioning a fresh GPT-RAG environment with `azd up` are the main beneficiaries: the preflight now fails fast with a clear `MODEL_QUOTA_INSUFFICIENT` error in seconds, instead of letting ARM run for ~15 minutes and then failing partway through the deploy.
+
+### Changed
+
+- **AI Landing Zone pin bumped to [`v2.0.20`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.0.20):** Closes [`Azure/bicep-ptn-aiml-landing-zone#103`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/issues/103). The preflight's `Expand-ParamValue` helper no longer coerces arrays and objects (such as `modelDeploymentList`) into strings while expanding `${VAR}` tokens. The AI model quota preflight can now actually inspect requested OpenAI deployments and fail early with `MODEL_QUOTA_INSUFFICIENT` when the requested capacity exceeds available regional quota. Previously the preflight could report "All checks passed" while ARM later failed with `InsufficientQuota` after ~15 minutes of partial provisioning.
+
+### Validation
+
+The following component versions are pinned for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v2.8.9 |
+| gpt-rag-ingestion | v2.4.7 |
+| infra (landing zone) | v2.0.20 |
+
+The bumped preflight behavior was reproduced on a fresh `azd up` against the v2.9.6 manifest (AI Landing Zone v2.0.19): preflight reported all checks passed in `westus3` even though `text-embedding-3-large` quota was insufficient there, and ARM failed ~15 minutes later with `InsufficientQuota`. With v2.0.20, the preflight inspects the structured `modelDeploymentList` and returns `MODEL_QUOTA_INSUFFICIENT` upfront. No other component behavior is changed by this release.
+
 ## [v2.9.6] - 2026-06-18
 
 ### User and operator impact
