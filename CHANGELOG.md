@@ -1,5 +1,32 @@
 # Changelog
 
+## [v2.9.10] - 2026-06-18
+
+### User and operator impact
+
+Feature release that bumps the ingestion pin from [`v2.4.9`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.9) to [`v2.4.10`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.10). No other component changed: orchestrator, UI, and AI Landing Zone pins are identical to v2.9.9. This release adds **queue and next-run visibility** to the ingestion operator dashboard. Before v2.4.10, the *Run now* button (added in v2.4.7) was fire-and-forget: clicking it queued a job and showed a toast, then disappeared, leaving no way to see what was in flight or when the next cron would fire without tailing container logs. v2.4.10 adds a compact *Queue and schedule* panel above the Jobs table that polls every 10 seconds and shows, per `job_type`: any in-flight run (run id + elapsed), the next scheduled run as a relative ETA with an absolute ISO tooltip, and the current cron string. The *Run now* button is also rendered disabled with a `Job already running` tooltip when the matching job is in flight, so operators learn before they click and get a `409 Conflict`. Operators who turned on `ENABLE_DASHBOARD=true` on the ingestion app are the main beneficiaries.
+
+### Changed
+
+- **Ingestion pin bumped to [`v2.4.10`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.10):** Adds [`Azure/gpt-rag-ingestion#247`](https://github.com/Azure/gpt-rag-ingestion/issues/247). New read-only `GET /api/jobs/queue` (network-only auth, same posture as `GET /api/jobs` and `GET /api/config`) returns per `job_type` the `in_flight` `{run_id, started_at}`, `next_scheduled_at` from APScheduler, and the current cron string. The existing in-process `_running_jobs` registry was extended to also record `started_at` at the same insertion sites — manual and cron paths still share one lock; no parallel registry was added. The frontend Queue panel polls every 10 seconds with plain `setInterval` (no new data-fetching dependency).
+
+- **Orchestrator pin unchanged:** [`v2.8.9`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.9).
+- **UI pin unchanged:** [`v2.3.13`](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.3.13).
+- **Infra (AI Landing Zone) pin unchanged:** [`v2.0.20`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.0.20).
+
+### Validation
+
+The following component versions are pinned for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v2.8.9 |
+| gpt-rag-ingestion | v2.4.10 |
+| bicep-ptn-aiml-landing-zone | v2.0.20 |
+
+Validated by upgrading an existing v2.9.9 sandbox: rebuilt the ingestion image at the v2.4.10 tag, redeployed the ingestion container app, confirmed `GET /api/version` returns `2.4.10` and `GET /api/jobs/queue` returns one row per `job_type` with the expected `in_flight`, `next_scheduled_at`, and `cron` fields. The operator dashboard *Queue and schedule* panel renders as documented and the *Run now* button correctly disables with the `Job already running` tooltip when a job is in flight.
+
 ## [v2.9.9] - 2026-06-18
 
 ### User and operator impact
