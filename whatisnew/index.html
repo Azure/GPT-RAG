@@ -1000,6 +1000,17 @@
 <p>📌 <a href="https://github.com/orgs/Azure/projects/536/views/6">Check out what's coming next</a>  (Azure org only)</p>
 </blockquote>
 <h3 id="june-2026">June 2026</h3>
+<p><strong><a href="https://github.com/Azure/GPT-RAG/tree/v2.9.6">Release 2.9.6</a> - Built-in operator dashboards (Overview, Conversations, Configuration)</strong></p>
+<p>The latest June drop adds an opt-in <strong>operator dashboard at <code>/dashboard</code></strong> on both the orchestrator and ingestion apps, with three tabs: Overview, Conversations, and Configuration.</p>
+<ul>
+<li><strong>Off by default, safe upgrade.</strong> Existing deployments are byte-for-byte unchanged. To turn it on, set <code>ENABLE_DASHBOARD=true</code> in App Configuration for the orchestrator and/or the ingestion app. With Entra auth on, dashboard pages also require the <code>Admin</code> app role.</li>
+<li><strong>Overview tab.</strong> Today / 7-day / 30-day conversation counts, a conversations-over-time chart, average user turns per conversation, and active user count. Reads come from the existing Cosmos conversation container — no new storage.</li>
+<li><strong>Conversations tab.</strong> Paginated, newest-first list with a detail dialog that renders the full message history.</li>
+<li><strong>Configuration tab.</strong> Admins can view and edit a curated, sectioned set of runtime settings (agent strategy, reasoning effort, temperature and top_p, max completion tokens, retrieval and search toggles, ingestion chunking, cron schedules, etc.) without leaving the app. Each field has the right control and an accessible info tooltip reachable by keyboard. Writes are protected by an explicit allow-list plus a denylist that rejects any key whose name matches sensitive suffixes (<code>_APIKEY</code>, <code>_SECRET</code>, <code>_PASSWORD</code>, <code>_CONNECTION_STRING</code>, <code>_TOKEN</code>, ...). Buttons are honest about what they do: <em>Reload settings cache</em> refreshes the in-process App Configuration cache, and <em>Apply changes</em> is a soft restart that refreshes the cache and returns a clear status — no button is labeled "Restart" if it does not actually restart the container.</li>
+<li><strong>Ingestion bonus: Run jobs on demand.</strong> Admins can trigger any of the scheduled ingestion jobs (blob, sharepoint, sharepoint purge, ...) from the Jobs tab with a single click. Changing a <code>CRON_RUN_*</code> schedule and applying reschedules the affected job in place — no restart needed.</li>
+</ul>
+<p>Pinned components: orchestrator <a href="https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.9"><code>v2.8.9</code></a>, ingestion <a href="https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.7"><code>v2.4.7</code></a>, UI <code>v2.3.13</code>, infra <code>v2.0.19</code>.</p>
+<hr />
 <p><strong><a href="https://github.com/Azure/GPT-RAG/tree/v2.9.1">Release 2.9.1</a> - Authenticated uploads, Foundry Agent Service v2 stabilization, and Sweden Central unblocked</strong></p>
 <p>The June release train delivers four themes:</p>
 <ul>
