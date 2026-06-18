@@ -1,6 +1,10 @@
 > 📌 [Check out what's coming next](https://github.com/orgs/Azure/projects/536/views/6)  (Azure org only)
 
 ### June 2026
+**[Release 2.9.8](https://github.com/Azure/GPT-RAG/tree/v2.9.8) - Configuration tab fix in the ingestion dashboard**
+
+Patch release that bumps the ingestion pin from `v2.4.7` to [`v2.4.8`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.8). No other component changed; orchestrator, UI, and AI Landing Zone pins are identical to v2.9.7. Operators who turned on `ENABLE_DASHBOARD=true` on the ingestion app saw the **Configuration tab render blank** in v2.9.7 (ingestion v2.4.7) because the ingestion `GET /api/config` endpoint did not return the flat `settings` array and `authEnabled` flag the typed frontend contract reads — the tab crashed with `TypeError: undefined is not iterable` and showed nothing. The endpoint now returns both the grouped `sections` view and a flat `settings` list (built from the same per-setting reader so the two views stay in lock-step), plus `authEnabled`. The Configuration tab loads as documented in v2.9.6. The allow-list, denylist, section grouping, and `Admin` app role gating are all unchanged. Fixes [`Azure/gpt-rag-ingestion#242`](https://github.com/Azure/gpt-rag-ingestion/issues/242).
+
 **[Release 2.9.7](https://github.com/Azure/GPT-RAG/tree/v2.9.7) - AI Landing Zone preflight quota fix**
 
 Patch release that bumps the AI Landing Zone pin from `v2.0.19` to [`v2.0.20`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.0.20). No component code changed; orchestrator, ingestion, and UI pins are identical to v2.9.6. Operators provisioning a fresh environment with `azd up` now get a clear `MODEL_QUOTA_INSUFFICIENT` error in seconds when regional OpenAI model quota is insufficient, instead of letting ARM run for ~15 minutes and then failing partway through the deploy.
