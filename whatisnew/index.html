@@ -1000,6 +1000,8 @@
 <p>📌 <a href="https://github.com/orgs/Azure/projects/536/views/6">Check out what's coming next</a>  (Azure org only)</p>
 </blockquote>
 <h3 id="june-2026">June 2026</h3>
+<p><strong><a href="https://github.com/Azure/GPT-RAG/tree/v2.9.7">Release 2.9.7</a> - AI Landing Zone preflight quota fix</strong></p>
+<p>Patch release that bumps the AI Landing Zone pin from <code>v2.0.19</code> to <a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.0.20"><code>v2.0.20</code></a>. No component code changed; orchestrator, ingestion, and UI pins are identical to v2.9.6. Operators provisioning a fresh environment with <code>azd up</code> now get a clear <code>MODEL_QUOTA_INSUFFICIENT</code> error in seconds when regional OpenAI model quota is insufficient, instead of letting ARM run for ~15 minutes and then failing partway through the deploy.</p>
 <p><strong><a href="https://github.com/Azure/GPT-RAG/tree/v2.9.6">Release 2.9.6</a> - Built-in operator dashboards (Overview, Conversations, Configuration)</strong></p>
 <p>The latest June drop adds an opt-in <strong>operator dashboard at <code>/dashboard</code></strong> on both the orchestrator and ingestion apps, with three tabs: Overview, Conversations, and Configuration.</p>
 <ul>
