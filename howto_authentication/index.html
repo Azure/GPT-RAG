@@ -797,6 +797,84 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#admin-access-for-the-operator-dashboards" class="md-nav__link">
+    <span class="md-ellipsis">
+      Admin Access for the Operator Dashboards
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Admin Access for the Operator Dashboards">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-each-dashboard-is-gated" class="md-nav__link">
+    <span class="md-ellipsis">
+      How each dashboard is gated
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1-add-the-admin-app-role-to-the-app-registration" class="md-nav__link">
+    <span class="md-ellipsis">
+      1) Add the Admin app role to the App Registration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-assign-users-or-groups-to-the-admin-role" class="md-nav__link">
+    <span class="md-ellipsis">
+      2) Assign users or groups to the Admin role
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-request-a-scope-that-returns-the-roles-claim" class="md-nav__link">
+    <span class="md-ellipsis">
+      3) Request a scope that returns the roles claim
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-enable_dashboard-and-labels-in-app-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      4) ENABLE_DASHBOARD and labels in App Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-configuration-tab-what-it-can-change-and-what-apply-actually-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      5) Configuration tab: what it can change, and what Apply actually does
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-operator-workflow-verifying-the-role-lands-in-the-token" class="md-nav__link">
+    <span class="md-ellipsis">
+      6) Operator workflow: verifying the role lands in the token
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1174,6 +1252,258 @@ metadata_security_group_ids
 <blockquote>
 <p>Note: For Blob Storage ingestion, the GPT-RAG ingestion pipeline will populate <code>metadata_security_rbac_scope</code> automatically. The value is the Azure resource ID of the container, for example:
 <em>/subscriptions/&lt;subscriptionId&gt;/resourceGroups/&lt;resourceGroup&gt;/providers/Microsoft.Storage/storageAccounts/&lt;storageAccount&gt;/blobServices/default/containers/&lt;container&gt;</em></p>
+</blockquote>
+<h2 id="admin-access-for-the-operator-dashboards">Admin Access for the Operator Dashboards</h2>
+<p>The orchestrator and the ingestion service each ship a small operator dashboard. The orchestrator dashboard is mounted at <code>/dashboard</code> on the orchestrator Container App and the ingestion dashboard is mounted at <code>/dashboard</code> on the ingestion Container App. Both surfaces let an operator inspect runs, conversations, and a curated set of runtime settings, and the ingestion dashboard also lets an operator trigger a scheduled job on demand.</p>
+<p>Admin access is enforced through an <strong>Entra ID App Role named <code>Admin</code></strong> added to the same App Registration you created for user sign-in. The same token the UI already uses for the orchestrator API also carries the role claim once a user is assigned to it, so there is no separate token, separate scope, or separate app registration to manage.</p>
+<p>This section explains how to add the role, assign users, request the correct scope, and debug the most common error (a 403 response even though the role is assigned).</p>
+<h3 id="how-each-dashboard-is-gated">How each dashboard is gated</h3>
+<p>The two dashboards apply the gate at slightly different layers. The HTML shell is always served (it is just static files) so the page can render its loading state before the user signs in, but every endpoint that returns data or performs an action enforces the gate.</p>
+<table>
+<thead>
+<tr>
+<th>Surface</th>
+<th>HTML at <code>/dashboard</code></th>
+<th>Data endpoints</th>
+<th>Job actions</th>
+<th>Configuration tab</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Orchestrator</td>
+<td>Open (loading shell only)</td>
+<td><code>Admin</code> role required on every <code>/api/dashboard/*</code> call</td>
+<td>Not applicable</td>
+<td>Entire tab requires <code>Admin</code> (read and write)</td>
+</tr>
+<tr>
+<td>Ingestion</td>
+<td>Open (loading shell only)</td>
+<td>Open (read-only run summaries)</td>
+<td><code>Admin</code> required for <code>POST /api/jobs/{job_type}/run</code></td>
+<td><code>GET /api/config</code> open in read-only mode for non-admins; <code>PUT /api/config</code>, <code>POST /api/config/reload</code>, and <code>POST /api/config/apply</code> require <code>Admin</code></td>
+</tr>
+</tbody>
+</table>
+<p>In all cases, when <code>OAUTH_AZURE_AD_TENANT_ID</code> is not configured the gate is a no-op. This matches the rest of the orchestrator and ingestion behavior in local development and lets contributors run both services without an Entra app registration.</p>
+<p>The orchestrator dashboard is only mounted when <code>ENABLE_DASHBOARD</code> is set to <code>true</code>. In default deployments the routes do not exist at all. Set <code>ENABLE_DASHBOARD=true</code> under the <code>gpt-rag-orchestrator</code> label in App Configuration to enable it.</p>
+<div class="highlight"><pre><span></span><code>flowchart LR
+  User[Operator] --&gt;|Bearer token&lt;br/&gt;api://CLIENT_ID/.default| Orch[Orchestrator /api/dashboard/*]
+  User --&gt;|Bearer token&lt;br/&gt;api://CLIENT_ID/.default| Ing[Ingestion /api/jobs/*/run&lt;br/&gt;and /api/config writes]
+  Orch --&gt;|require_admin| RoleCheck{roles claim&lt;br/&gt;contains &#39;Admin&#39;?}
+  Ing --&gt;|require_admin| RoleCheck
+  RoleCheck --&gt;|yes| Allow[200 / 202]
+  RoleCheck --&gt;|no| Deny[403 Admin role required]
+</code></pre></div>
+<h3 id="1-add-the-admin-app-role-to-the-app-registration">1) Add the <code>Admin</code> app role to the App Registration</h3>
+<p>You add the role to the same App Registration created in the <strong>Setup</strong> section above. You can do this in the Azure portal or with the Azure CLI.</p>
+<p><strong>Portal</strong></p>
+<p>In the App Registration, go to <strong>Manage &gt; App roles</strong>, then <strong>Create app role</strong> and fill the form as follows.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Display name</td>
+<td><code>Admin</code></td>
+</tr>
+<tr>
+<td>Allowed member types</td>
+<td><code>Users/Groups</code></td>
+</tr>
+<tr>
+<td>Value</td>
+<td><code>Admin</code></td>
+</tr>
+<tr>
+<td>Description</td>
+<td><code>Grants access to the GPT-RAG operator dashboards.</code></td>
+</tr>
+<tr>
+<td>Do you want to enable this app role?</td>
+<td>Checked</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>Value</code> field is what the dashboards check. It must be exactly <code>Admin</code> (case-sensitive).</p>
+<p><strong>CLI</strong></p>
+<div class="highlight"><pre><span></span><code>az ad app update --id &lt;replace-by-app-client-id&gt; --app-roles &#39;[{
+  &quot;allowedMemberTypes&quot;: [&quot;User&quot;],
+  &quot;description&quot;: &quot;Grants access to the GPT-RAG operator dashboards.&quot;,
+  &quot;displayName&quot;: &quot;Admin&quot;,
+  &quot;isEnabled&quot;: true,
+  &quot;value&quot;: &quot;Admin&quot;
+}]&#39;
+</code></pre></div>
+<blockquote>
+<p>Note: <code>az ad app update --app-roles</code> replaces the full list. If the App Registration already defines other app roles, include them in the same JSON array.</p>
+</blockquote>
+<h3 id="2-assign-users-or-groups-to-the-admin-role">2) Assign users or groups to the <code>Admin</code> role</h3>
+<p>App role assignments are done on the <strong>Enterprise application</strong>, not on the App Registration.</p>
+<ol>
+<li>In the Entra portal go to <strong>Microsoft Entra ID &gt; Enterprise applications</strong>.</li>
+<li>Open the application that matches your App Registration name (same client ID).</li>
+<li>Go to <strong>Users and groups &gt; Add user/group</strong>.</li>
+<li>Pick the user or group, select the <strong>Admin</strong> role, and confirm.</li>
+</ol>
+<p>Only users assigned the role will receive <code>Admin</code> in the <code>roles</code> claim of their access token. Users who are not assigned the role can still sign in and use the chat UI; they only see a 403 when calling a gated dashboard endpoint.</p>
+<blockquote>
+<p>Tip: For production, assign a security group instead of individual users so you can manage membership without touching Entra.</p>
+</blockquote>
+<h3 id="3-request-a-scope-that-returns-the-roles-claim">3) Request a scope that returns the <code>roles</code> claim</h3>
+<p>This is the most common source of confusion. Entra only includes the <code>roles</code> claim in an access token when the token is requested for <strong>your own API</strong>, not for Microsoft Graph. The scope you request decides the audience of the token and therefore whether the claim is present.</p>
+<table>
+<thead>
+<tr>
+<th>Scope you request</th>
+<th>Token audience</th>
+<th><code>roles</code> claim present?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>api://&lt;OAUTH_AZURE_AD_CLIENT_ID&gt;/.default</code></td>
+<td>Your API</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>api://&lt;OAUTH_AZURE_AD_CLIENT_ID&gt;/user_impersonation</code></td>
+<td>Your API</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>User.Read</code> (or any <code>https://graph.microsoft.com/*</code> scope)</td>
+<td>Microsoft Graph</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>openid profile email</code> only</td>
+<td>ID token only, no API access token</td>
+<td>No (and no API call possible)</td>
+</tr>
+</tbody>
+</table>
+<p>If the UI requests only Graph scopes or only OpenID Connect scopes, the access token sent to the orchestrator will not contain <code>roles</code>, and <code>require_admin</code> will reject the call with <code>403 Admin role required</code> even when the role is correctly assigned in Entra.</p>
+<p>The GPT-RAG UI already requests <code>api://&lt;OAUTH_AZURE_AD_CLIENT_ID&gt;/user_impersonation</code> by default. If you override <code>OAUTH_AZURE_AD_SCOPES</code>, make sure the API scope is still in the list. For example:</p>
+<div class="highlight"><pre><span></span><code>OAUTH_AZURE_AD_SCOPES = api://&lt;OAUTH_AZURE_AD_CLIENT_ID&gt;/user_impersonation openid profile email
+</code></pre></div>
+<h3 id="4-enable_dashboard-and-labels-in-app-configuration">4) <code>ENABLE_DASHBOARD</code> and labels in App Configuration</h3>
+<p>The dashboards and their Configuration tabs both read and write App Configuration. Each service uses its own label so an operator can filter cleanly in the portal.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Service</th>
+<th>Label</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ENABLE_DASHBOARD</code></td>
+<td>Orchestrator</td>
+<td><code>gpt-rag-orchestrator</code></td>
+<td>When <code>true</code>, mounts the orchestrator dashboard at <code>/dashboard</code>. Defaults to <code>false</code>.</td>
+</tr>
+<tr>
+<td>Curated runtime settings</td>
+<td>Orchestrator</td>
+<td><code>gpt-rag-orchestrator</code></td>
+<td>The 12 keys exposed on the Configuration tab (see below).</td>
+</tr>
+<tr>
+<td>Curated runtime settings</td>
+<td>Ingestion</td>
+<td><code>gpt-rag-ingestion</code></td>
+<td>The 17 keys exposed on the Configuration tab (see below).</td>
+</tr>
+</tbody>
+</table>
+<p>The ingestion dashboard is always mounted; there is no equivalent feature flag.</p>
+<h3 id="5-configuration-tab-what-it-can-change-and-what-apply-actually-does">5) Configuration tab: what it can change, and what <code>Apply</code> actually does</h3>
+<p>The Configuration tab in each dashboard is intentionally narrow. It only exposes a curated allowlist of settings, never secrets. The backend enforces both an <strong>allowlist</strong> (only listed keys can be read or written) and a <strong>denylist</strong> as defense in depth (any key whose name suggests a secret is rejected even if it sneaks into the allowlist).</p>
+<p>The denylist rejects any key that:</p>
+<ul>
+<li>starts with <code>OAUTH_</code>, or</li>
+<li>ends with <code>_APIKEY</code>, <code>_API_KEY</code>, <code>_SECRET</code>, <code>_PASSWORD</code>, <code>_CONNECTION_STRING</code>, <code>_CONNSTRING</code>, <code>_PRIVATE_KEY</code>, or <code>_TOKEN</code>, or</li>
+<li>is one of the known sensitive keys hard-coded in the registry (for example <code>AZURE_CLIENT_ID</code>, <code>KEY_VAULT_URI</code>, <code>APP_CONFIG_ENDPOINT</code>).</li>
+</ul>
+<p>So even if an operator types a Key Vault reference into a field, the API rejects the write.</p>
+<p><strong>Orchestrator allowlist (12 keys)</strong></p>
+<p><code>AGENT_STRATEGY</code>, <code>REASONING_EFFORT</code>, <code>CHAT_TEMPERATURE</code>, <code>CHAT_TOP_P</code>, <code>MAX_COMPLETION_TOKENS</code>, <code>CHAT_HISTORY_MAX_MESSAGES</code>, <code>CONVERSATION_HISTORY_COMPACTION_ENABLED</code>, <code>SEARCH_RETRIEVAL_ENABLED</code>, <code>SEARCH_RAGINDEX_TOP_K</code>, <code>BING_RETRIEVAL_ENABLED</code>, <code>INFERENCE_MAX_RETRIES</code>, <code>MULTIMODAL_CLASSIFY_IMAGES</code>.</p>
+<p><strong>Ingestion allowlist (17 keys)</strong></p>
+<p>The 7 cron expressions (<code>CRON_RUN_SHAREPOINT_INDEX</code>, <code>CRON_RUN_SHAREPOINT_PURGE</code>, <code>CRON_RUN_IMAGES_PURGE</code>, <code>CRON_RUN_BLOB_INDEX</code>, <code>CRON_RUN_BLOB_PURGE</code>, <code>CRON_RUN_NL2SQL_INDEX</code>, <code>CRON_RUN_NL2SQL_PURGE</code>) plus chunking, indexing, throughput, limits, multimodal, and SharePoint-source settings.</p>
+<p><strong>Read-only mode in the ingestion Configuration tab</strong></p>
+<p><code>GET /api/config</code> on the ingestion service is open to any caller, even unauthenticated, so the tab can render without a second round-trip. The response includes a <code>canEdit</code> boolean that is <code>true</code> only when auth is off, or when the caller presents a valid token carrying the <code>Admin</code> role. A non-admin operator sees the current values but the fields and the Save button are disabled. Writes (<code>PUT /api/config</code>), cache reload (<code>POST /api/config/reload</code>), and Apply (<code>POST /api/config/apply</code>) all require <code>Admin</code>. The orchestrator dashboard hides the tab entirely for non-admins instead, since the whole <code>/api/dashboard/*</code> surface is gated.</p>
+<p><strong>What <code>Apply</code> does, and what it does not do</strong></p>
+<p>The button labeled <strong>Apply</strong> calls <code>POST /api/dashboard/config/apply</code> (orchestrator) or <code>POST /api/config/apply</code> (ingestion). Both endpoints perform a <strong>soft refresh</strong>:</p>
+<ol>
+<li>The in-process App Configuration cache is refreshed so subsequent reads in this container instance see the new values immediately.</li>
+<li>On the ingestion service, every known cron job is rescheduled in APScheduler using the latest expression in App Configuration. This means a cron change takes effect on the running container without a restart.</li>
+</ol>
+<p>The endpoint is intentionally called <code>/config/apply</code> and not <code>/restart</code> so the response honestly reflects what happens. The Container App revision is <strong>not</strong> recycled. Other replicas of the same service refresh their own cache on their normal cadence; if you want every replica updated immediately, restart the Container App revision in the portal.</p>
+<h3 id="6-operator-workflow-verifying-the-role-lands-in-the-token">6) Operator workflow: verifying the role lands in the token</h3>
+<p>When access works in Entra but the dashboard still returns 403, the access token sent to the API is almost always missing the <code>roles</code> claim. The fastest way to confirm is to inspect the actual token.</p>
+<ol>
+<li>Sign in to the GPT-RAG UI as the user assigned to the role.</li>
+<li>Open the browser developer tools, switch to the <strong>Network</strong> tab, and filter by <code>dashboard</code> or <code>config</code>.</li>
+<li>Trigger any dashboard request, then open the request and copy the value of the <code>Authorization</code> header (the part after <code>Bearer</code>).</li>
+<li>Paste the token into <a href="https://jwt.ms">https://jwt.ms</a> and look at the claims.</li>
+</ol>
+<p>You should see:</p>
+<div class="highlight"><pre><span></span><code>&quot;aud&quot;: &quot;api://&lt;OAUTH_AZURE_AD_CLIENT_ID&gt;&quot;,
+&quot;roles&quot;: [&quot;Admin&quot;],
+&quot;scp&quot;: &quot;user_impersonation&quot;
+</code></pre></div>
+<p>If <code>roles</code> is missing, work down this checklist:</p>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Likely cause</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>aud</code> is <code>00000003-0000-0000-c000-000000000000</code> or starts with <code>https://graph.microsoft.com</code></td>
+<td>The UI requested a Microsoft Graph scope</td>
+<td>Make sure <code>OAUTH_AZURE_AD_SCOPES</code> contains <code>api://&lt;CLIENT_ID&gt;/user_impersonation</code> (or leave it unset to use the default)</td>
+</tr>
+<tr>
+<td><code>aud</code> is correct but <code>roles</code> is missing</td>
+<td>The user is not assigned to the <code>Admin</code> app role</td>
+<td>Assign the user (or their group) in <strong>Enterprise applications &gt; Users and groups</strong></td>
+</tr>
+<tr>
+<td><code>aud</code> is correct, <code>roles</code> is <code>["Admin"]</code>, but the API still returns 403</td>
+<td>Stale cached token in the browser</td>
+<td>Sign out, clear the site cookies, and sign back in to force Entra to issue a new token</td>
+</tr>
+<tr>
+<td><code>aud</code> is correct, <code>roles</code> is missing, and the user <em>was just assigned</em> the role</td>
+<td>Token was issued before the assignment</td>
+<td>Sign out and back in; access tokens are typically cached for 60 to 90 minutes</td>
+</tr>
+<tr>
+<td>Orchestrator returns 404 at <code>/dashboard</code></td>
+<td><code>ENABLE_DASHBOARD</code> is not set</td>
+<td>Set <code>ENABLE_DASHBOARD=true</code> under the <code>gpt-rag-orchestrator</code> label in App Configuration and restart the container</td>
+</tr>
+<tr>
+<td>Local dev returns 401 instead of being open</td>
+<td><code>OAUTH_AZURE_AD_TENANT_ID</code> is set in your local environment</td>
+<td>Unset it (or remove the value from your local <code>.env</code>) so <code>require_admin</code> becomes a no-op</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Tip: The ingestion service also exposes <code>GET /api/identity</code>, which returns <code>{"authEnabled": true, "isAdmin": true}</code> when the caller carries the <code>Admin</code> role. Curling that endpoint with your token is a quick way to confirm the gate sees the role without triggering a job run.</p>
 </blockquote>
 
 
