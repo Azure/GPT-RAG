@@ -2,6 +2,20 @@
 
 ### June 2026
 
+**[Release 2.9.6](https://github.com/Azure/GPT-RAG/tree/v2.9.6) - Built-in operator dashboards (Overview, Conversations, Configuration)**
+
+The latest June drop adds an opt-in **operator dashboard at `/dashboard`** on both the orchestrator and ingestion apps, with three tabs: Overview, Conversations, and Configuration.
+
+- **Off by default, safe upgrade.** Existing deployments are byte-for-byte unchanged. To turn it on, set `ENABLE_DASHBOARD=true` in App Configuration for the orchestrator and/or the ingestion app. With Entra auth on, dashboard pages also require the `Admin` app role.
+- **Overview tab.** Today / 7-day / 30-day conversation counts, a conversations-over-time chart, average user turns per conversation, and active user count. Reads come from the existing Cosmos conversation container — no new storage.
+- **Conversations tab.** Paginated, newest-first list with a detail dialog that renders the full message history.
+- **Configuration tab.** Admins can view and edit a curated, sectioned set of runtime settings (agent strategy, reasoning effort, temperature and top_p, max completion tokens, retrieval and search toggles, ingestion chunking, cron schedules, etc.) without leaving the app. Each field has the right control and an accessible info tooltip reachable by keyboard. Writes are protected by an explicit allow-list plus a denylist that rejects any key whose name matches sensitive suffixes (`_APIKEY`, `_SECRET`, `_PASSWORD`, `_CONNECTION_STRING`, `_TOKEN`, ...). Buttons are honest about what they do: *Reload settings cache* refreshes the in-process App Configuration cache, and *Apply changes* is a soft restart that refreshes the cache and returns a clear status — no button is labeled "Restart" if it does not actually restart the container.
+- **Ingestion bonus: Run jobs on demand.** Admins can trigger any of the scheduled ingestion jobs (blob, sharepoint, sharepoint purge, ...) from the Jobs tab with a single click. Changing a `CRON_RUN_*` schedule and applying reschedules the affected job in place — no restart needed.
+
+Pinned components: orchestrator [`v2.8.9`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.9), ingestion [`v2.4.7`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.7), UI `v2.3.13`, infra `v2.0.19`.
+
+---
+
 **[Release 2.9.1](https://github.com/Azure/GPT-RAG/tree/v2.9.1) - Authenticated uploads, Foundry Agent Service v2 stabilization, and Sweden Central unblocked**
 
 The June release train delivers four themes:
