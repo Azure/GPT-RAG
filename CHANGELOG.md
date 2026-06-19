@@ -1,5 +1,32 @@
 # Changelog
 
+## [v2.9.12] - 2026-06-18
+
+### User and operator impact
+
+Patch release that bumps the ingestion pin from [`v2.4.11`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.11) to [`v2.4.12`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.12). No other component changed: orchestrator, UI, and AI Landing Zone pins are identical to v2.9.11. This release fixes a small but visible usability problem on the ingestion dashboard's **Configuration** tab: every text/number input used its own example or default as the HTML placeholder, styled close enough to a real entered value that operators could not tell empty fields apart from configured ones, and the same example was duplicated in the helper text below the input. Placeholders are now neutral (`Not configured`, or `Default: <value>` for the two cron inputs where the backend falls back to a default when empty), and the example is shown only in the helper line.
+
+### Changed
+
+- **Ingestion pin bumped to [`v2.4.12`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.12):** Operator-reported follow-up to v2.4.11. 15 inputs updated on the Configuration tab; no backend, schema, or styling changes.
+
+- **Orchestrator pin unchanged:** [`v2.8.9`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.9).
+- **UI pin unchanged:** [`v2.3.13`](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.3.13).
+- **Infra (AI Landing Zone) pin unchanged:** [`v2.0.20`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.0.20).
+
+### Validation
+
+The following component versions are pinned for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v2.8.9 |
+| gpt-rag-ingestion | v2.4.12 |
+| bicep-ptn-aiml-landing-zone | v2.0.20 |
+
+Validated by upgrading an existing v2.9.11 sandbox: rebuilt the ingestion image at the v2.4.12 tag, redeployed the ingestion container app, confirmed `GET /api/version` returns `2.4.12`, and confirmed the Configuration tab inputs no longer show cron expressions or numeric examples as placeholders (they now read `Not configured` or `Default: <value>` and the example is shown only in the helper text below).
+
 ## [v2.9.11] - 2026-06-18
 
 ### User and operator impact
