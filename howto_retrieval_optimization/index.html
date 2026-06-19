@@ -1,0 +1,1627 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Official project documentation">
+      
+      
+        <meta name="author" content="Paulo Lacerda">
+      
+      
+      
+        <link rel="prev" href="../howto_sharepoint_connector/">
+      
+      
+        <link rel="next" href="../troubleshooting/">
+      
+      
+      <link rel="icon" href="../favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.34">
+    
+    
+      
+        <title>Retrieval Optimization - GPT-RAG</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.35f28582.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../styles.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#improving-retrieval-quality" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="GPT-RAG" class="md-header__button md-logo" aria-label="GPT-RAG" data-md-component="logo">
+      
+  <img src="../media/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            GPT-RAG
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Retrieval Optimization
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/azure/gpt-rag" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="GPT-RAG" class="md-nav__button md-logo" aria-label="GPT-RAG" data-md-component="logo">
+      
+  <img src="../media/logo.png" alt="logo">
+
+    </a>
+    GPT-RAG
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/azure/gpt-rag" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../whatisnew/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    What's New
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../release_267_270_walkthrough/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Release Walkthrough
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deploy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Deployment Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Quick Start Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Quick Start Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart_simple_rag/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Simple RAG
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart_nl2sql/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    NL2SQL
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Architecture
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Architecture
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Services
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Services
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_orchestrator/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Orchestrator
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_2" id="__nav_7_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Ingestion
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_2">
+            <span class="md-nav__icon md-icon"></span>
+            Ingestion
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_ingestion/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_blob_data_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Blob
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_sharepoint_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Sharepoint
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_nl2sql_data_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    NL2SQL
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    How-to Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            How-to Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_azure_direct/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Azure Direct Models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_app_gateway/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Application Gateway
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_authentication/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Auth & Doc Security
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_multimodality/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Multimodality
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_userfeedback/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    User Feedback
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_sharepoint_connector/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Sharepoint Connector
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Retrieval Optimization
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Retrieval Optimization
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#how-retrieval-works-in-gpt-rag" class="md-nav__link">
+    <span class="md-ellipsis">
+      How retrieval works in GPT-RAG
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-idea-measure-the-ranking-do-not-guess" class="md-nav__link">
+    <span class="md-ellipsis">
+      The idea: measure the ranking, do not guess
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#before-you-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      Before you start
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-choose-a-few-real-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 1: choose a few real questions
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-pull-the-ranked-results-from-your-index" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 2: pull the ranked results from your index
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-label-the-results-author-your-qrels" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 3: label the results (author your qrels)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-score-the-ranking" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 4: score the ranking
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-read-the-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 5: read the metrics
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-the-optimization-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 6: the optimization loop
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#after-re-ingesting-refresh-your-qrels" class="md-nav__link">
+    <span class="md-ellipsis">
+      After re-ingesting: refresh your qrels
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tips-and-caveats" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tips and caveats
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related" class="md-nav__link">
+    <span class="md-ellipsis">
+      Related
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../team/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Meet the Team
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="improving-retrieval-quality">Improving retrieval quality</h1>
+<p>When a GPT-RAG answer is vague, incomplete, or not grounded in your documents,
+the cause is usually retrieval: the agent answered from the wrong chunks. Better
+prompts and bigger models cannot fix a bad set of retrieved chunks. The fix is to
+measure retrieval quality directly and tune the search settings until the right
+chunks come back at the top.</p>
+<p>This guide takes you from zero to a working optimization loop. You will:</p>
+<ol>
+<li>Pull the chunks your index returns for a few real questions.</li>
+<li>Label which chunks are actually relevant (this is your ground truth).</li>
+<li>Score the ranking with the Foundry
+   <a href="https://learn.microsoft.com/azure/ai-foundry/concepts/evaluation-evaluators/rag-evaluators#document-retrieval">Document Retrieval evaluator</a>,
+   which returns ranking metrics like NDCG.</li>
+<li>Change one GPT-RAG search setting at a time and re-measure until the numbers go up.</li>
+</ol>
+<p>No prior evaluation experience is needed. Everything runs from a small Python
+script against your own search index.</p>
+<h2 id="how-retrieval-works-in-gpt-rag">How retrieval works in GPT-RAG</h2>
+<p>GPT-RAG stores every document as small chunks in an Azure AI Search index named
+<code>ragindex</code>. At query time the orchestrator embeds the user question, runs a search
+against that index, and passes the top chunks to the model as context. The
+behavior is controlled by settings in <strong>Azure App Configuration</strong> (label
+<code>gpt-rag</code>). These are the levers you will tune:</p>
+<table>
+<thead>
+<tr>
+<th>Setting (App Configuration, label <code>gpt-rag</code>)</th>
+<th>Default</th>
+<th>What it controls</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SEARCH_RAG_INDEX_NAME</code></td>
+<td><code>ragindex</code></td>
+<td>The index that holds your chunks.</td>
+</tr>
+<tr>
+<td><code>SEARCH_APPROACH</code></td>
+<td><code>hybrid</code></td>
+<td>How search runs: <code>term</code> (keyword only), <code>vector</code> (embeddings only), or <code>hybrid</code> (both).</td>
+</tr>
+<tr>
+<td><code>SEARCH_RAGINDEX_TOP_K</code></td>
+<td><code>3</code></td>
+<td>How many chunks are retrieved and sent to the model.</td>
+</tr>
+<tr>
+<td><code>SEARCH_USE_SEMANTIC</code></td>
+<td><code>false</code></td>
+<td>Turns the Azure AI Search semantic reranker on or off.</td>
+</tr>
+<tr>
+<td><code>SEARCH_SEMANTIC_SEARCH_CONFIG</code></td>
+<td><code>my-semantic-config</code></td>
+<td>The semantic ranker configuration name.</td>
+</tr>
+<tr>
+<td><code>CHUNKING_NUM_TOKENS</code></td>
+<td><code>2048</code></td>
+<td>Maximum chunk size in tokens (set in ingestion, applied when you re-ingest).</td>
+</tr>
+<tr>
+<td><code>TOKEN_OVERLAP</code></td>
+<td><code>200</code></td>
+<td>Token overlap between consecutive chunks (ingestion).</td>
+</tr>
+</tbody>
+</table>
+<p>The first four are query-time settings: change them and the next question uses the
+new behavior. The chunking settings are ingestion-time: changing them only takes
+effect after you re-ingest your documents, which rebuilds the index.</p>
+<h2 id="the-idea-measure-the-ranking-do-not-guess">The idea: measure the ranking, do not guess</h2>
+<p>Two evaluators that ship with GPT-RAG evaluation, <strong>Groundedness</strong> and
+<strong>Retrieval</strong>, already tell you <em>that</em> retrieval is weak. They use an LLM judge and
+a 1 to 5 score, need no labels, and are cheap to run on every change. What they do
+not do is tell you <em>how to fix it</em> or let you compare two search configurations
+objectively.</p>
+<p>Document Retrieval is the tuning tool. You give it two things per question:</p>
+<ul>
+<li><strong>The retrieved documents</strong>: the ranked list your index returned, each with the
+  retriever's own score.</li>
+<li><strong>The relevance labels (qrels)</strong>: your own judgment of how relevant each chunk
+  truly is, on a 0 to 4 scale.</li>
+</ul>
+<p>It then compares the ranking the retriever produced against the ranking your labels
+imply, and returns position-aware metrics. If the most relevant chunks are at the
+top, the scores are high. If relevant chunks are buried or missing, the scores drop.</p>
+<div class="admonition note">
+<p class="admonition-title">Why this is a tuning tool, not a CI gate</p>
+<p>Document Retrieval needs hand-labeled ground truth, and its labels reference
+specific chunk ids in your current index. Rebuilding the index can change those
+ids and invalidate the labels. That is fine for a deliberate tuning study, but
+too brittle to run on every commit. Keep Groundedness and Retrieval on your
+automated checks, and use Document Retrieval here, on demand, when you decide to
+improve search.</p>
+</div>
+<h2 id="before-you-start">Before you start</h2>
+<p>You need:</p>
+<ul>
+<li><strong>Python 3.10 or later.</strong></li>
+<li>
+<p><strong>The Python packages:</strong></p>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>azure-search-documents<span class="w"> </span>azure-identity<span class="w"> </span>openai<span class="w"> </span>azure-ai-evaluation
+</code></pre></div>
+</li>
+<li>
+<p><strong>Access to your deployed resources.</strong> Sign in with the Azure CLI using an
+  identity that can read the search index and call Azure OpenAI:</p>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>login
+</code></pre></div>
+<p>Your identity needs two role assignments:</p>
+<ul>
+<li><strong>Search Index Data Reader</strong> on the Azure AI Search service (to read chunks).</li>
+<li><strong>Cognitive Services OpenAI User</strong> on the Azure OpenAI resource (to embed the query).</li>
+</ul>
+</li>
+<li>
+<p><strong>A few values from your environment.</strong> Open Azure App Configuration (label
+  <code>gpt-rag</code>) or the Azure portal and collect:</p>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Where to find it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Search endpoint</td>
+<td><code>SEARCH_SERVICE_QUERY_ENDPOINT</code>, e.g. <code>https://&lt;your-search&gt;.search.windows.net</code></td>
+</tr>
+<tr>
+<td>Index name</td>
+<td><code>SEARCH_RAG_INDEX_NAME</code> (usually <code>ragindex</code>)</td>
+</tr>
+<tr>
+<td>Azure OpenAI endpoint</td>
+<td>Your Azure OpenAI resource endpoint, e.g. <code>https://&lt;your-aoai&gt;.openai.azure.com</code></td>
+</tr>
+<tr>
+<td>Embedding deployment</td>
+<td><code>EMBEDDING_DEPLOYMENT_NAME</code>, e.g. <code>text-embedding-3-large</code></td>
+</tr>
+</tbody>
+</table>
+</li>
+</ul>
+<p>Set them as environment variables so the scripts below can read them:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">SEARCH_ENDPOINT</span><span class="o">=</span><span class="s2">&quot;https://&lt;your-search&gt;.search.windows.net&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">INDEX_NAME</span><span class="o">=</span><span class="s2">&quot;ragindex&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">AOAI_ENDPOINT</span><span class="o">=</span><span class="s2">&quot;https://&lt;your-aoai&gt;.openai.azure.com&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">EMBED_DEPLOYMENT</span><span class="o">=</span><span class="s2">&quot;text-embedding-3-large&quot;</span>
+</code></pre></div>
+<p>On Windows PowerShell use <code>$env:SEARCH_ENDPOINT = "..."</code> instead of <code>export</code>.</p>
+<h2 id="step-1-choose-a-few-real-questions">Step 1: choose a few real questions</h2>
+<p>Pick a small set of questions that real users ask and that your documents should
+answer. Five to fifteen is plenty to start. A small, trusted set is far easier to
+label and reason about than a large noisy one.</p>
+<div class="highlight"><pre><span></span><code>What is the recommended tire pressure for the front wheels?
+How often should the cabin air filter be replaced?
+What does a flashing oil warning light mean?
+</code></pre></div>
+<p>Save them in a file <code>questions.txt</code>, one per line.</p>
+<h2 id="step-2-pull-the-ranked-results-from-your-index">Step 2: pull the ranked results from your index</h2>
+<p>This script runs the same kind of search the GPT-RAG orchestrator runs (hybrid by
+default) and prints the ranked chunks for each question, including a content
+preview so you can judge relevance. It also saves the raw results to
+<code>retrieved.json</code> for the next steps.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># retrieve.py</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span><span class="o">,</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">azure.identity</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultAzureCredential</span><span class="p">,</span> <span class="n">get_bearer_token_provider</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">azure.search.documents</span><span class="w"> </span><span class="kn">import</span> <span class="n">SearchClient</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">azure.search.documents.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">VectorizedQuery</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openai</span><span class="w"> </span><span class="kn">import</span> <span class="n">AzureOpenAI</span>
+
+<span class="n">SEARCH_ENDPOINT</span>  <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;SEARCH_ENDPOINT&quot;</span><span class="p">]</span>
+<span class="n">INDEX_NAME</span>       <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;INDEX_NAME&quot;</span><span class="p">,</span> <span class="s2">&quot;ragindex&quot;</span><span class="p">)</span>
+<span class="n">AOAI_ENDPOINT</span>    <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;AOAI_ENDPOINT&quot;</span><span class="p">]</span>
+<span class="n">EMBED_DEPLOYMENT</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;EMBED_DEPLOYMENT&quot;</span><span class="p">]</span>
+
+<span class="c1"># The four levers you will sweep in Step 6. Start with the GPT-RAG defaults.</span>
+<span class="n">TOP_K</span>           <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;TOP_K&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">))</span>          <span class="c1"># SEARCH_RAGINDEX_TOP_K</span>
+<span class="n">APPROACH</span>        <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;APPROACH&quot;</span><span class="p">,</span> <span class="s2">&quot;hybrid&quot;</span><span class="p">)</span>        <span class="c1"># term | vector | hybrid</span>
+<span class="n">USE_SEMANTIC</span>    <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;USE_SEMANTIC&quot;</span><span class="p">,</span> <span class="s2">&quot;false&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;true&quot;</span>
+<span class="n">SEMANTIC_CONFIG</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;SEMANTIC_CONFIG&quot;</span><span class="p">,</span> <span class="s2">&quot;my-semantic-config&quot;</span><span class="p">)</span>
+
+<span class="n">credential</span> <span class="o">=</span> <span class="n">DefaultAzureCredential</span><span class="p">()</span>
+<span class="n">token_provider</span> <span class="o">=</span> <span class="n">get_bearer_token_provider</span><span class="p">(</span>
+    <span class="n">credential</span><span class="p">,</span> <span class="s2">&quot;https://cognitiveservices.azure.com/.default&quot;</span>
+<span class="p">)</span>
+<span class="n">aoai</span> <span class="o">=</span> <span class="n">AzureOpenAI</span><span class="p">(</span>
+    <span class="n">azure_endpoint</span><span class="o">=</span><span class="n">AOAI_ENDPOINT</span><span class="p">,</span>
+    <span class="n">azure_ad_token_provider</span><span class="o">=</span><span class="n">token_provider</span><span class="p">,</span>
+    <span class="n">api_version</span><span class="o">=</span><span class="s2">&quot;2024-10-21&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">search</span> <span class="o">=</span> <span class="n">SearchClient</span><span class="p">(</span><span class="n">SEARCH_ENDPOINT</span><span class="p">,</span> <span class="n">INDEX_NAME</span><span class="p">,</span> <span class="n">credential</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">embed</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">aoai</span><span class="o">.</span><span class="n">embeddings</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="p">[</span><span class="n">text</span><span class="p">],</span> <span class="n">model</span><span class="o">=</span><span class="n">EMBED_DEPLOYMENT</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">embedding</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">retrieve</span><span class="p">(</span><span class="n">query</span><span class="p">):</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;select&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;title&quot;</span><span class="p">,</span> <span class="s2">&quot;filepath&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">],</span> <span class="s2">&quot;top&quot;</span><span class="p">:</span> <span class="n">TOP_K</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">APPROACH</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;vector&quot;</span><span class="p">,</span> <span class="s2">&quot;hybrid&quot;</span><span class="p">):</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;vector_queries&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">VectorizedQuery</span><span class="p">(</span><span class="n">vector</span><span class="o">=</span><span class="n">embed</span><span class="p">(</span><span class="n">query</span><span class="p">),</span> <span class="n">k_nearest_neighbors</span><span class="o">=</span><span class="n">TOP_K</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;contentVector&quot;</span><span class="p">)</span>
+        <span class="p">]</span>
+    <span class="k">if</span> <span class="n">APPROACH</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;term&quot;</span><span class="p">,</span> <span class="s2">&quot;hybrid&quot;</span><span class="p">):</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;search_text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">query</span>
+    <span class="k">if</span> <span class="n">USE_SEMANTIC</span><span class="p">:</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;query_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;semantic&quot;</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;semantic_configuration_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">SEMANTIC_CONFIG</span>
+
+    <span class="n">docs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">search</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">score</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;@search.reranker_score&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">USE_SEMANTIC</span> <span class="k">else</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;@search.score&quot;</span><span class="p">]</span>
+        <span class="n">docs</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s2">&quot;document_id&quot;</span><span class="p">:</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>            <span class="c1"># the index key, e.g. manual-pdf-c00002</span>
+            <span class="s2">&quot;relevance_score&quot;</span><span class="p">:</span> <span class="n">score</span><span class="p">,</span>          <span class="c1"># the retriever&#39;s own ranking score</span>
+            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;title&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;filepath&quot;</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;filepath&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;preview&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)[:</span><span class="mi">300</span><span class="p">],</span>
+        <span class="p">})</span>
+    <span class="k">return</span> <span class="n">docs</span>
+
+
+<span class="n">questions</span> <span class="o">=</span> <span class="p">[</span><span class="n">q</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;questions.txt&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">q</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span>
+<span class="n">out</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">questions</span><span class="p">:</span>
+    <span class="n">docs</span> <span class="o">=</span> <span class="n">retrieve</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+    <span class="n">out</span><span class="p">[</span><span class="n">q</span><span class="p">]</span> <span class="o">=</span> <span class="n">docs</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== </span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">. [</span><span class="si">{</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;relevance_score&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;document_id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;     </span><span class="si">{</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;preview&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;retrieved.json&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Saved retrieved.json&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>Run it:</p>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>retrieve.py
+</code></pre></div>
+<p>Each chunk's <code>document_id</code> is the index key (for example
+<code>manual-pdf-c00002</code>), built from the source file path plus the chunk number. That
+is the id you will label in the next step.</p>
+<div class="admonition tip">
+<p class="admonition-title">The orchestrator and the evaluator name fields differently</p>
+<p>Azure AI Search returns each chunk as <code>id</code> and <code>@search.score</code>. The Document
+Retrieval evaluator expects <code>document_id</code> and <code>relevance_score</code>. The script
+above already does that mapping for you. <code>relevance_score</code> is the retriever's
+own confidence used to rank. The label you add next is <em>your</em> judgment of true
+relevance.</p>
+</div>
+<h2 id="step-3-label-the-results-author-your-qrels">Step 3: label the results (author your qrels)</h2>
+<p>For each question, read the previews in <code>retrieved.json</code> and decide how relevant
+each chunk really is, from 0 (irrelevant) to 4 (perfect answer). This is the
+ground truth the evaluator compares against. You only label the chunks that matter
+for the question, not the whole index.</p>
+<p>A simple rubric works well:</p>
+<table>
+<thead>
+<tr>
+<th>Label</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>4</code></td>
+<td>Directly and fully answers the question.</td>
+</tr>
+<tr>
+<td><code>3</code></td>
+<td>Strongly relevant, contains most of the answer.</td>
+</tr>
+<tr>
+<td><code>2</code></td>
+<td>Partially relevant, touches the topic.</td>
+</tr>
+<tr>
+<td><code>1</code></td>
+<td>Weakly related, mentions the topic in passing.</td>
+</tr>
+<tr>
+<td><code>0</code></td>
+<td>Not relevant.</td>
+</tr>
+</tbody>
+</table>
+<p>Save your labels in <code>qrels.json</code>, keyed by the same question text:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;What is the recommended tire pressure for the front wheels?&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;document_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;manual-pdf-c00002&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;query_relevance_label&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;document_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;manual-pdf-c00001&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;query_relevance_label&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;document_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;brakes-pdf-c00007&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;query_relevance_label&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">Keep qrels small and stable</p>
+<p>A handful of carefully labeled questions beats a large, sloppy set. Store the
+labels next to your question file and treat them as ground truth you maintain.
+Because the ids are tied to your current index, re-check the labels after any
+re-ingestion or chunking change (see the reindex note below).</p>
+</div>
+<h2 id="step-4-score-the-ranking">Step 4: score the ranking</h2>
+<p>This script loads the retrieved chunks and your labels, runs the Document
+Retrieval evaluator once per question, and prints the metrics.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># evaluate.py</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">azure.ai.evaluation</span><span class="w"> </span><span class="kn">import</span> <span class="n">DocumentRetrievalEvaluator</span>
+
+<span class="n">retrieved</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;retrieved.json&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+<span class="n">qrels</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;qrels.json&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+
+<span class="n">evaluator</span> <span class="o">=</span> <span class="n">DocumentRetrievalEvaluator</span><span class="p">(</span>
+    <span class="n">ground_truth_label_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">ground_truth_label_max</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="k">for</span> <span class="n">question</span><span class="p">,</span> <span class="n">labels</span> <span class="ow">in</span> <span class="n">qrels</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">docs</span> <span class="o">=</span> <span class="n">retrieved</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">question</span><span class="p">,</span> <span class="p">[])</span>
+    <span class="c1"># The evaluator only needs document_id and relevance_score.</span>
+    <span class="n">retrieved_documents</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span><span class="s2">&quot;document_id&quot;</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;document_id&quot;</span><span class="p">],</span> <span class="s2">&quot;relevance_score&quot;</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;relevance_score&quot;</span><span class="p">]}</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">docs</span>
+    <span class="p">]</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">evaluator</span><span class="p">(</span>
+        <span class="n">retrieval_ground_truth</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
+        <span class="n">retrieved_documents</span><span class="o">=</span><span class="n">retrieved_documents</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== </span><span class="si">{</span><span class="n">question</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;ndcg@3&quot;</span><span class="p">,</span> <span class="s2">&quot;xdcg@3&quot;</span><span class="p">,</span> <span class="s2">&quot;fidelity&quot;</span><span class="p">,</span> <span class="s2">&quot;top1_relevance&quot;</span><span class="p">,</span> <span class="s2">&quot;top3_max_relevance&quot;</span><span class="p">,</span> <span class="s2">&quot;holes&quot;</span><span class="p">,</span> <span class="s2">&quot;holes_ratio&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">key</span><span class="si">:</span><span class="s2">20s</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>Run it:</p>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>evaluate.py
+</code></pre></div>
+<h2 id="step-5-read-the-metrics">Step 5: read the metrics</h2>
+<p>Document Retrieval returns a set of ranking metrics, not a single pass or fail. These
+are the ones you will use most.</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>What it tells you</th>
+<th>Direction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ndcg@3</code></td>
+<td>Ranking quality in the top 3, rewarding relevant chunks near the top. This is your headline number.</td>
+<td>higher is better</td>
+</tr>
+<tr>
+<td><code>xdcg@3</code></td>
+<td>Like NDCG but weights the very top results more heavily.</td>
+<td>higher is better</td>
+</tr>
+<tr>
+<td><code>fidelity</code></td>
+<td>How much of the truly relevant set the retriever managed to surface.</td>
+<td>higher is better</td>
+</tr>
+<tr>
+<td><code>top1_relevance</code></td>
+<td>The label of the single best-ranked chunk.</td>
+<td>higher is better</td>
+</tr>
+<tr>
+<td><code>top3_max_relevance</code></td>
+<td>The best label found anywhere in the top 3.</td>
+<td>higher is better</td>
+</tr>
+<tr>
+<td><code>holes</code></td>
+<td>Retrieved chunks you never labeled. A sign your qrels are incomplete.</td>
+<td>lower is better</td>
+</tr>
+<tr>
+<td><code>holes_ratio</code></td>
+<td>Holes as a fraction of retrieved chunks.</td>
+<td>lower is better</td>
+</tr>
+</tbody>
+</table>
+<p>How to read them in practice:</p>
+<ul>
+<li><strong>Pick <code>ndcg@3</code> as the number you optimize.</strong> A value near <code>1.0</code> means the most
+  relevant chunks are arriving at the top. A low value means relevant chunks exist
+  but are ranked poorly, or the right chunks are not coming back at all.</li>
+<li><strong>Watch <code>holes_ratio</code>.</strong> If it climbs, the retriever is returning chunks your
+  labels do not cover. Either your labels are incomplete, or the index changed and
+  your qrels need a refresh.</li>
+<li><strong>Average across your questions.</strong> Look at the mean <code>ndcg@3</code> over the whole set,
+  not a single question, so one odd query does not mislead you.</li>
+</ul>
+<h2 id="step-6-the-optimization-loop">Step 6: the optimization loop</h2>
+<p>Now use the numbers to tune search. Change one thing, re-run the same labeled
+questions, and compare the headline metric. Keep changes that raise <code>ndcg@3</code>
+without inflating <code>holes_ratio</code>; revert the rest.</p>
+<div class="highlight"><pre><span></span><code>flowchart LR
+    B[&quot;Baseline&lt;br/&gt;ndcg@3&quot;] --&gt; C[&quot;Change one&lt;br/&gt;search setting&quot;]
+    C --&gt; R[&quot;Re-run the same&lt;br/&gt;labeled questions&quot;]
+    R --&gt; M[&quot;Compare&lt;br/&gt;ndcg@3&quot;]
+    M --&gt; K{&quot;Better?&quot;}
+    K --&gt;|yes| A[&quot;Keep it&quot;]
+    K --&gt;|no| X[&quot;Revert&quot;]
+    A --&gt; C
+    X --&gt; C
+</code></pre></div>
+<p><strong>Tune offline first, then promote the winner.</strong> You do not have to redeploy
+GPT-RAG to test an idea. The <code>retrieve.py</code> script reads <code>TOP_K</code>, <code>APPROACH</code>,
+<code>USE_SEMANTIC</code>, and <code>SEMANTIC_CONFIG</code> from environment variables, so you can sweep
+them locally against the live index in seconds. Once you find a setting that wins,
+set the matching App Configuration key (label <code>gpt-rag</code>) so production uses it.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Try keyword-only vs vector-only vs hybrid, top-3 vs top-5, reranker on vs off.</span>
+<span class="nv">APPROACH</span><span class="o">=</span>hybrid<span class="w"> </span><span class="nv">TOP_K</span><span class="o">=</span><span class="m">3</span><span class="w"> </span>python<span class="w"> </span>retrieve.py<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>python<span class="w"> </span>evaluate.py
+<span class="nv">APPROACH</span><span class="o">=</span>hybrid<span class="w"> </span><span class="nv">TOP_K</span><span class="o">=</span><span class="m">5</span><span class="w"> </span>python<span class="w"> </span>retrieve.py<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>python<span class="w"> </span>evaluate.py
+<span class="nv">APPROACH</span><span class="o">=</span>hybrid<span class="w"> </span><span class="nv">TOP_K</span><span class="o">=</span><span class="m">5</span><span class="w"> </span><span class="nv">USE_SEMANTIC</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>python<span class="w"> </span>retrieve.py<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>python<span class="w"> </span>evaluate.py
+</code></pre></div>
+<p>What to sweep, and the GPT-RAG setting each one maps to:</p>
+<table>
+<thead>
+<tr>
+<th>Lever</th>
+<th>In the script</th>
+<th>In GPT-RAG (App Configuration, label <code>gpt-rag</code>)</th>
+<th>Needs re-ingestion?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>How many chunks are retrieved</td>
+<td><code>TOP_K</code></td>
+<td><code>SEARCH_RAGINDEX_TOP_K</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Search mode (keyword, vector, hybrid)</td>
+<td><code>APPROACH</code></td>
+<td><code>SEARCH_APPROACH</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Semantic reranker on/off</td>
+<td><code>USE_SEMANTIC</code></td>
+<td><code>SEARCH_USE_SEMANTIC</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Chunk size and overlap</td>
+<td>not in the script</td>
+<td><code>CHUNKING_NUM_TOKENS</code>, <code>TOKEN_OVERLAP</code></td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<p>Practical guidance:</p>
+<ul>
+<li><strong>Start with search mode and the reranker.</strong> Hybrid plus the semantic reranker is
+  usually the strongest combination, at slightly higher query cost. If you are on
+  keyword or vector only, try hybrid first.</li>
+<li><strong>Then tune top-k.</strong> Too few chunks miss relevant context; too many dilute it with
+  noise and cost more tokens. Sweep 3, 5, and 8 and watch where <code>ndcg@3</code> peaks.</li>
+<li><strong>Change chunking last.</strong> Bigger chunks keep more context together but match less
+  precisely; smaller chunks match precisely but can fragment an answer. This is the
+  most expensive lever because it requires re-ingesting your documents, which
+  rebuilds the index and changes chunk ids, so you must re-verify your qrels
+  afterward.</li>
+</ul>
+<p>When you are done, the improvement should show up downstream too. Better ranking
+feeds better context, so the LLM-judge <strong>Groundedness</strong> and <strong>Retrieval</strong> scores
+should rise as well. That is the loop closing: you tune retrieval here, and confirm
+the gain in your normal evaluation.</p>
+<h2 id="after-re-ingesting-refresh-your-qrels">After re-ingesting: refresh your qrels</h2>
+<p>Re-ingestion (for example after changing <code>CHUNKING_NUM_TOKENS</code>) rebuilds the index
+and assigns new chunk ids. Your old <code>qrels.json</code> points at ids that may no longer
+exist, so its labels become stale. After any re-ingestion:</p>
+<ol>
+<li>Re-run <code>retrieve.py</code> to get the new chunk ids.</li>
+<li>Re-label the new chunks in <code>qrels.json</code>.</li>
+<li>Re-run <code>evaluate.py</code> to compare against your previous baseline.</li>
+</ol>
+<p>This is why the labeled set is kept small: re-labeling a handful of questions is
+quick; re-labeling hundreds is not.</p>
+<h2 id="tips-and-caveats">Tips and caveats</h2>
+<ul>
+<li><strong>Labels are index-specific.</strong> The <code>document_id</code> values are chunk ids from your
+  current index. Re-author or re-verify qrels after re-ingesting or changing chunking.</li>
+<li><strong>Keep the labeled set focused.</strong> This is a diagnostic and tuning surface, not a
+  regression suite. A small, trusted set of questions is easier to maintain and
+  reason about.</li>
+<li><strong>It complements, it does not replace, your evaluation gate.</strong> Groundedness and
+  Retrieval stay on your automated checks. Document Retrieval is the deeper look you
+  reach for when those scores say retrieval is the problem.</li>
+<li><strong>The semantic reranker has a cost.</strong> It improves ranking but adds latency and is
+  billed per query. Confirm the <code>ndcg@3</code> gain is worth it before enabling it in
+  production.</li>
+</ul>
+<h2 id="related">Related</h2>
+<ul>
+<li><a href="https://learn.microsoft.com/azure/ai-foundry/concepts/evaluation-evaluators/rag-evaluators">Foundry RAG evaluators</a>: the full evaluator reference, including every Document Retrieval score key.</li>
+<li><a href="https://learn.microsoft.com/azure/ai-foundry/how-to/develop/evaluate-sdk">Evaluate with the Azure AI Evaluation SDK</a>: how the evaluator runs in code.</li>
+<li><a href="https://learn.microsoft.com/azure/search/hybrid-search-overview">Hybrid search in Azure AI Search</a>: how keyword and vector search combine.</li>
+<li><a href="https://learn.microsoft.com/azure/search/semantic-search-overview">Semantic ranking in Azure AI Search</a>: what the reranker does.</li>
+<li><a href="https://learn.microsoft.com/azure/search/hybrid-search-ranking">Relevance and scoring</a>: how results are scored and fused.</li>
+<li><a href="../services_ingestion/">Ingestion</a>: how documents are chunked and indexed in GPT-RAG.</li>
+<li><a href="../services_orchestrator/">Orchestrator</a>: how retrieved chunks become an answer.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <div style="
+  background-color: var(--md-primary-fg-color);
+  color: var(--md-primary-bg-color);
+  text-align: center;
+  font-size: 0.95em;
+  padding: 1em 0;
+">
+  © 2025 GPT-RAG — powered by ❤️ and coffee ☕
+</div>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.icon", "content.iconify", "navigation.tracking", "toc.integrate", "content.code.annotate", "navigation.top"], "search": "../assets/javascripts/workers/search.07f07601.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.56dfad97.min.js"></script>
+      
+        <script src="../javascripts/source-facts-refresh.js"></script>
+      
+    
+  </body>
+</html>
