@@ -1,5 +1,19 @@
 # Changelog
 
+## [v2.9.13] - 2026-06-19
+
+### User and operator impact
+
+Patch release that bumps the orchestrator pin from [`v2.8.9`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.9) to [`v2.8.10`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.10). No other component changed: UI, ingestion, and AI Landing Zone pins are identical to v2.9.12. The orchestrator update is a P1 patch against the operator dashboard shipped in v2.8.9: it restores the Conversations tab Created/Last updated date columns (they were showing `-` for every row), unblocks saving `REASONING_EFFORT` from the Configuration tab, and adds a time-range picker plus accessible info tooltips to the Overview tab so operators can scope the chart, Engagement panel, and Active users to a chosen window. See [Azure/gpt-rag-orchestrator#241](https://github.com/Azure/gpt-rag-orchestrator/issues/241) for the full operator report.
+
+### Changed
+
+- **Orchestrator pin bumped to [`v2.8.10`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.10):** Operator-reported follow-up to the v2.8.9 dashboard. Fixes the Conversations tab date columns and the `REASONING_EFFORT` save validation, and adds the Overview time-range picker and metric tooltips.
+
+- **UI pin unchanged:** [`v2.3.13`](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.3.13).
+- **Ingestion pin unchanged:** [`v2.4.12`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.12).
+- **Infra (AI Landing Zone) pin unchanged:** [`v2.0.20`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.0.20).
+
 ## [v2.9.12] - 2026-06-18
 
 ### User and operator impact
