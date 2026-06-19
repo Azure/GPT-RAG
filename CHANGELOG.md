@@ -1,5 +1,29 @@
 # Changelog
 
+## [v2.9.14] - 2026-06-19
+
+### User and operator impact
+
+Patch release that bumps the orchestrator pin from [`v2.8.10`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.10) to [`v2.8.11`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.11). No other component changed: UI, ingestion, and AI Landing Zone pins are identical to v2.9.13. The orchestrator update is a P2 follow-up against the Overview tab dashboard shipped in v2.8.10: it stops the info tooltips from rendering in ALL CAPS, fixes the Active users metric so anonymous traffic counts as a single bucket instead of one user per conversation, and makes the Custom range chip immediately reveal the From/To date inputs without zeroing the chart. See [Azure/gpt-rag-orchestrator#241](https://github.com/Azure/gpt-rag-orchestrator/issues/241) for the operator report.
+
+### Changed
+
+- **Orchestrator pin bumped to [`v2.8.11`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.11):** Operator-reported follow-up to v2.8.10. Three Overview tab fixes: tooltip sentence case, anonymous user bucketing in the Active users metric, and a visible Custom range editor that keeps the chart populated.
+
+- **UI pin unchanged:** [`v2.3.13`](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.3.13).
+- **Ingestion pin unchanged:** [`v2.4.12`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.12).
+- **Infra (AI Landing Zone) pin unchanged:** [`v2.0.20`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.0.20).
+
+### Validation
+
+The following component versions are pinned for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v2.8.11 |
+| gpt-rag-ingestion | v2.4.12 |
+| bicep-ptn-aiml-landing-zone | v2.0.20 |
 ## [v2.9.13] - 2026-06-19
 
 ### User and operator impact
