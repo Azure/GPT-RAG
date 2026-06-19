@@ -1,5 +1,32 @@
 # Changelog
 
+## [v2.9.11] - 2026-06-18
+
+### User and operator impact
+
+Patch release that bumps the ingestion pin from [`v2.4.10`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.10) to [`v2.4.11`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.11). No other component changed: orchestrator, UI, and AI Landing Zone pins are identical to v2.9.10. This release polishes the **Queue and schedule** panel added in v2.9.10: the *Run now* toast now correctly says "Started" instead of "Queued" (APScheduler fires immediately, not after a delay), the *Cron* column is no longer empty (it now reads the live trigger registered with the scheduler instead of an app config key that did not match), the panel refreshes within ~1 second after a *Run now* click (instead of waiting up to 10 seconds for the next normal poll), the panel is now **collapsible** with the operator preference persisted in localStorage and **defaults to collapsed** so it stops pushing the runs table down ~250 px on every page load, and a new **Last run** column shows the most recent finished or failed run per `job_type`. Operators who turned on `ENABLE_DASHBOARD=true` on the ingestion app are the main beneficiaries.
+
+### Changed
+
+- **Ingestion pin bumped to [`v2.4.11`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.11):** Polishes [`Azure/gpt-rag-ingestion#247`](https://github.com/Azure/gpt-rag-ingestion/issues/247). `GET /api/jobs/queue` now reads `cron` from `scheduler.get_job(job_id).trigger` (single source of truth, matches what APScheduler is actually firing) and includes a new `last_run` field with `{started_at, finished_at, status, indexed_count}` per item, derived from the same cached runs store `/api/jobs/runs` reads (no extra request per poll). The frontend Queue panel is now collapsible (default collapsed, preference persisted in localStorage under `gpt-rag-ingestion.queuePanel.expanded`), polls at 1 s for 15 s after every *Run now* click before reverting to 10 s, renders a new *Last run* column, and the *Run now* toast says "Started" / "is already running" matching what operators actually observe.
+
+- **Orchestrator pin unchanged:** [`v2.8.9`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.9).
+- **UI pin unchanged:** [`v2.3.13`](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.3.13).
+- **Infra (AI Landing Zone) pin unchanged:** [`v2.0.20`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.0.20).
+
+### Validation
+
+The following component versions are pinned for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v2.8.9 |
+| gpt-rag-ingestion | v2.4.11 |
+| bicep-ptn-aiml-landing-zone | v2.0.20 |
+
+Validated by upgrading an existing v2.9.10 sandbox: rebuilt the ingestion image at the v2.4.11 tag, redeployed the ingestion container app, confirmed `GET /api/version` returns `2.4.11` and `GET /api/jobs/queue` returns non-null `cron` for `blob_index` and `blob_purge` and a populated `last_run` for `blob_index`. The Queue panel renders collapsed by default with the compact summary line, expands via the chevron toggle, and the *Last run* column shows the most recent run with relative time, status, and indexed count.
+
 ## [v2.9.10] - 2026-06-18
 
 ### User and operator impact
