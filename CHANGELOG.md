@@ -1,5 +1,29 @@
 # Changelog
 
+## [v2.9.15] - 2026-06-19
+
+### User and operator impact
+
+Patch release that bumps the ingestion pin from [`v2.4.12`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.12) to [`v2.4.13`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.13). No other component changed: UI, orchestrator, and AI Landing Zone pins are identical to v2.9.14. The ingestion update is a P2 follow-up on the operator dashboard Jobs tab: the *Run now* button strip and the *Queue and schedule* table have moved off the Jobs tab into a new dedicated **Schedules** tab (tab order is now *Jobs | Schedules | Files | Configuration*), and the "Started <job>" success toast now auto-dismisses after 4 seconds and gets a manual close button so it no longer sits on screen forever. See [Azure/gpt-rag-ingestion#254](https://github.com/Azure/gpt-rag-ingestion/pull/254).
+
+### Changed
+
+- **Ingestion pin bumped to [`v2.4.13`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.13):** Operator-reported follow-up on the Jobs tab. Relocates the *Run now* strip and *Queue and schedule* table to a new *Schedules* tab so the Jobs tab stays focused on the recent-runs history; makes the *Run now* success toast auto-dismiss after 4 seconds with a manual close button so it no longer stays on screen forever.
+
+- **UI pin unchanged:** [`v2.3.13`](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.3.13).
+- **Orchestrator pin unchanged:** [`v2.8.11`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.11).
+- **Infra (AI Landing Zone) pin unchanged:** [`v2.0.20`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.0.20).
+
+### Validation
+
+The following component versions are pinned for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v2.8.11 |
+| gpt-rag-ingestion | v2.4.13 |
+| bicep-ptn-aiml-landing-zone | v2.0.20 |
 ## [v2.9.14] - 2026-06-19
 
 ### User and operator impact
