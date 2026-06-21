@@ -42,11 +42,14 @@ effect after you re-ingest your documents, which rebuilds the index.
 
 ## The idea: measure the ranking, do not guess
 
-Two evaluators that ship with GPT-RAG evaluation, **Groundedness** and
-**Retrieval**, already tell you *that* retrieval is weak. They use an LLM judge and
-a 1 to 5 score, need no labels, and are cheap to run on every change. What they do
-not do is tell you *how to fix it* or let you compare two search configurations
-objectively.
+GPT-RAG already ships an evaluation harness in the orchestrator (the
+`evaluations/` folder of `gpt-rag-orchestrator`) that runs Foundry's built-in
+evaluators against your golden dataset: **Relevance**, **Retrieval**,
+**Completeness**, and **Content Safety**. The two that speak to retrieval,
+**Relevance** and **Retrieval**, use an LLM judge and a 1 to 5 score, need no
+labels, and are cheap to run on every change, so they tell you *that* retrieval is
+weak. What they do not do is tell you *how to fix it* or let you compare two search
+configurations objectively.
 
 Document Retrieval is the tuning tool. You give it two things per question:
 
@@ -63,7 +66,7 @@ top, the scores are high. If relevant chunks are buried or missing, the scores d
     Document Retrieval needs hand-labeled ground truth, and its labels reference
     specific chunk ids in your current index. Rebuilding the index can change those
     ids and invalidate the labels. That is fine for a deliberate tuning study, but
-    too brittle to run on every commit. Keep Groundedness and Retrieval on your
+    too brittle to run on every commit. Keep Relevance and Retrieval on your
     automated checks, and use Document Retrieval here, on demand, when you decide to
     improve search.
 
@@ -118,12 +121,22 @@ answer. Five to fifteen is plenty to start. A small, trusted set is far easier t
 label and reason about than a large noisy one.
 
 ```text
-What is the recommended tire pressure for the front wheels?
-How often should the cabin air filter be replaced?
-What does a flashing oil warning light mean?
+How is fuel pressure maintained in the fuel delivery system?
+What is the function of the fuel pressure regulator?
+When should the fuel filter be replaced?
 ```
 
 Save them in a file `questions.txt`, one per line.
+
+!!! tip "Want a ready-made example to follow along?"
+    Download this sample document and use it as your test corpus:
+    [vw-fuel-system.pdf](assets/vw-fuel-system.pdf) (a short technical manual about
+    an automotive fuel system). Ingest it into GPT-RAG the same way you ingest any
+    document (drop it in the `documents` container of your storage account, or use
+    the ingestion path you configured), wait for indexing to finish, then run the
+    three questions above. After ingestion its chunks appear in `ragindex` with ids
+    like `documents-vw-fuel-system-pdf-c00002`. The walkthrough below uses those
+    ids so you can reproduce every step end to end.
 
 ## Step 2: pull the ranked results from your index
 
@@ -183,7 +196,7 @@ def retrieve(query):
     for r in search.search(**kwargs):
         score = r["@search.reranker_score"] if USE_SEMANTIC else r["@search.score"]
         docs.append({
-            "document_id": r["id"],            # the index key, e.g. manual-pdf-c00002
+            "document_id": r["id"],            # the index key, e.g. documents-vw-fuel-system-pdf-c00002
             "relevance_score": score,          # the retriever's own ranking score
             "title": r.get("title"),
             "filepath": r.get("filepath"),
@@ -213,8 +226,8 @@ python retrieve.py
 ```
 
 Each chunk's `document_id` is the index key (for example
-`manual-pdf-c00002`), built from the source file path plus the chunk number. That
-is the id you will label in the next step.
+`documents-vw-fuel-system-pdf-c00002`), built from the source file path plus the
+chunk number. That is the id you will label in the next step.
 
 !!! tip "The orchestrator and the evaluator name fields differently"
     Azure AI Search returns each chunk as `id` and `@search.score`. The Document
@@ -244,10 +257,10 @@ Save your labels in `qrels.json`, keyed by the same question text:
 
 ```json
 {
-  "What is the recommended tire pressure for the front wheels?": [
-    { "document_id": "manual-pdf-c00002", "query_relevance_label": 4 },
-    { "document_id": "manual-pdf-c00001", "query_relevance_label": 2 },
-    { "document_id": "brakes-pdf-c00007", "query_relevance_label": 0 }
+  "How is fuel pressure maintained in the fuel delivery system?": [
+    { "document_id": "documents-vw-fuel-system-pdf-c00002", "query_relevance_label": 4 },
+    { "document_id": "documents-vw-fuel-system-pdf-c00001", "query_relevance_label": 2 },
+    { "document_id": "documents-vw-fuel-system-pdf-c00007", "query_relevance_label": 0 }
   ]
 }
 ```
@@ -379,7 +392,7 @@ Practical guidance:
   afterward.
 
 When you are done, the improvement should show up downstream too. Better ranking
-feeds better context, so the LLM-judge **Groundedness** and **Retrieval** scores
+feeds better context, so the LLM-judge **Relevance** and **Retrieval** scores
 should rise as well. That is the loop closing: you tune retrieval here, and confirm
 the gain in your normal evaluation.
 
@@ -403,7 +416,7 @@ quick; re-labeling hundreds is not.
 - **Keep the labeled set focused.** This is a diagnostic and tuning surface, not a
   regression suite. A small, trusted set of questions is easier to maintain and
   reason about.
-- **It complements, it does not replace, your evaluation gate.** Groundedness and
+- **It complements, it does not replace, your evaluation gate.** Relevance and
   Retrieval stay on your automated checks. Document Retrieval is the deeper look you
   reach for when those scores say retrieval is the problem.
 - **The semantic reranker has a cost.** It improves ranking but adds latency and is
