@@ -1205,12 +1205,11 @@ On startup, if a CRON is configured, the corresponding job is scheduled and also
 </code></pre></div>
 <p><code>key</code> is filterable and facetable so you can use it for exact matches and tag discovery. <code>value</code> is also searchable, so full-text search over tag values is available when needed.</p>
 <h3 id="flow">Flow</h3>
-<div class="highlight"><pre><span></span><code>flowchart LR
+<pre class="mermaid"><code>flowchart LR
   Upload[az storage blob upload&lt;br/&gt;--metadata key=value] --&gt; Blob[Azure Blob Storage&lt;br/&gt;blob.metadata]
   Blob --&gt; Indexer[blob-storage-indexer]
   Indexer --&gt;|filter reserved keys&lt;br/&gt;lowercase keys&lt;br/&gt;drop empty values| Field[custom_metadata&lt;br/&gt;Collection&amp;lt;ComplexType&amp;gt;]
-  Field --&gt; Index[Azure AI Search&lt;br/&gt;RAG index]
-</code></pre></div>
+  Field --&gt; Index[Azure AI Search&lt;br/&gt;RAG index]</code></pre>
 <h3 id="tagging-a-blob">Tagging a blob</h3>
 <p>Set metadata at upload time, or update it on an existing blob:</p>
 <div class="highlight"><pre><span></span><code>az<span class="w"> </span>storage<span class="w"> </span>blob<span class="w"> </span>upload<span class="w"> </span><span class="se">\</span>

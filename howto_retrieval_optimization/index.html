@@ -1130,11 +1130,14 @@ behavior is controlled by settings in <strong>Azure App Configuration</strong> (
 new behavior. The chunking settings are ingestion-time: changing them only takes
 effect after you re-ingest your documents, which rebuilds the index.</p>
 <h2 id="the-idea-measure-the-ranking-do-not-guess">The idea: measure the ranking, do not guess</h2>
-<p>Two evaluators that ship with GPT-RAG evaluation, <strong>Groundedness</strong> and
-<strong>Retrieval</strong>, already tell you <em>that</em> retrieval is weak. They use an LLM judge and
-a 1 to 5 score, need no labels, and are cheap to run on every change. What they do
-not do is tell you <em>how to fix it</em> or let you compare two search configurations
-objectively.</p>
+<p>GPT-RAG already ships an evaluation harness in the orchestrator (the
+<code>evaluations/</code> folder of <code>gpt-rag-orchestrator</code>) that runs Foundry's built-in
+evaluators against your golden dataset: <strong>Relevance</strong>, <strong>Retrieval</strong>,
+<strong>Completeness</strong>, and <strong>Content Safety</strong>. The two that speak to retrieval,
+<strong>Relevance</strong> and <strong>Retrieval</strong>, use an LLM judge and a 1 to 5 score, need no
+labels, and are cheap to run on every change, so they tell you <em>that</em> retrieval is
+weak. What they do not do is tell you <em>how to fix it</em> or let you compare two search
+configurations objectively.</p>
 <p>Document Retrieval is the tuning tool. You give it two things per question:</p>
 <ul>
 <li><strong>The retrieved documents</strong>: the ranked list your index returned, each with the
@@ -1150,7 +1153,7 @@ top, the scores are high. If relevant chunks are buried or missing, the scores d
 <p>Document Retrieval needs hand-labeled ground truth, and its labels reference
 specific chunk ids in your current index. Rebuilding the index can change those
 ids and invalidate the labels. That is fine for a deliberate tuning study, but
-too brittle to run on every commit. Keep Groundedness and Retrieval on your
+too brittle to run on every commit. Keep Relevance and Retrieval on your
 automated checks, and use Document Retrieval here, on demand, when you decide to
 improve search.</p>
 </div>
@@ -1216,11 +1219,22 @@ improve search.</p>
 <p>Pick a small set of questions that real users ask and that your documents should
 answer. Five to fifteen is plenty to start. A small, trusted set is far easier to
 label and reason about than a large noisy one.</p>
-<div class="highlight"><pre><span></span><code>What is the recommended tire pressure for the front wheels?
-How often should the cabin air filter be replaced?
-What does a flashing oil warning light mean?
+<div class="highlight"><pre><span></span><code>How is fuel pressure maintained in the fuel delivery system?
+What is the function of the fuel pressure regulator?
+When should the fuel filter be replaced?
 </code></pre></div>
 <p>Save them in a file <code>questions.txt</code>, one per line.</p>
+<div class="admonition tip">
+<p class="admonition-title">Want a ready-made example to follow along?</p>
+<p>Download this sample document and use it as your test corpus:
+<a href="../assets/vw-fuel-system.pdf">vw-fuel-system.pdf</a> (a short technical manual about
+an automotive fuel system). Ingest it into GPT-RAG the same way you ingest any
+document (drop it in the <code>documents</code> container of your storage account, or use
+the ingestion path you configured), wait for indexing to finish, then run the
+three questions above. After ingestion its chunks appear in <code>ragindex</code> with ids
+like <code>documents-vw-fuel-system-pdf-c00002</code>. The walkthrough below uses those
+ids so you can reproduce every step end to end.</p>
+</div>
 <h2 id="step-2-pull-the-ranked-results-from-your-index">Step 2: pull the ranked results from your index</h2>
 <p>This script runs the same kind of search the GPT-RAG orchestrator runs (hybrid by
 default) and prints the ranked chunks for each question, including a content
@@ -1276,7 +1290,7 @@ preview so you can judge relevance. It also saves the raw results to
     <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">search</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">score</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;@search.reranker_score&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">USE_SEMANTIC</span> <span class="k">else</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;@search.score&quot;</span><span class="p">]</span>
         <span class="n">docs</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
-            <span class="s2">&quot;document_id&quot;</span><span class="p">:</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>            <span class="c1"># the index key, e.g. manual-pdf-c00002</span>
+            <span class="s2">&quot;document_id&quot;</span><span class="p">:</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>            <span class="c1"># the index key, e.g. documents-vw-fuel-system-pdf-c00002</span>
             <span class="s2">&quot;relevance_score&quot;</span><span class="p">:</span> <span class="n">score</span><span class="p">,</span>          <span class="c1"># the retriever&#39;s own ranking score</span>
             <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;title&quot;</span><span class="p">),</span>
             <span class="s2">&quot;filepath&quot;</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;filepath&quot;</span><span class="p">),</span>
@@ -1302,8 +1316,8 @@ preview so you can judge relevance. It also saves the raw results to
 <div class="highlight"><pre><span></span><code>python<span class="w"> </span>retrieve.py
 </code></pre></div>
 <p>Each chunk's <code>document_id</code> is the index key (for example
-<code>manual-pdf-c00002</code>), built from the source file path plus the chunk number. That
-is the id you will label in the next step.</p>
+<code>documents-vw-fuel-system-pdf-c00002</code>), built from the source file path plus the
+chunk number. That is the id you will label in the next step.</p>
 <div class="admonition tip">
 <p class="admonition-title">The orchestrator and the evaluator name fields differently</p>
 <p>Azure AI Search returns each chunk as <code>id</code> and <code>@search.score</code>. The Document
@@ -1350,10 +1364,10 @@ for the question, not the whole index.</p>
 </table>
 <p>Save your labels in <code>qrels.json</code>, keyed by the same question text:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;What is the recommended tire pressure for the front wheels?&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;document_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;manual-pdf-c00002&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;query_relevance_label&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;document_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;manual-pdf-c00001&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;query_relevance_label&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;document_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;brakes-pdf-c00007&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;query_relevance_label&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="nt">&quot;How is fuel pressure maintained in the fuel delivery system?&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;document_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;documents-vw-fuel-system-pdf-c00002&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;query_relevance_label&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;document_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;documents-vw-fuel-system-pdf-c00001&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;query_relevance_label&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;document_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;documents-vw-fuel-system-pdf-c00007&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;query_relevance_label&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">}</span>
 <span class="w">  </span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -1462,16 +1476,15 @@ are the ones you will use most.</p>
 <p>Now use the numbers to tune search. Change one thing, re-run the same labeled
 questions, and compare the headline metric. Keep changes that raise <code>ndcg@3</code>
 without inflating <code>holes_ratio</code>; revert the rest.</p>
-<div class="highlight"><pre><span></span><code>flowchart LR
-    B[&quot;Baseline&lt;br/&gt;ndcg@3&quot;] --&gt; C[&quot;Change one&lt;br/&gt;search setting&quot;]
-    C --&gt; R[&quot;Re-run the same&lt;br/&gt;labeled questions&quot;]
-    R --&gt; M[&quot;Compare&lt;br/&gt;ndcg@3&quot;]
-    M --&gt; K{&quot;Better?&quot;}
-    K --&gt;|yes| A[&quot;Keep it&quot;]
-    K --&gt;|no| X[&quot;Revert&quot;]
+<pre class="mermaid"><code>flowchart LR
+    B["Baseline&lt;br/&gt;ndcg@3"] --&gt; C["Change one&lt;br/&gt;search setting"]
+    C --&gt; R["Re-run the same&lt;br/&gt;labeled questions"]
+    R --&gt; M["Compare&lt;br/&gt;ndcg@3"]
+    M --&gt; K{"Better?"}
+    K --&gt;|yes| A["Keep it"]
+    K --&gt;|no| X["Revert"]
     A --&gt; C
-    X --&gt; C
-</code></pre></div>
+    X --&gt; C</code></pre>
 <p><strong>Tune offline first, then promote the winner.</strong> You do not have to redeploy
 GPT-RAG to test an idea. The <code>retrieve.py</code> script reads <code>TOP_K</code>, <code>APPROACH</code>,
 <code>USE_SEMANTIC</code>, and <code>SEMANTIC_CONFIG</code> from environment variables, so you can sweep
@@ -1533,7 +1546,7 @@ set the matching App Configuration key (label <code>gpt-rag</code>) so productio
   afterward.</li>
 </ul>
 <p>When you are done, the improvement should show up downstream too. Better ranking
-feeds better context, so the LLM-judge <strong>Groundedness</strong> and <strong>Retrieval</strong> scores
+feeds better context, so the LLM-judge <strong>Relevance</strong> and <strong>Retrieval</strong> scores
 should rise as well. That is the loop closing: you tune retrieval here, and confirm
 the gain in your normal evaluation.</p>
 <h2 id="after-re-ingesting-refresh-your-qrels">After re-ingesting: refresh your qrels</h2>
@@ -1554,7 +1567,7 @@ quick; re-labeling hundreds is not.</p>
 <li><strong>Keep the labeled set focused.</strong> This is a diagnostic and tuning surface, not a
   regression suite. A small, trusted set of questions is easier to maintain and
   reason about.</li>
-<li><strong>It complements, it does not replace, your evaluation gate.</strong> Groundedness and
+<li><strong>It complements, it does not replace, your evaluation gate.</strong> Relevance and
   Retrieval stay on your automated checks. Document Retrieval is the deeper look you
   reach for when those scores say retrieval is the problem.</li>
 <li><strong>The semantic reranker has a cost.</strong> It improves ranking but adds latency and is

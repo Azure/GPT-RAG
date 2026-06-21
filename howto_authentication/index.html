@@ -1309,14 +1309,13 @@ metadata_security_group_ids
 </table>
 <p>In all cases, when <code>OAUTH_AZURE_AD_TENANT_ID</code> is not configured the gate is a no-op. This matches the rest of the orchestrator and ingestion behavior in local development and lets contributors run both services without an Entra app registration.</p>
 <p>The orchestrator dashboard is only mounted when <code>ENABLE_DASHBOARD</code> is set to <code>true</code>. In default deployments the routes do not exist at all. Set <code>ENABLE_DASHBOARD=true</code> under the <code>gpt-rag-orchestrator</code> label in App Configuration to enable it.</p>
-<div class="highlight"><pre><span></span><code>flowchart LR
+<pre class="mermaid"><code>flowchart LR
   User[Operator] --&gt;|Bearer token&lt;br/&gt;api://CLIENT_ID/.default| Orch[Orchestrator /api/dashboard/*]
   User --&gt;|Bearer token&lt;br/&gt;api://CLIENT_ID/.default| Ing[Ingestion /api/jobs/*/run&lt;br/&gt;and /api/config writes]
-  Orch --&gt;|require_admin| RoleCheck{roles claim&lt;br/&gt;contains &#39;Admin&#39;?}
+  Orch --&gt;|require_admin| RoleCheck{roles claim&lt;br/&gt;contains 'Admin'?}
   Ing --&gt;|require_admin| RoleCheck
   RoleCheck --&gt;|yes| Allow[200 / 202]
-  RoleCheck --&gt;|no| Deny[403 Admin role required]
-</code></pre></div>
+  RoleCheck --&gt;|no| Deny[403 Admin role required]</code></pre>
 <h3 id="1-add-the-admin-app-role-to-the-app-registration">1) Add the <code>Admin</code> app role to the App Registration</h3>
 <p>You add the role to the same App Registration created in the <strong>Setup</strong> section above. You can do this in the Azure portal or with the Azure CLI.</p>
 <p><strong>Portal</strong></p>
