@@ -14,11 +14,12 @@ This guide takes you from zero to a working optimization loop. You will:
    [Document Retrieval evaluator](https://learn.microsoft.com/azure/ai-foundry/concepts/evaluation-evaluators/rag-evaluators#document-retrieval),
    which returns ranking metrics like NDCG.
 4. Change one GPT-RAG search setting at a time and re-measure until the numbers go up.
+5. Watch the whole loop move a real number on one worked example.
 
 No prior evaluation experience is needed. Everything runs from a small Python
 script against your own search index.
 
-## How retrieval works in GPT-RAG
+## How retrieval works
 
 GPT-RAG stores every document as small chunks in an Azure AI Search index named
 `ragindex`. At query time the orchestrator embeds the user question, runs a search
@@ -40,7 +41,7 @@ The first four are query-time settings: change them and the next question uses t
 new behavior. The chunking settings are ingestion-time: changing them only takes
 effect after you re-ingest your documents, which rebuilds the index.
 
-## The idea: measure the ranking, do not guess
+## Measure, do not guess
 
 GPT-RAG already ships an evaluation harness in the orchestrator (the
 `evaluations/` folder of `gpt-rag-orchestrator`) that runs Foundry's built-in
@@ -114,7 +115,7 @@ export EMBED_DEPLOYMENT="text-embedding-3-large"
 
 On Windows PowerShell use `$env:SEARCH_ENDPOINT = "..."` instead of `export`.
 
-## Step 1: choose a few real questions
+## Step 1: pick questions
 
 Pick a small set of questions that real users ask and that your documents should
 answer. Five to fifteen is plenty to start. A small, trusted set is far easier to
@@ -138,7 +139,7 @@ Save them in a file `questions.txt`, one per line.
     like `documents-vw-fuel-system-pdf-c00002`. The walkthrough below uses those
     ids so you can reproduce every step end to end.
 
-## Step 2: pull the ranked results from your index
+## Step 2: pull results
 
 This script runs the same kind of search the GPT-RAG orchestrator runs (hybrid by
 default) and prints the ranked chunks for each question, including a content
@@ -236,7 +237,7 @@ chunk number. That is the id you will label in the next step.
     own confidence used to rank. The label you add next is *your* judgment of true
     relevance.
 
-## Step 3: label the results (author your qrels)
+## Step 3: label results
 
 For each question, read the previews in `retrieved.json` and decide how relevant
 each chunk really is, from 0 (irrelevant) to 4 (perfect answer). This is the
@@ -338,7 +339,7 @@ How to read them in practice:
 - **Average across your questions.** Look at the mean `ndcg@3` over the whole set,
   not a single question, so one odd query does not mislead you.
 
-## Step 6: the optimization loop
+## Step 6: optimization loop
 
 Now use the numbers to tune search. Change one thing, re-run the same labeled
 questions, and compare the headline metric. Keep changes that raise `ndcg@3`
@@ -396,7 +397,68 @@ feeds better context, so the LLM-judge **Relevance** and **Retrieval** scores
 should rise as well. That is the loop closing: you tune retrieval here, and confirm
 the gain in your normal evaluation.
 
-## After re-ingesting: refresh your qrels
+## Step 7: prove the gain
+
+Theory is nice, but you want to watch the loop actually move a number. Here is the
+same fuel-system question worked end to end, changing exactly one lever: the
+semantic reranker. The commands are the ones from Step 6, run twice.
+
+```bash
+# Baseline: hybrid search, reranker off (the GPT-RAG default).
+APPROACH=hybrid TOP_K=3 python retrieve.py && python evaluate.py
+
+# One change: turn on the semantic reranker.
+APPROACH=hybrid TOP_K=3 USE_SEMANTIC=true python retrieve.py && python evaluate.py
+```
+
+Take the headline question, "How is fuel pressure maintained in the fuel delivery
+system?" In Step 3 you labeled three chunks for it:
+
+| Chunk id | Your label (0-4) |
+|---|---|
+| `documents-vw-fuel-system-pdf-c00002` | 4 (answers it directly) |
+| `documents-vw-fuel-system-pdf-c00001` | 2 (related background) |
+| `documents-vw-fuel-system-pdf-c00007` | 0 (off topic) |
+
+Now look at the order each run returns for that one question:
+
+- **Baseline (reranker off):** `c00001` (2), `c00007` (0), `c00002` (4). The chunk
+  that actually answers the question came back third, behind a weaker one.
+- **Reranker on:** `c00002` (4), `c00001` (2), `c00007` (0). The best chunk is now
+  first.
+
+The labels did not change, only the order did. That is exactly what `ndcg@3` is
+built to catch:
+
+| Setting | This question `ndcg@3` | Mean `ndcg@3` (all questions) | Mean `holes_ratio` |
+|---|---|---|---|
+| Baseline (hybrid, reranker off) | 0.62 | 0.63 | 0.00 |
+| Reranker on | 1.00 | 0.94 | 0.00 |
+
+Your exact decimals will differ; what matters is the direction and the size of the
+move. The mean `ndcg@3` jumped from `0.63` to `0.94` while `holes_ratio` stayed at
+`0.00`, so the reranker is a clean win: better ranking, and no new unlabeled chunks
+leaking in. If `holes_ratio` had climbed instead, you would pause and check whether
+your labels were simply incomplete before trusting the gain.
+
+> **Knowledge nugget: why the reranker moved the right chunk up.** Plain hybrid
+> search scores each chunk on lexical overlap plus vector similarity, and it scores
+> each chunk in isolation. The semantic reranker adds a second pass: a cross-encoder
+> model reads the query and each candidate chunk together and re-scores them by how
+> well the passage answers the question. Chunk `c00002` explains how the regulator
+> holds rail pressure, which is squarely on topic even though it shares fewer exact
+> words with the query, so the reranker lifts it above the lexically similar but less
+> useful `c00001`. That is why turning the reranker on is usually the first lever to
+> try.
+
+Now promote the winner. The setting that won locally is `USE_SEMANTIC=true`, which
+maps to the App Configuration key `SEARCH_USE_SEMANTIC` (label `gpt-rag`). Set it to
+`true` so production retrieval uses the configuration you just validated, then re-run
+your normal evaluation to confirm the LLM-judge **Relevance** and **Retrieval**
+scores rise too. That is one full turn of the loop: a change you measured, proved,
+and shipped.
+
+## After re-ingesting
 
 Re-ingestion (for example after changing `CHUNKING_NUM_TOKENS`) rebuilds the index
 and assigns new chunk ids. Your old `qrels.json` points at ids that may no longer
