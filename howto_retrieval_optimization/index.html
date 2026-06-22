@@ -1140,14 +1140,14 @@ behavior is controlled by settings in <strong>Azure App Configuration</strong> (
 new behavior. The chunking settings are ingestion-time: changing them only takes
 effect after you re-ingest your documents, which rebuilds the index.</p>
 <h2 id="measure-do-not-guess">Measure, do not guess</h2>
-<p>GPT-RAG already ships an evaluation harness in the orchestrator (the
-<code>evaluations/</code> folder of <code>gpt-rag-orchestrator</code>) that runs Foundry's built-in
-evaluators against your golden dataset: <strong>Relevance</strong>, <strong>Retrieval</strong>,
-<strong>Completeness</strong>, and <strong>Content Safety</strong>. The two that speak to retrieval,
-<strong>Relevance</strong> and <strong>Retrieval</strong>, use an LLM judge and a 1 to 5 score, need no
-labels, and are cheap to run on every change, so they tell you <em>that</em> retrieval is
-weak. What they do not do is tell you <em>how to fix it</em> or let you compare two search
-configurations objectively.</p>
+<p>GPT-RAG agents are evaluated with the
+<a href="https://azure.github.io/agentops/tutorial-http-agent/">AgentOps Accelerator</a>,
+which runs Foundry's built-in evaluators against the live orchestrator endpoint
+and turns the result into a pull request gate. Evaluators like <strong>Retrieval</strong> and
+<strong>Groundedness</strong> use an LLM judge and a 1 to 5 score, need no labels, and are cheap
+to run on every change, so they tell you <em>that</em> retrieval is weak. What they do not
+do is tell you <em>how to fix it</em> or let you compare two search configurations
+objectively.</p>
 <p>Document Retrieval is the tuning tool. You give it two things per question:</p>
 <ul>
 <li><strong>The retrieved documents</strong>: the ranked list your index returned, each with the
@@ -1163,7 +1163,7 @@ top, the scores are high. If relevant chunks are buried or missing, the scores d
 <p>Document Retrieval needs hand-labeled ground truth, and its labels reference
 specific chunk ids in your current index. Rebuilding the index can change those
 ids and invalidate the labels. That is fine for a deliberate tuning study, but
-too brittle to run on every commit. Keep Relevance and Retrieval on your
+too brittle to run on every commit. Keep Retrieval and Groundedness on your
 automated checks, and use Document Retrieval here, on demand, when you decide to
 improve search.</p>
 </div>
@@ -1556,7 +1556,7 @@ set the matching App Configuration key (label <code>gpt-rag</code>) so productio
   afterward.</li>
 </ul>
 <p>When you are done, the improvement should show up downstream too. Better ranking
-feeds better context, so the LLM-judge <strong>Relevance</strong> and <strong>Retrieval</strong> scores
+feeds better context, so the LLM-judge <strong>Retrieval</strong> and <strong>Groundedness</strong> scores
 should rise as well. That is the loop closing: you tune retrieval here, and confirm
 the gain in your normal evaluation.</p>
 <h2 id="step-7-prove-the-gain">Step 7: prove the gain</h2>
@@ -1645,7 +1645,7 @@ try.</p>
 <p>Now promote the winner. The setting that won locally is <code>USE_SEMANTIC=true</code>, which
 maps to the App Configuration key <code>SEARCH_USE_SEMANTIC</code> (label <code>gpt-rag</code>). Set it to
 <code>true</code> so production retrieval uses the configuration you just validated, then re-run
-your normal evaluation to confirm the LLM-judge <strong>Relevance</strong> and <strong>Retrieval</strong>
+your normal evaluation to confirm the LLM-judge <strong>Retrieval</strong> and <strong>Groundedness</strong>
 scores rise too. That is one full turn of the loop: a change you measured, proved,
 and shipped.</p>
 <h2 id="after-re-ingesting">After re-ingesting</h2>
@@ -1666,8 +1666,8 @@ quick; re-labeling hundreds is not.</p>
 <li><strong>Keep the labeled set focused.</strong> This is a diagnostic and tuning surface, not a
   regression suite. A small, trusted set of questions is easier to maintain and
   reason about.</li>
-<li><strong>It complements, it does not replace, your evaluation gate.</strong> Relevance and
-  Retrieval stay on your automated checks. Document Retrieval is the deeper look you
+<li><strong>It complements, it does not replace, your evaluation gate.</strong> Retrieval and
+  Groundedness stay on your automated checks. Document Retrieval is the deeper look you
   reach for when those scores say retrieval is the problem.</li>
 <li><strong>The semantic reranker has a cost.</strong> It improves ranking but adds latency and is
   billed per query. Confirm the <code>ndcg@3</code> gain is worth it before enabling it in
@@ -1675,6 +1675,7 @@ quick; re-labeling hundreds is not.</p>
 </ul>
 <h2 id="related">Related</h2>
 <ul>
+<li><a href="https://azure.github.io/agentops/tutorial-http-agent/">Evaluate GPT-RAG with AgentOps</a>: the pull request gate that scores the live orchestrator on every change.</li>
 <li><a href="https://learn.microsoft.com/azure/ai-foundry/concepts/evaluation-evaluators/rag-evaluators">Foundry RAG evaluators</a>: the full evaluator reference, including every Document Retrieval score key.</li>
 <li><a href="https://learn.microsoft.com/azure/ai-foundry/how-to/develop/evaluate-sdk">Evaluate with the Azure AI Evaluation SDK</a>: how the evaluator runs in code.</li>
 <li><a href="https://learn.microsoft.com/azure/search/hybrid-search-overview">Hybrid search in Azure AI Search</a>: how keyword and vector search combine.</li>
