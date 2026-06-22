@@ -855,18 +855,18 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#how-retrieval-works-in-gpt-rag" class="md-nav__link">
+  <a href="#how-retrieval-works" class="md-nav__link">
     <span class="md-ellipsis">
-      How retrieval works in GPT-RAG
+      How retrieval works
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-idea-measure-the-ranking-do-not-guess" class="md-nav__link">
+  <a href="#measure-do-not-guess" class="md-nav__link">
     <span class="md-ellipsis">
-      The idea: measure the ranking, do not guess
+      Measure, do not guess
     </span>
   </a>
   
@@ -882,27 +882,27 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-1-choose-a-few-real-questions" class="md-nav__link">
+  <a href="#step-1-pick-questions" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 1: choose a few real questions
+      Step 1: pick questions
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-2-pull-the-ranked-results-from-your-index" class="md-nav__link">
+  <a href="#step-2-pull-results" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 2: pull the ranked results from your index
+      Step 2: pull results
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-3-label-the-results-author-your-qrels" class="md-nav__link">
+  <a href="#step-3-label-results" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 3: label the results (author your qrels)
+      Step 3: label results
     </span>
   </a>
   
@@ -927,18 +927,27 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-6-the-optimization-loop" class="md-nav__link">
+  <a href="#step-6-optimization-loop" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 6: the optimization loop
+      Step 6: optimization loop
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#after-re-ingesting-refresh-your-qrels" class="md-nav__link">
+  <a href="#step-7-prove-the-gain" class="md-nav__link">
     <span class="md-ellipsis">
-      After re-ingesting: refresh your qrels
+      Step 7: prove the gain
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#after-re-ingesting" class="md-nav__link">
+    <span class="md-ellipsis">
+      After re-ingesting
     </span>
   </a>
   
@@ -1071,10 +1080,11 @@ chunks come back at the top.</p>
    <a href="https://learn.microsoft.com/azure/ai-foundry/concepts/evaluation-evaluators/rag-evaluators#document-retrieval">Document Retrieval evaluator</a>,
    which returns ranking metrics like NDCG.</li>
 <li>Change one GPT-RAG search setting at a time and re-measure until the numbers go up.</li>
+<li>Watch the whole loop move a real number on one worked example.</li>
 </ol>
 <p>No prior evaluation experience is needed. Everything runs from a small Python
 script against your own search index.</p>
-<h2 id="how-retrieval-works-in-gpt-rag">How retrieval works in GPT-RAG</h2>
+<h2 id="how-retrieval-works">How retrieval works</h2>
 <p>GPT-RAG stores every document as small chunks in an Azure AI Search index named
 <code>ragindex</code>. At query time the orchestrator embeds the user question, runs a search
 against that index, and passes the top chunks to the model as context. The
@@ -1129,7 +1139,7 @@ behavior is controlled by settings in <strong>Azure App Configuration</strong> (
 <p>The first four are query-time settings: change them and the next question uses the
 new behavior. The chunking settings are ingestion-time: changing them only takes
 effect after you re-ingest your documents, which rebuilds the index.</p>
-<h2 id="the-idea-measure-the-ranking-do-not-guess">The idea: measure the ranking, do not guess</h2>
+<h2 id="measure-do-not-guess">Measure, do not guess</h2>
 <p>GPT-RAG already ships an evaluation harness in the orchestrator (the
 <code>evaluations/</code> folder of <code>gpt-rag-orchestrator</code>) that runs Foundry's built-in
 evaluators against your golden dataset: <strong>Relevance</strong>, <strong>Retrieval</strong>,
@@ -1215,7 +1225,7 @@ improve search.</p>
 <span class="nb">export</span><span class="w"> </span><span class="nv">EMBED_DEPLOYMENT</span><span class="o">=</span><span class="s2">&quot;text-embedding-3-large&quot;</span>
 </code></pre></div>
 <p>On Windows PowerShell use <code>$env:SEARCH_ENDPOINT = "..."</code> instead of <code>export</code>.</p>
-<h2 id="step-1-choose-a-few-real-questions">Step 1: choose a few real questions</h2>
+<h2 id="step-1-pick-questions">Step 1: pick questions</h2>
 <p>Pick a small set of questions that real users ask and that your documents should
 answer. Five to fifteen is plenty to start. A small, trusted set is far easier to
 label and reason about than a large noisy one.</p>
@@ -1235,7 +1245,7 @@ three questions above. After ingestion its chunks appear in <code>ragindex</code
 like <code>documents-vw-fuel-system-pdf-c00002</code>. The walkthrough below uses those
 ids so you can reproduce every step end to end.</p>
 </div>
-<h2 id="step-2-pull-the-ranked-results-from-your-index">Step 2: pull the ranked results from your index</h2>
+<h2 id="step-2-pull-results">Step 2: pull results</h2>
 <p>This script runs the same kind of search the GPT-RAG orchestrator runs (hybrid by
 default) and prints the ranked chunks for each question, including a content
 preview so you can judge relevance. It also saves the raw results to
@@ -1326,7 +1336,7 @@ above already does that mapping for you. <code>relevance_score</code> is the ret
 own confidence used to rank. The label you add next is <em>your</em> judgment of true
 relevance.</p>
 </div>
-<h2 id="step-3-label-the-results-author-your-qrels">Step 3: label the results (author your qrels)</h2>
+<h2 id="step-3-label-results">Step 3: label results</h2>
 <p>For each question, read the previews in <code>retrieved.json</code> and decide how relevant
 each chunk really is, from 0 (irrelevant) to 4 (perfect answer). This is the
 ground truth the evaluator compares against. You only label the chunks that matter
@@ -1472,7 +1482,7 @@ are the ones you will use most.</p>
 <li><strong>Average across your questions.</strong> Look at the mean <code>ndcg@3</code> over the whole set,
   not a single question, so one odd query does not mislead you.</li>
 </ul>
-<h2 id="step-6-the-optimization-loop">Step 6: the optimization loop</h2>
+<h2 id="step-6-optimization-loop">Step 6: optimization loop</h2>
 <p>Now use the numbers to tune search. Change one thing, re-run the same labeled
 questions, and compare the headline metric. Keep changes that raise <code>ndcg@3</code>
 without inflating <code>holes_ratio</code>; revert the rest.</p>
@@ -1549,7 +1559,96 @@ set the matching App Configuration key (label <code>gpt-rag</code>) so productio
 feeds better context, so the LLM-judge <strong>Relevance</strong> and <strong>Retrieval</strong> scores
 should rise as well. That is the loop closing: you tune retrieval here, and confirm
 the gain in your normal evaluation.</p>
-<h2 id="after-re-ingesting-refresh-your-qrels">After re-ingesting: refresh your qrels</h2>
+<h2 id="step-7-prove-the-gain">Step 7: prove the gain</h2>
+<p>Theory is nice, but you want to watch the loop actually move a number. Here is the
+same fuel-system question worked end to end, changing exactly one lever: the
+semantic reranker. The commands are the ones from Step 6, run twice.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Baseline: hybrid search, reranker off (the GPT-RAG default).</span>
+<span class="nv">APPROACH</span><span class="o">=</span>hybrid<span class="w"> </span><span class="nv">TOP_K</span><span class="o">=</span><span class="m">3</span><span class="w"> </span>python<span class="w"> </span>retrieve.py<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>python<span class="w"> </span>evaluate.py
+
+<span class="c1"># One change: turn on the semantic reranker.</span>
+<span class="nv">APPROACH</span><span class="o">=</span>hybrid<span class="w"> </span><span class="nv">TOP_K</span><span class="o">=</span><span class="m">3</span><span class="w"> </span><span class="nv">USE_SEMANTIC</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>python<span class="w"> </span>retrieve.py<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>python<span class="w"> </span>evaluate.py
+</code></pre></div>
+<p>Take the headline question, "How is fuel pressure maintained in the fuel delivery
+system?" In Step 3 you labeled three chunks for it:</p>
+<table>
+<thead>
+<tr>
+<th>Chunk id</th>
+<th>Your label (0-4)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>documents-vw-fuel-system-pdf-c00002</code></td>
+<td>4 (answers it directly)</td>
+</tr>
+<tr>
+<td><code>documents-vw-fuel-system-pdf-c00001</code></td>
+<td>2 (related background)</td>
+</tr>
+<tr>
+<td><code>documents-vw-fuel-system-pdf-c00007</code></td>
+<td>0 (off topic)</td>
+</tr>
+</tbody>
+</table>
+<p>Now look at the order each run returns for that one question:</p>
+<ul>
+<li><strong>Baseline (reranker off):</strong> <code>c00001</code> (2), <code>c00007</code> (0), <code>c00002</code> (4). The chunk
+  that actually answers the question came back third, behind a weaker one.</li>
+<li><strong>Reranker on:</strong> <code>c00002</code> (4), <code>c00001</code> (2), <code>c00007</code> (0). The best chunk is now
+  first.</li>
+</ul>
+<p>The labels did not change, only the order did. That is exactly what <code>ndcg@3</code> is
+built to catch:</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>This question <code>ndcg@3</code></th>
+<th>Mean <code>ndcg@3</code> (all questions)</th>
+<th>Mean <code>holes_ratio</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Baseline (hybrid, reranker off)</td>
+<td>0.62</td>
+<td>0.63</td>
+<td>0.00</td>
+</tr>
+<tr>
+<td>Reranker on</td>
+<td>1.00</td>
+<td>0.94</td>
+<td>0.00</td>
+</tr>
+</tbody>
+</table>
+<p>Your exact decimals will differ; what matters is the direction and the size of the
+move. The mean <code>ndcg@3</code> jumped from <code>0.63</code> to <code>0.94</code> while <code>holes_ratio</code> stayed at
+<code>0.00</code>, so the reranker is a clean win: better ranking, and no new unlabeled chunks
+leaking in. If <code>holes_ratio</code> had climbed instead, you would pause and check whether
+your labels were simply incomplete before trusting the gain.</p>
+<blockquote>
+<p><strong>Knowledge nugget: why the reranker moved the right chunk up.</strong> Plain hybrid
+search scores each chunk on lexical overlap plus vector similarity, and it scores
+each chunk in isolation. The semantic reranker adds a second pass: a cross-encoder
+model reads the query and each candidate chunk together and re-scores them by how
+well the passage answers the question. Chunk <code>c00002</code> explains how the regulator
+holds rail pressure, which is squarely on topic even though it shares fewer exact
+words with the query, so the reranker lifts it above the lexically similar but less
+useful <code>c00001</code>. That is why turning the reranker on is usually the first lever to
+try.</p>
+</blockquote>
+<p>Now promote the winner. The setting that won locally is <code>USE_SEMANTIC=true</code>, which
+maps to the App Configuration key <code>SEARCH_USE_SEMANTIC</code> (label <code>gpt-rag</code>). Set it to
+<code>true</code> so production retrieval uses the configuration you just validated, then re-run
+your normal evaluation to confirm the LLM-judge <strong>Relevance</strong> and <strong>Retrieval</strong>
+scores rise too. That is one full turn of the loop: a change you measured, proved,
+and shipped.</p>
+<h2 id="after-re-ingesting">After re-ingesting</h2>
 <p>Re-ingestion (for example after changing <code>CHUNKING_NUM_TOKENS</code>) rebuilds the index
 and assigns new chunk ids. Your old <code>qrels.json</code> points at ids that may no longer
 exist, so its labels become stale. After any re-ingestion:</p>
