@@ -43,14 +43,14 @@ effect after you re-ingest your documents, which rebuilds the index.
 
 ## Measure, do not guess
 
-GPT-RAG already ships an evaluation harness in the orchestrator (the
-`evaluations/` folder of `gpt-rag-orchestrator`) that runs Foundry's built-in
-evaluators against your golden dataset: **Relevance**, **Retrieval**,
-**Completeness**, and **Content Safety**. The two that speak to retrieval,
-**Relevance** and **Retrieval**, use an LLM judge and a 1 to 5 score, need no
-labels, and are cheap to run on every change, so they tell you *that* retrieval is
-weak. What they do not do is tell you *how to fix it* or let you compare two search
-configurations objectively.
+GPT-RAG agents are evaluated with the
+[AgentOps Accelerator](https://azure.github.io/agentops/tutorial-http-agent/),
+which runs Foundry's built-in evaluators against the live orchestrator endpoint
+and turns the result into a pull request gate. Evaluators like **Retrieval** and
+**Groundedness** use an LLM judge and a 1 to 5 score, need no labels, and are cheap
+to run on every change, so they tell you *that* retrieval is weak. What they do not
+do is tell you *how to fix it* or let you compare two search configurations
+objectively.
 
 Document Retrieval is the tuning tool. You give it two things per question:
 
@@ -67,7 +67,7 @@ top, the scores are high. If relevant chunks are buried or missing, the scores d
     Document Retrieval needs hand-labeled ground truth, and its labels reference
     specific chunk ids in your current index. Rebuilding the index can change those
     ids and invalidate the labels. That is fine for a deliberate tuning study, but
-    too brittle to run on every commit. Keep Relevance and Retrieval on your
+    too brittle to run on every commit. Keep Retrieval and Groundedness on your
     automated checks, and use Document Retrieval here, on demand, when you decide to
     improve search.
 
@@ -393,7 +393,7 @@ Practical guidance:
   afterward.
 
 When you are done, the improvement should show up downstream too. Better ranking
-feeds better context, so the LLM-judge **Relevance** and **Retrieval** scores
+feeds better context, so the LLM-judge **Retrieval** and **Groundedness** scores
 should rise as well. That is the loop closing: you tune retrieval here, and confirm
 the gain in your normal evaluation.
 
@@ -454,7 +454,7 @@ your labels were simply incomplete before trusting the gain.
 Now promote the winner. The setting that won locally is `USE_SEMANTIC=true`, which
 maps to the App Configuration key `SEARCH_USE_SEMANTIC` (label `gpt-rag`). Set it to
 `true` so production retrieval uses the configuration you just validated, then re-run
-your normal evaluation to confirm the LLM-judge **Relevance** and **Retrieval**
+your normal evaluation to confirm the LLM-judge **Retrieval** and **Groundedness**
 scores rise too. That is one full turn of the loop: a change you measured, proved,
 and shipped.
 
@@ -478,8 +478,8 @@ quick; re-labeling hundreds is not.
 - **Keep the labeled set focused.** This is a diagnostic and tuning surface, not a
   regression suite. A small, trusted set of questions is easier to maintain and
   reason about.
-- **It complements, it does not replace, your evaluation gate.** Relevance and
-  Retrieval stay on your automated checks. Document Retrieval is the deeper look you
+- **It complements, it does not replace, your evaluation gate.** Retrieval and
+  Groundedness stay on your automated checks. Document Retrieval is the deeper look you
   reach for when those scores say retrieval is the problem.
 - **The semantic reranker has a cost.** It improves ranking but adds latency and is
   billed per query. Confirm the `ndcg@3` gain is worth it before enabling it in
@@ -487,6 +487,7 @@ quick; re-labeling hundreds is not.
 
 ## Related
 
+- [Evaluate GPT-RAG with AgentOps](https://azure.github.io/agentops/tutorial-http-agent/): the pull request gate that scores the live orchestrator on every change.
 - [Foundry RAG evaluators](https://learn.microsoft.com/azure/ai-foundry/concepts/evaluation-evaluators/rag-evaluators): the full evaluator reference, including every Document Retrieval score key.
 - [Evaluate with the Azure AI Evaluation SDK](https://learn.microsoft.com/azure/ai-foundry/how-to/develop/evaluate-sdk): how the evaluator runs in code.
 - [Hybrid search in Azure AI Search](https://learn.microsoft.com/azure/search/hybrid-search-overview): how keyword and vector search combine.
