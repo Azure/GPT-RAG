@@ -1313,7 +1313,8 @@
 <li><strong>Conversations detail reconstructed from <code>questions[]</code>.</strong> Assistant replies live on the Azure AI Foundry agent thread, so the dialog now reconstructs user turns from Cosmos and shows a friendly note pointing to the Foundry thread for the assistant side, instead of empty cards.</li>
 <li><strong>Clearer Configuration buttons.</strong> <em>Reload settings cache</em> is renamed to <em>Refresh from App Configuration</em>, and both footer buttons now have sentence-case info tooltips that explain what each one actually does.</li>
 </ul>
-<p>Fixes <a href="https://github.com/Azure/gpt-rag-orchestrator/pull/246"><code>gpt-rag-orchestrator#246</code></a>. <a href="https://github.com/Azure/GPT-RAG/tree/v2.9.16">Release notes</a></p>
+<p>Fixes <a href="https://github.com/Azure/gpt-rag-orchestrator/pull/246"><code>gpt-rag-orchestrator#246</code></a>.</p>
+<p><a href="https://github.com/Azure/GPT-RAG/tree/v2.9.16">Release notes</a></p>
 <hr />
 <h4 id="release-2915-schedules-tab-and-auto-dismissing-run-now-toast">Release 2.9.15: Schedules tab and auto-dismissing Run now toast</h4>
 <p><em>Patch · ingestion <a href="https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.13">v2.4.13</a></em></p>
@@ -1322,7 +1323,8 @@
 <li><strong>New Schedules tab.</strong> The seven-button <em>Run now</em> strip and the <em>Queue and schedule</em> table were crowding the Jobs tab. They now live on a dedicated <strong>Schedules</strong> tab between <em>Jobs</em> and <em>Files</em>, so the order is <strong>Jobs | Schedules | Files | Configuration</strong>. Jobs goes back to a clean recent-runs view. All triggering and scheduling behavior is preserved, including the 1-second burst polling after each <em>Run now</em> click, the cron column, and the <em>Last run</em> summary per job type. Clicking <em>Run now</em> on Schedules keeps you on Schedules so you can watch the queue update.</li>
 <li><strong>Toast auto-dismiss.</strong> The green "Started <job_type>." toast no longer stays on screen forever. It auto-dismisses after 4 seconds, each toast has its own independent timer (a fresh trigger does not extend an older toast), and there is a manual close button. The warning toast for "already running" and the error toast follow the same behavior.</li>
 </ul>
-<p>Fixes <a href="https://github.com/Azure/gpt-rag-ingestion/pull/254"><code>gpt-rag-ingestion#254</code></a>. <a href="https://github.com/Azure/GPT-RAG/tree/v2.9.15">Release notes</a></p>
+<p>Fixes <a href="https://github.com/Azure/gpt-rag-ingestion/pull/254"><code>gpt-rag-ingestion#254</code></a>.</p>
+<p><a href="https://github.com/Azure/GPT-RAG/tree/v2.9.15">Release notes</a></p>
 <hr />
 <h4 id="release-2914-overview-tab-tooltip-casing-anonymous-user-count-and-custom-range-editor">Release 2.9.14: Overview tab tooltip casing, anonymous user count, and custom range editor</h4>
 <p><em>Patch · orchestrator <a href="https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.11">v2.8.11</a></em></p>
@@ -1332,7 +1334,8 @@
 <li><strong>Active users counts anonymous traffic correctly.</strong> The card was showing one user per anonymous conversation (for example, 57 users for 57 anonymous conversations) because anonymous traffic uses a per-conversation Cosmos partition key written verbatim into <code>principal_id</code>. The aggregation now collapses every <code>principal_id</code> starting with <code>anonymous-</code> (or equal to <code>anonymous</code>) into a single bucket. Authenticated users are still counted by their Entra object id. Tooltip wording updated to match.</li>
 <li><strong>Custom range chip actually works.</strong> The From/To inputs were rendered but hidden inside the chip row's flex layout, and the chart momentarily went to zero on every range change. The picker now renders the date inputs on a dedicated full-width row directly under the chips with visible <code>From</code> / <code>To</code> labels and a short hint about the 365-day cap, and refreshes after the first successful load keep the chart and KPIs mounted with a small <code>Refreshing…</code> indicator.</li>
 </ul>
-<p>Fixes <a href="https://github.com/Azure/gpt-rag-orchestrator/issues/241"><code>gpt-rag-orchestrator#241</code></a>. <a href="https://github.com/Azure/GPT-RAG/tree/v2.9.14">Release notes</a></p>
+<p>Fixes <a href="https://github.com/Azure/gpt-rag-orchestrator/issues/241"><code>gpt-rag-orchestrator#241</code></a>.</p>
+<p><a href="https://github.com/Azure/GPT-RAG/tree/v2.9.14">Release notes</a></p>
 <hr />
 <h4 id="release-2913-dashboard-date-columns-reasoning_effort-overview-time-range-picker-and-tooltips">Release 2.9.13: Dashboard date columns, REASONING_EFFORT, Overview time-range picker and tooltips</h4>
 <p><em>Patch · orchestrator <a href="https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.10">v2.8.10</a></em></p>
@@ -1344,7 +1347,8 @@
 <li><strong><code>GET /api/dashboard/overview</code> accepts <code>from</code> and <code>to</code>.</strong> Validates <code>from &lt;= to</code>, caps the range at 365 days, returns <code>400</code> on invalid input, and keys the in-process cache on <code>(from, to)</code>.</li>
 <li><strong>Info tooltips on every Overview metric.</strong> Same primitive already used on the Configuration tab, so operators can confirm what each number measures without leaving the page.</li>
 </ul>
-<p>Fixes <a href="https://github.com/Azure/gpt-rag-orchestrator/issues/241"><code>gpt-rag-orchestrator#241</code></a>. <a href="https://github.com/Azure/GPT-RAG/tree/v2.9.13">Release notes</a></p>
+<p>Fixes <a href="https://github.com/Azure/gpt-rag-orchestrator/issues/241"><code>gpt-rag-orchestrator#241</code></a>.</p>
+<p><a href="https://github.com/Azure/GPT-RAG/tree/v2.9.13">Release notes</a></p>
 <hr />
 <h4 id="release-2912-configuration-tab-placeholder-polish">Release 2.9.12: Configuration tab placeholder polish</h4>
 <p><em>Patch · ingestion <a href="https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.12">v2.4.12</a></em></p>
@@ -1367,7 +1371,8 @@
 <li><strong>Collapsible panel, defaults collapsed.</strong> Chevron toggle, no more ~250 px push of the runs table on every page load. The expand/collapse preference persists in <code>localStorage</code> under <code>gpt-rag-ingestion.queuePanel.expanded</code>. Collapsed header still shows <code>N jobs scheduled, M in flight</code>.</li>
 <li><strong>New Last run column.</strong> Shows the most recent finished or failed run per job type as <code>&lt;relative time&gt; · &lt;status&gt; · &lt;indexed&gt; indexed</code> (for example <code>3s ago · finished · 0 indexed</code>), sourced from a new <code>last_run</code> field on each <code>/api/jobs/queue</code> item. Derived from the same cached runs store <code>/api/jobs/runs</code> reads, so the frontend still issues one request per poll.</li>
 </ul>
-<p>Polishes <a href="https://github.com/Azure/gpt-rag-ingestion/issues/247"><code>gpt-rag-ingestion#247</code></a>. <a href="https://github.com/Azure/GPT-RAG/tree/v2.9.11">Release notes</a></p>
+<p>Polishes <a href="https://github.com/Azure/gpt-rag-ingestion/issues/247"><code>gpt-rag-ingestion#247</code></a>.</p>
+<p><a href="https://github.com/Azure/GPT-RAG/tree/v2.9.11">Release notes</a></p>
 <hr />
 <h4 id="release-2910-operator-dashboard-queued-jobs-and-next-run-eta-per-job">Release 2.9.10: Operator dashboard: queued jobs and next-run ETA per job</h4>
 <p><em>Feature · ingestion <a href="https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.10">v2.4.10</a></em></p>
@@ -1380,20 +1385,23 @@
 <li>The current cron string.</li>
 </ul>
 <p>The <em>Run now</em> button is rendered disabled with a <code>Job already running</code> tooltip when the matching job is in flight, so operators learn before they click and get a <code>409 Conflict</code>. The panel reads from a new <code>GET /api/jobs/queue</code> endpoint (network-only auth, same posture as <code>GET /api/jobs</code> and <code>GET /api/config</code>). No persistent queue (Service Bus, Storage Queue, etc.) was added.</p>
-<p>Adds <a href="https://github.com/Azure/gpt-rag-ingestion/issues/247"><code>gpt-rag-ingestion#247</code></a>. <a href="https://github.com/Azure/GPT-RAG/tree/v2.9.10">Release notes</a></p>
+<p>Adds <a href="https://github.com/Azure/gpt-rag-ingestion/issues/247"><code>gpt-rag-ingestion#247</code></a>.</p>
+<p><a href="https://github.com/Azure/GPT-RAG/tree/v2.9.10">Release notes</a></p>
 <hr />
 <h4 id="release-299-configuration-tab-fix-follow-up">Release 2.9.9: Configuration tab fix follow-up</h4>
 <p><em>Patch · ingestion <a href="https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.9">v2.4.9</a></em></p>
 <p>v2.9.8 fixed the missing top-level <code>settings</code> array, but operators upgrading reported the <strong>Configuration tab in the ingestion dashboard was still blank</strong>.</p>
 <p>Second contract gap: each section was emitted as <code>{id, label, settings}</code> while the typed frontend <code>ConfigSection</code> reads <code>{id, title, keys}</code>. <code>section.keys.map(...)</code> crashed with <code>TypeError: undefined is not iterable</code> and the tab rendered nothing.</p>
 <p>v2.4.9 now also emits <code>title</code> (mirror of <code>label</code>) and <code>keys</code> (ordered list of setting keys, matching the nested <code>settings</code> order) on every section. The legacy <code>label</code> and nested <code>settings</code> fields stay, so no other callers are affected.</p>
-<p>Fixes the follow-up to <a href="https://github.com/Azure/gpt-rag-ingestion/issues/242"><code>gpt-rag-ingestion#242</code></a>. <a href="https://github.com/Azure/GPT-RAG/tree/v2.9.9">Release notes</a></p>
+<p>Fixes the follow-up to <a href="https://github.com/Azure/gpt-rag-ingestion/issues/242"><code>gpt-rag-ingestion#242</code></a>.</p>
+<p><a href="https://github.com/Azure/GPT-RAG/tree/v2.9.9">Release notes</a></p>
 <hr />
 <h4 id="release-298-configuration-tab-fix-in-the-ingestion-dashboard">Release 2.9.8: Configuration tab fix in the ingestion dashboard</h4>
 <p><em>Patch · ingestion <a href="https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.8">v2.4.8</a></em></p>
 <p>Operators who turned on <code>ENABLE_DASHBOARD=true</code> on the ingestion app saw the <strong>Configuration tab render blank</strong> in v2.9.7 (ingestion v2.4.7), because the ingestion <code>GET /api/config</code> endpoint did not return the flat <code>settings</code> array and <code>authEnabled</code> flag the typed frontend contract reads. The tab crashed with <code>TypeError: undefined is not iterable</code> and showed nothing.</p>
 <p>The endpoint now returns both the grouped <code>sections</code> view and a flat <code>settings</code> list (built from the same per-setting reader so the two views stay in lock-step), plus <code>authEnabled</code>. The Configuration tab loads as documented in v2.9.6. The allow-list, denylist, section grouping, and <code>Admin</code> app role gating are all unchanged.</p>
-<p>Fixes <a href="https://github.com/Azure/gpt-rag-ingestion/issues/242"><code>gpt-rag-ingestion#242</code></a>. <a href="https://github.com/Azure/GPT-RAG/tree/v2.9.8">Release notes</a></p>
+<p>Fixes <a href="https://github.com/Azure/gpt-rag-ingestion/issues/242"><code>gpt-rag-ingestion#242</code></a>.</p>
+<p><a href="https://github.com/Azure/GPT-RAG/tree/v2.9.8">Release notes</a></p>
 <hr />
 <h4 id="release-297-ai-landing-zone-preflight-quota-fix">Release 2.9.7: AI Landing Zone preflight quota fix</h4>
 <p><em>Patch · AI Landing Zone <a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.0.20">v2.0.20</a></em></p>
