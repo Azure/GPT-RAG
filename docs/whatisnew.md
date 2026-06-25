@@ -187,7 +187,8 @@ The latest June drop adds an opt-in **operator dashboard at `/dashboard`** on bo
 - **Authenticated per-conversation uploads end-to-end.** The uploader identity is preserved during ingestion, the active conversation id flows through retrieval, and uploaded chunks are indexed with ACL metadata so `single_agent_rag` can return them inside the same conversation.
 - **Foundry Agent Service v2 stabilization.** The orchestrator moves to the create-once/reuse model, the landing zone provisions the Cosmos DB data-plane RBAC that declarative and versioned Foundry agents require, and Dapr is explicitly enabled on the orchestrator, frontend, and ingestion Container Apps after the landing zone switched Dapr to opt-in.
 - **Sweden Central unblocked.** Late-June fixes scope the Foundry Cosmos data-plane role assignment at the database level and turn the Cosmos analytical storage preflight into a regional warning instead of a hard failure.
-- **Quality of life.** RAG search results expose a new `custom_metadata` field so retrieval can surface arbitrary blob metadata, and the deploy scripts now warn when `APP_CONFIG_ENDPOINT` drifts from the active azd environment.
+- **Custom metadata on RAG search results.** Search results expose a new `custom_metadata` field so retrieval can surface arbitrary blob metadata to the orchestrator.
+- **Deploy scripts catch App Configuration drift.** The deploy scripts now warn when `APP_CONFIG_ENDPOINT` drifts from the active azd environment, before the deployment touches anything.
 
 [Release notes](https://github.com/Azure/GPT-RAG/tree/v2.9.1)
 
