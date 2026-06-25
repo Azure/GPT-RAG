@@ -25,7 +25,9 @@ Five operator-reported fixes against the dashboard's **Overview** and **Conversa
 - **Conversations detail reconstructed from `questions[]`.** Assistant replies live on the Azure AI Foundry agent thread, so the dialog now reconstructs user turns from Cosmos and shows a friendly note pointing to the Foundry thread for the assistant side, instead of empty cards.
 - **Clearer Configuration buttons.** *Reload settings cache* is renamed to *Refresh from App Configuration*, and both footer buttons now have sentence-case info tooltips that explain what each one actually does.
 
-Fixes [`gpt-rag-orchestrator#246`](https://github.com/Azure/gpt-rag-orchestrator/pull/246). [Release notes](https://github.com/Azure/GPT-RAG/tree/v2.9.16)
+Fixes [`gpt-rag-orchestrator#246`](https://github.com/Azure/gpt-rag-orchestrator/pull/246).
+
+[Release notes](https://github.com/Azure/GPT-RAG/tree/v2.9.16)
 
 ---
 
@@ -37,7 +39,9 @@ Two operator-reported UX fixes on the ingestion dashboard. Orchestrator, UI, and
 - **New Schedules tab.** The seven-button *Run now* strip and the *Queue and schedule* table were crowding the Jobs tab. They now live on a dedicated **Schedules** tab between *Jobs* and *Files*, so the order is **Jobs | Schedules | Files | Configuration**. Jobs goes back to a clean recent-runs view. All triggering and scheduling behavior is preserved, including the 1-second burst polling after each *Run now* click, the cron column, and the *Last run* summary per job type. Clicking *Run now* on Schedules keeps you on Schedules so you can watch the queue update.
 - **Toast auto-dismiss.** The green "Started <job_type>." toast no longer stays on screen forever. It auto-dismisses after 4 seconds, each toast has its own independent timer (a fresh trigger does not extend an older toast), and there is a manual close button. The warning toast for "already running" and the error toast follow the same behavior.
 
-Fixes [`gpt-rag-ingestion#254`](https://github.com/Azure/gpt-rag-ingestion/pull/254). [Release notes](https://github.com/Azure/GPT-RAG/tree/v2.9.15)
+Fixes [`gpt-rag-ingestion#254`](https://github.com/Azure/gpt-rag-ingestion/pull/254).
+
+[Release notes](https://github.com/Azure/GPT-RAG/tree/v2.9.15)
 
 ---
 
@@ -50,7 +54,9 @@ P2 follow-up against the Overview tab dashboard shipped in v2.8.10. Three operat
 - **Active users counts anonymous traffic correctly.** The card was showing one user per anonymous conversation (for example, 57 users for 57 anonymous conversations) because anonymous traffic uses a per-conversation Cosmos partition key written verbatim into `principal_id`. The aggregation now collapses every `principal_id` starting with `anonymous-` (or equal to `anonymous`) into a single bucket. Authenticated users are still counted by their Entra object id. Tooltip wording updated to match.
 - **Custom range chip actually works.** The From/To inputs were rendered but hidden inside the chip row's flex layout, and the chart momentarily went to zero on every range change. The picker now renders the date inputs on a dedicated full-width row directly under the chips with visible `From` / `To` labels and a short hint about the 365-day cap, and refreshes after the first successful load keep the chart and KPIs mounted with a small `Refreshing…` indicator.
 
-Fixes [`gpt-rag-orchestrator#241`](https://github.com/Azure/gpt-rag-orchestrator/issues/241). [Release notes](https://github.com/Azure/GPT-RAG/tree/v2.9.14)
+Fixes [`gpt-rag-orchestrator#241`](https://github.com/Azure/gpt-rag-orchestrator/issues/241).
+
+[Release notes](https://github.com/Azure/GPT-RAG/tree/v2.9.14)
 
 ---
 
@@ -65,7 +71,9 @@ P1 patch against the operator dashboard shipped in v2.8.9. Other components unch
 - **`GET /api/dashboard/overview` accepts `from` and `to`.** Validates `from <= to`, caps the range at 365 days, returns `400` on invalid input, and keys the in-process cache on `(from, to)`.
 - **Info tooltips on every Overview metric.** Same primitive already used on the Configuration tab, so operators can confirm what each number measures without leaving the page.
 
-Fixes [`gpt-rag-orchestrator#241`](https://github.com/Azure/gpt-rag-orchestrator/issues/241). [Release notes](https://github.com/Azure/GPT-RAG/tree/v2.9.13)
+Fixes [`gpt-rag-orchestrator#241`](https://github.com/Azure/gpt-rag-orchestrator/issues/241).
+
+[Release notes](https://github.com/Azure/GPT-RAG/tree/v2.9.13)
 
 ---
 
@@ -96,7 +104,9 @@ Five operator-reported fixes against the *Queue and schedule* panel added in v2.
 - **Collapsible panel, defaults collapsed.** Chevron toggle, no more ~250 px push of the runs table on every page load. The expand/collapse preference persists in `localStorage` under `gpt-rag-ingestion.queuePanel.expanded`. Collapsed header still shows `N jobs scheduled, M in flight`.
 - **New Last run column.** Shows the most recent finished or failed run per job type as `<relative time> · <status> · <indexed> indexed` (for example `3s ago · finished · 0 indexed`), sourced from a new `last_run` field on each `/api/jobs/queue` item. Derived from the same cached runs store `/api/jobs/runs` reads, so the frontend still issues one request per poll.
 
-Polishes [`gpt-rag-ingestion#247`](https://github.com/Azure/gpt-rag-ingestion/issues/247). [Release notes](https://github.com/Azure/GPT-RAG/tree/v2.9.11)
+Polishes [`gpt-rag-ingestion#247`](https://github.com/Azure/gpt-rag-ingestion/issues/247).
+
+[Release notes](https://github.com/Azure/GPT-RAG/tree/v2.9.11)
 
 ---
 
@@ -115,7 +125,9 @@ A new compact *Queue and schedule* panel sits above the Jobs table, polls every 
 
 The *Run now* button is rendered disabled with a `Job already running` tooltip when the matching job is in flight, so operators learn before they click and get a `409 Conflict`. The panel reads from a new `GET /api/jobs/queue` endpoint (network-only auth, same posture as `GET /api/jobs` and `GET /api/config`). No persistent queue (Service Bus, Storage Queue, etc.) was added.
 
-Adds [`gpt-rag-ingestion#247`](https://github.com/Azure/gpt-rag-ingestion/issues/247). [Release notes](https://github.com/Azure/GPT-RAG/tree/v2.9.10)
+Adds [`gpt-rag-ingestion#247`](https://github.com/Azure/gpt-rag-ingestion/issues/247).
+
+[Release notes](https://github.com/Azure/GPT-RAG/tree/v2.9.10)
 
 ---
 
@@ -128,7 +140,9 @@ Second contract gap: each section was emitted as `{id, label, settings}` while t
 
 v2.4.9 now also emits `title` (mirror of `label`) and `keys` (ordered list of setting keys, matching the nested `settings` order) on every section. The legacy `label` and nested `settings` fields stay, so no other callers are affected.
 
-Fixes the follow-up to [`gpt-rag-ingestion#242`](https://github.com/Azure/gpt-rag-ingestion/issues/242). [Release notes](https://github.com/Azure/GPT-RAG/tree/v2.9.9)
+Fixes the follow-up to [`gpt-rag-ingestion#242`](https://github.com/Azure/gpt-rag-ingestion/issues/242).
+
+[Release notes](https://github.com/Azure/GPT-RAG/tree/v2.9.9)
 
 ---
 
@@ -139,7 +153,9 @@ Operators who turned on `ENABLE_DASHBOARD=true` on the ingestion app saw the **C
 
 The endpoint now returns both the grouped `sections` view and a flat `settings` list (built from the same per-setting reader so the two views stay in lock-step), plus `authEnabled`. The Configuration tab loads as documented in v2.9.6. The allow-list, denylist, section grouping, and `Admin` app role gating are all unchanged.
 
-Fixes [`gpt-rag-ingestion#242`](https://github.com/Azure/gpt-rag-ingestion/issues/242). [Release notes](https://github.com/Azure/GPT-RAG/tree/v2.9.8)
+Fixes [`gpt-rag-ingestion#242`](https://github.com/Azure/gpt-rag-ingestion/issues/242).
+
+[Release notes](https://github.com/Azure/GPT-RAG/tree/v2.9.8)
 
 ---
 
