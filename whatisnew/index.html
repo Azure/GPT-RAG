@@ -1425,7 +1425,8 @@
 <li><strong>Authenticated per-conversation uploads end-to-end.</strong> The uploader identity is preserved during ingestion, the active conversation id flows through retrieval, and uploaded chunks are indexed with ACL metadata so <code>single_agent_rag</code> can return them inside the same conversation.</li>
 <li><strong>Foundry Agent Service v2 stabilization.</strong> The orchestrator moves to the create-once/reuse model, the landing zone provisions the Cosmos DB data-plane RBAC that declarative and versioned Foundry agents require, and Dapr is explicitly enabled on the orchestrator, frontend, and ingestion Container Apps after the landing zone switched Dapr to opt-in.</li>
 <li><strong>Sweden Central unblocked.</strong> Late-June fixes scope the Foundry Cosmos data-plane role assignment at the database level and turn the Cosmos analytical storage preflight into a regional warning instead of a hard failure.</li>
-<li><strong>Quality of life.</strong> RAG search results expose a new <code>custom_metadata</code> field so retrieval can surface arbitrary blob metadata, and the deploy scripts now warn when <code>APP_CONFIG_ENDPOINT</code> drifts from the active azd environment.</li>
+<li><strong>Custom metadata on RAG search results.</strong> Search results expose a new <code>custom_metadata</code> field so retrieval can surface arbitrary blob metadata to the orchestrator.</li>
+<li><strong>Deploy scripts catch App Configuration drift.</strong> The deploy scripts now warn when <code>APP_CONFIG_ENDPOINT</code> drifts from the active azd environment, before the deployment touches anything.</li>
 </ul>
 <p><a href="https://github.com/Azure/GPT-RAG/tree/v2.9.1">Release notes</a></p>
 <hr />
