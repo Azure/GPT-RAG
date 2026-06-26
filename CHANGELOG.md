@@ -119,6 +119,31 @@ The following component versions are pinned for this release:
 | gpt-rag-ingestion | v2.4.13 |
 | bicep-ptn-aiml-landing-zone | v2.1.1 |
 
+## [v2.9.16] - 2026-06-19
+
+### User and operator impact
+
+Patch release that bumps the orchestrator pin from [`v2.8.11`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.11) to [`v2.8.12`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.12). No other component changed: UI, ingestion, and AI Landing Zone pins are identical to v2.9.15. The orchestrator update is a P1 follow-up on the operator dashboard's Overview and Conversations tabs: the Custom range date inputs now cap at today and clamp any stored future date on load; the `to=YYYY-MM-DD` query parameter is now inclusive of the entire end day instead of stopping at midnight UTC; Overview tooltips render on an opaque background so they are readable over the cards behind them; the Conversations dialog reconstructs user turns from the persisted prompts (with a friendly note pointing to the Azure AI Foundry agent thread for the full transcript) instead of showing empty cards; and the Configuration tab's *Reload settings cache* button is renamed to *Refresh from App Configuration* with sentence-case info tooltips on both footer buttons explaining what each one does. See [Azure/gpt-rag-orchestrator#246](https://github.com/Azure/gpt-rag-orchestrator/pull/246).
+
+### Changed
+
+- **Orchestrator pin bumped to [`v2.8.12`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.12):** Operator-reported follow-up on the dashboard Overview and Conversations tabs. Caps Custom range date inputs at today (UTC), makes the `to` parameter end-of-day inclusive, rejects future ranges with HTTP 400, gives tooltips an opaque background, reconstructs conversation detail from persisted prompts with a Foundry deep-link note, and clarifies the Configuration tab button labels and tooltips.
+
+- **UI pin unchanged:** [`v2.3.13`](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.3.13).
+- **Ingestion pin unchanged:** [`v2.4.13`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.13).
+- **Infra (AI Landing Zone) pin unchanged:** [`v2.0.20`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.0.20).
+
+### Validation
+
+The following component versions are pinned for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v2.8.12 |
+| gpt-rag-ingestion | v2.4.13 |
+| AI Landing Zone | v2.0.20 |
+
 ## [v2.9.15] - 2026-06-19
 
 ### User and operator impact
