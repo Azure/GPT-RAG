@@ -1,5 +1,27 @@
 # Changelog
 
+## [v3.0.2] - 2026-06-26
+
+### User and operator impact
+
+Fixes the native Foundry IQ Blob Knowledge Source setup introduced in `v3.0.1`. New default deployments with `RETRIEVAL_BACKEND=foundry_iq` now create the Foundry IQ `azureBlob` Knowledge Source and Knowledge Base successfully for the standard Blob container path.
+
+### Fixed
+
+- **Native Blob permission defaults:** `FOUNDRY_IQ_INGESTION_PERMISSION_OPTIONS` now defaults to `["rbacScope"]`, which is accepted by Foundry IQ for `azureBlob` sources when `FOUNDRY_IQ_IS_ADLS_GEN2=false`. ADLS Gen2 deployments can still override this setting to include ACL-driven permission metadata when supported by the source.
+- **Native Blob Knowledge Source payload:** The setup now sends `ResourceId=<storage resource ID>;` for the storage connection string and leaves `chatCompletionModel` unset because Foundry IQ permission extraction rejects Blob indexers that include the Chat Completion skill.
+- **Foundry IQ setup validation:** The Search setup script now normalizes JSON-like App Configuration values before rendering Knowledge Source payloads, cleans up the previous `searchIndex` Knowledge Source when switching to native Blob, and fails the setup when Foundry IQ Knowledge Source or Knowledge Base creation fails instead of reporting a successful provision with missing resources.
+- **AI Landing Zone Bicep module pin bumped to [`v2.1.2`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.1.2):** Aligns the default native Blob permission option with the Foundry IQ service contract.
+
+The following component versions are pinned for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v3.0.1 |
+| gpt-rag-ingestion | v2.4.13 |
+| bicep-ptn-aiml-landing-zone | v2.1.2 |
+
 ## [v3.0.1] - 2026-06-26
 
 ### User and operator impact

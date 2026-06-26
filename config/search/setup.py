@@ -54,6 +54,41 @@ LABEL_FILTER = "gpt-rag"
 DEFAULT_KNOWLEDGE_API_VERSION = "2026-05-01-preview"
 
 # ── App Config Loader ───────────────────────────────────────────────────────
+def parse_json_like_setting(value: Any) -> Any:
+    if isinstance(value, str) and value.strip().startswith(("{", "[")):
+        try:
+            return json.loads(value)
+        except json.JSONDecodeError:
+            if '\\"' in value:
+                try:
+                    return json.loads(value.replace('\\"', '"'))
+                except json.JSONDecodeError:
+                    return value
+            return value
+    return value
+
+
+def normalize_json_like_settings(settings: Dict[str, Any]) -> Dict[str, Any]:
+    return {key: parse_json_like_setting(value) for key, value in settings.items()}
+
+
+def is_truthy_setting(value: Any) -> bool:
+    return str(value).strip().lower() in {"1", "true", "t", "yes", "y"}
+
+
+def normalize_foundry_iq_settings(settings: Dict[str, Any]) -> Dict[str, Any]:
+    kind = str(settings.get("FOUNDRY_IQ_KNOWLEDGE_SOURCE_KIND") or "").lower()
+    is_adls_gen2 = is_truthy_setting(settings.get("FOUNDRY_IQ_IS_ADLS_GEN2"))
+    if kind == "azureblob" and not is_adls_gen2:
+        allowed_options = {"rbacScope", "sensitivityLabels"}
+        options = settings.get("FOUNDRY_IQ_INGESTION_PERMISSION_OPTIONS")
+        if not isinstance(options, list):
+            options = ["rbacScope"]
+        filtered_options = [option for option in options if option in allowed_options]
+        settings["FOUNDRY_IQ_INGESTION_PERMISSION_OPTIONS"] = filtered_options or ["rbacScope"]
+    return settings
+
+
 def load_appconfig_settings(ac_client: AzureAppConfigurationClient, label_filter: Optional[str] = None) -> Dict[str, Any]:
     """
     Reads all settings from App Configuration under given label_filter (or None for no label).
@@ -63,14 +98,7 @@ def load_appconfig_settings(ac_client: AzureAppConfigurationClient, label_filter
     ctx = {}
     try:
         for setting in ac_client.list_configuration_settings(key_filter="*", label_filter=label_filter):
-            raw = setting.value
-            parsed = None
-            if isinstance(raw, str) and raw.strip().startswith(("{", "[")):
-                try:
-                    parsed = json.loads(raw)
-                except json.JSONDecodeError:
-                    parsed = None
-            ctx[setting.key] = parsed if parsed is not None else raw
+            ctx[setting.key] = parse_json_like_setting(setting.value)
     except Exception as e:
         logging.error(f"Error listing App Configuration settings: {e}")
     return ctx
@@ -224,6 +252,7 @@ def prepare_context_and_render(template_name: str, template_dir: str, label_filt
         logging.info(f"Processing variable template {VARS_TEMPLATE}")
         vars_dict = render_and_parse_json(VARS_TEMPLATE, context)
         if vars_dict:
+            vars_dict = normalize_foundry_iq_settings(normalize_json_like_settings(vars_dict))
             context.update(vars_dict)
             for key, val in vars_dict.items():
                 if isinstance(val, (dict, list)):
@@ -344,7 +373,14 @@ def cleanup_knowledge_resources(defs: dict, context: dict, cred: ChainedTokenCre
             kb_name = kb["name"]
             call_search_api(search_endpoint, get_knowledge_api_version(context), "knowledgebases", kb_name, "delete", cred)
 
-    knowledge_sources = defs.get("knowledgeSources", [])
+    knowledge_sources = list(defs.get("knowledgeSources", []))
+    search_index_ks_name = f"{context.get('SEARCH_RAG_INDEX_NAME')}-rag-ks"
+    blob_ks_name = f"{context.get('SEARCH_RAG_INDEX_NAME')}-blob-ks"
+    existing_ks_names = {ks["name"] for ks in knowledge_sources if ks.get("name")}
+    for name in (search_index_ks_name, blob_ks_name):
+        if name and name not in existing_ks_names:
+            knowledge_sources.append({"name": name})
+            existing_ks_names.add(name)
     if knowledge_sources:
         logging.info("🧹 Cleaning up existing knowledge sources...")
         for ks in knowledge_sources:
@@ -362,7 +398,7 @@ def provision_knowledge_sources(defs: dict, context: dict, cred: ChainedTokenCre
     knowledge_sources = defs.get("knowledgeSources", [])
     if not knowledge_sources:
         logging.info("🧠 No knowledge sources defined in template; skipping creation")
-        return
+        return True
 
     knowledge_api_version = get_knowledge_api_version(context)
     logging.info(f"🧠 Creating knowledge sources ({knowledge_api_version})...")
@@ -377,6 +413,7 @@ def provision_knowledge_sources(defs: dict, context: dict, cred: ChainedTokenCre
             logging.error(f"❗️ Failed to create knowledge source '{ks_name}'")
 
     logging.info(f"🧠 Knowledge sources creation completed: {success_count}/{len(knowledge_sources)} successful")
+    return success_count == len(knowledge_sources)
 
 
 def provision_knowledge_bases(defs: dict, context: dict, cred: ChainedTokenCredential, search_endpoint: str):
@@ -388,7 +425,7 @@ def provision_knowledge_bases(defs: dict, context: dict, cred: ChainedTokenCrede
     knowledge_bases = defs.get("knowledgeBases", [])
     if not knowledge_bases:
         logging.info("📚 No knowledge bases defined in template; skipping creation")
-        return
+        return True
 
     knowledge_api_version = get_knowledge_api_version(context)
     logging.info(f"📚 Creating knowledge bases ({knowledge_api_version})...")
@@ -403,6 +440,7 @@ def provision_knowledge_bases(defs: dict, context: dict, cred: ChainedTokenCrede
             logging.error(f"❗️ Failed to create knowledge base '{kb_name}'")
 
     logging.info(f"📚 Knowledge bases creation completed: {success_count}/{len(knowledge_bases)} successful")
+    return success_count == len(knowledge_bases)
 
 # ── Main Provisioning to AI Search elements (datasources, indexes, skillset and indexers) ─────────────────────
 def execute_setup(defs: Optional[dict], context: dict):
@@ -434,8 +472,10 @@ def execute_setup(defs: Optional[dict], context: dict):
     provision_indexers(defs, context, cred, search_endpoint, api_version)
     
     # Step 3: Provision knowledge base resources (KS -> KB)
-    provision_knowledge_sources(defs, context, cred, search_endpoint)
-    provision_knowledge_bases(defs, context, cred, search_endpoint)
+    knowledge_sources_ok = provision_knowledge_sources(defs, context, cred, search_endpoint)
+    knowledge_bases_ok = provision_knowledge_bases(defs, context, cred, search_endpoint)
+    if context.get("RETRIEVAL_BACKEND") == "foundry_iq" and (not knowledge_sources_ok or not knowledge_bases_ok):
+        raise RuntimeError("Foundry IQ knowledge source/base provisioning failed")
     
     logging.info("All components have been provisioned.")
 
