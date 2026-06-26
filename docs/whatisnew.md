@@ -2,6 +2,19 @@
 
 ### June 2026
 
+#### Release v3.0.4: Foundry IQ pin alignment
+*Patch · orchestrator [v3.0.2](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.0.2) · AI Landing Zone [v2.1.3](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.1.3)*
+
+Aligns the Foundry IQ release train end to end. Earlier `v3.0.x` tags claimed AI Landing Zone `v2.1.3` and orchestrator `v3.0.2` in their notes, but `manifest.json`, the `infra` submodule pointer, and the `RETRIEVAL_BACKEND` default never moved together. `v3.0.4` is the release that actually consumes those pins.
+
+- Default `RETRIEVAL_BACKEND` is now `foundry_iq`, matching the AI Landing Zone `v2.1.3` default. Operators who want the GPT-RAG ingestion plus Azure AI Search path can opt down with `azd env set RETRIEVAL_BACKEND ai_search` before provisioning.
+- Picks up the orchestrator `v3.0.2` `x-ms-query-source-authorization` forwarding fix that makes RBAC-filtered Knowledge Bases work end to end.
+- Fixes the native Blob Knowledge Source connection string so the Foundry IQ permission scope matches the container resource ID for query-time RBAC filtering.
+
+[Release notes](https://github.com/Azure/GPT-RAG/releases/tag/v3.0.4)
+
+---
+
 #### Release v3.0.2: Foundry IQ default
 *Feature preview · Azure/GPT-RAG [#526](https://github.com/Azure/GPT-RAG/issues/526)*
 
