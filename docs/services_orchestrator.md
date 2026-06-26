@@ -5,7 +5,7 @@ The Orchestrator is the core engine of GPT-RAG, an agentic orchestration layer b
 ## Key Features
 
 - **Strategy-Based Architecture:** Pluggable orchestration strategies selected via Azure App Configuration (`AGENT_STRATEGY`).
-- **Context Retrieval:** Intelligent retrieval from Azure AI Search with citation support and conservative retrieval-needed triage for local MAF strategies.
+- **Context Retrieval:** Intelligent retrieval from Azure AI Search or Foundry IQ with citation support and conservative retrieval-needed triage for local MAF strategies.
 - **Microsoft Agent Framework:** Built on the Microsoft Agent Framework.
 - **Conversation Persistence:** Maintains conversation history in Cosmos DB with real-time SSE streaming and bounded persisted history compaction.
 - **Extensible Design:** Easy to add new strategies by extending `BaseAgentStrategy`.
@@ -21,6 +21,19 @@ The Orchestrator supports multiple strategies. The active strategy is set via th
 | `single_agent_rag` | Single Agent RAG | Uses Azure AI Agents SDK with Agent Service for agentic RAG. Supports dynamic routing, streaming via event handlers, and pre-warming for low-latency first responses. |
 | `mcp` | MCP | Model Context Protocol strategy using Semantic Kernel. Connects to an MCP server for tool orchestration and passes user context via HTTP headers. |
 | `nl2sql` | NL2SQL | Natural language to SQL translation using Microsoft Agent Framework `ChatAgent` with local metadata lookup, SQL validation, and query execution. No Semantic Kernel or Agent Service agent creation is used in this path. |
+
+## Retrieval backend
+
+The orchestrator reads `RETRIEVAL_BACKEND` at startup:
+
+| Value | Behavior |
+| --- | --- |
+| `ai_search` | Uses the GPT-RAG Azure AI Search index directly. This is the safe default and rollback path. |
+| `foundry_iq` | Uses a Foundry IQ knowledge base. See [Retrieval backend selection](howto_retrieval_backend.md) for setup, security modes, and billing. |
+
+`maf_lite`, `maf_agent_service`, `single_agent_rag`, and `multimodal` are the
+RAG strategies affected by the backend selector. `mcp` and `nl2sql` do not use
+the GPT-RAG retrieval backend.
 
 ## Conversation History and Retrieval Controls
 
