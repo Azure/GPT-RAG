@@ -1,5 +1,30 @@
 # Changelog
 
+## [v3.0.4] - 2026-06-26
+
+### User and operator impact
+
+Aligns the Foundry IQ release train end to end. Earlier `v3.0.x` tags shipped CHANGELOG entries and GitHub Release notes that claimed AI Landing Zone `v2.1.3` and `gpt-rag-orchestrator` `v3.0.2`, but `manifest.json`, the `infra` submodule pointer, and the `RETRIEVAL_BACKEND` default never moved together. `v3.0.4` is the release that actually consumes those pins and makes the native Foundry IQ Blob default work consistently for new deployments.
+
+### Changed
+
+- **Default `RETRIEVAL_BACKEND` flipped from `ai_search` to `foundry_iq`** (`scripts/postProvision.ps1`). Matches the AI Landing Zone `v2.1.3` default so a fresh `azd up` lands on the native Foundry IQ Blob path without operators having to set `RETRIEVAL_BACKEND` by hand. Operators who want the GPT-RAG ingestion plus Azure AI Search path can opt down with `azd env set RETRIEVAL_BACKEND ai_search` before provisioning.
+- **`gpt-rag-orchestrator` pin bumped to [`v3.0.2`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.0.2):** Picks up the Foundry IQ `azureBlob` reference parsing fix and the `x-ms-query-source-authorization` forwarding fix that makes RBAC-filtered Knowledge Bases work end to end (closes the orchestrator-side half of [#508](https://github.com/Azure/GPT-RAG/issues/508)).
+- **AI Landing Zone Bicep module pin reaffirmed at [`v2.1.3`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.1.3):** `manifest.json`, `.gitmodules`, and the `infra` submodule HEAD are now all aligned on `v2.1.3`.
+
+### Fixed
+
+- **Native Blob Knowledge Source connection string** (`config/search/search.j2`): removed the trailing semicolon from `ResourceId={{STORAGE_ACCOUNT_RESOURCE_ID}}`. The semicolon caused the Foundry IQ permission scope to be derived from a malformed resource ID, so RBAC-filtered query-time filtering did not match the actual container. Without this fix, RBAC-trim retrieval against the native Blob Knowledge Source silently returned no documents.
+
+The following component versions are pinned for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v3.0.2 |
+| gpt-rag-ingestion | v2.4.13 |
+| bicep-ptn-aiml-landing-zone | v2.1.3 |
+
 ## [v3.0.3] - 2026-06-26
 
 ### User and operator impact
@@ -46,7 +71,7 @@ Fixes the native Foundry IQ Blob Knowledge Source setup introduced in `v3.0.1`. 
 ### Fixed
 
 - **Native Blob permission defaults:** `FOUNDRY_IQ_INGESTION_PERMISSION_OPTIONS` now defaults to `["rbacScope"]`, which is accepted by Foundry IQ for `azureBlob` sources when `FOUNDRY_IQ_IS_ADLS_GEN2=false`. ADLS Gen2 deployments can still override this setting to include ACL-driven permission metadata when supported by the source.
-- **Native Blob Knowledge Source payload:** The setup now sends `ResourceId=<storage resource ID>;` for the storage connection string and leaves `chatCompletionModel` unset because Foundry IQ permission extraction rejects Blob indexers that include the Chat Completion skill.
+- **Native Blob Knowledge Source payload:** The setup now sends `ResourceId=<storage resource ID>` for the storage connection string, without a trailing semicolon, so the generated Blob permission scope matches the container resource ID used by query-time RBAC filtering. It also leaves `chatCompletionModel` unset because Foundry IQ permission extraction rejects Blob indexers that include the Chat Completion skill.
 - **Foundry IQ setup validation:** The Search setup script now normalizes JSON-like App Configuration values before rendering Knowledge Source payloads, cleans up the previous `searchIndex` Knowledge Source when switching to native Blob, and fails the setup when Foundry IQ Knowledge Source or Knowledge Base creation fails instead of reporting a successful provision with missing resources.
 - **AI Landing Zone Bicep module pin bumped to [`v2.1.2`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.1.2):** Aligns the default native Blob permission option with the Foundry IQ service contract.
 

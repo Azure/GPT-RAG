@@ -1,5 +1,5 @@
 {
-  "tag": "v3.0.2",
+  "tag": "v3.0.4",
   "repo": "https://github.com/azure/gpt-rag.git",
   "ailz_tag": "v2.1.3",
   "components": [
@@ -11,7 +11,7 @@
     {
       "name": "gpt-rag-orchestrator",
       "repo": "https://github.com/azure/gpt-rag-orchestrator.git",
-      "tag": "v3.0.1"
+      "tag": "v3.0.2"
     },
     {
       "name": "gpt-rag-ingestion",

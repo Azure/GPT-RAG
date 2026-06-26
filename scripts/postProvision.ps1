@@ -233,7 +233,7 @@ function Set-GptRagAppConfiguration {
         [ordered]@{ canonical_name = 'EMBEDDING_DEPLOYMENT_NAME'; capacity = 100; model = [ordered]@{ format = 'OpenAI'; name = 'text-embedding-3-large'; version = '1' }; name = 'text-embedding'; version = '1'; apiVersion = '2025-01-01-preview'; endpoint = "https://$foundryName.openai.azure.com/" }
     )
 
-    $retrievalBackend = Get-OptionalEnvValue 'RETRIEVAL_BACKEND' 'ai_search'
+    $retrievalBackend = Get-OptionalEnvValue 'RETRIEVAL_BACKEND' 'foundry_iq'
     $foundryIqPattern = Get-OptionalEnvValue 'FOUNDRY_IQ_PATTERN' 'azureBlob'
     $ragIndexName = "ragindex-$resourceToken"
     $knowledgeBaseName = Get-OptionalEnvValue 'KNOWLEDGE_BASE_NAME' "$ragIndexName-rag-kb"

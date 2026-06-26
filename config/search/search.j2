@@ -350,7 +350,7 @@
       "description": "RAG documents knowledge source (native Azure Blob Storage ingestion)",
       "encryptionKey": null,
       "azureBlobParameters": {
-        "connectionString": "ResourceId={{STORAGE_ACCOUNT_RESOURCE_ID}};",
+        "connectionString": "ResourceId={{STORAGE_ACCOUNT_RESOURCE_ID}}",
         "containerName": "{{FOUNDRY_IQ_STORAGE_CONTAINER_NAME}}",
         "folderPath": {% if FOUNDRY_IQ_STORAGE_FOLDER_PATH %}"{{FOUNDRY_IQ_STORAGE_FOLDER_PATH}}"{% else %}null{% endif %},
         "isADLSGen2": {{FOUNDRY_IQ_IS_ADLS_GEN2 | lower}},
