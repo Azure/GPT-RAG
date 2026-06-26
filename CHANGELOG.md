@@ -11,8 +11,8 @@ Foundry IQ deployments now default to native Blob or ADLS Gen2 Knowledge Sources
 ### Added
 
 - **Foundry IQ retrieval backend support** ([#526](https://github.com/Azure/GPT-RAG/issues/526)). Adds the GPT-RAG configuration, deployment pins, and documentation needed to run retrieval through Foundry IQ.
-- **AI Landing Zone Bicep module pin bumped to [`v2.1.0`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.1.0):** Adds Foundry IQ Knowledge Base and Knowledge Source runtime configuration, `knowledgeRetrieval` billing configuration, App Configuration values, post-provision data-plane setup, and Azure AI Search semantic ranker standard.
-- **Orchestrator pin bumped to [`v3.0.0`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.0.0):** Adds the selectable `RETRIEVAL_BACKEND=foundry_iq` runtime backend, OBO header support for native permissions, Pattern B `filterAddOn` support, the minimal-reasoning retrieve API contract, and configurable Knowledge Source kind support.
+- **AI Landing Zone Bicep module pin bumped to [`v2.1.1`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.1.1):** Adds Foundry IQ Knowledge Base and Knowledge Source runtime configuration, `knowledgeRetrieval` billing configuration, native Blob/ADLS Knowledge Source defaults, App Configuration values, post-provision data-plane setup, and Azure AI Search semantic ranker standard.
+- **Orchestrator pin bumped to [`v3.0.1`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.0.1):** Adds the selectable `RETRIEVAL_BACKEND=foundry_iq` runtime backend, OBO header support for native permissions, Pattern B `filterAddOn` support, the minimal-reasoning retrieve API contract, and configurable Knowledge Source kind support.
 - **Foundry IQ App Configuration defaults:** `postProvision.ps1` and `config/search/search.settings.j2` now seed the generated Knowledge Base name, native Blob Knowledge Source name, Knowledge Source kind, Search endpoint, storage container, folder path, ADLS mode, content extraction mode, permission options, and semantic configuration so the deployed app can use the generated Foundry IQ resources without manual repair.
 - **Documentation:** Covers Foundry IQ deployment patterns, authorization behavior, migration, rollback, billing, limitations, and troubleshooting.
 
@@ -31,9 +31,9 @@ The following component versions are pinned for this release:
 | Component | Version |
 | --- | --- |
 | gpt-rag-ui | v2.3.13 |
-| gpt-rag-orchestrator | v3.0.0 |
+| gpt-rag-orchestrator | v3.0.1 |
 | gpt-rag-ingestion | v2.4.13 |
-| bicep-ptn-aiml-landing-zone | v2.1.0 |
+| bicep-ptn-aiml-landing-zone | v2.1.1 |
 
 ## [v2.9.15] - 2026-06-19
 
