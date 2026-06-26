@@ -1,5 +1,42 @@
 # Changelog
 
+## [v3.0.3] - 2026-06-26
+
+### User and operator impact
+
+Changes the default Foundry IQ native Blob content extraction mode from `minimal` to `standard` so that scanned and image-only PDFs are ingested with OCR by default. Under the previous `minimal` default, such PDFs were ingested with empty content and were silently unsearchable, which is the wrong default behavior for typical document libraries.
+
+`standard` mode uses the Foundry IQ Content Understanding skill (`Microsoft.Skills.Util.ContentUnderstandingSkill`) for layout, OCR, and structured extraction. It carries explicit prerequisites and limits that operators should be aware of:
+
+- The Foundry resource must live in a [Content Understanding-supported region](https://learn.microsoft.com/azure/ai-services/content-understanding/service-limits#region-support).
+- Content Understanding may require a one-time `PATCH /contentunderstanding/defaults` call against the Foundry resource on first use, otherwise Knowledge Source creation fails with `DefaultsNotSet`.
+- `standard` has per-document limits of 300 pages and 5 minutes of processing time.
+- `standard` is billed through Content Understanding meters in addition to the existing Azure AI Search `knowledgeRetrieval` plan.
+
+Operators who only ingest text PDFs and want to avoid Content Understanding billing can opt down to `minimal` before provisioning:
+
+```powershell
+azd env set FOUNDRY_IQ_CONTENT_EXTRACTION_MODE minimal
+```
+
+`FOUNDRY_IQ_CONTENT_EXTRACTION_MODE` is immutable on an existing Knowledge Source. Changing the value after deployment requires recreating the Knowledge Source and the Knowledge Base that references it.
+
+Documents that exceed the `standard` mode limits, or scenarios that need custom chunking, custom enrichment, or Excel chunking, should keep the GPT-RAG ingestion plus Azure AI Search path (`RETRIEVAL_BACKEND=ai_search` or `FOUNDRY_IQ_PATTERN=searchIndex`).
+
+### Changed
+
+- **Default `FOUNDRY_IQ_CONTENT_EXTRACTION_MODE` is now `standard`.** `scripts/postProvision.ps1` stamps `standard` into App Configuration for new deployments. Operators can opt down to `minimal` before provisioning. The setting is immutable after Knowledge Source creation.
+- **AI Landing Zone Bicep module pin bumped to [`v2.1.3`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.1.3):** Aligns the Bicep `foundryIqContentExtractionMode` default and the `${FOUNDRY_IQ_CONTENT_EXTRACTION_MODE=standard}` substitution with the new GPT-RAG default.
+
+The following component versions are pinned for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v3.0.1 |
+| gpt-rag-ingestion | v2.4.13 |
+| bicep-ptn-aiml-landing-zone | v2.1.3 |
+
 ## [v3.0.2] - 2026-06-26
 
 ### User and operator impact
