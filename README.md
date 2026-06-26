@@ -35,24 +35,13 @@ For unattended provisioning, set `AZURE_SKIP_NETWORK_ISOLATION_WARNING=true` to 
 
 ## Retrieval backend configuration
 
-GPT-RAG supports Azure AI Search as the direct retrieval backend and is adding Foundry IQ as a first-class backend for v3 deployments. Existing deployments should keep `RETRIEVAL_BACKEND=ai_search` until they intentionally migrate.
+GPT-RAG supports Azure AI Search as the direct retrieval backend and is adding
+Foundry IQ as a first-class backend for v3 deployments. Existing deployments
+should keep `RETRIEVAL_BACKEND=ai_search` until they intentionally migrate.
 
-For Foundry IQ there are two supported patterns:
-
-| Pattern | Use when | Security notes |
-| --- | --- | --- |
-| Foundry-managed ingestion | Foundry IQ owns the source connector and indexing flow. | Native per-user permissions require supported sources and `FOUNDRY_IQ_API_VERSION=2026-05-01-preview`. Plain Blob sources are container-level RBAC only. |
-| Existing GPT-RAG search index as `searchIndex` | You need GPT-RAG runtime uploads, existing chunking/schema, or `metadata_security_id` security trimming. | Query-time `filterAddOn` handles GPT-RAG security fields and is separate from the OBO authorization header. |
-
-Important settings:
-
-- `RETRIEVAL_BACKEND`: `ai_search` or `foundry_iq`.
-- `KNOWLEDGE_BASE_NAME`, `KNOWLEDGE_BASE_ENDPOINT`, `KNOWLEDGE_BASE_CONNECTION_ID`: Foundry IQ knowledge base targeting. The knowledge-base connection is dedicated and must not reuse `SEARCH_CONNECTION_ID`.
-- `FOUNDRY_IQ_API_VERSION`: keep `2026-05-01-preview` when native permissions or Pattern B `filterAddOn` are enabled.
-- `FOUNDRY_IQ_KNOWLEDGE_RETRIEVAL_BILLING_PLAN`: `free` uses the included Azure AI Search agentic retrieval allowance; `standard` opts in to pay-as-you-go after that allowance.
-- `FOUNDRY_IQ_KNOWLEDGE_SOURCE_NAME`, `FOUNDRY_IQ_FILTER_ADD_ON_ENABLED`, `FOUNDRY_IQ_SECURITY_FIELD_NAME`: Pattern B query-time filtering settings.
-
-After the AI Landing Zone support is pinned, Pattern B knowledge sources and knowledge bases are created with `infra/scripts/Configure-FoundryIQKnowledgeBase.ps1`. Do not claim plain Blob per-document security unless the source uses ADLS Gen2 ACLs, Purview, SharePoint, OneLake/Fabric, or Pattern B.
+For the operator guide, including Pattern A vs Pattern B, security modes,
+`knowledgeRetrieval` billing, rollback, and known limitations, see the
+published docs: [Retrieval backend selection](https://azure.github.io/GPT-RAG/howto_retrieval_backend/).
 
 ## Architecture
 
