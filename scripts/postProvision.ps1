@@ -234,7 +234,7 @@ function Set-GptRagAppConfiguration {
     )
 
     $retrievalBackend = Get-OptionalEnvValue 'RETRIEVAL_BACKEND' 'ai_search'
-    $foundryIqPattern = Get-OptionalEnvValue 'FOUNDRY_IQ_PATTERN' 'searchIndex'
+    $foundryIqPattern = Get-OptionalEnvValue 'FOUNDRY_IQ_PATTERN' 'azureBlob'
     $ragIndexName = "ragindex-$resourceToken"
     $knowledgeBaseName = Get-OptionalEnvValue 'KNOWLEDGE_BASE_NAME' "$ragIndexName-rag-kb"
     $knowledgeBaseConnectionName = Get-OptionalEnvValue 'KNOWLEDGE_BASE_CONNECTION_NAME' "$environmentName-knowledge-base-connection"
@@ -250,8 +250,20 @@ function Set-GptRagAppConfiguration {
     else {
         ''
     }
-    $foundryIqKnowledgeSourceName = if ($retrievalBackend -eq 'foundry_iq' -and $foundryIqPattern -eq 'searchIndex') {
-        Get-OptionalEnvValue 'FOUNDRY_IQ_KNOWLEDGE_SOURCE_NAME' "$ragIndexName-rag-ks"
+    $foundryIqDefaultKnowledgeSourceName = if ($foundryIqPattern -eq 'searchIndex') {
+        "$ragIndexName-rag-ks"
+    }
+    else {
+        "$ragIndexName-blob-ks"
+    }
+    $foundryIqKnowledgeSourceName = if ($retrievalBackend -eq 'foundry_iq') {
+        Get-OptionalEnvValue 'FOUNDRY_IQ_KNOWLEDGE_SOURCE_NAME' $foundryIqDefaultKnowledgeSourceName
+    }
+    else {
+        ''
+    }
+    $foundryIqKnowledgeSourceKind = if ($retrievalBackend -eq 'foundry_iq') {
+        Get-OptionalEnvValue 'FOUNDRY_IQ_KNOWLEDGE_SOURCE_KIND' $foundryIqPattern
     }
     else {
         ''
@@ -272,6 +284,12 @@ function Set-GptRagAppConfiguration {
         FOUNDRY_IQ_API_VERSION = (Get-OptionalEnvValue 'FOUNDRY_IQ_API_VERSION' '2026-05-01-preview')
         FOUNDRY_IQ_KNOWLEDGE_RETRIEVAL_BILLING_PLAN = (Get-OptionalEnvValue 'FOUNDRY_IQ_KNOWLEDGE_RETRIEVAL_BILLING_PLAN' 'free')
         FOUNDRY_IQ_KNOWLEDGE_SOURCE_NAME = $foundryIqKnowledgeSourceName
+        FOUNDRY_IQ_KNOWLEDGE_SOURCE_KIND = $foundryIqKnowledgeSourceKind
+        FOUNDRY_IQ_STORAGE_CONTAINER_NAME = (Get-OptionalEnvValue 'FOUNDRY_IQ_STORAGE_CONTAINER_NAME' 'documents')
+        FOUNDRY_IQ_STORAGE_FOLDER_PATH = (Get-OptionalEnvValue 'FOUNDRY_IQ_STORAGE_FOLDER_PATH')
+        FOUNDRY_IQ_IS_ADLS_GEN2 = (Get-OptionalEnvValue 'FOUNDRY_IQ_IS_ADLS_GEN2' 'false')
+        FOUNDRY_IQ_CONTENT_EXTRACTION_MODE = (Get-OptionalEnvValue 'FOUNDRY_IQ_CONTENT_EXTRACTION_MODE' 'minimal')
+        FOUNDRY_IQ_INGESTION_PERMISSION_OPTIONS = (Get-OptionalEnvValue 'FOUNDRY_IQ_INGESTION_PERMISSION_OPTIONS' '["userIds","groupIds","rbacScope"]')
         FOUNDRY_IQ_SEARCH_INDEX_NAME = (Get-OptionalEnvValue 'FOUNDRY_IQ_SEARCH_INDEX_NAME' $ragIndexName)
         FOUNDRY_IQ_SEMANTIC_CONFIGURATION_NAME = (Get-OptionalEnvValue 'FOUNDRY_IQ_SEMANTIC_CONFIGURATION_NAME' 'semantic-config')
         FOUNDRY_IQ_FILTER_ADD_ON_ENABLED = (Get-OptionalEnvValue 'FOUNDRY_IQ_FILTER_ADD_ON_ENABLED' 'false')
