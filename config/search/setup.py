@@ -51,7 +51,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 TEMPLATE_NAME = "search.j2"
 VARS_TEMPLATE = "search.settings.j2"
 LABEL_FILTER = "gpt-rag"
-KNOWLEDGE_API_VERSION = "2025-11-01-preview"
+DEFAULT_KNOWLEDGE_API_VERSION = "2026-05-01-preview"
 
 # ── App Config Loader ───────────────────────────────────────────────────────
 def load_appconfig_settings(ac_client: AzureAppConfigurationClient, label_filter: Optional[str] = None) -> Dict[str, Any]:
@@ -326,6 +326,10 @@ def provision_indexers(defs: dict, context: dict, cred: ChainedTokenCredential, 
         call_search_api(search_endpoint, api_version, "indexers", name, "delete", cred)
         call_search_api(search_endpoint, api_version, "indexers", name, "put", cred, body)
 
+def get_knowledge_api_version(context: dict) -> str:
+    return str(context.get("FOUNDRY_IQ_API_VERSION") or DEFAULT_KNOWLEDGE_API_VERSION)
+
+
 def cleanup_knowledge_resources(defs: dict, context: dict, cred: ChainedTokenCredential, search_endpoint: str):
     """Clean up knowledge base resources in the correct order:
     1) Delete knowledge bases (they reference knowledge sources)
@@ -338,20 +342,21 @@ def cleanup_knowledge_resources(defs: dict, context: dict, cred: ChainedTokenCre
         logging.info("🧹 Cleaning up existing knowledge bases...")
         for kb in knowledge_bases:
             kb_name = kb["name"]
-            call_search_api(search_endpoint, KNOWLEDGE_API_VERSION, "knowledgebases", kb_name, "delete", cred)
+            call_search_api(search_endpoint, get_knowledge_api_version(context), "knowledgebases", kb_name, "delete", cred)
 
     knowledge_sources = defs.get("knowledgeSources", [])
     if knowledge_sources:
         logging.info("🧹 Cleaning up existing knowledge sources...")
         for ks in knowledge_sources:
             ks_name = ks["name"]
-            call_search_api(search_endpoint, KNOWLEDGE_API_VERSION, "knowledgesources", ks_name, "delete", cred)
+            call_search_api(search_endpoint, get_knowledge_api_version(context), "knowledgesources", ks_name, "delete", cred)
 
 
 def provision_knowledge_sources(defs: dict, context: dict, cred: ChainedTokenCredential, search_endpoint: str):
-    """Create or update knowledge sources (2025-11-01-preview).
+    """Create or update Foundry IQ knowledge sources.
 
     Knowledge sources are top-level objects. For searchIndex knowledge sources, the referenced index must already exist.
+    Native Blob/ADLS knowledge sources require the 2026-05-01-preview API when ingesting permissions.
     """
 
     knowledge_sources = defs.get("knowledgeSources", [])
@@ -359,12 +364,13 @@ def provision_knowledge_sources(defs: dict, context: dict, cred: ChainedTokenCre
         logging.info("🧠 No knowledge sources defined in template; skipping creation")
         return
 
-    logging.info("🧠 Creating knowledge sources (2025-11-01-preview)...")
+    knowledge_api_version = get_knowledge_api_version(context)
+    logging.info(f"🧠 Creating knowledge sources ({knowledge_api_version})...")
     success_count = 0
     for ks in knowledge_sources:
         ks_name = ks["name"]
         body = ks
-        success = call_search_api(search_endpoint, KNOWLEDGE_API_VERSION, "knowledgesources", ks_name, "put", cred, body)
+        success = call_search_api(search_endpoint, knowledge_api_version, "knowledgesources", ks_name, "put", cred, body)
         if success:
             success_count += 1
         else:
@@ -374,7 +380,7 @@ def provision_knowledge_sources(defs: dict, context: dict, cred: ChainedTokenCre
 
 
 def provision_knowledge_bases(defs: dict, context: dict, cred: ChainedTokenCredential, search_endpoint: str):
-    """Create or update knowledge bases (2025-11-01-preview).
+    """Create or update Foundry IQ knowledge bases.
 
     This repo uses outputMode=extractiveData and retrievalReasoningEffort=minimal so it doesn't depend on an LLM.
     """
@@ -384,12 +390,13 @@ def provision_knowledge_bases(defs: dict, context: dict, cred: ChainedTokenCrede
         logging.info("📚 No knowledge bases defined in template; skipping creation")
         return
 
-    logging.info("📚 Creating knowledge bases (2025-11-01-preview)...")
+    knowledge_api_version = get_knowledge_api_version(context)
+    logging.info(f"📚 Creating knowledge bases ({knowledge_api_version})...")
     success_count = 0
     for kb in knowledge_bases:
         kb_name = kb["name"]
         body = kb
-        success = call_search_api(search_endpoint, KNOWLEDGE_API_VERSION, "knowledgebases", kb_name, "put", cred, body)
+        success = call_search_api(search_endpoint, knowledge_api_version, "knowledgebases", kb_name, "put", cred, body)
         if success:
             success_count += 1
         else:
