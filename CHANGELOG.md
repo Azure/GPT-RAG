@@ -1,10 +1,10 @@
 # Changelog
 
-## [v3.0.0] - 2026-06-26
+## [v3.0.1] - 2026-06-26
 
 ### User and operator impact
 
-Adds end-to-end Foundry IQ retrieval support to GPT-RAG. Operators can now deploy GPT-RAG with either the existing Azure AI Search retrieval path or the new Foundry IQ retrieval backend using a documented, repeatable release path.
+Corrects the Foundry IQ release default so `RETRIEVAL_BACKEND=foundry_iq` uses native Blob or ADLS Gen2 Knowledge Sources by default. Operators can still opt into the existing Azure AI Search `searchIndex` registration path when they specifically need Pattern B `filterAddOn`.
 
 Foundry IQ deployments now default to native Blob or ADLS Gen2 Knowledge Sources, so Foundry IQ owns file processing and permission-aware retrieval when `RETRIEVAL_BACKEND=foundry_iq`. The existing GPT-RAG ingestion plus Azure AI Search `searchIndex` Knowledge Source path remains available as explicit Pattern B opt-in for custom security fields with `filterAddOn`.
 
