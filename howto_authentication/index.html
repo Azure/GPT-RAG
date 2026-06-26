@@ -1145,11 +1145,11 @@
 <p>When <code>RETRIEVAL_BACKEND=foundry_iq</code>, there are two security paths. Native
 Foundry IQ sources use the <code>x-ms-query-source-authorization</code> OBO header only
 when permissions were ingested from a supported source such as ADLS Gen2
-ACLs, SharePoint, OneLake/Fabric, or Purview labels. Pattern B, where the
-existing GPT-RAG index is registered as a <code>searchIndex</code> knowledge source,
-uses an OData <code>filterAddOn</code> over GPT-RAG security fields instead. Plain Blob
-storage is container-level RBAC for this purpose unless Purview labels or an
-equivalent per-document permission source are used. See
+ACLs, SharePoint, OneLake/Fabric, or Purview labels. The custom ingestion
+path, where the existing GPT-RAG index is registered as a <code>searchIndex</code>
+knowledge source, uses an OData <code>filterAddOn</code> over GPT-RAG security fields
+instead. Plain Blob storage is container-level RBAC for this purpose unless
+Purview labels or an equivalent per-document permission source are used. See
 <a href="../howto_retrieval_backend/#security-modes">Retrieval backend selection</a>.</p>
 </div>
 <p>GPT-RAG uses these field names consistently across ingestion paths:</p>

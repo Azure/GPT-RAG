@@ -301,9 +301,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#upcoming-v300-foundry-iq-retrieval-backend-groundwork" class="md-nav__link">
+  <a href="#release-v302-foundry-iq-retrieval-backend-default" class="md-nav__link">
     <span class="md-ellipsis">
-      Upcoming v3.0.0: Foundry IQ retrieval backend groundwork
+      Release v3.0.2: Foundry IQ retrieval backend default
     </span>
   </a>
   
@@ -1324,20 +1324,25 @@
 <p>📌 <a href="https://github.com/orgs/Azure/projects/536/views/6">Check out what's coming next</a>  (Azure org only)</p>
 </blockquote>
 <h3 id="june-2026">June 2026</h3>
-<h4 id="upcoming-v300-foundry-iq-retrieval-backend-groundwork">Upcoming v3.0.0: Foundry IQ retrieval backend groundwork</h4>
+<h4 id="release-v302-foundry-iq-retrieval-backend-default">Release v3.0.2: Foundry IQ retrieval backend default</h4>
 <p><em>Feature preview · Azure/GPT-RAG <a href="https://github.com/Azure/GPT-RAG/issues/526">#526</a></em></p>
-<p>GPT-RAG is adding Foundry IQ as a selectable retrieval backend while keeping
-Azure AI Search fully supported.</p>
+<p>Starting with GPT-RAG v3.0.2 and AI Landing Zone v2.1.2, new deployments use
+Foundry IQ by default through a native Azure Blob Knowledge Source. Azure AI
+Search remains fully supported for existing deployments, rollback, and custom
+GPT-RAG ingestion pipelines.</p>
 <ul>
-<li>Existing deployments stay on <code>RETRIEVAL_BACKEND=ai_search</code> unless an operator
-  opts in.</li>
-<li>Pattern A lets Foundry IQ manage the source and index lifecycle.</li>
-<li>Pattern B registers the existing GPT-RAG Azure AI Search index as a Foundry IQ
-  <code>searchIndex</code> knowledge source, preserving GPT-RAG ingestion, runtime uploads,
-  and security-field filtering through <code>filterAddOn</code>.</li>
+<li>New deployments use <code>RETRIEVAL_BACKEND=foundry_iq</code> with
+  <code>FOUNDRY_IQ_PATTERN=azureBlob</code>.</li>
+<li>Existing deployments can stay on <code>RETRIEVAL_BACKEND=ai_search</code> until an
+  operator migrates them.</li>
+<li>The default Blob path lets Foundry IQ process files directly from the
+  <code>documents</code> container. GPT-RAG ingestion is not used in that path.</li>
+<li>The custom ingestion path registers the existing GPT-RAG Azure AI Search index
+  as a Foundry IQ <code>searchIndex</code> knowledge source, preserving GPT-RAG ingestion,
+  runtime uploads, and security-field filtering through <code>filterAddOn</code>.</li>
 <li>Native Foundry IQ permission enforcement uses
-  <code>x-ms-query-source-authorization</code>; Pattern B GPT-RAG security fields use
-  <code>filterAddOn</code>. These are separate mechanisms.</li>
+  <code>x-ms-query-source-authorization</code>; custom ingestion path GPT-RAG security
+  fields use <code>filterAddOn</code>. These are separate mechanisms.</li>
 <li><code>FOUNDRY_IQ_KNOWLEDGE_RETRIEVAL_BILLING_PLAN</code> controls the Azure AI Search
   <code>knowledgeRetrieval</code> plan. Use <code>standard</code> only after billing approval.</li>
 </ul>

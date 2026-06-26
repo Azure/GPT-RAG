@@ -864,9 +864,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#pattern-a-and-pattern-b" class="md-nav__link">
+  <a href="#foundry-iq-setup-choices" class="md-nav__link">
     <span class="md-ellipsis">
-      Pattern A and Pattern B
+      Foundry IQ setup choices
     </span>
   </a>
   
@@ -900,18 +900,69 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#enable-foundry-iq-with-pattern-b" class="md-nav__link">
+  <a href="#default-foundry-iq-deployment" class="md-nav__link">
     <span class="md-ellipsis">
-      Enable Foundry IQ with Pattern B
+      Default Foundry IQ deployment
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#enable-foundry-iq-with-pattern-a" class="md-nav__link">
+  <a href="#content-extraction-modes-and-pdf-handling" class="md-nav__link">
     <span class="md-ellipsis">
-      Enable Foundry IQ with Pattern A
+      Content extraction modes and PDF handling
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Content extraction modes and PDF handling">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-standard-requires" class="md-nav__link">
+    <span class="md-ellipsis">
+      What standard requires
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#switching-the-mode-after-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      Switching the mode after deployment
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#when-to-use-the-gpt-rag-ingestion-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      When to use the GPT-RAG ingestion path
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#use-foundry-iq-with-a-custom-gpt-rag-ingestion-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      Use Foundry IQ with a custom GPT-RAG ingestion pipeline
     </span>
   </a>
   
@@ -1061,15 +1112,18 @@
 
 
 <h1 id="retrieval-backend-selection">Retrieval backend selection</h1>
-<p>Use this guide when you need to decide whether GPT-RAG should retrieve from the
-direct Azure AI Search index or from a Foundry IQ knowledge base.</p>
-<p>The safe default for existing deployments is still:</p>
+<p>Use this guide when you need to decide how GPT-RAG should retrieve grounding
+content.</p>
+<p>Starting with GPT-RAG v3.0.2 and AI Landing Zone v2.1.2, new deployments use
+Foundry IQ by default through a native Azure Blob Knowledge Source. The
+deployment provisions the Knowledge Source and Knowledge Base automatically, and
+Foundry IQ processes files directly from the <code>documents</code> container.</p>
+<p>Existing deployments can stay on Azure AI Search until you explicitly migrate:</p>
 <div class="highlight"><pre><span></span><code>RETRIEVAL_BACKEND=ai_search
 </code></pre></div>
-<p>Set <code>RETRIEVAL_BACKEND=foundry_iq</code> only after you have provisioned the Foundry IQ
-knowledge base, confirmed the security mode, and run a smoke test. Fresh v3
-deployments can move to Foundry IQ by default only after the AI Landing Zone
-support is validated and released.</p>
+<p>If you need to keep a custom GPT-RAG ingestion pipeline, use the Foundry IQ
+<code>searchIndex</code> path. In that mode, GPT-RAG ingestion processes files, writes
+chunks to Azure AI Search, and Foundry IQ retrieves from that existing index.</p>
 <h2 id="the-two-backends">The two backends</h2>
 <table>
 <thead>
@@ -1082,16 +1136,16 @@ support is validated and released.</p>
 </thead>
 <tbody>
 <tr>
-<td><code>ai_search</code></td>
-<td>The GPT-RAG Azure AI Search index, usually <code>ragindex</code>.</td>
-<td>Existing deployments, runtime uploads, multimodal retrieval, and the current GPT-RAG ingestion path.</td>
-<td>No migration required. This remains the rollback path.</td>
-</tr>
-<tr>
 <td><code>foundry_iq</code></td>
 <td>A Foundry IQ knowledge base hosted by Azure AI Search agentic retrieval.</td>
-<td>Managed knowledge retrieval, multi-source grounding, and the v3 managed-knowledge path.</td>
-<td>Requires knowledge base settings, billing choice, and a security mode.</td>
+<td>New GPT-RAG v3.0.2+ deployments.</td>
+<td>The default native Blob path is provisioned automatically by AI Landing Zone v2.1.2+.</td>
+</tr>
+<tr>
+<td><code>ai_search</code></td>
+<td>The GPT-RAG Azure AI Search index, usually <code>ragindex</code>.</td>
+<td>Existing deployments that are not migrating yet, rollback, or compatibility scenarios.</td>
+<td>No migration required. Existing deployments can keep this setting until they migrate.</td>
 </tr>
 </tbody>
 </table>
@@ -1100,15 +1154,16 @@ support is validated and released.</p>
   Orchestrator --&gt; Choice{RETRIEVAL_BACKEND}
   Choice --&gt;|ai_search| Search[GPT-RAG Azure AI Search index]
   Choice --&gt;|foundry_iq| KB[Foundry IQ knowledge base]
-  KB --&gt; SourceA[Pattern A: managed source]
-  KB --&gt; SourceB[Pattern B: existing searchIndex]</code></pre>
-<h2 id="pattern-a-and-pattern-b">Pattern A and Pattern B</h2>
-<p>Foundry IQ still runs on Azure AI Search. The difference is who owns the source
-and index lifecycle.</p>
+  KB --&gt; Blob[Default Blob path]
+  KB --&gt; Index[Custom ingestion path]
+  Blob --&gt; Documents[documents container]
+  Index --&gt; SearchIndex[Existing Azure AI Search index]</code></pre>
+<h2 id="foundry-iq-setup-choices">Foundry IQ setup choices</h2>
+<p>Foundry IQ has two setup choices:</p>
 <table>
 <thead>
 <tr>
-<th>Pattern</th>
+<th>Choice</th>
 <th>AILZ value</th>
 <th>What it means</th>
 <th>Use when</th>
@@ -1116,22 +1171,22 @@ and index lifecycle.</p>
 </thead>
 <tbody>
 <tr>
-<td>Pattern A: managed source</td>
-<td><code>FOUNDRY_IQ_PATTERN=managed</code></td>
-<td>Foundry IQ manages the source connector, chunking, vectorization, index, and refresh.</td>
-<td>You want the simplest managed ingestion path and your source supports the permissions you need.</td>
+<td>Default Blob path</td>
+<td><code>FOUNDRY_IQ_PATTERN=azureBlob</code></td>
+<td>Foundry IQ reads files directly from the <code>documents</code> container through a native Azure Blob Knowledge Source. Foundry IQ handles source ingestion, chunking, vectorization, index creation, and refresh. GPT-RAG ingestion is not used in this path.</td>
+<td>You want the default new deployment path and do not need a custom GPT-RAG ingestion pipeline.</td>
 </tr>
 <tr>
-<td>Pattern B: existing index</td>
+<td>Custom ingestion path</td>
 <td><code>FOUNDRY_IQ_PATTERN=searchIndex</code></td>
-<td>The existing GPT-RAG Azure AI Search index is registered as a Foundry IQ <code>searchIndex</code> knowledge source.</td>
-<td>You need runtime uploads, GPT-RAG chunking/schema, multimodal parity, or GPT-RAG security fields.</td>
+<td>GPT-RAG ingestion processes files, writes chunks to Azure AI Search, and that existing index is registered as a Foundry IQ <code>searchIndex</code> knowledge source.</td>
+<td>You intentionally keep a custom GPT-RAG ingestion pipeline.</td>
 </tr>
 </tbody>
 </table>
-<p>Pattern B is the safest first step for most existing GPT-RAG environments because
-it keeps the current ingestion and index schema while routing retrieval through
-the knowledge base.</p>
+<p>Use the custom ingestion path only when you intentionally keep document
+processing outside Foundry IQ. It keeps the GPT-RAG ingestion pipeline and index
+schema while routing retrieval through the Foundry IQ knowledge base.</p>
 <h2 id="security-modes">Security modes</h2>
 <p>There are two security mechanisms. They solve different problems and should not
 be mixed up.</p>
@@ -1146,12 +1201,12 @@ be mixed up.</p>
 <tbody>
 <tr>
 <td>Native ingested permissions</td>
-<td>Pattern A sources that ingest permissions, such as ADLS Gen2 ACLs, SharePoint, OneLake/Fabric, or Purview labels.</td>
+<td>The default Blob path and other sources that ingest permissions, such as Azure Blob RBAC scope, ADLS Gen2 ACLs, SharePoint, OneLake/Fabric, or Purview labels.</td>
 <td>The orchestrator forwards the user's delegated Search token in <code>x-ms-query-source-authorization</code>. Foundry IQ evaluates the ingested permissions.</td>
 </tr>
 <tr>
 <td>GPT-RAG security fields</td>
-<td>Pattern B with the existing GPT-RAG index.</td>
+<td>The custom ingestion path with the existing GPT-RAG index.</td>
 <td>The orchestrator sends an OData <code>filterAddOn</code> over GPT-RAG security fields. This is separate from the OBO header.</td>
 </tr>
 </tbody>
@@ -1164,7 +1219,7 @@ be mixed up.</p>
 <li>ADLS Gen2 ACLs, SharePoint, OneLake/Fabric, and Purview labels can support
   per-document permission trimming when native permission ingestion is
   configured.</li>
-<li>Pattern B uses the existing GPT-RAG index registered as a <code>searchIndex</code>
+<li>The custom ingestion path uses the existing GPT-RAG index registered as a <code>searchIndex</code>
   knowledge source. GPT-RAG security fields are enforced through <code>filterAddOn</code>,
   not through <code>x-ms-query-source-authorization</code>.</li>
 <li>The <code>x-ms-query-source-authorization</code> header is for native ingested
@@ -1190,56 +1245,80 @@ label, or supplied as container environment variables when you use the
 <tbody>
 <tr>
 <td><code>RETRIEVAL_BACKEND</code></td>
-<td><code>ai_search</code></td>
+<td><code>foundry_iq</code> for new v3.0.2+ deployments</td>
 <td>Always</td>
-<td>Selects <code>ai_search</code> or <code>foundry_iq</code>.</td>
+<td>Selects <code>ai_search</code> or <code>foundry_iq</code>. Existing deployments can keep <code>ai_search</code> until they migrate.</td>
 </tr>
 <tr>
 <td><code>KNOWLEDGE_BASE_NAME</code></td>
-<td>Empty until Foundry IQ is selected</td>
+<td>Generated during deployment</td>
 <td><code>foundry_iq</code></td>
 <td>Foundry IQ knowledge base name.</td>
 </tr>
 <tr>
 <td><code>KNOWLEDGE_BASE_ENDPOINT</code></td>
-<td>Empty until Foundry IQ is selected</td>
+<td>Generated during deployment</td>
 <td><code>foundry_iq</code></td>
 <td>Azure AI Search endpoint that hosts the knowledge base.</td>
 </tr>
 <tr>
 <td><code>KNOWLEDGE_BASE_CONNECTION_ID</code></td>
-<td>Empty until Foundry IQ is selected</td>
+<td>Generated during deployment</td>
 <td><code>foundry_iq</code></td>
 <td>Dedicated AI Foundry connection ID for the knowledge base. Do not reuse <code>SEARCH_CONNECTION_ID</code>.</td>
+</tr>
+<tr>
+<td><code>FOUNDRY_IQ_PATTERN</code></td>
+<td><code>azureBlob</code></td>
+<td><code>foundry_iq</code> provisioning</td>
+<td>Selects the default Blob path or the custom ingestion path. Use <code>searchIndex</code> only when you intentionally keep a custom GPT-RAG ingestion pipeline.</td>
 </tr>
 <tr>
 <td><code>FOUNDRY_IQ_API_VERSION</code></td>
 <td><code>2026-05-01-preview</code></td>
 <td><code>foundry_iq</code></td>
-<td>Required for native per-user permissions and Pattern B <code>filterAddOn</code>.</td>
+<td>Required for native per-user permissions and custom ingestion path <code>filterAddOn</code>.</td>
 </tr>
 <tr>
 <td><code>FOUNDRY_IQ_KNOWLEDGE_RETRIEVAL_BILLING_PLAN</code></td>
 <td><code>free</code></td>
-<td>Provisioning and post-provision</td>
+<td>Deployment configuration</td>
 <td>Azure AI Search <code>knowledgeRetrieval</code> billing plan.</td>
 </tr>
 <tr>
 <td><code>FOUNDRY_IQ_KNOWLEDGE_SOURCE_NAME</code></td>
-<td>Empty unless Pattern B</td>
-<td>Pattern B</td>
-<td>Name of the <code>searchIndex</code> knowledge source.</td>
+<td>Generated during deployment</td>
+<td><code>foundry_iq</code></td>
+<td>Name of the Foundry IQ knowledge source.</td>
+</tr>
+<tr>
+<td><code>FOUNDRY_IQ_KNOWLEDGE_SOURCE_KIND</code></td>
+<td><code>azureBlob</code></td>
+<td><code>foundry_iq</code></td>
+<td>Knowledge Source kind sent to Foundry IQ. Use <code>searchIndex</code> only for the custom ingestion path.</td>
+</tr>
+<tr>
+<td><code>FOUNDRY_IQ_STORAGE_CONTAINER_NAME</code></td>
+<td><code>documents</code></td>
+<td>Default Blob path</td>
+<td>Storage container that Foundry IQ reads directly.</td>
+</tr>
+<tr>
+<td><code>FOUNDRY_IQ_INGESTION_PERMISSION_OPTIONS</code></td>
+<td><code>["rbacScope"]</code></td>
+<td>Default Blob path</td>
+<td>Permission metadata ingested by the native Azure Blob Knowledge Source.</td>
 </tr>
 <tr>
 <td><code>FOUNDRY_IQ_FILTER_ADD_ON_ENABLED</code></td>
 <td><code>false</code></td>
-<td>Pattern B</td>
+<td>Custom ingestion path</td>
 <td>Enables query-time GPT-RAG security filtering through <code>filterAddOn</code>.</td>
 </tr>
 <tr>
 <td><code>FOUNDRY_IQ_SECURITY_FIELD_NAME</code></td>
 <td><code>metadata_security_id</code></td>
-<td>Pattern B</td>
+<td>Custom ingestion path</td>
 <td>Field used to build the GPT-RAG security filter.</td>
 </tr>
 <tr>
@@ -1248,10 +1327,15 @@ label, or supplied as container environment variables when you use the
 <td><code>foundry_iq</code></td>
 <td>Caps the number of documents returned by the knowledge base.</td>
 </tr>
+<tr>
+<td><code>FOUNDRY_IQ_CONTENT_EXTRACTION_MODE</code></td>
+<td><code>standard</code></td>
+<td>Default Blob path</td>
+<td>Native Blob content extraction mode. <code>standard</code> uses the Foundry IQ Content Understanding skill (layout and OCR) so scanned and image-only PDFs are ingested with text. <code>minimal</code> skips Content Understanding and only ingests text already present in the source. The setting is immutable on an existing Knowledge Source. See <a href="#content-extraction-modes-and-pdf-handling">Content extraction modes</a>.</td>
+</tr>
 </tbody>
 </table>
-<p>The AI Landing Zone also stamps Pattern B setup values used by the post-provision
-script:</p>
+<p>The AI Landing Zone also stamps setup values used by deployment configuration:</p>
 <table>
 <thead>
 <tr>
@@ -1261,12 +1345,8 @@ script:</p>
 </thead>
 <tbody>
 <tr>
-<td><code>FOUNDRY_IQ_PATTERN</code></td>
-<td><code>managed</code> for Pattern A or <code>searchIndex</code> for Pattern B.</td>
-</tr>
-<tr>
 <td><code>FOUNDRY_IQ_SEARCH_INDEX_NAME</code></td>
-<td>Existing Azure AI Search index registered as the Pattern B knowledge source.</td>
+<td>Existing Azure AI Search index registered as the custom ingestion path knowledge source.</td>
 </tr>
 <tr>
 <td><code>FOUNDRY_IQ_SEMANTIC_CONFIGURATION_NAME</code></td>
@@ -1307,14 +1387,159 @@ Search service <code>knowledgeRetrieval</code> plan.</p>
 </tr>
 </tbody>
 </table>
-<p>Set the plan before provisioning or before running the Foundry IQ post-provision
-script:</p>
+<p>Set the plan before provisioning:</p>
 <div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">FOUNDRY_IQ_KNOWLEDGE_RETRIEVAL_BILLING_PLAN</span> <span class="n">free</span>
 </code></pre></div>
 <p>Use <code>standard</code> only when the operator has approved the billing change.</p>
-<h2 id="enable-foundry-iq-with-pattern-b">Enable Foundry IQ with Pattern B</h2>
-<p>Pattern B keeps the existing GPT-RAG index and is the recommended migration path
-for current deployments.</p>
+<h2 id="default-foundry-iq-deployment">Default Foundry IQ deployment</h2>
+<p>For new GPT-RAG v3.0.2+ deployments with AI Landing Zone v2.1.2+, no manual
+backend configuration is required. The default configuration is:</p>
+<div class="highlight"><pre><span></span><code>RETRIEVAL_BACKEND=foundry_iq
+FOUNDRY_IQ_PATTERN=azureBlob
+FOUNDRY_IQ_KNOWLEDGE_SOURCE_KIND=azureBlob
+FOUNDRY_IQ_STORAGE_CONTAINER_NAME=documents
+FOUNDRY_IQ_INGESTION_PERMISSION_OPTIONS=[&quot;rbacScope&quot;]
+FOUNDRY_IQ_CONTENT_EXTRACTION_MODE=standard
+</code></pre></div>
+<p>The deployment creates a native Foundry IQ Azure Blob Knowledge Source and a
+Knowledge Base. Foundry IQ processes files directly from the <code>documents</code>
+container. No separate Knowledge Source or Knowledge Base creation step is
+required after deployment.</p>
+<h2 id="content-extraction-modes-and-pdf-handling">Content extraction modes and PDF handling</h2>
+<p>The default Blob path supports two content extraction modes. The mode controls
+whether Foundry IQ runs the Content Understanding skill on each document while
+ingesting it.</p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>What it does</th>
+<th>Use when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>standard</code> (default, recommended)</td>
+<td>Foundry IQ runs the <code>Microsoft.Skills.Util.ContentUnderstandingSkill</code> on each document for layout, OCR, and structured extraction. Scanned PDFs, image-only PDFs, and PDFs without a text layer are OCR'd and become searchable.</td>
+<td>Use this for any real-world document library. It is the recommended default.</td>
+</tr>
+<tr>
+<td><code>minimal</code></td>
+<td>Foundry IQ extracts only the text already present in the source. PDFs without a text layer ingest with empty content and are not searchable. No Content Understanding billing.</td>
+<td>You have validated that the corpus is text-only PDFs (or non-PDF text files) and you want to skip Content Understanding cost.</td>
+</tr>
+</tbody>
+</table>
+<p>Picking <code>minimal</code> for a corpus that contains scanned PDFs is a silent failure:
+the file lands in the container, ingestion reports success, and every retrieval
+against it returns nothing. The default is <code>standard</code> so you do not have to
+think about this.</p>
+<h3 id="what-standard-requires">What <code>standard</code> requires</h3>
+<ul>
+<li>The Foundry resource must be in a region that supports Content Understanding.
+  See the <a href="https://learn.microsoft.com/azure/ai-services/content-understanding/service-limits#region-support">region support
+  list</a>.</li>
+<li>On first use, Foundry IQ may require a one-time
+  <code>PATCH /contentunderstanding/defaults</code> call against the Foundry resource. If
+  this has not been done, Knowledge Source creation fails with <code>DefaultsNotSet</code>.
+  The GPT-RAG post-provision setup handles this for new deployments; if you hit
+  <code>DefaultsNotSet</code>, see the troubleshooting note at the bottom of this section.</li>
+<li><code>standard</code> is billed through Content Understanding meters in addition to the
+  Azure AI Search <code>knowledgeRetrieval</code> plan.</li>
+<li>Per-document limits: 300 pages and 5 minutes of processing time.</li>
+</ul>
+<p>Documents that exceed those limits, or scenarios that need custom chunking,
+custom enrichment, or Excel chunking, should use the alternative GPT-RAG
+ingestion path (see <a href="#when-to-use-the-gpt-rag-ingestion-path">When to use the GPT-RAG ingestion
+path</a>).</p>
+<h3 id="switching-the-mode-after-deployment">Switching the mode after deployment</h3>
+<p><code>FOUNDRY_IQ_CONTENT_EXTRACTION_MODE</code> is <strong>immutable</strong> on an existing Knowledge
+Source. To change it you have to recreate the Knowledge Source, and because the
+Knowledge Base references the Knowledge Source by name, you typically recreate
+both. There is no in-place update.</p>
+<p>To switch from <code>minimal</code> to <code>standard</code> (or back) on an existing deployment:</p>
+<ol>
+<li>
+<p>Update the App Configuration value (or <code>azd env set</code>) to the new mode:</p>
+<div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">FOUNDRY_IQ_CONTENT_EXTRACTION_MODE</span> <span class="n">standard</span>
+</code></pre></div>
+</li>
+<li>
+<p>Delete the existing Foundry IQ Knowledge Source and Knowledge Base for the
+   environment from the Azure AI Search resource (data plane). Use the Search
+   data-plane REST API with the <code>2026-05-01-preview</code> version.</p>
+</li>
+<li>Re-run the GPT-RAG post-provision step that creates the Foundry IQ
+   resources, so the Knowledge Source is recreated with the new mode and the
+   Knowledge Base is rebound to it.</li>
+<li>Re-ingest the documents container so the new Knowledge Source processes the
+   files with the chosen mode.</li>
+</ol>
+<pre class="mermaid"><code>flowchart LR
+  Old[Existing KS + KB on minimal] --&gt; Delete[Delete KB and KS]
+  Delete --&gt; Update[Update FOUNDRY_IQ_CONTENT_EXTRACTION_MODE]
+  Update --&gt; Recreate[Re-run post-provision to recreate KS + KB]
+  Recreate --&gt; Reingest[Re-ingest documents container]</code></pre>
+<h3 id="troubleshooting">Troubleshooting</h3>
+<ul>
+<li><strong><code>DefaultsNotSet</code> when creating the Knowledge Source on <code>standard</code>.</strong> The
+  Foundry resource has not been initialized for Content Understanding. Make a
+  one-time <code>PATCH /contentunderstanding/defaults</code> call against the Foundry
+  resource and re-run the setup. See the <a href="https://learn.microsoft.com/azure/search/cognitive-search-skill-content-understanding">Content Understanding skill
+  reference</a>
+  for the payload.</li>
+<li><strong>Scanned PDF ingests with empty content.</strong> The Knowledge Source is on
+  <code>minimal</code>. Either re-create it on <code>standard</code> (steps above) or run the document
+  through the GPT-RAG ingestion path.</li>
+<li><strong>PDF over 300 pages or processing times out.</strong> <code>standard</code> cannot handle it.
+  Use the GPT-RAG ingestion path with Document Intelligence.</li>
+</ul>
+<h2 id="when-to-use-the-gpt-rag-ingestion-path">When to use the GPT-RAG ingestion path</h2>
+<p>The default Blob path is the simplest production setup, but the GPT-RAG
+ingestion service (<code>gpt-rag-ingestion</code> plus Azure AI Search) is still the right
+choice for several scenarios:</p>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why the GPT-RAG ingestion path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PDFs over 300 pages, or single documents that take more than 5 minutes to process.</td>
+<td>Exceeds the <code>standard</code> content extraction limits. GPT-RAG ingestion uses Azure AI Document Intelligence and can chunk and process longer documents.</td>
+</tr>
+<tr>
+<td>Custom chunking strategy (sentence/window/semantic chunking, custom overlap, custom metadata enrichment).</td>
+<td>The GPT-RAG ingestion pipeline is the place to customize chunking. The default Blob path uses Foundry IQ's built-in chunker.</td>
+</tr>
+<tr>
+<td>Excel and spreadsheet chunking.</td>
+<td>GPT-RAG ingestion has dedicated handling for Excel sheets.</td>
+</tr>
+<tr>
+<td>Per-document security trimming via custom <code>metadata_security_*</code> fields.</td>
+<td>Use the custom ingestion path (<code>FOUNDRY_IQ_PATTERN=searchIndex</code>) with <code>FOUNDRY_IQ_FILTER_ADD_ON_ENABLED=true</code>, or stay on <code>RETRIEVAL_BACKEND=ai_search</code>.</td>
+</tr>
+<tr>
+<td>Low-latency ingestion after a runtime upload.</td>
+<td>The default Blob path source refresh can take seconds to minutes. GPT-RAG ingestion writes directly into the index.</td>
+</tr>
+</tbody>
+</table>
+<p>Two ways to combine the GPT-RAG ingestion service with Foundry IQ retrieval:</p>
+<ul>
+<li><strong><code>RETRIEVAL_BACKEND=ai_search</code>.</strong> Retrieval bypasses Foundry IQ entirely and
+  goes straight to the GPT-RAG Azure AI Search index. Simplest rollback target.</li>
+<li><strong><code>RETRIEVAL_BACKEND=foundry_iq</code> with <code>FOUNDRY_IQ_PATTERN=searchIndex</code>.</strong>
+  Keep GPT-RAG ingestion producing the index, but register that index as a
+  Foundry IQ <code>searchIndex</code> Knowledge Source so retrieval still goes through the
+  Foundry IQ Knowledge Base. This is the custom ingestion path described below.</li>
+</ul>
+<h2 id="use-foundry-iq-with-a-custom-gpt-rag-ingestion-pipeline">Use Foundry IQ with a custom GPT-RAG ingestion pipeline</h2>
+<p>Use the custom ingestion path only when you need to keep using a custom GPT-RAG
+ingestion pipeline.</p>
 <ol>
 <li>Start from a working <code>ai_search</code> deployment.</li>
 <li>
@@ -1329,40 +1554,7 @@ for current deployments.</p>
 <li>
 <p>Run <code>azd provision</code>.</p>
 </li>
-<li>
-<p>Create or update the data-plane knowledge source and knowledge base:</p>
-<div class="highlight"><pre><span></span><code><span class="p">./</span><span class="n">infra</span><span class="p">/</span><span class="n">scripts</span><span class="p">/</span><span class="n">Configure-FoundryIQKnowledgeBase</span><span class="p">.</span><span class="n">ps1</span> <span class="p">`</span>
-  <span class="n">-SearchEndpoint</span> <span class="s2">&quot;https://&lt;search-name&gt;.search.windows.net&quot;</span> <span class="p">`</span>
-  <span class="n">-KnowledgeBaseName</span> <span class="s2">&quot;&lt;knowledge-base-name&gt;&quot;</span> <span class="p">`</span>
-  <span class="n">-KnowledgeSourceName</span> <span class="s2">&quot;&lt;knowledge-source-name&gt;&quot;</span> <span class="p">`</span>
-  <span class="n">-SearchIndexName</span> <span class="s2">&quot;&lt;gpt-rag-index-name&gt;&quot;</span> <span class="p">`</span>
-  <span class="n">-SemanticConfigurationName</span> <span class="s2">&quot;&lt;semantic-config-name&gt;&quot;</span> <span class="p">`</span>
-  <span class="n">-SearchServiceResourceId</span> <span class="s2">&quot;/subscriptions/&lt;sub&gt;/resourceGroups/&lt;rg&gt;/providers/Microsoft.Search/searchServices/&lt;search-name&gt;&quot;</span> <span class="p">`</span>
-  <span class="n">-KnowledgeRetrievalBillingPlan</span> <span class="s2">&quot;free&quot;</span>
-</code></pre></div>
-</li>
-<li>
-<p>Deploy or restart the orchestrator so it reads the backend selector at startup.</p>
-</li>
-<li>Smoke test with a user who should see a document and a user who should not see
-   it. The second test must fail closed, not return unfiltered results.</li>
-</ol>
-<p>The script caller needs <strong>Search Service Contributor</strong> on the Search service.
-When <code>NETWORK_ISOLATION=true</code>, run the script from the jumpbox or another host
-with VNet access.</p>
-<h2 id="enable-foundry-iq-with-pattern-a">Enable Foundry IQ with Pattern A</h2>
-<p>Use Pattern A only when the source connector and permission model meet your
-needs.</p>
-<ol>
-<li>Confirm the source supports the permissions you require.</li>
-<li>Avoid claiming per-document security for plain Blob unless you use Purview
-   labels or an equivalent per-document permission source.</li>
-<li>Keep multimodal workloads on <code>ai_search</code> or Pattern B until captioning parity
-   is proven.</li>
-<li>Use <code>FOUNDRY_IQ_API_VERSION=2026-05-01-preview</code> when native per-user
-   permissions are enabled.</li>
-<li>Run a smoke test with allowed and denied users before sending production
-   traffic.</li>
+<li>Deploy or restart the orchestrator so it reads the backend selector at startup.</li>
 </ol>
 <h2 id="roll-back-to-azure-ai-search">Roll back to Azure AI Search</h2>
 <p>Rollback is intentionally simple.</p>
@@ -1387,27 +1579,42 @@ needs.</p>
 while you investigate.</p>
 <h2 id="migration-guidance">Migration guidance</h2>
 <ul>
-<li>Existing deployments should stay on <code>ai_search</code> until you explicitly opt in.</li>
-<li>Start with Pattern B if you already rely on GPT-RAG ingestion, runtime uploads,
-  multimodal retrieval, or custom security fields.</li>
-<li>Use Pattern A for new managed-source deployments only after you validate
-  connector availability, security behavior, billing, latency, and refresh
-  timing.</li>
-<li>Do not flip production traffic until you have tested both allowed and denied
-  retrieval paths.</li>
+<li>New GPT-RAG v3.0.3+ deployments use the Foundry IQ default Blob path with
+  <code>FOUNDRY_IQ_CONTENT_EXTRACTION_MODE=standard</code>, which handles scanned and
+  image-only PDFs out of the box.</li>
+<li>Existing deployments can stay on <code>ai_search</code> until you explicitly migrate.</li>
+<li>Use the custom ingestion path if you need to keep using a custom GPT-RAG
+  ingestion pipeline.</li>
+<li>Use the GPT-RAG ingestion path for PDFs over 300 pages, custom chunking,
+  Excel chunking, or low-latency runtime uploads.</li>
+<li>Do not claim per-document security for plain Blob unless you use Purview
+  labels or another per-document permission source. The default Blob path uses
+  RBAC scope permissions.</li>
 <li>Keep the rollback command ready during the first production change window.</li>
 </ul>
 <h2 id="known-limitations">Known limitations</h2>
 <ul>
-<li>Multimodal Pattern A captioning parity is deferred. Keep multimodal on
-  <code>ai_search</code> or Pattern B until the managed source output is proven equivalent.</li>
+<li>The default Blob path on <code>FOUNDRY_IQ_CONTENT_EXTRACTION_MODE=standard</code> has
+  per-document limits of 300 pages and 5 minutes of processing time. Documents
+  that exceed those limits need the GPT-RAG ingestion path with Document
+  Intelligence.</li>
+<li><code>FOUNDRY_IQ_CONTENT_EXTRACTION_MODE</code> is immutable on an existing Knowledge
+  Source. Switching modes requires deleting and recreating the Knowledge Source
+  and Knowledge Base, and re-ingesting the container.</li>
+<li><code>standard</code> mode requires a Foundry resource in a Content Understanding
+  supported region and is billed through Content Understanding meters in
+  addition to the <code>knowledgeRetrieval</code> plan.</li>
+<li>Multimodal captioning parity for the default Blob path is deferred. Keep
+  multimodal on <code>ai_search</code> or the custom ingestion path until the native
+  Foundry IQ output is proven equivalent.</li>
 <li>Runtime document uploads still need the self-managed GPT-RAG index for
-  low-latency searchability. Use Pattern B for that path.</li>
-<li>Pattern A source refresh can take seconds to minutes. It is not a low-latency
-  upload path.</li>
-<li>Pattern B requires the existing index to have a semantic configuration. Vector
-  fields must have the expected vectorizer setup.</li>
-<li>The knowledge base and Pattern B index must live on the same Search service.</li>
+  low-latency searchability. Use the custom ingestion path for that path.</li>
+<li>The default Blob path source refresh can take seconds to minutes. It is not a
+  low-latency upload path.</li>
+<li>The custom ingestion path requires the existing index to have a semantic
+  configuration. Vector fields must have the expected vectorizer setup.</li>
+<li>The knowledge base and custom ingestion path index must live on the same
+  Search service.</li>
 <li>Per-user security and <code>filterAddOn</code> require <code>2026-05-01-preview</code>.</li>
 </ul>
 

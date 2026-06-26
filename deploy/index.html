@@ -1103,12 +1103,13 @@ azd deploy
 <p>For the basic flow, the <code>postProvision</code> hook runs locally after <code>azd provision</code> and configures GPT-RAG data-plane resources such as App Configuration and search setup. Then <code>azd deploy</code> deploys the frontend, orchestrator, and ingestion services.</p>
 <h3 id="retrieval-backend">Retrieval backend</h3>
 <p>GPT-RAG can retrieve grounding content directly from Azure AI Search or through a
-Foundry IQ knowledge base. Existing deployments should stay on
-<code>RETRIEVAL_BACKEND=ai_search</code> unless you explicitly migrate.</p>
-<p>Use the <a href="../howto_retrieval_backend/">retrieval backend selection guide</a> before
-setting <code>RETRIEVAL_BACKEND=foundry_iq</code>. It explains Pattern A vs Pattern B,
-security modes, <code>knowledgeRetrieval</code> billing, rollback, and the post-provision
-knowledge base step.</p>
+Foundry IQ knowledge base. Starting with GPT-RAG v3.0.2 and AI Landing Zone
+v2.1.2, new deployments use Foundry IQ by default through a native Azure Blob
+Knowledge Source. Existing deployments can stay on <code>RETRIEVAL_BACKEND=ai_search</code>
+until you explicitly migrate.</p>
+<p>Use the <a href="../howto_retrieval_backend/">retrieval backend selection guide</a> to
+understand the default Foundry IQ path, when to keep using Azure AI Search, and
+when to use the <code>searchIndex</code> pattern for custom GPT-RAG ingestion pipelines.</p>
 <p>The most important settings are:</p>
 <table>
 <thead>
@@ -1121,13 +1122,13 @@ knowledge base step.</p>
 <tbody>
 <tr>
 <td><code>RETRIEVAL_BACKEND</code></td>
-<td><code>ai_search</code> or <code>foundry_iq</code></td>
+<td><code>foundry_iq</code> for new deployments, <code>ai_search</code> for existing compatibility or rollback</td>
 <td>Selects the retrieval path.</td>
 </tr>
 <tr>
 <td><code>FOUNDRY_IQ_PATTERN</code></td>
-<td><code>searchIndex</code> or <code>managed</code></td>
-<td>Selects Pattern B existing index or Pattern A managed source.</td>
+<td><code>azureBlob</code> by default, or <code>searchIndex</code> for custom GPT-RAG ingestion</td>
+<td>Selects the Foundry IQ setup choice.</td>
 </tr>
 <tr>
 <td><code>KNOWLEDGE_BASE_NAME</code></td>
@@ -1142,7 +1143,7 @@ knowledge base step.</p>
 <tr>
 <td><code>FOUNDRY_IQ_API_VERSION</code></td>
 <td><code>2026-05-01-preview</code></td>
-<td>Required for per-user permissions and Pattern B <code>filterAddOn</code>.</td>
+<td>Required for per-user permissions and custom ingestion path <code>filterAddOn</code>.</td>
 </tr>
 <tr>
 <td><code>FOUNDRY_IQ_KNOWLEDGE_RETRIEVAL_BILLING_PLAN</code></td>
@@ -1151,9 +1152,10 @@ knowledge base step.</p>
 </tr>
 </tbody>
 </table>
-<p>For Pattern B, run the data-plane knowledge base script after provisioning. In
-network-isolated deployments, run it from the jumpbox or another VNet-connected
-host.</p>
+<p>With the default Blob path, Foundry IQ processes files directly from the
+<code>documents</code> container. GPT-RAG ingestion is not used in that path. Use
+<code>FOUNDRY_IQ_PATTERN=searchIndex</code> only when you intentionally keep a custom
+GPT-RAG ingestion pipeline that writes chunks to Azure AI Search.</p>
 <p>Demo video:</p>
 <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; margin: 0 auto 20px auto; border-radius: 8px;">
   <iframe src="https://www.youtube.com/embed/nZMDtaDQuP4?rel=0&modestbranding=1" 
