@@ -83,11 +83,11 @@ Document-level access control is enforced by Azure AI Search when the index is c
     When `RETRIEVAL_BACKEND=foundry_iq`, there are two security paths. Native
     Foundry IQ sources use the `x-ms-query-source-authorization` OBO header only
     when permissions were ingested from a supported source such as ADLS Gen2
-    ACLs, SharePoint, OneLake/Fabric, or Purview labels. Pattern B, where the
-    existing GPT-RAG index is registered as a `searchIndex` knowledge source,
-    uses an OData `filterAddOn` over GPT-RAG security fields instead. Plain Blob
-    storage is container-level RBAC for this purpose unless Purview labels or an
-    equivalent per-document permission source are used. See
+    ACLs, SharePoint, OneLake/Fabric, or Purview labels. The custom ingestion
+    path, where the existing GPT-RAG index is registered as a `searchIndex`
+    knowledge source, uses an OData `filterAddOn` over GPT-RAG security fields
+    instead. Plain Blob storage is container-level RBAC for this purpose unless
+    Purview labels or an equivalent per-document permission source are used. See
     [Retrieval backend selection](howto_retrieval_backend.md#security-modes).
 
 GPT-RAG uses these field names consistently across ingestion paths:

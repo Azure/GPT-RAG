@@ -28,8 +28,8 @@ The orchestrator reads `RETRIEVAL_BACKEND` at startup:
 
 | Value | Behavior |
 | --- | --- |
-| `ai_search` | Uses the GPT-RAG Azure AI Search index directly. This is the safe default and rollback path. |
-| `foundry_iq` | Uses a Foundry IQ knowledge base. See [Retrieval backend selection](howto_retrieval_backend.md) for setup, security modes, and billing. |
+| `foundry_iq` | Uses a Foundry IQ knowledge base. This is the default for new GPT-RAG v3.0.2+ deployments with AI Landing Zone v2.1.2+. See [Retrieval backend selection](howto_retrieval_backend.md) for setup, security modes, and billing. |
+| `ai_search` | Uses the GPT-RAG Azure AI Search index directly. Existing deployments can keep it until they migrate. It also remains the rollback and compatibility path. |
 
 `maf_lite`, `maf_agent_service`, `single_agent_rag`, and `multimodal` are the
 RAG strategies affected by the backend selector. `mcp` and `nl2sql` do not use
