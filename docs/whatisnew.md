@@ -2,7 +2,7 @@
 
 ### June 2026
 
-#### Release v3.0.2: Foundry IQ retrieval backend default
+#### Release v3.0.2: Foundry IQ default
 *Feature preview · Azure/GPT-RAG [#526](https://github.com/Azure/GPT-RAG/issues/526)*
 
 Starting with GPT-RAG v3.0.2 and AI Landing Zone v2.1.2, new deployments use
@@ -30,7 +30,7 @@ security, rollback, and known limitations.
 
 ---
 
-#### Release 2.9.17: Conversations detail dialog renders messages again
+#### Release 2.9.17: Conversations dialog fix
 *Hotfix · orchestrator [v2.8.13](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.13)*
 
 Hotfix on top of v2.9.16. UI, ingestion, and AI Landing Zone pins are unchanged.
@@ -42,7 +42,7 @@ Hotfix on top of v2.9.16. UI, ingestion, and AI Landing Zone pins are unchanged.
 
 ---
 
-#### Release 2.9.16: Overview and Conversations dashboard fixes
+#### Release 2.9.16: Dashboard fixes
 *Patch · orchestrator [v2.8.12](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.12)*
 
 Five operator-reported fixes against the dashboard's **Overview** and **Conversations** tabs. Other components unchanged.
@@ -59,7 +59,7 @@ Fixes [`gpt-rag-orchestrator#246`](https://github.com/Azure/gpt-rag-orchestrator
 
 ---
 
-#### Release 2.9.15: Schedules tab and auto-dismissing Run now toast
+#### Release 2.9.15: Schedules tab
 *Patch · ingestion [v2.4.13](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.13)*
 
 Two operator-reported UX fixes on the ingestion dashboard. Orchestrator, UI, and AI Landing Zone pins are unchanged.
@@ -73,7 +73,7 @@ Fixes [`gpt-rag-ingestion#254`](https://github.com/Azure/gpt-rag-ingestion/pull/
 
 ---
 
-#### Release 2.9.14: Overview tab tooltip casing, anonymous user count, and custom range editor
+#### Release 2.9.14: Overview polish
 *Patch · orchestrator [v2.8.11](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.11)*
 
 P2 follow-up against the Overview tab dashboard shipped in v2.8.10. Three operator-reported fixes. Other components unchanged.
@@ -88,7 +88,7 @@ Fixes [`gpt-rag-orchestrator#241`](https://github.com/Azure/gpt-rag-orchestrator
 
 ---
 
-#### Release 2.9.13: Dashboard date columns, REASONING_EFFORT, Overview time-range picker and tooltips
+#### Release 2.9.13: Date columns and time-range picker
 *Patch · orchestrator [v2.8.10](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.10)*
 
 P1 patch against the operator dashboard shipped in v2.8.9. Other components unchanged.
@@ -105,7 +105,7 @@ Fixes [`gpt-rag-orchestrator#241`](https://github.com/Azure/gpt-rag-orchestrator
 
 ---
 
-#### Release 2.9.12: Configuration tab placeholder polish
+#### Release 2.9.12: Configuration polish
 *Patch · ingestion [v2.4.12](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.12)*
 
 Operator-reported follow-up to v2.4.11. Other components unchanged.
@@ -121,7 +121,7 @@ Placeholders now describe what an empty field means at runtime:
 
 ---
 
-#### Release 2.9.11: Queue panel polish: collapsible, Last run column, correct toast and cron
+#### Release 2.9.11: Queue panel polish
 *Patch · ingestion [v2.4.11](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.11)*
 
 Five operator-reported fixes against the *Queue and schedule* panel added in v2.9.10. Other components unchanged.
@@ -138,7 +138,7 @@ Polishes [`gpt-rag-ingestion#247`](https://github.com/Azure/gpt-rag-ingestion/is
 
 ---
 
-#### Release 2.9.10: Operator dashboard: queued jobs and next-run ETA per job
+#### Release 2.9.10: Queued jobs and ETA
 *Feature · ingestion [v2.4.10](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.10)*
 
 Operators who use the *Run now* button (added in v2.9.6 / ingestion v2.4.7) now get **queue and next-run visibility** in the ingestion operator dashboard. Other components unchanged.
@@ -159,7 +159,7 @@ Adds [`gpt-rag-ingestion#247`](https://github.com/Azure/gpt-rag-ingestion/issues
 
 ---
 
-#### Release 2.9.9: Configuration tab fix follow-up
+#### Release 2.9.9: Configuration fix follow-up
 *Patch · ingestion [v2.4.9](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.9)*
 
 v2.9.8 fixed the missing top-level `settings` array, but operators upgrading reported the **Configuration tab in the ingestion dashboard was still blank**.
@@ -174,7 +174,7 @@ Fixes the follow-up to [`gpt-rag-ingestion#242`](https://github.com/Azure/gpt-ra
 
 ---
 
-#### Release 2.9.8: Configuration tab fix in the ingestion dashboard
+#### Release 2.9.8: Configuration tab fix
 *Patch · ingestion [v2.4.8](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.8)*
 
 Operators who turned on `ENABLE_DASHBOARD=true` on the ingestion app saw the **Configuration tab render blank** in v2.9.7 (ingestion v2.4.7), because the ingestion `GET /api/config` endpoint did not return the flat `settings` array and `authEnabled` flag the typed frontend contract reads. The tab crashed with `TypeError: undefined is not iterable` and showed nothing.
@@ -187,14 +187,14 @@ Fixes [`gpt-rag-ingestion#242`](https://github.com/Azure/gpt-rag-ingestion/issue
 
 ---
 
-#### Release 2.9.7: AI Landing Zone preflight quota fix
+#### Release 2.9.7: Preflight quota fix
 *Patch · AI Landing Zone [v2.0.20](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.0.20)*
 
 No component code changed. Operators provisioning a fresh environment with `azd up` now get a clear `MODEL_QUOTA_INSUFFICIENT` error in seconds when regional OpenAI model quota is insufficient, instead of letting ARM run for ~15 minutes and then failing partway through the deploy. [Release notes](https://github.com/Azure/GPT-RAG/tree/v2.9.7)
 
 ---
 
-#### Release 2.9.6: Built-in operator dashboards (Overview, Conversations, Configuration)
+#### Release 2.9.6: Operator dashboards
 *Feature · orchestrator [v2.8.9](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.9) · ingestion [v2.4.7](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.7) · UI v2.3.13 · infra v2.0.19*
 
 The latest June drop adds an opt-in **operator dashboard at `/dashboard`** on both the orchestrator and ingestion apps, with three tabs: Overview, Conversations, and Configuration.
@@ -209,7 +209,7 @@ The latest June drop adds an opt-in **operator dashboard at `/dashboard`** on bo
 
 ---
 
-#### Release 2.9.1: Authenticated uploads, Foundry Agent Service v2 stabilization, and Sweden Central unblocked
+#### Release 2.9.1: Authenticated uploads
 *June release train · four themes*
 
 - **Authenticated per-conversation uploads end-to-end.** The uploader identity is preserved during ingestion, the active conversation id flows through retrieval, and uploaded chunks are indexed with ACL metadata so `single_agent_rag` can return them inside the same conversation.
@@ -224,14 +224,14 @@ The latest June drop adds an opt-in **operator dashboard at `/dashboard`** on bo
 
 ### May 2026
 
-#### Release 2.7.14: Landing zone hardening and ingestion identity fixes
+#### Release 2.7.14: Landing zone hardening
 *Patch · AI Landing Zone v2.0.12*
 
 The late-May patch train rolls the AI Landing Zone forward, including fixes for network-isolated deployments, firewall rule generation, Container Apps image pulls, and bounded Windows jumpbox bootstrap execution. It also completes the ingestion Managed Identity fix so Azure Container Apps can acquire user-assigned identity tokens reliably and avoid `/ingest-documents` returning HTTP 200 with `indexedChunks: 0`. [Release notes](https://github.com/Azure/GPT-RAG/tree/v2.7.14)
 
 ---
 
-#### Release 2.7.6: Long conversation handling and retrieval triage
+#### Release 2.7.6: Long conversations
 *Patch · orchestrator v2.6.9*
 
 - The orchestrator bounds persisted conversation documents before saving to Cosmos DB, keeping recent messages and question metadata while preventing very long chats from growing indefinitely.
@@ -241,7 +241,7 @@ The late-May patch train rolls the AI Landing Zone forward, including fixes for 
 
 ---
 
-#### Release 2.7.5: Existing-platform deployment, NL2SQL, and conversation rename fixes
+#### Release 2.7.5: Existing-platform deployment
 
 - **Existing-platform parameters from the root `main.parameters.json`.** Operators can integrate with shared Private DNS Zones, observability, hub networking, existing jumpbox/Bastion/NAT resources, Private Endpoint placement, ACR Task agent pools, speech resources, and policy-managed DNS without editing the infra submodule.
 - **NL2SQL moved to Microsoft Agent Framework.** Direct model calls and local NL2SQL tool execution, removing Semantic Kernel Agent Service agent creation from that path.
@@ -251,7 +251,7 @@ The late-May patch train rolls the AI Landing Zone forward, including fixes for 
 
 ---
 
-#### Release 2.7.0: AI Landing Zone v2.0 bump
+#### Release 2.7.0: Landing Zone v2.0
 *Major baseline · AI Landing Zone v1.0.7 → v2.0.2*
 
 Default behavior is unchanged for existing operators. All new capabilities are opt-in via `azd env set`. No GPT-RAG component bumps in this release.
@@ -268,7 +268,7 @@ See the [v2-migration guide](https://github.com/Azure/bicep-ptn-aiml-landing-zon
 
 ---
 
-#### Release 2.6.7: Per-conversation file uploads
+#### Release 2.6.7: Per-conversation uploads
 *Feature · ingestion v2.3.4 · orchestrator v2.6.3 · UI v2.3.2*
 
 Users can now upload files directly through the chat interface. Documents are persisted to a per-conversation storage container, chunked and indexed into Azure AI Search with a `conversationId` field, and retrieved by the orchestrator with a filter that mixes conversation-private content with shared/global content. [Release notes](https://github.com/Azure/GPT-RAG/tree/v2.6.7)
@@ -277,7 +277,7 @@ Users can now upload files directly through the chat interface. Documents are pe
 
 ### April 2026
 
-#### Release 2.6.4: Ingestion enhancements, ingestion admin dashboard, and cost optimization
+#### Release 2.6.4: Ingestion enhancements
 
 - **Ingestion Admin Dashboard.** A new React-based admin dashboard at `/dashboard` for monitoring and managing ingestion jobs. Paginated job and file tables, search, filters, and the ability to unblock stuck files. Processing timings shown as stacked color bars per phase (download, analysis, chunking, index upload), with per-file cost estimates broken down by service.
 - **Content Understanding integration.** Document analysis now uses Azure AI Foundry Content Understanding (`prebuilt-layout`) by default instead of Document Intelligence, resulting in approximately 69% cost reduction per page.
@@ -300,7 +300,7 @@ Demo video:
 
 ---
 
-#### Release 2.6.1: Conversation history and multimodal improvements
+#### Release 2.6.1: Conversation history
 
 - **Conversation history.** List, resume, and delete past conversations directly from a sidebar in the chat UI.
 - **Multimodal improvements.** Images now appear inline between response steps instead of grouped at the bottom, with improved validation accuracy.
@@ -311,7 +311,7 @@ Demo video:
 
 ### March 2026
 
-#### Release 2.5.3: New orchestration strategies, infrastructure overhaul, and multimodality
+#### Release 2.5.3: Orchestration overhaul
 
 **New orchestration strategies.** The orchestrator now supports:
 
@@ -328,7 +328,7 @@ Demo video:
 
 ### January 2026
 
-#### Release 2.4.0: Authentication and document-level security
+#### Release 2.4.0: Document-level security
 
 Microsoft Entra ID authentication in the frontend, with orchestrator-side user identity validation, plus RBAC-based access control and document-level authorization in retrieval workflows. User identity context is propagated through ingestion and orchestration so [Azure AI Search can enforce fine-grained ACL/RBAC](https://learn.microsoft.com/en-us/azure/search/search-query-access-control-rbac-enforcement) permissions end-to-end. [`#417`](https://github.com/Azure/GPT-RAG/pull/417)
 
@@ -338,7 +338,7 @@ How to configure: [Authentication and Document-Level Security](howto_authenticat
 
 ### December 2025
 
-#### Release 2.3.0: SharePoint Lists and Azure Direct Models
+#### Release 2.3.0: SharePoint Lists
 
 - **Azure Direct Models (Microsoft Foundry).** Use Microsoft Foundry "Direct from Azure" models (Mistral, DeepSeek, Grok, Llama, etc.) through the Foundry inference APIs with Entra ID authentication. [`#296`](https://github.com/Azure/GPT-RAG/issues/296). How to configure: [Azure Direct Models](howto_azure_direct.md).
 - **SharePoint Lists.** The SharePoint connector now covers both SharePoint Online document libraries (PDFs, Office docs) and generic lists (structured fields), so your Azure AI Search index stays in sync with list items and documents. [`#369`](https://github.com/Azure/GPT-RAG/issues/369). How to configure: [SharePoint Data Source](ingestion_sharepoint_source.md) and [SharePoint Connector Setup Guide](howto_sharepoint_connector.md).
@@ -362,7 +362,7 @@ Demo video:
 
 ### October 2025
 
-#### Release 2.2.0: Agentic retrieval and network flexibility
+#### Release 2.2.0: Agentic retrieval
 
 - **Bring Your Own VNet.** Deploy GPT-RAG within your existing virtual network, keeping full control over network boundaries, DNS, and routing policies. [`#370`](https://github.com/Azure/GPT-RAG/issues/370)
 - **Agentic retrieval.** Intelligent, agent-driven retrieval orchestration that dynamically selects and combines information sources for more grounded and context-aware responses. [`#359`](https://github.com/Azure/GPT-RAG/issues/359)
