@@ -233,6 +233,43 @@ function Set-GptRagAppConfiguration {
         [ordered]@{ canonical_name = 'EMBEDDING_DEPLOYMENT_NAME'; capacity = 100; model = [ordered]@{ format = 'OpenAI'; name = 'text-embedding-3-large'; version = '1' }; name = 'text-embedding'; version = '1'; apiVersion = '2025-01-01-preview'; endpoint = "https://$foundryName.openai.azure.com/" }
     )
 
+    $retrievalBackend = Get-OptionalEnvValue 'RETRIEVAL_BACKEND' 'foundry_iq'
+    $foundryIqPattern = Get-OptionalEnvValue 'FOUNDRY_IQ_PATTERN' 'azureBlob'
+    $ragIndexName = "ragindex-$resourceToken"
+    $knowledgeBaseName = Get-OptionalEnvValue 'KNOWLEDGE_BASE_NAME' "$ragIndexName-rag-kb"
+    $knowledgeBaseConnectionName = Get-OptionalEnvValue 'KNOWLEDGE_BASE_CONNECTION_NAME' "$environmentName-knowledge-base-connection"
+    $knowledgeBaseEndpoint = if ($retrievalBackend -eq 'foundry_iq') {
+        Get-OptionalEnvValue 'KNOWLEDGE_BASE_ENDPOINT' "https://$searchName.search.windows.net"
+    }
+    else {
+        ''
+    }
+    $knowledgeBaseConnectionId = if ($retrievalBackend -eq 'foundry_iq') {
+        Get-OptionalEnvValue 'KNOWLEDGE_BASE_CONNECTION_ID' "$resourceGroupId/providers/Microsoft.CognitiveServices/accounts/$foundryName/projects/$foundryProjectName/connections/$knowledgeBaseConnectionName"
+    }
+    else {
+        ''
+    }
+    $foundryIqDefaultKnowledgeSourceName = if ($foundryIqPattern -eq 'searchIndex') {
+        "$ragIndexName-rag-ks"
+    }
+    else {
+        "$ragIndexName-blob-ks"
+    }
+    $foundryIqKnowledgeSourceName = if ($retrievalBackend -eq 'foundry_iq') {
+        Get-OptionalEnvValue 'FOUNDRY_IQ_KNOWLEDGE_SOURCE_NAME' $foundryIqDefaultKnowledgeSourceName
+    }
+    else {
+        ''
+    }
+    $foundryIqKnowledgeSourceKind = if ($retrievalBackend -eq 'foundry_iq') {
+        Get-OptionalEnvValue 'FOUNDRY_IQ_KNOWLEDGE_SOURCE_KIND' $foundryIqPattern
+    }
+    else {
+        ''
+    }
+    $effectiveKnowledgeBaseName = if ($retrievalBackend -eq 'foundry_iq') { $knowledgeBaseName } else { '' }
+
     $settings = [ordered]@{
         AZURE_TENANT_ID = $tenantId
         SUBSCRIPTION_ID = $subscriptionId
@@ -242,6 +279,22 @@ function Set-GptRagAppConfiguration {
         DEPLOYMENT_NAME = $deploymentName
         RESOURCE_TOKEN = $resourceToken
         ENABLE_AGENTIC_RETRIEVAL = (Get-OptionalEnvValue 'ENABLE_AGENTIC_RETRIEVAL' 'false')
+        RETRIEVAL_BACKEND = $retrievalBackend
+        FOUNDRY_IQ_PATTERN = $foundryIqPattern
+        FOUNDRY_IQ_API_VERSION = (Get-OptionalEnvValue 'FOUNDRY_IQ_API_VERSION' '2026-05-01-preview')
+        FOUNDRY_IQ_KNOWLEDGE_RETRIEVAL_BILLING_PLAN = (Get-OptionalEnvValue 'FOUNDRY_IQ_KNOWLEDGE_RETRIEVAL_BILLING_PLAN' 'free')
+        FOUNDRY_IQ_KNOWLEDGE_SOURCE_NAME = $foundryIqKnowledgeSourceName
+        FOUNDRY_IQ_KNOWLEDGE_SOURCE_KIND = $foundryIqKnowledgeSourceKind
+        FOUNDRY_IQ_STORAGE_CONTAINER_NAME = (Get-OptionalEnvValue 'FOUNDRY_IQ_STORAGE_CONTAINER_NAME' 'documents')
+        FOUNDRY_IQ_STORAGE_FOLDER_PATH = (Get-OptionalEnvValue 'FOUNDRY_IQ_STORAGE_FOLDER_PATH')
+        FOUNDRY_IQ_IS_ADLS_GEN2 = (Get-OptionalEnvValue 'FOUNDRY_IQ_IS_ADLS_GEN2' 'false')
+        FOUNDRY_IQ_CONTENT_EXTRACTION_MODE = (Get-OptionalEnvValue 'FOUNDRY_IQ_CONTENT_EXTRACTION_MODE' 'standard')
+        FOUNDRY_IQ_INGESTION_PERMISSION_OPTIONS = (Get-OptionalEnvValue 'FOUNDRY_IQ_INGESTION_PERMISSION_OPTIONS' '["rbacScope"]')
+        FOUNDRY_IQ_SEARCH_INDEX_NAME = (Get-OptionalEnvValue 'FOUNDRY_IQ_SEARCH_INDEX_NAME' $ragIndexName)
+        FOUNDRY_IQ_SEMANTIC_CONFIGURATION_NAME = (Get-OptionalEnvValue 'FOUNDRY_IQ_SEMANTIC_CONFIGURATION_NAME' 'semantic-config')
+        FOUNDRY_IQ_FILTER_ADD_ON_ENABLED = (Get-OptionalEnvValue 'FOUNDRY_IQ_FILTER_ADD_ON_ENABLED' 'false')
+        FOUNDRY_IQ_SECURITY_FIELD_NAME = (Get-OptionalEnvValue 'FOUNDRY_IQ_SECURITY_FIELD_NAME' 'metadata_security_id')
+        FOUNDRY_IQ_MAX_OUTPUT_DOCUMENTS = (Get-OptionalEnvValue 'FOUNDRY_IQ_MAX_OUTPUT_DOCUMENTS')
         NETWORK_ISOLATION = (Get-OptionalEnvValue 'NETWORK_ISOLATION' 'false')
         USE_UAI = (Get-OptionalEnvValue 'USE_UAI' 'false')
         USE_CAPP_API_KEY = (Get-OptionalEnvValue 'USE_CAPP_API_KEY' 'false')
@@ -259,6 +312,7 @@ function Set-GptRagAppConfiguration {
         AI_FOUNDRY_ACCOUNT_RESOURCE_ID = $foundryResourceId
         AI_FOUNDRY_PROJECT_RESOURCE_ID = $foundryProjectResourceId
         SEARCH_SERVICE_UAI_RESOURCE_ID = ''
+        KNOWLEDGE_BASE_CONNECTION_ID = $knowledgeBaseConnectionId
         SEARCH_SERVICE_RESOURCE_ID = $searchResourceId
         AZURE_SPEECH_RESOURCE_ID = (Get-OptionalEnvValue 'AZURE_SPEECH_RESOURCE_ID')
         COSMOS_DB_ACCOUNT_RESOURCE_ID = $cosmosResourceId
@@ -295,10 +349,12 @@ function Set-GptRagAppConfiguration {
         AI_FOUNDRY_ACCOUNT_ENDPOINT = "https://$foundryName.cognitiveservices.azure.com/"
         AI_FOUNDRY_PROJECT_ENDPOINT = "https://$foundryName.services.ai.azure.com/api/projects/$foundryProjectName"
         SEARCH_SERVICE_QUERY_ENDPOINT = "https://$searchName.search.windows.net"
+        KNOWLEDGE_BASE_ENDPOINT = $knowledgeBaseEndpoint
         AZURE_SPEECH_ENDPOINT = (Get-OptionalEnvValue 'AZURE_SPEECH_ENDPOINT')
         COSMOS_DB_ENDPOINT = "https://$cosmosName.documents.azure.com:443/"
 
         SEARCH_CONNECTION_ID = ''
+        KNOWLEDGE_BASE_NAME = $effectiveKnowledgeBaseName
         BING_CONNECTION_ID = ''
         CONTAINER_ENV_PRINCIPAL_ID = $containerEnvPrincipalId
         SEARCH_SERVICE_PRINCIPAL_ID = $searchPrincipalId

@@ -319,9 +319,10 @@
   "datasources": [],
   "skillsets": [],
   "indexers": [],
-  "knowledgeSources": [
+  "knowledgeSources": {% if RETRIEVAL_BACKEND == 'foundry_iq' %}[
+    {% if FOUNDRY_IQ_PATTERN == 'searchIndex' %}
     {
-      "name": "{{SEARCH_RAG_INDEX_NAME}}-rag-ks",
+      "name": "{{FOUNDRY_IQ_KNOWLEDGE_SOURCE_NAME}}",
       "kind": "searchIndex",
       "description": "RAG documents knowledge source (searchIndex)",
       "encryptionKey": null,
@@ -342,20 +343,50 @@
         ]
       }
     }
-  ],
-  "knowledgeBases": [
+    {% else %}
     {
-      "name": "{{SEARCH_RAG_INDEX_NAME}}-rag-kb",
+      "name": "{{FOUNDRY_IQ_KNOWLEDGE_SOURCE_NAME}}",
+      "kind": "azureBlob",
+      "description": "RAG documents knowledge source (native Azure Blob Storage ingestion)",
+      "encryptionKey": null,
+      "azureBlobParameters": {
+        "connectionString": "ResourceId={{STORAGE_ACCOUNT_RESOURCE_ID}}",
+        "containerName": "{{FOUNDRY_IQ_STORAGE_CONTAINER_NAME}}",
+        "folderPath": {% if FOUNDRY_IQ_STORAGE_FOLDER_PATH %}"{{FOUNDRY_IQ_STORAGE_FOLDER_PATH}}"{% else %}null{% endif %},
+        "isADLSGen2": {{FOUNDRY_IQ_IS_ADLS_GEN2 | lower}},
+        "ingestionParameters": {
+          "identity": null,
+          "disableImageVerbalization": false,
+          "chatCompletionModel": null,
+          "embeddingModel": {% if EMBEDDING_MODEL_INFO %}{
+            "kind": "azureOpenAI",
+            "azureOpenAIParameters": {
+              "resourceUri": "{{EMBEDDING_MODEL_INFO.endpoint}}",
+              "deploymentId": "{{EMBEDDING_MODEL_INFO.deployment_name}}",
+              "modelName": "{{EMBEDDING_MODEL_INFO.model_name}}"
+            }
+          }{% else %}null{% endif %},
+          "contentExtractionMode": "{{FOUNDRY_IQ_CONTENT_EXTRACTION_MODE}}",
+          "ingestionSchedule": null,
+          "ingestionPermissionOptions": {{FOUNDRY_IQ_INGESTION_PERMISSION_OPTIONS | tojson}}
+        }
+      }
+    }
+    {% endif %}
+  ]{% else %}[]{% endif %},
+  "knowledgeBases": {% if RETRIEVAL_BACKEND == 'foundry_iq' %}[
+    {
+      "name": "{{KNOWLEDGE_BASE_NAME}}",
       "description": "Knowledge base for RAG grounded retrieval.",
       "retrievalInstructions": null,
       "answerInstructions": null,
       "outputMode": "extractiveData",
       "knowledgeSources": [
-        { "name": "{{SEARCH_RAG_INDEX_NAME}}-rag-ks" }
+        { "name": "{{FOUNDRY_IQ_KNOWLEDGE_SOURCE_NAME}}" }
       ],
       "models": [],
       "encryptionKey": null,
       "retrievalReasoningEffort": { "kind": "minimal" }
     }
-  ]
+  ]{% else %}[]{% endif %}
 }

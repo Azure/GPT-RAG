@@ -1,5 +1,124 @@
 # Changelog
 
+## [v3.0.4] - 2026-06-26
+
+### User and operator impact
+
+Aligns the Foundry IQ release train end to end. Earlier `v3.0.x` tags shipped CHANGELOG entries and GitHub Release notes that claimed AI Landing Zone `v2.1.3` and `gpt-rag-orchestrator` `v3.0.2`, but `manifest.json`, the `infra` submodule pointer, and the `RETRIEVAL_BACKEND` default never moved together. `v3.0.4` is the release that actually consumes those pins and makes the native Foundry IQ Blob default work consistently for new deployments.
+
+### Changed
+
+- **Default `RETRIEVAL_BACKEND` flipped from `ai_search` to `foundry_iq`** (`scripts/postProvision.ps1`). Matches the AI Landing Zone `v2.1.3` default so a fresh `azd up` lands on the native Foundry IQ Blob path without operators having to set `RETRIEVAL_BACKEND` by hand. Operators who want the GPT-RAG ingestion plus Azure AI Search path can opt down with `azd env set RETRIEVAL_BACKEND ai_search` before provisioning.
+- **`gpt-rag-orchestrator` pin bumped to [`v3.0.2`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.0.2):** Picks up the Foundry IQ `azureBlob` reference parsing fix and the `x-ms-query-source-authorization` forwarding fix that makes RBAC-filtered Knowledge Bases work end to end (closes the orchestrator-side half of [#508](https://github.com/Azure/GPT-RAG/issues/508)).
+- **AI Landing Zone Bicep module pin reaffirmed at [`v2.1.3`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.1.3):** `manifest.json`, `.gitmodules`, and the `infra` submodule HEAD are now all aligned on `v2.1.3`.
+
+### Fixed
+
+- **Native Blob Knowledge Source connection string** (`config/search/search.j2`): removed the trailing semicolon from `ResourceId={{STORAGE_ACCOUNT_RESOURCE_ID}}`. The semicolon caused the Foundry IQ permission scope to be derived from a malformed resource ID, so RBAC-filtered query-time filtering did not match the actual container. Without this fix, RBAC-trim retrieval against the native Blob Knowledge Source silently returned no documents.
+
+The following component versions are pinned for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v3.0.2 |
+| gpt-rag-ingestion | v2.4.13 |
+| bicep-ptn-aiml-landing-zone | v2.1.3 |
+
+## [v3.0.3] - 2026-06-26
+
+### User and operator impact
+
+Changes the default Foundry IQ native Blob content extraction mode from `minimal` to `standard` so that scanned and image-only PDFs are ingested with OCR by default. Under the previous `minimal` default, such PDFs were ingested with empty content and were silently unsearchable, which is the wrong default behavior for typical document libraries.
+
+`standard` mode uses the Foundry IQ Content Understanding skill (`Microsoft.Skills.Util.ContentUnderstandingSkill`) for layout, OCR, and structured extraction. It carries explicit prerequisites and limits that operators should be aware of:
+
+- The Foundry resource must live in a [Content Understanding-supported region](https://learn.microsoft.com/azure/ai-services/content-understanding/service-limits#region-support).
+- Content Understanding may require a one-time `PATCH /contentunderstanding/defaults` call against the Foundry resource on first use, otherwise Knowledge Source creation fails with `DefaultsNotSet`.
+- `standard` has per-document limits of 300 pages and 5 minutes of processing time.
+- `standard` is billed through Content Understanding meters in addition to the existing Azure AI Search `knowledgeRetrieval` plan.
+
+Operators who only ingest text PDFs and want to avoid Content Understanding billing can opt down to `minimal` before provisioning:
+
+```powershell
+azd env set FOUNDRY_IQ_CONTENT_EXTRACTION_MODE minimal
+```
+
+`FOUNDRY_IQ_CONTENT_EXTRACTION_MODE` is immutable on an existing Knowledge Source. Changing the value after deployment requires recreating the Knowledge Source and the Knowledge Base that references it.
+
+Documents that exceed the `standard` mode limits, or scenarios that need custom chunking, custom enrichment, or Excel chunking, should keep the GPT-RAG ingestion plus Azure AI Search path (`RETRIEVAL_BACKEND=ai_search` or `FOUNDRY_IQ_PATTERN=searchIndex`).
+
+### Changed
+
+- **Default `FOUNDRY_IQ_CONTENT_EXTRACTION_MODE` is now `standard`.** `scripts/postProvision.ps1` stamps `standard` into App Configuration for new deployments. Operators can opt down to `minimal` before provisioning. The setting is immutable after Knowledge Source creation.
+- **AI Landing Zone Bicep module pin bumped to [`v2.1.3`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.1.3):** Aligns the Bicep `foundryIqContentExtractionMode` default and the `${FOUNDRY_IQ_CONTENT_EXTRACTION_MODE=standard}` substitution with the new GPT-RAG default.
+
+The following component versions are pinned for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v3.0.1 |
+| gpt-rag-ingestion | v2.4.13 |
+| bicep-ptn-aiml-landing-zone | v2.1.3 |
+
+## [v3.0.2] - 2026-06-26
+
+### User and operator impact
+
+Fixes the native Foundry IQ Blob Knowledge Source setup introduced in `v3.0.1`. New default deployments with `RETRIEVAL_BACKEND=foundry_iq` now create the Foundry IQ `azureBlob` Knowledge Source and Knowledge Base successfully for the standard Blob container path.
+
+### Fixed
+
+- **Native Blob permission defaults:** `FOUNDRY_IQ_INGESTION_PERMISSION_OPTIONS` now defaults to `["rbacScope"]`, which is accepted by Foundry IQ for `azureBlob` sources when `FOUNDRY_IQ_IS_ADLS_GEN2=false`. ADLS Gen2 deployments can still override this setting to include ACL-driven permission metadata when supported by the source.
+- **Native Blob Knowledge Source payload:** The setup now sends `ResourceId=<storage resource ID>` for the storage connection string, without a trailing semicolon, so the generated Blob permission scope matches the container resource ID used by query-time RBAC filtering. It also leaves `chatCompletionModel` unset because Foundry IQ permission extraction rejects Blob indexers that include the Chat Completion skill.
+- **Foundry IQ setup validation:** The Search setup script now normalizes JSON-like App Configuration values before rendering Knowledge Source payloads, cleans up the previous `searchIndex` Knowledge Source when switching to native Blob, and fails the setup when Foundry IQ Knowledge Source or Knowledge Base creation fails instead of reporting a successful provision with missing resources.
+- **AI Landing Zone Bicep module pin bumped to [`v2.1.2`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.1.2):** Aligns the default native Blob permission option with the Foundry IQ service contract.
+
+The following component versions are pinned for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v3.0.1 |
+| gpt-rag-ingestion | v2.4.13 |
+| bicep-ptn-aiml-landing-zone | v2.1.2 |
+
+## [v3.0.1] - 2026-06-26
+
+### User and operator impact
+
+Corrects the Foundry IQ release default so `RETRIEVAL_BACKEND=foundry_iq` uses native Blob or ADLS Gen2 Knowledge Sources by default. Operators can still opt into the existing Azure AI Search `searchIndex` registration path when they specifically need Pattern B `filterAddOn`.
+
+Foundry IQ deployments now default to native Blob or ADLS Gen2 Knowledge Sources, so Foundry IQ owns file processing and permission-aware retrieval when `RETRIEVAL_BACKEND=foundry_iq`. The existing GPT-RAG ingestion plus Azure AI Search `searchIndex` Knowledge Source path remains available as explicit Pattern B opt-in for custom security fields with `filterAddOn`.
+
+### Added
+
+- **Foundry IQ retrieval backend support** ([#526](https://github.com/Azure/GPT-RAG/issues/526)). Adds the GPT-RAG configuration, deployment pins, and documentation needed to run retrieval through Foundry IQ.
+- **AI Landing Zone Bicep module pin bumped to [`v2.1.1`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.1.1):** Adds Foundry IQ Knowledge Base and Knowledge Source runtime configuration, `knowledgeRetrieval` billing configuration, native Blob/ADLS Knowledge Source defaults, App Configuration values, post-provision data-plane setup, and Azure AI Search semantic ranker standard.
+- **Orchestrator pin bumped to [`v3.0.1`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.0.1):** Adds the selectable `RETRIEVAL_BACKEND=foundry_iq` runtime backend, OBO header support for native permissions, Pattern B `filterAddOn` support, the minimal-reasoning retrieve API contract, and configurable Knowledge Source kind support.
+- **Foundry IQ App Configuration defaults:** `postProvision.ps1` and `config/search/search.settings.j2` now seed the generated Knowledge Base name, native Blob Knowledge Source name, Knowledge Source kind, Search endpoint, storage container, folder path, ADLS mode, content extraction mode, permission options, and semantic configuration so the deployed app can use the generated Foundry IQ resources without manual repair.
+- **Documentation:** Covers Foundry IQ deployment patterns, authorization behavior, migration, rollback, billing, limitations, and troubleshooting.
+
+### Validation
+
+Validated in a live Azure environment:
+
+- Provision and deploy completed successfully.
+- Foundry IQ direct retrieval returned HTTP 200.
+- Orchestrator image smoke test returned HTTP 200.
+- Logs confirmed retrieval through Foundry IQ.
+- Frontend health, ingestion docs, and orchestrator docs endpoints returned HTTP 200.
+
+The following component versions are pinned for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v3.0.1 |
+| gpt-rag-ingestion | v2.4.13 |
+| bicep-ptn-aiml-landing-zone | v2.1.1 |
+
 ## [v2.9.16] - 2026-06-19
 
 ### User and operator impact
