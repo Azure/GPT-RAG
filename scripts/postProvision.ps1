@@ -235,7 +235,8 @@ function Set-GptRagAppConfiguration {
 
     $retrievalBackend = Get-OptionalEnvValue 'RETRIEVAL_BACKEND' 'ai_search'
     $foundryIqPattern = Get-OptionalEnvValue 'FOUNDRY_IQ_PATTERN' 'searchIndex'
-    $knowledgeBaseName = Get-OptionalEnvValue 'KNOWLEDGE_BASE_NAME' "$environmentName-knowledge-base"
+    $ragIndexName = "ragindex-$resourceToken"
+    $knowledgeBaseName = Get-OptionalEnvValue 'KNOWLEDGE_BASE_NAME' "$ragIndexName-rag-kb"
     $knowledgeBaseConnectionName = Get-OptionalEnvValue 'KNOWLEDGE_BASE_CONNECTION_NAME' "$environmentName-knowledge-base-connection"
     $knowledgeBaseEndpoint = if ($retrievalBackend -eq 'foundry_iq') {
         Get-OptionalEnvValue 'KNOWLEDGE_BASE_ENDPOINT' "https://$searchName.search.windows.net"
@@ -250,7 +251,7 @@ function Set-GptRagAppConfiguration {
         ''
     }
     $foundryIqKnowledgeSourceName = if ($retrievalBackend -eq 'foundry_iq' -and $foundryIqPattern -eq 'searchIndex') {
-        Get-OptionalEnvValue 'FOUNDRY_IQ_KNOWLEDGE_SOURCE_NAME' 'gpt-rag-search-index'
+        Get-OptionalEnvValue 'FOUNDRY_IQ_KNOWLEDGE_SOURCE_NAME' "$ragIndexName-rag-ks"
     }
     else {
         ''
@@ -271,8 +272,8 @@ function Set-GptRagAppConfiguration {
         FOUNDRY_IQ_API_VERSION = (Get-OptionalEnvValue 'FOUNDRY_IQ_API_VERSION' '2026-05-01-preview')
         FOUNDRY_IQ_KNOWLEDGE_RETRIEVAL_BILLING_PLAN = (Get-OptionalEnvValue 'FOUNDRY_IQ_KNOWLEDGE_RETRIEVAL_BILLING_PLAN' 'free')
         FOUNDRY_IQ_KNOWLEDGE_SOURCE_NAME = $foundryIqKnowledgeSourceName
-        FOUNDRY_IQ_SEARCH_INDEX_NAME = (Get-OptionalEnvValue 'FOUNDRY_IQ_SEARCH_INDEX_NAME' "ragindex-$resourceToken")
-        FOUNDRY_IQ_SEMANTIC_CONFIGURATION_NAME = (Get-OptionalEnvValue 'FOUNDRY_IQ_SEMANTIC_CONFIGURATION_NAME' 'default')
+        FOUNDRY_IQ_SEARCH_INDEX_NAME = (Get-OptionalEnvValue 'FOUNDRY_IQ_SEARCH_INDEX_NAME' $ragIndexName)
+        FOUNDRY_IQ_SEMANTIC_CONFIGURATION_NAME = (Get-OptionalEnvValue 'FOUNDRY_IQ_SEMANTIC_CONFIGURATION_NAME' 'semantic-config')
         FOUNDRY_IQ_FILTER_ADD_ON_ENABLED = (Get-OptionalEnvValue 'FOUNDRY_IQ_FILTER_ADD_ON_ENABLED' 'false')
         FOUNDRY_IQ_SECURITY_FIELD_NAME = (Get-OptionalEnvValue 'FOUNDRY_IQ_SECURITY_FIELD_NAME' 'metadata_security_id')
         FOUNDRY_IQ_MAX_OUTPUT_DOCUMENTS = (Get-OptionalEnvValue 'FOUNDRY_IQ_MAX_OUTPUT_DOCUMENTS')
