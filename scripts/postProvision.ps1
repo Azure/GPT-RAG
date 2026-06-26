@@ -269,6 +269,7 @@ function Set-GptRagAppConfiguration {
         RETRIEVAL_BACKEND = $retrievalBackend
         FOUNDRY_IQ_PATTERN = $foundryIqPattern
         FOUNDRY_IQ_API_VERSION = (Get-OptionalEnvValue 'FOUNDRY_IQ_API_VERSION' '2026-05-01-preview')
+        FOUNDRY_IQ_KNOWLEDGE_RETRIEVAL_BILLING_PLAN = (Get-OptionalEnvValue 'FOUNDRY_IQ_KNOWLEDGE_RETRIEVAL_BILLING_PLAN' 'free')
         FOUNDRY_IQ_KNOWLEDGE_SOURCE_NAME = $foundryIqKnowledgeSourceName
         FOUNDRY_IQ_SEARCH_INDEX_NAME = (Get-OptionalEnvValue 'FOUNDRY_IQ_SEARCH_INDEX_NAME' "ragindex-$resourceToken")
         FOUNDRY_IQ_SEMANTIC_CONFIGURATION_NAME = (Get-OptionalEnvValue 'FOUNDRY_IQ_SEMANTIC_CONFIGURATION_NAME' 'default')

@@ -4,7 +4,7 @@
 
 ### Added
 
-- **Foundry IQ retrieval backend configuration groundwork** ([#526](https://github.com/Azure/GPT-RAG/issues/526)). Documented the Azure AI Search vs Foundry IQ backend choice, Pattern A/Pattern B security tradeoffs, and the dedicated `KNOWLEDGE_BASE_CONNECTION_ID` requirement. `postProvision.ps1` and `config/search/search.settings.j2` now preserve and seed Foundry IQ runtime settings without removing the one-release deprecated `ENABLE_AGENTIC_RETRIEVAL` compatibility value.
+- **Foundry IQ retrieval backend configuration groundwork** ([#526](https://github.com/Azure/GPT-RAG/issues/526)). Documented the Azure AI Search vs Foundry IQ backend choice, Pattern A/Pattern B security tradeoffs, the `knowledgeRetrieval` billing plan, and the dedicated `KNOWLEDGE_BASE_CONNECTION_ID` requirement. `postProvision.ps1` and `config/search/search.settings.j2` now preserve and seed Foundry IQ runtime settings without removing the one-release deprecated `ENABLE_AGENTIC_RETRIEVAL` compatibility value.
 
 ## [v2.9.15] - 2026-06-19
 
