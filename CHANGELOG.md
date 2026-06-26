@@ -1,10 +1,39 @@
 # Changelog
 
-## [Unreleased]
+## [v3.0.0] - 2026-06-26
+
+### User and operator impact
+
+Adds end-to-end Foundry IQ retrieval support to GPT-RAG. Operators can now deploy GPT-RAG with either the existing Azure AI Search retrieval path or the new Foundry IQ retrieval backend using a documented, repeatable release path.
+
+Foundry IQ deployments support Pattern A native permissions with OBO and Pattern B custom security fields with `filterAddOn`.
 
 ### Added
 
-- **Foundry IQ retrieval backend configuration groundwork** ([#526](https://github.com/Azure/GPT-RAG/issues/526)). Documented the Azure AI Search vs Foundry IQ backend choice, Pattern A/Pattern B security tradeoffs, the `knowledgeRetrieval` billing plan, and the dedicated `KNOWLEDGE_BASE_CONNECTION_ID` requirement. `postProvision.ps1` and `config/search/search.settings.j2` now preserve and seed Foundry IQ runtime settings without removing the one-release deprecated `ENABLE_AGENTIC_RETRIEVAL` compatibility value.
+- **Foundry IQ retrieval backend support** ([#526](https://github.com/Azure/GPT-RAG/issues/526)). Adds the GPT-RAG configuration, deployment pins, and documentation needed to run retrieval through Foundry IQ.
+- **AI Landing Zone Bicep module pin bumped to [`v2.1.0`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.1.0):** Adds Foundry IQ Knowledge Base and Knowledge Source runtime configuration, `knowledgeRetrieval` billing configuration, App Configuration values, post-provision data-plane setup, and Azure AI Search semantic ranker standard.
+- **Orchestrator pin bumped to [`v2.9.0`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.9.0):** Adds the selectable `RETRIEVAL_BACKEND=foundry_iq` runtime backend, OBO header support for native permissions, Pattern B `filterAddOn` support, and the minimal-reasoning retrieve API contract.
+- **Foundry IQ App Configuration defaults:** `postProvision.ps1` and `config/search/search.settings.j2` now seed the generated Knowledge Base name, Knowledge Source name, Search endpoint, and semantic configuration so the deployed app can use the generated Foundry IQ resources without manual repair.
+- **Documentation:** Covers Foundry IQ deployment patterns, authorization behavior, migration, rollback, billing, limitations, and troubleshooting.
+
+### Validation
+
+Validated in a live Azure environment:
+
+- Provision and deploy completed successfully.
+- Foundry IQ direct retrieval returned HTTP 200.
+- Orchestrator image smoke test returned HTTP 200.
+- Logs confirmed retrieval through Foundry IQ.
+- Frontend health, ingestion docs, and orchestrator docs endpoints returned HTTP 200.
+
+The following component versions are pinned for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v2.9.0 |
+| gpt-rag-ingestion | v2.4.13 |
+| bicep-ptn-aiml-landing-zone | v2.1.0 |
 
 ## [v2.9.15] - 2026-06-19
 
