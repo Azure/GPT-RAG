@@ -33,6 +33,16 @@ Component image builds use Azure Container Registry remote builds in isolated en
 
 For unattended provisioning, set `AZURE_SKIP_NETWORK_ISOLATION_WARNING=true` to skip only the provisioning warning prompt. Do not use `AZURE_ZERO_TRUST`; it is no longer part of the deployment flow.
 
+## Retrieval backend configuration
+
+GPT-RAG supports Azure AI Search as the direct retrieval backend and is adding
+Foundry IQ as a first-class backend for v3 deployments. Existing deployments
+should keep `RETRIEVAL_BACKEND=ai_search` until they intentionally migrate.
+
+For the operator guide, including Pattern A vs Pattern B, security modes,
+`knowledgeRetrieval` billing, rollback, and known limitations, see the
+published docs: [Retrieval backend selection](https://azure.github.io/GPT-RAG/howto_retrieval_backend/).
+
 ## Architecture
 
 ![Zero Trust Architecture](media/architecture_zero_trust.png)
