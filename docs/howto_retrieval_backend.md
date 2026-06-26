@@ -157,12 +157,13 @@ ingesting it.
 
 | Mode | What it does | Use when |
 | --- | --- | --- |
-| `standard` (default) | Foundry IQ runs the `Microsoft.Skills.Util.ContentUnderstandingSkill` on each document for layout, OCR, and structured extraction. Scanned PDFs, image-only PDFs, and PDFs without a text layer are OCR'd and become searchable. | This is the safe default for typical document libraries, which usually include some scanned content. |
+| `standard` (default, recommended) | Foundry IQ runs the `Microsoft.Skills.Util.ContentUnderstandingSkill` on each document for layout, OCR, and structured extraction. Scanned PDFs, image-only PDFs, and PDFs without a text layer are OCR'd and become searchable. | Use this for any real-world document library. It is the recommended default. |
 | `minimal` | Foundry IQ extracts only the text already present in the source. PDFs without a text layer ingest with empty content and are not searchable. No Content Understanding billing. | You have validated that the corpus is text-only PDFs (or non-PDF text files) and you want to skip Content Understanding cost. |
 
-The single most common failure with `minimal` is silent: a scanned PDF lands in
-the container, ingestion reports success, but every retrieval against that
-document returns nothing. The default is `standard` to avoid this trap.
+Picking `minimal` for a corpus that contains scanned PDFs is a silent failure:
+the file lands in the container, ingestion reports success, and every retrieval
+against it returns nothing. The default is `standard` so you do not have to
+think about this.
 
 ### What `standard` requires
 
