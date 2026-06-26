@@ -13,10 +13,10 @@
       
       
       
-        <link rel="prev" href="../whatisnew/">
+        <link rel="prev" href="../howto_sharepoint_connector/">
       
       
-        <link rel="next" href="../deploy/">
+        <link rel="next" href="../howto_retrieval_optimization/">
       
       
       <link rel="icon" href="../favicon.ico">
@@ -24,7 +24,7 @@
     
     
       
-        <title>Release Walkthrough - GPT-RAG</title>
+        <title>Retrieval Backend Selection - GPT-RAG</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#release-walkthrough-file-uploads-and-ai-landing-zone-v2" class="md-skip">
+        <a href="#retrieval-backend-selection" class="md-skip">
           Skip to content
         </a>
       
@@ -111,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Release Walkthrough
+              Retrieval Backend Selection
             
           </span>
         </div>
@@ -266,30 +266,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Release Walkthrough
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../release_267_270_walkthrough/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -298,296 +278,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#1-executive-summary" class="md-nav__link">
-    <span class="md-ellipsis">
-      1. Executive summary
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#2-what-to-show-first" class="md-nav__link">
-    <span class="md-ellipsis">
-      2. What to show first
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#3-per-conversation-file-uploads" class="md-nav__link">
-    <span class="md-ellipsis">
-      3. Per-conversation file uploads
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="3. Per-conversation file uploads">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#what-changed" class="md-nav__link">
-    <span class="md-ellipsis">
-      What changed
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#why-it-matters" class="md-nav__link">
-    <span class="md-ellipsis">
-      Why it matters
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#architecture-talking-points" class="md-nav__link">
-    <span class="md-ellipsis">
-      Architecture talking points
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#demo-script" class="md-nav__link">
-    <span class="md-ellipsis">
-      Demo script
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#4-ai-landing-zone-v2-foundation" class="md-nav__link">
-    <span class="md-ellipsis">
-      4. AI Landing Zone v2 foundation
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="4. AI Landing Zone v2 foundation">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#what-changed_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      What changed
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#what-to-highlight" class="md-nav__link">
-    <span class="md-ellipsis">
-      What to highlight
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#operator-value" class="md-nav__link">
-    <span class="md-ellipsis">
-      Operator value
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#5-regional-preflight-checks" class="md-nav__link">
-    <span class="md-ellipsis">
-      5. Regional preflight checks
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="5. Regional preflight checks">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#what-changed_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      What changed
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#checks-to-mention" class="md-nav__link">
-    <span class="md-ellipsis">
-      Checks to mention
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#important-limitation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Important limitation
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#6-basic-deployment-path" class="md-nav__link">
-    <span class="md-ellipsis">
-      6. Basic deployment path
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="6. Basic deployment path">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#what-to-explain" class="md-nav__link">
-    <span class="md-ellipsis">
-      What to explain
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#7-network-isolation-deployment-path" class="md-nav__link">
-    <span class="md-ellipsis">
-      7. Network Isolation deployment path
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="7. Network Isolation deployment path">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#workstation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Workstation
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#jumpbox" class="md-nav__link">
-    <span class="md-ellipsis">
-      Jumpbox
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#what-not-to-do" class="md-nav__link">
-    <span class="md-ellipsis">
-      What not to do
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#8-docker-free-deployment" class="md-nav__link">
-    <span class="md-ellipsis">
-      8. Docker-free deployment
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="8. Docker-free deployment">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#what-changed_3" class="md-nav__link">
-    <span class="md-ellipsis">
-      What changed
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#why-it-matters_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      Why it matters
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#9-validation-status" class="md-nav__link">
-    <span class="md-ellipsis">
-      9. Validation status
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#10-recommended-walkthrough-order" class="md-nav__link">
-    <span class="md-ellipsis">
-      10. Recommended walkthrough order
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -953,17 +643,19 @@
       
   
   
+    
   
   
+  
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
         
           
           <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
@@ -977,7 +669,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             How-to Guides
@@ -1114,10 +806,30 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../howto_retrieval_backend/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Retrieval Backend Selection
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -1126,6 +838,116 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-two-backends" class="md-nav__link">
+    <span class="md-ellipsis">
+      The two backends
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pattern-a-and-pattern-b" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pattern A and Pattern B
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security modes
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration settings
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#billing-choice" class="md-nav__link">
+    <span class="md-ellipsis">
+      Billing choice
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#enable-foundry-iq-with-pattern-b" class="md-nav__link">
+    <span class="md-ellipsis">
+      Enable Foundry IQ with Pattern B
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#enable-foundry-iq-with-pattern-a" class="md-nav__link">
+    <span class="md-ellipsis">
+      Enable Foundry IQ with Pattern A
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#roll-back-to-azure-ai-search" class="md-nav__link">
+    <span class="md-ellipsis">
+      Roll back to Azure AI Search
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migration-guidance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Migration guidance
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#known-limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Known limitations
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1238,202 +1060,356 @@
   
 
 
-<h1 id="release-walkthrough-file-uploads-and-ai-landing-zone-v2">Release walkthrough: file uploads and AI Landing Zone v2</h1>
-<p>Use this page as a guided walkthrough for the latest GPT-RAG updates around per-conversation file uploads, deployment hardening, and the Azure AI Landing Zone v2 foundation.</p>
-<h2 id="1-executive-summary">1. Executive summary</h2>
-<p>GPT-RAG now has two important improvements for real deployments:</p>
-<ol>
-<li><strong>Per-conversation file uploads</strong>: users can upload documents directly in the chat and ask questions over those files in the current conversation.</li>
-<li><strong>Deployment reliability improvements</strong>: GPT-RAG now uses the Azure AI Landing Zone v2 foundation, adds preflight validation, clarifies the Network Isolation flow, and supports Docker-free remote builds with Azure Container Registry.</li>
-</ol>
-<p>The user-facing result is simple: users get a richer chat experience, while operators get a clearer and safer deployment path.</p>
-<h2 id="2-what-to-show-first">2. What to show first</h2>
-<p>Start on the <strong>What's New</strong> page and point out:</p>
-<ul>
-<li><strong>Release 2.6.7 — Per-conversation file uploads</strong></li>
-<li><strong>Release 2.7.0 — AI Landing Zone v2.0 bump and deployment hardening</strong></li>
-</ul>
-<p>Then move to this walkthrough to explain the story end-to-end.</p>
-<h2 id="3-per-conversation-file-uploads">3. Per-conversation file uploads</h2>
-<h3 id="what-changed">What changed</h3>
-<p>Users can upload files directly through the chat UI. GPT-RAG ingests the uploaded file, indexes its chunks in Azure AI Search, and scopes those chunks to the active conversation.</p>
-<h3 id="why-it-matters">Why it matters</h3>
-<ul>
-<li>Users can ask questions about a file without making it part of the global corpus.</li>
-<li>Uploaded content is isolated by <code>conversationId</code>.</li>
-<li>The orchestrator retrieves both conversation-private chunks and shared/global chunks when answering.</li>
-<li>Citations can point back to the uploaded file content.</li>
-</ul>
-<h3 id="architecture-talking-points">Architecture talking points</h3>
+<h1 id="retrieval-backend-selection">Retrieval backend selection</h1>
+<p>Use this guide when you need to decide whether GPT-RAG should retrieve from the
+direct Azure AI Search index or from a Foundry IQ knowledge base.</p>
+<p>The safe default for existing deployments is still:</p>
+<div class="highlight"><pre><span></span><code>RETRIEVAL_BACKEND=ai_search
+</code></pre></div>
+<p>Set <code>RETRIEVAL_BACKEND=foundry_iq</code> only after you have provisioned the Foundry IQ
+knowledge base, confirmed the security mode, and run a smoke test. Fresh v3
+deployments can move to Foundry IQ by default only after the AI Landing Zone
+support is validated and released.</p>
+<h2 id="the-two-backends">The two backends</h2>
 <table>
 <thead>
 <tr>
-<th>Layer</th>
-<th>What to explain</th>
+<th>Backend</th>
+<th>What it uses</th>
+<th>Best for</th>
+<th>Operator impact</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>UI</td>
-<td>The chat interface exposes file upload when the user is authenticated or the configured access mode allows it.</td>
+<td><code>ai_search</code></td>
+<td>The GPT-RAG Azure AI Search index, usually <code>ragindex</code>.</td>
+<td>Existing deployments, runtime uploads, multimodal retrieval, and the current GPT-RAG ingestion path.</td>
+<td>No migration required. This remains the rollback path.</td>
 </tr>
 <tr>
-<td>Ingestion</td>
-<td>Uploaded files are persisted and chunked, then written to Azure AI Search with a <code>conversationId</code>.</td>
-</tr>
-<tr>
-<td>Orchestrator</td>
-<td>Retrieval filters include the current conversation plus shared/global content.</td>
-</tr>
-<tr>
-<td>Storage/Search</td>
-<td>Original files and indexed chunks remain separate from the global ingestion flow.</td>
+<td><code>foundry_iq</code></td>
+<td>A Foundry IQ knowledge base hosted by Azure AI Search agentic retrieval.</td>
+<td>Managed knowledge retrieval, multi-source grounding, and the v3 managed-knowledge path.</td>
+<td>Requires knowledge base settings, billing choice, and a security mode.</td>
 </tr>
 </tbody>
 </table>
-<h3 id="demo-script">Demo script</h3>
-<ol>
-<li>Open GPT-RAG.</li>
-<li>Start a new conversation.</li>
-<li>Upload a small document.</li>
-<li>Ask a question whose answer is only in that document.</li>
-<li>Point out that the answer is grounded in the uploaded file.</li>
-<li>Start or switch to another conversation and explain that private uploaded chunks are scoped by conversation.</li>
-</ol>
-<h2 id="4-ai-landing-zone-v2-foundation">4. AI Landing Zone v2 foundation</h2>
-<h3 id="what-changed_1">What changed</h3>
-<p>GPT-RAG now consumes the newer Azure AI Landing Zone Bicep foundation. This brings a more robust infrastructure baseline and a clearer path for enterprise scenarios.</p>
-<h3 id="what-to-highlight">What to highlight</h3>
-<ul>
-<li><strong>IP allow-listing</strong> through <code>allowedIpRanges</code>.</li>
-<li><strong>Bring-your-own Private DNS zones</strong> for hub-and-spoke or enterprise landing zone integration.</li>
-<li><strong>Bring-your-own observability</strong> with existing Log Analytics and Application Insights.</li>
-<li><strong>Deployment mode</strong> parameterization for standalone versus landing-zone-integrated topologies.</li>
-<li><strong>Preflight validation</strong> before ARM deployment reaches late failures.</li>
-</ul>
-<h3 id="operator-value">Operator value</h3>
-<p>The upgrade reduces the chance of failing late in provisioning and gives platform teams more control over networking, DNS, and observability integration.</p>
-<h2 id="5-regional-preflight-checks">5. Regional preflight checks</h2>
-<h3 id="what-changed_2">What changed</h3>
-<p>Before provisioning, GPT-RAG now validates whether the selected region can support the important deployment prerequisites.</p>
-<h3 id="checks-to-mention">Checks to mention</h3>
-<ul>
-<li>Azure CLI subscription matches the <code>azd</code> environment.</li>
-<li>Region is supported by required resource providers.</li>
-<li>Jumpbox VM SKU is available.</li>
-<li>Azure AI Search, Cosmos DB, Container Apps, and AI Foundry/Cognitive Services are supported in the selected region.</li>
-<li>Azure OpenAI deployment quota is sufficient for the configured models.</li>
-</ul>
-<h3 id="important-limitation">Important limitation</h3>
-<p>Some Azure capacity issues are transient and are not exposed by a reliable pre-create API. Cosmos DB high-demand <code>ServiceUnavailable</code> is the main example. The preflight is explicit about that limitation.</p>
-<h2 id="6-basic-deployment-path">6. Basic deployment path</h2>
-<p>Use this path for a simple environment without Network Isolation.</p>
-<div class="highlight"><pre><span></span><code>azd<span class="w"> </span>init<span class="w"> </span>-t<span class="w"> </span>azure/gpt-rag
-az<span class="w"> </span>login
-azd<span class="w"> </span>auth<span class="w"> </span>login
-azd<span class="w"> </span>env<span class="w"> </span><span class="nb">set</span><span class="w"> </span>NETWORK_ISOLATION<span class="w"> </span><span class="nb">false</span>
-azd<span class="w"> </span>provision
-azd<span class="w"> </span>deploy
-</code></pre></div>
-<h3 id="what-to-explain">What to explain</h3>
-<ul>
-<li>The workstation can run the full flow.</li>
-<li><code>postProvision</code> runs locally after <code>azd provision</code>.</li>
-<li>Component images can be built locally with Docker or remotely with ACR when configured.</li>
-</ul>
-<h2 id="7-network-isolation-deployment-path">7. Network Isolation deployment path</h2>
-<p>Network Isolation uses a two-host flow.</p>
+<pre class="mermaid"><code>flowchart LR
+  User[User asks a question] --&gt; Orchestrator[GPT-RAG orchestrator]
+  Orchestrator --&gt; Choice{RETRIEVAL_BACKEND}
+  Choice --&gt;|ai_search| Search[GPT-RAG Azure AI Search index]
+  Choice --&gt;|foundry_iq| KB[Foundry IQ knowledge base]
+  KB --&gt; SourceA[Pattern A: managed source]
+  KB --&gt; SourceB[Pattern B: existing searchIndex]</code></pre>
+<h2 id="pattern-a-and-pattern-b">Pattern A and Pattern B</h2>
+<p>Foundry IQ still runs on Azure AI Search. The difference is who owns the source
+and index lifecycle.</p>
 <table>
 <thead>
 <tr>
-<th>Phase</th>
-<th>Where it runs</th>
-<th>Why</th>
+<th>Pattern</th>
+<th>AILZ value</th>
+<th>What it means</th>
+<th>Use when</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>azd provision</code></td>
-<td>Workstation</td>
-<td>Creates the private infrastructure.</td>
+<td>Pattern A: managed source</td>
+<td><code>FOUNDRY_IQ_PATTERN=managed</code></td>
+<td>Foundry IQ manages the source connector, chunking, vectorization, index, and refresh.</td>
+<td>You want the simplest managed ingestion path and your source supports the permissions you need.</td>
 </tr>
 <tr>
-<td><code>scripts/postProvision.ps1</code></td>
-<td>Jumpbox or VNet-connected host</td>
-<td>Data-plane resources are private.</td>
-</tr>
-<tr>
-<td><code>azd deploy</code></td>
-<td>Jumpbox or VNet-connected host</td>
-<td>Private ACR and private Container Apps are reachable only inside the VNet.</td>
+<td>Pattern B: existing index</td>
+<td><code>FOUNDRY_IQ_PATTERN=searchIndex</code></td>
+<td>The existing GPT-RAG Azure AI Search index is registered as a Foundry IQ <code>searchIndex</code> knowledge source.</td>
+<td>You need runtime uploads, GPT-RAG chunking/schema, multimodal parity, or GPT-RAG security fields.</td>
 </tr>
 </tbody>
 </table>
-<h3 id="workstation">Workstation</h3>
-<div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">NETWORK_ISOLATION</span> <span class="n">true</span>
-<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">AZURE_SKIP_NETWORK_ISOLATION_WARNING</span> <span class="n">true</span>
-<span class="n">azd</span> <span class="n">provision</span>
-</code></pre></div>
-<h3 id="jumpbox">Jumpbox</h3>
-<div class="highlight"><pre><span></span><code><span class="nb">cd </span><span class="n">C</span><span class="p">:\</span><span class="n">github</span><span class="p">\</span><span class="n">GPT-RAG</span>
-<span class="n">az</span> <span class="n">login</span> <span class="p">-</span><span class="n">-identity</span>
-<span class="n">azd</span> <span class="n">auth</span> <span class="n">login</span> <span class="p">-</span><span class="n">-managed-identity</span>
-<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">RUN_FROM_JUMPBOX</span> <span class="n">true</span>
-<span class="p">.\</span><span class="n">scripts</span><span class="p">\</span><span class="n">postProvision</span><span class="p">.</span><span class="n">ps1</span>
-<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">ACR_TASK_AGENT_POOL</span> <span class="n">build-pool</span>
-<span class="n">azd</span> <span class="n">deploy</span>
-</code></pre></div>
-<h3 id="what-not-to-do">What not to do</h3>
-<p>Do not run <code>azd deploy</code> from the workstation when <code>NETWORK_ISOLATION=true</code>. The deployment hook blocks this intentionally.</p>
-<p><code>BUILD_MODE</code> normally does not need to be set. When <code>NETWORK_ISOLATION=true</code> or <code>ACR_TASK_AGENT_POOL</code> is set, component scripts infer ACR remote build.</p>
-<h2 id="8-docker-free-deployment">8. Docker-free deployment</h2>
-<h3 id="what-changed_3">What changed</h3>
-<p>Component deployment can use Azure Container Registry remote builds, so Docker does not need to be installed on the jumpbox for network-isolated deployments.</p>
-<h3 id="why-it-matters_1">Why it matters</h3>
-<ul>
-<li>Easier jumpbox setup.</li>
-<li>Fewer local dependencies.</li>
-<li>Builds run inside the private ACR build path.</li>
-<li>The same deploy command works for the operator.</li>
-</ul>
-<h2 id="9-validation-status">9. Validation status</h2>
-<p>The current flow was validated in both modes:</p>
+<p>Pattern B is the safest first step for most existing GPT-RAG environments because
+it keeps the current ingestion and index schema while routing retrieval through
+the knowledge base.</p>
+<h2 id="security-modes">Security modes</h2>
+<p>There are two security mechanisms. They solve different problems and should not
+be mixed up.</p>
 <table>
 <thead>
 <tr>
-<th>Mode</th>
-<th>Result</th>
+<th>Security mode</th>
+<th>Used by</th>
+<th>How it is enforced</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Basic deployment</td>
-<td>Provision, post-provision, deploy, and smoke checks completed successfully.</td>
+<td>Native ingested permissions</td>
+<td>Pattern A sources that ingest permissions, such as ADLS Gen2 ACLs, SharePoint, OneLake/Fabric, or Purview labels.</td>
+<td>The orchestrator forwards the user's delegated Search token in <code>x-ms-query-source-authorization</code>. Foundry IQ evaluates the ingested permissions.</td>
 </tr>
 <tr>
-<td>Network Isolation</td>
-<td>Workstation provision, jumpbox post-provision, private ACR Tasks deploy, and smoke checks completed successfully.</td>
+<td>GPT-RAG security fields</td>
+<td>Pattern B with the existing GPT-RAG index.</td>
+<td>The orchestrator sends an OData <code>filterAddOn</code> over GPT-RAG security fields. This is separate from the OBO header.</td>
 </tr>
 </tbody>
 </table>
-<p>Smoke checks included:</p>
+<p>Important rules:</p>
 <ul>
-<li>Frontend returns HTTP 200.</li>
-<li>Data ingestion returns HTTP 200.</li>
-<li>Orchestrator root returns the expected HTTP 404.</li>
-<li>Container Apps are <code>Succeeded</code> and <code>Running</code>.</li>
+<li>Plain Blob storage provides container-level RBAC for this purpose. Do not rely
+  on it for per-document trimming unless you use Purview labels or an equivalent
+  permission source.</li>
+<li>ADLS Gen2 ACLs, SharePoint, OneLake/Fabric, and Purview labels can support
+  per-document permission trimming when native permission ingestion is
+  configured.</li>
+<li>Pattern B uses the existing GPT-RAG index registered as a <code>searchIndex</code>
+  knowledge source. GPT-RAG security fields are enforced through <code>filterAddOn</code>,
+  not through <code>x-ms-query-source-authorization</code>.</li>
+<li>The <code>x-ms-query-source-authorization</code> header is for native ingested
+  permissions.</li>
+<li>Per-user security uses the <code>2026-05-01-preview</code> Azure AI Search API.</li>
+<li>Security-enabled retrieval must fail closed. Missing token, filter, or
+  permission configuration should be treated as an error, not as permission to
+  run an unfiltered query.</li>
 </ul>
-<h2 id="10-recommended-walkthrough-order">10. Recommended walkthrough order</h2>
+<h2 id="configuration-settings">Configuration settings</h2>
+<p>All runtime settings are stored in Azure App Configuration with the <code>gpt-rag</code>
+label, or supplied as container environment variables when you use the
+<code>containerEnv</code> runtime mode.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Used when</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>RETRIEVAL_BACKEND</code></td>
+<td><code>ai_search</code></td>
+<td>Always</td>
+<td>Selects <code>ai_search</code> or <code>foundry_iq</code>.</td>
+</tr>
+<tr>
+<td><code>KNOWLEDGE_BASE_NAME</code></td>
+<td>Empty until Foundry IQ is selected</td>
+<td><code>foundry_iq</code></td>
+<td>Foundry IQ knowledge base name.</td>
+</tr>
+<tr>
+<td><code>KNOWLEDGE_BASE_ENDPOINT</code></td>
+<td>Empty until Foundry IQ is selected</td>
+<td><code>foundry_iq</code></td>
+<td>Azure AI Search endpoint that hosts the knowledge base.</td>
+</tr>
+<tr>
+<td><code>KNOWLEDGE_BASE_CONNECTION_ID</code></td>
+<td>Empty until Foundry IQ is selected</td>
+<td><code>foundry_iq</code></td>
+<td>Dedicated AI Foundry connection ID for the knowledge base. Do not reuse <code>SEARCH_CONNECTION_ID</code>.</td>
+</tr>
+<tr>
+<td><code>FOUNDRY_IQ_API_VERSION</code></td>
+<td><code>2026-05-01-preview</code></td>
+<td><code>foundry_iq</code></td>
+<td>Required for native per-user permissions and Pattern B <code>filterAddOn</code>.</td>
+</tr>
+<tr>
+<td><code>FOUNDRY_IQ_KNOWLEDGE_RETRIEVAL_BILLING_PLAN</code></td>
+<td><code>free</code></td>
+<td>Provisioning and post-provision</td>
+<td>Azure AI Search <code>knowledgeRetrieval</code> billing plan.</td>
+</tr>
+<tr>
+<td><code>FOUNDRY_IQ_KNOWLEDGE_SOURCE_NAME</code></td>
+<td>Empty unless Pattern B</td>
+<td>Pattern B</td>
+<td>Name of the <code>searchIndex</code> knowledge source.</td>
+</tr>
+<tr>
+<td><code>FOUNDRY_IQ_FILTER_ADD_ON_ENABLED</code></td>
+<td><code>false</code></td>
+<td>Pattern B</td>
+<td>Enables query-time GPT-RAG security filtering through <code>filterAddOn</code>.</td>
+</tr>
+<tr>
+<td><code>FOUNDRY_IQ_SECURITY_FIELD_NAME</code></td>
+<td><code>metadata_security_id</code></td>
+<td>Pattern B</td>
+<td>Field used to build the GPT-RAG security filter.</td>
+</tr>
+<tr>
+<td><code>FOUNDRY_IQ_MAX_OUTPUT_DOCUMENTS</code></td>
+<td><code>5</code></td>
+<td><code>foundry_iq</code></td>
+<td>Caps the number of documents returned by the knowledge base.</td>
+</tr>
+</tbody>
+</table>
+<p>The AI Landing Zone also stamps Pattern B setup values used by the post-provision
+script:</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>FOUNDRY_IQ_PATTERN</code></td>
+<td><code>managed</code> for Pattern A or <code>searchIndex</code> for Pattern B.</td>
+</tr>
+<tr>
+<td><code>FOUNDRY_IQ_SEARCH_INDEX_NAME</code></td>
+<td>Existing Azure AI Search index registered as the Pattern B knowledge source.</td>
+</tr>
+<tr>
+<td><code>FOUNDRY_IQ_SEMANTIC_CONFIGURATION_NAME</code></td>
+<td>Semantic configuration on the existing index.</td>
+</tr>
+<tr>
+<td><code>FOUNDRY_IQ_SOURCE_DATA_FIELDS</code></td>
+<td>Source fields exposed by the knowledge source.</td>
+</tr>
+<tr>
+<td><code>FOUNDRY_IQ_SEARCH_FIELDS</code></td>
+<td>Searchable fields used by the knowledge source.</td>
+</tr>
+<tr>
+<td><code>FOUNDRY_IQ_BASE_FILTER</code></td>
+<td>Optional persisted filter on the knowledge source.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="billing-choice">Billing choice</h2>
+<p>Foundry IQ retrieval uses Azure AI Search agentic retrieval billing through the
+Search service <code>knowledgeRetrieval</code> plan.</p>
+<table>
+<thead>
+<tr>
+<th>Plan</th>
+<th>Use when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>free</code></td>
+<td>You want to stay within the included allowance. Retrieval can fail when the allowance is exhausted.</td>
+</tr>
+<tr>
+<td><code>standard</code></td>
+<td>You explicitly opt in to pay-as-you-go retrieval after the included allowance.</td>
+</tr>
+</tbody>
+</table>
+<p>Set the plan before provisioning or before running the Foundry IQ post-provision
+script:</p>
+<div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">FOUNDRY_IQ_KNOWLEDGE_RETRIEVAL_BILLING_PLAN</span> <span class="n">free</span>
+</code></pre></div>
+<p>Use <code>standard</code> only when the operator has approved the billing change.</p>
+<h2 id="enable-foundry-iq-with-pattern-b">Enable Foundry IQ with Pattern B</h2>
+<p>Pattern B keeps the existing GPT-RAG index and is the recommended migration path
+for current deployments.</p>
 <ol>
-<li>Start with <strong>What's New</strong> to show the two release themes.</li>
-<li>Open this walkthrough page.</li>
-<li>Explain file upload from a user perspective.</li>
-<li>Explain the architecture path: UI → ingestion → storage/search → orchestrator.</li>
-<li>Explain the AI Landing Zone v2 operator value.</li>
-<li>Show the <strong>Deployment Guide</strong> and compare Basic versus Network Isolation.</li>
-<li>Emphasize the new regional preflight checks and Docker-free ACR remote build flow.</li>
-<li>Close with validation: both Basic and Network Isolation paths were tested end-to-end.</li>
+<li>Start from a working <code>ai_search</code> deployment.</li>
+<li>
+<p>Set the Foundry IQ parameters before provisioning:</p>
+<div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">RETRIEVAL_BACKEND</span> <span class="n">foundry_iq</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">FOUNDRY_IQ_PATTERN</span> <span class="n">searchIndex</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">FOUNDRY_IQ_API_VERSION</span> <span class="n">2026</span><span class="p">-</span><span class="n">05</span><span class="p">-</span><span class="n">01-preview</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">FOUNDRY_IQ_KNOWLEDGE_RETRIEVAL_BILLING_PLAN</span> <span class="n">free</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">FOUNDRY_IQ_FILTER_ADD_ON_ENABLED</span> <span class="n">true</span>
+</code></pre></div>
+</li>
+<li>
+<p>Run <code>azd provision</code>.</p>
+</li>
+<li>
+<p>Create or update the data-plane knowledge source and knowledge base:</p>
+<div class="highlight"><pre><span></span><code><span class="p">./</span><span class="n">infra</span><span class="p">/</span><span class="n">scripts</span><span class="p">/</span><span class="n">Configure-FoundryIQKnowledgeBase</span><span class="p">.</span><span class="n">ps1</span> <span class="p">`</span>
+  <span class="n">-SearchEndpoint</span> <span class="s2">&quot;https://&lt;search-name&gt;.search.windows.net&quot;</span> <span class="p">`</span>
+  <span class="n">-KnowledgeBaseName</span> <span class="s2">&quot;&lt;knowledge-base-name&gt;&quot;</span> <span class="p">`</span>
+  <span class="n">-KnowledgeSourceName</span> <span class="s2">&quot;&lt;knowledge-source-name&gt;&quot;</span> <span class="p">`</span>
+  <span class="n">-SearchIndexName</span> <span class="s2">&quot;&lt;gpt-rag-index-name&gt;&quot;</span> <span class="p">`</span>
+  <span class="n">-SemanticConfigurationName</span> <span class="s2">&quot;&lt;semantic-config-name&gt;&quot;</span> <span class="p">`</span>
+  <span class="n">-SearchServiceResourceId</span> <span class="s2">&quot;/subscriptions/&lt;sub&gt;/resourceGroups/&lt;rg&gt;/providers/Microsoft.Search/searchServices/&lt;search-name&gt;&quot;</span> <span class="p">`</span>
+  <span class="n">-KnowledgeRetrievalBillingPlan</span> <span class="s2">&quot;free&quot;</span>
+</code></pre></div>
+</li>
+<li>
+<p>Deploy or restart the orchestrator so it reads the backend selector at startup.</p>
+</li>
+<li>Smoke test with a user who should see a document and a user who should not see
+   it. The second test must fail closed, not return unfiltered results.</li>
 </ol>
+<p>The script caller needs <strong>Search Service Contributor</strong> on the Search service.
+When <code>NETWORK_ISOLATION=true</code>, run the script from the jumpbox or another host
+with VNet access.</p>
+<h2 id="enable-foundry-iq-with-pattern-a">Enable Foundry IQ with Pattern A</h2>
+<p>Use Pattern A only when the source connector and permission model meet your
+needs.</p>
+<ol>
+<li>Confirm the source supports the permissions you require.</li>
+<li>Avoid claiming per-document security for plain Blob unless you use Purview
+   labels or an equivalent per-document permission source.</li>
+<li>Keep multimodal workloads on <code>ai_search</code> or Pattern B until captioning parity
+   is proven.</li>
+<li>Use <code>FOUNDRY_IQ_API_VERSION=2026-05-01-preview</code> when native per-user
+   permissions are enabled.</li>
+<li>Run a smoke test with allowed and denied users before sending production
+   traffic.</li>
+</ol>
+<h2 id="roll-back-to-azure-ai-search">Roll back to Azure AI Search</h2>
+<p>Rollback is intentionally simple.</p>
+<ol>
+<li>
+<p>Set the backend selector back to Azure AI Search:</p>
+<div class="highlight"><pre><span></span><code><span class="n">az</span> <span class="n">appconfig</span> <span class="n">kv</span> <span class="nb">set </span><span class="p">`</span>
+  <span class="p">-</span><span class="n">-name</span> <span class="p">&lt;</span><span class="n">app-config-name</span><span class="p">&gt;</span> <span class="p">`</span>
+  <span class="p">-</span><span class="n">-key</span> <span class="n">RETRIEVAL_BACKEND</span> <span class="p">`</span>
+  <span class="p">-</span><span class="n">-value</span> <span class="n">ai_search</span> <span class="p">`</span>
+  <span class="p">-</span><span class="n">-label</span> <span class="n">gpt-rag</span> <span class="p">`</span>
+  <span class="p">-</span><span class="n">-yes</span>
+</code></pre></div>
+</li>
+<li>
+<p>Restart the orchestrator Container App so the startup selector is re-read.</p>
+</li>
+<li>Ask a known retrieval question and confirm citations come from the GPT-RAG
+   Azure AI Search index.</li>
+</ol>
+<p>You do not need to delete the knowledge base to roll back. Leave it in place
+while you investigate.</p>
+<h2 id="migration-guidance">Migration guidance</h2>
+<ul>
+<li>Existing deployments should stay on <code>ai_search</code> until you explicitly opt in.</li>
+<li>Start with Pattern B if you already rely on GPT-RAG ingestion, runtime uploads,
+  multimodal retrieval, or custom security fields.</li>
+<li>Use Pattern A for new managed-source deployments only after you validate
+  connector availability, security behavior, billing, latency, and refresh
+  timing.</li>
+<li>Do not flip production traffic until you have tested both allowed and denied
+  retrieval paths.</li>
+<li>Keep the rollback command ready during the first production change window.</li>
+</ul>
+<h2 id="known-limitations">Known limitations</h2>
+<ul>
+<li>Multimodal Pattern A captioning parity is deferred. Keep multimodal on
+  <code>ai_search</code> or Pattern B until the managed source output is proven equivalent.</li>
+<li>Runtime document uploads still need the self-managed GPT-RAG index for
+  low-latency searchability. Use Pattern B for that path.</li>
+<li>Pattern A source refresh can take seconds to minutes. It is not a low-latency
+  upload path.</li>
+<li>Pattern B requires the existing index to have a semantic configuration. Vector
+  fields must have the expected vectorizer setup.</li>
+<li>The knowledge base and Pattern B index must live on the same Search service.</li>
+<li>Per-user security and <code>filterAddOn</code> require <code>2026-05-01-preview</code>.</li>
+</ul>
 
 
 

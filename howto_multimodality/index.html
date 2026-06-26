@@ -863,6 +863,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../howto_retrieval_backend/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Retrieval Backend Selection
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../howto_retrieval_optimization/" class="md-nav__link">
         
   
@@ -968,6 +989,10 @@
 <p>GPT-RAG supports end-to-end multimodal processing: from document ingestion (extracting figures and generating captions) through orchestration (retrieving and presenting images alongside text to a vision-capable model). This page covers both sides.</p>
 <blockquote>
 <p>Multimodal processing is opt-in. When disabled (the default), the ingestion pipeline ignores figures and the orchestrator works with text only.</p>
+<p><strong>Retrieval backend note:</strong> Multimodal captioning parity for Foundry IQ Pattern
+A is not yet proven. Keep multimodal workloads on <code>RETRIEVAL_BACKEND=ai_search</code>
+or Foundry IQ Pattern B (<code>FOUNDRY_IQ_PATTERN=searchIndex</code>) until your own smoke
+tests confirm that managed-source captioning returns equivalent visual context.</p>
 </blockquote>
 <p>The feature spans two components:</p>
 <ul>

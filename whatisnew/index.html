@@ -301,6 +301,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#upcoming-v300-foundry-iq-retrieval-backend-groundwork" class="md-nav__link">
+    <span class="md-ellipsis">
+      Upcoming v3.0.0: Foundry IQ retrieval backend groundwork
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#release-2917-conversations-detail-dialog-renders-messages-again" class="md-nav__link">
     <span class="md-ellipsis">
       Release 2.9.17: Conversations detail dialog renders messages again
@@ -1188,6 +1197,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../howto_retrieval_backend/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Retrieval Backend Selection
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../howto_retrieval_optimization/" class="md-nav__link">
         
   
@@ -1294,6 +1324,26 @@
 <p>📌 <a href="https://github.com/orgs/Azure/projects/536/views/6">Check out what's coming next</a>  (Azure org only)</p>
 </blockquote>
 <h3 id="june-2026">June 2026</h3>
+<h4 id="upcoming-v300-foundry-iq-retrieval-backend-groundwork">Upcoming v3.0.0: Foundry IQ retrieval backend groundwork</h4>
+<p><em>Feature preview · Azure/GPT-RAG <a href="https://github.com/Azure/GPT-RAG/issues/526">#526</a></em></p>
+<p>GPT-RAG is adding Foundry IQ as a selectable retrieval backend while keeping
+Azure AI Search fully supported.</p>
+<ul>
+<li>Existing deployments stay on <code>RETRIEVAL_BACKEND=ai_search</code> unless an operator
+  opts in.</li>
+<li>Pattern A lets Foundry IQ manage the source and index lifecycle.</li>
+<li>Pattern B registers the existing GPT-RAG Azure AI Search index as a Foundry IQ
+  <code>searchIndex</code> knowledge source, preserving GPT-RAG ingestion, runtime uploads,
+  and security-field filtering through <code>filterAddOn</code>.</li>
+<li>Native Foundry IQ permission enforcement uses
+  <code>x-ms-query-source-authorization</code>; Pattern B GPT-RAG security fields use
+  <code>filterAddOn</code>. These are separate mechanisms.</li>
+<li><code>FOUNDRY_IQ_KNOWLEDGE_RETRIEVAL_BILLING_PLAN</code> controls the Azure AI Search
+  <code>knowledgeRetrieval</code> plan. Use <code>standard</code> only after billing approval.</li>
+</ul>
+<p>See <a href="../howto_retrieval_backend/">Retrieval backend selection</a> for setup,
+security, rollback, and known limitations.</p>
+<hr />
 <h4 id="release-2917-conversations-detail-dialog-renders-messages-again">Release 2.9.17: Conversations detail dialog renders messages again</h4>
 <p><em>Hotfix · orchestrator <a href="https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.13">v2.8.13</a></em></p>
 <p>Hotfix on top of v2.9.16. UI, ingestion, and AI Landing Zone pins are unchanged.</p>

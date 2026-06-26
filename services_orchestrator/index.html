@@ -557,6 +557,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#retrieval-backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      Retrieval backend
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#conversation-history-and-retrieval-controls" class="md-nav__link">
     <span class="md-ellipsis">
       Conversation History and Retrieval Controls
@@ -894,6 +903,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../howto_retrieval_backend/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Retrieval Backend Selection
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../howto_retrieval_optimization/" class="md-nav__link">
         
   
@@ -999,7 +1029,7 @@
 <h2 id="key-features">Key Features</h2>
 <ul>
 <li><strong>Strategy-Based Architecture:</strong> Pluggable orchestration strategies selected via Azure App Configuration (<code>AGENT_STRATEGY</code>).</li>
-<li><strong>Context Retrieval:</strong> Intelligent retrieval from Azure AI Search with citation support and conservative retrieval-needed triage for local MAF strategies.</li>
+<li><strong>Context Retrieval:</strong> Intelligent retrieval from Azure AI Search or Foundry IQ with citation support and conservative retrieval-needed triage for local MAF strategies.</li>
 <li><strong>Microsoft Agent Framework:</strong> Built on the Microsoft Agent Framework.</li>
 <li><strong>Conversation Persistence:</strong> Maintains conversation history in Cosmos DB with real-time SSE streaming and bounded persisted history compaction.</li>
 <li><strong>Extensible Design:</strong> Easy to add new strategies by extending <code>BaseAgentStrategy</code>.</li>
@@ -1042,6 +1072,29 @@
 </tr>
 </tbody>
 </table>
+<h2 id="retrieval-backend">Retrieval backend</h2>
+<p>The orchestrator reads <code>RETRIEVAL_BACKEND</code> at startup:</p>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ai_search</code></td>
+<td>Uses the GPT-RAG Azure AI Search index directly. This is the safe default and rollback path.</td>
+</tr>
+<tr>
+<td><code>foundry_iq</code></td>
+<td>Uses a Foundry IQ knowledge base. See <a href="../howto_retrieval_backend/">Retrieval backend selection</a> for setup, security modes, and billing.</td>
+</tr>
+</tbody>
+</table>
+<p><code>maf_lite</code>, <code>maf_agent_service</code>, <code>single_agent_rag</code>, and <code>multimodal</code> are the
+RAG strategies affected by the backend selector. <code>mcp</code> and <code>nl2sql</code> do not use
+the GPT-RAG retrieval backend.</p>
 <h2 id="conversation-history-and-retrieval-controls">Conversation History and Retrieval Controls</h2>
 <p>Long-running chats are handled in two places: the model prompt receives only a recent history window, while the Cosmos DB conversation document is compacted before persistence so it keeps useful recent context without growing indefinitely. The default <code>maf_lite</code> strategy and the <code>multimodal</code> strategy also classify each turn as a greeting, retrieval-needed question, or no-retrieval follow-up; transformations such as "format that answer as a table" or "translate the previous answer" can skip Azure AI Search while still using the recent chat history.</p>
 <table>

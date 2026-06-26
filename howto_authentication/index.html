@@ -954,6 +954,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../howto_retrieval_backend/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Retrieval Backend Selection
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../howto_retrieval_optimization/" class="md-nav__link">
         
   
@@ -1119,6 +1140,18 @@
 <div class="highlight"><pre><span></span><code>x-ms-query-source-authorization: Bearer &lt;search_user_access_token&gt;
 </code></pre></div>
 <p>Document-level access control is enforced by Azure AI Search when the index is configured for document permissions (see <code>permissionFilterOption</code> in the index definition) and documents include permission metadata. </p>
+<div class="admonition note">
+<p class="admonition-title">Foundry IQ retrieval</p>
+<p>When <code>RETRIEVAL_BACKEND=foundry_iq</code>, there are two security paths. Native
+Foundry IQ sources use the <code>x-ms-query-source-authorization</code> OBO header only
+when permissions were ingested from a supported source such as ADLS Gen2
+ACLs, SharePoint, OneLake/Fabric, or Purview labels. Pattern B, where the
+existing GPT-RAG index is registered as a <code>searchIndex</code> knowledge source,
+uses an OData <code>filterAddOn</code> over GPT-RAG security fields instead. Plain Blob
+storage is container-level RBAC for this purpose unless Purview labels or an
+equivalent per-document permission source are used. See
+<a href="../howto_retrieval_backend/#security-modes">Retrieval backend selection</a>.</p>
+</div>
 <p>GPT-RAG uses these field names consistently across ingestion paths:</p>
 <div class="highlight"><pre><span></span><code>metadata_security_user_ids
 metadata_security_group_ids
