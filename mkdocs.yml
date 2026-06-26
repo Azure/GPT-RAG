@@ -56,6 +56,7 @@ nav:
     - Multimodality: howto_multimodality.md
     - User Feedback: howto_userfeedback.md
     - Sharepoint Connector: howto_sharepoint_connector.md
+    - Retrieval Backend Selection: howto_retrieval_backend.md
     - Retrieval Optimization: howto_retrieval_optimization.md
     - Troubleshooting: troubleshooting.md
   - Meet the Team: team.md

@@ -2,6 +2,11 @@ GPT-RAG supports end-to-end multimodal processing: from document ingestion (extr
 
 > Multimodal processing is opt-in. When disabled (the default), the ingestion pipeline ignores figures and the orchestrator works with text only.
 
+> **Retrieval backend note:** Multimodal captioning parity for Foundry IQ Pattern
+> A is not yet proven. Keep multimodal workloads on `RETRIEVAL_BACKEND=ai_search`
+> or Foundry IQ Pattern B (`FOUNDRY_IQ_PATTERN=searchIndex`) until your own smoke
+> tests confirm that managed-source captioning returns equivalent visual context.
+
 The feature spans two components:
 
 - **Ingestion** (`gpt-rag-ingestion`) — extracts figures from documents, generates captions, creates caption embeddings, and stores everything in Azure AI Search.

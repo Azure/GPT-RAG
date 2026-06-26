@@ -2,6 +2,29 @@
 
 ### June 2026
 
+#### Upcoming v3.0.0: Foundry IQ retrieval backend groundwork
+*Feature preview · Azure/GPT-RAG [#526](https://github.com/Azure/GPT-RAG/issues/526)*
+
+GPT-RAG is adding Foundry IQ as a selectable retrieval backend while keeping
+Azure AI Search fully supported.
+
+- Existing deployments stay on `RETRIEVAL_BACKEND=ai_search` unless an operator
+  opts in.
+- Pattern A lets Foundry IQ manage the source and index lifecycle.
+- Pattern B registers the existing GPT-RAG Azure AI Search index as a Foundry IQ
+  `searchIndex` knowledge source, preserving GPT-RAG ingestion, runtime uploads,
+  and security-field filtering through `filterAddOn`.
+- Native Foundry IQ permission enforcement uses
+  `x-ms-query-source-authorization`; Pattern B GPT-RAG security fields use
+  `filterAddOn`. These are separate mechanisms.
+- `FOUNDRY_IQ_KNOWLEDGE_RETRIEVAL_BILLING_PLAN` controls the Azure AI Search
+  `knowledgeRetrieval` plan. Use `standard` only after billing approval.
+
+See [Retrieval backend selection](howto_retrieval_backend.md) for setup,
+security, rollback, and known limitations.
+
+---
+
 #### Release 2.9.17: Conversations detail dialog renders messages again
 *Hotfix · orchestrator [v2.8.13](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v2.8.13)*
 
