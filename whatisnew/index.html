@@ -301,6 +301,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#release-v305-zt-foundry-iq-unblocked" class="md-nav__link">
+    <span class="md-ellipsis">
+      Release v3.0.5: ZT Foundry IQ unblocked
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#release-v304-foundry-iq-pin-alignment" class="md-nav__link">
     <span class="md-ellipsis">
       Release v3.0.4: Foundry IQ pin alignment
@@ -1333,6 +1342,11 @@
 <p>📌 <a href="https://github.com/orgs/Azure/projects/536/views/6">Check out what's coming next</a>  (Azure org only)</p>
 </blockquote>
 <h3 id="june-2026">June 2026</h3>
+<h4 id="release-v305-zt-foundry-iq-unblocked">Release v3.0.5: ZT Foundry IQ unblocked</h4>
+<p><em>Patch · orchestrator <a href="https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.0.2">v3.0.2</a> · AI Landing Zone <a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.1.4">v2.1.4</a></em></p>
+<p>Unblocks Zero Trust + Foundry IQ deployments end to end. AI Landing Zone <code>v2.1.4</code> fixes the capability host subnet delegation casing that caused <code>AmlRp</code> errors on ZT provisioning in <code>v3.0.4</code>. Operators no longer need the manual workaround: a clean ZT provision now finishes green in roughly 65 minutes.</p>
+<p><a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.0.5">Release notes</a></p>
+<hr />
 <h4 id="release-v304-foundry-iq-pin-alignment">Release v3.0.4: Foundry IQ pin alignment</h4>
 <p><em>Patch · orchestrator <a href="https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.0.2">v3.0.2</a> · AI Landing Zone <a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.1.3">v2.1.3</a></em></p>
 <p>Aligns the Foundry IQ release train end to end. Earlier <code>v3.0.x</code> tags claimed AI Landing Zone <code>v2.1.3</code> and orchestrator <code>v3.0.2</code> in their notes, but <code>manifest.json</code>, the <code>infra</code> submodule pointer, and the <code>RETRIEVAL_BACKEND</code> default never moved together. <code>v3.0.4</code> is the release that actually consumes those pins.</p>
