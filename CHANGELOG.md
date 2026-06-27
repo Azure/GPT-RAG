@@ -1,5 +1,24 @@
 # Changelog
 
+## [v3.0.5] - 2026-06-27
+
+### User and operator impact
+
+Zero Trust deployments with Foundry IQ now work end to end. `v3.0.4` left ZT blocked on [bicep-ptn-aiml-landing-zone#110](https://github.com/Azure/bicep-ptn-aiml-landing-zone/issues/110), where Foundry capability host creation failed during `azd provision` with `AmlRp BadRequest: "Invalid vnet resource ID provided"` because the capability host subnet delegation was emitted as `Microsoft.app` instead of `Microsoft.App`. AI Landing Zone [`v2.1.4`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.1.4) fixes the casing, and `v3.0.5` consumes that pin. ZT operators no longer need to opt down to `RETRIEVAL_BACKEND=ai_search`.
+
+### Changed
+
+- **AI Landing Zone Bicep module pin bumped to [`v2.1.4`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.1.4):** `manifest.json`, `.gitmodules`, and the `infra` submodule HEAD are all aligned on `v2.1.4`. Picks up the capability host subnet delegation casing fix that unblocks ZT + Foundry IQ.
+
+The following component versions are pinned for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v3.0.2 |
+| gpt-rag-ingestion | v2.4.13 |
+| bicep-ptn-aiml-landing-zone | v2.1.4 |
+
 ## [v3.0.4] - 2026-06-26
 
 ### User and operator impact
