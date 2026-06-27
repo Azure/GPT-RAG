@@ -2,6 +2,15 @@
 
 ### June 2026
 
+#### Release v3.0.5: ZT Foundry IQ unblocked
+*Patch · orchestrator [v3.0.2](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.0.2) · AI Landing Zone [v2.1.4](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.1.4)*
+
+Unblocks Zero Trust + Foundry IQ deployments end to end. AI Landing Zone `v2.1.4` fixes the capability host subnet delegation casing that caused `AmlRp` errors on ZT provisioning in `v3.0.4`. Operators no longer need the manual workaround: a clean ZT provision now finishes green in roughly 65 minutes.
+
+[Release notes](https://github.com/Azure/GPT-RAG/releases/tag/v3.0.5)
+
+---
+
 #### Release v3.0.4: Foundry IQ pin alignment
 *Patch · orchestrator [v3.0.2](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.0.2) · AI Landing Zone [v2.1.3](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.1.3)*
 
