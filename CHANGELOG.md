@@ -1,10 +1,35 @@
 # Changelog
 
-## [Unreleased]
+## [v3.0.6] - 2026-06-28
+
+### User and operator impact
+
+Zero Trust component deployments no longer depend on Docker Hub base-image pulls for the orchestrator and ingestion images. The runtime pins in this umbrella release consume the released component fixes that moved those builds to Azure-owned bases, so ACR remote builds can complete in locked-down environments where Docker Hub egress is unavailable.
+
+This release also includes bounded retries for ACR remote builds and the GPT-RAG regional preflight gate. Operators get faster, clearer feedback before long provisioning attempts when a target region has provider registration, quota, model, AI Search, or Cosmos DB readiness issues.
 
 ### Changed
 
-- Added a GPT-RAG-owned regional preflight hook that runs before provisioning and reports provider registration, location support, supported quota, model availability, and known AI Search/Cosmos capacity limitations with plain `PASS` / `WARN` / `FAIL` output.
+- **Orchestrator pin bumped to [`v3.0.3`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.0.3):** picks up the Zero Trust deployment hardening and bounded ACR remote build retry behavior for the orchestrator component.
+- **Ingestion pin bumped to [`v2.4.14`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.14):** picks up the Zero Trust deployment hardening and bounded ACR remote build retry behavior for the ingestion component.
+- **Regional preflight gate added:** the GPT-RAG-owned preflight hook runs before provisioning and reports provider registration, location support, supported quota, model availability, and known AI Search/Cosmos capacity limitations with plain `PASS` / `WARN` / `FAIL` output.
+- **AI Landing Zone and UI pins unchanged:** AI Landing Zone remains [`v2.1.4`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.1.4), and UI remains [`v2.3.13`](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.3.13).
+
+### Validation
+
+- Full Zero Trust deployment validation passed in Switzerland North.
+- Provisioning, post-provision configuration, component deployment, ACR remote builds, and readiness checks passed.
+- ACR build logs showed no Docker Hub (`registry-1.docker.io`) pulls for the orchestrator or ingestion images.
+- The regional preflight read-only run passed with expected warnings only.
+
+The following component versions are pinned for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v3.0.3 |
+| gpt-rag-ingestion | v2.4.14 |
+| bicep-ptn-aiml-landing-zone | v2.1.4 |
 
 ## [v3.0.5] - 2026-06-27
 
