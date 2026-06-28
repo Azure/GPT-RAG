@@ -109,6 +109,43 @@ Use this runbook for a clean network-isolated deployment:
 
 `BUILD_MODE` is normally not required. Component deploy scripts automatically use ACR remote builds when `NETWORK_ISOLATION=true` or when `ACR_TASK_AGENT_POOL` is set.
 
+### Regional preflight
+
+Run preflight before every Zero Trust deployment. It is much faster to fail in
+the first few minutes than to wait for a long network-isolated deployment and
+then discover that a regional dependency cannot be created.
+
+`azd provision` runs the `scripts/preProvision` hook. When the AI Landing Zone
+preflight script is available, the hook invokes `infra/scripts/Invoke-PreflightChecks.ps1`
+before the Azure Resource Manager deployment starts.
+
+Preflight checks include:
+
+- the selected Azure region and provider support,
+- common regional readiness checks for Azure AI Search, Cosmos DB, Container
+  Apps, AI Foundry, and Cognitive Services,
+- jumpbox VM SKU availability and restrictions,
+- Azure OpenAI model quota for the configured deployments.
+
+Preflight is an early warning, not a live capacity reservation. Azure capacity
+can still change after the check passes, and some regional capacity errors are
+only returned when Azure creates the resource. Recent examples include Azure AI
+Search Standard capacity in Sweden Central and Cosmos DB zonal capacity in West
+Europe.
+
+Use the result this way:
+
+| Result | Operator action |
+| --- | --- |
+| `FAIL` | Stop. Fix the subscription, quota, region, or parameter issue before provisioning. |
+| `WARN` | Review the warning before continuing. If it mentions capacity or regional risk, consider changing region first. |
+| Pass | Continue, but keep the deployment logs open because live capacity can still change. |
+
+If a region fails or warns on a critical dependency, try another fully supported
+region instead of waiting 30 minutes or more for a deployment that is likely to
+fail. Use `GPT_RAG_REGIONAL_PREFLIGHT_SKIP=true` only when you intentionally
+bypass regional checks, or `PREFLIGHT_SKIP=true` to bypass all preflight hooks.
+
 **Before Provisioning**
 
 Enable network isolation in your environment:
