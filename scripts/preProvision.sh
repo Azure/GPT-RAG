@@ -67,6 +67,25 @@ for FILE_NAME in manifest.json main.parameters.json; do
 done
 
 ###############################################################################
+# GPT-RAG regional readiness preflight
+###############################################################################
+
+REGIONAL_PREFLIGHT_SCRIPT="$SCRIPT_DIR/Invoke-RegionalPreflight.ps1"
+if [ -f "$REGIONAL_PREFLIGHT_SCRIPT" ] && [ "$PREFLIGHT_SKIP" != "true" ] && [ "$PREFLIGHT_SKIP" != "1" ] && [ "$GPT_RAG_REGIONAL_PREFLIGHT_SKIP" != "true" ] && [ "$GPT_RAG_REGIONAL_PREFLIGHT_SKIP" != "1" ]; then
+    if command -v pwsh >/dev/null 2>&1; then
+        echo "${CYAN}Running GPT-RAG regional preflight...${NC}"
+        pwsh -NoProfile -File "$REGIONAL_PREFLIGHT_SCRIPT" -ProjectRoot "$PROJECT_ROOT" -ParameterFile "$PROJECT_ROOT/main.parameters.json"
+        REGIONAL_PREFLIGHT_EXIT=$?
+        if [ $REGIONAL_PREFLIGHT_EXIT -ne 0 ]; then
+            echo "${YELLOW}GPT-RAG regional preflight failed. Fix the reported blockers, or set GPT_RAG_REGIONAL_PREFLIGHT_SKIP=true to bypass only this check.${NC}"
+            exit $REGIONAL_PREFLIGHT_EXIT
+        fi
+    else
+        echo "${CYAN}Skipping GPT-RAG regional preflight (pwsh not installed; install PowerShell 7 to enable).${NC}"
+    fi
+fi
+
+###############################################################################
 # AI Landing Zone v2.0.4+ preflight validation
 # https://github.com/Azure/bicep-ptn-aiml-landing-zone/blob/v2.0.4/scripts/Invoke-PreflightChecks.ps1
 # Covers parameter/topology/BYO/IP checks plus regional readiness (subscription
