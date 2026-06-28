@@ -301,6 +301,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#release-v306-zt-deploys-green" class="md-nav__link">
+    <span class="md-ellipsis">
+      Release v3.0.6: ZT deploys green
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#release-v305-zt-foundry-iq-unblocked" class="md-nav__link">
     <span class="md-ellipsis">
       Release v3.0.5: ZT Foundry IQ unblocked
@@ -1342,6 +1351,12 @@
 <p>📌 <a href="https://github.com/orgs/Azure/projects/536/views/6">Check out what's coming next</a>  (Azure org only)</p>
 </blockquote>
 <h3 id="june-2026">June 2026</h3>
+<h4 id="release-v306-zt-deploys-green">Release v3.0.6: ZT deploys green</h4>
+<p><em>Patch · orchestrator <a href="https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.0.3">v3.0.3</a> · ingestion <a href="https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.14">v2.4.14</a> · AI Landing Zone <a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.1.4">v2.1.4</a> · UI <a href="https://github.com/Azure/gpt-rag-ui/releases/tag/v2.3.13">v2.3.13</a></em></p>
+<p>Improves Zero Trust deployment reliability for operators. Orchestrator and ingestion ACR remote builds no longer depend on Docker Hub base-image pulls, and both use bounded retry for transient build failures. GPT-RAG also runs a regional preflight gate before long provisioning attempts, so unsupported regions fail earlier.</p>
+<p>Full Zero Trust validation passed in Switzerland North, including <code>provision</code>, <code>postProvision</code>, <code>deploy</code>, private ACR build pool use, readiness checks, and no <code>registry-1.docker.io</code> pulls in ACR logs.</p>
+<p><a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.0.6">Release notes</a></p>
+<hr />
 <h4 id="release-v305-zt-foundry-iq-unblocked">Release v3.0.5: ZT Foundry IQ unblocked</h4>
 <p><em>Patch · orchestrator <a href="https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.0.2">v3.0.2</a> · AI Landing Zone <a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.1.4">v2.1.4</a></em></p>
 <p>Unblocks Zero Trust + Foundry IQ deployments end to end. AI Landing Zone <code>v2.1.4</code> fixes the capability host subnet delegation casing that caused <code>AmlRp</code> errors on ZT provisioning in <code>v3.0.4</code>. Operators no longer need the manual workaround: a clean ZT provision now finishes green in roughly 65 minutes.</p>

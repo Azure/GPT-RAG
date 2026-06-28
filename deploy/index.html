@@ -1222,9 +1222,9 @@ GPT-RAG ingestion pipeline that writes chunks to Azure AI Search.</p>
 <p>Run preflight before every Zero Trust deployment. It is much faster to fail in
 the first few minutes than to wait for a long network-isolated deployment and
 then discover that a regional dependency cannot be created.</p>
-<p><code>azd provision</code> runs the <code>scripts/preProvision</code> hook. When the AI Landing Zone
-preflight script is available, the hook invokes <code>infra/scripts/Invoke-PreflightChecks.ps1</code>
-before the Azure Resource Manager deployment starts.</p>
+<p><code>azd provision</code> runs the <code>scripts/preProvision</code> hook. The hook invokes
+<code>scripts/Invoke-RegionalPreflight.ps1</code> before the Azure Resource Manager
+deployment starts.</p>
 <p>Preflight checks include:</p>
 <ul>
 <li>the selected Azure region and provider support,</li>
