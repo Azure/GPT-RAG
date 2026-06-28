@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- Added a GPT-RAG-owned regional preflight hook that runs before provisioning and reports provider registration, location support, supported quota, model availability, and known AI Search/Cosmos capacity limitations with plain `PASS` / `WARN` / `FAIL` output.
+
 ## [v3.0.5] - 2026-06-27
 
 ### User and operator impact

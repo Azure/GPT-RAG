@@ -60,6 +60,17 @@ function Test-Truthy($value) {
     return $value -match '^(1|true|t)$'
 }
 
+# GPT-RAG regional readiness preflight
+$regionalPreflightScript = Join-Path $PSScriptRoot "Invoke-RegionalPreflight.ps1"
+if ((Test-Path $regionalPreflightScript) -and (-not (Test-Truthy $env:PREFLIGHT_SKIP)) -and (-not (Test-Truthy $env:GPT_RAG_REGIONAL_PREFLIGHT_SKIP))) {
+    Write-Host "Running GPT-RAG regional preflight..." -ForegroundColor Cyan
+    & pwsh -NoProfile -File $regionalPreflightScript -ProjectRoot $projectRoot -ParameterFile (Join-Path $projectRoot "main.parameters.json")
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "GPT-RAG regional preflight failed. Fix the reported blockers, or set GPT_RAG_REGIONAL_PREFLIGHT_SKIP=true to bypass only this check." -ForegroundColor Red
+        exit $LASTEXITCODE
+    }
+}
+
 # AI Landing Zone v2.0.4+ preflight validation
 # https://github.com/Azure/bicep-ptn-aiml-landing-zone/blob/v2.0.4/scripts/Invoke-PreflightChecks.ps1
 # Covers parameter/topology/BYO/IP checks plus regional readiness (subscription drift,
