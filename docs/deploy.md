@@ -115,9 +115,9 @@ Run preflight before every Zero Trust deployment. It is much faster to fail in
 the first few minutes than to wait for a long network-isolated deployment and
 then discover that a regional dependency cannot be created.
 
-`azd provision` runs the `scripts/preProvision` hook. When the AI Landing Zone
-preflight script is available, the hook invokes `infra/scripts/Invoke-PreflightChecks.ps1`
-before the Azure Resource Manager deployment starts.
+`azd provision` runs the `scripts/preProvision` hook. The hook invokes
+`scripts/Invoke-RegionalPreflight.ps1` before the Azure Resource Manager
+deployment starts.
 
 Preflight checks include:
 

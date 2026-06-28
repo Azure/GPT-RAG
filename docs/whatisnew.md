@@ -2,6 +2,17 @@
 
 ### June 2026
 
+#### Release v3.0.6: ZT deploys green
+*Patch · orchestrator [v3.0.3](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.0.3) · ingestion [v2.4.14](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.14) · AI Landing Zone [v2.1.4](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.1.4) · UI [v2.3.13](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.3.13)*
+
+Improves Zero Trust deployment reliability for operators. Orchestrator and ingestion ACR remote builds no longer depend on Docker Hub base-image pulls, and both use bounded retry for transient build failures. GPT-RAG also runs a regional preflight gate before long provisioning attempts, so unsupported regions fail earlier.
+
+Full Zero Trust validation passed in Switzerland North, including `provision`, `postProvision`, `deploy`, private ACR build pool use, readiness checks, and no `registry-1.docker.io` pulls in ACR logs.
+
+[Release notes](https://github.com/Azure/GPT-RAG/releases/tag/v3.0.6)
+
+---
+
 #### Release v3.0.5: ZT Foundry IQ unblocked
 *Patch · orchestrator [v3.0.2](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.0.2) · AI Landing Zone [v2.1.4](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.1.4)*
 
