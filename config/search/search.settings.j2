@@ -1,30 +1,40 @@
+{% set search_rag_index_name = SEARCH_RAG_INDEX_NAME | default('ragindex-' ~ RESOURCE_TOKEN, true) %}
+{% set foundry_iq_pattern = FOUNDRY_IQ_PATTERN | default('azureBlob', true) %}
+{% set foundry_iq_ai_services_endpoint = FOUNDRY_IQ_AI_SERVICES_ENDPOINT | default('', true) %}
+{% if not foundry_iq_ai_services_endpoint and AI_FOUNDRY_PROJECT_ENDPOINT is defined and AI_FOUNDRY_PROJECT_ENDPOINT %}
+{% set foundry_iq_ai_services_endpoint = AI_FOUNDRY_PROJECT_ENDPOINT.split('/api/projects/')[0].rstrip('/') ~ '/' %}
+{% endif %}
+{% if not foundry_iq_ai_services_endpoint and AI_FOUNDRY_ACCOUNT_NAME is defined and AI_FOUNDRY_ACCOUNT_NAME %}
+{% set foundry_iq_ai_services_endpoint = 'https://' ~ AI_FOUNDRY_ACCOUNT_NAME ~ '.services.ai.azure.com/' %}
+{% endif %}
 {
     "SEARCH_API_VERSION": "2025-05-01-preview",
     "SEARCH_ANALYZER_NAME": "standard.lucene",
     "EMBEDDINGS_VECTOR_DIMENSIONS": "3072",
-    "SEARCH_RAG_INDEX_NAME": "ragindex-{{RESOURCE_TOKEN}}",
+    "SEARCH_RAG_INDEX_NAME": "{{search_rag_index_name}}",
     "SEARCH_QUERIES_INDEX_NAME": "nl2sql-{{RESOURCE_TOKEN}}-queries",
     "SEARCH_TABLES_INDEX_NAME": "nl2sql-{{RESOURCE_TOKEN}}-tables",
     "SEARCH_MEASURES_INDEX_NAME": "nl2sql-{{RESOURCE_TOKEN}}-measures",
     "ENABLE_AGENTIC_RETRIEVAL": "{{ENABLE_AGENTIC_RETRIEVAL | default('false')}}",
     "RETRIEVAL_BACKEND": "{{RETRIEVAL_BACKEND | default('ai_search')}}",
-    "FOUNDRY_IQ_PATTERN": "{{FOUNDRY_IQ_PATTERN | default('azureBlob')}}",
-    "KNOWLEDGE_BASE_NAME": "{{KNOWLEDGE_BASE_NAME | default(SEARCH_RAG_INDEX_NAME ~ '-rag-kb')}}",
+    "FOUNDRY_IQ_PATTERN": "{{foundry_iq_pattern}}",
+    "KNOWLEDGE_BASE_NAME": "{{KNOWLEDGE_BASE_NAME | default(search_rag_index_name ~ '-rag-kb', true)}}",
     "KNOWLEDGE_BASE_ENDPOINT": "{{KNOWLEDGE_BASE_ENDPOINT | default(SEARCH_SERVICE_QUERY_ENDPOINT)}}",
     "KNOWLEDGE_BASE_CONNECTION_ID": "{{KNOWLEDGE_BASE_CONNECTION_ID | default('')}}",
     "FOUNDRY_IQ_API_VERSION": "{{FOUNDRY_IQ_API_VERSION | default('2026-05-01-preview')}}",
     "FOUNDRY_IQ_KNOWLEDGE_RETRIEVAL_BILLING_PLAN": "{{FOUNDRY_IQ_KNOWLEDGE_RETRIEVAL_BILLING_PLAN | default('free')}}",
-    "FOUNDRY_IQ_KNOWLEDGE_SOURCE_NAME": "{{FOUNDRY_IQ_KNOWLEDGE_SOURCE_NAME | default(SEARCH_RAG_INDEX_NAME ~ ('-rag-ks' if (FOUNDRY_IQ_PATTERN | default('azureBlob')) == 'searchIndex' else '-blob-ks'))}}",
-    "FOUNDRY_IQ_KNOWLEDGE_SOURCE_KIND": "{{FOUNDRY_IQ_KNOWLEDGE_SOURCE_KIND | default('searchIndex' if (FOUNDRY_IQ_PATTERN | default('azureBlob')) == 'searchIndex' else 'azureBlob')}}",
+    "FOUNDRY_IQ_KNOWLEDGE_SOURCE_NAME": "{{FOUNDRY_IQ_KNOWLEDGE_SOURCE_NAME | default(search_rag_index_name ~ ('-rag-ks' if foundry_iq_pattern == 'searchIndex' else '-blob-ks'), true)}}",
+    "FOUNDRY_IQ_KNOWLEDGE_SOURCE_KIND": "{{FOUNDRY_IQ_KNOWLEDGE_SOURCE_KIND | default('searchIndex' if foundry_iq_pattern == 'searchIndex' else 'azureBlob', true)}}",
     "FOUNDRY_IQ_STORAGE_CONTAINER_NAME": "{{FOUNDRY_IQ_STORAGE_CONTAINER_NAME | default('documents')}}",
     "FOUNDRY_IQ_STORAGE_FOLDER_PATH": "{{FOUNDRY_IQ_STORAGE_FOLDER_PATH | default('')}}",
     "FOUNDRY_IQ_IS_ADLS_GEN2": "{{FOUNDRY_IQ_IS_ADLS_GEN2 | default('false')}}",
-    "FOUNDRY_IQ_CONTENT_EXTRACTION_MODE": "{{FOUNDRY_IQ_CONTENT_EXTRACTION_MODE | default('minimal')}}",
+    "FOUNDRY_IQ_CONTENT_EXTRACTION_MODE": "{{FOUNDRY_IQ_CONTENT_EXTRACTION_MODE | default('standard')}}",
+    "FOUNDRY_IQ_AI_SERVICES_ENDPOINT": "{{foundry_iq_ai_services_endpoint}}",
     "FOUNDRY_IQ_INGESTION_PERMISSION_OPTIONS": {{FOUNDRY_IQ_INGESTION_PERMISSION_OPTIONS | default(['rbacScope']) | tojson}},
     "FOUNDRY_IQ_FILTER_ADD_ON_ENABLED": "{{FOUNDRY_IQ_FILTER_ADD_ON_ENABLED | default('false')}}",
     "FOUNDRY_IQ_SECURITY_FIELD_NAME": "{{FOUNDRY_IQ_SECURITY_FIELD_NAME | default('metadata_security_id')}}",
     "FOUNDRY_IQ_MAX_OUTPUT_DOCUMENTS": "{{FOUNDRY_IQ_MAX_OUTPUT_DOCUMENTS | default('')}}",
-    {% if GPT_MODEL_INFO %}
+    {% if GPT_MODEL_INFO | default({}) %}
     "GPT_MODEL_DEPLOYMENT_NAME": "{{GPT_MODEL_INFO.deployment_name}}",
     "GPT_MODEL_NAME": "{{GPT_MODEL_INFO.model_name}}"
     {% else %}

@@ -1,3 +1,4 @@
+{% set is_foundry_iq_standard_blob = RETRIEVAL_BACKEND == 'foundry_iq' and FOUNDRY_IQ_PATTERN != 'searchIndex' and FOUNDRY_IQ_CONTENT_EXTRACTION_MODE == 'standard' %}
 {
   "indexes": [
     {
@@ -357,7 +358,14 @@
         "ingestionParameters": {
           "identity": null,
           "disableImageVerbalization": false,
-          "chatCompletionModel": null,
+          "chatCompletionModel": {% if is_foundry_iq_standard_blob and GPT_MODEL_INFO %}{
+            "kind": "azureOpenAI",
+            "azureOpenAIParameters": {
+              "resourceUri": "{{FOUNDRY_IQ_AI_SERVICES_ENDPOINT}}",
+              "deploymentId": "{{GPT_MODEL_INFO.deployment_name}}",
+              "modelName": "{{GPT_MODEL_INFO.model_name}}"
+            }
+          }{% else %}null{% endif %},
           "embeddingModel": {% if EMBEDDING_MODEL_INFO %}{
             "kind": "azureOpenAI",
             "azureOpenAIParameters": {
@@ -368,7 +376,10 @@
           }{% else %}null{% endif %},
           "contentExtractionMode": "{{FOUNDRY_IQ_CONTENT_EXTRACTION_MODE}}",
           "ingestionSchedule": null,
-          "ingestionPermissionOptions": {{FOUNDRY_IQ_INGESTION_PERMISSION_OPTIONS | tojson}}
+          "ingestionPermissionOptions": {{FOUNDRY_IQ_INGESTION_PERMISSION_OPTIONS | tojson}}{% if is_foundry_iq_standard_blob %},
+          "aiServices": {
+            "uri": "{{FOUNDRY_IQ_AI_SERVICES_ENDPOINT}}"
+          }{% endif %}
         }
       }
     }

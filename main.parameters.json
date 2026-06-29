@@ -35,6 +35,7 @@
     "foundryIqStorageFolderPath":          { "value": "${FOUNDRY_IQ_STORAGE_FOLDER_PATH=}" },
     "foundryIqIsAdlsGen2":                 { "value": "${FOUNDRY_IQ_IS_ADLS_GEN2=false}" },
     "foundryIqContentExtractionMode":      { "value": "${FOUNDRY_IQ_CONTENT_EXTRACTION_MODE=standard}" },
+    "foundryIqAiServicesEndpoint":         { "value": "${FOUNDRY_IQ_AI_SERVICES_ENDPOINT=}" },
     "foundryIqIngestionPermissionOptionsJson": { "value": "${FOUNDRY_IQ_INGESTION_PERMISSION_OPTIONS=[\"rbacScope\"]}" },
     "foundryIqFilterAddOnEnabled":         { "value": "${FOUNDRY_IQ_FILTER_ADD_ON_ENABLED=false}" },
 

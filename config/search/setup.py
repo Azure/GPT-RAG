@@ -89,6 +89,51 @@ def normalize_foundry_iq_settings(settings: Dict[str, Any]) -> Dict[str, Any]:
     return settings
 
 
+def normalize_endpoint_uri(value: Any) -> str:
+    endpoint = str(value or "").strip()
+    if not endpoint:
+        return ""
+    return endpoint.rstrip("/") + "/"
+
+
+def derive_foundry_iq_ai_services_endpoint(settings: Dict[str, Any]) -> str:
+    endpoint = normalize_endpoint_uri(settings.get("FOUNDRY_IQ_AI_SERVICES_ENDPOINT"))
+    if endpoint:
+        return endpoint
+
+    project_endpoint = str(settings.get("AI_FOUNDRY_PROJECT_ENDPOINT") or "").strip()
+    if "/api/projects/" in project_endpoint:
+        return normalize_endpoint_uri(project_endpoint.split("/api/projects/", 1)[0])
+
+    account_name = str(settings.get("AI_FOUNDRY_ACCOUNT_NAME") or "").strip()
+    if account_name:
+        return f"https://{account_name}.services.ai.azure.com/"
+
+    return ""
+
+
+def is_foundry_iq_standard_blob(settings: Dict[str, Any]) -> bool:
+    retrieval_backend = str(settings.get("RETRIEVAL_BACKEND") or "").lower()
+    pattern = str(settings.get("FOUNDRY_IQ_PATTERN") or "").lower()
+    kind = str(settings.get("FOUNDRY_IQ_KNOWLEDGE_SOURCE_KIND") or "").lower()
+    mode = str(settings.get("FOUNDRY_IQ_CONTENT_EXTRACTION_MODE") or "").lower()
+    return (
+        retrieval_backend == "foundry_iq"
+        and pattern != "searchindex"
+        and kind == "azureblob"
+        and mode == "standard"
+    )
+
+
+def validate_foundry_iq_settings(settings: Dict[str, Any]) -> None:
+    if is_foundry_iq_standard_blob(settings) and not settings.get("FOUNDRY_IQ_AI_SERVICES_ENDPOINT"):
+        raise ValueError(
+            "FOUNDRY_IQ_CONTENT_EXTRACTION_MODE is set to 'standard', but no AI Services endpoint "
+            "could be derived. Set FOUNDRY_IQ_AI_SERVICES_ENDPOINT to the Foundry resource endpoint "
+            "on services.ai.azure.com, for example 'https://<foundry-resource>.services.ai.azure.com/'."
+        )
+
+
 def load_appconfig_settings(ac_client: AzureAppConfigurationClient, label_filter: Optional[str] = None) -> Dict[str, Any]:
     """
     Reads all settings from App Configuration under given label_filter (or None for no label).
@@ -171,10 +216,10 @@ def prepare_context_and_render(template_name: str, template_dir: str, label_filt
                     model_obj = model.get("model")
                     if isinstance(model_obj, dict):
                         model_name = model_obj.get("name")
-                        model_format = model_obj.get("format")
+                        model_format = model_obj.get("format") or model.get("modelFormat")
                     else:
                         model_name = model_obj
-                        model_format = None
+                        model_format = model.get("modelFormat")
 
                     gpt_info = {
                         "deployment_name": model.get("name"),
@@ -254,6 +299,15 @@ def prepare_context_and_render(template_name: str, template_dir: str, label_filt
         if vars_dict:
             vars_dict = normalize_foundry_iq_settings(normalize_json_like_settings(vars_dict))
             context.update(vars_dict)
+            ai_services_endpoint = derive_foundry_iq_ai_services_endpoint(context)
+            if ai_services_endpoint:
+                context["FOUNDRY_IQ_AI_SERVICES_ENDPOINT"] = ai_services_endpoint
+                vars_dict["FOUNDRY_IQ_AI_SERVICES_ENDPOINT"] = ai_services_endpoint
+            try:
+                validate_foundry_iq_settings(context)
+            except ValueError as ve:
+                logging.error(str(ve))
+                return None, context
             for key, val in vars_dict.items():
                 if isinstance(val, (dict, list)):
                     final_val = json.dumps(val)
@@ -445,8 +499,7 @@ def provision_knowledge_bases(defs: dict, context: dict, cred: ChainedTokenCrede
 # ── Main Provisioning to AI Search elements (datasources, indexes, skillset and indexers) ─────────────────────
 def execute_setup(defs: Optional[dict], context: dict):
     if defs is None:
-        logging.error("No search definitions to provision. Skipping setup.")
-        return
+        raise RuntimeError("No search definitions were rendered; aborting Azure Search setup")
     cred = ChainedTokenCredential(AzureCliCredential(),ManagedIdentityCredential())
     indexers = defs.get("indexers", [])
     ds_to_indexers = {}
