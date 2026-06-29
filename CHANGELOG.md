@@ -1,5 +1,33 @@
 # Changelog
 
+## [v3.0.7] - 2026-06-29
+
+### User and operator impact
+
+NL2SQL deployments now consume the orchestrator patch that strengthens the
+read-only enforcement before SQL execution. This umbrella release pins
+`gpt-rag-orchestrator` to `v3.0.4`, which rejects stacked SQL batches and
+non-read-only SQL before datasource access. Operators should still keep every
+SQL Server, Azure SQL, or Fabric SQL datasource principal least-privilege and
+read-only.
+
+### Changed
+
+- **Orchestrator pin bumped to [`v3.0.4`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.0.4):** consumes the NL2SQL read-only enforcement hardening from [Azure/gpt-rag-orchestrator#256](https://github.com/Azure/gpt-rag-orchestrator/pull/256). UI, ingestion, and AI Landing Zone pins are unchanged from `v3.0.6`.
+
+### Validation
+
+- Release metadata validation passed for `manifest.json` and `CHANGELOG.md`.
+
+The following component versions are pinned for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v3.0.4 |
+| gpt-rag-ingestion | v2.4.14 |
+| bicep-ptn-aiml-landing-zone | v2.1.4 |
+
 ## [v3.0.6] - 2026-06-28
 
 ### User and operator impact
