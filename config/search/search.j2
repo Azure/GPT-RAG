@@ -1,4 +1,6 @@
 {% set is_foundry_iq_standard_blob = RETRIEVAL_BACKEND == 'foundry_iq' and FOUNDRY_IQ_PATTERN != 'searchIndex' and FOUNDRY_IQ_CONTENT_EXTRACTION_MODE == 'standard' %}
+{% set content_understanding_chat_models = ['gpt-4.1', 'gpt-4.1-mini', 'gpt-4.1-nano', 'gpt-4o', 'gpt-4o-mini', 'gpt-5.2'] %}
+{% set is_content_understanding_chat_model_supported = GPT_MODEL_INFO and GPT_MODEL_INFO.model_name in content_understanding_chat_models %}
 {
   "indexes": [
     {
@@ -358,7 +360,7 @@
         "ingestionParameters": {
           "identity": null,
           "disableImageVerbalization": false,
-          "chatCompletionModel": {% if is_foundry_iq_standard_blob and GPT_MODEL_INFO %}{
+          "chatCompletionModel": {% if is_foundry_iq_standard_blob and is_content_understanding_chat_model_supported %}{
             "kind": "azureOpenAI",
             "azureOpenAIParameters": {
               "resourceUri": "{{FOUNDRY_IQ_AI_SERVICES_ENDPOINT}}",

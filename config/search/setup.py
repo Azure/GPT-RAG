@@ -76,6 +76,18 @@ def is_truthy_setting(value: Any) -> bool:
     return str(value).strip().lower() in {"1", "true", "t", "yes", "y"}
 
 
+def strip_odata_metadata(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {
+            key: strip_odata_metadata(item)
+            for key, item in value.items()
+            if not key.startswith("@odata.")
+        }
+    if isinstance(value, list):
+        return [strip_odata_metadata(item) for item in value]
+    return value
+
+
 def normalize_foundry_iq_settings(settings: Dict[str, Any]) -> Dict[str, Any]:
     kind = str(settings.get("FOUNDRY_IQ_KNOWLEDGE_SOURCE_KIND") or "").lower()
     is_adls_gen2 = is_truthy_setting(settings.get("FOUNDRY_IQ_IS_ADLS_GEN2"))
@@ -470,6 +482,47 @@ def provision_knowledge_sources(defs: dict, context: dict, cred: ChainedTokenCre
     return success_count == len(knowledge_sources)
 
 
+def enforce_private_execution_for_generated_indexers(defs: dict, context: dict, cred: ChainedTokenCredential, search_endpoint: str, api_version: str):
+    if not is_truthy_setting(context.get("NETWORK_ISOLATION")):
+        return
+
+    generated_indexers = []
+    for ks in defs.get("knowledgeSources", []):
+        if ks.get("kind") != "azureBlob" or not ks.get("name"):
+            continue
+        generated_indexers.append(
+            ks.get("azureBlobParameters", {}).get("createdResources", {}).get("indexer")
+            or f"{ks['name']}-indexer"
+        )
+    generated_indexers = [name for name in generated_indexers if name]
+    if not generated_indexers:
+        return
+
+    token = cred.get_token("https://search.azure.com/.default").token
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    for indexer_name in generated_indexers:
+        url = f"{search_endpoint}/indexers/{indexer_name}?api-version={api_version}"
+        resp = requests.get(url, headers=headers)
+        if resp.status_code == 404:
+            logging.info(f"ℹ️ Generated indexer '{indexer_name}' not found yet; skipping private execution update.")
+            continue
+        if resp.status_code >= 400:
+            logging.warning(f"❗️ GET indexers/{indexer_name} failed {resp.status_code}: {resp.text}")
+            continue
+
+        body = strip_odata_metadata(resp.json())
+        if not isinstance(body.get("parameters"), dict):
+            body["parameters"] = {}
+        if not isinstance(body["parameters"].get("configuration"), dict):
+            body["parameters"]["configuration"] = {}
+        body["parameters"]["configuration"]["executionEnvironment"] = "Private"
+        update_resp = requests.put(url, headers=headers, json=body)
+        if update_resp.status_code >= 400:
+            logging.warning(f"❗️ PUT indexers/{indexer_name} failed {update_resp.status_code}: {update_resp.text}")
+            continue
+        logging.info(f"✅ Set generated indexer '{indexer_name}' executionEnvironment to Private")
+
+
 def provision_knowledge_bases(defs: dict, context: dict, cred: ChainedTokenCredential, search_endpoint: str):
     """Create or update Foundry IQ knowledge bases.
 
@@ -526,6 +579,7 @@ def execute_setup(defs: Optional[dict], context: dict):
     
     # Step 3: Provision knowledge base resources (KS -> KB)
     knowledge_sources_ok = provision_knowledge_sources(defs, context, cred, search_endpoint)
+    enforce_private_execution_for_generated_indexers(defs, context, cred, search_endpoint, api_version)
     knowledge_bases_ok = provision_knowledge_bases(defs, context, cred, search_endpoint)
     if context.get("RETRIEVAL_BACKEND") == "foundry_iq" and (not knowledge_sources_ok or not knowledge_bases_ok):
         raise RuntimeError("Foundry IQ knowledge source/base provisioning failed")

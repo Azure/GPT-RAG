@@ -394,6 +394,32 @@ function Test-ContainerAppsQuota {
     Test-QuotaRemaining -CheckName 'quota:container-apps:managed-environments' -QuotaData $quota -Names @('ManagedEnvironmentCount') -Required 1
 }
 
+function Test-ContentUnderstandingRegion {
+    param([Parameter(Mandatory = $true)][string]$Location)
+
+    $supportedRegions = @(
+        'australiaeast',
+        'eastus',
+        'eastus2',
+        'japaneast',
+        'northeurope',
+        'southcentralus',
+        'southeastasia',
+        'swedencentral',
+        'uksouth',
+        'westeurope',
+        'westus',
+        'westus3'
+    )
+
+    $normalized = Get-NormalizedLocation $Location
+    if ($supportedRegions -contains $normalized) {
+        Write-PreflightCheck -Status PASS -Name 'foundry-iq:content-understanding-region' -Message "Content Understanding supports Foundry resource location $Location."
+    } else {
+        Write-PreflightCheck -Status FAIL -Name 'foundry-iq:content-understanding-region' -Message "Content Understanding does not support Foundry resource location $Location. Use one of: $($supportedRegions -join ', ')."
+    }
+}
+
 function Test-ModelReadiness {
     param(
         [Parameter(Mandatory = $true)][string]$Location,
@@ -519,6 +545,9 @@ $deployJumpbox = Get-DeploymentFlag -Parameters $parameters -Name 'deployJumpbox
 $deployBastion = Get-DeploymentFlag -Parameters $parameters -Name 'deployBastion' -DefaultValue $false
 $deployNatGateway = Get-DeploymentFlag -Parameters $parameters -Name 'deployNatGateway' -DefaultValue $false
 $networkIsolation = Get-DeploymentFlag -Parameters $parameters -Name 'networkIsolation' -DefaultValue $false
+$retrievalBackend = Get-ParameterValue -Parameters $parameters -Name 'retrievalBackend' -DefaultValue 'foundry_iq'
+$foundryIqPattern = Get-ParameterValue -Parameters $parameters -Name 'foundryIqPattern' -DefaultValue 'azureBlob'
+$foundryIqContentExtractionMode = Get-ParameterValue -Parameters $parameters -Name 'foundryIqContentExtractionMode' -DefaultValue 'standard'
 
 $providerNamespaces = [System.Collections.Generic.HashSet[string]]::new()
 if ($deployAiFoundry -or $deploySpeech) { [void]$providerNamespaces.Add('Microsoft.CognitiveServices') }
@@ -580,6 +609,10 @@ if ($deployCosmos) {
 }
 
 if ($deployAiFoundry) {
+    if ($retrievalBackend -eq 'foundry_iq' -and $foundryIqPattern -ne 'searchIndex' -and $foundryIqContentExtractionMode -eq 'standard') {
+        Test-ContentUnderstandingRegion -Location $aiFoundryLocation
+    }
+
     $models = Get-ParameterValue -Parameters $parameters -Name 'modelDeploymentList' -DefaultValue @()
     if (@($models).Count -gt 0) {
         Test-ModelReadiness -Location $aiFoundryLocation -Models $models
