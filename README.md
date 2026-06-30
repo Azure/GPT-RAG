@@ -35,9 +35,12 @@ For unattended provisioning, set `AZURE_SKIP_NETWORK_ISOLATION_WARNING=true` to 
 
 ## Retrieval backend configuration
 
-GPT-RAG supports Azure AI Search as the direct retrieval backend and is adding
-Foundry IQ as a first-class backend for v3 deployments. Existing deployments
-should keep `RETRIEVAL_BACKEND=ai_search` until they intentionally migrate.
+GPT-RAG supports Azure AI Search as the direct retrieval backend and Foundry IQ
+as the default backend for fresh v3 deployments. Native Foundry IQ Blob
+Knowledge Sources use `RETRIEVAL_BACKEND=foundry_iq`,
+`FOUNDRY_IQ_PATTERN=azureBlob`, and `FOUNDRY_IQ_KNOWLEDGE_SOURCE_KIND=azureBlob`.
+Existing deployments can keep `RETRIEVAL_BACKEND=ai_search` until they
+intentionally migrate.
 
 For the operator guide, including Pattern A vs Pattern B, security modes,
 `knowledgeRetrieval` billing, rollback, and known limitations, see the

@@ -1,5 +1,66 @@
 # Changelog
 
+## [v3.0.8] - 2026-06-30
+
+### User and operator impact
+
+Fresh Zero Trust deployments with Foundry IQ native Blob now provision and retrieve documents end to end. The release consumes AI Landing Zone `v2.1.5`, which fixes the primary application Search service private-link ordering for Foundry/OpenAI/Cognitive Services, and carries the GPT-RAG post-provision fixes that stamp and consume the native Blob settings required for Knowledge Source and Knowledge Base creation.
+
+### Changed
+
+- **AI Landing Zone Bicep module pin bumped to [`v2.1.5`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.1.5):** `manifest.json`, `.gitmodules`, and the `infra` submodule HEAD are aligned on the validated landing-zone release.
+- **Fresh Foundry IQ deployments now carry native Blob settings into infrastructure:** `main.parameters.json` passes `RETRIEVAL_BACKEND=foundry_iq` and the native `FOUNDRY_IQ_*` defaults through azd/Bicep so fresh Zero Trust provisions stamp App Configuration for Foundry IQ `azureBlob` instead of silently falling back to direct Azure AI Search.
+
+### Fixed
+
+- **Fresh Foundry IQ standard extraction setup now seeds required search and AI Services settings:** Post-provision search setup derives `SEARCH_RAG_INDEX_NAME` before rendering Foundry IQ knowledge resources and supplies the `aiServices.uri` / chat model resource URI required by Azure AI Search when `FOUNDRY_IQ_CONTENT_EXTRACTION_MODE=standard`.
+- **Generated Foundry IQ Blob indexers run privately under network isolation:** Search setup enforces `parameters.configuration.executionEnvironment = Private` on service-generated Blob indexers when `NETWORK_ISOLATION=true`.
+- **Regional preflight blocks unsupported Content Understanding regions:** The preflight gate rejects regions where Foundry IQ standard extraction cannot run before provisioning starts.
+
+### Validation
+
+- Full Zero Trust validation passed in Australia East with `NETWORK_ISOLATION=true`, Foundry IQ native Blob, Azure Firewall, Bastion, jumpbox, NAT Gateway, and ACR task agent pool enabled.
+- Provisioning and jumpbox post-provision completed successfully.
+- App Configuration contained `NETWORK_ISOLATION`; the Foundry IQ Knowledge Source and Knowledge Base were created; the generated Blob indexer used private execution.
+- The requested PDF was indexed through the private Blob path, the Knowledge Base index contained documents, and Knowledge Base retrieval returned references from the indexed PDF.
+
+The following component versions are pinned for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v3.0.4 |
+| gpt-rag-ingestion | v2.4.14 |
+| bicep-ptn-aiml-landing-zone | v2.1.5 |
+
+## [v3.0.7] - 2026-06-29
+
+### User and operator impact
+
+NL2SQL deployments now consume the orchestrator patch that strengthens the
+read-only enforcement before SQL execution. This umbrella release pins
+`gpt-rag-orchestrator` to `v3.0.4`, which rejects stacked SQL batches and
+non-read-only SQL before datasource access. Operators should still keep every
+SQL Server, Azure SQL, or Fabric SQL datasource principal least-privilege and
+read-only.
+
+### Changed
+
+- **Orchestrator pin bumped to [`v3.0.4`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.0.4):** consumes the NL2SQL read-only enforcement hardening from [Azure/gpt-rag-orchestrator#256](https://github.com/Azure/gpt-rag-orchestrator/pull/256). UI, ingestion, and AI Landing Zone pins are unchanged from `v3.0.6`.
+
+### Validation
+
+- Release metadata validation passed for `manifest.json` and `CHANGELOG.md`.
+
+The following component versions are pinned for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v3.0.4 |
+| gpt-rag-ingestion | v2.4.14 |
+| bicep-ptn-aiml-landing-zone | v2.1.4 |
+
 ## [v3.0.6] - 2026-06-28
 
 ### User and operator impact

@@ -278,6 +278,7 @@ function Set-GptRagAppConfiguration {
         ENVIRONMENT_NAME = $environmentName
         DEPLOYMENT_NAME = $deploymentName
         RESOURCE_TOKEN = $resourceToken
+        SEARCH_RAG_INDEX_NAME = $ragIndexName
         ENABLE_AGENTIC_RETRIEVAL = (Get-OptionalEnvValue 'ENABLE_AGENTIC_RETRIEVAL' 'false')
         RETRIEVAL_BACKEND = $retrievalBackend
         FOUNDRY_IQ_PATTERN = $foundryIqPattern
@@ -289,6 +290,7 @@ function Set-GptRagAppConfiguration {
         FOUNDRY_IQ_STORAGE_FOLDER_PATH = (Get-OptionalEnvValue 'FOUNDRY_IQ_STORAGE_FOLDER_PATH')
         FOUNDRY_IQ_IS_ADLS_GEN2 = (Get-OptionalEnvValue 'FOUNDRY_IQ_IS_ADLS_GEN2' 'false')
         FOUNDRY_IQ_CONTENT_EXTRACTION_MODE = (Get-OptionalEnvValue 'FOUNDRY_IQ_CONTENT_EXTRACTION_MODE' 'standard')
+        FOUNDRY_IQ_AI_SERVICES_ENDPOINT = (Get-OptionalEnvValue 'FOUNDRY_IQ_AI_SERVICES_ENDPOINT' "https://$foundryName.services.ai.azure.com/")
         FOUNDRY_IQ_INGESTION_PERMISSION_OPTIONS = (Get-OptionalEnvValue 'FOUNDRY_IQ_INGESTION_PERMISSION_OPTIONS' '["rbacScope"]')
         FOUNDRY_IQ_SEARCH_INDEX_NAME = (Get-OptionalEnvValue 'FOUNDRY_IQ_SEARCH_INDEX_NAME' $ragIndexName)
         FOUNDRY_IQ_SEMANTIC_CONFIGURATION_NAME = (Get-OptionalEnvValue 'FOUNDRY_IQ_SEMANTIC_CONFIGURATION_NAME' 'semantic-config')
