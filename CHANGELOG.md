@@ -14,10 +14,11 @@ Fresh deployments now consume [AI Landing Zone `v2.2.0`](https://github.com/Azur
 ### Fixed
 
 - **Azure AI Foundry can be provisioned in a different region than the primary deployment:** `main.bicep` now exposes an `aiFoundryLocation` parameter (wired from `AZURE_AI_FOUNDRY_LOCATION`) and routes both the AI Foundry account module and its capability host through it, so deployments with `AZURE_LOCATION=<primary>` and `AZURE_AI_FOUNDRY_LOCATION=<foundry-region>` no longer force the AI Foundry account into the primary region.
+- **`scripts/postProvision.ps1` is now CAF-naming aware:** introduced an `_resolveResource` helper that queries `az resource list` per resource type (AI Foundry, Storage, Cosmos, Search, Key Vault, ACR, Container Apps Environment, Log Analytics, App Insights) and falls back to the legacy `<prefix>-<resourceToken>` derivation. Foundry project name is discovered via `az cognitiveservices account list-projects`; Cosmos DB name via `az cosmosdb sql database list`. Without this fix, post-provision failed with `ResourceNotFound` under the new `resourceNamingMode=caf` default because it assumed the legacy naming pattern. Legacy environments continue to work via the fallback.
 
 ### Validation
 
-- Fresh Basic (non-Zero-Trust) provision in Australia East with AI Foundry in East US 2, `RETRIEVAL_BACKEND=foundry_iq`, and `FOUNDRY_IQ_PATTERN=searchIndex`. `azd provision --preview` produced CAF-conformant names (workload hash + `AZURE_ENV_NAME` + region abbreviation + instance) and the full provision plus `azd deploy` completed successfully.
+- Fresh Basic (non-Zero-Trust) provision + deploy in Australia East with AI Foundry in East US 2, `RETRIEVAL_BACKEND=foundry_iq`, and `FOUNDRY_IQ_PATTERN=searchIndex`. Post-provision resolver picked up all CAF-named resources; AI Foundry blocklist and RAI policy created against the CAF-named account; AppConfig populated with 103 keys; Search indexes plus Foundry IQ knowledge source and knowledge base created; all three container apps healthy on `--0000001` with 100% traffic; frontend fronted by Entra Easy Auth (`RedirectToLoginPage`, v2 issuer).
 - Bicep build validation (`az bicep build --file infra/main.bicep`) exited 0.
 
 The following component versions are pinned for this release:
