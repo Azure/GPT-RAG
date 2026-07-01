@@ -181,22 +181,110 @@ function Set-GptRagAppConfiguration {
 
     $appConfigName = Get-AppConfigResourceName -Endpoint $Endpoint
     $nameSuffix = $resourceToken
-    $acrName = "cr$nameSuffix"
-    $keyVaultName = "kv-$nameSuffix"
-    $storageName = "st$nameSuffix"
-    $cosmosName = "cosmos-$nameSuffix"
-    $databaseName = "cosmos-db$nameSuffix"
-    $searchName = "srch-$nameSuffix"
-    $foundryName = "aif-$nameSuffix"
-    $foundryProjectName = 'aifoundry-default-project'
-    $foundryStorageName = "staif$nameSuffix"
-    $appInsightsName = "appi-$nameSuffix"
-    $logAnalyticsName = "log-$nameSuffix"
-    $containerEnvName = "cae-$nameSuffix"
 
+    # --- CAF-aware resource discovery (v3.1.0) ---
+    # AI Landing Zone v2.2.0 defaults to caf naming; resource names no longer follow the
+    # legacy "<prefix>-$nameSuffix" pattern. Discover actual names by listing resources
+    # in the RG; fall back to the legacy derivation only when discovery finds nothing.
+    function _resolveResource {
+        param([string]$Type, [string]$Fallback, [scriptblock]$Filter = $null)
+        try {
+            $json = az resource list -g $resourceGroup --resource-type $Type -o json 2>$null
+            if ($LASTEXITCODE -ne 0 -or -not $json) { return $Fallback }
+            $items = $json | ConvertFrom-Json
+            if ($null -eq $items) { return $Fallback }
+            if ($Filter) { $items = @($items | Where-Object $Filter) }
+            if ($items.Count -eq 1) { return $items[0].name }
+            if ($items.Count -eq 0) { return $Fallback }
+            Write-Warning "Multiple '$Type' resources matched; falling back to legacy name '$Fallback'."
+            return $Fallback
+        } catch {
+            return $Fallback
+        }
+    }
+
+    # Storage: main workload vs AI Foundry storage (prefix "staif")
+    $storageName = _resolveResource `
+        -Type 'Microsoft.Storage/storageAccounts' `
+        -Fallback "st$nameSuffix" `
+        -Filter { -not $_.name.StartsWith('staif') }
+    $foundryStorageName = _resolveResource `
+        -Type 'Microsoft.Storage/storageAccounts' `
+        -Fallback "staif$nameSuffix" `
+        -Filter { $_.name.StartsWith('staif') }
+
+    # Key Vault: main workload vs AI Foundry KV (prefix "kv-ai")
+    $keyVaultName = _resolveResource `
+        -Type 'Microsoft.KeyVault/vaults' `
+        -Fallback "kv-$nameSuffix" `
+        -Filter { -not $_.name.StartsWith('kv-ai') }
+
+    # Cosmos: main vs AI Foundry-project cosmos (prefix "cosmos-aif")
+    $cosmosName = _resolveResource `
+        -Type 'Microsoft.DocumentDB/databaseAccounts' `
+        -Fallback "cosmos-$nameSuffix" `
+        -Filter { -not $_.name.StartsWith('cosmos-aif') }
+
+    # Search: main vs AI Foundry-project search (prefix "srch-aif")
+    $searchName = _resolveResource `
+        -Type 'Microsoft.Search/searchServices' `
+        -Fallback "srch-$nameSuffix" `
+        -Filter { -not $_.name.StartsWith('srch-aif') }
+
+    # AI Foundry Cognitive account (kind = AIServices) — LZ v2.2.0 deploys a single one
+    $foundryName = _resolveResource `
+        -Type 'Microsoft.CognitiveServices/accounts' `
+        -Fallback "aif-$nameSuffix"
+
+    # AI Foundry project (child of foundry account) — resolve via CLI
+    $foundryProjectName = 'aifoundry-default-project'
+    try {
+        $projJson = az cognitiveservices account list-projects -g $resourceGroup -n $foundryName -o json 2>$null
+        if ($LASTEXITCODE -eq 0 -and $projJson) {
+            $projs = $projJson | ConvertFrom-Json
+            if ($projs.Count -ge 1) { $foundryProjectName = $projs[0].name }
+        }
+    } catch { }
+
+    # Container Registry / Container Apps Env / Log Analytics / App Insights
+    $acrName = _resolveResource `
+        -Type 'Microsoft.ContainerRegistry/registries' `
+        -Fallback "cr$nameSuffix"
+    $containerEnvName = _resolveResource `
+        -Type 'Microsoft.App/managedEnvironments' `
+        -Fallback "cae-$nameSuffix"
+    $logAnalyticsName = _resolveResource `
+        -Type 'Microsoft.OperationalInsights/workspaces' `
+        -Fallback "log-$nameSuffix"
+    $appInsightsName = _resolveResource `
+        -Type 'Microsoft.Insights/components' `
+        -Fallback "appi-$nameSuffix"
+
+    # Container apps use the RESOURCE_TOKEN suffix from GPT-RAG's own bicep — this is
+    # stable across naming modes.
     $frontendAppName = "ca-$nameSuffix-frontend"
     $orchestratorAppName = "ca-$nameSuffix-orchestrator"
     $dataIngestAppName = "ca-$nameSuffix-dataingest"
+
+    # Cosmos database name — introspect the account to get the actual DB name
+    $databaseName = "cosmos-db$nameSuffix"
+    try {
+        $dbJson = az cosmosdb sql database list -g $resourceGroup -a $cosmosName -o json 2>$null
+        if ($LASTEXITCODE -eq 0 -and $dbJson) {
+            $dbs = $dbJson | ConvertFrom-Json
+            if ($dbs.Count -eq 1) { $databaseName = $dbs[0].name }
+        }
+    } catch { }
+
+    Write-Host "🔎 Resolved resource names:"
+    Write-Host "   Foundry:          $foundryName / $foundryProjectName"
+    Write-Host "   Storage:          $storageName (main), $foundryStorageName (foundry)"
+    Write-Host "   Cosmos / DB:      $cosmosName / $databaseName"
+    Write-Host "   Search:           $searchName"
+    Write-Host "   Key Vault:        $keyVaultName"
+    Write-Host "   ACR / CAE:        $acrName / $containerEnvName"
+    Write-Host "   Observability:    $logAnalyticsName / $appInsightsName"
+    Write-Host "   Container apps:   $frontendAppName, $orchestratorAppName, $dataIngestAppName"
 
     $resourceGroupId = "/subscriptions/$subscriptionId/resourceGroups/$resourceGroup"
     $keyVaultResourceId = "$resourceGroupId/providers/Microsoft.KeyVault/vaults/$keyVaultName"
