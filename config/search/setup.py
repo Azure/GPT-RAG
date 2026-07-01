@@ -76,6 +76,18 @@ def is_truthy_setting(value: Any) -> bool:
     return str(value).strip().lower() in {"1", "true", "t", "yes", "y"}
 
 
+def strip_odata_metadata(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {
+            key: strip_odata_metadata(item)
+            for key, item in value.items()
+            if not key.startswith("@odata.")
+        }
+    if isinstance(value, list):
+        return [strip_odata_metadata(item) for item in value]
+    return value
+
+
 def normalize_foundry_iq_settings(settings: Dict[str, Any]) -> Dict[str, Any]:
     kind = str(settings.get("FOUNDRY_IQ_KNOWLEDGE_SOURCE_KIND") or "").lower()
     is_adls_gen2 = is_truthy_setting(settings.get("FOUNDRY_IQ_IS_ADLS_GEN2"))
@@ -87,6 +99,51 @@ def normalize_foundry_iq_settings(settings: Dict[str, Any]) -> Dict[str, Any]:
         filtered_options = [option for option in options if option in allowed_options]
         settings["FOUNDRY_IQ_INGESTION_PERMISSION_OPTIONS"] = filtered_options or ["rbacScope"]
     return settings
+
+
+def normalize_endpoint_uri(value: Any) -> str:
+    endpoint = str(value or "").strip()
+    if not endpoint:
+        return ""
+    return endpoint.rstrip("/") + "/"
+
+
+def derive_foundry_iq_ai_services_endpoint(settings: Dict[str, Any]) -> str:
+    endpoint = normalize_endpoint_uri(settings.get("FOUNDRY_IQ_AI_SERVICES_ENDPOINT"))
+    if endpoint:
+        return endpoint
+
+    project_endpoint = str(settings.get("AI_FOUNDRY_PROJECT_ENDPOINT") or "").strip()
+    if "/api/projects/" in project_endpoint:
+        return normalize_endpoint_uri(project_endpoint.split("/api/projects/", 1)[0])
+
+    account_name = str(settings.get("AI_FOUNDRY_ACCOUNT_NAME") or "").strip()
+    if account_name:
+        return f"https://{account_name}.services.ai.azure.com/"
+
+    return ""
+
+
+def is_foundry_iq_standard_blob(settings: Dict[str, Any]) -> bool:
+    retrieval_backend = str(settings.get("RETRIEVAL_BACKEND") or "").lower()
+    pattern = str(settings.get("FOUNDRY_IQ_PATTERN") or "").lower()
+    kind = str(settings.get("FOUNDRY_IQ_KNOWLEDGE_SOURCE_KIND") or "").lower()
+    mode = str(settings.get("FOUNDRY_IQ_CONTENT_EXTRACTION_MODE") or "").lower()
+    return (
+        retrieval_backend == "foundry_iq"
+        and pattern != "searchindex"
+        and kind == "azureblob"
+        and mode == "standard"
+    )
+
+
+def validate_foundry_iq_settings(settings: Dict[str, Any]) -> None:
+    if is_foundry_iq_standard_blob(settings) and not settings.get("FOUNDRY_IQ_AI_SERVICES_ENDPOINT"):
+        raise ValueError(
+            "FOUNDRY_IQ_CONTENT_EXTRACTION_MODE is set to 'standard', but no AI Services endpoint "
+            "could be derived. Set FOUNDRY_IQ_AI_SERVICES_ENDPOINT to the Foundry resource endpoint "
+            "on services.ai.azure.com, for example 'https://<foundry-resource>.services.ai.azure.com/'."
+        )
 
 
 def load_appconfig_settings(ac_client: AzureAppConfigurationClient, label_filter: Optional[str] = None) -> Dict[str, Any]:
@@ -171,10 +228,10 @@ def prepare_context_and_render(template_name: str, template_dir: str, label_filt
                     model_obj = model.get("model")
                     if isinstance(model_obj, dict):
                         model_name = model_obj.get("name")
-                        model_format = model_obj.get("format")
+                        model_format = model_obj.get("format") or model.get("modelFormat")
                     else:
                         model_name = model_obj
-                        model_format = None
+                        model_format = model.get("modelFormat")
 
                     gpt_info = {
                         "deployment_name": model.get("name"),
@@ -254,6 +311,15 @@ def prepare_context_and_render(template_name: str, template_dir: str, label_filt
         if vars_dict:
             vars_dict = normalize_foundry_iq_settings(normalize_json_like_settings(vars_dict))
             context.update(vars_dict)
+            ai_services_endpoint = derive_foundry_iq_ai_services_endpoint(context)
+            if ai_services_endpoint:
+                context["FOUNDRY_IQ_AI_SERVICES_ENDPOINT"] = ai_services_endpoint
+                vars_dict["FOUNDRY_IQ_AI_SERVICES_ENDPOINT"] = ai_services_endpoint
+            try:
+                validate_foundry_iq_settings(context)
+            except ValueError as ve:
+                logging.error(str(ve))
+                return None, context
             for key, val in vars_dict.items():
                 if isinstance(val, (dict, list)):
                     final_val = json.dumps(val)
@@ -416,6 +482,47 @@ def provision_knowledge_sources(defs: dict, context: dict, cred: ChainedTokenCre
     return success_count == len(knowledge_sources)
 
 
+def enforce_private_execution_for_generated_indexers(defs: dict, context: dict, cred: ChainedTokenCredential, search_endpoint: str, api_version: str):
+    if not is_truthy_setting(context.get("NETWORK_ISOLATION")):
+        return
+
+    generated_indexers = []
+    for ks in defs.get("knowledgeSources", []):
+        if ks.get("kind") != "azureBlob" or not ks.get("name"):
+            continue
+        generated_indexers.append(
+            ks.get("azureBlobParameters", {}).get("createdResources", {}).get("indexer")
+            or f"{ks['name']}-indexer"
+        )
+    generated_indexers = [name for name in generated_indexers if name]
+    if not generated_indexers:
+        return
+
+    token = cred.get_token("https://search.azure.com/.default").token
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    for indexer_name in generated_indexers:
+        url = f"{search_endpoint}/indexers/{indexer_name}?api-version={api_version}"
+        resp = requests.get(url, headers=headers)
+        if resp.status_code == 404:
+            logging.info(f"ℹ️ Generated indexer '{indexer_name}' not found yet; skipping private execution update.")
+            continue
+        if resp.status_code >= 400:
+            logging.warning(f"❗️ GET indexers/{indexer_name} failed {resp.status_code}: {resp.text}")
+            continue
+
+        body = strip_odata_metadata(resp.json())
+        if not isinstance(body.get("parameters"), dict):
+            body["parameters"] = {}
+        if not isinstance(body["parameters"].get("configuration"), dict):
+            body["parameters"]["configuration"] = {}
+        body["parameters"]["configuration"]["executionEnvironment"] = "Private"
+        update_resp = requests.put(url, headers=headers, json=body)
+        if update_resp.status_code >= 400:
+            logging.warning(f"❗️ PUT indexers/{indexer_name} failed {update_resp.status_code}: {update_resp.text}")
+            continue
+        logging.info(f"✅ Set generated indexer '{indexer_name}' executionEnvironment to Private")
+
+
 def provision_knowledge_bases(defs: dict, context: dict, cred: ChainedTokenCredential, search_endpoint: str):
     """Create or update Foundry IQ knowledge bases.
 
@@ -445,8 +552,7 @@ def provision_knowledge_bases(defs: dict, context: dict, cred: ChainedTokenCrede
 # ── Main Provisioning to AI Search elements (datasources, indexes, skillset and indexers) ─────────────────────
 def execute_setup(defs: Optional[dict], context: dict):
     if defs is None:
-        logging.error("No search definitions to provision. Skipping setup.")
-        return
+        raise RuntimeError("No search definitions were rendered; aborting Azure Search setup")
     cred = ChainedTokenCredential(AzureCliCredential(),ManagedIdentityCredential())
     indexers = defs.get("indexers", [])
     ds_to_indexers = {}
@@ -473,6 +579,7 @@ def execute_setup(defs: Optional[dict], context: dict):
     
     # Step 3: Provision knowledge base resources (KS -> KB)
     knowledge_sources_ok = provision_knowledge_sources(defs, context, cred, search_endpoint)
+    enforce_private_execution_for_generated_indexers(defs, context, cred, search_endpoint, api_version)
     knowledge_bases_ok = provision_knowledge_bases(defs, context, cred, search_endpoint)
     if context.get("RETRIEVAL_BACKEND") == "foundry_iq" and (not knowledge_sources_ok or not knowledge_bases_ok):
         raise RuntimeError("Foundry IQ knowledge source/base provisioning failed")

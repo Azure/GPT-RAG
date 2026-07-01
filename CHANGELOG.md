@@ -1,5 +1,96 @@
 # Changelog
 
+## [v3.1.0] - 2026-07-01
+
+### User and operator impact
+
+Fresh deployments now consume [AI Landing Zone `v2.2.0`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.2.0), which flips the default `resourceNamingMode` from `legacy` to `caf` and derives every CAF token automatically (workload from a subscription/env/location hash, environment from `AZURE_ENV_NAME`, region from a built-in abbreviation map). Fresh Basic and Zero Trust provisions therefore produce Cloud Adoption Framework-aligned resource names out of the box (for example `cosmos-<hash>-<env>-<region>-001`), without requiring operators to set `CAF_WORKLOAD_NAME`, `CAF_ENVIRONMENT_NAME`, or `CAF_REGION_NAME`. Operators who still want the pre-`v2.2.0` naming scheme can opt back in by setting `RESOURCE_NAMING_MODE=legacy` before `azd provision`.
+
+### Changed
+
+- **AI Landing Zone Bicep module pin bumped to [`v2.2.0`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.2.0):** `manifest.json`, `.gitmodules`, and the `infra` submodule HEAD are aligned on the CAF-default landing-zone release. This supersedes the interim `v2.1.6` pin.
+- **`main.parameters.json` aligned with the `v2.2.0` CAF-default contract:** `resourceNamingMode` now defaults to `caf`, and `cafWorkloadName`, `cafEnvironmentName`, and `cafRegionName` default to empty strings so the landing-zone bicep resolves them from `AZURE_ENV_NAME`, `AZURE_LOCATION`, and a subscription-scoped hash. Operators can still override every token via the same `${CAF_*_NAME=...}` environment variables.
+
+### Fixed
+
+- **Azure AI Foundry can be provisioned in a different region than the primary deployment:** `main.bicep` now exposes an `aiFoundryLocation` parameter (wired from `AZURE_AI_FOUNDRY_LOCATION`) and routes both the AI Foundry account module and its capability host through it, so deployments with `AZURE_LOCATION=<primary>` and `AZURE_AI_FOUNDRY_LOCATION=<foundry-region>` no longer force the AI Foundry account into the primary region.
+- **`scripts/postProvision.ps1` is now CAF-naming aware:** introduced an `_resolveResource` helper that queries `az resource list` per resource type (AI Foundry, Storage, Cosmos, Search, Key Vault, ACR, Container Apps Environment, Log Analytics, App Insights) and falls back to the legacy `<prefix>-<resourceToken>` derivation. Foundry project name is discovered via `az cognitiveservices account list-projects`; Cosmos DB name via `az cosmosdb sql database list`. Without this fix, post-provision failed with `ResourceNotFound` under the new `resourceNamingMode=caf` default because it assumed the legacy naming pattern. Legacy environments continue to work via the fallback.
+
+### Validation
+
+- Fresh Basic (non-Zero-Trust) provision + deploy in Australia East with AI Foundry in East US 2, `RETRIEVAL_BACKEND=foundry_iq`, and `FOUNDRY_IQ_PATTERN=searchIndex`. Post-provision resolver picked up all CAF-named resources; AI Foundry blocklist and RAI policy created against the CAF-named account; AppConfig populated with 103 keys; Search indexes plus Foundry IQ knowledge source and knowledge base created; all three container apps healthy on `--0000001` with 100% traffic; frontend fronted by Entra Easy Auth (`RedirectToLoginPage`, v2 issuer).
+- Bicep build validation (`az bicep build --file infra/main.bicep`) exited 0.
+
+The following component versions are pinned for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v3.0.4 |
+| gpt-rag-ingestion | v2.4.14 |
+| bicep-ptn-aiml-landing-zone | v2.2.0 |
+
+## [v3.0.8] - 2026-06-30
+
+### User and operator impact
+
+Fresh Zero Trust deployments with Foundry IQ native Blob now provision and retrieve documents end to end. The release consumes AI Landing Zone `v2.1.5`, which fixes the primary application Search service private-link ordering for Foundry/OpenAI/Cognitive Services, and carries the GPT-RAG post-provision fixes that stamp and consume the native Blob settings required for Knowledge Source and Knowledge Base creation.
+
+### Changed
+
+- **AI Landing Zone Bicep module pin bumped to [`v2.1.5`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.1.5):** `manifest.json`, `.gitmodules`, and the `infra` submodule HEAD are aligned on the validated landing-zone release.
+- **Fresh Foundry IQ deployments now carry native Blob settings into infrastructure:** `main.parameters.json` passes `RETRIEVAL_BACKEND=foundry_iq` and the native `FOUNDRY_IQ_*` defaults through azd/Bicep so fresh Zero Trust provisions stamp App Configuration for Foundry IQ `azureBlob` instead of silently falling back to direct Azure AI Search.
+
+### Fixed
+
+- **Fresh Foundry IQ standard extraction setup now seeds required search and AI Services settings:** Post-provision search setup derives `SEARCH_RAG_INDEX_NAME` before rendering Foundry IQ knowledge resources and supplies the `aiServices.uri` / chat model resource URI required by Azure AI Search when `FOUNDRY_IQ_CONTENT_EXTRACTION_MODE=standard`.
+- **Generated Foundry IQ Blob indexers run privately under network isolation:** Search setup enforces `parameters.configuration.executionEnvironment = Private` on service-generated Blob indexers when `NETWORK_ISOLATION=true`.
+- **Regional preflight blocks unsupported Content Understanding regions:** The preflight gate rejects regions where Foundry IQ standard extraction cannot run before provisioning starts.
+
+### Validation
+
+- Full Zero Trust validation passed in Australia East with `NETWORK_ISOLATION=true`, Foundry IQ native Blob, Azure Firewall, Bastion, jumpbox, NAT Gateway, and ACR task agent pool enabled.
+- Provisioning and jumpbox post-provision completed successfully.
+- App Configuration contained `NETWORK_ISOLATION`; the Foundry IQ Knowledge Source and Knowledge Base were created; the generated Blob indexer used private execution.
+- The requested PDF was indexed through the private Blob path, the Knowledge Base index contained documents, and Knowledge Base retrieval returned references from the indexed PDF.
+
+The following component versions are pinned for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v3.0.4 |
+| gpt-rag-ingestion | v2.4.14 |
+| bicep-ptn-aiml-landing-zone | v2.1.5 |
+
+## [v3.0.7] - 2026-06-29
+
+### User and operator impact
+
+NL2SQL deployments now consume the orchestrator patch that strengthens the
+read-only enforcement before SQL execution. This umbrella release pins
+`gpt-rag-orchestrator` to `v3.0.4`, which rejects stacked SQL batches and
+non-read-only SQL before datasource access. Operators should still keep every
+SQL Server, Azure SQL, or Fabric SQL datasource principal least-privilege and
+read-only.
+
+### Changed
+
+- **Orchestrator pin bumped to [`v3.0.4`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.0.4):** consumes the NL2SQL read-only enforcement hardening from [Azure/gpt-rag-orchestrator#256](https://github.com/Azure/gpt-rag-orchestrator/pull/256). UI, ingestion, and AI Landing Zone pins are unchanged from `v3.0.6`.
+
+### Validation
+
+- Release metadata validation passed for `manifest.json` and `CHANGELOG.md`.
+
+The following component versions are pinned for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v3.0.4 |
+| gpt-rag-ingestion | v2.4.14 |
+| bicep-ptn-aiml-landing-zone | v2.1.4 |
+
 ## [v3.0.6] - 2026-06-28
 
 ### User and operator impact
