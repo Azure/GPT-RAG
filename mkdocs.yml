@@ -58,6 +58,7 @@ nav:
     - Sharepoint Connector: howto_sharepoint_connector.md
     - Retrieval Backend Selection: howto_retrieval_backend.md
     - Retrieval Optimization: howto_retrieval_optimization.md
+    - Resource Naming (CAF): howto_resource_naming.md
     - Troubleshooting: troubleshooting.md
   - Meet the Team: team.md
   - Contributing: contributing.md    

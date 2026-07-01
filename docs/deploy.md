@@ -35,6 +35,14 @@ azd deploy
 
 > Add `--tenant` for `az` or `--tenant-id` for `azd` if you want a specific tenant.
 
+> **Resource naming:** Starting with GPT-RAG v3.1.0 and AI Landing Zone v2.2.0,
+> fresh deployments name resources using the Cloud Adoption Framework pattern
+> (for example `cosmos-<hash>-<env>-<region>-001`). No extra variables are
+> required. If you need to keep the pre-v3.1.0 names, set
+> `RESOURCE_NAMING_MODE=legacy` before `azd provision`. See the
+> [resource naming guide](howto_resource_naming.md) for details, override
+> options, and a before/after table.
+
 `azd provision` runs GPT-RAG preflight checks before Azure Resource Manager deployment starts. These checks validate the selected region, jumpbox VM SKU restrictions, provider/location support for AI Search, Cosmos DB, Container Apps, and AI Foundry/Cognitive Services, and Azure OpenAI model quota for the configured deployments. If model quota is insufficient, the hook fails early and suggests candidate regions when possible.
 
 Some transient Azure capacity failures are not exposed by reliable pre-create APIs. For example, Cosmos DB can still fail later with regional high-demand `ServiceUnavailable`; the preflight reports this limitation explicitly. Use `GPT_RAG_REGIONAL_PREFLIGHT_SKIP=true` only to bypass GPT-RAG regional checks, or `PREFLIGHT_SKIP=true` to bypass all preflight hooks.

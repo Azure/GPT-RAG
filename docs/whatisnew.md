@@ -1,5 +1,27 @@
 > 📌 [Check out what's coming next](https://github.com/orgs/Azure/projects/536/views/6)  (Azure org only)
 
+### July 2026
+
+#### Release v3.1.0: CAF resource naming by default
+*Minor · AI Landing Zone [v2.2.0](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.2.0) · orchestrator [v3.0.4](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.0.4) · ingestion [v2.4.14](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.14) · UI [v2.3.13](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.3.13)*
+
+Fresh Basic and Zero Trust deployments now produce Cloud Adoption Framework-aligned
+resource names out of the box (for example `cosmos-y6ijlv-gptrag-v22-aue-001`
+instead of the legacy `cosmos-y6ijlvleexuta`). The workload, environment, and
+region tokens are derived automatically from your subscription, `AZURE_ENV_NAME`,
+and `AZURE_LOCATION`, so no extra configuration is required. Operators who need
+the pre-v3.1.0 scheme can opt back in with `azd env set RESOURCE_NAMING_MODE legacy`
+before `azd provision`. Existing deployments are unaffected: resources are named
+at create time, and post-provision plus `azd deploy` resolve either naming style
+transparently.
+
+See the new [resource naming guide](howto_resource_naming.md) for the full token
+composition, override options, and a before/after table.
+
+[Release notes](https://github.com/Azure/GPT-RAG/releases/tag/v3.1.0)
+
+---
+
 ### June 2026
 
 #### Release v3.0.6: ZT deploys green
