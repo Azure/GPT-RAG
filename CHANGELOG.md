@@ -1,5 +1,34 @@
 # Changelog
 
+## [v3.1.0] - 2026-07-01
+
+### User and operator impact
+
+Fresh deployments now consume [AI Landing Zone `v2.2.0`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.2.0), which flips the default `resourceNamingMode` from `legacy` to `caf` and derives every CAF token automatically (workload from a subscription/env/location hash, environment from `AZURE_ENV_NAME`, region from a built-in abbreviation map). Fresh Basic and Zero Trust provisions therefore produce Cloud Adoption Framework-aligned resource names out of the box (for example `cosmos-<hash>-<env>-<region>-001`), without requiring operators to set `CAF_WORKLOAD_NAME`, `CAF_ENVIRONMENT_NAME`, or `CAF_REGION_NAME`. Operators who still want the pre-`v2.2.0` naming scheme can opt back in by setting `RESOURCE_NAMING_MODE=legacy` before `azd provision`.
+
+### Changed
+
+- **AI Landing Zone Bicep module pin bumped to [`v2.2.0`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.2.0):** `manifest.json`, `.gitmodules`, and the `infra` submodule HEAD are aligned on the CAF-default landing-zone release. This supersedes the interim `v2.1.6` pin.
+- **`main.parameters.json` aligned with the `v2.2.0` CAF-default contract:** `resourceNamingMode` now defaults to `caf`, and `cafWorkloadName`, `cafEnvironmentName`, and `cafRegionName` default to empty strings so the landing-zone bicep resolves them from `AZURE_ENV_NAME`, `AZURE_LOCATION`, and a subscription-scoped hash. Operators can still override every token via the same `${CAF_*_NAME=...}` environment variables.
+
+### Fixed
+
+- **Azure AI Foundry can be provisioned in a different region than the primary deployment:** `main.bicep` now exposes an `aiFoundryLocation` parameter (wired from `AZURE_AI_FOUNDRY_LOCATION`) and routes both the AI Foundry account module and its capability host through it, so deployments with `AZURE_LOCATION=<primary>` and `AZURE_AI_FOUNDRY_LOCATION=<foundry-region>` no longer force the AI Foundry account into the primary region.
+
+### Validation
+
+- Fresh Basic (non-Zero-Trust) provision in Australia East with AI Foundry in East US 2, `RETRIEVAL_BACKEND=foundry_iq`, and `FOUNDRY_IQ_PATTERN=searchIndex`. `azd provision --preview` produced CAF-conformant names (workload hash + `AZURE_ENV_NAME` + region abbreviation + instance) and the full provision plus `azd deploy` completed successfully.
+- Bicep build validation (`az bicep build --file infra/main.bicep`) exited 0.
+
+The following component versions are pinned for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v3.0.4 |
+| gpt-rag-ingestion | v2.4.14 |
+| bicep-ptn-aiml-landing-zone | v2.2.0 |
+
 ## [v3.0.8] - 2026-06-30
 
 ### User and operator impact
