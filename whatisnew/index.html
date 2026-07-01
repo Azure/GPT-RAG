@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#june-2026" class="md-skip">
+        <a href="#july-2026" class="md-skip">
           Skip to content
         </a>
       
@@ -289,6 +289,30 @@
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#july-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      July 2026
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="July 2026">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#release-v310-caf-resource-naming-by-default" class="md-nav__link">
+    <span class="md-ellipsis">
+      Release v3.1.0: CAF resource naming by default
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
   <a href="#june-2026" class="md-nav__link">
@@ -1266,6 +1290,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../howto_resource_naming/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Resource Naming (CAF)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../troubleshooting/" class="md-nav__link">
         
   
@@ -1350,6 +1395,22 @@
 <blockquote>
 <p>📌 <a href="https://github.com/orgs/Azure/projects/536/views/6">Check out what's coming next</a>  (Azure org only)</p>
 </blockquote>
+<h3 id="july-2026">July 2026</h3>
+<h4 id="release-v310-caf-resource-naming-by-default">Release v3.1.0: CAF resource naming by default</h4>
+<p><em>Minor · AI Landing Zone <a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.2.0">v2.2.0</a> · orchestrator <a href="https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.0.4">v3.0.4</a> · ingestion <a href="https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.14">v2.4.14</a> · UI <a href="https://github.com/Azure/gpt-rag-ui/releases/tag/v2.3.13">v2.3.13</a></em></p>
+<p>Fresh Basic and Zero Trust deployments now produce Cloud Adoption Framework-aligned
+resource names out of the box (for example <code>cosmos-y6ijlv-gptrag-v22-aue-001</code>
+instead of the legacy <code>cosmos-y6ijlvleexuta</code>). The workload, environment, and
+region tokens are derived automatically from your subscription, <code>AZURE_ENV_NAME</code>,
+and <code>AZURE_LOCATION</code>, so no extra configuration is required. Operators who need
+the pre-v3.1.0 scheme can opt back in with <code>azd env set RESOURCE_NAMING_MODE legacy</code>
+before <code>azd provision</code>. Existing deployments are unaffected: resources are named
+at create time, and post-provision plus <code>azd deploy</code> resolve either naming style
+transparently.</p>
+<p>See the new <a href="../howto_resource_naming/">resource naming guide</a> for the full token
+composition, override options, and a before/after table.</p>
+<p><a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.1.0">Release notes</a></p>
+<hr />
 <h3 id="june-2026">June 2026</h3>
 <h4 id="release-v306-zt-deploys-green">Release v3.0.6: ZT deploys green</h4>
 <p><em>Patch · orchestrator <a href="https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.0.3">v3.0.3</a> · ingestion <a href="https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.4.14">v2.4.14</a> · AI Landing Zone <a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.1.4">v2.1.4</a> · UI <a href="https://github.com/Azure/gpt-rag-ui/releases/tag/v2.3.13">v2.3.13</a></em></p>

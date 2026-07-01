@@ -13,10 +13,10 @@
       
       
       
-        <link rel="prev" href="../howto_azure_direct/">
+        <link rel="prev" href="../howto_retrieval_optimization/">
       
       
-        <link rel="next" href="../howto_authentication/">
+        <link rel="next" href="../troubleshooting/">
       
       
       <link rel="icon" href="../favicon.ico">
@@ -24,7 +24,7 @@
     
     
       
-        <title>Application Gateway - GPT-RAG</title>
+        <title>Resource Naming (CAF) - GPT-RAG</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#application-gateway-public-ingress" class="md-skip">
+        <a href="#resource-naming-caf-vs-legacy" class="md-skip">
           Skip to content
         </a>
       
@@ -111,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Application Gateway
+              Resource Naming (CAF)
             
           </span>
         </div>
@@ -701,28 +701,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Application Gateway
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../howto_app_gateway/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -731,51 +713,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#application-gateway-public-ingress" class="md-nav__link">
-    <span class="md-ellipsis">
-      Application Gateway public ingress
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#when-to-use-it" class="md-nav__link">
-    <span class="md-ellipsis">
-      When to use it
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#gpt-rag-configuration-handoff" class="md-nav__link">
-    <span class="md-ellipsis">
-      GPT-RAG configuration handoff
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -911,10 +848,30 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../howto_resource_naming/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Resource Naming (CAF)
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -923,6 +880,89 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-two-naming-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      The two naming modes
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-caf-names-are-composed" class="md-nav__link">
+    <span class="md-ellipsis">
+      How CAF names are composed
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#before-and-after" class="md-nav__link">
+    <span class="md-ellipsis">
+      Before and after
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#opt-out-and-stay-on-legacy-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      Opt out and stay on legacy names
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#override-individual-tokens" class="md-nav__link">
+    <span class="md-ellipsis">
+      Override individual tokens
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-gpt-rag-does-under-the-hood" class="md-nav__link">
+    <span class="md-ellipsis">
+      What GPT-RAG does under the hood
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      See also
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1014,43 +1054,220 @@
   
 
 
-  <h1>Application Gateway</h1>
-
-<h2 id="application-gateway-public-ingress">Application Gateway public ingress</h2>
-<p>GPT-RAG uses the Azure AI Landing Zone Bicep module for network-isolated infrastructure. Application Gateway WAF v2 public ingress is implemented in that landing-zone module, while GPT-RAG exposes the <code>publicIngress</code> parameter from the root <code>main.parameters.json</code>.</p>
-<div class="admonition tip">
-<p class="admonition-title">Full runbook</p>
-<p>Follow the AI Landing Zone runbook for certificate, DNS, validation, and teardown steps: <a href="https://azure.github.io/AI-Landing-Zones/bicep/public-ingress/">Public Ingress with Application Gateway</a>.</p>
-</div>
-<h2 id="when-to-use-it">When to use it</h2>
+<h1 id="resource-naming-caf-vs-legacy">Resource naming (CAF vs legacy)</h1>
+<p>Use this guide when you need to understand or change the names GPT-RAG gives to
+the Azure resources it provisions.</p>
+<p>Starting with GPT-RAG v3.1.0 and <a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.2.0">AI Landing Zone
+v2.2.0</a>,
+fresh Basic and Zero Trust deployments produce resource names aligned with the
+<a href="https://learn.microsoft.com/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming">Microsoft Cloud Adoption Framework naming and tagging
+guidance</a>
+out of the box. You do not need to set any additional variables for this to
+happen.</p>
+<p>Existing deployments keep their current names. The naming mode is chosen at
+<code>azd provision</code> time and does not change resources after the fact.</p>
+<h2 id="the-two-naming-modes">The two naming modes</h2>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>When it is used</th>
+<th>Example Cosmos DB account name</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>caf</code> (default in v3.1.0+)</td>
+<td>Fresh deployments on GPT-RAG v3.1.0 or later.</td>
+<td><code>cosmos-y6ijlv-gptrag-v22-aue-001</code></td>
+</tr>
+<tr>
+<td><code>legacy</code></td>
+<td>Deployments that provisioned before GPT-RAG v3.1.0, or fresh deployments that explicitly opt out with <code>RESOURCE_NAMING_MODE=legacy</code>.</td>
+<td><code>cosmos-y6ijlvleexuta</code></td>
+</tr>
+</tbody>
+</table>
+<p>Both modes produce fully working deployments. CAF names are easier to read at a
+glance, easier to correlate with the environment they belong to, and easier to
+audit against enterprise naming standards.</p>
+<h2 id="how-caf-names-are-composed">How CAF names are composed</h2>
+<p>A CAF resource name in GPT-RAG follows the shape:</p>
+<div class="highlight"><pre><span></span><code>&lt;resourcePrefix&gt;-&lt;workload&gt;-&lt;environment&gt;-&lt;region&gt;-&lt;instance&gt;
+</code></pre></div>
+<pre class="mermaid"><code>flowchart LR
+  Prefix["resource prefix&lt;br/&gt;e.g. cosmos, st, kv, cr"] --&gt; Name
+  Workload["workload token&lt;br/&gt;CAF_WORKLOAD_NAME&lt;br/&gt;or subscription/env/location hash"] --&gt; Name
+  Env["environment token&lt;br/&gt;CAF_ENVIRONMENT_NAME&lt;br/&gt;or AZURE_ENV_NAME"] --&gt; Name
+  Region["region token&lt;br/&gt;CAF_REGION_NAME&lt;br/&gt;or built-in abbreviation of AZURE_LOCATION"] --&gt; Name
+  Instance["instance token&lt;br/&gt;CAF_INSTANCE, default 001"] --&gt; Name
+  Name["final resource name"]</code></pre>
+<p>Each token has a sensible default so that operators do not have to set any of
+the <code>CAF_*</code> variables:</p>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Environment variable</th>
+<th>Default when unset</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Workload</td>
+<td><code>CAF_WORKLOAD_NAME</code></td>
+<td>A short hash derived from the subscription ID, <code>AZURE_ENV_NAME</code>, and <code>AZURE_LOCATION</code>. Stable across re-runs of the same environment.</td>
+</tr>
+<tr>
+<td>Environment</td>
+<td><code>CAF_ENVIRONMENT_NAME</code></td>
+<td><code>AZURE_ENV_NAME</code>.</td>
+</tr>
+<tr>
+<td>Region</td>
+<td><code>CAF_REGION_NAME</code></td>
+<td>A built-in short code from an abbreviation map (for example <code>australiaeast</code> becomes <code>aue</code>, <code>eastus2</code> becomes <code>eus2</code>).</td>
+</tr>
+<tr>
+<td>Instance</td>
+<td><code>CAF_INSTANCE</code></td>
+<td><code>001</code>.</td>
+</tr>
+<tr>
+<td>Prefix</td>
+<td>(not user-configurable)</td>
+<td>The CAF-recommended abbreviation for the resource type (for example <code>cosmos</code>, <code>st</code>, <code>kv</code>, <code>cr</code>, <code>srch</code>).</td>
+</tr>
+</tbody>
+</table>
+<p>The full mapping between resource type and prefix, and the exact abbreviation
+map for regions, lives in the AI Landing Zone. See the <a href="https://azure.github.io/AI-Landing-Zones/bicep/parameterization">AILZ parameterization
+reference</a> for
+the authoritative source of truth.</p>
+<h2 id="before-and-after">Before and after</h2>
+<p>The table below shows the same resources under <code>legacy</code> and <code>caf</code> for a
+deployment with <code>AZURE_ENV_NAME=gptrag-v22</code> in <code>australiaeast</code>. Values are
+illustrative.</p>
+<table>
+<thead>
+<tr>
+<th>Resource type</th>
+<th>Legacy name</th>
+<th>CAF name</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cosmos DB account</td>
+<td><code>cosmos-y6ijlvleexuta</code></td>
+<td><code>cosmos-y6ijlv-gptrag-v22-aue-001</code></td>
+</tr>
+<tr>
+<td>AI Search service</td>
+<td><code>search-y6ijlvleexuta</code></td>
+<td><code>srch-y6ijlv-gptrag-v22-aue-001</code></td>
+</tr>
+<tr>
+<td>Storage account</td>
+<td><code>sty6ijlvleexuta</code></td>
+<td><code>sty6ijlvgptragv22aue001</code></td>
+</tr>
+<tr>
+<td>Key Vault</td>
+<td><code>kv-y6ijlvleexuta</code></td>
+<td><code>kv-y6ijlv-gptrag-v22-aue-001</code></td>
+</tr>
+<tr>
+<td>Container Registry</td>
+<td><code>cry6ijlvleexuta</code></td>
+<td><code>cry6ijlvgptragv22aue001</code></td>
+</tr>
+<tr>
+<td>Log Analytics workspace</td>
+<td><code>log-y6ijlvleexuta</code></td>
+<td><code>log-y6ijlv-gptrag-v22-aue-001</code></td>
+</tr>
+<tr>
+<td>Application Insights</td>
+<td><code>appi-y6ijlvleexuta</code></td>
+<td><code>appi-y6ijlv-gptrag-v22-aue-001</code></td>
+</tr>
+<tr>
+<td>Container Apps Environment</td>
+<td><code>cae-y6ijlvleexuta</code></td>
+<td><code>cae-y6ijlv-gptrag-v22-aue-001</code></td>
+</tr>
+<tr>
+<td>AI Foundry account</td>
+<td><code>aif-y6ijlvleexuta</code></td>
+<td><code>aif-y6ijlv-gptrag-v22-aue-001</code></td>
+</tr>
+</tbody>
+</table>
+<p>Container apps (<code>ca-orchestrator-*</code>, <code>ca-frontend-*</code>, <code>ca-dataingest-*</code>, <code>ca-mcp-*</code>)
+are provisioned by GPT-RAG's own Bicep, not by the landing zone, and keep the
+same legacy-style pattern under both naming modes. This is intentional: their
+names must stay stable across releases so <code>azd deploy</code> and the post-provision
+scripts can find them.</p>
+<h2 id="opt-out-and-stay-on-legacy-names">Opt out and stay on legacy names</h2>
+<p>Set <code>RESOURCE_NAMING_MODE=legacy</code> before <code>azd provision</code> if you need to keep the
+pre-v3.1.0 naming scheme. Typical reasons:</p>
 <ul>
-<li><strong>Use Application Gateway</strong> when <code>NETWORK_ISOLATION=true</code> and one private Container App needs a controlled public HTTPS entry point.</li>
-<li><strong>Do not use it for basic deployments</strong> unless you specifically need a public WAF entry point in front of an internal Container Apps environment.</li>
-<li><strong>Expect extra cost</strong> because Application Gateway WAF_v2 and Standard Public IP incur hourly charges while deployed.</li>
+<li>You are re-provisioning into an existing subscription or resource group that
+  already contains legacy-named GPT-RAG resources and you want the names to
+  match.</li>
+<li>You have external tooling, documentation, dashboards, or automation that
+  hardcodes the legacy pattern and you cannot update it yet.</li>
+<li>You want to defer the naming change until a later planned change window.</li>
 </ul>
-<h2 id="gpt-rag-configuration-handoff">GPT-RAG configuration handoff</h2>
-<p>Do not edit <code>infra/</code> directly. Before running <code>azd provision</code>, update GPT-RAG's root <code>main.parameters.json</code>; the pre-provision hook copies this file into the landing-zone module as the deployment parameter override.</p>
-<p>Start with skeleton mode so the gateway resources are created but public traffic remains closed:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">&quot;publicIngress&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
-<span class="w">  </span><span class="p">}</span>
-<span class="p">}</span>
+<div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">RESOURCE_NAMING_MODE</span> <span class="n">legacy</span>
+<span class="n">azd</span> <span class="n">provision</span>
 </code></pre></div>
-<p>After you have the hostname, Key Vault certificate secret URI, DNS record, and allowed source CIDRs, move to live mode:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">&quot;publicIngress&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;backendAppIndex&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;frontendHostName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;app.contoso.com&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;sslCertSecretId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://&lt;key-vault-name&gt;.vault.azure.net/secrets/&lt;certificate-name&gt;&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;allowedSourceAddressPrefixes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">      </span><span class="s2">&quot;203.0.113.10/32&quot;</span>
-<span class="w">    </span><span class="p">]</span>
-<span class="w">  </span><span class="p">}</span>
-<span class="p">}</span>
+<p>Existing deployments that were provisioned before v3.1.0 do not need to set
+anything. Resource names are chosen at create time; a landing-zone version bump
+alone does not rename resources. Post-provision and <code>azd deploy</code> remain
+compatible with legacy names.</p>
+<h2 id="override-individual-tokens">Override individual tokens</h2>
+<p>You can override each token independently while staying in <code>caf</code> mode. This is
+useful when your organization already publishes CAF token values that GPT-RAG
+should adopt.</p>
+<div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">CAF_WORKLOAD_NAME</span>    <span class="s2">&quot;genai&quot;</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">CAF_ENVIRONMENT_NAME</span> <span class="s2">&quot;prod&quot;</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">CAF_REGION_NAME</span>      <span class="s2">&quot;aue&quot;</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">CAF_INSTANCE</span>         <span class="s2">&quot;001&quot;</span>
+<span class="n">azd</span> <span class="n">provision</span>
 </code></pre></div>
-<p>For GPT-RAG's default <code>containerAppsList</code>, <code>backendAppIndex: 1</code> points to the frontend app. Use the AI Landing Zone runbook for the complete two-step flow and for the <code>PUBLIC_INGRESS_*</code> outputs to validate the deployed gateway.</p>
+<p>With the values above, a Cosmos DB account is named <code>cosmos-genai-prod-aue-001</code>.</p>
+<p>Constraints to keep in mind:</p>
+<ul>
+<li>Total resource name length is bounded by Azure per resource type. Long custom
+  workload or environment tokens can push names over the limit for storage
+  accounts, key vaults, or container registries.</li>
+<li>Storage accounts and container registries do not allow hyphens; the landing
+  zone strips them automatically, so <code>sty6ijlv-gptrag-v22-aue-001</code> becomes
+  <code>sty6ijlvgptragv22aue001</code>.</li>
+<li>Tokens should stay lower-case and alphanumeric to satisfy the strictest
+  resource types.</li>
+</ul>
+<h2 id="what-gpt-rag-does-under-the-hood">What GPT-RAG does under the hood</h2>
+<p>Post-provision and <code>azd deploy</code> do not assume a specific naming pattern. They
+resolve each resource by type inside the target resource group using
+<code>az resource list</code>, so both <code>caf</code> and <code>legacy</code> names are discovered
+automatically. If the resource cannot be found by type, the scripts fall back to
+the legacy <code>&lt;prefix&gt;-&lt;resourceToken&gt;</code> derivation. This keeps existing legacy
+environments working without changes.</p>
+<h2 id="see-also">See also</h2>
+<ul>
+<li><a href="../deploy/">Deployment Guide</a> for the end-to-end <code>azd provision</code> and
+  <code>azd deploy</code> flow.</li>
+<li><a href="https://azure.github.io/AI-Landing-Zones/bicep/parameterization">AI Landing Zone parameterization
+  reference</a>
+  for the authoritative naming contract and the full abbreviation map.</li>
+<li><a href="https://learn.microsoft.com/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming">Cloud Adoption Framework naming and tagging
+  guidance</a>.</li>
+<li><a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.1.0">GPT-RAG v3.1.0 release
+  notes</a>.</li>
+</ul>
 
 
 
