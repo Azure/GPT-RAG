@@ -179,5 +179,131 @@ class FoundryIqTemplateTests(unittest.TestCase):
         get.assert_not_called()
 
 
+    def test_conversation_upload_disabled_by_default_keeps_single_knowledge_source(self):
+        settings = render_json_template(
+            "search.settings.j2",
+            {
+                "RESOURCE_TOKEN": "abc123",
+                "SEARCH_SERVICE_QUERY_ENDPOINT": "https://search.search.windows.net",
+                "AI_FOUNDRY_ACCOUNT_NAME": "aif-abc123",
+                "RETRIEVAL_BACKEND": "foundry_iq",
+            },
+        )
+        self.assertEqual(settings["FOUNDRY_IQ_CONVERSATION_UPLOAD_ENABLED"], "false")
+        self.assertEqual(
+            settings["FOUNDRY_IQ_CONVERSATION_KNOWLEDGE_SOURCE_NAME"],
+            "ragindex-abc123-conv-ks",
+        )
+
+        context = {
+            **settings,
+            "STORAGE_ACCOUNT_RESOURCE_ID": "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Storage/storageAccounts/st",
+            "EMBEDDING_MODEL_INFO": {
+                "endpoint": "https://aif-abc123.openai.azure.com/",
+                "deployment_name": "text-embedding",
+                "model_name": "text-embedding-3-large",
+            },
+            "GPT_MODEL_INFO": {
+                "deployment_name": "chat",
+                "model_name": "gpt-5-nano",
+            },
+        }
+
+        search_definitions = render_json_template("search.j2", context)
+        self.assertEqual(len(search_definitions["knowledgeSources"]), 1)
+        self.assertEqual(
+            search_definitions["knowledgeSources"][0]["kind"], "azureBlob"
+        )
+        self.assertEqual(
+            len(search_definitions["knowledgeBases"][0]["knowledgeSources"]), 1
+        )
+
+    def test_conversation_upload_enabled_adds_conversational_search_index_source(self):
+        settings = render_json_template(
+            "search.settings.j2",
+            {
+                "RESOURCE_TOKEN": "abc123",
+                "SEARCH_SERVICE_QUERY_ENDPOINT": "https://search.search.windows.net",
+                "AI_FOUNDRY_ACCOUNT_NAME": "aif-abc123",
+                "RETRIEVAL_BACKEND": "foundry_iq",
+                "FOUNDRY_IQ_CONVERSATION_UPLOAD_ENABLED": "true",
+            },
+        )
+        self.assertEqual(settings["FOUNDRY_IQ_CONVERSATION_UPLOAD_ENABLED"], "true")
+
+        context = {
+            **settings,
+            "STORAGE_ACCOUNT_RESOURCE_ID": "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Storage/storageAccounts/st",
+            "EMBEDDING_MODEL_INFO": {
+                "endpoint": "https://aif-abc123.openai.azure.com/",
+                "deployment_name": "text-embedding",
+                "model_name": "text-embedding-3-large",
+            },
+            "GPT_MODEL_INFO": {
+                "deployment_name": "chat",
+                "model_name": "gpt-5-nano",
+            },
+        }
+
+        search_definitions = render_json_template("search.j2", context)
+        knowledge_sources = search_definitions["knowledgeSources"]
+        self.assertEqual(len(knowledge_sources), 2)
+        self.assertEqual(knowledge_sources[0]["kind"], "azureBlob")
+
+        conv_source = knowledge_sources[1]
+        self.assertEqual(conv_source["name"], "ragindex-abc123-conv-ks")
+        self.assertEqual(conv_source["kind"], "searchIndex")
+        self.assertEqual(
+            conv_source["searchIndexParameters"]["searchIndexName"],
+            "ragindex-abc123",
+        )
+        self.assertEqual(
+            conv_source["searchIndexParameters"]["semanticConfigurationName"],
+            "semantic-config",
+        )
+
+        kb_sources = search_definitions["knowledgeBases"][0]["knowledgeSources"]
+        self.assertEqual(
+            [s["name"] for s in kb_sources],
+            ["ragindex-abc123-blob-ks", "ragindex-abc123-conv-ks"],
+        )
+
+    def test_conversation_upload_not_added_for_search_index_pattern(self):
+        settings = render_json_template(
+            "search.settings.j2",
+            {
+                "RESOURCE_TOKEN": "abc123",
+                "SEARCH_SERVICE_QUERY_ENDPOINT": "https://search.search.windows.net",
+                "AI_FOUNDRY_ACCOUNT_NAME": "aif-abc123",
+                "RETRIEVAL_BACKEND": "foundry_iq",
+                "FOUNDRY_IQ_PATTERN": "searchIndex",
+                "FOUNDRY_IQ_CONVERSATION_UPLOAD_ENABLED": "true",
+            },
+        )
+
+        context = {
+            **settings,
+            "STORAGE_ACCOUNT_RESOURCE_ID": "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Storage/storageAccounts/st",
+            "EMBEDDING_MODEL_INFO": {
+                "endpoint": "https://aif-abc123.openai.azure.com/",
+                "deployment_name": "text-embedding",
+                "model_name": "text-embedding-3-large",
+            },
+            "GPT_MODEL_INFO": {
+                "deployment_name": "chat",
+                "model_name": "gpt-5-nano",
+            },
+        }
+
+        search_definitions = render_json_template("search.j2", context)
+        self.assertEqual(len(search_definitions["knowledgeSources"]), 1)
+        self.assertEqual(
+            search_definitions["knowledgeSources"][0]["kind"], "searchIndex"
+        )
+        self.assertEqual(
+            len(search_definitions["knowledgeBases"][0]["knowledgeSources"]), 1
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

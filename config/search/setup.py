@@ -442,8 +442,9 @@ def cleanup_knowledge_resources(defs: dict, context: dict, cred: ChainedTokenCre
     knowledge_sources = list(defs.get("knowledgeSources", []))
     search_index_ks_name = f"{context.get('SEARCH_RAG_INDEX_NAME')}-rag-ks"
     blob_ks_name = f"{context.get('SEARCH_RAG_INDEX_NAME')}-blob-ks"
+    conversation_ks_name = context.get("FOUNDRY_IQ_CONVERSATION_KNOWLEDGE_SOURCE_NAME") or f"{context.get('SEARCH_RAG_INDEX_NAME')}-conv-ks"
     existing_ks_names = {ks["name"] for ks in knowledge_sources if ks.get("name")}
-    for name in (search_index_ks_name, blob_ks_name):
+    for name in (search_index_ks_name, blob_ks_name, conversation_ks_name):
         if name and name not in existing_ks_names:
             knowledge_sources.append({"name": name})
             existing_ks_names.add(name)

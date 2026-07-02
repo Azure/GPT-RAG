@@ -1,5 +1,40 @@
 # Changelog
 
+## [v3.2.0] - 2026-07-02
+
+### User and operator impact
+
+Foundry IQ deployments using Pattern A (`FOUNDRY_IQ_PATTERN=azureBlob`) can now also serve documents that users upload through the chat UI, in the same conversation, without switching retrieval backends. When you turn the feature on, the search setup provisions a second, conversational knowledge source over the existing RAG index (`ragindex-<token>`) and adds it to the Foundry IQ knowledge base. Uploaded files are indexed with a `conversationId`, and the orchestrator (pinned here to [`v3.1.0`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.1.0)) scopes that conversational source per conversation at query time, so one user's upload never leaks into another conversation.
+
+The feature is opt-in and defaults to off. Set `FOUNDRY_IQ_CONVERSATION_UPLOAD_ENABLED=true` before `azd provision` to enable it. With the flag off (the default), the rendered search resources and deployed behavior are identical to `v3.1.0`, so existing environments upgrade with no change. The feature only applies to Pattern A; the `searchIndex` pattern (Pattern B) never adds the conversational source because file upload already works there.
+
+Fresh deployments also consume [AI Landing Zone `v2.3.0`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.3.0), which adds a generic App Configuration passthrough so accelerators can push their own settings into App Config without the landing zone needing to know about them.
+
+### Added
+
+- **Conversational file upload knowledge source for Foundry IQ Pattern A:** When `RETRIEVAL_BACKEND=foundry_iq`, the pattern is not `searchIndex`, and `FOUNDRY_IQ_CONVERSATION_UPLOAD_ENABLED=true`, `config/search/search.j2` renders a second `searchIndex` knowledge source over `SEARCH_RAG_INDEX_NAME` (semantic config `semantic-config`) and references it from the knowledge base alongside the primary `azureBlob` source. The conversational source name defaults to `<ragIndexName>-conv-ks` and can be overridden with `FOUNDRY_IQ_CONVERSATION_KNOWLEDGE_SOURCE_NAME`.
+- **New passthrough settings:** `scripts/postProvision.ps1` and `config/search/search.settings.j2` stamp `FOUNDRY_IQ_CONVERSATION_UPLOAD_ENABLED` (default `false`) and `FOUNDRY_IQ_CONVERSATION_KNOWLEDGE_SOURCE_NAME` (default `<ragIndexName>-conv-ks`) into App Configuration under the `gpt-rag` label, so both new and upgraded environments always carry the keys.
+- **Template tests:** `config/search/tests/test_foundry_iq_templates.py` covers the feature off (single source), on (blob plus conversational source, knowledge base references both), and the `searchIndex` pattern guard (no conversational source added).
+
+### Changed
+
+- **AI Landing Zone Bicep module pin bumped to [`v2.3.0`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.3.0):** `manifest.json`, `.gitmodules`, and the `infra` submodule HEAD are aligned on the landing-zone release that adds the generic App Configuration passthrough.
+- **Orchestrator pin bumped to [`v3.1.0`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.1.0):** carries the hybrid multi-source retrieval that reads the conversational knowledge source and applies the per-`conversationId` filter add-on at query time. Required for conversational file upload to work end to end.
+
+### Validation
+
+- `pytest config/search/tests/test_foundry_iq_templates.py` passes (8 tests), covering the conversational source on/off behavior, the knowledge base references, and the `searchIndex` pattern guard.
+- With `FOUNDRY_IQ_CONVERSATION_UPLOAD_ENABLED` unset or `false`, the rendered `search.j2` output is unchanged from `v3.1.0` (single knowledge source, single knowledge base reference), so the default deployment is byte-identical.
+
+The following component versions are pinned for this release:
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v3.1.0 |
+| gpt-rag-ingestion | v2.4.14 |
+| bicep-ptn-aiml-landing-zone | v2.3.0 |
+
 ## [v3.1.0] - 2026-07-01
 
 ### User and operator impact

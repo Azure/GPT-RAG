@@ -25,6 +25,8 @@
     "FOUNDRY_IQ_KNOWLEDGE_RETRIEVAL_BILLING_PLAN": "{{FOUNDRY_IQ_KNOWLEDGE_RETRIEVAL_BILLING_PLAN | default('free')}}",
     "FOUNDRY_IQ_KNOWLEDGE_SOURCE_NAME": "{{FOUNDRY_IQ_KNOWLEDGE_SOURCE_NAME | default(search_rag_index_name ~ ('-rag-ks' if foundry_iq_pattern == 'searchIndex' else '-blob-ks'), true)}}",
     "FOUNDRY_IQ_KNOWLEDGE_SOURCE_KIND": "{{FOUNDRY_IQ_KNOWLEDGE_SOURCE_KIND | default('searchIndex' if foundry_iq_pattern == 'searchIndex' else 'azureBlob', true)}}",
+    "FOUNDRY_IQ_CONVERSATION_UPLOAD_ENABLED": "{{FOUNDRY_IQ_CONVERSATION_UPLOAD_ENABLED | default('false')}}",
+    "FOUNDRY_IQ_CONVERSATION_KNOWLEDGE_SOURCE_NAME": "{{FOUNDRY_IQ_CONVERSATION_KNOWLEDGE_SOURCE_NAME | default(search_rag_index_name ~ '-conv-ks', true)}}",
     "FOUNDRY_IQ_STORAGE_CONTAINER_NAME": "{{FOUNDRY_IQ_STORAGE_CONTAINER_NAME | default('documents')}}",
     "FOUNDRY_IQ_STORAGE_FOLDER_PATH": "{{FOUNDRY_IQ_STORAGE_FOLDER_PATH | default('')}}",
     "FOUNDRY_IQ_IS_ADLS_GEN2": "{{FOUNDRY_IQ_IS_ADLS_GEN2 | default('false')}}",

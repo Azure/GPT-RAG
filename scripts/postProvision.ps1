@@ -358,6 +358,13 @@ function Set-GptRagAppConfiguration {
     }
     $effectiveKnowledgeBaseName = if ($retrievalBackend -eq 'foundry_iq') { $knowledgeBaseName } else { '' }
 
+    $foundryIqConversationKnowledgeSourceName = if ($retrievalBackend -eq 'foundry_iq') {
+        Get-OptionalEnvValue 'FOUNDRY_IQ_CONVERSATION_KNOWLEDGE_SOURCE_NAME' "$ragIndexName-conv-ks"
+    }
+    else {
+        ''
+    }
+
     $settings = [ordered]@{
         AZURE_TENANT_ID = $tenantId
         SUBSCRIPTION_ID = $subscriptionId
@@ -385,6 +392,8 @@ function Set-GptRagAppConfiguration {
         FOUNDRY_IQ_FILTER_ADD_ON_ENABLED = (Get-OptionalEnvValue 'FOUNDRY_IQ_FILTER_ADD_ON_ENABLED' 'false')
         FOUNDRY_IQ_SECURITY_FIELD_NAME = (Get-OptionalEnvValue 'FOUNDRY_IQ_SECURITY_FIELD_NAME' 'metadata_security_id')
         FOUNDRY_IQ_MAX_OUTPUT_DOCUMENTS = (Get-OptionalEnvValue 'FOUNDRY_IQ_MAX_OUTPUT_DOCUMENTS')
+        FOUNDRY_IQ_CONVERSATION_UPLOAD_ENABLED = (Get-OptionalEnvValue 'FOUNDRY_IQ_CONVERSATION_UPLOAD_ENABLED' 'false')
+        FOUNDRY_IQ_CONVERSATION_KNOWLEDGE_SOURCE_NAME = $foundryIqConversationKnowledgeSourceName
         NETWORK_ISOLATION = (Get-OptionalEnvValue 'NETWORK_ISOLATION' 'false')
         USE_UAI = (Get-OptionalEnvValue 'USE_UAI' 'false')
         USE_CAPP_API_KEY = (Get-OptionalEnvValue 'USE_CAPP_API_KEY' 'false')
