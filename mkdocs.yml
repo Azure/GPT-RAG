@@ -53,6 +53,7 @@ nav:
     - Azure Direct Models: howto_azure_direct.md
     - Application Gateway: howto_app_gateway.md
     - Auth & Doc Security: howto_authentication.md
+    - Admin Dashboard Sign-in: howto_dashboard_signin.md
     - Multimodality: howto_multimodality.md
     - User Feedback: howto_userfeedback.md
     - Sharepoint Connector: howto_sharepoint_connector.md

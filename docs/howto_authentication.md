@@ -264,9 +264,11 @@ Examples of how to populate `metadata_security_user_ids` and `metadata_security_
 
 The orchestrator and the ingestion service each ship a small operator dashboard. The orchestrator dashboard is mounted at `/dashboard` on the orchestrator Container App and the ingestion dashboard is mounted at `/dashboard` on the ingestion Container App. Both surfaces let an operator inspect runs, conversations, and a curated set of runtime settings, and the ingestion dashboard also lets an operator trigger a scheduled job on demand.
 
-Admin access is enforced through an **Entra ID App Role named `Admin`** added to the same App Registration you created for user sign-in. The same token the UI already uses for the orchestrator API also carries the role claim once a user is assigned to it, so there is no separate token, separate scope, or separate app registration to manage.
+Admin access is enforced through an **Entra ID App Role named `Admin`** added to the same App Registration you created for user sign-in. The token the caller presents to `/api/dashboard/*` (or the ingestion equivalents) must carry `Admin` in its `roles` claim.
 
 This section explains how to add the role, assign users, request the correct scope, and debug the most common error (a 403 response even though the role is assigned).
+
+> The orchestrator dashboard SPA performs its own Microsoft Entra ID sign-in (MSAL, Authorization Code + PKCE) independent of the chat UI. If you are enabling sign-in specifically for the orchestrator dashboard, follow [Admin Dashboard Sign-in](howto_dashboard_signin.md) for the SPA-specific setup: adding a Single-page application redirect URI, exposing the `access_as_user` scope, and the `OAUTH_AZURE_AD_TENANT_ID`, `OAUTH_AZURE_AD_CLIENT_ID`, and optional `OAUTH_AZURE_AD_API_SCOPE` App Configuration keys. The rest of this section covers the `Admin` app role itself, which is shared by both dashboards.
 
 ### How each dashboard is gated
 

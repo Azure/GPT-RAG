@@ -7,6 +7,7 @@ patch, and fix, see the [GitHub releases](https://github.com/Azure/GPT-RAG/relea
 ### July 2026
 
 - **CAF resource naming by default.** Fresh Basic and Zero Trust deployments produce Cloud Adoption Framework-aligned resource names automatically, with an opt-out to the legacy scheme. See [resource naming guide](howto_resource_naming.md).
+- **Admin dashboard sign-in.** The orchestrator dashboard SPA now performs its own Microsoft Entra ID sign-in using MSAL (Authorization Code + PKCE), with a clear "signed in but missing Admin role" state and a runtime `auth-config` endpoint so the SPA can bootstrap in either authenticated or open mode. See [Admin Dashboard Sign-in](howto_dashboard_signin.md).
 
 ### June 2026
 
