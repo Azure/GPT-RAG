@@ -861,6 +861,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../howto_dashboard_signin/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Admin Dashboard Sign-in
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../howto_multimodality/" class="md-nav__link">
         
   
@@ -1077,6 +1098,7 @@ patch, and fix, see the <a href="https://github.com/Azure/GPT-RAG/releases">GitH
 <h3 id="july-2026">July 2026</h3>
 <ul>
 <li><strong>CAF resource naming by default.</strong> Fresh Basic and Zero Trust deployments produce Cloud Adoption Framework-aligned resource names automatically, with an opt-out to the legacy scheme. See <a href="../howto_resource_naming/">resource naming guide</a>.</li>
+<li><strong>Admin dashboard sign-in.</strong> The orchestrator dashboard SPA now performs its own Microsoft Entra ID sign-in using MSAL (Authorization Code + PKCE), with a clear "signed in but missing Admin role" state and a runtime <code>auth-config</code> endpoint so the SPA can bootstrap in either authenticated or open mode. See <a href="../howto_dashboard_signin/">Admin Dashboard Sign-in</a>.</li>
 </ul>
 <h3 id="june-2026">June 2026</h3>
 <ul>

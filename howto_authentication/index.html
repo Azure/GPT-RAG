@@ -16,7 +16,7 @@
         <link rel="prev" href="../howto_app_gateway/">
       
       
-        <link rel="next" href="../howto_multimodality/">
+        <link rel="next" href="../howto_dashboard_signin/">
       
       
       <link rel="icon" href="../favicon.ico">
@@ -891,6 +891,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../howto_dashboard_signin/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Admin Dashboard Sign-in
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../howto_multimodality/" class="md-nav__link">
         
   
@@ -1330,8 +1351,11 @@ metadata_security_group_ids
 </blockquote>
 <h2 id="admin-access-for-the-operator-dashboards">Admin Access for the Operator Dashboards</h2>
 <p>The orchestrator and the ingestion service each ship a small operator dashboard. The orchestrator dashboard is mounted at <code>/dashboard</code> on the orchestrator Container App and the ingestion dashboard is mounted at <code>/dashboard</code> on the ingestion Container App. Both surfaces let an operator inspect runs, conversations, and a curated set of runtime settings, and the ingestion dashboard also lets an operator trigger a scheduled job on demand.</p>
-<p>Admin access is enforced through an <strong>Entra ID App Role named <code>Admin</code></strong> added to the same App Registration you created for user sign-in. The same token the UI already uses for the orchestrator API also carries the role claim once a user is assigned to it, so there is no separate token, separate scope, or separate app registration to manage.</p>
+<p>Admin access is enforced through an <strong>Entra ID App Role named <code>Admin</code></strong> added to the same App Registration you created for user sign-in. The token the caller presents to <code>/api/dashboard/*</code> (or the ingestion equivalents) must carry <code>Admin</code> in its <code>roles</code> claim.</p>
 <p>This section explains how to add the role, assign users, request the correct scope, and debug the most common error (a 403 response even though the role is assigned).</p>
+<blockquote>
+<p>The orchestrator dashboard SPA performs its own Microsoft Entra ID sign-in (MSAL, Authorization Code + PKCE) independent of the chat UI. If you are enabling sign-in specifically for the orchestrator dashboard, follow <a href="../howto_dashboard_signin/">Admin Dashboard Sign-in</a> for the SPA-specific setup: adding a Single-page application redirect URI, exposing the <code>access_as_user</code> scope, and the <code>OAUTH_AZURE_AD_TENANT_ID</code>, <code>OAUTH_AZURE_AD_CLIENT_ID</code>, and optional <code>OAUTH_AZURE_AD_API_SCOPE</code> App Configuration keys. The rest of this section covers the <code>Admin</code> app role itself, which is shared by both dashboards.</p>
+</blockquote>
 <h3 id="how-each-dashboard-is-gated">How each dashboard is gated</h3>
 <p>The two dashboards apply the gate at slightly different layers. The HTML shell is always served (it is just static files) so the page can render its loading state before the user signs in, but every endpoint that returns data or performs an action enforces the gate.</p>
 <table>

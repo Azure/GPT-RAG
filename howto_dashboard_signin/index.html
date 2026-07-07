@@ -1,0 +1,1479 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Official project documentation">
+      
+      
+        <meta name="author" content="Paulo Lacerda">
+      
+      
+      
+        <link rel="prev" href="../howto_authentication/">
+      
+      
+        <link rel="next" href="../howto_multimodality/">
+      
+      
+      <link rel="icon" href="../favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.34">
+    
+    
+      
+        <title>Admin Dashboard Sign-in - GPT-RAG</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.35f28582.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../styles.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#admin-dashboard-sign-in" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="GPT-RAG" class="md-header__button md-logo" aria-label="GPT-RAG" data-md-component="logo">
+      
+  <img src="../media/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            GPT-RAG
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Admin Dashboard Sign-in
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/azure/gpt-rag" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="GPT-RAG" class="md-nav__button md-logo" aria-label="GPT-RAG" data-md-component="logo">
+      
+  <img src="../media/logo.png" alt="logo">
+
+    </a>
+    GPT-RAG
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/azure/gpt-rag" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../whatisnew/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    What's New
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../release_267_270_walkthrough/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Release Walkthrough
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deploy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Deployment Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Quick Start Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Quick Start Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart_simple_rag/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Simple RAG
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart_nl2sql/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    NL2SQL
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Architecture
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Architecture
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Services
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Services
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_orchestrator/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Orchestrator
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_2" id="__nav_7_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Ingestion
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_2">
+            <span class="md-nav__icon md-icon"></span>
+            Ingestion
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_ingestion/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_blob_data_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Blob
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_sharepoint_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Sharepoint
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_nl2sql_data_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    NL2SQL
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    How-to Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            How-to Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_azure_direct/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Azure Direct Models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_app_gateway/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Application Gateway
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_authentication/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Auth & Doc Security
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Admin Dashboard Sign-in
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Admin Dashboard Sign-in
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-this-is" class="md-nav__link">
+    <span class="md-ellipsis">
+      What this is
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-add-a-spa-redirect-uri" class="md-nav__link">
+    <span class="md-ellipsis">
+      1) Add a SPA redirect URI
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-expose-the-access_as_user-scope-on-the-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      2) Expose the access_as_user scope on the API
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-add-the-admin-app-role" class="md-nav__link">
+    <span class="md-ellipsis">
+      3) Add the Admin app role
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-set-the-app-configuration-keys" class="md-nav__link">
+    <span class="md-ellipsis">
+      4) Set the App Configuration keys
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-assign-the-admin-role-to-a-user" class="md-nav__link">
+    <span class="md-ellipsis">
+      5) Assign the Admin role to a user
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-verify" class="md-nav__link">
+    <span class="md-ellipsis">
+      6) Verify
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#turning-sign-in-back-off" class="md-nav__link">
+    <span class="md-ellipsis">
+      Turning sign-in back off
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#backwards-compatibility-note" class="md-nav__link">
+    <span class="md-ellipsis">
+      Backwards-compatibility note
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_multimodality/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Multimodality
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_userfeedback/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    User Feedback
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_sharepoint_connector/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Sharepoint Connector
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_retrieval_backend/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Retrieval Backend Selection
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_retrieval_optimization/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Retrieval Optimization
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_resource_naming/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Resource Naming (CAF)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../team/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Meet the Team
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="admin-dashboard-sign-in">Admin Dashboard Sign-in</h1>
+<p>The orchestrator admin dashboard at <code>/dashboard</code> signs the operator in with Microsoft Entra ID. This page explains what an operator needs to configure in Entra and in App Configuration to turn that sign-in on, how to assign the <code>Admin</code> role, what a working sign-in should look like, and how to diagnose the common failures.</p>
+<p>If you are looking for the wider authentication picture (chat UI sign-in, On-Behalf-Of, document-level access control), see <a href="../howto_authentication/">Authentication and Document-Level Security</a>. This page is scoped to the operator dashboard.</p>
+<h2 id="what-this-is">What this is</h2>
+<p>Until this release, the orchestrator dashboard SPA had no real sign-in. The <code>require_admin</code> gate on <code>/api/dashboard/*</code> existed, but the only way to feed it a token was to paste one into browser storage. That is now replaced by a proper Entra ID sign-in flow inside the SPA using MSAL (Authorization Code + PKCE, redirect flow):</p>
+<ol>
+<li>On load, the SPA calls the unauthenticated <code>GET /api/dashboard/auth-config</code> and reads whether auth is on and, if so, which tenant, client, authority, and API scope to use.</li>
+<li>If auth is off, the SPA renders the dashboard as before. The backend gate is a no-op in that mode.</li>
+<li>If auth is on, the SPA shows a <strong>Sign in</strong> hero. Clicking it triggers a redirect to Entra ID.</li>
+<li>After the redirect returns, the SPA silently acquires an access token for the orchestrator API and uses it on every <code>/api/dashboard/*</code> call.</li>
+<li>If the user is signed in but the token does not carry the <code>Admin</code> app role, the SPA renders a clear "access denied" state instead of the dashboard.</li>
+</ol>
+<p>The chat UI is not affected. Only the orchestrator dashboard uses this new flow.</p>
+<pre class="mermaid"><code>sequenceDiagram
+    autonumber
+    participant SPA as Dashboard SPA
+    participant API as Orchestrator API
+    participant Entra as Entra ID
+    SPA-&gt;&gt;API: GET /api/dashboard/auth-config (unauth)
+    API--&gt;&gt;SPA: { auth_enabled, client_id, tenant_id, authority, api_scope }
+    SPA-&gt;&gt;Entra: loginRedirect (scopes: [api_scope])
+    Entra--&gt;&gt;SPA: Redirect back with auth code
+    SPA-&gt;&gt;Entra: acquireTokenSilent (Auth Code + PKCE)
+    Entra--&gt;&gt;SPA: Access token (aud=api://client_id, roles=["Admin"])
+    SPA-&gt;&gt;API: GET /api/dashboard/*  Authorization: Bearer &lt;token&gt;
+    API--&gt;&gt;SPA: 200 dashboard data (or 403 if Admin role missing)</code></pre>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li>A Microsoft Entra ID tenant and permission to create or edit an App Registration in it.</li>
+<li>An orchestrator Container App already deployed and reachable at a known host (for example <code>https://&lt;container-app-fqdn&gt;/</code>).</li>
+<li>Access to the orchestrator's App Configuration store to set the <code>OAUTH_AZURE_AD_*</code> keys.</li>
+<li><code>ENABLE_DASHBOARD=true</code> in App Configuration under the <code>gpt-rag-orchestrator</code> label. When this flag is off, the dashboard and its routes are not mounted at all.</li>
+</ul>
+<p>You can either reuse the App Registration you already created for the chat UI (recommended, so one registration serves both surfaces) or create a dedicated one for the orchestrator API. The steps below assume a single registration.</p>
+<h2 id="1-add-a-spa-redirect-uri">1) Add a SPA redirect URI</h2>
+<p>The dashboard SPA runs on the same origin as the orchestrator API and needs its redirect URI registered under the <strong>Single-page application</strong> platform, not <strong>Web</strong>. This is the single most common misconfiguration; getting it wrong produces <code>AADSTS9002326</code> at sign-in.</p>
+<p>In the App Registration:</p>
+<ol>
+<li>Go to <strong>Manage &gt; Authentication</strong>.</li>
+<li>Under <strong>Platform configurations</strong> click <strong>Add a platform</strong> and pick <strong>Single-page application</strong>.</li>
+<li>
+<p>Add the dashboard origin, with the trailing slash:</p>
+<table>
+<thead>
+<tr>
+<th>Environment</th>
+<th>Redirect URI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Deployed</td>
+<td><code>https://&lt;container-app-fqdn&gt;/dashboard/</code></td>
+</tr>
+<tr>
+<td>Local dev (Vite)</td>
+<td><code>http://localhost:8000/dashboard/</code></td>
+</tr>
+</tbody>
+</table>
+<p>If a custom domain or Front Door fronts the Container App, register that origin too. The URI must match the browser's address exactly, including scheme, host, port, path, and trailing slash.</p>
+</li>
+<li>
+<p>Leave <strong>Access tokens</strong> and <strong>ID tokens</strong> unchecked. The Auth Code + PKCE flow does not need them enabled at the platform level.</p>
+</li>
+</ol>
+<h2 id="2-expose-the-access_as_user-scope-on-the-api">2) Expose the <code>access_as_user</code> scope on the API</h2>
+<p>The dashboard requests a delegated scope on the orchestrator's own API so the returned token has the right audience and carries the <code>Admin</code> role claim. The default scope name is <code>access_as_user</code>.</p>
+<p>In <strong>Manage &gt; Expose an API</strong>:</p>
+<ol>
+<li>If <strong>Application ID URI</strong> is not set yet, click <strong>Set</strong> and accept the default <code>api://&lt;client-id&gt;</code>.</li>
+<li>
+<p>Click <strong>Add a scope</strong> and fill:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Scope name</td>
+<td><code>access_as_user</code></td>
+</tr>
+<tr>
+<td>Who can consent?</td>
+<td><strong>Admins and users</strong> (or admins-only, per your policy)</td>
+</tr>
+<tr>
+<td>Admin consent display name</td>
+<td><code>Access GPT-RAG orchestrator as the signed-in user</code></td>
+</tr>
+<tr>
+<td>Admin consent description</td>
+<td><code>Allows the orchestrator dashboard to call the orchestrator API on behalf of the signed-in user.</code></td>
+</tr>
+<tr>
+<td>State</td>
+<td><strong>Enabled</strong></td>
+</tr>
+</tbody>
+</table>
+</li>
+</ol>
+<p>The manifest fragment is:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;oauth2Permissions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;adminConsentDescription&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Allows the orchestrator dashboard to call the orchestrator API on behalf of the signed-in user.&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;adminConsentDisplayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Access GPT-RAG orchestrator as the signed-in user&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;generate-a-guid&gt;&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;isEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;User&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;userConsentDescription&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Allow the orchestrator dashboard to call the orchestrator API on your behalf.&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;userConsentDisplayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Access GPT-RAG orchestrator as you&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;access_as_user&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">]</span>
+</code></pre></div>
+<p>If you also use the chat UI, you can keep its existing <code>user_impersonation</code> scope. Both scopes coexist on the same registration and both return tokens whose audience is your API.</p>
+<p>While in the manifest, set <code>accessTokenAcceptedVersion</code> to <code>2</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;accessTokenAcceptedVersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span>
+</code></pre></div>
+<p>The orchestrator validates both v1 and v2 tokens, but v2 is the recommended default and is what the SPA will receive.</p>
+<h2 id="3-add-the-admin-app-role">3) Add the <code>Admin</code> app role</h2>
+<p>The gate on <code>/api/dashboard/*</code> checks that the caller's access token carries <code>Admin</code> in its <code>roles</code> claim. Add the role on the same App Registration.</p>
+<p>Manifest fragment:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;appRoles&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;allowedMemberTypes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;User&quot;</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Grants access to the GPT-RAG operator dashboards.&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Admin&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;generate-a-guid&gt;&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;isEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Admin&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">]</span>
+</code></pre></div>
+<p>Or via the CLI:</p>
+<div class="highlight"><pre><span></span><code>az ad app update --id &lt;orchestrator-client-id&gt; --app-roles &#39;[{
+  &quot;allowedMemberTypes&quot;: [&quot;User&quot;],
+  &quot;description&quot;: &quot;Grants access to the GPT-RAG operator dashboards.&quot;,
+  &quot;displayName&quot;: &quot;Admin&quot;,
+  &quot;isEnabled&quot;: true,
+  &quot;value&quot;: &quot;Admin&quot;
+}]&#39;
+</code></pre></div>
+<p>The <code>Value</code> field is what the backend compares. It is case-sensitive and must be exactly <code>Admin</code>.</p>
+<p>Note that <code>az ad app update --app-roles</code> replaces the full list. If the registration already defines other app roles (for example ingestion roles), include them all in the same JSON array.</p>
+<h2 id="4-set-the-app-configuration-keys">4) Set the App Configuration keys</h2>
+<p>The dashboard reads its runtime auth configuration from the orchestrator's App Configuration store. Set the following keys under the <code>gpt-rag-orchestrator</code> label:</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Required</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>OAUTH_AZURE_AD_TENANT_ID</code></td>
+<td>Yes, to enable the gate</td>
+<td>Entra tenant id. When unset, the SPA renders without MSAL and <code>require_admin</code> is a no-op.</td>
+</tr>
+<tr>
+<td><code>OAUTH_AZURE_AD_CLIENT_ID</code></td>
+<td>Yes when tenant is set</td>
+<td>Application (client) id of the orchestrator API app registration.</td>
+</tr>
+<tr>
+<td><code>OAUTH_AZURE_AD_API_SCOPE</code></td>
+<td>Optional</td>
+<td>Override for the scope the SPA requests. Defaults to <code>api://&lt;OAUTH_AZURE_AD_CLIENT_ID&gt;/access_as_user</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Two rules to keep in mind:</p>
+<ul>
+<li>Setting only <code>OAUTH_AZURE_AD_TENANT_ID</code> without <code>OAUTH_AZURE_AD_CLIENT_ID</code> is intentionally rejected. <code>/api/dashboard/auth-config</code> returns <code>500</code> in that case rather than pretending auth is off; the SPA surfaces the misconfiguration instead of silently loading unauthenticated.</li>
+<li>To go back to unauthenticated mode, unset <code>OAUTH_AZURE_AD_TENANT_ID</code>. See <a href="#turning-sign-in-back-off">Turning sign-in back off</a>.</li>
+</ul>
+<p>The unauthenticated <code>GET /api/dashboard/auth-config</code> response looks like this when auth is on:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;auth_enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;client_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;00000000-0000-0000-0000-000000000000&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;tenant_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;11111111-1111-1111-1111-111111111111&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://login.microsoftonline.com/11111111-1111-1111-1111-111111111111&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;api_scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;api://00000000-0000-0000-0000-000000000000/access_as_user&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>And when auth is off:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"> </span><span class="nt">&quot;auth_enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<h2 id="5-assign-the-admin-role-to-a-user">5) Assign the <code>Admin</code> role to a user</h2>
+<p>App role assignments live on the <strong>Enterprise application</strong>, not on the App Registration.</p>
+<p><strong>Portal</strong></p>
+<ol>
+<li>Go to <strong>Microsoft Entra ID &gt; Enterprise applications</strong>.</li>
+<li>Open the enterprise app that matches your App Registration (same client id).</li>
+<li>Optionally set <strong>Properties &gt; Assignment required?</strong> to <strong>Yes</strong> so only assigned users can sign in.</li>
+<li>Go to <strong>Users and groups &gt; Add user/group</strong>, pick the user (or a security group), select the <strong>Admin</strong> role, and confirm.</li>
+</ol>
+<p><strong>CLI</strong></p>
+<div class="highlight"><pre><span></span><code>CLIENT_ID=&lt;orchestrator-client-id&gt;
+USER_UPN=&lt;user@yourtenant.onmicrosoft.com&gt;
+
+SP_ID=$(az ad sp list --filter &quot;appId eq &#39;$CLIENT_ID&#39;&quot; --query &quot;[0].id&quot; -o tsv)
+ROLE_ID=$(az ad sp show --id &quot;$SP_ID&quot; --query &quot;appRoles[?value==&#39;Admin&#39;].id | [0]&quot; -o tsv)
+USER_ID=$(az ad user show --id &quot;$USER_UPN&quot; --query id -o tsv)
+
+az rest --method POST \
+  --uri &quot;https://graph.microsoft.com/v1.0/servicePrincipals/$SP_ID/appRoleAssignments&quot; \
+  --headers &quot;Content-Type=application/json&quot; \
+  --body &quot;{\&quot;principalId\&quot;:\&quot;$USER_ID\&quot;,\&quot;resourceId\&quot;:\&quot;$SP_ID\&quot;,\&quot;appRoleId\&quot;:\&quot;$ROLE_ID\&quot;}&quot;
+</code></pre></div>
+<p>For production, prefer assigning a security group. Access tokens issued before an assignment do not carry the role; the user must sign out and back in (or wait for their token to expire) after being assigned.</p>
+<h2 id="6-verify">6) Verify</h2>
+<p>Open the dashboard in a fresh browser session and confirm each of the three states.</p>
+<table>
+<thead>
+<tr>
+<th>State</th>
+<th>What triggers it</th>
+<th>Expected view</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unauthenticated</td>
+<td><code>OAUTH_AZURE_AD_TENANT_ID</code> is unset</td>
+<td>Dashboard renders directly. No sign-in prompt.</td>
+</tr>
+<tr>
+<td>Signed in as Admin</td>
+<td>Auth on and user has the <code>Admin</code> role</td>
+<td>Sign-in hero appears, sign-in redirects to Entra, redirect returns, the dashboard loads, and the header shows the user's name with a <strong>Sign out</strong> control.</td>
+</tr>
+<tr>
+<td>Signed in but not Admin</td>
+<td>Auth on and user has no <code>Admin</code> role</td>
+<td>Sign-in hero appears, sign-in succeeds, then an <strong>Access denied</strong> page explains that the <code>Admin</code> app role is missing. No dashboard data is fetched.</td>
+</tr>
+</tbody>
+</table>
+<p>Quick token check. In DevTools <strong>Network</strong> tab, open any <code>/api/dashboard/*</code> request, copy the <code>Authorization</code> header value, paste it into <code>https://jwt.ms</code>, and confirm:</p>
+<div class="highlight"><pre><span></span><code>&quot;aud&quot;: &quot;api://&lt;OAUTH_AZURE_AD_CLIENT_ID&gt;&quot;,
+&quot;roles&quot;: [&quot;Admin&quot;],
+&quot;scp&quot;: &quot;access_as_user&quot;
+</code></pre></div>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Likely cause</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AADSTS50011: The reply URL specified in the request does not match</code></td>
+<td>Redirect URI in the app registration does not match the browser origin (scheme, host, port, path, or trailing slash)</td>
+<td>Add the exact URI, including trailing slash. <code>https://&lt;host&gt;/dashboard/</code> is not the same as <code>https://&lt;host&gt;/dashboard</code>.</td>
+</tr>
+<tr>
+<td><code>AADSTS9002326: Cross-origin token redemption is permitted only for the Single-Page Application client type</code></td>
+<td>The redirect URI was registered under the <strong>Web</strong> platform instead of <strong>Single-page application</strong></td>
+<td>Remove it from <strong>Web</strong> and add it under <strong>Single-page application</strong>.</td>
+</tr>
+<tr>
+<td>Dashboard reloads to the sign-in hero after every redirect</td>
+<td>Third-party cookie blocking or a stale MSAL session</td>
+<td>Try a normal window (not private), confirm your browser is not blocking cookies for <code>login.microsoftonline.com</code>, and clear site data for the dashboard origin.</td>
+</tr>
+<tr>
+<td>Signed in successfully but the dashboard shows <strong>Access denied</strong></td>
+<td>Token was issued but is missing <code>Admin</code> in <code>roles</code></td>
+<td>Assign the user to the <code>Admin</code> role on the enterprise app, then sign out and back in.</td>
+</tr>
+<tr>
+<td>Every <code>/api/dashboard/*</code> call returns 401</td>
+<td>Token audience is wrong (Graph or another API) or expired</td>
+<td>Confirm <code>api_scope</code> in <code>/api/dashboard/auth-config</code> matches the scope exposed on the API, and that <code>OAUTH_AZURE_AD_API_SCOPE</code>, if set, points at <code>api://&lt;client_id&gt;/&lt;scope-name&gt;</code>.</td>
+</tr>
+<tr>
+<td>Every <code>/api/dashboard/*</code> call returns 403 even for an assigned admin</td>
+<td>Token was issued before the role assignment, or the token audience is Microsoft Graph</td>
+<td>Sign out and back in. Inspect the token in <code>jwt.ms</code> and confirm <code>aud</code> is <code>api://&lt;client_id&gt;</code> and <code>roles</code> contains <code>Admin</code>.</td>
+</tr>
+<tr>
+<td><code>/api/dashboard/auth-config</code> returns 500</td>
+<td><code>OAUTH_AZURE_AD_TENANT_ID</code> is set but <code>OAUTH_AZURE_AD_CLIENT_ID</code> is not</td>
+<td>Set <code>OAUTH_AZURE_AD_CLIENT_ID</code> too, or unset the tenant to disable auth.</td>
+</tr>
+<tr>
+<td><code>/dashboard</code> returns 404</td>
+<td><code>ENABLE_DASHBOARD</code> is not <code>true</code></td>
+<td>Set <code>ENABLE_DASHBOARD=true</code> under the <code>gpt-rag-orchestrator</code> label in App Configuration and restart the container.</td>
+</tr>
+<tr>
+<td>Local dev returns 401 even though the tenant is not configured for the deployed environment</td>
+<td>Your local <code>.env</code> still has <code>OAUTH_AZURE_AD_TENANT_ID</code> set</td>
+<td>Unset it locally to run the SPA without MSAL.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="turning-sign-in-back-off">Turning sign-in back off</h2>
+<p>To return the dashboard to unauthenticated mode (for a diagnostic session, or in a lab environment), unset <code>OAUTH_AZURE_AD_TENANT_ID</code> in App Configuration and restart the orchestrator Container App revision. On the next load, <code>/api/dashboard/auth-config</code> responds with <code>{"auth_enabled": false}</code> and the SPA renders without MSAL. The <code>require_admin</code> backend gate is a no-op in that mode.</p>
+<p>Leave <code>ENABLE_DASHBOARD=false</code> if you want to unmount the dashboard entirely instead. That removes both the HTML page and every <code>/api/dashboard/*</code> route.</p>
+<h2 id="backwards-compatibility-note">Backwards-compatibility note</h2>
+<p>Previous builds of the SPA read a bearer token from <code>localStorage["dashboard.bearer"]</code> as a default fallback. That default has been removed. If you have scripts or bookmarklets that used it, switch to signing in through the SPA. An explicit <code>Authorization</code> header passed on a scripted request still wins over the MSAL-provided token, so integration tests that already build their own header keep working.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <div style="
+  background-color: var(--md-primary-fg-color);
+  color: var(--md-primary-bg-color);
+  text-align: center;
+  font-size: 0.95em;
+  padding: 1em 0;
+">
+  © 2025 GPT-RAG — powered by ❤️ and coffee ☕
+</div>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.icon", "content.iconify", "navigation.tracking", "toc.integrate", "content.code.annotate", "navigation.top"], "search": "../assets/javascripts/workers/search.07f07601.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.56dfad97.min.js"></script>
+      
+        <script src="../javascripts/source-facts-refresh.js"></script>
+      
+    
+  </body>
+</html>
