@@ -89,7 +89,7 @@ Move when you want one of the things Foundry IQ gives you and this path does
 not:
 
 - A single Knowledge Base that can blend multiple sources (documents,
-  Microsoft 365 via Work IQ, Fabric IQ when it ships).
+  Microsoft 365 via Work IQ, Microsoft Fabric via Fabric IQ).
 - Native permission ingestion for ADLS Gen2 ACLs, SharePoint,
   OneLake/Fabric, or Purview labels, evaluated through
   `x-ms-query-source-authorization`.

@@ -44,7 +44,7 @@ flowchart LR
   KB --> KS1[Knowledge Source: Blob container]
   KB --> KS2[Knowledge Source: existing Search index]
   KB --> KS3[Knowledge Source: Work IQ, Microsoft 365]
-  KB -.planned.-> KS4[Knowledge Source: Fabric IQ, Fabric and OneLake]
+  KB --> KS4[Knowledge Source: Fabric IQ, Fabric ontology]
 ```
 
 ## The alternative: Azure AI Search direct
@@ -68,7 +68,7 @@ The orchestrator uses one backend at a time:
 | Blob container, native | Foundry IQ Knowledge Source (`azureBlob`) | Generally available. Default for new deployments. | [Foundry IQ: Documents](howto_grounding_foundry_iq_documents.md) |
 | Existing Azure AI Search index, custom ingestion | Foundry IQ Knowledge Source (`searchIndex`) | Generally available. For deployments that keep a custom GPT-RAG ingestion pipeline. | [Foundry IQ: Documents](howto_grounding_foundry_iq_documents.md#custom-ingestion-path) |
 | Work IQ (Microsoft 365) | Foundry IQ Knowledge Source | Gated public preview. Off by default. | [Foundry IQ: Work IQ](howto_grounding_work_iq.md) |
-| Fabric IQ (Fabric and OneLake) | Foundry IQ Knowledge Source | Not shipped in GPT-RAG yet. Planned. | [Foundry IQ: Fabric IQ (planned)](howto_grounding_fabric_iq.md) |
+| Fabric IQ (Microsoft Fabric ontology) | Foundry IQ Knowledge Source (`fabricOntology`) | Preview. Off by default. Requires Fabric workspace + ontology and signed-in users. | [Foundry IQ: Fabric IQ](howto_grounding_fabric_iq.md) |
 | Azure AI Search direct | Not a Foundry IQ Knowledge Source. Separate retrieval backend. | Fully supported. Rollback and compatibility path. | [Direct: Azure AI Search](howto_grounding_ai_search_direct.md) |
 
 ## When to use each
@@ -87,9 +87,11 @@ A first-time operator can follow this short decision guide.
   such as recent emails, meetings, shared files, or chats.** Add Work IQ as a
   second Knowledge Source next to the documents source. Requires signed-in
   users and M365 Copilot licenses. See [Foundry IQ: Work IQ](howto_grounding_work_iq.md).
-- **You want to ground on data in Microsoft Fabric or OneLake (semantic
-  models, lakehouses, warehouses).** Not shipped in GPT-RAG yet. Track
-  [Foundry IQ: Fabric IQ (planned)](howto_grounding_fabric_iq.md).
+- **You want to ground on analytical data in Microsoft Fabric (semantic
+  models, lakehouses, warehouses, KQL databases) exposed through a Fabric
+  ontology.** Add Fabric IQ as a Knowledge Source next to the documents
+  source. Requires signed-in users, Fabric licenses, and workspace access
+  to the ontology. See [Foundry IQ: Fabric IQ](howto_grounding_fabric_iq.md).
 - **Existing GPT-RAG deployment that is working on Azure AI Search direct and
   is not ready to migrate.** Stay on `RETRIEVAL_BACKEND=ai_search`. See
   [Direct: Azure AI Search](howto_grounding_ai_search_direct.md).

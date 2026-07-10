@@ -6,6 +6,7 @@ patch, and fix, see the [GitHub releases](https://github.com/Azure/GPT-RAG/relea
 
 ### July 2026
 
+- **Fabric IQ grounding (preview).** The orchestrator can now augment retrieval with data from a Microsoft Fabric ontology (semantic model, lakehouse, warehouse, or KQL database exposed through that ontology) through Foundry IQ. Off by default. Requires a signed-in user, a Fabric-licensed account, and workspace access to the ontology. See [Foundry IQ: Fabric IQ](howto_grounding_fabric_iq.md).
 - **Work IQ grounding (public preview).** The orchestrator can now augment retrieval with signals from the signed-in user's Microsoft 365 world (mail, meetings, files, chats, people) through Foundry IQ. Off by default. Requires a signed-in user, an M365 Copilot license, and gated preview access. See [Foundry IQ: Work IQ](howto_grounding_work_iq.md).
 - **CAF resource naming by default.** Fresh Basic and Zero Trust deployments produce Cloud Adoption Framework-aligned resource names automatically, with an opt-out to the legacy scheme. See [resource naming guide](howto_resource_naming.md).
 - **Admin dashboard sign-in.** The orchestrator dashboard SPA now performs its own Microsoft Entra ID sign-in using MSAL (Authorization Code + PKCE), with a clear "signed in but missing Admin role" state and a runtime `auth-config` endpoint so the SPA can bootstrap in either authenticated or open mode. See [Admin Dashboard Sign-in](howto_dashboard_signin.md).

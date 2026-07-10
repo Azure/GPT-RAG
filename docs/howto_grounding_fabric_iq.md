@@ -1,94 +1,131 @@
-# Foundry IQ: Fabric IQ (planned)
+# Foundry IQ: Fabric IQ (Microsoft Fabric)
 
-Fabric IQ is a planned Foundry IQ Knowledge Source that grounds answers on
-data in Microsoft Fabric and OneLake: semantic models, lakehouses, and
-warehouses. It is **not yet available in GPT-RAG** as of v3.3.0. This page
-exists so operators know what Fabric IQ is, what it will require, and why
-they cannot enable it today.
+Fabric IQ is a Foundry IQ Knowledge Source that grounds answers on data in a
+Microsoft Fabric ontology: semantic models, lakehouses, warehouses, and KQL
+databases exposed through that ontology. It runs next to your document
+Knowledge Source and (optionally) Work IQ on the same Knowledge Base. It
+does not replace them.
 
 If you have not read the [Grounding sources overview](howto_grounding_overview.md),
-start there. Fabric IQ, like Work IQ, is a Knowledge Source on the Foundry
-IQ Knowledge Base. It is not a separate retrieval backend.
+start there. In short: Fabric IQ is not a separate retrieval backend. It is
+a Knowledge Source registered on the Foundry IQ Knowledge Base, so a single
+request can pull from documents, from Microsoft 365 (via Work IQ), and from
+Fabric analytical data in one call.
 
-## Status
+!!! warning "Preview, per-user auth, data leaves the Azure boundary"
+    Fabric IQ uses a preview Foundry IQ API and requires an on-behalf-of
+    (OBO) token for the signed-in user. Fabric IQ may route requests and
+    intermediate data outside the Azure compliance boundary; operators must
+    review this before enabling. Behavior and configuration may change
+    without notice. Do not depend on Fabric IQ for production workloads
+    until it is generally available.
 
-Not shipped in GPT-RAG. Tracked as a follow-up to
-[Azure/GPT-RAG#543](https://github.com/Azure/GPT-RAG/issues/543).
+## When to use Fabric IQ
 
-- Fabric IQ is not implemented in the orchestrator today.
-- GPT-RAG deployment does not provision a Fabric IQ Knowledge Source.
-- There are no supported configuration keys for Fabric IQ in App
-  Configuration. Do not set imaginary values, they will not do anything.
+Use Fabric IQ when:
 
-Enable Work IQ today if you need a non-document grounding source. Fabric IQ
-will follow in a future release.
+- Users sign in to the GPT-RAG UI (or another authenticated client), so the
+  orchestrator can obtain a delegated (OBO) token for the user.
+- Answers benefit from live analytical data that lives in Fabric: revenue
+  by region, headcount by team, warehouse metrics, or facts and dimensions
+  a semantic model exposes.
+- All target users have Fabric licenses and workspace access to the
+  ontology.
 
-## What Fabric IQ is
+Do not use Fabric IQ when:
 
-Fabric IQ lets Foundry IQ query Microsoft Fabric and OneLake artifacts as a
-grounding source. Instead of indexing extracts of Fabric data into Azure AI
-Search, Foundry IQ talks to Fabric directly and returns permission-trimmed
-results based on the user's Fabric permissions.
+- The deployment allows anonymous chat. Fabric IQ requires a signed-in user
+  and cannot fall back to managed identity or app-only auth.
+- The users do not have Fabric licenses or workspace access.
+- Your compliance posture does not allow data flow outside the Azure
+  compliance boundary. See the [data egress caveat](#data-egress-caveat)
+  below.
 
-Fabric IQ targets structured and semi-structured analytical data that lives
-in Fabric:
+## Prerequisites
 
-- Fabric semantic models (Power BI datasets), for measures, dimensions, and
-  aggregated business metrics.
-- Lakehouses, for tables and files stored in OneLake.
-- Warehouses, for relational data in Fabric.
+Work through these in order. All of them are hard blockers.
 
-The value in GPT-RAG will be the ability to answer questions like "what was
-last quarter's revenue by region" from live Fabric data, blended with
-documents from the same Knowledge Base, in one call.
+1. **A Microsoft Fabric workspace with an ontology item.** Fabric IQ binds
+   to one ontology at a time, identified by the pair (`workspaceId`,
+   `ontologyId`). The ontology exposes the underlying semantic model,
+   lakehouse, warehouse, or KQL data.
+2. **Tenant enablement.** The Fabric ontology feature must be enabled at
+   the tenant level by a Fabric admin.
+3. **Fabric-licensed end users** with access to the workspace and the
+   ontology. Fabric enforces per-user permissions natively over the OBO
+   token; GPT-RAG does not add its own ACL layer for Fabric IQ.
+4. **Same Entra tenant.** The Fabric tenant, the Foundry / Search resource,
+   and the GPT-RAG orchestrator must all be in the same Entra tenant.
+   Cross-tenant is not supported.
+5. **Foundry IQ preview API.** Fabric IQ requires the Foundry IQ preview
+   API that supports `kind: fabricOntology`. GPT-RAG v3.4.0 pins the
+   `2026-05-01-preview` baseline.
 
-## What GPT-RAG will need to enable it
+## Configure Fabric IQ
 
-When Fabric IQ ships in GPT-RAG, expect these prerequisites. These are
-Fabric-side requirements, not GPT-RAG-side ones. They apply regardless of
-which platform consumes Fabric IQ.
+Fabric IQ is opt-in and defaults to off. Set the following App
+Configuration values (label `gpt-rag`) before you run `azd provision` or
+`azd deploy`:
 
-- **Fabric capacity.** An F-SKU Fabric capacity in the same tenant as the
-  Foundry resource. Trials do not count for production.
-- **Fabric artifacts.** At least one semantic model, lakehouse, or
-  warehouse to ground on, with the appropriate Fabric workspace roles
-  granted so the ingested permissions have something to evaluate.
-- **Same-tenant Foundry.** The Foundry resource and the Fabric tenant must
-  be in the same Entra tenant. Cross-tenant is not on the roadmap.
-- **Signed-in users.** Fabric IQ will use delegated (OBO) authentication so
-  Fabric can enforce per-user permissions. Anonymous chat will not be able
-  to call Fabric IQ, for the same reason Work IQ cannot.
-- **Foundry IQ API version.** Fabric IQ will require the Foundry IQ preview
-  API that supports the Fabric Knowledge Source kind. The current
-  `2026-05-01-preview` API is the baseline. A later preview may be
-  required.
+| Key | Value |
+| --- | --- |
+| `FABRIC_IQ_ENABLED` | `true` |
+| `FABRIC_IQ_KNOWLEDGE_SOURCE_NAME` | Any name for the KS; must match on both provision and orchestrator. Example: `fabric-iq-ks`. |
+| `FABRIC_IQ_WORKSPACE_ID` | GUID of the Fabric workspace that owns the ontology. |
+| `FABRIC_IQ_ONTOLOGY_ID` | GUID of the ontology item within that workspace. |
 
-## Why it is not shipped yet
+`azd provision` renders the search resources and registers the Fabric IQ
+knowledge source on the Foundry IQ Knowledge Base. `azd deploy` restarts
+the orchestrator so it picks up the enable flag and knowledge source name.
 
-- The Fabric IQ Knowledge Source kind is still moving through preview on
-  the Foundry IQ side.
-- Enabling and testing Fabric IQ end to end requires a Fabric capacity in
-  the test subscription. The GPT-RAG maintainers do not have that in the
-  main development subscription today. Adding it is part of the follow-up
-  work tracked in [Azure/GPT-RAG#543](https://github.com/Azure/GPT-RAG/issues/543).
-- Until the maintainers can validate Fabric IQ against a real Fabric
-  workspace, GPT-RAG will not ship configuration keys or provisioning
-  steps for it. Documentation and defaults you can trust matter more than
-  a half-tested toggle.
+The four keys must all be set for the knowledge source to be registered.
+If any of `FABRIC_IQ_KNOWLEDGE_SOURCE_NAME`, `FABRIC_IQ_WORKSPACE_ID`, or
+`FABRIC_IQ_ONTOLOGY_ID` is empty, GPT-RAG skips the Fabric IQ knowledge
+source and continues with document grounding (and Work IQ, if enabled).
 
-## What you can do today
+## How it works at runtime
 
-- If your users need Microsoft 365 context (mail, meetings, files, chats,
-  people), enable [Work IQ](howto_grounding_work_iq.md). Work IQ shipped
-  in GPT-RAG v3.3.0 and follows the same "extra Knowledge Source on the
-  Foundry IQ Knowledge Base" pattern that Fabric IQ will use.
-- If you have analytical data in Fabric that users want to ask questions
-  about today, keep it out of the GPT-RAG retrieval path for now. The
-  NL2SQL orchestrator strategy (`AGENT_STRATEGY=nl2sql`) can be pointed at
-  a SQL data source, and Fabric warehouses are queryable through the
-  standard SQL endpoint. That is a separate integration from Fabric IQ.
-- Subscribe to [Azure/GPT-RAG#543](https://github.com/Azure/GPT-RAG/issues/543)
-  and the [What's New](whatisnew.md) page for updates.
+When Fabric IQ is enabled and a signed-in user asks a question:
+
+1. The orchestrator obtains an OBO token for the user, the same way it does
+   for Work IQ.
+2. The Foundry IQ retrieve call includes the Fabric IQ knowledge source in
+   `knowledgeSourceParams` and forwards the OBO token as the
+   `x-ms-query-source-authorization` header.
+3. Fabric evaluates the user's ontology permissions and runs the underlying
+   query on the semantic model, lakehouse, warehouse, or KQL database.
+4. The response comes back with `fabricAnswer` (natural language) and
+   `fabricRawData` (a CSV-style extract). The orchestrator normalizes both
+   into the standard reference shape and hands them to the LLM alongside
+   document references.
+
+Local Foundry IQ document sources always serve the request. If the OBO
+token is missing (for example, a background job), the Fabric IQ source is
+skipped with a warning and only local sources contribute. Managed identity
+is never used to reach Fabric IQ, by design.
+
+## Data egress caveat
+
+Fabric IQ may route request data and intermediate answers to Fabric
+endpoints that are not part of the Azure compliance boundary you selected
+for the Foundry / Search resource. Review this with your compliance team
+before enabling Fabric IQ on any tenant with data residency, sovereign
+cloud, or regulated-data constraints. If Fabric egress is not acceptable,
+do not enable Fabric IQ; document grounding and Work IQ are unaffected.
+
+## Troubleshooting
+
+- **No Fabric answers in responses.** Confirm all four App Configuration
+  keys are set. Check the orchestrator logs for a "Fabric IQ knowledge
+  source skipped" warning; that usually points at a missing OBO token, an
+  empty knowledge source name, or an empty workspace / ontology id.
+- **`403` or empty results from Fabric.** Verify the signed-in user has
+  access to the Fabric workspace and the ontology item. Fabric enforces
+  per-user permissions, so an OBO token for a user without ontology access
+  will return an empty result.
+- **`400` on knowledge source registration.** Confirm the Foundry IQ
+  Preview API version pinned by GPT-RAG matches your Foundry resource.
+  Fabric IQ requires `2026-05-01-preview` at minimum.
 
 ## Related reading
 
