@@ -1014,7 +1014,7 @@
         
   
   <span class="md-ellipsis">
-    Foundry IQ: Fabric IQ (planned)
+    Foundry IQ: Fabric IQ (preview)
   </span>
   
 
@@ -1320,6 +1320,16 @@ knowledge source, uses an OData <code>filterAddOn</code> over GPT-RAG security f
 instead. Plain Blob storage is container-level RBAC for this purpose unless
 Purview labels or an equivalent per-document permission source are used. See
 <a href="../howto_grounding_foundry_iq_documents/#security-modes">Foundry IQ: Documents, security modes</a>.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Work IQ and Fabric IQ auth</p>
+<p><a href="../howto_grounding_work_iq/">Work IQ</a> and
+<a href="../howto_grounding_fabric_iq/">Fabric IQ</a> always require the same OBO
+token flow described above: the orchestrator forwards the signed-in
+user's delegated token in <code>x-ms-query-source-authorization</code>, and the
+remote service (Microsoft 365 or Microsoft Fabric) evaluates
+per-user permissions natively. Managed identity fallback does not
+apply. Anonymous requests skip these sources.</p>
 </div>
 <p>GPT-RAG uses these field names consistently across ingestion paths:</p>
 <div class="highlight"><pre><span></span><code>metadata_security_user_ids

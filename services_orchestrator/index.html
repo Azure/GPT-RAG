@@ -963,7 +963,7 @@
         
   
   <span class="md-ellipsis">
-    Foundry IQ: Fabric IQ (planned)
+    Foundry IQ: Fabric IQ (preview)
   </span>
   
 
@@ -1264,6 +1264,11 @@
 <p><code>maf_lite</code>, <code>maf_agent_service</code>, <code>single_agent_rag</code>, and <code>multimodal</code> are the
 RAG strategies affected by the backend selector. <code>mcp</code> and <code>nl2sql</code> do not use
 the GPT-RAG retrieval backend.</p>
+<p>On <code>foundry_iq</code>, the Knowledge Base can also register optional additive
+Knowledge Sources next to the documents source: <a href="../howto_grounding_work_iq/">Work IQ</a>
+for Microsoft 365 context and <a href="../howto_grounding_fabric_iq/">Fabric IQ</a> for
+Microsoft Fabric analytical data. Both are off by default and require a
+signed-in user.</p>
 <h2 id="conversation-history-and-retrieval-controls">Conversation History and Retrieval Controls</h2>
 <p>Long-running chats are handled in two places: the model prompt receives only a recent history window, while the Cosmos DB conversation document is compacted before persistence so it keeps useful recent context without growing indefinitely. The default <code>maf_lite</code> strategy and the <code>multimodal</code> strategy also classify each turn as a greeting, retrieval-needed question, or no-retrieval follow-up; transformations such as "format that answer as a table" or "translate the previous answer" can skip Azure AI Search while still using the recent chat history.</p>
 <table>

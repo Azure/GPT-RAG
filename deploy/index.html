@@ -1015,7 +1015,7 @@
         
   
   <span class="md-ellipsis">
-    Foundry IQ: Fabric IQ (planned)
+    Foundry IQ: Fabric IQ (preview)
   </span>
   
 
@@ -1341,6 +1341,18 @@ when to use the <code>searchIndex</code> pattern for custom GPT-RAG ingestion pi
 <code>documents</code> container. GPT-RAG ingestion is not used in that path. Use
 <code>FOUNDRY_IQ_PATTERN=searchIndex</code> only when you intentionally keep a custom
 GPT-RAG ingestion pipeline that writes chunks to Azure AI Search.</p>
+<p>Two optional Foundry IQ Knowledge Sources can run alongside the documents
+source on the same Knowledge Base. Both are off by default and require
+signed-in users:</p>
+<ul>
+<li><a href="../howto_grounding_work_iq/">Foundry IQ: Work IQ (Microsoft 365)</a> blends
+  in mail, meetings, files, chats, and people from the signed-in user's
+  M365 world. Gated public preview.</li>
+<li><a href="../howto_grounding_fabric_iq/">Foundry IQ: Fabric IQ (Microsoft Fabric)</a>
+  blends in analytical data from a Fabric ontology (semantic model,
+  lakehouse, warehouse, KQL). Preview. Review data-egress caveats before
+  enabling.</li>
+</ul>
 <p>Demo video:</p>
 <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; margin: 0 auto 20px auto; border-radius: 8px;">
   <iframe src="https://www.youtube.com/embed/nZMDtaDQuP4?rel=0&modestbranding=1" 

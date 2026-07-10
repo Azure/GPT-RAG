@@ -984,7 +984,7 @@
         
   
   <span class="md-ellipsis">
-    Foundry IQ: Fabric IQ (planned)
+    Foundry IQ: Fabric IQ (preview)
   </span>
   
 
@@ -1224,8 +1224,8 @@ patch, and fix, see the <a href="https://github.com/Azure/GPT-RAG/releases">GitH
 </blockquote>
 <h3 id="july-2026">July 2026</h3>
 <ul>
-<li><strong>Fabric IQ grounding (preview).</strong> The orchestrator can now augment retrieval with data from a Microsoft Fabric ontology (semantic model, lakehouse, warehouse, or KQL database exposed through that ontology) through Foundry IQ. Off by default. Requires a signed-in user, a Fabric-licensed account, and workspace access to the ontology. See <a href="../howto_grounding_fabric_iq/">Foundry IQ: Fabric IQ</a>.</li>
-<li><strong>Work IQ grounding (public preview).</strong> The orchestrator can now augment retrieval with signals from the signed-in user's Microsoft 365 world (mail, meetings, files, chats, people) through Foundry IQ. Off by default. Requires a signed-in user, an M365 Copilot license, and gated preview access. See <a href="../howto_grounding_work_iq/">Foundry IQ: Work IQ</a>.</li>
+<li><strong>Fabric IQ grounding (preview, v3.4.0).</strong> Answers can now include analytical data from a Microsoft Fabric ontology (a semantic model, lakehouse, warehouse, or KQL database exposed through that ontology) through Foundry IQ, blended alongside documents and Work IQ. Off by default. Prereqs at a glance: signed-in user, Fabric capacity and workspace, an ontology item, tenant-enabled Fabric ontology feature, Fabric licenses for target users, same Entra tenant, Foundry IQ preview API <code>2026-05-01-preview</code>. Fabric IQ may route request data outside your Foundry region's compliance boundary, so review data residency before turning it on. Live Fabric validation was deferred to a follow-up patch; the shipped code path is covered by unit tests. See <a href="../howto_grounding_fabric_iq/">Foundry IQ: Fabric IQ</a> and the <a href="../howto_grounding_overview/">Grounding sources overview</a>.</li>
+<li><strong>Work IQ grounding (public preview).</strong> The orchestrator can now augment retrieval with signals from the signed-in user's Microsoft 365 world (mail, meetings, files, chats, people) through Foundry IQ. Off by default. Requires a signed-in user, an M365 Copilot license, and gated preview access. Work IQ, Fabric IQ, and the documents source can all run together on the same Knowledge Base. See <a href="../howto_grounding_work_iq/">Foundry IQ: Work IQ</a>.</li>
 <li><strong>CAF resource naming by default.</strong> Fresh Basic and Zero Trust deployments produce Cloud Adoption Framework-aligned resource names automatically, with an opt-out to the legacy scheme. See <a href="../howto_resource_naming/">resource naming guide</a>.</li>
 <li><strong>Admin dashboard sign-in.</strong> The orchestrator dashboard SPA now performs its own Microsoft Entra ID sign-in using MSAL (Authorization Code + PKCE), with a clear "signed in but missing Admin role" state and a runtime <code>auth-config</code> endpoint so the SPA can bootstrap in either authenticated or open mode. See <a href="../howto_dashboard_signin/">Admin Dashboard Sign-in</a>.</li>
 </ul>
