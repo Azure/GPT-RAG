@@ -1,6 +1,6 @@
 # 🎯 Orchestrator
 
-The Orchestrator is the core engine of GPT-RAG, an agentic orchestration layer built on the Microsoft Agent Framework and Azure AI Foundry Agent Service. It coordinates agent-based RAG workflows — each agent has a defined role — to generate accurate, context-aware responses for complex user queries. [GitHub Repository](https://github.com/Azure/gpt-rag-orchestrator).
+The Orchestrator is the core engine of GPT-RAG, an agentic orchestration layer built on the Microsoft Agent Framework and Azure AI Foundry Agent Service. It coordinates agent-based RAG workflows, where each agent has a defined role, to generate accurate, context-aware responses for complex user queries. [GitHub Repository](https://github.com/Azure/gpt-rag-orchestrator).
 
 ## Key Features
 
@@ -16,7 +16,7 @@ The Orchestrator supports multiple strategies. The active strategy is set via th
 
 | Key | Strategy | Description |
 |-----|----------|-------------|
-| `maf_lite` | MAF Lite **(default)** | Microsoft Agent Framework with direct Azure OpenAI model access. Lightweight — no Agent Service dependency. Includes user profile memory and optional agentic search. |
+| `maf_lite` | MAF Lite **(default)** | Microsoft Agent Framework with direct Azure OpenAI model access. Lightweight, no Agent Service dependency. Includes user profile memory and optional agentic search. |
 | `maf_agent_service` | MAF + Agent Service | Microsoft Agent Framework with Azure AI Foundry Agent Service for server-side thread management and tool orchestration. Includes user profile memory and optional agentic search. |
 | `single_agent_rag` | Single Agent RAG | Uses Azure AI Agents SDK with Agent Service for agentic RAG. Supports dynamic routing, streaming via event handlers, and pre-warming for low-latency first responses. |
 | `mcp` | MCP | Model Context Protocol strategy using Semantic Kernel. Connects to an MCP server for tool orchestration and passes user context via HTTP headers. |
@@ -28,7 +28,7 @@ The orchestrator reads `RETRIEVAL_BACKEND` at startup:
 
 | Value | Behavior |
 | --- | --- |
-| `foundry_iq` | Uses a Foundry IQ knowledge base. This is the default for new GPT-RAG v3.0.2+ deployments with AI Landing Zone v2.1.2+. See [Retrieval backend selection](howto_retrieval_backend.md) for setup, security modes, and billing. |
+| `foundry_iq` | Uses a Foundry IQ knowledge base. This is the default for new GPT-RAG v3.0.2+ deployments with AI Landing Zone v2.1.2+. See [Foundry IQ: Documents](howto_grounding_foundry_iq_documents.md) for setup, security modes, and billing. |
 | `ai_search` | Uses the GPT-RAG Azure AI Search index directly. Existing deployments can keep it until they migrate. It also remains the rollback and compatibility path. |
 
 `maf_lite`, `maf_agent_service`, `single_agent_rag`, and `multimodal` are the

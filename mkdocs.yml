@@ -54,12 +54,16 @@ nav:
     - Application Gateway: howto_app_gateway.md
     - Auth & Doc Security: howto_authentication.md
     - Admin Dashboard Sign-in: howto_dashboard_signin.md
+    - Grounding sources:
+      - Overview: howto_grounding_overview.md
+      - 'Foundry IQ: Documents': howto_grounding_foundry_iq_documents.md
+      - 'Foundry IQ: Work IQ (Microsoft 365)': howto_grounding_work_iq.md
+      - 'Foundry IQ: Fabric IQ (planned)': howto_grounding_fabric_iq.md
+      - 'Direct: Azure AI Search': howto_grounding_ai_search_direct.md
     - Multimodality: howto_multimodality.md
     - User Feedback: howto_userfeedback.md
     - Sharepoint Connector: howto_sharepoint_connector.md
-    - Retrieval Backend Selection: howto_retrieval_backend.md
     - Retrieval Optimization: howto_retrieval_optimization.md
-    - Work IQ Grounding: howto_work_iq.md
     - Resource Naming (CAF): howto_resource_naming.md
     - Troubleshooting: troubleshooting.md
   - Meet the Team: team.md

@@ -57,7 +57,7 @@ v2.1.2, new deployments use Foundry IQ by default through a native Azure Blob
 Knowledge Source. Existing deployments can stay on `RETRIEVAL_BACKEND=ai_search`
 until you explicitly migrate.
 
-Use the [retrieval backend selection guide](howto_retrieval_backend.md) to
+Use the [grounding sources overview](howto_grounding_overview.md) to
 understand the default Foundry IQ path, when to keep using Azure AI Search, and
 when to use the `searchIndex` pattern for custom GPT-RAG ingestion pipelines.
 

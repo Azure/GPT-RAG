@@ -88,7 +88,7 @@ Document-level access control is enforced by Azure AI Search when the index is c
     knowledge source, uses an OData `filterAddOn` over GPT-RAG security fields
     instead. Plain Blob storage is container-level RBAC for this purpose unless
     Purview labels or an equivalent per-document permission source are used. See
-    [Retrieval backend selection](howto_retrieval_backend.md#security-modes).
+    [Foundry IQ: Documents, security modes](howto_grounding_foundry_iq_documents.md#security-modes).
 
 GPT-RAG uses these field names consistently across ingestion paths:
 
