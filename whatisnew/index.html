@@ -881,6 +881,154 @@
   
   
   
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_8_5" id="__nav_8_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Grounding sources
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_5">
+            <span class="md-nav__icon md-icon"></span>
+            Grounding sources
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_foundry_iq_documents/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Foundry IQ: Documents
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_work_iq/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Foundry IQ: Work IQ (Microsoft 365)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_fabric_iq/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Foundry IQ: Fabric IQ (planned)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_ai_search_direct/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Direct: Azure AI Search
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../howto_multimodality/" class="md-nav__link">
         
@@ -945,53 +1093,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../howto_retrieval_backend/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Retrieval Backend Selection
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../howto_retrieval_optimization/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
     Retrieval Optimization
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../howto_work_iq/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Work IQ Grounding
   </span>
   
 
@@ -1118,13 +1224,13 @@ patch, and fix, see the <a href="https://github.com/Azure/GPT-RAG/releases">GitH
 </blockquote>
 <h3 id="july-2026">July 2026</h3>
 <ul>
-<li><strong>Work IQ grounding (public preview).</strong> The orchestrator can now augment retrieval with signals from the signed-in user's Microsoft 365 world (mail, meetings, files, chats, people) through Foundry IQ. Off by default. Requires a signed-in user, an M365 Copilot license, and gated preview access. See <a href="../howto_work_iq/">Work IQ grounding</a>.</li>
+<li><strong>Work IQ grounding (public preview).</strong> The orchestrator can now augment retrieval with signals from the signed-in user's Microsoft 365 world (mail, meetings, files, chats, people) through Foundry IQ. Off by default. Requires a signed-in user, an M365 Copilot license, and gated preview access. See <a href="../howto_grounding_work_iq/">Foundry IQ: Work IQ</a>.</li>
 <li><strong>CAF resource naming by default.</strong> Fresh Basic and Zero Trust deployments produce Cloud Adoption Framework-aligned resource names automatically, with an opt-out to the legacy scheme. See <a href="../howto_resource_naming/">resource naming guide</a>.</li>
 <li><strong>Admin dashboard sign-in.</strong> The orchestrator dashboard SPA now performs its own Microsoft Entra ID sign-in using MSAL (Authorization Code + PKCE), with a clear "signed in but missing Admin role" state and a runtime <code>auth-config</code> endpoint so the SPA can bootstrap in either authenticated or open mode. See <a href="../howto_dashboard_signin/">Admin Dashboard Sign-in</a>.</li>
 </ul>
 <h3 id="june-2026">June 2026</h3>
 <ul>
-<li><strong>Foundry IQ retrieval backend.</strong> New deployments retrieve through a native Azure Blob Knowledge Source in Foundry IQ by default, with Azure AI Search still fully supported for existing deployments and custom ingestion pipelines. See <a href="../howto_retrieval_backend/">Retrieval backend selection</a>.</li>
+<li><strong>Foundry IQ retrieval backend.</strong> New deployments retrieve through a native Azure Blob Knowledge Source in Foundry IQ by default, with Azure AI Search still fully supported for existing deployments and custom ingestion pipelines. See <a href="../howto_grounding_overview/">Grounding sources overview</a>.</li>
 <li><strong>Operator dashboards.</strong> An opt-in dashboard at <code>/dashboard</code> on the orchestrator and ingestion apps gives admins conversation analytics, a conversations browser, live configuration editing, and on-demand job runs with queue and schedule visibility.</li>
 </ul>
 <h3 id="may-2026">May 2026</h3>

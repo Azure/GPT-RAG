@@ -13,10 +13,10 @@
       
       
       
-        <link rel="prev" href="../howto_resource_naming/">
+        <link rel="prev" href="../howto_grounding_foundry_iq_documents/">
       
       
-        <link rel="next" href="../team/">
+        <link rel="next" href="../howto_grounding_fabric_iq/">
       
       
       <link rel="icon" href="../favicon.ico">
@@ -24,7 +24,7 @@
     
     
       
-        <title>Troubleshooting - GPT-RAG</title>
+        <title>Foundry IQ: Work IQ (Microsoft 365) - GPT-RAG</title>
       
     
     
@@ -75,6 +75,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#foundry-iq-work-iq-microsoft-365" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -106,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Troubleshooting
+              Foundry IQ: Work IQ (Microsoft 365)
             
           </span>
         </div>
@@ -759,17 +764,19 @@
                 
   
   
+    
   
   
+  
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_5" checked>
         
           
           <label class="md-nav__link" for="__nav_8_5" id="__nav_8_5_label" tabindex="0">
@@ -783,7 +790,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_8_5">
             <span class="md-nav__icon md-icon"></span>
             Grounding sources
@@ -836,10 +843,30 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../howto_grounding_work_iq/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Foundry IQ: Work IQ (Microsoft 365)
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -848,6 +875,89 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#when-to-use-work-iq" class="md-nav__link">
+    <span class="md-ellipsis">
+      When to use Work IQ
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-work-iq-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      How Work IQ works
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#compliance-boundary-caveat" class="md-nav__link">
+    <span class="md-ellipsis">
+      Compliance boundary caveat
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-reading" class="md-nav__link">
+    <span class="md-ellipsis">
+      Related reading
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1012,17 +1122,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1031,7 +1134,6 @@
   
 
       </a>
-      
     </li>
   
 
@@ -1102,77 +1204,183 @@
   
 
 
-  <h1>Troubleshooting</h1>
-
-<p>This page covers common issues, debugging tools, and how to inspect logs in GPT-RAG.</p>
-<p><strong>Showing Response Time Statistics in the Chat UI</strong></p>
-<p>The GPT-RAG UI includes a built-in option to display response time after each agent answer. To enable it, set the <code>SHOW_STATISTICS</code> application setting to <code>true</code> in your Container App (or App Configuration). Once enabled, each response in the chat will show timing information, helping you identify slow responses and compare performance across different queries or configurations.</p>
-<p><strong>Enabling Debug Logging</strong></p>
-<p>To increase log verbosity for any GPT-RAG component (orchestrator, ingestion, or UI), set the <code>LOG_LEVEL</code> environment variable to <code>DEBUG</code> in the corresponding Container App. For example, in the Azure Portal go to your Container App → Environment variables → set <code>LOG_LEVEL</code> = <code>DEBUG</code>. After restarting the container, the application will emit detailed logs including internal function calls, SDK diagnostics, and step-by-step execution traces. Remember to revert to <code>INFO</code> or <code>WARNING</code> after troubleshooting to avoid excessive log volume and cost.</p>
-<p><strong>Viewing Logs in Application Insights</strong></p>
-<p>All GPT-RAG components send telemetry to Application Insights. Open your Application Insights resource in the Azure Portal and go to <strong>Logs</strong> to run KQL queries.</p>
-<p>To find recent errors across all components:</p>
-<div class="highlight"><pre><span></span><code><span class="n">traces</span>
-<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="p">&gt;</span><span class="w"> </span><span class="n">ago</span><span class="p">(</span><span class="mi">1</span><span class="n">h</span><span class="p">)</span>
-<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">severityLevel</span><span class="w"> </span><span class="p">&gt;=</span><span class="w"> </span><span class="mi">3</span>
-<span class="p">|</span><span class="w"> </span><span class="k">project</span><span class="w"> </span><span class="n">timestamp</span><span class="p">,</span><span class="w"> </span><span class="n">message</span><span class="p">,</span><span class="w"> </span><span class="n">cloud_RoleName</span><span class="p">,</span><span class="w"> </span><span class="n">severityLevel</span>
-<span class="p">|</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="n">desc</span>
-<span class="p">|</span><span class="w"> </span><span class="k">take</span><span class="w"> </span><span class="mi">50</span>
-</code></pre></div>
-<p>To see errors specifically in the orchestrator:</p>
-<div class="highlight"><pre><span></span><code><span class="n">traces</span>
-<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="p">&gt;</span><span class="w"> </span><span class="n">ago</span><span class="p">(</span><span class="mi">24</span><span class="n">h</span><span class="p">)</span>
-<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">cloud_RoleName</span><span class="w"> </span><span class="k">contains</span><span class="w"> </span><span class="s">&quot;orchestrator&quot;</span>
-<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">severityLevel</span><span class="w"> </span><span class="p">&gt;=</span><span class="w"> </span><span class="mi">3</span>
-<span class="p">|</span><span class="w"> </span><span class="k">project</span><span class="w"> </span><span class="n">timestamp</span><span class="p">,</span><span class="w"> </span><span class="n">message</span><span class="p">,</span><span class="w"> </span><span class="n">operation_Id</span>
-<span class="p">|</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="n">desc</span>
-</code></pre></div>
-<p>To trace a single request end-to-end using its operation ID (you can get this from a previous query or from the UI response headers):</p>
-<div class="highlight"><pre><span></span><code><span class="n">traces</span>
-<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">operation_Id</span><span class="w"> </span><span class="p">==</span><span class="w"> </span><span class="s">&quot;YOUR_OPERATION_ID&quot;</span>
-<span class="p">|</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="n">asc</span>
-<span class="p">|</span><span class="w"> </span><span class="k">project</span><span class="w"> </span><span class="n">timestamp</span><span class="p">,</span><span class="w"> </span><span class="n">message</span><span class="p">,</span><span class="w"> </span><span class="n">severityLevel</span><span class="p">,</span><span class="w"> </span><span class="n">cloud_RoleName</span>
-</code></pre></div>
-<p>To check for rate-limit (429) or throttling issues in ingestion:</p>
-<div class="highlight"><pre><span></span><code><span class="n">traces</span>
-<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="p">&gt;</span><span class="w"> </span><span class="n">ago</span><span class="p">(</span><span class="mi">24</span><span class="n">h</span><span class="p">)</span>
-<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">cloud_RoleName</span><span class="w"> </span><span class="k">contains</span><span class="w"> </span><span class="s">&quot;ingest&quot;</span>
-<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="k">contains</span><span class="w"> </span><span class="s">&quot;429&quot;</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="k">contains</span><span class="w"> </span><span class="s">&quot;throttl&quot;</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="k">contains</span><span class="w"> </span><span class="s">&quot;rate limit&quot;</span>
-<span class="p">|</span><span class="w"> </span><span class="k">project</span><span class="w"> </span><span class="n">timestamp</span><span class="p">,</span><span class="w"> </span><span class="n">message</span>
-<span class="p">|</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="n">desc</span>
-</code></pre></div>
-<p>To view exceptions with stack traces:</p>
-<div class="highlight"><pre><span></span><code><span class="n">exceptions</span>
-<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="p">&gt;</span><span class="w"> </span><span class="n">ago</span><span class="p">(</span><span class="mi">24</span><span class="n">h</span><span class="p">)</span>
-<span class="p">|</span><span class="w"> </span><span class="k">project</span><span class="w"> </span><span class="n">timestamp</span><span class="p">,</span><span class="w"> </span><span class="n">problemId</span><span class="p">,</span><span class="w"> </span><span class="n">outerMessage</span><span class="p">,</span><span class="w"> </span><span class="n">details</span><span class="p">,</span><span class="w"> </span><span class="n">cloud_RoleName</span>
-<span class="p">|</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="n">desc</span>
-<span class="p">|</span><span class="w"> </span><span class="k">take</span><span class="w"> </span><span class="mi">20</span>
-</code></pre></div>
-<p><strong>Deploy fails after switching azd environments (stale <code>APP_CONFIG_ENDPOINT</code>)</strong></p>
-<p>If <code>azd deploy &lt;component&gt;</code> fails right after starting with an Azure CLI error saying the App Configuration resource does not exist or cannot be found, and the message references an <code>https://&lt;name&gt;.azconfig.io</code> endpoint that does not match your current environment, the most likely cause is a stale <code>APP_CONFIG_ENDPOINT</code> environment variable left over from a previous deployment.</p>
-<p>The component deploy scripts (<code>scripts/deploy.ps1</code> and <code>scripts/deploy.sh</code>) prefer the value of <code>APP_CONFIG_ENDPOINT</code> from your shell over the value stored in the active <code>azd</code> environment. When the previous App Configuration was deleted or recreated (for example, after tearing down an azd env and provisioning a new one), the stale value silently wins and the deploy targets a resource that no longer exists.</p>
-<p>Clear the variable from your shell and let <code>azd env</code> provide the correct value:</p>
-<p>PowerShell:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">Remove-Item</span> <span class="n">env</span><span class="p">:</span><span class="n">APP_CONFIG_ENDPOINT</span> <span class="n">-ErrorAction</span> <span class="n">SilentlyContinue</span>
-<span class="n">azd</span> <span class="n">env</span> <span class="nb">get-values</span> <span class="p">|</span> <span class="nb">Out-Null</span>  <span class="c"># optional, confirms the active env</span>
-<span class="n">azd</span> <span class="n">deploy</span> <span class="p">&lt;</span><span class="n">component</span><span class="p">&gt;</span>
-</code></pre></div>
-<p>Bash:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">unset</span><span class="w"> </span>APP_CONFIG_ENDPOINT
-azd<span class="w"> </span>env<span class="w"> </span>get-values<span class="w"> </span>&gt;/dev/null<span class="w">  </span><span class="c1"># optional</span>
-azd<span class="w"> </span>deploy<span class="w"> </span>&lt;component&gt;
-</code></pre></div>
-<p>To avoid this in the future:</p>
+<h1 id="foundry-iq-work-iq-microsoft-365">Foundry IQ: Work IQ (Microsoft 365)</h1>
+<p>Work IQ is a Foundry IQ Knowledge Source that grounds answers on the
+signed-in user's Microsoft 365 world: mail, meetings, files, chats, and
+people. It runs next to your document Knowledge Source on the same Knowledge
+Base. It does not replace it.</p>
+<p>If you have not read the <a href="../howto_grounding_overview/">Grounding sources overview</a>,
+start there. In short: Work IQ is not a separate retrieval backend. It is a
+second source registered on the Foundry IQ Knowledge Base, so a single
+request can pull from documents and from Microsoft 365 in one call.</p>
+<div class="admonition warning">
+<p class="admonition-title">Public preview, gated access, no SLA</p>
+<p>Work IQ is in gated public preview. Access must be requested and approved
+by Microsoft. There is no SLA, and behavior, quotas, and configuration
+may change without notice. Do not depend on Work IQ for production
+workloads until it is generally available.</p>
+</div>
+<h2 id="when-to-use-work-iq">When to use Work IQ</h2>
+<p>Use Work IQ when:</p>
 <ul>
-<li>Open a fresh terminal when switching between azd environments.</li>
-<li>If you must set <code>APP_CONFIG_ENDPOINT</code> manually (for example, on a jumpbox or in CI), confirm it matches <code>azd env get-value APP_CONFIG_ENDPOINT</code> before deploying.</li>
+<li>Users sign in to the GPT-RAG UI (or another authenticated client), so the
+  orchestrator can obtain a delegated (OBO) token for the user.</li>
+<li>Answers benefit from personal or team context that lives in M365, such as
+  recent emails, meetings, shared files, or chats.</li>
+<li>All target users have an active Microsoft 365 Copilot license.</li>
 </ul>
-<p>The component deploy scripts also print a yellow warning when the shell <code>APP_CONFIG_ENDPOINT</code> and the active azd env disagree, starting with GPT-RAG <a href="https://github.com/Azure/GPT-RAG/releases/tag/v2.9.1">v2.9.1</a> (orchestrator v2.8.3, ingestion v2.4.4, ui v2.3.11). See <a href="https://github.com/Azure/GPT-RAG/issues/491">#491</a> for context.</p>
-<p><strong>Known Issues and Fixes</strong></p>
-<p>Below is a list of commonly reported issues that have been resolved. If you encounter one of these, make sure you are running the version that includes the fix.</p>
-<p><strong>OOM container restarts during parallel ingestion</strong> — Ingestion containers could run out of memory when processing multiple large files concurrently. Fixed by adding memory guards, temp-file downloads for large PDFs, and lowering default concurrency. See <a href="https://github.com/Azure/gpt-rag/issues/438">#438</a>.</p>
-<p><strong>Re-indexing caused by embedding retry issues</strong> — Transient embedding failures could cause documents to be unnecessarily re-indexed. Fixed in ingestion v2.2.5. See <a href="https://github.com/Azure/gpt-rag/issues/437">#437</a>.</p>
-<p><strong>All documents re-indexed when permissionFilterOption is enabled</strong> — Enabling document-level security caused a full re-index instead of incremental updates. Fixed in ingestion v2.2.5. See <a href="https://github.com/Azure/gpt-rag/issues/436">#436</a>.</p>
+<p>Do not use Work IQ when:</p>
+<ul>
+<li>The deployment allows anonymous chat. Work IQ requires a signed-in user
+  and cannot fall back to managed identity or app-only auth.</li>
+<li>The users do not have M365 Copilot licenses.</li>
+<li>Your compliance posture does not allow Microsoft-managed retrieval across
+  Azure region boundaries. See the <a href="#compliance-boundary-caveat">compliance boundary caveat</a>
+  below.</li>
+</ul>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Work through these in order. The first four are hard blockers.</p>
+<ol>
+<li>Request access to the Work IQ gated preview from Microsoft and wait for
+   approval.</li>
+<li>Enable the subscription feature flag <code>EnableFoundryIQWithWorkIQ</code> on the
+   Azure subscription that hosts the Foundry resource.</li>
+<li>Submit Microsoft-approved admin consent for the Work IQ service
+   principal in your tenant. The service principal <code>appId</code> is
+   <code>fdcc1f02-fc51-4226-8753-f668596af7f7</code>. Use the Microsoft-provided
+   consent form: <a href="https://aka.ms/foundry-iq-work-iq-admin-consent-form">https://aka.ms/foundry-iq-work-iq-admin-consent-form</a>.
+   Tenant admin consent is required, and it is a one-time step per tenant.</li>
+<li>Assign a Microsoft 365 Copilot license to every user who should be able
+   to ground answers on Work IQ. Users without a Copilot license get empty
+   Work IQ results.</li>
+<li>Make sure the Foundry resource and the target M365 tenant are in the
+   same Entra tenant. Cross-tenant Work IQ is not supported.</li>
+</ol>
+<h2 id="configuration">Configuration</h2>
+<p>All Work IQ settings live in Azure App Configuration on the GPT-RAG
+deployment, under the <code>gpt-rag</code> label (or as container environment variables
+when the deployment uses the <code>containerEnv</code> runtime mode).</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>WORK_IQ_ENABLED</code></td>
+<td><code>false</code></td>
+<td>Set to <code>true</code> to turn Work IQ on.</td>
+</tr>
+<tr>
+<td><code>WORK_IQ_KNOWLEDGE_SOURCE_NAME</code></td>
+<td>Not set</td>
+<td>Name of the Work IQ Knowledge Source registered on the Foundry IQ Knowledge Base. Set this to the name your operator picked during onboarding.</td>
+</tr>
+<tr>
+<td><code>FOUNDRY_IQ_MAX_RUNTIME_SECONDS</code></td>
+<td><code>120</code></td>
+<td>Total per-request retrieval budget for Foundry IQ, including Work IQ. Work IQ calls can take 40 to 60 seconds. Raise this only if Work IQ is timing out.</td>
+</tr>
+</tbody>
+</table>
+<p>Notes:</p>
+<ul>
+<li>Sign-in is required. The orchestrator only calls Work IQ when it has a
+  delegated user token to forward. Anonymous chat requests skip Work IQ,
+  even when <code>WORK_IQ_ENABLED=true</code>.</li>
+<li>Work IQ is additive. Your existing Knowledge Base retrieval (default
+  Blob path or custom ingestion path) continues to run and is blended into
+  the final answer.</li>
+<li>Enabling Work IQ does not remove the M365 Copilot license requirement for
+  the end user. A missing license is a per-user failure, not a deployment
+  failure.</li>
+</ul>
+<h2 id="how-work-iq-works">How Work IQ works</h2>
+<p>At runtime, the GPT-RAG orchestrator:</p>
+<ol>
+<li>Verifies the incoming request has a signed-in user and obtains a
+   delegated token for the user (on-behalf-of, OBO).</li>
+<li>Calls the Foundry IQ Knowledge Base retrieve API with two grounding
+   sources: the existing Knowledge Source (documents), and the Work IQ
+   Knowledge Source.</li>
+<li>Forwards the user's OBO token in the <code>x-ms-query-source-authorization</code>
+   header so Work IQ can evaluate the user's permissions in M365.</li>
+<li>Receives permission-trimmed results from Work IQ, blends them with the
+   Knowledge Base results, and hands the merged context to the model.</li>
+</ol>
+<pre class="mermaid"><code>sequenceDiagram
+    autonumber
+    participant U as User (signed in)
+    participant UI as GPT-RAG UI
+    participant O as Orchestrator
+    participant KB as Azure AI Search KB
+    participant W as Work IQ
+    participant M as Microsoft 365
+    participant L as LLM
+
+    U-&gt;&gt;UI: Ask a question
+    UI-&gt;&gt;O: Chat request with user token
+    O-&gt;&gt;KB: retrieve (question, OBO in x-ms-query-source-authorization)
+    KB-&gt;&gt;W: Query Work IQ Knowledge Source
+    W-&gt;&gt;M: Read mail, meetings, files, chats, people
+    M--&gt;&gt;W: Permission-trimmed signals
+    W--&gt;&gt;KB: Work IQ results
+    KB--&gt;&gt;O: Blended KB + Work IQ results
+    O-&gt;&gt;L: Prompt with grounded context
+    L--&gt;&gt;O: Answer
+    O--&gt;&gt;UI: Answer
+    UI--&gt;&gt;U: Answer</code></pre>
+<h2 id="compliance-boundary-caveat">Compliance boundary caveat</h2>
+<p>Work IQ is a Microsoft-managed service. Requests and responses may cross
+Azure region boundaries and are not confined to the region your Foundry
+resource is deployed in. Before turning Work IQ on for regulated workloads,
+review your compliance posture (data residency, sovereign cloud, and
+data-sharing policies) and confirm that Microsoft-managed retrieval across
+regions is acceptable.</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Likely cause</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>403 responses from Work IQ, or all Work IQ results empty across every user.</td>
+<td>The <code>EnableFoundryIQWithWorkIQ</code> feature flag is missing, or admin consent for <code>appId fdcc1f02-fc51-4226-8753-f668596af7f7</code> has not been granted in your tenant.</td>
+<td>Confirm the subscription feature flag is enabled and that a tenant admin has submitted the consent form.</td>
+</tr>
+<tr>
+<td>Requests hit <code>FOUNDRY_IQ_MAX_RUNTIME_SECONDS</code> and time out.</td>
+<td>Work IQ can take 40 to 60 seconds. The default 120 second budget is tight when the Knowledge Base is also slow.</td>
+<td>Raise <code>FOUNDRY_IQ_MAX_RUNTIME_SECONDS</code> and re-test. Do not raise it beyond what your client and gateway timeouts allow.</td>
+</tr>
+<tr>
+<td>Work IQ works for some users but returns empty results for one user.</td>
+<td>That user is not signed in, or the user does not have an M365 Copilot license.</td>
+<td>Confirm the user is signed in end to end (UI, orchestrator) and that the tenant has assigned an M365 Copilot license to the user.</td>
+</tr>
+<tr>
+<td>Orchestrator logs show errors similar to "app-only not supported" or "delegated token required" for Work IQ.</td>
+<td>The request reached Work IQ without an OBO token. Managed identity fallback does not apply to Work IQ.</td>
+<td>Make sure the caller is a signed-in user, and that the UI and orchestrator are configured to forward the delegated token. See <a href="../howto_authentication/">Auth and Doc Security</a>.</td>
+</tr>
+</tbody>
+</table>
+<p>If Work IQ is unhealthy but you must keep serving traffic, set
+<code>WORK_IQ_ENABLED=false</code> in App Configuration. The orchestrator continues to
+answer using the existing Knowledge Base only.</p>
+<h2 id="related-reading">Related reading</h2>
+<ul>
+<li><a href="../howto_grounding_overview/">Grounding sources overview</a></li>
+<li><a href="../howto_grounding_foundry_iq_documents/">Foundry IQ: Documents</a></li>
+<li><a href="../howto_authentication/">Auth and Doc Security</a></li>
+</ul>
 
 
 

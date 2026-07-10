@@ -13,10 +13,10 @@
       
       
       
-        <link rel="prev" href="../howto_resource_naming/">
+        <link rel="prev" href="../howto_dashboard_signin/">
       
       
-        <link rel="next" href="../team/">
+        <link rel="next" href="../howto_grounding_foundry_iq_documents/">
       
       
       <link rel="icon" href="../favicon.ico">
@@ -24,7 +24,7 @@
     
     
       
-        <title>Troubleshooting - GPT-RAG</title>
+        <title>Overview - GPT-RAG</title>
       
     
     
@@ -75,6 +75,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#grounding-sources-overview" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -106,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Troubleshooting
+              Overview
             
           </span>
         </div>
@@ -759,17 +764,19 @@
                 
   
   
+    
   
   
+  
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_5" checked>
         
           
           <label class="md-nav__link" for="__nav_8_5" id="__nav_8_5_label" tabindex="0">
@@ -783,7 +790,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_8_5">
             <span class="md-nav__icon md-icon"></span>
             Grounding sources
@@ -794,10 +801,30 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../howto_grounding_overview/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -806,6 +833,80 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#retrieval-and-grounding-in-plain-language" class="md-nav__link">
+    <span class="md-ellipsis">
+      Retrieval and grounding in plain language
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#foundry-iq-knowledge-bases-and-knowledge-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Foundry IQ, Knowledge Bases, and Knowledge Sources
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-alternative-azure-ai-search-direct" class="md-nav__link">
+    <span class="md-ellipsis">
+      The alternative: Azure AI Search direct
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-gpt-rag-supports-today" class="md-nav__link">
+    <span class="md-ellipsis">
+      What GPT-RAG supports today
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#when-to-use-each" class="md-nav__link">
+    <span class="md-ellipsis">
+      When to use each
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-reading" class="md-nav__link">
+    <span class="md-ellipsis">
+      Related reading
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1012,17 +1113,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1031,7 +1125,6 @@
   
 
       </a>
-      
     </li>
   
 
@@ -1102,77 +1195,128 @@
   
 
 
-  <h1>Troubleshooting</h1>
-
-<p>This page covers common issues, debugging tools, and how to inspect logs in GPT-RAG.</p>
-<p><strong>Showing Response Time Statistics in the Chat UI</strong></p>
-<p>The GPT-RAG UI includes a built-in option to display response time after each agent answer. To enable it, set the <code>SHOW_STATISTICS</code> application setting to <code>true</code> in your Container App (or App Configuration). Once enabled, each response in the chat will show timing information, helping you identify slow responses and compare performance across different queries or configurations.</p>
-<p><strong>Enabling Debug Logging</strong></p>
-<p>To increase log verbosity for any GPT-RAG component (orchestrator, ingestion, or UI), set the <code>LOG_LEVEL</code> environment variable to <code>DEBUG</code> in the corresponding Container App. For example, in the Azure Portal go to your Container App → Environment variables → set <code>LOG_LEVEL</code> = <code>DEBUG</code>. After restarting the container, the application will emit detailed logs including internal function calls, SDK diagnostics, and step-by-step execution traces. Remember to revert to <code>INFO</code> or <code>WARNING</code> after troubleshooting to avoid excessive log volume and cost.</p>
-<p><strong>Viewing Logs in Application Insights</strong></p>
-<p>All GPT-RAG components send telemetry to Application Insights. Open your Application Insights resource in the Azure Portal and go to <strong>Logs</strong> to run KQL queries.</p>
-<p>To find recent errors across all components:</p>
-<div class="highlight"><pre><span></span><code><span class="n">traces</span>
-<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="p">&gt;</span><span class="w"> </span><span class="n">ago</span><span class="p">(</span><span class="mi">1</span><span class="n">h</span><span class="p">)</span>
-<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">severityLevel</span><span class="w"> </span><span class="p">&gt;=</span><span class="w"> </span><span class="mi">3</span>
-<span class="p">|</span><span class="w"> </span><span class="k">project</span><span class="w"> </span><span class="n">timestamp</span><span class="p">,</span><span class="w"> </span><span class="n">message</span><span class="p">,</span><span class="w"> </span><span class="n">cloud_RoleName</span><span class="p">,</span><span class="w"> </span><span class="n">severityLevel</span>
-<span class="p">|</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="n">desc</span>
-<span class="p">|</span><span class="w"> </span><span class="k">take</span><span class="w"> </span><span class="mi">50</span>
-</code></pre></div>
-<p>To see errors specifically in the orchestrator:</p>
-<div class="highlight"><pre><span></span><code><span class="n">traces</span>
-<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="p">&gt;</span><span class="w"> </span><span class="n">ago</span><span class="p">(</span><span class="mi">24</span><span class="n">h</span><span class="p">)</span>
-<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">cloud_RoleName</span><span class="w"> </span><span class="k">contains</span><span class="w"> </span><span class="s">&quot;orchestrator&quot;</span>
-<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">severityLevel</span><span class="w"> </span><span class="p">&gt;=</span><span class="w"> </span><span class="mi">3</span>
-<span class="p">|</span><span class="w"> </span><span class="k">project</span><span class="w"> </span><span class="n">timestamp</span><span class="p">,</span><span class="w"> </span><span class="n">message</span><span class="p">,</span><span class="w"> </span><span class="n">operation_Id</span>
-<span class="p">|</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="n">desc</span>
-</code></pre></div>
-<p>To trace a single request end-to-end using its operation ID (you can get this from a previous query or from the UI response headers):</p>
-<div class="highlight"><pre><span></span><code><span class="n">traces</span>
-<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">operation_Id</span><span class="w"> </span><span class="p">==</span><span class="w"> </span><span class="s">&quot;YOUR_OPERATION_ID&quot;</span>
-<span class="p">|</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="n">asc</span>
-<span class="p">|</span><span class="w"> </span><span class="k">project</span><span class="w"> </span><span class="n">timestamp</span><span class="p">,</span><span class="w"> </span><span class="n">message</span><span class="p">,</span><span class="w"> </span><span class="n">severityLevel</span><span class="p">,</span><span class="w"> </span><span class="n">cloud_RoleName</span>
-</code></pre></div>
-<p>To check for rate-limit (429) or throttling issues in ingestion:</p>
-<div class="highlight"><pre><span></span><code><span class="n">traces</span>
-<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="p">&gt;</span><span class="w"> </span><span class="n">ago</span><span class="p">(</span><span class="mi">24</span><span class="n">h</span><span class="p">)</span>
-<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">cloud_RoleName</span><span class="w"> </span><span class="k">contains</span><span class="w"> </span><span class="s">&quot;ingest&quot;</span>
-<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="k">contains</span><span class="w"> </span><span class="s">&quot;429&quot;</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="k">contains</span><span class="w"> </span><span class="s">&quot;throttl&quot;</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="k">contains</span><span class="w"> </span><span class="s">&quot;rate limit&quot;</span>
-<span class="p">|</span><span class="w"> </span><span class="k">project</span><span class="w"> </span><span class="n">timestamp</span><span class="p">,</span><span class="w"> </span><span class="n">message</span>
-<span class="p">|</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="n">desc</span>
-</code></pre></div>
-<p>To view exceptions with stack traces:</p>
-<div class="highlight"><pre><span></span><code><span class="n">exceptions</span>
-<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="p">&gt;</span><span class="w"> </span><span class="n">ago</span><span class="p">(</span><span class="mi">24</span><span class="n">h</span><span class="p">)</span>
-<span class="p">|</span><span class="w"> </span><span class="k">project</span><span class="w"> </span><span class="n">timestamp</span><span class="p">,</span><span class="w"> </span><span class="n">problemId</span><span class="p">,</span><span class="w"> </span><span class="n">outerMessage</span><span class="p">,</span><span class="w"> </span><span class="n">details</span><span class="p">,</span><span class="w"> </span><span class="n">cloud_RoleName</span>
-<span class="p">|</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="n">desc</span>
-<span class="p">|</span><span class="w"> </span><span class="k">take</span><span class="w"> </span><span class="mi">20</span>
-</code></pre></div>
-<p><strong>Deploy fails after switching azd environments (stale <code>APP_CONFIG_ENDPOINT</code>)</strong></p>
-<p>If <code>azd deploy &lt;component&gt;</code> fails right after starting with an Azure CLI error saying the App Configuration resource does not exist or cannot be found, and the message references an <code>https://&lt;name&gt;.azconfig.io</code> endpoint that does not match your current environment, the most likely cause is a stale <code>APP_CONFIG_ENDPOINT</code> environment variable left over from a previous deployment.</p>
-<p>The component deploy scripts (<code>scripts/deploy.ps1</code> and <code>scripts/deploy.sh</code>) prefer the value of <code>APP_CONFIG_ENDPOINT</code> from your shell over the value stored in the active <code>azd</code> environment. When the previous App Configuration was deleted or recreated (for example, after tearing down an azd env and provisioning a new one), the stale value silently wins and the deploy targets a resource that no longer exists.</p>
-<p>Clear the variable from your shell and let <code>azd env</code> provide the correct value:</p>
-<p>PowerShell:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">Remove-Item</span> <span class="n">env</span><span class="p">:</span><span class="n">APP_CONFIG_ENDPOINT</span> <span class="n">-ErrorAction</span> <span class="n">SilentlyContinue</span>
-<span class="n">azd</span> <span class="n">env</span> <span class="nb">get-values</span> <span class="p">|</span> <span class="nb">Out-Null</span>  <span class="c"># optional, confirms the active env</span>
-<span class="n">azd</span> <span class="n">deploy</span> <span class="p">&lt;</span><span class="n">component</span><span class="p">&gt;</span>
-</code></pre></div>
-<p>Bash:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">unset</span><span class="w"> </span>APP_CONFIG_ENDPOINT
-azd<span class="w"> </span>env<span class="w"> </span>get-values<span class="w"> </span>&gt;/dev/null<span class="w">  </span><span class="c1"># optional</span>
-azd<span class="w"> </span>deploy<span class="w"> </span>&lt;component&gt;
-</code></pre></div>
-<p>To avoid this in the future:</p>
+<h1 id="grounding-sources-overview">Grounding sources overview</h1>
+<p>Start here if you are new to how GPT-RAG finds the information it uses to answer
+a question. This page explains what retrieval and grounding mean, what Foundry
+IQ is, how Knowledge Bases and Knowledge Sources fit together, which sources
+GPT-RAG supports today, and when to pick each one.</p>
+<p>The other pages in this section are the operator guides for each source. Read
+this page first, then jump to the source you want to enable.</p>
+<h2 id="retrieval-and-grounding-in-plain-language">Retrieval and grounding in plain language</h2>
+<p>When a user asks a question, the orchestrator does not send the question
+straight to a language model and hope for the best. It first looks up relevant
+material and includes it in the prompt. That lookup is <strong>retrieval</strong>. The
+material it finds is <strong>grounding content</strong>. Answers are then built on top of
+that material, so they cite real sources instead of guessing.</p>
+<p>GPT-RAG can retrieve grounding content from more than one place in the same
+request, blend the results, and hand the merged context to the model.</p>
+<h2 id="foundry-iq-knowledge-bases-and-knowledge-sources">Foundry IQ, Knowledge Bases, and Knowledge Sources</h2>
+<p><strong>Foundry IQ</strong> is a retrieval product in Azure AI Search that sits above the
+raw index. Instead of talking to individual indexes, the orchestrator talks to
+a Foundry IQ <strong>Knowledge Base</strong>. The Knowledge Base is the single retrieval
+endpoint for a deployment.</p>
+<p>A Knowledge Base points to one or more <strong>Knowledge Sources</strong>. Each Knowledge
+Source is one place to look: a Blob container, an existing Azure AI Search
+index, a Microsoft 365 tenant, and so on. Foundry IQ queries the sources,
+applies permissions, and returns a merged, permission-trimmed result.</p>
+<p>Two things matter for operators:</p>
 <ul>
-<li>Open a fresh terminal when switching between azd environments.</li>
-<li>If you must set <code>APP_CONFIG_ENDPOINT</code> manually (for example, on a jumpbox or in CI), confirm it matches <code>azd env get-value APP_CONFIG_ENDPOINT</code> before deploying.</li>
+<li>You do not have to pick one source. A Knowledge Base can hold several, and
+  the orchestrator gets blended results in a single call.</li>
+<li>Each Knowledge Source has its own setup, its own security model, and its own
+  cost profile. The rest of this section covers them one by one.</li>
 </ul>
-<p>The component deploy scripts also print a yellow warning when the shell <code>APP_CONFIG_ENDPOINT</code> and the active azd env disagree, starting with GPT-RAG <a href="https://github.com/Azure/GPT-RAG/releases/tag/v2.9.1">v2.9.1</a> (orchestrator v2.8.3, ingestion v2.4.4, ui v2.3.11). See <a href="https://github.com/Azure/GPT-RAG/issues/491">#491</a> for context.</p>
-<p><strong>Known Issues and Fixes</strong></p>
-<p>Below is a list of commonly reported issues that have been resolved. If you encounter one of these, make sure you are running the version that includes the fix.</p>
-<p><strong>OOM container restarts during parallel ingestion</strong> — Ingestion containers could run out of memory when processing multiple large files concurrently. Fixed by adding memory guards, temp-file downloads for large PDFs, and lowering default concurrency. See <a href="https://github.com/Azure/gpt-rag/issues/438">#438</a>.</p>
-<p><strong>Re-indexing caused by embedding retry issues</strong> — Transient embedding failures could cause documents to be unnecessarily re-indexed. Fixed in ingestion v2.2.5. See <a href="https://github.com/Azure/gpt-rag/issues/437">#437</a>.</p>
-<p><strong>All documents re-indexed when permissionFilterOption is enabled</strong> — Enabling document-level security caused a full re-index instead of incremental updates. Fixed in ingestion v2.2.5. See <a href="https://github.com/Azure/gpt-rag/issues/436">#436</a>.</p>
+<pre class="mermaid"><code>flowchart LR
+  O[GPT-RAG orchestrator] --&gt; KB[Foundry IQ Knowledge Base]
+  KB --&gt; KS1[Knowledge Source: Blob container]
+  KB --&gt; KS2[Knowledge Source: existing Search index]
+  KB --&gt; KS3[Knowledge Source: Work IQ, Microsoft 365]
+  KB -.planned.-&gt; KS4[Knowledge Source: Fabric IQ, Fabric and OneLake]</code></pre>
+<h2 id="the-alternative-azure-ai-search-direct">The alternative: Azure AI Search direct</h2>
+<p>GPT-RAG can also skip Foundry IQ entirely and query an Azure AI Search index
+directly. This is the older path and the rollback path. It is not a Knowledge
+Source. It is a separate retrieval backend selected with
+<code>RETRIEVAL_BACKEND=ai_search</code>.</p>
+<p>The orchestrator uses one backend at a time:</p>
+<ul>
+<li><code>foundry_iq</code> (default for new v3.0.2+ deployments): retrieval goes through
+  the Foundry IQ Knowledge Base, which can hold multiple Knowledge Sources.</li>
+<li><code>ai_search</code>: retrieval goes straight to the GPT-RAG Azure AI Search index.
+  No Foundry IQ involved.</li>
+</ul>
+<h2 id="what-gpt-rag-supports-today">What GPT-RAG supports today</h2>
+<table>
+<thead>
+<tr>
+<th>Source</th>
+<th>Kind</th>
+<th>Status</th>
+<th>Page</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Blob container, native</td>
+<td>Foundry IQ Knowledge Source (<code>azureBlob</code>)</td>
+<td>Generally available. Default for new deployments.</td>
+<td><a href="../howto_grounding_foundry_iq_documents/">Foundry IQ: Documents</a></td>
+</tr>
+<tr>
+<td>Existing Azure AI Search index, custom ingestion</td>
+<td>Foundry IQ Knowledge Source (<code>searchIndex</code>)</td>
+<td>Generally available. For deployments that keep a custom GPT-RAG ingestion pipeline.</td>
+<td><a href="../howto_grounding_foundry_iq_documents/#custom-ingestion-path">Foundry IQ: Documents</a></td>
+</tr>
+<tr>
+<td>Work IQ (Microsoft 365)</td>
+<td>Foundry IQ Knowledge Source</td>
+<td>Gated public preview. Off by default.</td>
+<td><a href="../howto_grounding_work_iq/">Foundry IQ: Work IQ</a></td>
+</tr>
+<tr>
+<td>Fabric IQ (Fabric and OneLake)</td>
+<td>Foundry IQ Knowledge Source</td>
+<td>Not shipped in GPT-RAG yet. Planned.</td>
+<td><a href="../howto_grounding_fabric_iq/">Foundry IQ: Fabric IQ (planned)</a></td>
+</tr>
+<tr>
+<td>Azure AI Search direct</td>
+<td>Not a Foundry IQ Knowledge Source. Separate retrieval backend.</td>
+<td>Fully supported. Rollback and compatibility path.</td>
+<td><a href="../howto_grounding_ai_search_direct/">Direct: Azure AI Search</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="when-to-use-each">When to use each</h2>
+<p>A first-time operator can follow this short decision guide.</p>
+<ul>
+<li><strong>New deployment, unstructured documents (PDFs, Office files) in Blob.</strong> Use
+  the default. That is Foundry IQ with the native Blob Knowledge Source. No
+  extra configuration needed. See <a href="../howto_grounding_foundry_iq_documents/">Foundry IQ: Documents</a>.</li>
+<li><strong>You need custom chunking, Excel handling, PDFs over 300 pages, or per-user
+  security based on GPT-RAG metadata fields.</strong> Use Foundry IQ with the custom
+  ingestion path, which keeps the GPT-RAG ingestion pipeline and writes to an
+  Azure AI Search index. Foundry IQ retrieves from that index. See
+  <a href="../howto_grounding_foundry_iq_documents/#custom-ingestion-path">Foundry IQ: Documents, custom ingestion path</a>.</li>
+<li><strong>You want answers to include personal or team context from Microsoft 365,
+  such as recent emails, meetings, shared files, or chats.</strong> Add Work IQ as a
+  second Knowledge Source next to the documents source. Requires signed-in
+  users and M365 Copilot licenses. See <a href="../howto_grounding_work_iq/">Foundry IQ: Work IQ</a>.</li>
+<li><strong>You want to ground on data in Microsoft Fabric or OneLake (semantic
+  models, lakehouses, warehouses).</strong> Not shipped in GPT-RAG yet. Track
+  <a href="../howto_grounding_fabric_iq/">Foundry IQ: Fabric IQ (planned)</a>.</li>
+<li><strong>Existing GPT-RAG deployment that is working on Azure AI Search direct and
+  is not ready to migrate.</strong> Stay on <code>RETRIEVAL_BACKEND=ai_search</code>. See
+  <a href="../howto_grounding_ai_search_direct/">Direct: Azure AI Search</a>.</li>
+</ul>
+<h2 id="related-reading">Related reading</h2>
+<ul>
+<li><a href="../howto_authentication/">Auth and Doc Security</a> explains how the
+  orchestrator obtains and forwards the user's delegated token, which is what
+  makes per-user security work across sources.</li>
+<li><a href="../howto_retrieval_optimization/">Retrieval Optimization</a> covers query-time
+  tuning that applies once a source is configured.</li>
+</ul>
 
 
 
