@@ -1231,7 +1231,7 @@ applies permissions, and returns a merged, permission-trimmed result.</p>
   KB --&gt; KS1[Knowledge Source: Blob container]
   KB --&gt; KS2[Knowledge Source: existing Search index]
   KB --&gt; KS3[Knowledge Source: Work IQ, Microsoft 365]
-  KB -.planned.-&gt; KS4[Knowledge Source: Fabric IQ, Fabric and OneLake]</code></pre>
+  KB --&gt; KS4[Knowledge Source: Fabric IQ, Fabric ontology]</code></pre>
 <h2 id="the-alternative-azure-ai-search-direct">The alternative: Azure AI Search direct</h2>
 <p>GPT-RAG can also skip Foundry IQ entirely and query an Azure AI Search index
 directly. This is the older path and the rollback path. It is not a Knowledge
@@ -1274,10 +1274,10 @@ Source. It is a separate retrieval backend selected with
 <td><a href="../howto_grounding_work_iq/">Foundry IQ: Work IQ</a></td>
 </tr>
 <tr>
-<td>Fabric IQ (Fabric and OneLake)</td>
-<td>Foundry IQ Knowledge Source</td>
-<td>Not shipped in GPT-RAG yet. Planned.</td>
-<td><a href="../howto_grounding_fabric_iq/">Foundry IQ: Fabric IQ (planned)</a></td>
+<td>Fabric IQ (Microsoft Fabric ontology)</td>
+<td>Foundry IQ Knowledge Source (<code>fabricOntology</code>)</td>
+<td>Preview. Off by default. Requires Fabric workspace + ontology and signed-in users.</td>
+<td><a href="../howto_grounding_fabric_iq/">Foundry IQ: Fabric IQ</a></td>
 </tr>
 <tr>
 <td>Azure AI Search direct</td>
@@ -1302,9 +1302,11 @@ Source. It is a separate retrieval backend selected with
   such as recent emails, meetings, shared files, or chats.</strong> Add Work IQ as a
   second Knowledge Source next to the documents source. Requires signed-in
   users and M365 Copilot licenses. See <a href="../howto_grounding_work_iq/">Foundry IQ: Work IQ</a>.</li>
-<li><strong>You want to ground on data in Microsoft Fabric or OneLake (semantic
-  models, lakehouses, warehouses).</strong> Not shipped in GPT-RAG yet. Track
-  <a href="../howto_grounding_fabric_iq/">Foundry IQ: Fabric IQ (planned)</a>.</li>
+<li><strong>You want to ground on analytical data in Microsoft Fabric (semantic
+  models, lakehouses, warehouses, KQL databases) exposed through a Fabric
+  ontology.</strong> Add Fabric IQ as a Knowledge Source next to the documents
+  source. Requires signed-in users, Fabric licenses, and workspace access
+  to the ontology. See <a href="../howto_grounding_fabric_iq/">Foundry IQ: Fabric IQ</a>.</li>
 <li><strong>Existing GPT-RAG deployment that is working on Azure AI Search direct and
   is not ready to migrate.</strong> Stay on <code>RETRIEVAL_BACKEND=ai_search</code>. See
   <a href="../howto_grounding_ai_search_direct/">Direct: Azure AI Search</a>.</li>
