@@ -23,6 +23,19 @@
 
 ### Fixed
 
+- **`scripts/postProvision.ps1` now seeds `WORK_IQ_*` and `FABRIC_IQ_*` App Configuration keys.**
+  The post-provision hook previously stamped every `FOUNDRY_IQ_*` key
+  explicitly but relied on `config/search/setup.py` rendering
+  `search.settings.j2` to populate the Work IQ and Fabric IQ keys as a
+  side-effect. `Set-GptRagAppConfiguration` now seeds `WORK_IQ_ENABLED`,
+  `WORK_IQ_KNOWLEDGE_SOURCE_NAME`, `FABRIC_IQ_ENABLED`,
+  `FABRIC_IQ_KNOWLEDGE_SOURCE_NAME`, `FABRIC_IQ_WORKSPACE_ID`, and
+  `FABRIC_IQ_ONTOLOGY_ID` with the same defaults as the Jinja template
+  (`enabled=false`, everything else `""`). Operators can now flip Work IQ
+  or Fabric IQ on from the App Configuration blade without having to
+  discover key names first. See
+  [`Azure/gpt-rag#551`](https://github.com/Azure/gpt-rag/issues/551).
+
 ## [v3.3.0] - 2026-07-10
 
 ### User and operator impact

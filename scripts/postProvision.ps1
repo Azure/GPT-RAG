@@ -394,6 +394,18 @@ function Set-GptRagAppConfiguration {
         FOUNDRY_IQ_MAX_OUTPUT_DOCUMENTS = (Get-OptionalEnvValue 'FOUNDRY_IQ_MAX_OUTPUT_DOCUMENTS')
         FOUNDRY_IQ_CONVERSATION_UPLOAD_ENABLED = (Get-OptionalEnvValue 'FOUNDRY_IQ_CONVERSATION_UPLOAD_ENABLED' 'false')
         FOUNDRY_IQ_CONVERSATION_KNOWLEDGE_SOURCE_NAME = $foundryIqConversationKnowledgeSourceName
+        # Work IQ and Fabric IQ knowledge-source passthrough keys. Defaults
+        # match config/search/search.settings.j2 (opt-in via `*_ENABLED=true`
+        # plus the required identifiers). Seeding them here so a fresh
+        # provision registers the keys with default values under the
+        # gpt-rag label, and operators can flip the flags from the App
+        # Configuration blade without having to know the exact key names.
+        WORK_IQ_ENABLED = (Get-OptionalEnvValue 'WORK_IQ_ENABLED' 'false')
+        WORK_IQ_KNOWLEDGE_SOURCE_NAME = (Get-OptionalEnvValue 'WORK_IQ_KNOWLEDGE_SOURCE_NAME' '')
+        FABRIC_IQ_ENABLED = (Get-OptionalEnvValue 'FABRIC_IQ_ENABLED' 'false')
+        FABRIC_IQ_KNOWLEDGE_SOURCE_NAME = (Get-OptionalEnvValue 'FABRIC_IQ_KNOWLEDGE_SOURCE_NAME' '')
+        FABRIC_IQ_WORKSPACE_ID = (Get-OptionalEnvValue 'FABRIC_IQ_WORKSPACE_ID' '')
+        FABRIC_IQ_ONTOLOGY_ID = (Get-OptionalEnvValue 'FABRIC_IQ_ONTOLOGY_ID' '')
         NETWORK_ISOLATION = (Get-OptionalEnvValue 'NETWORK_ISOLATION' 'false')
         USE_UAI = (Get-OptionalEnvValue 'USE_UAI' 'false')
         USE_CAPP_API_KEY = (Get-OptionalEnvValue 'USE_CAPP_API_KEY' 'false')
