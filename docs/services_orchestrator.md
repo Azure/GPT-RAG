@@ -35,6 +35,12 @@ The orchestrator reads `RETRIEVAL_BACKEND` at startup:
 RAG strategies affected by the backend selector. `mcp` and `nl2sql` do not use
 the GPT-RAG retrieval backend.
 
+On `foundry_iq`, the Knowledge Base can also register optional additive
+Knowledge Sources next to the documents source: [Work IQ](howto_grounding_work_iq.md)
+for Microsoft 365 context and [Fabric IQ](howto_grounding_fabric_iq.md) for
+Microsoft Fabric analytical data. Both are off by default and require a
+signed-in user.
+
 ## Conversation History and Retrieval Controls
 
 Long-running chats are handled in two places: the model prompt receives only a recent history window, while the Cosmos DB conversation document is compacted before persistence so it keeps useful recent context without growing indefinitely. The default `maf_lite` strategy and the `multimodal` strategy also classify each turn as a greeting, retrieval-needed question, or no-retrieval follow-up; transformations such as "format that answer as a table" or "translate the previous answer" can skip Azure AI Search while still using the recent chat history.

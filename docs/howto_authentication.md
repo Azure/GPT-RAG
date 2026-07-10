@@ -90,6 +90,15 @@ Document-level access control is enforced by Azure AI Search when the index is c
     Purview labels or an equivalent per-document permission source are used. See
     [Foundry IQ: Documents, security modes](howto_grounding_foundry_iq_documents.md#security-modes).
 
+!!! note "Work IQ and Fabric IQ auth"
+    [Work IQ](howto_grounding_work_iq.md) and
+    [Fabric IQ](howto_grounding_fabric_iq.md) always require the same OBO
+    token flow described above: the orchestrator forwards the signed-in
+    user's delegated token in `x-ms-query-source-authorization`, and the
+    remote service (Microsoft 365 or Microsoft Fabric) evaluates
+    per-user permissions natively. Managed identity fallback does not
+    apply. Anonymous requests skip these sources.
+
 GPT-RAG uses these field names consistently across ingestion paths:
 
 ```

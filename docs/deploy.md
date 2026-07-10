@@ -77,6 +77,18 @@ With the default Blob path, Foundry IQ processes files directly from the
 `FOUNDRY_IQ_PATTERN=searchIndex` only when you intentionally keep a custom
 GPT-RAG ingestion pipeline that writes chunks to Azure AI Search.
 
+Two optional Foundry IQ Knowledge Sources can run alongside the documents
+source on the same Knowledge Base. Both are off by default and require
+signed-in users:
+
+- [Foundry IQ: Work IQ (Microsoft 365)](howto_grounding_work_iq.md) blends
+  in mail, meetings, files, chats, and people from the signed-in user's
+  M365 world. Gated public preview.
+- [Foundry IQ: Fabric IQ (Microsoft Fabric)](howto_grounding_fabric_iq.md)
+  blends in analytical data from a Fabric ontology (semantic model,
+  lakehouse, warehouse, KQL). Preview. Review data-egress caveats before
+  enabling.
+
 Demo video:
 
 <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; margin: 0 auto 20px auto; border-radius: 8px;">
