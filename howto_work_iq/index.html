@@ -13,10 +13,10 @@
       
       
       
-        <link rel="prev" href="../howto_multimodality/">
+        <link rel="prev" href="../howto_retrieval_optimization/">
       
       
-        <link rel="next" href="../howto_sharepoint_connector/">
+        <link rel="next" href="../howto_resource_naming/">
       
       
       <link rel="icon" href="../favicon.ico">
@@ -24,7 +24,7 @@
     
     
       
-        <title>User Feedback - GPT-RAG</title>
+        <title>Work IQ Grounding - GPT-RAG</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#user-feedback-configuration" class="md-skip">
+        <a href="#enabling-work-iq-grounding" class="md-skip">
           Skip to content
         </a>
       
@@ -111,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              User Feedback
+              Work IQ Grounding
             
           </span>
         </div>
@@ -785,30 +785,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    User Feedback
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../howto_userfeedback/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -817,53 +797,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#feedback-types" class="md-nav__link">
-    <span class="md-ellipsis">
-      Feedback Types
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuration-settings" class="md-nav__link">
-    <span class="md-ellipsis">
-      Configuration Settings
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#default-values" class="md-nav__link">
-    <span class="md-ellipsis">
-      Default Values
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -936,10 +869,30 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../howto_work_iq/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Work IQ Grounding
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -948,6 +901,89 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#when-to-use-work-iq" class="md-nav__link">
+    <span class="md-ellipsis">
+      When to use Work IQ
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-work-iq-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      How Work IQ works
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#compliance-boundary-caveat" class="md-nav__link">
+    <span class="md-ellipsis">
+      Compliance boundary caveat
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-reading" class="md-nav__link">
+    <span class="md-ellipsis">
+      Related reading
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1060,35 +1096,184 @@
   
 
 
-<h1 id="user-feedback-configuration">User Feedback Configuration</h1>
-<p>GPT-RAG includes a <strong>User Feedback Loop</strong> feature that lets users evaluate assistant responses through the UI. Feedback is sent to the backend, processed by the orchestrator, and stored in <strong>Cosmos DB</strong> for analysis and continuous improvement.</p>
-<p><img alt="Feedback stored in Cosmos DB" src="../media/feedback_stored_in_cosmos_db.png" />
-<br><em>User feedback stored in Cosmos DB</em></p>
-<p>By default, <strong>basic feedback</strong> (thumbs up/down) is enabled, while <strong>detailed ratings</strong> (star rating and comments) are disabled. Administrators control these options through <strong>Azure App Configuration</strong>.</p>
-<h2 id="feedback-types">Feedback Types</h2>
-<p>When enabled, users can provide <strong>star ratings</strong> and text comments for richer feedback that captures both satisfaction and reasoning.</p>
-<p><img alt="User feedback with rating" src="../media/user_feedback_with_rating.png" />
-<br><em>User providing rating and comment feedback</em></p>
-<h2 id="configuration-settings">Configuration Settings</h2>
-<p>The behavior of the feedback loop is controlled by key-values in <strong>Azure App Configuration</strong>:</p>
+<h1 id="enabling-work-iq-grounding">Enabling Work IQ grounding</h1>
+<div class="admonition warning">
+<p class="admonition-title">Public preview, gated access, no SLA</p>
+<p>Work IQ is in gated public preview. Access must be requested and approved by
+Microsoft. There is no SLA, and behavior, quotas, and configuration may
+change without notice. Do not depend on Work IQ for production workloads
+until it is generally available.</p>
+</div>
+<p>Work IQ is an opt-in grounding source that lets the GPT-RAG orchestrator
+augment answers with signals from the signed-in user's Microsoft 365 world:
+mail, meetings, files, chats, and people. Work IQ is a Microsoft-managed
+service that returns permission-trimmed results based on the calling user's
+own M365 permissions. It runs alongside the existing knowledge base retrieval;
+it does not replace it.</p>
+<p>This page covers Work IQ only. Fabric IQ, another Foundry IQ grounding source,
+will be documented separately.</p>
+<h2 id="when-to-use-work-iq">When to use Work IQ</h2>
+<p>Use Work IQ when:</p>
 <ul>
-<li><strong>ENABLE_USER_FEEDBACK</strong> → Default: <code>true</code>
-  Controls whether the feedback feature is available at all.</li>
+<li>Users sign in to the GPT-RAG UI (or another authenticated client), so the
+  orchestrator can obtain a delegated (OBO) token for the user.</li>
+<li>Answers benefit from personal or team context that lives in M365, such as
+  recent emails, meetings, shared files, or chats.</li>
+<li>All target users have an active Microsoft 365 Copilot license.</li>
 </ul>
-<p><img alt="Enable user feedback" src="../media/enable_user_feedback.png" />
-<BR><em>Key to enable or disable user feedback globally</em></p>
+<p>Do not use Work IQ when:</p>
 <ul>
-<li><strong>USER_FEEDBACK_RATING</strong> → Default: <code>false</code>
-  Controls whether users can provide detailed feedback with ratings and comments.</li>
+<li>The deployment allows anonymous chat. Work IQ requires a signed-in user and
+  cannot fall back to managed identity or app-only auth.</li>
+<li>The users do not have M365 Copilot licenses.</li>
+<li>Your compliance posture does not allow Microsoft-managed retrieval across
+  Azure region boundaries. See the compliance note below.</li>
 </ul>
-<p><img alt="Enable user feedback rating" src="../media/enable_user_feedback_rating.png" />
-<BR><em>Key to enable or disable detailed rating feedback</em></p>
-<h2 id="default-values">Default Values</h2>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Work through these in order. The first four are hard blockers.</p>
+<ol>
+<li>Request access to the Work IQ gated preview from Microsoft and wait for
+   approval.</li>
+<li>Enable the subscription feature flag <code>EnableFoundryIQWithWorkIQ</code> on the
+   Azure subscription that hosts the Foundry resource.</li>
+<li>Submit Microsoft-approved admin consent for the Work IQ service principal
+   in your tenant. The service principal <code>appId</code> is
+   <code>fdcc1f02-fc51-4226-8753-f668596af7f7</code>. Use the Microsoft-provided consent
+   form: <a href="https://aka.ms/foundry-iq-work-iq-admin-consent-form">https://aka.ms/foundry-iq-work-iq-admin-consent-form</a>. Tenant admin
+   consent is required, and it is a one-time step per tenant.</li>
+<li>Assign a Microsoft 365 Copilot license to every user who should be able to
+   ground answers on Work IQ. Users without a Copilot license get empty Work
+   IQ results.</li>
+<li>Make sure the Foundry resource and the target M365 tenant are in the same
+   Entra tenant. Cross-tenant Work IQ is not supported.</li>
+</ol>
+<h2 id="configuration">Configuration</h2>
+<p>All Work IQ settings live in Azure App Configuration on the GPT-RAG
+deployment, under the <code>gpt-rag</code> label (or as container environment variables
+when the deployment uses the <code>containerEnv</code> runtime mode).</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>WORK_IQ_ENABLED</code></td>
+<td><code>false</code></td>
+<td>Set to <code>true</code> to turn Work IQ on.</td>
+</tr>
+<tr>
+<td><code>WORK_IQ_KNOWLEDGE_SOURCE_NAME</code></td>
+<td>Not set</td>
+<td>Name of the Work IQ knowledge source registered on the Foundry IQ knowledge base. Set this to the name your operator picked during onboarding.</td>
+</tr>
+<tr>
+<td><code>FOUNDRY_IQ_MAX_RUNTIME_SECONDS</code></td>
+<td><code>120</code></td>
+<td>Total per-request retrieval budget for Foundry IQ, including Work IQ. Work IQ calls can take 40 to 60 seconds. Raise this only if Work IQ is timing out.</td>
+</tr>
+</tbody>
+</table>
+<p>Notes:</p>
 <ul>
-<li><code>ENABLE_USER_FEEDBACK = true</code></li>
-<li><code>USER_FEEDBACK_RATING = false</code></li>
+<li>Sign-in is required. The orchestrator only calls Work IQ when it has a
+  delegated user token to forward. Anonymous chat requests skip Work IQ, even
+  when <code>WORK_IQ_ENABLED=true</code>.</li>
+<li>Work IQ is additive. Your existing knowledge base retrieval (default Blob
+  path or custom ingestion path) continues to run and is blended into the
+  final answer.</li>
+<li>Enabling Work IQ does not remove the M365 Copilot license requirement for
+  the end user. A missing license is a per-user failure, not a deployment
+  failure.</li>
 </ul>
-<p>This means feedback is collected by default, but <strong>star ratings and comments</strong> must be explicitly enabled by setting <code>USER_FEEDBACK_RATING</code> to <code>true</code>.</p>
+<h2 id="how-work-iq-works">How Work IQ works</h2>
+<p>At runtime, the GPT-RAG orchestrator:</p>
+<ol>
+<li>Verifies the incoming request has a signed-in user and obtains a delegated
+   token for the user (on-behalf-of, OBO).</li>
+<li>Calls the Foundry IQ knowledge base retrieve API with two grounding
+   sources: the existing knowledge source (documents), and the Work IQ
+   knowledge source.</li>
+<li>Forwards the user's OBO token in the
+   <code>x-ms-query-source-authorization</code> header so Work IQ can evaluate the
+   user's permissions in M365.</li>
+<li>Receives permission-trimmed results from Work IQ, blends them with the
+   knowledge base results, and hands the merged context to the model.</li>
+</ol>
+<pre class="mermaid"><code>sequenceDiagram
+    autonumber
+    participant U as User (signed in)
+    participant UI as GPT-RAG UI
+    participant O as Orchestrator
+    participant KB as Azure AI Search KB
+    participant W as Work IQ
+    participant M as Microsoft 365
+    participant L as LLM
+
+    U-&gt;&gt;UI: Ask a question
+    UI-&gt;&gt;O: Chat request with user token
+    O-&gt;&gt;KB: retrieve (question, OBO in x-ms-query-source-authorization)
+    KB-&gt;&gt;W: Query Work IQ knowledge source
+    W-&gt;&gt;M: Read mail, meetings, files, chats, people
+    M--&gt;&gt;W: Permission-trimmed signals
+    W--&gt;&gt;KB: Work IQ results
+    KB--&gt;&gt;O: Blended KB + Work IQ results
+    O-&gt;&gt;L: Prompt with grounded context
+    L--&gt;&gt;O: Answer
+    O--&gt;&gt;UI: Answer
+    UI--&gt;&gt;U: Answer</code></pre>
+<h2 id="compliance-boundary-caveat">Compliance boundary caveat</h2>
+<p>Work IQ is a Microsoft-managed service. Requests and responses may cross
+Azure region boundaries and are not confined to the region your Foundry
+resource is deployed in. Before turning Work IQ on for regulated workloads,
+review your compliance posture (data residency, sovereign cloud, and
+data-sharing policies) and confirm that Microsoft-managed retrieval across
+regions is acceptable.</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Likely cause</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>403 responses from Work IQ, or all Work IQ results empty across every user.</td>
+<td>The <code>EnableFoundryIQWithWorkIQ</code> feature flag is missing, or admin consent for <code>appId fdcc1f02-fc51-4226-8753-f668596af7f7</code> has not been granted in your tenant.</td>
+<td>Confirm the subscription feature flag is enabled and that a tenant admin has submitted the consent form.</td>
+</tr>
+<tr>
+<td>Requests hit <code>FOUNDRY_IQ_MAX_RUNTIME_SECONDS</code> and time out.</td>
+<td>Work IQ can take 40 to 60 seconds. The default 120 second budget is tight when the knowledge base is also slow.</td>
+<td>Raise <code>FOUNDRY_IQ_MAX_RUNTIME_SECONDS</code> and re-test. Do not raise it beyond what your client and gateway timeouts allow.</td>
+</tr>
+<tr>
+<td>Work IQ works for some users but returns empty results for one user.</td>
+<td>That user is not signed in, or the user does not have an M365 Copilot license.</td>
+<td>Confirm the user is signed in end to end (UI, orchestrator) and that the tenant has assigned an M365 Copilot license to the user.</td>
+</tr>
+<tr>
+<td>Orchestrator logs show errors similar to "app-only not supported" or "delegated token required" for Work IQ.</td>
+<td>The request reached Work IQ without an OBO token. Managed identity fallback does not apply to Work IQ.</td>
+<td>Make sure the caller is a signed-in user, and that the UI and orchestrator are configured to forward the delegated token. See the Auth and Doc Security how-to.</td>
+</tr>
+</tbody>
+</table>
+<p>If Work IQ is unhealthy but you must keep serving traffic, set
+<code>WORK_IQ_ENABLED=false</code> in App Configuration. The orchestrator will continue
+to answer using the existing knowledge base only.</p>
+<h2 id="related-reading">Related reading</h2>
+<ul>
+<li>Retrieval backend selection: how the default Blob path and custom ingestion
+  path work, and how OBO is used for native ingested permissions.</li>
+<li>Auth and Doc Security: how the orchestrator obtains and forwards the
+  user's delegated token.</li>
+</ul>
 
 
 
