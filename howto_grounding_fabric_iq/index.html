@@ -1264,9 +1264,14 @@ until it is generally available.</p>
    <code>2026-05-01-preview</code> baseline.</li>
 </ol>
 <h2 id="configure-fabric-iq">Configure Fabric IQ</h2>
-<p>Fabric IQ is opt-in and defaults to off. Set the following App
-Configuration values (label <code>gpt-rag</code>) before you run <code>azd provision</code> or
-<code>azd deploy</code>:</p>
+<p>Fabric IQ is opt-in and defaults to off. <code>azd provision</code> (v3.4.1+) seeds
+the four Fabric IQ keys automatically under the <code>gpt-rag</code> label with
+<code>FABRIC_IQ_ENABLED=false</code> and the workspace, ontology, and knowledge-source
+name as empty strings. You do not have to create them by hand. To turn
+Fabric IQ on for an existing environment, edit the values in the App
+Configuration blade (or <code>az appconfig kv set --label gpt-rag --key ...</code>)
+and restart the orchestrator; or set the same values as azd env vars and
+re-run <code>azd hooks run postprovision</code> and <code>azd deploy</code>.</p>
 <table>
 <thead>
 <tr>
