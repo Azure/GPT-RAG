@@ -6,6 +6,7 @@ patch, and fix, see the [GitHub releases](https://github.com/Azure/GPT-RAG/relea
 
 ### July 2026
 
+- **App Configuration seeding fix ([v3.4.1](https://github.com/Azure/GPT-RAG/releases/tag/v3.4.1)).** `azd provision` now seeds the `WORK_IQ_*` and `FABRIC_IQ_*` App Configuration keys with `enabled=false` and empty string defaults, so operators no longer have to create them by hand before flipping Work IQ or Fabric IQ on in an existing environment.
 - **Fabric IQ grounding (preview, v3.4.0).** Answers can now blend analytical data from a Microsoft Fabric ontology alongside documents and Work IQ. Off by default, gated by data residency (may route data outside your Foundry region). See [Foundry IQ: Fabric IQ](howto_grounding_fabric_iq.md) and the [Grounding sources overview](howto_grounding_overview.md).
 - **Work IQ grounding (public preview).** The orchestrator can now augment retrieval with signals from the signed-in user's Microsoft 365 world (mail, meetings, files, chats, people) through Foundry IQ. Off by default. Requires a signed-in user, an M365 Copilot license, and gated preview access. Work IQ, Fabric IQ, and the documents source can all run together on the same Knowledge Base. See [Foundry IQ: Work IQ](howto_grounding_work_iq.md).
 - **CAF resource naming by default.** Fresh Basic and Zero Trust deployments produce Cloud Adoption Framework-aligned resource names automatically, with an opt-out to the legacy scheme. See [resource naming guide](howto_resource_naming.md).

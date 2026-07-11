@@ -63,9 +63,14 @@ Work through these in order. All of them are hard blockers.
 
 ## Configure Fabric IQ
 
-Fabric IQ is opt-in and defaults to off. Set the following App
-Configuration values (label `gpt-rag`) before you run `azd provision` or
-`azd deploy`:
+Fabric IQ is opt-in and defaults to off. `azd provision` (v3.4.1+) seeds
+the four Fabric IQ keys automatically under the `gpt-rag` label with
+`FABRIC_IQ_ENABLED=false` and the workspace, ontology, and knowledge-source
+name as empty strings. You do not have to create them by hand. To turn
+Fabric IQ on for an existing environment, edit the values in the App
+Configuration blade (or `az appconfig kv set --label gpt-rag --key ...`)
+and restart the orchestrator; or set the same values as azd env vars and
+re-run `azd hooks run postprovision` and `azd deploy`.
 
 | Key | Value |
 | --- | --- |

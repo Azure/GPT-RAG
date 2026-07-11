@@ -58,12 +58,18 @@ Work through these in order. The first four are hard blockers.
 
 All Work IQ settings live in Azure App Configuration on the GPT-RAG
 deployment, under the `gpt-rag` label (or as container environment variables
-when the deployment uses the `containerEnv` runtime mode).
+when the deployment uses the `containerEnv` runtime mode). `azd provision`
+(v3.4.1+) seeds `WORK_IQ_ENABLED=false` and `WORK_IQ_KNOWLEDGE_SOURCE_NAME=""`
+automatically, so you do not have to create the keys by hand. To turn Work IQ
+on for an existing environment, edit the values in the App Configuration
+blade (or `az appconfig kv set --label gpt-rag --key ...`) and restart the
+orchestrator; or set the same values as azd env vars and re-run
+`azd hooks run postprovision` and `azd deploy`.
 
 | Setting | Default | Purpose |
 | --- | --- | --- |
 | `WORK_IQ_ENABLED` | `false` | Set to `true` to turn Work IQ on. |
-| `WORK_IQ_KNOWLEDGE_SOURCE_NAME` | Not set | Name of the Work IQ Knowledge Source registered on the Foundry IQ Knowledge Base. Set this to the name your operator picked during onboarding. |
+| `WORK_IQ_KNOWLEDGE_SOURCE_NAME` | `""` | Name of the Work IQ Knowledge Source registered on the Foundry IQ Knowledge Base. Set this to the name your operator picked during onboarding. |
 | `FOUNDRY_IQ_MAX_RUNTIME_SECONDS` | `120` | Total per-request retrieval budget for Foundry IQ, including Work IQ. Work IQ calls can take 40 to 60 seconds. Raise this only if Work IQ is timing out. |
 
 Notes:
