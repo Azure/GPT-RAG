@@ -943,6 +943,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#fabric-data-agent-vs-fabric-ontology" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fabric Data Agent vs Fabric ontology
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#prerequisites" class="md-nav__link">
     <span class="md-ellipsis">
       Prerequisites
@@ -1268,6 +1277,48 @@ until it is generally available.</p>
   compliance boundary. See the <a href="#data-egress-caveat">data egress caveat</a>
   below.</li>
 </ul>
+<h2 id="fabric-data-agent-vs-fabric-ontology">Fabric Data Agent vs Fabric ontology</h2>
+<p>Both knowledge sources ground on Microsoft Fabric data, and both can be
+enabled on the same Knowledge Base. Pick the one that matches how your
+Fabric content is exposed today.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Fabric Data Agent (<code>fabricDataAgent</code>)</th>
+<th>Fabric ontology (<code>fabricOntology</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What it grounds on</td>
+<td>A curated Fabric Data Agent that answers questions over your data.</td>
+<td>A Fabric ontology exposing semantic models, lakehouses, warehouses, KQL.</td>
+</tr>
+<tr>
+<td>Mental model</td>
+<td>Virtual analyst. Hands the question to the Data Agent and gets an answer back.</td>
+<td>Reasoning over entities and relationships in your business ontology.</td>
+</tr>
+<tr>
+<td>Best when</td>
+<td>You already invested in a Data Agent tuned for your business questions.</td>
+<td>You have a modeled ontology and want the LLM to reason across it.</td>
+</tr>
+<tr>
+<td>Response shape</td>
+<td>Natural-language answer plus tabular evidence.</td>
+<td>Grounded facts derived from the ontology.</td>
+</tr>
+<tr>
+<td>App Config prefix</td>
+<td><code>FABRIC_DATA_AGENT_*</code></td>
+<td><code>FABRIC_IQ_*</code> (historical name, configures <code>fabricOntology</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>If both fit, start with the one your team already uses in Fabric. You can
+add the other later on the same Knowledge Base.</p>
 <h2 id="prerequisites">Prerequisites</h2>
 <p>Work through these in order. All of them are hard blockers.</p>
 <ol>
