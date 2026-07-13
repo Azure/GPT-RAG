@@ -1,6 +1,16 @@
 # Changelog
 
-## [Unreleased]
+## [v3.4.2] - 2026-07-13
+
+### User and operator impact
+
+Foundry IQ deployments can now optionally include a **Microsoft Fabric Data Agent** as an additional knowledge source on the shared knowledge base, so retrieval can ground answers on a Fabric Data Agent (a virtual analyst that queries Fabric data) alongside existing RAG documents, Work IQ, and Fabric ontology. The feature is opt-in and defaults to off. Set `FABRIC_DATA_AGENT_ENABLED=true` and pick `FABRIC_DATA_AGENT_KNOWLEDGE_SOURCE_NAME`, `FABRIC_DATA_AGENT_WORKSPACE_ID`, and `FABRIC_DATA_AGENT_DATA_AGENT_ID` before `azd provision` to enable it. With the flag off (the default), the rendered search resources and deployed behavior are identical to `v3.4.1` defaults, so existing environments upgrade with no change.
+
+Enabling Fabric Data Agent requires: a Microsoft Fabric workspace with a Data Agent item, Fabric-licensed end users, and the same Entra tenant as the Foundry / Search resource. ACL is enforced natively by Fabric via the forwarded per-user OBO token (same `x-ms-query-source-authorization` header used by Work IQ and Fabric ontology). Managed-identity fallback is never used for the remote `fabricDataAgent` kind: when the OBO token is missing, the Fabric Data Agent source is skipped with a clear warning and local sources still serve the request.
+
+**Data-egress caveat:** Fabric Data Agent forwards the caller's OBO token to Microsoft Fabric and returns grounded answers plus tabular evidence from Fabric data back to the orchestrator. Operators enabling Fabric Data Agent should confirm this data-flow is compliant with their tenant's data-boundary and Fabric-workspace access policies before turning the flag on. Grounded content still ends up in orchestrator responses and, transitively, in downstream telemetry and chat history.
+
+The paired orchestrator release [`v3.4.0`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.4.0) adds the runtime settings `FABRIC_DATA_AGENT_ENABLED` and `FABRIC_DATA_AGENT_KNOWLEDGE_SOURCE_NAME`, plus the Fabric Data Agent retrieve wiring (`kind=fabricDataAgent` with preview API `2026-05-01-preview`). `manifest.json` is pinned to that release.
 
 ### Added
 
