@@ -980,11 +980,32 @@
   
   
     <li class="md-nav__item">
-      <a href="../howto_grounding_fabric_iq/" class="md-nav__link">
+      <a href="../howto_grounding_fabric_ontology/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Foundry IQ: Fabric IQ (preview)
+    Foundry IQ: Fabric ontology (preview)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_fabric_data_agent/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Foundry IQ: Fabric Data Agent (preview)
   </span>
   
 
@@ -1224,8 +1245,9 @@ patch, and fix, see the <a href="https://github.com/Azure/GPT-RAG/releases">GitH
 </blockquote>
 <h3 id="july-2026">July 2026</h3>
 <ul>
+<li><strong>Fabric Data Agent grounding (preview, <a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.4.2">v3.4.2</a>).</strong> Answers can now be grounded on a Microsoft Fabric Data Agent (a virtual analyst that queries Fabric data) alongside documents, Work IQ, and the Fabric ontology source. Off by default, same OBO auth and data-egress caveat as the other Fabric source. See <a href="../howto_grounding_fabric_data_agent/">Foundry IQ: Fabric Data Agent</a>.</li>
 <li><strong>App Configuration seeding fix (<a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.4.1">v3.4.1</a>).</strong> <code>azd provision</code> now seeds the <code>WORK_IQ_*</code> and <code>FABRIC_IQ_*</code> App Configuration keys with <code>enabled=false</code> and empty string defaults, so operators no longer have to create them by hand before flipping Work IQ or Fabric IQ on in an existing environment.</li>
-<li><strong>Fabric IQ grounding (preview, v3.4.0).</strong> Answers can now blend analytical data from a Microsoft Fabric ontology alongside documents and Work IQ. Off by default, gated by data residency (may route data outside your Foundry region). See <a href="../howto_grounding_fabric_iq/">Foundry IQ: Fabric IQ</a> and the <a href="../howto_grounding_overview/">Grounding sources overview</a>.</li>
+<li><strong>Fabric ontology grounding (preview, v3.4.0).</strong> Answers can now blend analytical data from a Microsoft Fabric ontology alongside documents and Work IQ. Off by default, gated by data residency (may route data outside your Foundry region). See <a href="../howto_grounding_fabric_ontology/">Foundry IQ: Fabric ontology</a> and the <a href="../howto_grounding_overview/">Grounding sources overview</a>.</li>
 <li><strong>Work IQ grounding (public preview).</strong> The orchestrator can now augment retrieval with signals from the signed-in user's Microsoft 365 world (mail, meetings, files, chats, people) through Foundry IQ. Off by default. Requires a signed-in user, an M365 Copilot license, and gated preview access. Work IQ, Fabric IQ, and the documents source can all run together on the same Knowledge Base. See <a href="../howto_grounding_work_iq/">Foundry IQ: Work IQ</a>.</li>
 <li><strong>CAF resource naming by default.</strong> Fresh Basic and Zero Trust deployments produce Cloud Adoption Framework-aligned resource names automatically, with an opt-out to the legacy scheme. See <a href="../howto_resource_naming/">resource naming guide</a>.</li>
 <li><strong>Admin dashboard sign-in.</strong> The orchestrator dashboard SPA now performs its own Microsoft Entra ID sign-in using MSAL (Authorization Code + PKCE), with a clear "signed in but missing Admin role" state and a runtime <code>auth-config</code> endpoint so the SPA can bootstrap in either authenticated or open mode. See <a href="../howto_dashboard_signin/">Admin Dashboard Sign-in</a>.</li>

@@ -1010,11 +1010,32 @@
   
   
     <li class="md-nav__item">
-      <a href="../howto_grounding_fabric_iq/" class="md-nav__link">
+      <a href="../howto_grounding_fabric_ontology/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Foundry IQ: Fabric IQ (preview)
+    Foundry IQ: Fabric ontology (preview)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_fabric_data_agent/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Foundry IQ: Fabric Data Agent (preview)
   </span>
   
 
@@ -1322,9 +1343,11 @@ Purview labels or an equivalent per-document permission source are used. See
 <a href="../howto_grounding_foundry_iq_documents/#security-modes">Foundry IQ: Documents, security modes</a>.</p>
 </div>
 <div class="admonition note">
-<p class="admonition-title">Work IQ and Fabric IQ auth</p>
-<p><a href="../howto_grounding_work_iq/">Work IQ</a> and
-<a href="../howto_grounding_fabric_iq/">Fabric IQ</a> always require the same OBO
+<p class="admonition-title">Work IQ and Fabric auth</p>
+<p><a href="../howto_grounding_work_iq/">Work IQ</a>,
+<a href="../howto_grounding_fabric_ontology/">Fabric ontology</a>, and
+<a href="../howto_grounding_fabric_data_agent/">Fabric Data Agent</a> always
+require the same OBO
 token flow described above: the orchestrator forwards the signed-in
 user's delegated token in <code>x-ms-query-source-authorization</code>, and the
 remote service (Microsoft 365 or Microsoft Fabric) evaluates

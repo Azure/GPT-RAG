@@ -13,10 +13,10 @@
       
       
       
-        <link rel="prev" href="../howto_multimodality/">
+        <link rel="prev" href="../howto_grounding_work_iq/">
       
       
-        <link rel="next" href="../howto_sharepoint_connector/">
+        <link rel="next" href="../howto_grounding_fabric_data_agent/">
       
       
       <link rel="icon" href="../favicon.ico">
@@ -24,7 +24,7 @@
     
     
       
-        <title>User Feedback - GPT-RAG</title>
+        <title>Foundry IQ: Fabric ontology (preview) - GPT-RAG</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#user-feedback-configuration" class="md-skip">
+        <a href="#foundry-iq-fabric-ontology-microsoft-fabric" class="md-skip">
           Skip to content
         </a>
       
@@ -111,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              User Feedback
+              Foundry IQ: Fabric ontology (preview)
             
           </span>
         </div>
@@ -764,17 +764,19 @@
                 
   
   
+    
   
   
+  
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_5" checked>
         
           
           <label class="md-nav__link" for="__nav_8_5" id="__nav_8_5_label" tabindex="0">
@@ -788,7 +790,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_8_5">
             <span class="md-nav__icon md-icon"></span>
             Grounding sources
@@ -862,10 +864,30 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../howto_grounding_fabric_ontology/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Foundry IQ: Fabric ontology (preview)
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -874,6 +896,89 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#when-to-use-fabric-ontology" class="md-nav__link">
+    <span class="md-ellipsis">
+      When to use Fabric ontology
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configure-fabric-ontology" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configure Fabric ontology
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works-at-runtime" class="md-nav__link">
+    <span class="md-ellipsis">
+      How it works at runtime
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-egress-caveat" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data egress caveat
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-reading" class="md-nav__link">
+    <span class="md-ellipsis">
+      Related reading
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -954,30 +1059,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    User Feedback
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../howto_userfeedback/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -986,53 +1071,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#feedback-types" class="md-nav__link">
-    <span class="md-ellipsis">
-      Feedback Types
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuration-settings" class="md-nav__link">
-    <span class="md-ellipsis">
-      Configuration Settings
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#default-values" class="md-nav__link">
-    <span class="md-ellipsis">
-      Default Values
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1187,35 +1225,157 @@
   
 
 
-<h1 id="user-feedback-configuration">User Feedback Configuration</h1>
-<p>GPT-RAG includes a <strong>User Feedback Loop</strong> feature that lets users evaluate assistant responses through the UI. Feedback is sent to the backend, processed by the orchestrator, and stored in <strong>Cosmos DB</strong> for analysis and continuous improvement.</p>
-<p><img alt="Feedback stored in Cosmos DB" src="../media/feedback_stored_in_cosmos_db.png" />
-<br><em>User feedback stored in Cosmos DB</em></p>
-<p>By default, <strong>basic feedback</strong> (thumbs up/down) is enabled, while <strong>detailed ratings</strong> (star rating and comments) are disabled. Administrators control these options through <strong>Azure App Configuration</strong>.</p>
-<h2 id="feedback-types">Feedback Types</h2>
-<p>When enabled, users can provide <strong>star ratings</strong> and text comments for richer feedback that captures both satisfaction and reasoning.</p>
-<p><img alt="User feedback with rating" src="../media/user_feedback_with_rating.png" />
-<br><em>User providing rating and comment feedback</em></p>
-<h2 id="configuration-settings">Configuration Settings</h2>
-<p>The behavior of the feedback loop is controlled by key-values in <strong>Azure App Configuration</strong>:</p>
+<h1 id="foundry-iq-fabric-ontology-microsoft-fabric">Foundry IQ: Fabric ontology (Microsoft Fabric)</h1>
+<p>The <code>fabricOntology</code> Foundry IQ knowledge source grounds answers on data in a
+Microsoft Fabric ontology: semantic models, lakehouses, warehouses, and KQL
+databases exposed through that ontology. It runs next to your document
+knowledge source and (optionally) Work IQ and Fabric Data Agent on the same
+knowledge base. It does not replace them.</p>
+<p>If you have not read the <a href="../howto_grounding_overview/">Grounding sources overview</a>,
+start there. In short: this knowledge source is not a separate retrieval
+backend. It is registered on the Foundry IQ knowledge base, so a single
+request can pull from documents, from Microsoft 365 (via Work IQ), and from
+Fabric analytical data in one call.</p>
+<div class="admonition warning">
+<p class="admonition-title">Preview, per-user auth, data leaves the Azure boundary</p>
+<p>Fabric ontology support uses a preview Foundry IQ API and requires an
+on-behalf-of (OBO) token for the signed-in user. Requests and
+intermediate data may route outside the Azure compliance boundary;
+operators must review this before enabling. Behavior and configuration
+may change without notice. Do not depend on it for production workloads
+until it is generally available.</p>
+</div>
+<h2 id="when-to-use-fabric-ontology">When to use Fabric ontology</h2>
+<p>Use the Fabric ontology knowledge source when:</p>
 <ul>
-<li><strong>ENABLE_USER_FEEDBACK</strong> → Default: <code>true</code>
-  Controls whether the feedback feature is available at all.</li>
+<li>Users sign in to the GPT-RAG UI (or another authenticated client), so the
+  orchestrator can obtain a delegated (OBO) token for the user.</li>
+<li>Answers benefit from live analytical data that lives in Fabric: revenue
+  by region, headcount by team, warehouse metrics, or facts and dimensions
+  a semantic model exposes.</li>
+<li>All target users have Fabric licenses and workspace access to the
+  ontology.</li>
 </ul>
-<p><img alt="Enable user feedback" src="../media/enable_user_feedback.png" />
-<BR><em>Key to enable or disable user feedback globally</em></p>
+<p>Do not use it when:</p>
 <ul>
-<li><strong>USER_FEEDBACK_RATING</strong> → Default: <code>false</code>
-  Controls whether users can provide detailed feedback with ratings and comments.</li>
+<li>The deployment allows anonymous chat. It requires a signed-in user and
+  cannot fall back to managed identity or app-only auth.</li>
+<li>The users do not have Fabric licenses or workspace access.</li>
+<li>Your compliance posture does not allow data flow outside the Azure
+  compliance boundary. See the <a href="#data-egress-caveat">data egress caveat</a>
+  below.</li>
 </ul>
-<p><img alt="Enable user feedback rating" src="../media/enable_user_feedback_rating.png" />
-<BR><em>Key to enable or disable detailed rating feedback</em></p>
-<h2 id="default-values">Default Values</h2>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Work through these in order. All of them are hard blockers.</p>
+<ol>
+<li><strong>A Microsoft Fabric workspace with an ontology item.</strong> The knowledge
+   source binds to one ontology at a time, identified by the pair
+   (<code>workspaceId</code>, <code>ontologyId</code>). The ontology exposes the underlying
+   semantic model, lakehouse, warehouse, or KQL data.</li>
+<li><strong>Tenant enablement.</strong> The Fabric ontology feature must be enabled at
+   the tenant level by a Fabric admin.</li>
+<li><strong>Fabric-licensed end users</strong> with access to the workspace and the
+   ontology. Fabric enforces per-user permissions natively over the OBO
+   token; GPT-RAG does not add its own ACL layer for this source.</li>
+<li><strong>Same Entra tenant.</strong> The Fabric tenant, the Foundry / Search resource,
+   and the GPT-RAG orchestrator must all be in the same Entra tenant.
+   Cross-tenant is not supported.</li>
+<li><strong>Foundry IQ preview API.</strong> The knowledge source requires the Foundry IQ
+   preview API that supports <code>kind: fabricOntology</code>. GPT-RAG v3.4.0 pins the
+   <code>2026-05-01-preview</code> baseline.</li>
+</ol>
+<h2 id="configure-fabric-ontology">Configure Fabric ontology</h2>
+<p>The Fabric ontology source is opt-in and defaults to off. <code>azd provision</code>
+(v3.4.1+) seeds the four keys automatically under the <code>gpt-rag</code> label with
+<code>FABRIC_IQ_ENABLED=false</code> and the workspace, ontology, and knowledge-source
+name as empty strings. You do not have to create them by hand. To turn it
+on for an existing environment, edit the values in the App Configuration
+blade (or <code>az appconfig kv set --label gpt-rag --key ...</code>) and restart the
+orchestrator; or set the same values as azd env vars and re-run
+<code>azd hooks run postprovision</code> and <code>azd deploy</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>FABRIC_IQ_ENABLED</code></td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>FABRIC_IQ_KNOWLEDGE_SOURCE_NAME</code></td>
+<td>Any name for the KS; must match on both provision and orchestrator. Example: <code>fabric-ontology-ks</code>.</td>
+</tr>
+<tr>
+<td><code>FABRIC_IQ_WORKSPACE_ID</code></td>
+<td>GUID of the Fabric workspace that owns the ontology.</td>
+</tr>
+<tr>
+<td><code>FABRIC_IQ_ONTOLOGY_ID</code></td>
+<td>GUID of the ontology item within that workspace.</td>
+</tr>
+</tbody>
+</table>
+<p><code>azd provision</code> renders the search resources and registers the Fabric
+ontology knowledge source (<code>kind: fabricOntology</code>) on the Foundry IQ
+knowledge base. <code>azd deploy</code> restarts the orchestrator so it picks up the
+enable flag and knowledge source name.</p>
+<p>The four keys must all be set for the knowledge source to be registered.
+If any of <code>FABRIC_IQ_KNOWLEDGE_SOURCE_NAME</code>, <code>FABRIC_IQ_WORKSPACE_ID</code>, or
+<code>FABRIC_IQ_ONTOLOGY_ID</code> is empty, GPT-RAG skips the source and continues
+with document grounding (and Work IQ / Fabric Data Agent, if enabled).</p>
+<h2 id="how-it-works-at-runtime">How it works at runtime</h2>
+<p>When the source is enabled and a signed-in user asks a question:</p>
+<ol>
+<li>The orchestrator obtains an OBO token for the user, the same way it does
+   for Work IQ.</li>
+<li>The Foundry IQ retrieve call includes the Fabric ontology knowledge
+   source in <code>knowledgeSourceParams</code> and forwards the OBO token as the
+   <code>x-ms-query-source-authorization</code> header.</li>
+<li>Fabric evaluates the user ontology permissions and runs the underlying
+   query on the semantic model, lakehouse, warehouse, or KQL database.</li>
+<li>The response comes back with <code>fabricAnswer</code> (natural language) and
+   <code>fabricRawData</code> (a CSV-style extract). The orchestrator normalizes both
+   into the standard reference shape and hands them to the LLM alongside
+   document references.</li>
+</ol>
+<p>Local Foundry IQ document sources always serve the request. If the OBO
+token is missing (for example, a background job), the Fabric ontology
+source is skipped with a warning and only local sources contribute.
+Managed identity is never used to reach this source, by design.</p>
+<h2 id="data-egress-caveat">Data egress caveat</h2>
+<p>The Fabric ontology source may route request data and intermediate answers
+to Fabric endpoints that are not part of the Azure compliance boundary you
+selected for the Foundry / Search resource. Review this with your
+compliance team before enabling it on any tenant with data residency,
+sovereign cloud, or regulated-data constraints. If Fabric egress is not
+acceptable, do not enable it; document grounding and Work IQ are
+unaffected.</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
 <ul>
-<li><code>ENABLE_USER_FEEDBACK = true</code></li>
-<li><code>USER_FEEDBACK_RATING = false</code></li>
+<li><strong>No Fabric answers in responses.</strong> Confirm all four App Configuration
+  keys are set. Check the orchestrator logs for a "Fabric ontology
+  knowledge source skipped" warning; that usually points at a missing OBO
+  token, an empty knowledge source name, or an empty workspace / ontology
+  id.</li>
+<li><strong><code>403</code> or empty results from Fabric.</strong> Verify the signed-in user has
+  access to the Fabric workspace and the ontology item. Fabric enforces
+  per-user permissions, so an OBO token for a user without ontology access
+  will return an empty result.</li>
+<li><strong><code>400</code> on knowledge source registration.</strong> Confirm the Foundry IQ
+  preview API version pinned by GPT-RAG matches your Foundry resource.
+  The Fabric ontology source requires <code>2026-05-01-preview</code> at minimum.</li>
 </ul>
-<p>This means feedback is collected by default, but <strong>star ratings and comments</strong> must be explicitly enabled by setting <code>USER_FEEDBACK_RATING</code> to <code>true</code>.</p>
+<h2 id="related-reading">Related reading</h2>
+<ul>
+<li><a href="../howto_grounding_overview/">Grounding sources overview</a></li>
+<li><a href="../howto_grounding_foundry_iq_documents/">Foundry IQ: Documents</a></li>
+<li><a href="../howto_grounding_work_iq/">Foundry IQ: Work IQ (Microsoft 365)</a></li>
+<li><a href="../howto_grounding_fabric_data_agent/">Foundry IQ: Fabric Data Agent</a></li>
+</ul>
 
 
 
