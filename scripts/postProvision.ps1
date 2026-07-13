@@ -422,6 +422,14 @@ function Set-GptRagAppConfiguration {
         SHAREPOINT_INDEXED_INDEX_NAME = (Get-OptionalEnvValue 'SHAREPOINT_INDEXED_INDEX_NAME' '')
         SHAREPOINT_INDEXED_SITE_URL = (Get-OptionalEnvValue 'SHAREPOINT_INDEXED_SITE_URL' '')
         SHAREPOINT_INDEXED_TENANT_ID = (Get-OptionalEnvValue 'SHAREPOINT_INDEXED_TENANT_ID' '')
+        # Web grounding (Grounding with Bing) knowledge-source passthrough
+        # keys. Opt-in via WEB_GROUNDING_ENABLED=true plus a knowledge
+        # source name. Public data, no ACL, no OBO. Allowed/blocked
+        # domain lists are optional and comma-separated.
+        WEB_GROUNDING_ENABLED = (Get-OptionalEnvValue 'WEB_GROUNDING_ENABLED' 'false')
+        WEB_GROUNDING_KNOWLEDGE_SOURCE_NAME = (Get-OptionalEnvValue 'WEB_GROUNDING_KNOWLEDGE_SOURCE_NAME' '')
+        WEB_GROUNDING_ALLOWED_DOMAINS = (Get-OptionalEnvValue 'WEB_GROUNDING_ALLOWED_DOMAINS' '')
+        WEB_GROUNDING_BLOCKED_DOMAINS = (Get-OptionalEnvValue 'WEB_GROUNDING_BLOCKED_DOMAINS' '')
         NETWORK_ISOLATION = (Get-OptionalEnvValue 'NETWORK_ISOLATION' 'false')
         USE_UAI = (Get-OptionalEnvValue 'USE_UAI' 'false')
         USE_CAPP_API_KEY = (Get-OptionalEnvValue 'USE_CAPP_API_KEY' 'false')

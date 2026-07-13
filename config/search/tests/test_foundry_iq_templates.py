@@ -549,6 +549,93 @@ class WorkIqTemplateTests(unittest.TestCase):
         ]
         self.assertIn("fabric-data-agent-ks", kb_source_names)
 
+    def test_settings_defaults_web_grounding_disabled_and_empty(self):
+        settings = render_json_template(
+            "search.settings.j2",
+            {
+                "RESOURCE_TOKEN": "abc123",
+                "SEARCH_SERVICE_QUERY_ENDPOINT": "https://search.search.windows.net",
+                "AI_FOUNDRY_ACCOUNT_NAME": "aif-abc123",
+                "RETRIEVAL_BACKEND": "foundry_iq",
+            },
+        )
+        self.assertEqual(settings["WEB_GROUNDING_ENABLED"], "false")
+        self.assertEqual(settings["WEB_GROUNDING_KNOWLEDGE_SOURCE_NAME"], "")
+        self.assertEqual(settings["WEB_GROUNDING_ALLOWED_DOMAINS"], "")
+        self.assertEqual(settings["WEB_GROUNDING_BLOCKED_DOMAINS"], "")
+
+    def test_web_grounding_disabled_by_default_produces_no_entry(self):
+        _, context = self._foundry_iq_context()
+        search_definitions = render_json_template("search.j2", context)
+        for ks in search_definitions["knowledgeSources"]:
+            self.assertNotEqual(ks["kind"], "web")
+        kb_source_names = [
+            s["name"] for s in search_definitions["knowledgeBases"][0]["knowledgeSources"]
+        ]
+        self.assertNotIn("web-ks", kb_source_names)
+
+    def test_web_grounding_enabled_without_name_produces_no_entry(self):
+        _, context = self._foundry_iq_context(
+            WEB_GROUNDING_ENABLED="true",
+            WEB_GROUNDING_KNOWLEDGE_SOURCE_NAME="",
+        )
+        search_definitions = render_json_template("search.j2", context)
+        for ks in search_definitions["knowledgeSources"]:
+            self.assertNotEqual(ks["kind"], "web")
+
+    def test_web_grounding_enabled_adds_knowledge_source_and_kb_reference(self):
+        _, context = self._foundry_iq_context(
+            WEB_GROUNDING_ENABLED="true",
+            WEB_GROUNDING_KNOWLEDGE_SOURCE_NAME="web-ks",
+            WEB_GROUNDING_ALLOWED_DOMAINS="Learn.Microsoft.com, azure.microsoft.com",
+            WEB_GROUNDING_BLOCKED_DOMAINS="example.com",
+        )
+        search_definitions = render_json_template("search.j2", context)
+
+        web_sources = [
+            ks
+            for ks in search_definitions["knowledgeSources"]
+            if ks["kind"] == "web"
+        ]
+        self.assertEqual(len(web_sources), 1)
+        web = web_sources[0]
+        self.assertEqual(web["name"], "web-ks")
+        self.assertEqual(web["kind"], "web")
+        self.assertIsNone(web["encryptionKey"])
+        # Public data - no ACL, no filterAddOn.
+        self.assertNotIn("filterAddOn", web)
+        self.assertEqual(
+            web["webParameters"],
+            {
+                "domains": {
+                    "allowedDomains": ["learn.microsoft.com", "azure.microsoft.com"],
+                    "blockedDomains": ["example.com"],
+                }
+            },
+        )
+
+        kb_source_names = [
+            s["name"] for s in search_definitions["knowledgeBases"][0]["knowledgeSources"]
+        ]
+        self.assertIn("web-ks", kb_source_names)
+
+    def test_web_grounding_enabled_without_domains_emits_empty_lists(self):
+        _, context = self._foundry_iq_context(
+            WEB_GROUNDING_ENABLED="true",
+            WEB_GROUNDING_KNOWLEDGE_SOURCE_NAME="web-ks",
+        )
+        search_definitions = render_json_template("search.j2", context)
+        web_sources = [
+            ks
+            for ks in search_definitions["knowledgeSources"]
+            if ks["kind"] == "web"
+        ]
+        self.assertEqual(len(web_sources), 1)
+        self.assertEqual(
+            web_sources[0]["webParameters"],
+            {"domains": {"allowedDomains": [], "blockedDomains": []}},
+        )
+
 
 class WorkIqPreflightTests(unittest.TestCase):
     def test_filter_work_iq_sources_no_op_when_disabled(self):
