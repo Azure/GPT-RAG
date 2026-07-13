@@ -65,6 +65,10 @@ nav:
       - 'Foundry IQ: Work IQ (Microsoft 365)': howto_grounding_work_iq.md
       - 'Foundry IQ: Fabric ontology (preview)': howto_grounding_fabric_ontology.md
       - 'Foundry IQ: Fabric Data Agent (preview)': howto_grounding_fabric_data_agent.md
+      - 'Foundry IQ: SharePoint remote (preview)': howto_grounding_sharepoint_remote.md
+      - 'Foundry IQ: OneLake (preview)': howto_grounding_onelake.md
+      - 'Foundry IQ: SharePoint indexed (preview)': howto_grounding_sharepoint_indexed.md
+      - 'Foundry IQ: Web grounding (preview)': howto_grounding_web_bing.md
       - 'Direct: Azure AI Search': howto_grounding_ai_search_direct.md
     - Multimodality: howto_multimodality.md
     - User Feedback: howto_userfeedback.md

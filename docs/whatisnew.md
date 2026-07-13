@@ -6,6 +6,11 @@ patch, and fix, see the [GitHub releases](https://github.com/Azure/GPT-RAG/relea
 
 ### July 2026
 
+- **Four new Foundry IQ knowledge sources (preview, [v3.5.0](https://github.com/Azure/GPT-RAG/releases/tag/v3.5.0)).** All off by default and gated by their own App Config flags.
+    - **SharePoint remote (`remoteSharePoint`).** Live retrieval from SharePoint via the Copilot Retrieval API, with per-user OBO ACL. See [Foundry IQ: SharePoint remote](howto_grounding_sharepoint_remote.md).
+    - **OneLake indexed (`indexedOneLake`).** Fabric OneLake as a knowledge source, indexed and queried natively by Foundry IQ. See [Foundry IQ: OneLake](howto_grounding_onelake.md).
+    - **SharePoint indexed (`indexedSharePoint`).** Foundry IQ indexes a SharePoint site using app-only Microsoft Graph auth (Sites.Selected preferred). See [Foundry IQ: SharePoint indexed](howto_grounding_sharepoint_indexed.md).
+    - **Web grounding (`web`).** Public web results scoped by allow / block domain lists, billed per Bing call. See [Foundry IQ: Web grounding](howto_grounding_web_bing.md).
 - **Fabric Data Agent grounding (preview, [v3.4.3](https://github.com/Azure/GPT-RAG/releases/tag/v3.4.3)).** Answers can now be grounded on a Microsoft Fabric Data Agent, a virtual analyst that runs queries over Fabric data. It sits alongside documents, Work IQ, and the Fabric ontology source. Off by default, same OBO auth and data-egress notes as the other Fabric source. See [Foundry IQ: Fabric Data Agent](howto_grounding_fabric_data_agent.md).
 - **App Configuration seeding fix ([v3.4.1](https://github.com/Azure/GPT-RAG/releases/tag/v3.4.1)).** `azd provision` now seeds the `WORK_IQ_*` and `FABRIC_IQ_*` App Configuration keys with `enabled=false` and empty string defaults, so operators no longer have to create them by hand before flipping Work IQ or the Fabric knowledge sources on in an existing environment.
 - **Fabric ontology grounding (preview, v3.4.0).** Answers can now blend analytical data from a Microsoft Fabric ontology alongside documents and Work IQ. Off by default, gated by data residency (may route data outside your Foundry region). See [Foundry IQ: Fabric ontology](howto_grounding_fabric_ontology.md) and the [Grounding sources overview](howto_grounding_overview.md).
