@@ -1,4 +1,4 @@
-﻿# postProvision.ps1
+# postProvision.ps1
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -231,12 +231,12 @@ function Set-GptRagAppConfiguration {
         -Fallback "srch-$nameSuffix" `
         -Filter { -not $_.name.StartsWith('srch-aif') }
 
-    # AI Foundry Cognitive account (kind = AIServices) — LZ v2.2.0 deploys a single one
+    # AI Foundry Cognitive account (kind = AIServices) - LZ v2.2.0 deploys a single one
     $foundryName = _resolveResource `
         -Type 'Microsoft.CognitiveServices/accounts' `
         -Fallback "aif-$nameSuffix"
 
-    # AI Foundry project (child of foundry account) — resolve via CLI
+    # AI Foundry project (child of foundry account) - resolve via CLI
     $foundryProjectName = 'aifoundry-default-project'
     try {
         $projJson = az cognitiveservices account list-projects -g $resourceGroup -n $foundryName -o json 2>$null
@@ -260,13 +260,13 @@ function Set-GptRagAppConfiguration {
         -Type 'Microsoft.Insights/components' `
         -Fallback "appi-$nameSuffix"
 
-    # Container apps use the RESOURCE_TOKEN suffix from GPT-RAG's own bicep — this is
+    # Container apps use the RESOURCE_TOKEN suffix from GPT-RAG's own bicep - this is
     # stable across naming modes.
     $frontendAppName = "ca-$nameSuffix-frontend"
     $orchestratorAppName = "ca-$nameSuffix-orchestrator"
     $dataIngestAppName = "ca-$nameSuffix-dataingest"
 
-    # Cosmos database name — introspect the account to get the actual DB name
+    # Cosmos database name - introspect the account to get the actual DB name
     $databaseName = "cosmos-db$nameSuffix"
     try {
         $dbJson = az cosmosdb sql database list -g $resourceGroup -a $cosmosName -o json 2>$null
@@ -406,6 +406,10 @@ function Set-GptRagAppConfiguration {
         FABRIC_IQ_KNOWLEDGE_SOURCE_NAME = (Get-OptionalEnvValue 'FABRIC_IQ_KNOWLEDGE_SOURCE_NAME' '')
         FABRIC_IQ_WORKSPACE_ID = (Get-OptionalEnvValue 'FABRIC_IQ_WORKSPACE_ID' '')
         FABRIC_IQ_ONTOLOGY_ID = (Get-OptionalEnvValue 'FABRIC_IQ_ONTOLOGY_ID' '')
+        FABRIC_DATA_AGENT_ENABLED = (Get-OptionalEnvValue 'FABRIC_DATA_AGENT_ENABLED' 'false')
+        FABRIC_DATA_AGENT_KNOWLEDGE_SOURCE_NAME = (Get-OptionalEnvValue 'FABRIC_DATA_AGENT_KNOWLEDGE_SOURCE_NAME' '')
+        FABRIC_DATA_AGENT_WORKSPACE_ID = (Get-OptionalEnvValue 'FABRIC_DATA_AGENT_WORKSPACE_ID' '')
+        FABRIC_DATA_AGENT_DATA_AGENT_ID = (Get-OptionalEnvValue 'FABRIC_DATA_AGENT_DATA_AGENT_ID' '')
         NETWORK_ISOLATION = (Get-OptionalEnvValue 'NETWORK_ISOLATION' 'false')
         USE_UAI = (Get-OptionalEnvValue 'USE_UAI' 'false')
         USE_CAPP_API_KEY = (Get-OptionalEnvValue 'USE_CAPP_API_KEY' 'false')

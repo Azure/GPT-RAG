@@ -4,6 +4,7 @@
 {% set conversation_upload_enabled = RETRIEVAL_BACKEND == 'foundry_iq' and FOUNDRY_IQ_PATTERN != 'searchIndex' and (FOUNDRY_IQ_CONVERSATION_UPLOAD_ENABLED | default('false') | string | lower) in ['true', '1', 'yes', 'y', 't'] and (FOUNDRY_IQ_CONVERSATION_KNOWLEDGE_SOURCE_NAME | default('', true)) %}
 {% set work_iq_enabled = RETRIEVAL_BACKEND == 'foundry_iq' and (WORK_IQ_ENABLED | default('false') | string | lower) in ['true', '1', 'yes', 'y', 't'] and (WORK_IQ_KNOWLEDGE_SOURCE_NAME | default('', true)) %}
 {% set fabric_iq_enabled = RETRIEVAL_BACKEND == 'foundry_iq' and (FABRIC_IQ_ENABLED | default('false') | string | lower) in ['true', '1', 'yes', 'y', 't'] and (FABRIC_IQ_KNOWLEDGE_SOURCE_NAME | default('', true)) and (FABRIC_IQ_WORKSPACE_ID | default('', true)) and (FABRIC_IQ_ONTOLOGY_ID | default('', true)) %}
+{% set fabric_data_agent_enabled = RETRIEVAL_BACKEND == 'foundry_iq' and (FABRIC_DATA_AGENT_ENABLED | default('false') | string | lower) in ['true', '1', 'yes', 'y', 't'] and (FABRIC_DATA_AGENT_KNOWLEDGE_SOURCE_NAME | default('', true)) and (FABRIC_DATA_AGENT_WORKSPACE_ID | default('', true)) and (FABRIC_DATA_AGENT_DATA_AGENT_ID | default('', true)) %}
 {
   "indexes": [
     {
@@ -433,6 +434,18 @@
       "encryptionKey": null
     }
     {% endif %}
+    {% if fabric_data_agent_enabled %},
+    {
+      "name": "{{FABRIC_DATA_AGENT_KNOWLEDGE_SOURCE_NAME}}",
+      "kind": "fabricDataAgent",
+      "description": "Microsoft Fabric Data Agent knowledge source (queries a Fabric Data Agent in the caller's workspace).",
+      "fabricDataAgentParameters": {
+        "workspaceId": "{{FABRIC_DATA_AGENT_WORKSPACE_ID}}",
+        "dataAgentId": "{{FABRIC_DATA_AGENT_DATA_AGENT_ID}}"
+      },
+      "encryptionKey": null
+    }
+    {% endif %}
   ]{% else %}[]{% endif %},
   "knowledgeBases": {% if RETRIEVAL_BACKEND == 'foundry_iq' %}[
     {
@@ -445,7 +458,8 @@
         { "name": "{{FOUNDRY_IQ_KNOWLEDGE_SOURCE_NAME}}" }{% if conversation_upload_enabled %},
         { "name": "{{FOUNDRY_IQ_CONVERSATION_KNOWLEDGE_SOURCE_NAME}}" }{% endif %}{% if work_iq_enabled %},
         { "name": "{{WORK_IQ_KNOWLEDGE_SOURCE_NAME}}" }{% endif %}{% if fabric_iq_enabled %},
-        { "name": "{{FABRIC_IQ_KNOWLEDGE_SOURCE_NAME}}" }{% endif %}
+        { "name": "{{FABRIC_IQ_KNOWLEDGE_SOURCE_NAME}}" }{% endif %}{% if fabric_data_agent_enabled %},
+        { "name": "{{FABRIC_DATA_AGENT_KNOWLEDGE_SOURCE_NAME}}" }{% endif %}
       ],
       "models": [],
       "encryptionKey": null,

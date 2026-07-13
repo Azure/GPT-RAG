@@ -483,6 +483,24 @@ def is_fabric_iq_enabled(context: dict) -> bool:
     )
 
 
+def is_fabric_data_agent_enabled(context: dict) -> bool:
+    """Return True when Fabric Data Agent should be registered as a knowledge source.
+
+    Requires the retrieval backend to be Foundry IQ, the
+    FABRIC_DATA_AGENT_ENABLED switch to be truthy, and all three binding
+    fields (knowledge source name, Fabric workspace id, Fabric data agent id)
+    to be set. Fabric Data Agent has no shared service principal, so there is
+    no admin-consent preflight.
+    """
+    return (
+        str(context.get("RETRIEVAL_BACKEND") or "").lower() == "foundry_iq"
+        and is_truthy_setting(context.get("FABRIC_DATA_AGENT_ENABLED"))
+        and bool(str(context.get("FABRIC_DATA_AGENT_KNOWLEDGE_SOURCE_NAME") or "").strip())
+        and bool(str(context.get("FABRIC_DATA_AGENT_WORKSPACE_ID") or "").strip())
+        and bool(str(context.get("FABRIC_DATA_AGENT_DATA_AGENT_ID") or "").strip())
+    )
+
+
 def check_work_iq_admin_consent(cred: ChainedTokenCredential) -> Optional[bool]:
     """Soft preflight: check whether the Work IQ service principal has been
     consented in the caller's tenant.

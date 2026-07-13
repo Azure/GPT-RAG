@@ -483,6 +483,72 @@ class WorkIqTemplateTests(unittest.TestCase):
         ]
         self.assertIn("fabric-iq-ks", kb_source_names)
 
+    def test_settings_defaults_fabric_data_agent_disabled_and_empty(self):
+        settings = render_json_template(
+            "search.settings.j2",
+            {
+                "RESOURCE_TOKEN": "abc123",
+                "SEARCH_SERVICE_QUERY_ENDPOINT": "https://search.search.windows.net",
+                "AI_FOUNDRY_ACCOUNT_NAME": "aif-abc123",
+                "RETRIEVAL_BACKEND": "foundry_iq",
+            },
+        )
+        self.assertEqual(settings["FABRIC_DATA_AGENT_ENABLED"], "false")
+        self.assertEqual(settings["FABRIC_DATA_AGENT_KNOWLEDGE_SOURCE_NAME"], "")
+        self.assertEqual(settings["FABRIC_DATA_AGENT_WORKSPACE_ID"], "")
+        self.assertEqual(settings["FABRIC_DATA_AGENT_DATA_AGENT_ID"], "")
+
+    def test_fabric_data_agent_disabled_by_default_produces_no_entry(self):
+        _, context = self._foundry_iq_context()
+        search_definitions = render_json_template("search.j2", context)
+        for ks in search_definitions["knowledgeSources"]:
+            self.assertNotEqual(ks["kind"], "fabricDataAgent")
+        kb_source_names = [
+            s["name"] for s in search_definitions["knowledgeBases"][0]["knowledgeSources"]
+        ]
+        self.assertNotIn("fabric-data-agent-ks", kb_source_names)
+
+    def test_fabric_data_agent_enabled_without_binding_fields_produces_no_entry(self):
+        # Enabled + name but missing workspace and data agent ids must not emit.
+        _, context = self._foundry_iq_context(
+            FABRIC_DATA_AGENT_ENABLED="true",
+            FABRIC_DATA_AGENT_KNOWLEDGE_SOURCE_NAME="fabric-data-agent-ks",
+        )
+        search_definitions = render_json_template("search.j2", context)
+        for ks in search_definitions["knowledgeSources"]:
+            self.assertNotEqual(ks["kind"], "fabricDataAgent")
+
+    def test_fabric_data_agent_enabled_adds_knowledge_source_and_kb_reference(self):
+        _, context = self._foundry_iq_context(
+            FABRIC_DATA_AGENT_ENABLED="true",
+            FABRIC_DATA_AGENT_KNOWLEDGE_SOURCE_NAME="fabric-data-agent-ks",
+            FABRIC_DATA_AGENT_WORKSPACE_ID="ws-guid-2",
+            FABRIC_DATA_AGENT_DATA_AGENT_ID="da-guid-2",
+        )
+        search_definitions = render_json_template("search.j2", context)
+
+        agent_sources = [
+            ks
+            for ks in search_definitions["knowledgeSources"]
+            if ks["kind"] == "fabricDataAgent"
+        ]
+        self.assertEqual(len(agent_sources), 1)
+        agent = agent_sources[0]
+        self.assertEqual(agent["name"], "fabric-data-agent-ks")
+        self.assertEqual(agent["kind"], "fabricDataAgent")
+        self.assertIsNone(agent["encryptionKey"])
+        # Fabric Data Agent is service-managed. It must not carry a filterAddOn.
+        self.assertNotIn("filterAddOn", agent)
+        self.assertEqual(
+            agent["fabricDataAgentParameters"],
+            {"workspaceId": "ws-guid-2", "dataAgentId": "da-guid-2"},
+        )
+
+        kb_source_names = [
+            s["name"] for s in search_definitions["knowledgeBases"][0]["knowledgeSources"]
+        ]
+        self.assertIn("fabric-data-agent-ks", kb_source_names)
+
 
 class WorkIqPreflightTests(unittest.TestCase):
     def test_filter_work_iq_sources_no_op_when_disabled(self):
