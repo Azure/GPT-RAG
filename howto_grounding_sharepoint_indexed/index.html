@@ -1,0 +1,1461 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Official project documentation">
+      
+      
+        <meta name="author" content="Paulo Lacerda">
+      
+      
+      
+      
+      
+      <link rel="icon" href="../favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.34">
+    
+    
+      
+        <title>Foundry IQ: SharePoint Indexed (preview) - GPT-RAG</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.35f28582.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../styles.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#foundry-iq-sharepoint-indexed-preview" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="GPT-RAG" class="md-header__button md-logo" aria-label="GPT-RAG" data-md-component="logo">
+      
+  <img src="../media/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            GPT-RAG
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Foundry IQ: SharePoint Indexed (preview)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/azure/gpt-rag" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="GPT-RAG" class="md-nav__button md-logo" aria-label="GPT-RAG" data-md-component="logo">
+      
+  <img src="../media/logo.png" alt="logo">
+
+    </a>
+    GPT-RAG
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/azure/gpt-rag" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../whatisnew/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    What's New
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../release_267_270_walkthrough/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Release Walkthrough
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deploy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Deployment Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Quick Start Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Quick Start Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart_simple_rag/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Simple RAG
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart_nl2sql/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    NL2SQL
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Architecture
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Architecture
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Services
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Services
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_orchestrator/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Orchestrator
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_2" id="__nav_7_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Ingestion
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_2">
+            <span class="md-nav__icon md-icon"></span>
+            Ingestion
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_ingestion/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_blob_data_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Blob
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_sharepoint_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Sharepoint
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_nl2sql_data_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    NL2SQL
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    How-to Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            How-to Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_azure_direct/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Azure Direct Models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_app_gateway/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Application Gateway
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_authentication/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Auth & Doc Security
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_dashboard_signin/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Admin Dashboard Sign-in
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_8_5" id="__nav_8_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Grounding sources
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_5">
+            <span class="md-nav__icon md-icon"></span>
+            Grounding sources
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_foundry_iq_documents/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Foundry IQ: Documents
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_work_iq/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Foundry IQ: Work IQ (Microsoft 365)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_fabric_ontology/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Foundry IQ: Fabric ontology (preview)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_fabric_data_agent/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Foundry IQ: Fabric Data Agent (preview)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_ai_search_direct/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Direct: Azure AI Search
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_multimodality/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Multimodality
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_userfeedback/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    User Feedback
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_sharepoint_connector/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Sharepoint Connector
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_retrieval_optimization/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Retrieval Optimization
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_resource_naming/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Resource Naming (CAF)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../team/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Meet the Team
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="foundry-iq-sharepoint-indexed-preview">Foundry IQ: SharePoint Indexed (preview)</h1>
+<p>SharePoint Indexed is a Foundry IQ Knowledge Source that grounds answers on
+content from a specific SharePoint site, served from a pre-built Azure AI
+Search index. It runs next to your document Knowledge Source on the same
+Knowledge Base. It does not replace it.</p>
+<p>On the Knowledge Base, this source is registered with <code>kind: indexedSharePoint</code>.
+That is the literal string in the Foundry IQ configuration, matching <code>workIq</code>,
+<code>fabricOntology</code>, and <code>fabricDataAgent</code> for the other sources. The
+<code>SHAREPOINT_INDEXED_*</code> App Configuration keys below configure this
+<code>indexedSharePoint</code> knowledge source.</p>
+<p>If you have not read the <a href="../howto_grounding_overview/">Grounding sources overview</a>,
+start there. In short: SharePoint Indexed is not a separate retrieval
+backend. It is an additional source registered on the Foundry IQ Knowledge
+Base, so a single request can pull from documents and from SharePoint in one
+call.</p>
+<div class="admonition warning">
+<p class="admonition-title">Public preview, app-only auth, no ACL trimming</p>
+<p>SharePoint Indexed is in public preview on Foundry IQ API
+<code>2026-05-01-preview</code>. This release ships with <strong>app-only auth</strong> (Managed
+Identity + Federated Identity Credential + Microsoft Graph
+<code>Sites.Selected</code> or <code>Sites.Read.All</code>) and <strong>does not</strong> perform per-user
+ACL or site-group trimming. Every signed-in user sees results the app
+itself has been granted access to. Behavior, quotas, and configuration
+may change without notice. Do not depend on SharePoint Indexed for
+workloads that require per-user permission trimming until delegated
+auth lands in a later release.</p>
+</div>
+<h2 id="when-to-use-sharepoint-indexed">When to use SharePoint Indexed</h2>
+<p>Use SharePoint Indexed when:</p>
+<ul>
+<li>You have a specific SharePoint site whose content should ground answers
+  for everyone using the deployment.</li>
+<li>The site's contents are safe to expose to all authenticated users of the
+  deployment (no per-user ACL requirement).</li>
+<li>You want retrieval latency comparable to your existing AI Search index
+  (the source reads a local index, not a live SharePoint API).</li>
+</ul>
+<p>Do not use SharePoint Indexed when:</p>
+<ul>
+<li>You need per-user permission trimming based on SharePoint or M365 group
+  membership. Use Work IQ instead, which enforces the caller's M365
+  permissions via a delegated (OBO) token.</li>
+<li>You want to ground on the caller's own SharePoint or OneDrive content.
+  Use Work IQ.</li>
+<li>You need to cover many SharePoint sites at once. This preview scopes to
+  one site per knowledge source; wire additional sites as separate KS
+  entries in a follow-up release.</li>
+</ul>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Work through these in order. Steps 1 through 4 are hard blockers. Bicep
+cannot cover them today because they modify Entra objects; run the <code>az</code>
+commands manually or ask your tenant admin.</p>
+<ol>
+<li>
+<p>Register an Entra application in the target tenant for the SharePoint
+   Indexed knowledge source. Note its Application (client) ID; you will
+   reference it in step 2.</p>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>ad<span class="w"> </span>app<span class="w"> </span>create<span class="w"> </span>--display-name<span class="w"> </span><span class="s2">&quot;gpt-rag-sharepoint-indexed&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--sign-in-audience<span class="w"> </span>AzureADMyOrg
+</code></pre></div>
+</li>
+<li>
+<p>Add a Federated Identity Credential on that app that trusts the User
+   Assigned Managed Identity used by the orchestrator. Replace
+   <code>&lt;app-object-id&gt;</code>, <code>&lt;uami-issuer&gt;</code>, and <code>&lt;uami-subject&gt;</code> with the values
+   from your deployment (the UAMI issuer is
+   <code>https://&lt;region&gt;.identity.azure.net/subscriptions/&lt;sub&gt;/resourceGroups/&lt;rg&gt;/providers/Microsoft.ManagedIdentity/userAssignedIdentities/&lt;uami&gt;</code>;
+   the subject is the same URL).</p>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>ad<span class="w"> </span>app<span class="w"> </span>federated-credential<span class="w"> </span>create<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--id<span class="w"> </span>&lt;app-object-id&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--parameters<span class="w"> </span><span class="s1">&#39;{</span>
+<span class="s1">    &quot;name&quot;: &quot;gpt-rag-orchestrator-uami&quot;,</span>
+<span class="s1">    &quot;issuer&quot;: &quot;&lt;uami-issuer&gt;&quot;,</span>
+<span class="s1">    &quot;subject&quot;: &quot;&lt;uami-subject&gt;&quot;,</span>
+<span class="s1">    &quot;audiences&quot;: [&quot;api://AzureADTokenExchange&quot;]</span>
+<span class="s1">  }&#39;</span>
+</code></pre></div>
+</li>
+<li>
+<p>Grant admin consent for the Microsoft Graph permissions the knowledge
+   source needs. Prefer <code>Sites.Selected</code> (least privilege) over
+   <code>Sites.Read.All</code>. Replace <code>&lt;app-object-id&gt;</code> with the app object ID from
+   step 1.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Sites.Selected (preferred): grant Application permission, then grant</span>
+<span class="c1"># site-scoped access in step 4.</span>
+az<span class="w"> </span>ad<span class="w"> </span>app<span class="w"> </span>permission<span class="w"> </span>add<span class="w"> </span>--id<span class="w"> </span>&lt;app-object-id&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--api<span class="w"> </span><span class="m">00000003</span>-0000-0000-c000-000000000000<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--api-permissions<span class="w"> </span>883ea226-0bf2-4a8f-9f9d-92c9162a727d<span class="o">=</span>Role
+
+az<span class="w"> </span>ad<span class="w"> </span>app<span class="w"> </span>permission<span class="w"> </span>admin-consent<span class="w"> </span>--id<span class="w"> </span>&lt;app-object-id&gt;
+</code></pre></div>
+<p>If your organization does not use <code>Sites.Selected</code>, you can grant
+<code>Sites.Read.All</code> (tenant-wide read) instead:</p>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>ad<span class="w"> </span>app<span class="w"> </span>permission<span class="w"> </span>add<span class="w"> </span>--id<span class="w"> </span>&lt;app-object-id&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--api<span class="w"> </span><span class="m">00000003</span>-0000-0000-c000-000000000000<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--api-permissions<span class="w"> </span>332a536c-c7ef-4017-ab91-336970924f0d<span class="o">=</span>Role
+
+az<span class="w"> </span>ad<span class="w"> </span>app<span class="w"> </span>permission<span class="w"> </span>admin-consent<span class="w"> </span>--id<span class="w"> </span>&lt;app-object-id&gt;
+</code></pre></div>
+</li>
+<li>
+<p>If you used <code>Sites.Selected</code>, grant the app read access to the target
+   SharePoint site. Run this as a Graph call from a tenant admin session
+   (Graph Explorer, or <code>az rest</code>). Replace <code>&lt;site-id&gt;</code> with the site's
+   Microsoft Graph site ID and <code>&lt;app-object-id&gt;</code> with the value from
+   step 1.</p>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>rest<span class="w"> </span>--method<span class="w"> </span>POST<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--uri<span class="w"> </span><span class="s2">&quot;https://graph.microsoft.com/v1.0/sites/&lt;site-id&gt;/permissions&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--body<span class="w"> </span><span class="s1">&#39;{</span>
+<span class="s1">    &quot;roles&quot;: [&quot;read&quot;],</span>
+<span class="s1">    &quot;grantedToIdentities&quot;: [</span>
+<span class="s1">      { &quot;application&quot;: { &quot;id&quot;: &quot;&lt;app-object-id&gt;&quot;, &quot;displayName&quot;: &quot;gpt-rag-sharepoint-indexed&quot; } }</span>
+<span class="s1">    ]</span>
+<span class="s1">  }&#39;</span>
+</code></pre></div>
+</li>
+<li>
+<p>Provision an Azure AI Search index that projects the SharePoint site's
+   content. The index name goes into <code>SHAREPOINT_INDEXED_INDEX_NAME</code>. This
+   preview does not create the index for you; use the SharePoint indexer
+   templates published by AI Search, or your own ingestion pipeline.</p>
+</li>
+<li>
+<p>Confirm the AI Search service SKU is at least <code>standard</code> (the preview
+   feature is not available on <code>free</code> or <code>basic</code>).</p>
+</li>
+<li>
+<p>The Foundry resource and the target SharePoint tenant must be in the
+   same Entra tenant. Cross-tenant SharePoint Indexed is not supported in
+   this preview.</p>
+</li>
+</ol>
+<h2 id="configuration">Configuration</h2>
+<p>All SharePoint Indexed settings live in Azure App Configuration on the
+GPT-RAG deployment, under the <code>gpt-rag</code> label. <code>azd provision</code> seeds the
+five keys below with defaults (<code>SHAREPOINT_INDEXED_ENABLED=false</code>,
+identifiers blank) so you do not have to create them by hand. To turn
+SharePoint Indexed on for an existing environment, edit the values in the
+App Configuration blade (or <code>az appconfig kv set --label gpt-rag --key ...</code>)
+and restart the orchestrator; or set the same values as azd env vars and
+re-run <code>azd hooks run postprovision</code> and <code>azd deploy</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SHAREPOINT_INDEXED_ENABLED</code></td>
+<td><code>false</code></td>
+<td>Set to <code>true</code> to turn SharePoint Indexed on.</td>
+</tr>
+<tr>
+<td><code>SHAREPOINT_INDEXED_KNOWLEDGE_SOURCE_NAME</code></td>
+<td><code>""</code></td>
+<td>Name of the SharePoint Indexed Knowledge Source registered on the Foundry IQ Knowledge Base.</td>
+</tr>
+<tr>
+<td><code>SHAREPOINT_INDEXED_INDEX_NAME</code></td>
+<td><code>""</code></td>
+<td>Name of the pre-built Azure AI Search index that projects the SharePoint site.</td>
+</tr>
+<tr>
+<td><code>SHAREPOINT_INDEXED_SITE_URL</code></td>
+<td><code>""</code></td>
+<td>Absolute URL of the target SharePoint site, for example <code>https://contoso.sharepoint.com/sites/knowledge</code>.</td>
+</tr>
+<tr>
+<td><code>SHAREPOINT_INDEXED_TENANT_ID</code></td>
+<td><code>""</code></td>
+<td>Entra tenant ID that owns the SharePoint site and the Entra app registered in step 1.</td>
+</tr>
+</tbody>
+</table>
+<p>All four identifier keys must be non-empty (in addition to
+<code>SHAREPOINT_INDEXED_ENABLED=true</code>) for the knowledge source to be
+registered on the Knowledge Base. If any identifier is missing at
+provisioning time, <code>sharepoint_indexed_setup.py</code> removes the KS from the
+payload and logs a warning; the rest of the provisioning still succeeds.</p>
+<p>Notes:</p>
+<ul>
+<li><strong>App-only, not delegated.</strong> The orchestrator does not forward the
+  caller's OBO token to this knowledge source. Every authenticated user
+  sees the same results.</li>
+<li><strong>Additive.</strong> Your existing Knowledge Base retrieval (default Blob path
+  or custom ingestion path) continues to run and is blended into the final
+  answer.</li>
+<li><strong>No <code>FOUNDRY_IQ_MAX_RUNTIME_SECONDS</code> bump required.</strong> SharePoint
+  Indexed reads a pre-built local index and returns quickly, unlike Work
+  IQ.</li>
+</ul>
+<h2 id="how-sharepoint-indexed-works">How SharePoint Indexed works</h2>
+<p>At runtime, the GPT-RAG orchestrator:</p>
+<ol>
+<li>Reads <code>SHAREPOINT_INDEXED_ENABLED</code> and the four identifiers. If any is
+   missing, the source is skipped.</li>
+<li>Adds the SharePoint Indexed source to the Foundry IQ Knowledge Base
+   <code>retrieve</code> call, alongside the existing document source.</li>
+<li>Receives results grounded on the pre-built AI Search index. The
+   knowledge source itself calls Microsoft Graph app-only, using the
+   Managed Identity federated to the Entra app registered in step 1.</li>
+<li>Blends the results with the document Knowledge Base results and hands
+   the merged context to the model.</li>
+</ol>
+<pre class="mermaid"><code>sequenceDiagram
+    autonumber
+    participant U as User
+    participant UI as GPT-RAG UI
+    participant O as Orchestrator
+    participant KB as Azure AI Search KB
+    participant SP as SharePoint Indexed KS
+    participant S as Azure AI Search index
+    participant L as LLM
+
+    U-&gt;&gt;UI: Ask a question
+    UI-&gt;&gt;O: Chat request
+    O-&gt;&gt;KB: retrieve (question, documents + indexedSharePoint sources)
+    KB-&gt;&gt;SP: Query SharePoint Indexed
+    SP-&gt;&gt;S: Query pre-built site index
+    S--&gt;&gt;SP: Ranked chunks
+    SP--&gt;&gt;KB: SharePoint Indexed results
+    KB--&gt;&gt;O: Blended KB + SharePoint results
+    O-&gt;&gt;L: Prompt with grounded context
+    L--&gt;&gt;O: Answer
+    O--&gt;&gt;UI: Answer
+    UI--&gt;&gt;U: Answer</code></pre>
+<h2 id="preview-limitations">Preview limitations</h2>
+<ul>
+<li>No per-user ACL trimming (app-only auth). Results are limited to what
+  the app has been granted access to, not to what the individual caller
+  can see in SharePoint. Use Work IQ if per-user trimming is required.</li>
+<li>One knowledge source per SharePoint site. Cover multiple sites by
+  registering multiple <code>SHAREPOINT_INDEXED_*</code> KS entries in follow-up
+  releases.</li>
+<li>No delegated (OBO) auth path. Delegated auth is out of scope for this
+  preview and is on the roadmap.</li>
+<li>No automatic index provisioning. Bring your own AI Search index that
+  projects the SharePoint site.</li>
+<li>Bicep does not create the Entra app, the Federated Identity Credential,
+  or the admin consent. Follow the manual steps in Prerequisites.</li>
+</ul>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Likely cause</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SharePoint Indexed results are always empty.</td>
+<td>The Entra app has no admin consent, or <code>Sites.Selected</code> was chosen but the app was not granted read access to the target site.</td>
+<td>Confirm admin consent for the correct Graph permission and, if using <code>Sites.Selected</code>, re-run the <code>az rest</code> grant in prerequisite step 4.</td>
+</tr>
+<tr>
+<td>Provisioning warns that identifiers are missing and skips the KS.</td>
+<td>One or more of <code>SHAREPOINT_INDEXED_KNOWLEDGE_SOURCE_NAME</code>, <code>SHAREPOINT_INDEXED_INDEX_NAME</code>, <code>SHAREPOINT_INDEXED_SITE_URL</code>, <code>SHAREPOINT_INDEXED_TENANT_ID</code> is blank.</td>
+<td>Populate all four keys in App Configuration and re-run <code>azd hooks run postprovision</code>.</td>
+</tr>
+<tr>
+<td>KS registration returns HTTP 400 with a schema error.</td>
+<td>The AI Search service does not support the <code>2026-05-01-preview</code> API, or the SKU is <code>free</code>/<code>basic</code>.</td>
+<td>Upgrade the SKU to <code>standard</code> or higher and confirm the service region supports the preview API.</td>
+</tr>
+<tr>
+<td>Orchestrator logs show <code>indexedSharePoint</code> calls succeeding but the model still ignores the results.</td>
+<td>The knowledge base reference to the SharePoint KS may be missing.</td>
+<td>Confirm the KB payload includes an entry for <code>SHAREPOINT_INDEXED_KNOWLEDGE_SOURCE_NAME</code> under <code>knowledgeBases[0].knowledgeSources</code>. Re-render the template if needed.</td>
+</tr>
+<tr>
+<td>Different tenant sees no results after turning the feature on.</td>
+<td><code>SHAREPOINT_INDEXED_TENANT_ID</code> does not match the tenant that owns the SharePoint site, or the Entra app registered in prerequisite step 1 lives in a different tenant.</td>
+<td>Recheck the tenant ID and re-register the app in the correct tenant if needed.</td>
+</tr>
+</tbody>
+</table>
+<p>If SharePoint Indexed is unhealthy but you must keep serving traffic, set
+<code>SHAREPOINT_INDEXED_ENABLED=false</code> in App Configuration. The orchestrator
+continues to answer using the existing Knowledge Base only.</p>
+<h2 id="related-reading">Related reading</h2>
+<ul>
+<li><a href="../howto_grounding_overview/">Grounding sources overview</a></li>
+<li><a href="../howto_grounding_foundry_iq_documents/">Foundry IQ: Documents</a></li>
+<li><a href="../howto_grounding_work_iq/">Foundry IQ: Work IQ</a></li>
+<li><a href="../howto_authentication/">Auth and Doc Security</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <div style="
+  background-color: var(--md-primary-fg-color);
+  color: var(--md-primary-bg-color);
+  text-align: center;
+  font-size: 0.95em;
+  padding: 1em 0;
+">
+  © 2025 GPT-RAG — powered by ❤️ and coffee ☕
+</div>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.icon", "content.iconify", "navigation.tracking", "toc.integrate", "content.code.annotate", "navigation.top"], "search": "../assets/javascripts/workers/search.07f07601.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.56dfad97.min.js"></script>
+      
+        <script src="../javascripts/source-facts-refresh.js"></script>
+      
+    
+  </body>
+</html>
