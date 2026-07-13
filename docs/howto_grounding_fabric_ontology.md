@@ -58,7 +58,7 @@ Work through these in order. All of them are hard blockers.
    and the GPT-RAG orchestrator must all be in the same Entra tenant.
    Cross-tenant is not supported.
 5. **Foundry IQ preview API.** The knowledge source requires the Foundry IQ
-   preview API that supports `kind: fabricOntology`. GPT-RAG v3.4.0 pins the
+   preview API that supports `kind: fabricOntology`. GPT-RAG v3.4.1+ pins the
    `2026-05-01-preview` baseline.
 
 ## Configure Fabric ontology
