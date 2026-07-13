@@ -1012,6 +1012,90 @@
   
   
     <li class="md-nav__item">
+      <a href="../howto_grounding_sharepoint_remote/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Foundry IQ: SharePoint remote (preview)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_onelake/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Foundry IQ: OneLake (preview)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_sharepoint_indexed/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Foundry IQ: SharePoint indexed (preview)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_web_bing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Foundry IQ: Web grounding (preview)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../howto_grounding_ai_search_direct/" class="md-nav__link">
         
   
@@ -1246,6 +1330,15 @@ this page first, then jump to the source you want to enable.</p>
 <li>You have a Fabric Data Agent that already answers questions over your
   warehouse or lakehouse? Add <strong>Fabric Data Agent</strong> and let it act as a
   virtual analyst.</li>
+<li>Your content lives in SharePoint and you want per-user ACL live at query
+  time (no ingestion pipeline)? Add <strong>SharePoint (remote)</strong>. Preview.</li>
+<li>Your content lives in Fabric OneLake and you want Foundry IQ to index it
+  natively? Add <strong>OneLake (indexed)</strong>. Preview.</li>
+<li>You want Foundry IQ to run a pre-built AI Search index over a SharePoint
+  site using app-only Graph auth? Add <strong>SharePoint (indexed)</strong>. Preview.</li>
+<li>You want the agent to ground on the public internet, scoped by allow /
+  block domain lists? Add <strong>Web grounding (Bing)</strong>. Preview. Billed per Bing
+  call.</li>
 <li>You are on the older Azure AI Search direct path and not ready to move?
   Stay there. It is fully supported as the rollback path.</li>
 </ul>
@@ -1291,11 +1384,15 @@ the <code>fabricOntology</code> knowledge source.</p>
 </ul>
 <pre class="mermaid"><code>flowchart LR
   O[GPT-RAG orchestrator] --&gt; KB[Foundry IQ Knowledge Base]
-  KB --&gt; KS1[KS: Blob container, azureBlob]
-  KB --&gt; KS2[KS: Azure AI Search index, searchIndex]
-  KB --&gt; KS3[KS: Work IQ, workIq]
-  KB --&gt; KS4[KS: Fabric ontology, fabricOntology]
-  KB --&gt; KS5[KS: Fabric Data Agent, fabricDataAgent]</code></pre>
+  KB --&gt; KS1[KS: Blob container, azureBlob - GA]
+  KB --&gt; KS2[KS: Azure AI Search index, searchIndex - GA]
+  KB --&gt; KS3[KS: Work IQ, workIQ - Preview]
+  KB --&gt; KS4[KS: Fabric ontology, fabricOntology - Preview]
+  KB --&gt; KS5[KS: Fabric Data Agent, fabricDataAgent - Preview]
+  KB --&gt; KS6[KS: SharePoint remote, remoteSharePoint - Preview]
+  KB --&gt; KS7[KS: OneLake indexed, indexedOneLake - Preview]
+  KB --&gt; KS8[KS: SharePoint indexed, indexedSharePoint - Preview]
+  KB --&gt; KS9[KS: Web grounding, web - Preview]</code></pre>
 <h2 id="the-alternative-azure-ai-search-direct">The alternative: Azure AI Search direct</h2>
 <p>GPT-RAG can also skip Foundry IQ entirely and query an Azure AI Search index
 directly. This is the older path and the rollback path. It is not a Knowledge
@@ -1333,7 +1430,7 @@ Source. It is a separate retrieval backend selected with
 </tr>
 <tr>
 <td>Work IQ (Microsoft 365)</td>
-<td>Foundry IQ Knowledge Source (<code>workIq</code>)</td>
+<td>Foundry IQ Knowledge Source (<code>workIQ</code>)</td>
 <td>Gated public preview. Off by default.</td>
 <td><a href="../howto_grounding_work_iq/">Foundry IQ: Work IQ</a></td>
 </tr>
@@ -1348,6 +1445,30 @@ Source. It is a separate retrieval backend selected with
 <td>Foundry IQ Knowledge Source (<code>fabricDataAgent</code>)</td>
 <td>Preview. Off by default. Requires a published Fabric Data Agent and signed-in users.</td>
 <td><a href="../howto_grounding_fabric_data_agent/">Foundry IQ: Fabric Data Agent</a></td>
+</tr>
+<tr>
+<td>SharePoint remote (Copilot Retrieval API)</td>
+<td>Foundry IQ Knowledge Source (<code>remoteSharePoint</code>)</td>
+<td>Preview. Off by default. Live retrieval with per-user OBO ACL.</td>
+<td><a href="../howto_grounding_sharepoint_remote/">Foundry IQ: SharePoint remote</a></td>
+</tr>
+<tr>
+<td>OneLake (Microsoft Fabric)</td>
+<td>Foundry IQ Knowledge Source (<code>indexedOneLake</code>)</td>
+<td>Preview. Off by default. Requires Fabric workspace + lakehouse and workspace RBAC.</td>
+<td><a href="../howto_grounding_onelake/">Foundry IQ: OneLake</a></td>
+</tr>
+<tr>
+<td>SharePoint indexed (Microsoft Graph app-only)</td>
+<td>Foundry IQ Knowledge Source (<code>indexedSharePoint</code>)</td>
+<td>Preview. Off by default. Pre-built AI Search index over a SharePoint site.</td>
+<td><a href="../howto_grounding_sharepoint_indexed/">Foundry IQ: SharePoint indexed</a></td>
+</tr>
+<tr>
+<td>Web grounding (Bing)</td>
+<td>Foundry IQ Knowledge Source (<code>web</code>)</td>
+<td>Preview. Off by default. Public internet, no ACL. Billed per Bing call.</td>
+<td><a href="../howto_grounding_web_bing/">Foundry IQ: Web grounding</a></td>
 </tr>
 <tr>
 <td>Azure AI Search direct</td>
@@ -1379,6 +1500,24 @@ the ones that match your data and add them one by one.</p>
   Data Agent and want the LLM to hand analytical questions off to it
   rather than reason over an ontology. See
   <a href="../howto_grounding_fabric_data_agent/">Foundry IQ: Fabric Data Agent</a>.</li>
+<li><strong>SharePoint remote (<code>remoteSharePoint</code>).</strong> Your content lives in
+  SharePoint and you want per-user ACL enforced live at query time,
+  without ingesting or indexing it. Uses the Copilot Retrieval API with
+  OBO. Preview. See
+  <a href="../howto_grounding_sharepoint_remote/">Foundry IQ: SharePoint remote</a>.</li>
+<li><strong>OneLake (<code>indexedOneLake</code>).</strong> Your content lives in Fabric OneLake
+  and you want Foundry IQ to index and query it natively. Requires
+  Fabric workspace RBAC as a manual prerequisite. Preview. See
+  <a href="../howto_grounding_onelake/">Foundry IQ: OneLake</a>.</li>
+<li><strong>SharePoint indexed (<code>indexedSharePoint</code>).</strong> You want Foundry IQ to
+  run a pre-built AI Search index over a SharePoint site using
+  Microsoft Graph app-only auth (Sites.Selected preferred). No per-user
+  OBO on this kind. Preview. See
+  <a href="../howto_grounding_sharepoint_indexed/">Foundry IQ: SharePoint indexed</a>.</li>
+<li><strong>Web grounding (<code>web</code>).</strong> You want the agent to ground on the public
+  internet, scoped by allow / block domain lists. No ACL, no OBO,
+  billed per Bing call. Preview. See
+  <a href="../howto_grounding_web_bing/">Foundry IQ: Web grounding</a>.</li>
 <li><strong>Azure AI Search direct.</strong> Existing deployment on
   <code>RETRIEVAL_BACKEND=ai_search</code> that is not migrating yet, or a rollback.
   See <a href="../howto_grounding_ai_search_direct/">Direct: Azure AI Search</a>.</li>
