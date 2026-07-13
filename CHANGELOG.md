@@ -8,6 +8,22 @@
 
 ### Fixed
 
+## [v3.4.3] - 2026-07-13
+
+### User and operator impact
+
+Fixes the Fabric Data Agent knowledge source support that `v3.4.2` advertised. In `v3.4.2` the platform-side wiring (App Configuration keys, `search.j2` knowledge source block, `search.settings.j2` bindings, `postProvision.ps1` passthrough) was correct and the knowledge source registers against Foundry IQ `2026-05-01-preview`. However `manifest.json` pinned the orchestrator to `v3.4.0`, and the Fabric Data Agent retrieve wiring (`kind=fabricDataAgent`, per-user OBO forwarding, `dataAgentAnswer` normalization) actually landed on the orchestrator's `develop` branch a few minutes after that tag was cut. As a result, `v3.4.2` deployments that flipped `FABRIC_DATA_AGENT_ENABLED=true` had the knowledge source registered in Foundry IQ but the deployed orchestrator container did not append it to `knowledgeSourceParams` at retrieve time, so no Fabric Data Agent grounding actually occurred.
+
+`v3.4.3` bumps the orchestrator pin to [`v3.4.1`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.4.1), which is the tag that actually contains the Fabric Data Agent retrieve code. No template, script, or App Configuration changes are needed; existing `v3.4.2` environments only need to redeploy the orchestrator container to pick up the fix.
+
+### Changed
+
+- **`manifest.json`: orchestrator pin bumped from `v3.4.0` to [`v3.4.1`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.4.1).** The Fabric Data Agent retrieve wiring (`kind=fabricDataAgent`, per-user OBO forwarding, `dataAgentAnswer` normalization) ships in orchestrator `v3.4.1`; `v3.4.0` did not include it.
+
+### Fixed
+
+- **Fabric Data Agent knowledge source now actually works end to end when `FABRIC_DATA_AGENT_ENABLED=true`.** The `v3.4.2` platform release registered the knowledge source in Foundry IQ but pinned an orchestrator (`v3.4.0`) that had no code to consume it at retrieve time. `v3.4.3` pins orchestrator `v3.4.1` which carries the retrieve wiring.
+
 ## [v3.4.2] - 2026-07-13
 
 ### User and operator impact
