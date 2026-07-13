@@ -1237,9 +1237,18 @@ raw index. Instead of talking to individual indexes, the orchestrator talks to
 a Foundry IQ <strong>Knowledge Base</strong>. The Knowledge Base is the single retrieval
 endpoint for a deployment.</p>
 <p>A Knowledge Base points to one or more <strong>Knowledge Sources</strong>. Each Knowledge
-Source is one place to look: a Blob container, an existing Azure AI Search
-index, a Microsoft 365 tenant, and so on. Foundry IQ queries the sources,
-applies permissions, and returns a merged, permission-trimmed result.</p>
+Source is one place to look, with its own <code>kind</code>: a Blob container, an existing
+Azure AI Search index, a Microsoft 365 tenant, a Fabric ontology, or a Fabric
+Data Agent. Foundry IQ queries the sources, applies permissions, and returns a
+merged, permission-trimmed result.</p>
+<blockquote>
+<p><strong>On the name "Fabric IQ."</strong> "Fabric IQ" is Microsoft's umbrella marketing
+term for the Fabric-side grounding capabilities. It is not a knowledge source
+<code>kind</code>. In Foundry IQ, those capabilities show up as two distinct knowledge
+sources: <code>fabricOntology</code> and <code>fabricDataAgent</code>. When this documentation
+talks about wiring GPT-RAG to Fabric, it is always through one of those two
+knowledge source kinds on the Knowledge Base.</p>
+</blockquote>
 <p>Two things matter for operators:</p>
 <ul>
 <li>You do not have to pick one source. A Knowledge Base can hold several, and
@@ -1249,10 +1258,11 @@ applies permissions, and returns a merged, permission-trimmed result.</p>
 </ul>
 <pre class="mermaid"><code>flowchart LR
   O[GPT-RAG orchestrator] --&gt; KB[Foundry IQ Knowledge Base]
-  KB --&gt; KS1[Knowledge Source: Blob container]
-  KB --&gt; KS2[Knowledge Source: existing Search index]
-  KB --&gt; KS3[Knowledge Source: Work IQ, Microsoft 365]
-  KB --&gt; KS4[Knowledge Source: Fabric IQ, Fabric ontology]</code></pre>
+  KB --&gt; KS1[KS: Blob container, azureBlob]
+  KB --&gt; KS2[KS: Azure AI Search index, searchIndex]
+  KB --&gt; KS3[KS: Work IQ, workIq]
+  KB --&gt; KS4[KS: Fabric ontology, fabricOntology]
+  KB --&gt; KS5[KS: Fabric Data Agent, fabricDataAgent]</code></pre>
 <h2 id="the-alternative-azure-ai-search-direct">The alternative: Azure AI Search direct</h2>
 <p>GPT-RAG can also skip Foundry IQ entirely and query an Azure AI Search index
 directly. This is the older path and the rollback path. It is not a Knowledge
@@ -1290,15 +1300,21 @@ Source. It is a separate retrieval backend selected with
 </tr>
 <tr>
 <td>Work IQ (Microsoft 365)</td>
-<td>Foundry IQ Knowledge Source</td>
+<td>Foundry IQ Knowledge Source (<code>workIq</code>)</td>
 <td>Gated public preview. Off by default.</td>
 <td><a href="../howto_grounding_work_iq/">Foundry IQ: Work IQ</a></td>
 </tr>
 <tr>
-<td>Fabric IQ (Microsoft Fabric ontology)</td>
+<td>Fabric ontology (Microsoft Fabric)</td>
 <td>Foundry IQ Knowledge Source (<code>fabricOntology</code>)</td>
 <td>Preview. Off by default. Requires Fabric workspace + ontology and signed-in users.</td>
-<td><a href="howto_grounding_fabric_iq.md">Foundry IQ: Fabric IQ</a></td>
+<td><a href="../howto_grounding_fabric_ontology/">Foundry IQ: Fabric ontology</a></td>
+</tr>
+<tr>
+<td>Fabric Data Agent (Microsoft Fabric)</td>
+<td>Foundry IQ Knowledge Source (<code>fabricDataAgent</code>)</td>
+<td>Preview. Off by default. Requires a published Fabric Data Agent and signed-in users.</td>
+<td><a href="../howto_grounding_fabric_data_agent/">Foundry IQ: Fabric Data Agent</a></td>
 </tr>
 <tr>
 <td>Azure AI Search direct</td>
@@ -1309,6 +1325,11 @@ Source. It is a separate retrieval backend selected with
 </tbody>
 </table>
 <h2 id="when-to-use-each">When to use each</h2>
+<p>Quick summary before the details below: use the documents source for files,
+Work IQ for personal Microsoft 365 context, Fabric ontology for reasoning over
+business entities and relationships in Fabric, and Fabric Data Agent when you
+want a virtual analyst to run queries over Fabric data on the user's behalf.
+Multiple sources can be enabled together on the same Knowledge Base.</p>
 <p>A first-time operator can follow this short decision guide.</p>
 <ul>
 <li><strong>New deployment, unstructured documents (PDFs, Office files) in Blob.</strong> Use
@@ -1325,9 +1346,13 @@ Source. It is a separate retrieval backend selected with
   users and M365 Copilot licenses. See <a href="../howto_grounding_work_iq/">Foundry IQ: Work IQ</a>.</li>
 <li><strong>You want to ground on analytical data in Microsoft Fabric (semantic
   models, lakehouses, warehouses, KQL databases) exposed through a Fabric
-  ontology.</strong> Add Fabric IQ as a Knowledge Source next to the documents
+  ontology.</strong> Add the Fabric ontology Knowledge Source next to the documents
   source. Requires signed-in users, Fabric licenses, and workspace access
-  to the ontology. See <a href="howto_grounding_fabric_iq.md">Foundry IQ: Fabric IQ</a>.</li>
+  to the ontology. See <a href="../howto_grounding_fabric_ontology/">Foundry IQ: Fabric ontology</a>.</li>
+<li><strong>You want a virtual analyst that runs queries against Fabric data on the
+  user's behalf, rather than reasoning over an ontology.</strong> Add the Fabric
+  Data Agent Knowledge Source. Requires a published Fabric Data Agent and
+  signed-in users. See <a href="../howto_grounding_fabric_data_agent/">Foundry IQ: Fabric Data Agent</a>.</li>
 <li><strong>Existing GPT-RAG deployment that is working on Azure AI Search direct and
   is not ready to migrate.</strong> Stay on <code>RETRIEVAL_BACKEND=ai_search</code>. See
   <a href="../howto_grounding_ai_search_direct/">Direct: Azure AI Search</a>.</li>
