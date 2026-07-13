@@ -37,9 +37,11 @@ the GPT-RAG retrieval backend.
 
 On `foundry_iq`, the Knowledge Base can also register optional additive
 Knowledge Sources next to the documents source: [Work IQ](howto_grounding_work_iq.md)
-for Microsoft 365 context and [Fabric IQ](howto_grounding_fabric_iq.md) for
-Microsoft Fabric analytical data. Both are off by default and require a
-signed-in user.
+for Microsoft 365 context, [Fabric ontology](howto_grounding_fabric_ontology.md)
+for Microsoft Fabric analytical data, and
+[Fabric Data Agent](howto_grounding_fabric_data_agent.md) for handing
+questions off to a curated Fabric virtual analyst. All are off by default
+and require a signed-in user.
 
 ## Conversation History and Retrieval Controls
 

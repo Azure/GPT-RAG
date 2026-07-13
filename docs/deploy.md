@@ -84,7 +84,8 @@ signed-in users:
 - [Foundry IQ: Work IQ (Microsoft 365)](howto_grounding_work_iq.md) blends
   in mail, meetings, files, chats, and people from the signed-in user's
   M365 world. Gated public preview.
-- [Foundry IQ: Fabric IQ (Microsoft Fabric)](howto_grounding_fabric_iq.md)
+- [Foundry IQ: Fabric ontology (Microsoft Fabric)](howto_grounding_fabric_ontology.md)
+- [Foundry IQ: Fabric Data Agent (Microsoft Fabric)](howto_grounding_fabric_data_agent.md)
   blends in analytical data from a Fabric ontology (semantic model,
   lakehouse, warehouse, KQL). Preview. Review data-egress caveats before
   enabling.

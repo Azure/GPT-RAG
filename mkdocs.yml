@@ -24,6 +24,7 @@ plugins:
       redirect_maps:
         howto_retrieval_backend.md: howto_grounding_foundry_iq_documents.md
         howto_work_iq.md: howto_grounding_work_iq.md
+        howto_grounding_fabric_iq.md: howto_grounding_fabric_ontology.md
 markdown_extensions:
   - admonition
   - attr_list
@@ -62,7 +63,8 @@ nav:
       - Overview: howto_grounding_overview.md
       - 'Foundry IQ: Documents': howto_grounding_foundry_iq_documents.md
       - 'Foundry IQ: Work IQ (Microsoft 365)': howto_grounding_work_iq.md
-      - 'Foundry IQ: Fabric IQ (preview)': howto_grounding_fabric_iq.md
+      - 'Foundry IQ: Fabric ontology (preview)': howto_grounding_fabric_ontology.md
+      - 'Foundry IQ: Fabric Data Agent (preview)': howto_grounding_fabric_data_agent.md
       - 'Direct: Azure AI Search': howto_grounding_ai_search_direct.md
     - Multimodality: howto_multimodality.md
     - User Feedback: howto_userfeedback.md
