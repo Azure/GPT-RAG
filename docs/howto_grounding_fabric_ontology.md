@@ -72,6 +72,13 @@ blade (or `az appconfig kv set --label gpt-rag --key ...`) and restart the
 orchestrator; or set the same values as azd env vars and re-run
 `azd hooks run postprovision` and `azd deploy`.
 
+> **About the `FABRIC_IQ_*` prefix.** The prefix is historical. These four
+> keys configure the `fabricOntology` knowledge source, not a separate
+> "Fabric IQ" thing. The name stuck because the code shipped before the
+> knowledge-source kinds were split. Treat `FABRIC_IQ_*` as the config
+> namespace for `fabricOntology`. The Fabric Data Agent knowledge source
+> has its own `FABRIC_DATA_AGENT_*` keys.
+
 | Key | Value |
 | --- | --- |
 | `FABRIC_IQ_ENABLED` | `true` |

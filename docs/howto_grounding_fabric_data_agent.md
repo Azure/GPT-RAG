@@ -44,6 +44,23 @@ Do not use it when:
   compliance boundary. See the [data egress caveat](#data-egress-caveat)
   below.
 
+## Fabric Data Agent vs Fabric ontology
+
+Both knowledge sources ground on Microsoft Fabric data, and both can be
+enabled on the same Knowledge Base. Pick the one that matches how your
+Fabric content is exposed today.
+
+| | Fabric Data Agent (`fabricDataAgent`) | Fabric ontology (`fabricOntology`) |
+| --- | --- | --- |
+| What it grounds on | A curated Fabric Data Agent that answers questions over your data. | A Fabric ontology exposing semantic models, lakehouses, warehouses, KQL. |
+| Mental model | Virtual analyst. Hands the question to the Data Agent and gets an answer back. | Reasoning over entities and relationships in your business ontology. |
+| Best when | You already invested in a Data Agent tuned for your business questions. | You have a modeled ontology and want the LLM to reason across it. |
+| Response shape | Natural-language answer plus tabular evidence. | Grounded facts derived from the ontology. |
+| App Config prefix | `FABRIC_DATA_AGENT_*` | `FABRIC_IQ_*` (historical name, configures `fabricOntology`) |
+
+If both fit, start with the one your team already uses in Fabric. You can
+add the other later on the same Knowledge Base.
+
 ## Prerequisites
 
 Work through these in order. All of them are hard blockers.

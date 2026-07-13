@@ -5,6 +5,11 @@ signed-in user's Microsoft 365 world: mail, meetings, files, chats, and
 people. It runs next to your document Knowledge Source on the same Knowledge
 Base. It does not replace it.
 
+On the Knowledge Base, this source is registered with `kind: workIq`. That is
+the literal string in the Foundry IQ configuration, matching `fabricOntology`
+and `fabricDataAgent` for the Fabric sources. The `WORK_IQ_*` App
+Configuration keys below configure this `workIq` knowledge source.
+
 If you have not read the [Grounding sources overview](howto_grounding_overview.md),
 start there. In short: Work IQ is not a separate retrieval backend. It is a
 second source registered on the Foundry IQ Knowledge Base, so a single
