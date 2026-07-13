@@ -60,13 +60,13 @@ Work through these in order. All of them are hard blockers.
    and the GPT-RAG orchestrator must all be in the same Entra tenant.
    Cross-tenant is not supported.
 5. **Foundry IQ preview API.** The knowledge source requires the Foundry IQ
-   preview API that supports `kind: fabricDataAgent`. GPT-RAG v3.4.2 pins
+   preview API that supports `kind: fabricDataAgent`. GPT-RAG v3.4.3 pins
    the `2026-05-01-preview` baseline.
 
 ## Configure Fabric Data Agent
 
 The Fabric Data Agent source is opt-in and defaults to off. `azd provision`
-(v3.4.2+) seeds the four keys automatically under the `gpt-rag` label with
+(v3.4.3+) seeds the four keys automatically under the `gpt-rag` label with
 `FABRIC_DATA_AGENT_ENABLED=false` and the workspace, data agent, and
 knowledge-source name as empty strings. You do not have to create them by
 hand. To turn it on for an existing environment, edit the values in the
