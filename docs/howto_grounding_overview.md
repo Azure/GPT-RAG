@@ -1,24 +1,52 @@
 # Grounding sources overview
 
 Start here if you are new to how GPT-RAG finds the information it uses to answer
-a question. This page explains what retrieval and grounding mean, what Foundry
-IQ is, how Knowledge Bases and Knowledge Sources fit together, which sources
-GPT-RAG supports today, and when to pick each one.
+a question. This page is the map for everything under **Grounding sources**.
+Read it first, then jump to the page for the approach and source you want.
 
-The other pages in this section are the operator guides for each source. Read
-this page first, then jump to the source you want to enable.
+## The two approaches
+
+GPT-RAG supports **two** ways to ground the LLM. Every other page in this
+section belongs to one of them. Pick your approach first so you know which
+set of pages you are reading.
+
+| | Approach A: **Foundry IQ Knowledge Base** | Approach B: **Azure AI Search direct** |
+| --- | --- | --- |
+| What the orchestrator talks to | A single Foundry IQ Knowledge Base endpoint that fans out to one or more Knowledge Sources | An Azure AI Search index, directly |
+| Setting | `RETRIEVAL_BACKEND=foundry_iq` (default for v3.0.2+) | `RETRIEVAL_BACKEND=ai_search` |
+| Sources it can blend in one call | Blob, existing Search index, Work IQ, Fabric ontology, Fabric Data Agent, SharePoint (remote and indexed), OneLake, Web | One AI Search index |
+| Multi-source, permission trimming, agentic retrieval | Yes, out of the box | No, you build it |
+| Custom ingestion pipeline | Optional (via a `searchIndex` knowledge source) | Required — GPT-RAG ingestion pipeline writes to the index |
+| Status | Default and recommended | Fully supported, rollback and compatibility path |
+| Pages | Everything under **Approach A** in the left nav, starting with [Prerequisites](howto_grounding_foundry_iq_prereqs.md) | Everything under **Approach B** in the left nav, starting with [Azure AI Search direct](howto_grounding_ai_search_direct.md) |
+
+Rule of thumb:
+
+- **New deployment or you want to add Microsoft 365, Fabric, SharePoint live,
+  OneLake, or Web sources:** use Approach A (Foundry IQ). It is the default.
+- **Existing deployment that still runs the classic GPT-RAG ingestion into a
+  single AI Search index, or you want the rollback path:** stay on Approach B.
+
+You cannot mix the two backends in the same request. The orchestrator uses one
+`RETRIEVAL_BACKEND` at a time. Inside Approach A you can enable many Knowledge
+Sources on the same Knowledge Base and Foundry IQ blends them.
 
 ## Prerequisites
 
-Before you enable any Foundry IQ knowledge source, review
-[Foundry IQ prerequisites](howto_grounding_foundry_iq_prereqs.md). That page
-covers the shared baseline: region, RBAC, API version, feature flags, and the
-authorization model for each knowledge source kind. Each knowledge source also
-has extra prerequisites specific to that source, listed on its own page.
+Prerequisites depend on the approach:
 
-## Which source for which question
+- **Approach A (Foundry IQ):** review [Foundry IQ prerequisites](howto_grounding_foundry_iq_prereqs.md).
+  That page covers the shared baseline (region, RBAC, API version, feature
+  flags, authorization model). Each knowledge source page adds source-specific
+  prerequisites on top.
+- **Approach B (Azure AI Search direct):** see the [Azure AI Search direct](howto_grounding_ai_search_direct.md)
+  page and, if you are ingesting from SharePoint via the classic path, the
+  [SharePoint connector](howto_sharepoint_connector.md) page.
 
-If you just want to know where to start, use this quick guide.
+## Which source for which question (Approach A)
+
+If you already decided on Approach A and just want to know where to start, use
+this quick guide.
 
 - Your files already live in a Blob container? Use the **Blob** knowledge
   source. This is the default for new deployments.
@@ -40,8 +68,6 @@ If you just want to know where to start, use this quick guide.
 - You want the agent to ground on the public internet, scoped by allow /
   block domain lists? Add **Web grounding (Bing)**. Preview. Billed per Bing
   call.
-- You are on the older Azure AI Search direct path and not ready to move?
-  Stay there. It is fully supported as the rollback path.
 
 You can enable more than one of the above on the same Knowledge Base. The
 rest of this page explains the pieces behind those names.

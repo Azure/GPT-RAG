@@ -60,20 +60,22 @@ nav:
     - Auth & Doc Security: howto_authentication.md
     - Admin Dashboard Sign-in: howto_dashboard_signin.md
     - Grounding sources:
-      - 'Foundry IQ: Prerequisites': howto_grounding_foundry_iq_prereqs.md
-      - Overview: howto_grounding_overview.md
-      - 'Foundry IQ: Documents': howto_grounding_foundry_iq_documents.md
-      - 'Foundry IQ: Work IQ (Microsoft 365)': howto_grounding_work_iq.md
-      - 'Foundry IQ: Fabric ontology (preview)': howto_grounding_fabric_ontology.md
-      - 'Foundry IQ: Fabric Data Agent (preview)': howto_grounding_fabric_data_agent.md
-      - 'Foundry IQ: SharePoint remote (preview)': howto_grounding_sharepoint_remote.md
-      - 'Foundry IQ: OneLake (preview)': howto_grounding_onelake.md
-      - 'Foundry IQ: SharePoint indexed (preview)': howto_grounding_sharepoint_indexed.md
-      - 'Foundry IQ: Web grounding (preview)': howto_grounding_web_bing.md
-      - 'Direct: Azure AI Search': howto_grounding_ai_search_direct.md
+      - Overview (start here): howto_grounding_overview.md
+      - 'Approach A: Foundry IQ Knowledge Base':
+        - Prerequisites: howto_grounding_foundry_iq_prereqs.md
+        - Documents: howto_grounding_foundry_iq_documents.md
+        - Work IQ (Microsoft 365): howto_grounding_work_iq.md
+        - Fabric ontology (preview): howto_grounding_fabric_ontology.md
+        - Fabric Data Agent (preview): howto_grounding_fabric_data_agent.md
+        - SharePoint remote (preview): howto_grounding_sharepoint_remote.md
+        - SharePoint indexed (preview): howto_grounding_sharepoint_indexed.md
+        - OneLake (preview): howto_grounding_onelake.md
+        - Web grounding (preview): howto_grounding_web_bing.md
+      - 'Approach B: Azure AI Search direct':
+        - Overview: howto_grounding_ai_search_direct.md
+        - SharePoint connector: howto_sharepoint_connector.md
     - Multimodality: howto_multimodality.md
     - User Feedback: howto_userfeedback.md
-    - Sharepoint Connector: howto_sharepoint_connector.md
     - Retrieval Optimization: howto_retrieval_optimization.md
     - Resource Naming (CAF): howto_resource_naming.md
     - Troubleshooting: troubleshooting.md
