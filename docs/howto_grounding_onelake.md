@@ -23,6 +23,10 @@ from a OneLake lakehouse in one call.
     and configuration may change without notice. Do not depend on it for
     production workloads until it is generally available.
 
+> Complete the [Foundry IQ prerequisites](howto_grounding_foundry_iq_prereqs.md)
+> first. The Prerequisites section below covers only what is specific to this
+> source.
+
 ## When to use the OneLake source
 
 Use the `indexedOneLake` knowledge source when:

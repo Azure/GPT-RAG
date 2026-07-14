@@ -60,6 +60,7 @@ nav:
     - Auth & Doc Security: howto_authentication.md
     - Admin Dashboard Sign-in: howto_dashboard_signin.md
     - Grounding sources:
+      - 'Foundry IQ: Prerequisites': howto_grounding_foundry_iq_prereqs.md
       - Overview: howto_grounding_overview.md
       - 'Foundry IQ: Documents': howto_grounding_foundry_iq_documents.md
       - 'Foundry IQ: Work IQ (Microsoft 365)': howto_grounding_work_iq.md

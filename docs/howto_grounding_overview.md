@@ -8,6 +8,14 @@ GPT-RAG supports today, and when to pick each one.
 The other pages in this section are the operator guides for each source. Read
 this page first, then jump to the source you want to enable.
 
+## Prerequisites
+
+Before you enable any Foundry IQ knowledge source, review
+[Foundry IQ prerequisites](howto_grounding_foundry_iq_prereqs.md). That page
+covers the shared baseline: region, RBAC, API version, feature flags, and the
+authorization model for each knowledge source kind. Each knowledge source also
+has extra prerequisites specific to that source, listed on its own page.
+
 ## Which source for which question
 
 If you just want to know where to start, use this quick guide.

@@ -17,6 +17,10 @@ Use this when:
 - You need item-level ACL to stay with the source, not be replicated.
 - Fresh (near real-time) content is more important than sub-second latency.
 
+> Complete the [Foundry IQ prerequisites](howto_grounding_foundry_iq_prereqs.md)
+> first. The Prerequisites section below covers only what is specific to this
+> source.
+
 ## Overview
 
 At retrieve time the orchestrator adds a `remoteSharePoint` knowledge source

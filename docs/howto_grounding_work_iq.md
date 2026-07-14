@@ -21,6 +21,10 @@ request can pull from documents and from Microsoft 365 in one call.
     may change without notice. Do not depend on Work IQ for production
     workloads until it is generally available.
 
+> Complete the [Foundry IQ prerequisites](howto_grounding_foundry_iq_prereqs.md)
+> first. The Prerequisites section below covers only what is specific to this
+> source.
+
 ## When to use Work IQ
 
 Use Work IQ when:

@@ -28,6 +28,10 @@ call.
     workloads that require per-user permission trimming until delegated
     auth lands in a later release.
 
+> Complete the [Foundry IQ prerequisites](howto_grounding_foundry_iq_prereqs.md)
+> first. The Prerequisites section below covers only what is specific to this
+> source.
+
 ## When to use SharePoint Indexed
 
 Use SharePoint Indexed when:

@@ -1,5 +1,9 @@
 # Foundry IQ: Documents
 
+> Complete the [Foundry IQ prerequisites](howto_grounding_foundry_iq_prereqs.md)
+> first. This page adds only the settings specific to the default Blob
+> Documents path and the custom `searchIndex` path.
+
 This page covers the two document-oriented Knowledge Sources that Foundry IQ
 supports in GPT-RAG. Use it when you deploy on Foundry IQ
 (`RETRIEVAL_BACKEND=foundry_iq`) and you need to decide how documents get into

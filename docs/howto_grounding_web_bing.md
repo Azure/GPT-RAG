@@ -19,6 +19,10 @@ from Bing in one call.
     without notice. Do not depend on it for production workloads until it
     is generally available.
 
+> Complete the [Foundry IQ prerequisites](howto_grounding_foundry_iq_prereqs.md)
+> first. The Prerequisites section below covers only what is specific to this
+> source.
+
 ## When to use Web grounding
 
 Use the Web knowledge source when:
