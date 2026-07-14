@@ -13,10 +13,10 @@
       
       
       
-        <link rel="prev" href="../howto_grounding_onelake/">
+        <link rel="prev" href="../howto_dashboard_signin/">
       
       
-        <link rel="next" href="../howto_grounding_web_bing/">
+        <link rel="next" href="../howto_grounding_overview/">
       
       
       <link rel="icon" href="../favicon.ico">
@@ -24,7 +24,7 @@
     
     
       
-        <title>Foundry IQ: SharePoint indexed (preview) - GPT-RAG</title>
+        <title>Foundry IQ: Prerequisites - GPT-RAG</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#foundry-iq-sharepoint-indexed-preview" class="md-skip">
+        <a href="#foundry-iq-prerequisites" class="md-skip">
           Skip to content
         </a>
       
@@ -111,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Foundry IQ: SharePoint indexed (preview)
+              Foundry IQ: Prerequisites
             
           </span>
         </div>
@@ -801,10 +801,30 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../howto_grounding_foundry_iq_prereqs/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Foundry IQ: Prerequisites
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -813,6 +833,116 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-gpt-rag-does-for-you" class="md-nav__link">
+    <span class="md-ellipsis">
+      What GPT-RAG does for you
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#before-you-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      Before you start
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#foundry-project-and-preview-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      Foundry project and preview API
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rbac-and-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      RBAC and permissions
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authorization-model-per-knowledge-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      Authorization model per knowledge source
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#feature-flags-gated-by-microsoft" class="md-nav__link">
+    <span class="md-ellipsis">
+      Feature flags gated by Microsoft
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#optional-query-planning-llm" class="md-nav__link">
+    <span class="md-ellipsis">
+      Optional: query planning LLM
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verify-your-baseline" class="md-nav__link">
+    <span class="md-ellipsis">
+      Verify your baseline
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-reading" class="md-nav__link">
+    <span class="md-ellipsis">
+      Related reading
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -969,30 +1099,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Foundry IQ: SharePoint indexed (preview)
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../howto_grounding_sharepoint_indexed/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1001,89 +1111,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#when-to-use-sharepoint-indexed" class="md-nav__link">
-    <span class="md-ellipsis">
-      When to use SharePoint Indexed
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
-    <span class="md-ellipsis">
-      Prerequisites
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      Configuration
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#how-sharepoint-indexed-works" class="md-nav__link">
-    <span class="md-ellipsis">
-      How SharePoint Indexed works
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#preview-limitations" class="md-nav__link">
-    <span class="md-ellipsis">
-      Preview limitations
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#troubleshooting" class="md-nav__link">
-    <span class="md-ellipsis">
-      Troubleshooting
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#related-reading" class="md-nav__link">
-    <span class="md-ellipsis">
-      Related reading
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1330,301 +1357,346 @@
   
 
 
-<h1 id="foundry-iq-sharepoint-indexed-preview">Foundry IQ: SharePoint Indexed (preview)</h1>
-<p>SharePoint Indexed is a Foundry IQ Knowledge Source that grounds answers on
-content from a specific SharePoint site, served from a pre-built Azure AI
-Search index. It runs next to your document Knowledge Source on the same
-Knowledge Base. It does not replace it.</p>
-<p>On the Knowledge Base, this source is registered with <code>kind: indexedSharePoint</code>.
-That is the literal string in the Foundry IQ configuration, matching <code>workIq</code>,
-<code>fabricOntology</code>, and <code>fabricDataAgent</code> for the other sources. The
-<code>SHAREPOINT_INDEXED_*</code> App Configuration keys below configure this
-<code>indexedSharePoint</code> knowledge source.</p>
-<p>If you have not read the <a href="../howto_grounding_overview/">Grounding sources overview</a>,
-start there. In short: SharePoint Indexed is not a separate retrieval
-backend. It is an additional source registered on the Foundry IQ Knowledge
-Base, so a single request can pull from documents and from SharePoint in one
-call.</p>
+<h1 id="foundry-iq-prerequisites">Foundry IQ prerequisites</h1>
+<p>This is the shared baseline for every Foundry IQ knowledge source in GPT-RAG.
+Read this once before you enable your first Foundry IQ knowledge source. Each
+per-source how-to page lists only its own extra prerequisites on top of what
+is covered here.</p>
+<p>If you have not read the <a href="../howto_grounding_overview/">Grounding sources overview</a>
+yet, start there. It explains what a Knowledge Base and a Knowledge Source
+are and how GPT-RAG uses them.</p>
 <div class="admonition warning">
-<p class="admonition-title">Public preview, app-only auth, no ACL trimming</p>
-<p>SharePoint Indexed is in public preview on Foundry IQ API
-<code>2026-05-01-preview</code>. This release ships with <strong>app-only auth</strong> (Managed
-Identity + Federated Identity Credential + Microsoft Graph
-<code>Sites.Selected</code> or <code>Sites.Read.All</code>) and <strong>does not</strong> perform per-user
-ACL or site-group trimming. Every signed-in user sees results the app
-itself has been granted access to. Behavior, quotas, and configuration
-may change without notice. Do not depend on SharePoint Indexed for
-workloads that require per-user permission trimming until delegated
-auth lands in a later release.</p>
+<p class="admonition-title">Preview API</p>
+<p>Foundry IQ uses the Azure AI Search agentic retrieval API. GPT-RAG pins
+the <code>2026-05-01-preview</code> version. Preview features are provided without a
+service-level agreement and may change without notice. Do not depend on
+them for production workloads until they are generally available. See the
+<a href="https://azure.microsoft.com/support/legal/preview-supplemental-terms/">Microsoft preview terms</a>.</p>
 </div>
-<blockquote>
-<p>Complete the <a href="../howto_grounding_foundry_iq_prereqs/">Foundry IQ prerequisites</a>
-first. The Prerequisites section below covers only what is specific to this
-source.</p>
-</blockquote>
-<h2 id="when-to-use-sharepoint-indexed">When to use SharePoint Indexed</h2>
-<p>Use SharePoint Indexed when:</p>
+<h2 id="what-gpt-rag-does-for-you">What GPT-RAG does for you</h2>
+<p><code>azd provision</code> on GPT-RAG v3.0.2+ with AI Landing Zone v2.1.2+ handles the
+common Foundry IQ setup: it deploys a Foundry project, an Azure AI Search
+service with the <code>knowledgeRetrieval</code> billing plan enabled, assigns the RBAC
+roles listed below, creates the Knowledge Base, and seeds all the Foundry IQ
+<code>App Configuration</code> keys under the <code>gpt-rag</code> label.</p>
+<p>If you used the default deployment path, most of this page is background
+information. The parts you may still need to act on yourself are:</p>
 <ul>
-<li>You have a specific SharePoint site whose content should ground answers
-  for everyone using the deployment.</li>
-<li>The site's contents are safe to expose to all authenticated users of the
-  deployment (no per-user ACL requirement).</li>
-<li>You want retrieval latency comparable to your existing AI Search index
-  (the source reads a local index, not a live SharePoint API).</li>
+<li>Region selection before <code>azd provision</code>.</li>
+<li>Feature flags gated by Microsoft (Work IQ, Web).</li>
+<li>Per-source authorization steps for on-behalf-of (OBO) knowledge sources.</li>
+<li>Choosing whether to enable a query planning LLM on the Knowledge Base.</li>
 </ul>
-<p>Do not use SharePoint Indexed when:</p>
+<p>Everything else on this page is what your deployment already has.</p>
+<h2 id="before-you-start">Before you start</h2>
 <ul>
-<li>You need per-user permission trimming based on SharePoint or M365 group
-  membership. Use Work IQ instead, which enforces the caller's M365
-  permissions via a delegated (OBO) token.</li>
-<li>You want to ground on the caller's own SharePoint or OneDrive content.
-  Use Work IQ.</li>
-<li>You need to cover many SharePoint sites at once. This preview scopes to
-  one site per knowledge source; wire additional sites as separate KS
-  entries in a follow-up release.</li>
+<li>An <strong>Azure subscription</strong> where you will deploy GPT-RAG.</li>
+<li>Local roles on that subscription:<ul>
+<li><code>Contributor</code> and <code>User Access Administrator</code> for the identity that
+  runs <code>azd provision</code>. This is the <a href="../deploy/#prerequisites">deploy guide</a>
+  baseline.</li>
 </ul>
-<h2 id="prerequisites">Prerequisites</h2>
-<p>Work through these in order. Steps 1 through 4 are hard blockers. Bicep
-cannot cover them today because they modify Entra objects; run the <code>az</code>
-commands manually or ask your tenant admin.</p>
-<ol>
-<li>
-<p>Register an Entra application in the target tenant for the SharePoint
-   Indexed knowledge source. Note its Application (client) ID; you will
-   reference it in step 2.</p>
-<div class="highlight"><pre><span></span><code>az<span class="w"> </span>ad<span class="w"> </span>app<span class="w"> </span>create<span class="w"> </span>--display-name<span class="w"> </span><span class="s2">&quot;gpt-rag-sharepoint-indexed&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--sign-in-audience<span class="w"> </span>AzureADMyOrg
-</code></pre></div>
 </li>
-<li>
-<p>Add a Federated Identity Credential on that app that trusts the User
-   Assigned Managed Identity used by the orchestrator. Replace
-   <code>&lt;app-object-id&gt;</code>, <code>&lt;uami-issuer&gt;</code>, and <code>&lt;uami-subject&gt;</code> with the values
-   from your deployment (the UAMI issuer is
-   <code>https://&lt;region&gt;.identity.azure.net/subscriptions/&lt;sub&gt;/resourceGroups/&lt;rg&gt;/providers/Microsoft.ManagedIdentity/userAssignedIdentities/&lt;uami&gt;</code>;
-   the subject is the same URL).</p>
-<div class="highlight"><pre><span></span><code>az<span class="w"> </span>ad<span class="w"> </span>app<span class="w"> </span>federated-credential<span class="w"> </span>create<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--id<span class="w"> </span>&lt;app-object-id&gt;<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--parameters<span class="w"> </span><span class="s1">&#39;{</span>
-<span class="s1">    &quot;name&quot;: &quot;gpt-rag-orchestrator-uami&quot;,</span>
-<span class="s1">    &quot;issuer&quot;: &quot;&lt;uami-issuer&gt;&quot;,</span>
-<span class="s1">    &quot;subject&quot;: &quot;&lt;uami-subject&gt;&quot;,</span>
-<span class="s1">    &quot;audiences&quot;: [&quot;api://AzureADTokenExchange&quot;]</span>
-<span class="s1">  }&#39;</span>
-</code></pre></div>
-</li>
-<li>
-<p>Grant admin consent for the Microsoft Graph permissions the knowledge
-   source needs. Prefer <code>Sites.Selected</code> (least privilege) over
-   <code>Sites.Read.All</code>. Replace <code>&lt;app-object-id&gt;</code> with the app object ID from
-   step 1.</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Sites.Selected (preferred): grant Application permission, then grant</span>
-<span class="c1"># site-scoped access in step 4.</span>
-az<span class="w"> </span>ad<span class="w"> </span>app<span class="w"> </span>permission<span class="w"> </span>add<span class="w"> </span>--id<span class="w"> </span>&lt;app-object-id&gt;<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--api<span class="w"> </span><span class="m">00000003</span>-0000-0000-c000-000000000000<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--api-permissions<span class="w"> </span>883ea226-0bf2-4a8f-9f9d-92c9162a727d<span class="o">=</span>Role
-
-az<span class="w"> </span>ad<span class="w"> </span>app<span class="w"> </span>permission<span class="w"> </span>admin-consent<span class="w"> </span>--id<span class="w"> </span>&lt;app-object-id&gt;
-</code></pre></div>
-<p>If your organization does not use <code>Sites.Selected</code>, you can grant
-<code>Sites.Read.All</code> (tenant-wide read) instead:</p>
-<div class="highlight"><pre><span></span><code>az<span class="w"> </span>ad<span class="w"> </span>app<span class="w"> </span>permission<span class="w"> </span>add<span class="w"> </span>--id<span class="w"> </span>&lt;app-object-id&gt;<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--api<span class="w"> </span><span class="m">00000003</span>-0000-0000-c000-000000000000<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--api-permissions<span class="w"> </span>332a536c-c7ef-4017-ab91-336970924f0d<span class="o">=</span>Role
-
-az<span class="w"> </span>ad<span class="w"> </span>app<span class="w"> </span>permission<span class="w"> </span>admin-consent<span class="w"> </span>--id<span class="w"> </span>&lt;app-object-id&gt;
-</code></pre></div>
-</li>
-<li>
-<p>If you used <code>Sites.Selected</code>, grant the app read access to the target
-   SharePoint site. Run this as a Graph call from a tenant admin session
-   (Graph Explorer, or <code>az rest</code>). Replace <code>&lt;site-id&gt;</code> with the site's
-   Microsoft Graph site ID and <code>&lt;app-object-id&gt;</code> with the value from
-   step 1.</p>
-<div class="highlight"><pre><span></span><code>az<span class="w"> </span>rest<span class="w"> </span>--method<span class="w"> </span>POST<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--uri<span class="w"> </span><span class="s2">&quot;https://graph.microsoft.com/v1.0/sites/&lt;site-id&gt;/permissions&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--body<span class="w"> </span><span class="s1">&#39;{</span>
-<span class="s1">    &quot;roles&quot;: [&quot;read&quot;],</span>
-<span class="s1">    &quot;grantedToIdentities&quot;: [</span>
-<span class="s1">      { &quot;application&quot;: { &quot;id&quot;: &quot;&lt;app-object-id&gt;&quot;, &quot;displayName&quot;: &quot;gpt-rag-sharepoint-indexed&quot; } }</span>
-<span class="s1">    ]</span>
-<span class="s1">  }&#39;</span>
-</code></pre></div>
-</li>
-<li>
-<p>Provision an Azure AI Search index that projects the SharePoint site's
-   content. The index name goes into <code>SHAREPOINT_INDEXED_INDEX_NAME</code>. This
-   preview does not create the index for you; use the SharePoint indexer
-   templates published by AI Search, or your own ingestion pipeline.</p>
-</li>
-<li>
-<p>Confirm the AI Search service SKU is at least <code>standard</code> (the preview
-   feature is not available on <code>free</code> or <code>basic</code>).</p>
-</li>
-<li>
-<p>The Foundry resource and the target SharePoint tenant must be in the
-   same Entra tenant. Cross-tenant SharePoint Indexed is not supported in
-   this preview.</p>
-</li>
-</ol>
-<h2 id="configuration">Configuration</h2>
-<p>All SharePoint Indexed settings live in Azure App Configuration on the
-GPT-RAG deployment, under the <code>gpt-rag</code> label. <code>azd provision</code> seeds the
-five keys below with defaults (<code>SHAREPOINT_INDEXED_ENABLED=false</code>,
-identifiers blank) so you do not have to create them by hand. To turn
-SharePoint Indexed on for an existing environment, edit the values in the
-App Configuration blade (or <code>az appconfig kv set --label gpt-rag --key ...</code>)
-and restart the orchestrator; or set the same values as azd env vars and
-re-run <code>azd hooks run postprovision</code> and <code>azd deploy</code>.</p>
+<li>A <strong>region</strong> that supports Azure AI Search agentic retrieval. See
+  <a href="https://learn.microsoft.com/azure/search/search-region-support#features-subject-to-regional-availability">Azure AI Search regions list</a>
+  and pick a region with the "Agentic retrieval" column set. GPT-RAG's
+  <a href="../deploy/#regional-preflight">regional preflight</a> will flag your choice
+  before deployment starts.</li>
+<li><strong>Azure AI Search tier</strong>: Basic or higher. The Free tier does not support
+  managed identity, which Foundry IQ needs to read the Knowledge Base and
+  optionally to call the query planning LLM. See
+  <a href="https://learn.microsoft.com/azure/search/agentic-retrieval-overview#availability-and-pricing">tier and pricing</a>.</li>
+</ul>
+<h2 id="foundry-project-and-preview-api">Foundry project and preview API</h2>
+<ul>
+<li>A <strong>Foundry project</strong> in the same subscription and region as your Search
+  service. GPT-RAG deploys one for you through AI Landing Zone. To create
+  one manually, see
+  <a href="https://learn.microsoft.com/azure/ai-foundry/how-to/create-projects">Create a Foundry project</a>.</li>
+<li><strong>Preview API version</strong> <code>FOUNDRY_IQ_API_VERSION=2026-05-01-preview</code>. This
+  is required for per-user permissions on native knowledge sources and for
+  <code>filterAddOn</code> on the <code>searchIndex</code> knowledge source. See
+  <a href="../howto_grounding_foundry_iq_documents/#configuration-settings">Foundry IQ documents</a>
+  for the full key list.</li>
+</ul>
+<h2 id="rbac-and-permissions">RBAC and permissions</h2>
+<p>Two distinct identities need permissions for Foundry IQ to work end to end:</p>
+<ul>
+<li>The <strong>executor</strong> identity that provisions and manages Knowledge Bases and
+  Knowledge Sources.</li>
+<li>The <strong>runtime</strong> identities that call the Knowledge Base at query time: the
+  GPT-RAG orchestrator managed identity and the Foundry project managed
+  identity.</li>
+</ul>
+<p>GPT-RAG's provisioning assigns these roles automatically. The table is here
+so you can verify them in the Azure portal or reproduce them in a locked-down
+subscription where you deploy manually.</p>
 <table>
 <thead>
 <tr>
-<th>Setting</th>
+<th>Assignee</th>
+<th>Role</th>
+<th>Scope</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Executor (user or SP running <code>azd provision</code>)</td>
+<td><code>Search Service Contributor</code></td>
+<td>Azure AI Search service</td>
+<td>Create and update the Knowledge Base and Knowledge Sources.</td>
+</tr>
+<tr>
+<td>Executor</td>
+<td><code>Search Index Data Contributor</code></td>
+<td>Azure AI Search service</td>
+<td>Populate indexes generated by indexed knowledge sources.</td>
+</tr>
+<tr>
+<td>Executor</td>
+<td><code>App Configuration Data Owner</code></td>
+<td>App Configuration store</td>
+<td>Write the <code>gpt-rag</code>-labeled keys.</td>
+</tr>
+<tr>
+<td>Foundry project managed identity</td>
+<td><code>Search Index Data Reader</code></td>
+<td>Azure AI Search service</td>
+<td>Read Knowledge Base results.</td>
+</tr>
+<tr>
+<td>Foundry project managed identity</td>
+<td><code>Search Service Contributor</code></td>
+<td>Azure AI Search service</td>
+<td>Create the AI Search connection used by the Knowledge Base.</td>
+</tr>
+<tr>
+<td>Foundry project managed identity</td>
+<td><code>Storage Blob Data Reader</code></td>
+<td>GenAI storage account</td>
+<td>Read the <code>documents</code> container for the default Blob path.</td>
+</tr>
+<tr>
+<td>Azure AI Search service managed identity</td>
+<td><code>Cognitive Services User</code></td>
+<td>Foundry account</td>
+<td>Call the Foundry model account (vectorizers and, if configured, the query planning LLM). Assigned by default.</td>
+</tr>
+<tr>
+<td>Orchestrator container app managed identity</td>
+<td><code>Search Index Data Reader</code></td>
+<td>Azure AI Search service</td>
+<td>Query the Knowledge Base at runtime.</td>
+</tr>
+<tr>
+<td>Orchestrator container app managed identity</td>
+<td><code>Cognitive Services OpenAI User</code></td>
+<td>Foundry account</td>
+<td>Call the model that generates the final answer.</td>
+</tr>
+</tbody>
+</table>
+<p>Full role tables for every GPT-RAG component are in
+<a href="../deploy/#deploy-gpt-rag-services">Deployment guide: role assignments</a>.</p>
+<p>For the underlying Microsoft-documented roles, see
+<a href="https://learn.microsoft.com/azure/search/agentic-retrieval-how-to-create-knowledge-base#prerequisites">Create a Knowledge Base: prerequisites</a>
+and
+<a href="https://learn.microsoft.com/azure/foundry/agents/how-to/foundry-iq-connect#authentication-and-permissions">Connect a Foundry IQ Knowledge Base to Foundry Agent Service: authentication and permissions</a>.</p>
+<h2 id="authorization-model-per-knowledge-source">Authorization model per knowledge source</h2>
+<p>Foundry IQ has two authorization patterns. Which one applies determines
+whether the source can serve anonymous chat and whether your users need to
+sign in.</p>
+<table>
+<thead>
+<tr>
+<th>Knowledge source kind</th>
+<th>Auth pattern</th>
+<th>Signed-in user required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>azureBlob</code> (Documents, default)</td>
+<td>App-only. Foundry IQ reads Blob using its own identity, with optional <code>rbacScope</code> or Purview labels for trimming.</td>
+<td>No.</td>
+</tr>
+<tr>
+<td><code>searchIndex</code> (custom ingestion path)</td>
+<td>App-only. Optional <code>filterAddOn</code> for GPT-RAG security fields.</td>
+<td>No.</td>
+</tr>
+<tr>
+<td><code>indexedOneLake</code></td>
+<td>App-only. Foundry IQ managed identity reads the lakehouse.</td>
+<td>No.</td>
+</tr>
+<tr>
+<td><code>indexedSharePoint</code></td>
+<td>App-only. Microsoft Graph <code>Sites.Selected</code> or <code>Sites.Read.All</code> on a registered Entra app. No per-user ACL trimming in this preview.</td>
+<td>No.</td>
+</tr>
+<tr>
+<td><code>web</code> (Grounding with Bing)</td>
+<td>App-only. No ACL. Billed per call.</td>
+<td>No.</td>
+</tr>
+<tr>
+<td><code>workIq</code></td>
+<td>On-behalf-of (OBO). Orchestrator forwards the user's delegated token in <code>x-ms-query-source-authorization</code>.</td>
+<td>Yes.</td>
+</tr>
+<tr>
+<td><code>remoteSharePoint</code></td>
+<td>OBO through the Microsoft 365 Copilot Retrieval API.</td>
+<td>Yes.</td>
+</tr>
+<tr>
+<td><code>fabricOntology</code></td>
+<td>OBO to Microsoft Fabric.</td>
+<td>Yes.</td>
+</tr>
+<tr>
+<td><code>fabricDataAgent</code></td>
+<td>OBO to Microsoft Fabric.</td>
+<td>Yes.</td>
+</tr>
+</tbody>
+</table>
+<p>For every OBO knowledge source, the orchestrator front end must be
+configured to forward a delegated token. This is the same plumbing that
+<a href="../howto_authentication/">Auth and Doc Security</a> describes for GPT-RAG's own
+security-trimmed retrieval. Each per-source page lists the specific tenant
+consent, delegated permissions, and licensing you need.</p>
+<h2 id="feature-flags-gated-by-microsoft">Feature flags gated by Microsoft</h2>
+<p>Two knowledge sources require Microsoft-controlled enrollment before you can
+use them. GPT-RAG cannot enable these for you.</p>
+<table>
+<thead>
+<tr>
+<th>Knowledge source</th>
+<th>Gate</th>
+<th>Where to enable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Work IQ (<code>workIq</code>)</td>
+<td>Gated public preview. Requires the <code>EnableFoundryIQWithWorkIQ</code> subscription feature and one-time tenant admin consent for the Work IQ service principal.</td>
+<td>See <a href="../howto_grounding_work_iq/#prerequisites">Work IQ prerequisites</a>.</td>
+</tr>
+<tr>
+<td>Web (<code>web</code>)</td>
+<td>Requires the <code>Microsoft.Search/WebKnowledgeSource</code> subscription feature. Billed per Bing call.</td>
+<td>See <a href="../howto_grounding_web_bing/#prerequisites">Web grounding prerequisites</a>.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="optional-query-planning-llm">Optional: query planning LLM</h2>
+<p>The Knowledge Base can call an Azure OpenAI model to plan queries and choose
+which knowledge sources to hit. GPT-RAG does not require you to configure
+this: at <code>retrievalReasoningEffort=minimal</code> (the current default) the
+Knowledge Base skips LLM planning entirely. Configure a planning model when:</p>
+<ul>
+<li>You enable the <code>web</code> knowledge source. Web requires an LLM.</li>
+<li>You want <code>low</code> or <code>medium</code> reasoning effort so the Knowledge Base can
+  select and blend across multiple sources.</li>
+</ul>
+<p>Supported planning models on <code>2026-05-01-preview</code> include <code>gpt-4o</code>,
+<code>gpt-4o-mini</code>, <code>gpt-4.1</code>, <code>gpt-4.1-mini</code>, <code>gpt-4.1-nano</code>, <code>gpt-5</code>,
+<code>gpt-5-mini</code>, <code>gpt-5-nano</code>, <code>gpt-5.1</code>, <code>gpt-5.2</code>, and the <code>gpt-5.4</code> family.
+The authoritative list moves; check
+<a href="https://learn.microsoft.com/azure/search/agentic-retrieval-how-to-create-knowledge-base#supported-models">Supported models</a>
+before pinning one.</p>
+<p>The GPT-RAG orchestrator uses its own model for the final answer, configured
+through <code>CHAT_DEPLOYMENT_NAME</code> in App Configuration. That is separate from the
+Knowledge Base planning model. See
+<a href="../howto_azure_direct/">Azure Direct Models</a> for how to change it.</p>
+<h2 id="configuration">Configuration</h2>
+<p>Every Foundry IQ toggle lives in Azure App Configuration under the
+<code>gpt-rag</code> label, or as container environment variables when the deployment
+runs in <code>containerEnv</code> mode. GPT-RAG seeds the shared keys and each source's
+per-source keys, so you rarely start from an empty store. The lever that
+picks the default Blob path versus the custom <code>searchIndex</code> ingestion path
+is documented in
+<a href="../howto_grounding_foundry_iq_documents/#configuration-settings">Foundry IQ: Documents</a>.</p>
+<p>Common shared keys (defaults set by GPT-RAG):</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
 <th>Default</th>
 <th>Purpose</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>SHAREPOINT_INDEXED_ENABLED</code></td>
-<td><code>false</code></td>
-<td>Set to <code>true</code> to turn SharePoint Indexed on.</td>
+<td><code>RETRIEVAL_BACKEND</code></td>
+<td><code>foundry_iq</code></td>
+<td>Select the Foundry IQ backend. Set to <code>ai_search</code> to roll back.</td>
 </tr>
 <tr>
-<td><code>SHAREPOINT_INDEXED_KNOWLEDGE_SOURCE_NAME</code></td>
-<td><code>""</code></td>
-<td>Name of the SharePoint Indexed Knowledge Source registered on the Foundry IQ Knowledge Base.</td>
+<td><code>KNOWLEDGE_BASE_NAME</code></td>
+<td>Generated</td>
+<td>Foundry IQ Knowledge Base name.</td>
 </tr>
 <tr>
-<td><code>SHAREPOINT_INDEXED_INDEX_NAME</code></td>
-<td><code>""</code></td>
-<td>Name of the pre-built Azure AI Search index that projects the SharePoint site.</td>
+<td><code>KNOWLEDGE_BASE_ENDPOINT</code></td>
+<td>Generated</td>
+<td>Azure AI Search endpoint that hosts the Knowledge Base.</td>
 </tr>
 <tr>
-<td><code>SHAREPOINT_INDEXED_SITE_URL</code></td>
-<td><code>""</code></td>
-<td>Absolute URL of the target SharePoint site, for example <code>https://contoso.sharepoint.com/sites/knowledge</code>.</td>
+<td><code>KNOWLEDGE_BASE_CONNECTION_ID</code></td>
+<td>Generated</td>
+<td>Foundry connection ID dedicated to the Knowledge Base.</td>
 </tr>
 <tr>
-<td><code>SHAREPOINT_INDEXED_TENANT_ID</code></td>
-<td><code>""</code></td>
-<td>Entra tenant ID that owns the SharePoint site and the Entra app registered in step 1.</td>
+<td><code>FOUNDRY_IQ_API_VERSION</code></td>
+<td><code>2026-05-01-preview</code></td>
+<td>Preview API version required for per-user permissions and <code>filterAddOn</code>.</td>
+</tr>
+<tr>
+<td><code>FOUNDRY_IQ_KNOWLEDGE_RETRIEVAL_BILLING_PLAN</code></td>
+<td><code>free</code></td>
+<td><code>free</code> or <code>standard</code> for the Azure AI Search agentic retrieval billing plan.</td>
+</tr>
+<tr>
+<td><code>FOUNDRY_IQ_MAX_OUTPUT_DOCUMENTS</code></td>
+<td><code>5</code></td>
+<td>Cap on documents returned by the Knowledge Base per call.</td>
+</tr>
+<tr>
+<td><code>FOUNDRY_IQ_MAX_RUNTIME_SECONDS</code></td>
+<td><code>120</code></td>
+<td>Per-request retrieval budget. OBO sources such as Work IQ can approach this budget.</td>
 </tr>
 </tbody>
 </table>
-<p>All four identifier keys must be non-empty (in addition to
-<code>SHAREPOINT_INDEXED_ENABLED=true</code>) for the knowledge source to be
-registered on the Knowledge Base. If any identifier is missing at
-provisioning time, <code>sharepoint_indexed_setup.py</code> removes the KS from the
-payload and logs a warning; the rest of the provisioning still succeeds.</p>
-<p>Notes:</p>
-<ul>
-<li><strong>App-only, not delegated.</strong> The orchestrator does not forward the
-  caller's OBO token to this knowledge source. Every authenticated user
-  sees the same results.</li>
-<li><strong>Additive.</strong> Your existing Knowledge Base retrieval (default Blob path
-  or custom ingestion path) continues to run and is blended into the final
-  answer.</li>
-<li><strong>No <code>FOUNDRY_IQ_MAX_RUNTIME_SECONDS</code> bump required.</strong> SharePoint
-  Indexed reads a pre-built local index and returns quickly, unlike Work
-  IQ.</li>
-</ul>
-<h2 id="how-sharepoint-indexed-works">How SharePoint Indexed works</h2>
-<p>At runtime, the GPT-RAG orchestrator:</p>
+<p>Each per-source page documents its own keys in full.</p>
+<h2 id="verify-your-baseline">Verify your baseline</h2>
+<p>Before you enable any Foundry IQ knowledge source, confirm the four items
+below on your deployment.</p>
 <ol>
-<li>Reads <code>SHAREPOINT_INDEXED_ENABLED</code> and the four identifiers. If any is
-   missing, the source is skipped.</li>
-<li>Adds the SharePoint Indexed source to the Foundry IQ Knowledge Base
-   <code>retrieve</code> call, alongside the existing document source.</li>
-<li>Receives results grounded on the pre-built AI Search index. The
-   knowledge source itself calls Microsoft Graph app-only, using the
-   Managed Identity federated to the Entra app registered in step 1.</li>
-<li>Blends the results with the document Knowledge Base results and hands
-   the merged context to the model.</li>
+<li><code>RETRIEVAL_BACKEND=foundry_iq</code> is set in App Configuration under the
+   <code>gpt-rag</code> label.</li>
+<li><code>FOUNDRY_IQ_API_VERSION=2026-05-01-preview</code> is set.</li>
+<li>The Foundry project, the Azure AI Search service, and the GenAI storage
+   account are all in the same subscription and Entra tenant. In the Azure
+   portal, open each resource and check the Subscription and Directory
+   (tenant) properties match.</li>
+<li>The Search region shows "Agentic retrieval" in the
+   <a href="https://learn.microsoft.com/azure/search/search-region-support#features-subject-to-regional-availability">Azure AI Search regions list</a>.</li>
 </ol>
-<pre class="mermaid"><code>sequenceDiagram
-    autonumber
-    participant U as User
-    participant UI as GPT-RAG UI
-    participant O as Orchestrator
-    participant KB as Azure AI Search KB
-    participant SP as SharePoint Indexed KS
-    participant S as Azure AI Search index
-    participant L as LLM
-
-    U-&gt;&gt;UI: Ask a question
-    UI-&gt;&gt;O: Chat request
-    O-&gt;&gt;KB: retrieve (question, documents + indexedSharePoint sources)
-    KB-&gt;&gt;SP: Query SharePoint Indexed
-    SP-&gt;&gt;S: Query pre-built site index
-    S--&gt;&gt;SP: Ranked chunks
-    SP--&gt;&gt;KB: SharePoint Indexed results
-    KB--&gt;&gt;O: Blended KB + SharePoint results
-    O-&gt;&gt;L: Prompt with grounded context
-    L--&gt;&gt;O: Answer
-    O--&gt;&gt;UI: Answer
-    UI--&gt;&gt;U: Answer</code></pre>
-<h2 id="preview-limitations">Preview limitations</h2>
-<ul>
-<li>No per-user ACL trimming (app-only auth). Results are limited to what
-  the app has been granted access to, not to what the individual caller
-  can see in SharePoint. Use Work IQ if per-user trimming is required.</li>
-<li>One knowledge source per SharePoint site. Cover multiple sites by
-  registering multiple <code>SHAREPOINT_INDEXED_*</code> KS entries in follow-up
-  releases.</li>
-<li>No delegated (OBO) auth path. Delegated auth is out of scope for this
-  preview and is on the roadmap.</li>
-<li>No automatic index provisioning. Bring your own AI Search index that
-  projects the SharePoint site.</li>
-<li>Bicep does not create the Entra app, the Federated Identity Credential,
-  or the admin consent. Follow the manual steps in Prerequisites.</li>
-</ul>
-<h2 id="troubleshooting">Troubleshooting</h2>
-<table>
-<thead>
-<tr>
-<th>Symptom</th>
-<th>Likely cause</th>
-<th>What to do</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>SharePoint Indexed results are always empty.</td>
-<td>The Entra app has no admin consent, or <code>Sites.Selected</code> was chosen but the app was not granted read access to the target site.</td>
-<td>Confirm admin consent for the correct Graph permission and, if using <code>Sites.Selected</code>, re-run the <code>az rest</code> grant in prerequisite step 4.</td>
-</tr>
-<tr>
-<td>Provisioning warns that identifiers are missing and skips the KS.</td>
-<td>One or more of <code>SHAREPOINT_INDEXED_KNOWLEDGE_SOURCE_NAME</code>, <code>SHAREPOINT_INDEXED_INDEX_NAME</code>, <code>SHAREPOINT_INDEXED_SITE_URL</code>, <code>SHAREPOINT_INDEXED_TENANT_ID</code> is blank.</td>
-<td>Populate all four keys in App Configuration and re-run <code>azd hooks run postprovision</code>.</td>
-</tr>
-<tr>
-<td>KS registration returns HTTP 400 with a schema error.</td>
-<td>The AI Search service does not support the <code>2026-05-01-preview</code> API, or the SKU is <code>free</code>/<code>basic</code>.</td>
-<td>Upgrade the SKU to <code>standard</code> or higher and confirm the service region supports the preview API.</td>
-</tr>
-<tr>
-<td>Orchestrator logs show <code>indexedSharePoint</code> calls succeeding but the model still ignores the results.</td>
-<td>The knowledge base reference to the SharePoint KS may be missing.</td>
-<td>Confirm the KB payload includes an entry for <code>SHAREPOINT_INDEXED_KNOWLEDGE_SOURCE_NAME</code> under <code>knowledgeBases[0].knowledgeSources</code>. Re-render the template if needed.</td>
-</tr>
-<tr>
-<td>Different tenant sees no results after turning the feature on.</td>
-<td><code>SHAREPOINT_INDEXED_TENANT_ID</code> does not match the tenant that owns the SharePoint site, or the Entra app registered in prerequisite step 1 lives in a different tenant.</td>
-<td>Recheck the tenant ID and re-register the app in the correct tenant if needed.</td>
-</tr>
-</tbody>
-</table>
-<p>If SharePoint Indexed is unhealthy but you must keep serving traffic, set
-<code>SHAREPOINT_INDEXED_ENABLED=false</code> in App Configuration. The orchestrator
-continues to answer using the existing Knowledge Base only.</p>
+<p>If any of those are missing, fix them before you turn on a knowledge source.</p>
 <h2 id="related-reading">Related reading</h2>
 <ul>
 <li><a href="../howto_grounding_overview/">Grounding sources overview</a></li>
 <li><a href="../howto_grounding_foundry_iq_documents/">Foundry IQ: Documents</a></li>
-<li><a href="../howto_grounding_work_iq/">Foundry IQ: Work IQ</a></li>
+<li><a href="../deploy/">Deployment guide</a></li>
 <li><a href="../howto_authentication/">Auth and Doc Security</a></li>
+<li>Microsoft Learn: <a href="https://learn.microsoft.com/azure/foundry/agents/concepts/what-is-foundry-iq">What is Foundry IQ?</a></li>
+<li>Microsoft Learn: <a href="https://learn.microsoft.com/azure/search/agentic-knowledge-source-overview">What is a knowledge source?</a></li>
+<li>Microsoft Learn: <a href="https://learn.microsoft.com/azure/search/agentic-retrieval-how-to-create-knowledge-base">Create a Knowledge Base</a></li>
 </ul>
 
 
