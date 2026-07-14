@@ -1,6 +1,16 @@
-# SharePoint Setup (Pre-release)
+# SharePoint Setup (Azure AI Search direct)
 
-This section explains how to configure SharePoint as a data source for the GPT-RAG Azure AI Search Index, using the `Sites.Selected` permission to limit access to specific site collections.
+!!! info "This is the Azure AI Search direct path, not Foundry IQ"
+    This page describes the **classic GPT-RAG ingestion path**: GPT-RAG reads content from SharePoint via Microsoft Graph API and indexes it directly into your Azure AI Search index. It does **not** use Foundry IQ.
+
+    If you want to ground on SharePoint through **Foundry IQ Knowledge Bases** instead, use one of these:
+
+    - **[SharePoint (remote)](howto_grounding_sharepoint_remote.md)**: Foundry IQ calls SharePoint live at query time (user-delegated auth, no local copy).
+    - **[SharePoint (indexed)](howto_grounding_sharepoint_indexed.md)**: Foundry IQ maintains its own managed index of SharePoint content (app-only auth).
+
+    See [Grounding sources overview](howto_grounding_overview.md) to compare the paths and [Foundry IQ prerequisites](howto_grounding_foundry_iq_prereqs.md) if you go the Foundry IQ route.
+
+This page explains how to configure SharePoint as a data source for the GPT-RAG Azure AI Search index, using the `Sites.Selected` permission to limit access to specific site collections.
 
 The configuration process involves the following steps:
 
@@ -10,9 +20,7 @@ The configuration process involves the following steps:
 4. **[Run Job](#run-ingestion-job)**: Enable and schedule the ingestion jobs using CRON expressions in App Configuration.
 5. **[Validation](#validation)**: Test and verify that the SharePoint content is being successfully indexed.
 
-
-> 
-> Using `Sites.Selected` ensures that your application only has access to the SharePoint sites you've explicitly granted permissions to, enhancing security by limiting access scope
+> Using `Sites.Selected` ensures that your application only has access to the SharePoint sites you've explicitly granted permissions to, enhancing security by limiting access scope.
 
 ## Exploring SharePoint with Graph API
 
