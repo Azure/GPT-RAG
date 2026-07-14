@@ -61,17 +61,17 @@ nav:
     - Admin Dashboard Sign-in: howto_dashboard_signin.md
     - Grounding sources:
       - Overview (start here): howto_grounding_overview.md
-      - 'Approach A: Foundry IQ Knowledge Base':
+      - 'Approach A: Foundry IQ':
         - Prerequisites: howto_grounding_foundry_iq_prereqs.md
         - Documents: howto_grounding_foundry_iq_documents.md
-        - Work IQ (Microsoft 365): howto_grounding_work_iq.md
-        - Fabric ontology (preview): howto_grounding_fabric_ontology.md
-        - Fabric Data Agent (preview): howto_grounding_fabric_data_agent.md
-        - SharePoint remote (preview): howto_grounding_sharepoint_remote.md
-        - SharePoint indexed (preview): howto_grounding_sharepoint_indexed.md
-        - OneLake (preview): howto_grounding_onelake.md
-        - Web grounding (preview): howto_grounding_web_bing.md
-      - 'Approach B: Azure AI Search direct':
+        - Work IQ: howto_grounding_work_iq.md
+        - Fabric ontology: howto_grounding_fabric_ontology.md
+        - Fabric Data Agent: howto_grounding_fabric_data_agent.md
+        - SharePoint remote: howto_grounding_sharepoint_remote.md
+        - SharePoint indexed: howto_grounding_sharepoint_indexed.md
+        - OneLake: howto_grounding_onelake.md
+        - Web grounding: howto_grounding_web_bing.md
+      - 'Approach B: AI Search direct':
         - Overview: howto_grounding_ai_search_direct.md
         - SharePoint connector: howto_sharepoint_connector.md
     - Multimodality: howto_multimodality.md
