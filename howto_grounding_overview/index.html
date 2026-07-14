@@ -868,15 +868,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#which-source-for-which-question-approach-a" class="md-nav__link">
-    <span class="md-ellipsis">
-      Which source for which question (Approach A)
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#retrieval-and-grounding-in-plain-language" class="md-nav__link">
     <span class="md-ellipsis">
       Retrieval and grounding in plain language
@@ -886,36 +877,42 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#foundry-iq-knowledge-bases-and-knowledge-sources" class="md-nav__link">
+  <a href="#approach-a-foundry-iq-knowledge-base" class="md-nav__link">
     <span class="md-ellipsis">
-      Foundry IQ, Knowledge Bases, and Knowledge Sources
+      Approach A: Foundry IQ Knowledge Base
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Approach A: Foundry IQ Knowledge Base">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#knowledge-sources-at-a-glance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Knowledge sources at a glance
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#the-alternative-azure-ai-search-direct" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#pick-a-source" class="md-nav__link">
     <span class="md-ellipsis">
-      The alternative: Azure AI Search direct
+      Pick a source
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#what-gpt-rag-supports-today" class="md-nav__link">
-    <span class="md-ellipsis">
-      What GPT-RAG supports today
-    </span>
-  </a>
+        
+      </ul>
+    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#when-to-use-each" class="md-nav__link">
+  <a href="#approach-b-azure-ai-search-direct" class="md-nav__link">
     <span class="md-ellipsis">
-      When to use each
+      Approach B: Azure AI Search direct
     </span>
   </a>
   
@@ -1435,34 +1432,33 @@
 
 
 <h1 id="grounding-sources-overview">Grounding sources overview</h1>
-<p>Start here if you are new to how GPT-RAG finds the information it uses to answer
-a question. This page is the map for everything under <strong>Grounding sources</strong>.
-Read it first, then jump to the page for the approach and source you want.</p>
+<p>This page is the map for everything under <strong>Grounding sources</strong>. Read it
+first, then jump to the page for the approach and source you want.</p>
 <h2 id="the-two-approaches">The two approaches</h2>
-<p>GPT-RAG supports <strong>two</strong> ways to ground the LLM. Every other page in this
-section belongs to one of them. Pick your approach first so you know which
+<p>GPT-RAG supports two ways to ground the LLM. Every other page in this
+section belongs to one of them. Pick the approach first so you know which
 set of pages you are reading.</p>
 <table>
 <thead>
 <tr>
 <th></th>
-<th>Approach A: <strong>Foundry IQ Knowledge Base</strong></th>
-<th>Approach B: <strong>Azure AI Search direct</strong></th>
+<th>Approach A: Foundry IQ Knowledge Base</th>
+<th>Approach B: Azure AI Search direct</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>What the orchestrator talks to</td>
-<td>A single Foundry IQ Knowledge Base endpoint that fans out to one or more Knowledge Sources</td>
-<td>An Azure AI Search index, directly</td>
+<td>Orchestrator talks to</td>
+<td>A single Knowledge Base endpoint that fans out to one or more Knowledge Sources</td>
+<td>An Azure AI Search index</td>
 </tr>
 <tr>
-<td>Setting</td>
-<td><code>RETRIEVAL_BACKEND=foundry_iq</code> (default for v3.0.2+)</td>
-<td><code>RETRIEVAL_BACKEND=ai_search</code></td>
+<td><code>RETRIEVAL_BACKEND</code></td>
+<td><code>foundry_iq</code> (default in v3.0.2+)</td>
+<td><code>ai_search</code></td>
 </tr>
 <tr>
-<td>Sources it can blend in one call</td>
+<td>Sources it can blend</td>
 <td>Blob, existing Search index, Work IQ, Fabric ontology, Fabric Data Agent, SharePoint (remote and indexed), OneLake, Web</td>
 <td>One AI Search index</td>
 </tr>
@@ -1473,131 +1469,95 @@ set of pages you are reading.</p>
 </tr>
 <tr>
 <td>Custom ingestion pipeline</td>
-<td>Optional (via a <code>searchIndex</code> knowledge source)</td>
-<td>Required — GPT-RAG ingestion pipeline writes to the index</td>
+<td>Optional (<code>searchIndex</code> source)</td>
+<td>Required (GPT-RAG ingestion into the index)</td>
 </tr>
 <tr>
 <td>Status</td>
-<td>Default and recommended</td>
+<td>Default, recommended</td>
 <td>Fully supported, rollback and compatibility path</td>
 </tr>
 <tr>
-<td>Pages</td>
-<td>Everything under <strong>Approach A</strong> in the left nav, starting with <a href="../howto_grounding_foundry_iq_prereqs/">Prerequisites</a></td>
-<td>Everything under <strong>Approach B</strong> in the left nav, starting with <a href="../howto_grounding_ai_search_direct/">Azure AI Search direct</a></td>
+<td>Start here</td>
+<td><a href="../howto_grounding_foundry_iq_prereqs/">Prerequisites</a></td>
+<td><a href="../howto_grounding_ai_search_direct/">Azure AI Search direct</a></td>
 </tr>
 </tbody>
 </table>
-<p>Rule of thumb:</p>
+<p><strong>Rule of thumb</strong></p>
 <ul>
-<li><strong>New deployment or you want to add Microsoft 365, Fabric, SharePoint live,
-  OneLake, or Web sources:</strong> use Approach A (Foundry IQ). It is the default.</li>
-<li><strong>Existing deployment that still runs the classic GPT-RAG ingestion into a
-  single AI Search index, or you want the rollback path:</strong> stay on Approach B.</li>
+<li>New deployment, or you need Microsoft 365, Fabric, SharePoint live,
+  OneLake, or Web sources: use Approach A.</li>
+<li>Existing deployment that still runs the classic GPT-RAG ingestion into
+  a single AI Search index, or you want the rollback path: stay on Approach B.</li>
 </ul>
-<p>You cannot mix the two backends in the same request. The orchestrator uses one
-<code>RETRIEVAL_BACKEND</code> at a time. Inside Approach A you can enable many Knowledge
-Sources on the same Knowledge Base and Foundry IQ blends them.</p>
+<div class="admonition note">
+<p class="admonition-title">One backend at a time</p>
+<p>The orchestrator uses one <code>RETRIEVAL_BACKEND</code> per request. You cannot
+mix Approach A and Approach B in the same call. Inside Approach A you
+can enable many Knowledge Sources on the same Knowledge Base and
+Foundry IQ blends the results.</p>
+</div>
 <h2 id="prerequisites">Prerequisites</h2>
-<p>Prerequisites depend on the approach:</p>
+<p>Prerequisites depend on the approach.</p>
 <ul>
-<li><strong>Approach A (Foundry IQ):</strong> review <a href="../howto_grounding_foundry_iq_prereqs/">Foundry IQ prerequisites</a>.
+<li><strong>Approach A.</strong> Review <a href="../howto_grounding_foundry_iq_prereqs/">Foundry IQ prerequisites</a>.
   That page covers the shared baseline (region, RBAC, API version, feature
-  flags, authorization model). Each knowledge source page adds source-specific
-  prerequisites on top.</li>
-<li><strong>Approach B (Azure AI Search direct):</strong> see the <a href="../howto_grounding_ai_search_direct/">Azure AI Search direct</a>
-  page and, if you are ingesting from SharePoint via the classic path, the
-  <a href="../howto_sharepoint_connector/">SharePoint connector</a> page.</li>
+  flags, authorization model). Each knowledge source page adds its own
+  extras on top.</li>
+<li><strong>Approach B.</strong> See <a href="../howto_grounding_ai_search_direct/">Azure AI Search direct</a>.
+  If you ingest from SharePoint via the classic path, also see the
+  <a href="../howto_sharepoint_connector/">SharePoint connector</a>.</li>
 </ul>
-<h2 id="which-source-for-which-question-approach-a">Which source for which question (Approach A)</h2>
-<p>If you already decided on Approach A and just want to know where to start, use
-this quick guide.</p>
-<ul>
-<li>Your files already live in a Blob container? Use the <strong>Blob</strong> knowledge
-  source. This is the default for new deployments.</li>
-<li>You already run a custom ingestion pipeline that writes to an Azure AI
-  Search index? Register that index as a <strong>Search Index</strong> knowledge source.</li>
-<li>You want answers grounded on the signed-in user's Microsoft 365 world
-  (mail, meetings, files, chats)? Add <strong>Work IQ</strong>.</li>
-<li>You have a Fabric ontology and want the agent to reason over its business
-  entities and relationships? Add <strong>Fabric ontology</strong>.</li>
-<li>You have a Fabric Data Agent that already answers questions over your
-  warehouse or lakehouse? Add <strong>Fabric Data Agent</strong> and let it act as a
-  virtual analyst.</li>
-<li>Your content lives in SharePoint and you want per-user ACL live at query
-  time (no ingestion pipeline)? Add <strong>SharePoint (remote)</strong>. Preview.</li>
-<li>Your content lives in Fabric OneLake and you want Foundry IQ to index it
-  natively? Add <strong>OneLake (indexed)</strong>. Preview.</li>
-<li>You want Foundry IQ to run a pre-built AI Search index over a SharePoint
-  site using app-only Graph auth? Add <strong>SharePoint (indexed)</strong>. Preview.</li>
-<li>You want the agent to ground on the public internet, scoped by allow /
-  block domain lists? Add <strong>Web grounding (Bing)</strong>. Preview. Billed per Bing
-  call.</li>
-</ul>
-<p>You can enable more than one of the above on the same Knowledge Base. The
-rest of this page explains the pieces behind those names.</p>
 <h2 id="retrieval-and-grounding-in-plain-language">Retrieval and grounding in plain language</h2>
 <p>When a user asks a question, the orchestrator does not send the question
-straight to a language model and hope for the best. It first looks up relevant
-material and includes it in the prompt. That lookup is <strong>retrieval</strong>. The
-material it finds is <strong>grounding content</strong>. Answers are then built on top of
-that material, so they cite real sources instead of guessing.</p>
-<p>GPT-RAG can retrieve grounding content from more than one place in the same
-request, blend the results, and hand the merged context to the model.</p>
-<h2 id="foundry-iq-knowledge-bases-and-knowledge-sources">Foundry IQ, Knowledge Bases, and Knowledge Sources</h2>
-<p><strong>Foundry IQ</strong> is a retrieval product in Azure AI Search that sits above the
-raw index. Instead of talking to individual indexes, the orchestrator talks to
-a Foundry IQ <strong>Knowledge Base</strong>. The Knowledge Base is the single retrieval
-endpoint for a deployment.</p>
-<p>A Knowledge Base points to one or more <strong>Knowledge Sources</strong>. Each Knowledge
-Source is one place to look, with its own <code>kind</code>: a Blob container, an existing
-Azure AI Search index, a Microsoft 365 tenant, a Fabric ontology, or a Fabric
-Data Agent. Foundry IQ queries the sources, applies permissions, and returns a
-merged, permission-trimmed result.</p>
-<blockquote>
-<p><strong>On the name "Fabric IQ."</strong> You will hear people say "Fabric IQ" a lot.
-It is Microsoft's umbrella marketing name for grounding on Microsoft
-Fabric data, not something you configure directly. In the Foundry IQ
-Knowledge Base, "Fabric IQ" shows up as two concrete knowledge source
-kinds: <code>fabricOntology</code> (reason over a Fabric business ontology and its
-entities and relationships) and <code>fabricDataAgent</code> (hand the question to a
-Fabric Data Agent that runs queries over your data). Every time this
-documentation talks about wiring GPT-RAG to Fabric, it is one of those
-two kinds on the Knowledge Base. If you ever see <code>FABRIC_IQ_*</code> in an env
-var or config key, that prefix is historical: those settings configure
-the <code>fabricOntology</code> knowledge source.</p>
-</blockquote>
-<p>Two things matter for operators:</p>
-<ul>
-<li>You do not have to pick one source. A Knowledge Base can hold several, and
-  the orchestrator gets blended results in a single call.</li>
-<li>Each Knowledge Source has its own setup, its own security model, and its own
-  cost profile. The rest of this section covers them one by one.</li>
-</ul>
+straight to a language model. It first looks up relevant material and
+includes it in the prompt. That lookup is <strong>retrieval</strong>. The material it
+finds is <strong>grounding content</strong>. Answers are built on top of that material,
+so they cite real sources instead of guessing.</p>
+<p>GPT-RAG can retrieve grounding content from more than one place in the
+same request, blend the results, and hand the merged context to the model.</p>
+<h2 id="approach-a-foundry-iq-knowledge-base">Approach A: Foundry IQ Knowledge Base</h2>
+<p>Foundry IQ is a retrieval product in Azure AI Search that sits above the
+raw index. Instead of talking to individual indexes, the orchestrator
+talks to a <strong>Knowledge Base</strong>, the single retrieval endpoint for a
+deployment.</p>
+<p>A Knowledge Base points to one or more <strong>Knowledge Sources</strong>. Each source
+is one place to look, with its own <code>kind</code>. Foundry IQ queries the
+sources, applies permissions, and returns a merged, permission-trimmed
+result.</p>
 <pre class="mermaid"><code>flowchart LR
   O[GPT-RAG orchestrator] --&gt; KB[Foundry IQ Knowledge Base]
-  KB --&gt; KS1[KS: Blob container, azureBlob - GA]
-  KB --&gt; KS2[KS: Azure AI Search index, searchIndex - GA]
-  KB --&gt; KS3[KS: Work IQ, workIQ - Preview]
-  KB --&gt; KS4[KS: Fabric ontology, fabricOntology - Preview]
-  KB --&gt; KS5[KS: Fabric Data Agent, fabricDataAgent - Preview]
-  KB --&gt; KS6[KS: SharePoint remote, remoteSharePoint - Preview]
-  KB --&gt; KS7[KS: OneLake indexed, indexedOneLake - Preview]
-  KB --&gt; KS8[KS: SharePoint indexed, indexedSharePoint - Preview]
-  KB --&gt; KS9[KS: Web grounding, web - Preview]</code></pre>
-<h2 id="the-alternative-azure-ai-search-direct">The alternative: Azure AI Search direct</h2>
-<p>GPT-RAG can also skip Foundry IQ entirely and query an Azure AI Search index
-directly. This is the older path and the rollback path. It is not a Knowledge
-Source. It is a separate retrieval backend selected with
-<code>RETRIEVAL_BACKEND=ai_search</code>.</p>
-<p>The orchestrator uses one backend at a time:</p>
+  KB --&gt; KS1[Blob container - azureBlob - GA]
+  KB --&gt; KS2[Azure AI Search index - searchIndex - GA]
+  KB --&gt; KS3[Work IQ - workIQ - Preview]
+  KB --&gt; KS4[Fabric ontology - fabricOntology - Preview]
+  KB --&gt; KS5[Fabric Data Agent - fabricDataAgent - Preview]
+  KB --&gt; KS6[SharePoint remote - remoteSharePoint - Preview]
+  KB --&gt; KS7[OneLake indexed - indexedOneLake - Preview]
+  KB --&gt; KS8[SharePoint indexed - indexedSharePoint - Preview]
+  KB --&gt; KS9[Web grounding - web - Preview]</code></pre>
+<p>Two things matter for operators.</p>
 <ul>
-<li><code>foundry_iq</code> (default for new v3.0.2+ deployments): retrieval goes through
-  the Foundry IQ Knowledge Base, which can hold multiple Knowledge Sources.</li>
-<li><code>ai_search</code>: retrieval goes straight to the GPT-RAG Azure AI Search index.
-  No Foundry IQ involved.</li>
+<li>A Knowledge Base can hold several sources. The orchestrator gets blended
+  results in a single call.</li>
+<li>Each source has its own setup, security model, and cost profile. The
+  rest of this section covers them one by one.</li>
 </ul>
-<h2 id="what-gpt-rag-supports-today">What GPT-RAG supports today</h2>
+<div class="admonition info">
+<p class="admonition-title">On the name Fabric IQ</p>
+<p>"Fabric IQ" is Microsoft's umbrella marketing name for grounding on
+Microsoft Fabric data, not something you configure directly. On the
+Knowledge Base it shows up as two concrete kinds: <code>fabricOntology</code>
+(reason over a Fabric business ontology and its entities and
+relationships) and <code>fabricDataAgent</code> (hand the question to a Fabric
+Data Agent that runs queries over your data). Any time this
+documentation talks about wiring GPT-RAG to Fabric, it is one of
+those two kinds. If you see <code>FABRIC_IQ_*</code> in an env var or config
+key, that prefix is historical and configures the <code>fabricOntology</code>
+source.</p>
+</div>
+<h3 id="knowledge-sources-at-a-glance">Knowledge sources at a glance</h3>
 <table>
 <thead>
 <tr>
@@ -1609,120 +1569,107 @@ Source. It is a separate retrieval backend selected with
 </thead>
 <tbody>
 <tr>
-<td>Blob container, native</td>
-<td>Foundry IQ Knowledge Source (<code>azureBlob</code>)</td>
-<td>Generally available. Default for new deployments.</td>
-<td><a href="../howto_grounding_foundry_iq_documents/">Foundry IQ: Documents</a></td>
+<td>Blob container</td>
+<td><code>azureBlob</code></td>
+<td>GA, default for new deployments</td>
+<td><a href="../howto_grounding_foundry_iq_documents/">Documents</a></td>
 </tr>
 <tr>
-<td>Existing Azure AI Search index, custom ingestion</td>
-<td>Foundry IQ Knowledge Source (<code>searchIndex</code>)</td>
-<td>Generally available. For deployments that keep a custom GPT-RAG ingestion pipeline.</td>
-<td><a href="../howto_grounding_foundry_iq_documents/#custom-ingestion-path">Foundry IQ: Documents</a></td>
+<td>Existing AI Search index</td>
+<td><code>searchIndex</code></td>
+<td>GA, for custom ingestion pipelines</td>
+<td><a href="../howto_grounding_foundry_iq_documents/#custom-ingestion-path">Documents, custom ingestion</a></td>
 </tr>
 <tr>
 <td>Work IQ (Microsoft 365)</td>
-<td>Foundry IQ Knowledge Source (<code>workIQ</code>)</td>
-<td>Gated public preview. Off by default.</td>
-<td><a href="../howto_grounding_work_iq/">Foundry IQ: Work IQ</a></td>
+<td><code>workIQ</code></td>
+<td>Gated public preview</td>
+<td><a href="../howto_grounding_work_iq/">Work IQ</a></td>
 </tr>
 <tr>
-<td>Fabric ontology (Microsoft Fabric)</td>
-<td>Foundry IQ Knowledge Source (<code>fabricOntology</code>)</td>
-<td>Preview. Off by default. Requires Fabric workspace + ontology and signed-in users.</td>
-<td><a href="../howto_grounding_fabric_ontology/">Foundry IQ: Fabric ontology</a></td>
+<td>Fabric ontology</td>
+<td><code>fabricOntology</code></td>
+<td>Preview</td>
+<td><a href="../howto_grounding_fabric_ontology/">Fabric ontology</a></td>
 </tr>
 <tr>
-<td>Fabric Data Agent (Microsoft Fabric)</td>
-<td>Foundry IQ Knowledge Source (<code>fabricDataAgent</code>)</td>
-<td>Preview. Off by default. Requires a published Fabric Data Agent and signed-in users.</td>
-<td><a href="../howto_grounding_fabric_data_agent/">Foundry IQ: Fabric Data Agent</a></td>
+<td>Fabric Data Agent</td>
+<td><code>fabricDataAgent</code></td>
+<td>Preview</td>
+<td><a href="../howto_grounding_fabric_data_agent/">Fabric Data Agent</a></td>
 </tr>
 <tr>
-<td>SharePoint remote (Copilot Retrieval API)</td>
-<td>Foundry IQ Knowledge Source (<code>remoteSharePoint</code>)</td>
-<td>Preview. Off by default. Live retrieval with per-user OBO ACL.</td>
-<td><a href="../howto_grounding_sharepoint_remote/">Foundry IQ: SharePoint remote</a></td>
+<td>SharePoint remote</td>
+<td><code>remoteSharePoint</code></td>
+<td>Preview, per-user OBO ACL</td>
+<td><a href="../howto_grounding_sharepoint_remote/">SharePoint remote</a></td>
 </tr>
 <tr>
-<td>OneLake (Microsoft Fabric)</td>
-<td>Foundry IQ Knowledge Source (<code>indexedOneLake</code>)</td>
-<td>Preview. Off by default. Requires Fabric workspace + lakehouse and workspace RBAC.</td>
-<td><a href="../howto_grounding_onelake/">Foundry IQ: OneLake</a></td>
+<td>OneLake</td>
+<td><code>indexedOneLake</code></td>
+<td>Preview, requires workspace RBAC</td>
+<td><a href="../howto_grounding_onelake/">OneLake</a></td>
 </tr>
 <tr>
-<td>SharePoint indexed (Microsoft Graph app-only)</td>
-<td>Foundry IQ Knowledge Source (<code>indexedSharePoint</code>)</td>
-<td>Preview. Off by default. Pre-built AI Search index over a SharePoint site.</td>
-<td><a href="../howto_grounding_sharepoint_indexed/">Foundry IQ: SharePoint indexed</a></td>
+<td>SharePoint indexed</td>
+<td><code>indexedSharePoint</code></td>
+<td>Preview, app-only auth</td>
+<td><a href="../howto_grounding_sharepoint_indexed/">SharePoint indexed</a></td>
 </tr>
 <tr>
-<td>Web grounding (Bing)</td>
-<td>Foundry IQ Knowledge Source (<code>web</code>)</td>
-<td>Preview. Off by default. Public internet, no ACL. Billed per Bing call.</td>
-<td><a href="../howto_grounding_web_bing/">Foundry IQ: Web grounding</a></td>
-</tr>
-<tr>
-<td>Azure AI Search direct</td>
-<td>Not a Foundry IQ Knowledge Source. Separate retrieval backend.</td>
-<td>Fully supported. Rollback and compatibility path.</td>
-<td><a href="../howto_grounding_ai_search_direct/">Direct: Azure AI Search</a></td>
+<td>Web grounding</td>
+<td><code>web</code></td>
+<td>Preview, billed per Bing call</td>
+<td><a href="../howto_grounding_web_bing/">Web grounding</a></td>
 </tr>
 </tbody>
 </table>
-<h2 id="when-to-use-each">When to use each</h2>
-<p>Multiple sources can be enabled together on the same Knowledge Base. Pick
-the ones that match your data and add them one by one.</p>
+<h3 id="pick-a-source">Pick a source</h3>
+<p>Match the situation to the source. You can enable several on the same
+Knowledge Base.</p>
 <ul>
-<li><strong>Blob (<code>azureBlob</code>).</strong> PDFs and Office files already sit in the
-  <code>documents</code> container. This is the new-deployment default. See
-  <a href="../howto_grounding_foundry_iq_documents/">Foundry IQ: Documents</a>.</li>
-<li><strong>Search Index (<code>searchIndex</code>).</strong> You keep the GPT-RAG ingestion
-  pipeline for custom chunking, large PDFs, Excel handling, or
-  security-metadata trimming, and want Foundry IQ to query the resulting
-  index. See <a href="../howto_grounding_foundry_iq_documents/#custom-ingestion-path">Foundry IQ: Documents, custom ingestion path</a>.</li>
-<li><strong>Work IQ (<code>workIq</code>).</strong> Answers should include the signed-in user's
-  Microsoft 365 context: recent emails, meetings, shared files, chats.
-  Requires signed-in users and M365 Copilot licenses. See
-  <a href="../howto_grounding_work_iq/">Foundry IQ: Work IQ</a>.</li>
-<li><strong>Fabric ontology (<code>fabricOntology</code>).</strong> You have a Fabric ontology and
-  want the agent to reason over its entities and relationships. See
-  <a href="../howto_grounding_fabric_ontology/">Foundry IQ: Fabric ontology</a>.</li>
-<li><strong>Fabric Data Agent (<code>fabricDataAgent</code>).</strong> You have a curated Fabric
-  Data Agent and want the LLM to hand analytical questions off to it
-  rather than reason over an ontology. See
-  <a href="../howto_grounding_fabric_data_agent/">Foundry IQ: Fabric Data Agent</a>.</li>
-<li><strong>SharePoint remote (<code>remoteSharePoint</code>).</strong> Your content lives in
-  SharePoint and you want per-user ACL enforced live at query time,
-  without ingesting or indexing it. Uses the Copilot Retrieval API with
-  OBO. Preview. See
-  <a href="../howto_grounding_sharepoint_remote/">Foundry IQ: SharePoint remote</a>.</li>
-<li><strong>OneLake (<code>indexedOneLake</code>).</strong> Your content lives in Fabric OneLake
-  and you want Foundry IQ to index and query it natively. Requires
-  Fabric workspace RBAC as a manual prerequisite. Preview. See
-  <a href="../howto_grounding_onelake/">Foundry IQ: OneLake</a>.</li>
-<li><strong>SharePoint indexed (<code>indexedSharePoint</code>).</strong> You want Foundry IQ to
-  run a pre-built AI Search index over a SharePoint site using
-  Microsoft Graph app-only auth (Sites.Selected preferred). No per-user
-  OBO on this kind. Preview. See
-  <a href="../howto_grounding_sharepoint_indexed/">Foundry IQ: SharePoint indexed</a>.</li>
-<li><strong>Web grounding (<code>web</code>).</strong> You want the agent to ground on the public
-  internet, scoped by allow / block domain lists. No ACL, no OBO,
-  billed per Bing call. Preview. See
-  <a href="../howto_grounding_web_bing/">Foundry IQ: Web grounding</a>.</li>
-<li><strong>Azure AI Search direct.</strong> Existing deployment on
-  <code>RETRIEVAL_BACKEND=ai_search</code> that is not migrating yet, or a rollback.
-  See <a href="../howto_grounding_ai_search_direct/">Direct: Azure AI Search</a>.</li>
+<li><strong>Files in a Blob container.</strong> Use <code>azureBlob</code>. Default for new
+  deployments.</li>
+<li><strong>Custom ingestion into an AI Search index.</strong> Register that index as a
+  <code>searchIndex</code> source and keep the pipeline.</li>
+<li><strong>Microsoft 365 context</strong> (mail, meetings, files, chats for the
+  signed-in user). Add <code>workIQ</code>. Requires M365 Copilot licensing and
+  signed-in users.</li>
+<li><strong>Fabric business ontology.</strong> Reason over entities and relationships
+  with <code>fabricOntology</code>.</li>
+<li><strong>Fabric Data Agent.</strong> Hand analytical questions to a curated Data
+  Agent with <code>fabricDataAgent</code>. See the
+  <a href="../howto_grounding_fabric_data_agent/#fabric-data-agent-vs-fabric-ontology">comparison with Fabric ontology</a>.</li>
+<li><strong>SharePoint, live with per-user ACL.</strong> Add <code>remoteSharePoint</code>. No
+  ingestion, no local copy.</li>
+<li><strong>SharePoint, indexed with app-only auth.</strong> Add <code>indexedSharePoint</code>.
+  Foundry IQ maintains its own AI Search index over the site.</li>
+<li><strong>Fabric OneLake.</strong> Add <code>indexedOneLake</code>. Foundry IQ indexes and
+  queries lakehouse content natively.</li>
+<li><strong>Public web, scoped by allow / block lists.</strong> Add <code>web</code>. No ACL, no
+  OBO, billed per Bing call.</li>
 </ul>
-<p>Not sure whether to pick Fabric ontology or Fabric Data Agent? See the
-comparison table on the
-<a href="../howto_grounding_fabric_data_agent/#fabric-data-agent-vs-fabric-ontology">Fabric Data Agent page</a>.</p>
+<h2 id="approach-b-azure-ai-search-direct">Approach B: Azure AI Search direct</h2>
+<p>GPT-RAG can skip Foundry IQ and query an Azure AI Search index directly.
+This is the older path and the rollback path. It is not a Knowledge
+Source, it is a separate retrieval backend selected with
+<code>RETRIEVAL_BACKEND=ai_search</code>.</p>
+<ul>
+<li><strong>Ingestion.</strong> GPT-RAG's own ingestion pipeline writes to the index.
+  See <a href="../howto_sharepoint_connector/">SharePoint connector</a> for the
+  classic SharePoint ingestion path.</li>
+<li><strong>Retrieval.</strong> The orchestrator queries the index directly. No
+  Knowledge Base fan-out, no cross-source blending.</li>
+<li><strong>When to stay here.</strong> Existing deployment not migrating yet, or as a
+  rollback if a Foundry IQ change causes trouble.</li>
+</ul>
+<p>Full details on the <a href="../howto_grounding_ai_search_direct/">Azure AI Search direct</a> page.</p>
 <h2 id="related-reading">Related reading</h2>
 <ul>
-<li><a href="../howto_authentication/">Auth and Doc Security</a> explains how the
-  orchestrator obtains and forwards the user's delegated token, which is what
-  makes per-user security work across sources.</li>
-<li><a href="../howto_retrieval_optimization/">Retrieval Optimization</a> covers query-time
+<li><a href="../howto_authentication/">Auth and Doc Security</a>. How the orchestrator
+  obtains and forwards the user's delegated token, which is what makes
+  per-user security work across sources.</li>
+<li><a href="../howto_retrieval_optimization/">Retrieval Optimization</a>. Query-time
   tuning that applies once a source is configured.</li>
 </ul>
 
