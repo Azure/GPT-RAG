@@ -75,6 +75,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#embedded-chat" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -741,6 +746,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../howto_embed_chat/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Embed chat in a portal
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../howto_dashboard_signin/" class="md-nav__link">
         
   
@@ -769,10 +795,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_6" >
         
           
-          <label class="md-nav__link" for="__nav_8_5" id="__nav_8_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_6" id="__nav_8_6_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -783,8 +809,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_5">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_6">
             <span class="md-nav__icon md-icon"></span>
             Grounding sources
           </label>
@@ -825,10 +851,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_5_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_6_2" >
         
           
-          <label class="md-nav__link" for="__nav_8_5_2" id="__nav_8_5_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_6_2" id="__nav_8_6_2_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -839,8 +865,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_8_5_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_5_2">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_8_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_6_2">
             <span class="md-nav__icon md-icon"></span>
             Approach A: Foundry IQ
           </label>
@@ -1057,10 +1083,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_5_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_6_3" >
         
           
-          <label class="md-nav__link" for="__nav_8_5_3" id="__nav_8_5_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_6_3" id="__nav_8_6_3_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1071,8 +1097,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_8_5_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_5_3">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_8_6_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_6_3">
             <span class="md-nav__icon md-icon"></span>
             Approach B: AI Search direct
           </label>
@@ -1234,6 +1260,17 @@
       
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -1243,6 +1280,32 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#embedded-chat" class="md-nav__link">
+    <span class="md-ellipsis">
+      Embedded chat
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -1317,6 +1380,136 @@
   <h1>Troubleshooting</h1>
 
 <p>This page covers common issues, debugging tools, and how to inspect logs in GPT-RAG.</p>
+<h2 id="embedded-chat">Embedded chat</h2>
+<p>Use this matrix when a portal embeds GPT-RAG through Chainlit Copilot. Start by
+confirming <code>CHAINLIT_COPILOT_ENABLED=true</code>, verifying that
+<code>CHAINLIT_COPILOT_AUTH_MODE</code> is explicitly <code>anonymous</code> or <code>entra</code>, and checking
+the exact public base from <code>CHAINLIT_URL</code> plus <code>CHAINLIT_ROOT_PATH</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Likely cause</th>
+<th>What to check</th>
+<th>Recovery</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Widget stays on "Loading assistant..."</td>
+<td>Bundle blocked, bootstrap failed, or CSP blocked script execution</td>
+<td>Network and Console for <code>{publicBase}/copilot/auth/bootstrap</code> and <code>{publicBase}/copilot/index.js</code>; portal <code>script-src</code></td>
+<td>Fix the first failed request. Mount only after bootstrap succeeds.</td>
+</tr>
+<tr>
+<td>Same-origin path returns 404</td>
+<td>The proxy stripped, duplicated, or ambiguously rewrote <code>CHAINLIT_ROOT_PATH</code></td>
+<td>Confirm <code>/gpt-rag</code> reaches GPT-RAG UI unchanged and <code>chainlitServer</code> includes it</td>
+<td>Preserve the exact prefix. Do not rely on <code>X-Forwarded-Prefix</code>.</td>
+</tr>
+<tr>
+<td>Anonymous bootstrap returns 400</td>
+<td>The request sent <code>Authorization</code> while <code>CHAINLIT_COPILOT_AUTH_MODE=anonymous</code></td>
+<td>Request headers</td>
+<td>Remove the header. Anonymous mode never consumes or falls back from a token.</td>
+</tr>
+<tr>
+<td>Entra bootstrap returns 401</td>
+<td>Token signature, version, issuer, audience, tenant, identity, scope, or time validation failed</td>
+<td>RS256, <code>ver=2.0</code>, <code>iss</code>, <code>aud</code>, <code>tid</code>, <code>oid</code>, <code>scp</code>, <code>exp</code>, and <code>nbf</code>; confirm the portal requested the delegated GPT-RAG API scope</td>
+<td>Acquire one fresh delegated token and retry once. Do not pass it to widget <code>accessToken</code>.</td>
+</tr>
+<tr>
+<td>Bootstrap returns a readable 403</td>
+<td>The Entra <code>azp</code> is not allowed or the valid user fails GPT-RAG authorization</td>
+<td><code>CHAINLIT_COPILOT_ENTRA_ALLOWED_CLIENT_IDS</code>, <code>ALLOWED_USER_PRINCIPALS</code>, and <code>ALLOWED_USER_NAMES</code></td>
+<td>Correct the authorized portal or user policy. Do not fall back to anonymous.</td>
+</tr>
+<tr>
+<td>Bootstrap appears as a CORS or network error</td>
+<td>Browser <code>Origin</code> is not allowlisted exactly</td>
+<td>Compare scheme, host, and port with <code>CHAINLIT_ALLOWED_ORIGINS</code>; remove paths, wildcards, and <code>null</code></td>
+<td>Add the exact HTTPS origin and restart GPT-RAG UI.</td>
+</tr>
+<tr>
+<td>Bootstrap returns 429</td>
+<td>The process-local bootstrap attempt limit was reached</td>
+<td><code>Retry-After</code>, gateway/WAF limits, and aggregate traffic behind trusted ingress</td>
+<td>Honor <code>Retry-After</code> and stop automatic retries. Configure authoritative ingress throttling.</td>
+</tr>
+<tr>
+<td>Bootstrap returns 503</td>
+<td>GPT-RAG UI could not retrieve Entra signing keys</td>
+<td>UI connectivity to the tenant v2 JWKS and service logs</td>
+<td>Show an unavailable state. Do not start a sign-in loop or anonymous fallback.</td>
+</tr>
+<tr>
+<td>Bootstrap succeeds but the widget reports authentication failure</td>
+<td>The opaque session cookie was omitted, blocked, or scoped to the wrong path</td>
+<td><code>credentials: "include"</code>, <code>Set-Cookie</code>, cookie path, <code>SameSite</code>, and gateway cookie preservation; probe <code>{publicBase}/project/settings</code></td>
+<td>Fix cookie delivery. Never put the Entra token in <code>accessToken</code>.</td>
+</tr>
+<tr>
+<td>Widget loads, then disconnects</td>
+<td>Socket.IO route, WebSocket upgrade, session expiry, or affinity is broken</td>
+<td><code>{publicBase}/ws/socket.io</code> polling and upgrade; cookie; exact origin; backend affinity; WebSocket <code>4401</code></td>
+<td>Route all transports to the same session, preserve cookies, and rebootstrap once if the session expired.</td>
+</tr>
+<tr>
+<td>Reconnect or retry duplicates a message</td>
+<td>The portal retried the send operation instead of only the connection</td>
+<td>Network trace around the last send and Socket.IO reconnect</td>
+<td>Preserve the transcript and draft, reconnect first, and never automatically resend the last message.</td>
+</tr>
+<tr>
+<td>Session stops near token expiry</td>
+<td>The earlier of Entra <code>exp</code> and the configured Copilot TTL was reached</td>
+<td>Bootstrap <code>expiresAt</code>, session TTL, eviction, process restart, or revision switch</td>
+<td>In Entra mode acquire one fresh token; in anonymous mode send no token. Rebootstrap once, then offer recovery.</td>
+</tr>
+<tr>
+<td>Works in one browser but not another</td>
+<td>Third-party cookies, tracking prevention, private browsing, or enterprise browser policy blocks the cookie</td>
+<td>Browser cookie warnings and whether the portal and GPT-RAG UI are unrelated sites</td>
+<td>Prefer a same-origin path or sibling subdomain. Cross-site embedding is best effort; provide a standalone link.</td>
+</tr>
+<tr>
+<td>Browser does not render or operate the widget correctly</td>
+<td>The browser does not support the tested Chainlit 2.9.4 Shadow DOM, storage, or WebSocket behavior</td>
+<td>Supported browser matrix, JavaScript policy, local storage, CSP, and WebSocket support</td>
+<td>Use a supported current browser and provide a standalone fallback. Sidebar mode is not supported.</td>
+</tr>
+<tr>
+<td>Citation or download returns 404</td>
+<td>Grant expired or changed, session is stale, conversation ownership failed, path is unsafe, or blob is absent</td>
+<td>Absolute URL under <code>{publicBase}/api/download/{grant_token}</code>; current session; unchanged grant; conversation ownership</td>
+<td>Reopen the citation from the current conversation. Do not replace the grant with a SAS or public-blob URL. The server intentionally uses 404 for denied and missing targets.</td>
+</tr>
+<tr>
+<td>Citation opens a portal 404 outside GPT-RAG</td>
+<td>Public root path was omitted from an absolute URL or the proxy route is incomplete</td>
+<td><code>CHAINLIT_URL</code>, <code>CHAINLIT_ROOT_PATH</code>, rendered <code>href</code>, and gateway path rule</td>
+<td>Use the server-generated absolute URL and route the full public base.</td>
+</tr>
+<tr>
+<td>A different account sees a previous thread</td>
+<td>The portal remounted without clearing Copilot state</td>
+<td>Logout/account-switch handler, <code>#chainlit-copilot</code>, and <code>chainlit-copilot-thread-id</code></td>
+<td>Stop the widget immediately, remove local state, call Copilot logout, and mount only after a clean bootstrap.</td>
+</tr>
+<tr>
+<td>CSP blocks styles or fonts</td>
+<td>Chainlit 2.9.4 injects Shadow DOM styles and may load Google Inter</td>
+<td>Console violations for <code>style-src</code> and <code>font-src</code></td>
+<td>Add the required <code>style-src 'unsafe-inline'</code> exception with security-owner review, and allow approved font sources or self-host the font.</td>
+</tr>
+</tbody>
+</table>
+<p>The embedded widget is not an iframe. Changing <code>frame-src</code>,
+<code>X-Frame-Options</code>, or GPT-RAG UI <code>frame-ancestors</code> does not fix a bundle, CORS,
+cookie, or WebSocket failure.</p>
+<p>See <a href="../howto_embed_chat/">Embed the chat in a portal</a> for the complete setup and
+validation checklist.</p>
 <p><strong>Showing Response Time Statistics in the Chat UI</strong></p>
 <p>The GPT-RAG UI includes a built-in option to display response time after each agent answer. To enable it, set the <code>SHOW_STATISTICS</code> application setting to <code>true</code> in your Container App (or App Configuration). Once enabled, each response in the chat will show timing information, helping you identify slow responses and compare performance across different queries or configurations.</p>
 <p><strong>Enabling Debug Logging</strong></p>

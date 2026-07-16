@@ -1,0 +1,2048 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Official project documentation">
+      
+      
+        <meta name="author" content="Paulo Lacerda">
+      
+      
+      
+        <link rel="prev" href="../howto_authentication/">
+      
+      
+        <link rel="next" href="../howto_dashboard_signin/">
+      
+      
+      <link rel="icon" href="../favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.34">
+    
+    
+      
+        <title>Embed chat in a portal - GPT-RAG</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.35f28582.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../styles.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#embed-the-chat-in-a-portal" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="GPT-RAG" class="md-header__button md-logo" aria-label="GPT-RAG" data-md-component="logo">
+      
+  <img src="../media/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            GPT-RAG
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Embed chat in a portal
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/azure/gpt-rag" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="GPT-RAG" class="md-nav__button md-logo" aria-label="GPT-RAG" data-md-component="logo">
+      
+  <img src="../media/logo.png" alt="logo">
+
+    </a>
+    GPT-RAG
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/azure/gpt-rag" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../whatisnew/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    What's New
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../release_267_270_walkthrough/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Release Walkthrough
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deploy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Deployment Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Quick Start Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Quick Start Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart_simple_rag/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Simple RAG
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart_nl2sql/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    NL2SQL
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Architecture
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Architecture
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Services
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Services
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_orchestrator/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Orchestrator
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_2" id="__nav_7_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Ingestion
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_2">
+            <span class="md-nav__icon md-icon"></span>
+            Ingestion
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_ingestion/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_blob_data_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Blob
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_sharepoint_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Sharepoint
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_nl2sql_data_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    NL2SQL
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    How-to Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            How-to Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_azure_direct/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Azure Direct Models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_app_gateway/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Application Gateway
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_authentication/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Auth & Doc Security
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Embed chat in a portal
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Embed chat in a portal
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#before-you-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      Before you start
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#choose-a-topology" class="md-nav__link">
+    <span class="md-ellipsis">
+      Choose a topology
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configure-gpt-rag-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configure GPT-RAG UI
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configure GPT-RAG UI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configure-the-preferred-same-origin-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configure the preferred same-origin path
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#add-an-anonymous-widget" class="md-nav__link">
+    <span class="md-ellipsis">
+      Add an anonymous widget
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#add-an-entra-authenticated-widget" class="md-nav__link">
+    <span class="md-ellipsis">
+      Add an Entra-authenticated widget
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configure-the-portal-csp" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configure the portal CSP
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#treat-the-browser-bridge-as-untrusted-input" class="md-nav__link">
+    <span class="md-ellipsis">
+      Treat the browser bridge as untrusted input
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#handle-logout-account-switch-and-expiry" class="md-nav__link">
+    <span class="md-ellipsis">
+      Handle logout, account switch, and expiry
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#use-absolute-citation-and-download-urls" class="md-nav__link">
+    <span class="md-ellipsis">
+      Use absolute citation and download URLs
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#browser-and-deployment-limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Browser and deployment limitations
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validate-the-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Validate the integration
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_dashboard_signin/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Admin Dashboard Sign-in
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_8_6" id="__nav_8_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Grounding sources
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_6">
+            <span class="md-nav__icon md-icon"></span>
+            Grounding sources
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview (start here)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_6_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_8_6_2" id="__nav_8_6_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Approach A: Foundry IQ
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_8_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            Approach A: Foundry IQ
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_foundry_iq_prereqs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Prerequisites
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_foundry_iq_documents/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Documents
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_work_iq/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Work IQ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_fabric_ontology/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Fabric ontology
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_fabric_data_agent/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Fabric Data Agent
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_sharepoint_remote/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    SharePoint remote
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_sharepoint_indexed/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    SharePoint indexed
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_onelake/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    OneLake
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_web_bing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Web grounding
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_6_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_8_6_3" id="__nav_8_6_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Approach B: AI Search direct
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_8_6_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_6_3">
+            <span class="md-nav__icon md-icon"></span>
+            Approach B: AI Search direct
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_ai_search_direct/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_sharepoint_connector/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    SharePoint connector
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_multimodality/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Multimodality
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_userfeedback/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    User Feedback
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_retrieval_optimization/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Retrieval Optimization
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_resource_naming/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Resource Naming (CAF)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../team/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Meet the Team
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="embed-the-chat-in-a-portal">Embed the chat in a portal</h1>
+<p>Use Chainlit Copilot when users should open GPT-RAG from an existing web portal
+instead of navigating to the standalone UI. Embedding is disabled by default.
+When it is enabled, you must explicitly select <code>anonymous</code> or <code>entra</code>
+authentication. An Entra failure never falls back to anonymous access.</p>
+<p>GPT-RAG UI currently pins Chainlit 2.9.4. In this version, Copilot injects a
+floating button and popover into an open Shadow DOM in the portal page. It does
+not use an iframe. Sidebar mode requires Chainlit 2.11 or later and is outside
+the scope of this integration.</p>
+<h2 id="before-you-start">Before you start</h2>
+<p>You need:</p>
+<ul>
+<li>a GPT-RAG UI version that includes Copilot embedding support;</li>
+<li>an HTTPS portal origin, for example <code>https://portal.contoso.com</code>;</li>
+<li>permission to update GPT-RAG UI settings in Azure App Configuration;</li>
+<li>control of the portal Content Security Policy (CSP) and reverse proxy;</li>
+<li>for Entra mode, a portal SPA registration and a delegated GPT-RAG API scope.</li>
+</ul>
+<p>Publish GPT-RAG UI through the approved gateway or reverse proxy. Do not expose
+the internal Container App directly.</p>
+<h2 id="choose-a-topology">Choose a topology</h2>
+<p>Use the first topology your portal can support.</p>
+<table>
+<thead>
+<tr>
+<th>Topology</th>
+<th>Example</th>
+<th>Support level</th>
+<th>Required action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Same-origin path</td>
+<td>Portal <code>https://portal.contoso.com</code>, GPT-RAG at <code>/gpt-rag</code></td>
+<td>Preferred</td>
+<td>Preserve the complete <code>/gpt-rag</code> prefix for HTTP, Socket.IO, WebSocket, assets, and downloads.</td>
+</tr>
+<tr>
+<td>Sibling subdomain</td>
+<td>Portal <code>https://portal.contoso.com</code>, GPT-RAG <code>https://chat.contoso.com</code></td>
+<td>Supported</td>
+<td>Add the exact portal origin and preserve cookies. This is cross-origin but normally same-site.</td>
+</tr>
+<tr>
+<td>Unrelated site</td>
+<td>Portal <code>https://contoso-portal.com</code>, GPT-RAG <code>https://gpt-rag.example.net</code></td>
+<td>Best effort</td>
+<td>Use exact CORS and <code>SameSite=None</code>. Test every target browser because third-party-cookie policies can block the session.</td>
+</tr>
+</tbody>
+</table>
+<p>An origin contains the scheme, host, and port only. Configure a public path
+separately with <code>CHAINLIT_ROOT_PATH</code>. Never use a path, wildcard, query string,
+fragment, credentials, or the <code>null</code> origin in <code>CHAINLIT_ALLOWED_ORIGINS</code>.</p>
+<h2 id="configure-gpt-rag-ui">Configure GPT-RAG UI</h2>
+<p>Add these settings to Azure App Configuration with the <code>gpt-rag-ui</code> or
+<code>gpt-rag</code> label. Environment variables with the same names take precedence.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Required</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CHAINLIT_COPILOT_ENABLED</code></td>
+<td>Yes</td>
+<td>Set to <code>true</code>. Default: <code>false</code>.</td>
+</tr>
+<tr>
+<td><code>CHAINLIT_COPILOT_AUTH_MODE</code></td>
+<td>Yes</td>
+<td>Set explicitly to <code>anonymous</code> or <code>entra</code>. There is no default.</td>
+</tr>
+<tr>
+<td><code>CHAINLIT_AUTH_SECRET</code></td>
+<td>Yes</td>
+<td>Persistent secret with at least 32 UTF-8 bytes and 256 bits of entropy. Store it through a Key Vault-backed reference. Never expose it to the portal.</td>
+</tr>
+<tr>
+<td><code>CHAINLIT_URL</code></td>
+<td>Yes</td>
+<td>Exact public HTTPS origin, such as <code>https://portal.contoso.com</code>. Paths are rejected.</td>
+</tr>
+<tr>
+<td><code>CHAINLIT_ROOT_PATH</code></td>
+<td>Same-origin</td>
+<td>Canonical public prefix, such as <code>/gpt-rag</code>. A non-root path is required when the portal origin equals <code>CHAINLIT_URL</code>.</td>
+</tr>
+<tr>
+<td><code>CHAINLIT_ALLOWED_ORIGINS</code></td>
+<td>Yes</td>
+<td>Comma-separated exact portal origins, with at most 20 entries.</td>
+</tr>
+<tr>
+<td><code>CHAINLIT_COOKIE_SAMESITE</code></td>
+<td>No</td>
+<td><code>lax</code> by default. Use <code>none</code> only for a cross-site HTTPS deployment.</td>
+</tr>
+<tr>
+<td><code>CHAINLIT_COPILOT_ENTRA_TENANT_ID</code></td>
+<td>Entra</td>
+<td>Tenant GUID accepted in <code>tid</code> and the exact v2 issuer.</td>
+</tr>
+<tr>
+<td><code>CHAINLIT_COPILOT_ENTRA_AUDIENCE</code></td>
+<td>Entra</td>
+<td>Exact API audience expected in <code>aud</code>.</td>
+</tr>
+<tr>
+<td><code>CHAINLIT_COPILOT_ENTRA_ALLOWED_CLIENT_IDS</code></td>
+<td>Entra</td>
+<td>Comma-separated portal application client GUIDs, with at most 50 entries. The token's <code>azp</code> must match.</td>
+</tr>
+<tr>
+<td><code>CHAINLIT_COPILOT_ENTRA_REQUIRED_SCOPE</code></td>
+<td>No</td>
+<td>Delegated scope required in <code>scp</code> for Entra mode. Default: <code>user_impersonation</code>.</td>
+</tr>
+<tr>
+<td><code>CHAINLIT_COPILOT_SESSION_TTL_SECONDS</code></td>
+<td>No</td>
+<td>Session lifetime from 60 to 86400 seconds. Default: 3600. Entra expiry can shorten it.</td>
+</tr>
+<tr>
+<td><code>CHAINLIT_COPILOT_MAX_SESSIONS</code></td>
+<td>No</td>
+<td>Maximum process-local sessions from 1 to 10000. Default: 1000.</td>
+</tr>
+<tr>
+<td><code>CHAINLIT_COPILOT_BOOTSTRAP_RATE_LIMIT_PER_MINUTE</code></td>
+<td>No</td>
+<td>Process-local attempt limit from 1 to 600. Default: 60. Enforce authoritative throttling at trusted ingress.</td>
+</tr>
+<tr>
+<td><code>CITATION_SHARED_DOWNLOAD_CONTAINERS</code></td>
+<td>No</td>
+<td>Configured document or image containers with uniform access for every authorized UI user. Default: empty. Never list permission-trimmed containers.</td>
+</tr>
+</tbody>
+</table>
+<p>Unsafe or incomplete enabled configuration fails startup. The Copilot
+authentication mode is separate from standalone OAuth and <code>ALLOW_ANONYMOUS</code>.
+When Copilot is disabled, standalone behavior is unchanged. Enabling Copilot
+changes the process default for standalone anonymous access to <code>false</code>; set
+<code>ALLOW_ANONYMOUS=true</code> explicitly if standalone anonymous access must remain
+available without OAuth.</p>
+<p>Restart GPT-RAG UI after changing these settings. Rotating
+<code>CHAINLIT_AUTH_SECRET</code> signs out users and invalidates existing Chainlit tokens
+and download grants.</p>
+<p><code>CHAINLIT_ROOT_PATH</code> must start with one <code>/</code> and must not end with <code>/</code>. Dot
+segments, empty segments, percent encoding, a query, and a fragment are
+rejected. A portal origin can equal <code>CHAINLIT_URL</code> only when this path is
+non-root.</p>
+<h3 id="configure-the-preferred-same-origin-path">Configure the preferred same-origin path</h3>
+<div class="highlight"><pre><span></span><code>CHAINLIT_URL=https://portal.contoso.com
+CHAINLIT_ROOT_PATH=/gpt-rag
+CHAINLIT_ALLOWED_ORIGINS=https://portal.contoso.com
+</code></pre></div>
+<p>The public base is <code>https://portal.contoso.com/gpt-rag</code>. The reverse proxy must
+preserve the exact <code>/gpt-rag</code> prefix and send it to GPT-RAG UI. Do not strip the
+prefix and do not rely on <code>X-Forwarded-Prefix</code> to add it. Requests outside that
+prefix remain portal routes.</p>
+<p>All GPT-RAG UI routes are under the public base:</p>
+<table>
+<thead>
+<tr>
+<th>Purpose</th>
+<th>Path under the public base</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Copilot bundle</td>
+<td><code>/copilot/index.js</code></td>
+</tr>
+<tr>
+<td>Session bootstrap</td>
+<td><code>/copilot/auth/bootstrap</code></td>
+</tr>
+<tr>
+<td>Session logout</td>
+<td><code>/copilot/auth/logout</code></td>
+</tr>
+<tr>
+<td>Widget settings and APIs</td>
+<td><code>/project/settings</code> and <code>/project/*</code></td>
+</tr>
+<tr>
+<td>Socket.IO polling and upgrade</td>
+<td><code>/ws/socket.io</code></td>
+</tr>
+<tr>
+<td>Static content</td>
+<td><code>/assets/*</code>, <code>/public/*</code>, and <code>/version-footer</code></td>
+</tr>
+<tr>
+<td>Citation download</td>
+<td><code>/api/download/{grant_token}</code></td>
+</tr>
+</tbody>
+</table>
+<p>For this example, the bootstrap URL is
+<code>https://portal.contoso.com/gpt-rag/copilot/auth/bootstrap</code>.</p>
+<p>For a sibling subdomain, use exact origins and no root prefix:</p>
+<div class="highlight"><pre><span></span><code>CHAINLIT_URL=https://chat.contoso.com
+CHAINLIT_ROOT_PATH=
+CHAINLIT_ALLOWED_ORIGINS=https://portal.contoso.com
+CHAINLIT_COOKIE_SAMESITE=none
+</code></pre></div>
+<p>The portal must use <code>credentials: "include"</code> and the UI must return an exact
+CORS response for <code>https://portal.contoso.com</code>. An unrelated site uses the same
+cookie setting but remains best effort because browsers can reject third-party
+cookies.</p>
+<h2 id="add-an-anonymous-widget">Add an anonymous widget</h2>
+<p>Anonymous mode must be deliberate:</p>
+<div class="highlight"><pre><span></span><code>CHAINLIT_COPILOT_ENABLED=true
+CHAINLIT_COPILOT_AUTH_MODE=anonymous
+CHAINLIT_URL=https://portal.contoso.com
+CHAINLIT_ROOT_PATH=/gpt-rag
+CHAINLIT_ALLOWED_ORIGINS=https://portal.contoso.com
+CHAINLIT_AUTH_SECRET=&lt;Key Vault-backed secret with at least 32 bytes&gt;
+</code></pre></div>
+<p>Call bootstrap without an <code>Authorization</code> header. Supplying one returns <code>400</code>;
+it is never treated as an anonymous fallback.</p>
+<div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;gpt-rag-status&quot;</span> <span class="na">role</span><span class="o">=</span><span class="s">&quot;status&quot;</span><span class="p">&gt;</span>Loading assistant...<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">chainlitServer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;https://portal.contoso.com/gpt-rag&quot;</span><span class="p">;</span>
+
+<span class="w">  </span><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">startAnonymousAssistant</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s2">&quot;gpt-rag-status&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">bootstrap</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span>
+<span class="w">      </span><span class="sb">`</span><span class="si">${</span><span class="nx">chainlitServer</span><span class="si">}</span><span class="sb">/copilot/auth/bootstrap`</span><span class="p">,</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nx">method</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;POST&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">credentials</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;include&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">bootstrap</span><span class="p">.</span><span class="nx">ok</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">status</span><span class="p">.</span><span class="nx">textContent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;The assistant is unavailable.&quot;</span><span class="p">;</span>
+<span class="w">      </span><span class="k">return</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">probe</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="sb">`</span><span class="si">${</span><span class="nx">chainlitServer</span><span class="si">}</span><span class="sb">/project/settings`</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">credentials</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;include&quot;</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">probe</span><span class="p">.</span><span class="nx">ok</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="sb">`</span><span class="si">${</span><span class="nx">chainlitServer</span><span class="si">}</span><span class="sb">/copilot/auth/logout`</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">method</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;POST&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">credentials</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;include&quot;</span>
+<span class="w">      </span><span class="p">});</span>
+<span class="w">      </span><span class="nx">status</span><span class="p">.</span><span class="nx">textContent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;The assistant session could not be established.&quot;</span><span class="p">;</span>
+<span class="w">      </span><span class="k">return</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">script</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s2">&quot;script&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="nx">script</span><span class="p">.</span><span class="nx">src</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sb">`</span><span class="si">${</span><span class="nx">chainlitServer</span><span class="si">}</span><span class="sb">/copilot/index.js`</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">script</span><span class="p">.</span><span class="nx">onload</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nb">window</span><span class="p">.</span><span class="nx">mountChainlitWidget</span><span class="p">({</span><span class="w"> </span><span class="nx">chainlitServer</span><span class="p">,</span><span class="w"> </span><span class="nx">theme</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;light&quot;</span><span class="w"> </span><span class="p">});</span>
+<span class="w">      </span><span class="nx">status</span><span class="p">.</span><span class="nx">hidden</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">    </span><span class="p">};</span>
+<span class="w">    </span><span class="nx">script</span><span class="p">.</span><span class="nx">onerror</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">status</span><span class="p">.</span><span class="nx">textContent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;The assistant is unavailable.&quot;</span><span class="p">;</span>
+<span class="w">    </span><span class="p">};</span>
+<span class="w">    </span><span class="nb">document</span><span class="p">.</span><span class="nx">head</span><span class="p">.</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">script</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="ow">void</span><span class="w"> </span><span class="nx">startAnonymousAssistant</span><span class="p">();</span>
+<span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</code></pre></div>
+<p>Anonymous sessions use an ephemeral identity. Durable thread recovery,
+user-bound uploads, feedback, and authenticated citation downloads are not
+available. Unauthorized citations appear as text instead of insecure links.</p>
+<h2 id="add-an-entra-authenticated-widget">Add an Entra-authenticated widget</h2>
+<p>Use an allowed portal app to obtain a delegated v2 access token for the GPT-RAG
+API. GPT-RAG UI validates the token, creates a bounded server session, and sets
+an opaque <code>HttpOnly; Secure</code> cookie. The cookie contains neither the Entra token
+nor a Chainlit token.</p>
+<div class="highlight"><pre><span></span><code>CHAINLIT_COPILOT_ENABLED=true
+CHAINLIT_COPILOT_AUTH_MODE=entra
+CHAINLIT_URL=https://portal.contoso.com
+CHAINLIT_ROOT_PATH=/gpt-rag
+CHAINLIT_ALLOWED_ORIGINS=https://portal.contoso.com
+CHAINLIT_AUTH_SECRET=&lt;Key Vault-backed secret with at least 32 bytes&gt;
+CHAINLIT_COPILOT_ENTRA_TENANT_ID=11111111-1111-4111-8111-111111111111
+CHAINLIT_COPILOT_ENTRA_AUDIENCE=api://22222222-2222-4222-8222-222222222222
+CHAINLIT_COPILOT_ENTRA_ALLOWED_CLIENT_IDS=33333333-3333-4333-8333-333333333333
+CHAINLIT_COPILOT_ENTRA_REQUIRED_SCOPE=user_impersonation
+</code></pre></div>
+<p>The allowed client ID is the portal app registration's application client ID.
+The access token must contain <code>ver=2.0</code> and an <code>azp</code> GUID in that allowlist.
+<code>appid</code>-only v1 tokens are rejected.</p>
+<p>Do not pass the raw Entra token to
+<code>mountChainlitWidget({ accessToken: ... })</code>. In Chainlit 2.9.4,
+<code>accessToken</code> expects a Chainlit session token signed with
+<code>CHAINLIT_AUTH_SECRET</code>, not an Entra token.</p>
+<div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;gpt-rag-status&quot;</span> <span class="na">role</span><span class="o">=</span><span class="s">&quot;status&quot;</span><span class="p">&gt;</span>Loading assistant...<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">chainlitServer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;https://portal.contoso.com/gpt-rag&quot;</span><span class="p">;</span>
+<span class="w">  </span><span class="kd">let</span><span class="w"> </span><span class="nx">sessionExpiryTimer</span><span class="p">;</span>
+
+<span class="w">  </span><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">bootstrapAssistant</span><span class="p">(</span><span class="nx">accessToken</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="sb">`</span><span class="si">${</span><span class="nx">chainlitServer</span><span class="si">}</span><span class="sb">/copilot/auth/bootstrap`</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">method</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;POST&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">credentials</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;include&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">headers</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Authorization</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Bearer &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">accessToken</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="kd">function</span><span class="w"> </span><span class="nx">removeAssistantUi</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">clearTimeout</span><span class="p">(</span><span class="nx">sessionExpiryTimer</span><span class="p">);</span>
+<span class="w">    </span><span class="nb">window</span><span class="p">.</span><span class="nx">unmountChainlitWidget</span><span class="o">?</span><span class="p">.();</span>
+<span class="w">    </span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s2">&quot;chainlit-copilot&quot;</span><span class="p">)</span><span class="o">?</span><span class="p">.</span><span class="nx">remove</span><span class="p">();</span>
+<span class="w">    </span><span class="nx">localStorage</span><span class="p">.</span><span class="nx">removeItem</span><span class="p">(</span><span class="s2">&quot;chainlit-copilot-thread-id&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">stopAssistant</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">removeAssistantUi</span><span class="p">();</span>
+<span class="w">    </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="sb">`</span><span class="si">${</span><span class="nx">chainlitServer</span><span class="si">}</span><span class="sb">/copilot/auth/logout`</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">method</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;POST&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">credentials</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;include&quot;</span>
+<span class="w">      </span><span class="p">});</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="c1">// The local UI is already gone. The bounded server session will expire.</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">loadCopilotBundle</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="ow">typeof</span><span class="w"> </span><span class="nb">window</span><span class="p">.</span><span class="nx">mountChainlitWidget</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">&quot;function&quot;</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Promise</span><span class="p">((</span><span class="nx">resolve</span><span class="p">,</span><span class="w"> </span><span class="nx">reject</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="kd">const</span><span class="w"> </span><span class="nx">script</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s2">&quot;script&quot;</span><span class="p">);</span>
+<span class="w">      </span><span class="nx">script</span><span class="p">.</span><span class="nx">src</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sb">`</span><span class="si">${</span><span class="nx">chainlitServer</span><span class="si">}</span><span class="sb">/copilot/index.js`</span><span class="p">;</span>
+<span class="w">      </span><span class="nx">script</span><span class="p">.</span><span class="nx">onload</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">resolve</span><span class="p">;</span>
+<span class="w">      </span><span class="nx">script</span><span class="p">.</span><span class="nx">onerror</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">reject</span><span class="p">;</span>
+<span class="w">      </span><span class="nb">document</span><span class="p">.</span><span class="nx">head</span><span class="p">.</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">script</span><span class="p">);</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="kd">function</span><span class="w"> </span><span class="nx">scheduleRefresh</span><span class="p">(</span><span class="nx">expiresAt</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">refreshAt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Number</span><span class="p">(</span><span class="nx">expiresAt</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">1000</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">30</span><span class="nx">_000</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nb">Number</span><span class="p">.</span><span class="nb">isFinite</span><span class="p">(</span><span class="nx">refreshAt</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">sessionExpiryTimer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">setTimeout</span><span class="p">(</span>
+<span class="w">        </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="ow">void</span><span class="w"> </span><span class="nx">restartAssistant</span><span class="p">(),</span>
+<span class="w">        </span><span class="nb">Math</span><span class="p">.</span><span class="nx">max</span><span class="p">(</span><span class="mf">0</span><span class="p">,</span><span class="w"> </span><span class="nx">refreshAt</span><span class="p">)</span>
+<span class="w">      </span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">startAssistant</span><span class="p">({</span><span class="w"> </span><span class="nx">forceRefresh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{})</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s2">&quot;gpt-rag-status&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="nx">status</span><span class="p">.</span><span class="nx">hidden</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">status</span><span class="p">.</span><span class="nx">textContent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Loading assistant...&quot;</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="kd">let</span><span class="w"> </span><span class="nx">token</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">portalAuth</span><span class="p">.</span><span class="nx">getGptRagAccessToken</span><span class="p">({</span><span class="w"> </span><span class="nx">forceRefresh</span><span class="w"> </span><span class="p">});</span>
+<span class="w">      </span><span class="kd">let</span><span class="w"> </span><span class="nx">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">bootstrapAssistant</span><span class="p">(</span><span class="nx">token</span><span class="p">);</span>
+
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">status</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="mf">401</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="nx">forceRefresh</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">token</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">portalAuth</span><span class="p">.</span><span class="nx">getGptRagAccessToken</span><span class="p">({</span><span class="w"> </span><span class="nx">forceRefresh</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">});</span>
+<span class="w">        </span><span class="nx">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">bootstrapAssistant</span><span class="p">(</span><span class="nx">token</span><span class="p">);</span>
+<span class="w">      </span><span class="p">}</span>
+
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">response</span><span class="p">.</span><span class="nx">ok</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">status</span><span class="p">.</span><span class="nx">textContent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">status</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="mf">403</span>
+<span class="w">          </span><span class="o">?</span><span class="w"> </span><span class="s2">&quot;You do not have access to this assistant.&quot;</span>
+<span class="w">          </span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;The assistant is temporarily unavailable.&quot;</span><span class="p">;</span>
+<span class="w">        </span><span class="k">return</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+
+<span class="w">      </span><span class="kd">const</span><span class="w"> </span><span class="nx">session</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">json</span><span class="p">();</span>
+<span class="w">      </span><span class="kd">const</span><span class="w"> </span><span class="nx">probe</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="sb">`</span><span class="si">${</span><span class="nx">chainlitServer</span><span class="si">}</span><span class="sb">/project/settings`</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">credentials</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;include&quot;</span>
+<span class="w">      </span><span class="p">});</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">probe</span><span class="p">.</span><span class="nx">ok</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">throw</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="ne">Error</span><span class="p">(</span><span class="s2">&quot;The assistant cookie was not established.&quot;</span><span class="p">);</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="k">await</span><span class="w"> </span><span class="nx">loadCopilotBundle</span><span class="p">();</span>
+<span class="w">      </span><span class="nb">window</span><span class="p">.</span><span class="nx">mountChainlitWidget</span><span class="p">({</span><span class="w"> </span><span class="nx">chainlitServer</span><span class="p">,</span><span class="w"> </span><span class="nx">theme</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;light&quot;</span><span class="w"> </span><span class="p">});</span>
+<span class="w">      </span><span class="nx">scheduleRefresh</span><span class="p">(</span><span class="nx">session</span><span class="p">.</span><span class="nx">expiresAt</span><span class="p">);</span>
+<span class="w">      </span><span class="nx">status</span><span class="p">.</span><span class="nx">hidden</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">await</span><span class="w"> </span><span class="nx">stopAssistant</span><span class="p">();</span>
+<span class="w">      </span><span class="nx">status</span><span class="p">.</span><span class="nx">hidden</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span>
+<span class="w">      </span><span class="nx">status</span><span class="p">.</span><span class="nx">textContent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;The assistant is temporarily unavailable.&quot;</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">restartAssistant</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">stopAssistant</span><span class="p">();</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">startAssistant</span><span class="p">({</span><span class="w"> </span><span class="nx">forceRefresh</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">});</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="ow">void</span><span class="w"> </span><span class="nx">startAssistant</span><span class="p">();</span>
+<span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</code></pre></div>
+<p>Bootstrap returns
+<code>{"success":true,"authMode":"entra","expiresAt":&lt;unix-seconds&gt;}</code> and the
+session cookie. Honor <code>429 Retry-After</code>. After one forced token refresh fails,
+stop retrying and show an explicit sign-in or unavailable action.</p>
+<h2 id="configure-the-portal-csp">Configure the portal CSP</h2>
+<p>The portal's CSP governs the widget because the Shadow DOM is part of the portal
+document. GPT-RAG UI response headers do not set the portal's policy.</p>
+<p>For a sibling subdomain such as <code>https://chat.contoso.com</code>, permit:</p>
+<div class="highlight"><pre><span></span><code>script-src &#39;self&#39; https://chat.contoso.com;
+connect-src &#39;self&#39; https://chat.contoso.com wss://chat.contoso.com;
+style-src &#39;self&#39; &#39;unsafe-inline&#39;;
+img-src &#39;self&#39; data: blob: https://chat.contoso.com;
+</code></pre></div>
+<p>Chainlit 2.9.4 requires inline styles injected into the Shadow DOM. Scope this
+exception to the portal that hosts the widget and review it with the portal
+security owner. If no custom font is configured, the bundle loads Google Inter.
+Permit the required Google style and font origins or configure an approved
+self-hosted font.</p>
+<p>No <code>frame-src</code> change is required because Copilot is not an iframe. If a
+nonce-based policy loads the bundle dynamically, give each new script element a
+valid nonce, including after an account switch.</p>
+<h2 id="treat-the-browser-bridge-as-untrusted-input">Treat the browser bridge as untrusted input</h2>
+<p>Shadow DOM isolates styles, not trust. Scripts already running in the portal can
+inspect the open shadow root and call Chainlit browser globals.</p>
+<p>GPT-RAG default-denies <code>call_fn</code> and <code>window_message</code> for Copilot sessions in
+both directions. Do not place credentials, tokens, customer data, or
+authorization decisions in browser events. Chainlit 2.9.4 still contains
+browser-global APIs and wildcard <code>postMessage</code> behavior in its bundle, so these
+convenience APIs are not authorization boundaries.</p>
+<h2 id="handle-logout-account-switch-and-expiry">Handle logout, account switch, and expiry</h2>
+<p>The portal owns the complete widget lifecycle. On logout or account switch:</p>
+<ol>
+<li>Stop accepting new chat input.</li>
+<li>Unmount the widget and remove <code>#chainlit-copilot</code>.</li>
+<li>Remove <code>chainlit-copilot-thread-id</code> from local storage.</li>
+<li><code>POST</code> to <code>{publicBase}/copilot/auth/logout</code> with
+   <code>credentials: "include"</code>.</li>
+<li>Clear the portal's cached delegated token.</li>
+<li>For a new account, acquire a new token, bootstrap, and then mount a fresh
+   widget.</li>
+</ol>
+<p>The logout endpoint deletes the bounded server session, disconnects active
+sockets, and clears the cookie. A successful bootstrap also replaces the
+previous session. Do not let a user send another message if stale content from a
+different account is visible.</p>
+<p>The cookie and thread key are shared across tabs in one browser profile. A
+bootstrap in one tab replaces the server session used by the others. If the
+portal supports multiple tabs, coordinate lifecycle changes with
+<code>BroadcastChannel</code> or an equivalent portal-owned mechanism. Do not support
+different accounts concurrently in separate tabs.</p>
+<p>Use the bootstrap <code>expiresAt</code> value to refresh before planned expiry. A session
+can also disappear after eviction, process restart, revision replacement, or
+affinity loss. On HTTP <code>401</code>, Socket.IO authentication failure, or WebSocket
+<code>4401</code>, clear local state and bootstrap once. Do not retry indefinitely or
+automatically resend the user's last message.</p>
+<h2 id="use-absolute-citation-and-download-urls">Use absolute citation and download URLs</h2>
+<p>GPT-RAG UI returns absolute citation URLs based on <code>CHAINLIT_URL</code> plus
+<code>CHAINLIT_ROOT_PATH</code>. Authorized links use
+<code>/api/download/{grant_token}</code>. The short-lived signed grant is bound to the
+principal, conversation, container, and blob. The server rechecks session and
+conversation ownership before streaming the file.</p>
+<p>Do not replace these URLs with relative links, public blobs, or SAS fallbacks.
+Leave <code>CITATION_SHARED_DOWNLOAD_CONTAINERS</code> empty for permission-trimmed
+content. Unauthorized citations render as text.</p>
+<h2 id="browser-and-deployment-limitations">Browser and deployment limitations</h2>
+<ul>
+<li>Unrelated cross-site operation depends on the browser accepting a
+  <code>SameSite=None; Secure</code> third-party cookie. There is no safe application
+  fallback when it is blocked.</li>
+<li>Only Chainlit 2.9.4 floating mode is supported.</li>
+<li>Anonymous sessions have no durable identity, thread recovery, user-bound
+  upload, feedback, or authenticated citation download.</li>
+<li>Copilot session state and retained Entra tokens are process-local. One active
+  revision with one UI replica is the supported baseline. Scale-out requires
+  affinity for bootstrap, HTTP, Socket.IO polling and upgrade, and WebSocket,
+  but affinity is not high availability.</li>
+<li>Restart, revision replacement, eviction, or affinity loss signs affected
+  users out.</li>
+</ul>
+<h2 id="validate-the-integration">Validate the integration</h2>
+<p>Complete this checklist in each supported browser:</p>
+<ul>
+<li>[ ] Embedding is off by default and the standalone UI remains unchanged.</li>
+<li>[ ] <code>CHAINLIT_COPILOT_AUTH_MODE</code> is explicitly <code>anonymous</code> or <code>entra</code>.</li>
+<li>[ ] The public base preserves the exact <code>CHAINLIT_ROOT_PATH</code>.</li>
+<li>[ ] The bundle creates an open Shadow DOM floating widget.</li>
+<li>[ ] An unlisted <code>Origin</code> is rejected for HTTP, Socket.IO, and WebSocket.</li>
+<li>[ ] Anonymous bootstrap omits <code>Authorization</code>; Entra bootstrap never falls
+      back to anonymous.</li>
+<li>[ ] Entra accepts only the configured v2 issuer, tenant, audience, delegated
+      scope, <code>tid</code>, <code>oid</code>, and allowed portal <code>azp</code>.</li>
+<li>[ ] ID, Graph, app-only, v1, expired, future, and wrong-issuer tokens are
+      rejected.</li>
+<li>[ ] No Entra token appears in widget configuration, local storage, page
+      source, or logs.</li>
+<li>[ ] HTTPS chat and WSS streaming work through the gateway.</li>
+<li>[ ] Disconnect and retry do not duplicate the user's last message.</li>
+<li>[ ] Expiry performs one refresh or rebootstrap and then offers recovery.</li>
+<li>[ ] Logout and account switch clear the widget, server session, and thread
+      state.</li>
+<li>[ ] Download links are absolute and use <code>/api/download/{grant_token}</code> under
+      the public base.</li>
+<li>[ ] Keyboard focus, Escape, visible focus, screen-reader announcements, and
+      320 px layout are usable.</li>
+<li>[ ] A blocked third-party cookie produces a clear error and a standalone
+      fallback.</li>
+</ul>
+<p>See <a href="../troubleshooting/#embedded-chat">Troubleshooting</a> for failure symptoms and
+recovery steps.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <div style="
+  background-color: var(--md-primary-fg-color);
+  color: var(--md-primary-bg-color);
+  text-align: center;
+  font-size: 0.95em;
+  padding: 1em 0;
+">
+  © 2025 GPT-RAG — powered by ❤️ and coffee ☕
+</div>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.icon", "content.iconify", "navigation.tracking", "toc.integrate", "content.code.annotate", "navigation.top"], "search": "../assets/javascripts/workers/search.07f07601.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.56dfad97.min.js"></script>
+      
+        <script src="../javascripts/source-facts-refresh.js"></script>
+      
+    
+  </body>
+</html>

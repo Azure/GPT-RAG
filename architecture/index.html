@@ -514,6 +514,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Key Capabilities">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#embedded-portal-request-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Embedded portal request flow
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -827,6 +842,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../howto_embed_chat/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Embed chat in a portal
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../howto_dashboard_signin/" class="md-nav__link">
         
   
@@ -855,10 +891,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_6" >
         
           
-          <label class="md-nav__link" for="__nav_8_5" id="__nav_8_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_6" id="__nav_8_6_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -869,8 +905,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_5">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_6">
             <span class="md-nav__icon md-icon"></span>
             Grounding sources
           </label>
@@ -911,10 +947,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_5_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_6_2" >
         
           
-          <label class="md-nav__link" for="__nav_8_5_2" id="__nav_8_5_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_6_2" id="__nav_8_6_2_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -925,8 +961,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_8_5_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_5_2">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_8_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_6_2">
             <span class="md-nav__icon md-icon"></span>
             Approach A: Foundry IQ
           </label>
@@ -1143,10 +1179,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_5_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_6_3" >
         
           
-          <label class="md-nav__link" for="__nav_8_5_3" id="__nav_8_5_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_6_3" id="__nav_8_6_3_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1157,8 +1193,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_8_5_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_5_3">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_8_6_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_6_3">
             <span class="md-nav__icon md-icon"></span>
             Approach B: AI Search direct
           </label>
@@ -1490,6 +1526,34 @@
 </tbody>
 </table>
 <h2 id="key-capabilities">Key Capabilities</h2>
+<h3 id="embedded-portal-request-flow">Embedded portal request flow</h3>
+<p>When Copilot embedding is enabled, the portal first calls the dedicated
+bootstrap endpoint. Anonymous mode sends no token. Entra mode sends one
+delegated v2 API token, which GPT-RAG UI validates before creating a bounded
+session. Both modes receive an opaque <code>HttpOnly; Secure</code> cookie and mount the
+Chainlit 2.9.4 floating widget without <code>accessToken</code>.</p>
+<pre class="mermaid"><code>sequenceDiagram
+  participant Portal
+  participant Entra as Microsoft Entra ID
+  participant UI as GPT-RAG UI
+  participant Widget as Chainlit Copilot
+  participant Orch as Orchestrator
+
+  alt Entra mode
+    Portal-&gt;&gt;Entra: Request delegated v2 API token
+    Entra--&gt;&gt;Portal: Short-lived access token
+    Portal-&gt;&gt;UI: POST /copilot/auth/bootstrap with token
+    UI-&gt;&gt;UI: Validate token, scope, and portal azp
+  else Anonymous mode
+    Portal-&gt;&gt;UI: POST /copilot/auth/bootstrap without token
+  end
+  UI--&gt;&gt;Portal: Opaque HttpOnly Secure cookie
+  Portal-&gt;&gt;Widget: Mount floating widget without accessToken
+  Widget-&gt;&gt;UI: HTTP and Socket.IO with cookie
+  UI-&gt;&gt;Orch: Chat request
+  Orch--&gt;&gt;UI: Streamed response and absolute links</code></pre>
+<p>See <a href="../howto_embed_chat/">Embed the chat in a portal</a> for supported topologies,
+origin enforcement, CSP, cookies, and logout behavior.</p>
 <ul>
 <li>
 <p><strong>Enterprise-Grade Security</strong><br />
