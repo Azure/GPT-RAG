@@ -58,6 +58,7 @@ nav:
     - Azure Direct Models: howto_azure_direct.md
     - Application Gateway: howto_app_gateway.md
     - Auth & Doc Security: howto_authentication.md
+    - Embed chat in a portal: howto_embed_chat.md
     - Admin Dashboard Sign-in: howto_dashboard_signin.md
     - Grounding sources:
       - Overview (start here): howto_grounding_overview.md

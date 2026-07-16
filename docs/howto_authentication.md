@@ -230,11 +230,80 @@ At a minimum, you only need to set the settings marked as **Required** in the ta
 | `OAUTH_AZURE_AD_CLIENT_ID` | Yes (for OAuth) | No | Entra App Registration application (client) ID used by the UI OAuth provider to request tokens for the orchestrator API. |
 | `OAUTH_AZURE_AD_TENANT_ID` | Yes (for OAuth) | No | Entra tenant ID used to validate/target the tenant for the OAuth flow (single-tenant by default). |
 | `OAUTH_AZURE_AD_CLIENT_SECRET` | Yes (for OAuth) | Yes | Client secret used by the app for confidential-client flows (for example, completing the OAuth code flow and performing the OBO exchange). Store as a Key Vault secret and reference it from App Configuration (or from App Settings if you bypass App Configuration). |
-| `CHAINLIT_AUTH_SECRET` | Yes | Yes | Secret used by Chainlit to sign its session JWT. If missing, the UI generates a temporary value (sessions reset on restart). Store as a Key Vault secret and reference it from App Configuration (or from App Settings if you bypass App Configuration). |
-| `CHAINLIT_URL` | No | No | Public base URL of the UI. Used to build the OAuth redirect/callback URL (and normalized without a trailing slash). |
+| `CHAINLIT_AUTH_SECRET` | Yes | Yes | Secret used by Chainlit to sign sessions. When Copilot embedding is enabled, it must be persistent and contain at least 32 UTF-8 bytes; startup fails if it is missing. Standalone development can generate a temporary value only when embedding is disabled. Store it as a Key Vault secret and reference it from App Configuration. |
+| `CHAINLIT_URL` | No | No | Exact public origin of the UI, without a path. Copilot embedding requires HTTPS. Configure a public path separately with `CHAINLIT_ROOT_PATH`. |
+| `CHAINLIT_ROOT_PATH` | No | No | Optional canonical public path prefix, such as `/gpt-rag`. A non-root path is required when an embedded portal and GPT-RAG UI share an origin. |
 | `OAUTH_AZURE_AD_SCOPES` | No | No | Scopes requested during interactive login. If omitted, the UI defaults to the orchestrator API scope plus OpenID Connect scopes. Setting this explicitly helps avoid accidentally getting Microsoft Graph tokens. |
 | `OAUTH_AZURE_AD_ENABLE_SINGLE_TENANT` | No | No | Defaults to `true`. When `true`, the UI enforces single-tenant behavior for the OAuth flow. Set to `false` only for multi-tenant scenarios. |
 | `ALLOW_ANONYMOUS` | No | No | When `true`, the UI runs without OAuth (anonymous mode). Defaults to `true` locally when OAuth is not configured. |
+
+
+## Embedded Entra authentication
+
+The Chainlit Copilot widget does not run the standalone OAuth redirect inside a
+portal. In Entra mode, the portal uses its existing MSAL flow to request a
+delegated v2 access token for the GPT-RAG API. It sends that token once to:
+
+```text
+POST {CHAINLIT_URL}{CHAINLIT_ROOT_PATH}/copilot/auth/bootstrap
+Authorization: Bearer <delegated-access-token>
+```
+
+GPT-RAG UI validates and authorizes the token, retains it only in bounded
+process memory, and sets an opaque `HttpOnly; Secure` cookie scoped to the
+configured root path. The response contains
+`{"success":true,"authMode":"entra","expiresAt":<unix-seconds>}`. The cookie
+contains neither the Entra token nor a Chainlit token.
+
+Configure these Entra-specific settings:
+
+| Setting | Rule |
+| --- | --- |
+| `CHAINLIT_COPILOT_AUTH_MODE` | Must be `entra`. There is no default or anonymous fallback. |
+| `CHAINLIT_COPILOT_ENTRA_TENANT_ID` | Exact tenant GUID. |
+| `CHAINLIT_COPILOT_ENTRA_AUDIENCE` | Exact GPT-RAG API audience. |
+| `CHAINLIT_COPILOT_ENTRA_ALLOWED_CLIENT_IDS` | One or more comma-separated portal application client GUIDs. The list cannot be empty. |
+| `CHAINLIT_COPILOT_ENTRA_REQUIRED_SCOPE` | Delegated scope required in `scp`. Default: `user_impersonation`. |
+
+The bootstrap flow accepts the token only when every rule below passes:
+
+| Claim or property | Rule |
+| --- | --- |
+| Signature | RS256 using a usable RSA signing key from the configured tenant's v2 JWKS. |
+| `ver` | Must be exactly `2.0`. `appid`-only v1 tokens are rejected. |
+| `iss` | Exact `https://login.microsoftonline.com/{tenant-id}/v2.0` issuer. |
+| `aud` | Exact `CHAINLIT_COPILOT_ENTRA_AUDIENCE`. |
+| `tid` | Required GUID matching `CHAINLIT_COPILOT_ENTRA_TENANT_ID`. |
+| `oid` | Required GUID. GPT-RAG binds users and threads to canonical `tid:oid`. |
+| `azp` | Required GUID in `CHAINLIT_COPILOT_ENTRA_ALLOWED_CLIENT_IDS`. |
+| `scp` | Must include `CHAINLIT_COPILOT_ENTRA_REQUIRED_SCOPE`. App-only tokens are rejected. |
+| `exp` and `nbf` | `exp` is required and must be current. `nbf`, when present, is enforced. Validation allows at most 60 seconds of clock skew. |
+
+ID tokens, Microsoft Graph tokens, app-only tokens, refresh tokens, and tokens
+for another tenant, audience, client, or scope are not valid bootstrap
+credentials.
+
+Do not pass the raw Entra token to
+`mountChainlitWidget({ accessToken: ... })`. In Chainlit 2.9.4,
+`accessToken` expects a Chainlit session token signed with
+`CHAINLIT_AUTH_SECRET`, not an Entra token. Never expose
+`CHAINLIT_AUTH_SECRET` to a portal.
+
+The Copilot session expires at the earlier of the delegated token expiry and
+`CHAINLIT_COPILOT_SESSION_TTL_SECONDS`. Before planned expiry, silently acquire
+one fresh delegated token and repeat bootstrap. Do not retry indefinitely.
+
+On logout or account switch, unmount and remove the widget, remove
+`chainlit-copilot-thread-id`, and call the path-prefixed
+`POST /copilot/auth/logout` endpoint with credentials. Acquire a token for the
+new account and bootstrap again before mounting. This prevents the new identity
+from resuming state stored by the previous user.
+
+Anonymous Copilot mode is a separate explicit mode. It bootstraps without an
+`Authorization` header and never acts as a fallback for an Entra failure.
+
+For the complete portal and operator flow, see
+[Embed the chat in a portal](howto_embed_chat.md).
 
 
 **7) Configure the Azure AI Search index for document-level access control and ensure your documents include permission metadata.**

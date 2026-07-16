@@ -1,6 +1,42 @@
 This page covers common issues, debugging tools, and how to inspect logs in GPT-RAG.
 
 
+## Embedded chat
+
+Use this matrix when a portal embeds GPT-RAG through Chainlit Copilot. Start by
+confirming `CHAINLIT_COPILOT_ENABLED=true`, verifying that
+`CHAINLIT_COPILOT_AUTH_MODE` is explicitly `anonymous` or `entra`, and checking
+the exact public base from `CHAINLIT_URL` plus `CHAINLIT_ROOT_PATH`.
+
+| Symptom | Likely cause | What to check | Recovery |
+| --- | --- | --- | --- |
+| Widget stays on "Loading assistant..." | Bundle blocked, bootstrap failed, or CSP blocked script execution | Network and Console for `{publicBase}/copilot/auth/bootstrap` and `{publicBase}/copilot/index.js`; portal `script-src` | Fix the first failed request. Mount only after bootstrap succeeds. |
+| Same-origin path returns 404 | The proxy stripped, duplicated, or ambiguously rewrote `CHAINLIT_ROOT_PATH` | Confirm `/gpt-rag` reaches GPT-RAG UI unchanged and `chainlitServer` includes it | Preserve the exact prefix. Do not rely on `X-Forwarded-Prefix`. |
+| Anonymous bootstrap returns 400 | The request sent `Authorization` while `CHAINLIT_COPILOT_AUTH_MODE=anonymous` | Request headers | Remove the header. Anonymous mode never consumes or falls back from a token. |
+| Entra bootstrap returns 401 | Token signature, version, issuer, audience, tenant, identity, scope, or time validation failed | RS256, `ver=2.0`, `iss`, `aud`, `tid`, `oid`, `scp`, `exp`, and `nbf`; confirm the portal requested the delegated GPT-RAG API scope | Acquire one fresh delegated token and retry once. Do not pass it to widget `accessToken`. |
+| Bootstrap returns a readable 403 | The Entra `azp` is not allowed or the valid user fails GPT-RAG authorization | `CHAINLIT_COPILOT_ENTRA_ALLOWED_CLIENT_IDS`, `ALLOWED_USER_PRINCIPALS`, and `ALLOWED_USER_NAMES` | Correct the authorized portal or user policy. Do not fall back to anonymous. |
+| Bootstrap appears as a CORS or network error | Browser `Origin` is not allowlisted exactly | Compare scheme, host, and port with `CHAINLIT_ALLOWED_ORIGINS`; remove paths, wildcards, and `null` | Add the exact HTTPS origin and restart GPT-RAG UI. |
+| Bootstrap returns 429 | The process-local bootstrap attempt limit was reached | `Retry-After`, gateway/WAF limits, and aggregate traffic behind trusted ingress | Honor `Retry-After` and stop automatic retries. Configure authoritative ingress throttling. |
+| Bootstrap returns 503 | GPT-RAG UI could not retrieve Entra signing keys | UI connectivity to the tenant v2 JWKS and service logs | Show an unavailable state. Do not start a sign-in loop or anonymous fallback. |
+| Bootstrap succeeds but the widget reports authentication failure | The opaque session cookie was omitted, blocked, or scoped to the wrong path | `credentials: "include"`, `Set-Cookie`, cookie path, `SameSite`, and gateway cookie preservation; probe `{publicBase}/project/settings` | Fix cookie delivery. Never put the Entra token in `accessToken`. |
+| Widget loads, then disconnects | Socket.IO route, WebSocket upgrade, session expiry, or affinity is broken | `{publicBase}/ws/socket.io` polling and upgrade; cookie; exact origin; backend affinity; WebSocket `4401` | Route all transports to the same session, preserve cookies, and rebootstrap once if the session expired. |
+| Reconnect or retry duplicates a message | The portal retried the send operation instead of only the connection | Network trace around the last send and Socket.IO reconnect | Preserve the transcript and draft, reconnect first, and never automatically resend the last message. |
+| Session stops near token expiry | The earlier of Entra `exp` and the configured Copilot TTL was reached | Bootstrap `expiresAt`, session TTL, eviction, process restart, or revision switch | In Entra mode acquire one fresh token; in anonymous mode send no token. Rebootstrap once, then offer recovery. |
+| Works in one browser but not another | Third-party cookies, tracking prevention, private browsing, or enterprise browser policy blocks the cookie | Browser cookie warnings and whether the portal and GPT-RAG UI are unrelated sites | Prefer a same-origin path or sibling subdomain. Cross-site embedding is best effort; provide a standalone link. |
+| Browser does not render or operate the widget correctly | The browser does not support the tested Chainlit 2.9.4 Shadow DOM, storage, or WebSocket behavior | Supported browser matrix, JavaScript policy, local storage, CSP, and WebSocket support | Use a supported current browser and provide a standalone fallback. Sidebar mode is not supported. |
+| Citation or download returns 404 | Grant expired or changed, session is stale, conversation ownership failed, path is unsafe, or blob is absent | Absolute URL under `{publicBase}/api/download/{grant_token}`; current session; unchanged grant; conversation ownership | Reopen the citation from the current conversation. Do not replace the grant with a SAS or public-blob URL. The server intentionally uses 404 for denied and missing targets. |
+| Citation opens a portal 404 outside GPT-RAG | Public root path was omitted from an absolute URL or the proxy route is incomplete | `CHAINLIT_URL`, `CHAINLIT_ROOT_PATH`, rendered `href`, and gateway path rule | Use the server-generated absolute URL and route the full public base. |
+| A different account sees a previous thread | The portal remounted without clearing Copilot state | Logout/account-switch handler, `#chainlit-copilot`, and `chainlit-copilot-thread-id` | Stop the widget immediately, remove local state, call Copilot logout, and mount only after a clean bootstrap. |
+| CSP blocks styles or fonts | Chainlit 2.9.4 injects Shadow DOM styles and may load Google Inter | Console violations for `style-src` and `font-src` | Add the required `style-src 'unsafe-inline'` exception with security-owner review, and allow approved font sources or self-host the font. |
+
+The embedded widget is not an iframe. Changing `frame-src`,
+`X-Frame-Options`, or GPT-RAG UI `frame-ancestors` does not fix a bundle, CORS,
+cookie, or WebSocket failure.
+
+See [Embed the chat in a portal](howto_embed_chat.md) for the complete setup and
+validation checklist.
+
+
 **Showing Response Time Statistics in the Chat UI**
 
 The GPT-RAG UI includes a built-in option to display response time after each agent answer. To enable it, set the `SHOW_STATISTICS` application setting to `true` in your Container App (or App Configuration). Once enabled, each response in the chat will show timing information, helping you identify slow responses and compare performance across different queries or configurations.
