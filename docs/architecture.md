@@ -43,40 +43,6 @@ Use the table below for the deployment parameters behind each layer, and the [De
 
 ## Key Capabilities
 
-### Embedded portal request flow
-
-When Copilot embedding is enabled, the portal first calls the dedicated
-bootstrap endpoint. Anonymous mode sends no token. Entra mode sends one
-delegated v2 API token, which GPT-RAG UI validates before creating a bounded
-session. Both modes receive an opaque `HttpOnly; Secure` cookie and mount the
-Chainlit 2.9.4 floating widget without `accessToken`.
-
-```mermaid
-sequenceDiagram
-  participant Portal
-  participant Entra as Microsoft Entra ID
-  participant UI as GPT-RAG UI
-  participant Widget as Chainlit Copilot
-  participant Orch as Orchestrator
-
-  alt Entra mode
-    Portal->>Entra: Request delegated v2 API token
-    Entra-->>Portal: Short-lived access token
-    Portal->>UI: POST /copilot/auth/bootstrap with token
-    UI->>UI: Validate token, scope, and portal azp
-  else Anonymous mode
-    Portal->>UI: POST /copilot/auth/bootstrap without token
-  end
-  UI-->>Portal: Opaque HttpOnly Secure cookie
-  Portal->>Widget: Mount floating widget without accessToken
-  Widget->>UI: HTTP and Socket.IO with cookie
-  UI->>Orch: Chat request
-  Orch-->>UI: Streamed response and absolute links
-```
-
-See [Embed the chat in a portal](howto_embed_chat.md) for supported topologies,
-origin enforcement, CSP, cookies, and logout behavior.
-
 - **Enterprise-Grade Security**  
   Optional Zero Trust architecture with private endpoints, Azure Key Vault integration, and comprehensive monitoring.
 
