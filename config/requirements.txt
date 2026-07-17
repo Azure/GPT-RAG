@@ -5,7 +5,7 @@ azure-appconfiguration==1.9.0
 
 # app container apps
 
-azure-mgmt-appcontainers==3.2.0
+azure-mgmt-appcontainers==5.0.0
 
 # aifoundry
 
