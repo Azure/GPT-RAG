@@ -772,15 +772,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#reverse-proxy-requirements-for-embedded-chat" class="md-nav__link">
-    <span class="md-ellipsis">
-      Reverse proxy requirements for embedded chat
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -818,7 +809,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../howto_embed_chat/" class="md-nav__link">
+      <a href="https://github.com/Azure/gpt-rag-ui/blob/1ef6f9e88022e3168b8caf9c867f090eb632f562/docs/copilot-embedding.md" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1441,60 +1432,6 @@
 <span class="p">}</span>
 </code></pre></div>
 <p>For GPT-RAG's default <code>containerAppsList</code>, <code>backendAppIndex: 1</code> points to the frontend app. Use the AI Landing Zone runbook for the complete two-step flow and for the <code>PUBLIC_INGRESS_*</code> outputs to validate the deployed gateway.</p>
-<h2 id="reverse-proxy-requirements-for-embedded-chat">Reverse proxy requirements for embedded chat</h2>
-<p>When a portal embeds GPT-RAG with Chainlit Copilot, prefer a same-origin path
-such as <code>https://portal.contoso.com/gpt-rag</code>:</p>
-<div class="highlight"><pre><span></span><code>CHAINLIT_URL=https://portal.contoso.com
-CHAINLIT_ROOT_PATH=/gpt-rag
-CHAINLIT_ALLOWED_ORIGINS=https://portal.contoso.com
-</code></pre></div>
-<p>The public base is the exact concatenation of <code>CHAINLIT_URL</code> and
-<code>CHAINLIT_ROOT_PATH</code>. Configure one Application Gateway path rule for
-<code>/gpt-rag</code> and <code>/gpt-rag/*</code>. Forward that prefix unchanged to GPT-RAG UI. Do
-not strip it, duplicate it, percent-encode it, or rely on
-<code>X-Forwarded-Prefix</code> to add it. Requests outside the prefix remain portal
-routes.</p>
-<p>The rule must route every public GPT-RAG UI path to the same backend:</p>
-<ul>
-<li><code>/gpt-rag/copilot/index.js</code>;</li>
-<li><code>/gpt-rag/copilot/auth/bootstrap</code> and <code>/gpt-rag/copilot/auth/logout</code>;</li>
-<li><code>/gpt-rag/project/settings</code> and other authorized <code>/gpt-rag/project/*</code> APIs;</li>
-<li><code>/gpt-rag/ws/socket.io</code> polling, POST, and WebSocket upgrade traffic;</li>
-<li><code>/gpt-rag/assets/*</code>, <code>/gpt-rag/public/*</code>, and
-  <code>/gpt-rag/version-footer</code>;</li>
-<li><code>/gpt-rag/api/download/{grant_token}</code>.</li>
-</ul>
-<p>For each route:</p>
-<ul>
-<li>preserve the external <code>Host</code>, exact <code>Origin</code>, methods, query strings, request
-  bodies, and HTTPS scheme;</li>
-<li>preserve <code>Set-Cookie</code> and <code>Cookie</code> headers and do not cache authenticated
-  bootstrap, settings, logout, or download responses;</li>
-<li>do not rewrite the cookie path. Copilot and Chainlit cookies are scoped to
-  <code>CHAINLIT_ROOT_PATH</code>;</li>
-<li>enable WebSocket upgrades and use an idle timeout suitable for streamed
-  responses;</li>
-<li>keep bootstrap, HTTP, Socket.IO polling and upgrade, and WebSocket traffic on
-  the same backend session if more than one replica is used;</li>
-<li>do not rewrite an unapproved origin into an allowed origin;</li>
-<li>keep TLS from the browser to the gateway. Use end-to-end TLS when required by
-  the network security design.</li>
-</ul>
-<p>GPT-RAG UI does not infer its public URL from forwarding headers. Set
-<code>CHAINLIT_URL</code> and <code>CHAINLIT_ROOT_PATH</code> to the externally visible values so
-bundle URLs and absolute <code>/api/download/{grant_token}</code> links are correct.</p>
-<p>Copilot session and retained Entra token state are process-local. One active
-revision with <code>minReplicas=1</code> and <code>maxReplicas=1</code> is the supported baseline.
-Affinity across all routes above is required for multiple replicas, but it does
-not provide high availability. A restart or revision switch signs users out.</p>
-<p>The portal owns the CSP that allows the bundle and connection. Add the public
-GPT-RAG UI HTTPS origin to <code>script-src</code> and <code>connect-src</code>, and its WSS origin to
-<code>connect-src</code>. Chainlit 2.9.4 also requires <code>style-src 'unsafe-inline'</code> for
-styles injected into the Shadow DOM. Scope and review that exception with the
-portal security owner. Do not add <code>frame-src</code> for Copilot because the widget is
-not an iframe.</p>
-<p>For exact origins, cookies, CSP, authentication, and browser limitations, see
-<a href="../howto_embed_chat/">Embed the chat in a portal</a>.</p>
 
 
 

@@ -514,21 +514,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Key Capabilities">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#embedded-portal-request-flow" class="md-nav__link">
-    <span class="md-ellipsis">
-      Embedded portal request flow
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -842,7 +827,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../howto_embed_chat/" class="md-nav__link">
+      <a href="https://github.com/Azure/gpt-rag-ui/blob/1ef6f9e88022e3168b8caf9c867f090eb632f562/docs/copilot-embedding.md" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1526,34 +1511,6 @@
 </tbody>
 </table>
 <h2 id="key-capabilities">Key Capabilities</h2>
-<h3 id="embedded-portal-request-flow">Embedded portal request flow</h3>
-<p>When Copilot embedding is enabled, the portal first calls the dedicated
-bootstrap endpoint. Anonymous mode sends no token. Entra mode sends one
-delegated v2 API token, which GPT-RAG UI validates before creating a bounded
-session. Both modes receive an opaque <code>HttpOnly; Secure</code> cookie and mount the
-Chainlit 2.9.4 floating widget without <code>accessToken</code>.</p>
-<pre class="mermaid"><code>sequenceDiagram
-  participant Portal
-  participant Entra as Microsoft Entra ID
-  participant UI as GPT-RAG UI
-  participant Widget as Chainlit Copilot
-  participant Orch as Orchestrator
-
-  alt Entra mode
-    Portal-&gt;&gt;Entra: Request delegated v2 API token
-    Entra--&gt;&gt;Portal: Short-lived access token
-    Portal-&gt;&gt;UI: POST /copilot/auth/bootstrap with token
-    UI-&gt;&gt;UI: Validate token, scope, and portal azp
-  else Anonymous mode
-    Portal-&gt;&gt;UI: POST /copilot/auth/bootstrap without token
-  end
-  UI--&gt;&gt;Portal: Opaque HttpOnly Secure cookie
-  Portal-&gt;&gt;Widget: Mount floating widget without accessToken
-  Widget-&gt;&gt;UI: HTTP and Socket.IO with cookie
-  UI-&gt;&gt;Orch: Chat request
-  Orch--&gt;&gt;UI: Streamed response and absolute links</code></pre>
-<p>See <a href="../howto_embed_chat/">Embed the chat in a portal</a> for supported topologies,
-origin enforcement, CSP, cookies, and logout behavior.</p>
 <ul>
 <li>
 <p><strong>Enterprise-Grade Security</strong><br />

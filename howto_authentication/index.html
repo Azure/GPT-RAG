@@ -16,7 +16,7 @@
         <link rel="prev" href="../howto_app_gateway/">
       
       
-        <link rel="next" href="../howto_embed_chat/">
+        <link rel="next" href="../howto_dashboard_signin/">
       
       
       <link rel="icon" href="../favicon.ico">
@@ -771,6 +771,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#embed-gpt-rag-in-a-portal" class="md-nav__link">
+    <span class="md-ellipsis">
+      Embed GPT-RAG in a portal
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#concepts" class="md-nav__link">
     <span class="md-ellipsis">
       Concepts
@@ -792,15 +801,6 @@
   <a href="#setup" class="md-nav__link">
     <span class="md-ellipsis">
       Setup
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#embedded-entra-authentication" class="md-nav__link">
-    <span class="md-ellipsis">
-      Embedded Entra authentication
     </span>
   </a>
   
@@ -900,7 +900,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../howto_embed_chat/" class="md-nav__link">
+      <a href="https://github.com/Azure/gpt-rag-ui/blob/1ef6f9e88022e3168b8caf9c867f090eb632f562/docs/copilot-embedding.md" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1491,6 +1491,18 @@
 <blockquote>
 <p>In OAuth mode, the orchestrator receives a user access token (for the orchestrator API) and then performs an On-Behalf-Of (OBO) exchange to obtain a separate token for Azure AI Search. The two tokens have different audiences and are not interchangeable.</p>
 </blockquote>
+<h2 id="embed-gpt-rag-in-a-portal">Embed GPT-RAG in a portal</h2>
+<p>To add GPT-RAG chat to an existing portal, follow the
+<a href="https://github.com/Azure/gpt-rag-ui/blob/1ef6f9e88022e3168b8caf9c867f090eb632f562/docs/copilot-embedding.md">Chainlit Copilot embedding guide</a>.
+It covers the opt-in configuration, deployment topology, anonymous and Entra
+authentication modes, browser security controls, and rollout.</p>
+<div class="admonition warning">
+<p class="admonition-title">Zero Trust deployments</p>
+<p>The GPT-RAG UI Container App has no public endpoint in a Zero Trust
+deployment. Route widget traffic through the environment's existing
+authenticated front door or gateway. Do not expose the internal Container
+App directly, and do not treat CORS or an origin allowlist as authentication.</p>
+</div>
 <h2 id="concepts">Concepts</h2>
 <p>GPT-RAG uses Microsoft Entra ID authentication end-to-end, and Azure <a href="https://learn.microsoft.com/en-us/azure/search/search-document-level-access-overview">AI Search document-level access control (POSIX-like ACL / RBAC scopes)</a> relies on three related steps:</p>
 <p>1) The UI signs the user in and sends an access token to the orchestrator. This token is meant for the orchestrator API.</p>
@@ -1678,19 +1690,13 @@ az ad app permission admin-consent --id &lt;replace-by-app-client-id&gt;
 <td><code>CHAINLIT_AUTH_SECRET</code></td>
 <td>Yes</td>
 <td>Yes</td>
-<td>Secret used by Chainlit to sign sessions. When Copilot embedding is enabled, it must be persistent and contain at least 32 UTF-8 bytes; startup fails if it is missing. Standalone development can generate a temporary value only when embedding is disabled. Store it as a Key Vault secret and reference it from App Configuration.</td>
+<td>Secret used by Chainlit to sign its session JWT. If missing, the UI generates a temporary value (sessions reset on restart). Store as a Key Vault secret and reference it from App Configuration (or from App Settings if you bypass App Configuration).</td>
 </tr>
 <tr>
 <td><code>CHAINLIT_URL</code></td>
 <td>No</td>
 <td>No</td>
-<td>Exact public origin of the UI, without a path. Copilot embedding requires HTTPS. Configure a public path separately with <code>CHAINLIT_ROOT_PATH</code>.</td>
-</tr>
-<tr>
-<td><code>CHAINLIT_ROOT_PATH</code></td>
-<td>No</td>
-<td>No</td>
-<td>Optional canonical public path prefix, such as <code>/gpt-rag</code>. A non-root path is required when an embedded portal and GPT-RAG UI share an origin.</td>
+<td>Public base URL of the UI. Used to build the OAuth redirect/callback URL (and normalized without a trailing slash).</td>
 </tr>
 <tr>
 <td><code>OAUTH_AZURE_AD_SCOPES</code></td>
@@ -1712,116 +1718,6 @@ az ad app permission admin-consent --id &lt;replace-by-app-client-id&gt;
 </tr>
 </tbody>
 </table>
-<h2 id="embedded-entra-authentication">Embedded Entra authentication</h2>
-<p>The Chainlit Copilot widget does not run the standalone OAuth redirect inside a
-portal. In Entra mode, the portal uses its existing MSAL flow to request a
-delegated v2 access token for the GPT-RAG API. It sends that token once to:</p>
-<div class="highlight"><pre><span></span><code>POST {CHAINLIT_URL}{CHAINLIT_ROOT_PATH}/copilot/auth/bootstrap
-Authorization: Bearer &lt;delegated-access-token&gt;
-</code></pre></div>
-<p>GPT-RAG UI validates and authorizes the token, retains it only in bounded
-process memory, and sets an opaque <code>HttpOnly; Secure</code> cookie scoped to the
-configured root path. The response contains
-<code>{"success":true,"authMode":"entra","expiresAt":&lt;unix-seconds&gt;}</code>. The cookie
-contains neither the Entra token nor a Chainlit token.</p>
-<p>Configure these Entra-specific settings:</p>
-<table>
-<thead>
-<tr>
-<th>Setting</th>
-<th>Rule</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>CHAINLIT_COPILOT_AUTH_MODE</code></td>
-<td>Must be <code>entra</code>. There is no default or anonymous fallback.</td>
-</tr>
-<tr>
-<td><code>CHAINLIT_COPILOT_ENTRA_TENANT_ID</code></td>
-<td>Exact tenant GUID.</td>
-</tr>
-<tr>
-<td><code>CHAINLIT_COPILOT_ENTRA_AUDIENCE</code></td>
-<td>Exact GPT-RAG API audience.</td>
-</tr>
-<tr>
-<td><code>CHAINLIT_COPILOT_ENTRA_ALLOWED_CLIENT_IDS</code></td>
-<td>One or more comma-separated portal application client GUIDs. The list cannot be empty.</td>
-</tr>
-<tr>
-<td><code>CHAINLIT_COPILOT_ENTRA_REQUIRED_SCOPE</code></td>
-<td>Delegated scope required in <code>scp</code>. Default: <code>user_impersonation</code>.</td>
-</tr>
-</tbody>
-</table>
-<p>The bootstrap flow accepts the token only when every rule below passes:</p>
-<table>
-<thead>
-<tr>
-<th>Claim or property</th>
-<th>Rule</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Signature</td>
-<td>RS256 using a usable RSA signing key from the configured tenant's v2 JWKS.</td>
-</tr>
-<tr>
-<td><code>ver</code></td>
-<td>Must be exactly <code>2.0</code>. <code>appid</code>-only v1 tokens are rejected.</td>
-</tr>
-<tr>
-<td><code>iss</code></td>
-<td>Exact <code>https://login.microsoftonline.com/{tenant-id}/v2.0</code> issuer.</td>
-</tr>
-<tr>
-<td><code>aud</code></td>
-<td>Exact <code>CHAINLIT_COPILOT_ENTRA_AUDIENCE</code>.</td>
-</tr>
-<tr>
-<td><code>tid</code></td>
-<td>Required GUID matching <code>CHAINLIT_COPILOT_ENTRA_TENANT_ID</code>.</td>
-</tr>
-<tr>
-<td><code>oid</code></td>
-<td>Required GUID. GPT-RAG binds users and threads to canonical <code>tid:oid</code>.</td>
-</tr>
-<tr>
-<td><code>azp</code></td>
-<td>Required GUID in <code>CHAINLIT_COPILOT_ENTRA_ALLOWED_CLIENT_IDS</code>.</td>
-</tr>
-<tr>
-<td><code>scp</code></td>
-<td>Must include <code>CHAINLIT_COPILOT_ENTRA_REQUIRED_SCOPE</code>. App-only tokens are rejected.</td>
-</tr>
-<tr>
-<td><code>exp</code> and <code>nbf</code></td>
-<td><code>exp</code> is required and must be current. <code>nbf</code>, when present, is enforced. Validation allows at most 60 seconds of clock skew.</td>
-</tr>
-</tbody>
-</table>
-<p>ID tokens, Microsoft Graph tokens, app-only tokens, refresh tokens, and tokens
-for another tenant, audience, client, or scope are not valid bootstrap
-credentials.</p>
-<p>Do not pass the raw Entra token to
-<code>mountChainlitWidget({ accessToken: ... })</code>. In Chainlit 2.9.4,
-<code>accessToken</code> expects a Chainlit session token signed with
-<code>CHAINLIT_AUTH_SECRET</code>, not an Entra token. Never expose
-<code>CHAINLIT_AUTH_SECRET</code> to a portal.</p>
-<p>The Copilot session expires at the earlier of the delegated token expiry and
-<code>CHAINLIT_COPILOT_SESSION_TTL_SECONDS</code>. Before planned expiry, silently acquire
-one fresh delegated token and repeat bootstrap. Do not retry indefinitely.</p>
-<p>On logout or account switch, unmount and remove the widget, remove
-<code>chainlit-copilot-thread-id</code>, and call the path-prefixed
-<code>POST /copilot/auth/logout</code> endpoint with credentials. Acquire a token for the
-new account and bootstrap again before mounting. This prevents the new identity
-from resuming state stored by the previous user.</p>
-<p>Anonymous Copilot mode is a separate explicit mode. It bootstraps without an
-<code>Authorization</code> header and never acts as a fallback for an Entra failure.</p>
-<p>For the complete portal and operator flow, see
-<a href="../howto_embed_chat/">Embed the chat in a portal</a>.</p>
 <p><strong>7) Configure the Azure AI Search index for document-level access control and ensure your documents include permission metadata.</strong></p>
 <p>In the index definition, set <code>permissionFilterOption</code> to <code>enabled</code>.</p>
 <p>These are the Azure AI Search index fields used for document-level access control:</p>
