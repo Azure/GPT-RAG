@@ -1,0 +1,42 @@
+{
+  "name": "monitor-mcp",
+  "description": "Read-only Azure Monitor MCP source.",
+  "serverURL": "https://mcp.contoso.com/mcp",
+  "tools": [
+    {
+      "name": "query_logs",
+      "outputParsing": {
+        "kind": "json",
+        "jsonParameters": {
+          "documentsPath": "$.results[*]",
+          "includeContext": true
+        }
+      },
+      "inclusionMode": "reranked",
+      "maxOutputTokens": 2048
+    },
+    {
+      "name": "get_status",
+      "outputParsing": {
+        "kind": "auto"
+      },
+      "inclusionMode": "always",
+      "maxOutputTokens": 512
+    },
+    {
+      "name": "split_report",
+      "outputParsing": {
+        "kind": "split",
+        "splitParameters": {
+          "textSplitMode": "pages",
+          "maximumPageLength": 4000,
+          "pageOverlapLength": 500,
+          "maximumPagesToTake": 10,
+          "defaultLanguageCode": "en"
+        }
+      },
+      "inclusionMode": "reranked",
+      "maxOutputTokens": 1024
+    }
+  ]
+}

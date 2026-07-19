@@ -15,6 +15,9 @@
 {% for _d in (WEB_GROUNDING_BLOCKED_DOMAINS | default('', true)).replace(';', ',').replace('\n', ',').split(',') %}
 {% if _d.strip() %}{% set _ = web_blocked_domains.append(_d.strip().lower()) %}{% endif %}
 {% endfor %}
+{% set foundry_iq_mcp_sources = FOUNDRY_IQ_MCP_SOURCES_JSON if (FOUNDRY_IQ_MCP_SOURCES_JSON is iterable and FOUNDRY_IQ_MCP_SOURCES_JSON is not string and FOUNDRY_IQ_MCP_SOURCES_JSON is not mapping) else [] %}
+{% set foundry_iq_mcp_enabled = RETRIEVAL_BACKEND == 'foundry_iq' and (FOUNDRY_IQ_MCP_ENABLED | default('false') | string | lower) in ['true', '1', 'yes', 'y', 't'] and (foundry_iq_mcp_sources | length) > 0 %}
+{% set foundry_iq_mcp_reasoning_effort = FOUNDRY_IQ_MCP_REASONING_EFFORT | default('low', true) %}
 {
   "indexes": [
     {
@@ -483,6 +486,29 @@
       "encryptionKey": null
     }
     {% endif %}
+    {% if foundry_iq_mcp_enabled %}
+    {% for mcp_src in foundry_iq_mcp_sources %},
+    {
+      "name": {{ mcp_src.name | tojson }},
+      "kind": "mcpServer",
+      "description": {{ (mcp_src.description | default('MCP server knowledge source (' ~ mcp_src.name ~ ').', true)) | tojson }},
+      "mcpServerParameters": {
+        "serverURL": {{ mcp_src.serverURL | tojson }},
+        "tools": [
+          {% for tool in mcp_src.tools %}{% if not loop.first %},{% endif %}
+          {
+            "name": {{ tool.name | tojson }},
+            "outputParsing": {{ tool.outputParsing | tojson }},
+            "inclusionMode": {{ tool.inclusionMode | tojson }},
+            "maxOutputTokens": {{ tool.maxOutputTokens }}
+          }
+          {% endfor %}
+        ]
+      },
+      "encryptionKey": null
+    }
+    {% endfor %}
+    {% endif %}
   ]{% else %}[]{% endif %},
   "knowledgeBases": {% if RETRIEVAL_BACKEND == 'foundry_iq' %}[
     {
@@ -498,11 +524,21 @@
         { "name": "{{FABRIC_IQ_KNOWLEDGE_SOURCE_NAME}}" }{% endif %}{% if fabric_data_agent_enabled %},
         { "name": "{{FABRIC_DATA_AGENT_KNOWLEDGE_SOURCE_NAME}}" }{% endif %}{% if sharepoint_indexed_enabled %},
         { "name": "{{SHAREPOINT_INDEXED_KNOWLEDGE_SOURCE_NAME}}" }{% endif %}{% if web_grounding_enabled %},
-        { "name": "{{WEB_GROUNDING_KNOWLEDGE_SOURCE_NAME}}" }{% endif %}
+        { "name": "{{WEB_GROUNDING_KNOWLEDGE_SOURCE_NAME}}" }{% endif %}{% if foundry_iq_mcp_enabled %}{% for mcp_src in foundry_iq_mcp_sources %},
+        { "name": {{ mcp_src.name | tojson }} }{% endfor %}{% endif %}
       ],
-      "models": [],
+      "models": {% if foundry_iq_mcp_enabled %}[
+        {
+          "kind": "azureOpenAI",
+          "azureOpenAIParameters": {
+            "resourceUri": "{{FOUNDRY_IQ_AI_SERVICES_ENDPOINT}}",
+            "deploymentId": "{{GPT_MODEL_INFO.deployment_name}}",
+            "modelName": "{{GPT_MODEL_INFO.model_name}}"
+          }
+        }
+      ]{% else %}[]{% endif %},
       "encryptionKey": null,
-      "retrievalReasoningEffort": { "kind": "minimal" }
+      "retrievalReasoningEffort": { "kind": "{% if foundry_iq_mcp_enabled %}{{foundry_iq_mcp_reasoning_effort}}{% else %}minimal{% endif %}" }
     }
   ]{% else %}[]{% endif %}
 }

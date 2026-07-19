@@ -145,6 +145,58 @@ function ConvertTo-FlatJsonString {
     return ($Value | ConvertTo-Json -Depth 50 -Compress)
 }
 
+#-------------------------------------------------------------------------------
+# Make config.* importable early (moved ahead of Set-GptRagAppConfiguration so
+# the Foundry IQ MCP pre-flight validation below can run before any App
+# Configuration write/import). No Python package installation is required for
+# that pre-flight check: foundry_iq_mcp_setup.py has no external dependencies.
+#-------------------------------------------------------------------------------
+$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+$env:PYTHONPATH = if ($env:PYTHONPATH) { "$repoRoot;$($env:PYTHONPATH)" } else { $repoRoot }
+$env:GPT_RAG_REPO_ROOT = $repoRoot
+Set-Location $repoRoot
+
+function Invoke-PythonModule {
+    param(
+        [Parameter(Mandatory = $true)][string]$ModuleName,
+        [string[]]$Arguments = @()
+    )
+    Invoke-NativeCommand {
+        & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['GPT_RAG_REPO_ROOT']); sys.argv = ['$ModuleName'] + sys.argv[1:]; runpy.run_module('$ModuleName', run_name='__main__')" @Arguments
+    }
+}
+
+#-------------------------------------------------------------------------------
+# Foundry IQ MCP Server source pre-flight validation
+# Validates FOUNDRY_IQ_MCP_SOURCES_JSON (JSON shape, security constraints:
+# only non-secret queryHeaders references, no auth/authentication or literal
+# credential material at any nesting depth, trusted-host allowlisting,
+# output-parsing shape, token caps) before ANY of it is imported into Azure
+# App Configuration below. The validator returns canonical JSON so the raw
+# operator value is never persisted.
+#-------------------------------------------------------------------------------
+$mcpEnabled = Test-Truthy (Get-OptionalEnvValue 'FOUNDRY_IQ_MCP_ENABLED' 'false')
+if ($mcpEnabled) {
+    Write-Host "🔐 Validating Foundry IQ MCP Server source configuration..."
+    $mcpSourcesJson = Invoke-PythonModule -ModuleName 'config.search.foundry_iq_mcp_setup' -Arguments @('--canonical')
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Foundry IQ MCP Server source validation failed; aborting before any App Configuration write."
+        exit 1
+    }
+    $mcpSourcesJson = ([string]$mcpSourcesJson).Trim()
+    $mcpReasoningEffort = Get-OptionalEnvValue 'FOUNDRY_IQ_MCP_REASONING_EFFORT' 'low'
+    $mcpTrustedHosts = Get-OptionalEnvValue 'FOUNDRY_IQ_MCP_TRUSTED_HOSTS' ''
+    $mcpLogToolArguments = Get-OptionalEnvValue 'FOUNDRY_IQ_MCP_LOG_TOOL_ARGUMENTS' 'false'
+} else {
+    # Disabled provisioning must not parse, preserve, or persist stale source
+    # content. Write canonical safe defaults instead.
+    Write-Host "⏭️ Foundry IQ MCP Server disabled; skipping source validation."
+    $mcpSourcesJson = '[]'
+    $mcpReasoningEffort = 'low'
+    $mcpTrustedHosts = ''
+    $mcpLogToolArguments = 'false'
+}
+
 function Set-GptRagAppConfiguration {
     param(
         [Parameter(Mandatory = $true)][string]$Endpoint,
@@ -430,6 +482,23 @@ function Set-GptRagAppConfiguration {
         WEB_GROUNDING_KNOWLEDGE_SOURCE_NAME = (Get-OptionalEnvValue 'WEB_GROUNDING_KNOWLEDGE_SOURCE_NAME' '')
         WEB_GROUNDING_ALLOWED_DOMAINS = (Get-OptionalEnvValue 'WEB_GROUNDING_ALLOWED_DOMAINS' '')
         WEB_GROUNDING_BLOCKED_DOMAINS = (Get-OptionalEnvValue 'WEB_GROUNDING_BLOCKED_DOMAINS' '')
+        # Generic MCP Server knowledge source passthrough keys (preview).
+        # Opt-in via FOUNDRY_IQ_MCP_ENABLED=true plus at least one source in
+        # FOUNDRY_IQ_MCP_SOURCES_JSON (a JSON array; see
+        # docs/howto_grounding_mcp_server.md for the schema). Disabled by
+        # default. No secrets belong in FOUNDRY_IQ_MCP_SOURCES_JSON or in
+        # App Configuration. queryHeaders may contain only managed identity
+        # or OBO scopes, Key Vault secret names, or explicit none metadata;
+        # the compatible orchestrator resolves values at request time.
+        # FOUNDRY_IQ_MCP_TRUSTED_HOSTS is a
+        # comma-separated allowlist of exact hostnames the provisioning
+        # script requires an MCP serverURL to match before it will
+        # register the source.
+        FOUNDRY_IQ_MCP_ENABLED = if ($mcpEnabled) { 'true' } else { 'false' }
+        FOUNDRY_IQ_MCP_SOURCES_JSON = $mcpSourcesJson
+        FOUNDRY_IQ_MCP_REASONING_EFFORT = $mcpReasoningEffort
+        FOUNDRY_IQ_MCP_TRUSTED_HOSTS = $mcpTrustedHosts
+        FOUNDRY_IQ_MCP_LOG_TOOL_ARGUMENTS = $mcpLogToolArguments
         NETWORK_ISOLATION = (Get-OptionalEnvValue 'NETWORK_ISOLATION' 'false')
         USE_UAI = (Get-OptionalEnvValue 'USE_UAI' 'false')
         USE_CAPP_API_KEY = (Get-OptionalEnvValue 'USE_CAPP_API_KEY' 'false')
@@ -552,16 +621,6 @@ Set-GptRagAppConfiguration -Endpoint (Get-RequiredEnvValue 'APP_CONFIG_ENDPOINT'
 #-------------------------------------------------------------------------------
 # Setup Python environment
 #-------------------------------------------------------------------------------
-$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
-$env:PYTHONPATH = if ($env:PYTHONPATH) { "$repoRoot;$($env:PYTHONPATH)" } else { $repoRoot }
-$env:GPT_RAG_REPO_ROOT = $repoRoot
-Set-Location $repoRoot
-
-function Invoke-PythonModule {
-    param([Parameter(Mandatory = $true)][string]$ModuleName)
-    Invoke-NativeCommand { & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['GPT_RAG_REPO_ROOT']); runpy.run_module('$ModuleName', run_name='__main__')" }
-}
-
 Write-Host "🐍 Checking Python venv support..."
 Invoke-NativeCommand { & python -c "import venv" 2>$null }
 $venvSupported = ($LASTEXITCODE -eq 0)

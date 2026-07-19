@@ -38,6 +38,8 @@ from azure.identity import ManagedIdentityCredential, AzureCliCredential, Chaine
 from azure.appconfiguration import AzureAppConfigurationClient, ConfigurationSetting
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, TemplateError
 
+from config.search.foundry_iq_mcp_setup import validate_foundry_iq_mcp_settings
+
 # ── Silence verbose logging ─────────────────────────────────────────────────
 for logger_name in (
     "azure.core.pipeline.policies.http_logging_policy",
@@ -320,9 +322,15 @@ def prepare_context_and_render(template_name: str, template_dir: str, label_filt
                 vars_dict["FOUNDRY_IQ_AI_SERVICES_ENDPOINT"] = ai_services_endpoint
             try:
                 validate_foundry_iq_settings(context)
+                validate_foundry_iq_mcp_settings(context)
             except ValueError as ve:
                 logging.error(str(ve))
                 return None, context
+            # The MCP validator returns a canonical disabled value or a
+            # deep-copied, normalized source model. Persist that model rather
+            # than the raw App Configuration value.
+            if "FOUNDRY_IQ_MCP_SOURCES_JSON" in context:
+                vars_dict["FOUNDRY_IQ_MCP_SOURCES_JSON"] = context["FOUNDRY_IQ_MCP_SOURCES_JSON"]
             for key, val in vars_dict.items():
                 if isinstance(val, (dict, list)):
                     final_val = json.dumps(val)
@@ -599,6 +607,37 @@ def filter_work_iq_sources(defs: dict, context: dict, cred: ChainedTokenCredenti
         ]
 
 
+def validate_unique_knowledge_source_names(defs: dict) -> None:
+    """Fail closed when the rendered template would register two or more
+    knowledge sources under the same name, case-insensitively.
+
+    Azure AI Search knowledge source names are unique per search service; a
+    case-only collision between, say, the Blob source and an MCP source
+    would silently overwrite one of them at registration time. This checks
+    ``defs["knowledgeSources"]`` -- the already-rendered list, which by
+    construction only contains sources that search.j2's own per-kind
+    enablement gates decided are enabled/renderable (Blob or Search Index,
+    the conversation-upload Search Index, Work IQ, Fabric IQ, Fabric Data
+    Agent, SharePoint Indexed, Web grounding, and every MCP Server source) --
+    rather than re-deriving each kind's enablement logic here.
+    """
+
+    seen: dict[str, str] = {}
+    for ks in defs.get("knowledgeSources") or []:
+        name = str(ks.get("name") or "").strip()
+        if not name:
+            continue
+        key = name.lower()
+        if key in seen:
+            raise ValueError(
+                f"Knowledge source name '{name}' collides (case-insensitive) with '{seen[key]}'. "
+                "Knowledge source names must be globally unique across every enabled source "
+                "(Blob/Search Index, Work IQ, Fabric IQ, Fabric Data Agent, SharePoint Indexed, Web "
+                "grounding, MCP Server); rename one of them before provisioning."
+            )
+        seen[key] = name
+
+
 def provision_knowledge_sources(defs: dict, context: dict, cred: ChainedTokenCredential, search_endpoint: str):
     """Create or update Foundry IQ knowledge sources.
 
@@ -698,6 +737,7 @@ def provision_knowledge_bases(defs: dict, context: dict, cred: ChainedTokenCrede
 def execute_setup(defs: Optional[dict], context: dict):
     if defs is None:
         raise RuntimeError("No search definitions were rendered; aborting Azure Search setup")
+    validate_unique_knowledge_source_names(defs)
     cred = ChainedTokenCredential(AzureCliCredential(),ManagedIdentityCredential())
     indexers = defs.get("indexers", [])
     ds_to_indexers = {}
