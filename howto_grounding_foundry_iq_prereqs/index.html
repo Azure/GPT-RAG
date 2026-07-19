@@ -1706,9 +1706,13 @@ consent, delegated permissions, and licensing you need.</p>
 <p>For <code>mcpServer</code>, do not confuse the orchestrator's managed identity with an
 OBO token. Managed identity is app-only and gives every user the same MCP
 authorization scope. OBO preserves the signed-in user's identity and only
-works when the MCP endpoint validates that delegated token. Neither mode is
-configured by the provisioning-only change described in
-<a href="../howto_grounding_mcp_server/">Generic MCP server</a>.</p>
+works when the MCP endpoint validates that delegated token. The optional
+<code>queryHeaders</code> metadata selects how a compatible orchestrator resolves the
+header and requires an explicit, non-secret scope for either mode. The
+provisioning change stores this metadata in App Configuration but never
+renders it into Search registration or retrieve parameters. Runtime
+resolution still requires a compatible orchestrator. See
+<a href="../howto_grounding_mcp_server/#authentication">Generic MCP server</a>.</p>
 <h2 id="feature-flags-gated-by-microsoft">Feature flags gated by Microsoft</h2>
 <p>Two knowledge sources require Microsoft-controlled enrollment before you can
 use them. GPT-RAG cannot enable these for you.</p>

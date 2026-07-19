@@ -1599,7 +1599,7 @@ Azure AI Search calls the registered MCP server directly over HTTPS:</p>
    registered -- the exact <code>serverURL</code> from your configuration, never a
    value supplied by the end user or by the orchestrator at query time.
    Only the tools you explicitly allowlisted per source can be called.</li>
-<li>The tool output is parsed according to the <code>outputParsing</code> mode and
+<li>The tool output is parsed according to the <code>outputParsing</code> object and
    returned in the normal retrieve response. Each MCP call appears in the
    <code>activity</code> array. Each result appears in <code>references</code> and points back to
    its activity entry through <code>activitySource</code>.</li>
@@ -1631,10 +1631,11 @@ PR #568.</p>
 <li>The data is better served by an indexed knowledge source (Blob, AI
   Search index, SharePoint indexed, OneLake). Indexed sources have a much
   smaller trust surface than a live tool call.</li>
-<li>You need static, long-lived credential (API key or bearer token)
-  authentication. Azure AI Search supports stored headers upstream, but
-  GPT-RAG code PR #568 deliberately does not emit them;
-  see <a href="#authentication">Authentication</a> below.</li>
+<li>The only way to authenticate the endpoint would be to put a literal
+  credential, header value, cookie, or connection string in configuration.
+  GPT-RAG rejects that material. Use only the non-secret <code>queryHeaders</code>
+  references described in <a href="#authentication">Authentication</a>, with a
+  compatible orchestrator that resolves them at request time.</li>
 </ul>
 <h2 id="prerequisites">Prerequisites</h2>
 <p>All of these are hard blockers. Work through them in order.</p>
@@ -1642,11 +1643,11 @@ PR #568.</p>
 <li><strong>The MCP server must be reachable over HTTPS with a fixed, production
    hostname.</strong> No IP-literal endpoints, no <code>localhost</code>, no query strings
    with embedded credentials. See <a href="#trusted-hosts">Trusted hosts</a>.</li>
-<li><strong>A supported endpoint authentication path.</strong> Code PR #568 does not
-   configure credentials on the knowledge source and the current
-   orchestrator does not forward credentials at query time. Do not assume
-   Azure AI Search automatically presents its managed identity to the MCP
-   endpoint. See <a href="#authentication">Authentication</a>.</li>
+<li><strong>A supported endpoint authentication path.</strong> Optional <code>queryHeaders</code>
+   metadata can tell a compatible orchestrator how to resolve a header at
+   request time, but code PR #568 does not add that orchestrator support.
+   Do not assume Azure AI Search automatically presents its managed identity
+   to the MCP endpoint. See <a href="#authentication">Authentication</a>.</li>
 <li><strong>Every tool you intend to call is explicitly allowlisted.</strong> There is
    no "allow all tools" option. Add each tool by name with its own
    <code>inclusionMode</code>, <code>outputParsing</code>, and <code>maxOutputTokens</code>.</li>
@@ -1665,6 +1666,12 @@ is available, <code>azd provision</code> seeds five keys under the <code>gpt-rag
 with safe defaults (<code>FOUNDRY_IQ_MCP_ENABLED=false</code>, an empty source list,
 and conservative defaults for the rest). You do not have to create them by
 hand.</p>
+<p>When MCP is disabled, provisioning keeps
+<code>FOUNDRY_IQ_MCP_SOURCES_JSON=[]</code> as the canonical value in App
+Configuration. It does not parse or re-persist stale source content. The
+Search template renders no MCP source or reference and preserves the
+disabled Knowledge Base settings described in
+<a href="#knowledge-base-planning-model">Knowledge base planning model</a>.</p>
 <table>
 <thead>
 <tr>
@@ -1710,9 +1717,20 @@ hand.</p>
 <span class="w">  </span><span class="nt">&quot;tools&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;query_logs&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;outputParsing&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;outputParsing&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;auto&quot;</span>
+<span class="w">      </span><span class="p">},</span>
 <span class="w">      </span><span class="nt">&quot;inclusionMode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;reranked&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">&quot;maxOutputTokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4096</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;queryHeaders&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Authorization&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;valueFrom&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;managedIdentity&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;api://monitor-mcp/.default&quot;</span>
+<span class="w">      </span><span class="p">}</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">]</span>
 <span class="p">}</span>
@@ -1739,7 +1757,7 @@ hand.</p>
 <tr>
 <td><code>serverURL</code></td>
 <td>Yes</td>
-<td>Must be <code>https://</code>, no userinfo, no fragment, no IP literal, and its host must exactly match an entry in <code>FOUNDRY_IQ_MCP_TRUSTED_HOSTS</code>.</td>
+<td>Must be <code>https://</code>, with no userinfo, query string, fragment, IP literal, or local/reserved host. Its host must exactly match an entry in <code>FOUNDRY_IQ_MCP_TRUSTED_HOSTS</code>.</td>
 </tr>
 <tr>
 <td><code>tools</code></td>
@@ -1747,9 +1765,9 @@ hand.</p>
 <td>Non-empty array. Every tool the planner is allowed to call.</td>
 </tr>
 <tr>
-<td><code>auth</code></td>
+<td><code>queryHeaders</code></td>
 <td>No</td>
-<td>Validation-only in code PR #568. It is never forwarded and does not authenticate the endpoint. See <a href="#authentication">Authentication</a>.</td>
+<td>Array of <code>{name, valueFrom}</code> objects containing only non-secret request-time resolution metadata. Stored in App Configuration for a compatible orchestrator, but never rendered into Search registration or retrieve parameters.</td>
 </tr>
 </tbody>
 </table>
@@ -1771,12 +1789,12 @@ hand.</p>
 <tr>
 <td><code>outputParsing</code></td>
 <td>Yes</td>
-<td>One of <code>auto</code>, <code>json</code>, <code>split</code>, <code>none</code>.</td>
+<td>Object with <code>kind</code> set to <code>auto</code>, <code>json</code>, <code>split</code>, or <code>none</code>.</td>
 </tr>
 <tr>
-<td><code>documentsPath</code></td>
-<td>Only if <code>outputParsing</code> is <code>json</code></td>
-<td>JSON path into the tool's structured output.</td>
+<td><code>outputParsing.jsonParameters</code></td>
+<td>Only if <code>kind</code> is <code>json</code></td>
+<td>Object containing a non-empty <code>documentsPath</code>. It is rejected for every other kind.</td>
 </tr>
 <tr>
 <td><code>inclusionMode</code></td>
@@ -1790,17 +1808,72 @@ hand.</p>
 </tr>
 </tbody>
 </table>
+<p>For JSON tool output, use the nested Search schema exactly:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;outputParsing&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;json&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;jsonParameters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;documentsPath&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$.results&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Each <code>queryHeaders</code> entry has a <code>name</code> and a <code>valueFrom</code> object:</p>
+<table>
+<thead>
+<tr>
+<th><code>valueFrom.kind</code></th>
+<th>Required metadata</th>
+<th>Do not include</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>managedIdentity</code></td>
+<td>Explicit, non-secret <code>scope</code></td>
+<td><code>secretName</code> or any credential value</td>
+</tr>
+<tr>
+<td><code>obo</code></td>
+<td>Explicit, non-secret <code>scope</code></td>
+<td><code>secretName</code> or any credential value</td>
+</tr>
+<tr>
+<td><code>keyVaultSecret</code></td>
+<td><code>secretName</code> only</td>
+<td><code>scope</code> or the secret value</td>
+</tr>
+<tr>
+<td><code>none</code></td>
+<td>None</td>
+<td><code>scope</code>, <code>secretName</code>, or any credential value</td>
+</tr>
+</tbody>
+</table>
+<p>Header names must be valid HTTP field names and unique within a source,
+ignoring case. <code>Host</code>, <code>Content-Length</code>, and hop-by-hop headers are rejected.
+For <code>keyVaultSecret</code>, store the secret in Key Vault and provide only its
+name. Never put the secret value in this JSON.</p>
+<p><code>queryHeaders</code> is runtime-only metadata. Provisioning validates and
+canonicalizes it, then stores it as part of
+<code>FOUNDRY_IQ_MCP_SOURCES_JSON</code> in App Configuration so a compatible
+orchestrator can resolve the value when it builds a retrieve request. The
+metadata is deliberately omitted from both the Azure AI Search
+knowledge-source registration and Knowledge Base retrieve parameters.</p>
 <p>After code PR #568 is available, <code>azd provision</code> parses and validates this
 JSON during setup and <strong>fails the
 deployment closed</strong> if it is invalid while <code>FOUNDRY_IQ_MCP_ENABLED=true</code>:
 malformed JSON, zero sources, zero tools, duplicate source or tool names,
-a non-<code>https</code> scheme, userinfo or a fragment in <code>serverURL</code>, an IP-literal
-or <code>localhost</code> host, a host outside <code>FOUNDRY_IQ_MCP_TRUSTED_HOSTS</code>, an
-unsupported <code>outputParsing</code> or <code>inclusionMode</code> value, a missing
-<code>documentsPath</code> when required, a non-positive or over-cap
-<code>maxOutputTokens</code>, or unsupported <code>auth</code> metadata all abort provisioning
-with an actionable error instead of silently registering a broken or
-insecure source.</p>
+a non-<code>https</code> scheme, userinfo, query string, or fragment in <code>serverURL</code>,
+an IP-literal, local, or reserved host, a host outside
+<code>FOUNDRY_IQ_MCP_TRUSTED_HOSTS</code>, an unsupported <code>outputParsing.kind</code> or
+<code>inclusionMode</code>, invalid JSON output parameters, a non-positive or
+over-cap <code>maxOutputTokens</code>, invalid <code>queryHeaders</code>, or any forbidden
+credential material. <code>auth</code> and <code>authentication</code> remain forbidden.
+Literal credential values, secrets, headers, cookies, tokens, passwords,
+credentials, and connection strings are rejected at any nesting depth.
+Validation aborts provisioning with an actionable error instead of
+silently registering a broken or insecure source.</p>
 <h3 id="trusted-hosts">Trusted hosts</h3>
 <p><code>FOUNDRY_IQ_MCP_TRUSTED_HOSTS</code> is a comma-separated allowlist of exact
 hostnames (not URLs, not wildcards, not CIDR ranges). Every <code>serverURL</code>
@@ -1832,22 +1905,31 @@ server-to-server call.</p>
   render this option and rejects literal credentials.</li>
 <li>Paired query-time control headers, prefixed with the knowledge-source
   name. This is the appropriate upstream mechanism for rotating or
-  per-request credentials, but it requires orchestrator support that is
-  not included in code PR #568.</li>
+  per-request credentials. It requires compatible orchestrator support.</li>
 </ul>
-<p>Managed identity and OBO describe how a compatible orchestrator can obtain
-the token placed in a paired query-time header:</p>
+<p>Use <code>queryHeaders</code> to describe request-time resolution without storing a
+credential:</p>
 <ul>
-<li><strong>Managed identity</strong> obtains an app-only token. Every user sees the same
-  MCP authorization scope.</li>
-<li><strong>On-behalf-of (OBO)</strong> exchanges the signed-in user's delegated token.
-  Use it only when the MCP server enforces per-user authorization.</li>
+<li><strong><code>managedIdentity</code></strong> requires an explicit, non-secret <code>scope</code>. A
+  compatible orchestrator obtains an app-only token for that scope. Every
+  user receives the same MCP authorization scope.</li>
+<li><strong><code>obo</code></strong> requires an explicit, non-secret <code>scope</code>. A compatible
+  orchestrator exchanges the signed-in user's delegated token. Use it only
+  when the MCP server enforces per-user authorization.</li>
+<li><strong><code>keyVaultSecret</code></strong> requires only <code>secretName</code>. A compatible
+  orchestrator reads the secret at request time. The secret value never
+  belongs in App Configuration.</li>
+<li><strong><code>none</code></strong> has no <code>scope</code>, <code>secretName</code>, or other credential fields.</li>
 </ul>
-<p>Neither mode is enabled by writing <code>{"kind": "managedIdentity"}</code> in
-<code>FOUNDRY_IQ_MCP_SOURCES_JSON</code>. Code PR #568 accepts that value only as a
-validation no-op and does not emit an <code>authentication</code> block. Any <code>auth</code>
-object containing API keys, tokens, secrets, passwords, or headers is
-rejected. <strong>Never put credential material in
+<p>Code PR #568 stores only this validated metadata. It does not add the
+orchestrator logic that resolves a managed identity token, OBO token, or
+Key Vault secret, and it never emits an <code>authentication</code> block,
+<code>queryHeaders</code>, or credential fields to Azure AI Search. A compatible
+orchestrator release is still required.</p>
+<p><code>auth</code> and <code>authentication</code> are forbidden, not accepted for
+validation-only use. Literal API keys, bearer tokens, passwords, secret
+values, header blobs, cookies, credentials, and connection strings are
+also rejected. <strong>Never put credential material in
 <code>FOUNDRY_IQ_MCP_SOURCES_JSON</code> or App Configuration.</strong></p>
 <p>Until a compatible orchestrator forwards the documented paired headers,
 use this feature only with an isolated test endpoint that does not require
@@ -1907,24 +1989,35 @@ example. The template has no Azure Monitor-specific code path.</p>
 <span class="w">    </span><span class="nt">&quot;tools&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">      </span><span class="p">{</span>
 <span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;workspace-log-query-tool&gt;&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;outputParsing&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;outputParsing&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;auto&quot;</span>
+<span class="w">        </span><span class="p">},</span>
 <span class="w">        </span><span class="nt">&quot;inclusionMode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;reranked&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;maxOutputTokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4096</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;queryHeaders&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Authorization&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;valueFrom&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;managedIdentity&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;api://azure-monitor-mcp/.default&quot;</span>
+<span class="w">        </span><span class="p">}</span>
 <span class="w">      </span><span class="p">}</span>
 <span class="w">    </span><span class="p">]</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">]</span>
 </code></pre></div>
-<ol>
-<li>Add <code>azmon-mcp.contoso.com</code> to <code>FOUNDRY_IQ_MCP_TRUSTED_HOSTS</code>. In an
+<p>Replace the sample <code>scope</code> with the application ID URI exposed by your
+   MCP gateway. It is metadata, not a token or secret.
+6. Add <code>azmon-mcp.contoso.com</code> to <code>FOUNDRY_IQ_MCP_TRUSTED_HOSTS</code>. In an
    isolated test environment with compatible provisioning and
    orchestrator builds, set <code>FOUNDRY_IQ_MCP_ENABLED=true</code> and run
-   <code>azd hooks run postprovision</code> or <code>azd provision</code>.</li>
-<li>Ask a bounded question, such as "Were there any 5xx spikes on the
+   <code>azd hooks run postprovision</code> or <code>azd provision</code>.
+7. Ask a bounded question, such as "Were there any 5xx spikes on the
    checkout service in the last 24 hours? Limit the result to 100 rows."
    Review the generated KQL before trusting the answer. A safe query should
-   contain both a time predicate and a result cap, for example:</li>
-</ol>
+   contain both a time predicate and a result cap, for example:</p>
 <div class="highlight"><pre><span></span><code><span class="n">AppRequests</span>
 <span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">TimeGenerated</span><span class="w"> </span><span class="p">&gt;=</span><span class="w"> </span><span class="n">ago</span><span class="p">(</span><span class="mi">24</span><span class="n">h</span><span class="p">)</span>
 <span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">ResultCode</span><span class="w"> </span><span class="k">startswith</span><span class="w"> </span><span class="s">&quot;5&quot;</span>
@@ -1976,15 +2069,15 @@ MCP source outside a fully isolated test environment:</p>
   semantic correctness (the server accepting a syntactically valid but
   wrong query and returning misleading results). Bound blast radius at the
   MCP server itself, not just at the GPT-RAG configuration layer.</li>
-<li>Nothing in code PR #568 accepts or forwards static credentials. Azure AI
-  Search supports stored headers, but GPT-RAG intentionally does not expose
-  that option because it would place long-lived secrets in configuration.
-  If an MCP server requires header or token authentication, do not work
-  around the missing runtime support by
-  embedding a token in <code>FOUNDRY_IQ_MCP_SOURCES_JSON</code>, in an environment
-  variable, or anywhere else in App Configuration. Use a gateway and a
-  compatible orchestrator that forwards a short-lived token through the
-  documented paired query-time headers.</li>
+<li>Nothing in code PR #568 accepts or forwards literal credentials. A
+  <code>keyVaultSecret</code> entry contains only a secret name, never the secret
+  value. Azure AI Search supports stored headers, but GPT-RAG intentionally
+  does not expose that option because it would place long-lived secrets in
+  configuration. Do not work around missing runtime support by embedding a
+  token, header value, cookie, or connection string in
+  <code>FOUNDRY_IQ_MCP_SOURCES_JSON</code>, an environment variable, or App
+  Configuration. Use a gateway and a compatible orchestrator that resolves
+  validated <code>queryHeaders</code> metadata at request time.</li>
 </ul>
 <h2 id="rollout-canary-and-rollback">Rollout, canary, and rollback</h2>
 <ul>
@@ -1997,12 +2090,14 @@ MCP source outside a fully isolated test environment:</p>
   the others.</li>
 <li><strong>Rollback.</strong> Set <code>FOUNDRY_IQ_MCP_ENABLED=false</code> and run
   <code>azd hooks run postprovision</code> or <code>azd provision</code>. This removes the MCP
-  references from the Knowledge Base and restores <code>models=[]</code> and
-  <code>retrievalReasoningEffort=minimal</code>. The top-level MCP knowledge-source
-  object can remain registered in Azure AI Search because provisioning
-  does not delete objects that disappear from the template. It is unused
-  after the Knowledge Base reference is removed. Delete it separately only
-  after you verify that no Knowledge Base references it.</li>
+  references from the Knowledge Base, writes the canonical
+  <code>FOUNDRY_IQ_MCP_SOURCES_JSON=[]</code> value to App Configuration, and restores
+  <code>models=[]</code> and <code>retrievalReasoningEffort=minimal</code>. Stale source content is
+  neither parsed nor re-persisted while disabled. The top-level MCP
+  knowledge-source object can remain registered in Azure AI Search because
+  provisioning does not delete objects that disappear from the template.
+  It is unused after the Knowledge Base reference is removed. Delete it
+  separately only after you verify that no Knowledge Base references it.</li>
 </ul>
 <h2 id="production-blockers">Production blockers</h2>
 <p>Do not promote an MCP source to a production environment until all of the
@@ -2028,7 +2123,8 @@ following are true:</p>
   <code>FOUNDRY_IQ_MCP_SOURCES_JSON</code>.</strong> Provisioning validation rejected your
   configuration. The error message names the exact field and rule that
   failed (for example, an untrusted host, a duplicate name, or a missing
-  <code>documentsPath</code>). Fix the JSON and re-run <code>azd hooks run postprovision</code>.</li>
+  <code>outputParsing.jsonParameters.documentsPath</code>). Fix the JSON and re-run
+  <code>azd hooks run postprovision</code>.</li>
 <li><strong>No MCP citations in responses.</strong> Confirm <code>FOUNDRY_IQ_MCP_ENABLED=true</code>,
   that <code>FOUNDRY_IQ_MCP_SOURCES_JSON</code> has at least one source, and that
   <code>FOUNDRY_IQ_MCP_REASONING_EFFORT</code> is <code>low</code> or <code>medium</code>. Also confirm
