@@ -49,6 +49,7 @@ import ipaddress
 import json
 import os
 import sys
+from copy import deepcopy
 from typing import Any
 from urllib.parse import urlsplit
 
@@ -121,6 +122,8 @@ def _validate_server_url(label: str, server_url: str, trusted_hosts: set[str]) -
         raise ValueError(f"{label}: 'serverURL' must use https, got scheme '{parsed.scheme or '(none)'}'.")
     if parsed.username or parsed.password:
         raise ValueError(f"{label}: 'serverURL' must not contain userinfo (a username or password).")
+    if parsed.query or "?" in server_url:
+        raise ValueError(f"{label}: 'serverURL' must not contain a query string.")
     if parsed.fragment:
         raise ValueError(f"{label}: 'serverURL' must not contain a fragment.")
 
@@ -271,8 +274,9 @@ def validate_and_get_mcp_sources(context: dict) -> list[dict]:
             f"got '{reasoning_effort}'. MCP knowledge sources require the query planner to run."
         )
 
+    normalized_sources = deepcopy(sources)
     seen_names: set[str] = set()
-    for index, source in enumerate(sources):
+    for index, source in enumerate(normalized_sources):
         label = f"FOUNDRY_IQ_MCP_SOURCES_JSON[{index}]"
         if not isinstance(source, dict):
             raise ValueError(f"{label}: must be a JSON object.")
@@ -303,8 +307,9 @@ def validate_and_get_mcp_sources(context: dict) -> list[dict]:
         seen_tool_names: set[str] = set()
         for tool in tools:
             _validate_tool(label, tool, seen_tool_names)
+            tool["outputParsing"] = str(tool["outputParsing"]).strip().lower()
 
-    return sources
+    return normalized_sources
 
 
 def validate_foundry_iq_mcp_settings(context: dict) -> None:
@@ -319,8 +324,15 @@ def validate_foundry_iq_mcp_settings(context: dict) -> None:
     """
 
     if not is_foundry_iq_mcp_enabled(context):
+        # Do not inspect or parse stale source content while disabled. Keeping
+        # the context canonical also prevents a later App Configuration write
+        # from re-persisting disabled source data.
+        context["FOUNDRY_IQ_MCP_SOURCES_JSON"] = []
         return
 
+    # Validate and recursively scan all source content before checking later
+    # prerequisites or allowing setup.py to persist the rendered settings.
+    sources = validate_and_get_mcp_sources(context)
     if not context.get("GPT_MODEL_INFO"):
         raise ValueError(
             "FOUNDRY_IQ_MCP_ENABLED is true but no chat model was found in MODEL_DEPLOYMENTS (canonical_name "
@@ -332,8 +344,7 @@ def validate_foundry_iq_mcp_settings(context: dict) -> None:
             "FOUNDRY_IQ_MCP_ENABLED is true but no AI Services endpoint could be derived. Set "
             "FOUNDRY_IQ_AI_SERVICES_ENDPOINT, AI_FOUNDRY_PROJECT_ENDPOINT, or AI_FOUNDRY_ACCOUNT_NAME."
         )
-
-    validate_and_get_mcp_sources(context)
+    context["FOUNDRY_IQ_MCP_SOURCES_JSON"] = sources
 
 
 def _parse_env_sources_json(raw: str) -> Any:
@@ -367,13 +378,21 @@ def build_preflight_context_from_environ() -> dict:
     and remain covered later by ``config.search.setup`` itself.
     """
 
-    return {
-        "RETRIEVAL_BACKEND": os.environ.get("RETRIEVAL_BACKEND", ""),
+    context = {
+        "RETRIEVAL_BACKEND": os.environ.get("RETRIEVAL_BACKEND", "foundry_iq"),
         "FOUNDRY_IQ_MCP_ENABLED": os.environ.get("FOUNDRY_IQ_MCP_ENABLED", "false"),
-        "FOUNDRY_IQ_MCP_SOURCES_JSON": _parse_env_sources_json(os.environ.get("FOUNDRY_IQ_MCP_SOURCES_JSON", "[]")),
+        "FOUNDRY_IQ_MCP_SOURCES_JSON": [],
         "FOUNDRY_IQ_MCP_TRUSTED_HOSTS": os.environ.get("FOUNDRY_IQ_MCP_TRUSTED_HOSTS", ""),
         "FOUNDRY_IQ_MCP_REASONING_EFFORT": os.environ.get("FOUNDRY_IQ_MCP_REASONING_EFFORT", "low"),
     }
+    # Check the explicit enablement gate before touching the raw JSON. This
+    # keeps disabled provisioning independent of stale or malformed source
+    # content left in the environment.
+    if is_foundry_iq_mcp_enabled(context):
+        context["FOUNDRY_IQ_MCP_SOURCES_JSON"] = _parse_env_sources_json(
+            os.environ.get("FOUNDRY_IQ_MCP_SOURCES_JSON", "[]")
+        )
+    return context
 
 
 def main() -> int:

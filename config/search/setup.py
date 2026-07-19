@@ -326,6 +326,11 @@ def prepare_context_and_render(template_name: str, template_dir: str, label_filt
             except ValueError as ve:
                 logging.error(str(ve))
                 return None, context
+            # The MCP validator returns a canonical disabled value or a
+            # deep-copied, normalized source model. Persist that model rather
+            # than the raw App Configuration value.
+            if "FOUNDRY_IQ_MCP_SOURCES_JSON" in context:
+                vars_dict["FOUNDRY_IQ_MCP_SOURCES_JSON"] = context["FOUNDRY_IQ_MCP_SOURCES_JSON"]
             for key, val in vars_dict.items():
                 if isinstance(val, (dict, list)):
                     final_val = json.dumps(val)

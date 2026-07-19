@@ -170,11 +170,26 @@ function Invoke-PythonModule {
 # or malicious MCP source must be rejected before it is ever persisted, not
 # just before the knowledge source is registered by config.search.setup.
 #-------------------------------------------------------------------------------
-Write-Host "🔐 Validating Foundry IQ MCP Server source configuration..."
-Invoke-PythonModule -ModuleName 'config.search.foundry_iq_mcp_setup'
-if ($LASTEXITCODE -ne 0) {
-    Write-Error "Foundry IQ MCP Server source validation failed; aborting before any App Configuration write."
-    exit 1
+$mcpEnabled = Test-Truthy (Get-OptionalEnvValue 'FOUNDRY_IQ_MCP_ENABLED' 'false')
+if ($mcpEnabled) {
+    Write-Host "🔐 Validating Foundry IQ MCP Server source configuration..."
+    Invoke-PythonModule -ModuleName 'config.search.foundry_iq_mcp_setup'
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Foundry IQ MCP Server source validation failed; aborting before any App Configuration write."
+        exit 1
+    }
+    $mcpSourcesJson = Get-OptionalEnvValue 'FOUNDRY_IQ_MCP_SOURCES_JSON' '[]'
+    $mcpReasoningEffort = Get-OptionalEnvValue 'FOUNDRY_IQ_MCP_REASONING_EFFORT' 'low'
+    $mcpTrustedHosts = Get-OptionalEnvValue 'FOUNDRY_IQ_MCP_TRUSTED_HOSTS' ''
+    $mcpLogToolArguments = Get-OptionalEnvValue 'FOUNDRY_IQ_MCP_LOG_TOOL_ARGUMENTS' 'false'
+} else {
+    # Disabled provisioning must not parse, preserve, or persist stale source
+    # content. Write canonical safe defaults instead.
+    Write-Host "⏭️ Foundry IQ MCP Server disabled; skipping source validation."
+    $mcpSourcesJson = '[]'
+    $mcpReasoningEffort = 'low'
+    $mcpTrustedHosts = ''
+    $mcpLogToolArguments = 'false'
 }
 
 function Set-GptRagAppConfiguration {
@@ -472,11 +487,11 @@ function Set-GptRagAppConfiguration {
         # comma-separated allowlist of exact hostnames the provisioning
         # script requires an MCP serverURL to match before it will
         # register the source.
-        FOUNDRY_IQ_MCP_ENABLED = (Get-OptionalEnvValue 'FOUNDRY_IQ_MCP_ENABLED' 'false')
-        FOUNDRY_IQ_MCP_SOURCES_JSON = (Get-OptionalEnvValue 'FOUNDRY_IQ_MCP_SOURCES_JSON' '[]')
-        FOUNDRY_IQ_MCP_REASONING_EFFORT = (Get-OptionalEnvValue 'FOUNDRY_IQ_MCP_REASONING_EFFORT' 'low')
-        FOUNDRY_IQ_MCP_TRUSTED_HOSTS = (Get-OptionalEnvValue 'FOUNDRY_IQ_MCP_TRUSTED_HOSTS' '')
-        FOUNDRY_IQ_MCP_LOG_TOOL_ARGUMENTS = (Get-OptionalEnvValue 'FOUNDRY_IQ_MCP_LOG_TOOL_ARGUMENTS' 'false')
+        FOUNDRY_IQ_MCP_ENABLED = if ($mcpEnabled) { 'true' } else { 'false' }
+        FOUNDRY_IQ_MCP_SOURCES_JSON = $mcpSourcesJson
+        FOUNDRY_IQ_MCP_REASONING_EFFORT = $mcpReasoningEffort
+        FOUNDRY_IQ_MCP_TRUSTED_HOSTS = $mcpTrustedHosts
+        FOUNDRY_IQ_MCP_LOG_TOOL_ARGUMENTS = $mcpLogToolArguments
         NETWORK_ISOLATION = (Get-OptionalEnvValue 'NETWORK_ISOLATION' 'false')
         USE_UAI = (Get-OptionalEnvValue 'USE_UAI' 'false')
         USE_CAPP_API_KEY = (Get-OptionalEnvValue 'USE_CAPP_API_KEY' 'false')

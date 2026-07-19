@@ -827,6 +827,59 @@ class FoundryIqMcpTemplateTests(unittest.TestCase):
         for tool in tools:
             self.assertNotIn("documentsPath", tool)
 
+    def test_mixed_case_output_parsing_is_normalized_before_rendering(self):
+        _, context = self._foundry_iq_context(FOUNDRY_IQ_MCP_ENABLED="true")
+        context["FOUNDRY_IQ_MCP_TRUSTED_HOSTS"] = "monitor-mcp.contoso.com"
+        context["FOUNDRY_IQ_MCP_SOURCES_JSON"] = [
+            self._mcp_source(
+                tools=[
+                    {
+                        "name": "auto_tool",
+                        "outputParsing": "AUTO",
+                        "inclusionMode": "reranked",
+                        "maxOutputTokens": 1024,
+                    },
+                    {
+                        "name": "none_tool",
+                        "outputParsing": "NoNe",
+                        "inclusionMode": "reranked",
+                        "maxOutputTokens": 1024,
+                    },
+                    {
+                        "name": "split_tool",
+                        "outputParsing": "SpLiT",
+                        "inclusionMode": "reranked",
+                        "maxOutputTokens": 1024,
+                    },
+                    {
+                        "name": "json_tool",
+                        "outputParsing": "JSON",
+                        "documentsPath": "$.results",
+                        "inclusionMode": "always",
+                        "maxOutputTokens": 2048,
+                    },
+                ]
+            )
+        ]
+
+        mcp_setup.validate_foundry_iq_mcp_settings(context)
+        normalized_tools = context["FOUNDRY_IQ_MCP_SOURCES_JSON"][0]["tools"]
+        self.assertEqual(
+            [tool["outputParsing"] for tool in normalized_tools],
+            ["auto", "none", "split", "json"],
+        )
+
+        search_definitions = render_json_template("search.j2", context)
+        tools = search_definitions["knowledgeSources"][-1]["mcpServerParameters"]["tools"]
+        rendered = {tool["name"]: tool["outputParsing"] for tool in tools}
+        self.assertEqual(rendered["auto_tool"], {"kind": "auto"})
+        self.assertEqual(rendered["none_tool"], {"kind": "none"})
+        self.assertEqual(rendered["split_tool"], {"kind": "split"})
+        self.assertEqual(
+            rendered["json_tool"],
+            {"kind": "json", "jsonParameters": {"documentsPath": "$.results"}},
+        )
+
     def test_multiple_mcp_sources_all_registered_and_referenced(self):
         _, context = self._foundry_iq_context(FOUNDRY_IQ_MCP_ENABLED="true")
         context["FOUNDRY_IQ_MCP_SOURCES_JSON"] = [
@@ -955,6 +1008,32 @@ class FoundryIqMcpValidationTests(unittest.TestCase):
         context = self._context(sources=[self._source(serverURL="https://monitor-mcp.contoso.com/mcp#frag")])
         with self.assertRaisesRegex(ValueError, "fragment"):
             mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_query_string_in_url_raises(self):
+        for server_url in (
+            "https://monitor-mcp.contoso.com/mcp?api-version=1",
+            "https://monitor-mcp.contoso.com/mcp?",
+        ):
+            with self.subTest(server_url=server_url):
+                context = self._context(sources=[self._source(serverURL=server_url)])
+                with self.assertRaisesRegex(ValueError, "query string"):
+                    mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_source_scan_precedes_planning_model_validation(self):
+        context = self._context(
+            sources=[self._source(auth={"kind": "managedIdentity"})],
+            GPT_MODEL_INFO={},
+        )
+        with self.assertRaisesRegex(ValueError, "not supported"):
+            mcp_setup.validate_foundry_iq_mcp_settings(context)
+
+    def test_disabled_stale_source_content_is_discarded_without_parsing(self):
+        context = self._context(
+            sources="{not valid JSON",
+            FOUNDRY_IQ_MCP_ENABLED="false",
+        )
+        mcp_setup.validate_foundry_iq_mcp_settings(context)
+        self.assertEqual(context["FOUNDRY_IQ_MCP_SOURCES_JSON"], [])
 
     def test_ip_literal_host_raises(self):
         context = self._context(
@@ -1183,6 +1262,22 @@ class FoundryIqMcpPreflightCliTests(unittest.TestCase):
         self.assertEqual(result, 0)
         self.assertEqual(stderr, "")
 
+    def test_disabled_malformed_json_returns_zero_without_parsing(self):
+        result, stderr = self._run_main(
+            FOUNDRY_IQ_MCP_ENABLED="false",
+            FOUNDRY_IQ_MCP_SOURCES_JSON="{not valid JSON",
+        )
+        self.assertEqual(result, 0)
+        self.assertEqual(stderr, "")
+
+    def test_disabled_credential_json_returns_zero_without_scanning(self):
+        result, stderr = self._run_main(
+            FOUNDRY_IQ_MCP_ENABLED="false",
+            FOUNDRY_IQ_MCP_SOURCES_JSON='[{"auth":{"kind":"foundryConnection","token":"stale"}}]',
+        )
+        self.assertEqual(result, 0)
+        self.assertEqual(stderr, "")
+
     def test_valid_configuration_returns_zero(self):
         result, stderr = self._run_main(FOUNDRY_IQ_MCP_SOURCES_JSON=self._sources_json())
         self.assertEqual(result, 0)
@@ -1226,6 +1321,31 @@ class FoundryIqMcpPreflightCliTests(unittest.TestCase):
         self.assertNotIn("azure.appconfiguration", source)
         self.assertNotIn("AzureAppConfigurationClient", source)
         self.assertNotIn("import azure", source)
+
+
+class PostProvisionMcpSourceGuardTests(unittest.TestCase):
+    """Regression guards for the PowerShell validation/write ordering."""
+
+    SCRIPT = Path(__file__).resolve().parents[3] / "scripts" / "postProvision.ps1"
+
+    def test_disabled_path_skips_source_read_and_writes_safe_defaults(self):
+        script = self.SCRIPT.read_text(encoding="utf-8")
+        flag = script.index("$mcpEnabled = Test-Truthy")
+        preflight = script.index(
+            "Invoke-PythonModule -ModuleName 'config.search.foundry_iq_mcp_setup'"
+        )
+        enabled_source_read = script.index(
+            "$mcpSourcesJson = Get-OptionalEnvValue 'FOUNDRY_IQ_MCP_SOURCES_JSON' '[]'"
+        )
+        app_config_import = script.index("Set-GptRagAppConfiguration -Endpoint")
+
+        self.assertLess(flag, preflight)
+        self.assertLess(preflight, enabled_source_read)
+        self.assertLess(enabled_source_read, app_config_import)
+        self.assertIn("$mcpSourcesJson = '[]'", script)
+        self.assertIn("$mcpReasoningEffort = 'low'", script)
+        self.assertIn("$mcpTrustedHosts = ''", script)
+        self.assertIn("$mcpLogToolArguments = 'false'", script)
 
 
 class WorkIqPreflightTests(unittest.TestCase):
