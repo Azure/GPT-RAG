@@ -4,17 +4,75 @@
 
 ### Added
 
-- **Generic MCP Server knowledge source template (preview, [Azure/GPT-RAG#567](https://github.com/Azure/GPT-RAG/issues/567), PR #568).** `config/search/search.j2` renders the `mcpServer` Foundry IQ knowledge source (Search API `2026-05-01-preview`) when `FOUNDRY_IQ_MCP_ENABLED=true` and at least one source is configured in `FOUNDRY_IQ_MCP_SOURCES_JSON`. Off by default; disabled rendering is byte-for-byte unchanged (`models: []`, `retrievalReasoningEffort: minimal`). When enabled, the knowledge base's `models` array reuses the same Azure OpenAI model object already rendered for standard-mode Blob content extraction as the planning model, and `retrievalReasoningEffort` is set to `low` or `medium` via `FOUNDRY_IQ_MCP_REASONING_EFFORT`. Each tool uses the official `outputParsing` object shape (`{"kind": "auto"|"none"|"split"}` or `{"kind": "json", "jsonParameters": {"documentsPath": ...}}`) and `inclusionMode` accepts `reranked` or `always`. Coexists with all existing knowledge sources (Blob, Search index, Work IQ, Fabric ontology/Data Agent, SharePoint remote/indexed, OneLake, Web).
-- **`config/search/foundry_iq_mcp_setup.py`: fail-closed validation for MCP sources.** Unlike the soft/best-effort preflight pattern used by some other opt-in sources, `config/search/setup.py` now aborts provisioning with an actionable error when `FOUNDRY_IQ_MCP_ENABLED=true` and the configuration is invalid: malformed JSON, zero sources or tools, duplicate names, non-`https` `serverURL`, userinfo/query string/fragment/IP-literal/local/reserved hosts, a host outside `FOUNDRY_IQ_MCP_TRUSTED_HOSTS`, unsupported `outputParsing`/`inclusionMode` values, invalid output-parsing parameters, non-positive or over-cap (`8192`) `maxOutputTokens`, an `alwaysQuerySource` field, or any `auth`/`authentication` key or literal credential-shaped field anywhere in the JSON. Optional `queryHeaders` accepts only non-secret runtime metadata: managed identity or OBO with an explicit scope, Key Vault with a secret name, or `none` with no credential fields. Header names must be valid HTTP tokens and cannot be `Host`, `Content-Length`, or hop-by-hop headers. The canonical metadata is persisted for orchestrator request-time resolution but is never rendered into Search knowledge-source registration or knowledge-base parameters. The PowerShell preflight validates and canonicalizes the source JSON before any App Configuration write. When disabled, it skips source parsing and writes canonical `[]` plus safe MCP defaults.
-- **Global knowledge source name uniqueness.** `config/search/setup.py` now validates, case-insensitively and before any Search API provisioning call, that every enabled/renderable Foundry IQ knowledge source name (Blob/Search Index, conversation upload, Work IQ, Fabric IQ, Fabric Data Agent, SharePoint Indexed, Web grounding, and every MCP Server source) is globally unique, aborting with an actionable error on the first collision.
-- **`FOUNDRY_IQ_MCP_*` App Configuration passthrough.** `postProvision.ps1` seeds `FOUNDRY_IQ_MCP_ENABLED`, canonical `FOUNDRY_IQ_MCP_SOURCES_JSON`, `FOUNDRY_IQ_MCP_REASONING_EFFORT`, `FOUNDRY_IQ_MCP_TRUSTED_HOSTS`, and `FOUNDRY_IQ_MCP_LOG_TOOL_ARGUMENTS` with safe defaults so a fresh provision registers the keys without any config action from operators who do not opt in. Only validated non-secret `queryHeaders` references are retained in source JSON.
-- **Docs: [Foundry IQ: Generic MCP server](https://azure.github.io/GPT-RAG/howto_grounding_mcp_server/) how-to (preview).** Covers the trusted-host and tool allowlist model, request-time managed identity/OBO/Key Vault header resolution, API Management / gateway and rate-limiting guidance, the Azure Monitor MCP reference scenario (workspace-scoped Log Analytics Data Reader, bounded time range and row caps, auditable KQL), rollout/canary/rollback via the existing disable gate, and production blockers.
+### Changed
+
+### Fixed
+
+## [v3.6.0] - 2026-07-19
+
+### User and operator impact
+
+Adds opt-in provisioning for generic, approved, preconfigured MCP Server knowledge sources, resolving [#567](https://github.com/Azure/GPT-RAG/issues/567) through [GPT-RAG PR #568](https://github.com/Azure/GPT-RAG/pull/568), [docs PR #569](https://github.com/Azure/GPT-RAG/pull/569), and [orchestrator PR #275](https://github.com/Azure/gpt-rag-orchestrator/pull/275). The feature is **Preview and disabled by default**, so existing deployments do not change unless an operator explicitly enables it.
+
+Provisioning from GPT-RAG `v3.6.0` and [orchestrator `v3.7.0`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.7.0) must be deployed together before enabling MCP. The configuration governs trusted HTTPS endpoints, exact tool allowlists, output parsing, per-source failure behavior, reasoning effort, runtime/output limits, and request-time authentication metadata.
+
+### Added
+
+- **Generic MCP Server knowledge source template.** Foundry IQ can call allowed tools on one or more operator-approved MCP servers and combine those results with existing knowledge sources. The Search integration uses API `2026-05-01-preview`; Azure Monitor MCP over workspace-based Application Insights is a worked example, not a special product code path.
+- **Fail-closed source validation and canonical configuration.** Provisioning rejects malformed or empty source definitions, duplicate names, untrusted or unsafe endpoints, unsupported tool/output controls, forbidden headers, literal credentials, and invalid runtime limits before any App Configuration or Search write. Disabled configuration remains canonical and byte-identical to the prior rendered behavior.
+- **Secure request-time authentication metadata.** Managed identity, OBO, Key Vault secret-name references, and no-auth mode are supported without rendering credential values into Search resources. Operators must apply least privilege and keep secrets out of source JSON.
+- **Operator controls and rollback.** `FOUNDRY_IQ_MCP_ENABLED=false` remains the default and rollback gate. Trusted-host and tool allowlists, bounded reasoning/runtime/output, explicit parsing, and per-source failure behavior constrain the preview integration.
 
 ### Changed
 
-- **`manifest.json`: orchestrator pin bumped from `v3.5.0` to [`v3.7.0`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.7.0) for [#567](https://github.com/Azure/GPT-RAG/issues/567) / PR #568.** Orchestrator `v3.7.0` is the minimum compatible runtime for this preview because it consumes the canonical MCP source schema at request time, including `serverURL`, `outputParsing.jsonParameters`, `outputParsing.splitParameters`, `reranked`/`always` inclusion modes, and non-secret managed identity, OBO, Key Vault, or `none` query-header metadata. Earlier pins do not provide the complete runtime contract. Existing deployments must redeploy the `v3.7.0` orchestrator before enabling `FOUNDRY_IQ_MCP_ENABLED`.
+- **`manifest.json` now identifies umbrella release `v3.6.0` and pins orchestrator `v3.7.0`.** UI `v2.3.13`, ingestion `v2.4.14`, and infra `v2.3.0` are unchanged.
+
+### Security and operational guidance
+
+MCP tool safety does not guarantee that model-generated arguments are semantically correct. Use only trusted endpoints, exact read-only tool allowlists, bounded queries, least-privilege identities, and auditable server-side enforcement. The Azure Monitor example must retain workspace scope, bounded time ranges and row counts, and generated-KQL review. Production enablement requires a canary against the operator's approved endpoint and credentials.
+
+To roll back, set `FOUNDRY_IQ_MCP_ENABLED=false` and rerun post-provisioning or provisioning. This removes MCP references from the knowledge base and restores disabled planning behavior; an unused top-level Search knowledge-source resource may be deleted separately after confirming that no knowledge base references it.
+
+### Validation
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v3.7.0 |
+| gpt-rag-ingestion | v2.4.14 |
+| infra / AI Landing Zone | v2.3.0 |
+
+- GPT-RAG configuration and template suites: **109 tests passed, 66 subtests passed**.
+- Orchestrator `v3.7.0`: **457 tests passed, 65 subtests passed**.
+- Python compilation, PowerShell AST/preflight, JSON/manifest/remote-tag checks, canonical fixture compatibility, disabled-byte identity, Bicep build/size gate, strict documentation build, and Pages publication passed.
+- No live Azure MCP end-to-end test was run because no approved MCP endpoint or credentials were available. The release is acceptable because MCP remains Preview, disabled by default, fail-closed, fully regression-tested, and reversible; production enablement still requires an operator-owned canary.
+
+## [v3.5.1] - 2026-07-15
+
+### User and operator impact
+
+Ships [orchestrator `v3.5.1`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.5.1), which adds Microsoft Entra/MSAL sign-in for the optional admin dashboard at `/dashboard/`. Operators can now require an Entra sign-in and the exact `Admin` app role before dashboard APIs return administrative data. Existing deployments are unchanged unless dashboard authentication is enabled with App Configuration.
+
+### Changed
+
+- **`manifest.json`: orchestrator pin bumped from `v3.5.0` to [`v3.5.1`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.5.1).** The new orchestrator release adds MSAL Authorization Code + PKCE sign-in for the dashboard SPA, API-scoped token acquisition, fail-closed tenant/client configuration, verified token audience validation, and exact `Admin` app-role enforcement.
 
 ### Fixed
+
+- **Admin dashboard authentication is now usable end to end.** The dashboard SPA no longer depends on manually injected bearer tokens. It can bootstrap MSAL from `/api/dashboard/auth-config`, sign in with the configured single App Registration, send bearer tokens to protected dashboard APIs, and show clear 401 reauthentication or 403 missing-role states.
+
+### Validation
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v3.5.1 |
+| gpt-rag-ingestion | v2.4.14 |
+| infra / AI Landing Zone | v2.3.0 |
+
+- `Azure/gpt-rag-orchestrator#260` checks passed before merge.
+- Orchestrator release `v3.5.1` was published from the release commit.
+- Live tenant validation still requires a recreated or selected GPT-RAG validation environment, because the previous dashboard validation resource group is no longer present in the target subscription.
 
 ## [v3.5.0] - 2026-07-13
 
