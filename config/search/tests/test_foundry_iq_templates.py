@@ -15,6 +15,9 @@ from config.search import foundry_iq_mcp_setup as mcp_setup
 
 
 TEMPLATE_DIR = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[3]
+FIXTURE_DIR = Path(__file__).resolve().parent / "fixtures"
+MCP_RUNTIME_CONTRACT_VERSION = "v3.7.0"
 
 
 def render_json_template(template_name, context):
@@ -896,106 +899,36 @@ class FoundryIqMcpTemplateTests(unittest.TestCase):
 
     def test_canonical_fixture_shared_with_runtime_validates_and_renders(self):
         _, context = self._foundry_iq_context(FOUNDRY_IQ_MCP_ENABLED="true")
-        context["FOUNDRY_IQ_MCP_TRUSTED_HOSTS"] = "monitor-mcp.contoso.com"
-        context["FOUNDRY_IQ_MCP_SOURCES_JSON"] = [
-            self._mcp_source(
-                tools=[
-                    {
-                        "name": "auto_tool",
-                        "outputParsing": {"kind": "auto"},
-                        "inclusionMode": "reranked",
-                        "maxOutputTokens": 1024,
-                    },
-                    {
-                        "name": "none_tool",
-                        "outputParsing": {"kind": "none"},
-                        "inclusionMode": "reranked",
-                        "maxOutputTokens": 1024,
-                    },
-                    {
-                        "name": "split_tool",
-                        "outputParsing": {
-                            "kind": "split",
-                            "splitParameters": {
-                                "textSplitMode": "pages",
-                                "maximumPageLength": 4000,
-                                "maximumPagesToTake": 10,
-                                "pageOverlapLength": 500,
-                                "defaultLanguageCode": " en ",
-                            },
-                        },
-                        "inclusionMode": "reranked",
-                        "maxOutputTokens": 1024,
-                    },
-                    {
-                        "name": "json_tool",
-                        "outputParsing": {
-                            "kind": "json",
-                            "jsonParameters": {
-                                "documentsPath": "$.results",
-                                "includeContext": True,
-                            },
-                        },
-                        "inclusionMode": "always",
-                        "maxOutputTokens": 2048,
-                    },
-                ]
-            )
-        ]
+        manifest = json.loads((REPO_ROOT / "manifest.json").read_text(encoding="utf-8"))
+        orchestrator = next(
+            component
+            for component in manifest["components"]
+            if component["name"] == "gpt-rag-orchestrator"
+        )
+        self.assertEqual(orchestrator["tag"], MCP_RUNTIME_CONTRACT_VERSION)
+
+        fixture_path = (
+            FIXTURE_DIR
+            / f"foundry_iq_mcp_canonical_source_{MCP_RUNTIME_CONTRACT_VERSION.removeprefix('v').replace('.', '_')}.json"
+        )
+        source = json.loads(fixture_path.read_text(encoding="utf-8"))
+        context["FOUNDRY_IQ_MCP_TRUSTED_HOSTS"] = "mcp.contoso.com"
+        context["FOUNDRY_IQ_MCP_SOURCES_JSON"] = [source]
 
         mcp_setup.validate_foundry_iq_mcp_settings(context)
-        normalized_tools = context["FOUNDRY_IQ_MCP_SOURCES_JSON"][0]["tools"]
-        self.assertEqual(
-            [tool["outputParsing"] for tool in normalized_tools],
-            [
-                {"kind": "auto"},
-                {"kind": "none"},
-                {
-                    "kind": "split",
-                    "splitParameters": {
-                        "textSplitMode": "pages",
-                        "maximumPageLength": 4000,
-                        "maximumPagesToTake": 10,
-                        "pageOverlapLength": 500,
-                        "defaultLanguageCode": "en",
-                    },
-                },
-                {
-                    "kind": "json",
-                    "jsonParameters": {
-                        "documentsPath": "$.results",
-                        "includeContext": True,
-                    },
-                },
-            ],
-        )
+        self.assertEqual(context["FOUNDRY_IQ_MCP_SOURCES_JSON"], [source])
 
         search_definitions = render_json_template("search.j2", context)
-        tools = search_definitions["knowledgeSources"][-1]["mcpServerParameters"]["tools"]
-        rendered = {tool["name"]: tool["outputParsing"] for tool in tools}
-        self.assertEqual(rendered["auto_tool"], {"kind": "auto"})
-        self.assertEqual(rendered["none_tool"], {"kind": "none"})
-        self.assertEqual(
-            rendered["split_tool"],
-            {
-                "kind": "split",
-                "splitParameters": {
-                    "textSplitMode": "pages",
-                    "maximumPageLength": 4000,
-                    "maximumPagesToTake": 10,
-                    "pageOverlapLength": 500,
-                    "defaultLanguageCode": "en",
-                },
-            },
+        rendered_source = next(
+            knowledge_source
+            for knowledge_source in search_definitions["knowledgeSources"]
+            if knowledge_source["name"] == source["name"]
         )
         self.assertEqual(
-            rendered["json_tool"],
+            rendered_source["mcpServerParameters"],
             {
-                "kind": "json",
-                "jsonParameters": {
-                    "documentsPath": "$.results",
-                    "includeContext": True,
-                },
+                "serverURL": source["serverURL"],
+                "tools": source["tools"],
             },
         )
 
@@ -1251,7 +1184,9 @@ class FoundryIqMcpValidationTests(unittest.TestCase):
             mcp_setup.validate_and_get_mcp_sources(context)
 
     def test_duplicate_source_names_raise(self):
-        context = self._context(sources=[self._source(), self._source()])
+        context = self._context(
+            sources=[self._source(), self._source(name="MONITOR-MCP-KS")]
+        )
         with self.assertRaisesRegex(ValueError, "used more than once"):
             mcp_setup.validate_and_get_mcp_sources(context)
 
@@ -1335,7 +1270,16 @@ class FoundryIqMcpValidationTests(unittest.TestCase):
             mcp_setup.validate_and_get_mcp_sources(context)
 
     def test_reserved_or_single_label_host_raises(self):
-        for host in ("mcp.internal", "mcp.example", "singlelabel"):
+        for host in (
+            "home.arpa",
+            "mcp.internal",
+            "mcp.example",
+            "mcp.corp",
+            "mcp.intranet",
+            "mcp.private",
+            "mcp.123",
+            "singlelabel",
+        ):
             with self.subTest(host=host):
                 context = self._context(
                     sources=[self._source(serverURL=f"https://{host}/mcp")],
@@ -1357,6 +1301,30 @@ class FoundryIqMcpValidationTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "TRUSTED_HOSTS is empty"):
             mcp_setup.validate_and_get_mcp_sources(context)
 
+    def test_trusted_hosts_accept_runtime_json_array_shape(self):
+        context = self._context(
+            sources=[self._source()],
+            FOUNDRY_IQ_MCP_TRUSTED_HOSTS='["monitor-mcp.contoso.com"]',
+        )
+        self.assertEqual(
+            mcp_setup.validate_and_get_mcp_sources(context)[0]["serverURL"],
+            "https://monitor-mcp.contoso.com/mcp",
+        )
+
+    def test_trusted_hosts_reject_non_hostname_entries(self):
+        for trusted_hosts in (
+            "https://monitor-mcp.contoso.com",
+            "monitor-mcp.contoso.com/mcp",
+            "monitor-mcp.contoso.com:443",
+        ):
+            with self.subTest(trusted_hosts=trusted_hosts):
+                context = self._context(
+                    sources=[self._source()],
+                    FOUNDRY_IQ_MCP_TRUSTED_HOSTS=trusted_hosts,
+                )
+                with self.assertRaisesRegex(ValueError, "hostnames only"):
+                    mcp_setup.validate_and_get_mcp_sources(context)
+
     def test_no_tools_raises(self):
         context = self._context(sources=[self._source(tools=[])])
         with self.assertRaisesRegex(ValueError, "non-empty array"):
@@ -1369,7 +1337,13 @@ class FoundryIqMcpValidationTests(unittest.TestCase):
             "inclusionMode": "reranked",
             "maxOutputTokens": 100,
         }
-        context = self._context(sources=[self._source(tools=[tool, dict(tool)])])
+        context = self._context(
+            sources=[
+                self._source(
+                    tools=[tool, {**tool, "name": tool["name"].upper()}]
+                )
+            ]
+        )
         with self.assertRaisesRegex(ValueError, "used more than once"):
             mcp_setup.validate_and_get_mcp_sources(context)
 

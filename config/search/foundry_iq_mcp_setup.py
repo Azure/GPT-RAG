@@ -55,14 +55,18 @@ LOCAL_MAX_OUTPUT_TOKENS_CAP = 8192
 ALLOWED_INCLUSION_MODES = {"reranked", "always"}
 ALLOWED_OUTPUT_PARSING_MODES = {"auto", "json", "split", "none"}
 ALLOWED_REASONING_EFFORTS = {"low", "medium"}
-DISALLOWED_HOSTNAMES = {"localhost", "localhost.localdomain"}
+DISALLOWED_HOSTNAMES = {"localhost", "localhost.localdomain", "home.arpa"}
 DISALLOWED_HOST_SUFFIXES = (
     ".localhost",
     ".local",
     ".localdomain",
     ".internal",
     ".home",
+    ".home.arpa",
     ".lan",
+    ".corp",
+    ".intranet",
+    ".private",
     ".invalid",
     ".test",
     ".example",
@@ -152,8 +156,27 @@ def _is_truthy(value: Any) -> bool:
 def _parse_trusted_hosts(raw: Any) -> set[str]:
     if not raw:
         return set()
-    parts = str(raw).replace(";", ",").replace("\n", ",").split(",")
-    return {part.strip().lower() for part in parts if part.strip()}
+    if isinstance(raw, str):
+        text = raw.strip()
+        if text.startswith("["):
+            try:
+                raw = json.loads(text)
+            except json.JSONDecodeError as exc:
+                raise ValueError("FOUNDRY_IQ_MCP_TRUSTED_HOSTS is not valid JSON.") from exc
+        else:
+            raw = re.split(r"[,\r\n]+", text)
+    if not isinstance(raw, (list, tuple, set)):
+        raise ValueError("FOUNDRY_IQ_MCP_TRUSTED_HOSTS must be a host list.")
+
+    hosts: set[str] = set()
+    for item in raw:
+        host = str(item).strip().rstrip(".").lower()
+        if not host or "://" in host or "/" in host or ":" in host:
+            raise ValueError(
+                "FOUNDRY_IQ_MCP_TRUSTED_HOSTS entries must be hostnames only."
+            )
+        hosts.add(host)
+    return hosts
 
 
 def is_foundry_iq_mcp_enabled(context: dict) -> bool:
@@ -212,6 +235,8 @@ def _validate_server_url(label: str, server_url: str, trusted_hosts: set[str]) -
             f"{label}: 'serverURL' host must be a DNS hostname, not an IP literal ('{hostname}'). "
             "This blocks loopback, link-local, and other reserved IP ranges by construction."
         )
+    if hostname_l.rsplit(".", 1)[-1].isdigit():
+        raise ValueError(f"{label}: 'serverURL' must not use a local or reserved host.")
 
     if not trusted_hosts:
         raise ValueError(
@@ -384,9 +409,10 @@ def _validate_tool(source_label: str, tool: Any, seen_tool_names: set[str]) -> d
     if not isinstance(name_value, str) or not name_value.strip():
         raise ValueError(f"{source_label}: tool 'name' is required.")
     name = name_value.strip()
-    if name in seen_tool_names:
+    normalized_name = name.casefold()
+    if normalized_name in seen_tool_names:
         raise ValueError(f"{source_label}: tool name '{name}' is used more than once; tool names must be unique.")
-    seen_tool_names.add(name)
+    seen_tool_names.add(normalized_name)
     tool_label = f"{source_label} tool '{name}'"
 
     output_parsing = _validate_output_parsing(tool_label, tool.get("outputParsing"))
@@ -535,9 +561,10 @@ def validate_and_get_mcp_sources(context: dict) -> list[dict]:
                 f"{label}: 'name' must start with a letter or number, contain only letters, "
                 "numbers, '.', '_' or '-', and be at most 128 characters."
             )
-        if name in seen_names:
+        normalized_name = name.casefold()
+        if normalized_name in seen_names:
             raise ValueError(f"MCP source name '{name}' is used more than once; source names must be unique.")
-        seen_names.add(name)
+        seen_names.add(normalized_name)
         label = f"MCP source '{name}'"
 
         description_value = source.get("description")
