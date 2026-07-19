@@ -125,9 +125,13 @@ consent, delegated permissions, and licensing you need.
 For `mcpServer`, do not confuse the orchestrator's managed identity with an
 OBO token. Managed identity is app-only and gives every user the same MCP
 authorization scope. OBO preserves the signed-in user's identity and only
-works when the MCP endpoint validates that delegated token. Neither mode is
-configured by the provisioning-only change described in
-[Generic MCP server](howto_grounding_mcp_server.md).
+works when the MCP endpoint validates that delegated token. The optional
+`queryHeaders` metadata selects how a compatible orchestrator resolves the
+header and requires an explicit, non-secret scope for either mode. The
+provisioning change stores this metadata in App Configuration but never
+renders it into Search registration or retrieve parameters. Runtime
+resolution still requires a compatible orchestrator. See
+[Generic MCP server](howto_grounding_mcp_server.md#authentication).
 
 ## Feature flags gated by Microsoft
 
