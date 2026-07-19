@@ -114,7 +114,7 @@ Two things matter for operators.
 | OneLake | `indexedOneLake` | Preview, requires workspace RBAC | [OneLake](howto_grounding_onelake.md) |
 | SharePoint indexed | `indexedSharePoint` | Preview, app-only auth | [SharePoint indexed](howto_grounding_sharepoint_indexed.md) |
 | Web grounding | `web` | Preview, billed per Bing call | [Web grounding](howto_grounding_web_bing.md) |
-| Generic MCP server | `mcpServer` | Preview, tool-backed, managed-identity auth only | [Generic MCP server](howto_grounding_mcp_server.md) |
+| Generic MCP server | `mcpServer` | Configuration preview, compatible runtime required | [Generic MCP server](howto_grounding_mcp_server.md) |
 
 ### Pick a source
 
@@ -144,7 +144,9 @@ Knowledge Base.
 - **Live, tool-backed data from a trusted remote MCP server** (metrics,
   logs, or another system that cannot be pre-indexed). Add `mcpServer`.
   Requires an explicit tool allowlist, a trusted-host allowlist, and a
-  knowledge base planning model. See
+  knowledge base planning model. The proposed provisioning settings are
+  not yet available in a released GPT-RAG version, and a compatible
+  orchestrator is also required. See
   [Generic MCP server](howto_grounding_mcp_server.md).
 
 ## Approach B: Azure AI Search direct
