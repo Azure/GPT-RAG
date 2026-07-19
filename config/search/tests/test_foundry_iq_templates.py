@@ -6,6 +6,7 @@ from unittest.mock import Mock, patch
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
 from config.search import setup
+from config.search import foundry_iq_mcp_setup as mcp_setup
 
 
 TEMPLATE_DIR = Path(__file__).resolve().parents[1]
@@ -635,6 +636,422 @@ class WorkIqTemplateTests(unittest.TestCase):
             web_sources[0]["webParameters"],
             {"domains": {"allowedDomains": [], "blockedDomains": []}},
         )
+
+
+class FoundryIqMcpTemplateTests(unittest.TestCase):
+    """Generic MCP Server knowledge sources are opt-in and default-off.
+    Rendered output must be unchanged when the feature is disabled.
+    """
+
+    def _foundry_iq_context(self, **overrides):
+        settings_input = {
+            "RESOURCE_TOKEN": "abc123",
+            "SEARCH_SERVICE_QUERY_ENDPOINT": "https://search.search.windows.net",
+            "AI_FOUNDRY_ACCOUNT_NAME": "aif-abc123",
+            "RETRIEVAL_BACKEND": "foundry_iq",
+        }
+        settings_input.update(overrides)
+        settings = render_json_template("search.settings.j2", settings_input)
+        return settings, {
+            **settings,
+            "STORAGE_ACCOUNT_RESOURCE_ID": "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Storage/storageAccounts/st",
+            "EMBEDDING_MODEL_INFO": {
+                "endpoint": "https://aif-abc123.openai.azure.com/",
+                "deployment_name": "text-embedding",
+                "model_name": "text-embedding-3-large",
+            },
+            "GPT_MODEL_INFO": {
+                "deployment_name": "chat",
+                "model_name": "gpt-5-nano",
+            },
+        }
+
+    def _mcp_source(self, **overrides):
+        source = {
+            "name": "monitor-mcp-ks",
+            "description": "Azure Monitor MCP",
+            "serverURL": "https://monitor-mcp.contoso.com/mcp",
+            "tools": [
+                {
+                    "name": "query_logs",
+                    "outputParsing": "auto",
+                    "inclusionMode": "reranked",
+                    "maxOutputTokens": 4096,
+                }
+            ],
+        }
+        source.update(overrides)
+        return source
+
+    def test_settings_defaults_mcp_disabled_and_empty(self):
+        settings = render_json_template(
+            "search.settings.j2",
+            {
+                "RESOURCE_TOKEN": "abc123",
+                "SEARCH_SERVICE_QUERY_ENDPOINT": "https://search.search.windows.net",
+                "AI_FOUNDRY_ACCOUNT_NAME": "aif-abc123",
+                "RETRIEVAL_BACKEND": "foundry_iq",
+            },
+        )
+        self.assertEqual(settings["FOUNDRY_IQ_MCP_ENABLED"], "false")
+        self.assertEqual(settings["FOUNDRY_IQ_MCP_SOURCES_JSON"], [])
+        self.assertEqual(settings["FOUNDRY_IQ_MCP_REASONING_EFFORT"], "low")
+        self.assertEqual(settings["FOUNDRY_IQ_MCP_TRUSTED_HOSTS"], "")
+        self.assertEqual(settings["FOUNDRY_IQ_MCP_LOG_TOOL_ARGUMENTS"], "false")
+
+    def test_mcp_disabled_by_default_produces_no_entry_and_preserves_minimal_reasoning(self):
+        _, context = self._foundry_iq_context()
+        search_definitions = render_json_template("search.j2", context)
+        for ks in search_definitions["knowledgeSources"]:
+            self.assertNotEqual(ks["kind"], "mcpServer")
+        kb = search_definitions["knowledgeBases"][0]
+        self.assertNotIn("monitor-mcp-ks", [s["name"] for s in kb["knowledgeSources"]])
+        self.assertEqual(kb["models"], [])
+        self.assertEqual(kb["retrievalReasoningEffort"], {"kind": "minimal"})
+
+    def test_mcp_enabled_without_sources_produces_no_entry(self):
+        _, context = self._foundry_iq_context(FOUNDRY_IQ_MCP_ENABLED="true")
+        search_definitions = render_json_template("search.j2", context)
+        for ks in search_definitions["knowledgeSources"]:
+            self.assertNotEqual(ks["kind"], "mcpServer")
+        kb = search_definitions["knowledgeBases"][0]
+        self.assertEqual(kb["models"], [])
+        self.assertEqual(kb["retrievalReasoningEffort"], {"kind": "minimal"})
+
+    def test_mcp_enabled_registers_source_with_kb_planning_model_and_reasoning(self):
+        _, context = self._foundry_iq_context(
+            FOUNDRY_IQ_MCP_ENABLED="true",
+            FOUNDRY_IQ_MCP_REASONING_EFFORT="medium",
+        )
+        context["FOUNDRY_IQ_MCP_SOURCES_JSON"] = [self._mcp_source()]
+        search_definitions = render_json_template("search.j2", context)
+
+        mcp_sources = [ks for ks in search_definitions["knowledgeSources"] if ks["kind"] == "mcpServer"]
+        self.assertEqual(len(mcp_sources), 1)
+        source = mcp_sources[0]
+        self.assertEqual(source["name"], "monitor-mcp-ks")
+        self.assertIsNone(source["encryptionKey"])
+        self.assertEqual(
+            source["mcpServerParameters"],
+            {
+                "serverURL": "https://monitor-mcp.contoso.com/mcp",
+                "tools": [
+                    {
+                        "name": "query_logs",
+                        "outputParsing": "auto",
+                        "inclusionMode": "reranked",
+                        "maxOutputTokens": 4096,
+                    }
+                ],
+            },
+        )
+        # Auth metadata (if any) must never be forwarded into the registration payload.
+        self.assertNotIn("auth", source["mcpServerParameters"])
+        self.assertNotIn("authIdentity", source["mcpServerParameters"])
+
+        kb = search_definitions["knowledgeBases"][0]
+        self.assertIn("monitor-mcp-ks", [s["name"] for s in kb["knowledgeSources"]])
+        # Never emit alwaysQuerySource for MCP knowledge source references.
+        mcp_ref = next(s for s in kb["knowledgeSources"] if s["name"] == "monitor-mcp-ks")
+        self.assertEqual(mcp_ref, {"name": "monitor-mcp-ks"})
+
+        self.assertEqual(
+            kb["models"],
+            [
+                {
+                    "kind": "azureOpenAI",
+                    "azureOpenAIParameters": {
+                        "resourceUri": context["FOUNDRY_IQ_AI_SERVICES_ENDPOINT"],
+                        "deploymentId": "chat",
+                        "modelName": "gpt-5-nano",
+                    },
+                }
+            ],
+        )
+        self.assertEqual(kb["retrievalReasoningEffort"], {"kind": "medium"})
+
+    def test_mcp_tool_with_json_output_parsing_includes_documents_path(self):
+        _, context = self._foundry_iq_context(FOUNDRY_IQ_MCP_ENABLED="true")
+        context["FOUNDRY_IQ_MCP_SOURCES_JSON"] = [
+            self._mcp_source(
+                tools=[
+                    {
+                        "name": "query_logs",
+                        "outputParsing": "json",
+                        "documentsPath": "$.results",
+                        "inclusionMode": "always",
+                        "maxOutputTokens": 2048,
+                    }
+                ]
+            )
+        ]
+        search_definitions = render_json_template("search.j2", context)
+        tool = search_definitions["knowledgeSources"][-1]["mcpServerParameters"]["tools"][0]
+        self.assertEqual(tool["documentsPath"], "$.results")
+
+    def test_multiple_mcp_sources_all_registered_and_referenced(self):
+        _, context = self._foundry_iq_context(FOUNDRY_IQ_MCP_ENABLED="true")
+        context["FOUNDRY_IQ_MCP_SOURCES_JSON"] = [
+            self._mcp_source(name="monitor-mcp-ks", serverURL="https://monitor-mcp.contoso.com/mcp"),
+            self._mcp_source(name="billing-mcp-ks", serverURL="https://billing-mcp.contoso.com/mcp"),
+        ]
+        search_definitions = render_json_template("search.j2", context)
+
+        mcp_names = [
+            ks["name"] for ks in search_definitions["knowledgeSources"] if ks["kind"] == "mcpServer"
+        ]
+        self.assertEqual(mcp_names, ["monitor-mcp-ks", "billing-mcp-ks"])
+
+        kb_names = [s["name"] for s in search_definitions["knowledgeBases"][0]["knowledgeSources"]]
+        self.assertIn("monitor-mcp-ks", kb_names)
+        self.assertIn("billing-mcp-ks", kb_names)
+
+    def test_mcp_coexists_with_web_grounding_and_sharepoint_indexed(self):
+        _, context = self._foundry_iq_context(
+            FOUNDRY_IQ_MCP_ENABLED="true",
+            WEB_GROUNDING_ENABLED="true",
+            WEB_GROUNDING_KNOWLEDGE_SOURCE_NAME="web-ks",
+            SHAREPOINT_INDEXED_ENABLED="true",
+            SHAREPOINT_INDEXED_KNOWLEDGE_SOURCE_NAME="sp-ks",
+            SHAREPOINT_INDEXED_INDEX_NAME="sp-index",
+            SHAREPOINT_INDEXED_SITE_URL="https://contoso.sharepoint.com/sites/eng",
+            SHAREPOINT_INDEXED_TENANT_ID="tenant-guid",
+        )
+        context["FOUNDRY_IQ_MCP_SOURCES_JSON"] = [self._mcp_source()]
+        search_definitions = render_json_template("search.j2", context)
+
+        kinds = {ks["kind"] for ks in search_definitions["knowledgeSources"]}
+        self.assertTrue({"azureBlob", "web", "indexedSharePoint", "mcpServer"}.issubset(kinds))
+
+        kb_names = [s["name"] for s in search_definitions["knowledgeBases"][0]["knowledgeSources"]]
+        self.assertIn("web-ks", kb_names)
+        self.assertIn("sp-ks", kb_names)
+        self.assertIn("monitor-mcp-ks", kb_names)
+
+    def test_rendering_is_deterministic(self):
+        _, context = self._foundry_iq_context(FOUNDRY_IQ_MCP_ENABLED="true")
+        context["FOUNDRY_IQ_MCP_SOURCES_JSON"] = [
+            self._mcp_source(name="monitor-mcp-ks"),
+            self._mcp_source(name="billing-mcp-ks", serverURL="https://billing-mcp.contoso.com/mcp"),
+        ]
+        first = render_json_template("search.j2", context)
+        second = render_json_template("search.j2", context)
+        self.assertEqual(first, second)
+        self.assertEqual(json.dumps(first, sort_keys=True), json.dumps(second, sort_keys=True))
+
+
+class FoundryIqMcpValidationTests(unittest.TestCase):
+    """Unit tests for the fail-closed validation in foundry_iq_mcp_setup."""
+
+    def _context(self, sources=None, **overrides):
+        context = {
+            "RETRIEVAL_BACKEND": "foundry_iq",
+            "FOUNDRY_IQ_MCP_ENABLED": "true",
+            "FOUNDRY_IQ_MCP_SOURCES_JSON": sources if sources is not None else [],
+            "FOUNDRY_IQ_MCP_TRUSTED_HOSTS": "monitor-mcp.contoso.com",
+            "FOUNDRY_IQ_MCP_REASONING_EFFORT": "low",
+            "GPT_MODEL_INFO": {"deployment_name": "chat", "model_name": "gpt-5-nano"},
+            "FOUNDRY_IQ_AI_SERVICES_ENDPOINT": "https://aif-abc123.services.ai.azure.com/",
+        }
+        context.update(overrides)
+        return context
+
+    def _source(self, **overrides):
+        source = {
+            "name": "monitor-mcp-ks",
+            "serverURL": "https://monitor-mcp.contoso.com/mcp",
+            "tools": [
+                {
+                    "name": "query_logs",
+                    "outputParsing": "auto",
+                    "inclusionMode": "reranked",
+                    "maxOutputTokens": 4096,
+                }
+            ],
+        }
+        source.update(overrides)
+        return source
+
+    def test_disabled_is_a_no_op(self):
+        context = self._context(sources=[], FOUNDRY_IQ_MCP_ENABLED="false")
+        mcp_setup.validate_foundry_iq_mcp_settings(context)  # must not raise
+
+    def test_enabled_with_no_sources_raises(self):
+        context = self._context(sources=[])
+        with self.assertRaisesRegex(ValueError, "no sources"):
+            mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_missing_planning_model_raises(self):
+        context = self._context(sources=[self._source()], GPT_MODEL_INFO={})
+        with self.assertRaisesRegex(ValueError, "planning model"):
+            mcp_setup.validate_foundry_iq_mcp_settings(context)
+
+    def test_missing_ai_services_endpoint_raises(self):
+        context = self._context(sources=[self._source()], FOUNDRY_IQ_AI_SERVICES_ENDPOINT="")
+        with self.assertRaisesRegex(ValueError, "AI Services endpoint"):
+            mcp_setup.validate_foundry_iq_mcp_settings(context)
+
+    def test_invalid_sources_json_type_raises(self):
+        context = self._context(sources={"not": "a list"})
+        with self.assertRaisesRegex(ValueError, "JSON array"):
+            mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_duplicate_source_names_raise(self):
+        context = self._context(sources=[self._source(), self._source()])
+        with self.assertRaisesRegex(ValueError, "used more than once"):
+            mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_non_https_scheme_raises(self):
+        context = self._context(sources=[self._source(serverURL="http://monitor-mcp.contoso.com/mcp")])
+        with self.assertRaisesRegex(ValueError, "https"):
+            mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_userinfo_in_url_raises(self):
+        context = self._context(
+            sources=[self._source(serverURL="https://user:pass@monitor-mcp.contoso.com/mcp")]
+        )
+        with self.assertRaisesRegex(ValueError, "userinfo"):
+            mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_fragment_in_url_raises(self):
+        context = self._context(sources=[self._source(serverURL="https://monitor-mcp.contoso.com/mcp#frag")])
+        with self.assertRaisesRegex(ValueError, "fragment"):
+            mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_ip_literal_host_raises(self):
+        context = self._context(
+            sources=[self._source(serverURL="https://203.0.113.10/mcp")],
+            FOUNDRY_IQ_MCP_TRUSTED_HOSTS="203.0.113.10",
+        )
+        with self.assertRaisesRegex(ValueError, "IP literal"):
+            mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_loopback_ip_literal_host_raises(self):
+        context = self._context(
+            sources=[self._source(serverURL="https://127.0.0.1/mcp")],
+            FOUNDRY_IQ_MCP_TRUSTED_HOSTS="127.0.0.1",
+        )
+        with self.assertRaisesRegex(ValueError, "IP literal"):
+            mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_localhost_host_raises(self):
+        context = self._context(
+            sources=[self._source(serverURL="https://localhost/mcp")],
+            FOUNDRY_IQ_MCP_TRUSTED_HOSTS="localhost",
+        )
+        with self.assertRaisesRegex(ValueError, "localhost"):
+            mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_host_not_in_trusted_allowlist_raises(self):
+        context = self._context(
+            sources=[self._source()],
+            FOUNDRY_IQ_MCP_TRUSTED_HOSTS="other-host.contoso.com",
+        )
+        with self.assertRaisesRegex(ValueError, "not an exact match"):
+            mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_empty_trusted_hosts_raises(self):
+        context = self._context(sources=[self._source()], FOUNDRY_IQ_MCP_TRUSTED_HOSTS="")
+        with self.assertRaisesRegex(ValueError, "TRUSTED_HOSTS is empty"):
+            mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_no_tools_raises(self):
+        context = self._context(sources=[self._source(tools=[])])
+        with self.assertRaisesRegex(ValueError, "non-empty array"):
+            mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_duplicate_tool_names_raise(self):
+        tool = {
+            "name": "query_logs",
+            "outputParsing": "auto",
+            "inclusionMode": "reranked",
+            "maxOutputTokens": 100,
+        }
+        context = self._context(sources=[self._source(tools=[tool, dict(tool)])])
+        with self.assertRaisesRegex(ValueError, "used more than once"):
+            mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_invalid_inclusion_mode_raises(self):
+        context = self._context(
+            sources=[self._source(tools=[{**self._source()["tools"][0], "inclusionMode": "sometimes"}])]
+        )
+        with self.assertRaisesRegex(ValueError, "inclusionMode"):
+            mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_invalid_output_parsing_raises(self):
+        context = self._context(
+            sources=[self._source(tools=[{**self._source()["tools"][0], "outputParsing": "yaml"}])]
+        )
+        with self.assertRaisesRegex(ValueError, "outputParsing"):
+            mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_json_output_parsing_without_documents_path_raises(self):
+        context = self._context(
+            sources=[self._source(tools=[{**self._source()["tools"][0], "outputParsing": "json"}])]
+        )
+        with self.assertRaisesRegex(ValueError, "documentsPath"):
+            mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_non_positive_max_output_tokens_raises(self):
+        context = self._context(
+            sources=[self._source(tools=[{**self._source()["tools"][0], "maxOutputTokens": 0}])]
+        )
+        with self.assertRaisesRegex(ValueError, "positive integer"):
+            mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_max_output_tokens_above_local_cap_raises(self):
+        context = self._context(
+            sources=[self._source(tools=[{**self._source()["tools"][0], "maxOutputTokens": 20000}])]
+        )
+        with self.assertRaisesRegex(ValueError, "local cap"):
+            mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_always_query_source_on_tool_raises(self):
+        context = self._context(
+            sources=[self._source(tools=[{**self._source()["tools"][0], "alwaysQuerySource": True}])]
+        )
+        with self.assertRaisesRegex(ValueError, "alwaysQuerySource"):
+            mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_always_query_source_on_source_raises(self):
+        context = self._context(sources=[self._source(alwaysQuerySource=True)])
+        with self.assertRaisesRegex(ValueError, "alwaysQuerySource"):
+            mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_foundry_connection_auth_raises(self):
+        context = self._context(sources=[self._source(auth={"kind": "foundryConnection"})])
+        with self.assertRaisesRegex(ValueError, "foundryConnection"):
+            mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_secret_like_auth_key_raises(self):
+        context = self._context(sources=[self._source(auth={"apiKey": "not-a-real-secret"})])
+        with self.assertRaisesRegex(ValueError, "credential material"):
+            mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_unsupported_auth_kind_raises(self):
+        context = self._context(sources=[self._source(auth={"kind": "oauth2"})])
+        with self.assertRaisesRegex(ValueError, "unsupported"):
+            mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_managed_identity_auth_is_a_no_op(self):
+        context = self._context(sources=[self._source(auth={"kind": "managedIdentity"})])
+        sources = mcp_setup.validate_and_get_mcp_sources(context)
+        self.assertEqual(len(sources), 1)
+
+    def test_absent_auth_is_valid(self):
+        context = self._context(sources=[self._source()])
+        sources = mcp_setup.validate_and_get_mcp_sources(context)
+        self.assertEqual(len(sources), 1)
+
+    def test_unexpected_source_key_raises(self):
+        context = self._context(sources=[self._source(unexpectedKey="value")])
+        with self.assertRaisesRegex(ValueError, "unexpected key"):
+            mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_invalid_reasoning_effort_raises(self):
+        context = self._context(sources=[self._source()], FOUNDRY_IQ_MCP_REASONING_EFFORT="minimal")
+        with self.assertRaisesRegex(ValueError, "REASONING_EFFORT"):
+            mcp_setup.validate_and_get_mcp_sources(context)
 
 
 class WorkIqPreflightTests(unittest.TestCase):

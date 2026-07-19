@@ -430,6 +430,21 @@ function Set-GptRagAppConfiguration {
         WEB_GROUNDING_KNOWLEDGE_SOURCE_NAME = (Get-OptionalEnvValue 'WEB_GROUNDING_KNOWLEDGE_SOURCE_NAME' '')
         WEB_GROUNDING_ALLOWED_DOMAINS = (Get-OptionalEnvValue 'WEB_GROUNDING_ALLOWED_DOMAINS' '')
         WEB_GROUNDING_BLOCKED_DOMAINS = (Get-OptionalEnvValue 'WEB_GROUNDING_BLOCKED_DOMAINS' '')
+        # Generic MCP Server knowledge source passthrough keys (preview).
+        # Opt-in via FOUNDRY_IQ_MCP_ENABLED=true plus at least one source in
+        # FOUNDRY_IQ_MCP_SOURCES_JSON (a JSON array; see
+        # docs/howto_grounding_mcp_server.md for the schema). Disabled by
+        # default. No secrets belong in FOUNDRY_IQ_MCP_SOURCES_JSON or in
+        # App Configuration; only managed-identity-authenticated MCP
+        # servers are supported. FOUNDRY_IQ_MCP_TRUSTED_HOSTS is a
+        # comma-separated allowlist of exact hostnames the provisioning
+        # script requires an MCP serverURL to match before it will
+        # register the source.
+        FOUNDRY_IQ_MCP_ENABLED = (Get-OptionalEnvValue 'FOUNDRY_IQ_MCP_ENABLED' 'false')
+        FOUNDRY_IQ_MCP_SOURCES_JSON = (Get-OptionalEnvValue 'FOUNDRY_IQ_MCP_SOURCES_JSON' '[]')
+        FOUNDRY_IQ_MCP_REASONING_EFFORT = (Get-OptionalEnvValue 'FOUNDRY_IQ_MCP_REASONING_EFFORT' 'low')
+        FOUNDRY_IQ_MCP_TRUSTED_HOSTS = (Get-OptionalEnvValue 'FOUNDRY_IQ_MCP_TRUSTED_HOSTS' '')
+        FOUNDRY_IQ_MCP_LOG_TOOL_ARGUMENTS = (Get-OptionalEnvValue 'FOUNDRY_IQ_MCP_LOG_TOOL_ARGUMENTS' 'false')
         NETWORK_ISOLATION = (Get-OptionalEnvValue 'NETWORK_ISOLATION' 'false')
         USE_UAI = (Get-OptionalEnvValue 'USE_UAI' 'false')
         USE_CAPP_API_KEY = (Get-OptionalEnvValue 'USE_CAPP_API_KEY' 'false')

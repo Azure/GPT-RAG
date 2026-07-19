@@ -1,0 +1,296 @@
+"""Foundry IQ generic MCP Server knowledge source validation (preview).
+
+MCP Server knowledge sources (kind ``mcpServer``, Search API
+``2026-05-01-preview``) let a Foundry IQ knowledge base call tools exposed by
+an arbitrary remote MCP server (for example, Azure Monitor MCP over
+workspace-based Application Insights). Unlike the other knowledge sources in
+this directory, MCP servers are attacker-reachable, operator-supplied remote
+endpoints, so this module fails deployment closed (raises ``ValueError``)
+instead of silently dropping a misconfigured source the way
+``sharepoint_indexed_setup.filter_sharepoint_indexed_sources`` does.
+
+This module intentionally does NOT PUT the knowledge source itself; rendering
+happens through the standard ``search.j2`` template (see the
+``foundry_iq_mcp_enabled`` block) and registration goes through the existing
+``provision_knowledge_sources`` path in ``config/search/setup.py``. This
+module owns:
+
+1. ``is_foundry_iq_mcp_enabled`` -- the same enable gate used by the template
+   and by ``setup.py``.
+2. ``validate_foundry_iq_mcp_settings`` -- the single entry point called from
+   ``setup.py`` before rendering. It parses and validates
+   ``FOUNDRY_IQ_MCP_SOURCES_JSON``, the trusted-host allowlist, the reasoning
+   effort, and the planning-model prerequisites, raising ``ValueError`` with
+   an actionable message on the first problem found.
+
+Static long-lived MCP authentication (API keys, bearer tokens, headers) is
+NOT supported by this provisioning template: Azure AI Search's real schema
+for authenticating an ``mcpServer`` knowledge source is not yet publicly
+documented, and this module must not guess an unverified REST field. Only
+managed-identity-authenticated MCP servers (the Azure Monitor MCP reference
+scenario) are supported in this release; see
+``docs/howto_grounding_mcp_server.md``. Dynamic per-query MI/OBO credentials
+are out of scope here entirely -- those are query-time control headers owned
+by the orchestrator repository.
+"""
+
+from __future__ import annotations
+
+import ipaddress
+from typing import Any
+from urllib.parse import urlsplit
+
+MCP_KIND = "mcpServer"
+MCP_PARAMS_KEY = "mcpServerParameters"
+
+LOCAL_MAX_OUTPUT_TOKENS_CAP = 8192
+
+ALLOWED_INCLUSION_MODES = {"reranked", "always"}
+ALLOWED_OUTPUT_PARSING_MODES = {"auto", "json", "split", "none"}
+ALLOWED_REASONING_EFFORTS = {"low", "medium"}
+DISALLOWED_HOSTNAMES = {"localhost"}
+
+ALLOWED_SOURCE_KEYS = {"name", "description", "serverURL", "tools", "auth"}
+ALLOWED_TOOL_KEYS = {"name", "outputParsing", "inclusionMode", "maxOutputTokens", "documentsPath"}
+
+# auth.kind values that are recognized as safe no-ops. Anything else (or any
+# key that looks like it could carry a literal secret) is rejected.
+SUPPORTED_AUTH_KINDS = {"", "managedidentity"}
+SECRET_LIKE_AUTH_KEYS = {"apikey", "secret", "token", "password", "key", "bearer", "header", "headers"}
+
+
+def _is_truthy(value: Any) -> bool:
+    return str(value).strip().lower() in {"1", "true", "t", "yes", "y"}
+
+
+def _parse_trusted_hosts(raw: Any) -> set[str]:
+    if not raw:
+        return set()
+    parts = str(raw).replace(";", ",").replace("\n", ",").split(",")
+    return {part.strip().lower() for part in parts if part.strip()}
+
+
+def is_foundry_iq_mcp_enabled(context: dict) -> bool:
+    """Return True when generic MCP Server knowledge sources should be
+    registered on the Foundry IQ knowledge base.
+
+    Requires the retrieval backend to be Foundry IQ and ``FOUNDRY_IQ_MCP_ENABLED``
+    to be truthy. Whether ``FOUNDRY_IQ_MCP_SOURCES_JSON`` is well-formed and
+    non-empty is a validation concern, not a gating concern: an operator who
+    sets ``FOUNDRY_IQ_MCP_ENABLED=true`` with no (or invalid) sources must get
+    a hard failure from ``validate_and_get_mcp_sources``, not a silent no-op.
+    """
+
+    if str(context.get("RETRIEVAL_BACKEND") or "").lower() != "foundry_iq":
+        return False
+    return _is_truthy(context.get("FOUNDRY_IQ_MCP_ENABLED"))
+
+
+def _validate_server_url(label: str, server_url: str, trusted_hosts: set[str]) -> None:
+    parsed = urlsplit(server_url)
+
+    if parsed.scheme.lower() != "https":
+        raise ValueError(f"{label}: 'serverURL' must use https, got scheme '{parsed.scheme or '(none)'}'.")
+    if parsed.username or parsed.password:
+        raise ValueError(f"{label}: 'serverURL' must not contain userinfo (a username or password).")
+    if parsed.fragment:
+        raise ValueError(f"{label}: 'serverURL' must not contain a fragment.")
+
+    hostname = parsed.hostname
+    if not hostname:
+        raise ValueError(f"{label}: 'serverURL' is missing a host.")
+    hostname_l = hostname.lower()
+
+    if hostname_l in DISALLOWED_HOSTNAMES:
+        raise ValueError(f"{label}: 'serverURL' host '{hostname}' (localhost) is not allowed.")
+
+    try:
+        ipaddress.ip_address(hostname_l.strip("[]"))
+        is_ip_literal = True
+    except ValueError:
+        is_ip_literal = False
+    if is_ip_literal:
+        raise ValueError(
+            f"{label}: 'serverURL' host must be a DNS hostname, not an IP literal ('{hostname}'). "
+            "This blocks loopback, link-local, and other reserved IP ranges by construction."
+        )
+
+    if not trusted_hosts:
+        raise ValueError(
+            f"{label}: FOUNDRY_IQ_MCP_TRUSTED_HOSTS is empty. Add the exact host '{hostname}' to the "
+            "allowlist before enabling this MCP source."
+        )
+    if hostname_l not in trusted_hosts:
+        raise ValueError(
+            f"{label}: 'serverURL' host '{hostname}' is not an exact match in FOUNDRY_IQ_MCP_TRUSTED_HOSTS."
+        )
+
+
+def _validate_auth_metadata(label: str, auth: Any) -> None:
+    if auth is None:
+        return
+    if not isinstance(auth, dict):
+        raise ValueError(f"{label}: 'auth' must be a JSON object when present.")
+
+    kind = str(auth.get("kind") or auth.get("type") or "").strip().lower()
+    if kind == "foundryconnection":
+        raise ValueError(
+            f"{label}: 'auth.kind' of 'foundryConnection' is not supported. GPT-RAG calls the knowledge "
+            "base retrieve API directly, and Foundry project connection authentication does not apply "
+            "to that path."
+        )
+    if any(str(key).lower() in SECRET_LIKE_AUTH_KEYS for key in auth):
+        raise ValueError(
+            f"{label}: 'auth' must not contain literal credential material (api keys, tokens, secrets, "
+            "passwords, or headers). Static long-lived MCP authentication is not yet supported by this "
+            "provisioning template; only managed-identity-authenticated MCP servers are supported in this "
+            "release. See docs/howto_grounding_mcp_server.md."
+        )
+    if kind not in SUPPORTED_AUTH_KINDS:
+        raise ValueError(
+            f"{label}: unsupported 'auth.kind' value '{kind}'. Omit 'auth' or set it to "
+            "{'kind': 'managedIdentity'} -- only implicit managed-identity authentication is supported."
+        )
+
+
+def _validate_tool(source_label: str, tool: Any, seen_tool_names: set[str]) -> None:
+    if not isinstance(tool, dict):
+        raise ValueError(f"{source_label}: each tool must be a JSON object.")
+
+    unexpected = set(tool.keys()) - ALLOWED_TOOL_KEYS
+    if unexpected:
+        raise ValueError(f"{source_label}: tool has unexpected key(s) {sorted(unexpected)}.")
+
+    name = str(tool.get("name") or "").strip()
+    if not name:
+        raise ValueError(f"{source_label}: tool 'name' is required.")
+    if name in seen_tool_names:
+        raise ValueError(f"{source_label}: tool name '{name}' is used more than once; tool names must be unique.")
+    seen_tool_names.add(name)
+    tool_label = f"{source_label} tool '{name}'"
+
+    output_parsing = str(tool.get("outputParsing") or "").strip().lower()
+    if output_parsing not in ALLOWED_OUTPUT_PARSING_MODES:
+        raise ValueError(
+            f"{tool_label}: 'outputParsing' must be one of {sorted(ALLOWED_OUTPUT_PARSING_MODES)}, "
+            f"got '{output_parsing or '(none)'}'."
+        )
+    if output_parsing == "json" and not str(tool.get("documentsPath") or "").strip():
+        raise ValueError(f"{tool_label}: 'documentsPath' is required when 'outputParsing' is 'json'.")
+
+    inclusion_mode = str(tool.get("inclusionMode") or "").strip()
+    if inclusion_mode not in ALLOWED_INCLUSION_MODES:
+        raise ValueError(
+            f"{tool_label}: 'inclusionMode' must be one of {sorted(ALLOWED_INCLUSION_MODES)}, "
+            f"got '{inclusion_mode or '(none)'}'."
+        )
+
+    max_output_tokens = tool.get("maxOutputTokens")
+    if isinstance(max_output_tokens, bool) or not isinstance(max_output_tokens, int) or max_output_tokens <= 0:
+        raise ValueError(f"{tool_label}: 'maxOutputTokens' must be a positive integer.")
+    if max_output_tokens > LOCAL_MAX_OUTPUT_TOKENS_CAP:
+        raise ValueError(
+            f"{tool_label}: 'maxOutputTokens' ({max_output_tokens}) exceeds the local cap of "
+            f"{LOCAL_MAX_OUTPUT_TOKENS_CAP}."
+        )
+    # Note: 'alwaysQuerySource' is deliberately absent from ALLOWED_TOOL_KEYS,
+    # so the unexpected-key check above already rejects it. MCP tools must
+    # always go through the query planner; they are never forced in.
+
+
+def validate_and_get_mcp_sources(context: dict) -> list[dict]:
+    """Parse, validate, and return the configured MCP sources.
+
+    Returns an empty list when the feature is not enabled. Raises
+    ``ValueError`` with an actionable message on the first invalid field
+    found when it is enabled.
+    """
+
+    if not is_foundry_iq_mcp_enabled(context):
+        return []
+
+    sources = context.get("FOUNDRY_IQ_MCP_SOURCES_JSON")
+    if not isinstance(sources, list):
+        raise ValueError(
+            "FOUNDRY_IQ_MCP_SOURCES_JSON must be a JSON array of MCP source objects; "
+            f"got {type(sources).__name__}."
+        )
+    if not sources:
+        raise ValueError(
+            "FOUNDRY_IQ_MCP_ENABLED is true but FOUNDRY_IQ_MCP_SOURCES_JSON has no sources. "
+            "Add at least one MCP source or set FOUNDRY_IQ_MCP_ENABLED=false."
+        )
+
+    trusted_hosts = _parse_trusted_hosts(context.get("FOUNDRY_IQ_MCP_TRUSTED_HOSTS"))
+    reasoning_effort = str(context.get("FOUNDRY_IQ_MCP_REASONING_EFFORT") or "low").strip().lower()
+    if reasoning_effort not in ALLOWED_REASONING_EFFORTS:
+        raise ValueError(
+            f"FOUNDRY_IQ_MCP_REASONING_EFFORT must be one of {sorted(ALLOWED_REASONING_EFFORTS)}, "
+            f"got '{reasoning_effort}'. MCP knowledge sources require the query planner to run."
+        )
+
+    seen_names: set[str] = set()
+    for index, source in enumerate(sources):
+        label = f"FOUNDRY_IQ_MCP_SOURCES_JSON[{index}]"
+        if not isinstance(source, dict):
+            raise ValueError(f"{label}: must be a JSON object.")
+
+        unexpected = set(source.keys()) - ALLOWED_SOURCE_KEYS
+        if unexpected:
+            raise ValueError(f"{label}: unexpected key(s) {sorted(unexpected)}.")
+        # Note: 'alwaysQuerySource' is deliberately absent from
+        # ALLOWED_SOURCE_KEYS, so the unexpected-key check above already
+        # rejects it. MCP sources are never forced into every retrieval.
+
+        name = str(source.get("name") or "").strip()
+        if not name:
+            raise ValueError(f"{label}: 'name' is required.")
+        if name in seen_names:
+            raise ValueError(f"MCP source name '{name}' is used more than once; source names must be unique.")
+        seen_names.add(name)
+        label = f"MCP source '{name}'"
+
+        server_url = str(source.get("serverURL") or "").strip()
+        if not server_url:
+            raise ValueError(f"{label}: 'serverURL' is required.")
+        _validate_server_url(label, server_url, trusted_hosts)
+
+        _validate_auth_metadata(label, source.get("auth"))
+
+        tools = source.get("tools")
+        if not isinstance(tools, list) or not tools:
+            raise ValueError(f"{label}: 'tools' must be a non-empty array.")
+        seen_tool_names: set[str] = set()
+        for tool in tools:
+            _validate_tool(label, tool, seen_tool_names)
+
+    return sources
+
+
+def validate_foundry_iq_mcp_settings(context: dict) -> None:
+    """Top-level fail-closed validation entry point, called from
+    ``setup.py`` right after ``validate_foundry_iq_settings``.
+
+    Raises ``ValueError`` (aborting the whole provisioning run) when
+    ``FOUNDRY_IQ_MCP_ENABLED`` is true and the configuration is invalid, or
+    when no planning model is available for the knowledge base. When the
+    feature is disabled this is a no-op so disabled deployments render
+    exactly as before.
+    """
+
+    if not is_foundry_iq_mcp_enabled(context):
+        return
+
+    if not context.get("GPT_MODEL_INFO"):
+        raise ValueError(
+            "FOUNDRY_IQ_MCP_ENABLED is true but no chat model was found in MODEL_DEPLOYMENTS (canonical_name "
+            "'CHAT_DEPLOYMENT_NAME'). MCP knowledge sources require a planning model for tool selection and "
+            "argument generation."
+        )
+    if not context.get("FOUNDRY_IQ_AI_SERVICES_ENDPOINT"):
+        raise ValueError(
+            "FOUNDRY_IQ_MCP_ENABLED is true but no AI Services endpoint could be derived. Set "
+            "FOUNDRY_IQ_AI_SERVICES_ENDPOINT, AI_FOUNDRY_PROJECT_ENDPOINT, or AI_FOUNDRY_ACCOUNT_NAME."
+        )
+
+    validate_and_get_mcp_sources(context)

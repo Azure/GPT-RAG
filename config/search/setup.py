@@ -38,6 +38,8 @@ from azure.identity import ManagedIdentityCredential, AzureCliCredential, Chaine
 from azure.appconfiguration import AzureAppConfigurationClient, ConfigurationSetting
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, TemplateError
 
+from config.search.foundry_iq_mcp_setup import validate_foundry_iq_mcp_settings
+
 # ── Silence verbose logging ─────────────────────────────────────────────────
 for logger_name in (
     "azure.core.pipeline.policies.http_logging_policy",
@@ -320,6 +322,7 @@ def prepare_context_and_render(template_name: str, template_dir: str, label_filt
                 vars_dict["FOUNDRY_IQ_AI_SERVICES_ENDPOINT"] = ai_services_endpoint
             try:
                 validate_foundry_iq_settings(context)
+                validate_foundry_iq_mcp_settings(context)
             except ValueError as ve:
                 logging.error(str(ve))
                 return None, context
