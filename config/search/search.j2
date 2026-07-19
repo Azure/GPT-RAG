@@ -498,7 +498,7 @@
           {% for tool in mcp_src.tools %}{% if not loop.first %},{% endif %}
           {
             "name": {{ tool.name | tojson }},
-            "outputParsing": {% if (tool.outputParsing | lower) == 'json' %}{ "kind": "json", "jsonParameters": { "documentsPath": {{ tool.documentsPath | tojson }} } }{% else %}{ "kind": {{ (tool.outputParsing | lower) | tojson }} }{% endif %},
+            "outputParsing": {{ tool.outputParsing | tojson }},
             "inclusionMode": {{ tool.inclusionMode | tojson }},
             "maxOutputTokens": {{ tool.maxOutputTokens }}
           }

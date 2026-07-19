@@ -29,18 +29,12 @@ module owns:
    Configuration, so an invalid/malicious MCP source is rejected before it is
    ever persisted -- not just before the knowledge source is registered.
 
-No MCP authentication metadata is supported by this provisioning template:
-Azure AI Search's real schema for authenticating an ``mcpServer`` knowledge
-source is not publicly documented, this module must not guess an unverified
-REST field, and registration authentication is never rendered by
-``search.j2`` regardless of what is provided here. An ``auth`` (or
-``authentication``) key is therefore rejected outright, at any nesting depth,
-rather than partially validated -- accepting one, even validation-only, would
-mislead operators into believing it takes effect. Every MCP source in this
-release relies solely on implicit managed-identity authentication (the Azure
-Monitor MCP reference scenario); see ``docs/howto_grounding_mcp_server.md``.
-Dynamic per-query MI/OBO credentials are out of scope here entirely -- those
-are query-time control headers owned by the orchestrator repository.
+``queryHeaders`` is runtime-only credential-resolution metadata. This module
+accepts only strict, non-secret references (managed identity/OBO scopes, a Key
+Vault secret name, or ``none``), persists that canonical metadata for the
+orchestrator, and never renders it into the Search knowledge-source
+registration payload. Literal credentials and every ``auth`` or
+``authentication`` shape are rejected before any App Configuration write.
 """
 
 from __future__ import annotations
@@ -48,8 +42,8 @@ from __future__ import annotations
 import ipaddress
 import json
 import os
+import re
 import sys
-from copy import deepcopy
 from typing import Any
 from urllib.parse import urlsplit
 
@@ -61,30 +55,93 @@ LOCAL_MAX_OUTPUT_TOKENS_CAP = 8192
 ALLOWED_INCLUSION_MODES = {"reranked", "always"}
 ALLOWED_OUTPUT_PARSING_MODES = {"auto", "json", "split", "none"}
 ALLOWED_REASONING_EFFORTS = {"low", "medium"}
-DISALLOWED_HOSTNAMES = {"localhost"}
+DISALLOWED_HOSTNAMES = {"localhost", "localhost.localdomain"}
+DISALLOWED_HOST_SUFFIXES = (
+    ".localhost",
+    ".local",
+    ".localdomain",
+    ".internal",
+    ".home",
+    ".lan",
+    ".invalid",
+    ".test",
+    ".example",
+)
 
-ALLOWED_SOURCE_KEYS = {"name", "description", "serverURL", "tools"}
-ALLOWED_TOOL_KEYS = {"name", "outputParsing", "inclusionMode", "maxOutputTokens", "documentsPath"}
+ALLOWED_SOURCE_KEYS = {
+    "name",
+    "description",
+    "serverURL",
+    "failOnError",
+    "maxOutputDocuments",
+    "tools",
+    "queryHeaders",
+}
+ALLOWED_TOOL_KEYS = {"name", "outputParsing", "inclusionMode", "maxOutputTokens"}
+ALLOWED_OUTPUT_PARSING_KEYS = {"kind", "jsonParameters", "splitParameters"}
+ALLOWED_JSON_PARAMETER_KEYS = {"documentsPath", "includeContext"}
+ALLOWED_SPLIT_PARAMETER_KEYS = {
+    "textSplitMode",
+    "maximumPageLength",
+    "pageOverlapLength",
+    "maximumPagesToTake",
+    "defaultLanguageCode",
+}
+ALLOWED_TEXT_SPLIT_MODES = {"pages", "sentences"}
+ALLOWED_QUERY_HEADER_KEYS = {"name", "valueFrom"}
+ALLOWED_VALUE_FROM_KEYS = {"kind", "scope", "secretName"}
+ALLOWED_VALUE_FROM_KINDS = {"managedIdentity", "obo", "keyVaultSecret", "none"}
+
+HEADER_NAME_PATTERN = re.compile(r"^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$")
+KNOWLEDGE_SOURCE_NAME_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
+KEY_VAULT_SECRET_NAME_PATTERN = re.compile(r"^[0-9A-Za-z-]{1,127}$")
+DENIED_HEADER_NAMES = {
+    "connection",
+    "content-length",
+    "host",
+    "keep-alive",
+    "proxy-authenticate",
+    "proxy-authorization",
+    "te",
+    "trailer",
+    "transfer-encoding",
+    "upgrade",
+}
 
 # Keys that must never appear anywhere in FOUNDRY_IQ_MCP_SOURCES_JSON, no
 # matter how deeply nested, checked before any other validation runs.
-# 'auth'/'authentication' are rejected outright (see module docstring); the
-# remaining keys guard against literal credential material (API keys,
-# bearer tokens, passwords, stored HTTP headers) being smuggled in under an
-# unrelated or unexpected key.
-DISALLOWED_AUTH_KEYS_ANY_DEPTH = {"auth", "authentication"}
+# Key comparisons ignore punctuation and casing so variants such as
+# ``api_key`` and ``connection-string`` cannot bypass the scan. Metadata keys
+# explicitly allowed by the schema (``queryHeaders``, ``valueFrom``,
+# ``secretName``, and ``scope``) do not collide with these exact normalized
+# names.
 SECRET_LIKE_KEYS_ANY_DEPTH = {
+    "auth",
+    "authentication",
     "apikey",
+    "accesstoken",
+    "authorizationvalue",
+    "bearer",
+    "clientsecret",
+    "connectionstring",
+    "connectionstrings",
+    "cookie",
+    "cookies",
+    "credential",
+    "credentials",
+    "header",
+    "headerblob",
+    "headers",
     "secret",
+    "secretvalue",
+    "storedheaders",
+    "refreshtoken",
     "token",
     "password",
     "key",
-    "bearer",
-    "header",
-    "headers",
+    "idtoken",
     "authorization",
-    "credential",
-    "credentials",
+    "value",
 }
 
 
@@ -116,7 +173,13 @@ def is_foundry_iq_mcp_enabled(context: dict) -> bool:
 
 
 def _validate_server_url(label: str, server_url: str, trusted_hosts: set[str]) -> None:
-    parsed = urlsplit(server_url)
+    try:
+        parsed = urlsplit(server_url)
+        # Accessing ``port`` makes urllib validate non-numeric and out-of-range
+        # ports instead of leaving them in an otherwise parseable netloc.
+        _ = parsed.port
+    except ValueError as exc:
+        raise ValueError(f"{label}: 'serverURL' is not a valid URL.") from exc
 
     if parsed.scheme.lower() != "https":
         raise ValueError(f"{label}: 'serverURL' must use https, got scheme '{parsed.scheme or '(none)'}'.")
@@ -130,10 +193,14 @@ def _validate_server_url(label: str, server_url: str, trusted_hosts: set[str]) -
     hostname = parsed.hostname
     if not hostname:
         raise ValueError(f"{label}: 'serverURL' is missing a host.")
-    hostname_l = hostname.lower()
+    hostname_l = hostname.rstrip(".").lower()
 
-    if hostname_l in DISALLOWED_HOSTNAMES:
-        raise ValueError(f"{label}: 'serverURL' host '{hostname}' (localhost) is not allowed.")
+    if (
+        hostname_l in DISALLOWED_HOSTNAMES
+        or hostname_l.endswith(DISALLOWED_HOST_SUFFIXES)
+        or "." not in hostname_l
+    ):
+        raise ValueError(f"{label}: 'serverURL' must not use a local or reserved host.")
 
     try:
         ipaddress.ip_address(hostname_l.strip("[]"))
@@ -157,9 +224,12 @@ def _validate_server_url(label: str, server_url: str, trusted_hosts: set[str]) -
         )
 
 
+def _normalized_key(key: Any) -> str:
+    return re.sub(r"[^a-z0-9]", "", str(key).strip().lower())
+
+
 def _scan_for_disallowed_keys_anywhere(node: Any, label: str) -> None:
-    """Recursively reject 'auth'/'authentication' and any secret-like key at
-    any nesting depth within the raw MCP sources JSON.
+    """Recursively reject literal credential-shaped keys at any nesting depth.
 
     This runs before any other structural validation so a rejected key is
     always reported clearly, regardless of where in the JSON it appears or
@@ -168,19 +238,11 @@ def _scan_for_disallowed_keys_anywhere(node: Any, label: str) -> None:
 
     if isinstance(node, dict):
         for key, value in node.items():
-            key_l = str(key).strip().lower()
-            if key_l in DISALLOWED_AUTH_KEYS_ANY_DEPTH:
+            if _normalized_key(key) in SECRET_LIKE_KEYS_ANY_DEPTH:
                 raise ValueError(
-                    f"{label}: '{key}' is not supported, at any nesting depth. This provisioning "
-                    "template never forwards authentication metadata into the registration payload; "
-                    "every MCP source relies solely on implicit managed-identity authentication. "
-                    "Remove it from FOUNDRY_IQ_MCP_SOURCES_JSON. See docs/howto_grounding_mcp_server.md."
-                )
-            if key_l in SECRET_LIKE_KEYS_ANY_DEPTH:
-                raise ValueError(
-                    f"{label}: key '{key}' must not carry literal credential material (API keys, "
-                    "bearer tokens, passwords, secrets, or stored headers are not allowed anywhere in "
-                    "FOUNDRY_IQ_MCP_SOURCES_JSON, at any nesting depth)."
+                    f"{label}: key '{key}' is not allowed because literal credentials, auth objects, "
+                    "stored headers, cookies, and connection strings must never appear in "
+                    "FOUNDRY_IQ_MCP_SOURCES_JSON."
                 )
             _scan_for_disallowed_keys_anywhere(value, f"{label}.{key}")
     elif isinstance(node, list):
@@ -188,7 +250,129 @@ def _scan_for_disallowed_keys_anywhere(node: Any, label: str) -> None:
             _scan_for_disallowed_keys_anywhere(item, f"{label}[{index}]")
 
 
-def _validate_tool(source_label: str, tool: Any, seen_tool_names: set[str]) -> None:
+def _validate_output_parsing(tool_label: str, value: Any) -> dict:
+    if not isinstance(value, dict):
+        raise ValueError(f"{tool_label}: 'outputParsing' must be a JSON object.")
+
+    unexpected = set(value.keys()) - ALLOWED_OUTPUT_PARSING_KEYS
+    if unexpected:
+        raise ValueError(f"{tool_label}: 'outputParsing' has unexpected key(s) {sorted(unexpected)}.")
+
+    kind = value.get("kind")
+    if not isinstance(kind, str) or kind not in ALLOWED_OUTPUT_PARSING_MODES:
+        raise ValueError(
+            f"{tool_label}: 'outputParsing.kind' must be one of "
+            f"{sorted(ALLOWED_OUTPUT_PARSING_MODES)}."
+        )
+
+    json_parameters = value.get("jsonParameters")
+    split_parameters = value.get("splitParameters")
+    if kind == "json":
+        if split_parameters is not None:
+            raise ValueError(
+                f"{tool_label}: 'outputParsing.splitParameters' is only valid when kind is 'split'."
+            )
+        if not isinstance(json_parameters, dict):
+            raise ValueError(
+                f"{tool_label}: 'outputParsing.jsonParameters.documentsPath' is required "
+                "when kind is 'json'."
+            )
+        unexpected = set(json_parameters.keys()) - ALLOWED_JSON_PARAMETER_KEYS
+        if unexpected:
+            raise ValueError(
+                f"{tool_label}: 'outputParsing.jsonParameters' has unexpected key(s) "
+                f"{sorted(unexpected)}."
+            )
+        documents_path = json_parameters.get("documentsPath")
+        if not isinstance(documents_path, str) or not documents_path.strip():
+            raise ValueError(
+                f"{tool_label}: 'outputParsing.jsonParameters.documentsPath' must be a non-empty string."
+            )
+        canonical_json_parameters = {"documentsPath": documents_path.strip()}
+        include_context = json_parameters.get("includeContext")
+        if include_context is not None:
+            if not isinstance(include_context, bool):
+                raise ValueError(
+                    f"{tool_label}: 'outputParsing.jsonParameters.includeContext' must be a boolean."
+                )
+            canonical_json_parameters["includeContext"] = include_context
+        return {
+            "kind": "json",
+            "jsonParameters": canonical_json_parameters,
+        }
+
+    if json_parameters is not None:
+        raise ValueError(
+            f"{tool_label}: 'outputParsing.jsonParameters' is only valid when kind is 'json'."
+        )
+    if kind == "split":
+        if split_parameters is None:
+            return {"kind": "split"}
+        if not isinstance(split_parameters, dict):
+            raise ValueError(f"{tool_label}: 'outputParsing.splitParameters' must be a JSON object.")
+        unexpected = set(split_parameters.keys()) - ALLOWED_SPLIT_PARAMETER_KEYS
+        if unexpected:
+            raise ValueError(
+                f"{tool_label}: 'outputParsing.splitParameters' has unexpected key(s) "
+                f"{sorted(unexpected)}."
+            )
+
+        canonical_split_parameters: dict[str, Any] = {}
+        text_split_mode = split_parameters.get("textSplitMode")
+        if text_split_mode is not None:
+            if text_split_mode not in ALLOWED_TEXT_SPLIT_MODES:
+                raise ValueError(
+                    f"{tool_label}: 'outputParsing.splitParameters.textSplitMode' must be one of "
+                    f"{sorted(ALLOWED_TEXT_SPLIT_MODES)}."
+                )
+            canonical_split_parameters["textSplitMode"] = text_split_mode
+
+        for key in ("maximumPageLength", "maximumPagesToTake"):
+            parameter = split_parameters.get(key)
+            if parameter is not None:
+                if isinstance(parameter, bool) or not isinstance(parameter, int) or parameter <= 0:
+                    raise ValueError(
+                        f"{tool_label}: 'outputParsing.splitParameters.{key}' must be a positive integer."
+                    )
+                canonical_split_parameters[key] = parameter
+
+        page_overlap_length = split_parameters.get("pageOverlapLength")
+        if page_overlap_length is not None:
+            if (
+                isinstance(page_overlap_length, bool)
+                or not isinstance(page_overlap_length, int)
+                or page_overlap_length < 0
+            ):
+                raise ValueError(
+                    f"{tool_label}: 'outputParsing.splitParameters.pageOverlapLength' "
+                    "must be a non-negative integer."
+                )
+            maximum_page_length = split_parameters.get("maximumPageLength")
+            if maximum_page_length is not None and page_overlap_length >= maximum_page_length:
+                raise ValueError(
+                    f"{tool_label}: 'outputParsing.splitParameters.pageOverlapLength' "
+                    "must be less than maximumPageLength."
+                )
+            canonical_split_parameters["pageOverlapLength"] = page_overlap_length
+
+        default_language_code = split_parameters.get("defaultLanguageCode")
+        if default_language_code is not None:
+            if not isinstance(default_language_code, str) or not default_language_code.strip():
+                raise ValueError(
+                    f"{tool_label}: 'outputParsing.splitParameters.defaultLanguageCode' "
+                    "must be a non-empty string."
+                )
+            canonical_split_parameters["defaultLanguageCode"] = default_language_code.strip()
+
+        return {"kind": "split", "splitParameters": canonical_split_parameters}
+    if split_parameters is not None:
+        raise ValueError(
+            f"{tool_label}: 'outputParsing.splitParameters' is only valid when kind is 'split'."
+        )
+    return {"kind": kind}
+
+
+def _validate_tool(source_label: str, tool: Any, seen_tool_names: set[str]) -> dict:
     if not isinstance(tool, dict):
         raise ValueError(f"{source_label}: each tool must be a JSON object.")
 
@@ -196,34 +380,21 @@ def _validate_tool(source_label: str, tool: Any, seen_tool_names: set[str]) -> N
     if unexpected:
         raise ValueError(f"{source_label}: tool has unexpected key(s) {sorted(unexpected)}.")
 
-    name = str(tool.get("name") or "").strip()
-    if not name:
+    name_value = tool.get("name")
+    if not isinstance(name_value, str) or not name_value.strip():
         raise ValueError(f"{source_label}: tool 'name' is required.")
+    name = name_value.strip()
     if name in seen_tool_names:
         raise ValueError(f"{source_label}: tool name '{name}' is used more than once; tool names must be unique.")
     seen_tool_names.add(name)
     tool_label = f"{source_label} tool '{name}'"
 
-    output_parsing = str(tool.get("outputParsing") or "").strip().lower()
-    if output_parsing not in ALLOWED_OUTPUT_PARSING_MODES:
-        raise ValueError(
-            f"{tool_label}: 'outputParsing' must be one of {sorted(ALLOWED_OUTPUT_PARSING_MODES)}, "
-            f"got '{output_parsing or '(none)'}'."
-        )
-    if output_parsing == "json" and not str(tool.get("documentsPath") or "").strip():
-        raise ValueError(f"{tool_label}: 'documentsPath' is required when 'outputParsing' is 'json'.")
-    if output_parsing != "json" and str(tool.get("documentsPath") or "").strip():
-        raise ValueError(
-            f"{tool_label}: 'documentsPath' is only valid when 'outputParsing' is 'json' (got "
-            f"outputParsing='{output_parsing}'). The rendered REST payload nests 'documentsPath' under "
-            "outputParsing.jsonParameters, so it has no effect for any other outputParsing kind."
-        )
+    output_parsing = _validate_output_parsing(tool_label, tool.get("outputParsing"))
 
-    inclusion_mode = str(tool.get("inclusionMode") or "").strip()
+    inclusion_mode = tool.get("inclusionMode")
     if inclusion_mode not in ALLOWED_INCLUSION_MODES:
         raise ValueError(
-            f"{tool_label}: 'inclusionMode' must be one of {sorted(ALLOWED_INCLUSION_MODES)}, "
-            f"got '{inclusion_mode or '(none)'}'."
+            f"{tool_label}: 'inclusionMode' must be one of {sorted(ALLOWED_INCLUSION_MODES)}."
         )
 
     max_output_tokens = tool.get("maxOutputTokens")
@@ -234,9 +405,76 @@ def _validate_tool(source_label: str, tool: Any, seen_tool_names: set[str]) -> N
             f"{tool_label}: 'maxOutputTokens' ({max_output_tokens}) exceeds the local cap of "
             f"{LOCAL_MAX_OUTPUT_TOKENS_CAP}."
         )
-    # Note: 'alwaysQuerySource' is deliberately absent from ALLOWED_TOOL_KEYS,
-    # so the unexpected-key check above already rejects it. MCP tools must
-    # always go through the query planner; they are never forced in.
+    return {
+        "name": name,
+        "outputParsing": output_parsing,
+        "inclusionMode": inclusion_mode,
+        "maxOutputTokens": max_output_tokens,
+    }
+
+
+def _validate_query_header(source_label: str, header: Any, seen_names: set[str]) -> dict:
+    if not isinstance(header, dict):
+        raise ValueError(f"{source_label}: each queryHeaders entry must be a JSON object.")
+
+    unexpected = set(header.keys()) - ALLOWED_QUERY_HEADER_KEYS
+    if unexpected:
+        raise ValueError(f"{source_label}: queryHeaders entry has unexpected key(s) {sorted(unexpected)}.")
+
+    name_value = header.get("name")
+    if not isinstance(name_value, str):
+        raise ValueError(f"{source_label}: query header 'name' must be a string.")
+    name = name_value.strip()
+    if not HEADER_NAME_PATTERN.fullmatch(name):
+        raise ValueError(f"{source_label}: query header name is not a valid HTTP field name.")
+    if name.lower() in DENIED_HEADER_NAMES:
+        raise ValueError(f"{source_label}: query header '{name}' is not allowed.")
+    if name.casefold() in seen_names:
+        raise ValueError(f"{source_label}: query header names must be unique within a source.")
+    seen_names.add(name.casefold())
+
+    value_from = header.get("valueFrom")
+    if not isinstance(value_from, dict):
+        raise ValueError(f"{source_label}: query header 'valueFrom' must be a JSON object.")
+    unexpected = set(value_from.keys()) - ALLOWED_VALUE_FROM_KEYS
+    if unexpected:
+        raise ValueError(
+            f"{source_label}: query header 'valueFrom' has unexpected key(s) {sorted(unexpected)}."
+        )
+
+    kind = value_from.get("kind")
+    if kind not in ALLOWED_VALUE_FROM_KINDS:
+        raise ValueError(
+            f"{source_label}: query header 'valueFrom.kind' must be one of "
+            f"{sorted(ALLOWED_VALUE_FROM_KINDS)}."
+        )
+
+    scope = value_from.get("scope")
+    secret_name = value_from.get("secretName")
+    if kind in {"managedIdentity", "obo"}:
+        if not isinstance(scope, str) or not scope.strip():
+            raise ValueError(f"{source_label}: query header kind '{kind}' requires an explicit scope.")
+        if any(ord(character) < 0x20 or ord(character) == 0x7F for character in scope):
+            raise ValueError(f"{source_label}: query header scope contains control characters.")
+        if secret_name is not None:
+            raise ValueError(f"{source_label}: 'secretName' is not valid for query header kind '{kind}'.")
+        canonical_value_from = {"kind": kind, "scope": scope.strip()}
+    elif kind == "keyVaultSecret":
+        if scope is not None:
+            raise ValueError(f"{source_label}: 'scope' is not valid for query header kind 'keyVaultSecret'.")
+        if not isinstance(secret_name, str) or not KEY_VAULT_SECRET_NAME_PATTERN.fullmatch(secret_name):
+            raise ValueError(
+                f"{source_label}: query header kind 'keyVaultSecret' requires a valid secretName."
+            )
+        canonical_value_from = {"kind": kind, "secretName": secret_name}
+    else:
+        if scope is not None or secret_name is not None:
+            raise ValueError(
+                f"{source_label}: query header kind 'none' must not carry scope or secretName."
+            )
+        canonical_value_from = {"kind": "none"}
+
+    return {"name": name, "valueFrom": canonical_value_from}
 
 
 def validate_and_get_mcp_sources(context: dict) -> list[dict]:
@@ -262,8 +500,8 @@ def validate_and_get_mcp_sources(context: dict) -> list[dict]:
             "Add at least one MCP source or set FOUNDRY_IQ_MCP_ENABLED=false."
         )
 
-    # Reject 'auth'/'authentication' and any secret-like key anywhere in the
-    # raw JSON before any other validation runs (see module docstring).
+    # Reject auth objects and literal credential-shaped keys anywhere in the
+    # raw JSON before any structural validation runs.
     _scan_for_disallowed_keys_anywhere(sources, "FOUNDRY_IQ_MCP_SOURCES_JSON")
 
     trusted_hosts = _parse_trusted_hosts(context.get("FOUNDRY_IQ_MCP_TRUSTED_HOSTS"))
@@ -274,9 +512,9 @@ def validate_and_get_mcp_sources(context: dict) -> list[dict]:
             f"got '{reasoning_effort}'. MCP knowledge sources require the query planner to run."
         )
 
-    normalized_sources = deepcopy(sources)
+    canonical_sources: list[dict] = []
     seen_names: set[str] = set()
-    for index, source in enumerate(normalized_sources):
+    for index, source in enumerate(sources):
         label = f"FOUNDRY_IQ_MCP_SOURCES_JSON[{index}]"
         if not isinstance(source, dict):
             raise ValueError(f"{label}: must be a JSON object.")
@@ -288,28 +526,77 @@ def validate_and_get_mcp_sources(context: dict) -> list[dict]:
         # ALLOWED_SOURCE_KEYS, so the unexpected-key check above already
         # rejects it. MCP sources are never forced into every retrieval.
 
-        name = str(source.get("name") or "").strip()
-        if not name:
+        name_value = source.get("name")
+        if not isinstance(name_value, str) or not name_value.strip():
             raise ValueError(f"{label}: 'name' is required.")
+        name = name_value.strip()
+        if not KNOWLEDGE_SOURCE_NAME_PATTERN.fullmatch(name):
+            raise ValueError(
+                f"{label}: 'name' must start with a letter or number, contain only letters, "
+                "numbers, '.', '_' or '-', and be at most 128 characters."
+            )
         if name in seen_names:
             raise ValueError(f"MCP source name '{name}' is used more than once; source names must be unique.")
         seen_names.add(name)
         label = f"MCP source '{name}'"
 
-        server_url = str(source.get("serverURL") or "").strip()
-        if not server_url:
+        description_value = source.get("description")
+        if description_value is not None and not isinstance(description_value, str):
+            raise ValueError(f"{label}: 'description' must be a string when provided.")
+
+        server_url_value = source.get("serverURL")
+        if not isinstance(server_url_value, str) or not server_url_value.strip():
             raise ValueError(f"{label}: 'serverURL' is required.")
+        server_url = server_url_value.strip()
         _validate_server_url(label, server_url, trusted_hosts)
+
+        fail_on_error = source.get("failOnError")
+        if "failOnError" in source and not isinstance(fail_on_error, bool):
+            raise ValueError(f"{label}: 'failOnError' must be a boolean when provided.")
+
+        max_output_documents = source.get("maxOutputDocuments")
+        if max_output_documents is not None and (
+            isinstance(max_output_documents, bool)
+            or not isinstance(max_output_documents, int)
+            or not 1 <= max_output_documents <= 50
+        ):
+            raise ValueError(
+                f"{label}: 'maxOutputDocuments' must be an integer between 1 and 50 when provided."
+            )
 
         tools = source.get("tools")
         if not isinstance(tools, list) or not tools:
             raise ValueError(f"{label}: 'tools' must be a non-empty array.")
         seen_tool_names: set[str] = set()
+        canonical_tools: list[dict] = []
         for tool in tools:
-            _validate_tool(label, tool, seen_tool_names)
-            tool["outputParsing"] = str(tool["outputParsing"]).strip().lower()
+            canonical_tools.append(_validate_tool(label, tool, seen_tool_names))
 
-    return normalized_sources
+        query_headers = source.get("queryHeaders", [])
+        if not isinstance(query_headers, list):
+            raise ValueError(f"{label}: 'queryHeaders' must be an array when provided.")
+        seen_header_names: set[str] = set()
+        canonical_headers = [
+            _validate_query_header(label, header, seen_header_names)
+            for header in query_headers
+        ]
+
+        canonical_source = {
+            "name": name,
+            "serverURL": server_url,
+            "tools": canonical_tools,
+        }
+        if description_value is not None:
+            canonical_source["description"] = description_value.strip()
+        if "failOnError" in source:
+            canonical_source["failOnError"] = fail_on_error
+        if "maxOutputDocuments" in source:
+            canonical_source["maxOutputDocuments"] = max_output_documents
+        if "queryHeaders" in source:
+            canonical_source["queryHeaders"] = canonical_headers
+        canonical_sources.append(canonical_source)
+
+    return canonical_sources
 
 
 def validate_foundry_iq_mcp_settings(context: dict) -> None:
@@ -395,25 +682,26 @@ def build_preflight_context_from_environ() -> dict:
     return context
 
 
-def main() -> int:
+def main(*, emit_canonical: bool = False) -> int:
     """Pre-flight CLI entry point.
 
     Validates FOUNDRY_IQ_MCP_SOURCES_JSON (and the other FOUNDRY_IQ_MCP_*
-    environment variables) exactly as they will be imported into Azure App
-    Configuration, before that import happens. Prints an actionable error to
-    stderr and returns a non-zero exit code on the first invalid field, and
-    intentionally imports/writes nothing itself either way -- this module
-    only validates.
+    environment variables) before import. With ``emit_canonical=True`` it
+    writes the canonical, metadata-only source JSON to stdout for the
+    PowerShell preflight to persist. Errors go to stderr without rejected
+    values. This module never writes App Configuration itself.
     """
 
     try:
         context = build_preflight_context_from_environ()
-        validate_and_get_mcp_sources(context)
+        sources = validate_and_get_mcp_sources(context)
     except ValueError as ve:
         print(f"❗️ FOUNDRY_IQ_MCP_SOURCES_JSON validation failed: {ve}", file=sys.stderr)
         return 1
+    if emit_canonical:
+        print(json.dumps(sources, separators=(",", ":")))
     return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(main(emit_canonical="--canonical" in sys.argv[1:]))

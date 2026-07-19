@@ -4,7 +4,7 @@ import itertools
 import json
 import os
 import unittest
-from contextlib import redirect_stderr
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from unittest.mock import Mock, patch
 
@@ -679,7 +679,7 @@ class FoundryIqMcpTemplateTests(unittest.TestCase):
             "tools": [
                 {
                     "name": "query_logs",
-                    "outputParsing": "auto",
+                    "outputParsing": {"kind": "auto"},
                     "inclusionMode": "reranked",
                     "maxOutputTokens": 4096,
                 }
@@ -687,6 +687,32 @@ class FoundryIqMcpTemplateTests(unittest.TestCase):
         }
         source.update(overrides)
         return source
+
+    def _query_headers(self):
+        return [
+            {
+                "name": "Authorization",
+                "valueFrom": {
+                    "kind": "managedIdentity",
+                    "scope": "api://monitor/.default",
+                },
+            },
+            {
+                "name": "x-user-token",
+                "valueFrom": {
+                    "kind": "obo",
+                    "scope": "api://monitor/user_impersonation",
+                },
+            },
+            {
+                "name": "x-api-key",
+                "valueFrom": {
+                    "kind": "keyVaultSecret",
+                    "secretName": "monitor-api-key",
+                },
+            },
+            {"name": "x-no-auth", "valueFrom": {"kind": "none"}},
+        ]
 
     def test_settings_defaults_mcp_disabled_and_empty(self):
         settings = render_json_template(
@@ -728,7 +754,13 @@ class FoundryIqMcpTemplateTests(unittest.TestCase):
             FOUNDRY_IQ_MCP_ENABLED="true",
             FOUNDRY_IQ_MCP_REASONING_EFFORT="medium",
         )
-        context["FOUNDRY_IQ_MCP_SOURCES_JSON"] = [self._mcp_source()]
+        context["FOUNDRY_IQ_MCP_SOURCES_JSON"] = [
+            self._mcp_source(
+                failOnError=False,
+                maxOutputDocuments=25,
+                queryHeaders=self._query_headers(),
+            )
+        ]
         search_definitions = render_json_template("search.j2", context)
 
         mcp_sources = [ks for ks in search_definitions["knowledgeSources"] if ks["kind"] == "mcpServer"]
@@ -750,7 +782,10 @@ class FoundryIqMcpTemplateTests(unittest.TestCase):
                 ],
             },
         )
-        # Auth metadata (if any) must never be forwarded into the registration payload.
+        # Runtime query-header metadata must never be forwarded into Search
+        # registration or knowledge-base retrieve parameters.
+        self.assertNotIn("queryHeaders", json.dumps(source))
+        self.assertNotIn("queryHeaders", json.dumps(search_definitions["knowledgeBases"]))
         self.assertNotIn("auth", source["mcpServerParameters"])
         self.assertNotIn("authentication", source["mcpServerParameters"])
         self.assertNotIn("authIdentity", source["mcpServerParameters"])
@@ -786,26 +821,40 @@ class FoundryIqMcpTemplateTests(unittest.TestCase):
                 tools=[
                     {
                         "name": "auto_tool",
-                        "outputParsing": "auto",
+                        "outputParsing": {"kind": "auto"},
                         "inclusionMode": "reranked",
                         "maxOutputTokens": 1024,
                     },
                     {
                         "name": "none_tool",
-                        "outputParsing": "none",
+                        "outputParsing": {"kind": "none"},
                         "inclusionMode": "reranked",
                         "maxOutputTokens": 1024,
                     },
                     {
                         "name": "split_tool",
-                        "outputParsing": "split",
+                        "outputParsing": {
+                            "kind": "split",
+                            "splitParameters": {
+                                "textSplitMode": "pages",
+                                "maximumPageLength": 4000,
+                                "pageOverlapLength": 500,
+                                "maximumPagesToTake": 10,
+                                "defaultLanguageCode": "en",
+                            },
+                        },
                         "inclusionMode": "reranked",
                         "maxOutputTokens": 1024,
                     },
                     {
                         "name": "json_tool",
-                        "outputParsing": "json",
-                        "documentsPath": "$.results",
+                        "outputParsing": {
+                            "kind": "json",
+                            "jsonParameters": {
+                                "documentsPath": "$.results",
+                                "includeContext": True,
+                            },
+                        },
                         "inclusionMode": "always",
                         "maxOutputTokens": 2048,
                     },
@@ -818,16 +867,34 @@ class FoundryIqMcpTemplateTests(unittest.TestCase):
 
         self.assertEqual(rendered["auto_tool"]["outputParsing"], {"kind": "auto"})
         self.assertEqual(rendered["none_tool"]["outputParsing"], {"kind": "none"})
-        self.assertEqual(rendered["split_tool"]["outputParsing"], {"kind": "split"})
+        self.assertEqual(
+            rendered["split_tool"]["outputParsing"],
+            {
+                "kind": "split",
+                "splitParameters": {
+                    "textSplitMode": "pages",
+                    "maximumPageLength": 4000,
+                    "pageOverlapLength": 500,
+                    "maximumPagesToTake": 10,
+                    "defaultLanguageCode": "en",
+                },
+            },
+        )
         self.assertEqual(
             rendered["json_tool"]["outputParsing"],
-            {"kind": "json", "jsonParameters": {"documentsPath": "$.results"}},
+            {
+                "kind": "json",
+                "jsonParameters": {
+                    "documentsPath": "$.results",
+                    "includeContext": True,
+                },
+            },
         )
         # documentsPath must never be a tool-level sibling key.
         for tool in tools:
             self.assertNotIn("documentsPath", tool)
 
-    def test_mixed_case_output_parsing_is_normalized_before_rendering(self):
+    def test_canonical_fixture_shared_with_runtime_validates_and_renders(self):
         _, context = self._foundry_iq_context(FOUNDRY_IQ_MCP_ENABLED="true")
         context["FOUNDRY_IQ_MCP_TRUSTED_HOSTS"] = "monitor-mcp.contoso.com"
         context["FOUNDRY_IQ_MCP_SOURCES_JSON"] = [
@@ -835,26 +902,40 @@ class FoundryIqMcpTemplateTests(unittest.TestCase):
                 tools=[
                     {
                         "name": "auto_tool",
-                        "outputParsing": "AUTO",
+                        "outputParsing": {"kind": "auto"},
                         "inclusionMode": "reranked",
                         "maxOutputTokens": 1024,
                     },
                     {
                         "name": "none_tool",
-                        "outputParsing": "NoNe",
+                        "outputParsing": {"kind": "none"},
                         "inclusionMode": "reranked",
                         "maxOutputTokens": 1024,
                     },
                     {
                         "name": "split_tool",
-                        "outputParsing": "SpLiT",
+                        "outputParsing": {
+                            "kind": "split",
+                            "splitParameters": {
+                                "textSplitMode": "pages",
+                                "maximumPageLength": 4000,
+                                "maximumPagesToTake": 10,
+                                "pageOverlapLength": 500,
+                                "defaultLanguageCode": " en ",
+                            },
+                        },
                         "inclusionMode": "reranked",
                         "maxOutputTokens": 1024,
                     },
                     {
                         "name": "json_tool",
-                        "outputParsing": "JSON",
-                        "documentsPath": "$.results",
+                        "outputParsing": {
+                            "kind": "json",
+                            "jsonParameters": {
+                                "documentsPath": "$.results",
+                                "includeContext": True,
+                            },
+                        },
                         "inclusionMode": "always",
                         "maxOutputTokens": 2048,
                     },
@@ -866,7 +947,27 @@ class FoundryIqMcpTemplateTests(unittest.TestCase):
         normalized_tools = context["FOUNDRY_IQ_MCP_SOURCES_JSON"][0]["tools"]
         self.assertEqual(
             [tool["outputParsing"] for tool in normalized_tools],
-            ["auto", "none", "split", "json"],
+            [
+                {"kind": "auto"},
+                {"kind": "none"},
+                {
+                    "kind": "split",
+                    "splitParameters": {
+                        "textSplitMode": "pages",
+                        "maximumPageLength": 4000,
+                        "maximumPagesToTake": 10,
+                        "pageOverlapLength": 500,
+                        "defaultLanguageCode": "en",
+                    },
+                },
+                {
+                    "kind": "json",
+                    "jsonParameters": {
+                        "documentsPath": "$.results",
+                        "includeContext": True,
+                    },
+                },
+            ],
         )
 
         search_definitions = render_json_template("search.j2", context)
@@ -874,10 +975,28 @@ class FoundryIqMcpTemplateTests(unittest.TestCase):
         rendered = {tool["name"]: tool["outputParsing"] for tool in tools}
         self.assertEqual(rendered["auto_tool"], {"kind": "auto"})
         self.assertEqual(rendered["none_tool"], {"kind": "none"})
-        self.assertEqual(rendered["split_tool"], {"kind": "split"})
+        self.assertEqual(
+            rendered["split_tool"],
+            {
+                "kind": "split",
+                "splitParameters": {
+                    "textSplitMode": "pages",
+                    "maximumPageLength": 4000,
+                    "maximumPagesToTake": 10,
+                    "pageOverlapLength": 500,
+                    "defaultLanguageCode": "en",
+                },
+            },
+        )
         self.assertEqual(
             rendered["json_tool"],
-            {"kind": "json", "jsonParameters": {"documentsPath": "$.results"}},
+            {
+                "kind": "json",
+                "jsonParameters": {
+                    "documentsPath": "$.results",
+                    "includeContext": True,
+                },
+            },
         )
 
     def test_multiple_mcp_sources_all_registered_and_referenced(self):
@@ -954,7 +1073,7 @@ class FoundryIqMcpValidationTests(unittest.TestCase):
             "tools": [
                 {
                     "name": "query_logs",
-                    "outputParsing": "auto",
+                    "outputParsing": {"kind": "auto"},
                     "inclusionMode": "reranked",
                     "maxOutputTokens": 4096,
                 }
@@ -962,6 +1081,150 @@ class FoundryIqMcpValidationTests(unittest.TestCase):
         }
         source.update(overrides)
         return source
+
+    def _query_headers(self):
+        return [
+            {
+                "name": "Authorization",
+                "valueFrom": {
+                    "kind": "managedIdentity",
+                    "scope": "api://monitor/.default",
+                },
+            },
+            {
+                "name": "x-user-token",
+                "valueFrom": {
+                    "kind": "obo",
+                    "scope": "api://monitor/user_impersonation",
+                },
+            },
+            {
+                "name": "x-api-key",
+                "valueFrom": {
+                    "kind": "keyVaultSecret",
+                    "secretName": "monitor-api-key",
+                },
+            },
+            {"name": "x-no-auth", "valueFrom": {"kind": "none"}},
+        ]
+
+    def test_valid_query_header_metadata_is_preserved_in_canonical_json(self):
+        source = self._source(queryHeaders=self._query_headers())
+        context = self._context(sources=[source])
+
+        canonical = mcp_setup.validate_and_get_mcp_sources(context)
+
+        self.assertEqual(canonical[0]["queryHeaders"], self._query_headers())
+        serialized = json.dumps(canonical)
+        self.assertNotIn("literal-secret", serialized)
+        self.assertNotIn('"value":', serialized)
+
+    def test_query_headers_reject_literal_and_nested_credentials_without_echoing_values(self):
+        cases = {
+            "literal value": {
+                "name": "Authorization",
+                "value": "literal-secret-marker",
+                "valueFrom": {
+                    "kind": "managedIdentity",
+                    "scope": "api://monitor/.default",
+                },
+            },
+            "nested token": {
+                "name": "Authorization",
+                "valueFrom": {
+                    "kind": "managedIdentity",
+                    "scope": "api://monitor/.default",
+                    "access_token": "literal-secret-marker",
+                },
+            },
+            "headers blob": {
+                "name": "x-custom",
+                "valueFrom": {
+                    "kind": "none",
+                    "storedHeaders": {"x-api-key": "literal-secret-marker"},
+                },
+            },
+            "connection string": {
+                "name": "x-custom",
+                "valueFrom": {
+                    "kind": "none",
+                    "connection-string": "literal-secret-marker",
+                },
+            },
+        }
+        for name, query_header in cases.items():
+            with self.subTest(name=name):
+                context = self._context(
+                    sources=[self._source(queryHeaders=[query_header])]
+                )
+                with self.assertRaises(ValueError) as exc_info:
+                    mcp_setup.validate_and_get_mcp_sources(context)
+                self.assertIn("literal credentials", str(exc_info.exception))
+                self.assertNotIn("literal-secret-marker", str(exc_info.exception))
+
+    def test_query_headers_reject_forbidden_names_and_invalid_value_from_shapes(self):
+        cases = {
+            "invalid token": {
+                "name": "bad header",
+                "valueFrom": {"kind": "none"},
+            },
+            "host": {
+                "name": "Host",
+                "valueFrom": {"kind": "none"},
+            },
+            "content length": {
+                "name": "Content-Length",
+                "valueFrom": {"kind": "none"},
+            },
+            "hop by hop": {
+                "name": "Connection",
+                "valueFrom": {"kind": "none"},
+            },
+            "managed identity missing scope": {
+                "name": "Authorization",
+                "valueFrom": {"kind": "managedIdentity"},
+            },
+            "obo with secretName": {
+                "name": "Authorization",
+                "valueFrom": {
+                    "kind": "obo",
+                    "scope": "api://monitor/user_impersonation",
+                    "secretName": "not-applicable",
+                },
+            },
+            "key vault with scope": {
+                "name": "x-api-key",
+                "valueFrom": {
+                    "kind": "keyVaultSecret",
+                    "scope": "api://not-applicable",
+                    "secretName": "monitor-api-key",
+                },
+            },
+            "none with credential field": {
+                "name": "x-none",
+                "valueFrom": {"kind": "none", "scope": "api://not-applicable"},
+            },
+            "unknown nested field": {
+                "name": "x-custom",
+                "valueFrom": {"kind": "none", "issuer": "contoso"},
+            },
+        }
+        for name, query_header in cases.items():
+            with self.subTest(name=name):
+                context = self._context(
+                    sources=[self._source(queryHeaders=[query_header])]
+                )
+                with self.assertRaises(ValueError):
+                    mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_duplicate_query_header_names_are_rejected_case_insensitively(self):
+        headers = [
+            {"name": "X-Custom", "valueFrom": {"kind": "none"}},
+            {"name": "x-custom", "valueFrom": {"kind": "none"}},
+        ]
+        context = self._context(sources=[self._source(queryHeaders=headers)])
+        with self.assertRaisesRegex(ValueError, "unique"):
+            mcp_setup.validate_and_get_mcp_sources(context)
 
     def test_disabled_is_a_no_op(self):
         context = self._context(sources=[], FOUNDRY_IQ_MCP_ENABLED="false")
@@ -992,9 +1255,21 @@ class FoundryIqMcpValidationTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "used more than once"):
             mcp_setup.validate_and_get_mcp_sources(context)
 
+    def test_invalid_source_name_raises_before_search_api_use(self):
+        context = self._context(sources=[self._source(name="../indexes/victim")])
+        with self.assertRaisesRegex(ValueError, "must start with a letter or number"):
+            mcp_setup.validate_and_get_mcp_sources(context)
+
     def test_non_https_scheme_raises(self):
         context = self._context(sources=[self._source(serverURL="http://monitor-mcp.contoso.com/mcp")])
         with self.assertRaisesRegex(ValueError, "https"):
+            mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_malformed_port_raises(self):
+        context = self._context(
+            sources=[self._source(serverURL="https://monitor-mcp.contoso.com:notaport/mcp")]
+        )
+        with self.assertRaisesRegex(ValueError, "not a valid URL"):
             mcp_setup.validate_and_get_mcp_sources(context)
 
     def test_userinfo_in_url_raises(self):
@@ -1024,7 +1299,7 @@ class FoundryIqMcpValidationTests(unittest.TestCase):
             sources=[self._source(auth={"kind": "managedIdentity"})],
             GPT_MODEL_INFO={},
         )
-        with self.assertRaisesRegex(ValueError, "not supported"):
+        with self.assertRaisesRegex(ValueError, "not allowed"):
             mcp_setup.validate_foundry_iq_mcp_settings(context)
 
     def test_disabled_stale_source_content_is_discarded_without_parsing(self):
@@ -1056,8 +1331,18 @@ class FoundryIqMcpValidationTests(unittest.TestCase):
             sources=[self._source(serverURL="https://localhost/mcp")],
             FOUNDRY_IQ_MCP_TRUSTED_HOSTS="localhost",
         )
-        with self.assertRaisesRegex(ValueError, "localhost"):
+        with self.assertRaisesRegex(ValueError, "local or reserved"):
             mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_reserved_or_single_label_host_raises(self):
+        for host in ("mcp.internal", "mcp.example", "singlelabel"):
+            with self.subTest(host=host):
+                context = self._context(
+                    sources=[self._source(serverURL=f"https://{host}/mcp")],
+                    FOUNDRY_IQ_MCP_TRUSTED_HOSTS=host,
+                )
+                with self.assertRaisesRegex(ValueError, "local or reserved"):
+                    mcp_setup.validate_and_get_mcp_sources(context)
 
     def test_host_not_in_trusted_allowlist_raises(self):
         context = self._context(
@@ -1080,7 +1365,7 @@ class FoundryIqMcpValidationTests(unittest.TestCase):
     def test_duplicate_tool_names_raise(self):
         tool = {
             "name": "query_logs",
-            "outputParsing": "auto",
+            "outputParsing": {"kind": "auto"},
             "inclusionMode": "reranked",
             "maxOutputTokens": 100,
         }
@@ -1097,16 +1382,50 @@ class FoundryIqMcpValidationTests(unittest.TestCase):
 
     def test_invalid_output_parsing_raises(self):
         context = self._context(
-            sources=[self._source(tools=[{**self._source()["tools"][0], "outputParsing": "yaml"}])]
+            sources=[
+                self._source(
+                    tools=[
+                        {
+                            **self._source()["tools"][0],
+                            "outputParsing": {"kind": "yaml"},
+                        }
+                    ]
+                )
+            ]
         )
         with self.assertRaisesRegex(ValueError, "outputParsing"):
             mcp_setup.validate_and_get_mcp_sources(context)
 
+    def test_legacy_string_output_parsing_is_rejected(self):
+        context = self._context(
+            sources=[
+                self._source(
+                    tools=[
+                        {
+                            **self._source()["tools"][0],
+                            "outputParsing": "auto",
+                        }
+                    ]
+                )
+            ]
+        )
+        with self.assertRaisesRegex(ValueError, "JSON object"):
+            mcp_setup.validate_and_get_mcp_sources(context)
+
     def test_json_output_parsing_without_documents_path_raises(self):
         context = self._context(
-            sources=[self._source(tools=[{**self._source()["tools"][0], "outputParsing": "json"}])]
+            sources=[
+                self._source(
+                    tools=[
+                        {
+                            **self._source()["tools"][0],
+                            "outputParsing": {"kind": "json"},
+                        }
+                    ]
+                )
+            ]
         )
-        with self.assertRaisesRegex(ValueError, "documentsPath"):
+        with self.assertRaisesRegex(ValueError, "jsonParameters"):
             mcp_setup.validate_and_get_mcp_sources(context)
 
     def test_documents_path_with_non_json_output_parsing_raises(self):
@@ -1119,15 +1438,103 @@ class FoundryIqMcpValidationTests(unittest.TestCase):
                     tools=[
                         {
                             **self._source()["tools"][0],
-                            "outputParsing": "auto",
-                            "documentsPath": "$.results",
+                            "outputParsing": {
+                                "kind": "auto",
+                                "jsonParameters": {"documentsPath": "$.results"},
+                            },
                         }
                     ]
                 )
             ]
         )
-        with self.assertRaisesRegex(ValueError, "documentsPath"):
+        with self.assertRaisesRegex(ValueError, "jsonParameters"):
             mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_invalid_documented_output_parsing_parameters_raise(self):
+        cases = [
+            (
+                "includeContext must be boolean",
+                {
+                    "kind": "json",
+                    "jsonParameters": {
+                        "documentsPath": "$.results",
+                        "includeContext": "true",
+                    },
+                },
+                "includeContext",
+            ),
+            (
+                "JSON parameter keys are strict",
+                {
+                    "kind": "json",
+                    "jsonParameters": {
+                        "documentsPath": "$.results",
+                        "unexpected": True,
+                    },
+                },
+                "unexpected key",
+            ),
+            (
+                "split parameters require split kind",
+                {
+                    "kind": "auto",
+                    "splitParameters": {"textSplitMode": "pages"},
+                },
+                "splitParameters",
+            ),
+            (
+                "split parameter keys are strict",
+                {
+                    "kind": "split",
+                    "splitParameters": {"unit": "azureOpenAITokens"},
+                },
+                "unexpected key",
+            ),
+            (
+                "split mode is constrained",
+                {
+                    "kind": "split",
+                    "splitParameters": {"textSplitMode": "paragraphs"},
+                },
+                "textSplitMode",
+            ),
+            (
+                "split lengths must be integers",
+                {
+                    "kind": "split",
+                    "splitParameters": {"maximumPageLength": True},
+                },
+                "positive integer",
+            ),
+            (
+                "split overlap must be smaller than page length",
+                {
+                    "kind": "split",
+                    "splitParameters": {
+                        "maximumPageLength": 100,
+                        "pageOverlapLength": 100,
+                    },
+                },
+                "less than maximumPageLength",
+            ),
+        ]
+
+        for label, output_parsing, expected_error in cases:
+            with self.subTest(label):
+                context = self._context(
+                    sources=[
+                        self._source(
+                            tools=[
+                                {
+                                    **self._source()["tools"][0],
+                                    "outputParsing": output_parsing,
+                                }
+                            ]
+                        )
+                    ]
+                )
+                with self.assertRaisesRegex(ValueError, expected_error):
+                    mcp_setup.validate_and_get_mcp_sources(context)
 
     def test_non_positive_max_output_tokens_raises(self):
         context = self._context(
@@ -1157,17 +1564,17 @@ class FoundryIqMcpValidationTests(unittest.TestCase):
 
     def test_foundry_connection_auth_raises(self):
         context = self._context(sources=[self._source(auth={"kind": "foundryConnection"})])
-        with self.assertRaisesRegex(ValueError, "not supported"):
+        with self.assertRaisesRegex(ValueError, "not allowed"):
             mcp_setup.validate_and_get_mcp_sources(context)
 
     def test_secret_like_auth_key_raises(self):
         context = self._context(sources=[self._source(apiKey="not-a-real-secret")])
-        with self.assertRaisesRegex(ValueError, "credential material"):
+        with self.assertRaisesRegex(ValueError, "literal credentials"):
             mcp_setup.validate_and_get_mcp_sources(context)
 
     def test_unsupported_auth_kind_raises(self):
         context = self._context(sources=[self._source(auth={"kind": "oauth2"})])
-        with self.assertRaisesRegex(ValueError, "not supported"):
+        with self.assertRaisesRegex(ValueError, "not allowed"):
             mcp_setup.validate_and_get_mcp_sources(context)
 
     def test_managed_identity_auth_is_rejected(self):
@@ -1175,31 +1582,31 @@ class FoundryIqMcpValidationTests(unittest.TestCase):
         kind -- it is never rendered/forwarded, so even a would-be-safe
         {'kind': 'managedIdentity'} value must not be silently accepted."""
         context = self._context(sources=[self._source(auth={"kind": "managedIdentity"})])
-        with self.assertRaisesRegex(ValueError, "not supported"):
+        with self.assertRaisesRegex(ValueError, "not allowed"):
             mcp_setup.validate_and_get_mcp_sources(context)
 
     def test_authentication_key_is_rejected(self):
         context = self._context(sources=[self._source(authentication={"kind": "foundryConnection"})])
-        with self.assertRaisesRegex(ValueError, "not supported"):
+        with self.assertRaisesRegex(ValueError, "not allowed"):
             mcp_setup.validate_and_get_mcp_sources(context)
 
     def test_auth_nested_inside_tool_is_rejected(self):
         tool = {**self._source()["tools"][0], "auth": {"kind": "managedIdentity"}}
         context = self._context(sources=[self._source(tools=[tool])])
-        with self.assertRaisesRegex(ValueError, "not supported"):
+        with self.assertRaisesRegex(ValueError, "not allowed"):
             mcp_setup.validate_and_get_mcp_sources(context)
 
     def test_secret_like_key_nested_inside_tool_is_rejected(self):
         tool = {**self._source()["tools"][0], "token": "not-a-real-token"}
         context = self._context(sources=[self._source(tools=[tool])])
-        with self.assertRaisesRegex(ValueError, "credential material"):
+        with self.assertRaisesRegex(ValueError, "literal credentials"):
             mcp_setup.validate_and_get_mcp_sources(context)
 
     def test_secret_like_key_two_levels_deep_is_rejected(self):
         """The scan must recurse arbitrarily deep, not just one level."""
         tool = {**self._source()["tools"][0], "extra": {"nested": {"bearer": "not-a-real-token"}}}
         context = self._context(sources=[self._source(tools=[tool])])
-        with self.assertRaisesRegex(ValueError, "credential material"):
+        with self.assertRaisesRegex(ValueError, "literal credentials"):
             mcp_setup.validate_and_get_mcp_sources(context)
 
     def test_absent_auth_is_valid(self):
@@ -1209,6 +1616,42 @@ class FoundryIqMcpValidationTests(unittest.TestCase):
 
     def test_unexpected_source_key_raises(self):
         context = self._context(sources=[self._source(unexpectedKey="value")])
+        with self.assertRaisesRegex(ValueError, "unexpected key"):
+            mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_runtime_retrieval_controls_are_validated_and_preserved(self):
+        context = self._context(
+            sources=[
+                self._source(
+                    failOnError=False,
+                    maxOutputDocuments=25,
+                )
+            ]
+        )
+
+        sources = mcp_setup.validate_and_get_mcp_sources(context)
+
+        self.assertFalse(sources[0]["failOnError"])
+        self.assertEqual(sources[0]["maxOutputDocuments"], 25)
+
+    def test_invalid_runtime_retrieval_controls_raise(self):
+        cases = [
+            ({"failOnError": "false"}, "failOnError"),
+            ({"failOnError": None}, "failOnError"),
+            ({"maxOutputDocuments": True}, "maxOutputDocuments"),
+            ({"maxOutputDocuments": 0}, "maxOutputDocuments"),
+            ({"maxOutputDocuments": 51}, "maxOutputDocuments"),
+        ]
+        for overrides, expected_error in cases:
+            with self.subTest(overrides=overrides):
+                context = self._context(sources=[self._source(**overrides)])
+                with self.assertRaisesRegex(ValueError, expected_error):
+                    mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_legacy_server_url_casing_is_rejected(self):
+        source = self._source()
+        source["serverUrl"] = source.pop("serverURL")
+        context = self._context(sources=[source])
         with self.assertRaisesRegex(ValueError, "unexpected key"):
             mcp_setup.validate_and_get_mcp_sources(context)
 
@@ -1240,7 +1683,7 @@ class FoundryIqMcpPreflightCliTests(unittest.TestCase):
             "tools": [
                 {
                     "name": "query_logs",
-                    "outputParsing": "auto",
+                    "outputParsing": {"kind": "auto"},
                     "inclusionMode": "reranked",
                     "maxOutputTokens": 4096,
                 }
@@ -1283,6 +1726,62 @@ class FoundryIqMcpPreflightCliTests(unittest.TestCase):
         self.assertEqual(result, 0)
         self.assertEqual(stderr, "")
 
+    def test_valid_configuration_emits_canonical_json_for_app_configuration(self):
+        query_headers = [
+            {
+                "name": " Authorization ",
+                "valueFrom": {
+                    "kind": "managedIdentity",
+                    "scope": " api://monitor/.default ",
+                },
+            },
+            {
+                "name": "x-api-key",
+                "valueFrom": {
+                    "kind": "keyVaultSecret",
+                    "secretName": "monitor-api-key",
+                },
+            },
+        ]
+        env = {
+            **self.BASE_ENV,
+            "FOUNDRY_IQ_MCP_SOURCES_JSON": self._sources_json(
+                failOnError=False,
+                maxOutputDocuments=25,
+                queryHeaders=query_headers,
+            ),
+        }
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+        with patch.dict(os.environ, env, clear=False):
+            with redirect_stdout(stdout), redirect_stderr(stderr):
+                result = mcp_setup.main(emit_canonical=True)
+
+        self.assertEqual(result, 0)
+        self.assertEqual(stderr.getvalue(), "")
+        canonical = json.loads(stdout.getvalue())
+        self.assertFalse(canonical[0]["failOnError"])
+        self.assertEqual(canonical[0]["maxOutputDocuments"], 25)
+        self.assertEqual(
+            canonical[0]["queryHeaders"],
+            [
+                {
+                    "name": "Authorization",
+                    "valueFrom": {
+                        "kind": "managedIdentity",
+                        "scope": "api://monitor/.default",
+                    },
+                },
+                {
+                    "name": "x-api-key",
+                    "valueFrom": {
+                        "kind": "keyVaultSecret",
+                        "secretName": "monitor-api-key",
+                    },
+                },
+            ],
+        )
+
     def test_malformed_json_returns_one_before_any_write(self):
         result, stderr = self._run_main(FOUNDRY_IQ_MCP_SOURCES_JSON="{not valid json")
         self.assertEqual(result, 1)
@@ -1297,12 +1796,12 @@ class FoundryIqMcpPreflightCliTests(unittest.TestCase):
             FOUNDRY_IQ_MCP_SOURCES_JSON=self._sources_json(auth={"kind": "managedIdentity"})
         )
         self.assertEqual(result, 1)
-        self.assertIn("not supported", stderr)
+        self.assertIn("not allowed", stderr)
 
     def test_secret_like_key_returns_one_before_any_write(self):
         result, stderr = self._run_main(FOUNDRY_IQ_MCP_SOURCES_JSON=self._sources_json(apiKey="not-a-real-secret"))
         self.assertEqual(result, 1)
-        self.assertIn("credential material", stderr)
+        self.assertIn("literal credentials", stderr)
 
     def test_untrusted_host_returns_one_before_any_write(self):
         result, stderr = self._run_main(
@@ -1334,14 +1833,18 @@ class PostProvisionMcpSourceGuardTests(unittest.TestCase):
         preflight = script.index(
             "Invoke-PythonModule -ModuleName 'config.search.foundry_iq_mcp_setup'"
         )
-        enabled_source_read = script.index(
-            "$mcpSourcesJson = Get-OptionalEnvValue 'FOUNDRY_IQ_MCP_SOURCES_JSON' '[]'"
+        canonical_output = script.index(
+            "-Arguments @('--canonical')"
         )
         app_config_import = script.index("Set-GptRagAppConfiguration -Endpoint")
 
         self.assertLess(flag, preflight)
-        self.assertLess(preflight, enabled_source_read)
-        self.assertLess(enabled_source_read, app_config_import)
+        self.assertLess(preflight, canonical_output)
+        self.assertLess(canonical_output, app_config_import)
+        self.assertNotIn(
+            "$mcpSourcesJson = Get-OptionalEnvValue 'FOUNDRY_IQ_MCP_SOURCES_JSON'",
+            script,
+        )
         self.assertIn("$mcpSourcesJson = '[]'", script)
         self.assertIn("$mcpReasoningEffort = 'low'", script)
         self.assertIn("$mcpTrustedHosts = ''", script)
@@ -1507,7 +2010,7 @@ class KnowledgeSourceNameUniquenessTests(unittest.TestCase):
                     "tools": [
                         {
                             "name": "query",
-                            "outputParsing": "auto",
+                            "outputParsing": {"kind": "auto"},
                             "inclusionMode": "reranked",
                             "maxOutputTokens": 1024,
                         }

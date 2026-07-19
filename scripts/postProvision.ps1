@@ -157,28 +157,33 @@ $env:GPT_RAG_REPO_ROOT = $repoRoot
 Set-Location $repoRoot
 
 function Invoke-PythonModule {
-    param([Parameter(Mandatory = $true)][string]$ModuleName)
-    Invoke-NativeCommand { & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['GPT_RAG_REPO_ROOT']); runpy.run_module('$ModuleName', run_name='__main__')" }
+    param(
+        [Parameter(Mandatory = $true)][string]$ModuleName,
+        [string[]]$Arguments = @()
+    )
+    Invoke-NativeCommand {
+        & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['GPT_RAG_REPO_ROOT']); sys.argv = ['$ModuleName'] + sys.argv[1:]; runpy.run_module('$ModuleName', run_name='__main__')" @Arguments
+    }
 }
 
 #-------------------------------------------------------------------------------
 # Foundry IQ MCP Server source pre-flight validation
 # Validates FOUNDRY_IQ_MCP_SOURCES_JSON (JSON shape, security constraints:
-# no auth/authentication or literal credential material at any nesting
-# depth, trusted-host allowlisting, output-parsing shape, token caps) before
-# ANY of it is imported into Azure App Configuration below. A misconfigured
-# or malicious MCP source must be rejected before it is ever persisted, not
-# just before the knowledge source is registered by config.search.setup.
+# only non-secret queryHeaders references, no auth/authentication or literal
+# credential material at any nesting depth, trusted-host allowlisting,
+# output-parsing shape, token caps) before ANY of it is imported into Azure
+# App Configuration below. The validator returns canonical JSON so the raw
+# operator value is never persisted.
 #-------------------------------------------------------------------------------
 $mcpEnabled = Test-Truthy (Get-OptionalEnvValue 'FOUNDRY_IQ_MCP_ENABLED' 'false')
 if ($mcpEnabled) {
     Write-Host "🔐 Validating Foundry IQ MCP Server source configuration..."
-    Invoke-PythonModule -ModuleName 'config.search.foundry_iq_mcp_setup'
+    $mcpSourcesJson = Invoke-PythonModule -ModuleName 'config.search.foundry_iq_mcp_setup' -Arguments @('--canonical')
     if ($LASTEXITCODE -ne 0) {
         Write-Error "Foundry IQ MCP Server source validation failed; aborting before any App Configuration write."
         exit 1
     }
-    $mcpSourcesJson = Get-OptionalEnvValue 'FOUNDRY_IQ_MCP_SOURCES_JSON' '[]'
+    $mcpSourcesJson = ([string]$mcpSourcesJson).Trim()
     $mcpReasoningEffort = Get-OptionalEnvValue 'FOUNDRY_IQ_MCP_REASONING_EFFORT' 'low'
     $mcpTrustedHosts = Get-OptionalEnvValue 'FOUNDRY_IQ_MCP_TRUSTED_HOSTS' ''
     $mcpLogToolArguments = Get-OptionalEnvValue 'FOUNDRY_IQ_MCP_LOG_TOOL_ARGUMENTS' 'false'
@@ -482,8 +487,10 @@ function Set-GptRagAppConfiguration {
         # FOUNDRY_IQ_MCP_SOURCES_JSON (a JSON array; see
         # docs/howto_grounding_mcp_server.md for the schema). Disabled by
         # default. No secrets belong in FOUNDRY_IQ_MCP_SOURCES_JSON or in
-        # App Configuration; only managed-identity-authenticated MCP
-        # servers are supported. FOUNDRY_IQ_MCP_TRUSTED_HOSTS is a
+        # App Configuration. queryHeaders may contain only managed identity
+        # or OBO scopes, Key Vault secret names, or explicit none metadata;
+        # the compatible orchestrator resolves values at request time.
+        # FOUNDRY_IQ_MCP_TRUSTED_HOSTS is a
         # comma-separated allowlist of exact hostnames the provisioning
         # script requires an MCP serverURL to match before it will
         # register the source.
