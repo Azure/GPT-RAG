@@ -110,6 +110,7 @@ sign in.
 | `indexedOneLake` | App-only. Foundry IQ managed identity reads the lakehouse. | No. |
 | `indexedSharePoint` | App-only. Microsoft Graph `Sites.Selected` or `Sites.Read.All` on a registered Entra app. No per-user ACL trimming in this preview. | No. |
 | `web` (Grounding with Bing) | App-only. No ACL. Billed per call. | No. |
+| `mcpServer` (generic MCP server) | App-only, managed-identity only in this release. No per-user ACL trimming. See [Generic MCP server](howto_grounding_mcp_server.md#authentication). | No. |
 | `workIq` | On-behalf-of (OBO). Orchestrator forwards the user's delegated token in `x-ms-query-source-authorization`. | Yes. |
 | `remoteSharePoint` | OBO through the Microsoft 365 Copilot Retrieval API. | Yes. |
 | `fabricOntology` | OBO to Microsoft Fabric. | Yes. |
@@ -139,6 +140,10 @@ this: at `retrievalReasoningEffort=minimal` (the current default) the
 Knowledge Base skips LLM planning entirely. Configure a planning model when:
 
 - You enable the `web` knowledge source. Web requires an LLM.
+- You enable one or more generic MCP server (`mcpServer`) sources. MCP
+  requires `low` or `medium` reasoning so the planner can select a tool
+  and generate its arguments; see
+  [Generic MCP server](howto_grounding_mcp_server.md#knowledge-base-planning-model).
 - You want `low` or `medium` reasoning effort so the Knowledge Base can
   select and blend across multiple sources.
 
