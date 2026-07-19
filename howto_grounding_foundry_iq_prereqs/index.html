@@ -1195,6 +1195,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_mcp_server/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Generic MCP server
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1651,6 +1672,11 @@ sign in.</p>
 <td>No.</td>
 </tr>
 <tr>
+<td><code>mcpServer</code> (generic MCP server)</td>
+<td>Registration is app-only. Endpoint authentication is separate and requires a compatible runtime for query-time headers. App-only managed identity and per-user OBO are distinct runtime token-acquisition options. See <a href="../howto_grounding_mcp_server/#authentication">Generic MCP server</a>.</td>
+<td>Only if you choose OBO for per-user endpoint authorization.</td>
+</tr>
+<tr>
 <td><code>workIq</code></td>
 <td>On-behalf-of (OBO). Orchestrator forwards the user's delegated token in <code>x-ms-query-source-authorization</code>.</td>
 <td>Yes.</td>
@@ -1677,6 +1703,12 @@ configured to forward a delegated token. This is the same plumbing that
 <a href="../howto_authentication/">Auth and Doc Security</a> describes for GPT-RAG's own
 security-trimmed retrieval. Each per-source page lists the specific tenant
 consent, delegated permissions, and licensing you need.</p>
+<p>For <code>mcpServer</code>, do not confuse the orchestrator's managed identity with an
+OBO token. Managed identity is app-only and gives every user the same MCP
+authorization scope. OBO preserves the signed-in user's identity and only
+works when the MCP endpoint validates that delegated token. Neither mode is
+configured by the provisioning-only change described in
+<a href="../howto_grounding_mcp_server/">Generic MCP server</a>.</p>
 <h2 id="feature-flags-gated-by-microsoft">Feature flags gated by Microsoft</h2>
 <p>Two knowledge sources require Microsoft-controlled enrollment before you can
 use them. GPT-RAG cannot enable these for you.</p>
@@ -1708,6 +1740,11 @@ this: at <code>retrievalReasoningEffort=minimal</code> (the current default) the
 Knowledge Base skips LLM planning entirely. Configure a planning model when:</p>
 <ul>
 <li>You enable the <code>web</code> knowledge source. Web requires an LLM.</li>
+<li>You enable one or more generic MCP server (<code>mcpServer</code>) sources. MCP
+  requires <code>low</code> or <code>medium</code> reasoning so the planner can select a tool
+  and generate its arguments. A compatible orchestrator must also use a
+  <code>messages</code>-based retrieve request; see
+  <a href="../howto_grounding_mcp_server/#knowledge-base-planning-model">Generic MCP server</a>.</li>
 <li>You want <code>low</code> or <code>medium</code> reasoning effort so the Knowledge Base can
   select and blend across multiple sources.</li>
 </ul>

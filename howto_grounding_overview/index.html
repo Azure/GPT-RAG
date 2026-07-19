@@ -1181,6 +1181,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_mcp_server/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Generic MCP server
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1480,7 +1501,7 @@ set of pages you are reading.</p>
 </tr>
 <tr>
 <td>Sources it can blend</td>
-<td>Blob, existing Search index, Work IQ, Fabric ontology, Fabric Data Agent, SharePoint (remote and indexed), OneLake, Web</td>
+<td>Blob, existing Search index, Work IQ, Fabric ontology, Fabric Data Agent, SharePoint (remote and indexed), OneLake, Web, generic MCP servers</td>
 <td>One AI Search index</td>
 </tr>
 <tr>
@@ -1557,7 +1578,8 @@ result.</p>
   KB --&gt; KS6[SharePoint remote - remoteSharePoint - Preview]
   KB --&gt; KS7[OneLake indexed - indexedOneLake - Preview]
   KB --&gt; KS8[SharePoint indexed - indexedSharePoint - Preview]
-  KB --&gt; KS9[Web grounding - web - Preview]</code></pre>
+  KB --&gt; KS9[Web grounding - web - Preview]
+  KB --&gt; KS10[Generic MCP server - mcpServer - Preview]</code></pre>
 <p>Two things matter for operators.</p>
 <ul>
 <li>A Knowledge Base can hold several sources. The orchestrator gets blended
@@ -1643,6 +1665,12 @@ source.</p>
 <td>Preview, billed per Bing call</td>
 <td><a href="../howto_grounding_web_bing/">Web grounding</a></td>
 </tr>
+<tr>
+<td>Generic MCP server</td>
+<td><code>mcpServer</code></td>
+<td>Configuration preview, compatible runtime required</td>
+<td><a href="../howto_grounding_mcp_server/">Generic MCP server</a></td>
+</tr>
 </tbody>
 </table>
 <h3 id="pick-a-source">Pick a source</h3>
@@ -1669,6 +1697,13 @@ Knowledge Base.</p>
   queries lakehouse content natively.</li>
 <li><strong>Public web, scoped by allow / block lists.</strong> Add <code>web</code>. No ACL, no
   OBO, billed per Bing call.</li>
+<li><strong>Live, tool-backed data from a trusted remote MCP server</strong> (metrics,
+  logs, or another system that cannot be pre-indexed). Add <code>mcpServer</code>.
+  Requires an explicit tool allowlist, a trusted-host allowlist, and a
+  knowledge base planning model. The proposed provisioning settings are
+  not yet available in a released GPT-RAG version, and a compatible
+  orchestrator is also required. See
+  <a href="../howto_grounding_mcp_server/">Generic MCP server</a>.</li>
 </ul>
 <h2 id="approach-b-azure-ai-search-direct">Approach B: Azure AI Search direct</h2>
 <p>GPT-RAG can skip Foundry IQ and query an Azure AI Search index directly.

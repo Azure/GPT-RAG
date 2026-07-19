@@ -1,0 +1,2119 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Official project documentation">
+      
+      
+        <meta name="author" content="Paulo Lacerda">
+      
+      
+      
+        <link rel="prev" href="../howto_grounding_web_bing/">
+      
+      
+        <link rel="next" href="../howto_grounding_ai_search_direct/">
+      
+      
+      <link rel="icon" href="../favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.34">
+    
+    
+      
+        <title>Generic MCP server - GPT-RAG</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.35f28582.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../styles.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#foundry-iq-generic-mcp-server-knowledge-sources" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="GPT-RAG" class="md-header__button md-logo" aria-label="GPT-RAG" data-md-component="logo">
+      
+  <img src="../media/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            GPT-RAG
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Generic MCP server
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/azure/gpt-rag" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="GPT-RAG" class="md-nav__button md-logo" aria-label="GPT-RAG" data-md-component="logo">
+      
+  <img src="../media/logo.png" alt="logo">
+
+    </a>
+    GPT-RAG
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/azure/gpt-rag" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../whatisnew/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    What's New
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../release_267_270_walkthrough/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Release Walkthrough
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deploy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Deployment Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Quick Start Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Quick Start Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart_simple_rag/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Simple RAG
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart_nl2sql/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    NL2SQL
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Architecture
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Architecture
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Services
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Services
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_orchestrator/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Orchestrator
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_2" id="__nav_7_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Ingestion
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_2">
+            <span class="md-nav__icon md-icon"></span>
+            Ingestion
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_ingestion/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_blob_data_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Blob
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_sharepoint_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Sharepoint
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_nl2sql_data_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    NL2SQL
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    How-to Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            How-to Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_azure_direct/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Azure Direct Models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_app_gateway/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Application Gateway
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_authentication/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Auth & Doc Security
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/Azure/gpt-rag-ui/blob/1ef6f9e88022e3168b8caf9c867f090eb632f562/docs/copilot-embedding.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Embed chat in a portal
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_dashboard_signin/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Admin Dashboard Sign-in
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_8_6" id="__nav_8_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Grounding sources
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_8_6">
+            <span class="md-nav__icon md-icon"></span>
+            Grounding sources
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview (start here)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_6_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_8_6_2" id="__nav_8_6_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Approach A: Foundry IQ
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_8_6_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_8_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            Approach A: Foundry IQ
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_foundry_iq_prereqs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Prerequisites
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_foundry_iq_documents/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Documents
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_work_iq/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Work IQ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_fabric_ontology/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Fabric ontology
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_fabric_data_agent/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Fabric Data Agent
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_sharepoint_remote/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    SharePoint remote
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_sharepoint_indexed/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    SharePoint indexed
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_onelake/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    OneLake
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_web_bing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Web grounding
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Generic MCP server
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Generic MCP server
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      How it works
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#when-to-use-a-generic-mcp-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      When to use a generic MCP source
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configure-a-generic-mcp-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configure a generic MCP source
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configure a generic MCP source">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#source-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      Source schema
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trusted-hosts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Trusted hosts
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      Authentication
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#knowledge-base-planning-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      Knowledge base planning model
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reference-scenario-azure-monitor-mcp" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reference scenario: Azure Monitor MCP
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#network-and-gateway-guidance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Network and gateway guidance
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-and-trust-boundary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security and trust boundary
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rollout-canary-and-rollback" class="md-nav__link">
+    <span class="md-ellipsis">
+      Rollout, canary, and rollback
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#production-blockers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Production blockers
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-reading" class="md-nav__link">
+    <span class="md-ellipsis">
+      Related reading
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_6_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_8_6_3" id="__nav_8_6_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Approach B: AI Search direct
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_8_6_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_6_3">
+            <span class="md-nav__icon md-icon"></span>
+            Approach B: AI Search direct
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_ai_search_direct/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_sharepoint_connector/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    SharePoint connector
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_multimodality/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Multimodality
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_userfeedback/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    User Feedback
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_retrieval_optimization/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Retrieval Optimization
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_resource_naming/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Resource Naming (CAF)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../team/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Meet the Team
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="foundry-iq-generic-mcp-server-knowledge-sources">Foundry IQ: Generic MCP server knowledge sources</h1>
+<p>The <code>mcpServer</code> Foundry IQ knowledge source lets the Knowledge Base call
+tools exposed by a remote <a href="https://modelcontextprotocol.io/">Model Context Protocol (MCP)</a>
+server you operate or trust, and blend the results with your other Foundry
+IQ sources (documents, Work IQ, Fabric, SharePoint, Web, and so on) in a
+single retrieve call. GPT-RAG's provisioning template is server-agnostic:
+it does not hard-code any particular MCP server. Azure Monitor MCP over
+workspace-scoped Application Insights / Log Analytics is used below as the
+worked reference scenario.</p>
+<p>If you have not read the <a href="../howto_grounding_overview/">Grounding sources overview</a>,
+start there.</p>
+<div class="admonition warning">
+<p class="admonition-title">Preview configuration, not yet available end to end</p>
+<p>MCP Server knowledge sources use a preview Foundry IQ knowledge-source
+kind (<code>mcpServer</code>) on the <code>2026-05-01-preview</code> Azure AI Search API.
+Behavior and configuration may change without notice; do not depend on
+this for production workloads until it is generally available.</p>
+<p>The <code>FOUNDRY_IQ_MCP_*</code> settings on this page match the proposed
+provisioning implementation in
+<a href="https://github.com/Azure/GPT-RAG/pull/568">GPT-RAG code PR #568</a>.
+They are not available in a released GPT-RAG version yet. That PR
+registers the source but does not update the orchestrator to send the
+required <code>messages</code> request or query-time authentication headers. Keep
+<code>FOUNDRY_IQ_MCP_ENABLED=false</code> until you deploy both the provisioning
+change and a compatible orchestrator release.</p>
+<p>An MCP server is a <strong>remote, tool-invoking endpoint</strong>.
+Azure AI Search's knowledge-base planner decides which tool to call and
+generates that tool's arguments from the user's question. Tool safety
+does not guarantee semantic correctness of the generated arguments.
+Only point this at MCP servers you trust, scope every tool to
+read-only, bounded operations, and review the
+<a href="#security-and-trust-boundary">Security</a> section below before you
+enable this in any environment that is not fully isolated.</p>
+</div>
+<blockquote>
+<p>Complete the <a href="../howto_grounding_foundry_iq_prereqs/">Foundry IQ prerequisites</a>
+first. The Prerequisites section below covers only what is specific to
+this source.</p>
+</blockquote>
+<h2 id="how-it-works">How it works</h2>
+<p>When the provisioning and compatible runtime changes are both deployed,
+Azure AI Search calls the registered MCP server directly over HTTPS:</p>
+<pre class="mermaid"><code>flowchart LR
+  O[GPT-RAG orchestrator] --&gt; KB[Foundry IQ Knowledge Base]
+  KB -- "plans + selects a tool" --&gt; KB
+  KB -- "HTTPS, tool call" --&gt; MCP[Remote MCP server]
+  MCP --&gt; KB
+  KB --&gt; O</code></pre>
+<ol>
+<li>A compatible orchestrator sends a <code>messages</code>-based retrieve request to the
+   Knowledge Base with <code>low</code> or <code>medium</code> reasoning effort (never
+   <code>minimal</code>). Minimal reasoning skips query planning entirely, and MCP
+   tool selection and argument generation require the planner to run.</li>
+<li>The Knowledge Base's planning model (see
+   <a href="#knowledge-base-planning-model">Knowledge base planning model</a> below)
+   decides whether to call the MCP source, which tool to invoke, and what
+   arguments to generate for it.</li>
+<li>Azure AI Search invokes the governed remote HTTPS MCP endpoint you
+   registered -- the exact <code>serverURL</code> from your configuration, never a
+   value supplied by the end user or by the orchestrator at query time.
+   Only the tools you explicitly allowlisted per source can be called.</li>
+<li>The tool output is parsed according to the <code>outputParsing</code> mode and
+   returned in the normal retrieve response. Each MCP call appears in the
+   <code>activity</code> array. Each result appears in <code>references</code> and points back to
+   its activity entry through <code>activitySource</code>.</li>
+</ol>
+<p>The MCP <code>references</code> entries do <strong>not</strong> contain the knowledge-source name.
+The name appears as <code>knowledgeSourceName</code> on the matching <code>activity</code> entry.
+Join <code>references[].activitySource</code> to <code>activity[].id</code> when you need to
+identify which source produced a citation.</p>
+<p>The user request and the retrieve response still pass through the
+orchestrator. Only the MCP tool call travels directly from Azure AI Search
+to the registered remote HTTPS endpoint. Query-time credential forwarding
+is also an orchestrator responsibility and is not implemented by code
+PR #568.</p>
+<h2 id="when-to-use-a-generic-mcp-source">When to use a generic MCP source</h2>
+<p>Use an MCP Server knowledge source when:</p>
+<ul>
+<li>You need live, tool-backed data (metrics, logs, a ticketing system, an
+  internal API) that cannot be pre-indexed, and an MCP server already
+  exposes it with a bounded, read-only tool surface.</li>
+<li>You control or trust the MCP server's operator and network exposure, and
+  you have a supported way to authenticate the Azure AI Search call to it.</li>
+<li>You can accept that the knowledge base's planning model, not a human,
+  decides when to call the tool and what arguments to generate.</li>
+</ul>
+<p>Do not use it when:</p>
+<ul>
+<li>The MCP server is untrusted, publicly writable, or you cannot audit the
+  arguments the planner generates.</li>
+<li>The data is better served by an indexed knowledge source (Blob, AI
+  Search index, SharePoint indexed, OneLake). Indexed sources have a much
+  smaller trust surface than a live tool call.</li>
+<li>You need static, long-lived credential (API key or bearer token)
+  authentication. Azure AI Search supports stored headers upstream, but
+  GPT-RAG code PR #568 deliberately does not emit them;
+  see <a href="#authentication">Authentication</a> below.</li>
+</ul>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>All of these are hard blockers. Work through them in order.</p>
+<ol>
+<li><strong>The MCP server must be reachable over HTTPS with a fixed, production
+   hostname.</strong> No IP-literal endpoints, no <code>localhost</code>, no query strings
+   with embedded credentials. See <a href="#trusted-hosts">Trusted hosts</a>.</li>
+<li><strong>A supported endpoint authentication path.</strong> Code PR #568 does not
+   configure credentials on the knowledge source and the current
+   orchestrator does not forward credentials at query time. Do not assume
+   Azure AI Search automatically presents its managed identity to the MCP
+   endpoint. See <a href="#authentication">Authentication</a>.</li>
+<li><strong>Every tool you intend to call is explicitly allowlisted.</strong> There is
+   no "allow all tools" option. Add each tool by name with its own
+   <code>inclusionMode</code>, <code>outputParsing</code>, and <code>maxOutputTokens</code>.</li>
+<li><strong>A knowledge base planning model.</strong> MCP requires <code>low</code> or <code>medium</code>
+   <code>retrievalReasoningEffort</code>, which requires an Azure OpenAI chat model
+   on the knowledge base. See
+   <a href="#knowledge-base-planning-model">Knowledge base planning model</a>.</li>
+<li><strong>Network egress review.</strong> Confirm with your network/security owner
+   that the Azure AI Search service is allowed to call the MCP server's
+   hostname, and that the MCP server's ingress is restricted to expected
+   callers. See <a href="#network-and-gateway-guidance">Network and gateway guidance</a>.</li>
+</ol>
+<h2 id="configure-a-generic-mcp-source">Configure a generic MCP source</h2>
+<p>The proposed MCP support is opt-in and defaults to off. After code PR #568
+is available, <code>azd provision</code> seeds five keys under the <code>gpt-rag</code> label
+with safe defaults (<code>FOUNDRY_IQ_MCP_ENABLED=false</code>, an empty source list,
+and conservative defaults for the rest). You do not have to create them by
+hand.</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Default</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>FOUNDRY_IQ_MCP_ENABLED</code></td>
+<td><code>false</code></td>
+<td><code>true</code> to enable, <code>false</code> to disable.</td>
+</tr>
+<tr>
+<td><code>FOUNDRY_IQ_MCP_SOURCES_JSON</code></td>
+<td><code>[]</code></td>
+<td>JSON array of MCP source objects. See schema below.</td>
+</tr>
+<tr>
+<td><code>FOUNDRY_IQ_MCP_REASONING_EFFORT</code></td>
+<td><code>low</code></td>
+<td><code>low</code> or <code>medium</code>. Controls the knowledge base's <code>retrievalReasoningEffort</code> when MCP is enabled.</td>
+</tr>
+<tr>
+<td><code>FOUNDRY_IQ_MCP_TRUSTED_HOSTS</code></td>
+<td>`` (empty)</td>
+<td>Comma-separated allowlist of exact hostnames. Every <code>serverURL</code> host must match one of these exactly.</td>
+</tr>
+<tr>
+<td><code>FOUNDRY_IQ_MCP_LOG_TOOL_ARGUMENTS</code></td>
+<td><code>false</code></td>
+<td>Reserved for a compatible orchestrator implementation. Code PR #568 only seeds this key; it does not log tool arguments. Leave it <code>false</code> because arguments can contain user or customer data.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="source-schema">Source schema</h3>
+<p>Each entry in <code>FOUNDRY_IQ_MCP_SOURCES_JSON</code> is a JSON object:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;monitor-mcp-ks&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Azure Monitor MCP over the platform Log Analytics workspace&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;serverURL&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://monitor-mcp.contoso.com/mcp&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;tools&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;query_logs&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;outputParsing&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;inclusionMode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;reranked&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;maxOutputTokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4096</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Required</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>Yes</td>
+<td>Unique across all MCP sources. Becomes the knowledge-source name.</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>No</td>
+<td>Defaults to a generic description if omitted.</td>
+</tr>
+<tr>
+<td><code>serverURL</code></td>
+<td>Yes</td>
+<td>Must be <code>https://</code>, no userinfo, no fragment, no IP literal, and its host must exactly match an entry in <code>FOUNDRY_IQ_MCP_TRUSTED_HOSTS</code>.</td>
+</tr>
+<tr>
+<td><code>tools</code></td>
+<td>Yes</td>
+<td>Non-empty array. Every tool the planner is allowed to call.</td>
+</tr>
+<tr>
+<td><code>auth</code></td>
+<td>No</td>
+<td>Validation-only in code PR #568. It is never forwarded and does not authenticate the endpoint. See <a href="#authentication">Authentication</a>.</td>
+</tr>
+</tbody>
+</table>
+<p>Each tool object:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Required</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>Yes</td>
+<td>Unique within the source.</td>
+</tr>
+<tr>
+<td><code>outputParsing</code></td>
+<td>Yes</td>
+<td>One of <code>auto</code>, <code>json</code>, <code>split</code>, <code>none</code>.</td>
+</tr>
+<tr>
+<td><code>documentsPath</code></td>
+<td>Only if <code>outputParsing</code> is <code>json</code></td>
+<td>JSON path into the tool's structured output.</td>
+</tr>
+<tr>
+<td><code>inclusionMode</code></td>
+<td>Yes</td>
+<td><code>reranked</code> (only included when the reranker judges it relevant) or <code>always</code> (always passed to the model; budget accordingly).</td>
+</tr>
+<tr>
+<td><code>maxOutputTokens</code></td>
+<td>Yes</td>
+<td>Positive integer. Provisioning enforces a local cap of <code>8192</code> regardless of what the Search service would otherwise accept, to bound cost and prompt size.</td>
+</tr>
+</tbody>
+</table>
+<p>After code PR #568 is available, <code>azd provision</code> parses and validates this
+JSON during setup and <strong>fails the
+deployment closed</strong> if it is invalid while <code>FOUNDRY_IQ_MCP_ENABLED=true</code>:
+malformed JSON, zero sources, zero tools, duplicate source or tool names,
+a non-<code>https</code> scheme, userinfo or a fragment in <code>serverURL</code>, an IP-literal
+or <code>localhost</code> host, a host outside <code>FOUNDRY_IQ_MCP_TRUSTED_HOSTS</code>, an
+unsupported <code>outputParsing</code> or <code>inclusionMode</code> value, a missing
+<code>documentsPath</code> when required, a non-positive or over-cap
+<code>maxOutputTokens</code>, or unsupported <code>auth</code> metadata all abort provisioning
+with an actionable error instead of silently registering a broken or
+insecure source.</p>
+<h3 id="trusted-hosts">Trusted hosts</h3>
+<p><code>FOUNDRY_IQ_MCP_TRUSTED_HOSTS</code> is a comma-separated allowlist of exact
+hostnames (not URLs, not wildcards, not CIDR ranges). Every <code>serverURL</code>
+you configure must have a host that matches one of these entries exactly
+(case-insensitive). This is defense in depth on top of the network-level
+egress control described in
+<a href="#network-and-gateway-guidance">Network and gateway guidance</a>: even if an
+operator fat-fingers a source's <code>serverURL</code>, provisioning refuses to
+register a knowledge source pointing anywhere the allowlist has not
+explicitly approved. IP literals are always rejected outright (this
+blocks loopback, link-local, and other reserved ranges by construction),
+so the allowlist is DNS-hostname-only.</p>
+<h3 id="authentication">Authentication</h3>
+<p>There are two separate authentication hops:</p>
+<ol>
+<li>The orchestrator authenticates to Azure AI Search to call the Knowledge
+   Base.</li>
+<li>Azure AI Search calls the MCP endpoint and must satisfy that endpoint's
+   authentication requirements.</li>
+</ol>
+<p>Do not treat the trusted-host list, private DNS, an IP allowlist, TLS, or
+CORS as authentication. CORS is a browser control and does not protect this
+server-to-server call.</p>
+<p>Azure AI Search currently documents three endpoint-authentication patterns:</p>
+<ul>
+<li><code>foundryConnection</code>, only when Foundry Agent Service invokes the
+  Knowledge Base. It does not apply to GPT-RAG's direct retrieve call.</li>
+<li><code>storedHeaders</code>, for static credentials. GPT-RAG code PR #568 does not
+  render this option and rejects literal credentials.</li>
+<li>Paired query-time control headers, prefixed with the knowledge-source
+  name. This is the appropriate upstream mechanism for rotating or
+  per-request credentials, but it requires orchestrator support that is
+  not included in code PR #568.</li>
+</ul>
+<p>Managed identity and OBO describe how a compatible orchestrator can obtain
+the token placed in a paired query-time header:</p>
+<ul>
+<li><strong>Managed identity</strong> obtains an app-only token. Every user sees the same
+  MCP authorization scope.</li>
+<li><strong>On-behalf-of (OBO)</strong> exchanges the signed-in user's delegated token.
+  Use it only when the MCP server enforces per-user authorization.</li>
+</ul>
+<p>Neither mode is enabled by writing <code>{"kind": "managedIdentity"}</code> in
+<code>FOUNDRY_IQ_MCP_SOURCES_JSON</code>. Code PR #568 accepts that value only as a
+validation no-op and does not emit an <code>authentication</code> block. Any <code>auth</code>
+object containing API keys, tokens, secrets, passwords, or headers is
+rejected. <strong>Never put credential material in
+<code>FOUNDRY_IQ_MCP_SOURCES_JSON</code> or App Configuration.</strong></p>
+<p>Until a compatible orchestrator forwards the documented paired headers,
+use this feature only with an isolated test endpoint that does not require
+credentials. Do not expose an unauthenticated MCP endpoint to the public
+internet.</p>
+<h3 id="knowledge-base-planning-model">Knowledge base planning model</h3>
+<p>When at least one MCP source is enabled, the knowledge base's <code>models</code>
+array is populated with the same Azure OpenAI model object GPT-RAG already
+renders for standard-mode Blob content extraction (reusing
+<code>FOUNDRY_IQ_AI_SERVICES_ENDPOINT</code>, <code>CHAT_DEPLOYMENT_NAME</code>'s deployment, and
+model name from <code>MODEL_DEPLOYMENTS</code>), and <code>retrievalReasoningEffort</code> is set
+to <code>FOUNDRY_IQ_MCP_REASONING_EFFORT</code> (<code>low</code> by default, or <code>medium</code>).
+Provisioning fails closed if no chat model or AI Services endpoint can be
+resolved, since the planner cannot select or call an MCP tool without one.
+When MCP is disabled, <code>models</code> stays <code>[]</code> and reasoning effort stays
+<code>minimal</code>, exactly as before this feature existed.</p>
+<h2 id="reference-scenario-azure-monitor-mcp">Reference scenario: Azure Monitor MCP</h2>
+<p>Azure Monitor MCP over a workspace-scoped Log Analytics workspace is the
+motivating scenario for this feature, used here purely as a worked
+example. The template has no Azure Monitor-specific code path.</p>
+<ol>
+<li>Deploy or identify an Azure Monitor MCP endpoint. Put it behind API
+   Management or an equivalent gateway, and restrict the backend to one
+   Log Analytics workspace or a small, explicit set of workspaces.</li>
+<li>Identify the principal that actually queries Log Analytics:<ul>
+<li>If the hosted MCP server uses its own managed identity, grant that
+  identity access.</li>
+<li>If a compatible orchestrator forwards an app-only or OBO token, grant
+  the principal represented by that token access.</li>
+</ul>
+</li>
+</ol>
+<p>Do <strong>not</strong> grant the Azure AI Search service identity Log Analytics
+   access unless your endpoint has a separately verified design that
+   authenticates and uses that identity.
+3. Assign <strong>Log Analytics Data Reader</strong> at the <strong>workspace scope</strong>, not at
+   subscription or resource-group scope. Do not grant Contributor.
+4. Expose only the Azure Monitor MCP workspace-log query tool. Get its
+   exact name from the endpoint's <code>tools/list</code> response because tool names
+   can change between Azure MCP Server versions. Enforce these controls in
+   the MCP server or gateway, not only in the prompt:
+    - A bounded lookback, such as 24 hours.
+    - A row cap, such as 100 rows.
+    - Read-only KQL, with no management commands or unapproved
+      cross-workspace queries.
+    - Auditable tool arguments and generated KQL. Payloads can contain
+      customer data, so log them only in a controlled environment and
+      apply retention and access controls.
+5. Add the source to <code>FOUNDRY_IQ_MCP_SOURCES_JSON</code>. Replace
+   <code>&lt;workspace-log-query-tool&gt;</code> with the exact name returned by
+   <code>tools/list</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;azure-monitor-mcp-ks&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Azure Monitor MCP over the platform observability workspace&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;serverURL&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://azmon-mcp.contoso.com/mcp&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;tools&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;workspace-log-query-tool&gt;&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;outputParsing&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;inclusionMode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;reranked&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;maxOutputTokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4096</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">]</span>
+</code></pre></div>
+<ol>
+<li>Add <code>azmon-mcp.contoso.com</code> to <code>FOUNDRY_IQ_MCP_TRUSTED_HOSTS</code>. In an
+   isolated test environment with compatible provisioning and
+   orchestrator builds, set <code>FOUNDRY_IQ_MCP_ENABLED=true</code> and run
+   <code>azd hooks run postprovision</code> or <code>azd provision</code>.</li>
+<li>Ask a bounded question, such as "Were there any 5xx spikes on the
+   checkout service in the last 24 hours? Limit the result to 100 rows."
+   Review the generated KQL before trusting the answer. A safe query should
+   contain both a time predicate and a result cap, for example:</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="n">AppRequests</span>
+<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">TimeGenerated</span><span class="w"> </span><span class="p">&gt;=</span><span class="w"> </span><span class="n">ago</span><span class="p">(</span><span class="mi">24</span><span class="n">h</span><span class="p">)</span>
+<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">ResultCode</span><span class="w"> </span><span class="k">startswith</span><span class="w"> </span><span class="s">&quot;5&quot;</span>
+<span class="p">|</span><span class="w"> </span><span class="k">summarize</span><span class="w"> </span><span class="n">failures</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">count</span><span class="p">()</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">bin</span><span class="p">(</span><span class="n">TimeGenerated</span><span class="p">,</span><span class="w"> </span><span class="mi">15</span><span class="n">m</span><span class="p">)</span>
+<span class="p">|</span><span class="w"> </span><span class="k">top</span><span class="w"> </span><span class="mi">100</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">TimeGenerated</span><span class="w"> </span><span class="n">desc</span>
+</code></pre></div>
+<p>The bounded time range, row cap, read-only role, and auditable KQL are the
+minimum controls for exposing a natural-language-to-KQL tool to an LLM
+planner.</p>
+<h2 id="network-and-gateway-guidance">Network and gateway guidance</h2>
+<p>The trusted-host allowlist in this template is provisioning-time defense
+in depth, not a substitute for network-level control. Before enabling any
+MCP source outside a fully isolated test environment:</p>
+<ul>
+<li><strong>Put the MCP server behind Azure API Management or an equivalent
+  gateway</strong> so authentication, authorization, rate limiting, and
+  request logging do not depend only on the MCP implementation. Point
+  <code>serverURL</code> at the gateway endpoint, then add the gateway hostname to
+  <code>FOUNDRY_IQ_MCP_TRUSTED_HOSTS</code>. See
+  <a href="https://learn.microsoft.com/azure/api-management/expose-existing-mcp-server">Expose and govern an existing MCP server</a>,
+  <a href="https://learn.microsoft.com/azure/api-management/secure-mcp-servers">Secure access to MCP servers</a>,
+  <a href="https://learn.microsoft.com/azure/api-management/mcp-server-overview">About MCP servers in Azure API Management</a>,
+  and <a href="https://learn.microsoft.com/azure/api-management/monitor-mcp-servers">Monitor MCP server traffic in Azure API Management</a>.</li>
+<li><strong>Rate-limit the MCP endpoint.</strong> The knowledge base planner can call a
+  tool on every retrieve request that selects it; an unbounded MCP server
+  behind a popular knowledge base is an unbounded cost and load surface.</li>
+<li><strong>Restrict egress from Azure AI Search and ingress on the MCP server</strong>
+  to each other where your network topology allows it (private endpoints,
+  IP allowlists, or an API Management instance with its own private
+  ingress). If the Azure AI Search service is deployed with network
+  isolation, confirm the MCP server's hostname is reachable through the
+  same private path other outbound Search traffic uses.</li>
+<li><strong>Treat network controls and CORS as defense in depth.</strong> Private
+  connectivity and IP rules reduce exposure but do not identify the
+  caller. CORS controls browser JavaScript and does not authenticate Azure
+  AI Search. Require endpoint authentication as well.</li>
+<li><strong>Do not expose write-capable or destructive tools.</strong> Every tool
+  allowlisted in <code>FOUNDRY_IQ_MCP_SOURCES_JSON</code> should be safe to call
+  automatically and repeatedly, with no meaningful side effect if the
+  planner calls it with unexpected arguments.</li>
+</ul>
+<h2 id="security-and-trust-boundary">Security and trust boundary</h2>
+<ul>
+<li>The knowledge base planning model, not GPT-RAG code, decides when to
+  call an MCP tool and what arguments to pass. Treat every allowlisted
+  tool as something that <strong>will</strong> be called with LLM-generated arguments
+  during normal operation, not as a theoretical capability.</li>
+<li>MCP tool safety (the server rejecting unsafe calls) does not guarantee
+  semantic correctness (the server accepting a syntactically valid but
+  wrong query and returning misleading results). Bound blast radius at the
+  MCP server itself, not just at the GPT-RAG configuration layer.</li>
+<li>Nothing in code PR #568 accepts or forwards static credentials. Azure AI
+  Search supports stored headers, but GPT-RAG intentionally does not expose
+  that option because it would place long-lived secrets in configuration.
+  If an MCP server requires header or token authentication, do not work
+  around the missing runtime support by
+  embedding a token in <code>FOUNDRY_IQ_MCP_SOURCES_JSON</code>, in an environment
+  variable, or anywhere else in App Configuration. Use a gateway and a
+  compatible orchestrator that forwards a short-lived token through the
+  documented paired query-time headers.</li>
+</ul>
+<h2 id="rollout-canary-and-rollback">Rollout, canary, and rollback</h2>
+<ul>
+<li><strong>Canary.</strong> First deploy compatible provisioning and orchestrator builds
+  in a non-production environment. Enable one source with one low-risk,
+  read-only tool. Confirm the endpoint receives authenticated calls and
+  review the generated arguments before adding tools or sources.</li>
+<li><strong>Rollout.</strong> Add sources and tools incrementally. Each source is
+  independent; a problem with one MCP server does not require disabling
+  the others.</li>
+<li><strong>Rollback.</strong> Set <code>FOUNDRY_IQ_MCP_ENABLED=false</code> and run
+  <code>azd hooks run postprovision</code> or <code>azd provision</code>. This removes the MCP
+  references from the Knowledge Base and restores <code>models=[]</code> and
+  <code>retrievalReasoningEffort=minimal</code>. The top-level MCP knowledge-source
+  object can remain registered in Azure AI Search because provisioning
+  does not delete objects that disappear from the template. It is unused
+  after the Knowledge Base reference is removed. Delete it separately only
+  after you verify that no Knowledge Base references it.</li>
+</ul>
+<h2 id="production-blockers">Production blockers</h2>
+<p>Do not promote an MCP source to a production environment until all of the
+following are true:</p>
+<ul>
+<li>The <code>serverURL</code> is the actual production endpoint, not a development or
+  staging hostname left over from testing.</li>
+<li>A compatible orchestrator sends <code>messages</code>-based retrieval and the
+  endpoint authentication has been tested. Code PR #568 alone is not
+  sufficient.</li>
+<li>Every tool name in <code>FOUNDRY_IQ_MCP_SOURCES_JSON</code> matches the MCP
+  server's real, current tool names. A stale tool name fails at
+  registration or, worse, silently never gets selected by the planner.</li>
+<li>The identity used for the MCP endpoint and the identity used by the MCP
+  tool against its backend have both been reviewed for the correct token
+  audience and least-privilege role.</li>
+<li>The network and gateway guidance above has been reviewed and signed off
+  by whoever owns egress/ingress policy for your environment.</li>
+</ul>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<ul>
+<li><strong>Deployment fails during Search setup with a message naming
+  <code>FOUNDRY_IQ_MCP_SOURCES_JSON</code>.</strong> Provisioning validation rejected your
+  configuration. The error message names the exact field and rule that
+  failed (for example, an untrusted host, a duplicate name, or a missing
+  <code>documentsPath</code>). Fix the JSON and re-run <code>azd hooks run postprovision</code>.</li>
+<li><strong>No MCP citations in responses.</strong> Confirm <code>FOUNDRY_IQ_MCP_ENABLED=true</code>,
+  that <code>FOUNDRY_IQ_MCP_SOURCES_JSON</code> has at least one source, and that
+  <code>FOUNDRY_IQ_MCP_REASONING_EFFORT</code> is <code>low</code> or <code>medium</code>. Also confirm
+  that your orchestrator build supports <code>messages</code>-based MCP retrieval.
+  To identify the source for a citation, join its <code>activitySource</code> to the
+  matching activity record; the reference itself has no source name.</li>
+<li><strong>Planner never selects the MCP tool.</strong> Reasoning effort, tool
+  description quality, and <code>inclusionMode</code> all affect selection. Try
+  <code>medium</code> reasoning, or <code>inclusionMode: "always"</code> while diagnosing (then
+  revert to <code>reranked</code> once you confirm the tool works, to control token
+  usage).</li>
+<li><strong>Registration succeeds but calls fail at query time with an
+  authentication error.</strong> Registration does not prove endpoint
+  authentication works. Confirm the compatible orchestrator sends the
+  paired query-time headers, the token audience matches the MCP gateway,
+  and the gateway accepts the app-only or OBO identity you selected.</li>
+</ul>
+<h2 id="related-reading">Related reading</h2>
+<ul>
+<li><a href="../howto_grounding_overview/">Grounding sources overview</a></li>
+<li><a href="../howto_grounding_foundry_iq_prereqs/">Foundry IQ prerequisites</a></li>
+<li><a href="../howto_grounding_web_bing/">Foundry IQ: Web grounding</a></li>
+<li>Microsoft Learn: <a href="https://learn.microsoft.com/azure/search/agentic-knowledge-source-overview">What is a knowledge source?</a></li>
+<li>Microsoft Learn: <a href="https://learn.microsoft.com/azure/search/agentic-knowledge-source-how-to-mcp-server">Create an MCP Server knowledge source</a></li>
+<li>Microsoft Learn: <a href="https://learn.microsoft.com/azure/search/agentic-retrieval-how-to-create-knowledge-base">Create a Knowledge Base</a></li>
+<li>Microsoft Learn: <a href="https://learn.microsoft.com/azure/search/agentic-retrieval-how-to-retrieve">Query a Knowledge Base and review activity and references</a></li>
+<li>Microsoft Learn: <a href="https://learn.microsoft.com/azure/developer/ai/intro-agents-mcp">Build agents using Model Context Protocol on Azure</a></li>
+<li>Microsoft Learn: <a href="https://learn.microsoft.com/azure/api-management/expose-existing-mcp-server">Expose and govern an existing MCP server</a></li>
+<li>Microsoft Learn: <a href="https://learn.microsoft.com/azure/api-management/secure-mcp-servers">Secure access to MCP servers</a></li>
+<li>Microsoft Learn: <a href="https://learn.microsoft.com/azure/api-management/mcp-server-overview">About MCP servers in Azure API Management</a></li>
+<li>Microsoft Learn: <a href="https://learn.microsoft.com/azure/developer/azure-mcp-server/tools/azure-monitor">Azure MCP Server tools for Azure Monitor and Workbooks</a></li>
+<li>Microsoft Learn: <a href="https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/monitor#log-analytics-data-reader">Log Analytics Data Reader built-in role</a></li>
+<li><a href="https://azure.microsoft.com/support/legal/preview-supplemental-terms/">Microsoft preview terms</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <div style="
+  background-color: var(--md-primary-fg-color);
+  color: var(--md-primary-bg-color);
+  text-align: center;
+  font-size: 0.95em;
+  padding: 1em 0;
+">
+  © 2025 GPT-RAG — powered by ❤️ and coffee ☕
+</div>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.icon", "content.iconify", "navigation.tracking", "toc.integrate", "content.code.annotate", "navigation.top"], "search": "../assets/javascripts/workers/search.07f07601.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.56dfad97.min.js"></script>
+      
+        <script src="../javascripts/source-facts-refresh.js"></script>
+      
+    
+  </body>
+</html>
