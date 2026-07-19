@@ -6,6 +6,12 @@ patch, and fix, see the [GitHub releases](https://github.com/Azure/GPT-RAG/relea
 
 ### July 2026
 
+- **Generic MCP Server knowledge source (preview, [v3.6.0](https://github.com/Azure/GPT-RAG/releases/tag/v3.6.0)).**
+  The Knowledge Base can call approved tools on a remote MCP server you
+  operate or trust and blend those results with other Foundry IQ sources.
+  The feature is off by default, requires a trusted-host allowlist, and must
+  be deployed together with orchestrator `v3.7.0`. See
+  [Foundry IQ: Generic MCP server](howto_grounding_mcp_server.md).
 - **Four new Foundry IQ knowledge sources (preview, [v3.5.0](https://github.com/Azure/GPT-RAG/releases/tag/v3.5.0)).** All off by default and gated by their own App Config flags.
     - **SharePoint remote (`remoteSharePoint`).** Live retrieval from SharePoint via the Copilot Retrieval API, with per-user OBO ACL. See [Foundry IQ: SharePoint remote](howto_grounding_sharepoint_remote.md).
     - **OneLake indexed (`indexedOneLake`).** Fabric OneLake as a knowledge source, indexed and queried natively by Foundry IQ. See [Foundry IQ: OneLake](howto_grounding_onelake.md).
