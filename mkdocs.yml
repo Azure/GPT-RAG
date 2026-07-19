@@ -72,6 +72,7 @@ nav:
         - SharePoint indexed: howto_grounding_sharepoint_indexed.md
         - OneLake: howto_grounding_onelake.md
         - Web grounding: howto_grounding_web_bing.md
+        - Generic MCP server: howto_grounding_mcp_server.md
       - 'Approach B: AI Search direct':
         - Overview: howto_grounding_ai_search_direct.md
         - SharePoint connector: howto_sharepoint_connector.md

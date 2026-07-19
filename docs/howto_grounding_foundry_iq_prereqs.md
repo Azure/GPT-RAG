@@ -110,6 +110,7 @@ sign in.
 | `indexedOneLake` | App-only. Foundry IQ managed identity reads the lakehouse. | No. |
 | `indexedSharePoint` | App-only. Microsoft Graph `Sites.Selected` or `Sites.Read.All` on a registered Entra app. No per-user ACL trimming in this preview. | No. |
 | `web` (Grounding with Bing) | App-only. No ACL. Billed per call. | No. |
+| `mcpServer` (generic MCP server) | Registration is app-only. Endpoint authentication is separate and requires a compatible runtime for query-time headers. App-only managed identity and per-user OBO are distinct runtime token-acquisition options. See [Generic MCP server](howto_grounding_mcp_server.md#authentication). | Only if you choose OBO for per-user endpoint authorization. |
 | `workIq` | On-behalf-of (OBO). Orchestrator forwards the user's delegated token in `x-ms-query-source-authorization`. | Yes. |
 | `remoteSharePoint` | OBO through the Microsoft 365 Copilot Retrieval API. | Yes. |
 | `fabricOntology` | OBO to Microsoft Fabric. | Yes. |
@@ -120,6 +121,13 @@ configured to forward a delegated token. This is the same plumbing that
 [Auth and Doc Security](howto_authentication.md) describes for GPT-RAG's own
 security-trimmed retrieval. Each per-source page lists the specific tenant
 consent, delegated permissions, and licensing you need.
+
+For `mcpServer`, do not confuse the orchestrator's managed identity with an
+OBO token. Managed identity is app-only and gives every user the same MCP
+authorization scope. OBO preserves the signed-in user's identity and only
+works when the MCP endpoint validates that delegated token. Neither mode is
+configured by the provisioning-only change described in
+[Generic MCP server](howto_grounding_mcp_server.md).
 
 ## Feature flags gated by Microsoft
 
@@ -139,6 +147,11 @@ this: at `retrievalReasoningEffort=minimal` (the current default) the
 Knowledge Base skips LLM planning entirely. Configure a planning model when:
 
 - You enable the `web` knowledge source. Web requires an LLM.
+- You enable one or more generic MCP server (`mcpServer`) sources. MCP
+  requires `low` or `medium` reasoning so the planner can select a tool
+  and generate its arguments. A compatible orchestrator must also use a
+  `messages`-based retrieve request; see
+  [Generic MCP server](howto_grounding_mcp_server.md#knowledge-base-planning-model).
 - You want `low` or `medium` reasoning effort so the Knowledge Base can
   select and blend across multiple sources.
 

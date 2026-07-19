@@ -13,7 +13,7 @@ set of pages you are reading.
 | --- | --- | --- |
 | Orchestrator talks to | A single Knowledge Base endpoint that fans out to one or more Knowledge Sources | An Azure AI Search index |
 | `RETRIEVAL_BACKEND` | `foundry_iq` (default in v3.0.2+) | `ai_search` |
-| Sources it can blend | Blob, existing Search index, Work IQ, Fabric ontology, Fabric Data Agent, SharePoint (remote and indexed), OneLake, Web | One AI Search index |
+| Sources it can blend | Blob, existing Search index, Work IQ, Fabric ontology, Fabric Data Agent, SharePoint (remote and indexed), OneLake, Web, generic MCP servers | One AI Search index |
 | Multi-source, permission trimming, agentic retrieval | Yes, out of the box | No, you build it |
 | Custom ingestion pipeline | Optional (`searchIndex` source) | Required (GPT-RAG ingestion into the index) |
 | Status | Default, recommended | Fully supported, rollback and compatibility path |
@@ -79,6 +79,7 @@ flowchart LR
   KB --> KS7[OneLake indexed - indexedOneLake - Preview]
   KB --> KS8[SharePoint indexed - indexedSharePoint - Preview]
   KB --> KS9[Web grounding - web - Preview]
+  KB --> KS10[Generic MCP server - mcpServer - Preview]
 ```
 
 Two things matter for operators.
@@ -113,6 +114,7 @@ Two things matter for operators.
 | OneLake | `indexedOneLake` | Preview, requires workspace RBAC | [OneLake](howto_grounding_onelake.md) |
 | SharePoint indexed | `indexedSharePoint` | Preview, app-only auth | [SharePoint indexed](howto_grounding_sharepoint_indexed.md) |
 | Web grounding | `web` | Preview, billed per Bing call | [Web grounding](howto_grounding_web_bing.md) |
+| Generic MCP server | `mcpServer` | Configuration preview, compatible runtime required | [Generic MCP server](howto_grounding_mcp_server.md) |
 
 ### Pick a source
 
@@ -139,6 +141,13 @@ Knowledge Base.
   queries lakehouse content natively.
 - **Public web, scoped by allow / block lists.** Add `web`. No ACL, no
   OBO, billed per Bing call.
+- **Live, tool-backed data from a trusted remote MCP server** (metrics,
+  logs, or another system that cannot be pre-indexed). Add `mcpServer`.
+  Requires an explicit tool allowlist, a trusted-host allowlist, and a
+  knowledge base planning model. The proposed provisioning settings are
+  not yet available in a released GPT-RAG version, and a compatible
+  orchestrator is also required. See
+  [Generic MCP server](howto_grounding_mcp_server.md).
 
 ## Approach B: Azure AI Search direct
 
