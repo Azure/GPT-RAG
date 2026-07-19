@@ -1550,20 +1550,21 @@ worked reference scenario.</p>
 <p>If you have not read the <a href="../howto_grounding_overview/">Grounding sources overview</a>,
 start there.</p>
 <div class="admonition warning">
-<p class="admonition-title">Preview configuration, not yet available end to end</p>
+<p class="admonition-title">Preview - off by default</p>
 <p>MCP Server knowledge sources use a preview Foundry IQ knowledge-source
 kind (<code>mcpServer</code>) on the <code>2026-05-01-preview</code> Azure AI Search API.
 Behavior and configuration may change without notice; do not depend on
 this for production workloads until it is generally available.</p>
-<p>The <code>FOUNDRY_IQ_MCP_*</code> settings on this page match the proposed
-provisioning implementation in
-<a href="https://github.com/Azure/GPT-RAG/pull/568">GPT-RAG code PR #568</a>.
-They are not available in a released GPT-RAG version yet. That PR
-registers the source, while the required <code>messages</code> request and
-query-time authentication support ships in
+<p>This feature is available in
+<a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.6.0">GPT-RAG <code>v3.6.0</code></a>
+and requires the provisioning release and
 <a href="https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.7.0">gpt-rag-orchestrator <code>v3.7.0</code></a>.
-Keep <code>FOUNDRY_IQ_MCP_ENABLED=false</code> until you deploy both the provisioning
-change and orchestrator <code>v3.7.0</code> or later.</p>
+Deploy both together and keep <code>FOUNDRY_IQ_MCP_ENABLED=false</code> until both
+components are in place.</p>
+<p>Release validation did not run a live Azure MCP end-to-end call because
+no approved endpoint or credentials were available. Production
+enablement requires a canary against your approved endpoint and
+credentials.</p>
 <p>An MCP server is a <strong>remote, tool-invoking endpoint</strong>.
 Azure AI Search's knowledge-base planner decides which tool to call and
 generates that tool's arguments from the user's question. Tool safety
@@ -1613,7 +1614,7 @@ identify which source produced a citation.</p>
 orchestrator. Only the MCP tool call travels directly from Azure AI Search
 to the registered remote HTTPS endpoint. Query-time credential forwarding
 is an orchestrator responsibility implemented in <code>v3.7.0</code> and later, not by
-code PR #568.</p>
+GPT-RAG <code>v3.6.0</code> provisioning.</p>
 <h2 id="when-to-use-a-generic-mcp-source">When to use a generic MCP source</h2>
 <p>Use an MCP Server knowledge source when:</p>
 <ul>
@@ -1646,7 +1647,7 @@ code PR #568.</p>
    with embedded credentials. See <a href="#trusted-hosts">Trusted hosts</a>.</li>
 <li><strong>Orchestrator <code>v3.7.0</code> or later and a supported endpoint authentication
    path.</strong> Optional <code>queryHeaders</code> metadata tells the orchestrator how to
-   resolve a header at request time; code PR #568 only provisions and
+   resolve a header at request time; GPT-RAG <code>v3.6.0</code> only provisions and
    validates that metadata.
    Do not assume Azure AI Search automatically presents its managed identity
    to the MCP endpoint. See <a href="#authentication">Authentication</a>.</li>
@@ -1663,8 +1664,8 @@ code PR #568.</p>
    callers. See <a href="#network-and-gateway-guidance">Network and gateway guidance</a>.</li>
 </ol>
 <h2 id="configure-a-generic-mcp-source">Configure a generic MCP source</h2>
-<p>The proposed MCP support is opt-in and defaults to off. After code PR #568
-is available, <code>azd provision</code> seeds five keys under the <code>gpt-rag</code> label
+<p>MCP support in GPT-RAG <code>v3.6.0</code> is opt-in and defaults to off.
+<code>azd provision</code> seeds five keys under the <code>gpt-rag</code> label
 with safe defaults (<code>FOUNDRY_IQ_MCP_ENABLED=false</code>, an empty source list,
 and conservative defaults for the rest). You do not have to create them by
 hand.</p>
@@ -1862,7 +1863,7 @@ canonicalizes it, then stores it as part of
 orchestrator can resolve the value when it builds a retrieve request. The
 metadata is deliberately omitted from both the Azure AI Search
 knowledge-source registration and Knowledge Base retrieve parameters.</p>
-<p>After code PR #568 is available, <code>azd provision</code> parses and validates this
+<p>In GPT-RAG <code>v3.6.0</code>, <code>azd provision</code> parses and validates this
 JSON during setup and <strong>fails the
 deployment closed</strong> if it is invalid while <code>FOUNDRY_IQ_MCP_ENABLED=true</code>:
 malformed JSON, zero sources, zero tools, duplicate source or tool names,
@@ -1903,7 +1904,7 @@ server-to-server call.</p>
 <ul>
 <li><code>foundryConnection</code>, only when Foundry Agent Service invokes the
   Knowledge Base. It does not apply to GPT-RAG's direct retrieve call.</li>
-<li><code>storedHeaders</code>, for static credentials. GPT-RAG code PR #568 does not
+<li><code>storedHeaders</code>, for static credentials. GPT-RAG <code>v3.6.0</code> does not
   render this option and rejects literal credentials.</li>
 <li>Paired query-time control headers, prefixed with the knowledge-source
   name. This is the appropriate upstream mechanism for rotating or
@@ -1923,7 +1924,7 @@ credential:</p>
   belongs in App Configuration.</li>
 <li><strong><code>none</code></strong> has no <code>scope</code>, <code>secretName</code>, or other credential fields.</li>
 </ul>
-<p>Code PR #568 stores only this validated metadata. It does not add the
+<p>GPT-RAG <code>v3.6.0</code> stores only this validated metadata. It does not add the
 orchestrator logic that resolves a managed identity token, OBO token, or
 Key Vault secret, and it never emits an <code>authentication</code> block,
 <code>queryHeaders</code>, or credential fields to Azure AI Search. That runtime logic
@@ -2012,7 +2013,7 @@ example. The template has no Azure Monitor-specific code path.</p>
 <p>Replace the sample <code>scope</code> with the application ID URI exposed by your
    MCP gateway. It is metadata, not a token or secret.
 6. Add <code>azmon-mcp.contoso.com</code> to <code>FOUNDRY_IQ_MCP_TRUSTED_HOSTS</code>. In an
-   isolated test environment with provisioning from PR #568 and orchestrator
+   isolated test environment with GPT-RAG <code>v3.6.0</code> and orchestrator
    <code>v3.7.0</code> or later, set <code>FOUNDRY_IQ_MCP_ENABLED=true</code> and run
    <code>azd hooks run postprovision</code> or <code>azd provision</code>.
 7. Ask a bounded question, such as "Were there any 5xx spikes on the
@@ -2070,7 +2071,7 @@ MCP source outside a fully isolated test environment:</p>
   semantic correctness (the server accepting a syntactically valid but
   wrong query and returning misleading results). Bound blast radius at the
   MCP server itself, not just at the GPT-RAG configuration layer.</li>
-<li>Nothing in code PR #568 accepts or forwards literal credentials. A
+<li>Nothing in GPT-RAG <code>v3.6.0</code> provisioning accepts or forwards literal credentials. A
   <code>keyVaultSecret</code> entry contains only a secret name, never the secret
   value. Azure AI Search supports stored headers, but GPT-RAG intentionally
   does not expose that option because it would place long-lived secrets in
@@ -2082,7 +2083,7 @@ MCP source outside a fully isolated test environment:</p>
 </ul>
 <h2 id="rollout-canary-and-rollback">Rollout, canary, and rollback</h2>
 <ul>
-<li><strong>Canary.</strong> First deploy provisioning from PR #568 and orchestrator <code>v3.7.0</code> or later
+<li><strong>Canary.</strong> First deploy GPT-RAG <code>v3.6.0</code> and orchestrator <code>v3.7.0</code> or later
   in a non-production environment. Enable one source with one low-risk,
   read-only tool. Confirm the endpoint receives authenticated calls and
   review the generated arguments before adding tools or sources.</li>
@@ -2107,7 +2108,7 @@ following are true:</p>
 <li>The <code>serverURL</code> is the actual production endpoint, not a development or
   staging hostname left over from testing.</li>
 <li>Orchestrator <code>v3.7.0</code> or later sends <code>messages</code>-based retrieval and the
-  endpoint authentication has been tested. Code PR #568 alone is not
+  endpoint authentication has been tested. GPT-RAG <code>v3.6.0</code> alone is not
   sufficient.</li>
 <li>Every tool name in <code>FOUNDRY_IQ_MCP_SOURCES_JSON</code> matches the MCP
   server's real, current tool names. A stale tool name fails at
