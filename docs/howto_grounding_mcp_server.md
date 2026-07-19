@@ -22,10 +22,11 @@ start there.
     provisioning implementation in
     [GPT-RAG code PR #568](https://github.com/Azure/GPT-RAG/pull/568).
     They are not available in a released GPT-RAG version yet. That PR
-    registers the source but does not update the orchestrator to send the
-    required `messages` request or query-time authentication headers. Keep
-    `FOUNDRY_IQ_MCP_ENABLED=false` until you deploy both the provisioning
-    change and a compatible orchestrator release.
+    registers the source, while the required `messages` request and
+    query-time authentication support ships in
+    [gpt-rag-orchestrator `v3.7.0`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.7.0).
+    Keep `FOUNDRY_IQ_MCP_ENABLED=false` until you deploy both the provisioning
+    change and orchestrator `v3.7.0` or later.
 
     An MCP server is a **remote, tool-invoking endpoint**.
     Azure AI Search's knowledge-base planner decides which tool to call and
@@ -54,7 +55,7 @@ flowchart LR
   KB --> O
 ```
 
-1. A compatible orchestrator sends a `messages`-based retrieve request to the
+1. Orchestrator `v3.7.0` or later sends a `messages`-based retrieve request to the
    Knowledge Base with `low` or `medium` reasoning effort (never
    `minimal`). Minimal reasoning skips query planning entirely, and MCP
    tool selection and argument generation require the planner to run.
@@ -79,8 +80,8 @@ identify which source produced a citation.
 The user request and the retrieve response still pass through the
 orchestrator. Only the MCP tool call travels directly from Azure AI Search
 to the registered remote HTTPS endpoint. Query-time credential forwarding
-is also an orchestrator responsibility and is not implemented by code
-PR #568.
+is an orchestrator responsibility implemented in `v3.7.0` and later, not by
+code PR #568.
 
 ## When to use a generic MCP source
 
@@ -105,7 +106,7 @@ Do not use it when:
   credential, header value, cookie, or connection string in configuration.
   GPT-RAG rejects that material. Use only the non-secret `queryHeaders`
   references described in [Authentication](#authentication), with a
-  compatible orchestrator that resolves them at request time.
+  orchestrator `v3.7.0` or later, which resolves them at request time.
 
 ## Prerequisites
 
@@ -114,9 +115,10 @@ All of these are hard blockers. Work through them in order.
 1. **The MCP server must be reachable over HTTPS with a fixed, production
    hostname.** No IP-literal endpoints, no `localhost`, no query strings
    with embedded credentials. See [Trusted hosts](#trusted-hosts).
-2. **A supported endpoint authentication path.** Optional `queryHeaders`
-   metadata can tell a compatible orchestrator how to resolve a header at
-   request time, but code PR #568 does not add that orchestrator support.
+2. **Orchestrator `v3.7.0` or later and a supported endpoint authentication
+   path.** Optional `queryHeaders` metadata tells the orchestrator how to
+   resolve a header at request time; code PR #568 only provisions and
+   validates that metadata.
    Do not assume Azure AI Search automatically presents its managed identity
    to the MCP endpoint. See [Authentication](#authentication).
 3. **Every tool you intend to call is explicitly allowlisted.** There is
@@ -152,7 +154,7 @@ disabled Knowledge Base settings described in
 | `FOUNDRY_IQ_MCP_SOURCES_JSON` | `[]` | JSON array of MCP source objects. See schema below. |
 | `FOUNDRY_IQ_MCP_REASONING_EFFORT` | `low` | `low` or `medium`. Controls the knowledge base's `retrievalReasoningEffort` when MCP is enabled. |
 | `FOUNDRY_IQ_MCP_TRUSTED_HOSTS` | `` (empty) | Comma-separated allowlist of exact hostnames. Every `serverURL` host must match one of these exactly. |
-| `FOUNDRY_IQ_MCP_LOG_TOOL_ARGUMENTS` | `false` | Reserved for a compatible orchestrator implementation. Code PR #568 only seeds this key; it does not log tool arguments. Leave it `false` because arguments can contain user or customer data. |
+| `FOUNDRY_IQ_MCP_LOG_TOOL_ARGUMENTS` | `false` | Enables bounded, recursively redacted debug argument logging in orchestrator `v3.7.0` or later. Leave it `false` because arguments can contain user or customer data. |
 
 ### Source schema
 
@@ -191,7 +193,7 @@ Each entry in `FOUNDRY_IQ_MCP_SOURCES_JSON` is a JSON object:
 | `description` | No | Defaults to a generic description if omitted. |
 | `serverURL` | Yes | Must be `https://`, with no userinfo, query string, fragment, IP literal, or local/reserved host. Its host must exactly match an entry in `FOUNDRY_IQ_MCP_TRUSTED_HOSTS`. |
 | `tools` | Yes | Non-empty array. Every tool the planner is allowed to call. |
-| `queryHeaders` | No | Array of `{name, valueFrom}` objects containing only non-secret request-time resolution metadata. Stored in App Configuration for a compatible orchestrator, but never rendered into Search registration or retrieve parameters. |
+| `queryHeaders` | No | Array of `{name, valueFrom}` objects containing only non-secret request-time resolution metadata. Stored in App Configuration for orchestrator `v3.7.0` or later, but never rendered into Search registration or retrieve parameters. |
 
 Each tool object:
 
@@ -287,27 +289,27 @@ Azure AI Search currently documents three endpoint-authentication patterns:
   render this option and rejects literal credentials.
 - Paired query-time control headers, prefixed with the knowledge-source
   name. This is the appropriate upstream mechanism for rotating or
-  per-request credentials. It requires compatible orchestrator support.
+  per-request credentials. It requires orchestrator `v3.7.0` or later.
 
 Use `queryHeaders` to describe request-time resolution without storing a
 credential:
 
-- **`managedIdentity`** requires an explicit, non-secret `scope`. A
-  compatible orchestrator obtains an app-only token for that scope. Every
+- **`managedIdentity`** requires an explicit, non-secret `scope`.
+  Orchestrator `v3.7.0` or later obtains an app-only token for that scope. Every
   user receives the same MCP authorization scope.
-- **`obo`** requires an explicit, non-secret `scope`. A compatible
-  orchestrator exchanges the signed-in user's delegated token. Use it only
+- **`obo`** requires an explicit, non-secret `scope`. Orchestrator `v3.7.0`
+  or later exchanges the signed-in user's delegated token. Use it only
   when the MCP server enforces per-user authorization.
-- **`keyVaultSecret`** requires only `secretName`. A compatible
-  orchestrator reads the secret at request time. The secret value never
+- **`keyVaultSecret`** requires only `secretName`. Orchestrator `v3.7.0` or
+  later reads the secret at request time. The secret value never
   belongs in App Configuration.
 - **`none`** has no `scope`, `secretName`, or other credential fields.
 
 Code PR #568 stores only this validated metadata. It does not add the
 orchestrator logic that resolves a managed identity token, OBO token, or
 Key Vault secret, and it never emits an `authentication` block,
-`queryHeaders`, or credential fields to Azure AI Search. A compatible
-orchestrator release is still required.
+`queryHeaders`, or credential fields to Azure AI Search. That runtime logic
+ships in orchestrator `v3.7.0` and later.
 
 `auth` and `authentication` are forbidden, not accepted for
 validation-only use. Literal API keys, bearer tokens, passwords, secret
@@ -315,10 +317,9 @@ values, header blobs, cookies, credentials, and connection strings are
 also rejected. **Never put credential material in
 `FOUNDRY_IQ_MCP_SOURCES_JSON` or App Configuration.**
 
-Until a compatible orchestrator forwards the documented paired headers,
-use this feature only with an isolated test endpoint that does not require
-credentials. Do not expose an unauthenticated MCP endpoint to the public
-internet.
+Do not use an orchestrator older than `v3.7.0` with an MCP endpoint that
+requires credentials, because it cannot forward the documented paired
+headers. Do not expose an unauthenticated MCP endpoint to the public internet.
 
 ### Knowledge base planning model
 
@@ -345,7 +346,7 @@ example. The template has no Azure Monitor-specific code path.
 2. Identify the principal that actually queries Log Analytics:
     - If the hosted MCP server uses its own managed identity, grant that
       identity access.
-    - If a compatible orchestrator forwards an app-only or OBO token, grant
+    - If orchestrator `v3.7.0` or later forwards an app-only or OBO token, grant
       the principal represented by that token access.
 
    Do **not** grant the Azure AI Search service identity Log Analytics
@@ -400,8 +401,8 @@ example. The template has no Azure Monitor-specific code path.
    Replace the sample `scope` with the application ID URI exposed by your
    MCP gateway. It is metadata, not a token or secret.
 6. Add `azmon-mcp.contoso.com` to `FOUNDRY_IQ_MCP_TRUSTED_HOSTS`. In an
-   isolated test environment with compatible provisioning and
-   orchestrator builds, set `FOUNDRY_IQ_MCP_ENABLED=true` and run
+   isolated test environment with provisioning from PR #568 and orchestrator
+   `v3.7.0` or later, set `FOUNDRY_IQ_MCP_ENABLED=true` and run
    `azd hooks run postprovision` or `azd provision`.
 7. Ask a bounded question, such as "Were there any 5xx spikes on the
    checkout service in the last 24 hours? Limit the result to 100 rows."
@@ -470,12 +471,12 @@ MCP source outside a fully isolated test environment:
   configuration. Do not work around missing runtime support by embedding a
   token, header value, cookie, or connection string in
   `FOUNDRY_IQ_MCP_SOURCES_JSON`, an environment variable, or App
-  Configuration. Use a gateway and a compatible orchestrator that resolves
-  validated `queryHeaders` metadata at request time.
+  Configuration. Use a gateway and orchestrator `v3.7.0` or later, which
+  resolves validated `queryHeaders` metadata at request time.
 
 ## Rollout, canary, and rollback
 
-- **Canary.** First deploy compatible provisioning and orchestrator builds
+- **Canary.** First deploy provisioning from PR #568 and orchestrator `v3.7.0` or later
   in a non-production environment. Enable one source with one low-risk,
   read-only tool. Confirm the endpoint receives authenticated calls and
   review the generated arguments before adding tools or sources.
@@ -500,7 +501,7 @@ following are true:
 
 - The `serverURL` is the actual production endpoint, not a development or
   staging hostname left over from testing.
-- A compatible orchestrator sends `messages`-based retrieval and the
+- Orchestrator `v3.7.0` or later sends `messages`-based retrieval and the
   endpoint authentication has been tested. Code PR #568 alone is not
   sufficient.
 - Every tool name in `FOUNDRY_IQ_MCP_SOURCES_JSON` matches the MCP
@@ -523,7 +524,7 @@ following are true:
 - **No MCP citations in responses.** Confirm `FOUNDRY_IQ_MCP_ENABLED=true`,
   that `FOUNDRY_IQ_MCP_SOURCES_JSON` has at least one source, and that
   `FOUNDRY_IQ_MCP_REASONING_EFFORT` is `low` or `medium`. Also confirm
-  that your orchestrator build supports `messages`-based MCP retrieval.
+  that your orchestrator is `v3.7.0` or later.
   To identify the source for a citation, join its `activitySource` to the
   matching activity record; the reference itself has no source name.
 - **Planner never selects the MCP tool.** Reasoning effort, tool
@@ -533,7 +534,7 @@ following are true:
   usage).
 - **Registration succeeds but calls fail at query time with an
   authentication error.** Registration does not prove endpoint
-  authentication works. Confirm the compatible orchestrator sends the
+  authentication works. Confirm orchestrator `v3.7.0` or later sends the
   paired query-time headers, the token audience matches the MCP gateway,
   and the gateway accepts the app-only or OBO identity you selected.
 
