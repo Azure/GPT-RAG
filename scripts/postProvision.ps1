@@ -145,6 +145,38 @@ function ConvertTo-FlatJsonString {
     return ($Value | ConvertTo-Json -Depth 50 -Compress)
 }
 
+#-------------------------------------------------------------------------------
+# Make config.* importable early (moved ahead of Set-GptRagAppConfiguration so
+# the Foundry IQ MCP pre-flight validation below can run before any App
+# Configuration write/import). No Python package installation is required for
+# that pre-flight check: foundry_iq_mcp_setup.py has no external dependencies.
+#-------------------------------------------------------------------------------
+$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+$env:PYTHONPATH = if ($env:PYTHONPATH) { "$repoRoot;$($env:PYTHONPATH)" } else { $repoRoot }
+$env:GPT_RAG_REPO_ROOT = $repoRoot
+Set-Location $repoRoot
+
+function Invoke-PythonModule {
+    param([Parameter(Mandatory = $true)][string]$ModuleName)
+    Invoke-NativeCommand { & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['GPT_RAG_REPO_ROOT']); runpy.run_module('$ModuleName', run_name='__main__')" }
+}
+
+#-------------------------------------------------------------------------------
+# Foundry IQ MCP Server source pre-flight validation
+# Validates FOUNDRY_IQ_MCP_SOURCES_JSON (JSON shape, security constraints:
+# no auth/authentication or literal credential material at any nesting
+# depth, trusted-host allowlisting, output-parsing shape, token caps) before
+# ANY of it is imported into Azure App Configuration below. A misconfigured
+# or malicious MCP source must be rejected before it is ever persisted, not
+# just before the knowledge source is registered by config.search.setup.
+#-------------------------------------------------------------------------------
+Write-Host "🔐 Validating Foundry IQ MCP Server source configuration..."
+Invoke-PythonModule -ModuleName 'config.search.foundry_iq_mcp_setup'
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Foundry IQ MCP Server source validation failed; aborting before any App Configuration write."
+    exit 1
+}
+
 function Set-GptRagAppConfiguration {
     param(
         [Parameter(Mandatory = $true)][string]$Endpoint,
@@ -567,16 +599,6 @@ Set-GptRagAppConfiguration -Endpoint (Get-RequiredEnvValue 'APP_CONFIG_ENDPOINT'
 #-------------------------------------------------------------------------------
 # Setup Python environment
 #-------------------------------------------------------------------------------
-$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
-$env:PYTHONPATH = if ($env:PYTHONPATH) { "$repoRoot;$($env:PYTHONPATH)" } else { $repoRoot }
-$env:GPT_RAG_REPO_ROOT = $repoRoot
-Set-Location $repoRoot
-
-function Invoke-PythonModule {
-    param([Parameter(Mandatory = $true)][string]$ModuleName)
-    Invoke-NativeCommand { & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['GPT_RAG_REPO_ROOT']); runpy.run_module('$ModuleName', run_name='__main__')" }
-}
-
 Write-Host "🐍 Checking Python venv support..."
 Invoke-NativeCommand { & python -c "import venv" 2>$null }
 $venvSupported = ($LASTEXITCODE -eq 0)

@@ -22,21 +22,33 @@ module owns:
    ``FOUNDRY_IQ_MCP_SOURCES_JSON``, the trusted-host allowlist, the reasoning
    effort, and the planning-model prerequisites, raising ``ValueError`` with
    an actionable message on the first problem found.
+3. A standalone CLI entry point (``python -m config.search.foundry_iq_mcp_setup``)
+   that validates ``FOUNDRY_IQ_MCP_SOURCES_JSON`` straight from process
+   environment variables. ``scripts/postProvision.ps1`` runs this as a
+   pre-flight gate, before it imports any settings into Azure App
+   Configuration, so an invalid/malicious MCP source is rejected before it is
+   ever persisted -- not just before the knowledge source is registered.
 
-Static long-lived MCP authentication (API keys, bearer tokens, headers) is
-NOT supported by this provisioning template: Azure AI Search's real schema
-for authenticating an ``mcpServer`` knowledge source is not yet publicly
-documented, and this module must not guess an unverified REST field. Only
-managed-identity-authenticated MCP servers (the Azure Monitor MCP reference
-scenario) are supported in this release; see
-``docs/howto_grounding_mcp_server.md``. Dynamic per-query MI/OBO credentials
-are out of scope here entirely -- those are query-time control headers owned
-by the orchestrator repository.
+No MCP authentication metadata is supported by this provisioning template:
+Azure AI Search's real schema for authenticating an ``mcpServer`` knowledge
+source is not publicly documented, this module must not guess an unverified
+REST field, and registration authentication is never rendered by
+``search.j2`` regardless of what is provided here. An ``auth`` (or
+``authentication``) key is therefore rejected outright, at any nesting depth,
+rather than partially validated -- accepting one, even validation-only, would
+mislead operators into believing it takes effect. Every MCP source in this
+release relies solely on implicit managed-identity authentication (the Azure
+Monitor MCP reference scenario); see ``docs/howto_grounding_mcp_server.md``.
+Dynamic per-query MI/OBO credentials are out of scope here entirely -- those
+are query-time control headers owned by the orchestrator repository.
 """
 
 from __future__ import annotations
 
 import ipaddress
+import json
+import os
+import sys
 from typing import Any
 from urllib.parse import urlsplit
 
@@ -50,13 +62,29 @@ ALLOWED_OUTPUT_PARSING_MODES = {"auto", "json", "split", "none"}
 ALLOWED_REASONING_EFFORTS = {"low", "medium"}
 DISALLOWED_HOSTNAMES = {"localhost"}
 
-ALLOWED_SOURCE_KEYS = {"name", "description", "serverURL", "tools", "auth"}
+ALLOWED_SOURCE_KEYS = {"name", "description", "serverURL", "tools"}
 ALLOWED_TOOL_KEYS = {"name", "outputParsing", "inclusionMode", "maxOutputTokens", "documentsPath"}
 
-# auth.kind values that are recognized as safe no-ops. Anything else (or any
-# key that looks like it could carry a literal secret) is rejected.
-SUPPORTED_AUTH_KINDS = {"", "managedidentity"}
-SECRET_LIKE_AUTH_KEYS = {"apikey", "secret", "token", "password", "key", "bearer", "header", "headers"}
+# Keys that must never appear anywhere in FOUNDRY_IQ_MCP_SOURCES_JSON, no
+# matter how deeply nested, checked before any other validation runs.
+# 'auth'/'authentication' are rejected outright (see module docstring); the
+# remaining keys guard against literal credential material (API keys,
+# bearer tokens, passwords, stored HTTP headers) being smuggled in under an
+# unrelated or unexpected key.
+DISALLOWED_AUTH_KEYS_ANY_DEPTH = {"auth", "authentication"}
+SECRET_LIKE_KEYS_ANY_DEPTH = {
+    "apikey",
+    "secret",
+    "token",
+    "password",
+    "key",
+    "bearer",
+    "header",
+    "headers",
+    "authorization",
+    "credential",
+    "credentials",
+}
 
 
 def _is_truthy(value: Any) -> bool:
@@ -126,31 +154,35 @@ def _validate_server_url(label: str, server_url: str, trusted_hosts: set[str]) -
         )
 
 
-def _validate_auth_metadata(label: str, auth: Any) -> None:
-    if auth is None:
-        return
-    if not isinstance(auth, dict):
-        raise ValueError(f"{label}: 'auth' must be a JSON object when present.")
+def _scan_for_disallowed_keys_anywhere(node: Any, label: str) -> None:
+    """Recursively reject 'auth'/'authentication' and any secret-like key at
+    any nesting depth within the raw MCP sources JSON.
 
-    kind = str(auth.get("kind") or auth.get("type") or "").strip().lower()
-    if kind == "foundryconnection":
-        raise ValueError(
-            f"{label}: 'auth.kind' of 'foundryConnection' is not supported. GPT-RAG calls the knowledge "
-            "base retrieve API directly, and Foundry project connection authentication does not apply "
-            "to that path."
-        )
-    if any(str(key).lower() in SECRET_LIKE_AUTH_KEYS for key in auth):
-        raise ValueError(
-            f"{label}: 'auth' must not contain literal credential material (api keys, tokens, secrets, "
-            "passwords, or headers). Static long-lived MCP authentication is not yet supported by this "
-            "provisioning template; only managed-identity-authenticated MCP servers are supported in this "
-            "release. See docs/howto_grounding_mcp_server.md."
-        )
-    if kind not in SUPPORTED_AUTH_KINDS:
-        raise ValueError(
-            f"{label}: unsupported 'auth.kind' value '{kind}'. Omit 'auth' or set it to "
-            "{'kind': 'managedIdentity'} -- only implicit managed-identity authentication is supported."
-        )
+    This runs before any other structural validation so a rejected key is
+    always reported clearly, regardless of where in the JSON it appears or
+    whether it also happens to be an otherwise-unexpected key.
+    """
+
+    if isinstance(node, dict):
+        for key, value in node.items():
+            key_l = str(key).strip().lower()
+            if key_l in DISALLOWED_AUTH_KEYS_ANY_DEPTH:
+                raise ValueError(
+                    f"{label}: '{key}' is not supported, at any nesting depth. This provisioning "
+                    "template never forwards authentication metadata into the registration payload; "
+                    "every MCP source relies solely on implicit managed-identity authentication. "
+                    "Remove it from FOUNDRY_IQ_MCP_SOURCES_JSON. See docs/howto_grounding_mcp_server.md."
+                )
+            if key_l in SECRET_LIKE_KEYS_ANY_DEPTH:
+                raise ValueError(
+                    f"{label}: key '{key}' must not carry literal credential material (API keys, "
+                    "bearer tokens, passwords, secrets, or stored headers are not allowed anywhere in "
+                    "FOUNDRY_IQ_MCP_SOURCES_JSON, at any nesting depth)."
+                )
+            _scan_for_disallowed_keys_anywhere(value, f"{label}.{key}")
+    elif isinstance(node, list):
+        for index, item in enumerate(node):
+            _scan_for_disallowed_keys_anywhere(item, f"{label}[{index}]")
 
 
 def _validate_tool(source_label: str, tool: Any, seen_tool_names: set[str]) -> None:
@@ -177,6 +209,12 @@ def _validate_tool(source_label: str, tool: Any, seen_tool_names: set[str]) -> N
         )
     if output_parsing == "json" and not str(tool.get("documentsPath") or "").strip():
         raise ValueError(f"{tool_label}: 'documentsPath' is required when 'outputParsing' is 'json'.")
+    if output_parsing != "json" and str(tool.get("documentsPath") or "").strip():
+        raise ValueError(
+            f"{tool_label}: 'documentsPath' is only valid when 'outputParsing' is 'json' (got "
+            f"outputParsing='{output_parsing}'). The rendered REST payload nests 'documentsPath' under "
+            "outputParsing.jsonParameters, so it has no effect for any other outputParsing kind."
+        )
 
     inclusion_mode = str(tool.get("inclusionMode") or "").strip()
     if inclusion_mode not in ALLOWED_INCLUSION_MODES:
@@ -221,6 +259,10 @@ def validate_and_get_mcp_sources(context: dict) -> list[dict]:
             "Add at least one MCP source or set FOUNDRY_IQ_MCP_ENABLED=false."
         )
 
+    # Reject 'auth'/'authentication' and any secret-like key anywhere in the
+    # raw JSON before any other validation runs (see module docstring).
+    _scan_for_disallowed_keys_anywhere(sources, "FOUNDRY_IQ_MCP_SOURCES_JSON")
+
     trusted_hosts = _parse_trusted_hosts(context.get("FOUNDRY_IQ_MCP_TRUSTED_HOSTS"))
     reasoning_effort = str(context.get("FOUNDRY_IQ_MCP_REASONING_EFFORT") or "low").strip().lower()
     if reasoning_effort not in ALLOWED_REASONING_EFFORTS:
@@ -254,8 +296,6 @@ def validate_and_get_mcp_sources(context: dict) -> list[dict]:
         if not server_url:
             raise ValueError(f"{label}: 'serverURL' is required.")
         _validate_server_url(label, server_url, trusted_hosts)
-
-        _validate_auth_metadata(label, source.get("auth"))
 
         tools = source.get("tools")
         if not isinstance(tools, list) or not tools:
@@ -294,3 +334,67 @@ def validate_foundry_iq_mcp_settings(context: dict) -> None:
         )
 
     validate_and_get_mcp_sources(context)
+
+
+def _parse_env_sources_json(raw: str) -> Any:
+    """Parse the raw FOUNDRY_IQ_MCP_SOURCES_JSON environment variable value.
+
+    Used only by the standalone CLI pre-flight (below); ``setup.py`` itself
+    reads already-parsed values via ``load_appconfig_settings``.
+    """
+
+    text = (raw or "").strip()
+    if not text:
+        return []
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError as je:
+        raise ValueError(f"FOUNDRY_IQ_MCP_SOURCES_JSON is not valid JSON: {je}") from je
+
+
+def build_preflight_context_from_environ() -> dict:
+    """Build the minimal validation context ``validate_and_get_mcp_sources``
+    needs, sourced directly from process environment variables.
+
+    This lets this module be invoked standalone, as a provisioning
+    pre-flight gate, against the operator's raw candidate settings --
+    before ``scripts/postProvision.ps1`` imports anything into Azure App
+    Configuration. Only the fields ``validate_and_get_mcp_sources`` reads
+    are included; the planning-model/AI-Services-endpoint checks in
+    ``validate_foundry_iq_mcp_settings`` need App-Configuration-derived data
+    (``MODEL_DEPLOYMENTS``) that does not exist yet at this point in
+    provisioning, so they are intentionally not part of this pre-flight gate
+    and remain covered later by ``config.search.setup`` itself.
+    """
+
+    return {
+        "RETRIEVAL_BACKEND": os.environ.get("RETRIEVAL_BACKEND", ""),
+        "FOUNDRY_IQ_MCP_ENABLED": os.environ.get("FOUNDRY_IQ_MCP_ENABLED", "false"),
+        "FOUNDRY_IQ_MCP_SOURCES_JSON": _parse_env_sources_json(os.environ.get("FOUNDRY_IQ_MCP_SOURCES_JSON", "[]")),
+        "FOUNDRY_IQ_MCP_TRUSTED_HOSTS": os.environ.get("FOUNDRY_IQ_MCP_TRUSTED_HOSTS", ""),
+        "FOUNDRY_IQ_MCP_REASONING_EFFORT": os.environ.get("FOUNDRY_IQ_MCP_REASONING_EFFORT", "low"),
+    }
+
+
+def main() -> int:
+    """Pre-flight CLI entry point.
+
+    Validates FOUNDRY_IQ_MCP_SOURCES_JSON (and the other FOUNDRY_IQ_MCP_*
+    environment variables) exactly as they will be imported into Azure App
+    Configuration, before that import happens. Prints an actionable error to
+    stderr and returns a non-zero exit code on the first invalid field, and
+    intentionally imports/writes nothing itself either way -- this module
+    only validates.
+    """
+
+    try:
+        context = build_preflight_context_from_environ()
+        validate_and_get_mcp_sources(context)
+    except ValueError as ve:
+        print(f"❗️ FOUNDRY_IQ_MCP_SOURCES_JSON validation failed: {ve}", file=sys.stderr)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

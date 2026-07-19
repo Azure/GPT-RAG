@@ -1,5 +1,10 @@
+import inspect
+import io
+import itertools
 import json
+import os
 import unittest
+from contextlib import redirect_stderr
 from pathlib import Path
 from unittest.mock import Mock, patch
 
@@ -738,7 +743,7 @@ class FoundryIqMcpTemplateTests(unittest.TestCase):
                 "tools": [
                     {
                         "name": "query_logs",
-                        "outputParsing": "auto",
+                        "outputParsing": {"kind": "auto"},
                         "inclusionMode": "reranked",
                         "maxOutputTokens": 4096,
                     }
@@ -747,6 +752,7 @@ class FoundryIqMcpTemplateTests(unittest.TestCase):
         )
         # Auth metadata (if any) must never be forwarded into the registration payload.
         self.assertNotIn("auth", source["mcpServerParameters"])
+        self.assertNotIn("authentication", source["mcpServerParameters"])
         self.assertNotIn("authIdentity", source["mcpServerParameters"])
 
         kb = search_definitions["knowledgeBases"][0]
@@ -770,24 +776,56 @@ class FoundryIqMcpTemplateTests(unittest.TestCase):
         )
         self.assertEqual(kb["retrievalReasoningEffort"], {"kind": "medium"})
 
-    def test_mcp_tool_with_json_output_parsing_includes_documents_path(self):
+    def test_mcp_tool_output_parsing_kinds_render_as_official_rest_shapes(self):
+        """auto/none/split render as {"kind": "..."}; json nests documentsPath
+        under jsonParameters, matching Search API 2026-05-01-preview
+        (McpServerOutputParsing / McpServerJsonOutputParsing)."""
         _, context = self._foundry_iq_context(FOUNDRY_IQ_MCP_ENABLED="true")
         context["FOUNDRY_IQ_MCP_SOURCES_JSON"] = [
             self._mcp_source(
                 tools=[
                     {
-                        "name": "query_logs",
+                        "name": "auto_tool",
+                        "outputParsing": "auto",
+                        "inclusionMode": "reranked",
+                        "maxOutputTokens": 1024,
+                    },
+                    {
+                        "name": "none_tool",
+                        "outputParsing": "none",
+                        "inclusionMode": "reranked",
+                        "maxOutputTokens": 1024,
+                    },
+                    {
+                        "name": "split_tool",
+                        "outputParsing": "split",
+                        "inclusionMode": "reranked",
+                        "maxOutputTokens": 1024,
+                    },
+                    {
+                        "name": "json_tool",
                         "outputParsing": "json",
                         "documentsPath": "$.results",
                         "inclusionMode": "always",
                         "maxOutputTokens": 2048,
-                    }
+                    },
                 ]
             )
         ]
         search_definitions = render_json_template("search.j2", context)
-        tool = search_definitions["knowledgeSources"][-1]["mcpServerParameters"]["tools"][0]
-        self.assertEqual(tool["documentsPath"], "$.results")
+        tools = search_definitions["knowledgeSources"][-1]["mcpServerParameters"]["tools"]
+        rendered = {tool["name"]: tool for tool in tools}
+
+        self.assertEqual(rendered["auto_tool"]["outputParsing"], {"kind": "auto"})
+        self.assertEqual(rendered["none_tool"]["outputParsing"], {"kind": "none"})
+        self.assertEqual(rendered["split_tool"]["outputParsing"], {"kind": "split"})
+        self.assertEqual(
+            rendered["json_tool"]["outputParsing"],
+            {"kind": "json", "jsonParameters": {"documentsPath": "$.results"}},
+        )
+        # documentsPath must never be a tool-level sibling key.
+        for tool in tools:
+            self.assertNotIn("documentsPath", tool)
 
     def test_multiple_mcp_sources_all_registered_and_referenced(self):
         _, context = self._foundry_iq_context(FOUNDRY_IQ_MCP_ENABLED="true")
@@ -992,6 +1030,26 @@ class FoundryIqMcpValidationTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "documentsPath"):
             mcp_setup.validate_and_get_mcp_sources(context)
 
+    def test_documents_path_with_non_json_output_parsing_raises(self):
+        """documentsPath only has an effect (and is only rendered) nested
+        under outputParsing.jsonParameters when outputParsing is 'json';
+        silently accepting it for other kinds would mislead operators."""
+        context = self._context(
+            sources=[
+                self._source(
+                    tools=[
+                        {
+                            **self._source()["tools"][0],
+                            "outputParsing": "auto",
+                            "documentsPath": "$.results",
+                        }
+                    ]
+                )
+            ]
+        )
+        with self.assertRaisesRegex(ValueError, "documentsPath"):
+            mcp_setup.validate_and_get_mcp_sources(context)
+
     def test_non_positive_max_output_tokens_raises(self):
         context = self._context(
             sources=[self._source(tools=[{**self._source()["tools"][0], "maxOutputTokens": 0}])]
@@ -1020,23 +1078,50 @@ class FoundryIqMcpValidationTests(unittest.TestCase):
 
     def test_foundry_connection_auth_raises(self):
         context = self._context(sources=[self._source(auth={"kind": "foundryConnection"})])
-        with self.assertRaisesRegex(ValueError, "foundryConnection"):
+        with self.assertRaisesRegex(ValueError, "not supported"):
             mcp_setup.validate_and_get_mcp_sources(context)
 
     def test_secret_like_auth_key_raises(self):
-        context = self._context(sources=[self._source(auth={"apiKey": "not-a-real-secret"})])
+        context = self._context(sources=[self._source(apiKey="not-a-real-secret")])
         with self.assertRaisesRegex(ValueError, "credential material"):
             mcp_setup.validate_and_get_mcp_sources(context)
 
     def test_unsupported_auth_kind_raises(self):
         context = self._context(sources=[self._source(auth={"kind": "oauth2"})])
-        with self.assertRaisesRegex(ValueError, "unsupported"):
+        with self.assertRaisesRegex(ValueError, "not supported"):
             mcp_setup.validate_and_get_mcp_sources(context)
 
-    def test_managed_identity_auth_is_a_no_op(self):
+    def test_managed_identity_auth_is_rejected(self):
+        """auth is rejected outright, at any nesting depth, regardless of
+        kind -- it is never rendered/forwarded, so even a would-be-safe
+        {'kind': 'managedIdentity'} value must not be silently accepted."""
         context = self._context(sources=[self._source(auth={"kind": "managedIdentity"})])
-        sources = mcp_setup.validate_and_get_mcp_sources(context)
-        self.assertEqual(len(sources), 1)
+        with self.assertRaisesRegex(ValueError, "not supported"):
+            mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_authentication_key_is_rejected(self):
+        context = self._context(sources=[self._source(authentication={"kind": "foundryConnection"})])
+        with self.assertRaisesRegex(ValueError, "not supported"):
+            mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_auth_nested_inside_tool_is_rejected(self):
+        tool = {**self._source()["tools"][0], "auth": {"kind": "managedIdentity"}}
+        context = self._context(sources=[self._source(tools=[tool])])
+        with self.assertRaisesRegex(ValueError, "not supported"):
+            mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_secret_like_key_nested_inside_tool_is_rejected(self):
+        tool = {**self._source()["tools"][0], "token": "not-a-real-token"}
+        context = self._context(sources=[self._source(tools=[tool])])
+        with self.assertRaisesRegex(ValueError, "credential material"):
+            mcp_setup.validate_and_get_mcp_sources(context)
+
+    def test_secret_like_key_two_levels_deep_is_rejected(self):
+        """The scan must recurse arbitrarily deep, not just one level."""
+        tool = {**self._source()["tools"][0], "extra": {"nested": {"bearer": "not-a-real-token"}}}
+        context = self._context(sources=[self._source(tools=[tool])])
+        with self.assertRaisesRegex(ValueError, "credential material"):
+            mcp_setup.validate_and_get_mcp_sources(context)
 
     def test_absent_auth_is_valid(self):
         context = self._context(sources=[self._source()])
@@ -1052,6 +1137,95 @@ class FoundryIqMcpValidationTests(unittest.TestCase):
         context = self._context(sources=[self._source()], FOUNDRY_IQ_MCP_REASONING_EFFORT="minimal")
         with self.assertRaisesRegex(ValueError, "REASONING_EFFORT"):
             mcp_setup.validate_and_get_mcp_sources(context)
+
+
+class FoundryIqMcpPreflightCliTests(unittest.TestCase):
+    """Unit tests for the standalone pre-flight CLI entry point
+    (mcp_setup.main / build_preflight_context_from_environ). This is the
+    module scripts/postProvision.ps1 runs before it imports anything into
+    Azure App Configuration, so a rejected configuration here proves the
+    ordering bug (import happening before validation) cannot recur: a
+    non-zero exit here happens before any write."""
+
+    BASE_ENV = {
+        "RETRIEVAL_BACKEND": "foundry_iq",
+        "FOUNDRY_IQ_MCP_ENABLED": "true",
+        "FOUNDRY_IQ_MCP_TRUSTED_HOSTS": "monitor-mcp.contoso.com",
+        "FOUNDRY_IQ_MCP_REASONING_EFFORT": "low",
+    }
+
+    def _sources_json(self, **overrides):
+        source = {
+            "name": "monitor-mcp-ks",
+            "serverURL": "https://monitor-mcp.contoso.com/mcp",
+            "tools": [
+                {
+                    "name": "query_logs",
+                    "outputParsing": "auto",
+                    "inclusionMode": "reranked",
+                    "maxOutputTokens": 4096,
+                }
+            ],
+        }
+        source.update(overrides)
+        return json.dumps([source])
+
+    def _run_main(self, **env_overrides):
+        env = {**self.BASE_ENV, **env_overrides}
+        with patch.dict(os.environ, env, clear=False):
+            stderr = io.StringIO()
+            with redirect_stderr(stderr):
+                result = mcp_setup.main()
+        return result, stderr.getvalue()
+
+    def test_disabled_by_default_returns_zero_without_error(self):
+        result, stderr = self._run_main(FOUNDRY_IQ_MCP_ENABLED="false", FOUNDRY_IQ_MCP_SOURCES_JSON="[]")
+        self.assertEqual(result, 0)
+        self.assertEqual(stderr, "")
+
+    def test_valid_configuration_returns_zero(self):
+        result, stderr = self._run_main(FOUNDRY_IQ_MCP_SOURCES_JSON=self._sources_json())
+        self.assertEqual(result, 0)
+        self.assertEqual(stderr, "")
+
+    def test_malformed_json_returns_one_before_any_write(self):
+        result, stderr = self._run_main(FOUNDRY_IQ_MCP_SOURCES_JSON="{not valid json")
+        self.assertEqual(result, 1)
+        self.assertIn("valid JSON", stderr)
+
+    def test_auth_key_returns_one_before_any_write(self):
+        """The exact regression scenario for the postProvision.ps1 ordering
+        fix: an operator-supplied auth key must fail this gate (exit 1)
+        before scripts/postProvision.ps1 ever imports
+        FOUNDRY_IQ_MCP_SOURCES_JSON into App Configuration."""
+        result, stderr = self._run_main(
+            FOUNDRY_IQ_MCP_SOURCES_JSON=self._sources_json(auth={"kind": "managedIdentity"})
+        )
+        self.assertEqual(result, 1)
+        self.assertIn("not supported", stderr)
+
+    def test_secret_like_key_returns_one_before_any_write(self):
+        result, stderr = self._run_main(FOUNDRY_IQ_MCP_SOURCES_JSON=self._sources_json(apiKey="not-a-real-secret"))
+        self.assertEqual(result, 1)
+        self.assertIn("credential material", stderr)
+
+    def test_untrusted_host_returns_one_before_any_write(self):
+        result, stderr = self._run_main(
+            FOUNDRY_IQ_MCP_SOURCES_JSON=self._sources_json(),
+            FOUNDRY_IQ_MCP_TRUSTED_HOSTS="other-host.contoso.com",
+        )
+        self.assertEqual(result, 1)
+        self.assertIn("not an exact match", stderr)
+
+    def test_module_has_no_azure_sdk_dependency(self):
+        """Regression guard: this module must never itself write to Azure
+        App Configuration (or import an SDK capable of it), so it can be run
+        as a pure pre-flight gate with only the system Python interpreter,
+        before scripts/postProvision.ps1 installs any pip dependency."""
+        source = inspect.getsource(mcp_setup)
+        self.assertNotIn("azure.appconfiguration", source)
+        self.assertNotIn("AzureAppConfigurationClient", source)
+        self.assertNotIn("import azure", source)
 
 
 class WorkIqPreflightTests(unittest.TestCase):
@@ -1142,6 +1316,123 @@ class WorkIqPreflightTests(unittest.TestCase):
             )
         self.assertEqual(defs["knowledgeSources"], [])
         self.assertEqual(defs["knowledgeBases"][0]["knowledgeSources"], [])
+
+
+class KnowledgeSourceNameUniquenessTests(unittest.TestCase):
+    """Comprehensive collision coverage for
+    setup.validate_unique_knowledge_source_names across every knowledge
+    source kind search.j2 can render: Blob/Search Index, conversation
+    Search Index, Work IQ, Fabric IQ, Fabric Data Agent, SharePoint Indexed,
+    Web grounding, and MCP Server."""
+
+    ALL_CATEGORIES = (
+        "blob",
+        "conversation",
+        "work_iq",
+        "fabric_iq",
+        "fabric_data_agent",
+        "sharepoint_indexed",
+        "web_grounding",
+        "mcp",
+    )
+
+    def _default_names(self, **overrides):
+        names = {category: f"{category}-ks" for category in self.ALL_CATEGORIES}
+        names.update(overrides)
+        return names
+
+    def _defs_with_all_categories_enabled(self, **name_overrides):
+        names = self._default_names(**name_overrides)
+        settings_input = {
+            "RESOURCE_TOKEN": "abc123",
+            "SEARCH_SERVICE_QUERY_ENDPOINT": "https://search.search.windows.net",
+            "AI_FOUNDRY_ACCOUNT_NAME": "aif-abc123",
+            "RETRIEVAL_BACKEND": "foundry_iq",
+            "FOUNDRY_IQ_KNOWLEDGE_SOURCE_NAME": names["blob"],
+            "FOUNDRY_IQ_CONVERSATION_UPLOAD_ENABLED": "true",
+            "FOUNDRY_IQ_CONVERSATION_KNOWLEDGE_SOURCE_NAME": names["conversation"],
+            "WORK_IQ_ENABLED": "true",
+            "WORK_IQ_KNOWLEDGE_SOURCE_NAME": names["work_iq"],
+            "FABRIC_IQ_ENABLED": "true",
+            "FABRIC_IQ_KNOWLEDGE_SOURCE_NAME": names["fabric_iq"],
+            "FABRIC_IQ_WORKSPACE_ID": "workspace-1",
+            "FABRIC_IQ_ONTOLOGY_ID": "ontology-1",
+            "FABRIC_DATA_AGENT_ENABLED": "true",
+            "FABRIC_DATA_AGENT_KNOWLEDGE_SOURCE_NAME": names["fabric_data_agent"],
+            "FABRIC_DATA_AGENT_WORKSPACE_ID": "workspace-1",
+            "FABRIC_DATA_AGENT_DATA_AGENT_ID": "agent-1",
+            "SHAREPOINT_INDEXED_ENABLED": "true",
+            "SHAREPOINT_INDEXED_KNOWLEDGE_SOURCE_NAME": names["sharepoint_indexed"],
+            "SHAREPOINT_INDEXED_INDEX_NAME": "sp-index",
+            "SHAREPOINT_INDEXED_SITE_URL": "https://contoso.sharepoint.com/sites/eng",
+            "SHAREPOINT_INDEXED_TENANT_ID": "tenant-guid",
+            "WEB_GROUNDING_ENABLED": "true",
+            "WEB_GROUNDING_KNOWLEDGE_SOURCE_NAME": names["web_grounding"],
+            "FOUNDRY_IQ_MCP_ENABLED": "true",
+        }
+        settings = render_json_template("search.settings.j2", settings_input)
+        context = {
+            **settings,
+            "STORAGE_ACCOUNT_RESOURCE_ID": "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Storage/storageAccounts/st",
+            "EMBEDDING_MODEL_INFO": {
+                "endpoint": "https://aif-abc123.openai.azure.com/",
+                "deployment_name": "text-embedding",
+                "model_name": "text-embedding-3-large",
+            },
+            "GPT_MODEL_INFO": {"deployment_name": "chat", "model_name": "gpt-5-nano"},
+            "FOUNDRY_IQ_MCP_SOURCES_JSON": [
+                {
+                    "name": names["mcp"],
+                    "serverURL": "https://mcp.contoso.com/mcp",
+                    "tools": [
+                        {
+                            "name": "query",
+                            "outputParsing": "auto",
+                            "inclusionMode": "reranked",
+                            "maxOutputTokens": 1024,
+                        }
+                    ],
+                }
+            ],
+        }
+        return render_json_template("search.j2", context)
+
+    def test_all_categories_enabled_with_distinct_names_pass(self):
+        defs = self._defs_with_all_categories_enabled()
+        names = [ks["name"] for ks in defs["knowledgeSources"]]
+        self.assertEqual(len(names), len(self.ALL_CATEGORIES))
+        self.assertEqual(len(names), len(set(n.lower() for n in names)))
+        setup.validate_unique_knowledge_source_names(defs)  # must not raise
+
+    def test_exact_case_collision_across_every_category_pair_raises(self):
+        for category_a, category_b in itertools.combinations(self.ALL_CATEGORIES, 2):
+            with self.subTest(colliding=(category_a, category_b)):
+                defs = self._defs_with_all_categories_enabled(**{category_b: f"{category_a}-ks"})
+                with self.assertRaisesRegex(ValueError, "[Cc]ollides"):
+                    setup.validate_unique_knowledge_source_names(defs)
+
+    def test_case_insensitive_collision_raises(self):
+        defs = self._defs_with_all_categories_enabled(mcp="BLOB-KS")
+        with self.assertRaisesRegex(ValueError, "case-insensitive"):
+            setup.validate_unique_knowledge_source_names(defs)
+
+    def test_no_knowledge_sources_passes(self):
+        setup.validate_unique_knowledge_source_names({"knowledgeSources": []})  # must not raise
+        setup.validate_unique_knowledge_source_names({})  # must not raise
+
+    def test_single_knowledge_source_passes(self):
+        setup.validate_unique_knowledge_source_names({"knowledgeSources": [{"name": "blob-ks"}]})
+
+    def test_two_distinct_names_pass(self):
+        setup.validate_unique_knowledge_source_names(
+            {"knowledgeSources": [{"name": "blob-ks"}, {"name": "mcp-ks"}]}
+        )
+
+    def test_duplicate_same_case_raises(self):
+        with self.assertRaisesRegex(ValueError, "collides"):
+            setup.validate_unique_knowledge_source_names(
+                {"knowledgeSources": [{"name": "blob-ks"}, {"name": "blob-ks"}]}
+            )
 
 
 if __name__ == "__main__":

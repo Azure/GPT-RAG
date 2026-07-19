@@ -498,10 +498,9 @@
           {% for tool in mcp_src.tools %}{% if not loop.first %},{% endif %}
           {
             "name": {{ tool.name | tojson }},
-            "outputParsing": {{ tool.outputParsing | tojson }},
+            "outputParsing": {% if tool.outputParsing == 'json' %}{ "kind": "json", "jsonParameters": { "documentsPath": {{ tool.documentsPath | tojson }} } }{% else %}{ "kind": {{ tool.outputParsing | tojson }} }{% endif %},
             "inclusionMode": {{ tool.inclusionMode | tojson }},
-            "maxOutputTokens": {{ tool.maxOutputTokens }}{% if tool.outputParsing == 'json' %},
-            "documentsPath": {{ tool.documentsPath | tojson }}{% endif %}
+            "maxOutputTokens": {{ tool.maxOutputTokens }}
           }
           {% endfor %}
         ]
