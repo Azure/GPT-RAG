@@ -7,7 +7,7 @@ runtime release.
 !!! warning "Implemented in a pull request, but not released"
     This page is reconciled with orchestrator pull request
     [#277](https://github.com/Azure/gpt-rag-orchestrator/pull/277) at commit
-    `a017fa61914ce5c3ccc560ed91d96e5b5d09b628`. That code is not in a released
+    `844fe14757d07a2cdc828189105fbce831f3c11d`. That code is not in a released
     orchestrator version. Audit events also remain disabled by default and need
     GPT-RAG umbrella deployment integration before they are available through a
     normal GPT-RAG deployment. Do not configure the flags below until the
@@ -42,20 +42,20 @@ The shared schema reserves ingestion event names, but orchestrator pull request
 
 The exact reviewed artifacts are:
 
-- [logical v1 schema](https://github.com/Azure/gpt-rag-orchestrator/blob/a017fa61914ce5c3ccc560ed91d96e5b5d09b628/contracts/audit-event-v1.schema.json)
-- [Application Insights wire schema](https://github.com/Azure/gpt-rag-orchestrator/blob/a017fa61914ce5c3ccc560ed91d96e5b5d09b628/contracts/audit-event-v1.application-insights.schema.json)
-- [contract SHA-256 digests](https://github.com/Azure/gpt-rag-orchestrator/blob/a017fa61914ce5c3ccc560ed91d96e5b5d09b628/contracts/audit-event-v1.sha256)
-- [golden logical event](https://github.com/Azure/gpt-rag-orchestrator/blob/a017fa61914ce5c3ccc560ed91d96e5b5d09b628/tests/golden/audit_event_v1.json)
-- [golden logical root event](https://github.com/Azure/gpt-rag-orchestrator/blob/a017fa61914ce5c3ccc560ed91d96e5b5d09b628/tests/golden/audit_event_v1_root.json)
-- [runtime configuration guidance](https://github.com/Azure/gpt-rag-orchestrator/blob/a017fa61914ce5c3ccc560ed91d96e5b5d09b628/README.md#audit-event-configuration)
+- [logical v1 schema](https://github.com/Azure/gpt-rag-orchestrator/blob/844fe14757d07a2cdc828189105fbce831f3c11d/contracts/audit-event-v1.schema.json)
+- [Application Insights wire schema](https://github.com/Azure/gpt-rag-orchestrator/blob/844fe14757d07a2cdc828189105fbce831f3c11d/contracts/audit-event-v1.application-insights.schema.json)
+- [contract SHA-256 digests](https://github.com/Azure/gpt-rag-orchestrator/blob/844fe14757d07a2cdc828189105fbce831f3c11d/contracts/audit-event-v1.sha256)
+- [golden logical event](https://github.com/Azure/gpt-rag-orchestrator/blob/844fe14757d07a2cdc828189105fbce831f3c11d/tests/golden/audit_event_v1.json)
+- [golden logical root event](https://github.com/Azure/gpt-rag-orchestrator/blob/844fe14757d07a2cdc828189105fbce831f3c11d/tests/golden/audit_event_v1_root.json)
+- [runtime configuration guidance](https://github.com/Azure/gpt-rag-orchestrator/blob/844fe14757d07a2cdc828189105fbce831f3c11d/README.md#audit-event-configuration)
 
 The pinned SHA-256 digests of the two schema files, recorded in
 `contracts/audit-event-v1.sha256`, are:
 
 | Artifact | SHA-256 |
 | --- | --- |
-| `audit-event-v1.schema.json` | `3c96e4a2ab355bdc87ad9bdba0f4cb369f0d23c3a6c74022e83f971d30b852d9` |
-| `audit-event-v1.application-insights.schema.json` | `cb983f8d48ed3593e91bec8620f3c328e37d3245d50cf544e45892f290f6985a` |
+| `audit-event-v1.schema.json` | `825db8ef40a81e2c19e5d80d37c565b6b47fc9a6540e9881d35cc12b8fde5aab` |
+| `audit-event-v1.application-insights.schema.json` | `066c8f5408610ab839d5121d06ca5bc59e8797e551d5c47c875c5ba52f7e0588` |
 
 Recompute these digests against the pinned commit before relying on this page
 if the contract is revised.
@@ -145,14 +145,13 @@ these exact logical event types:
 
 The shared schema also reserves these names for a future ingestion producer:
 
-- `ingestion.request.started`
-- `ingestion.request.completed`
-- `ingestion.request.failed`
-- `ingestion.request.cancelled`
-- `ingestion.document.selected`
+- `ingestion.run.started`
+- `ingestion.run.completed`
+- `ingestion.run.failed`
+- `ingestion.run.cancelled`
+- `ingestion.document.indexed`
 - `ingestion.document.rejected`
-- `ingestion.outcome.produced`
-- `ingestion.outcome.rejected`
+- `ingestion.document.deleted`
 
 ## Required logical fields
 
@@ -182,7 +181,7 @@ ignore unknown optional fields.
 
 Terminal request and tool events also require `started_at_utc` and
 `duration_ms`. This applies to completed, failed, and cancelled request or tool
-events, including the reserved ingestion request terminal events.
+events, including the reserved ingestion run terminal events.
 
 ## Optional logical fields
 
