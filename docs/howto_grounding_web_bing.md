@@ -136,8 +136,8 @@ Query terms are sent to Bing and web page snippets are returned to the
 orchestrator. Both cross the public internet and land outside the Azure
 compliance boundary. Grounded snippets still end up in orchestrator
 responses and, transitively, in downstream telemetry and chat history.
-Operators enabling Web grounding should confirm this data flow is
-compliant with their tenant data-boundary policies before turning the
+Operators enabling Web grounding should determine whether this data flow
+is permitted by their tenant data-boundary policies before turning the
 flag on.
 
 ## Citations shape

@@ -151,8 +151,8 @@ Managed identity is never used to reach this source, by design.
 
 Fabric Data Agent forwards the caller OBO token to Microsoft Fabric and
 returns grounded answers plus tabular evidence from Fabric data back to
-the orchestrator. Operators enabling Fabric Data Agent should confirm
-this data flow is compliant with their tenant data-boundary and
+the orchestrator. Operators enabling Fabric Data Agent should determine
+whether this data flow is permitted by their tenant data-boundary and
 Fabric-workspace access policies before turning the flag on. Grounded
 content still ends up in orchestrator responses and, transitively, in
 downstream telemetry and chat history.

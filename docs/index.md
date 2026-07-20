@@ -22,6 +22,13 @@ The complementary modular view below separates the basic deployment from optiona
 
 ![Modular architecture layers](media/architecture_modular_layers.svg)
 
+## Governance
+
+Before connecting enterprise data or relying on telemetry as evidence, review
+[Governance and responsible operation](governance_overview.md). It explains
+intended use, limitations, data and telemetry responsibilities, retention,
+access, and the exact but unreleased audit trail contract.
+
 ## Runtime Services
 
 | Services                                                          | Description                                                                             |
