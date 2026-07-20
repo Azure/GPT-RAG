@@ -207,23 +207,33 @@ guarantee complete evidence. Verify the deployed OpenTelemetry and Azure Monitor
 sampling behavior, exporter health, and throttling before relying on telemetry
 for an investigation.
 
-## Roll out the audit feature after release
+## Roll out the audit feature
 
-Do not begin this procedure until the orchestrator implementation is released
-and GPT-RAG umbrella deployment integration is complete.
+Use GPT-RAG umbrella `v3.7.0` or later with orchestrator `v3.8.0` and ingestion
+`v2.5.0`. Do not mix older component versions with this shared-contract rollout.
 
-1. Upgrade with audit emission disabled.
-2. Enable metadata-only events in a non-production environment.
-3. Keep `AUDIT_ACTOR_PSEUDONYM_ENABLED` and
+1. Upgrade with `AUDIT_EVENTS_ENABLED=false`,
+   `AUDIT_SENSITIVE_CONTENT_ENABLED=false`, and
+   `INGESTION_PROVENANCE_ENABLED=false`.
+2. Run post-provisioning. Verify that `AUDIT_HMAC_KEY` is a Key Vault reference
+   and that the existing Search index gained the optional provenance fields
+   without being recreated.
+3. Enable metadata-only audit events in a non-production environment.
+4. Enable ingestion provenance separately if the deployment has reviewed the
+   classification and right-to-use defaults.
+5. Keep `AUDIT_ACTOR_PSEUDONYM_ENABLED` and
    `AUDIT_SENSITIVE_CONTENT_ENABLED` disabled.
-4. If actor correlation is approved, create and restrict a Key Vault HMAC key
-   before enabling it.
-5. Canary a small production slice and reconstruct representative requests.
-6. Monitor latency, exporter failures, ingestion volume, retention cost, and
+6. If actor correlation is approved, enable pseudonymization only after
+   reviewing access to the automatically provisioned Key Vault key.
+7. Canary a small production slice and reconstruct representative requests.
+8. Monitor latency, exporter failures, ingestion volume, retention cost, and
    evidence-gap health signals.
-7. Confirm that existing traces, logs, dashboards, and alerts still work.
-8. Roll back by setting `AUDIT_EVENTS_ENABLED=false` and restarting the
-   orchestrator. Do not enable sensitive content as a troubleshooting shortcut.
+9. Confirm that existing traces, logs, dashboards, alerts, indexed documents,
+   and operator-added Search fields still work.
+10. Roll back by setting `AUDIT_EVENTS_ENABLED=false` and
+    `INGESTION_PROVENANCE_ENABLED=false`, then restart the components. Additive
+    Search fields can remain. Do not enable sensitive content as a
+    troubleshooting shortcut.
 
 Audit emission should not make the user request fail. If event production or
 the synchronous logging path fails, the runtime continues the request and
@@ -235,7 +245,7 @@ volume and Azure Monitor ingestion health.
 
 ## Related reading
 
-- [Audit Contract v1, unreleased](governance_audit_contract_v1.md)
+- [Audit Contract v1](governance_audit_contract_v1.md)
 - [Authentication and Document-Level Security](howto_authentication.md)
 - [Grounding sources overview](howto_grounding_overview.md)
 - [Azure Monitor Application Insights telemetry data model](https://learn.microsoft.com/azure/azure-monitor/app/data-model-complete)

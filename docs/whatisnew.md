@@ -6,6 +6,16 @@ patch, and fix, see the [GitHub releases](https://github.com/Azure/GPT-RAG/relea
 
 ### July 2026
 
+- **Governance audit and provenance integration (planned for GPT-RAG v3.7.0).**
+  The next minor umbrella release pins orchestrator `v3.8.0` and ingestion
+  `v2.5.0` to the shared `audit-event-v1` contract. Audit, sensitive-content
+  capture, actor pseudonymization, and ingestion provenance remain off by
+  default. Post-provisioning creates a stable 256-bit HMAC key in Key Vault,
+  registers only its Key Vault reference, and adds optional provenance fields
+  to existing Azure AI Search indexes without recreating them. See
+  [Audit Contract v1](governance_audit_contract_v1.md) for configuration,
+  migration, rollback, and evidence limitations. `delete_after` records policy
+  intent only; it does not trigger automatic deletion.
 - **Generic MCP Server knowledge source (preview, [v3.6.0](https://github.com/Azure/GPT-RAG/releases/tag/v3.6.0)).**
   The Knowledge Base can call approved tools on a remote MCP server you
   operate or trust and blend those results with other Foundry IQ sources.

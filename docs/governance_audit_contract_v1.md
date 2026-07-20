@@ -340,6 +340,29 @@ dashboard.
 | `AUDIT_SOURCE_EVENT_LIMIT` | `25` | Accepts an integer from 1 through 25. |
 | `AUDIT_ADDITIONAL_REDACTED_KEYS` | Empty | Comma-separated nested key fragments that the sanitizer always redacts. |
 
+GPT-RAG's next minor umbrella release pins orchestrator `v3.8.0` and ingestion
+`v2.5.0`. Post-provisioning creates `AUDIT-HMAC-KEY` in Key Vault from 256
+cryptographically random bits when it does not already exist, then registers
+only an `AUDIT_HMAC_KEY` Key Vault reference in App Configuration. Ordinary
+reprovisioning reuses the existing secret. The key value is not an admin
+setting, deployment output, or log value.
+
+Ingestion provenance uses a separate, non-secret configuration surface:
+
+| Key | Default | Exact behavior |
+| --- | --- | --- |
+| `INGESTION_PROVENANCE_ENABLED` | `false` | Adds provenance and governance values to supported ingestion document events and indexed documents when enabled. |
+| `INGESTION_REQUIRE_GOVERNANCE_METADATA` | `false` | Requires explicit classification and right-to-use values when provenance is enabled. Setting this to `true` while provenance is disabled is invalid. |
+| `INGESTION_DEFAULT_CLASSIFICATION` | `unclassified` | Fallback classification when provenance is enabled and strict mode is off. |
+| `INGESTION_DEFAULT_RIGHT_TO_USE` | `not_asserted` | Fallback right-to-use value when provenance is enabled and strict mode is off. |
+
+These four ingestion values contain no credentials and are safe to display and
+edit as normal configuration. Ingestion does not consume `AUDIT_HMAC_KEY`.
+Post-provisioning seeds only missing values and preserves operator-managed
+settings unless an AZD environment value explicitly overrides them. A deployment
+that explicitly disables Key Vault receives the disabled defaults but cannot
+enable audit events until a valid HMAC Key Vault reference is supplied.
+
 If `AZURE_MONITOR_DISABLE_LOGGING=true` while auditing is enabled, the
 orchestrator enables Azure Monitor log export only for the `gptrag.audit`
 namespace. If normal log export is enabled, audit events use that existing
@@ -349,6 +372,32 @@ orchestrator fail.
 
 To roll back, set `AUDIT_EVENTS_ENABLED=false` and restart the orchestrator.
 This stops new events. It does not delete previously exported telemetry.
+
+## Search provenance schema and migration
+
+The RAG Azure AI Search index has optional, retrievable fields for
+`provenance_id`, `source_uri_id`, `source_version_id`,
+`content_checksum_sha256`, `ingested_at`, `ingest_run_id`,
+`data_classification`, `right_to_use`, `retention_class`, and `delete_after`.
+Identifiers and checksums are filterable. Guaranteed UTC `ingested_at` values
+use filterable, sortable `Edm.DateTimeOffset`. `delete_after` remains a
+filterable, sortable string because ingestion v2.5.0 passes through operator
+policy values without imposing a date format. Classification, right-to-use, and
+retention class are also facetable.
+
+Post-provisioning updates an existing index in place by merging only missing
+fields into its current definition. It preserves existing documents and
+operator-added fields. If a same-name field has an incompatible type or
+attributes, setup fails before making the update. GPT-RAG does not fall back to
+deleting and recreating the index.
+
+Existing documents can leave the new fields empty until they are reingested by
+ingestion `v2.5.0`. Older component versions ignore the additive fields, so
+rollback does not require removing them.
+
+`delete_after` is policy intent only. No GPT-RAG job reads this field to
+schedule or perform a purge. The operator must implement retention enforcement
+and verify the deletion outcome.
 
 ## HMAC identifiers and rotation
 
