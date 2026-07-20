@@ -223,12 +223,21 @@ Use GPT-RAG umbrella `v3.7.0` or later with orchestrator `v3.8.0` and ingestion
    `AUDIT_SENSITIVE_CONTENT_ENABLED` disabled.
 6. If actor correlation is approved, enable pseudonymization only after
    reviewing access to the automatically provisioned Key Vault key.
-7. Canary a small production slice and reconstruct representative requests.
-8. Monitor latency, exporter failures, ingestion volume, retention cost, and
+7. Rotate the pseudonymization key on your schedule, or immediately after a
+   suspected exposure: create a new version of the `AUDIT-HMAC-KEY` secret in
+   Key Vault, advance `AUDIT_HMAC_KEY_ID` to a new value that marks the new
+   pseudonymization epoch, then restart or redeploy the affected workloads so
+   both changes take effect together. Do not edit `AUDIT_HMAC_KEY` itself; it
+   is an unversioned Key Vault reference and always resolves to the secret's
+   current version. Retain or remove prior secret versions according to your
+   rollback and retention policy. See
+   [HMAC identifiers and rotation](governance_audit_contract_v1.md#hmac-identifiers-and-rotation).
+8. Canary a small production slice and reconstruct representative requests.
+9. Monitor latency, exporter failures, ingestion volume, retention cost, and
    evidence-gap health signals.
-9. Confirm that existing traces, logs, dashboards, alerts, indexed documents,
-   and operator-added Search fields still work.
-10. Roll back by setting `AUDIT_EVENTS_ENABLED=false` and
+10. Confirm that existing traces, logs, dashboards, alerts, indexed documents,
+    and operator-added Search fields still work.
+11. Roll back by setting `AUDIT_EVENTS_ENABLED=false` and
     `INGESTION_PROVENANCE_ENABLED=false`, then restart the components. Additive
     Search fields can remain. Do not enable sensitive content as a
     troubleshooting shortcut.

@@ -412,10 +412,21 @@ the digest. Current code pseudonymizes conversation IDs, question IDs, source
 references, tool IDs, tool invocation IDs, and optional actor IDs. Raw values
 are not placed in those audit properties.
 
-Create and restrict the key in Key Vault. To rotate it, update
-`AUDIT_HMAC_KEY` and `AUDIT_HMAC_KEY_ID` together, then restart. Identical raw
-values produce different pseudonyms after rotation, so correlation does not
-continue automatically across key versions.
+Create and restrict the key in Key Vault. The `AUDIT_HMAC_KEY` App
+Configuration value is an unversioned Key Vault reference to the
+`AUDIT-HMAC-KEY` secret, so it always resolves to that secret's current
+version. Ordinary reprovisioning reuses the existing secret and does not
+rotate it.
+
+To rotate the key: create a new version of the `AUDIT-HMAC-KEY` secret in Key
+Vault (do not edit `AUDIT_HMAC_KEY` itself), then advance `AUDIT_HMAC_KEY_ID`
+to a new value that identifies the new pseudonymization epoch. Restart or
+redeploy the affected workloads so they pick up the new secret version and key
+identifier together. Identical raw values produce different pseudonyms after
+rotation, so correlation does not continue automatically across key versions.
+Retain or remove prior secret versions according to the deployment's rollback
+and retention policy; keep a prior version available if you may need to roll
+back to the previous `AUDIT_HMAC_KEY_ID`.
 
 ## Sensitive-content capture
 
