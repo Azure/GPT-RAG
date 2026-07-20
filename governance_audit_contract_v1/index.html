@@ -1,0 +1,2533 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Official project documentation">
+      
+      
+        <meta name="author" content="Paulo Lacerda">
+      
+      
+      
+        <link rel="prev" href="../governance_overview/">
+      
+      
+        <link rel="next" href="../services_orchestrator/">
+      
+      
+      <link rel="icon" href="../favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.34">
+    
+    
+      
+        <title>Audit Contract v1 (unreleased) - GPT-RAG</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.35f28582.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../styles.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#audit-contract-v1" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="GPT-RAG" class="md-header__button md-logo" aria-label="GPT-RAG" data-md-component="logo">
+      
+  <img src="../media/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            GPT-RAG
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Audit Contract v1 (unreleased)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/azure/gpt-rag" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="GPT-RAG" class="md-nav__button md-logo" aria-label="GPT-RAG" data-md-component="logo">
+      
+  <img src="../media/logo.png" alt="logo">
+
+    </a>
+    GPT-RAG
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/azure/gpt-rag" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../whatisnew/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    What's New
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../release_267_270_walkthrough/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Release Walkthrough
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deploy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Deployment Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Quick Start Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Quick Start Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart_simple_rag/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Simple RAG
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart_nl2sql/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    NL2SQL
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Architecture
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Architecture
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Governance
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Governance
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../governance_overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview and responsibilities
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Audit Contract v1 (unreleased)
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Audit Contract v1 (unreleased)
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-the-implementation-covers" class="md-nav__link">
+    <span class="md-ellipsis">
+      What the implementation covers
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Services
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Services
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_orchestrator/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Orchestrator
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_8_2" id="__nav_8_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Ingestion
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_2">
+            <span class="md-nav__icon md-icon"></span>
+            Ingestion
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_ingestion/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_blob_data_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Blob
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_sharepoint_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Sharepoint
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_nl2sql_data_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    NL2SQL
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    How-to Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            How-to Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_azure_direct/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Azure Direct Models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_app_gateway/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Application Gateway
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_authentication/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Auth & Doc Security
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/Azure/gpt-rag-ui/blob/1ef6f9e88022e3168b8caf9c867f090eb632f562/docs/copilot-embedding.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Embed chat in a portal
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_dashboard_signin/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Admin Dashboard Sign-in
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_9_6" id="__nav_9_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Grounding sources
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_6">
+            <span class="md-nav__icon md-icon"></span>
+            Grounding sources
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview (start here)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_6_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_9_6_2" id="__nav_9_6_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Approach A: Foundry IQ
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            Approach A: Foundry IQ
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_foundry_iq_prereqs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Prerequisites
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_foundry_iq_documents/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Documents
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_work_iq/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Work IQ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_fabric_ontology/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Fabric ontology
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_fabric_data_agent/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Fabric Data Agent
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_sharepoint_remote/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    SharePoint remote
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_sharepoint_indexed/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    SharePoint indexed
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_onelake/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    OneLake
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_web_bing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Web grounding
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_mcp_server/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Generic MCP server
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_6_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_9_6_3" id="__nav_9_6_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Approach B: AI Search direct
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_6_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_6_3">
+            <span class="md-nav__icon md-icon"></span>
+            Approach B: AI Search direct
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_ai_search_direct/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_sharepoint_connector/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    SharePoint connector
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_multimodality/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Multimodality
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_userfeedback/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    User Feedback
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_retrieval_optimization/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Retrieval Optimization
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_resource_naming/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Resource Naming (CAF)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../team/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Meet the Team
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="audit-contract-v1">Audit Contract v1</h1>
+<p>Use this page to understand the unreleased GPT-RAG orchestrator audit event
+contract, estimate its telemetry volume, and prepare queries for a future
+runtime release.</p>
+<div class="admonition warning">
+<p class="admonition-title">Implemented in a pull request, but not released</p>
+<p>This page is reconciled with orchestrator pull request
+<a href="https://github.com/Azure/gpt-rag-orchestrator/pull/277">#277</a> at commit
+<code>844fe14757d07a2cdc828189105fbce831f3c11d</code>. That code is not in a released
+orchestrator version. Audit events also remain disabled by default and need
+GPT-RAG umbrella deployment integration before they are available through a
+normal GPT-RAG deployment. Do not configure the flags below until the
+runtime release and integration are complete.</p>
+</div>
+<p>The contract provides best-effort operational evidence. It is not a transaction
+log, an immutable or nonrepudiable record, independent attestation, or proof
+that a component behaved correctly. It does not establish legal or regulatory
+compliance.</p>
+<h2 id="what-the-implementation-covers">What the implementation covers</h2>
+<p>The orchestrator implementation adds request, route, grounding source, tool,
+outcome, and audit-emission events over the existing OpenTelemetry and Azure
+Monitor connection.</p>
+<pre class="mermaid"><code>flowchart LR
+  Request[Request] --&gt; Route[Route selection]
+  Route --&gt; Sources[Grounding sources]
+  Sources --&gt; Tools[Tool calls]
+  Tools --&gt; Outcome[Outcome]
+  Request -. correlation ID .-&gt; Events[AppEvents]
+  Route -. audit event .-&gt; Events
+  Sources -. audit events .-&gt; Events
+  Tools -. audit events .-&gt; Events
+  Outcome -. audit events .-&gt; Events</code></pre>
+<p>The shared schema reserves ingestion event names, but orchestrator pull request</p>
+<h1 id="277-does-not-implement-an-ingestion-producer">277 does not implement an ingestion producer.</h1>
+<p>The exact reviewed artifacts are:</p>
+<ul>
+<li><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/844fe14757d07a2cdc828189105fbce831f3c11d/contracts/audit-event-v1.schema.json">logical v1 schema</a></li>
+<li><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/844fe14757d07a2cdc828189105fbce831f3c11d/contracts/audit-event-v1.application-insights.schema.json">Application Insights wire schema</a></li>
+<li><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/844fe14757d07a2cdc828189105fbce831f3c11d/contracts/audit-event-v1.sha256">contract SHA-256 digests</a></li>
+<li><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/844fe14757d07a2cdc828189105fbce831f3c11d/tests/golden/audit_event_v1.json">golden logical event</a></li>
+<li><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/844fe14757d07a2cdc828189105fbce831f3c11d/tests/golden/audit_event_v1_root.json">golden logical root event</a></li>
+<li><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/844fe14757d07a2cdc828189105fbce831f3c11d/README.md#audit-event-configuration">runtime configuration guidance</a></li>
+</ul>
+<p>The pinned SHA-256 digests of the two schema files, recorded in
+<code>contracts/audit-event-v1.sha256</code>, are:</p>
+<table>
+<thead>
+<tr>
+<th>Artifact</th>
+<th>SHA-256</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>audit-event-v1.schema.json</code></td>
+<td><code>825db8ef40a81e2c19e5d80d37c565b6b47fc9a6540e9881d35cc12b8fde5aab</code></td>
+</tr>
+<tr>
+<td><code>audit-event-v1.application-insights.schema.json</code></td>
+<td><code>066c8f5408610ab839d5121d06ca5bc59e8797e551d5c47c875c5ba52f7e0588</code></td>
+</tr>
+</tbody>
+</table>
+<p>Recompute these digests against the pinned commit before relying on this page
+if the contract is revised.</p>
+<h2 id="application-insights-wire-format">Application Insights wire format</h2>
+<p>The producer writes through the <code>gptrag.audit</code> logger with the fixed log body
+<code>GPT-RAG audit event</code>. It sets <code>microsoft.custom_event.name</code> to
+<code>gptrag.audit.&lt;event_type&gt;</code>, which the pinned Azure Monitor exporter converts to
+an <code>AppEvents</code> row.</p>
+<table>
+<thead>
+<tr>
+<th>Logical value</th>
+<th>Workspace-based Application Insights value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Custom event name</td>
+<td><code>AppEvents.Name</code></td>
+</tr>
+<tr>
+<td>Export time</td>
+<td><code>AppEvents.TimeGenerated</code></td>
+</tr>
+<tr>
+<td>Current OpenTelemetry trace ID</td>
+<td><code>AppEvents.OperationId</code></td>
+</tr>
+<tr>
+<td>Current OpenTelemetry span ID</td>
+<td><code>AppEvents.ParentId</code></td>
+</tr>
+<tr>
+<td>Event fields</td>
+<td>Unprefixed keys in <code>AppEvents.Properties</code></td>
+</tr>
+<tr>
+<td>Service name</td>
+<td><code>AppEvents.AppRoleName</code> and <code>Properties["service_name"]</code></td>
+</tr>
+<tr>
+<td>Runtime version</td>
+<td><code>AppEvents.AppVersion</code> and <code>Properties["service_version"]</code></td>
+</tr>
+</tbody>
+</table>
+<p>The event property names are not prefixed with <code>gptrag.audit.</code>. For example,
+use <code>Properties["correlation_id"]</code>, not
+<code>Properties["gptrag.audit.correlation_id"]</code>.
+The exporter can add properties such as source-code attributes or
+<code>logger_name</code>; v1 readers must ignore unknown optional properties.</p>
+<p>Azure Monitor stringifies every custom event property. Logical numbers,
+booleans, and arrays therefore arrive as strings. Parse scalar values in KQL
+before comparing or calculating with them. The wire contract does not guarantee
+JSON encoding for arrays. Treat <code>omitted_fields</code> and <code>truncated_fields</code> as
+display values on the wire unless a future contract defines a portable array
+encoding.</p>
+<p>The logical schema allows a root <code>parent_event_id</code> to be <code>null</code>. Azure Monitor
+drops null custom properties, so the wire adapter encodes that logical null as
+this reserved sentinel before export:</p>
+<div class="highlight"><pre><span></span><code>evt_00000000000000000000000000000000
+</code></pre></div>
+<p>A consumer must decode <code>Properties["parent_event_id"] ==
+"evt_00000000000000000000000000000000"</code> back to logical <code>null</code> and must never
+treat it as an identifier or join it as an event. The all-zero value is also
+explicitly rejected as an <code>event_id</code> and as any non-root <code>parent_event_id</code>, in
+both the logical and wire schemas: it can only ever mean "no logical parent."</p>
+<p>When an event has a valid active span:</p>
+<ul>
+<li><code>Properties["trace_id"]</code> equals <code>OperationId</code>;</li>
+<li><code>Properties["span_id"]</code> equals <code>ParentId</code>; and</li>
+<li><code>Properties["parent_event_id"]</code> expresses the logical audit relationship,
+  not the OpenTelemetry span relationship.</li>
+</ul>
+<p>If no valid span is active, the logical <code>trace_id</code> and <code>span_id</code> and the
+exported <code>OperationId</code> and <code>ParentId</code> use all-zero hexadecimal values. Exclude
+the all-zero trace ID from joins.</p>
+<p>The runtime reads <code>service_version</code> from the repository root <code>VERSION</code> file and
+uses the same value for the OpenTelemetry <code>service.version</code> resource attribute.
+The reviewed branch reports <code>3.7.0</code>, but the audit feature itself is unreleased.
+The eventual release will report the version packaged in its own <code>VERSION</code>
+file.</p>
+<h2 id="event-names">Event names</h2>
+<p>The orchestrator event name is the <code>gptrag.audit.</code> prefix followed by one of
+these exact logical event types:</p>
+<table>
+<thead>
+<tr>
+<th><code>event_type</code></th>
+<th><code>AppEvents.Name</code></th>
+<th>Current meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>request.started</code></td>
+<td><code>gptrag.audit.request.started</code></td>
+<td>Streaming request processing started.</td>
+</tr>
+<tr>
+<td><code>request.completed</code></td>
+<td><code>gptrag.audit.request.completed</code></td>
+<td>Streaming request processing completed.</td>
+</tr>
+<tr>
+<td><code>request.failed</code></td>
+<td><code>gptrag.audit.request.failed</code></td>
+<td>Request processing raised an exception.</td>
+</tr>
+<tr>
+<td><code>request.cancelled</code></td>
+<td><code>gptrag.audit.request.cancelled</code></td>
+<td>The stream was cancelled or disconnected.</td>
+</tr>
+<tr>
+<td><code>route.selected</code></td>
+<td><code>gptrag.audit.route.selected</code></td>
+<td>An agent strategy or single-agent route was selected.</td>
+</tr>
+<tr>
+<td><code>grounding.source.selected</code></td>
+<td><code>gptrag.audit.grounding.source.selected</code></td>
+<td>A grounding source or result was selected.</td>
+</tr>
+<tr>
+<td><code>grounding.source.rejected</code></td>
+<td><code>gptrag.audit.grounding.source.rejected</code></td>
+<td>A source was rejected, empty, or not selected.</td>
+</tr>
+<tr>
+<td><code>tool.invocation.started</code></td>
+<td><code>gptrag.audit.tool.invocation.started</code></td>
+<td>A proxied tool invocation started, or a Foundry IQ activity was reconstructed as started.</td>
+</tr>
+<tr>
+<td><code>tool.invocation.completed</code></td>
+<td><code>gptrag.audit.tool.invocation.completed</code></td>
+<td>A tool invocation completed.</td>
+</tr>
+<tr>
+<td><code>tool.invocation.failed</code></td>
+<td><code>gptrag.audit.tool.invocation.failed</code></td>
+<td>A tool invocation failed or timed out.</td>
+</tr>
+<tr>
+<td><code>tool.invocation.cancelled</code></td>
+<td><code>gptrag.audit.tool.invocation.cancelled</code></td>
+<td>A proxied tool invocation was cancelled.</td>
+</tr>
+<tr>
+<td><code>outcome.produced</code></td>
+<td><code>gptrag.audit.outcome.produced</code></td>
+<td>A streamed response was produced.</td>
+</tr>
+<tr>
+<td><code>outcome.rejected</code></td>
+<td><code>gptrag.audit.outcome.rejected</code></td>
+<td>A streamed response was rejected after a failure.</td>
+</tr>
+<tr>
+<td><code>audit.emission.failed</code></td>
+<td><code>gptrag.audit.audit.emission.failed</code></td>
+<td>Sanitization, serialization, size, attribute, or synchronous logging failed.</td>
+</tr>
+</tbody>
+</table>
+<p>The shared schema also reserves these names for a future ingestion producer:</p>
+<ul>
+<li><code>ingestion.run.started</code></li>
+<li><code>ingestion.run.completed</code></li>
+<li><code>ingestion.run.failed</code></li>
+<li><code>ingestion.run.cancelled</code></li>
+<li><code>ingestion.document.indexed</code></li>
+<li><code>ingestion.document.rejected</code></li>
+<li><code>ingestion.document.deleted</code></li>
+</ul>
+<h2 id="required-logical-fields">Required logical fields</h2>
+<p>Every logical event requires these fields. Readers of major version 1 must
+ignore unknown optional fields.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Logical type and constraint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>schema_version</code></td>
+<td>Integer constant <code>1</code>.</td>
+</tr>
+<tr>
+<td><code>event_id</code></td>
+<td><code>evt_</code> plus 32 lowercase hexadecimal characters. The all-zero value (<code>evt_00000000000000000000000000000000</code>) is reserved and rejected; it can never identify a real event.</td>
+</tr>
+<tr>
+<td><code>event_type</code></td>
+<td>One of the event types in the shared schema.</td>
+</tr>
+<tr>
+<td><code>event_time_utc</code></td>
+<td>UTC timestamp with exactly six fractional digits and a <code>Z</code> suffix.</td>
+</tr>
+<tr>
+<td><code>correlation_id</code></td>
+<td><code>req_</code> plus 32 lowercase hexadecimal characters.</td>
+</tr>
+<tr>
+<td><code>trace_id</code></td>
+<td>32 lowercase hexadecimal characters.</td>
+</tr>
+<tr>
+<td><code>span_id</code></td>
+<td>16 lowercase hexadecimal characters.</td>
+</tr>
+<tr>
+<td><code>parent_event_id</code></td>
+<td>Event ID or <code>null</code> in the logical schema. <code>null</code> marks a root event. The reserved all-zero value is rejected as a non-root parent; the wire uses the all-zero sentinel only to represent <code>null</code>.</td>
+</tr>
+<tr>
+<td><code>service_name</code></td>
+<td>String, maximum 512 characters. Current value: <code>gpt-rag-orchestrator</code>.</td>
+</tr>
+<tr>
+<td><code>service_version</code></td>
+<td>String, maximum 512 characters, read from <code>VERSION</code>.</td>
+</tr>
+<tr>
+<td><code>environment</code></td>
+<td>String, maximum 64 characters. Uses <code>ENVIRONMENT_NAME</code>, then <code>AZURE_ENV_NAME</code>, then <code>unknown</code>.</td>
+</tr>
+<tr>
+<td><code>operation</code></td>
+<td>String, maximum 512 characters.</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>Exact status enum below.</td>
+</tr>
+<tr>
+<td><code>reason_code</code></td>
+<td>Exact reason enum below.</td>
+</tr>
+<tr>
+<td><code>capture_mode</code></td>
+<td><code>metadata_only</code> or <code>sensitive_allowlist</code>.</td>
+</tr>
+<tr>
+<td><code>redaction_applied</code></td>
+<td>Boolean. This indicates that the sanitizer changed a value, not that arbitrary content is safe.</td>
+</tr>
+<tr>
+<td><code>omitted_fields</code></td>
+<td>Array of at most 32 field paths, each at most 512 characters.</td>
+</tr>
+<tr>
+<td><code>truncated_fields</code></td>
+<td>Array of at most 32 field paths, each at most 512 characters.</td>
+</tr>
+</tbody>
+</table>
+<p>Terminal request and tool events also require <code>started_at_utc</code> and
+<code>duration_ms</code>. This applies to completed, failed, and cancelled request or tool
+events, including the reserved ingestion run terminal events.</p>
+<h2 id="optional-logical-fields">Optional logical fields</h2>
+<table>
+<thead>
+<tr>
+<th>Fields</th>
+<th>Logical type and constraint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>started_at_utc</code></td>
+<td>UTC timestamp in the same format as <code>event_time_utc</code>.</td>
+</tr>
+<tr>
+<td><code>duration_ms</code></td>
+<td>Number from 0 through 86,400,000 (24 hours), rounded to three decimal places. The producer rejects out-of-range or non-finite values rather than clamping them.</td>
+</tr>
+<tr>
+<td><code>timing_source</code></td>
+<td><code>observed</code> or <code>reconstructed</code>. Present only on Foundry IQ MCP tool events today, always as <code>reconstructed</code>; absent elsewhere, which means the timestamp was observed directly. <code>reconstructed</code> values are approximate, described further in <a href="#mcp-and-foundry-iq-evidence">MCP and Foundry IQ evidence</a>.</td>
+</tr>
+<tr>
+<td><code>decision_type</code>, <code>decision_value</code></td>
+<td>String, maximum 512 characters.</td>
+</tr>
+<tr>
+<td><code>source_id</code></td>
+<td>String or <code>null</code>, maximum 512 characters.</td>
+</tr>
+<tr>
+<td><code>source_type</code></td>
+<td>String, maximum 512 characters.</td>
+</tr>
+<tr>
+<td><code>source_rank</code></td>
+<td>Non-negative integer.</td>
+</tr>
+<tr>
+<td><code>tool_name</code></td>
+<td>String, maximum 512 characters.</td>
+</tr>
+<tr>
+<td><code>tool_id</code>, <code>tool_invocation_id</code></td>
+<td>String or <code>null</code>, maximum 512 characters.</td>
+</tr>
+<tr>
+<td><code>outcome_type</code>, <code>failure_type</code></td>
+<td>String, maximum 512 characters.</td>
+</tr>
+<tr>
+<td><code>input_count</code>, <code>output_count</code>, <code>source_count</code></td>
+<td>Non-negative integer. Current request counts are character and emitted-source-event counts, not token counts.</td>
+</tr>
+<tr>
+<td><code>partial_output</code></td>
+<td>Boolean.</td>
+</tr>
+<tr>
+<td><code>audit_events_omitted</code>, <code>source_events_omitted</code>, <code>tool_invocations_omitted</code></td>
+<td>Non-negative integer. Present only on request-terminal events (<code>request.completed</code>, <code>request.failed</code>, <code>request.cancelled</code>), reporting how many detail, grounding-source, and complete tool-invocation-pair events this request could not emit because a fixed per-request budget was reached. See <a href="#event-and-tool-budgets">Event and tool budgets</a>.</td>
+</tr>
+<tr>
+<td><code>http_status_code</code></td>
+<td>Integer from 100 through 599. Reserved by the contract but not populated by the reviewed request lifecycle.</td>
+</tr>
+<tr>
+<td><code>transport</code></td>
+<td>String, maximum 512 characters.</td>
+</tr>
+<tr>
+<td><code>actor_id</code>, <code>conversation_id</code>, <code>question_id</code>, <code>thread_id</code></td>
+<td>String or <code>null</code>, maximum 512 characters. <code>thread_id</code> is reserved but not populated by the reviewed implementation.</td>
+</tr>
+<tr>
+<td><code>hmac_key_id</code></td>
+<td>String, maximum 512 characters. Present on normal emitted events, but not on the minimal <code>audit.emission.failed</code> fallback.</td>
+</tr>
+<tr>
+<td><code>prompt</code>, <code>response</code>, <code>source_excerpt</code>, <code>tool_arguments</code>, <code>tool_result</code></td>
+<td>Sensitive allowlist string, maximum 2,048 characters after conversion and sanitization.</td>
+</tr>
+</tbody>
+</table>
+<p>The logical JSON Schema allows additional properties for forward-compatible
+readers. The current producer is stricter: it omits fields outside its required
+and optional allowlists and records their names in <code>omitted_fields</code>.</p>
+<h2 id="status-and-reason-enums">Status and reason enums</h2>
+<p>The exact <code>status</code> values are:</p>
+<div class="highlight"><pre><span></span><code>started
+completed
+failed
+cancelled
+selected
+rejected
+produced
+</code></pre></div>
+<p>The exact <code>reason_code</code> values are:</p>
+<div class="highlight"><pre><span></span><code>none
+request_received
+request_completed
+request_failed
+request_cancelled
+client_disconnected
+partial_output
+strategy_configured
+direct_model_selected
+agent_selected
+source_selected
+source_rejected
+source_empty
+source_limit_reached
+tool_invoked
+tool_completed
+tool_failed
+tool_cancelled
+timeout
+outcome_produced
+outcome_rejected
+validation_failed
+redaction_failure
+serialization_failure
+event_too_large
+attribute_limit_exceeded
+export_failure
+unknown
+</code></pre></div>
+<p>Not every reserved reason is emitted by the current orchestrator paths. For
+example, reaching the source event limit stops further source events silently;
+it does not currently emit <code>source_limit_reached</code>.</p>
+<h2 id="bounds-and-sanitizer-behavior">Bounds and sanitizer behavior</h2>
+<table>
+<thead>
+<tr>
+<th>Bound</th>
+<th>Current value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Serialized logical event</td>
+<td>16 KiB UTF-8</td>
+</tr>
+<tr>
+<td>Producer attributes</td>
+<td>60, leaving room for the custom-event marker and three OpenTelemetry source-code attributes</td>
+</tr>
+<tr>
+<td>Logical or wire properties</td>
+<td>64 maximum</td>
+</tr>
+<tr>
+<td>Metadata string</td>
+<td>512 characters</td>
+</tr>
+<tr>
+<td>Environment</td>
+<td>64 characters</td>
+</tr>
+<tr>
+<td>Sensitive string</td>
+<td>2,048 characters</td>
+</tr>
+<tr>
+<td>Recursive depth</td>
+<td>6</td>
+</tr>
+<tr>
+<td>Mapping entries inspected</td>
+<td>65 (64 considered plus one truncation lookahead)</td>
+</tr>
+<tr>
+<td>Sequence items inspected</td>
+<td>33 (32 emitted plus one truncation lookahead)</td>
+</tr>
+<tr>
+<td>Total nested values inspected per event</td>
+<td>256</td>
+</tr>
+<tr>
+<td>Recorded omitted or truncated field paths</td>
+<td>32 per list</td>
+</tr>
+<tr>
+<td>Source events per request</td>
+<td>Configurable from 1 through 25, default 25</td>
+</tr>
+</tbody>
+</table>
+<p>Metadata and approved sensitive strings that exceed their character limits are
+truncated and named in <code>truncated_fields</code>. If the whole event still exceeds 16
+KiB, optional fields are removed until it fits. If only required fields remain
+and the event is still too large, the payload is discarded and an
+<code>audit.emission.failed</code> event is attempted.</p>
+<p>The recursive sanitizer:</p>
+<ul>
+<li>strips control characters other than tab, line feed, and carriage return,
+  then truncates and records oversize strings and keys;</li>
+<li>redacts prohibited key classes and configured additional nested keys;</li>
+<li>scans for bearer and basic credentials, cookies, JWT-like values, connection
+  strings, SAS signatures, private keys, embedded URL credentials, and similar
+  secret forms;</li>
+<li>inspects mappings and sequences through a bounded lookahead so it can detect
+  and record truncation without materializing an entire oversize collection;</li>
+<li>handles cycles, unsupported objects, malformed iterables, collection bounds,
+  depth bounds, and the total inspected-node cap by omitting or truncating
+  fields instead of raising; and</li>
+<li>scans the final serialized event before logging it.</li>
+</ul>
+<p>This filtering is defense in depth, not a data-loss-prevention boundary.</p>
+<h2 id="event-and-tool-budgets">Event and tool budgets</h2>
+<p>Independent of the per-event serialization bounds above, each request has a
+fixed, non-configurable ceiling on how many audit events it can produce:</p>
+<table>
+<thead>
+<tr>
+<th>Budget</th>
+<th>Limit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Audit events per request</td>
+<td>64 total, including one reserved request-terminal event and at most one reserved <code>audit.emission.failed</code> event</td>
+</tr>
+<tr>
+<td>Tool invocation pairs per request</td>
+<td>16 complete <code>started</code> and terminal event pairs</td>
+</tr>
+<tr>
+<td>Grounding-source events per request</td>
+<td>25 maximum, the same limit as <code>AUDIT_SOURCE_EVENT_LIMIT</code> above</td>
+</tr>
+</tbody>
+</table>
+<p>Tool invocation pairs are reserved atomically: the producer only emits a
+<code>tool.invocation.started</code> event once request capacity also guarantees room for
+its terminal event, so a start is never recorded without a matching outcome.
+When a budget is exhausted, the orchestrator drops further detail, source, or
+tool events for that request rather than emitting a partial or malformed one,
+while the reserved request-terminal event still fires. That terminal event
+(<code>request.completed</code>, <code>request.failed</code>, or <code>request.cancelled</code>) reports how
+much was dropped in <code>audit_events_omitted</code>, <code>source_events_omitted</code>, and
+<code>tool_invocations_omitted</code>, so a consumer can tell that evidence is incomplete
+for that request instead of assuming silence means nothing else happened.</p>
+<h2 id="configuration">Configuration</h2>
+<p>These values are loaded at startup from Azure App Configuration. The HMAC key
+must be a Key Vault reference and must not be exposed through the admin
+dashboard.</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Default</th>
+<th>Exact behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AUDIT_EVENTS_ENABLED</code></td>
+<td><code>false</code></td>
+<td>Enables the emitter. When <code>false</code>, inactive audit settings are ignored and no HMAC key is required.</td>
+</tr>
+<tr>
+<td><code>AUDIT_HMAC_KEY</code></td>
+<td>Unset</td>
+<td>Required when auditing is enabled. Accepts Base64, Base64URL, or hexadecimal encoding of exactly 32 random bytes. Invalid or missing values fail startup.</td>
+</tr>
+<tr>
+<td><code>AUDIT_HMAC_KEY_ID</code></td>
+<td><code>v1</code></td>
+<td>Non-secret key version stored on normal events. Required and limited to 512 characters when enabled.</td>
+</tr>
+<tr>
+<td><code>AUDIT_SENSITIVE_CONTENT_ENABLED</code></td>
+<td><code>false</code></td>
+<td>Allows fields in the sensitive field allowlist to be considered.</td>
+</tr>
+<tr>
+<td><code>AUDIT_SENSITIVE_CONTENT_FIELDS</code></td>
+<td>Empty</td>
+<td>Comma-separated subset of <code>prompt</code>, <code>response</code>, <code>source_excerpt</code>, <code>tool_arguments</code>, and <code>tool_result</code>. Unknown values fail startup when auditing is enabled.</td>
+</tr>
+<tr>
+<td><code>AUDIT_ACTOR_PSEUDONYM_ENABLED</code></td>
+<td><code>false</code></td>
+<td>Adds an HMAC pseudonym for the authenticated actor.</td>
+</tr>
+<tr>
+<td><code>AUDIT_SOURCE_EVENT_LIMIT</code></td>
+<td><code>25</code></td>
+<td>Accepts an integer from 1 through 25.</td>
+</tr>
+<tr>
+<td><code>AUDIT_ADDITIONAL_REDACTED_KEYS</code></td>
+<td>Empty</td>
+<td>Comma-separated nested key fragments that the sanitizer always redacts.</td>
+</tr>
+</tbody>
+</table>
+<p>If <code>AZURE_MONITOR_DISABLE_LOGGING=true</code> while auditing is enabled, the
+orchestrator enables Azure Monitor log export only for the <code>gptrag.audit</code>
+namespace. If normal log export is enabled, audit events use that existing
+export path. A valid <code>APPLICATIONINSIGHTS_CONNECTION_STRING</code> is still required.
+If it is unavailable, monitoring export is disabled rather than making the
+orchestrator fail.</p>
+<p>To roll back, set <code>AUDIT_EVENTS_ENABLED=false</code> and restart the orchestrator.
+This stops new events. It does not delete previously exported telemetry.</p>
+<h2 id="hmac-identifiers-and-rotation">HMAC identifiers and rotation</h2>
+<p>Auditing requires a 256-bit HMAC key even when actor pseudonyms are disabled.
+The producer uses HMAC-SHA256 over:</p>
+<div class="highlight"><pre><span></span><code>&lt;identifier-kind&gt;:&lt;raw-value&gt;
+</code></pre></div>
+<p>It exports <code>hmac_</code> followed by the first 32 lowercase hexadecimal characters of
+the digest. Current code pseudonymizes conversation IDs, question IDs, source
+references, tool IDs, tool invocation IDs, and optional actor IDs. Raw values
+are not placed in those audit properties.</p>
+<p>Create and restrict the key in Key Vault. To rotate it, update
+<code>AUDIT_HMAC_KEY</code> and <code>AUDIT_HMAC_KEY_ID</code> together, then restart. Identical raw
+values produce different pseudonyms after rotation, so correlation does not
+continue automatically across key versions.</p>
+<h2 id="sensitive-content-capture">Sensitive-content capture</h2>
+<p>The default <code>capture_mode</code> is <code>metadata_only</code>. It changes to
+<code>sensitive_allowlist</code> only when both the feature flag is true and the allowlist
+is non-empty. A field not in the allowlist is omitted and named in
+<code>omitted_fields</code>.</p>
+<p>The reviewed implementation places approved sensitive fields in the same
+<code>AppEvents.Properties</code> collection as the rest of the audit event. It does not
+route audit content to <code>AppGenAIContent</code>. Protect access to <code>AppEvents</code>,
+retention, exports, workbooks, alerts, and query results accordingly. Other
+OpenTelemetry generative AI instrumentation may use <code>AppGenAIContent</code>
+independently.</p>
+<p>Even when allowlisted, content is bounded and scanned for prohibited values.
+Do not enable sensitive capture as a troubleshooting shortcut. The scanner
+cannot guarantee that every secret or sensitive business value will be found.</p>
+<h2 id="mcp-and-foundry-iq-evidence">MCP and Foundry IQ evidence</h2>
+<p>Direct MCP calls from the MCP strategy are wrapped with public Microsoft Agent
+Framework <code>AIFunction</code> proxies. The same invocation seam covers SSE and
+streamable HTTP. It emits a started event before delegation and one completed,
+failed, timed-out, or cancelled terminal event. Tool arguments and results are
+only present when their sensitive fields are explicitly allowlisted.</p>
+<p>Both direct MCP transports propagate W3C Trace Context and remove OpenTelemetry
+baggage. This supports trace correlation without forwarding ambient identity
+or other baggage to the MCP server.</p>
+<p>Foundry IQ MCP activity has a different evidence quality. The Azure AI Search
+response exposes completed activity but no pre-invocation callback, and
+reconstruction only runs when auditing is enabled and a request audit context
+is present; it never touches retrieval when auditing is disabled. For each
+returned activity, the orchestrator validates that <code>elapsedMs</code> is a finite,
+non-negative number of at most 86,400,000 milliseconds (24 hours). If the value
+is invalid, the orchestrator does not clamp it: it omits that tool-invocation
+pair, records it in <code>tool_invocations_omitted</code> on the request-terminal event,
+and attempts a bounded, payload-free <code>audit.emission.failed</code> event, all without
+failing the underlying retrieval call. If the value is valid, the orchestrator
+reserves a started and terminal event pair atomically, the same way it reserves
+direct tool invocation pairs, and derives <code>started_at_utc</code> by subtracting
+<code>elapsedMs</code> from the observation time; <code>elapsedMs</code> becomes <code>duration_ms</code>. The
+tool name is the bounded <code>foundry_iq_mcp_tool</code>, the started event records
+transport <code>foundry_iq</code>, and both the started and terminal events set
+<code>timing_source=reconstructed</code>.</p>
+<p>This reconstructed pair is not proof that a start event was observed when the
+remote call began; <code>timing_source=reconstructed</code> marks it as approximate. If
+the response or its activity array is missing, those tool events are also
+missing.</p>
+<p>Grounding source normalization covers the specific integrations implemented by
+GPT-RAG:</p>
+<div class="highlight"><pre><span></span><code>azure_ai_search
+azure_ai_search_multimodal
+foundry_iq
+foundry_iq_mcp
+web_grounding
+work_iq
+fabric_iq
+fabric_data_agent
+sharepoint_remote
+sharepoint_indexed
+onelake
+nl2sql_datasource
+unknown
+</code></pre></div>
+<p>This list describes specific Work IQ, Fabric IQ, Foundry IQ, and web grounding
+integrations. It does not claim complete support for Microsoft IQ or visibility
+into telemetry produced inside those upstream services.</p>
+<h2 id="failure-semantics-and-evidence-gaps">Failure semantics and evidence gaps</h2>
+<p>Enabling, disabling, or exhausting a budget in the audit instrumentation never
+changes response bodies, SSE streams, retrieval results, cache behavior,
+application logs, traces, or metrics. For example, a grounding source with
+empty content is still appended to the result list whether or not its
+<code>grounding.source.rejected</code> audit event was emitted; audit evidence describes
+what the orchestrator did, it does not gate what the orchestrator does.</p>
+<p>Audit emission is deliberately best effort:</p>
+<ul>
+<li>sanitization or serialization failure discards the original payload and
+  attempts a payload-free, constant-safe <code>audit.emission.failed</code> event, one
+  with a fixed <code>service_name</code>, <code>service_version</code>, <code>environment</code>, and
+  <code>capture_mode</code> instead of values derived from the event that failed, so the
+  fallback event itself cannot fail to serialize or redact;</li>
+<li>oversize and attribute-limit failures use the same minimal event;</li>
+<li>at most one <code>audit.emission.failed</code> event is attempted per request, guarded
+  against re-entrant failures;</li>
+<li>a synchronous logging failure is caught and mapped to <code>export_failure</code>;</li>
+<li>if the minimal event also cannot be logged, the runtime attempts a fixed
+  warning and continues the user operation; and</li>
+<li>the Azure Monitor batch exporter has no application callback for later
+  delivery failure, so an asynchronous export failure cannot produce a reliable
+  failure event.</li>
+</ul>
+<p>The implementation does not add a separate health event, metric, rate limiter,
+or delivery acknowledgment. Operators must use Azure Monitor ingestion health,
+application logs, and expected-volume checks to identify gaps.</p>
+<p>Additional known gaps include:</p>
+<ul>
+<li>sampling, filtering, throttling, queue loss, process termination, and network
+  failure;</li>
+<li>request dependency or body-validation failures before the endpoint handler,
+  which may not receive <code>X-Correlation-ID</code> or lifecycle audit events;</li>
+<li>feedback requests, which receive a server correlation header but do not enter
+  the streaming request audit lifecycle;</li>
+<li>upstream actions that occur outside instrumented seams;</li>
+<li>detail, source, or tool events dropped after a request reaches the fixed
+  event or tool budgets described in
+  <a href="#event-and-tool-budgets">Event and tool budgets</a>, reported through
+  <code>audit_events_omitted</code>, <code>source_events_omitted</code>, and
+  <code>tool_invocations_omitted</code> on the request-terminal event; and</li>
+<li>the reconstructed Foundry IQ MCP timing described above.</li>
+</ul>
+<p>The server ignores an inbound <code>X-Correlation-ID</code> and generates a new
+<code>req_&lt;32 lowercase hex&gt;</code> value. Successful orchestrator and feedback responses
+return it in <code>X-Correlation-ID</code>. The identifier is also saved with a question in
+Cosmos when a question is persisted. It is not authentication, authorization,
+idempotency, proof of delivery, or an immutability mechanism.</p>
+<h2 id="event-volume-and-benchmark">Event volume and benchmark</h2>
+<p>A normal successful streaming request emits four lifecycle events before source
+or tool activity:</p>
+<ol>
+<li><code>request.started</code></li>
+<li><code>route.selected</code></li>
+<li><code>outcome.produced</code></li>
+<li><code>request.completed</code></li>
+</ol>
+<p>A failed stream normally emits four events, replacing the last two with
+<code>outcome.rejected</code> and <code>request.failed</code>. A cancelled stream normally emits
+three: request start, route selection, and request cancellation. The
+single-agent strategy can add another <code>route.selected</code> event for its internal
+direct-model or agent-service choice.</p>
+<p>Each selected or rejected grounding source adds one event, up to
+<code>AUDIT_SOURCE_EVENT_LIMIT</code>. Each proxied direct MCP invocation adds a started
+and terminal pair, and each returned Foundry IQ MCP activity also adds a
+reconstructed pair, up to the fixed 16-pair tool budget described in
+<a href="#event-and-tool-budgets">Event and tool budgets</a>. The request also has an
+overall 64-event ceiling that includes its reserved terminal event. A request
+with unusually heavy source or tool activity can reach these budgets; check
+<code>audit_events_omitted</code>, <code>source_events_omitted</code>, and <code>tool_invocations_omitted</code>
+on the request-terminal event rather than assuming the visible event count is
+complete.</p>
+<p>The pull request validation ran a non-gating metadata-only microbenchmark with a
+null logging handler for 10,000 events:</p>
+<table>
+<thead>
+<tr>
+<th>Measurement</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Median emitter time</td>
+<td>886.85 microseconds</td>
+</tr>
+<tr>
+<td>p95 emitter time</td>
+<td>1,706.20 microseconds</td>
+</tr>
+<tr>
+<td>Peak traced memory</td>
+<td>334.1 KiB</td>
+</tr>
+</tbody>
+</table>
+<p>This isolates event construction and sanitization. It does not include Azure
+Monitor export, network latency, production concurrency, or end-to-end request
+p95. Measure representative traffic and ingestion cost before production
+enablement.</p>
+<h2 id="kql-reconstruct-audit-events">KQL: reconstruct audit events</h2>
+<p>Replace the correlation ID with the value returned in <code>X-Correlation-ID</code>.
+This query uses the exact unprefixed wire properties and converts scalar strings
+to useful KQL types. <code>ParentEventId</code> decodes the Application Insights wire
+sentinel back to logical <code>null</code>: an empty <code>ParentEventId</code> means the event is a
+logical root, not that decoding failed. <code>TimingSource</code>,
+<code>AuditEventsOmitted</code>, <code>SourceEventsOmitted</code>, and <code>ToolInvocationsOmitted</code> are
+optional fields; expect empty values on events that do not set them, for
+example on every event except reconstructed Foundry IQ MCP tool events and
+request-terminal events respectively.</p>
+<div class="highlight"><pre><span></span><code><span class="n">let</span><span class="w"> </span><span class="n">lookback</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">30</span><span class="n">d</span><span class="p">;</span>
+<span class="n">let</span><span class="w"> </span><span class="n">audit_correlation_id</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;req_0123456789abcdef0123456789abcdef&quot;</span><span class="p">;</span>
+<span class="n">AppEvents</span>
+<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">TimeGenerated</span><span class="w"> </span><span class="p">&gt;=</span><span class="w"> </span><span class="n">ago</span><span class="p">(</span><span class="n">lookback</span><span class="p">)</span>
+<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">Name</span><span class="w"> </span><span class="k">startswith</span><span class="w"> </span><span class="s">&quot;gptrag.audit.&quot;</span>
+<span class="p">|</span><span class="w"> </span><span class="k">extend</span><span class="w"> </span><span class="n">AuditCorrelationId</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">Properties</span><span class="p">[</span><span class="s">&quot;correlation_id&quot;</span><span class="p">])</span>
+<span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">AuditCorrelationId</span><span class="w"> </span><span class="p">==</span><span class="w"> </span><span class="n">audit_correlation_id</span>
+<span class="p">|</span><span class="w"> </span><span class="k">extend</span>
+<span class="w">    </span><span class="n">AuditEventTime</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">todatetime</span><span class="p">(</span><span class="n">Properties</span><span class="p">[</span><span class="s">&quot;event_time_utc&quot;</span><span class="p">]),</span>
+<span class="w">    </span><span class="n">AuditEventId</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">Properties</span><span class="p">[</span><span class="s">&quot;event_id&quot;</span><span class="p">]),</span>
+<span class="w">    </span><span class="n">AuditEventType</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">Properties</span><span class="p">[</span><span class="s">&quot;event_type&quot;</span><span class="p">]),</span>
+<span class="w">    </span><span class="n">SchemaVersion</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">toint</span><span class="p">(</span><span class="n">Properties</span><span class="p">[</span><span class="s">&quot;schema_version&quot;</span><span class="p">]),</span>
+<span class="w">    </span><span class="n">AuditStatus</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">Properties</span><span class="p">[</span><span class="s">&quot;status&quot;</span><span class="p">]),</span>
+<span class="w">    </span><span class="n">ReasonCode</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">Properties</span><span class="p">[</span><span class="s">&quot;reason_code&quot;</span><span class="p">]),</span>
+<span class="w">    </span><span class="n">ServiceName</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">Properties</span><span class="p">[</span><span class="s">&quot;service_name&quot;</span><span class="p">]),</span>
+<span class="w">    </span><span class="n">ServiceVersion</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">Properties</span><span class="p">[</span><span class="s">&quot;service_version&quot;</span><span class="p">]),</span>
+<span class="w">    </span><span class="n">AuditOperation</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">Properties</span><span class="p">[</span><span class="s">&quot;operation&quot;</span><span class="p">]),</span>
+<span class="w">    </span><span class="n">DurationMs</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">todouble</span><span class="p">(</span><span class="n">Properties</span><span class="p">[</span><span class="s">&quot;duration_ms&quot;</span><span class="p">]),</span>
+<span class="w">    </span><span class="n">TimingSource</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">Properties</span><span class="p">[</span><span class="s">&quot;timing_source&quot;</span><span class="p">]),</span>
+<span class="w">    </span><span class="n">SourceRank</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">toint</span><span class="p">(</span><span class="n">Properties</span><span class="p">[</span><span class="s">&quot;source_rank&quot;</span><span class="p">]),</span>
+<span class="w">    </span><span class="n">OutputCount</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tolong</span><span class="p">(</span><span class="n">Properties</span><span class="p">[</span><span class="s">&quot;output_count&quot;</span><span class="p">]),</span>
+<span class="w">    </span><span class="n">PartialOutput</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tobool</span><span class="p">(</span><span class="n">Properties</span><span class="p">[</span><span class="s">&quot;partial_output&quot;</span><span class="p">]),</span>
+<span class="w">    </span><span class="n">RedactionApplied</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tobool</span><span class="p">(</span><span class="n">Properties</span><span class="p">[</span><span class="s">&quot;redaction_applied&quot;</span><span class="p">]),</span>
+<span class="w">    </span><span class="n">AuditEventsOmitted</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tolong</span><span class="p">(</span><span class="n">Properties</span><span class="p">[</span><span class="s">&quot;audit_events_omitted&quot;</span><span class="p">]),</span>
+<span class="w">    </span><span class="n">SourceEventsOmitted</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tolong</span><span class="p">(</span><span class="n">Properties</span><span class="p">[</span><span class="s">&quot;source_events_omitted&quot;</span><span class="p">]),</span>
+<span class="w">    </span><span class="n">ToolInvocationsOmitted</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tolong</span><span class="p">(</span><span class="n">Properties</span><span class="p">[</span><span class="s">&quot;tool_invocations_omitted&quot;</span><span class="p">])</span>
+<span class="p">|</span><span class="w"> </span><span class="k">extend</span>
+<span class="w">    </span><span class="c">// Decode the Application Insights wire sentinel back to a logical null.</span>
+<span class="w">    </span><span class="c">// Never join or treat this sentinel as an event.</span>
+<span class="w">    </span><span class="n">ParentEventId</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">iff</span><span class="p">(</span>
+<span class="w">        </span><span class="n">tostring</span><span class="p">(</span><span class="n">Properties</span><span class="p">[</span><span class="s">&quot;parent_event_id&quot;</span><span class="p">])</span><span class="w"> </span><span class="p">==</span><span class="w"> </span><span class="s">&quot;evt_00000000000000000000000000000000&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s">&quot;&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="n">tostring</span><span class="p">(</span><span class="n">Properties</span><span class="p">[</span><span class="s">&quot;parent_event_id&quot;</span><span class="p">])</span>
+<span class="w">    </span><span class="p">)</span>
+<span class="p">|</span><span class="w"> </span><span class="k">project</span>
+<span class="w">    </span><span class="n">TimeGenerated</span><span class="p">,</span>
+<span class="w">    </span><span class="n">AuditEventTime</span><span class="p">,</span>
+<span class="w">    </span><span class="n">Name</span><span class="p">,</span>
+<span class="w">    </span><span class="n">AuditEventType</span><span class="p">,</span>
+<span class="w">    </span><span class="n">AuditCorrelationId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">AuditEventId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">ParentEventId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">AuditStatus</span><span class="p">,</span>
+<span class="w">    </span><span class="n">ReasonCode</span><span class="p">,</span>
+<span class="w">    </span><span class="n">ServiceName</span><span class="p">,</span>
+<span class="w">    </span><span class="n">ServiceVersion</span><span class="p">,</span>
+<span class="w">    </span><span class="n">AuditOperation</span><span class="p">,</span>
+<span class="w">    </span><span class="n">DurationMs</span><span class="p">,</span>
+<span class="w">    </span><span class="n">TimingSource</span><span class="p">,</span>
+<span class="w">    </span><span class="n">SourceRank</span><span class="p">,</span>
+<span class="w">    </span><span class="n">OutputCount</span><span class="p">,</span>
+<span class="w">    </span><span class="n">PartialOutput</span><span class="p">,</span>
+<span class="w">    </span><span class="n">RedactionApplied</span><span class="p">,</span>
+<span class="w">    </span><span class="n">AuditEventsOmitted</span><span class="p">,</span>
+<span class="w">    </span><span class="n">SourceEventsOmitted</span><span class="p">,</span>
+<span class="w">    </span><span class="n">ToolInvocationsOmitted</span><span class="p">,</span>
+<span class="w">    </span><span class="n">OperationId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">ParentId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">AppRoleName</span><span class="p">,</span>
+<span class="w">    </span><span class="n">AppVersion</span><span class="p">,</span>
+<span class="w">    </span><span class="n">Properties</span>
+<span class="p">|</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">AuditEventTime</span><span class="w"> </span><span class="n">asc</span><span class="p">,</span><span class="w"> </span><span class="n">TimeGenerated</span><span class="w"> </span><span class="n">asc</span>
+</code></pre></div>
+<h2 id="kql-add-requests-and-dependencies">KQL: add requests and dependencies</h2>
+<p>This query builds one timeline from the audit events and matching
+<code>AppRequests</code> and <code>AppDependencies</code> rows. It uses the official workspace table
+columns, including <code>DurationMs</code>, <code>ResultCode</code>, <code>DependencyType</code>, <code>Target</code>, and
+<code>Data</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="n">let</span><span class="w"> </span><span class="n">lookback</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">30</span><span class="n">d</span><span class="p">;</span>
+<span class="n">let</span><span class="w"> </span><span class="n">audit_correlation_id</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;req_0123456789abcdef0123456789abcdef&quot;</span><span class="p">;</span>
+<span class="n">let</span><span class="w"> </span><span class="n">audit_events</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">materialize</span><span class="p">(</span>
+<span class="w">    </span><span class="n">AppEvents</span>
+<span class="w">    </span><span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">TimeGenerated</span><span class="w"> </span><span class="p">&gt;=</span><span class="w"> </span><span class="n">ago</span><span class="p">(</span><span class="n">lookback</span><span class="p">)</span>
+<span class="w">    </span><span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">Name</span><span class="w"> </span><span class="k">startswith</span><span class="w"> </span><span class="s">&quot;gptrag.audit.&quot;</span>
+<span class="w">    </span><span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">Properties</span><span class="p">[</span><span class="s">&quot;correlation_id&quot;</span><span class="p">])</span><span class="w"> </span><span class="p">==</span><span class="w"> </span><span class="n">audit_correlation_id</span>
+<span class="p">);</span>
+<span class="n">let</span><span class="w"> </span><span class="n">operation_ids</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">materialize</span><span class="p">(</span>
+<span class="w">    </span><span class="n">audit_events</span>
+<span class="w">    </span><span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">isnotempty</span><span class="p">(</span><span class="n">OperationId</span><span class="p">)</span>
+<span class="w">    </span><span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">OperationId</span><span class="w"> </span><span class="p">!=</span><span class="w"> </span><span class="s">&quot;00000000000000000000000000000000&quot;</span>
+<span class="w">    </span><span class="p">|</span><span class="w"> </span><span class="k">distinct</span><span class="w"> </span><span class="n">OperationId</span>
+<span class="p">);</span>
+<span class="k">union</span>
+<span class="p">(</span>
+<span class="w">    </span><span class="n">audit_events</span>
+<span class="w">    </span><span class="p">|</span><span class="w"> </span><span class="k">project</span>
+<span class="w">        </span><span class="n">TimeGenerated</span><span class="p">,</span>
+<span class="w">        </span><span class="n">TelemetryType</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;audit&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="n">Name</span><span class="p">,</span>
+<span class="w">        </span><span class="n">OperationId</span><span class="p">,</span>
+<span class="w">        </span><span class="n">ParentId</span><span class="p">,</span>
+<span class="w">        </span><span class="n">Id</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">Properties</span><span class="p">[</span><span class="s">&quot;event_id&quot;</span><span class="p">]),</span>
+<span class="w">        </span><span class="n">Success</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">case</span><span class="p">(</span>
+<span class="w">            </span><span class="n">tostring</span><span class="p">(</span><span class="n">Properties</span><span class="p">[</span><span class="s">&quot;status&quot;</span><span class="p">])</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">(</span><span class="s">&quot;failed&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;cancelled&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;rejected&quot;</span><span class="p">),</span><span class="w"> </span><span class="n">false</span><span class="p">,</span>
+<span class="w">            </span><span class="n">tostring</span><span class="p">(</span><span class="n">Properties</span><span class="p">[</span><span class="s">&quot;status&quot;</span><span class="p">])</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">(</span><span class="s">&quot;completed&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;selected&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;produced&quot;</span><span class="p">),</span><span class="w"> </span><span class="n">true</span><span class="p">,</span>
+<span class="w">            </span><span class="k">bool</span><span class="p">(</span><span class="n">null</span><span class="p">)</span>
+<span class="w">        </span><span class="p">),</span>
+<span class="w">        </span><span class="n">ResultCode</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tostring</span><span class="p">(</span><span class="n">Properties</span><span class="p">[</span><span class="s">&quot;reason_code&quot;</span><span class="p">]),</span>
+<span class="w">        </span><span class="n">DurationMs</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">todouble</span><span class="p">(</span><span class="n">Properties</span><span class="p">[</span><span class="s">&quot;duration_ms&quot;</span><span class="p">]),</span>
+<span class="w">        </span><span class="n">DependencyType</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="n">Target</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="n">Data</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="n">Properties</span>
+<span class="p">),</span>
+<span class="p">(</span>
+<span class="w">    </span><span class="n">AppRequests</span>
+<span class="w">    </span><span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">TimeGenerated</span><span class="w"> </span><span class="p">&gt;=</span><span class="w"> </span><span class="n">ago</span><span class="p">(</span><span class="n">lookback</span><span class="p">)</span>
+<span class="w">    </span><span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">OperationId</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">(</span><span class="n">operation_ids</span><span class="p">)</span>
+<span class="w">    </span><span class="p">|</span><span class="w"> </span><span class="k">project</span>
+<span class="w">        </span><span class="n">TimeGenerated</span><span class="p">,</span>
+<span class="w">        </span><span class="n">TelemetryType</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;request&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="n">Name</span><span class="p">,</span>
+<span class="w">        </span><span class="n">OperationId</span><span class="p">,</span>
+<span class="w">        </span><span class="n">ParentId</span><span class="p">,</span>
+<span class="w">        </span><span class="n">Id</span><span class="p">,</span>
+<span class="w">        </span><span class="n">Success</span><span class="p">,</span>
+<span class="w">        </span><span class="n">ResultCode</span><span class="p">,</span>
+<span class="w">        </span><span class="n">DurationMs</span><span class="p">,</span>
+<span class="w">        </span><span class="n">DependencyType</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="n">Target</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="n">Data</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Url</span><span class="p">,</span>
+<span class="w">        </span><span class="n">Properties</span>
+<span class="p">),</span>
+<span class="p">(</span>
+<span class="w">    </span><span class="n">AppDependencies</span>
+<span class="w">    </span><span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">TimeGenerated</span><span class="w"> </span><span class="p">&gt;=</span><span class="w"> </span><span class="n">ago</span><span class="p">(</span><span class="n">lookback</span><span class="p">)</span>
+<span class="w">    </span><span class="p">|</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">OperationId</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="p">(</span><span class="n">operation_ids</span><span class="p">)</span>
+<span class="w">    </span><span class="p">|</span><span class="w"> </span><span class="k">project</span>
+<span class="w">        </span><span class="n">TimeGenerated</span><span class="p">,</span>
+<span class="w">        </span><span class="n">TelemetryType</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;dependency&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="n">Name</span><span class="p">,</span>
+<span class="w">        </span><span class="n">OperationId</span><span class="p">,</span>
+<span class="w">        </span><span class="n">ParentId</span><span class="p">,</span>
+<span class="w">        </span><span class="n">Id</span><span class="p">,</span>
+<span class="w">        </span><span class="n">Success</span><span class="p">,</span>
+<span class="w">        </span><span class="n">ResultCode</span><span class="p">,</span>
+<span class="w">        </span><span class="n">DurationMs</span><span class="p">,</span>
+<span class="w">        </span><span class="n">DependencyType</span><span class="p">,</span>
+<span class="w">        </span><span class="n">Target</span><span class="p">,</span>
+<span class="w">        </span><span class="n">Data</span><span class="p">,</span>
+<span class="w">        </span><span class="n">Properties</span>
+<span class="p">)</span>
+<span class="p">|</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">TimeGenerated</span><span class="w"> </span><span class="n">asc</span>
+</code></pre></div>
+<p><code>AppRequests.Url</code>, <code>AppDependencies.Data</code>, and arbitrary <code>Properties</code> can
+contain sensitive details. Restrict access to query results and exported copies.</p>
+<p>The queries are reconciled with the exporter wire conversion test in pull
+request #277 and the official Azure Monitor table schemas. They cannot be run
+against released audit telemetry until the runtime is released and enabled.</p>
+<h2 id="what-evidence-can-support">What evidence can support</h2>
+<p>When combined with adopter-owned identity, access, retention, review, and
+incident processes, this evidence can help with:</p>
+<ul>
+<li>security and architecture reviews;</li>
+<li>incident reconstruction;</li>
+<li>privacy and risk assessments;</li>
+<li>adopter-led
+  <a href="https://www.nist.gov/itl/ai-risk-management-framework">NIST AI Risk Management Framework</a>
+  activities; and</li>
+<li>adopter-led assessments involving the
+  <a href="https://eur-lex.europa.eu/eli/reg/2024/1689/oj">EU AI Act</a>.</li>
+</ul>
+<p>The evidence is an input to those activities, not automatic compliance,
+certification, or a legal conclusion.</p>
+<h2 id="official-references">Official references</h2>
+<ul>
+<li><a href="https://learn.microsoft.com/azure/azure-monitor/app/opentelemetry-add-modify#collect-custom-telemetry">Azure Monitor OpenTelemetry custom telemetry</a></li>
+<li><a href="https://learn.microsoft.com/azure/azure-monitor/app/data-model-complete">Application Insights telemetry data model</a></li>
+<li><a href="https://learn.microsoft.com/azure/azure-monitor/reference/tables/appevents"><code>AppEvents</code> table</a></li>
+<li><a href="https://learn.microsoft.com/azure/azure-monitor/reference/tables/apprequests"><code>AppRequests</code> table</a></li>
+<li><a href="https://learn.microsoft.com/azure/azure-monitor/reference/tables/appdependencies"><code>AppDependencies</code> table</a></li>
+<li><a href="https://www.w3.org/TR/trace-context/">W3C Trace Context</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <div style="
+  background-color: var(--md-primary-fg-color);
+  color: var(--md-primary-bg-color);
+  text-align: center;
+  font-size: 0.95em;
+  padding: 1em 0;
+">
+  © 2025 GPT-RAG — powered by ❤️ and coffee ☕
+</div>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.icon", "content.iconify", "navigation.tracking", "toc.integrate", "content.code.annotate", "navigation.top"], "search": "../assets/javascripts/workers/search.07f07601.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.56dfad97.min.js"></script>
+      
+        <script src="../javascripts/source-facts-refresh.js"></script>
+      
+    
+  </body>
+</html>

@@ -13,10 +13,10 @@
       
       
       
-        <link rel="prev" href="../howto_grounding_fabric_ontology/">
+        <link rel="prev" href="../architecture/">
       
       
-        <link rel="next" href="../howto_grounding_sharepoint_remote/">
+        <link rel="next" href="../governance_audit_contract_v1/">
       
       
       <link rel="icon" href="../favicon.ico">
@@ -24,7 +24,7 @@
     
     
       
-        <title>Fabric Data Agent - GPT-RAG</title>
+        <title>Overview and responsibilities - GPT-RAG</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#foundry-iq-fabric-data-agent-microsoft-fabric" class="md-skip">
+        <a href="#governance-and-responsible-operation" class="md-skip">
           Skip to content
         </a>
       
@@ -111,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Fabric Data Agent
+              Overview and responsibilities
             
           </span>
         </div>
@@ -453,17 +453,19 @@
       
   
   
+    
   
   
+  
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
         
           
           <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
@@ -477,7 +479,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             Governance
@@ -488,10 +490,30 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../governance_overview/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Overview and responsibilities
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -500,6 +522,146 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#why-this-matters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why this matters
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-gpt-rag-can-and-cannot-establish" class="md-nav__link">
+    <span class="md-ellipsis">
+      What GPT-RAG can and cannot establish
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#intended-use-and-limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Intended use and limitations
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#shared-responsibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      Shared responsibility
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#govern-ingested-and-connected-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Govern ingested and connected data
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Govern ingested and connected data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#before-connecting-a-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      Before connecting a source
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sensitive-content" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sensitive content
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#govern-generated-telemetry" class="md-nav__link">
+    <span class="md-ellipsis">
+      Govern generated telemetry
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Govern generated telemetry">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#data-classes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data classes
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#retention-access-and-export" class="md-nav__link">
+    <span class="md-ellipsis">
+      Retention, access, and export
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#roll-out-the-audit-feature-after-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      Roll out the audit feature after release
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-reading" class="md-nav__link">
+    <span class="md-ellipsis">
+      Related reading
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -727,19 +889,17 @@
       
   
   
-    
   
   
-  
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
         
           
           <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
@@ -753,7 +913,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_9">
             <span class="md-nav__icon md-icon"></span>
             How-to Guides
@@ -869,19 +1029,17 @@
                 
   
   
-    
   
   
-  
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_6" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_6" >
         
           
           <label class="md-nav__link" for="__nav_9_6" id="__nav_9_6_label" tabindex="0">
@@ -895,7 +1053,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_6_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_6_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_9_6">
             <span class="md-nav__icon md-icon"></span>
             Grounding sources
@@ -927,19 +1085,17 @@
                 
   
   
-    
   
   
-  
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_6_2" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_6_2" >
         
           
           <label class="md-nav__link" for="__nav_9_6_2" id="__nav_9_6_2_label" tabindex="0">
@@ -953,7 +1109,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_6_2_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_6_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_9_6_2">
             <span class="md-nav__icon md-icon"></span>
             Approach A: Foundry IQ
@@ -1048,30 +1204,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Fabric Data Agent
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../howto_grounding_fabric_data_agent/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1080,98 +1216,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#when-to-use-fabric-data-agent" class="md-nav__link">
-    <span class="md-ellipsis">
-      When to use Fabric Data Agent
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#fabric-data-agent-vs-fabric-ontology" class="md-nav__link">
-    <span class="md-ellipsis">
-      Fabric Data Agent vs Fabric ontology
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
-    <span class="md-ellipsis">
-      Prerequisites
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configure-fabric-data-agent" class="md-nav__link">
-    <span class="md-ellipsis">
-      Configure Fabric Data Agent
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#how-it-works-at-runtime" class="md-nav__link">
-    <span class="md-ellipsis">
-      How it works at runtime
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#data-egress-caveat" class="md-nav__link">
-    <span class="md-ellipsis">
-      Data egress caveat
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#troubleshooting" class="md-nav__link">
-    <span class="md-ellipsis">
-      Troubleshooting
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#related-reading" class="md-nav__link">
-    <span class="md-ellipsis">
-      Related reading
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1553,216 +1597,259 @@
   
 
 
-<h1 id="foundry-iq-fabric-data-agent-microsoft-fabric">Foundry IQ: Fabric Data Agent (Microsoft Fabric)</h1>
-<p>The <code>fabricDataAgent</code> Foundry IQ knowledge source grounds answers on a
-Microsoft Fabric Data Agent. A Fabric Data Agent acts as a virtual analyst:
-it runs queries over Fabric data (semantic models, lakehouses, warehouses,
-KQL databases) and returns natural-language answers plus tabular evidence.
-It runs next to your document knowledge source and (optionally) Work IQ and
-the Fabric ontology source on the same knowledge base. It does not replace
-them.</p>
-<p>If you have not read the <a href="../howto_grounding_overview/">Grounding sources overview</a>,
-start there. In short: this knowledge source is not a separate retrieval
-backend. It is registered on the Foundry IQ knowledge base, so a single
-request can pull from documents, from Microsoft 365 (via Work IQ), and
-from a Fabric Data Agent in one call.</p>
+<h1 id="governance-and-responsible-operation">Governance and responsible operation</h1>
+<p>Use this guide to decide what data GPT-RAG may process, who owns each
+control, and what evidence an operator should preserve for security reviews
+and incident investigations.</p>
 <div class="admonition warning">
-<p class="admonition-title">Preview, per-user auth, data leaves the Azure boundary</p>
-<p>Fabric Data Agent support uses a preview Foundry IQ API and requires an
-on-behalf-of (OBO) token for the signed-in user. Requests and
-intermediate data may route outside the Azure compliance boundary;
-operators must review this before enabling. Behavior and configuration
-may change without notice. Do not depend on it for production workloads
-until it is generally available.</p>
+<p class="admonition-title">Audit trail implementation is not released</p>
+<p>The governance practices on this page can be applied today. The correlated
+<a href="../governance_audit_contract_v1/">Audit Contract v1</a> is reconciled with
+orchestrator pull request #277, but that implementation is not in a released
+runtime. It is disabled by default and still needs GPT-RAG umbrella
+deployment integration. Do not configure it until the runtime release and
+integration are complete.</p>
 </div>
-<blockquote>
-<p>Complete the <a href="../howto_grounding_foundry_iq_prereqs/">Foundry IQ prerequisites</a>
-first. The Prerequisites section below covers only what is specific to this
-source.</p>
-</blockquote>
-<h2 id="when-to-use-fabric-data-agent">When to use Fabric Data Agent</h2>
-<p>Use the Fabric Data Agent knowledge source when:</p>
+<h2 id="why-this-matters">Why this matters</h2>
+<p>During a review or incident, an operator should be able to answer practical
+questions without searching unrelated logs:</p>
 <ul>
-<li>Users sign in to the GPT-RAG UI (or another authenticated client), so the
-  orchestrator can obtain a delegated (OBO) token for the user.</li>
-<li>A Fabric Data Agent has already been curated to answer the questions
-  end users typically ask (revenue trends, cohort analysis, warehouse
-  metrics, and so on) and you want the LLM to hand those questions off to
-  the Data Agent rather than re-implement the query logic.</li>
-<li>All target users have Fabric licenses and access to the Data Agent
-  workspace.</li>
+<li>What route or orchestration strategy handled the request?</li>
+<li>Which grounding sources and tools were selected?</li>
+<li>Did each tool call complete, fail, time out, or get cancelled?</li>
+<li>Was an outcome produced or rejected?</li>
+<li>What data classes could have entered telemetry?</li>
+<li>Who configured access, retention, deletion, and export?</li>
 </ul>
-<p>Do not use it when:</p>
+<p>GPT-RAG already uses logs, traces, metrics, and source references. Those signals
+are useful, but current releases do not provide the versioned audit contract
+described in issue
+<a href="https://github.com/Azure/GPT-RAG/issues/571">#571</a>. The unreleased contract
+correlates operational metadata while leaving prompts, responses, source
+excerpts, tool arguments, and tool results out of the default event stream.</p>
+<pre class="mermaid"><code>flowchart LR
+  Request[User request] --&gt; Route[Route and source selection]
+  Route --&gt; Tools[Retrieval and tools]
+  Tools --&gt; Outcome[Outcome]
+  Route -. unreleased audit events .-&gt; Evidence[Correlated operational evidence]
+  Tools -. unreleased audit events .-&gt; Evidence
+  Outcome -. unreleased audit events .-&gt; Evidence</code></pre>
+<h2 id="what-gpt-rag-can-and-cannot-establish">What GPT-RAG can and cannot establish</h2>
+<p>GPT-RAG cannot determine whether a deployment or use case is legally compliant.
+It does not certify a system, enforce an external governance framework, provide
+a complete legal crosswalk, or replace an adopter's legal, privacy, security,
+risk, records-management, or human-oversight processes.</p>
+<p>Clear responsibilities, documented data practices, correlated audit events,
+configurable retention, and reviewable technical evidence can help adopters
+perform their own:</p>
 <ul>
-<li>The deployment allows anonymous chat. It requires a signed-in user and
-  cannot fall back to managed identity or app-only auth.</li>
-<li>The users do not have Fabric licenses or workspace access.</li>
-<li>Your compliance posture does not allow data flow outside the Azure
-  compliance boundary. See the <a href="#data-egress-caveat">data egress caveat</a>
-  below.</li>
+<li>security and architecture reviews;</li>
+<li>incident investigations;</li>
+<li>privacy, risk, and audit assessments;</li>
+<li><a href="https://www.nist.gov/itl/ai-risk-management-framework">NIST AI Risk Management Framework</a>
+  activities; and</li>
+<li>assessments involving the
+  <a href="https://eur-lex.europa.eu/eli/reg/2024/1689/oj">EU AI Act</a>.</li>
 </ul>
-<h2 id="fabric-data-agent-vs-fabric-ontology">Fabric Data Agent vs Fabric ontology</h2>
-<p>Both knowledge sources ground on Microsoft Fabric data, and both can be
-enabled on the same Knowledge Base. Pick the one that matches how your
-Fabric content is exposed today.</p>
+<p>These are inputs to an adopter-led assessment, not proof of conformance or a
+legal conclusion. Applicability and evidence requirements depend on the
+deployment, data, users, jurisdiction, and intended use.</p>
+<h2 id="intended-use-and-limitations">Intended use and limitations</h2>
+<p>The governance baseline is intended for teams that deploy GPT-RAG as a
+retrieval-augmented assistant and need a repeatable way to manage enterprise
+data and operational evidence.</p>
+<p>Do not assume that:</p>
+<ul>
+<li>a citation proves that an answer is correct or complete;</li>
+<li>a recorded event proves that the producer behaved correctly;</li>
+<li>missing telemetry proves that an action did not occur;</li>
+<li>an opaque identifier is anonymous in every environment;</li>
+<li>permission trimming replaces source-system authorization review;</li>
+<li>a preview grounding capability is production-ready because it has audit
+  events;</li>
+<li>retention in Azure Monitor satisfies a records-management obligation; or</li>
+<li>technical evidence establishes legal compliance.</li>
+</ul>
+<p>The unreleased audit trail is best-effort telemetry. Sampling, exporter failures,
+process termination, asynchronous boundaries, disabled instrumentation, and
+upstream systems can create evidence gaps. Events are asserted by the producing
+GPT-RAG process. They are not independently attested, cryptographically signed,
+tamper-evident, or nonrepudiable.</p>
+<h2 id="shared-responsibility">Shared responsibility</h2>
+<p>One organization may perform more than one role. Assign each responsibility
+explicitly before production use.</p>
 <table>
 <thead>
 <tr>
-<th></th>
-<th>Fabric Data Agent (<code>fabricDataAgent</code>)</th>
-<th>Fabric ontology (<code>fabricOntology</code>)</th>
+<th>Role</th>
+<th>Responsibilities</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>What it grounds on</td>
-<td>A curated Fabric Data Agent that answers questions over your data.</td>
-<td>A Fabric ontology exposing semantic models, lakehouses, warehouses, KQL.</td>
+<td>GPT-RAG maintainers</td>
+<td>Publish accurate behavior and limitations; provide privacy-conscious defaults; version the audit contract; test schema compatibility, redaction, and bounds; preserve compatibility or publish migration guidance.</td>
 </tr>
 <tr>
-<td>Mental model</td>
-<td>Virtual analyst. Hands the question to the Data Agent and gets an answer back.</td>
-<td>Reasoning over entities and relationships in your business ontology.</td>
+<td>Deployer or platform team</td>
+<td>Select the deployment topology; configure identities, networking, Key Vault, Azure Monitor, retention, export, and backup; apply least-privilege RBAC; keep secrets out of configuration and telemetry; verify regional and service boundaries.</td>
 </tr>
 <tr>
-<td>Best when</td>
-<td>You already invested in a Data Agent tuned for your business questions.</td>
-<td>You have a modeled ontology and want the LLM to reason across it.</td>
+<td>Runtime operator</td>
+<td>Monitor health, cost, sampling, and evidence gaps; review access regularly; investigate incidents; validate deletion and export procedures; canary changes; roll back audit emission if it harms reliability.</td>
 </tr>
 <tr>
-<td>Response shape</td>
-<td>Natural-language answer plus tabular evidence.</td>
-<td>Grounded facts derived from the ontology.</td>
-</tr>
-<tr>
-<td>App Config prefix</td>
-<td><code>FABRIC_DATA_AGENT_*</code></td>
-<td><code>FABRIC_IQ_*</code> (historical name, configures <code>fabricOntology</code>)</td>
+<td>Adopter, business owner, or data owner</td>
+<td>Define the intended and prohibited uses; assert the right to use each data source; classify data; set minimization and retention policy; determine legal and regulatory obligations; define human oversight, risk acceptance, and user communication.</td>
 </tr>
 </tbody>
 </table>
-<p>If both fit, start with the one your team already uses in Fabric. You can
-add the other later on the same Knowledge Base.</p>
-<h2 id="prerequisites">Prerequisites</h2>
-<p>Work through these in order. All of them are hard blockers.</p>
+<h2 id="govern-ingested-and-connected-data">Govern ingested and connected data</h2>
+<p>Apply these controls to indexed content and to sources queried at request time.
+That includes Blob Storage, Azure AI Search, SharePoint, OneLake, specific Work
+IQ, Fabric IQ, Foundry IQ and web grounding integrations, and remote MCP
+servers.</p>
+<h3 id="before-connecting-a-source">Before connecting a source</h3>
 <ol>
-<li><strong>A Microsoft Fabric workspace with a Data Agent item.</strong> The knowledge
-   source binds to one Data Agent at a time, identified by the pair
-   (<code>workspaceId</code>, <code>dataAgentId</code>).</li>
-<li><strong>Tenant enablement.</strong> The Fabric Data Agent feature must be enabled at
-   the tenant level by a Fabric admin.</li>
-<li><strong>Fabric-licensed end users</strong> with access to the workspace and the
-   Data Agent item. Fabric enforces per-user permissions natively over the
-   OBO token; GPT-RAG does not add its own ACL layer for this source.</li>
-<li><strong>Same Entra tenant.</strong> The Fabric tenant, the Foundry / Search resource,
-   and the GPT-RAG orchestrator must all be in the same Entra tenant.
-   Cross-tenant is not supported.</li>
-<li><strong>Foundry IQ preview API.</strong> The knowledge source requires the Foundry IQ
-   preview API that supports <code>kind: fabricDataAgent</code>. GPT-RAG v3.4.3 pins
-   the <code>2026-05-01-preview</code> baseline.</li>
+<li><strong>Record provenance.</strong> Identify the system of record, data owner, ingestion
+   or query path, refresh cadence, and applicable permission model.</li>
+<li><strong>Obtain a right-to-use assertion.</strong> The operator or data owner should record
+   that the organization is authorized to process the source for the intended
+   users and purpose. GPT-RAG cannot make this determination.</li>
+<li><strong>Classify the data.</strong> Apply the organization's classification for personal,
+   confidential, regulated, export-controlled, or other sensitive content.</li>
+<li><strong>Minimize scope.</strong> Include only the sites, containers, indexes, tables,
+   fields, date ranges, and tools required by the use case.</li>
+<li><strong>Define retention and deletion.</strong> Document how source data, indexes,
+   conversation history, caches, and backups are removed. Test the process.</li>
+<li><strong>Review access.</strong> Use source-system permissions, managed identities,
+   delegated access, and GPT-RAG retrieval controls as applicable. Test with
+   representative allowed and denied users.</li>
+<li><strong>Review data movement.</strong> Confirm region, service, public internet, and
+   cross-boundary behavior for every enabled source.</li>
 </ol>
-<h2 id="configure-fabric-data-agent">Configure Fabric Data Agent</h2>
-<p>The Fabric Data Agent source is opt-in and defaults to off. <code>azd provision</code>
-(v3.4.3+) seeds the four keys automatically under the <code>gpt-rag</code> label with
-<code>FABRIC_DATA_AGENT_ENABLED=false</code> and the workspace, data agent, and
-knowledge-source name as empty strings. You do not have to create them by
-hand. To turn it on for an existing environment, edit the values in the
-App Configuration blade (or <code>az appconfig kv set --label gpt-rag --key
-...</code>) and restart the orchestrator; or set the same values as azd env vars
-and re-run <code>azd hooks run postprovision</code> and <code>azd deploy</code>.</p>
+<h3 id="sensitive-content">Sensitive content</h3>
+<p>Treat retrieved content as sensitive whenever its source classification says
+so. Grounding can copy excerpts into prompts, responses, conversation history,
+dependency telemetry, or troubleshooting logs. Permission trimming reduces
+unauthorized retrieval, but it does not replace classification, minimization,
+access review, or downstream handling controls.</p>
+<p>For the concrete capabilities GPT-RAG integrates, see the
+<a href="../howto_grounding_overview/">Grounding sources overview</a>. GPT-RAG integrates
+specific Work IQ, Fabric IQ, Foundry IQ, and web grounding capabilities. It
+does not claim complete Microsoft IQ support or provide a Microsoft IQ
+governance layer.</p>
+<h2 id="govern-generated-telemetry">Govern generated telemetry</h2>
+<h3 id="data-classes">Data classes</h3>
 <table>
 <thead>
 <tr>
-<th>Key</th>
-<th>Value</th>
+<th>Class</th>
+<th>Examples</th>
+<th>Required posture</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>FABRIC_DATA_AGENT_ENABLED</code></td>
-<td><code>true</code></td>
+<td>Operational metadata</td>
+<td>Event and correlation IDs, service and version, bounded status and reason codes, durations, tool names, source kinds, opaque source references</td>
+<td>Permitted by the unreleased metadata-only contract. Classify and minimize it because identifiers and operational context can still be sensitive.</td>
 </tr>
 <tr>
-<td><code>FABRIC_DATA_AGENT_KNOWLEDGE_SOURCE_NAME</code></td>
-<td>Any name for the KS; must match on both provision and orchestrator. Example: <code>fabric-data-agent-ks</code>.</td>
+<td>Sensitive content</td>
+<td>Prompts, responses, source excerpts, system instructions, tool arguments, tool results</td>
+<td>Off by default. Enable only after an explicit need, privacy review, access design, retention decision, and cost review.</td>
 </tr>
 <tr>
-<td><code>FABRIC_DATA_AGENT_WORKSPACE_ID</code></td>
-<td>GUID of the Fabric workspace that owns the Data Agent.</td>
-</tr>
-<tr>
-<td><code>FABRIC_DATA_AGENT_DATA_AGENT_ID</code></td>
-<td>GUID of the Data Agent item within that workspace.</td>
+<td>Prohibited data</td>
+<td>Access tokens, API keys, authorization headers, cookies, connection strings, credentials, and detected secrets</td>
+<td>Never capture or export, including when sensitive-content capture is enabled. Redact before telemetry leaves the producing process and fail closed by omitting unsafe values.</td>
 </tr>
 </tbody>
 </table>
-<p>At the API level the knowledge source is registered with <code>kind:
-fabricDataAgent</code> and:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fabricDataAgent&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;fabricDataAgentParameters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;workspaceId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;FABRIC_DATA_AGENT_WORKSPACE_ID&gt;&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;dataAgentId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;FABRIC_DATA_AGENT_DATA_AGENT_ID&gt;&quot;</span>
-<span class="w">  </span><span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>
-<p><code>azd provision</code> renders the search resources and registers the Fabric
-Data Agent knowledge source on the Foundry IQ knowledge base. <code>azd deploy</code>
-restarts the orchestrator so it picks up the enable flag and knowledge
-source name.</p>
-<p>The four keys must all be set for the knowledge source to be registered.
-If any of <code>FABRIC_DATA_AGENT_KNOWLEDGE_SOURCE_NAME</code>,
-<code>FABRIC_DATA_AGENT_WORKSPACE_ID</code>, or <code>FABRIC_DATA_AGENT_DATA_AGENT_ID</code> is
-empty, GPT-RAG skips the source and continues with document grounding
-(and Work IQ / Fabric ontology, if enabled).</p>
-<h2 id="how-it-works-at-runtime">How it works at runtime</h2>
-<p>When the source is enabled and a signed-in user asks a question:</p>
-<ol>
-<li>The orchestrator obtains an OBO token for the user, the same way it does
-   for Work IQ and the Fabric ontology source.</li>
-<li>The Foundry IQ retrieve call includes the Fabric Data Agent knowledge
-   source in <code>knowledgeSourceParams</code> and forwards the OBO token as the
-   <code>x-ms-query-source-authorization</code> header.</li>
-<li>Fabric evaluates the user permissions and hands the question to the
-   Data Agent, which runs one or more queries over the underlying Fabric
-   data.</li>
-<li>The response comes back with a natural-language answer and a tabular
-   extract. The orchestrator normalizes both into the standard reference
-   shape and hands them to the LLM alongside document references.</li>
-</ol>
-<p>Local Foundry IQ document sources always serve the request. If the OBO
-token is missing (for example, a background job), the Fabric Data Agent
-source is skipped with a warning and only local sources contribute.
-Managed identity is never used to reach this source, by design.</p>
-<h2 id="data-egress-caveat">Data egress caveat</h2>
-<p>Fabric Data Agent forwards the caller OBO token to Microsoft Fabric and
-returns grounded answers plus tabular evidence from Fabric data back to
-the orchestrator. Operators enabling Fabric Data Agent should determine
-whether this data flow is permitted by their tenant data-boundary and
-Fabric-workspace access policies before turning the flag on. Grounded
-content still ends up in orchestrator responses and, transitively, in
-downstream telemetry and chat history.</p>
-<h2 id="troubleshooting">Troubleshooting</h2>
+<p>Actor correlation is disabled by default. If
+<code>AUDIT_ACTOR_PSEUDONYM_ENABLED=true</code>, the producer records <code>actor_id</code> as
+<code>hmac_</code> plus the first 32 hexadecimal characters of an HMAC-SHA256 digest. It
+never places the raw user name, email address, object ID, or token claim in that
+property. Store <code>AUDIT_HMAC_KEY</code> in Azure Key Vault, restrict it to the
+producing workload, and rotate it together with <code>AUDIT_HMAC_KEY_ID</code>. Rotation
+breaks direct pseudonym correlation across key versions.</p>
+<p>Redaction metadata should say that redaction occurred and list omitted field
+names, never the omitted values. A successful redaction flag does not prove that
+all sensitive information was found, so producers must use allowlisted fields
+and bounded enums instead of trying to sanitize arbitrary objects.</p>
+<h2 id="retention-access-and-export">Retention, access, and export</h2>
+<p>GPT-RAG's current AI Landing Zone template configures the Log Analytics
+workspace for 30 days of retention. A reused workspace or table-level override
+can differ, so inspect the deployed settings rather than assuming the template
+value applies.</p>
+<p>Azure Monitor supports up to two years of analytics retention for Analytics
+tables and up to 12 years of total retention with long-term retention. Longer
+retention and additional ingestion can increase cost. The adopter must choose a
+period that matches incident, privacy, records-management, and legal needs.</p>
+<p>Use this operational baseline:</p>
 <ul>
-<li><strong>No Fabric Data Agent answers in responses.</strong> Confirm all four App
-  Configuration keys are set. Check the orchestrator logs for a "Fabric
-  Data Agent knowledge source skipped" warning; that usually points at a
-  missing OBO token, an empty knowledge source name, or an empty
-  workspace / data agent id.</li>
-<li><strong><code>403</code> or empty results from Fabric.</strong> Verify the signed-in user has
-  access to the Fabric workspace and the Data Agent item. Fabric enforces
-  per-user permissions, so an OBO token for a user without Data Agent
-  access will return an empty result.</li>
-<li><strong><code>400</code> on knowledge source registration.</strong> Confirm the Foundry IQ
-  preview API version pinned by GPT-RAG matches your Foundry resource.
-  The Fabric Data Agent source requires <code>2026-05-01-preview</code> at minimum.</li>
+<li>Keep access least-privileged and review role assignments regularly.</li>
+<li>Separate platform administration from routine telemetry reading where
+  practical.</li>
+<li>The audit implementation stores allowlisted <code>prompt</code>, <code>response</code>,
+  <code>source_excerpt</code>, <code>tool_arguments</code>, and <code>tool_result</code> values in
+  <code>AppEvents.Properties</code>, not <code>AppGenAIContent</code>. If audit sensitive capture is
+  approved, restrict <code>AppEvents</code>, its query results, alerts, workbooks, and
+  exports accordingly.</li>
+<li>Other generative AI instrumentation can use <code>AppGenAIContent</code>. Follow the
+  current
+  <a href="https://learn.microsoft.com/azure/azure-monitor/app/data-model-complete#generative-ai-telemetry">Application Insights routing guidance</a>
+  and configure it as a
+  <a href="https://learn.microsoft.com/azure/azure-monitor/logs/protected-tables-configure">protected table</a>
+  when that separate content capture is enabled.</li>
+<li>Test retention changes and deletion procedures in a non-production
+  environment.</li>
+<li>Use
+  <a href="https://learn.microsoft.com/azure/azure-monitor/logs/logs-data-export">Log Analytics data export</a>
+  when continuous export to Azure Storage or Event Hubs is required.</li>
+<li>If an organization needs WORM retention, configure
+  <a href="https://learn.microsoft.com/azure/storage/blobs/immutable-storage-overview">immutable Blob Storage</a>
+  on the export destination as an operator-owned control. GPT-RAG does not
+  configure an immutable evidence store.</li>
 </ul>
+<p>Sampling affects evidence. A 100 percent sampling configuration may reduce
+sampling gaps, but it increases ingestion and retention cost and still does not
+guarantee complete evidence. Verify the deployed OpenTelemetry and Azure Monitor
+sampling behavior, exporter health, and throttling before relying on telemetry
+for an investigation.</p>
+<h2 id="roll-out-the-audit-feature-after-release">Roll out the audit feature after release</h2>
+<p>Do not begin this procedure until the orchestrator implementation is released
+and GPT-RAG umbrella deployment integration is complete.</p>
+<ol>
+<li>Upgrade with audit emission disabled.</li>
+<li>Enable metadata-only events in a non-production environment.</li>
+<li>Keep <code>AUDIT_ACTOR_PSEUDONYM_ENABLED</code> and
+   <code>AUDIT_SENSITIVE_CONTENT_ENABLED</code> disabled.</li>
+<li>If actor correlation is approved, create and restrict a Key Vault HMAC key
+   before enabling it.</li>
+<li>Canary a small production slice and reconstruct representative requests.</li>
+<li>Monitor latency, exporter failures, ingestion volume, retention cost, and
+   evidence-gap health signals.</li>
+<li>Confirm that existing traces, logs, dashboards, and alerts still work.</li>
+<li>Roll back by setting <code>AUDIT_EVENTS_ENABLED=false</code> and restarting the
+   orchestrator. Do not enable sensitive content as a troubleshooting shortcut.</li>
+</ol>
+<p>Audit emission should not make the user request fail. If event production or
+the synchronous logging path fails, the runtime continues the request and
+attempts an <code>audit.emission.failed</code> event, then a fixed warning if that also
+fails. The Azure Monitor batch exporter does not expose an application callback
+for later delivery failure. The implementation has no separate health event,
+rate limiter, or delivery acknowledgment, so operators must monitor expected
+volume and Azure Monitor ingestion health.</p>
 <h2 id="related-reading">Related reading</h2>
 <ul>
+<li><a href="../governance_audit_contract_v1/">Audit Contract v1, unreleased</a></li>
+<li><a href="../howto_authentication/">Authentication and Document-Level Security</a></li>
 <li><a href="../howto_grounding_overview/">Grounding sources overview</a></li>
-<li><a href="../howto_grounding_foundry_iq_documents/">Foundry IQ: Documents</a></li>
-<li><a href="../howto_grounding_work_iq/">Foundry IQ: Work IQ (Microsoft 365)</a></li>
-<li><a href="../howto_grounding_fabric_ontology/">Foundry IQ: Fabric ontology</a></li>
+<li><a href="https://learn.microsoft.com/azure/azure-monitor/app/data-model-complete">Azure Monitor Application Insights telemetry data model</a></li>
+<li><a href="https://learn.microsoft.com/azure/azure-monitor/logs/data-retention-configure">Manage Log Analytics retention</a></li>
+<li><a href="https://learn.microsoft.com/azure/azure-monitor/logs/manage-access">Manage access to Log Analytics workspaces</a></li>
 </ul>
 
 
