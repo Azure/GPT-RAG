@@ -17,7 +17,12 @@ from config.search import foundry_iq_mcp_setup as mcp_setup
 TEMPLATE_DIR = Path(__file__).resolve().parents[1]
 REPO_ROOT = Path(__file__).resolve().parents[3]
 FIXTURE_DIR = Path(__file__).resolve().parent / "fixtures"
-MCP_RUNTIME_CONTRACT_VERSION = "v3.7.0"
+MCP_RUNTIME_CONTRACT_MIN_VERSION = "v3.7.0"
+MCP_FIXTURE_CONTRACT_VERSION = "v3.7.0"
+
+
+def version_tuple(tag):
+    return tuple(int(part) for part in tag.removeprefix("v").split("."))
 
 
 def render_json_template(template_name, context):
@@ -645,7 +650,7 @@ class WorkIqTemplateTests(unittest.TestCase):
             {"domains": {"allowedDomains": [], "blockedDomains": []}},
         )
 
-
+
 class FoundryIqMcpTemplateTests(unittest.TestCase):
     """Generic MCP Server knowledge sources are opt-in and default-off.
     Rendered output must be unchanged when the feature is disabled.
@@ -905,11 +910,14 @@ class FoundryIqMcpTemplateTests(unittest.TestCase):
             for component in manifest["components"]
             if component["name"] == "gpt-rag-orchestrator"
         )
-        self.assertEqual(orchestrator["tag"], MCP_RUNTIME_CONTRACT_VERSION)
+        self.assertGreaterEqual(
+            version_tuple(orchestrator["tag"]),
+            version_tuple(MCP_RUNTIME_CONTRACT_MIN_VERSION),
+        )
 
         fixture_path = (
             FIXTURE_DIR
-            / f"foundry_iq_mcp_canonical_source_{MCP_RUNTIME_CONTRACT_VERSION.removeprefix('v').replace('.', '_')}.json"
+            / f"foundry_iq_mcp_canonical_source_{MCP_FIXTURE_CONTRACT_VERSION.removeprefix('v').replace('.', '_')}.json"
         )
         source = json.loads(fixture_path.read_text(encoding="utf-8"))
         context["FOUNDRY_IQ_MCP_TRUSTED_HOSTS"] = "mcp.contoso.com"

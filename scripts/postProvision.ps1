@@ -654,7 +654,20 @@ Invoke-NativeCommand { & python -m pip install -r config/requirements.txt }
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 #-------------------------------------------------------------------------------
-# 1) AI Foundry Setup
+# 1) Governance and audit configuration
+#-------------------------------------------------------------------------------
+if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
+    Write-Host "`n🔐 Governance and audit configuration..."
+    Write-Host "🚀 Running config.governance.setup..."
+    Invoke-PythonModule -ModuleName 'config.governance.setup'
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    Write-Host "✅ Governance and audit configuration finished."
+} else {
+    Write-Host "⏭️  Skipping governance setup (missing APP_CONFIG_ENDPOINT)."
+}
+
+#-------------------------------------------------------------------------------
+# 2) AI Foundry Setup
 #-------------------------------------------------------------------------------
 if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
     Write-Host "`n📑 AI Foundry Setup..."
@@ -667,7 +680,7 @@ if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
 }
 
 #-------------------------------------------------------------------------------
-# 2) Container Apps Setup
+# 3) Container Apps Setup
 #-------------------------------------------------------------------------------
 if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
     Write-Host "`n🔍 ContainerApp setup..."
@@ -680,7 +693,7 @@ if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
 }
 
 #-------------------------------------------------------------------------------
-# 3) AI Search Setup
+# 4) AI Search Setup
 #-------------------------------------------------------------------------------
 if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
     Write-Host "🔍 AI Search setup..."
