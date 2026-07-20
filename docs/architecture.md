@@ -41,6 +41,11 @@ Use the table below for the deployment parameters behind each layer, and the [De
 | Existing platform / AI Landing Zone integration | Optional enterprise integration | `DEPLOYMENT_MODE=ailz-integrated`, `USE_EXISTING_VNET`, `EXISTING_*_RESOURCE_ID`, `HUB_INTEGRATION_*` | Reusing central network, DNS, observability, Bastion, NAT, or hub-spoke resources. |
 | Scenario capabilities | Optional feature add-ons | `DEPLOY_SPEECH_SERVICE`, `DEPLOY_GROUNDING_WITH_BING`, `ENABLE_AGENTIC_RETRIEVAL` | Enabling voice, Bing grounding, or agentic retrieval scenarios. MCP/tool-hosting and NL2SQL application behavior are configured outside the Bicep-deployed infrastructure shown in this diagram. |
 
+For data ownership, telemetry, retention, and responsibility boundaries, see
+[Governance and responsible operation](governance_overview.md). The correlated
+audit event contract on that page is under development and is not part of the
+current released runtime.
+
 ## Key Capabilities
 
 - **Enterprise-Grade Security**  

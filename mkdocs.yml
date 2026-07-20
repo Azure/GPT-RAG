@@ -47,6 +47,9 @@ nav:
     - NL2SQL: quickstart_nl2sql.md
   - Architecture:
     - Overview: architecture.md
+  - Governance:
+    - Overview and responsibilities: governance_overview.md
+    - Audit Contract v1 (proposed): governance_audit_contract_v1.md
   - Services:
     - Orchestrator: services_orchestrator.md
     - Ingestion:
