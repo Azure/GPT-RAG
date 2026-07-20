@@ -1,282 +1,562 @@
 # Audit Contract v1
 
-This page is the proposed technical contract for reconstructing GPT-RAG request,
-route, source, tool, and outcome activity through Azure Monitor.
+Use this page to understand the unreleased GPT-RAG orchestrator audit event
+contract, estimate its telemetry volume, and prepare queries for a future
+runtime release.
 
-!!! warning "Proposed contract, not released"
-    Current GPT-RAG releases do not emit this event set. The names, fields,
-    enums, bounds, feature flags, health behavior, and queries below are
-    implementation assumptions based on the design brief for issue
-    [#571](https://github.com/Azure/GPT-RAG/issues/571). They must be compared
-    field by field with the runtime schema pull request and validated against
-    deployed telemetry before this contract is described as available.
+!!! warning "Implemented in a pull request, but not released"
+    This page is reconciled with orchestrator pull request
+    [#277](https://github.com/Azure/gpt-rag-orchestrator/pull/277) at commit
+    `40e581aafed7051132859d95bc07e3b08ef17e68`. That code is not in a released
+    orchestrator version. Audit events also remain disabled by default and need
+    GPT-RAG umbrella deployment integration before they are available through a
+    normal GPT-RAG deployment. Do not configure the flags below until the
+    runtime release and integration are complete.
 
-## Contract goals
+The contract provides best-effort operational evidence. It is not a transaction
+log, an immutable or nonrepudiable record, independent attestation, or proof
+that a component behaved correctly. It does not establish legal or regulatory
+compliance.
 
-Audit Contract v1 is designed to:
+## What the implementation covers
 
-- reconstruct a representative request without recording sensitive content;
-- correlate custom events with request and dependency telemetry;
-- keep event values bounded and machine-readable;
-- state when content was omitted or redacted;
-- remain additive so consumers can ignore unknown optional fields; and
-- reuse GPT-RAG's OpenTelemetry and Application Insights integration.
-
-It is not a transaction log, a source of legal conclusions, an immutable
-ledger, or proof that the producing component behaved correctly.
+The orchestrator implementation adds request, route, grounding source, tool,
+outcome, and audit-emission events over the existing OpenTelemetry and Azure
+Monitor connection.
 
 ```mermaid
 flowchart LR
-  Runtime[GPT-RAG runtime] -->|metadata-only custom events| Events[AppEvents]
-  Runtime -->|requests and calls| Traces[AppRequests and AppDependencies]
-  Runtime -. explicit content opt-in .-> Content[AppGenAIContent]
-  Events --> Query[Correlation query]
-  Traces --> Query
+  Request[Request] --> Route[Route selection]
+  Route --> Sources[Grounding sources]
+  Sources --> Tools[Tool calls]
+  Tools --> Outcome[Outcome]
+  Request -. correlation ID .-> Events[AppEvents]
+  Route -. audit event .-> Events
+  Sources -. audit events .-> Events
+  Tools -. audit events .-> Events
+  Outcome -. audit events .-> Events
 ```
 
-## Application Insights representation
+The shared schema reserves ingestion event names, but orchestrator pull request
+#277 does not implement an ingestion producer.
 
-The proposal uses Azure Monitor OpenTelemetry custom events. The producer sets
-`microsoft.custom_event.name`; workspace-based Application Insights stores the
-event in `AppEvents`.
+The exact reviewed artifacts are:
 
-| Contract value | `AppEvents` representation |
+- [logical v1 schema](https://github.com/Azure/gpt-rag-orchestrator/blob/40e581aafed7051132859d95bc07e3b08ef17e68/contracts/audit-event-v1.schema.json)
+- [Application Insights wire schema](https://github.com/Azure/gpt-rag-orchestrator/blob/40e581aafed7051132859d95bc07e3b08ef17e68/contracts/audit-event-v1.application-insights.schema.json)
+- [golden logical event](https://github.com/Azure/gpt-rag-orchestrator/blob/40e581aafed7051132859d95bc07e3b08ef17e68/tests/golden/audit_event_v1.json)
+- [runtime configuration guidance](https://github.com/Azure/gpt-rag-orchestrator/blob/40e581aafed7051132859d95bc07e3b08ef17e68/README.md#audit-event-configuration)
+
+## Application Insights wire format
+
+The producer writes through the `gptrag.audit` logger with the fixed log body
+`GPT-RAG audit event`. It sets `microsoft.custom_event.name` to
+`gptrag.audit.<event_type>`, which the pinned Azure Monitor exporter converts to
+an `AppEvents` row.
+
+| Logical value | Workspace-based Application Insights value |
 | --- | --- |
-| Event name | `Name` |
-| Event timestamp | `TimeGenerated` |
-| W3C trace ID | `OperationId` |
-| Parent operation or span | `ParentId` |
-| GPT-RAG envelope and event fields | `Properties` |
-| Producing service | `AppRoleName` and `gptrag.audit.component` |
-| Producing version | `AppVersion` and `gptrag.audit.service_version` |
+| Custom event name | `AppEvents.Name` |
+| Export time | `AppEvents.TimeGenerated` |
+| Current OpenTelemetry trace ID | `AppEvents.OperationId` |
+| Current OpenTelemetry span ID | `AppEvents.ParentId` |
+| Event fields | Unprefixed keys in `AppEvents.Properties` |
+| Service name | `AppEvents.AppRoleName` and `Properties["service_name"]` |
+| Runtime version | `AppEvents.AppVersion` and `Properties["service_version"]` |
 
-Application Insights uses `customEvents` in the classic Application Insights
-query experience and `AppEvents` in the workspace schema. The queries on this
-page use the workspace schema provisioned by GPT-RAG.
+The event property names are not prefixed with `gptrag.audit.`. For example,
+use `Properties["correlation_id"]`, not
+`Properties["gptrag.audit.correlation_id"]`.
+The exporter can add properties such as source-code attributes or
+`logger_name`; v1 readers must ignore unknown optional properties.
 
-Sensitive prompts, responses, system instructions, and tool content must not be
-placed in `AppEvents`. Azure Monitor maps the relevant `gen_ai.*` content
-attributes to `AppGenAIContent`. Sensitive-content capture remains an explicit
-opt-in and the table should be protected. Follow the current Azure Monitor
-migration guidance before enabling content capture. During the table migration,
-the same content attributes can also be routed to existing telemetry tables
-unless the documented protection feature is enabled.
+Azure Monitor stringifies every custom event property. Logical numbers,
+booleans, and arrays therefore arrive as strings. Parse scalar values in KQL
+before comparing or calculating with them. The wire contract does not guarantee
+JSON encoding for arrays. Treat `omitted_fields` and `truncated_fields` as
+display values on the wire unless a future contract defines a portable array
+encoding.
 
-## Proposed event names
+The logical schema allows a root `parent_event_id` to be `null`. Azure Monitor
+drops null custom properties, so the wire event uses this required sentinel:
 
-The `Name` value is proposed as:
+```text
+evt_00000000000000000000000000000000
+```
 
-| Event name | Meaning |
-| --- | --- |
-| `gptrag.audit.request.started` | GPT-RAG accepted a request for processing. |
-| `gptrag.audit.request.completed` | Request processing completed. |
-| `gptrag.audit.request.failed` | Request processing failed. |
-| `gptrag.audit.request.cancelled` | The caller or runtime cancelled processing. |
-| `gptrag.audit.orchestration.decision` | A strategy, route, or fallback was selected. |
-| `gptrag.audit.source.selected` | A grounding source was selected. |
-| `gptrag.audit.source.rejected` | A grounding source was considered but not used. |
-| `gptrag.audit.tool.started` | A tool invocation started. |
-| `gptrag.audit.tool.completed` | A tool invocation completed. |
-| `gptrag.audit.tool.failed` | A tool invocation failed or timed out. |
-| `gptrag.audit.outcome.produced` | A final outcome was produced. |
-| `gptrag.audit.outcome.rejected` | A final outcome was not returned because a bounded policy or runtime reason rejected it. |
+When an event has a valid active span:
 
-A runtime health signal such as `gptrag.audit.health.degraded` is also proposed,
-but it is not part of the per-request audit taxonomy. Its exact name, metric,
-rate limit, and alert behavior are pending implementation.
+- `Properties["trace_id"]` equals `OperationId`;
+- `Properties["span_id"]` equals `ParentId`; and
+- `Properties["parent_event_id"]` expresses the logical audit relationship,
+  not the OpenTelemetry span relationship.
 
-## Common envelope
+If no valid span is active, the logical `trace_id` and `span_id` and the
+exported `OperationId` and `ParentId` use all-zero hexadecimal values. Exclude
+the all-zero trace ID from joins.
 
-Every event should expose this logical envelope. Property names are proposed
-and pending runtime verification.
+The runtime reads `service_version` from the repository root `VERSION` file and
+uses the same value for the OpenTelemetry `service.version` resource attribute.
+The reviewed branch reports `3.7.0`, but the audit feature itself is unreleased.
+The eventual release will report the version packaged in its own `VERSION`
+file.
 
-| Proposed property or column | Type | Semantics |
+## Event names
+
+The orchestrator event name is the `gptrag.audit.` prefix followed by one of
+these exact logical event types:
+
+| `event_type` | `AppEvents.Name` | Current meaning |
 | --- | --- | --- |
-| `gptrag.audit.schema_version` | string | Contract version. Proposed initial value: `1.0`. Consumers branch on this value and ignore unknown optional fields. |
-| `gptrag.audit.event_id` | UUID string | Unique identifier for one audit event. |
-| `gptrag.audit.correlation_id` | opaque string | Operator-facing identifier shared by all events for one logical activity. It is separate from the trace ID because asynchronous work can cross trace boundaries. |
-| `gptrag.audit.parent_event_id` | UUID string, optional | Previous logical audit event when a parent is known. |
-| `OperationId` | 32 hexadecimal characters | W3C `trace-id` populated by Application Insights correlation. |
-| `gptrag.audit.span_id` | 16 hexadecimal characters | W3C span identifier for the emitting operation when available. |
-| `ParentId` | string, optional | Application Insights parent operation or span identifier. |
-| `gptrag.audit.component` | bounded string | Producing component, initially `orchestrator` or `ingestion`. |
-| `gptrag.audit.operation` | bounded string | Activity such as `chat`, `retrieve`, `ingest`, or `tool_call`. |
-| `gptrag.audit.environment` | bounded string | Deployment environment label. Do not store subscription, tenant, or resource credentials. |
-| `gptrag.audit.service_version` | bounded string | Deployed component version. |
-| `gptrag.audit.status` | enum | Current event status from the enum below. |
-| `gptrag.audit.start_time` | ISO 8601 UTC string, optional | Logical activity start when it differs from `TimeGenerated`. |
-| `gptrag.audit.duration_ms` | non-negative integer, optional | Elapsed time for completed, failed, cancelled, or timed-out activity. |
-| `gptrag.audit.capture_mode` | enum | Whether only metadata or explicitly approved sensitive content was enabled. |
-| `gptrag.audit.redaction_applied` | boolean | `true` when the producer omitted or transformed a permitted field. It is not a guarantee that arbitrary content is safe. |
-| `gptrag.audit.omitted_fields` | bounded string array | Field names omitted by policy or validation. Never include omitted values. |
-| `gptrag.audit.actor_id` | HMAC pseudonym, optional | Off by default. Never a raw email, user name, object ID, or token claim. Exact format and configuration are pending. |
+| `request.started` | `gptrag.audit.request.started` | Streaming request processing started. |
+| `request.completed` | `gptrag.audit.request.completed` | Streaming request processing completed. |
+| `request.failed` | `gptrag.audit.request.failed` | Request processing raised an exception. |
+| `request.cancelled` | `gptrag.audit.request.cancelled` | The stream was cancelled or disconnected. |
+| `route.selected` | `gptrag.audit.route.selected` | An agent strategy or single-agent route was selected. |
+| `grounding.source.selected` | `gptrag.audit.grounding.source.selected` | A grounding source or result was selected. |
+| `grounding.source.rejected` | `gptrag.audit.grounding.source.rejected` | A source was rejected, empty, or not selected. |
+| `tool.invocation.started` | `gptrag.audit.tool.invocation.started` | A proxied tool invocation started, or a Foundry IQ activity was reconstructed as started. |
+| `tool.invocation.completed` | `gptrag.audit.tool.invocation.completed` | A tool invocation completed. |
+| `tool.invocation.failed` | `gptrag.audit.tool.invocation.failed` | A tool invocation failed or timed out. |
+| `tool.invocation.cancelled` | `gptrag.audit.tool.invocation.cancelled` | A proxied tool invocation was cancelled. |
+| `outcome.produced` | `gptrag.audit.outcome.produced` | A streamed response was produced. |
+| `outcome.rejected` | `gptrag.audit.outcome.rejected` | A streamed response was rejected after a failure. |
+| `audit.emission.failed` | `gptrag.audit.audit.emission.failed` | Sanitization, serialization, size, attribute, or synchronous logging failed. |
 
-## Event-specific fields
+The shared schema also reserves these names for a future ingestion producer:
 
-| Event group | Proposed fields |
+- `ingestion.request.started`
+- `ingestion.request.completed`
+- `ingestion.request.failed`
+- `ingestion.request.cancelled`
+- `ingestion.document.selected`
+- `ingestion.document.rejected`
+- `ingestion.outcome.produced`
+- `ingestion.outcome.rejected`
+
+## Required logical fields
+
+Every logical event requires these fields. Readers of major version 1 must
+ignore unknown optional fields.
+
+| Field | Logical type and constraint |
 | --- | --- |
-| Request lifecycle | `request_kind`, `status`, `duration_ms`, and, for failure, `error_class` and bounded `reason_code`. |
-| Orchestration decision | `action_type`, `route`, `decision_outcome`, and bounded `reason_code`. Do not record chain-of-thought or free-form model reasoning. |
-| Source selection | `source_kind`, opaque `source_id`, `decision_outcome`, and bounded `reason_code`. Do not record a title, URL query string, document text, or excerpt by default. |
-| Tool invocation | `tool_name`, opaque `invocation_id`, `tool_operation`, `status`, `duration_ms`, and bounded `error_class`. Do not record arguments or results by default. |
-| Final outcome | `outcome_kind`, `status`, `duration_ms`, and bounded `reason_code`. Do not record the response body by default. |
+| `schema_version` | Integer constant `1`. |
+| `event_id` | `evt_` plus 32 lowercase hexadecimal characters. |
+| `event_type` | One of the event types in the shared schema. |
+| `event_time_utc` | UTC timestamp with exactly six fractional digits and a `Z` suffix. |
+| `correlation_id` | `req_` plus 32 lowercase hexadecimal characters. |
+| `trace_id` | 32 lowercase hexadecimal characters. |
+| `span_id` | 16 lowercase hexadecimal characters. |
+| `parent_event_id` | Event ID or `null` in the logical schema. The wire uses the root sentinel instead of `null`. |
+| `service_name` | String, maximum 512 characters. Current value: `gpt-rag-orchestrator`. |
+| `service_version` | String, maximum 512 characters, read from `VERSION`. |
+| `environment` | String, maximum 64 characters. Uses `ENVIRONMENT_NAME`, then `AZURE_ENV_NAME`, then `unknown`. |
+| `operation` | String, maximum 512 characters. |
+| `status` | Exact status enum below. |
+| `reason_code` | Exact reason enum below. |
+| `capture_mode` | `metadata_only` or `sensitive_allowlist`. |
+| `redaction_applied` | Boolean. This indicates that the sanitizer changed a value, not that arbitrary content is safe. |
+| `omitted_fields` | Array of at most 32 field paths, each at most 512 characters. |
+| `truncated_fields` | Array of at most 32 field paths, each at most 512 characters. |
 
-## Proposed enums
+Terminal request and tool events also require `started_at_utc` and
+`duration_ms`. This applies to completed, failed, and cancelled request or tool
+events, including the reserved ingestion request terminal events.
 
-Exact values remain an implementation dependency. The runtime must reject or
-map unknown values rather than emitting unbounded free text.
+## Optional logical fields
 
-| Enum | Proposed values |
+| Fields | Logical type and constraint |
 | --- | --- |
-| `status` | `started`, `ok`, `failed`, `cancelled`, `rejected`, `timeout` |
-| `capture_mode` | `metadata_only`, `sensitive_content_enabled` |
-| `decision_outcome` | `selected`, `rejected`, `fallback` |
-| `error_class` | `authentication`, `authorization`, `validation`, `rate_limited`, `timeout`, `dependency`, `cancelled`, `internal`, `unknown` |
-| `source_kind` | `ai_search`, `foundry_iq_documents`, `work_iq`, `fabric_ontology`, `fabric_data_agent`, `onelake`, `sharepoint_remote`, `sharepoint_indexed`, `web_bing`, `mcp` |
+| `started_at_utc` | UTC timestamp in the same format as `event_time_utc`. |
+| `duration_ms` | Non-negative number. The producer rounds to three decimal places. |
+| `decision_type`, `decision_value` | String, maximum 512 characters. |
+| `source_id` | String or `null`, maximum 512 characters. |
+| `source_type` | String, maximum 512 characters. |
+| `source_rank` | Non-negative integer. |
+| `tool_name` | String, maximum 512 characters. |
+| `tool_id`, `tool_invocation_id` | String or `null`, maximum 512 characters. |
+| `outcome_type`, `failure_type` | String, maximum 512 characters. |
+| `input_count`, `output_count`, `source_count` | Non-negative integer. Current request counts are character and emitted-source-event counts, not token counts. |
+| `partial_output` | Boolean. |
+| `http_status_code` | Integer from 100 through 599. Reserved by the contract but not populated by the reviewed request lifecycle. |
+| `transport` | String, maximum 512 characters. |
+| `actor_id`, `conversation_id`, `question_id`, `thread_id` | String or `null`, maximum 512 characters. `thread_id` is reserved but not populated by the reviewed implementation. |
+| `hmac_key_id` | String, maximum 512 characters. Present on normal emitted events, but not on the minimal `audit.emission.failed` fallback. |
+| `prompt`, `response`, `source_excerpt`, `tool_arguments`, `tool_result` | Sensitive allowlist string, maximum 2,048 characters after conversion and sanitization. |
 
-The source enum represents the specific integrations documented by GPT-RAG. It
-does not imply complete support for Microsoft IQ or access to telemetry produced
-inside Work IQ, Fabric IQ, Foundry IQ, Bing, SharePoint, or an MCP server.
+The logical JSON Schema allows additional properties for forward-compatible
+readers. The current producer is stricter: it omits fields outside its required
+and optional allowlists and records their names in `omitted_fields`.
 
-## Bounds
+## Status and reason enums
 
-OpenTelemetry SDKs default to 128 attributes per span or log record and 128
-events per span. OpenTelemetry does not define a default attribute-value length,
-so the runtime serializer must add explicit limits.
+The exact `status` values are:
 
-| Item | Proposed v1 ceiling | Reconciliation required |
+```text
+started
+completed
+failed
+cancelled
+selected
+rejected
+produced
+```
+
+The exact `reason_code` values are:
+
+```text
+none
+request_received
+request_completed
+request_failed
+request_cancelled
+client_disconnected
+partial_output
+strategy_configured
+direct_model_selected
+agent_selected
+source_selected
+source_rejected
+source_empty
+source_limit_reached
+tool_invoked
+tool_completed
+tool_failed
+tool_cancelled
+timeout
+outcome_produced
+outcome_rejected
+validation_failed
+redaction_failure
+serialization_failure
+event_too_large
+attribute_limit_exceeded
+export_failure
+unknown
+```
+
+Not every reserved reason is emitted by the current orchestrator paths. For
+example, reaching the source event limit stops further source events silently;
+it does not currently emit `source_limit_reached`.
+
+## Bounds and sanitizer behavior
+
+| Bound | Current value |
+| --- | --- |
+| Serialized logical event | 16 KiB UTF-8 |
+| Producer attributes | 60, leaving room for the custom-event marker and three OpenTelemetry source-code attributes |
+| Logical or wire properties | 64 maximum |
+| Metadata string | 512 characters |
+| Environment | 64 characters |
+| Sensitive string | 2,048 characters |
+| Recursive depth | 6 |
+| Dictionary entries considered | 64 |
+| Items emitted from an array | 32 |
+| Recorded omitted or truncated field paths | 32 per list |
+| Source events per request | Configurable from 1 through 25, default 25 |
+
+Metadata and approved sensitive strings that exceed their character limits are
+truncated and named in `truncated_fields`. If the whole event still exceeds 16
+KiB, optional fields are removed until it fits. If only required fields remain
+and the event is still too large, the payload is discarded and an
+`audit.emission.failed` event is attempted.
+
+The recursive sanitizer:
+
+- strips control characters other than tab, line feed, and carriage return;
+- redacts prohibited key classes and configured additional nested keys;
+- scans for bearer and basic credentials, cookies, JWT-like values, connection
+  strings, SAS signatures, private keys, embedded URL credentials, and similar
+  secret forms;
+- handles cycles, unsupported objects, collection bounds, and depth bounds by
+  omitting or truncating fields; and
+- scans the final serialized event before logging it.
+
+This filtering is defense in depth, not a data-loss-prevention boundary.
+
+## Configuration
+
+These values are loaded at startup from Azure App Configuration. The HMAC key
+must be a Key Vault reference and must not be exposed through the admin
+dashboard.
+
+| Key | Default | Exact behavior |
 | --- | --- | --- |
-| Total event properties | 128 | Confirm the runtime serializer and exporter apply the same or a lower limit. |
-| Event name and enum value | 128 characters | Confirm whether validation rejects or maps longer values. |
-| Identifier, component, operation, source, route, and tool fields | 256 characters each | Confirm the exact UTF-8 byte or character rule. |
-| `reason_code` and `error_class` | 128 characters each | Confirm these are allowlisted values, not truncated exception messages. |
-| `omitted_fields` | 32 entries, 128 characters per field name | Confirm serialization and overflow behavior. |
-| Optional properties | 64 in addition to the required envelope, while remaining within the 128 total | Confirm the exact count. |
-| `duration_ms` | Non-negative integer | Define and test the maximum accepted value in the runtime PR. |
+| `AUDIT_EVENTS_ENABLED` | `false` | Enables the emitter. When `false`, inactive audit settings are ignored and no HMAC key is required. |
+| `AUDIT_HMAC_KEY` | Unset | Required when auditing is enabled. Accepts Base64, Base64URL, or hexadecimal encoding of exactly 32 random bytes. Invalid or missing values fail startup. |
+| `AUDIT_HMAC_KEY_ID` | `v1` | Non-secret key version stored on normal events. Required and limited to 512 characters when enabled. |
+| `AUDIT_SENSITIVE_CONTENT_ENABLED` | `false` | Allows fields in the sensitive field allowlist to be considered. |
+| `AUDIT_SENSITIVE_CONTENT_FIELDS` | Empty | Comma-separated subset of `prompt`, `response`, `source_excerpt`, `tool_arguments`, and `tool_result`. Unknown values fail startup when auditing is enabled. |
+| `AUDIT_ACTOR_PSEUDONYM_ENABLED` | `false` | Adds an HMAC pseudonym for the authenticated actor. |
+| `AUDIT_SOURCE_EVENT_LIMIT` | `25` | Accepts an integer from 1 through 25. |
+| `AUDIT_ADDITIONAL_REDACTED_KEYS` | Empty | Comma-separated nested key fragments that the sanitizer always redacts. |
 
-Values that exceed a limit should be omitted or mapped to a bounded sentinel.
-Do not truncate and export a token, secret, arbitrary prompt, exception body, or
-tool payload. Exact byte limits, Unicode handling, and sentinel values are
-pending runtime verification.
+If `AZURE_MONITOR_DISABLE_LOGGING=true` while auditing is enabled, the
+orchestrator enables Azure Monitor log export only for the `gptrag.audit`
+namespace. If normal log export is enabled, audit events use that existing
+export path. A valid `APPLICATIONINSIGHTS_CONNECTION_STRING` is still required.
+If it is unavailable, monitoring export is disabled rather than making the
+orchestrator fail.
 
-## Correlation semantics
+To roll back, set `AUDIT_EVENTS_ENABLED=false` and restart the orchestrator.
+This stops new events. It does not delete previously exported telemetry.
 
-Use [W3C Trace Context](https://www.w3.org/TR/trace-context/) to propagate
-`traceparent` and `tracestate` across supported HTTP boundaries.
+## HMAC identifiers and rotation
 
-- `OperationId` is the W3C trace correlation used to connect `AppEvents`,
-  `AppRequests`, and `AppDependencies`.
-- `gptrag.audit.correlation_id` groups the logical GPT-RAG activity, including
-  work that can cross traces or asynchronous boundaries.
-- `gptrag.audit.event_id` identifies one event.
-- `gptrag.audit.parent_event_id` expresses logical audit ordering when a trace
-  parent is not sufficient.
-- `gptrag.audit.span_id` and `ParentId` retain trace structure when available.
+Auditing requires a 256-bit HMAC key even when actor pseudonyms are disabled.
+The producer uses HMAC-SHA256 over:
 
-Do not put personal or business meaning into trace, correlation, event, or
-invocation identifiers. Generate opaque values with sufficient randomness.
+```text
+<identifier-kind>:<raw-value>
+```
 
-OpenTelemetry generative AI semantic conventions are currently marked
-Development. GPT-RAG can align with fields such as `gen_ai.operation.name` and
-`gen_ai.conversation.id`, but the runtime must pin and document the convention
-version before treating those names as a stable public contract.
+It exports `hmac_` followed by the first 32 lowercase hexadecimal characters of
+the digest. Current code pseudonymizes conversation IDs, question IDs, source
+references, tool IDs, tool invocation IDs, and optional actor IDs. Raw values
+are not placed in those audit properties.
 
-## Privacy semantics
+Create and restrict the key in Key Vault. To rotate it, update
+`AUDIT_HMAC_KEY` and `AUDIT_HMAC_KEY_ID` together, then restart. Identical raw
+values produce different pseudonyms after rotation, so correlation does not
+continue automatically across key versions.
 
-Metadata-only events may include bounded identifiers, statuses, timings,
-component and tool names, source kinds, and reason codes. They must not contain
-prompts, responses, source excerpts, tool arguments, tool results, arbitrary
-exception messages, or URLs with query strings.
+## Sensitive-content capture
 
-Even when sensitive-content capture is explicitly enabled, producers must never
-capture access tokens, API keys, authorization headers, cookies, connection
-strings, credentials, or detected secrets. Redaction must occur before export.
+The default `capture_mode` is `metadata_only`. It changes to
+`sensitive_allowlist` only when both the feature flag is true and the allowlist
+is non-empty. A field not in the allowlist is omitted and named in
+`omitted_fields`.
 
-If actor correlation is later enabled:
+The reviewed implementation places approved sensitive fields in the same
+`AppEvents.Properties` collection as the rest of the audit event. It does not
+route audit content to `AppGenAIContent`. Protect access to `AppEvents`,
+retention, exports, workbooks, alerts, and query results accordingly. Other
+OpenTelemetry generative AI instrumentation may use `AppGenAIContent`
+independently.
 
-1. derive the pseudonym with a deployment-specific HMAC key;
-2. keep the key in Azure Key Vault;
-3. never emit the key identifier, raw actor identifier, or input claim;
-4. define rotation and historical-correlation behavior; and
-5. restrict access to the workload identity that performs the HMAC.
+Even when allowlisted, content is bounded and scanned for prohibited values.
+Do not enable sensitive capture as a troubleshooting shortcut. The scanner
+cannot guarantee that every secret or sensitive business value will be found.
 
-## Best-effort evidence and producer trust
+## MCP and Foundry IQ evidence
 
-The contract provides best-effort reconstruction. It does not guarantee a
-complete record.
+Direct MCP calls from the MCP strategy are wrapped with public Microsoft Agent
+Framework `AIFunction` proxies. The same invocation seam covers SSE and
+streamable HTTP. It emits a started event before delegation and one completed,
+failed, timed-out, or cancelled terminal event. Tool arguments and results are
+only present when their sensitive fields are explicitly allowlisted.
 
-Evidence can be missing because of sampling, filtering, exporter queue loss,
-throttling, process termination, network failure, async context loss, a disabled
-feature flag, an upstream service, or activity generated before instrumentation
-was enabled.
+Both direct MCP transports propagate W3C Trace Context and remove OpenTelemetry
+baggage. This supports trace correlation without forwarding ambient identity
+or other baggage to the MCP server.
 
-Audit events are producer-asserted telemetry from the same process they
-describe. They are not cryptographically signed or independently attested.
-Azure Monitor retention, purge, RBAC, and export settings are operator
-controls. If stronger immutability is required, export to an operator-managed
-destination and apply an appropriate immutable-storage policy.
+Foundry IQ MCP activity has a different evidence quality. The Azure AI Search
+response exposes completed activity but no pre-invocation callback. The
+orchestrator therefore converts each returned activity into a reconstructed
+started and terminal pair after the response arrives. It derives
+`started_at_utc` by subtracting `elapsedMs` from the observation time and uses
+`elapsedMs` as `duration_ms`. The tool name is the bounded
+`foundry_iq_mcp_tool`, and the started event records transport
+`foundry_iq`.
 
-The runtime should not fail a user request only because audit emission failed.
-Instead, it should expose a bounded, rate-limited health signal and let the
-operator identify the affected interval as an evidence gap. This behavior must
-be tested and reconciled with the runtime pull request.
+This reconstructed pair is not proof that a start event was observed when the
+remote call began. If the response or its activity array is missing, those tool
+events are also missing.
+
+Grounding source normalization covers the specific integrations implemented by
+GPT-RAG:
+
+```text
+azure_ai_search
+azure_ai_search_multimodal
+foundry_iq
+foundry_iq_mcp
+web_grounding
+work_iq
+fabric_iq
+fabric_data_agent
+sharepoint_remote
+sharepoint_indexed
+onelake
+nl2sql_datasource
+unknown
+```
+
+This list describes specific Work IQ, Fabric IQ, Foundry IQ, and web grounding
+integrations. It does not claim complete support for Microsoft IQ or visibility
+into telemetry produced inside those upstream services.
+
+## Failure semantics and evidence gaps
+
+Audit emission is deliberately best effort:
+
+- sanitization or serialization failure discards the original payload and
+  attempts a payload-free `audit.emission.failed` event;
+- oversize and attribute-limit failures use the same minimal event;
+- a synchronous logging failure is caught and mapped to `export_failure`;
+- if the minimal event also cannot be logged, the runtime attempts a fixed
+  warning and continues the user operation; and
+- the Azure Monitor batch exporter has no application callback for later
+  delivery failure, so an asynchronous export failure cannot produce a reliable
+  failure event.
+
+The implementation does not add a separate health event, metric, rate limiter,
+or delivery acknowledgment. Operators must use Azure Monitor ingestion health,
+application logs, and expected-volume checks to identify gaps.
+
+Additional known gaps include:
+
+- sampling, filtering, throttling, queue loss, process termination, and network
+  failure;
+- request dependency or body-validation failures before the endpoint handler,
+  which may not receive `X-Correlation-ID` or lifecycle audit events;
+- feedback requests, which receive a server correlation header but do not enter
+  the streaming request audit lifecycle;
+- upstream actions that occur outside instrumented seams;
+- source events after the configured per-request source limit; and
+- the reconstructed Foundry IQ MCP timing described above.
+
+The server ignores an inbound `X-Correlation-ID` and generates a new
+`req_<32 lowercase hex>` value. Successful orchestrator and feedback responses
+return it in `X-Correlation-ID`. The identifier is also saved with a question in
+Cosmos when a question is persisted. It is not authentication, authorization,
+idempotency, proof of delivery, or an immutability mechanism.
+
+## Event volume and benchmark
+
+A normal successful streaming request emits four lifecycle events before source
+or tool activity:
+
+1. `request.started`
+2. `route.selected`
+3. `outcome.produced`
+4. `request.completed`
+
+A failed stream normally emits four events, replacing the last two with
+`outcome.rejected` and `request.failed`. A cancelled stream normally emits
+three: request start, route selection, and request cancellation. The
+single-agent strategy can add another `route.selected` event for its internal
+direct-model or agent-service choice.
+
+Each selected or rejected grounding source adds one event, up to
+`AUDIT_SOURCE_EVENT_LIMIT`. Each proxied direct MCP invocation adds a started
+and terminal pair. Each returned Foundry IQ MCP activity also adds a
+reconstructed pair. There is no separate global per-request tool-event ceiling,
+so do not estimate a fixed maximum using only the 25-event source limit.
+
+The pull request validation ran a non-gating metadata-only microbenchmark with a
+null logging handler for 10,000 events:
+
+| Measurement | Result |
+| --- | --- |
+| Median emitter time | 886.85 microseconds |
+| p95 emitter time | 1,706.20 microseconds |
+| Peak traced memory | 334.1 KiB |
+
+This isolates event construction and sanitization. It does not include Azure
+Monitor export, network latency, production concurrency, or end-to-end request
+p95. Measure representative traffic and ingestion cost before production
+enablement.
 
 ## KQL: reconstruct audit events
 
-This query uses the proposed property names. It is syntactically aligned with
-the workspace-based `AppEvents` schema, but it has not been validated against
-runtime telemetry.
+Replace the correlation ID with the value returned in `X-Correlation-ID`.
+This query uses the exact unprefixed wire properties and converts scalar strings
+to useful KQL types.
 
 ```kusto
 let lookback = 30d;
-let audit_correlation_id = "<gptrag-audit-correlation-id>";
+let audit_correlation_id = "req_0123456789abcdef0123456789abcdef";
 AppEvents
 | where TimeGenerated >= ago(lookback)
 | where Name startswith "gptrag.audit."
-| extend AuditCorrelationId =
-    tostring(Properties["gptrag.audit.correlation_id"])
+| extend AuditCorrelationId = tostring(Properties["correlation_id"])
 | where AuditCorrelationId == audit_correlation_id
 | extend
-    AuditEventId = tostring(Properties["gptrag.audit.event_id"]),
-    SchemaVersion = tostring(Properties["gptrag.audit.schema_version"]),
-    AuditStatus = tostring(Properties["gptrag.audit.status"]),
-    Component = tostring(Properties["gptrag.audit.component"]),
-    DurationMs = tolong(Properties["gptrag.audit.duration_ms"])
+    AuditEventTime = todatetime(Properties["event_time_utc"]),
+    AuditEventId = tostring(Properties["event_id"]),
+    AuditEventType = tostring(Properties["event_type"]),
+    SchemaVersion = toint(Properties["schema_version"]),
+    AuditStatus = tostring(Properties["status"]),
+    ReasonCode = tostring(Properties["reason_code"]),
+    ServiceName = tostring(Properties["service_name"]),
+    ServiceVersion = tostring(Properties["service_version"]),
+    AuditOperation = tostring(Properties["operation"]),
+    DurationMs = todouble(Properties["duration_ms"]),
+    SourceRank = toint(Properties["source_rank"]),
+    OutputCount = tolong(Properties["output_count"]),
+    PartialOutput = tobool(Properties["partial_output"]),
+    RedactionApplied = tobool(Properties["redaction_applied"])
 | project
     TimeGenerated,
+    AuditEventTime,
     Name,
+    AuditEventType,
     AuditCorrelationId,
     AuditEventId,
-    SchemaVersion,
     AuditStatus,
-    Component,
+    ReasonCode,
+    ServiceName,
+    ServiceVersion,
+    AuditOperation,
     DurationMs,
+    SourceRank,
+    OutputCount,
+    PartialOutput,
+    RedactionApplied,
     OperationId,
     ParentId,
     AppRoleName,
+    AppVersion,
     Properties
-| order by TimeGenerated asc
+| order by AuditEventTime asc, TimeGenerated asc
 ```
 
 ## KQL: add requests and dependencies
 
-The second query finds trace operation IDs from the correlated audit events,
-then unions the matching `AppRequests` and `AppDependencies` rows.
+This query builds one timeline from the audit events and matching
+`AppRequests` and `AppDependencies` rows. It uses the official workspace table
+columns, including `DurationMs`, `ResultCode`, `DependencyType`, `Target`, and
+`Data`.
 
 ```kusto
 let lookback = 30d;
-let audit_correlation_id = "<gptrag-audit-correlation-id>";
-let operation_ids = materialize(
+let audit_correlation_id = "req_0123456789abcdef0123456789abcdef";
+let audit_events = materialize(
     AppEvents
     | where TimeGenerated >= ago(lookback)
     | where Name startswith "gptrag.audit."
-    | where tostring(
-        Properties["gptrag.audit.correlation_id"]
-      ) == audit_correlation_id
+    | where tostring(Properties["correlation_id"]) == audit_correlation_id
+);
+let operation_ids = materialize(
+    audit_events
     | where isnotempty(OperationId)
+    | where OperationId != "00000000000000000000000000000000"
     | distinct OperationId
 );
 union
+(
+    audit_events
+    | project
+        TimeGenerated,
+        TelemetryType = "audit",
+        Name,
+        OperationId,
+        ParentId,
+        Id = tostring(Properties["event_id"]),
+        Success = case(
+            tostring(Properties["status"]) in ("failed", "cancelled", "rejected"), false,
+            tostring(Properties["status"]) in ("completed", "selected", "produced"), true,
+            bool(null)
+        ),
+        ResultCode = tostring(Properties["reason_code"]),
+        DurationMs = todouble(Properties["duration_ms"]),
+        DependencyType = "",
+        Target = "",
+        Data = "",
+        Properties
+),
 (
     AppRequests
     | where TimeGenerated >= ago(lookback)
@@ -293,7 +573,8 @@ union
         DurationMs,
         DependencyType = "",
         Target = "",
-        Data = ""
+        Data = Url,
+        Properties
 ),
 (
     AppDependencies
@@ -311,31 +592,35 @@ union
         DurationMs,
         DependencyType,
         Target,
-        Data
+        Data,
+        Properties
 )
 | order by TimeGenerated asc
 ```
 
-`AppDependencies.Data` can contain a URI or other dependency detail. Treat the
-second query's output as potentially sensitive and apply the same access and
-export controls as the underlying workspace.
+`AppRequests.Url`, `AppDependencies.Data`, and arbitrary `Properties` can
+contain sensitive details. Restrict access to query results and exported copies.
 
-## Runtime reconciliation checklist
+The queries are reconciled with the exporter wire conversion test in pull
+request #277 and the official Azure Monitor table schemas. They cannot be run
+against released audit telemetry until the runtime is released and enabled.
 
-Before describing Audit Contract v1 as available:
+## What evidence can support
 
-- replace every proposed event name with the runtime constant;
-- compare every property name, type, required flag, and default;
-- replace proposed enums and bounds with tested runtime values;
-- document exact audit, actor, content, and rollback configuration keys;
-- verify how `OperationId`, span ID, `ParentId`, and logical correlation are
-  populated across sync and async paths;
-- verify prohibited-data filtering before the exporter;
-- verify how `AppGenAIContent` is used when sensitive content is enabled;
-- run both KQL queries against canary telemetry;
-- test sampling, exporter failure, health signaling, and evidence-gap behavior;
-- measure latency, volume, and cost; and
-- preserve the preview warning until the runtime version is released.
+When combined with adopter-owned identity, access, retention, review, and
+incident processes, this evidence can help with:
+
+- security and architecture reviews;
+- incident reconstruction;
+- privacy and risk assessments;
+- adopter-led
+  [NIST AI Risk Management Framework](https://www.nist.gov/itl/ai-risk-management-framework)
+  activities; and
+- adopter-led assessments involving the
+  [EU AI Act](https://eur-lex.europa.eu/eli/reg/2024/1689/oj).
+
+The evidence is an input to those activities, not automatic compliance,
+certification, or a legal conclusion.
 
 ## Official references
 
@@ -344,7 +629,4 @@ Before describing Audit Contract v1 as available:
 - [`AppEvents` table](https://learn.microsoft.com/azure/azure-monitor/reference/tables/appevents)
 - [`AppRequests` table](https://learn.microsoft.com/azure/azure-monitor/reference/tables/apprequests)
 - [`AppDependencies` table](https://learn.microsoft.com/azure/azure-monitor/reference/tables/appdependencies)
-- [`AppGenAIContent` table](https://learn.microsoft.com/azure/azure-monitor/reference/tables/appgenaicontent)
 - [W3C Trace Context](https://www.w3.org/TR/trace-context/)
-- [OpenTelemetry SDK environment variables and limits](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/configuration/sdk-environment-variables.md)
-- [OpenTelemetry generative AI events](https://github.com/open-telemetry/semantic-conventions-genai/blob/main/docs/gen-ai/gen-ai-events.md)

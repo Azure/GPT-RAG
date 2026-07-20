@@ -43,8 +43,8 @@ Use the table below for the deployment parameters behind each layer, and the [De
 
 For data ownership, telemetry, retention, and responsibility boundaries, see
 [Governance and responsible operation](governance_overview.md). The correlated
-audit event contract on that page is under development and is not part of the
-current released runtime.
+audit event implementation on that page is unreleased, disabled by default, and
+not part of the current GPT-RAG deployment.
 
 ## Key Capabilities
 

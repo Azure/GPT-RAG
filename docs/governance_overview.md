@@ -4,13 +4,13 @@ Use this guide to decide what data GPT-RAG may process, who owns each
 control, and what evidence an operator should preserve for security reviews
 and incident investigations.
 
-!!! warning "Audit trail feature under development"
+!!! warning "Audit trail implementation is not released"
     The governance practices on this page can be applied today. The correlated
-    audit events described in the [Audit Contract v1](governance_audit_contract_v1.md)
-    are a proposal for a coming release and are not emitted by the current
-    released runtime. Event names, fields, limits, configuration keys, and KQL
-    must be reconciled with the runtime schema pull request before this warning
-    is removed.
+    [Audit Contract v1](governance_audit_contract_v1.md) is reconciled with
+    orchestrator pull request #277, but that implementation is not in a released
+    runtime. It is disabled by default and still needs GPT-RAG umbrella
+    deployment integration. Do not configure it until the runtime release and
+    integration are complete.
 
 ## Why this matters
 
@@ -25,21 +25,20 @@ questions without searching unrelated logs:
 - Who configured access, retention, deletion, and export?
 
 GPT-RAG already uses logs, traces, metrics, and source references. Those signals
-are useful, but current releases do not provide the versioned, end-to-end audit
-contract described in issue
-[#571](https://github.com/Azure/GPT-RAG/issues/571). The coming contract is
-intended to correlate operational metadata while leaving prompts, responses,
-source excerpts, tool arguments, and tool results out of the default event
-stream.
+are useful, but current releases do not provide the versioned audit contract
+described in issue
+[#571](https://github.com/Azure/GPT-RAG/issues/571). The unreleased contract
+correlates operational metadata while leaving prompts, responses, source
+excerpts, tool arguments, and tool results out of the default event stream.
 
 ```mermaid
 flowchart LR
   Request[User request] --> Route[Route and source selection]
   Route --> Tools[Retrieval and tools]
   Tools --> Outcome[Outcome]
-  Route -. proposed audit events .-> Evidence[Correlated operational evidence]
-  Tools -. proposed audit events .-> Evidence
-  Outcome -. proposed audit events .-> Evidence
+  Route -. unreleased audit events .-> Evidence[Correlated operational evidence]
+  Tools -. unreleased audit events .-> Evidence
+  Outcome -. unreleased audit events .-> Evidence
 ```
 
 ## What GPT-RAG can and cannot establish
@@ -83,11 +82,11 @@ Do not assume that:
 - retention in Azure Monitor satisfies a records-management obligation; or
 - technical evidence establishes legal compliance.
 
-The proposed audit trail is best-effort telemetry. Sampling, exporter failures,
+The unreleased audit trail is best-effort telemetry. Sampling, exporter failures,
 process termination, asynchronous boundaries, disabled instrumentation, and
 upstream systems can create evidence gaps. Events are asserted by the producing
 GPT-RAG process. They are not independently attested, cryptographically signed,
-or a tamper-evident ledger.
+tamper-evident, or nonrepudiable.
 
 ## Shared responsibility
 
@@ -104,8 +103,9 @@ explicitly before production use.
 ## Govern ingested and connected data
 
 Apply these controls to indexed content and to sources queried at request time.
-That includes Blob Storage, Azure AI Search, SharePoint, OneLake, Work IQ,
-Fabric ontology, Fabric Data Agent, web grounding, and remote MCP servers.
+That includes Blob Storage, Azure AI Search, SharePoint, OneLake, specific Work
+IQ, Fabric IQ, Foundry IQ and web grounding integrations, and remote MCP
+servers.
 
 ### Before connecting a source
 
@@ -136,9 +136,9 @@ access review, or downstream handling controls.
 
 For the concrete capabilities GPT-RAG integrates, see the
 [Grounding sources overview](howto_grounding_overview.md). GPT-RAG integrates
-specific Work IQ, Fabric ontology, Fabric Data Agent, Foundry IQ, and web
-grounding capabilities. It does not claim complete support for a unified
-"Microsoft IQ" product or governance layer.
+specific Work IQ, Fabric IQ, Foundry IQ, and web grounding capabilities. It
+does not claim complete Microsoft IQ support or provide a Microsoft IQ
+governance layer.
 
 ## Govern generated telemetry
 
@@ -146,16 +146,17 @@ grounding capabilities. It does not claim complete support for a unified
 
 | Class | Examples | Required posture |
 | --- | --- | --- |
-| Operational metadata | Event and correlation IDs, component and version, bounded status and reason codes, durations, tool names, source kinds, opaque source references | Permitted by the proposed metadata-only contract. Classify and minimize it because identifiers and operational context can still be sensitive. |
+| Operational metadata | Event and correlation IDs, service and version, bounded status and reason codes, durations, tool names, source kinds, opaque source references | Permitted by the unreleased metadata-only contract. Classify and minimize it because identifiers and operational context can still be sensitive. |
 | Sensitive content | Prompts, responses, source excerpts, system instructions, tool arguments, tool results | Off by default. Enable only after an explicit need, privacy review, access design, retention decision, and cost review. |
 | Prohibited data | Access tokens, API keys, authorization headers, cookies, connection strings, credentials, and detected secrets | Never capture or export, including when sensitive-content capture is enabled. Redact before telemetry leaves the producing process and fail closed by omitting unsafe values. |
 
-The default proposal records no actor identity. If a future deployment enables
-actor correlation, use a deployment-specific HMAC pseudonym rather than a raw
-user name, email address, object ID, or token claim. Store and rotate the HMAC
-key in Azure Key Vault, restrict access to the producing workload, and document
-the effect of key rotation on historical correlation. The exact actor field and
-configuration are pending the runtime schema pull request.
+Actor correlation is disabled by default. If
+`AUDIT_ACTOR_PSEUDONYM_ENABLED=true`, the producer records `actor_id` as
+`hmac_` plus the first 32 hexadecimal characters of an HMAC-SHA256 digest. It
+never places the raw user name, email address, object ID, or token claim in that
+property. Store `AUDIT_HMAC_KEY` in Azure Key Vault, restrict it to the
+producing workload, and rotate it together with `AUDIT_HMAC_KEY_ID`. Rotation
+breaks direct pseudonym correlation across key versions.
 
 Redaction metadata should say that redaction occurred and list omitted field
 names, never the omitted values. A successful redaction flag does not prove that
@@ -179,14 +180,17 @@ Use this operational baseline:
 - Keep access least-privileged and review role assignments regularly.
 - Separate platform administration from routine telemetry reading where
   practical.
-- If sensitive generative AI content is enabled, use the dedicated
-  `AppGenAIContent` table and configure it as a
-  [protected table](https://learn.microsoft.com/azure/azure-monitor/logs/protected-tables-configure).
-  Check the current
+- The audit implementation stores allowlisted `prompt`, `response`,
+  `source_excerpt`, `tool_arguments`, and `tool_result` values in
+  `AppEvents.Properties`, not `AppGenAIContent`. If audit sensitive capture is
+  approved, restrict `AppEvents`, its query results, alerts, workbooks, and
+  exports accordingly.
+- Other generative AI instrumentation can use `AppGenAIContent`. Follow the
+  current
   [Application Insights routing guidance](https://learn.microsoft.com/azure/azure-monitor/app/data-model-complete#generative-ai-telemetry)
-  as well. During Azure Monitor's table migration, content attributes can
-  also appear in existing telemetry tables unless the documented protection
-  feature is enabled, so protecting only `AppGenAIContent` may be insufficient.
+  and configure it as a
+  [protected table](https://learn.microsoft.com/azure/azure-monitor/logs/protected-tables-configure)
+  when that separate content capture is enabled.
 - Test retention changes and deletion procedures in a non-production
   environment.
 - Use
@@ -203,32 +207,35 @@ guarantee complete evidence. Verify the deployed OpenTelemetry and Azure Monitor
 sampling behavior, exporter health, and throttling before relying on telemetry
 for an investigation.
 
-## Roll out the coming audit feature safely
+## Roll out the audit feature after release
 
-The exact configuration keys remain pending until the runtime schema pull
-request is available.
+Do not begin this procedure until the orchestrator implementation is released
+and GPT-RAG umbrella deployment integration is complete.
 
 1. Upgrade with audit emission disabled.
 2. Enable metadata-only events in a non-production environment.
-3. Keep actor correlation and sensitive-content capture disabled.
+3. Keep `AUDIT_ACTOR_PSEUDONYM_ENABLED` and
+   `AUDIT_SENSITIVE_CONTENT_ENABLED` disabled.
 4. If actor correlation is approved, create and restrict a Key Vault HMAC key
    before enabling it.
 5. Canary a small production slice and reconstruct representative requests.
 6. Monitor latency, exporter failures, ingestion volume, retention cost, and
    evidence-gap health signals.
 7. Confirm that existing traces, logs, dashboards, and alerts still work.
-8. Roll back by disabling the audit-emission feature flag. Do not enable
-   sensitive content as a troubleshooting shortcut.
+8. Roll back by setting `AUDIT_EVENTS_ENABLED=false` and restarting the
+   orchestrator. Do not enable sensitive content as a troubleshooting shortcut.
 
 Audit emission should not make the user request fail. If event production or
-export is degraded, the runtime should continue the request, expose a
-rate-limited health signal, and mark the period as an evidence gap for
-operators. The exact health signal and alert threshold are pending runtime
-verification.
+the synchronous logging path fails, the runtime continues the request and
+attempts an `audit.emission.failed` event, then a fixed warning if that also
+fails. The Azure Monitor batch exporter does not expose an application callback
+for later delivery failure. The implementation has no separate health event,
+rate limiter, or delivery acknowledgment, so operators must monitor expected
+volume and Azure Monitor ingestion health.
 
 ## Related reading
 
-- [Audit Contract v1 proposal](governance_audit_contract_v1.md)
+- [Audit Contract v1, unreleased](governance_audit_contract_v1.md)
 - [Authentication and Document-Level Security](howto_authentication.md)
 - [Grounding sources overview](howto_grounding_overview.md)
 - [Azure Monitor Application Insights telemetry data model](https://learn.microsoft.com/azure/azure-monitor/app/data-model-complete)
