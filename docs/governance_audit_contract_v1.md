@@ -7,7 +7,7 @@ runtime release.
 !!! warning "Implemented in a pull request, but not released"
     This page is reconciled with orchestrator pull request
     [#277](https://github.com/Azure/gpt-rag-orchestrator/pull/277) at commit
-    `40e581aafed7051132859d95bc07e3b08ef17e68`. That code is not in a released
+    `a017fa61914ce5c3ccc560ed91d96e5b5d09b628`. That code is not in a released
     orchestrator version. Audit events also remain disabled by default and need
     GPT-RAG umbrella deployment integration before they are available through a
     normal GPT-RAG deployment. Do not configure the flags below until the
@@ -42,10 +42,23 @@ The shared schema reserves ingestion event names, but orchestrator pull request
 
 The exact reviewed artifacts are:
 
-- [logical v1 schema](https://github.com/Azure/gpt-rag-orchestrator/blob/40e581aafed7051132859d95bc07e3b08ef17e68/contracts/audit-event-v1.schema.json)
-- [Application Insights wire schema](https://github.com/Azure/gpt-rag-orchestrator/blob/40e581aafed7051132859d95bc07e3b08ef17e68/contracts/audit-event-v1.application-insights.schema.json)
-- [golden logical event](https://github.com/Azure/gpt-rag-orchestrator/blob/40e581aafed7051132859d95bc07e3b08ef17e68/tests/golden/audit_event_v1.json)
-- [runtime configuration guidance](https://github.com/Azure/gpt-rag-orchestrator/blob/40e581aafed7051132859d95bc07e3b08ef17e68/README.md#audit-event-configuration)
+- [logical v1 schema](https://github.com/Azure/gpt-rag-orchestrator/blob/a017fa61914ce5c3ccc560ed91d96e5b5d09b628/contracts/audit-event-v1.schema.json)
+- [Application Insights wire schema](https://github.com/Azure/gpt-rag-orchestrator/blob/a017fa61914ce5c3ccc560ed91d96e5b5d09b628/contracts/audit-event-v1.application-insights.schema.json)
+- [contract SHA-256 digests](https://github.com/Azure/gpt-rag-orchestrator/blob/a017fa61914ce5c3ccc560ed91d96e5b5d09b628/contracts/audit-event-v1.sha256)
+- [golden logical event](https://github.com/Azure/gpt-rag-orchestrator/blob/a017fa61914ce5c3ccc560ed91d96e5b5d09b628/tests/golden/audit_event_v1.json)
+- [golden logical root event](https://github.com/Azure/gpt-rag-orchestrator/blob/a017fa61914ce5c3ccc560ed91d96e5b5d09b628/tests/golden/audit_event_v1_root.json)
+- [runtime configuration guidance](https://github.com/Azure/gpt-rag-orchestrator/blob/a017fa61914ce5c3ccc560ed91d96e5b5d09b628/README.md#audit-event-configuration)
+
+The pinned SHA-256 digests of the two schema files, recorded in
+`contracts/audit-event-v1.sha256`, are:
+
+| Artifact | SHA-256 |
+| --- | --- |
+| `audit-event-v1.schema.json` | `3c96e4a2ab355bdc87ad9bdba0f4cb369f0d23c3a6c74022e83f971d30b852d9` |
+| `audit-event-v1.application-insights.schema.json` | `cb983f8d48ed3593e91bec8620f3c328e37d3245d50cf544e45892f290f6985a` |
+
+Recompute these digests against the pinned commit before relying on this page
+if the contract is revised.
 
 ## Application Insights wire format
 
@@ -78,11 +91,18 @@ display values on the wire unless a future contract defines a portable array
 encoding.
 
 The logical schema allows a root `parent_event_id` to be `null`. Azure Monitor
-drops null custom properties, so the wire event uses this required sentinel:
+drops null custom properties, so the wire adapter encodes that logical null as
+this reserved sentinel before export:
 
 ```text
 evt_00000000000000000000000000000000
 ```
+
+A consumer must decode `Properties["parent_event_id"] ==
+"evt_00000000000000000000000000000000"` back to logical `null` and must never
+treat it as an identifier or join it as an event. The all-zero value is also
+explicitly rejected as an `event_id` and as any non-root `parent_event_id`, in
+both the logical and wire schemas: it can only ever mean "no logical parent."
 
 When an event has a valid active span:
 
@@ -142,13 +162,13 @@ ignore unknown optional fields.
 | Field | Logical type and constraint |
 | --- | --- |
 | `schema_version` | Integer constant `1`. |
-| `event_id` | `evt_` plus 32 lowercase hexadecimal characters. |
+| `event_id` | `evt_` plus 32 lowercase hexadecimal characters. The all-zero value (`evt_00000000000000000000000000000000`) is reserved and rejected; it can never identify a real event. |
 | `event_type` | One of the event types in the shared schema. |
 | `event_time_utc` | UTC timestamp with exactly six fractional digits and a `Z` suffix. |
 | `correlation_id` | `req_` plus 32 lowercase hexadecimal characters. |
 | `trace_id` | 32 lowercase hexadecimal characters. |
 | `span_id` | 16 lowercase hexadecimal characters. |
-| `parent_event_id` | Event ID or `null` in the logical schema. The wire uses the root sentinel instead of `null`. |
+| `parent_event_id` | Event ID or `null` in the logical schema. `null` marks a root event. The reserved all-zero value is rejected as a non-root parent; the wire uses the all-zero sentinel only to represent `null`. |
 | `service_name` | String, maximum 512 characters. Current value: `gpt-rag-orchestrator`. |
 | `service_version` | String, maximum 512 characters, read from `VERSION`. |
 | `environment` | String, maximum 64 characters. Uses `ENVIRONMENT_NAME`, then `AZURE_ENV_NAME`, then `unknown`. |
@@ -169,7 +189,8 @@ events, including the reserved ingestion request terminal events.
 | Fields | Logical type and constraint |
 | --- | --- |
 | `started_at_utc` | UTC timestamp in the same format as `event_time_utc`. |
-| `duration_ms` | Non-negative number. The producer rounds to three decimal places. |
+| `duration_ms` | Number from 0 through 86,400,000 (24 hours), rounded to three decimal places. The producer rejects out-of-range or non-finite values rather than clamping them. |
+| `timing_source` | `observed` or `reconstructed`. Present only on Foundry IQ MCP tool events today, always as `reconstructed`; absent elsewhere, which means the timestamp was observed directly. `reconstructed` values are approximate, described further in [MCP and Foundry IQ evidence](#mcp-and-foundry-iq-evidence). |
 | `decision_type`, `decision_value` | String, maximum 512 characters. |
 | `source_id` | String or `null`, maximum 512 characters. |
 | `source_type` | String, maximum 512 characters. |
@@ -179,6 +200,7 @@ events, including the reserved ingestion request terminal events.
 | `outcome_type`, `failure_type` | String, maximum 512 characters. |
 | `input_count`, `output_count`, `source_count` | Non-negative integer. Current request counts are character and emitted-source-event counts, not token counts. |
 | `partial_output` | Boolean. |
+| `audit_events_omitted`, `source_events_omitted`, `tool_invocations_omitted` | Non-negative integer. Present only on request-terminal events (`request.completed`, `request.failed`, `request.cancelled`), reporting how many detail, grounding-source, and complete tool-invocation-pair events this request could not emit because a fixed per-request budget was reached. See [Event and tool budgets](#event-and-tool-budgets). |
 | `http_status_code` | Integer from 100 through 599. Reserved by the contract but not populated by the reviewed request lifecycle. |
 | `transport` | String, maximum 512 characters. |
 | `actor_id`, `conversation_id`, `question_id`, `thread_id` | String or `null`, maximum 512 characters. `thread_id` is reserved but not populated by the reviewed implementation. |
@@ -251,8 +273,9 @@ it does not currently emit `source_limit_reached`.
 | Environment | 64 characters |
 | Sensitive string | 2,048 characters |
 | Recursive depth | 6 |
-| Dictionary entries considered | 64 |
-| Items emitted from an array | 32 |
+| Mapping entries inspected | 65 (64 considered plus one truncation lookahead) |
+| Sequence items inspected | 33 (32 emitted plus one truncation lookahead) |
+| Total nested values inspected per event | 256 |
 | Recorded omitted or truncated field paths | 32 per list |
 | Source events per request | Configurable from 1 through 25, default 25 |
 
@@ -264,16 +287,42 @@ and the event is still too large, the payload is discarded and an
 
 The recursive sanitizer:
 
-- strips control characters other than tab, line feed, and carriage return;
+- strips control characters other than tab, line feed, and carriage return,
+  then truncates and records oversize strings and keys;
 - redacts prohibited key classes and configured additional nested keys;
 - scans for bearer and basic credentials, cookies, JWT-like values, connection
   strings, SAS signatures, private keys, embedded URL credentials, and similar
   secret forms;
-- handles cycles, unsupported objects, collection bounds, and depth bounds by
-  omitting or truncating fields; and
+- inspects mappings and sequences through a bounded lookahead so it can detect
+  and record truncation without materializing an entire oversize collection;
+- handles cycles, unsupported objects, malformed iterables, collection bounds,
+  depth bounds, and the total inspected-node cap by omitting or truncating
+  fields instead of raising; and
 - scans the final serialized event before logging it.
 
 This filtering is defense in depth, not a data-loss-prevention boundary.
+
+## Event and tool budgets
+
+Independent of the per-event serialization bounds above, each request has a
+fixed, non-configurable ceiling on how many audit events it can produce:
+
+| Budget | Limit |
+| --- | --- |
+| Audit events per request | 64 total, including one reserved request-terminal event and at most one reserved `audit.emission.failed` event |
+| Tool invocation pairs per request | 16 complete `started` and terminal event pairs |
+| Grounding-source events per request | 25 maximum, the same limit as `AUDIT_SOURCE_EVENT_LIMIT` above |
+
+Tool invocation pairs are reserved atomically: the producer only emits a
+`tool.invocation.started` event once request capacity also guarantees room for
+its terminal event, so a start is never recorded without a matching outcome.
+When a budget is exhausted, the orchestrator drops further detail, source, or
+tool events for that request rather than emitting a partial or malformed one,
+while the reserved request-terminal event still fires. That terminal event
+(`request.completed`, `request.failed`, or `request.cancelled`) reports how
+much was dropped in `audit_events_omitted`, `source_events_omitted`, and
+`tool_invocations_omitted`, so a consumer can tell that evidence is incomplete
+for that request instead of assuming silence means nothing else happened.
 
 ## Configuration
 
@@ -352,17 +401,26 @@ baggage. This supports trace correlation without forwarding ambient identity
 or other baggage to the MCP server.
 
 Foundry IQ MCP activity has a different evidence quality. The Azure AI Search
-response exposes completed activity but no pre-invocation callback. The
-orchestrator therefore converts each returned activity into a reconstructed
-started and terminal pair after the response arrives. It derives
-`started_at_utc` by subtracting `elapsedMs` from the observation time and uses
-`elapsedMs` as `duration_ms`. The tool name is the bounded
-`foundry_iq_mcp_tool`, and the started event records transport
-`foundry_iq`.
+response exposes completed activity but no pre-invocation callback, and
+reconstruction only runs when auditing is enabled and a request audit context
+is present; it never touches retrieval when auditing is disabled. For each
+returned activity, the orchestrator validates that `elapsedMs` is a finite,
+non-negative number of at most 86,400,000 milliseconds (24 hours). If the value
+is invalid, the orchestrator does not clamp it: it omits that tool-invocation
+pair, records it in `tool_invocations_omitted` on the request-terminal event,
+and attempts a bounded, payload-free `audit.emission.failed` event, all without
+failing the underlying retrieval call. If the value is valid, the orchestrator
+reserves a started and terminal event pair atomically, the same way it reserves
+direct tool invocation pairs, and derives `started_at_utc` by subtracting
+`elapsedMs` from the observation time; `elapsedMs` becomes `duration_ms`. The
+tool name is the bounded `foundry_iq_mcp_tool`, the started event records
+transport `foundry_iq`, and both the started and terminal events set
+`timing_source=reconstructed`.
 
 This reconstructed pair is not proof that a start event was observed when the
-remote call began. If the response or its activity array is missing, those tool
-events are also missing.
+remote call began; `timing_source=reconstructed` marks it as approximate. If
+the response or its activity array is missing, those tool events are also
+missing.
 
 Grounding source normalization covers the specific integrations implemented by
 GPT-RAG:
@@ -389,11 +447,23 @@ into telemetry produced inside those upstream services.
 
 ## Failure semantics and evidence gaps
 
+Enabling, disabling, or exhausting a budget in the audit instrumentation never
+changes response bodies, SSE streams, retrieval results, cache behavior,
+application logs, traces, or metrics. For example, a grounding source with
+empty content is still appended to the result list whether or not its
+`grounding.source.rejected` audit event was emitted; audit evidence describes
+what the orchestrator did, it does not gate what the orchestrator does.
+
 Audit emission is deliberately best effort:
 
 - sanitization or serialization failure discards the original payload and
-  attempts a payload-free `audit.emission.failed` event;
+  attempts a payload-free, constant-safe `audit.emission.failed` event, one
+  with a fixed `service_name`, `service_version`, `environment`, and
+  `capture_mode` instead of values derived from the event that failed, so the
+  fallback event itself cannot fail to serialize or redact;
 - oversize and attribute-limit failures use the same minimal event;
+- at most one `audit.emission.failed` event is attempted per request, guarded
+  against re-entrant failures;
 - a synchronous logging failure is caught and mapped to `export_failure`;
 - if the minimal event also cannot be logged, the runtime attempts a fixed
   warning and continues the user operation; and
@@ -414,7 +484,11 @@ Additional known gaps include:
 - feedback requests, which receive a server correlation header but do not enter
   the streaming request audit lifecycle;
 - upstream actions that occur outside instrumented seams;
-- source events after the configured per-request source limit; and
+- detail, source, or tool events dropped after a request reaches the fixed
+  event or tool budgets described in
+  [Event and tool budgets](#event-and-tool-budgets), reported through
+  `audit_events_omitted`, `source_events_omitted`, and
+  `tool_invocations_omitted` on the request-terminal event; and
 - the reconstructed Foundry IQ MCP timing described above.
 
 The server ignores an inbound `X-Correlation-ID` and generates a new
@@ -441,9 +515,14 @@ direct-model or agent-service choice.
 
 Each selected or rejected grounding source adds one event, up to
 `AUDIT_SOURCE_EVENT_LIMIT`. Each proxied direct MCP invocation adds a started
-and terminal pair. Each returned Foundry IQ MCP activity also adds a
-reconstructed pair. There is no separate global per-request tool-event ceiling,
-so do not estimate a fixed maximum using only the 25-event source limit.
+and terminal pair, and each returned Foundry IQ MCP activity also adds a
+reconstructed pair, up to the fixed 16-pair tool budget described in
+[Event and tool budgets](#event-and-tool-budgets). The request also has an
+overall 64-event ceiling that includes its reserved terminal event. A request
+with unusually heavy source or tool activity can reach these budgets; check
+`audit_events_omitted`, `source_events_omitted`, and `tool_invocations_omitted`
+on the request-terminal event rather than assuming the visible event count is
+complete.
 
 The pull request validation ran a non-gating metadata-only microbenchmark with a
 null logging handler for 10,000 events:
@@ -463,7 +542,13 @@ enablement.
 
 Replace the correlation ID with the value returned in `X-Correlation-ID`.
 This query uses the exact unprefixed wire properties and converts scalar strings
-to useful KQL types.
+to useful KQL types. `ParentEventId` decodes the Application Insights wire
+sentinel back to logical `null`: an empty `ParentEventId` means the event is a
+logical root, not that decoding failed. `TimingSource`,
+`AuditEventsOmitted`, `SourceEventsOmitted`, and `ToolInvocationsOmitted` are
+optional fields; expect empty values on events that do not set them, for
+example on every event except reconstructed Foundry IQ MCP tool events and
+request-terminal events respectively.
 
 ```kusto
 let lookback = 30d;
@@ -484,10 +569,22 @@ AppEvents
     ServiceVersion = tostring(Properties["service_version"]),
     AuditOperation = tostring(Properties["operation"]),
     DurationMs = todouble(Properties["duration_ms"]),
+    TimingSource = tostring(Properties["timing_source"]),
     SourceRank = toint(Properties["source_rank"]),
     OutputCount = tolong(Properties["output_count"]),
     PartialOutput = tobool(Properties["partial_output"]),
-    RedactionApplied = tobool(Properties["redaction_applied"])
+    RedactionApplied = tobool(Properties["redaction_applied"]),
+    AuditEventsOmitted = tolong(Properties["audit_events_omitted"]),
+    SourceEventsOmitted = tolong(Properties["source_events_omitted"]),
+    ToolInvocationsOmitted = tolong(Properties["tool_invocations_omitted"])
+| extend
+    // Decode the Application Insights wire sentinel back to a logical null.
+    // Never join or treat this sentinel as an event.
+    ParentEventId = iff(
+        tostring(Properties["parent_event_id"]) == "evt_00000000000000000000000000000000",
+        "",
+        tostring(Properties["parent_event_id"])
+    )
 | project
     TimeGenerated,
     AuditEventTime,
@@ -495,16 +592,21 @@ AppEvents
     AuditEventType,
     AuditCorrelationId,
     AuditEventId,
+    ParentEventId,
     AuditStatus,
     ReasonCode,
     ServiceName,
     ServiceVersion,
     AuditOperation,
     DurationMs,
+    TimingSource,
     SourceRank,
     OutputCount,
     PartialOutput,
     RedactionApplied,
+    AuditEventsOmitted,
+    SourceEventsOmitted,
+    ToolInvocationsOmitted,
     OperationId,
     ParentId,
     AppRoleName,
