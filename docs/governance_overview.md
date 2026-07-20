@@ -4,13 +4,11 @@ Use this guide to decide what data GPT-RAG may process, who owns each
 control, and what evidence an operator should preserve for security reviews
 and incident investigations.
 
-!!! warning "Audit trail implementation is not released"
-    The governance practices on this page can be applied today. The correlated
-    [Audit Contract v1](governance_audit_contract_v1.md) is reconciled with
-    orchestrator pull request #277, but that implementation is not in a released
-    runtime. It is disabled by default and still needs GPT-RAG umbrella
-    deployment integration. Do not configure it until the runtime release and
-    integration are complete.
+!!! info "Runtime components released; umbrella release pending"
+    Orchestrator `v3.8.0` and ingestion `v2.5.0` implement the correlated
+    [Audit Contract v1](governance_audit_contract_v1.md). GPT-RAG umbrella
+    `v3.7.0` integration is implemented in pull request #573 but is not yet
+    released. Keep the feature disabled until that umbrella release is deployed.
 
 ## Why this matters
 
@@ -27,7 +25,7 @@ questions without searching unrelated logs:
 GPT-RAG already uses logs, traces, metrics, and source references. Those signals
 are useful, but current releases do not provide the versioned audit contract
 described in issue
-[#571](https://github.com/Azure/GPT-RAG/issues/571). The unreleased contract
+[#571](https://github.com/Azure/GPT-RAG/issues/571). The contract
 correlates operational metadata while leaving prompts, responses, source
 excerpts, tool arguments, and tool results out of the default event stream.
 
@@ -36,9 +34,9 @@ flowchart LR
   Request[User request] --> Route[Route and source selection]
   Route --> Tools[Retrieval and tools]
   Tools --> Outcome[Outcome]
-  Route -. unreleased audit events .-> Evidence[Correlated operational evidence]
-  Tools -. unreleased audit events .-> Evidence
-  Outcome -. unreleased audit events .-> Evidence
+  Route -. audit events .-> Evidence[Correlated operational evidence]
+  Tools -. audit events .-> Evidence
+  Outcome -. audit events .-> Evidence
 ```
 
 ## What GPT-RAG can and cannot establish
@@ -82,7 +80,7 @@ Do not assume that:
 - retention in Azure Monitor satisfies a records-management obligation; or
 - technical evidence establishes legal compliance.
 
-The unreleased audit trail is best-effort telemetry. Sampling, exporter failures,
+The audit trail is best-effort telemetry. Sampling, exporter failures,
 process termination, asynchronous boundaries, disabled instrumentation, and
 upstream systems can create evidence gaps. Events are asserted by the producing
 GPT-RAG process. They are not independently attested, cryptographically signed,
@@ -146,7 +144,7 @@ governance layer.
 
 | Class | Examples | Required posture |
 | --- | --- | --- |
-| Operational metadata | Event and correlation IDs, service and version, bounded status and reason codes, durations, tool names, source kinds, opaque source references | Permitted by the unreleased metadata-only contract. Classify and minimize it because identifiers and operational context can still be sensitive. |
+| Operational metadata | Event and correlation IDs, service and version, bounded status and reason codes, durations, tool names, source kinds, opaque source references | Permitted by the metadata-only contract. Classify and minimize it because identifiers and operational context can still be sensitive. |
 | Sensitive content | Prompts, responses, source excerpts, system instructions, tool arguments, tool results | Off by default. Enable only after an explicit need, privacy review, access design, retention decision, and cost review. |
 | Prohibited data | Access tokens, API keys, authorization headers, cookies, connection strings, credentials, and detected secrets | Never capture or export, including when sensitive-content capture is enabled. Redact before telemetry leaves the producing process and fail closed by omitting unsafe values. |
 

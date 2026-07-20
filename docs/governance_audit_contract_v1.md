@@ -1,17 +1,16 @@
 # Audit Contract v1
 
-Use this page to understand the unreleased GPT-RAG orchestrator audit event
-contract, estimate its telemetry volume, and prepare queries for a future
-runtime release.
+Use this page to understand the GPT-RAG audit event contract, estimate its
+telemetry volume, and prepare operational queries.
 
-!!! warning "Implemented in a pull request, but not released"
-    This page is reconciled with orchestrator pull request
-    [#277](https://github.com/Azure/gpt-rag-orchestrator/pull/277) at commit
-    `844fe14757d07a2cdc828189105fbce831f3c11d`. That code is not in a released
-    orchestrator version. Audit events also remain disabled by default and need
-    GPT-RAG umbrella deployment integration before they are available through a
-    normal GPT-RAG deployment. Do not configure the flags below until the
-    runtime release and integration are complete.
+!!! info "Runtime components released; umbrella release pending"
+    Orchestrator
+    [`v3.8.0`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.8.0)
+    and ingestion
+    [`v2.5.0`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.5.0)
+    implement this contract. Audit and provenance controls remain disabled by
+    default. GPT-RAG umbrella `v3.7.0` integration is implemented in pull
+    request #573 but is not yet released.
 
 The contract provides best-effort operational evidence. It is not a transaction
 log, an immutable or nonrepudiable record, independent attestation, or proof
@@ -37,17 +36,16 @@ flowchart LR
   Outcome -. audit events .-> Events
 ```
 
-The shared schema reserves ingestion event names, but orchestrator pull request
-#277 does not implement an ingestion producer.
+Ingestion `v2.5.0` implements the schema's ingestion run and document events.
 
 The exact reviewed artifacts are:
 
-- [logical v1 schema](https://github.com/Azure/gpt-rag-orchestrator/blob/844fe14757d07a2cdc828189105fbce831f3c11d/contracts/audit-event-v1.schema.json)
-- [Application Insights wire schema](https://github.com/Azure/gpt-rag-orchestrator/blob/844fe14757d07a2cdc828189105fbce831f3c11d/contracts/audit-event-v1.application-insights.schema.json)
-- [contract SHA-256 digests](https://github.com/Azure/gpt-rag-orchestrator/blob/844fe14757d07a2cdc828189105fbce831f3c11d/contracts/audit-event-v1.sha256)
-- [golden logical event](https://github.com/Azure/gpt-rag-orchestrator/blob/844fe14757d07a2cdc828189105fbce831f3c11d/tests/golden/audit_event_v1.json)
-- [golden logical root event](https://github.com/Azure/gpt-rag-orchestrator/blob/844fe14757d07a2cdc828189105fbce831f3c11d/tests/golden/audit_event_v1_root.json)
-- [runtime configuration guidance](https://github.com/Azure/gpt-rag-orchestrator/blob/844fe14757d07a2cdc828189105fbce831f3c11d/README.md#audit-event-configuration)
+- [logical v1 schema](https://github.com/Azure/gpt-rag-orchestrator/blob/v3.8.0/contracts/audit-event-v1.schema.json)
+- [Application Insights wire schema](https://github.com/Azure/gpt-rag-orchestrator/blob/v3.8.0/contracts/audit-event-v1.application-insights.schema.json)
+- [contract SHA-256 digests](https://github.com/Azure/gpt-rag-orchestrator/blob/v3.8.0/contracts/audit-event-v1.sha256)
+- [golden logical event](https://github.com/Azure/gpt-rag-orchestrator/blob/v3.8.0/tests/golden/audit_event_v1.json)
+- [golden logical root event](https://github.com/Azure/gpt-rag-orchestrator/blob/v3.8.0/tests/golden/audit_event_v1_root.json)
+- [runtime configuration guidance](https://github.com/Azure/gpt-rag-orchestrator/blob/v3.8.0/README.md#audit-event-configuration)
 
 The pinned SHA-256 digests of the two schema files, recorded in
 `contracts/audit-event-v1.sha256`, are:
@@ -117,9 +115,8 @@ the all-zero trace ID from joins.
 
 The runtime reads `service_version` from the repository root `VERSION` file and
 uses the same value for the OpenTelemetry `service.version` resource attribute.
-The reviewed branch reports `3.7.0`, but the audit feature itself is unreleased.
-The eventual release will report the version packaged in its own `VERSION`
-file.
+Orchestrator `v3.8.0` reports `3.8.0`. Ingestion audit events report their own
+released component version.
 
 ## Event names
 
@@ -341,17 +338,18 @@ dashboard.
 | `AUDIT_ADDITIONAL_REDACTED_KEYS` | Empty | Comma-separated nested key fragments that the sanitizer always redacts. |
 
 GPT-RAG's next minor umbrella release pins orchestrator `v3.8.0` and ingestion
-`v2.5.0`. Post-provisioning creates `AUDIT-HMAC-KEY` in Key Vault from 256
-cryptographically random bits when it does not already exist, then registers
-only an `AUDIT_HMAC_KEY` Key Vault reference in App Configuration. Ordinary
-reprovisioning reuses the existing secret. The key value is not an admin
-setting, deployment output, or log value.
+`v2.5.0`. When `AUDIT_HMAC_KEY` is absent, post-provisioning creates
+`AUDIT-HMAC-KEY` in Key Vault from 256 cryptographically random bits, then
+registers only its Key Vault reference in App Configuration. Ordinary
+reprovisioning reuses that secret. An existing operator-managed Key Vault
+reference is preserved instead. The key value is not an admin setting,
+deployment output, or log value.
 
 Ingestion provenance uses a separate, non-secret configuration surface:
 
 | Key | Default | Exact behavior |
 | --- | --- | --- |
-| `INGESTION_PROVENANCE_ENABLED` | `false` | Adds provenance and governance values to supported ingestion document events and indexed documents when enabled. |
+| `INGESTION_PROVENANCE_ENABLED` | `false` | Adds provenance and governance values to supported ingestion document audit events when enabled. |
 | `INGESTION_REQUIRE_GOVERNANCE_METADATA` | `false` | Requires explicit classification and right-to-use values when provenance is enabled. Setting this to `true` while provenance is disabled is invalid. |
 | `INGESTION_DEFAULT_CLASSIFICATION` | `unclassified` | Fallback classification when provenance is enabled and strict mode is off. |
 | `INGESTION_DEFAULT_RIGHT_TO_USE` | `not_asserted` | Fallback right-to-use value when provenance is enabled and strict mode is off. |
@@ -391,9 +389,10 @@ operator-added fields. If a same-name field has an incompatible type or
 attributes, setup fails before making the update. GPT-RAG does not fall back to
 deleting and recreating the index.
 
-Existing documents can leave the new fields empty until they are reingested by
-ingestion `v2.5.0`. Older component versions ignore the additive fields, so
-rollback does not require removing them.
+Ingestion `v2.5.0` emits these values in audit events; it does not populate the
+new Search index fields. The fields remain empty unless another indexing
+pipeline explicitly supplies them. Older component versions ignore the
+additive fields, so rollback does not require removing them.
 
 `delete_after` is policy intent only. No GPT-RAG job reads this field to
 schedule or perform a purge. The operator must implement retention enforcement
@@ -751,9 +750,9 @@ union
 `AppRequests.Url`, `AppDependencies.Data`, and arbitrary `Properties` can
 contain sensitive details. Restrict access to query results and exported copies.
 
-The queries are reconciled with the exporter wire conversion test in pull
-request #277 and the official Azure Monitor table schemas. They cannot be run
-against released audit telemetry until the runtime is released and enabled.
+The queries are reconciled with the exporter wire conversion tests in
+orchestrator `v3.8.0` and the official Azure Monitor table schemas. They return
+results after the released runtime is deployed and audit events are enabled.
 
 ## What evidence can support
 
