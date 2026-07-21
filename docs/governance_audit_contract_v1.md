@@ -49,16 +49,27 @@ The exact reviewed artifacts are:
 - [golden logical root event](https://github.com/Azure/gpt-rag-orchestrator/blob/v3.8.0/tests/golden/audit_event_v1_root.json)
 - [runtime configuration guidance](https://github.com/Azure/gpt-rag-orchestrator/blob/v3.8.0/README.md#audit-event-configuration)
 
-The pinned SHA-256 digests of the two schema files, recorded in
-`contracts/audit-event-v1.sha256`, are:
+GPT-RAG uses one shared audit-event contract so the orchestrator, ingestion,
+and Application Insights all interpret audit events the same way. The two
+schema files above define that contract: `audit-event-v1.schema.json` is the
+application-level (logical) event shape, and
+`audit-event-v1.application-insights.schema.json` is the shape those events
+take after Application Insights exports them.
+
+The SHA-256 values below are file fingerprints, recorded in
+`contracts/audit-event-v1.sha256`. They are not secrets or settings to
+configure. They exist mainly so maintainers and automated tests can confirm
+that the orchestrator, ingestion, and this documentation all reference the
+exact same version of the contract. Most operators can skip this table unless
+they are validating or changing the contract itself.
 
 | Artifact | SHA-256 |
 | --- | --- |
 | `audit-event-v1.schema.json` | `825db8ef40a81e2c19e5d80d37c565b6b47fc9a6540e9881d35cc12b8fde5aab` |
 | `audit-event-v1.application-insights.schema.json` | `066c8f5408610ab839d5121d06ca5bc59e8797e551d5c47c875c5ba52f7e0588` |
 
-Recompute these digests against the pinned commit before relying on this page
-if the contract is revised.
+If the contract changes, maintainers must update these fingerprints and
+verify all producing components together.
 
 ## Application Insights wire format
 
