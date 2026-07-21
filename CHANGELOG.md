@@ -2,9 +2,11 @@
 
 ## [Unreleased]
 
+## [v3.7.0] - 2026-07-21
+
 ### User and operator impact
 
-Prepares the next minor GPT-RAG release to deploy [orchestrator `v3.8.0`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.8.0) and [ingestion `v2.5.0`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.5.0) as one validated governance baseline. Metadata audit events and ingestion provenance remain disabled by default, sensitive-content capture remains independently disabled, and existing deployments do not change behavior until an operator opts in.
+GPT-RAG `v3.7.0` delivers the governance baseline tracked in [issue #571](https://github.com/Azure/GPT-RAG/issues/571) through [implementation PR #573](https://github.com/Azure/GPT-RAG/pull/573) and [documentation PR #574](https://github.com/Azure/GPT-RAG/pull/574), with [orchestrator `v3.8.0`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.8.0) and [ingestion `v2.5.0`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.5.0) deployed as one pinned combination. Metadata audit events and ingestion provenance remain disabled by default, sensitive-content capture remains independently disabled, and existing deployments do not change behavior until an operator opts in.
 
 The shared `audit-event-v1` contract is pinned to logical hash `825db8ef40a81e2c19e5d80d37c565b6b47fc9a6540e9881d35cc12b8fde5aab` and Application Insights wire hash `066c8f5408610ab839d5121d06ca5bc59e8797e551d5c47c875c5ba52f7e0588`. These audit events provide technical evidence for adopter governance and incident response; they do not establish legal or regulatory compliance.
 
@@ -17,7 +19,7 @@ The shared `audit-event-v1` contract is pinned to logical hash `825db8ef40a81e2c
 
 ### Changed
 
-- **Future minor release manifest.** `manifest.json` identifies the planned umbrella `v3.7.0` combination and pins orchestrator `v3.8.0` plus ingestion `v2.5.0`; UI `v2.3.13` and infra `v2.3.0` remain unchanged. No release is published by this change.
+- **Release manifest.** `manifest.json` identifies the umbrella `v3.7.0` combination and pins orchestrator `v3.8.0` plus ingestion `v2.5.0`; UI `v2.3.13` and infra `v2.3.0` remain unchanged.
 - **Non-destructive existing-index migration.** Search post-provisioning no longer deletes an index before updating it. Missing fields are merged into the current definition and submitted with an in-place `PUT`; operator-owned fields and existing documents are preserved. An incompatible same-name field fails before any update, and there is no delete/recreate fallback.
 
 ### Security and operational guidance
@@ -43,7 +45,9 @@ Rollback by setting both feature gates to `false` and redeploying prior componen
 | gpt-rag-ingestion | v2.5.0 |
 | infra / AI Landing Zone | v2.3.0 |
 
-Validation evidence will be recorded on the implementation pull request before merge. No Azure deployment or release publication is part of this change.
+- GPT-RAG governance and Search suites: 131 tests passed.
+- Bicep compilation, template rendering, static RBAC checks, manifest and component-release checks, and create-only Azure previews passed.
+- Runtime provisioning could not complete. Azure platform capacity blocked Azure AI Search in `eastus2` and the Container Apps managed environment in `swedencentral`; the Sweden Central attempt also exposed an ARM nested deployment name over the 64-character limit. No runtime endpoints, application health checks, live governance defaults, Search migration result, or Application Insights/KQL evidence were obtained.
 
 ## [v3.6.0] - 2026-07-19
 
