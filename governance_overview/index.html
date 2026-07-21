@@ -641,9 +641,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#roll-out-the-audit-feature-after-release" class="md-nav__link">
+  <a href="#roll-out-the-audit-feature" class="md-nav__link">
     <span class="md-ellipsis">
-      Roll out the audit feature after release
+      Roll out the audit feature
     </span>
   </a>
   
@@ -678,7 +678,7 @@
         
   
   <span class="md-ellipsis">
-    Audit Contract v1 (unreleased)
+    Audit Contract v1
   </span>
   
 
@@ -1601,14 +1601,12 @@
 <p>Use this guide to decide what data GPT-RAG may process, who owns each
 control, and what evidence an operator should preserve for security reviews
 and incident investigations.</p>
-<div class="admonition warning">
-<p class="admonition-title">Audit trail implementation is not released</p>
-<p>The governance practices on this page can be applied today. The correlated
-<a href="../governance_audit_contract_v1/">Audit Contract v1</a> is reconciled with
-orchestrator pull request #277, but that implementation is not in a released
-runtime. It is disabled by default and still needs GPT-RAG umbrella
-deployment integration. Do not configure it until the runtime release and
-integration are complete.</p>
+<div class="admonition info">
+<p class="admonition-title">Runtime components released; umbrella release pending</p>
+<p>Orchestrator <code>v3.8.0</code> and ingestion <code>v2.5.0</code> implement the correlated
+<a href="../governance_audit_contract_v1/">Audit Contract v1</a>. GPT-RAG umbrella
+<code>v3.7.0</code> integration is implemented in pull request #573 but is not yet
+released. Keep the feature disabled until that umbrella release is deployed.</p>
 </div>
 <h2 id="why-this-matters">Why this matters</h2>
 <p>During a review or incident, an operator should be able to answer practical
@@ -1624,16 +1622,16 @@ questions without searching unrelated logs:</p>
 <p>GPT-RAG already uses logs, traces, metrics, and source references. Those signals
 are useful, but current releases do not provide the versioned audit contract
 described in issue
-<a href="https://github.com/Azure/GPT-RAG/issues/571">#571</a>. The unreleased contract
+<a href="https://github.com/Azure/GPT-RAG/issues/571">#571</a>. The contract
 correlates operational metadata while leaving prompts, responses, source
 excerpts, tool arguments, and tool results out of the default event stream.</p>
 <pre class="mermaid"><code>flowchart LR
   Request[User request] --&gt; Route[Route and source selection]
   Route --&gt; Tools[Retrieval and tools]
   Tools --&gt; Outcome[Outcome]
-  Route -. unreleased audit events .-&gt; Evidence[Correlated operational evidence]
-  Tools -. unreleased audit events .-&gt; Evidence
-  Outcome -. unreleased audit events .-&gt; Evidence</code></pre>
+  Route -. audit events .-&gt; Evidence[Correlated operational evidence]
+  Tools -. audit events .-&gt; Evidence
+  Outcome -. audit events .-&gt; Evidence</code></pre>
 <h2 id="what-gpt-rag-can-and-cannot-establish">What GPT-RAG can and cannot establish</h2>
 <p>GPT-RAG cannot determine whether a deployment or use case is legally compliant.
 It does not certify a system, enforce an external governance framework, provide
@@ -1670,7 +1668,7 @@ data and operational evidence.</p>
 <li>retention in Azure Monitor satisfies a records-management obligation; or</li>
 <li>technical evidence establishes legal compliance.</li>
 </ul>
-<p>The unreleased audit trail is best-effort telemetry. Sampling, exporter failures,
+<p>The audit trail is best-effort telemetry. Sampling, exporter failures,
 process termination, asynchronous boundaries, disabled instrumentation, and
 upstream systems can create evidence gaps. Events are asserted by the producing
 GPT-RAG process. They are not independently attested, cryptographically signed,
@@ -1753,7 +1751,7 @@ governance layer.</p>
 <tr>
 <td>Operational metadata</td>
 <td>Event and correlation IDs, service and version, bounded status and reason codes, durations, tool names, source kinds, opaque source references</td>
-<td>Permitted by the unreleased metadata-only contract. Classify and minimize it because identifiers and operational context can still be sensitive.</td>
+<td>Permitted by the metadata-only contract. Classify and minimize it because identifiers and operational context can still be sensitive.</td>
 </tr>
 <tr>
 <td>Sensitive content</td>
@@ -1818,22 +1816,41 @@ sampling gaps, but it increases ingestion and retention cost and still does not
 guarantee complete evidence. Verify the deployed OpenTelemetry and Azure Monitor
 sampling behavior, exporter health, and throttling before relying on telemetry
 for an investigation.</p>
-<h2 id="roll-out-the-audit-feature-after-release">Roll out the audit feature after release</h2>
-<p>Do not begin this procedure until the orchestrator implementation is released
-and GPT-RAG umbrella deployment integration is complete.</p>
+<h2 id="roll-out-the-audit-feature">Roll out the audit feature</h2>
+<p>Use GPT-RAG umbrella <code>v3.7.0</code> or later with orchestrator <code>v3.8.0</code> and ingestion
+<code>v2.5.0</code>. Do not mix older component versions with this shared-contract rollout.</p>
 <ol>
-<li>Upgrade with audit emission disabled.</li>
-<li>Enable metadata-only events in a non-production environment.</li>
+<li>Upgrade with <code>AUDIT_EVENTS_ENABLED=false</code>,
+   <code>AUDIT_SENSITIVE_CONTENT_ENABLED=false</code>, and
+   <code>INGESTION_PROVENANCE_ENABLED=false</code>.</li>
+<li>Run post-provisioning. Verify that <code>AUDIT_HMAC_KEY</code> is a Key Vault reference
+   and that the existing Search index gained the optional provenance fields
+   without being recreated.</li>
+<li>Enable metadata-only audit events in a non-production environment.</li>
+<li>Enable ingestion provenance separately if the deployment has reviewed the
+   classification and right-to-use defaults.</li>
 <li>Keep <code>AUDIT_ACTOR_PSEUDONYM_ENABLED</code> and
    <code>AUDIT_SENSITIVE_CONTENT_ENABLED</code> disabled.</li>
-<li>If actor correlation is approved, create and restrict a Key Vault HMAC key
-   before enabling it.</li>
+<li>If actor correlation is approved, enable pseudonymization only after
+   reviewing access to the automatically provisioned Key Vault key.</li>
+<li>Rotate the pseudonymization key on your schedule, or immediately after a
+   suspected exposure: create a new version of the <code>AUDIT-HMAC-KEY</code> secret in
+   Key Vault, advance <code>AUDIT_HMAC_KEY_ID</code> to a new value that marks the new
+   pseudonymization epoch, then restart or redeploy the affected workloads so
+   both changes take effect together. Do not edit <code>AUDIT_HMAC_KEY</code> itself; it
+   is an unversioned Key Vault reference and always resolves to the secret's
+   current version. Retain or remove prior secret versions according to your
+   rollback and retention policy. See
+   <a href="../governance_audit_contract_v1/#hmac-identifiers-and-rotation">HMAC identifiers and rotation</a>.</li>
 <li>Canary a small production slice and reconstruct representative requests.</li>
 <li>Monitor latency, exporter failures, ingestion volume, retention cost, and
    evidence-gap health signals.</li>
-<li>Confirm that existing traces, logs, dashboards, and alerts still work.</li>
-<li>Roll back by setting <code>AUDIT_EVENTS_ENABLED=false</code> and restarting the
-   orchestrator. Do not enable sensitive content as a troubleshooting shortcut.</li>
+<li>Confirm that existing traces, logs, dashboards, alerts, indexed documents,
+    and operator-added Search fields still work.</li>
+<li>Roll back by setting <code>AUDIT_EVENTS_ENABLED=false</code> and
+    <code>INGESTION_PROVENANCE_ENABLED=false</code>, then restart the components. Additive
+    Search fields can remain. Do not enable sensitive content as a
+    troubleshooting shortcut.</li>
 </ol>
 <p>Audit emission should not make the user request fail. If event production or
 the synchronous logging path fails, the runtime continues the request and
@@ -1844,7 +1861,7 @@ rate limiter, or delivery acknowledgment, so operators must monitor expected
 volume and Azure Monitor ingestion health.</p>
 <h2 id="related-reading">Related reading</h2>
 <ul>
-<li><a href="../governance_audit_contract_v1/">Audit Contract v1, unreleased</a></li>
+<li><a href="../governance_audit_contract_v1/">Audit Contract v1</a></li>
 <li><a href="../howto_authentication/">Authentication and Document-Level Security</a></li>
 <li><a href="../howto_grounding_overview/">Grounding sources overview</a></li>
 <li><a href="https://learn.microsoft.com/azure/azure-monitor/app/data-model-complete">Azure Monitor Application Insights telemetry data model</a></li>

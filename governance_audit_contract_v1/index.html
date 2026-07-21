@@ -24,7 +24,7 @@
     
     
       
-        <title>Audit Contract v1 (unreleased) - GPT-RAG</title>
+        <title>Audit Contract v1 - GPT-RAG</title>
       
     
     
@@ -111,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Audit Contract v1 (unreleased)
+              Audit Contract v1
             
           </span>
         </div>
@@ -527,7 +527,7 @@
           
   
   <span class="md-ellipsis">
-    Audit Contract v1 (unreleased)
+    Audit Contract v1
   </span>
   
 
@@ -538,7 +538,7 @@
         
   
   <span class="md-ellipsis">
-    Audit Contract v1 (unreleased)
+    Audit Contract v1
   </span>
   
 
@@ -563,6 +563,168 @@
   <a href="#what-the-implementation-covers" class="md-nav__link">
     <span class="md-ellipsis">
       What the implementation covers
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#application-insights-wire-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      Application Insights wire format
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#event-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      Event names
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#required-logical-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      Required logical fields
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#optional-logical-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      Optional logical fields
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#status-and-reason-enums" class="md-nav__link">
+    <span class="md-ellipsis">
+      Status and reason enums
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bounds-and-sanitizer-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bounds and sanitizer behavior
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#event-and-tool-budgets" class="md-nav__link">
+    <span class="md-ellipsis">
+      Event and tool budgets
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#search-provenance-schema-and-migration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Search provenance schema and migration
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hmac-identifiers-and-rotation" class="md-nav__link">
+    <span class="md-ellipsis">
+      HMAC identifiers and rotation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sensitive-content-capture" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sensitive-content capture
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mcp-and-foundry-iq-evidence" class="md-nav__link">
+    <span class="md-ellipsis">
+      MCP and Foundry IQ evidence
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#failure-semantics-and-evidence-gaps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Failure semantics and evidence gaps
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#event-volume-and-benchmark" class="md-nav__link">
+    <span class="md-ellipsis">
+      Event volume and benchmark
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kql-reconstruct-audit-events" class="md-nav__link">
+    <span class="md-ellipsis">
+      KQL: reconstruct audit events
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kql-add-requests-and-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      KQL: add requests and dependencies
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-evidence-can-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      What evidence can support
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#official-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      Official references
     </span>
   </a>
   
@@ -1487,18 +1649,17 @@
 
 
 <h1 id="audit-contract-v1">Audit Contract v1</h1>
-<p>Use this page to understand the unreleased GPT-RAG orchestrator audit event
-contract, estimate its telemetry volume, and prepare queries for a future
-runtime release.</p>
-<div class="admonition warning">
-<p class="admonition-title">Implemented in a pull request, but not released</p>
-<p>This page is reconciled with orchestrator pull request
-<a href="https://github.com/Azure/gpt-rag-orchestrator/pull/277">#277</a> at commit
-<code>844fe14757d07a2cdc828189105fbce831f3c11d</code>. That code is not in a released
-orchestrator version. Audit events also remain disabled by default and need
-GPT-RAG umbrella deployment integration before they are available through a
-normal GPT-RAG deployment. Do not configure the flags below until the
-runtime release and integration are complete.</p>
+<p>Use this page to understand the GPT-RAG audit event contract, estimate its
+telemetry volume, and prepare operational queries.</p>
+<div class="admonition info">
+<p class="admonition-title">Runtime components released; umbrella release pending</p>
+<p>Orchestrator
+<a href="https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.8.0"><code>v3.8.0</code></a>
+and ingestion
+<a href="https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.5.0"><code>v2.5.0</code></a>
+implement this contract. Audit and provenance controls remain disabled by
+default. GPT-RAG umbrella <code>v3.7.0</code> integration is implemented in pull
+request #573 but is not yet released.</p>
 </div>
 <p>The contract provides best-effort operational evidence. It is not a transaction
 log, an immutable or nonrepudiable record, independent attestation, or proof
@@ -1518,16 +1679,15 @@ Monitor connection.</p>
   Sources -. audit events .-&gt; Events
   Tools -. audit events .-&gt; Events
   Outcome -. audit events .-&gt; Events</code></pre>
-<p>The shared schema reserves ingestion event names, but orchestrator pull request</p>
-<h1 id="277-does-not-implement-an-ingestion-producer">277 does not implement an ingestion producer.</h1>
+<p>Ingestion <code>v2.5.0</code> implements the schema's ingestion run and document events.</p>
 <p>The exact reviewed artifacts are:</p>
 <ul>
-<li><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/844fe14757d07a2cdc828189105fbce831f3c11d/contracts/audit-event-v1.schema.json">logical v1 schema</a></li>
-<li><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/844fe14757d07a2cdc828189105fbce831f3c11d/contracts/audit-event-v1.application-insights.schema.json">Application Insights wire schema</a></li>
-<li><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/844fe14757d07a2cdc828189105fbce831f3c11d/contracts/audit-event-v1.sha256">contract SHA-256 digests</a></li>
-<li><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/844fe14757d07a2cdc828189105fbce831f3c11d/tests/golden/audit_event_v1.json">golden logical event</a></li>
-<li><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/844fe14757d07a2cdc828189105fbce831f3c11d/tests/golden/audit_event_v1_root.json">golden logical root event</a></li>
-<li><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/844fe14757d07a2cdc828189105fbce831f3c11d/README.md#audit-event-configuration">runtime configuration guidance</a></li>
+<li><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/v3.8.0/contracts/audit-event-v1.schema.json">logical v1 schema</a></li>
+<li><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/v3.8.0/contracts/audit-event-v1.application-insights.schema.json">Application Insights wire schema</a></li>
+<li><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/v3.8.0/contracts/audit-event-v1.sha256">contract SHA-256 digests</a></li>
+<li><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/v3.8.0/tests/golden/audit_event_v1.json">golden logical event</a></li>
+<li><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/v3.8.0/tests/golden/audit_event_v1_root.json">golden logical root event</a></li>
+<li><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/v3.8.0/README.md#audit-event-configuration">runtime configuration guidance</a></li>
 </ul>
 <p>The pinned SHA-256 digests of the two schema files, recorded in
 <code>contracts/audit-event-v1.sha256</code>, are:</p>
@@ -1627,9 +1787,8 @@ exported <code>OperationId</code> and <code>ParentId</code> use all-zero hexadec
 the all-zero trace ID from joins.</p>
 <p>The runtime reads <code>service_version</code> from the repository root <code>VERSION</code> file and
 uses the same value for the OpenTelemetry <code>service.version</code> resource attribute.
-The reviewed branch reports <code>3.7.0</code>, but the audit feature itself is unreleased.
-The eventual release will report the version packaged in its own <code>VERSION</code>
-file.</p>
+Orchestrator <code>v3.8.0</code> reports <code>3.8.0</code>. Ingestion audit events report their own
+released component version.</p>
 <h2 id="event-names">Event names</h2>
 <p>The orchestrator event name is the <code>gptrag.audit.</code> prefix followed by one of
 these exact logical event types:</p>
@@ -2111,6 +2270,51 @@ dashboard.</p>
 </tr>
 </tbody>
 </table>
+<p>GPT-RAG's next minor umbrella release pins orchestrator <code>v3.8.0</code> and ingestion
+<code>v2.5.0</code>. When <code>AUDIT_HMAC_KEY</code> is absent, post-provisioning creates
+<code>AUDIT-HMAC-KEY</code> in Key Vault from 256 cryptographically random bits, then
+registers only its Key Vault reference in App Configuration. Ordinary
+reprovisioning reuses that secret. An existing operator-managed Key Vault
+reference is preserved instead. The key value is not an admin setting,
+deployment output, or log value.</p>
+<p>Ingestion provenance uses a separate, non-secret configuration surface:</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Default</th>
+<th>Exact behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>INGESTION_PROVENANCE_ENABLED</code></td>
+<td><code>false</code></td>
+<td>Adds provenance and governance values to supported ingestion document audit events when enabled.</td>
+</tr>
+<tr>
+<td><code>INGESTION_REQUIRE_GOVERNANCE_METADATA</code></td>
+<td><code>false</code></td>
+<td>Requires explicit classification and right-to-use values when provenance is enabled. Setting this to <code>true</code> while provenance is disabled is invalid.</td>
+</tr>
+<tr>
+<td><code>INGESTION_DEFAULT_CLASSIFICATION</code></td>
+<td><code>unclassified</code></td>
+<td>Fallback classification when provenance is enabled and strict mode is off.</td>
+</tr>
+<tr>
+<td><code>INGESTION_DEFAULT_RIGHT_TO_USE</code></td>
+<td><code>not_asserted</code></td>
+<td>Fallback right-to-use value when provenance is enabled and strict mode is off.</td>
+</tr>
+</tbody>
+</table>
+<p>These four ingestion values contain no credentials and are safe to display and
+edit as normal configuration. Ingestion does not consume <code>AUDIT_HMAC_KEY</code>.
+Post-provisioning seeds only missing values and preserves operator-managed
+settings unless an AZD environment value explicitly overrides them. A deployment
+that explicitly disables Key Vault receives the disabled defaults but cannot
+enable audit events until a valid HMAC Key Vault reference is supplied.</p>
 <p>If <code>AZURE_MONITOR_DISABLE_LOGGING=true</code> while auditing is enabled, the
 orchestrator enables Azure Monitor log export only for the <code>gptrag.audit</code>
 namespace. If normal log export is enabled, audit events use that existing
@@ -2119,6 +2323,28 @@ If it is unavailable, monitoring export is disabled rather than making the
 orchestrator fail.</p>
 <p>To roll back, set <code>AUDIT_EVENTS_ENABLED=false</code> and restart the orchestrator.
 This stops new events. It does not delete previously exported telemetry.</p>
+<h2 id="search-provenance-schema-and-migration">Search provenance schema and migration</h2>
+<p>The RAG Azure AI Search index has optional, retrievable fields for
+<code>provenance_id</code>, <code>source_uri_id</code>, <code>source_version_id</code>,
+<code>content_checksum_sha256</code>, <code>ingested_at</code>, <code>ingest_run_id</code>,
+<code>data_classification</code>, <code>right_to_use</code>, <code>retention_class</code>, and <code>delete_after</code>.
+Identifiers and checksums are filterable. Guaranteed UTC <code>ingested_at</code> values
+use filterable, sortable <code>Edm.DateTimeOffset</code>. <code>delete_after</code> remains a
+filterable, sortable string because ingestion v2.5.0 passes through operator
+policy values without imposing a date format. Classification, right-to-use, and
+retention class are also facetable.</p>
+<p>Post-provisioning updates an existing index in place by merging only missing
+fields into its current definition. It preserves existing documents and
+operator-added fields. If a same-name field has an incompatible type or
+attributes, setup fails before making the update. GPT-RAG does not fall back to
+deleting and recreating the index.</p>
+<p>Ingestion <code>v2.5.0</code> emits these values in audit events; it does not populate the
+new Search index fields. The fields remain empty unless another indexing
+pipeline explicitly supplies them. Older component versions ignore the
+additive fields, so rollback does not require removing them.</p>
+<p><code>delete_after</code> is policy intent only. No GPT-RAG job reads this field to
+schedule or perform a purge. The operator must implement retention enforcement
+and verify the deletion outcome.</p>
 <h2 id="hmac-identifiers-and-rotation">HMAC identifiers and rotation</h2>
 <p>Auditing requires a 256-bit HMAC key even when actor pseudonyms are disabled.
 The producer uses HMAC-SHA256 over:</p>
@@ -2128,10 +2354,20 @@ The producer uses HMAC-SHA256 over:</p>
 the digest. Current code pseudonymizes conversation IDs, question IDs, source
 references, tool IDs, tool invocation IDs, and optional actor IDs. Raw values
 are not placed in those audit properties.</p>
-<p>Create and restrict the key in Key Vault. To rotate it, update
-<code>AUDIT_HMAC_KEY</code> and <code>AUDIT_HMAC_KEY_ID</code> together, then restart. Identical raw
-values produce different pseudonyms after rotation, so correlation does not
-continue automatically across key versions.</p>
+<p>Create and restrict the key in Key Vault. The <code>AUDIT_HMAC_KEY</code> App
+Configuration value is an unversioned Key Vault reference to the
+<code>AUDIT-HMAC-KEY</code> secret, so it always resolves to that secret's current
+version. Ordinary reprovisioning reuses the existing secret and does not
+rotate it.</p>
+<p>To rotate the key: create a new version of the <code>AUDIT-HMAC-KEY</code> secret in Key
+Vault (do not edit <code>AUDIT_HMAC_KEY</code> itself), then advance <code>AUDIT_HMAC_KEY_ID</code>
+to a new value that identifies the new pseudonymization epoch. Restart or
+redeploy the affected workloads so they pick up the new secret version and key
+identifier together. Identical raw values produce different pseudonyms after
+rotation, so correlation does not continue automatically across key versions.
+Retain or remove prior secret versions according to the deployment's rollback
+and retention policy; keep a prior version available if you may need to roll
+back to the previous <code>AUDIT_HMAC_KEY_ID</code>.</p>
 <h2 id="sensitive-content-capture">Sensitive-content capture</h2>
 <p>The default <code>capture_mode</code> is <code>metadata_only</code>. It changes to
 <code>sensitive_allowlist</code> only when both the feature flag is true and the allowlist
@@ -2450,9 +2686,9 @@ columns, including <code>DurationMs</code>, <code>ResultCode</code>, <code>Depen
 </code></pre></div>
 <p><code>AppRequests.Url</code>, <code>AppDependencies.Data</code>, and arbitrary <code>Properties</code> can
 contain sensitive details. Restrict access to query results and exported copies.</p>
-<p>The queries are reconciled with the exporter wire conversion test in pull
-request #277 and the official Azure Monitor table schemas. They cannot be run
-against released audit telemetry until the runtime is released and enabled.</p>
+<p>The queries are reconciled with the exporter wire conversion tests in
+orchestrator <code>v3.8.0</code> and the official Azure Monitor table schemas. They return
+results after the released runtime is deployed and audit events are enabled.</p>
 <h2 id="what-evidence-can-support">What evidence can support</h2>
 <p>When combined with adopter-owned identity, access, retention, review, and
 incident processes, this evidence can help with:</p>
