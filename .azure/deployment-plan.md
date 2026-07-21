@@ -2,7 +2,7 @@
 
 ## Status
 
-Validated
+Deployment Blocked
 
 ## Mode
 
@@ -212,3 +212,47 @@ validation.
   `8f00c16`.
 - Documentation PR, unmerged:
   `https://github.com/Azure/GPT-RAG/pull/574`.
+
+## Section 8: Deployment Proof
+
+- Deployment source: exact PR evidence commit
+  `a7c98f187b37360cecd1500301a47dcecfcaac78`.
+- Deployment context: the exact validated AZD environment was recreated in
+  `eastus2` with the validated Standard-mode settings, subscription, tenant,
+  deploying principal, and principal type. The empty resource group created by
+  preview was reused after confirming it had only the AZD environment tag, had
+  no `keep=true` tag, contained no resources, and had no Container Apps
+  environment or conflicting `azd-service-name` tags.
+- Pre-deploy checklist: passed. Authentication, subscription, tenant,
+  deploying principal, region, Azure Policy assignments, environment values,
+  repository commit, resource-group location/tags, and AZD recipe were
+  rechecked before provisioning.
+- Provisioning attempts: `azd provision --no-prompt` was attempted three times
+  on 2026-07-21. The first retry followed a 60-second wait; the final retry
+  followed a 300-second backoff. Every attempt stopped at Azure AI Search with
+  `InsufficientResourcesAvailable` for `eastus2`. Azure request IDs:
+  `d73cd9b4-834a-93c5-fa68-7012f02c5f88`,
+  `59685ea6-8b58-1525-25e4-89697b8fbb55`, and
+  `8bc5f789-b35f-848b-fbcb-05bc90fe71d6`.
+- Partial result: the resource group was retained with successfully created
+  platform resources, including Log Analytics, Application Insights, App
+  Configuration, Key Vault, Container Registry, Storage, Cosmos DB, and a
+  Container Apps environment. Azure AI Search, Container Apps, component
+  images, and application endpoints were not created.
+- Deployment gate: `azd deploy --no-prompt` was not run because infrastructure
+  provisioning did not complete. The mandatory ACR `AcrPull` propagation gate,
+  endpoint/health checks, live application RBAC verification, App
+  Configuration default verification, Key Vault audit-key semantics/reference
+  verification, Search schema checks, component-pin checks, safe request and
+  ingestion flows, KQL audit reconstruction, sensitive-property checks,
+  root-sentinel/event-name/event-budget checks, and overhead measurement remain
+  blocked.
+- Security and retention: no secret value was read or exposed. Key Vault
+  metadata verification was unavailable because the data-plane role assignment
+  had not been provisioned. No resource, resource group, role assignment, or
+  deployment was deleted; `azd down` and all deletion commands were not run.
+  The partial validation environment remains running for follow-up.
+- Status: **Deployment Blocked** by regional Azure AI Search capacity. A safe
+  retry is to rerun `azd provision --no-prompt` when `eastus2` capacity is
+  available, then continue with the required ACR RBAC propagation check,
+  `azd deploy --no-prompt`, and the post-deployment verification matrix.
