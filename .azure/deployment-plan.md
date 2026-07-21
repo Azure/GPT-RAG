@@ -13,7 +13,9 @@ MODIFY
 - Azure/GPT-RAG#571: establish a practical governance baseline and auditable AI activity trail.
 - The user has approved autonomous preparation and implementation.
 - This plan changes the existing GPT-RAG AZD/Bicep deployment recipe in place.
-- No Azure deployment, destructive resource operation, or resource-group deletion is authorized.
+- The user has authorized one new Standard validation deployment in
+  `swedencentral`. No destructive resource operation or resource-group deletion
+  is authorized.
 
 ## Existing deployment recipe
 
@@ -126,7 +128,9 @@ The RAG index receives these optional, retrievable fields:
 - Manifest/version/tag assertions against published v3.8.0 and v2.5.0 releases.
 - Docker/config validation through existing repository scripts where applicable.
 - `azd provision --preview` or the repository's non-deploy preflight only when the current authenticated AZD context is complete. Treat any empty environment resource group that AZD creates before what-if as a preview-tool side effect, not as workload provisioning.
-- Never run `azd provision`, `azd up`, `azd deploy`, `terraform apply`, or any destructive Azure command.
+- Preparation and preview remain non-destructive. After region-aware validation
+  passes, hand off one `azd provision` and `azd deploy` attempt to the
+  `azure-deploy` recovery workflow.
 
 ## Role Assignment Verification
 
@@ -256,3 +260,154 @@ validation.
   retry is to rerun `azd provision --no-prompt` when `eastus2` capacity is
   available, then continue with the required ACR RBAC propagation check,
   `azd deploy --no-prompt`, and the post-deployment verification matrix.
+
+## Section 9: Sweden Central recovery plan
+
+- Authorization: on 2026-07-21 the user authorized one new, unique Standard
+  validation AZD environment in `swedencentral`, using subscription
+  `9788a92c-2f71-4629-8173-7ad449cb50e1`, tenant
+  `16b3c013-d300-468d-ac64-7eda0820b6d3`, and deploying principal
+  `88e31ae8-65b8-46a2-8b26-fad4e6c305f3` with principal type `User`.
+- Isolation: the recovery environment must be fresh and must not reuse Search
+  service `srch-c6emckf22jxl4`. That existing service proves prior regional
+  viability only; it does not guarantee new Search capacity.
+- Protected partial environment: do not modify or delete
+  `rg-gptrag-pr573-7xsurm`. Do not run `azd down` or any deletion command.
+- Configuration drift gate: preserve the validated Standard settings, including
+  `NETWORK_ISOLATION=false`, `USE_UAI=false`, `USE_CAPP_API_KEY=false`,
+  `ENABLE_AGENTIC_RETRIEVAL=false`, `RETRIEVAL_BACKEND=foundry_iq`,
+  `DEPLOYMENT_MODE=standalone`, and disabled VM, Bastion, NAT, and Firewall
+  deployment flags. Only environment/resource names and required regional
+  values may differ.
+- Region-aware gate: rerun the required pre-provision checks for
+  `swedencentral`, then run one fresh `azd provision --preview --no-prompt`.
+  Continue only if the plan is create-only and contains no modify/delete
+  operations.
+- Capacity stop condition: run one provision attempt. If Azure AI Search again
+  returns `InsufficientResourcesAvailable`, stop without retrying another
+  region and report the blocker.
+- Successful deployment gate: after provisioning, verify ACR pull roles have
+  propagated before `azd deploy --no-prompt`.
+- Verification: fully qualified endpoints and health, live RBAC, manifest
+  component versions, App Configuration safe defaults, Key Vault
+  `AUDIT-HMAC-KEY` existence and 32-byte semantics without exposing its value,
+  Key Vault reference wiring, additive Search provenance fields, minimal safe
+  request and ingestion flows, Application Insights `gptrag.audit.*` custom
+  events, root sentinel/privacy/event names, and KQL reconstruction. Keep
+  sensitive capture disabled.
+- Evidence: append exact environment, resource group, endpoints, commands,
+  timestamps, verification results, and blockers to this file; commit and push
+  the evidence to PR #573. Leave the successful environment active.
+
+## Section 10: Sweden Central validation proof
+
+- Validation source: PR head
+  `b7766419aa03375ef61de9fbe05e90b80f02a0db`. The only committed delta from
+  implementation head `5ea5f7c983660db0c2ece99b9eb4fd6cd1688485`
+  is `.azure/deployment-plan.md`; no code, Bicep, parameters, manifest, or
+  lifecycle hook changed.
+- Environment: new local AZD environment `gptrag-pr573-sw-a333b`, target resource
+  group `rg-gptrag-pr573-sw-a333b`, subscription
+  `9788a92c-2f71-4629-8173-7ad449cb50e1`, tenant
+  `16b3c013-d300-468d-ac64-7eda0820b6d3`, region `swedencentral`, deploying
+  principal `88e31ae8-65b8-46a2-8b26-fad4e6c305f3`, principal type `User`.
+- Configuration: `azd env get-values` confirmed the approved Standard settings,
+  including `NETWORK_ISOLATION=false`, `USE_UAI=false`,
+  `USE_CAPP_API_KEY=false`, `ENABLE_AGENTIC_RETRIEVAL=false`,
+  `RETRIEVAL_BACKEND=foundry_iq`, `DEPLOYMENT_MODE=standalone`, and disabled VM,
+  software, Jumpbox, Bastion, NAT Gateway, and Azure Firewall flags. Foundry,
+  Search, and Cosmos regional values are all `swedencentral`.
+- Authentication and authorization: `az account show`,
+  `az ad signed-in-user show`, and inherited role lookup confirmed the requested
+  subscription, tenant, exact principal, and inherited `Owner` at subscription
+  scope.
+- Regional evidence: existing Standard Search service
+  `srch-c6emckf22jxl4` is running in Sweden Central in the same subscription.
+  It is not referenced or reused by this environment.
+- Policy: Azure Policy assignments were refreshed. Subscription and inherited
+  MCAPSGov audit, deny, deploy/modify, security-baseline, and MFA assignments
+  remain applicable; preview found no policy blocker.
+- Provider/quota preflight: `scripts/preProvision.ps1` passed with 0 failures,
+  2 capacity warnings, and landing-zone preflight passed with 0 failures,
+  1 warning, and 1 information item. All required providers and
+  `swedencentral` locations passed. Container Apps had 50 managed environments
+  remaining. `gpt-5-nano` had 15,000 quota units remaining for a 100-unit
+  request; `text-embedding-3-large` had 350 remaining for a 100-unit request.
+  Search and Cosmos live capacity cannot be guaranteed before provisioning.
+- AZD schema: the Azure AZD stable-schema validator passed `azure.yaml`.
+- Build/what-if: the first `azd provision --preview --no-prompt` stopped before
+  Azure access because the fresh clone had not initialized the pinned `infra`
+  submodule. After `git submodule update --init --recursive` checked out
+  `1616ddd940b796c32f86e4459b079eebc254de08`, the preview passed in 1 minute
+  18 seconds. It compiled the pinned Bicep and returned create-only resources
+  with no modify/delete operations.
+- Preview safety: the preview-created resource group contains 0 resources, has
+  only the `azd-env-name=gptrag-pr573-sw-a333b` tag, and has no Container Apps
+  environment or `azd-service-name` conflict.
+- Protected environment: read-only checks confirmed
+  `rg-gptrag-pr573-7xsurm` remains in `eastus2`; no operation targeted, modified,
+  or deleted it.
+- Static RBAC and package/build proof from Section 7 remains applicable because
+  no implementation, infrastructure, parameter, manifest, or hook file changed.
+- Status: **Validated** for one `swedencentral` recovery deployment attempt. Any
+  modify/delete plan or Azure AI Search `InsufficientResourcesAvailable` result
+  is a hard stop. No deletion or `azd down` is authorized.
+
+## Section 11: Sweden Central deployment recovery proof
+
+- Attempt: one `azd provision --no-prompt` run against validated environment
+  `gptrag-pr573-sw-a333b` and resource group
+  `rg-gptrag-pr573-sw-a333b` in `swedencentral`.
+- Source: PR evidence head
+  `b7766419aa03375ef61de9fbe05e90b80f02a0db`, plus this uncommitted evidence
+  update. No implementation, Bicep, parameter, manifest, or lifecycle-hook file
+  changed.
+- Preflight: repeated during provisioning and passed with 0 failures. Provider,
+  location, Container Apps quota, model availability, and model quota checks
+  remained successful. Search and Cosmos live-capacity warnings remained.
+- ARM deployment:
+  `gptrag-pr573-sw-a333b-1784639848`, terminal state `Failed` at
+  `2026-07-21T13:21:12.160467Z`.
+- Capacity blocker: Container Apps managed environment
+  `cae-n7t6ey-gptrag-pr573-sw-a333b` failed with
+  `ManagedEnvironmentCapacityHeavyUsageError` /
+  `AKSCapacityHeavyUsage` because a new managed-environment cluster was
+  unavailable in `swedencentral`. Azure request ID:
+  `2757ce4e-9f1a-4e61-8f23-62978db7d9fd`.
+- Independent naming blocker: the Cosmos nested deployment name
+  `umd7bs2my5f6a-sqldb-cosmosdb-n7t6ey-gptrag-pr573-sw-a333b-sdc-001`
+  was 65 characters and exceeded the ARM deployment-name maximum of 64.
+- Stop condition: the requested one-region attempt limit was reached by the
+  platform-capacity failure. No retry, alternate region, shorter environment,
+  `azd deploy`, `azd down`, or deletion command was run.
+- Partial resources retained in the Sweden Central resource group:
+  Key Vault `kv-n7t6ey-gptrag-pr573-s`, Log Analytics workspace
+  `log-n7t6ey-gptrag-pr573-sw-a333b-sdc-001`, App Configuration
+  `appcs-n7t6ey-gptrag-pr573-sw-a333b-sdc-001`, Container Registry
+  `crn7t6eygptragpr573swa333bsdc001`, Cosmos DB account
+  `cosmos-n7t6ey-gptrag-pr573-sw-a333b-sdc-001`, Storage account
+  `stn7t6eygptragpr573swa33`, Application Insights
+  `appi-n7t6ey-gptrag-pr573-sw-a333b-sdc-001`, and failed Container Apps
+  environment `cae-n7t6ey-gptrag-pr573-sw-a333b`.
+- Partial platform endpoints:
+  `https://kv-n7t6ey-gptrag-pr573-s.vault.azure.net/` and
+  `https://appcs-n7t6ey-gptrag-pr573-sw-a333b-sdc-001.azconfig.io`.
+  These resources reached management-plane `Succeeded`, but application health
+  was not testable.
+- Not created: Azure AI Search services and Container Apps. No application FQDN
+  or health endpoint exists.
+- Blocked verification: ACR `AcrPull` propagation, `azd deploy`, component
+  versions in running apps, live application RBAC, App Configuration governance
+  defaults, Key Vault `AUDIT-HMAC-KEY` existence/32-byte semantics/reference,
+  additive Search fields, safe request and ingestion flows, Application
+  Insights `gptrag.audit.*` custom events, root sentinel/privacy/event names,
+  and KQL reconstruction.
+- Security: no Key Vault secret value, connection string, token, payload, or
+  sensitive event content was read or recorded. Sensitive capture was never
+  enabled.
+- Retention: all Sweden Central partial resources remain active. The eastus2
+  group `rg-gptrag-pr573-7xsurm` remains unchanged with 9 resources. No
+  resource, group, role assignment, or deployment was deleted.
+- Status: **Deployment Blocked** by Sweden Central Container Apps platform
+  capacity, with an additional environment-name length defect that must be
+  corrected before any future attempt.
