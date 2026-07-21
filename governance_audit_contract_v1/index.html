@@ -1691,8 +1691,18 @@ Monitor connection.</p>
 <li><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/v3.8.0/tests/golden/audit_event_v1_root.json">golden logical root event</a></li>
 <li><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/v3.8.0/README.md#audit-event-configuration">runtime configuration guidance</a></li>
 </ul>
-<p>The pinned SHA-256 digests of the two schema files, recorded in
-<code>contracts/audit-event-v1.sha256</code>, are:</p>
+<p>GPT-RAG uses one shared audit-event contract so the orchestrator, ingestion,
+and Application Insights all interpret audit events the same way. The two
+schema files above define that contract: <code>audit-event-v1.schema.json</code> is the
+application-level (logical) event shape, and
+<code>audit-event-v1.application-insights.schema.json</code> is the shape those events
+take after Application Insights exports them.</p>
+<p>The SHA-256 values below are file fingerprints, recorded in
+<code>contracts/audit-event-v1.sha256</code>. They are not secrets or settings to
+configure. They exist mainly so maintainers and automated tests can confirm
+that the orchestrator, ingestion, and this documentation all reference the
+exact same version of the contract. Most operators can skip this table unless
+they are validating or changing the contract itself.</p>
 <table>
 <thead>
 <tr>
@@ -1711,8 +1721,8 @@ Monitor connection.</p>
 </tr>
 </tbody>
 </table>
-<p>Recompute these digests against the pinned commit before relying on this page
-if the contract is revised.</p>
+<p>If the contract changes, maintainers must update these fingerprints and
+verify all producing components together.</p>
 <h2 id="application-insights-wire-format">Application Insights wire format</h2>
 <p>The producer writes through the <code>gptrag.audit</code> logger with the fixed log body
 <code>GPT-RAG audit event</code>. It sets <code>microsoft.custom_event.name</code> to
