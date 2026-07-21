@@ -4,11 +4,13 @@ Use this guide to decide what data GPT-RAG may process, who owns each
 control, and what evidence an operator should preserve for security reviews
 and incident investigations.
 
-!!! info "Runtime components released; umbrella release pending"
-    Orchestrator `v3.8.0` and ingestion `v2.5.0` implement the correlated
-    [Audit Contract v1](governance_audit_contract_v1.md). GPT-RAG umbrella
-    `v3.7.0` integration is implemented in pull request #573 but is not yet
-    released. Keep the feature disabled until that umbrella release is deployed.
+!!! info "Available in GPT-RAG v3.7.0"
+    [GPT-RAG `v3.7.0`](https://github.com/Azure/GPT-RAG/releases/tag/v3.7.0)
+    integrates orchestrator `v3.8.0` and ingestion `v2.5.0` with the
+    correlated [Audit Contract v1](governance_audit_contract_v1.md)
+    (integration history: [PR #573](https://github.com/Azure/GPT-RAG/pull/573)).
+    Audit and provenance controls remain disabled by default until you
+    complete the rollout steps below.
 
 ## Why this matters
 
@@ -22,12 +24,15 @@ questions without searching unrelated logs:
 - What data classes could have entered telemetry?
 - Who configured access, retention, deletion, and export?
 
-GPT-RAG already uses logs, traces, metrics, and source references. Those signals
-are useful, but current releases do not provide the versioned audit contract
-described in issue
-[#571](https://github.com/Azure/GPT-RAG/issues/571). The contract
+GPT-RAG already uses logs, traces, metrics, and source references. Those
+signals are useful, but they do not by themselves provide the versioned audit
+contract now implemented in
+[GPT-RAG v3.7.0](https://github.com/Azure/GPT-RAG/releases/tag/v3.7.0)
+(originally proposed in issue
+[#571](https://github.com/Azure/GPT-RAG/issues/571)). The contract
 correlates operational metadata while leaving prompts, responses, source
-excerpts, tool arguments, and tool results out of the default event stream.
+excerpts, tool arguments, and tool results out of the default event stream,
+and it stays off until an operator enables it.
 
 ```mermaid
 flowchart LR

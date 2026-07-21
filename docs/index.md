@@ -27,7 +27,9 @@ The complementary modular view below separates the basic deployment from optiona
 Before connecting enterprise data or relying on telemetry as evidence, review
 [Governance and responsible operation](governance_overview.md). It explains
 intended use, limitations, data and telemetry responsibilities, retention,
-access, and the exact but unreleased audit trail contract.
+access, and the exact audit trail contract available since
+[GPT-RAG v3.7.0](https://github.com/Azure/GPT-RAG/releases/tag/v3.7.0),
+disabled by default.
 
 ## Runtime Services
 

@@ -3,14 +3,16 @@
 Use this page to understand the GPT-RAG audit event contract, estimate its
 telemetry volume, and prepare operational queries.
 
-!!! info "Runtime components released; umbrella release pending"
-    Orchestrator
+!!! info "Available in GPT-RAG v3.7.0"
+    [GPT-RAG `v3.7.0`](https://github.com/Azure/GPT-RAG/releases/tag/v3.7.0)
+    integrates orchestrator
     [`v3.8.0`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.8.0)
     and ingestion
-    [`v2.5.0`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.5.0)
-    implement this contract. Audit and provenance controls remain disabled by
-    default. GPT-RAG umbrella `v3.7.0` integration is implemented in pull
-    request #573 but is not yet released.
+    [`v2.5.0`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.5.0),
+    which implement this contract (integration history:
+    [PR #573](https://github.com/Azure/GPT-RAG/pull/573)). Audit and
+    provenance controls remain disabled by default; operators must enable
+    them explicitly using the environment variables described below.
 
 The contract provides best-effort operational evidence. It is not a transaction
 log, an immutable or nonrepudiable record, independent attestation, or proof
@@ -140,7 +142,7 @@ these exact logical event types:
 | `outcome.rejected` | `gptrag.audit.outcome.rejected` | A streamed response was rejected after a failure. |
 | `audit.emission.failed` | `gptrag.audit.audit.emission.failed` | Sanitization, serialization, size, attribute, or synchronous logging failed. |
 
-The shared schema also reserves these names for a future ingestion producer:
+Ingestion `v2.5.0` emits these shared-schema event names:
 
 - `ingestion.run.started`
 - `ingestion.run.completed`

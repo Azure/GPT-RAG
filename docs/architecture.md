@@ -43,8 +43,10 @@ Use the table below for the deployment parameters behind each layer, and the [De
 
 For data ownership, telemetry, retention, and responsibility boundaries, see
 [Governance and responsible operation](governance_overview.md). The correlated
-audit event implementation on that page is unreleased, disabled by default, and
-not part of the current GPT-RAG deployment.
+audit event implementation on that page is available since
+[GPT-RAG v3.7.0](https://github.com/Azure/GPT-RAG/releases/tag/v3.7.0) but
+remains disabled by default and is not part of the basic deployment shown
+above until an operator enables it.
 
 ## Key Capabilities
 

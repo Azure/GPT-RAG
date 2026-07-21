@@ -6,8 +6,8 @@ patch, and fix, see the [GitHub releases](https://github.com/Azure/GPT-RAG/relea
 
 ### July 2026
 
-- **Governance audit and provenance integration (planned for GPT-RAG v3.7.0).**
-  The next minor umbrella release pins orchestrator `v3.8.0` and ingestion
+- **Governance audit and provenance integration ([GPT-RAG v3.7.0](https://github.com/Azure/GPT-RAG/releases/tag/v3.7.0)).**
+  The umbrella release pins orchestrator `v3.8.0` and ingestion
   `v2.5.0` to the shared `audit-event-v1` contract. Audit, sensitive-content
   capture, actor pseudonymization, and ingestion provenance remain off by
   default. When no operator-managed HMAC reference exists, post-provisioning
