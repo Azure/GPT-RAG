@@ -1652,14 +1652,16 @@
 <p>Use this page to understand the GPT-RAG audit event contract, estimate its
 telemetry volume, and prepare operational queries.</p>
 <div class="admonition info">
-<p class="admonition-title">Runtime components released; umbrella release pending</p>
-<p>Orchestrator
+<p class="admonition-title">Available in GPT-RAG v3.7.0</p>
+<p><a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.7.0">GPT-RAG <code>v3.7.0</code></a>
+integrates orchestrator
 <a href="https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.8.0"><code>v3.8.0</code></a>
 and ingestion
-<a href="https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.5.0"><code>v2.5.0</code></a>
-implement this contract. Audit and provenance controls remain disabled by
-default. GPT-RAG umbrella <code>v3.7.0</code> integration is implemented in pull
-request #573 but is not yet released.</p>
+<a href="https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.5.0"><code>v2.5.0</code></a>,
+which implement this contract (integration history:
+<a href="https://github.com/Azure/GPT-RAG/pull/573">PR #573</a>). Audit and
+provenance controls remain disabled by default; operators must enable
+them explicitly using the environment variables described below.</p>
 </div>
 <p>The contract provides best-effort operational evidence. It is not a transaction
 log, an immutable or nonrepudiable record, independent attestation, or proof
@@ -1873,7 +1875,7 @@ these exact logical event types:</p>
 </tr>
 </tbody>
 </table>
-<p>The shared schema also reserves these names for a future ingestion producer:</p>
+<p>Ingestion <code>v2.5.0</code> emits these shared-schema event names:</p>
 <ul>
 <li><code>ingestion.run.started</code></li>
 <li><code>ingestion.run.completed</code></li>
