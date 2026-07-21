@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Azure/GPT-RAG/contracts/audit-event-v1.application-insights.schema.json",
+  "title": "GPT-RAG audit event v1 Application Insights wire shape",
+  "description": "Azure Monitor represents custom-event property values as strings and drops null custom properties. Parse and type the properties according to audit-event-v1.schema.json, decode the root parent sentinel to logical null, then perform logical contract validation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "properties"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "enum": [
+        "gptrag.audit.request.started",
+        "gptrag.audit.request.completed",
+        "gptrag.audit.request.failed",
+        "gptrag.audit.request.cancelled",
+        "gptrag.audit.route.selected",
+        "gptrag.audit.grounding.source.selected",
+        "gptrag.audit.grounding.source.rejected",
+        "gptrag.audit.tool.invocation.started",
+        "gptrag.audit.tool.invocation.completed",
+        "gptrag.audit.tool.invocation.failed",
+        "gptrag.audit.tool.invocation.cancelled",
+        "gptrag.audit.outcome.produced",
+        "gptrag.audit.outcome.rejected",
+        "gptrag.audit.audit.emission.failed",
+        "gptrag.audit.ingestion.run.started",
+        "gptrag.audit.ingestion.run.completed",
+        "gptrag.audit.ingestion.run.failed",
+        "gptrag.audit.ingestion.run.cancelled",
+        "gptrag.audit.ingestion.document.indexed",
+        "gptrag.audit.ingestion.document.rejected",
+        "gptrag.audit.ingestion.document.deleted"
+      ]
+    },
+    "properties": {
+      "type": "object",
+      "maxProperties": 64,
+      "required": [
+        "schema_version",
+        "event_id",
+        "event_type",
+        "event_time_utc",
+        "correlation_id",
+        "trace_id",
+        "span_id",
+        "parent_event_id",
+        "service_name",
+        "service_version",
+        "environment",
+        "operation",
+        "status",
+        "reason_code",
+        "capture_mode",
+        "redaction_applied",
+        "omitted_fields",
+        "truncated_fields"
+      ],
+      "properties": {
+        "event_type": {
+          "type": "string",
+          "enum": [
+            "request.started",
+            "request.completed",
+            "request.failed",
+            "request.cancelled",
+            "route.selected",
+            "grounding.source.selected",
+            "grounding.source.rejected",
+            "tool.invocation.started",
+            "tool.invocation.completed",
+            "tool.invocation.failed",
+            "tool.invocation.cancelled",
+            "outcome.produced",
+            "outcome.rejected",
+            "audit.emission.failed",
+            "ingestion.run.started",
+            "ingestion.run.completed",
+            "ingestion.run.failed",
+            "ingestion.run.cancelled",
+            "ingestion.document.indexed",
+            "ingestion.document.rejected",
+            "ingestion.document.deleted"
+          ]
+        },
+        "parent_event_id": {
+          "type": "string",
+          "pattern": "^evt_[0-9a-f]{32}$",
+          "description": "Wire parent event ID. Exporters must encode logical null as evt_00000000000000000000000000000000 because the pinned Azure Monitor exporter drops null custom properties. Consumers must decode this sentinel back to null and must never join it as an event."
+        }
+      },
+      "additionalProperties": {
+        "type": "string",
+        "maxLength": 16384
+      }
+    }
+  }
+}

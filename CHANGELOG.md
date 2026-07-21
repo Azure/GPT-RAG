@@ -2,11 +2,48 @@
 
 ## [Unreleased]
 
+### User and operator impact
+
+Prepares the next minor GPT-RAG release to deploy [orchestrator `v3.8.0`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.8.0) and [ingestion `v2.5.0`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.5.0) as one validated governance baseline. Metadata audit events and ingestion provenance remain disabled by default, sensitive-content capture remains independently disabled, and existing deployments do not change behavior until an operator opts in.
+
+The shared `audit-event-v1` contract is pinned to logical hash `825db8ef40a81e2c19e5d80d37c565b6b47fc9a6540e9881d35cc12b8fde5aab` and Application Insights wire hash `066c8f5408610ab839d5121d06ca5bc59e8797e551d5c47c875c5ba52f7e0588`. These audit events provide technical evidence for adopter governance and incident response; they do not establish legal or regulatory compliance.
+
 ### Added
+
+- **Safe governance defaults in App Configuration.** Fresh and upgraded deployments seed missing keys as `AUDIT_EVENTS_ENABLED=false`, `AUDIT_SENSITIVE_CONTENT_ENABLED=false`, `AUDIT_SENSITIVE_CONTENT_FIELDS=''`, `AUDIT_ACTOR_PSEUDONYM_ENABLED=false`, `AUDIT_SOURCE_EVENT_LIMIT=25`, `AUDIT_HMAC_KEY_ID=v1`, `AUDIT_ADDITIONAL_REDACTED_KEYS=''`, `INGESTION_PROVENANCE_ENABLED=false`, `INGESTION_REQUIRE_GOVERNANCE_METADATA=false`, `INGESTION_DEFAULT_CLASSIFICATION=unclassified`, and `INGESTION_DEFAULT_RIGHT_TO_USE=not_asserted`. Reprovisioning preserves operator-managed values unless the corresponding AZD environment value explicitly overrides them.
+- **Key Vault-backed audit pseudonymization key.** When `AUDIT_HMAC_KEY` is absent, post-provisioning creates `AUDIT-HMAC-KEY` from 256 cryptographically random bits and registers only its Key Vault reference in App Configuration. Later runs reuse it; an existing operator-managed Key Vault reference is preserved, and a valid legacy plaintext key is migrated without changing its value. The value is not placed in plaintext deployment configuration, output, or logs. Rotation is explicit: create a new Key Vault secret version and advance `AUDIT_HMAC_KEY_ID`.
+- **Additive provenance fields in the RAG Search index.** The index adds `provenance_id`, `source_uri_id`, `source_version_id`, `content_checksum_sha256`, `ingested_at`, `ingest_run_id`, `data_classification`, `right_to_use`, `retention_class`, and `delete_after`. Identifier/checksum fields are retrievable and filterable; guaranteed UTC `ingested_at` values use sortable `Edm.DateTimeOffset`; `delete_after` remains a sortable string because ingestion v2.5.0 intentionally passes through operator policy values without imposing a date format; governance classification fields are facetable.
+- **Shared contract source.** `contracts/` now carries the byte-pinned logical and Application Insights wire schemas consumed by orchestrator v3.8.0 and ingestion v2.5.0.
 
 ### Changed
 
-### Fixed
+- **Future minor release manifest.** `manifest.json` identifies the planned umbrella `v3.7.0` combination and pins orchestrator `v3.8.0` plus ingestion `v2.5.0`; UI `v2.3.13` and infra `v2.3.0` remain unchanged. No release is published by this change.
+- **Non-destructive existing-index migration.** Search post-provisioning no longer deletes an index before updating it. Missing fields are merged into the current definition and submitted with an in-place `PUT`; operator-owned fields and existing documents are preserved. An incompatible same-name field fails before any update, and there is no delete/recreate fallback.
+
+### Security and operational guidance
+
+Keep `AUDIT_SENSITIVE_CONTENT_ENABLED=false` unless an explicit, reviewed capture policy is in place. Tokens, credentials, authorization material, cookies, connection strings, and configured redacted keys remain prohibited even when sensitive capture is enabled. The audit HMAC secret is intended for orchestrator pseudonymization only; ingestion does not consume it.
+
+`delete_after` records retention policy intent only. GPT-RAG does not schedule or perform automatic deletion from this field. Operators remain responsible for retention enforcement, confirmed deletion, telemetry access, and export controls.
+
+Deployments that explicitly disable Key Vault still receive the disabled governance defaults, but no audit HMAC key/reference is created. Audit events must remain disabled in that deployment mode.
+
+### Migration and rollback
+
+Upgrade the umbrella configuration and both pinned runtime components together, run post-provisioning to register the Key Vault reference and additive Search fields, verify metadata-only events in a non-production environment, and only then enable `AUDIT_EVENTS_ENABLED` or `INGESTION_PROVENANCE_ENABLED`.
+
+Rollback by setting both feature gates to `false` and redeploying prior component tags if needed. The additive Search fields can remain in place because older components ignore unknown fields. Post-provisioning never recreates an existing index for this migration.
+
+### Validation
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.3.13 |
+| gpt-rag-orchestrator | v3.8.0 |
+| gpt-rag-ingestion | v2.5.0 |
+| infra / AI Landing Zone | v2.3.0 |
+
+Validation evidence will be recorded on the implementation pull request before merge. No Azure deployment or release publication is part of this change.
 
 ## [v3.6.0] - 2026-07-19
 

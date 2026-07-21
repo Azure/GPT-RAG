@@ -110,7 +110,15 @@ pip install --upgrade pip
 pip install -r config/requirements.txt
 
 ###############################################################################
-# 1) AI Foundry Setup
+# 1) Governance and audit configuration
+###############################################################################
+echo
+echo "🔐 Governance and audit configuration…"
+python -m config.governance.setup
+echo "✅ Governance and audit configuration finished."
+
+###############################################################################
+# 2) AI Foundry Setup
 ###############################################################################
 echo
 echo "📑 AI Foundry Setup…"
@@ -123,7 +131,7 @@ echo "📑 AI Foundry Setup…"
 }
 
 ###############################################################################
-# 2) Container Apps Setup
+# 3) Container Apps Setup
 ###############################################################################
 echo
 echo "🔍 ContainerApp setup…"
@@ -136,7 +144,7 @@ echo "🔍 ContainerApp setup…"
 }
 
 ###############################################################################
-# 3) AI Search Setup
+# 4) AI Search Setup
 ###############################################################################
 echo
 echo "🔍 AI Search setup…"

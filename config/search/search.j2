@@ -56,8 +56,18 @@
         { "name": "relatedImages",                  "type": "Collection(Edm.String)",   "searchable": false, "retrievable": true },
         { "name": "relatedFiles",                   "type": "Collection(Edm.String)",   "searchable": false, "retrievable": true },
         { "name": "source",                         "type": "Edm.String",               "searchable": false, "retrievable": true,  "filterable": true },
-        { "name": "contentVector",                  "type": "Collection(Edm.Single)",   "searchable": true,  "retrievable": true,  "dimensions": "{{EMBEDDINGS_VECTOR_DIMENSIONS}}", "vectorSearchProfile": "default" },
-        { "name": "captionVector",                  "type": "Collection(Edm.Single)",   "searchable": true,  "retrievable": true,  "dimensions": "{{EMBEDDINGS_VECTOR_DIMENSIONS}}", "vectorSearchProfile": "default" }
+        { "name": "provenance_id",                  "type": "Edm.String",               "searchable": false, "retrievable": true,  "filterable": true },
+        { "name": "source_uri_id",                  "type": "Edm.String",               "searchable": false, "retrievable": true,  "filterable": true },
+        { "name": "source_version_id",              "type": "Edm.String",               "searchable": false, "retrievable": true,  "filterable": true },
+        { "name": "content_checksum_sha256",        "type": "Edm.String",               "searchable": false, "retrievable": true,  "filterable": true },
+        { "name": "ingested_at",                    "type": "Edm.DateTimeOffset",       "searchable": false, "retrievable": true,  "filterable": true, "sortable": true },
+        { "name": "ingest_run_id",                  "type": "Edm.String",               "searchable": false, "retrievable": true,  "filterable": true },
+        { "name": "data_classification",            "type": "Edm.String",               "searchable": false, "retrievable": true,  "filterable": true, "facetable": true },
+        { "name": "right_to_use",                   "type": "Edm.String",               "searchable": false, "retrievable": true,  "filterable": true, "facetable": true },
+        { "name": "retention_class",                "type": "Edm.String",               "searchable": false, "retrievable": true,  "filterable": true, "facetable": true },
+        { "name": "delete_after",                   "type": "Edm.String",               "searchable": false, "retrievable": true,  "filterable": true, "sortable": true },
+        { "name": "contentVector",                  "type": "Collection(Edm.Single)",   "searchable": true,  "retrievable": true,  "dimensions": {{EMBEDDINGS_VECTOR_DIMENSIONS}}, "vectorSearchProfile": "default" },
+        { "name": "captionVector",                  "type": "Collection(Edm.Single)",   "searchable": true,  "retrievable": true,  "dimensions": {{EMBEDDINGS_VECTOR_DIMENSIONS}}, "vectorSearchProfile": "default" }
       ],
       "corsOptions": {
         "allowedOrigins": ["*"],
@@ -128,7 +138,7 @@
         { "name": "question",      "type": "Edm.String",             "searchable": true, "retrievable": true, "analyzer": "{{SEARCH_ANALYZER_NAME}}" },
         { "name": "query",         "type": "Edm.String",             "searchable": false },
         { "name": "reasoning",     "type": "Edm.String",             "searchable": true },
-        { "name": "contentVector", "type": "Collection(Edm.Single)", "searchable": true, "retrievable": true, "dimensions": "{{EMBEDDINGS_VECTOR_DIMENSIONS}}", "vectorSearchProfile": "default" }
+        { "name": "contentVector", "type": "Collection(Edm.Single)", "searchable": true, "retrievable": true, "dimensions": {{EMBEDDINGS_VECTOR_DIMENSIONS}}, "vectorSearchProfile": "default" }
       ],
       "corsOptions": {
         "allowedOrigins": ["*"],
@@ -205,7 +215,7 @@
             { "name": "examples",    "type": "Collection(Edm.String)" }
           ]
         },
-        { "name": "contentVector", "type": "Collection(Edm.Single)", "searchable": true, "retrievable": true, "dimensions": "{{EMBEDDINGS_VECTOR_DIMENSIONS}}", "vectorSearchProfile": "default" }
+        { "name": "contentVector", "type": "Collection(Edm.Single)", "searchable": true, "retrievable": true, "dimensions": {{EMBEDDINGS_VECTOR_DIMENSIONS}}, "vectorSearchProfile": "default" }
       ],
       "corsOptions": {
         "allowedOrigins": ["*"],
@@ -276,7 +286,7 @@
         { "name": "source_table",  "type": "Edm.String",             "searchable": true, "filterable": true },
         { "name": "data_type",     "type": "Edm.String",             "searchable": true },
         { "name": "source_model",  "type": "Edm.String",             "searchable": true },
-        { "name": "contentVector", "type": "Collection(Edm.Single)", "searchable": true, "retrievable": true, "dimensions": "{{EMBEDDINGS_VECTOR_DIMENSIONS}}", "vectorSearchProfile": "default" }
+        { "name": "contentVector", "type": "Collection(Edm.Single)", "searchable": true, "retrievable": true, "dimensions": {{EMBEDDINGS_VECTOR_DIMENSIONS}}, "vectorSearchProfile": "default" }
       ],
       "corsOptions": {
         "allowedOrigins": ["*"],

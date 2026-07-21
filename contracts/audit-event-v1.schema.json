@@ -1,0 +1,208 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Azure/GPT-RAG/contracts/audit-event-v1.schema.json",
+  "title": "GPT-RAG audit event v1",
+  "description": "Shared logical audit event contract owned by Azure/GPT-RAG. Readers of major version 1 must ignore unknown optional fields. Logical root events use a null parent_event_id; the Azure Monitor wire sentinel is not a logical event ID.",
+  "type": "object",
+  "additionalProperties": true,
+  "maxProperties": 64,
+  "required": [
+    "schema_version",
+    "event_id",
+    "event_type",
+    "event_time_utc",
+    "correlation_id",
+    "trace_id",
+    "span_id",
+    "parent_event_id",
+    "service_name",
+    "service_version",
+    "environment",
+    "operation",
+    "status",
+    "reason_code",
+    "capture_mode",
+    "redaction_applied",
+    "omitted_fields",
+    "truncated_fields"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "event_id": {
+      "type": "string",
+      "pattern": "^evt_[0-9a-f]{32}$",
+      "not": { "const": "evt_00000000000000000000000000000000" },
+      "description": "Logical event ID. The all-zero Azure Monitor wire sentinel is reserved and cannot identify an event."
+    },
+    "event_type": {
+      "enum": [
+        "request.started",
+        "request.completed",
+        "request.failed",
+        "request.cancelled",
+        "route.selected",
+        "grounding.source.selected",
+        "grounding.source.rejected",
+        "tool.invocation.started",
+        "tool.invocation.completed",
+        "tool.invocation.failed",
+        "tool.invocation.cancelled",
+        "outcome.produced",
+        "outcome.rejected",
+        "audit.emission.failed",
+        "ingestion.run.started",
+        "ingestion.run.completed",
+        "ingestion.run.failed",
+        "ingestion.run.cancelled",
+        "ingestion.document.indexed",
+        "ingestion.document.rejected",
+        "ingestion.document.deleted"
+      ]
+    },
+    "event_time_utc": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6}Z$"
+    },
+    "correlation_id": { "type": "string", "pattern": "^req_[0-9a-f]{32}$" },
+    "trace_id": { "type": "string", "pattern": "^[0-9a-f]{32}$" },
+    "span_id": { "type": "string", "pattern": "^[0-9a-f]{16}$" },
+    "parent_event_id": {
+      "type": ["string", "null"],
+      "pattern": "^evt_[0-9a-f]{32}$",
+      "not": { "const": "evt_00000000000000000000000000000000" },
+      "description": "Logical parent event ID. Null identifies a root event. Exporters encode null as the reserved all-zero event ID only in the Azure Monitor wire shape."
+    },
+    "service_name": { "type": "string", "maxLength": 512 },
+    "service_version": { "type": "string", "maxLength": 512 },
+    "environment": { "type": "string", "maxLength": 64 },
+    "operation": { "type": "string", "maxLength": 512 },
+    "status": {
+      "enum": [
+        "started",
+        "completed",
+        "failed",
+        "cancelled",
+        "selected",
+        "rejected",
+        "produced"
+      ]
+    },
+    "reason_code": {
+      "enum": [
+        "none",
+        "request_received",
+        "request_completed",
+        "request_failed",
+        "request_cancelled",
+        "client_disconnected",
+        "partial_output",
+        "strategy_configured",
+        "direct_model_selected",
+        "agent_selected",
+        "source_selected",
+        "source_rejected",
+        "source_empty",
+        "source_limit_reached",
+        "tool_invoked",
+        "tool_completed",
+        "tool_failed",
+        "tool_cancelled",
+        "timeout",
+        "outcome_produced",
+        "outcome_rejected",
+        "validation_failed",
+        "redaction_failure",
+        "serialization_failure",
+        "event_too_large",
+        "attribute_limit_exceeded",
+        "export_failure",
+        "unknown"
+      ]
+    },
+    "capture_mode": { "enum": ["metadata_only", "sensitive_allowlist"] },
+    "redaction_applied": { "type": "boolean" },
+    "omitted_fields": {
+      "type": "array",
+      "maxItems": 32,
+      "items": { "type": "string", "maxLength": 512 }
+    },
+    "truncated_fields": {
+      "type": "array",
+      "maxItems": 32,
+      "items": { "type": "string", "maxLength": 512 }
+    },
+    "started_at_utc": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6}Z$"
+    },
+    "duration_ms": { "type": "number", "minimum": 0, "maximum": 86400000 },
+    "decision_type": { "type": "string", "maxLength": 512 },
+    "decision_value": { "type": "string", "maxLength": 512 },
+    "source_id": { "type": ["string", "null"], "maxLength": 512 },
+    "source_type": { "type": "string", "maxLength": 512 },
+    "source_rank": { "type": "integer", "minimum": 0 },
+    "tool_name": { "type": "string", "maxLength": 512 },
+    "tool_id": { "type": ["string", "null"], "maxLength": 512 },
+    "tool_invocation_id": { "type": ["string", "null"], "maxLength": 512 },
+    "outcome_type": { "type": "string", "maxLength": 512 },
+    "failure_type": { "type": "string", "maxLength": 512 },
+    "input_count": { "type": "integer", "minimum": 0 },
+    "output_count": { "type": "integer", "minimum": 0 },
+    "source_count": { "type": "integer", "minimum": 0 },
+    "partial_output": { "type": "boolean" },
+    "http_status_code": { "type": "integer", "minimum": 100, "maximum": 599 },
+    "transport": { "type": "string", "maxLength": 512 },
+    "actor_id": { "type": ["string", "null"], "maxLength": 512 },
+    "conversation_id": { "type": ["string", "null"], "maxLength": 512 },
+    "question_id": { "type": ["string", "null"], "maxLength": 512 },
+    "thread_id": { "type": ["string", "null"], "maxLength": 512 },
+    "hmac_key_id": { "type": "string", "maxLength": 512 },
+    "timing_source": {
+      "enum": ["observed", "reconstructed"],
+      "description": "How the activity start time was obtained. Reconstructed timestamps are approximate."
+    },
+    "audit_events_omitted": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of audit detail events omitted during this request."
+    },
+    "source_events_omitted": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of grounding-source events omitted during this request."
+    },
+    "tool_invocations_omitted": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of complete tool invocation event pairs omitted during this request."
+    },
+    "prompt": { "type": "string", "maxLength": 2048 },
+    "response": { "type": "string", "maxLength": 2048 },
+    "source_excerpt": { "type": "string", "maxLength": 2048 },
+    "tool_arguments": { "type": "string", "maxLength": 2048 },
+    "tool_result": { "type": "string", "maxLength": 2048 }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "enum": [
+              "request.completed",
+              "request.failed",
+              "request.cancelled",
+              "tool.invocation.completed",
+              "tool.invocation.failed",
+              "tool.invocation.cancelled",
+              "ingestion.run.completed",
+              "ingestion.run.failed",
+              "ingestion.run.cancelled"
+            ]
+          }
+        },
+        "required": ["event_type"]
+      },
+      "then": { "required": ["started_at_utc", "duration_ms"] }
+    }
+  ]
+}

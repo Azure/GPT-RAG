@@ -358,7 +358,7 @@ def prepare_context_and_render(template_name: str, template_dir: str, label_filt
     return result, context
 
 # ── Azure Search API Call ─────────────────────────────────────────────────--
-def call_search_api(endpoint: str, api_version: str, rtype: str, rname: str, method: str, cred: ChainedTokenCredential, body: Any = None, max_retries: int = 3) -> bool:
+def call_search_api(endpoint: str, api_version: str, rtype: str, rname: str, method: str, cred: ChainedTokenCredential, body: Any = None, max_retries: int = 3, if_match: Optional[str] = None, if_none_match: Optional[str] = None) -> bool:
     """
     Call Azure Search REST API with retry logic for authentication failures.
     """
@@ -367,6 +367,10 @@ def call_search_api(endpoint: str, api_version: str, rtype: str, rname: str, met
             # Get fresh token on each attempt
             token = cred.get_token("https://search.azure.com/.default").token
             headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+            if if_match:
+                headers["If-Match"] = if_match
+            if if_none_match:
+                headers["If-None-Match"] = if_none_match
             url = f"{endpoint}/{rtype}/{rname}?api-version={api_version}"
             resp = getattr(requests, method.lower())(url, headers=headers, json=body)
             
@@ -387,11 +391,134 @@ def call_search_api(endpoint: str, api_version: str, rtype: str, rname: str, met
                 return False
             else:
                 logging.warning(f"⚠️ Attempt {attempt + 1}/{max_retries} failed for {method.upper()} {rtype}/{rname}: {e}")
-                logging.warning(f"    Retrying in 2 seconds...")
+                logging.warning("    Retrying in 2 seconds...")
                 time.sleep(2)
                 # Continue to next attempt - cred.get_token() will be called again
 
     return False  # Should never reach here, but just in case
+
+
+def get_search_resource(
+    endpoint: str,
+    api_version: str,
+    resource_type: str,
+    resource_name: str,
+    credential: ChainedTokenCredential,
+) -> Tuple[Optional[dict], Optional[str]]:
+    """Return an existing Search resource and ETag, or two ``None`` values."""
+    token = credential.get_token("https://search.azure.com/.default").token
+    response = requests.get(
+        f"{endpoint}/{resource_type}/{resource_name}?api-version={api_version}",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json",
+        },
+    )
+    if response.status_code == 404:
+        return None, None
+    if response.status_code >= 400:
+        raise RuntimeError(
+            f"GET {resource_type}/{resource_name} failed with "
+            f"HTTP {response.status_code}; no update was attempted."
+        )
+    payload = response.json()
+    etag = response.headers.get("ETag") or payload.get("@odata.etag")
+    return strip_odata_metadata(payload), etag
+
+
+_INDEX_FIELD_COMPATIBILITY_PROPERTIES = (
+    "type",
+    "key",
+    "searchable",
+    "filterable",
+    "sortable",
+    "facetable",
+    "retrievable",
+    "analyzer",
+    "normalizer",
+    "dimensions",
+    "vectorSearchProfile",
+)
+
+
+def merge_additive_index_schema(
+    existing_index: dict,
+    desired_index: dict,
+) -> Tuple[dict, list[str]]:
+    """Preserve the current index and append fields that are absent from it."""
+    merged = strip_odata_metadata(existing_index)
+    existing_fields = {
+        field["name"]: field for field in merged.get("fields", [])
+    }
+    added_fields: list[str] = []
+
+    for desired_field in desired_index.get("fields", []):
+        name = desired_field["name"]
+        current_field = existing_fields.get(name)
+        if current_field is None:
+            merged.setdefault("fields", []).append(desired_field)
+            existing_fields[name] = desired_field
+            added_fields.append(name)
+            continue
+
+        incompatible_properties = []
+        for property_name in _INDEX_FIELD_COMPATIBILITY_PROPERTIES:
+            if property_name not in desired_field:
+                continue
+            current_value = current_field.get(property_name)
+            desired_value = desired_field[property_name]
+            if property_name == "dimensions":
+                try:
+                    current_value = int(current_value)
+                    desired_value = int(desired_value)
+                except (TypeError, ValueError):
+                    incompatible_properties.append(property_name)
+                    continue
+            if current_value != desired_value:
+                incompatible_properties.append(property_name)
+        if incompatible_properties:
+            properties = ", ".join(incompatible_properties)
+            raise ValueError(
+                f"Index field '{name}' is incompatible with the desired schema "
+                f"for properties: {properties}. The existing index was not modified."
+            )
+
+    return merged, added_fields
+
+
+def prepare_index_updates(
+    definitions: dict,
+    credential: ChainedTokenCredential,
+    search_endpoint: str,
+    api_version: str,
+) -> list[Tuple[str, Optional[dict], list[str], Optional[str], Optional[str]]]:
+    """Build every index update before any dependent resource is deleted."""
+    updates = []
+    for desired_index in definitions.get("indexes", []):
+        name = desired_index["name"]
+        existing, etag = get_search_resource(
+            search_endpoint,
+            api_version,
+            "indexes",
+            name,
+            credential,
+        )
+        if existing is None:
+            body = desired_index
+            added_fields = [
+                field["name"] for field in desired_index.get("fields", [])
+            ]
+            if_none_match = "*"
+        else:
+            body, added_fields = merge_additive_index_schema(
+                existing,
+                desired_index,
+            )
+            if not added_fields:
+                body = None
+            if_none_match = None
+        updates.append((name, body, added_fields, etag, if_none_match))
+    return updates
 
 # ── Resource Provisioning ─────────────────────────────────────────────────--
 def provision_datasources(defs: dict, context: dict, cred: ChainedTokenCredential, ds_to_indexers: dict, search_endpoint: str, api_version: str):
@@ -404,13 +531,59 @@ def provision_datasources(defs: dict, context: dict, cred: ChainedTokenCredentia
         call_search_api(search_endpoint, api_version, "datasources", name, "delete", cred)
         call_search_api(search_endpoint, api_version, "datasources", name, "put", cred, body)
 
-def provision_indexes(defs: dict, context: dict, cred: ChainedTokenCredential, search_endpoint: str, api_version: str):
-    logging.info("Creating indexes...")
-    for idx in defs.get("indexes", []):
-        body = idx
-        name = body["name"]
-        call_search_api(search_endpoint, api_version, "indexes", name, "delete", cred)
-        call_search_api(search_endpoint, api_version, "indexes", name, "put", cred, body)
+def provision_indexes(
+    defs: dict,
+    context: dict,
+    cred: ChainedTokenCredential,
+    search_endpoint: str,
+    api_version: str,
+    prepared_updates: Optional[
+        list[
+            Tuple[
+                str,
+                Optional[dict],
+                list[str],
+                Optional[str],
+                Optional[str],
+            ]
+        ]
+    ] = None,
+):
+    logging.info("Creating or additively updating indexes...")
+    updates = prepared_updates or prepare_index_updates(
+        defs,
+        cred,
+        search_endpoint,
+        api_version,
+    )
+    for name, body, added_fields, etag, if_none_match in updates:
+        if body is None:
+            logging.info(
+                "✅ Index '%s' already contains the desired fields; skipping update.",
+                name,
+            )
+            continue
+
+        if not call_search_api(
+            search_endpoint,
+            api_version,
+            "indexes",
+            name,
+            "put",
+            cred,
+            body,
+            if_match=etag,
+            if_none_match=if_none_match,
+        ):
+            raise RuntimeError(
+                f"Additive update failed for index '{name}'. The existing index "
+                "was not deleted."
+            )
+        logging.info(
+            "✅ Index '%s' updated in place with %d field(s).",
+            name,
+            len(added_fields),
+        )
 
 def provision_skillsets(defs: dict, context: dict, cred: ChainedTokenCredential, search_endpoint: str, api_version: str):
     logging.info("Creating skillsets...")
@@ -753,12 +926,32 @@ def execute_setup(defs: Optional[dict], context: dict):
         logging.error("❗️ SEARCH_API_VERSION not found in search.env; skipping Azure Search setup.")
         return
     
+    # Validate and prepare every index update before deleting any dependent
+    # resources. Unsupported schema changes and transient reads fail without
+    # disturbing the current knowledge bases, sources, indexers, or documents.
+    prepared_index_updates = prepare_index_updates(
+        defs,
+        cred,
+        search_endpoint,
+        api_version,
+    )
+
+    # Apply index changes while all dependent resources are still intact. A
+    # conditional-write failure leaves the current Search topology untouched.
+    provision_indexes(
+        defs,
+        context,
+        cred,
+        search_endpoint,
+        api_version,
+        prepared_index_updates,
+    )
+
     # Step 1: Clean up knowledge base resources in correct order (KB -> KS)
     cleanup_knowledge_resources(defs, context, cred, search_endpoint)
     
-    # Step 2: Provision standard search resources (now indexes can be deleted safely)
+    # Step 2: Reconcile the remaining standard Search resources.
     provision_datasources(defs, context, cred, ds_to_indexers, search_endpoint, api_version)
-    provision_indexes(defs, context, cred, search_endpoint, api_version)
     provision_skillsets(defs, context, cred, search_endpoint, api_version)
     provision_indexers(defs, context, cred, search_endpoint, api_version)
     
