@@ -4,13 +4,11 @@ Use this guide to decide what data GPT-RAG may process, who owns each
 control, and what evidence an operator should preserve for security reviews
 and incident investigations.
 
-!!! warning "Audit trail implementation is not released"
-    The governance practices on this page can be applied today. The correlated
-    [Audit Contract v1](governance_audit_contract_v1.md) is reconciled with
-    orchestrator pull request #277, but that implementation is not in a released
-    runtime. It is disabled by default and still needs GPT-RAG umbrella
-    deployment integration. Do not configure it until the runtime release and
-    integration are complete.
+!!! info "Runtime components released; umbrella release pending"
+    Orchestrator `v3.8.0` and ingestion `v2.5.0` implement the correlated
+    [Audit Contract v1](governance_audit_contract_v1.md). GPT-RAG umbrella
+    `v3.7.0` integration is implemented in pull request #573 but is not yet
+    released. Keep the feature disabled until that umbrella release is deployed.
 
 ## Why this matters
 
@@ -27,7 +25,7 @@ questions without searching unrelated logs:
 GPT-RAG already uses logs, traces, metrics, and source references. Those signals
 are useful, but current releases do not provide the versioned audit contract
 described in issue
-[#571](https://github.com/Azure/GPT-RAG/issues/571). The unreleased contract
+[#571](https://github.com/Azure/GPT-RAG/issues/571). The contract
 correlates operational metadata while leaving prompts, responses, source
 excerpts, tool arguments, and tool results out of the default event stream.
 
@@ -36,9 +34,9 @@ flowchart LR
   Request[User request] --> Route[Route and source selection]
   Route --> Tools[Retrieval and tools]
   Tools --> Outcome[Outcome]
-  Route -. unreleased audit events .-> Evidence[Correlated operational evidence]
-  Tools -. unreleased audit events .-> Evidence
-  Outcome -. unreleased audit events .-> Evidence
+  Route -. audit events .-> Evidence[Correlated operational evidence]
+  Tools -. audit events .-> Evidence
+  Outcome -. audit events .-> Evidence
 ```
 
 ## What GPT-RAG can and cannot establish
@@ -82,7 +80,7 @@ Do not assume that:
 - retention in Azure Monitor satisfies a records-management obligation; or
 - technical evidence establishes legal compliance.
 
-The unreleased audit trail is best-effort telemetry. Sampling, exporter failures,
+The audit trail is best-effort telemetry. Sampling, exporter failures,
 process termination, asynchronous boundaries, disabled instrumentation, and
 upstream systems can create evidence gaps. Events are asserted by the producing
 GPT-RAG process. They are not independently attested, cryptographically signed,
@@ -146,7 +144,7 @@ governance layer.
 
 | Class | Examples | Required posture |
 | --- | --- | --- |
-| Operational metadata | Event and correlation IDs, service and version, bounded status and reason codes, durations, tool names, source kinds, opaque source references | Permitted by the unreleased metadata-only contract. Classify and minimize it because identifiers and operational context can still be sensitive. |
+| Operational metadata | Event and correlation IDs, service and version, bounded status and reason codes, durations, tool names, source kinds, opaque source references | Permitted by the metadata-only contract. Classify and minimize it because identifiers and operational context can still be sensitive. |
 | Sensitive content | Prompts, responses, source excerpts, system instructions, tool arguments, tool results | Off by default. Enable only after an explicit need, privacy review, access design, retention decision, and cost review. |
 | Prohibited data | Access tokens, API keys, authorization headers, cookies, connection strings, credentials, and detected secrets | Never capture or export, including when sensitive-content capture is enabled. Redact before telemetry leaves the producing process and fail closed by omitting unsafe values. |
 
@@ -207,23 +205,42 @@ guarantee complete evidence. Verify the deployed OpenTelemetry and Azure Monitor
 sampling behavior, exporter health, and throttling before relying on telemetry
 for an investigation.
 
-## Roll out the audit feature after release
+## Roll out the audit feature
 
-Do not begin this procedure until the orchestrator implementation is released
-and GPT-RAG umbrella deployment integration is complete.
+Use GPT-RAG umbrella `v3.7.0` or later with orchestrator `v3.8.0` and ingestion
+`v2.5.0`. Do not mix older component versions with this shared-contract rollout.
 
-1. Upgrade with audit emission disabled.
-2. Enable metadata-only events in a non-production environment.
-3. Keep `AUDIT_ACTOR_PSEUDONYM_ENABLED` and
+1. Upgrade with `AUDIT_EVENTS_ENABLED=false`,
+   `AUDIT_SENSITIVE_CONTENT_ENABLED=false`, and
+   `INGESTION_PROVENANCE_ENABLED=false`.
+2. Run post-provisioning. Verify that `AUDIT_HMAC_KEY` is a Key Vault reference
+   and that the existing Search index gained the optional provenance fields
+   without being recreated.
+3. Enable metadata-only audit events in a non-production environment.
+4. Enable ingestion provenance separately if the deployment has reviewed the
+   classification and right-to-use defaults.
+5. Keep `AUDIT_ACTOR_PSEUDONYM_ENABLED` and
    `AUDIT_SENSITIVE_CONTENT_ENABLED` disabled.
-4. If actor correlation is approved, create and restrict a Key Vault HMAC key
-   before enabling it.
-5. Canary a small production slice and reconstruct representative requests.
-6. Monitor latency, exporter failures, ingestion volume, retention cost, and
+6. If actor correlation is approved, enable pseudonymization only after
+   reviewing access to the automatically provisioned Key Vault key.
+7. Rotate the pseudonymization key on your schedule, or immediately after a
+   suspected exposure: create a new version of the `AUDIT-HMAC-KEY` secret in
+   Key Vault, advance `AUDIT_HMAC_KEY_ID` to a new value that marks the new
+   pseudonymization epoch, then restart or redeploy the affected workloads so
+   both changes take effect together. Do not edit `AUDIT_HMAC_KEY` itself; it
+   is an unversioned Key Vault reference and always resolves to the secret's
+   current version. Retain or remove prior secret versions according to your
+   rollback and retention policy. See
+   [HMAC identifiers and rotation](governance_audit_contract_v1.md#hmac-identifiers-and-rotation).
+8. Canary a small production slice and reconstruct representative requests.
+9. Monitor latency, exporter failures, ingestion volume, retention cost, and
    evidence-gap health signals.
-7. Confirm that existing traces, logs, dashboards, and alerts still work.
-8. Roll back by setting `AUDIT_EVENTS_ENABLED=false` and restarting the
-   orchestrator. Do not enable sensitive content as a troubleshooting shortcut.
+10. Confirm that existing traces, logs, dashboards, alerts, indexed documents,
+    and operator-added Search fields still work.
+11. Roll back by setting `AUDIT_EVENTS_ENABLED=false` and
+    `INGESTION_PROVENANCE_ENABLED=false`, then restart the components. Additive
+    Search fields can remain. Do not enable sensitive content as a
+    troubleshooting shortcut.
 
 Audit emission should not make the user request fail. If event production or
 the synchronous logging path fails, the runtime continues the request and
@@ -235,7 +252,7 @@ volume and Azure Monitor ingestion health.
 
 ## Related reading
 
-- [Audit Contract v1, unreleased](governance_audit_contract_v1.md)
+- [Audit Contract v1](governance_audit_contract_v1.md)
 - [Authentication and Document-Level Security](howto_authentication.md)
 - [Grounding sources overview](howto_grounding_overview.md)
 - [Azure Monitor Application Insights telemetry data model](https://learn.microsoft.com/azure/azure-monitor/app/data-model-complete)
