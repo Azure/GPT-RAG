@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#improving-retrieval-quality" class="md-skip">
+        <a href="#optimize-retrieval" class="md-skip">
           Skip to content
         </a>
       
@@ -1362,24 +1362,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#how-retrieval-works" class="md-nav__link">
-    <span class="md-ellipsis">
-      How retrieval works
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#measure-do-not-guess" class="md-nav__link">
-    <span class="md-ellipsis">
-      Measure, do not guess
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#before-you-start" class="md-nav__link">
     <span class="md-ellipsis">
       Before you start
@@ -1389,81 +1371,123 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-1-pick-questions" class="md-nav__link">
+  <a href="#1-freeze-the-experiment" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 1: pick questions
+      1. Freeze the experiment
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-2-pull-results" class="md-nav__link">
+  <a href="#2-read-the-deployed-configuration" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 2: pull results
+      2. Read the deployed configuration
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-3-label-results" class="md-nav__link">
+  <a href="#3-install-the-lab-helpers" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 3: label results
+      3. Install the lab helpers
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-4-score-the-ranking" class="md-nav__link">
+  <a href="#4-capture-baselines" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 4: score the ranking
+      4. Capture baselines
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-5-read-the-metrics" class="md-nav__link">
+  <a href="#5-build-backend-specific-qrels" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 5: read the metrics
+      5. Build backend-specific qrels
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Build backend-specific qrels">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-the-identifiers-and-scores-differ" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why the identifiers and scores differ
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-score-retrieval" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. Score retrieval
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-6-optimization-loop" class="md-nav__link">
+  <a href="#7-sweep-one-variable-at-a-time" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 6: optimization loop
+      7. Sweep one variable at a time
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-7-prove-the-gain" class="md-nav__link">
+  <a href="#8-select-on-held-out-questions" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 7: prove the gain
+      8. Select on held-out questions
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#after-re-ingesting" class="md-nav__link">
+  <a href="#9-promote-restart-and-validate" class="md-nav__link">
     <span class="md-ellipsis">
-      After re-ingesting
+      9. Promote, restart, and validate
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#tips-and-caveats" class="md-nav__link">
+  <a href="#10-roll-back" class="md-nav__link">
     <span class="md-ellipsis">
-      Tips and caveats
+      10. Roll back
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#after-re-ingestion" class="md-nav__link">
+    <span class="md-ellipsis">
+      After re-ingestion
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#illustrative-walkthrough" class="md-nav__link">
+    <span class="md-ellipsis">
+      Illustrative walkthrough
     </span>
   </a>
   
@@ -1594,282 +1618,303 @@
   
 
 
-<h1 id="improving-retrieval-quality">Improving retrieval quality</h1>
-<p>When a GPT-RAG answer is vague, incomplete, or not grounded in your documents,
-the cause is usually retrieval: the agent answered from the wrong chunks. Better
-prompts and bigger models cannot fix a bad set of retrieved chunks. The fix is to
-measure retrieval quality directly and tune the search settings until the right
-chunks come back at the top.</p>
-<p>This guide takes you from zero to a working optimization loop. You will:</p>
-<ol>
-<li>Pull the chunks your index returns for a few real questions.</li>
-<li>Label which chunks are actually relevant (this is your ground truth).</li>
-<li>Score the ranking with the Foundry
-   <a href="https://learn.microsoft.com/azure/ai-foundry/concepts/evaluation-evaluators/rag-evaluators#document-retrieval">Document Retrieval evaluator</a>,
-   which returns ranking metrics like NDCG.</li>
-<li>Change one GPT-RAG search setting at a time and re-measure until the numbers go up.</li>
-<li>Watch the whole loop move a real number on one worked example.</li>
-</ol>
-<p>No prior evaluation experience is needed. Everything runs from a small Python
-script against your own search index.</p>
-<h2 id="how-retrieval-works">How retrieval works</h2>
-<p>GPT-RAG stores every document as small chunks in an Azure AI Search index named
-<code>ragindex</code>. At query time the orchestrator embeds the user question, runs a search
-against that index, and passes the top chunks to the model as context. The
-behavior is controlled by settings in <strong>Azure App Configuration</strong> (label
-<code>gpt-rag</code>). These are the levers you will tune:</p>
+<h1 id="optimize-retrieval">Optimize retrieval</h1>
+<p>Use this guide to measure and improve the documents GPT-RAG retrieves before
+you tune prompts, models, or orchestration. It supports both retrieval backends:</p>
 <table>
 <thead>
 <tr>
-<th>Setting (App Configuration, label <code>gpt-rag</code>)</th>
-<th>Default</th>
-<th>What it controls</th>
+<th>Backend</th>
+<th>Role in this guide</th>
+<th>What it queries</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>SEARCH_RAG_INDEX_NAME</code></td>
-<td><code>ragindex</code></td>
-<td>The index that holds your chunks.</td>
+<td><code>foundry_iq</code></td>
+<td>Primary, modern path</td>
+<td>A Foundry IQ knowledge base</td>
 </tr>
 <tr>
-<td><code>SEARCH_APPROACH</code></td>
-<td><code>hybrid</code></td>
-<td>How search runs: <code>term</code> (keyword only), <code>vector</code> (embeddings only), or <code>hybrid</code> (both).</td>
-</tr>
-<tr>
-<td><code>SEARCH_RAGINDEX_TOP_K</code></td>
-<td><code>3</code></td>
-<td>How many chunks are retrieved and sent to the model.</td>
-</tr>
-<tr>
-<td><code>SEARCH_USE_SEMANTIC</code></td>
-<td><code>false</code></td>
-<td>Turns the Azure AI Search semantic reranker on or off.</td>
-</tr>
-<tr>
-<td><code>SEARCH_SEMANTIC_SEARCH_CONFIG</code></td>
-<td><code>my-semantic-config</code></td>
-<td>The semantic ranker configuration name.</td>
-</tr>
-<tr>
-<td><code>CHUNKING_NUM_TOKENS</code></td>
-<td><code>2048</code></td>
-<td>Maximum chunk size in tokens (set in ingestion, applied when you re-ingest).</td>
-</tr>
-<tr>
-<td><code>TOKEN_OVERLAP</code></td>
-<td><code>200</code></td>
-<td>Token overlap between consecutive chunks (ingestion).</td>
+<td><code>ai_search</code></td>
+<td>Control and direct path</td>
+<td>The GPT-RAG Azure AI Search index</td>
 </tr>
 </tbody>
 </table>
-<p>The first four are query-time settings: change them and the next question uses the
-new behavior. The chunking settings are ingestion-time: changing them only takes
-effect after you re-ingest your documents, which rebuilds the index.</p>
-<h2 id="measure-do-not-guess">Measure, do not guess</h2>
-<p>GPT-RAG agents are evaluated with the
-<a href="https://azure.github.io/agentops/tutorial-http-agent/">AgentOps Accelerator</a>,
-which runs Foundry's built-in evaluators against the live orchestrator endpoint
-and turns the result into a pull request gate. Evaluators like <strong>Retrieval</strong> and
-<strong>Groundedness</strong> use an LLM judge and a 1 to 5 score, need no labels, and are cheap
-to run on every change, so they tell you <em>that</em> retrieval is weak. What they do not
-do is tell you <em>how to fix it</em> or let you compare two search configurations
-objectively.</p>
-<p>Document Retrieval is the tuning tool. You give it two things per question:</p>
-<ul>
-<li><strong>The retrieved documents</strong>: the ranked list your index returned, each with the
-  retriever's own score.</li>
-<li><strong>The relevance labels (qrels)</strong>: your own judgment of how relevant each chunk
-  truly is, on a 0 to 4 scale.</li>
-</ul>
-<p>It then compares the ranking the retriever produced against the ranking your labels
-imply, and returns position-aware metrics. If the most relevant chunks are at the
-top, the scores are high. If relevant chunks are buried or missing, the scores drop.</p>
-<div class="admonition note">
-<p class="admonition-title">Why this is a tuning tool, not a CI gate</p>
-<p>Document Retrieval needs hand-labeled ground truth, and its labels reference
-specific chunk ids in your current index. Rebuilding the index can change those
-ids and invalidate the labels. That is fine for a deliberate tuning study, but
-too brittle to run on every commit. Keep Retrieval and Groundedness on your
-automated checks, and use Document Retrieval here, on demand, when you decide to
-improve search.</p>
-</div>
+<p>The backends do not return the same identifiers, candidate sets, or scores.
+Measure each backend through its own adapter and qrels. Compare normalized
+ranking and answer-quality metrics, never raw backend scores.</p>
 <h2 id="before-you-start">Before you start</h2>
 <p>You need:</p>
 <ul>
-<li><strong>Python 3.10 or later.</strong></li>
-<li>
-<p><strong>The Python packages:</strong></p>
-<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>azure-search-documents<span class="w"> </span>azure-identity<span class="w"> </span>openai<span class="w"> </span>azure-ai-evaluation
+<li>a deployed GPT-RAG environment and access to its Azure App Configuration,
+  Search, model, and Container Apps resources;</li>
+<li><a href="https://learn.microsoft.com/cli/azure/install-azure-cli-windows">Azure CLI</a>,
+  <a href="https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd">Azure Developer CLI</a>,
+  Python 3.10 or later, and an authenticated <code>az login</code>;</li>
+<li>a fixed corpus snapshot and questions that require facts from that corpus;</li>
+<li>an evaluation environment. Do not run tuning sweeps against production.</li>
+</ul>
+<p>Run all retrieval experiments with:</p>
+<div class="highlight"><pre><span></span><code>AGENT_STRATEGY=single_agent_rag
 </code></pre></div>
-</li>
-<li>
-<p><strong>Access to your deployed resources.</strong> Sign in with the Azure CLI using an
-  identity that can read the search index and call Azure OpenAI:</p>
-<div class="highlight"><pre><span></span><code>az<span class="w"> </span>login
-</code></pre></div>
-<p>Your identity needs two role assignments:</p>
+<p><code>single_agent</code> and <code>maf_single_agent</code> are <strong>not valid strategy values</strong>. After
+you select a retrieval configuration, you can separately compare
+<code>maf_agent_service</code> and <code>maf_lite</code>. Mixing strategy and retrieval changes in
+the same experiment makes the result impossible to attribute.</p>
+<h2 id="1-freeze-the-experiment">1. Freeze the experiment</h2>
+<p>Split questions before running a sweep:</p>
 <ul>
-<li><strong>Search Index Data Reader</strong> on the Azure AI Search service (to read chunks).</li>
-<li><strong>Cognitive Services OpenAI User</strong> on the Azure OpenAI resource (to embed the query).</li>
+<li><strong>tuning set</strong>: use this to choose settings;</li>
+<li><strong>held-out set</strong>: open it only after selecting a candidate.</li>
 </ul>
-</li>
-<li>
-<p><strong>A few values from your environment.</strong> Open Azure App Configuration (label
-  <code>gpt-rag</code>) or the Azure portal and collect:</p>
-<table>
-<thead>
-<tr>
-<th>Value</th>
-<th>Where to find it</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Search endpoint</td>
-<td><code>SEARCH_SERVICE_QUERY_ENDPOINT</code>, e.g. <code>https://&lt;your-search&gt;.search.windows.net</code></td>
-</tr>
-<tr>
-<td>Index name</td>
-<td><code>SEARCH_RAG_INDEX_NAME</code> (usually <code>ragindex</code>)</td>
-</tr>
-<tr>
-<td>Azure OpenAI endpoint</td>
-<td>Your Azure OpenAI resource endpoint, e.g. <code>https://&lt;your-aoai&gt;.openai.azure.com</code></td>
-</tr>
-<tr>
-<td>Embedding deployment</td>
-<td><code>EMBEDDING_DEPLOYMENT_NAME</code>, e.g. <code>text-embedding-3-large</code></td>
-</tr>
-</tbody>
-</table>
-</li>
+<p>Use JSON Lines so every question has a durable ID:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">New-Item</span> <span class="n">-ItemType</span> <span class="n">Directory</span> <span class="n">-Force</span> <span class="p">.\</span><span class="n">retrieval-lab</span> <span class="p">|</span> <span class="nb">Out-Null</span>
+
+<span class="sh">@&#39;</span>
+<span class="sh">{&quot;id&quot;:&quot;fuel-pressure&quot;,&quot;split&quot;:&quot;tune&quot;,&quot;query&quot;:&quot;How is fuel pressure maintained in the fuel delivery system?&quot;}</span>
+<span class="sh">{&quot;id&quot;:&quot;pressure-failure&quot;,&quot;split&quot;:&quot;held_out&quot;,&quot;query&quot;:&quot;What happens when fuel pressure is too low?&quot;}</span>
+<span class="sh">&#39;@</span> <span class="p">|</span> <span class="nb">Set-Content</span> <span class="p">.\</span><span class="n">retrieval-lab</span><span class="p">\</span><span class="n">questions</span><span class="p">.</span><span class="n">jsonl</span>
+</code></pre></div>
+<p>The <a href="../assets/vw-fuel-system.pdf">fuel-system PDF</a> is available for a small
+walkthrough. Ingest it before using the sample questions. Your generated chunk
+identifiers will differ from any illustrative identifiers in this guide.</p>
+<p>Keep these conditions fixed across runs:</p>
+<ul>
+<li>corpus and ingestion version;</li>
+<li>question file and split;</li>
+<li>user identity and document permissions;</li>
+<li><code>AGENT_STRATEGY=single_agent_rag</code>;</li>
+<li>answer model, prompt, and temperature for downstream evaluation;</li>
+<li>the final document limit being compared;</li>
+<li>region and comparable load conditions.</li>
 </ul>
-<p>Set them as environment variables so the scripts below can read them:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">SEARCH_ENDPOINT</span><span class="o">=</span><span class="s2">&quot;https://&lt;your-search&gt;.search.windows.net&quot;</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">INDEX_NAME</span><span class="o">=</span><span class="s2">&quot;ragindex&quot;</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">AOAI_ENDPOINT</span><span class="o">=</span><span class="s2">&quot;https://&lt;your-aoai&gt;.openai.azure.com&quot;</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">EMBED_DEPLOYMENT</span><span class="o">=</span><span class="s2">&quot;text-embedding-3-large&quot;</span>
-</code></pre></div>
-<p>On Windows PowerShell use <code>$env:SEARCH_ENDPOINT = "..."</code> instead of <code>export</code>.</p>
-<h2 id="step-1-pick-questions">Step 1: pick questions</h2>
-<p>Pick a small set of questions that real users ask and that your documents should
-answer. Five to fifteen is plenty to start. A small, trusted set is far easier to
-label and reason about than a large noisy one.</p>
-<div class="highlight"><pre><span></span><code>How is fuel pressure maintained in the fuel delivery system?
-What is the function of the fuel pressure regulator?
-When should the fuel filter be replaced?
-</code></pre></div>
-<p>Save them in a file <code>questions.txt</code>, one per line.</p>
-<div class="admonition tip">
-<p class="admonition-title">Want a ready-made example to follow along?</p>
-<p>Download this sample document and use it as your test corpus:
-<a href="../assets/vw-fuel-system.pdf">vw-fuel-system.pdf</a> (a short technical manual about
-an automotive fuel system). Ingest it into GPT-RAG the same way you ingest any
-document (drop it in the <code>documents</code> container of your storage account, or use
-the ingestion path you configured), wait for indexing to finish, then run the
-three questions above. After ingestion its chunks appear in <code>ragindex</code> with ids
-like <code>documents-vw-fuel-system-pdf-c00002</code>. The walkthrough below uses those
-ids so you can reproduce every step end to end.</p>
-</div>
-<h2 id="step-2-pull-results">Step 2: pull results</h2>
-<p>This script runs the same kind of search the GPT-RAG orchestrator runs (hybrid by
-default) and prints the ranked chunks for each question, including a content
-preview so you can judge relevance. It also saves the raw results to
-<code>retrieved.json</code> for the next steps.</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># retrieve.py</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">json</span><span class="o">,</span><span class="w"> </span><span class="nn">os</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">azure.identity</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultAzureCredential</span><span class="p">,</span> <span class="n">get_bearer_token_provider</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">azure.search.documents</span><span class="w"> </span><span class="kn">import</span> <span class="n">SearchClient</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">azure.search.documents.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">VectorizedQuery</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">openai</span><span class="w"> </span><span class="kn">import</span> <span class="n">AzureOpenAI</span>
+<h2 id="2-read-the-deployed-configuration">2. Read the deployed configuration</h2>
+<p>Do not guess generated index, semantic configuration, or knowledge base names.
+GPT-RAG loads App Configuration labels in this precedence order:</p>
+<ol>
+<li><code>orchestrator</code></li>
+<li><code>gpt-rag-orchestrator</code></li>
+<li><code>gpt-rag</code></li>
+<li>no label</li>
+</ol>
+<p>The following PowerShell reads the active value and reports the label that
+supplied it. Run it from the deployed GPT-RAG project after selecting the
+correct <code>azd</code> environment.</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$env:APP_CONFIG_ENDPOINT</span> <span class="p">=</span> <span class="n">azd</span> <span class="n">env</span> <span class="nb">get-value</span> <span class="n">APP_CONFIG_ENDPOINT</span>
+<span class="k">if</span> <span class="p">(</span><span class="o">-not</span> <span class="nv">$env:APP_CONFIG_ENDPOINT</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">throw</span> <span class="s2">&quot;APP_CONFIG_ENDPOINT is not set in the selected azd environment.&quot;</span>
+<span class="p">}</span>
 
-<span class="n">SEARCH_ENDPOINT</span>  <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;SEARCH_ENDPOINT&quot;</span><span class="p">]</span>
-<span class="n">INDEX_NAME</span>       <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;INDEX_NAME&quot;</span><span class="p">,</span> <span class="s2">&quot;ragindex&quot;</span><span class="p">)</span>
-<span class="n">AOAI_ENDPOINT</span>    <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;AOAI_ENDPOINT&quot;</span><span class="p">]</span>
-<span class="n">EMBED_DEPLOYMENT</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;EMBED_DEPLOYMENT&quot;</span><span class="p">]</span>
+<span class="nv">$script:AppConfigName</span> <span class="p">=</span> <span class="p">(</span><span class="no">[uri]</span><span class="nv">$env:APP_CONFIG_ENDPOINT</span><span class="p">).</span><span class="n">Host</span><span class="p">.</span><span class="n">Split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="n">0</span><span class="p">]</span>
 
-<span class="c1"># The four levers you will sweep in Step 6. Start with the GPT-RAG defaults.</span>
-<span class="n">TOP_K</span>           <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;TOP_K&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">))</span>          <span class="c1"># SEARCH_RAGINDEX_TOP_K</span>
-<span class="n">APPROACH</span>        <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;APPROACH&quot;</span><span class="p">,</span> <span class="s2">&quot;hybrid&quot;</span><span class="p">)</span>        <span class="c1"># term | vector | hybrid</span>
-<span class="n">USE_SEMANTIC</span>    <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;USE_SEMANTIC&quot;</span><span class="p">,</span> <span class="s2">&quot;false&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;true&quot;</span>
-<span class="n">SEMANTIC_CONFIG</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;SEMANTIC_CONFIG&quot;</span><span class="p">,</span> <span class="s2">&quot;my-semantic-config&quot;</span><span class="p">)</span>
+<span class="k">function</span> <span class="nb">Get-ActiveSetting</span> <span class="p">{</span>
+    <span class="k">param</span><span class="p">([</span><span class="k">Parameter</span><span class="p">(</span><span class="k">Mandatory</span><span class="p">)]</span><span class="no">[string]</span><span class="nv">$Key</span><span class="p">)</span>
 
-<span class="n">credential</span> <span class="o">=</span> <span class="n">DefaultAzureCredential</span><span class="p">()</span>
-<span class="n">token_provider</span> <span class="o">=</span> <span class="n">get_bearer_token_provider</span><span class="p">(</span>
-    <span class="n">credential</span><span class="p">,</span> <span class="s2">&quot;https://cognitiveservices.azure.com/.default&quot;</span>
+    <span class="k">foreach</span> <span class="p">(</span><span class="nv">$label</span> <span class="k">in</span> <span class="p">@(</span><span class="s1">&#39;orchestrator&#39;</span><span class="p">,</span> <span class="s1">&#39;gpt-rag-orchestrator&#39;</span><span class="p">,</span> <span class="s1">&#39;gpt-rag&#39;</span><span class="p">,</span> <span class="s1">&#39;\0&#39;</span><span class="p">))</span> <span class="p">{</span>
+        <span class="nv">$json</span> <span class="p">=</span> <span class="n">az</span> <span class="n">appconfig</span> <span class="n">kv</span> <span class="n">show</span> <span class="p">`</span>
+            <span class="p">-</span><span class="n">-name</span> <span class="nv">$script:AppConfigName</span> <span class="p">`</span>
+            <span class="p">-</span><span class="n">-key</span> <span class="nv">$Key</span> <span class="p">`</span>
+            <span class="p">-</span><span class="n">-label</span> <span class="nv">$label</span> <span class="p">`</span>
+            <span class="p">-</span><span class="n">-auth-mode</span> <span class="n">login</span> <span class="p">`</span>
+            <span class="p">-</span><span class="n">-output</span> <span class="n">json</span> <span class="n">2</span><span class="p">&gt;</span><span class="nv">$null</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nv">$LASTEXITCODE</span> <span class="o">-eq</span> <span class="n">0</span> <span class="o">-and</span> <span class="nv">$json</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nv">$item</span> <span class="p">=</span> <span class="nv">$json</span> <span class="p">|</span> <span class="nb">ConvertFrom-Json</span>
+            <span class="nv">$displayLabel</span> <span class="p">=</span> <span class="k">if</span> <span class="p">(</span><span class="nv">$label</span> <span class="o">-eq</span> <span class="s1">&#39;\0&#39;</span><span class="p">)</span> <span class="p">{</span> <span class="s1">&#39;&lt;no label&gt;&#39;</span> <span class="p">}</span> <span class="k">else</span> <span class="p">{</span> <span class="nv">$label</span> <span class="p">}</span>
+            <span class="k">return</span> <span class="no">[pscustomobject]</span><span class="p">@{</span>
+                <span class="n">Key</span> <span class="p">=</span> <span class="nv">$Key</span>
+                <span class="n">Value</span> <span class="p">=</span> <span class="no">[string]</span><span class="nv">$item</span><span class="p">.</span><span class="n">value</span>
+                <span class="n">Label</span> <span class="p">=</span> <span class="nv">$displayLabel</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="no">[pscustomobject]</span><span class="p">@{</span> <span class="n">Key</span> <span class="p">=</span> <span class="nv">$Key</span><span class="p">;</span> <span class="n">Value</span> <span class="p">=</span> <span class="s1">&#39;&#39;</span><span class="p">;</span> <span class="n">Label</span> <span class="p">=</span> <span class="s1">&#39;&lt;not set&gt;&#39;</span> <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="nv">$keys</span> <span class="p">=</span> <span class="p">@(</span>
+    <span class="s1">&#39;AGENT_STRATEGY&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;RETRIEVAL_BACKEND&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;SEARCH_SERVICE_QUERY_ENDPOINT&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;SEARCH_API_VERSION&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;SEARCH_RAG_INDEX_NAME&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;SEARCH_RAGINDEX_TOP_K&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;SEARCH_APPROACH&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;SEARCH_USE_SEMANTIC&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;SEARCH_SEMANTIC_SEARCH_CONFIG&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;AI_FOUNDRY_ACCOUNT_ENDPOINT&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;EMBEDDING_DEPLOYMENT_NAME&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;OPENAI_API_VERSION&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;KNOWLEDGE_BASE_ENDPOINT&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;KNOWLEDGE_BASE_NAME&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;FOUNDRY_IQ_API_VERSION&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;FOUNDRY_IQ_KNOWLEDGE_SOURCE_NAME&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;FOUNDRY_IQ_KNOWLEDGE_SOURCE_KIND&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;FOUNDRY_IQ_FILTER_ADD_ON_ENABLED&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;FOUNDRY_IQ_MAX_OUTPUT_DOCUMENTS&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;FOUNDRY_IQ_FORWARD_SOURCE_AUTH&#39;</span>
 <span class="p">)</span>
-<span class="n">aoai</span> <span class="o">=</span> <span class="n">AzureOpenAI</span><span class="p">(</span>
-    <span class="n">azure_endpoint</span><span class="o">=</span><span class="n">AOAI_ENDPOINT</span><span class="p">,</span>
-    <span class="n">azure_ad_token_provider</span><span class="o">=</span><span class="n">token_provider</span><span class="p">,</span>
-    <span class="n">api_version</span><span class="o">=</span><span class="s2">&quot;2024-10-21&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">search</span> <span class="o">=</span> <span class="n">SearchClient</span><span class="p">(</span><span class="n">SEARCH_ENDPOINT</span><span class="p">,</span> <span class="n">INDEX_NAME</span><span class="p">,</span> <span class="n">credential</span><span class="p">)</span>
 
+<span class="nv">$active</span> <span class="p">=</span> <span class="nv">$keys</span> <span class="p">|</span> <span class="k">ForEach</span><span class="n">-Object</span> <span class="p">{</span> <span class="nb">Get-ActiveSetting</span> <span class="nv">$_</span> <span class="p">}</span>
+<span class="nv">$active</span> <span class="p">|</span> <span class="nb">Format-Table</span> <span class="n">-AutoSize</span>
+<span class="nv">$active</span> <span class="p">|</span> <span class="nb">ConvertTo-Json</span> <span class="p">|</span> <span class="nb">Set-Content</span> <span class="p">.\</span><span class="n">retrieval-lab</span><span class="p">\</span><span class="n">deployed-settings</span><span class="p">.</span><span class="n">json</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">embed</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">aoai</span><span class="o">.</span><span class="n">embeddings</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="p">[</span><span class="n">text</span><span class="p">],</span> <span class="n">model</span><span class="o">=</span><span class="n">EMBED_DEPLOYMENT</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">embedding</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">retrieve</span><span class="p">(</span><span class="n">query</span><span class="p">):</span>
-    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;select&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;title&quot;</span><span class="p">,</span> <span class="s2">&quot;filepath&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">],</span> <span class="s2">&quot;top&quot;</span><span class="p">:</span> <span class="n">TOP_K</span><span class="p">}</span>
-    <span class="k">if</span> <span class="n">APPROACH</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;vector&quot;</span><span class="p">,</span> <span class="s2">&quot;hybrid&quot;</span><span class="p">):</span>
-        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;vector_queries&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">VectorizedQuery</span><span class="p">(</span><span class="n">vector</span><span class="o">=</span><span class="n">embed</span><span class="p">(</span><span class="n">query</span><span class="p">),</span> <span class="n">k_nearest_neighbors</span><span class="o">=</span><span class="n">TOP_K</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;contentVector&quot;</span><span class="p">)</span>
-        <span class="p">]</span>
-    <span class="k">if</span> <span class="n">APPROACH</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;term&quot;</span><span class="p">,</span> <span class="s2">&quot;hybrid&quot;</span><span class="p">):</span>
-        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;search_text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">query</span>
-    <span class="k">if</span> <span class="n">USE_SEMANTIC</span><span class="p">:</span>
-        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;query_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;semantic&quot;</span>
-        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;semantic_configuration_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">SEMANTIC_CONFIG</span>
-
-    <span class="n">docs</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">search</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="n">score</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;@search.reranker_score&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">USE_SEMANTIC</span> <span class="k">else</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;@search.score&quot;</span><span class="p">]</span>
-        <span class="n">docs</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
-            <span class="s2">&quot;document_id&quot;</span><span class="p">:</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>            <span class="c1"># the index key, e.g. documents-vw-fuel-system-pdf-c00002</span>
-            <span class="s2">&quot;relevance_score&quot;</span><span class="p">:</span> <span class="n">score</span><span class="p">,</span>          <span class="c1"># the retriever&#39;s own ranking score</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;title&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;filepath&quot;</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;filepath&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;preview&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)[:</span><span class="mi">300</span><span class="p">],</span>
-        <span class="p">})</span>
-    <span class="k">return</span> <span class="n">docs</span>
-
-
-<span class="n">questions</span> <span class="o">=</span> <span class="p">[</span><span class="n">q</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;questions.txt&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">q</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span>
-<span class="n">out</span> <span class="o">=</span> <span class="p">{}</span>
-<span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">questions</span><span class="p">:</span>
-    <span class="n">docs</span> <span class="o">=</span> <span class="n">retrieve</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
-    <span class="n">out</span><span class="p">[</span><span class="n">q</span><span class="p">]</span> <span class="o">=</span> <span class="n">docs</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== </span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">. [</span><span class="si">{</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;relevance_score&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;document_id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;     </span><span class="si">{</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;preview&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-<span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;retrieved.json&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Saved retrieved.json&quot;</span><span class="p">)</span>
+<span class="k">foreach</span> <span class="p">(</span><span class="nv">$setting</span> <span class="k">in</span> <span class="nv">$active</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nv">$setting</span><span class="p">.</span><span class="n">Value</span><span class="p">)</span> <span class="p">{</span>
+        <span class="no">[Environment]</span><span class="p">::</span><span class="n">SetEnvironmentVariable</span><span class="p">(</span><span class="nv">$setting</span><span class="p">.</span><span class="n">Key</span><span class="p">,</span> <span class="nv">$setting</span><span class="p">.</span><span class="n">Value</span><span class="p">,</span> <span class="s1">&#39;Process&#39;</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
 </code></pre></div>
-<p>Run it:</p>
-<div class="highlight"><pre><span></span><code>python<span class="w"> </span>retrieve.py
+<p>If <code>SEARCH_SEMANTIC_SEARCH_CONFIG</code> is not set, read the index's deployed
+default instead of inventing a name:</p>
+<div class="highlight"><pre><span></span><code><span class="k">if</span> <span class="p">(</span><span class="o">-not</span> <span class="nv">$env:SEARCH_SEMANTIC_SEARCH_CONFIG</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nv">$searchToken</span> <span class="p">=</span> <span class="n">az</span> <span class="n">account</span> <span class="nb">get-access</span><span class="n">-token</span> <span class="p">`</span>
+        <span class="p">-</span><span class="n">-resource</span> <span class="n">https</span><span class="p">://</span><span class="n">search</span><span class="p">.</span><span class="n">azure</span><span class="p">.</span><span class="n">com</span> <span class="p">`</span>
+        <span class="p">-</span><span class="n">-query</span> <span class="n">accessToken</span> <span class="p">`</span>
+        <span class="p">-</span><span class="n">-output</span> <span class="n">tsv</span>
+
+    <span class="nv">$headers</span> <span class="p">=</span> <span class="p">@{</span> <span class="n">Authorization</span> <span class="p">=</span> <span class="s2">&quot;Bearer $searchToken&quot;</span> <span class="p">}</span>
+    <span class="nv">$indexUri</span> <span class="p">=</span> <span class="s1">&#39;{0}/indexes/{1}?api-version={2}&#39;</span> <span class="o">-f</span> <span class="p">`</span>
+        <span class="nv">$env:SEARCH_SERVICE_QUERY_ENDPOINT</span><span class="p">.</span><span class="n">TrimEnd</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">),</span> <span class="p">`</span>
+        <span class="no">[uri]</span><span class="p">::</span><span class="n">EscapeDataString</span><span class="p">(</span><span class="nv">$env:SEARCH_RAG_INDEX_NAME</span><span class="p">),</span> <span class="p">`</span>
+        <span class="nv">$env:SEARCH_API_VERSION</span>
+
+    <span class="nv">$indexDefinition</span> <span class="p">=</span> <span class="nb">Invoke-RestMethod</span> <span class="n">-Uri</span> <span class="nv">$indexUri</span> <span class="n">-Headers</span> <span class="nv">$headers</span>
+    <span class="nv">$env:SEARCH_SEMANTIC_SEARCH_CONFIG</span> <span class="p">=</span> <span class="nv">$indexDefinition</span><span class="p">.</span><span class="n">semantic</span><span class="p">.</span><span class="n">defaultConfiguration</span>
+<span class="p">}</span>
 </code></pre></div>
-<p>Each chunk's <code>document_id</code> is the index key (for example
-<code>documents-vw-fuel-system-pdf-c00002</code>), built from the source file path plus the
-chunk number. That is the id you will label in the next step.</p>
-<div class="admonition tip">
-<p class="admonition-title">The orchestrator and the evaluator name fields differently</p>
-<p>Azure AI Search returns each chunk as <code>id</code> and <code>@search.score</code>. The Document
-Retrieval evaluator expects <code>document_id</code> and <code>relevance_score</code>. The script
-above already does that mapping for you. <code>relevance_score</code> is the retriever's
-own confidence used to rank. The label you add next is <em>your</em> judgment of true
-relevance.</p>
+<p>Confirm that <code>AGENT_STRATEGY</code> resolves to <code>single_agent_rag</code>. Record the
+starting values and their labels. They are your baseline and rollback values.</p>
+<div class="admonition important">
+<p class="admonition-title">Configuration changes require a restart</p>
+<p>The orchestrator loads these settings into an in-memory provider at startup,
+and its retrieval backend selector is also cached. GPT-RAG does not configure
+automatic App Configuration refresh. A key change does <strong>not</strong> affect the next
+request. Restart the active orchestrator revision after every promoted or
+rolled-back configuration change.</p>
 </div>
-<h2 id="step-3-label-results">Step 3: label results</h2>
-<p>For each question, read the previews in <code>retrieved.json</code> and decide how relevant
-each chunk really is, from 0 (irrelevant) to 4 (perfect answer). This is the
-ground truth the evaluator compares against. You only label the chunks that matter
-for the question, not the whole index.</p>
-<p>A simple rubric works well:</p>
+<h2 id="3-install-the-lab-helpers">3. Install the lab helpers</h2>
+<p>Download these repository-maintained helpers into the same directory, or run
+them from a checkout of this documentation:</p>
+<ul>
+<li><a href="../assets/retrieval_optimization/retrieve.py"><code>retrieve.py</code></a></li>
+<li><a href="../assets/retrieval_optimization/pool_candidates.py"><code>pool_candidates.py</code></a></li>
+<li><a href="../assets/retrieval_optimization/evaluate_retrieval.py"><code>evaluate_retrieval.py</code></a></li>
+</ul>
+<p>Download them and create an isolated environment on Windows:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$tools</span> <span class="p">=</span> <span class="s1">&#39;.\retrieval-lab\tools&#39;</span>
+<span class="nb">New-Item</span> <span class="n">-ItemType</span> <span class="n">Directory</span> <span class="n">-Force</span> <span class="nv">$tools</span> <span class="p">|</span> <span class="nb">Out-Null</span>
+<span class="nv">$rawBase</span> <span class="p">=</span> <span class="s1">&#39;https://raw.githubusercontent.com/Azure/GPT-RAG/docs/docs/assets/retrieval_optimization&#39;</span>
+<span class="k">foreach</span> <span class="p">(</span><span class="nv">$file</span> <span class="k">in</span> <span class="p">@(</span><span class="s1">&#39;retrieve.py&#39;</span><span class="p">,</span> <span class="s1">&#39;pool_candidates.py&#39;</span><span class="p">,</span> <span class="s1">&#39;evaluate_retrieval.py&#39;</span><span class="p">))</span> <span class="p">{</span>
+    <span class="nb">Invoke-WebRequest</span> <span class="s2">&quot;$rawBase/$file&quot;</span> <span class="n">-OutFile</span> <span class="s2">&quot;$tools\$file&quot;</span>
+<span class="p">}</span>
+
+<span class="n">python</span> <span class="n">-m</span> <span class="n">venv</span> <span class="p">.\</span><span class="n">retrieval-lab</span><span class="p">\.</span><span class="n">venv</span>
+<span class="p">.\</span><span class="n">retrieval-lab</span><span class="p">\.</span><span class="n">venv</span><span class="p">\</span><span class="n">Scripts</span><span class="p">\</span><span class="n">Activate</span><span class="p">.</span><span class="n">ps1</span>
+<span class="n">python</span> <span class="n">-m</span> <span class="n">pip</span> <span class="n">install</span> <span class="p">-</span><span class="n">-upgrade</span> <span class="n">pip</span>
+<span class="n">python</span> <span class="n">-m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">azure-identity</span> <span class="n">openai</span> <span class="n">requests</span> <span class="n">azure-ai-evaluation</span>
+</code></pre></div>
+<p>For bash:</p>
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>./retrieval-lab/.venv
+<span class="nb">source</span><span class="w"> </span>./retrieval-lab/.venv/bin/activate
+python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>pip
+python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>azure-identity<span class="w"> </span>openai<span class="w"> </span>requests<span class="w"> </span>azure-ai-evaluation
+</code></pre></div>
+<p>The retrieval helper uses the same service surfaces as GPT-RAG:</p>
+<ul>
+<li><code>ai_search</code>: Azure OpenAI embeddings plus
+  <code>POST /indexes/{index}/docs/search</code>;</li>
+<li><code>foundry_iq</code>:
+  <code>POST /knowledgebases/{knowledge-base}/retrieve</code>.</li>
+</ul>
+<p>It writes raw responses and normalized documents. The Foundry IQ request uses
+the configured primary documents knowledge source and asks the service to
+include source data. It does not invent a Foundry IQ SDK or endpoint.
+For a document-retrieval experiment, keep optional Work IQ, Fabric, web, MCP,
+and other knowledge sources out of the run. The helper deliberately isolates
+the primary documents source. If Pattern B document security enables
+<code>FOUNDRY_IQ_FILTER_ADD_ON_ENABLED</code>, the helper stops instead of constructing an
+unsafe filter. Run those permission-sensitive checks through the live
+orchestrator, which builds the filter from the authenticated user context.
+For direct Search, the helper uses the current lab identity for native
+permission trimming and applies GPT-RAG's shared-corpus conversation filter.
+It therefore excludes conversation-specific uploads. Test uploaded-file and
+other request-specific security behavior through the live orchestrator.</p>
+<h2 id="4-capture-baselines">4. Capture baselines</h2>
+<p>Use a new output directory for every run. The helper refuses to overwrite an
+existing run.</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$runs</span> <span class="p">=</span> <span class="s1">&#39;.\retrieval-lab\runs&#39;</span>
+<span class="nb">New-Item</span> <span class="n">-ItemType</span> <span class="n">Directory</span> <span class="n">-Force</span> <span class="nv">$runs</span> <span class="p">|</span> <span class="nb">Out-Null</span>
+
+<span class="nv">$foundryTopK</span> <span class="p">=</span> <span class="k">if</span> <span class="p">(</span><span class="nv">$env:FOUNDRY_IQ_MAX_OUTPUT_DOCUMENTS</span><span class="p">)</span> <span class="p">{</span>
+    <span class="no">[int]</span><span class="nv">$env:FOUNDRY_IQ_MAX_OUTPUT_DOCUMENTS</span>
+<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="n">5</span>
+<span class="p">}</span>
+
+<span class="nv">$stamp</span> <span class="p">=</span> <span class="nb">Get-Date</span> <span class="n">-Format</span> <span class="s1">&#39;yyyyMMdd-HHmmss&#39;</span>
+<span class="nv">$foundryBaseline</span> <span class="p">=</span> <span class="s2">&quot;$runs\$stamp-foundry-iq-baseline&quot;</span>
+<span class="n">python</span> <span class="s2">&quot;$tools\retrieve.py&quot;</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-backend</span> <span class="n">foundry_iq</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-questions</span> <span class="p">.\</span><span class="n">retrieval-lab</span><span class="p">\</span><span class="n">questions</span><span class="p">.</span><span class="n">jsonl</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-split</span> <span class="n">tune</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-top-k</span> <span class="nv">$foundryTopK</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-out</span> <span class="nv">$foundryBaseline</span>
+
+<span class="nv">$searchApproach</span> <span class="p">=</span> <span class="k">if</span> <span class="p">(</span><span class="nv">$env:SEARCH_APPROACH</span><span class="p">)</span> <span class="p">{</span> <span class="nv">$env:SEARCH_APPROACH</span> <span class="p">}</span> <span class="k">else</span> <span class="p">{</span> <span class="s1">&#39;hybrid&#39;</span> <span class="p">}</span>
+<span class="nv">$searchTopK</span> <span class="p">=</span> <span class="k">if</span> <span class="p">(</span><span class="nv">$env:SEARCH_RAGINDEX_TOP_K</span><span class="p">)</span> <span class="p">{</span>
+    <span class="no">[int]</span><span class="nv">$env:SEARCH_RAGINDEX_TOP_K</span>
+<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="n">5</span>
+<span class="p">}</span>
+<span class="nv">$searchArgs</span> <span class="p">=</span> <span class="p">@(</span>
+    <span class="s2">&quot;$tools\retrieve.py&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;--backend&#39;</span><span class="p">,</span> <span class="s1">&#39;ai_search&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;--questions&#39;</span><span class="p">,</span> <span class="s1">&#39;.\retrieval-lab\questions.jsonl&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;--split&#39;</span><span class="p">,</span> <span class="s1">&#39;tune&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;--approach&#39;</span><span class="p">,</span> <span class="nv">$searchApproach</span><span class="p">,</span>
+    <span class="s1">&#39;--top-k&#39;</span><span class="p">,</span> <span class="nv">$searchTopK</span>
+<span class="p">)</span>
+<span class="nv">$searchArgs</span> <span class="p">+=</span> <span class="k">if</span> <span class="p">(</span><span class="nv">$env:SEARCH_USE_SEMANTIC</span> <span class="o">-eq</span> <span class="s1">&#39;true&#39;</span><span class="p">)</span> <span class="p">{</span>
+    <span class="s1">&#39;--semantic&#39;</span>
+<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="s1">&#39;--no-semantic&#39;</span>
+<span class="p">}</span>
+<span class="nv">$stamp</span> <span class="p">=</span> <span class="nb">Get-Date</span> <span class="n">-Format</span> <span class="s1">&#39;yyyyMMdd-HHmmss&#39;</span>
+<span class="nv">$searchBaseline</span> <span class="p">=</span> <span class="s2">&quot;$runs\$stamp-ai-search-baseline&quot;</span>
+<span class="nv">$searchArgs</span> <span class="p">+=</span> <span class="p">@(</span><span class="s1">&#39;--out&#39;</span><span class="p">,</span> <span class="nv">$searchBaseline</span><span class="p">)</span>
+<span class="n">python</span> <span class="nv">@searchArgs</span>
+</code></pre></div>
+<p>The example records <code>5</code> when a deployed document limit is missing instead of
+silently relying on a service default. Choose a different explicit value if it
+better represents your current environment.</p>
+<p>Each run contains:</p>
+<div class="highlight"><pre><span></span><code>runs/&lt;timestamp&gt;-&lt;backend&gt;-&lt;variant&gt;/
+|-- config.json
+|-- environment.json
+|-- questions.jsonl
+|-- raw/
+|   |-- &lt;question-id&gt;.json
+|-- retrieved.json
+`-- timings.json
+</code></pre></div>
+<p>Add qrels version and hash, metrics, answer-evaluation output, and cost
+observations to the run directory before archiving it. Treat a completed run
+as immutable. Also record the GPT-RAG manifest versions and the running
+Container App image digests so a later session can reproduce the service state.
+The evaluation helper writes the retrieved-data and qrels SHA-256 hashes into
+<code>metrics.json</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Protect experiment artifacts</p>
+<p>Raw responses and normalized documents can contain customer content,
+security metadata, and source locations. Store runs in an access-controlled
+location and apply the same retention rules as the source corpus.</p>
+</div>
+<h2 id="5-build-backend-specific-qrels">5. Build backend-specific qrels</h2>
+<p>Qrels are relevance judgments for a specific question and retrieved document.
+Use one rubric for both backends:</p>
 <table>
 <thead>
 <tr>
@@ -1880,337 +1925,327 @@ for the question, not the whole index.</p>
 <tbody>
 <tr>
 <td><code>4</code></td>
-<td>Directly and fully answers the question.</td>
+<td>Directly and fully answers the question</td>
 </tr>
 <tr>
 <td><code>3</code></td>
-<td>Strongly relevant, contains most of the answer.</td>
+<td>Strongly relevant</td>
 </tr>
 <tr>
 <td><code>2</code></td>
-<td>Partially relevant, touches the topic.</td>
+<td>Partially relevant</td>
 </tr>
 <tr>
 <td><code>1</code></td>
-<td>Weakly related, mentions the topic in passing.</td>
+<td>Weakly related</td>
 </tr>
 <tr>
 <td><code>0</code></td>
-<td>Not relevant.</td>
+<td>Not relevant</td>
 </tr>
 </tbody>
 </table>
-<p>Save your labels in <code>qrels.json</code>, keyed by the same question text:</p>
+<p>Before labeling, run every configuration you plan to test on the tuning set.
+Pool and de-duplicate their candidates <strong>within each backend</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">New-Item</span> <span class="n">-ItemType</span> <span class="n">Directory</span> <span class="n">-Force</span> <span class="p">.\</span><span class="n">retrieval-lab</span><span class="p">\</span><span class="n">qrels</span><span class="p">\</span><span class="n">foundry_iq</span> <span class="p">|</span> <span class="nb">Out-Null</span>
+<span class="nb">New-Item</span> <span class="n">-ItemType</span> <span class="n">Directory</span> <span class="n">-Force</span> <span class="p">.\</span><span class="n">retrieval-lab</span><span class="p">\</span><span class="n">qrels</span><span class="p">\</span><span class="n">ai_search</span> <span class="p">|</span> <span class="nb">Out-Null</span>
+
+<span class="n">python</span> <span class="s2">&quot;$tools\pool_candidates.py&quot;</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-retrieved</span> <span class="p">.\</span><span class="n">retrieval-lab</span><span class="p">\</span><span class="n">runs</span><span class="p">\*</span><span class="n">-foundry</span><span class="p">-*\</span><span class="n">retrieved</span><span class="p">.</span><span class="n">json</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-output</span> <span class="p">.\</span><span class="n">retrieval-lab</span><span class="p">\</span><span class="n">qrels</span><span class="p">\</span><span class="n">foundry_iq</span><span class="p">\</span><span class="n">candidate-pool</span><span class="p">.</span><span class="n">json</span>
+
+<span class="n">python</span> <span class="s2">&quot;$tools\pool_candidates.py&quot;</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-retrieved</span> <span class="p">.\</span><span class="n">retrieval-lab</span><span class="p">\</span><span class="n">runs</span><span class="p">\*</span><span class="n">-ai-search</span><span class="p">-*\</span><span class="n">retrieved</span><span class="p">.</span><span class="n">json</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-output</span> <span class="p">.\</span><span class="n">retrieval-lab</span><span class="p">\</span><span class="n">qrels</span><span class="p">\</span><span class="n">ai_search</span><span class="p">\</span><span class="n">candidate-pool</span><span class="p">.</span><span class="n">json</span>
+</code></pre></div>
+<p>Label every pooled candidate, including irrelevant ones, and save the results
+as <code>qrels/&lt;backend&gt;/v1.json</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;How is fuel pressure maintained in the fuel delivery system?&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;document_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;documents-vw-fuel-system-pdf-c00002&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;query_relevance_label&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;document_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;documents-vw-fuel-system-pdf-c00001&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;query_relevance_label&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;document_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;documents-vw-fuel-system-pdf-c00007&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;query_relevance_label&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="nt">&quot;fuel-pressure&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;document_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;exact identifier emitted by that backend adapter&gt;&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;query_relevance_label&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span>
+<span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div>
-<div class="admonition tip">
-<p class="admonition-title">Keep qrels small and stable</p>
-<p>A handful of carefully labeled questions beats a large, sloppy set. Store the
-labels next to your question file and treat them as ground truth you maintain.
-Because the ids are tied to your current index, re-check the labels after any
-re-ingestion or chunking change (see the reindex note below).</p>
-</div>
-<h2 id="step-4-score-the-ranking">Step 4: score the ranking</h2>
-<p>This script loads the retrieved chunks and your labels, runs the Document
-Retrieval evaluator once per question, and prints the metrics.</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># evaluate.py</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">azure.ai.evaluation</span><span class="w"> </span><span class="kn">import</span> <span class="n">DocumentRetrievalEvaluator</span>
+<p>The example is a schema illustration, not a measured judgment.</p>
+<h3 id="why-the-identifiers-and-scores-differ">Why the identifiers and scores differ</h3>
+<ul>
+<li>Direct Azure AI Search uses the index key (<code>id</code>) as <code>document_id</code>. Its
+  <code>relevance_score</code> is the semantic reranker score when present, otherwise the
+  Search score.</li>
+<li>A Foundry IQ <code>references[].id</code> is a response-scoped citation identifier. It
+  is not durable and the adapter never uses it for qrels.</li>
+<li>For a <code>searchIndex</code> knowledge source, the adapter prefers
+  <code>references[].docKey</code>. For document sources such as <code>azureBlob</code>, it combines
+  stable source metadata with a content fingerprint. Save the adapter version
+  and raw response with the run.</li>
+<li>Foundry IQ's retrieve response does not expose a Search reranker score that
+  can be compared with <code>@search.score</code> or <code>@search.rerankerScore</code>. The adapter
+  emits a strictly descending, rank-derived value only so the Document
+  Retrieval evaluator can preserve returned order. It is not a service
+  confidence score.</li>
+</ul>
+<p>If a Foundry IQ source returns neither a durable key nor stable source
+metadata, define and version an identity mapping before creating persistent
+qrels. Do not fall back to <code>references[].id</code>.</p>
+<h2 id="6-score-retrieval">6. Score retrieval</h2>
+<p>Run the Microsoft Foundry
+<a href="https://learn.microsoft.com/azure/foundry/concepts/evaluation-evaluators/rag-evaluators#document-retrieval">Document Retrieval evaluator</a>
+once per backend:</p>
+<div class="highlight"><pre><span></span><code><span class="n">python</span> <span class="s2">&quot;$tools\evaluate_retrieval.py&quot;</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-retrieved</span> <span class="s2">&quot;$foundryBaseline\retrieved.json&quot;</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-qrels</span> <span class="p">.\</span><span class="n">retrieval-lab</span><span class="p">\</span><span class="n">qrels</span><span class="p">\</span><span class="n">foundry_iq</span><span class="p">\</span><span class="n">v1</span><span class="p">.</span><span class="n">json</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-timings</span> <span class="s2">&quot;$foundryBaseline\timings.json&quot;</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-output</span> <span class="s2">&quot;$foundryBaseline\metrics.json&quot;</span>
 
-<span class="n">retrieved</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;retrieved.json&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
-<span class="n">qrels</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;qrels.json&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
-
-<span class="n">evaluator</span> <span class="o">=</span> <span class="n">DocumentRetrievalEvaluator</span><span class="p">(</span>
-    <span class="n">ground_truth_label_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-    <span class="n">ground_truth_label_max</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="k">for</span> <span class="n">question</span><span class="p">,</span> <span class="n">labels</span> <span class="ow">in</span> <span class="n">qrels</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-    <span class="n">docs</span> <span class="o">=</span> <span class="n">retrieved</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">question</span><span class="p">,</span> <span class="p">[])</span>
-    <span class="c1"># The evaluator only needs document_id and relevance_score.</span>
-    <span class="n">retrieved_documents</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="p">{</span><span class="s2">&quot;document_id&quot;</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;document_id&quot;</span><span class="p">],</span> <span class="s2">&quot;relevance_score&quot;</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;relevance_score&quot;</span><span class="p">]}</span>
-        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">docs</span>
-    <span class="p">]</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="n">evaluator</span><span class="p">(</span>
-        <span class="n">retrieval_ground_truth</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
-        <span class="n">retrieved_documents</span><span class="o">=</span><span class="n">retrieved_documents</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== </span><span class="si">{</span><span class="n">question</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;ndcg@3&quot;</span><span class="p">,</span> <span class="s2">&quot;xdcg@3&quot;</span><span class="p">,</span> <span class="s2">&quot;fidelity&quot;</span><span class="p">,</span> <span class="s2">&quot;top1_relevance&quot;</span><span class="p">,</span> <span class="s2">&quot;top3_max_relevance&quot;</span><span class="p">,</span> <span class="s2">&quot;holes&quot;</span><span class="p">,</span> <span class="s2">&quot;holes_ratio&quot;</span><span class="p">]:</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">key</span><span class="si">:</span><span class="s2">20s</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">python</span> <span class="s2">&quot;$tools\evaluate_retrieval.py&quot;</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-retrieved</span> <span class="s2">&quot;$searchBaseline\retrieved.json&quot;</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-qrels</span> <span class="p">.\</span><span class="n">retrieval-lab</span><span class="p">\</span><span class="n">qrels</span><span class="p">\</span><span class="n">ai_search</span><span class="p">\</span><span class="n">v1</span><span class="p">.</span><span class="n">json</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-timings</span> <span class="s2">&quot;$searchBaseline\timings.json&quot;</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-output</span> <span class="s2">&quot;$searchBaseline\metrics.json&quot;</span>
 </code></pre></div>
-<p>Run it:</p>
-<div class="highlight"><pre><span></span><code>python<span class="w"> </span>evaluate.py
-</code></pre></div>
-<h2 id="step-5-read-the-metrics">Step 5: read the metrics</h2>
-<p>Document Retrieval returns a set of ranking metrics, not a single pass or fail. These
-are the ones you will use most.</p>
+<p>Track at least:</p>
 <table>
 <thead>
 <tr>
-<th>Metric</th>
-<th>What it tells you</th>
+<th>Area</th>
+<th>Metrics</th>
 <th>Direction</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>ndcg@3</code></td>
-<td>Ranking quality in the top 3, rewarding relevant chunks near the top. This is your headline number.</td>
-<td>higher is better</td>
+<td>Ranking</td>
+<td><code>ndcg@3</code>, <code>xdcg@3</code>, <code>fidelity</code>, top relevance</td>
+<td>Higher</td>
 </tr>
 <tr>
-<td><code>xdcg@3</code></td>
-<td>Like NDCG but weights the very top results more heavily.</td>
-<td>higher is better</td>
+<td>Qrels coverage</td>
+<td><code>holes</code>, <code>holes_ratio</code></td>
+<td>Lower</td>
 </tr>
 <tr>
-<td><code>fidelity</code></td>
-<td>How much of the truly relevant set the retriever managed to surface.</td>
-<td>higher is better</td>
+<td>Client latency</td>
+<td>p50 and p95</td>
+<td>Lower, within your SLO</td>
 </tr>
 <tr>
-<td><code>top1_relevance</code></td>
-<td>The label of the single best-ranked chunk.</td>
-<td>higher is better</td>
+<td>Answer quality</td>
+<td>Retrieval and Groundedness LLM-judge scores</td>
+<td>Higher</td>
 </tr>
 <tr>
-<td><code>top3_max_relevance</code></td>
-<td>The best label found anywhere in the top 3.</td>
-<td>higher is better</td>
-</tr>
-<tr>
-<td><code>holes</code></td>
-<td>Retrieved chunks you never labeled. A sign your qrels are incomplete.</td>
-<td>lower is better</td>
-</tr>
-<tr>
-<td><code>holes_ratio</code></td>
-<td>Holes as a fraction of retrieved chunks.</td>
-<td>lower is better</td>
+<td>Cost</td>
+<td>model tokens, billed operations, and estimated cost per question</td>
+<td>Lower, within budget</td>
 </tr>
 </tbody>
 </table>
-<p>How to read them in practice:</p>
-<ul>
-<li><strong>Pick <code>ndcg@3</code> as the number you optimize.</strong> A value near <code>1.0</code> means the most
-  relevant chunks are arriving at the top. A low value means relevant chunks exist
-  but are ranked poorly, or the right chunks are not coming back at all.</li>
-<li><strong>Watch <code>holes_ratio</code>.</strong> If it climbs, the retriever is returning chunks your
-  labels do not cover. Either your labels are incomplete, or the index changed and
-  your qrels need a refresh.</li>
-<li><strong>Average across your questions.</strong> Look at the mean <code>ndcg@3</code> over the whole set,
-  not a single question, so one odd query does not mislead you.</li>
-</ul>
-<h2 id="step-6-optimization-loop">Step 6: optimization loop</h2>
-<p>Now use the numbers to tune search. Change one thing, re-run the same labeled
-questions, and compare the headline metric. Keep changes that raise <code>ndcg@3</code>
-without inflating <code>holes_ratio</code>; revert the rest.</p>
-<pre class="mermaid"><code>flowchart LR
-    B["Baseline&lt;br/&gt;ndcg@3"] --&gt; C["Change one&lt;br/&gt;search setting"]
-    C --&gt; R["Re-run the same&lt;br/&gt;labeled questions"]
-    R --&gt; M["Compare&lt;br/&gt;ndcg@3"]
-    M --&gt; K{"Better?"}
-    K --&gt;|yes| A["Keep it"]
-    K --&gt;|no| X["Revert"]
-    A --&gt; C
-    X --&gt; C</code></pre>
-<p><strong>Tune offline first, then promote the winner.</strong> You do not have to redeploy
-GPT-RAG to test an idea. The <code>retrieve.py</code> script reads <code>TOP_K</code>, <code>APPROACH</code>,
-<code>USE_SEMANTIC</code>, and <code>SEMANTIC_CONFIG</code> from environment variables, so you can sweep
-them locally against the live index in seconds. Once you find a setting that wins,
-set the matching App Configuration key (label <code>gpt-rag</code>) so production uses it.</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Try keyword-only vs vector-only vs hybrid, top-3 vs top-5, reranker on vs off.</span>
-<span class="nv">APPROACH</span><span class="o">=</span>hybrid<span class="w"> </span><span class="nv">TOP_K</span><span class="o">=</span><span class="m">3</span><span class="w"> </span>python<span class="w"> </span>retrieve.py<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>python<span class="w"> </span>evaluate.py
-<span class="nv">APPROACH</span><span class="o">=</span>hybrid<span class="w"> </span><span class="nv">TOP_K</span><span class="o">=</span><span class="m">5</span><span class="w"> </span>python<span class="w"> </span>retrieve.py<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>python<span class="w"> </span>evaluate.py
-<span class="nv">APPROACH</span><span class="o">=</span>hybrid<span class="w"> </span><span class="nv">TOP_K</span><span class="o">=</span><span class="m">5</span><span class="w"> </span><span class="nv">USE_SEMANTIC</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>python<span class="w"> </span>retrieve.py<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>python<span class="w"> </span>evaluate.py
-</code></pre></div>
-<p>What to sweep, and the GPT-RAG setting each one maps to:</p>
+<p>The helper calculates retrieval metrics and client-side latency. Run the
+selected configuration through the live orchestrator to collect answer,
+token, and service-cost data. Use
+<a href="https://azure.github.io/agentops/tutorial-http-agent/">AgentOps</a> or your
+existing Microsoft Foundry evaluation pipeline for Retrieval and Groundedness.
+Archive that output with the same run ID.</p>
+<h2 id="7-sweep-one-variable-at-a-time">7. Sweep one variable at a time</h2>
+<p>Start from each backend's deployed baseline. Change one lever, run the same
+tuning questions, and restore the baseline before changing a different lever.</p>
 <table>
 <thead>
 <tr>
-<th>Lever</th>
-<th>In the script</th>
-<th>In GPT-RAG (App Configuration, label <code>gpt-rag</code>)</th>
-<th>Needs re-ingestion?</th>
+<th>Backend</th>
+<th>First sweeps</th>
+<th>GPT-RAG setting</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>How many chunks are retrieved</td>
-<td><code>TOP_K</code></td>
-<td><code>SEARCH_RAGINDEX_TOP_K</code></td>
-<td>No</td>
+<td><code>foundry_iq</code></td>
+<td>final document count, for example 3, 5, 8</td>
+<td><code>FOUNDRY_IQ_MAX_OUTPUT_DOCUMENTS</code></td>
 </tr>
 <tr>
-<td>Search mode (keyword, vector, hybrid)</td>
-<td><code>APPROACH</code></td>
+<td><code>ai_search</code></td>
+<td><code>term</code>, <code>vector</code>, <code>hybrid</code></td>
 <td><code>SEARCH_APPROACH</code></td>
-<td>No</td>
 </tr>
 <tr>
-<td>Semantic reranker on/off</td>
-<td><code>USE_SEMANTIC</code></td>
+<td><code>ai_search</code></td>
+<td>semantic reranker off/on for term or hybrid</td>
 <td><code>SEARCH_USE_SEMANTIC</code></td>
-<td>No</td>
 </tr>
 <tr>
-<td>Chunk size and overlap</td>
-<td>not in the script</td>
-<td><code>CHUNKING_NUM_TOKENS</code>, <code>TOKEN_OVERLAP</code></td>
-<td>Yes</td>
+<td><code>ai_search</code></td>
+<td>final document count, for example 3, 5, 8</td>
+<td><code>SEARCH_RAGINDEX_TOP_K</code></td>
+</tr>
+<tr>
+<td>Either</td>
+<td>chunk size and overlap, last</td>
+<td>ingestion settings; requires re-ingestion</td>
 </tr>
 </tbody>
 </table>
-<p>Practical guidance:</p>
-<ul>
-<li><strong>Start with search mode and the reranker.</strong> Hybrid plus the semantic reranker is
-  usually the strongest combination, at slightly higher query cost. If you are on
-  keyword or vector only, try hybrid first.</li>
-<li><strong>Then tune top-k.</strong> Too few chunks miss relevant context; too many dilute it with
-  noise and cost more tokens. Sweep 3, 5, and 8 and watch where <code>ndcg@3</code> peaks.</li>
-<li><strong>Change chunking last.</strong> Bigger chunks keep more context together but match less
-  precisely; smaller chunks match precisely but can fragment an answer. This is the
-  most expensive lever because it requires re-ingesting your documents, which
-  rebuilds the index and changes chunk ids, so you must re-verify your qrels
-  afterward.</li>
-</ul>
-<p>When you are done, the improvement should show up downstream too. Better ranking
-feeds better context, so the LLM-judge <strong>Retrieval</strong> and <strong>Groundedness</strong> scores
-should rise as well. That is the loop closing: you tune retrieval here, and confirm
-the gain in your normal evaluation.</p>
-<h2 id="step-7-prove-the-gain">Step 7: prove the gain</h2>
-<p>Theory is nice, but you want to watch the loop actually move a number. Here is the
-same fuel-system question worked end to end, changing exactly one lever: the
-semantic reranker. The commands are the ones from Step 6, run twice.</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Baseline: hybrid search, reranker off (the GPT-RAG default).</span>
-<span class="nv">APPROACH</span><span class="o">=</span>hybrid<span class="w"> </span><span class="nv">TOP_K</span><span class="o">=</span><span class="m">3</span><span class="w"> </span>python<span class="w"> </span>retrieve.py<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>python<span class="w"> </span>evaluate.py
+<p>Example direct-search sweep:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$stamp</span> <span class="p">=</span> <span class="nb">Get-Date</span> <span class="n">-Format</span> <span class="s1">&#39;yyyyMMdd-HHmmss&#39;</span>
+<span class="n">python</span> <span class="s2">&quot;$tools\retrieve.py&quot;</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-backend</span> <span class="n">ai_search</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-questions</span> <span class="p">.\</span><span class="n">retrieval-lab</span><span class="p">\</span><span class="n">questions</span><span class="p">.</span><span class="n">jsonl</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-split</span> <span class="n">tune</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-approach</span> <span class="n">hybrid</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-top-k</span> <span class="n">5</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-no-semantic</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-out</span> <span class="s2">&quot;$runs\$stamp-ai-search-hybrid-k5-no-semantic&quot;</span>
 
-<span class="c1"># One change: turn on the semantic reranker.</span>
-<span class="nv">APPROACH</span><span class="o">=</span>hybrid<span class="w"> </span><span class="nv">TOP_K</span><span class="o">=</span><span class="m">3</span><span class="w"> </span><span class="nv">USE_SEMANTIC</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>python<span class="w"> </span>retrieve.py<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>python<span class="w"> </span>evaluate.py
+<span class="nv">$stamp</span> <span class="p">=</span> <span class="nb">Get-Date</span> <span class="n">-Format</span> <span class="s1">&#39;yyyyMMdd-HHmmss&#39;</span>
+<span class="n">python</span> <span class="s2">&quot;$tools\retrieve.py&quot;</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-backend</span> <span class="n">ai_search</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-questions</span> <span class="p">.\</span><span class="n">retrieval-lab</span><span class="p">\</span><span class="n">questions</span><span class="p">.</span><span class="n">jsonl</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-split</span> <span class="n">tune</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-approach</span> <span class="n">hybrid</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-top-k</span> <span class="n">5</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-semantic</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-out</span> <span class="s2">&quot;$runs\$stamp-ai-search-hybrid-k5-semantic&quot;</span>
 </code></pre></div>
-<p>Take the headline question, "How is fuel pressure maintained in the fuel delivery
-system?" In Step 3 you labeled three chunks for it:</p>
-<table>
-<thead>
-<tr>
-<th>Chunk id</th>
-<th>Your label (0-4)</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>documents-vw-fuel-system-pdf-c00002</code></td>
-<td>4 (answers it directly)</td>
-</tr>
-<tr>
-<td><code>documents-vw-fuel-system-pdf-c00001</code></td>
-<td>2 (related background)</td>
-</tr>
-<tr>
-<td><code>documents-vw-fuel-system-pdf-c00007</code></td>
-<td>0 (off topic)</td>
-</tr>
-</tbody>
-</table>
-<p>Now look at the order each run returns for that one question:</p>
+<p>Only the semantic-ranker switch changes between these runs. Do not enable it
+for vector-only search.</p>
+<p>Foundry IQ plans and executes retrieval differently from direct Search. Even
+when both use the same underlying corpus, they can return different chunks and
+ordering. A fair backend comparison keeps the conditions from Step 1 fixed,
+uses the same relevance rubric, completes each backend's candidate pool, and
+compares normalized metrics and downstream answers. Raw scores are not a
+cross-backend metric.</p>
+<h2 id="8-select-on-held-out-questions">8. Select on held-out questions</h2>
+<p>Write promotion criteria before opening the held-out results. For example:</p>
 <ul>
-<li><strong>Baseline (reranker off):</strong> <code>c00001</code> (2), <code>c00007</code> (0), <code>c00002</code> (4). The chunk
-  that actually answers the question came back third, behind a weaker one.</li>
-<li><strong>Reranker on:</strong> <code>c00002</code> (4), <code>c00001</code> (2), <code>c00007</code> (0). The best chunk is now
-  first.</li>
+<li>mean held-out <code>ndcg@3</code> improves by at least the chosen margin;</li>
+<li>no material <code>xdcg@3</code>, fidelity, Retrieval, or Groundedness regression;</li>
+<li><code>holes_ratio</code> stays below the qrels-coverage threshold;</li>
+<li>p95 latency stays within the service-level objective;</li>
+<li>estimated cost per question stays within budget;</li>
+<li>every permission-sensitive question returns only authorized content.</li>
 </ul>
-<p>The labels did not change, only the order did. That is exactly what <code>ndcg@3</code> is
-built to catch:</p>
-<table>
-<thead>
-<tr>
-<th>Setting</th>
-<th>This question <code>ndcg@3</code></th>
-<th>Mean <code>ndcg@3</code> (all questions)</th>
-<th>Mean <code>holes_ratio</code></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Baseline (hybrid, reranker off)</td>
-<td>0.62</td>
-<td>0.63</td>
-<td>0.00</td>
-</tr>
-<tr>
-<td>Reranker on</td>
-<td>1.00</td>
-<td>0.94</td>
-<td>0.00</td>
-</tr>
-</tbody>
-</table>
-<p>Your exact decimals will differ; what matters is the direction and the size of the
-move. The mean <code>ndcg@3</code> jumped from <code>0.63</code> to <code>0.94</code> while <code>holes_ratio</code> stayed at
-<code>0.00</code>, so the reranker is a clean win: better ranking, and no new unlabeled chunks
-leaking in. If <code>holes_ratio</code> had climbed instead, you would pause and check whether
-your labels were simply incomplete before trusting the gain.</p>
-<blockquote>
-<p><strong>Knowledge nugget: why the reranker moved the right chunk up.</strong> Plain hybrid
-search scores each chunk on lexical overlap plus vector similarity, and it scores
-each chunk in isolation. The semantic reranker adds a second pass: a cross-encoder
-model reads the query and each candidate chunk together and re-scores them by how
-well the passage answers the question. Chunk <code>c00002</code> explains how the regulator
-holds rail pressure, which is squarely on topic even though it shares fewer exact
-words with the query, so the reranker lifts it above the lexically similar but less
-useful <code>c00001</code>. That is why turning the reranker on is usually the first lever to
-try.</p>
-</blockquote>
-<p>Now promote the winner. The setting that won locally is <code>USE_SEMANTIC=true</code>, which
-maps to the App Configuration key <code>SEARCH_USE_SEMANTIC</code> (label <code>gpt-rag</code>). Set it to
-<code>true</code> so production retrieval uses the configuration you just validated, then re-run
-your normal evaluation to confirm the LLM-judge <strong>Retrieval</strong> and <strong>Groundedness</strong>
-scores rise too. That is one full turn of the loop: a change you measured, proved,
-and shipped.</p>
-<h2 id="after-re-ingesting">After re-ingesting</h2>
-<p>Re-ingestion (for example after changing <code>CHUNKING_NUM_TOKENS</code>) rebuilds the index
-and assigns new chunk ids. Your old <code>qrels.json</code> points at ids that may no longer
-exist, so its labels become stale. After any re-ingestion:</p>
+<p>Choose thresholds that match your application. Values such as a <code>0.03</code>
+minimum NDCG gain, a <code>0.02</code> maximum metric regression, or a <code>15%</code> p95 latency
+increase are <strong>illustrative policy examples</strong>, not GPT-RAG measured results or
+product defaults.</p>
+<p>Do not select on one impressive question. Promote only after the held-out
+aggregate and critical slices pass.</p>
+<p>After selecting one candidate per backend, rerun only the baseline and selected
+candidate with <code>--split held_out</code>. Pool those held-out candidates, label them
+without looking at system names or scores, and run the same evaluator. Do not
+reuse tuning-set averages as held-out evidence.</p>
+<h2 id="9-promote-restart-and-validate">9. Promote, restart, and validate</h2>
+<p>Write the winner to the same active App Configuration label you identified in
+Step 2. In most deployments this is <code>gpt-rag</code>; a higher-precedence
+service-specific override must be changed or removed instead.</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$targetLabel</span> <span class="p">=</span> <span class="s1">&#39;gpt-rag&#39;</span>
+
+<span class="n">az</span> <span class="n">appconfig</span> <span class="n">kv</span> <span class="nb">set </span><span class="p">`</span>
+    <span class="p">-</span><span class="n">-name</span> <span class="nv">$script:AppConfigName</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-key</span> <span class="n">RETRIEVAL_BACKEND</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-value</span> <span class="n">foundry_iq</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-label</span> <span class="nv">$targetLabel</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-auth-mode</span> <span class="n">login</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-yes</span>
+
+<span class="n">az</span> <span class="n">appconfig</span> <span class="n">kv</span> <span class="nb">set </span><span class="p">`</span>
+    <span class="p">-</span><span class="n">-name</span> <span class="nv">$script:AppConfigName</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-key</span> <span class="n">AGENT_STRATEGY</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-value</span> <span class="n">single_agent_rag</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-label</span> <span class="nv">$targetLabel</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-auth-mode</span> <span class="n">login</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-yes</span>
+</code></pre></div>
+<p>Set only the additional winning keys. Then restart the active orchestrator
+revision:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$env:RESOURCE_GROUP</span> <span class="p">=</span> <span class="n">azd</span> <span class="n">env</span> <span class="nb">get-value</span> <span class="n">AZURE_RESOURCE_GROUP</span>
+<span class="nv">$env:ORCHESTRATOR_APP</span> <span class="p">=</span> <span class="n">azd</span> <span class="n">env</span> <span class="nb">get-value</span> <span class="n">ORCHESTRATOR_APP_NAME</span>
+
+<span class="nv">$revision</span> <span class="p">=</span> <span class="n">az</span> <span class="n">containerapp</span> <span class="n">revision</span> <span class="n">list</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-name</span> <span class="nv">$env:ORCHESTRATOR_APP</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-resource-group</span> <span class="nv">$env:RESOURCE_GROUP</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-query</span> <span class="s2">&quot;[?properties.active].name | [0]&quot;</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-output</span> <span class="n">tsv</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="o">-not</span> <span class="nv">$revision</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">throw</span> <span class="s2">&quot;No active orchestrator revision was found.&quot;</span>
+<span class="p">}</span>
+
+<span class="n">az</span> <span class="n">containerapp</span> <span class="n">revision</span> <span class="n">restart</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-name</span> <span class="nv">$env:ORCHESTRATOR_APP</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-resource-group</span> <span class="nv">$env:RESOURCE_GROUP</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-revision</span> <span class="nv">$revision</span>
+</code></pre></div>
+<p>Validate after restart:</p>
 <ol>
-<li>Re-run <code>retrieve.py</code> to get the new chunk ids.</li>
-<li>Re-label the new chunks in <code>qrels.json</code>.</li>
-<li>Re-run <code>evaluate.py</code> to compare against your previous baseline.</li>
+<li>confirm the orchestrator is healthy and logs the expected backend;</li>
+<li>run known-answer, no-answer, and permission-sensitive questions;</li>
+<li>rerun the held-out retrieval metrics through the production path;</li>
+<li>rerun Retrieval and Groundedness answer evaluation;</li>
+<li>compare p50/p95 latency and cost with the archived baseline.</li>
 </ol>
-<p>This is why the labeled set is kept small: re-labeling a handful of questions is
-quick; re-labeling hundreds is not.</p>
-<h2 id="tips-and-caveats">Tips and caveats</h2>
-<ul>
-<li><strong>Labels are index-specific.</strong> The <code>document_id</code> values are chunk ids from your
-  current index. Re-author or re-verify qrels after re-ingesting or changing chunking.</li>
-<li><strong>Keep the labeled set focused.</strong> This is a diagnostic and tuning surface, not a
-  regression suite. A small, trusted set of questions is easier to maintain and
-  reason about.</li>
-<li><strong>It complements, it does not replace, your evaluation gate.</strong> Retrieval and
-  Groundedness stay on your automated checks. Document Retrieval is the deeper look you
-  reach for when those scores say retrieval is the problem.</li>
-<li><strong>The semantic reranker has a cost.</strong> It improves ranking but adds latency and is
-  billed per query. Confirm the <code>ndcg@3</code> gain is worth it before enabling it in
-  production.</li>
-</ul>
+<h2 id="10-roll-back">10. Roll back</h2>
+<p>Keep <code>deployed-settings.json</code> and the active labels from Step 2. If validation
+fails, restore every changed key to its previous value, restart the active
+revision again, and rerun the smoke questions. You do not need to delete the
+Foundry IQ knowledge base to roll back to <code>ai_search</code>.</p>
+<h2 id="after-re-ingestion">After re-ingestion</h2>
+<p>Chunking, parsing, embedding, or corpus changes can alter both candidate
+content and identifiers. After re-ingestion:</p>
+<ol>
+<li>freeze the new corpus and ingestion version;</li>
+<li>rerun every planned configuration;</li>
+<li>rebuild each backend's candidate pool;</li>
+<li>re-author or re-verify qrels;</li>
+<li>capture a new baseline before comparing settings.</li>
+</ol>
+<p>Do not compare a new-corpus run with stale qrels from the previous ingestion.</p>
+<h2 id="illustrative-walkthrough">Illustrative walkthrough</h2>
+<p>Suppose the tuning question is "How is fuel pressure maintained in the fuel
+delivery system?" and your pooled qrels assign labels 4, 2, and 0 to three
+returned chunks.</p>
+<table>
+<thead>
+<tr>
+<th>Variant</th>
+<th style="text-align: right;">Mean <code>ndcg@3</code></th>
+<th style="text-align: right;">Mean <code>holes_ratio</code></th>
+<th style="text-align: right;">p95 latency</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Baseline</td>
+<td style="text-align: right;">0.63</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">780 ms</td>
+</tr>
+<tr>
+<td>One-variable candidate</td>
+<td style="text-align: right;">0.74</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">840 ms</td>
+</tr>
+</tbody>
+</table>
+<p>These values are <strong>illustrative only</strong>. They show how to make a decision:
+ranking improved, qrels coverage did not worsen, and latency stayed within a
+hypothetical SLO. They are not results measured by the GPT-RAG team. Your run
+artifacts are the evidence for your environment.</p>
 <h2 id="related">Related</h2>
 <ul>
-<li><a href="https://azure.github.io/agentops/tutorial-http-agent/">Evaluate GPT-RAG with AgentOps</a>: the pull request gate that scores the live orchestrator on every change.</li>
-<li><a href="https://learn.microsoft.com/azure/ai-foundry/concepts/evaluation-evaluators/rag-evaluators">Foundry RAG evaluators</a>: the full evaluator reference, including every Document Retrieval score key.</li>
-<li><a href="https://learn.microsoft.com/azure/ai-foundry/how-to/develop/evaluate-sdk">Evaluate with the Azure AI Evaluation SDK</a>: how the evaluator runs in code.</li>
-<li><a href="https://learn.microsoft.com/azure/search/hybrid-search-overview">Hybrid search in Azure AI Search</a>: how keyword and vector search combine.</li>
-<li><a href="https://learn.microsoft.com/azure/search/semantic-search-overview">Semantic ranking in Azure AI Search</a>: what the reranker does.</li>
-<li><a href="https://learn.microsoft.com/azure/search/hybrid-search-ranking">Relevance and scoring</a>: how results are scored and fused.</li>
-<li><a href="../services_ingestion/">Ingestion</a>: how documents are chunked and indexed in GPT-RAG.</li>
-<li><a href="../services_orchestrator/">Orchestrator</a>: how retrieved chunks become an answer.</li>
+<li><a href="../howto_grounding_overview/">Grounding sources overview</a></li>
+<li><a href="../howto_grounding_foundry_iq_documents/">Foundry IQ: Documents</a></li>
+<li><a href="../howto_grounding_ai_search_direct/">Direct Azure AI Search</a></li>
+<li><a href="../services_ingestion/">Ingestion</a></li>
+<li><a href="../services_orchestrator/">Orchestrator</a></li>
+<li><a href="https://learn.microsoft.com/azure/search/agentic-retrieval-how-to-retrieve">Foundry IQ retrieve action</a></li>
+<li><a href="https://learn.microsoft.com/azure/search/hybrid-search-overview">Hybrid search</a></li>
+<li><a href="https://learn.microsoft.com/azure/search/semantic-search-overview">Semantic ranking</a></li>
+<li><a href="https://learn.microsoft.com/cli/azure/containerapp/revision">Azure Container Apps revision restart</a></li>
 </ul>
 
 
