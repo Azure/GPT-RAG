@@ -1,15 +1,20 @@
-name: Copilot setup steps
+name: Copilot evaluation deployment preview
 
 on:
+  push:
+    branches:
+      - placerda-feature-copilot-azure-oidc
+    paths:
+      - ".github/workflows/copilot-evaluation-preview.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  copilot-setup-steps:
+  preview:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 45
     environment: copilot
     permissions:
       contents: read
@@ -19,9 +24,12 @@ jobs:
       AZURE_RESOURCE_GROUP: rg-gptrag-evaluation
       AZURE_LOCATION: eastus
       AZURE_PRINCIPAL_ID: f4be7297-7532-4582-b0b5-53e7413879dd
+      NO_COLOR: "1"
     steps:
-      - name: Checkout repository
+      - name: Checkout repository and pinned infrastructure
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          submodules: recursive
 
       - name: Install Azure Developer CLI
         uses: Azure/setup-azd@003306647c7696088e6dff0900435682cb5e6ebd
@@ -35,25 +43,15 @@ jobs:
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Configure fixed GPT-RAG evaluation environment
+      - name: Configure fixed evaluation environment
         shell: bash
         run: |
           set -euo pipefail
-
-          test "$(az account show --query id --output tsv)" = "${{ vars.AZURE_SUBSCRIPTION_ID }}"
-          test "$(az group show --name "$AZURE_RESOURCE_GROUP" --query id --output tsv)" = \
-            "/subscriptions/${{ vars.AZURE_SUBSCRIPTION_ID }}/resourceGroups/$AZURE_RESOURCE_GROUP"
-
           azd config set auth.useAzCliAuth true
-          if [ -d ".azure/$AZURE_ENV_NAME" ]; then
-            azd env select "$AZURE_ENV_NAME" --no-prompt
-          else
-            azd env new "$AZURE_ENV_NAME" \
-              --subscription "${{ vars.AZURE_SUBSCRIPTION_ID }}" \
-              --location "$AZURE_LOCATION" \
-              --no-prompt
-          fi
-
+          azd env new "$AZURE_ENV_NAME" \
+            --subscription "${{ vars.AZURE_SUBSCRIPTION_ID }}" \
+            --location "$AZURE_LOCATION" \
+            --no-prompt
           azd env set --environment "$AZURE_ENV_NAME" --no-prompt \
             "AZURE_ENV_NAME=$AZURE_ENV_NAME" \
             "AZURE_RESOURCE_GROUP=$AZURE_RESOURCE_GROUP" \
@@ -91,8 +89,23 @@ jobs:
             "HUB_INTEGRATION_EXISTING_ROUTE_TABLE_RESOURCE_ID=" \
             "HUB_INTEGRATION_HUB_VNET_RESOURCE_ID="
 
-          test "$(azd env get-value AZURE_RESOURCE_GROUP --environment "$AZURE_ENV_NAME")" = \
-            "$AZURE_RESOURCE_GROUP"
-          test "$(azd env get-value AZURE_PRINCIPAL_TYPE --environment "$AZURE_ENV_NAME")" = \
-            "ServicePrincipal"
-          azd version
+      - name: Preview GPT-RAG infrastructure
+        shell: bash
+        run: |
+          set -euo pipefail
+          azd provision --preview --no-prompt 2>&1 | tee what-if.txt
+
+          if grep -Eiq '(^|[[:space:]])Delete([[:space:]]|$)' what-if.txt; then
+            echo "Unexpected delete operation in What-If." >&2
+            exit 1
+          fi
+
+          foreign_groups="$(
+            grep -Eio '/subscriptions/[0-9a-f-]+/resourceGroups/[^/[:space:]]+' what-if.txt |
+              grep -Fvi '/resourceGroups/rg-gptrag-evaluation' || true
+          )"
+          if [ -n "$foreign_groups" ]; then
+            echo "Unexpected cross-resource-group scope in What-If:" >&2
+            echo "$foreign_groups" >&2
+            exit 1
+          fi
