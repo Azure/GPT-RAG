@@ -1,0 +1,96 @@
+name: Copilot confined ARM write smoke test
+
+on:
+  push:
+    branches:
+      - placerda-feature-copilot-azure-oidc
+    paths:
+      - ".github/workflows/copilot-arm-write-smoke.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: copilot
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      TARGET_RESOURCE_GROUP: rg-gptrag-evaluation
+      OUTSIDE_RESOURCE_GROUP: rg-gpt-rag-copilot-agent
+      AZURE_LOCATION: eastus
+    steps:
+      - name: Sign in to Azure with GitHub OIDC
+        uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Prove confined ARM write and cleanup
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          smoke_name="mi-copilot-smoke-${GITHUB_RUN_ID}"
+          cleanup() {
+            az identity delete \
+              --name "$smoke_name" \
+              --resource-group "$TARGET_RESOURCE_GROUP" \
+              --only-show-errors >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+
+          test "$(az account show --query user.type --output tsv)" = "servicePrincipal"
+          test "$(az account show --query user.name --output tsv)" = \
+            "${{ vars.AZURE_CLIENT_ID }}"
+          test "$(az group show \
+            --name "$TARGET_RESOURCE_GROUP" \
+            --query id \
+            --output tsv)" = \
+            "/subscriptions/${{ vars.AZURE_SUBSCRIPTION_ID }}/resourceGroups/$TARGET_RESOURCE_GROUP"
+
+          if az group show \
+            --name "$OUTSIDE_RESOURCE_GROUP" \
+            --only-show-errors >/dev/null 2>&1; then
+            echo "Unexpected read access outside $TARGET_RESOURCE_GROUP." >&2
+            exit 1
+          fi
+          echo "Confirmed authorization denial outside $TARGET_RESOURCE_GROUP."
+
+          identity_id="$(
+            az identity create \
+              --name "$smoke_name" \
+              --resource-group "$TARGET_RESOURCE_GROUP" \
+              --location "$AZURE_LOCATION" \
+              --query id \
+              --output tsv
+          )"
+          test "$identity_id" = \
+            "/subscriptions/${{ vars.AZURE_SUBSCRIPTION_ID }}/resourceGroups/$TARGET_RESOURCE_GROUP/providers/Microsoft.ManagedIdentity/userAssignedIdentities/$smoke_name"
+          test -n "$(
+            az identity show \
+              --name "$smoke_name" \
+              --resource-group "$TARGET_RESOURCE_GROUP" \
+              --query principalId \
+              --output tsv
+          )"
+          echo "Created and verified $identity_id."
+
+          az identity delete \
+            --name "$smoke_name" \
+            --resource-group "$TARGET_RESOURCE_GROUP" \
+            --only-show-errors
+          if az identity show \
+            --name "$smoke_name" \
+            --resource-group "$TARGET_RESOURCE_GROUP" \
+            --only-show-errors >/dev/null 2>&1; then
+            echo "Smoke-test identity still exists after deletion." >&2
+            exit 1
+          fi
+          trap - EXIT
+          echo "Deleted and verified removal of $smoke_name."
