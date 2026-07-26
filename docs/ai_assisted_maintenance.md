@@ -21,6 +21,10 @@ identity. No Azure client secret is supplied. Azure RBAC limits that identity
 to the dedicated, non-production evaluation resource group
 `rg-gptrag-evaluation`.
 
+The required Azure identifiers are stored as GitHub variables rather than
+coding-agent secrets. The coding-agent secret set is empty, and no Azure client
+secret is configured.
+
 Deployments use the fixed Azure Developer CLI environment
 `gptrag-evaluation`. The identity currently has these roles at that resource
 group only:
@@ -31,8 +35,13 @@ group only:
 
 The identity has no subscription-wide Owner, Contributor, or Reader
 assignment. It cannot use these roles to manage resources or role assignments
-outside the evaluation resource group. Evaluation resources are cleaned up
-after testing to limit ongoing cost and avoid retaining test deployments.
+outside the evaluation resource group. A
+[live OIDC smoke test](https://github.com/Azure/GPT-RAG/actions/runs/30205002536)
+confirmed that reads outside the group are denied. It created and verified a
+temporary identity only inside the evaluation group, then deleted it and
+confirmed that no smoke-test identities remained. Evaluation resources are
+cleaned up after testing to limit ongoing cost and avoid retaining test
+deployments.
 
 The accepted design and its operational boundaries are recorded in
 [ADR-0002](https://github.com/Azure/GPT-RAG/blob/main/docs/adr/ADR-0002-copilot-azure-oidc.md).
