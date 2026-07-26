@@ -85,7 +85,8 @@ nav:
     - Resource Naming (CAF): howto_resource_naming.md
     - Troubleshooting: troubleshooting.md
   - Meet the Team: team.md
-  - Contributing: contributing.md    
+  - Contributing: contributing.md
+  - AI-assisted maintenance: ai_assisted_maintenance.md
 extra:
   generator: false
 extra_css:
