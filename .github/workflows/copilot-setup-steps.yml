@@ -1,0 +1,36 @@
+name: Copilot setup steps
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: copilot
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Install Azure Developer CLI
+        uses: Azure/setup-azd@003306647c7696088e6dff0900435682cb5e6ebd
+        with:
+          version: 1.28.1
+
+      - name: Sign in to Azure with GitHub OIDC
+        uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Verify read-only Azure context
+        shell: bash
+        run: |
+          set -euo pipefail
+          az account show --query '{subscription:id, tenant:tenantId}' --output json
+          az group list --query 'length(@)' --output tsv >/dev/null
+          azd version
