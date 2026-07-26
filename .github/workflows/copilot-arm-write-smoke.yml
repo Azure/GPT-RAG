@@ -70,8 +70,8 @@ jobs:
               --query id \
               --output tsv
           )"
-          test "$identity_id" = \
-            "/subscriptions/${{ vars.AZURE_SUBSCRIPTION_ID }}/resourceGroups/$TARGET_RESOURCE_GROUP/providers/Microsoft.ManagedIdentity/userAssignedIdentities/$smoke_name"
+          expected_id="/subscriptions/${{ vars.AZURE_SUBSCRIPTION_ID }}/resourceGroups/$TARGET_RESOURCE_GROUP/providers/Microsoft.ManagedIdentity/userAssignedIdentities/$smoke_name"
+          test "${identity_id,,}" = "${expected_id,,}"
           test -n "$(
             az identity show \
               --name "$smoke_name" \
