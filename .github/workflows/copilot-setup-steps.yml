@@ -22,6 +22,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          submodules: recursive
 
       - name: Install Azure Developer CLI
         uses: Azure/setup-azd@003306647c7696088e6dff0900435682cb5e6ebd
