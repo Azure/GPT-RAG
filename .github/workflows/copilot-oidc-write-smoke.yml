@@ -1,0 +1,140 @@
+name: Copilot OIDC confined write smoke test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: copilot
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      TARGET_RESOURCE_GROUP: rg-gptrag-evaluation
+      AZURE_LOCATION: eastus
+      EXPECTED_PRINCIPAL_ID: f4be7297-7532-4582-b0b5-53e7413879dd
+      READER_ROLE_ID: acdd72a7-3385-48ef-bd42-f606fba81ae7
+    steps:
+      - name: Sign in to Azure with GitHub OIDC
+        uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Exercise confined ARM and RBAC writes
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          smoke_name="mi-copilot-rbac-smoke-${GITHUB_RUN_ID}"
+          identity_id=""
+          temporary_principal_id=""
+          assignment_id=""
+
+          cleanup() {
+            set +e
+            if [ -n "$assignment_id" ]; then
+              az role assignment delete \
+                --ids "$assignment_id" \
+                --only-show-errors >/dev/null 2>&1
+            elif [ -n "$temporary_principal_id" ] && [ -n "$identity_id" ]; then
+              az role assignment delete \
+                --assignee-object-id "$temporary_principal_id" \
+                --role "$READER_ROLE_ID" \
+                --scope "$identity_id" \
+                --only-show-errors >/dev/null 2>&1
+            fi
+            az identity delete \
+              --name "$smoke_name" \
+              --resource-group "$TARGET_RESOURCE_GROUP" \
+              --only-show-errors >/dev/null 2>&1
+          }
+          trap cleanup EXIT
+
+          access_token="$(
+            az account get-access-token \
+              --resource https://management.azure.com/ \
+              --query accessToken \
+              --output tsv
+          )"
+          token_payload="$(
+            ACCESS_TOKEN="$access_token" python -c \
+              'import base64,json,os; p=os.environ["ACCESS_TOKEN"].split(".")[1]; p += "="*(-len(p)%4); print(json.loads(base64.urlsafe_b64decode(p))["oid"])'
+          )"
+          unset access_token
+          test "$token_payload" = "$EXPECTED_PRINCIPAL_ID"
+          echo "Authenticated principal object ID: $token_payload"
+
+          identity_json="$(
+            az identity create \
+              --name "$smoke_name" \
+              --resource-group "$TARGET_RESOURCE_GROUP" \
+              --location "$AZURE_LOCATION" \
+              --output json
+          )"
+          identity_id="$(jq -r '.id' <<<"$identity_json")"
+          temporary_principal_id="$(jq -r '.principalId' <<<"$identity_json")"
+          test -n "$identity_id"
+          test -n "$temporary_principal_id"
+          test "$(
+            az identity show \
+              --name "$smoke_name" \
+              --resource-group "$TARGET_RESOURCE_GROUP" \
+              --query id \
+              --output tsv
+          )" = "$identity_id"
+          echo "Created identity resource: $identity_id"
+          echo "Temporary identity principal ID: $temporary_principal_id"
+
+          assignment_id="$(
+            az role assignment create \
+              --assignee-object-id "$temporary_principal_id" \
+              --assignee-principal-type ServicePrincipal \
+              --role "$READER_ROLE_ID" \
+              --scope "$identity_id" \
+              --query id \
+              --output tsv
+          )"
+          test -n "$assignment_id"
+          test "$(
+            az role assignment list \
+              --assignee-object-id "$temporary_principal_id" \
+              --scope "$identity_id" \
+              --query "[?id=='$assignment_id'] | length(@)" \
+              --output tsv
+          )" = "1"
+          echo "Created and verified Reader assignment: $assignment_id"
+
+          az role assignment delete \
+            --ids "$assignment_id" \
+            --only-show-errors
+          test "$(
+            az role assignment list \
+              --assignee-object-id "$temporary_principal_id" \
+              --scope "$identity_id" \
+              --query "[?id=='$assignment_id'] | length(@)" \
+              --output tsv
+          )" = "0"
+          echo "Deleted and verified removal of Reader assignment."
+          assignment_id=""
+
+          az identity delete \
+            --name "$smoke_name" \
+            --resource-group "$TARGET_RESOURCE_GROUP" \
+            --only-show-errors
+          if az identity show \
+            --name "$smoke_name" \
+            --resource-group "$TARGET_RESOURCE_GROUP" \
+            --only-show-errors >/dev/null 2>&1; then
+            echo "Temporary identity still exists after deletion." >&2
+            exit 1
+          fi
+          echo "Deleted and verified removal of $smoke_name."
+
+          trap - EXIT
