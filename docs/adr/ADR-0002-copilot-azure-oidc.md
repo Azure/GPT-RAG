@@ -91,6 +91,9 @@ Reader role at
 
 The setup workflow uses environment variables for the non-secret client,
 tenant, and subscription identifiers. No client secret is created or retained.
+The repository uses GitHub's default OIDC subject format so the environment
+claim resolves to the exact federated subject instead of an organization-level
+custom subject template.
 The legacy applications are retained without subscription authorization because
 deletion is less reversible and exclusive ownership has not been established.
 
@@ -119,9 +122,11 @@ deletion is less reversible and exclusive ownership has not been established.
 
 1. Create the dedicated resource group and managed identity.
 2. Add the exact GitHub environment federation and subscription Reader role.
-3. Publish the pinned setup workflow and non-secret environment variables.
-4. Prove OIDC login and an Azure read operation from GitHub Actions.
-5. Remove `AZURE_CLIENT_SECRET` from the GitHub environment and remove the
+3. Set the repository to GitHub's default OIDC subject format and publish the
+   pinned setup workflow and non-secret environment variables.
+4. Prove the exact subject, OIDC login, and an Azure read operation from GitHub
+   Actions.
+5. Remove all legacy Azure secrets from the GitHub environment and remove the
    legacy service principal's Owner assignment.
 6. Merge the workflow and this ADR to `main`, because Copilot reads setup steps
    from the default branch.
@@ -140,6 +145,7 @@ workflow pin while keeping the identity read-only.
   `id-token: write`.
 - The managed identity has exactly one GitHub federation with the required
   issuer, subject, and audience.
+- The repository OIDC customization reports `use_default: true`.
 - Its effective assignment for this integration is Reader at the exact
   subscription scope, with no Contributor, Owner, or role-assignment role.
 - A GitHub Actions smoke test authenticates through OIDC and completes
