@@ -86,7 +86,7 @@ nav:
     - Troubleshooting: troubleshooting.md
   - Meet the Team: team.md
   - Contributing: contributing.md
-  - AI-assisted maintenance: ai_assisted_maintenance.md
+  - AI Transparency Notes: ai_transparency_notes.md
 extra:
   generator: false
 extra_css:
