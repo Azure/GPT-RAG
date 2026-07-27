@@ -467,10 +467,10 @@ gates for implementation tracks.
 | --- | --- | --- | --- |
 | History and feedback ownership | Hosted modes use Foundry managed Conversations for chat history. Feedback and administrative curation metadata remain in Cosmos and are only available when the administrative panel is deployed. | gpt-rag-orchestrator, gpt-rag-ui, Azure/GPT-RAG | Hosted/no-panel requires orchestrator Container Apps for chat persistence. |
 | Identity propagation and fallback policy | Primary path is Toolbox identity passthrough so Foundry IQ and AI Search apply native document trimming. Group-filter fallback is allowed only as an explicit temporary override for preview environments and cannot be the default release path. | gpt-rag-orchestrator, gpt-rag-ui | Any unauthorized document retrieval on hosted path; fallback enabled by default in a release candidate. |
-| Strategy eligibility under 2 vCPU / 4 GiB | Hosted single-agent eligibility: maf_lite, maf_agent_service, single_agent_rag, mcp, nl2sql. Multimodal is not eligible in the shared hosted agent and stays on classic mode unless isolated in a dedicated hosted deployment after profiling approval. | gpt-rag-orchestrator | Multimodal enabled in hosted shared agent without profiling evidence and approval. |
+| Strategy eligibility under 2 vCPU / 4 GiB | The initial shared hosted-agent implementation scope is maf_lite, maf_agent_service, single_agent_rag, and mcp, subject to the hosted runtime gates below. nl2sql and multimodal remain classic-only until their investigations pass. | gpt-rag-orchestrator | nl2sql or multimodal enabled in the shared hosted agent without the required bounds, profiling evidence, and approval. |
 | Chat/backend configuration contract | `CHAT_BACKEND` values are `orchestrator` (default) and `hosted_agent`. Deployment flags remain `DEPLOY_HOSTED_AGENT_ORCHESTRATION` (default `false`) and `DEPLOY_ADMINISTRATIVE_PANEL` (default `false`). App Configuration label `gpt-rag` must publish backend selector plus both endpoint outputs (`orchestrator` and hosted agent) so the UI can switch without code changes. | Azure/GPT-RAG, gpt-rag-ui | Missing selector/endpoint outputs or ambiguous ownership of the keys. |
 | Administrative panel boundary | Hosted/no-panel mode provisions no orchestrator Container Apps. Hosted/panel mode provisions panel-only backend endpoints (history, feedback, dashboard) and does not route chat through Container Apps. | Azure/GPT-RAG, gpt-rag-orchestrator, gpt-rag-ui | Any hosted/no-panel deployment with orchestrator app provisioned; hosted/panel chat routed to Container Apps. |
-| Private ACR build route | Default private-build path is ACR Task-based image build/push. VNet runner/jumpbox is the documented fallback when ACR Task prerequisites are unavailable. | Azure/GPT-RAG, gpt-rag-orchestrator, gpt-rag-ui, gpt-rag-ingestion | No validated private-build route for hosted mode before release sign-off. |
+| Private ACR build route | The automated baseline is a VNet-connected self-hosted CI runner or agent that runs the build from inside the VNet, as documented by Microsoft. A jump host is the interactive fallback. A dedicated VNet-connected ACR Tasks agent pool is an optional optimization pending validation; shared ACR Tasks are not a private-endpoint bypass. | Azure/GPT-RAG, bicep-ptn-aiml-landing-zone | No validated private-build route for hosted mode before release sign-off, or public ACR access enabled as an implicit workaround. |
 | Validation environment target | Validation must run in a dedicated non-production environment pair: one Basic topology and one network-isolated topology with private endpoints and private ACR support. | Azure/GPT-RAG | Hosted modes promoted without evidence from both topology classes. |
 
 ### Measurable release gates by topology
@@ -480,6 +480,16 @@ gates for implementation tracks.
 | Classic (default fallback) | `DEPLOY_HOSTED_AGENT_ORCHESTRATION=false`; orchestrator Container Apps deployed; UI `CHAT_BACKEND=orchestrator`; regression checks for history and feedback pass. | Any regression in classic chat, history, or feedback after hosted changes. |
 | Hosted / no-panel | `DEPLOY_HOSTED_AGENT_ORCHESTRATION=true`, `DEPLOY_ADMINISTRATIVE_PANEL=false`; zero orchestrator Container Apps provisioned; UI `CHAT_BACKEND=hosted_agent`; two-user authorization negative test proves restricted user cannot retrieve protected content. | Unauthorized retrieval, missing hosted endpoint, or orchestrator app unexpectedly provisioned. |
 | Hosted / panel | `DEPLOY_HOSTED_AGENT_ORCHESTRATION=true`, `DEPLOY_ADMINISTRATIVE_PANEL=true`; hosted path serves chat; panel endpoints serve history/feedback/dashboard; Cosmos contains panel feedback records only. | Chat flow depends on Container Apps or panel APIs unavailable in hosted/panel mode. |
+
+Cross-cutting hosted runtime gates:
+
+- Each enabled strategy must complete cold readiness within 30 seconds, survive
+  one 15-minute idle/resume cycle, and stay below 2.5 GiB peak RSS under five
+  representative concurrent requests. These are GPT-RAG release gates, not
+  Microsoft platform guarantees.
+- In-memory query results and image payloads must have explicit bounds.
+- A network-isolated release must build and push from inside the VNet and prove
+  that Foundry can pull the image while ACR public access remains disabled.
 
 ### Adoption order and migration
 
@@ -499,14 +509,23 @@ Migration boundaries:
 
 ### Time-bounded investigations required before relaxing the freeze
 
-- **INV-001 (due 2026-08-21):** profile hosted multimodal under realistic load.
-  Decision criterion: enable multimodal in shared hosted agent only if memory
-  stays within 4 GiB/session and p95 turn latency remains within agreed release
-  SLO in both topology classes.
+- **INV-001 (due 2026-08-21):** bound and profile hosted nl2sql. Before
+  profiling, enforce an explicit SQL result-row cap. Decision criterion:
+  enable nl2sql only after five concurrent representative requests meet the
+  cross-cutting RSS and startup gates without thread-pool saturation.
 - **INV-002 (due 2026-08-21):** validate native Toolbox identity passthrough in
   the isolated topology without group-filter fallback. Decision criterion:
   fallback policy stays temporary-only until two-user negative retrieval tests
   pass in isolated mode.
+- **INV-003 (due 2026-08-21):** decide and profile the hosted multimodal path.
+  Decision criterion: the selected retrieval path preserves actual image
+  behavior, private Blob access succeeds, payloads remain bounded, and the
+  cross-cutting RSS and startup gates pass.
+- **INV-004 (due 2026-08-21):** evaluate a dedicated VNet-connected ACR Tasks
+  agent pool as an optional alternative to the self-hosted runner. Decision
+  criterion: the selected region supports the preview pool, Premium ACR is
+  acceptable, private DNS and endpoint access work, least-privilege build and
+  Foundry pull both succeed, and azd integration requires no public ACR access.
 
 ## Review trigger
 
@@ -515,6 +534,8 @@ Reassess this ADR immediately when any of the following occurs:
   behavior.
 - Session resource ceilings, pricing model, or private ACR support policy
   changes.
+- ACR Tasks dedicated agent pools become generally available or add a required
+  deployment region.
 - A hosted-mode release gate fails in validation or production.
 - Security review reports an unauthorized document retrieval path.
 
@@ -530,6 +551,10 @@ Reassess this ADR immediately when any of the following occurs:
   https://learn.microsoft.com/azure/foundry/agents/how-to/virtual-networks
 - Deploy a hosted agent with a private ACR:
   https://learn.microsoft.com/azure/foundry/agents/how-to/deploy-hosted-agent-private-azure-container-registry
+- Allow trusted services to access Azure Container Registry:
+  https://learn.microsoft.com/azure/container-registry/allow-access-trusted-services
+- ACR Tasks dedicated agent pools:
+  https://learn.microsoft.com/azure/container-registry/tasks-agent-pools
 - Agent Service networking deep dive:
   https://learn.microsoft.com/azure/foundry/agents/concepts/agents-networking-deep-dive
 - Toolbox (tools via MCP):
