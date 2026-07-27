@@ -22,7 +22,7 @@
     
     
       
-        <title>AI-assisted maintenance - GPT-RAG</title>
+        <title>AI Transparency Notes - GPT-RAG</title>
       
     
     
@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#ai-assisted-maintenance" class="md-skip">
+        <a href="#ai-transparency-notes" class="md-skip">
           Skip to content
         </a>
       
@@ -109,7 +109,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              AI-assisted maintenance
+              AI Transparency Notes
             
           </span>
         </div>
@@ -1435,7 +1435,7 @@
           
   
   <span class="md-ellipsis">
-    AI-assisted maintenance
+    AI Transparency Notes
   </span>
   
 
@@ -1446,7 +1446,7 @@
         
   
   <span class="md-ellipsis">
-    AI-assisted maintenance
+    AI Transparency Notes
   </span>
   
 
@@ -1468,11 +1468,98 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#overview-and-purpose" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview and purpose
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#intended-uses" class="md-nav__link">
+    <span class="md-ellipsis">
+      Intended uses
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#capabilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      Capabilities
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Limitations
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#human-oversight-and-accountability" class="md-nav__link">
+    <span class="md-ellipsis">
+      Human oversight and accountability
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-privacy-and-security-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data, privacy, and security considerations
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reliability-and-evaluation-expectations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reliability and evaluation expectations
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#responsible-deployment-and-operation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Responsible deployment and operation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ai-assisted-repository-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      AI-assisted repository maintenance
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="AI-assisted repository maintenance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#azure-evaluation-access" class="md-nav__link">
     <span class="md-ellipsis">
       Azure evaluation access
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1502,48 +1589,130 @@
   
 
 
-<h1 id="ai-assisted-maintenance">AI-assisted maintenance</h1>
-<p>GPT-RAG maintainers use GitHub Copilot coding agents and repository skills to
-help with scoped engineering work such as analysis, implementation,
-documentation, and validation. These are engineering-time tools. They are
-separate from the agents and orchestration features that a deployed GPT-RAG
-runtime may expose to its users.</p>
-<p>Humans define or approve the task and review the resulting changes. Coding
-agents work in ephemeral GitHub-hosted environments and are constrained by the
-repository's instructions, specialized agent definitions, and reusable skills.
-The normal pull request process still applies, and continuous integration
-validates changes before they are merged.</p>
-<h2 id="azure-evaluation-access">Azure evaluation access</h2>
-<p>When an approved engineering task requires an Azure deployment, the
+<h1 id="ai-transparency-notes">AI Transparency Notes</h1>
+<h2 id="overview-and-purpose">Overview and purpose</h2>
+<p>GPT-RAG is a solution accelerator for building retrieval-augmented assistants
+on Azure. A deployed runtime combines a configured model with selected
+enterprise grounding sources and application services. The organization that
+deploys GPT-RAG chooses the model, data sources, access controls, deployment
+topology, user experience, and operating policies.</p>
+<p>This note summarizes intended uses, capabilities, limitations, and shared
+responsibilities. It does not certify a deployment or replace the adopter's
+legal, privacy, security, risk, records-management, or human-oversight review.
+Actual behavior depends on the deployed configuration, connected data, model,
+and enabled features.</p>
+<h2 id="intended-uses">Intended uses</h2>
+<p>GPT-RAG is intended to help organizations create assistants that retrieve
+information from approved sources and generate responses grounded in that
+information. Example scenarios include enterprise knowledge discovery,
+question answering, summarization, and configured text, image, or voice
+experiences.</p>
+<p>Adopters should define the intended users, approved data, permitted tasks, and
+prohibited uses before deployment. GPT-RAG should not be treated as an
+independent authority, a compliance decision maker, or the sole basis for
+high-impact decisions about a person. Scenarios that can materially affect
+people or operations need controls and human review appropriate to their risk.</p>
+<h2 id="capabilities">Capabilities</h2>
+<p>Depending on configuration, GPT-RAG can:</p>
+<ul>
+<li>ingest or query supported grounding sources;</li>
+<li>retrieve relevant content and provide source references with generated
+  responses;</li>
+<li>orchestrate configured models, retrieval strategies, and tools;</li>
+<li>apply application authentication and source-specific authorization patterns;
+  and</li>
+<li>support modular Azure deployment, optional network isolation, and
+  configurable observability.</li>
+</ul>
+<p>See <a href="../architecture/">Architecture</a> and the
+<a href="../howto_grounding_overview/">Grounding sources overview</a> for the current
+component and source boundaries.</p>
+<h2 id="limitations">Limitations</h2>
+<p>Generated responses can be inaccurate, incomplete, outdated, ambiguous, or
+unsuitable for the user's context. A source reference shows what content was
+used; it does not prove that the response or source is correct. Retrieval
+quality depends on source quality, indexing, permissions, configuration, and
+the user's question. A configured source or tool can also be unavailable,
+return incomplete results, or fail.</p>
+<p>GPT-RAG does not determine whether an organization has the right to use data,
+whether an answer is legally compliant, or whether a deployment satisfies an
+external framework. Its audit events are best-effort operational evidence, not
+an independently attested or complete record. Review the fuller limitations in
+<a href="../governance_overview/">Governance and responsible operation</a>.</p>
+<h2 id="human-oversight-and-accountability">Human oversight and accountability</h2>
+<p>The adopter remains accountable for the deployed system and its outcomes.
+Business and data owners should approve the purpose and data sources. Platform
+teams should configure identity, networking, retention, and access. Runtime
+operators should monitor health and investigate failures. People using or
+acting on generated content should be able to recognize the assistant's role,
+inspect relevant sources, and escalate uncertain or consequential outcomes.</p>
+<p>Human review should match the use-case risk. It should occur before sensitive
+data is connected, before material configuration changes are released, and
+before generated output is used for consequential action.</p>
+<h2 id="data-privacy-and-security-considerations">Data, privacy, and security considerations</h2>
+<p>Only connect data that the organization is authorized to process for the
+defined users and purpose. Classify and minimize source scope, preserve
+source-system authorization where supported, and test representative allowed
+and denied access. Retrieved excerpts can enter model prompts, responses,
+conversation history, or troubleshooting paths, so downstream handling must
+match the source classification.</p>
+<p>Use managed identities, least-privilege Azure RBAC, Key Vault references, and
+network controls appropriate to the deployment. Do not place credentials in
+prompts, source content, configuration, or telemetry. Retention and deletion
+depend on the deployed Azure services and operator configuration; inspect and
+test those settings rather than assuming one policy applies to every
+deployment.</p>
+<h2 id="reliability-and-evaluation-expectations">Reliability and evaluation expectations</h2>
+<p>Evaluate the complete configured system, not only the model. Before release,
+use representative questions, sources, identities, and failure conditions to
+measure answer quality, retrieval relevance, source-reference usefulness,
+authorization behavior, latency, and recovery. Include cases where the correct
+behavior is to acknowledge uncertainty or return no answer.</p>
+<p>Re-evaluate after changing models, prompts, indexes, grounding sources, tools,
+permissions, or infrastructure. Monitor runtime health and cost, preserve
+reviewable evidence appropriate to the scenario, and keep a tested rollback or
+disable path. No evaluation set can guarantee future responses.</p>
+<h2 id="responsible-deployment-and-operation">Responsible deployment and operation</h2>
+<p>Start with a non-production environment. Confirm regional service support,
+capacity, data boundaries, access assignments, network posture, logging,
+retention, deletion, and incident procedures. Limit enabled sources and tools
+to those required by the scenario. Document known limitations for users and
+operators, and review them when the deployment changes.</p>
+<p>The <a href="../deploy/">Deployment Guide</a> describes supported deployment paths.
+<a href="../governance_overview/">Governance and responsible operation</a> provides the
+detailed responsibility, data, telemetry, retention, and operational guidance.</p>
+<h2 id="ai-assisted-repository-maintenance">AI-assisted repository maintenance</h2>
+<p>GitHub Copilot coding agents and repository skills help maintainers with scoped
+engineering work such as analysis, implementation, documentation, and
+validation. These are engineering-time tools. They are separate from agents,
+models, retrieval, and orchestration in a deployed GPT-RAG runtime.</p>
+<p>Humans define or approve tasks and review resulting changes. Coding agents work
+in ephemeral GitHub-hosted environments and are constrained by repository
+instructions, specialized agent definitions, and reusable skills. The normal
+pull request process still applies, and continuous integration validates
+changes before merge.</p>
+<h3 id="azure-evaluation-access">Azure evaluation access</h3>
+<p>When an approved maintenance task requires Azure deployment, the
 <a href="https://github.com/Azure/GPT-RAG/blob/main/.github/workflows/copilot-setup-steps.yml">Copilot setup workflow</a>
 signs in through GitHub OpenID Connect (OIDC) using a dedicated managed
-identity. No Azure client secret is supplied. Azure RBAC limits that identity
-to the dedicated, non-production evaluation resource group
-<code>rg-gptrag-evaluation</code>.</p>
-<p>The required Azure identifiers are stored as GitHub variables rather than
-coding-agent secrets. The coding-agent secret set is empty, and no Azure client
-secret is configured.</p>
+identity. No Azure client secret is configured or supplied. Required Azure
+identifiers are stored as GitHub variables, and the coding-agent secret set is
+empty.</p>
 <p>Deployments use the fixed Azure Developer CLI environment
-<code>gptrag-evaluation</code>. The identity currently has these roles at that resource
-group only:</p>
-<ul>
-<li><strong>Contributor</strong>, for provisioning and removing evaluation resources.</li>
-<li><strong>Role Based Access Control Administrator</strong>, for the role assignments that
-  the deployment creates within the evaluation resource group.</li>
-</ul>
-<p>The identity has no subscription-wide Owner, Contributor, or Reader
-assignment. It cannot use these roles to manage resources or role assignments
-outside the evaluation resource group. A
-<a href="https://github.com/Azure/GPT-RAG/actions/runs/30205002536">live OIDC smoke test</a>
-confirmed that reads outside the group are denied. It created and verified a
-temporary identity only inside the evaluation group, then deleted it and
-confirmed that no smoke-test identities remained. Evaluation resources are
-cleaned up after testing to limit ongoing cost and avoid retaining test
-deployments.</p>
-<p>The accepted design and its operational boundaries are recorded in
+<code>gptrag-evaluation</code> and dedicated non-production resource group
+<code>rg-gptrag-evaluation</code>. The identity has <strong>Contributor</strong> and <strong>Role Based Access
+Control Administrator</strong> at that resource group only, for resource provisioning
+and in-group role assignments. It has no subscription-wide Owner, Contributor,
+or Reader assignment.</p>
+<p>A <a href="https://github.com/Azure/GPT-RAG/actions/runs/30205002536">live OIDC smoke test</a>
+confirmed that reads outside the group are denied. It created, verified, and
+deleted a temporary identity only inside the evaluation group, then confirmed
+that no smoke-test identities remained. Evaluation resources are cleaned up
+after testing.</p>
+<p>The accepted boundary is recorded in
 <a href="https://github.com/Azure/GPT-RAG/blob/main/docs/adr/ADR-0002-copilot-azure-oidc.md">ADR-0002</a>.
-Any proposal to widen the resource scope, change the identity model, or use a
-different deployment target requires maintainer review.</p>
+Changing the resource scope, identity model, or deployment target requires
+maintainer review.</p>
 
 
 
