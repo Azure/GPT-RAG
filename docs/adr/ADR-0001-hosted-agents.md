@@ -1,7 +1,7 @@
 # ADR-0001: How GPT-RAG will support Microsoft Foundry hosted agents
 
-Status: Accepted (revision 2, decision reversed)
-Date: 2026-07-24
+Status: Accepted (revision 3, implementation contracts frozen)
+Date: 2026-07-27
 Deciders: Paulo (GPT-RAG maintainer), with architecture analysis (Martin) and
 implementation analysis (Guido).
 
@@ -456,22 +456,88 @@ This is the architecture-level plan, in dependency order.
 - Private ACR date lock. Zero Trust environments on older projects may need the
   public ACR, which must be checked in environment planning.
 
-## Open decisions
+## Implementation contracts frozen for issue #588
 
-- Persistence ownership: do we confirm that history and feedback move into the
-  hosted agent, leaving Container Apps with read and the administrative panel
-  only?
-- Document-level security on the direct path: do we confirm that the native cut
-  of Foundry IQ and AI Search closes end to end via identity passthrough through
-  the Toolbox, with the group filter only as a fallback, or do we treat the
-  fallback as a first-class path too?
-- Eligibility under the ceiling: do nl2sql and multimodal enter the single agent,
-  stay on Container Apps, or become separate agents? Depends on profiling under
-  load.
-- Internal ACR build: do we use a jumpbox, a CI runner in the VNet, or ACR Tasks
-  for the image build and push when the ACR is private?
-- Target environment: VNet topology, egress, and region. Brazil South is
-  supported.
+The following decisions are frozen as repository-level contracts and release
+gates for implementation tracks.
+
+### Decision matrix
+
+| Area | Frozen decision | Contract owner(s) | Release blocker if violated |
+| --- | --- | --- | --- |
+| History and feedback ownership | Hosted modes use Foundry managed Conversations for chat history. Feedback and administrative curation metadata remain in Cosmos and are only available when the administrative panel is deployed. | gpt-rag-orchestrator, gpt-rag-ui, Azure/GPT-RAG | Hosted/no-panel requires orchestrator Container Apps for chat persistence. |
+| Identity propagation and fallback policy | Primary path is Toolbox identity passthrough so Foundry IQ and AI Search apply native document trimming. Group-filter fallback is allowed only as an explicit temporary override for preview environments and cannot be the default release path. | gpt-rag-orchestrator, gpt-rag-ui | Any unauthorized document retrieval on hosted path; fallback enabled by default in a release candidate. |
+| Strategy eligibility under 2 vCPU / 4 GiB | The initial shared hosted-agent implementation scope is maf_lite, maf_agent_service, single_agent_rag, and mcp, subject to the hosted runtime gates below. nl2sql and multimodal remain classic-only until their investigations pass. | gpt-rag-orchestrator | nl2sql or multimodal enabled in the shared hosted agent without the required bounds, profiling evidence, and approval. |
+| Chat/backend configuration contract | `CHAT_BACKEND` values are `orchestrator` (default) and `hosted_agent`. Deployment flags remain `DEPLOY_HOSTED_AGENT_ORCHESTRATION` (default `false`) and `DEPLOY_ADMINISTRATIVE_PANEL` (default `false`). App Configuration label `gpt-rag` must publish backend selector plus both endpoint outputs (`orchestrator` and hosted agent) so the UI can switch without code changes. | Azure/GPT-RAG, gpt-rag-ui | Missing selector/endpoint outputs or ambiguous ownership of the keys. |
+| Administrative panel boundary | Hosted/no-panel mode provisions no orchestrator Container Apps. Hosted/panel mode provisions panel-only backend endpoints (history, feedback, dashboard) and does not route chat through Container Apps. | Azure/GPT-RAG, gpt-rag-orchestrator, gpt-rag-ui | Any hosted/no-panel deployment with orchestrator app provisioned; hosted/panel chat routed to Container Apps. |
+| Private ACR build route | The automated baseline is a VNet-connected self-hosted CI runner or agent that runs the build from inside the VNet, as documented by Microsoft. A jump host is the interactive fallback. A dedicated VNet-connected ACR Tasks agent pool is an optional optimization pending validation; shared ACR Tasks are not a private-endpoint bypass. | Azure/GPT-RAG, bicep-ptn-aiml-landing-zone | No validated private-build route for hosted mode before release sign-off, or public ACR access enabled as an implicit workaround. |
+| Validation environment target | Validation must run in a dedicated non-production environment pair: one Basic topology and one network-isolated topology with private endpoints and private ACR support. | Azure/GPT-RAG | Hosted modes promoted without evidence from both topology classes. |
+
+### Measurable release gates by topology
+
+| Mode | Required evidence gates | Rollback trigger |
+| --- | --- | --- |
+| Classic (default fallback) | `DEPLOY_HOSTED_AGENT_ORCHESTRATION=false`; orchestrator Container Apps deployed; UI `CHAT_BACKEND=orchestrator`; regression checks for history and feedback pass. | Any regression in classic chat, history, or feedback after hosted changes. |
+| Hosted / no-panel | `DEPLOY_HOSTED_AGENT_ORCHESTRATION=true`, `DEPLOY_ADMINISTRATIVE_PANEL=false`; zero orchestrator Container Apps provisioned; UI `CHAT_BACKEND=hosted_agent`; two-user authorization negative test proves restricted user cannot retrieve protected content. | Unauthorized retrieval, missing hosted endpoint, or orchestrator app unexpectedly provisioned. |
+| Hosted / panel | `DEPLOY_HOSTED_AGENT_ORCHESTRATION=true`, `DEPLOY_ADMINISTRATIVE_PANEL=true`; hosted path serves chat; panel endpoints serve history/feedback/dashboard; Cosmos contains panel feedback records only. | Chat flow depends on Container Apps or panel APIs unavailable in hosted/panel mode. |
+
+Cross-cutting hosted runtime gates:
+
+- Each enabled strategy must complete cold readiness within 30 seconds, survive
+  one 15-minute idle/resume cycle, and stay below 2.5 GiB peak RSS under five
+  representative concurrent requests. These are GPT-RAG release gates, not
+  Microsoft platform guarantees.
+- In-memory query results and image payloads must have explicit bounds.
+- A network-isolated release must build and push from inside the VNet and prove
+  that Foundry can pull the image while ACR public access remains disabled.
+
+### Adoption order and migration
+
+1. Freeze configuration contracts and App Configuration key ownership in
+   Azure/GPT-RAG.
+2. Implement hosted/core adapter and persistence split in gpt-rag-orchestrator.
+3. Implement UI backend selection and endpoint switching in gpt-rag-ui.
+4. Register/validate Toolbox tooling and ingestion compatibility.
+5. Run release gates in both validation topology classes before manifest pin
+   promotion.
+
+Migration boundaries:
+- No mandatory backfill from Cosmos to Foundry Conversations is required for
+  hosted/no-panel adoption.
+- Existing classic deployments keep Cosmos-backed history/feedback and remain
+  supported fallback.
+
+### Time-bounded investigations required before relaxing the freeze
+
+- **INV-001 (due 2026-08-21):** bound and profile hosted nl2sql. Before
+  profiling, enforce an explicit SQL result-row cap. Decision criterion:
+  enable nl2sql only after five concurrent representative requests meet the
+  cross-cutting RSS and startup gates without thread-pool saturation.
+- **INV-002 (due 2026-08-21):** validate native Toolbox identity passthrough in
+  the isolated topology without group-filter fallback. Decision criterion:
+  fallback policy stays temporary-only until two-user negative retrieval tests
+  pass in isolated mode.
+- **INV-003 (due 2026-08-21):** decide and profile the hosted multimodal path.
+  Decision criterion: the selected retrieval path preserves actual image
+  behavior, private Blob access succeeds, payloads remain bounded, and the
+  cross-cutting RSS and startup gates pass.
+- **INV-004 (due 2026-08-21):** evaluate a dedicated VNet-connected ACR Tasks
+  agent pool as an optional alternative to the self-hosted runner. Decision
+  criterion: the selected region supports the preview pool, Premium ACR is
+  acceptable, private DNS and endpoint access work, least-privilege build and
+  Foundry pull both succeed, and azd integration requires no public ACR access.
+
+## Review trigger
+
+Reassess this ADR immediately when any of the following occurs:
+- Foundry hosted agents leave preview or change identity/header propagation
+  behavior.
+- Session resource ceilings, pricing model, or private ACR support policy
+  changes.
+- ACR Tasks dedicated agent pools become generally available or add a required
+  deployment region.
+- A hosted-mode release gate fails in validation or production.
+- Security review reports an unauthorized document retrieval path.
 
 ## References
 
@@ -485,6 +551,10 @@ This is the architecture-level plan, in dependency order.
   https://learn.microsoft.com/azure/foundry/agents/how-to/virtual-networks
 - Deploy a hosted agent with a private ACR:
   https://learn.microsoft.com/azure/foundry/agents/how-to/deploy-hosted-agent-private-azure-container-registry
+- Allow trusted services to access Azure Container Registry:
+  https://learn.microsoft.com/azure/container-registry/allow-access-trusted-services
+- ACR Tasks dedicated agent pools:
+  https://learn.microsoft.com/azure/container-registry/tasks-agent-pools
 - Agent Service networking deep dive:
   https://learn.microsoft.com/azure/foundry/agents/concepts/agents-networking-deep-dive
 - Toolbox (tools via MCP):
