@@ -1522,7 +1522,7 @@
 <p><strong>Step 3: Provision Infrastructure (30 min)</strong></p>
 <div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">provision</span>
 </code></pre></div>
-<p><strong>What this creates (~20 Azure resources):</strong></p>
+<p><strong>What this creates with the classic defaults (~20 Azure resources):</strong></p>
 <ul>
 <li><strong>Resource Group</strong> - Container for all resources</li>
 <li><strong>Storage Accounts</strong> - For documents and job logs</li>
@@ -1530,7 +1530,7 @@
 <li><strong>Microsoft Foundry</strong> - Foundry Account and project for agent orchestration</li>
 <li><strong>OpenAI Models</strong> - GPT-4o and text-embedding-3-large deployments</li>
 <li><strong>Container Registry</strong> - Stores Docker images</li>
-<li><strong>Container Apps (4)</strong> - Frontend, orchestrator, ingestion, MCP</li>
+<li><strong>Container Apps (4)</strong> - Frontend, orchestrator, ingestion, MCP. The unreleased <a href="../deploy/#chat-runtime-modes-unreleased">hosted modes</a> use a different chat topology.</li>
 <li><strong>App Configuration</strong> - Centralized configuration store</li>
 <li><strong>Key Vault</strong> - Secrets management</li>
 <li><strong>Cosmos DB</strong> - Agent state and metadata</li>

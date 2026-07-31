@@ -1599,6 +1599,7 @@
 <h1 id="admin-dashboard-sign-in">Admin Dashboard Sign-in</h1>
 <p>The orchestrator admin dashboard at <code>/dashboard</code> signs the operator in with Microsoft Entra ID. This page explains what an operator needs to configure in Entra and in App Configuration to turn that sign-in on, how to assign the <code>Admin</code> role, what a working sign-in should look like, and how to diagnose the common failures.</p>
 <p>If you are looking for the wider authentication picture (chat UI sign-in, On-Behalf-Of, document-level access control), see <a href="../howto_authentication/">Authentication and Document-Level Security</a>. This page is scoped to the operator dashboard.</p>
+<p>This procedure applies to the classic orchestrator Container App. The <a href="../deploy/#chat-runtime-modes-unreleased">unreleased hosted/no-panel mode</a> does not deploy it; hosted/panel routes chat to the Foundry hosted agent and retains only the ingestion administrative backend.</p>
 <h2 id="what-this-is">What this is</h2>
 <p>Until this release, the orchestrator dashboard SPA had no real sign-in. The <code>require_admin</code> gate on <code>/api/dashboard/*</code> existed, but the only way to feed it a token was to paste one into browser storage. That is now replaced by a proper Entra ID sign-in flow inside the SPA using MSAL (Authorization Code + PKCE, redirect flow):</p>
 <ol>
