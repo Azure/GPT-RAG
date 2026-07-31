@@ -1,6 +1,6 @@
 # User Feedback Configuration
 
-GPT-RAG includes a **User Feedback Loop** feature that lets users evaluate assistant responses through the UI. Feedback is sent to the backend, processed by the orchestrator, and stored in **Cosmos DB** for analysis and continuous improvement.
+GPT-RAG includes a **User Feedback Loop** feature that lets users evaluate assistant responses through the UI. In the classic default, feedback is processed by the orchestrator and stored in **Cosmos DB**. In the unreleased hosted composition, this Cosmos-backed administrative path exists only when `DEPLOY_ADMINISTRATIVE_PANEL=true`; hosted/no-panel does not provision the panel-only Cosmos dependency. See [Chat runtime modes](deploy.md#chat-runtime-modes-unreleased).
 
 ![Feedback stored in Cosmos DB](media/feedback_stored_in_cosmos_db.png)
 <br>*User feedback stored in Cosmos DB*

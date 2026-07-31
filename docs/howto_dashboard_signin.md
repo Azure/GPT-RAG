@@ -4,6 +4,8 @@ The orchestrator admin dashboard at `/dashboard` signs the operator in with Micr
 
 If you are looking for the wider authentication picture (chat UI sign-in, On-Behalf-Of, document-level access control), see [Authentication and Document-Level Security](howto_authentication.md). This page is scoped to the operator dashboard.
 
+This procedure applies to the classic orchestrator Container App. The [unreleased hosted/no-panel mode](deploy.md#chat-runtime-modes-unreleased) does not deploy it; hosted/panel routes chat to the Foundry hosted agent and retains only the ingestion administrative backend.
+
 ## What this is
 
 Until this release, the orchestrator dashboard SPA had no real sign-in. The `require_admin` gate on `/api/dashboard/*` existed, but the only way to feed it a token was to paste one into browser storage. That is now replaced by a proper Entra ID sign-in flow inside the SPA using MSAL (Authorization Code + PKCE, redirect flow):

@@ -68,7 +68,7 @@ azd auth login
 azd provision
 ```
 
-**What this creates (~20 Azure resources):**
+**What this creates with the classic defaults (~20 Azure resources):**
 
   - **Resource Group** - Container for all resources
   - **Storage Accounts** - For documents and job logs
@@ -76,7 +76,7 @@ azd provision
   - **Microsoft Foundry** - Foundry Account and project for agent orchestration
   - **OpenAI Models** - GPT-4o and text-embedding-3-large deployments
   - **Container Registry** - Stores Docker images
-  - **Container Apps (4)** - Frontend, orchestrator, ingestion, MCP
+  - **Container Apps (4)** - Frontend, orchestrator, ingestion, MCP. The unreleased [hosted modes](deploy.md#chat-runtime-modes-unreleased) use a different chat topology.
   - **App Configuration** - Centralized configuration store
   - **Key Vault** - Secrets management
   - **Cosmos DB** - Agent state and metadata
