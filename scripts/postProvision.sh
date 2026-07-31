@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
 # Ensure the temporary venv is always cleaned up, even on early exits.
 # Cleanup failures must never cause the post-provision hook to report failure.
 cleanup() {
@@ -95,6 +98,13 @@ if [[ -z "${APP_CONFIG_ENDPOINT:-}" ]]; then
   echo "❗️ APP_CONFIG_ENDPOINT environment variable must be set before running this script."
   exit 1
 fi
+
+echo "⚙️ Publishing GPT-RAG deployment-mode configuration…"
+(
+  cd "$PROJECT_ROOT"
+  python3 -m config.deployment.appconfig
+)
+echo "✅ Deployment-mode configuration published."
 
 ###############################################################################
 # Setup Python environment

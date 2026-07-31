@@ -2,6 +2,45 @@
 
 ## [Unreleased]
 
+### Added
+
+- **Three deterministic deployment modes.** `DEPLOY_HOSTED_AGENT_ORCHESTRATION`
+  and `DEPLOY_ADMINISTRATIVE_PANEL` default to `false` and compose classic,
+  hosted/no-panel, or hosted/panel resources without changing classic behavior.
+  Hosted chat uses the Foundry agent directly; the optional panel retains only
+  the ingestion administrative backend and its Cosmos-backed feedback/curation
+  data.
+- **Hosted-agent azd service isolation.** An isolated child azd project deploys
+  the orchestrator image through `azure.ai.agent` only in hosted modes. Hosted
+  deployment rejects mutable image tags and requires an operator-supplied OCI
+  digest.
+- **Mode-aware runtime contract.** App Configuration label `gpt-rag` now owns
+  `CHAT_BACKEND`, deployment topology, classic and hosted endpoints, resource
+  scope, and finite SSE timeout settings. PowerShell and shell lifecycle hooks
+  consume the same composition and publication modules.
+
+### Changed
+
+- **Released component pins.** The unreleased integration combination pins UI
+  `v2.5.0`, orchestrator `v3.9.0`, ingestion `v2.6.0`, and AI Landing Zone
+  `v2.4.0` at their exact released commits.
+
+### Migration and rollback
+
+Classic remains the default and requires no migration. Hosted modes require an
+immutable orchestrator image digest and an explicit hosted-agent data-plane
+scope. The deterministic rollback contract in
+`config/deployment/rollback.json` restores the complete `v3.7.0` classic pin
+set, clears hosted endpoint inputs, resets both mode flags to `false`, and
+restores `CHAT_BACKEND=orchestrator`.
+
+The UI and AI Landing Zone release APIs report `immutable=false`. AI Landing
+Zone `v2.4.0` is additionally protected by active exact-tag ruleset `20050531`
+against deletion and non-fast-forward updates; UI `v2.5.0` remains the
+unmitigated immutable-tag blocker because the maintainer lacks repository
+administration. This unreleased integration does not publish an umbrella
+release or activate hosted mode.
+
 ## [v3.7.0] - 2026-07-21
 
 ### User and operator impact

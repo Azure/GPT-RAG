@@ -45,13 +45,36 @@ if (-not (Test-Path $mainBicep)) {
     Write-Host "Infrastructure submodule cloned successfully." -ForegroundColor Green
 }
 
-foreach ($fileName in @("manifest.json", "main.parameters.json")) {
-    $src = Join-Path $projectRoot $fileName
-    $dst = Join-Path $infraDir $fileName
-    if (Test-Path $src) {
-        Write-Host "Applying project $fileName to infra..." -ForegroundColor Cyan
-        Copy-Item -Path $src -Destination $dst -Force
+$manifestSource = Join-Path $projectRoot "manifest.json"
+if (-not (Test-Path $manifestSource)) {
+    Write-Host "Error: manifest.json is required to verify the infrastructure release pin." -ForegroundColor Red
+    exit 1
+}
+$expectedInfraCommit = (Get-Content -LiteralPath $manifestSource -Raw | ConvertFrom-Json).ailz_commit
+$actualInfraCommitOutput = & git -C $infraDir rev-parse HEAD 2>$null
+$revParseExitCode = $LASTEXITCODE
+$actualInfraCommit = if ($actualInfraCommitOutput) { "$actualInfraCommitOutput".Trim() } else { '' }
+if ($revParseExitCode -ne 0 -or -not $expectedInfraCommit -or $actualInfraCommit -ne $expectedInfraCommit) {
+    Write-Host "Error: infra must resolve to $expectedInfraCommit but is at $actualInfraCommit." -ForegroundColor Red
+    exit 1
+}
+if (Test-Path $manifestSource) {
+    Write-Host "Applying project manifest.json to infra..." -ForegroundColor Cyan
+    Copy-Item -Path $manifestSource -Destination (Join-Path $infraDir "manifest.json") -Force
+}
+
+$parameterSource = Join-Path $projectRoot "main.parameters.json"
+$parameterDestination = Join-Path $infraDir "main.parameters.json"
+Write-Host "Composing GPT-RAG deployment mode..." -ForegroundColor Cyan
+Push-Location $projectRoot
+try {
+    & python -m config.deployment.composition --input $parameterSource --output $parameterDestination
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Error: GPT-RAG deployment mode composition failed." -ForegroundColor Red
+        exit $LASTEXITCODE
     }
+} finally {
+    Pop-Location
 }
 
 # Helper to match truthy values (1, true, t)
@@ -64,7 +87,7 @@ function Test-Truthy($value) {
 $regionalPreflightScript = Join-Path $PSScriptRoot "Invoke-RegionalPreflight.ps1"
 if ((Test-Path $regionalPreflightScript) -and (-not (Test-Truthy $env:PREFLIGHT_SKIP)) -and (-not (Test-Truthy $env:GPT_RAG_REGIONAL_PREFLIGHT_SKIP))) {
     Write-Host "Running GPT-RAG regional preflight..." -ForegroundColor Cyan
-    & pwsh -NoProfile -File $regionalPreflightScript -ProjectRoot $projectRoot -ParameterFile (Join-Path $projectRoot "main.parameters.json")
+    & pwsh -NoProfile -File $regionalPreflightScript -ProjectRoot $projectRoot -ParameterFile $parameterDestination
     if ($LASTEXITCODE -ne 0) {
         Write-Host "GPT-RAG regional preflight failed. Fix the reported blockers, or set GPT_RAG_REGIONAL_PREFLIGHT_SKIP=true to bypass only this check." -ForegroundColor Red
         exit $LASTEXITCODE

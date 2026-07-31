@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+name: azure-gpt-rag-hosted-agent
+services:
+  orchestrator-agent:
+    host: azure.ai.agent
+    project: .
+    image: ${AZURE_CONTAINER_REGISTRY_ENDPOINT}/${HOSTED_AGENT_IMAGE=gpt-rag-orchestrator}@${HOSTED_AGENT_IMAGE_VERSION}
+    kind: hosted
+    name: ${HOSTED_AGENT_NAME=gpt-rag-orchestrator}
+    displayName: GPT-RAG hosted orchestrator
+    description: GPT-RAG orchestration hosted by Microsoft Foundry.
+    startupCommand: ${HOSTED_AGENT_STARTUP_COMMAND=uvicorn src.api.hosted_entrypoint:app --host 0.0.0.0 --port 8088}
+    container:
+      resources:
+        cpu: ${HOSTED_AGENT_CONTAINER_CPU=2}
+        memory: ${HOSTED_AGENT_CONTAINER_MEMORY=4Gi}
+    protocols:
+      - protocol: responses
+        version: ${HOSTED_AGENT_RESPONSES_PROTOCOL_VERSION=2.0.0}
+      - protocol: invocations
+        version: ${HOSTED_AGENT_INVOCATIONS_PROTOCOL_VERSION=1.0.0}
+    env:
+      APP_CONFIG_ENDPOINT: ${APP_CONFIG_ENDPOINT}
+      APPLICATIONINSIGHTS_CONNECTION_STRING: ${APPLICATIONINSIGHTS_CONNECTION_STRING=}

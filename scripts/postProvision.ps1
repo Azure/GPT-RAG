@@ -230,6 +230,10 @@ function Set-GptRagAppConfiguration {
     $environmentName = Get-OptionalEnvValue 'AZURE_ENV_NAME' (Get-OptionalEnvValue 'ENVIRONMENT_NAME')
     $deploymentName = Get-OptionalEnvValue 'DEPLOYMENT_NAME'
     $release = Get-OptionalEnvValue 'RELEASE'
+    $hostedMode = Test-Truthy (Get-OptionalEnvValue 'DEPLOY_HOSTED_AGENT_ORCHESTRATION' 'false')
+    $administrativePanel = $hostedMode -and (Test-Truthy (Get-OptionalEnvValue 'DEPLOY_ADMINISTRATIVE_PANEL' 'false'))
+    $cosmosEnabled = (-not $hostedMode) -or $administrativePanel
+    $deploymentTopology = if (-not $hostedMode) { 'classic' } elseif ($administrativePanel) { 'hosted-panel' } else { 'hosted-no-panel' }
 
     $appConfigName = Get-AppConfigResourceName -Endpoint $Endpoint
     $nameSuffix = $resourceToken
@@ -272,10 +276,12 @@ function Set-GptRagAppConfiguration {
         -Filter { -not $_.name.StartsWith('kv-ai') }
 
     # Cosmos: main vs AI Foundry-project cosmos (prefix "cosmos-aif")
-    $cosmosName = _resolveResource `
-        -Type 'Microsoft.DocumentDB/databaseAccounts' `
-        -Fallback "cosmos-$nameSuffix" `
-        -Filter { -not $_.name.StartsWith('cosmos-aif') }
+    $cosmosName = if ($cosmosEnabled) {
+        _resolveResource `
+            -Type 'Microsoft.DocumentDB/databaseAccounts' `
+            -Fallback "cosmos-$nameSuffix" `
+            -Filter { -not $_.name.StartsWith('cosmos-aif') }
+    } else { '' }
 
     # Search: main vs AI Foundry-project search (prefix "srch-aif")
     $searchName = _resolveResource `
@@ -319,14 +325,16 @@ function Set-GptRagAppConfiguration {
     $dataIngestAppName = "ca-$nameSuffix-dataingest"
 
     # Cosmos database name - introspect the account to get the actual DB name
-    $databaseName = "cosmos-db$nameSuffix"
-    try {
-        $dbJson = az cosmosdb sql database list -g $resourceGroup -a $cosmosName -o json 2>$null
-        if ($LASTEXITCODE -eq 0 -and $dbJson) {
-            $dbs = $dbJson | ConvertFrom-Json
-            if ($dbs.Count -eq 1) { $databaseName = $dbs[0].name }
-        }
-    } catch { }
+    $databaseName = if ($cosmosEnabled) { "cosmos-db$nameSuffix" } else { '' }
+    if ($cosmosEnabled) {
+        try {
+            $dbJson = az cosmosdb sql database list -g $resourceGroup -a $cosmosName -o json 2>$null
+            if ($LASTEXITCODE -eq 0 -and $dbJson) {
+                $dbs = $dbJson | ConvertFrom-Json
+                if ($dbs.Count -eq 1) { $databaseName = $dbs[0].name }
+            }
+        } catch { }
+    }
 
     Write-Host "🔎 Resolved resource names:"
     Write-Host "   Foundry:          $foundryName / $foundryProjectName"
@@ -341,7 +349,7 @@ function Set-GptRagAppConfiguration {
     $resourceGroupId = "/subscriptions/$subscriptionId/resourceGroups/$resourceGroup"
     $keyVaultResourceId = "$resourceGroupId/providers/Microsoft.KeyVault/vaults/$keyVaultName"
     $storageResourceId = "$resourceGroupId/providers/Microsoft.Storage/storageAccounts/$storageName"
-    $cosmosResourceId = "$resourceGroupId/providers/Microsoft.DocumentDB/databaseAccounts/$cosmosName"
+    $cosmosResourceId = if ($cosmosEnabled) { "$resourceGroupId/providers/Microsoft.DocumentDB/databaseAccounts/$cosmosName" } else { '' }
     $searchResourceId = "$resourceGroupId/providers/Microsoft.Search/searchServices/$searchName"
     $foundryResourceId = "$resourceGroupId/providers/Microsoft.CognitiveServices/accounts/$foundryName"
     $foundryProjectResourceId = "$foundryResourceId/projects/$foundryProjectName"
@@ -350,11 +358,11 @@ function Set-GptRagAppConfiguration {
     $logAnalyticsResourceId = "$resourceGroupId/providers/Microsoft.OperationalInsights/workspaces/$logAnalyticsName"
 
     $frontendFqdn = Invoke-AzTsv -Arguments @('containerapp', 'show', '-g', $resourceGroup, '-n', $frontendAppName, '--query', 'properties.configuration.ingress.fqdn') -Description "$frontendAppName FQDN" -Required
-    $orchestratorFqdn = Invoke-AzTsv -Arguments @('containerapp', 'show', '-g', $resourceGroup, '-n', $orchestratorAppName, '--query', 'properties.configuration.ingress.fqdn') -Description "$orchestratorAppName FQDN" -Required
+    $orchestratorFqdn = if ($hostedMode) { '' } else { Invoke-AzTsv -Arguments @('containerapp', 'show', '-g', $resourceGroup, '-n', $orchestratorAppName, '--query', 'properties.configuration.ingress.fqdn') -Description "$orchestratorAppName FQDN" -Required }
     $dataIngestFqdn = Invoke-AzTsv -Arguments @('containerapp', 'show', '-g', $resourceGroup, '-n', $dataIngestAppName, '--query', 'properties.configuration.ingress.fqdn') -Description "$dataIngestAppName FQDN" -Required
 
     $frontendPrincipalId = Invoke-AzTsv -Arguments @('containerapp', 'show', '-g', $resourceGroup, '-n', $frontendAppName, '--query', 'identity.principalId') -Description "$frontendAppName principal id"
-    $orchestratorPrincipalId = Invoke-AzTsv -Arguments @('containerapp', 'show', '-g', $resourceGroup, '-n', $orchestratorAppName, '--query', 'identity.principalId') -Description "$orchestratorAppName principal id"
+    $orchestratorPrincipalId = if ($hostedMode) { '' } else { Invoke-AzTsv -Arguments @('containerapp', 'show', '-g', $resourceGroup, '-n', $orchestratorAppName, '--query', 'identity.principalId') -Description "$orchestratorAppName principal id" }
     $dataIngestPrincipalId = Invoke-AzTsv -Arguments @('containerapp', 'show', '-g', $resourceGroup, '-n', $dataIngestAppName, '--query', 'identity.principalId') -Description "$dataIngestAppName principal id"
     $containerEnvPrincipalId = Invoke-AzTsv -Arguments @('resource', 'show', '--ids', $containerEnvResourceId, '--query', 'identity.principalId') -Description 'Container Apps Environment principal id'
     $searchPrincipalId = Invoke-AzTsv -Arguments @('resource', 'show', '--ids', $searchResourceId, '--query', 'identity.principalId') -Description 'Search service principal id'
@@ -363,10 +371,14 @@ function Set-GptRagAppConfiguration {
     $appInsightsInstrumentationKey = Invoke-AzTsv -Arguments @('resource', 'show', '--ids', $appInsightsResourceId, '--query', 'properties.InstrumentationKey') -Description 'Application Insights instrumentation key'
 
     $containerApps = @(
-        [ordered]@{ name = $orchestratorAppName; serviceName = 'orchestrator'; canonical_name = 'ORCHESTRATOR_APP'; principalId = $orchestratorPrincipalId; fqdn = $orchestratorFqdn },
         [ordered]@{ name = $frontendAppName; serviceName = 'frontend'; canonical_name = 'FRONTEND_APP'; principalId = $frontendPrincipalId; fqdn = $frontendFqdn },
         [ordered]@{ name = $dataIngestAppName; serviceName = 'dataingest'; canonical_name = 'DATA_INGEST_APP'; principalId = $dataIngestPrincipalId; fqdn = $dataIngestFqdn }
     )
+    if (-not $hostedMode) {
+        $containerApps = @(
+            [ordered]@{ name = $orchestratorAppName; serviceName = 'orchestrator'; canonical_name = 'ORCHESTRATOR_APP'; principalId = $orchestratorPrincipalId; fqdn = $orchestratorFqdn }
+        ) + $containerApps
+    }
 
     $modelDeployments = @(
         [ordered]@{ canonical_name = 'CHAT_DEPLOYMENT_NAME'; capacity = 100; model = [ordered]@{ format = 'OpenAI'; name = 'gpt-5-nano'; version = '2025-08-07' }; name = 'chat'; version = '2025-08-07'; apiVersion = '2025-12-01-preview'; endpoint = "https://$foundryName.openai.azure.com/" },
@@ -425,6 +437,13 @@ function Set-GptRagAppConfiguration {
         ENVIRONMENT_NAME = $environmentName
         DEPLOYMENT_NAME = $deploymentName
         RESOURCE_TOKEN = $resourceToken
+        DEPLOY_HOSTED_AGENT_ORCHESTRATION = "$hostedMode".ToLowerInvariant()
+        DEPLOY_ADMINISTRATIVE_PANEL = "$administrativePanel".ToLowerInvariant()
+        DEPLOYMENT_TOPOLOGY = $deploymentTopology
+        CHAT_BACKEND = if ($hostedMode) { 'hosted_agent' } else { 'orchestrator' }
+        HOSTED_AGENT_BASE_URL = (Get-OptionalEnvValue 'HOSTED_AGENT_BASE_URL')
+        HOSTED_AGENT_RESOURCE_SCOPE = (Get-OptionalEnvValue 'HOSTED_AGENT_RESOURCE_SCOPE')
+        HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS = (Get-OptionalEnvValue 'HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS' '60')
         SEARCH_RAG_INDEX_NAME = $ragIndexName
         ENABLE_AGENTIC_RETRIEVAL = (Get-OptionalEnvValue 'ENABLE_AGENTIC_RETRIEVAL' 'false')
         RETRIEVAL_BACKEND = $retrievalBackend
@@ -543,7 +562,7 @@ function Set-GptRagAppConfiguration {
         DEPLOY_SEARCH_SERVICE = (Get-OptionalEnvValue 'DEPLOY_SEARCH_SERVICE' 'true')
         DEPLOY_SPEECH_SERVICE = (Get-OptionalEnvValue 'DEPLOY_SPEECH_SERVICE' 'false')
         DEPLOY_STORAGE_ACCOUNT = (Get-OptionalEnvValue 'DEPLOY_STORAGE_ACCOUNT' 'true')
-        DEPLOY_COSMOS_DB = (Get-OptionalEnvValue 'DEPLOY_COSMOS_DB' 'true')
+        DEPLOY_COSMOS_DB = "$cosmosEnabled".ToLowerInvariant()
         DEPLOY_CONTAINER_APPS = (Get-OptionalEnvValue 'DEPLOY_CONTAINER_APPS' 'true')
         DEPLOY_CONTAINER_REGISTRY = (Get-OptionalEnvValue 'DEPLOY_CONTAINER_REGISTRY' 'true')
         DEPLOY_CONTAINER_ENV = (Get-OptionalEnvValue 'DEPLOY_CONTAINER_ENV' 'true')
@@ -555,7 +574,7 @@ function Set-GptRagAppConfiguration {
         SEARCH_SERVICE_QUERY_ENDPOINT = "https://$searchName.search.windows.net"
         KNOWLEDGE_BASE_ENDPOINT = $knowledgeBaseEndpoint
         AZURE_SPEECH_ENDPOINT = (Get-OptionalEnvValue 'AZURE_SPEECH_ENDPOINT')
-        COSMOS_DB_ENDPOINT = "https://$cosmosName.documents.azure.com:443/"
+        COSMOS_DB_ENDPOINT = if ($cosmosEnabled) { "https://$cosmosName.documents.azure.com:443/" } else { '' }
 
         SEARCH_CONNECTION_ID = ''
         KNOWLEDGE_BASE_NAME = $effectiveKnowledgeBaseName
@@ -563,19 +582,19 @@ function Set-GptRagAppConfiguration {
         CONTAINER_ENV_PRINCIPAL_ID = $containerEnvPrincipalId
         SEARCH_SERVICE_PRINCIPAL_ID = $searchPrincipalId
 
-        ORCHESTRATOR_APP_ENDPOINT = "https://$orchestratorFqdn"
+        ORCHESTRATOR_APP_ENDPOINT = if ($orchestratorFqdn) { "https://$orchestratorFqdn" } else { '' }
         FRONTEND_APP_ENDPOINT = "https://$frontendFqdn"
         DATA_INGEST_APP_ENDPOINT = "https://$dataIngestFqdn"
-        ORCHESTRATOR_APP_NAME = $orchestratorAppName
+        ORCHESTRATOR_APP_NAME = if ($hostedMode) { '' } else { $orchestratorAppName }
         FRONTEND_APP_NAME = $frontendAppName
         DATA_INGEST_APP_NAME = $dataIngestAppName
 
         CHAT_DEPLOYMENT_NAME = 'chat'
         EMBEDDING_DEPLOYMENT_NAME = 'text-embedding'
-        CONVERSATIONS_DATABASE_CONTAINER = 'conversations'
-        DATASOURCES_DATABASE_CONTAINER = 'datasources'
-        PROMPTS_CONTAINER = 'prompts'
-        MCP_CONTAINER = 'mcp'
+        CONVERSATIONS_DATABASE_CONTAINER = if ($cosmosEnabled) { 'conversations' } else { '' }
+        DATASOURCES_DATABASE_CONTAINER = if ($cosmosEnabled) { 'datasources' } else { '' }
+        PROMPTS_CONTAINER = if ($cosmosEnabled) { 'prompts' } else { '' }
+        MCP_CONTAINER = if ($cosmosEnabled) { 'mcp' } else { '' }
         DOCUMENTS_IMAGES_STORAGE_CONTAINER = 'documents-images'
         DOCUMENTS_STORAGE_CONTAINER = 'documents'
         CONVERSATION_CACHE_STORAGE_CONTAINER = 'conversation-cache'
@@ -617,6 +636,11 @@ function Set-GptRagAppConfiguration {
 }
 
 Set-GptRagAppConfiguration -Endpoint (Get-RequiredEnvValue 'APP_CONFIG_ENDPOINT') -Label 'gpt-rag'
+Invoke-PythonModule -ModuleName 'config.deployment.appconfig'
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Failed to publish GPT-RAG deployment-mode App Configuration settings."
+    exit $LASTEXITCODE
+}
 
 #-------------------------------------------------------------------------------
 # Setup Python environment

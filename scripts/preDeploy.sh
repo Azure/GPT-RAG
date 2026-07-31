@@ -96,6 +96,21 @@ global_rg="$(get_azd_value "$repo_root" "AZURE_RESOURCE_GROUP")"
 global_sub="$(get_azd_value "$repo_root" "AZURE_SUBSCRIPTION_ID")"
 network_isolation="$(get_azd_value "$repo_root" "NETWORK_ISOLATION" | tr '[:upper:]' '[:lower:]')"
 acr_task_agent_pool="$(get_azd_value "$repo_root" "ACR_TASK_AGENT_POOL")"
+hosted_mode="$(get_azd_value "$repo_root" "DEPLOY_HOSTED_AGENT_ORCHESTRATION" | tr '[:upper:]' '[:lower:]')"
+administrative_panel="$(get_azd_value "$repo_root" "DEPLOY_ADMINISTRATIVE_PANEL" | tr '[:upper:]' '[:lower:]')"
+
+if [[ "$hosted_mode" =~ ^(1|true|t|yes|y)$ ]]; then
+  if [[ "$administrative_panel" =~ ^(1|true|t|yes|y)$ ]]; then
+    deployment_mode="hosted-panel"
+  else
+    deployment_mode="hosted-no-panel"
+  fi
+  selected_components="gpt-rag-ui gpt-rag-ingestion"
+else
+  deployment_mode="classic"
+  selected_components="gpt-rag-ui gpt-rag-orchestrator gpt-rag-ingestion"
+fi
+cyan "GPT-RAG deployment mode: $deployment_mode"
 
 if [ "$network_isolation" = "true" ] && [ "$(printf "%s" "${RUN_FROM_JUMPBOX:-}" | tr '[:upper:]' '[:lower:]')" != "true" ]; then
   red "NETWORK_ISOLATION=true deployments must run from the jumpbox/VNet. Provision from the workstation, then run azd deploy from the jumpbox with RUN_FROM_JUMPBOX=true."
@@ -121,12 +136,52 @@ fi
 had_errors=0
 release_default="$(jq -r '.release // empty' "$manifest_path")"
 
+if [[ "$hosted_mode" =~ ^(1|true|t|yes|y)$ ]]; then
+  hosted_project="$repo_root/hosted-agent"
+  hosted_scope="$(get_azd_value "$repo_root" "HOSTED_AGENT_RESOURCE_SCOPE")"
+  project_endpoint="$(get_azd_value "$repo_root" "AZURE_AI_PROJECT_ENDPOINT")"
+  project_resource_id="$(get_azd_value "$repo_root" "AZURE_AI_PROJECT_RESOURCE_ID")"
+  environment_name="$(get_azd_value "$repo_root" "AZURE_ENV_NAME")"
+
+  [ -f "$hosted_project/azure.yaml" ] || { red "Hosted agent azd project not found at $hosted_project."; exit 1; }
+  [[ "$hosted_scope" == */.default ]] || { red "Hosted mode requires HOSTED_AGENT_RESOURCE_SCOPE as an explicit data-plane scope ending in '/.default'."; exit 1; }
+  [ -n "$project_endpoint" ] && [ -n "$project_resource_id" ] || { red "Hosted mode requires AZURE_AI_PROJECT_ENDPOINT and AZURE_AI_PROJECT_RESOURCE_ID from provisioning."; exit 1; }
+
+  copy_dot_azure "$dot_azure" "$hosted_project"
+  (
+    cd "$hosted_project"
+    azd env set FOUNDRY_PROJECT_ENDPOINT "$project_endpoint" --environment "$environment_name" --no-prompt >/dev/null
+    azd env set AZURE_AI_PROJECT_ID "$project_resource_id" --environment "$environment_name" --no-prompt >/dev/null
+    azd deploy orchestrator-agent --environment "$environment_name" --no-prompt
+  ) || { red "Hosted orchestrator deployment failed."; exit 1; }
+
+  invocations_endpoint="$(get_azd_value "$hosted_project" "AGENT_ORCHESTRATOR_AGENT_INVOCATIONS_ENDPOINT")"
+  [ -n "$invocations_endpoint" ] || { red "Hosted deployment did not publish AGENT_ORCHESTRATOR_AGENT_INVOCATIONS_ENDPOINT."; exit 1; }
+  hosted_base_url="$(
+    cd "$repo_root"
+    python3 -m config.deployment.hosted --invocations-endpoint "$invocations_endpoint"
+  )" || { red "Hosted Invocations endpoint is not compatible with the UI endpoint contract."; exit 1; }
+
+  export HOSTED_AGENT_BASE_URL="$hosted_base_url"
+  export HOSTED_AGENT_RESOURCE_SCOPE="$hosted_scope"
+  (
+    cd "$repo_root"
+    azd env set HOSTED_AGENT_BASE_URL "$hosted_base_url" --environment "$environment_name" --no-prompt >/dev/null
+    python3 -m config.deployment.appconfig --require-hosted-endpoint
+  ) || { red "Failed to publish the hosted-agent endpoint contract."; exit 1; }
+fi
+
 # ---------- Iterate components ----------
-jq -c '.components[]' "$manifest_path" | while IFS= read -r comp; do
+while IFS= read -r comp; do
   name="$(printf "%s" "$comp" | jq -r '.name')"
+  if [[ " $selected_components " != *" $name "* ]]; then
+    yellow "$name is not deployed in $deployment_mode mode."
+    continue
+  fi
   repo="$(printf "%s" "$comp" | jq -r '.repo')"
   c_tag="$(printf "%s" "$comp" | jq -r '.tag // empty')"
   c_branch="$(printf "%s" "$comp" | jq -r '.branch // empty')"
+  expected_commit="$(printf "%s" "$comp" | jq -r '.commit // empty')"
 
   # Desired ref (no implicit fallback)
   ref_type=""; ref=""
@@ -151,7 +206,7 @@ jq -c '.components[]' "$manifest_path" | while IFS= read -r comp; do
   cyan "Deploying $name ($ref_type:$ref) -> $target"
 
   if [ -d "$target" ]; then
-    yellow "  ℹ️  '$name' already exists at $target, skipping clone."
+    yellow "  ℹ️  '$name' already exists at $target, verifying pin."
   else
     if [ "$ref_type" = "branch" ]; then
       if ! git clone --depth 1 --branch "$ref" --quiet "$repo" "$target" >/dev/null 2>&1; then
@@ -167,6 +222,15 @@ jq -c '.components[]' "$manifest_path" | while IFS= read -r comp; do
       if ! git -C "$target" -c advice.detachedHead=false checkout -q -f "$ref" >/dev/null 2>&1; then
         red "$name: git checkout tag failed."; had_errors=1; continue
       fi
+    fi
+  fi
+
+  if [ -n "$expected_commit" ]; then
+    actual_commit="$(git -C "$target" rev-parse HEAD 2>/dev/null || true)"
+    if [ "$actual_commit" != "$expected_commit" ]; then
+      red "$name must resolve to $expected_commit but $target is at $actual_commit. Remove or relocate the stale sibling checkout."
+      had_errors=1
+      continue
     fi
   fi
 
@@ -193,7 +257,7 @@ jq -c '.components[]' "$manifest_path" | while IFS= read -r comp; do
   else
     echo "$name: no scripts/deploy.sh found, skipping child deploy."
   fi
-done
+done < <(jq -c '.components[]' "$manifest_path")
 
 if [ "$had_errors" -ne 0 ]; then
   red "One or more components failed. See logs above."
