@@ -91,7 +91,7 @@ Treat these exact pins as one unreleased integration candidate; do not mix versi
 | GPT-RAG ingestion | `v2.6.0` |
 | AI Landing Zone (AILZ) | `v2.4.0` |
 
-The GitHub release APIs for UI `v2.5.0` and AILZ `v2.4.0` currently report `immutable=false` because the release publisher does not have the repository-admin permission needed to lock those releases. That metadata does not imply that this combination has an Azure/GPT-RAG umbrella release.
+The GitHub release APIs for UI `v2.5.0` and AILZ `v2.4.0` currently report `immutable=false`. AILZ `v2.4.0` is nevertheless protected by active exact-tag ruleset `20050531`, which blocks deletion and non-fast-forward updates to `refs/tags/v2.4.0`. UI `v2.5.0` has no equivalent mitigation and remains the immutable-tag release blocker because repository-admin permission is unavailable. Neither API metadata nor the AILZ tag ruleset implies that this combination has an Azure/GPT-RAG umbrella release.
 
 For a private ACR, build and push the hosted-agent image from a VNet-connected self-hosted runner or from the jump host. Shared ACR Tasks run outside that private network boundary and are not a private-endpoint bypass.
 
