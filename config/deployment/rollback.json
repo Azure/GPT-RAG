@@ -1,0 +1,29 @@
+{
+  "umbrella": {
+    "tag": "v3.7.0",
+    "ailz_tag": "v2.3.0",
+    "ailz_commit": "1616ddd940b796c32f86e4459b079eebc254de08"
+  },
+  "components": {
+    "gpt-rag-ui": "v2.3.13",
+    "gpt-rag-orchestrator": "v3.8.0",
+    "gpt-rag-ingestion": "v2.5.0"
+  },
+  "azd": {
+    "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "false",
+    "DEPLOY_ADMINISTRATIVE_PANEL": "false",
+    "HOSTED_AGENT_IMAGE_VERSION": "",
+    "HOSTED_AGENT_BASE_URL": "",
+    "HOSTED_AGENT_RESOURCE_SCOPE": ""
+  },
+  "appConfiguration": {
+    "label": "gpt-rag",
+    "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "false",
+    "DEPLOY_ADMINISTRATIVE_PANEL": "false",
+    "CHAT_BACKEND": "orchestrator",
+    "DEPLOYMENT_TOPOLOGY": "classic",
+    "HOSTED_AGENT_BASE_URL": "",
+    "HOSTED_AGENT_RESOURCE_SCOPE": "",
+    "HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS": "60"
+  }
+}

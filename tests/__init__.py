@@ -1,0 +1,1 @@
+"""GPT-RAG contract tests."""

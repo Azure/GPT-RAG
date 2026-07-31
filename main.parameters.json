@@ -52,8 +52,30 @@
     
     "deployAiFoundry":                      { "value": "true" },
     "deployAAfAgentSvc":                    { "value": "${DEPLOY_AAF_AGENT_SVC=true}" },
+    "deployHostedAgent":                    { "value": "${DEPLOY_HOSTED_AGENT_ORCHESTRATION=false}" },
+    "hostedAgent":                          { "value": {
+      "name": "${HOSTED_AGENT_NAME=gpt-rag-orchestrator}",
+      "image": "${HOSTED_AGENT_IMAGE=gpt-rag-orchestrator}",
+      "version": "${HOSTED_AGENT_IMAGE_VERSION=}",
+      "startupCommand": "${HOSTED_AGENT_STARTUP_COMMAND=uvicorn src.api.hosted_entrypoint:app --host 0.0.0.0 --port 8088}",
+      "runtime": {
+        "cpu": "${HOSTED_AGENT_CONTAINER_CPU=2}",
+        "memory": "${HOSTED_AGENT_CONTAINER_MEMORY=4Gi}"
+      },
+      "protocols": [
+        {
+          "protocol": "responses",
+          "version": "${HOSTED_AGENT_RESPONSES_PROTOCOL_VERSION=2.0.0}"
+        },
+        {
+          "protocol": "invocations",
+          "version": "${HOSTED_AGENT_INVOCATIONS_PROTOCOL_VERSION=1.0.0}"
+        }
+      ]
+    } },
     "deployAiFoundrySubnet":                { "value": "true" },
     "deployAppConfig":                      { "value": "true" },
+    "additionalAppConfigurationSettings":   { "value": [] },
     "appRuntimeConfigurationMode":          { "value": "${APP_RUNTIME_CONFIGURATION_MODE=appConfig}" },
     "deployAppInsights":                    { "value": "true" },
     "deployCosmosDb":                       { "value": "true" },

@@ -57,14 +57,40 @@ fi
 # Override submodule files with project-level overrides
 ###############################################################################
 
-for FILE_NAME in manifest.json main.parameters.json; do
-    SRC="$PROJECT_ROOT/$FILE_NAME"
-    DST="$INFRA_DIR/$FILE_NAME"
-    if [ -f "$SRC" ]; then
-        echo "${CYAN}Applying project $FILE_NAME to infra...${NC}"
-        cp -f "$SRC" "$DST"
-    fi
-done
+PYTHON_CMD=""
+if command -v python3 >/dev/null 2>&1; then
+    PYTHON_CMD="python3"
+elif command -v python >/dev/null 2>&1; then
+    PYTHON_CMD="python"
+else
+    echo "${YELLOW}Error: Python is required to compose the GPT-RAG deployment mode.${NC}"
+    exit 1
+fi
+
+EXPECTED_INFRA_COMMIT="$("$PYTHON_CMD" -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["ailz_commit"])' "$PROJECT_ROOT/manifest.json")"
+ACTUAL_INFRA_COMMIT="$(git -C "$INFRA_DIR" rev-parse HEAD 2>/dev/null || true)"
+if [ -z "$EXPECTED_INFRA_COMMIT" ] || [ "$ACTUAL_INFRA_COMMIT" != "$EXPECTED_INFRA_COMMIT" ]; then
+    echo "${YELLOW}Error: infra must resolve to $EXPECTED_INFRA_COMMIT but is at $ACTUAL_INFRA_COMMIT.${NC}"
+    exit 1
+fi
+
+if [ -f "$PROJECT_ROOT/manifest.json" ]; then
+    echo "${CYAN}Applying project manifest.json to infra...${NC}"
+    cp -f "$PROJECT_ROOT/manifest.json" "$INFRA_DIR/manifest.json"
+fi
+
+echo "${CYAN}Composing GPT-RAG deployment mode...${NC}"
+(
+    cd "$PROJECT_ROOT" &&
+    "$PYTHON_CMD" -m config.deployment.composition \
+        --input "$PROJECT_ROOT/main.parameters.json" \
+        --output "$INFRA_DIR/main.parameters.json"
+)
+COMPOSE_EXIT=$?
+if [ $COMPOSE_EXIT -ne 0 ]; then
+    echo "${YELLOW}Error: GPT-RAG deployment mode composition failed.${NC}"
+    exit $COMPOSE_EXIT
+fi
 
 ###############################################################################
 # GPT-RAG regional readiness preflight
@@ -74,7 +100,7 @@ REGIONAL_PREFLIGHT_SCRIPT="$SCRIPT_DIR/Invoke-RegionalPreflight.ps1"
 if [ -f "$REGIONAL_PREFLIGHT_SCRIPT" ] && [ "$PREFLIGHT_SKIP" != "true" ] && [ "$PREFLIGHT_SKIP" != "1" ] && [ "$GPT_RAG_REGIONAL_PREFLIGHT_SKIP" != "true" ] && [ "$GPT_RAG_REGIONAL_PREFLIGHT_SKIP" != "1" ]; then
     if command -v pwsh >/dev/null 2>&1; then
         echo "${CYAN}Running GPT-RAG regional preflight...${NC}"
-        pwsh -NoProfile -File "$REGIONAL_PREFLIGHT_SCRIPT" -ProjectRoot "$PROJECT_ROOT" -ParameterFile "$PROJECT_ROOT/main.parameters.json"
+        pwsh -NoProfile -File "$REGIONAL_PREFLIGHT_SCRIPT" -ProjectRoot "$PROJECT_ROOT" -ParameterFile "$INFRA_DIR/main.parameters.json"
         REGIONAL_PREFLIGHT_EXIT=$?
         if [ $REGIONAL_PREFLIGHT_EXIT -ne 0 ]; then
             echo "${YELLOW}GPT-RAG regional preflight failed. Fix the reported blockers, or set GPT_RAG_REGIONAL_PREFLIGHT_SKIP=true to bypass only this check.${NC}"
