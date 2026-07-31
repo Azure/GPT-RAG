@@ -6,19 +6,34 @@ services:
     project: .
     image: ${AZURE_CONTAINER_REGISTRY_ENDPOINT}/${HOSTED_AGENT_IMAGE=gpt-rag-orchestrator}@${HOSTED_AGENT_IMAGE_VERSION}
     kind: hosted
-    name: ${HOSTED_AGENT_NAME=gpt-rag-orchestrator}
+    # NOTE: The azure.ai.agent azd extension (v1.0.0-beta.8) reads name, container.resources,
+    # protocols[].version and startupCommand directly from this file to build the Foundry
+    # "Create Agent" REST payload, bypassing azd's core ${VAR=default} interpolation (confirmed
+    # via "template.name not in valid format" and Go-struct type errors when templated). The
+    # `image` field above and the `env:` block below use azd's separate, core/host-agnostic
+    # interpolation engine and resolve correctly, so they stay templated. These agent-definition
+    # fields are hardcoded to composition.py's own defaults (config/deployment/composition.py) so
+    # `azd deploy` from this directory works out of the box; to customize, edit this file directly
+    # instead of `azd env set HOSTED_AGENT_*`, which only affects the separate `azd provision`
+    # (main.parameters.json) path today.
+    name: gpt-rag-orchestrator
     displayName: GPT-RAG hosted orchestrator
     description: GPT-RAG orchestration hosted by Microsoft Foundry.
-    startupCommand: ${HOSTED_AGENT_STARTUP_COMMAND=uvicorn src.api.hosted_entrypoint:app --host 0.0.0.0 --port 8088}
+    startupCommand: uvicorn src.api.hosted_entrypoint:app --host 0.0.0.0 --port 8088
     container:
       resources:
-        cpu: ${HOSTED_AGENT_CONTAINER_CPU=2}
-        memory: ${HOSTED_AGENT_CONTAINER_MEMORY=4Gi}
+        # Must be quoted strings: the Foundry API's Go struct requires string type
+        # (unquoted numeric YAML like `cpu: 2` fails with a JSON unmarshal type error).
+        cpu: "2"
+        memory: "4Gi"
     protocols:
       - protocol: responses
-        version: ${HOSTED_AGENT_RESPONSES_PROTOCOL_VERSION=2.0.0}
+        version: "2.0.0"
       - protocol: invocations
-        version: ${HOSTED_AGENT_INVOCATIONS_PROTOCOL_VERSION=1.0.0}
+        version: "1.0.0"
     env:
       APP_CONFIG_ENDPOINT: ${APP_CONFIG_ENDPOINT}
-      APPLICATIONINSIGHTS_CONNECTION_STRING: ${APPLICATIONINSIGHTS_CONNECTION_STRING=}
+      # APPLICATIONINSIGHTS_CONNECTION_STRING intentionally omitted: it is a reserved env var
+      # name for Foundry hosted agents (all FOUNDRY_*/AGENT_* vars, plus this one, are reserved
+      # per the container-image-spec) and the Create Agent API rejects it if present. The
+      # platform auto-injects telemetry wiring for hosted agents.
