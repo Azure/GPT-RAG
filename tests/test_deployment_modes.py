@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -198,6 +199,41 @@ class AppConfigurationContractTests(unittest.TestCase):
                 },
                 require_hosted_endpoint=True,
             )
+
+
+class RunAzCommandResolutionTests(unittest.TestCase):
+    """Regression tests for the Windows ``az.cmd`` shim lookup.
+
+    ``subprocess.run(["az", ...])`` fails with ``FileNotFoundError``
+    on Windows because ``CreateProcess`` does not consult ``PATHEXT``
+    the way an interactive shell does. ``_run_az`` must resolve the
+    executable via ``shutil.which`` first.
+    """
+
+    @patch("config.deployment.appconfig.shutil.which")
+    @patch("config.deployment.appconfig.subprocess.run")
+    def test_uses_resolved_executable_path(
+        self, mock_run: object, mock_which: object
+    ) -> None:
+        mock_which.return_value = r"C:\path\to\az.cmd"
+        mock_run.return_value = subprocess.CompletedProcess(
+            args=[], returncode=0, stdout="ok", stderr=""
+        )
+
+        result = appconfig._run_az(["group", "show"])
+
+        mock_which.assert_called_once_with("az")
+        called_args = mock_run.call_args.args[0]
+        self.assertEqual(r"C:\path\to\az.cmd", called_args[0])
+        self.assertEqual("ok", result)
+
+    @patch("config.deployment.appconfig.shutil.which")
+    def test_falls_back_to_bare_command_when_unresolved(
+        self, mock_which: object
+    ) -> None:
+        mock_which.return_value = None
+
+        self.assertEqual("az", appconfig._resolve_az_command())
 
 
 class HostedEndpointContractTests(unittest.TestCase):
