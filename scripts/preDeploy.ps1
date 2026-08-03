@@ -157,6 +157,61 @@ if ($hostedMode) {
     exit 1
   }
 
+  # The Foundry "Create Agent" API for container-mode hosted agents only reads the
+  # image field; startupCommand (above, in azure.yaml) never reaches the real wire
+  # request, so whatever CMD is baked into the published orchestrator image is what
+  # actually runs. That image's CMD is the classic Container App entrypoint, not the
+  # hosted one. When HOSTED_AGENT_AUTO_BUILD_IMAGE=true, build a small derivative
+  # image (same digest-pinned base, CMD overridden to the hosted entrypoint) via ACR
+  # Tasks -- honoring the same VNet-injected agent pool used for every other
+  # NETWORK_ISOLATION=true build -- and point HOSTED_AGENT_IMAGE_VERSION at its
+  # digest before deploying. Defaults to false to preserve today's behavior for
+  # operators who already publish a correctly-configured hosted image themselves.
+  $hostedAutoBuildImage = "$($globalEnv.HOSTED_AGENT_AUTO_BUILD_IMAGE)".ToLowerInvariant() -match '^(1|true|t|yes|y)$'
+  if ($hostedAutoBuildImage) {
+    $acrEndpoint = "$($globalEnv.AZURE_CONTAINER_REGISTRY_ENDPOINT)"
+    if (-not $acrEndpoint) {
+      Write-Error "HOSTED_AGENT_AUTO_BUILD_IMAGE=true requires AZURE_CONTAINER_REGISTRY_ENDPOINT from provisioning."
+      exit 1
+    }
+    $acrName = $acrEndpoint.Split('.')[0]
+    $hostedImageName = if ($globalEnv.HOSTED_AGENT_IMAGE) { "$($globalEnv.HOSTED_AGENT_IMAGE)" } else { 'gpt-rag-orchestrator' }
+    $baseImageDigest = "$($globalEnv.HOSTED_AGENT_IMAGE_VERSION)"
+    $baseImageRef = "$acrEndpoint/$hostedImageName@$baseImageDigest"
+    $hostedImageTag = "hosted-$($baseImageDigest -replace '^sha256:', '').Substring(0,12)"
+    Write-Host "Building hosted-agent derivative image via ACR Tasks (base: $baseImageRef)..." -ForegroundColor Cyan
+    Push-Location $repoRoot
+    try {
+      $buildArgs = @(
+        '-m', 'config.deployment.hosted_image',
+        '--registry', $acrName,
+        '--base-image-ref', $baseImageRef,
+        '--image-name', $hostedImageName,
+        '--image-tag', $hostedImageTag
+      )
+      if ($globalEnv.ACR_TASK_AGENT_POOL) {
+        $buildArgs += @('--agent-pool', "$($globalEnv.ACR_TASK_AGENT_POOL)")
+      }
+      $hostedDigest = & python @buildArgs
+      if ($LASTEXITCODE -ne 0 -or -not $hostedDigest) {
+        Write-Error "Failed to build the hosted-agent derivative image."
+        exit $LASTEXITCODE
+      }
+      $hostedDigest = "$hostedDigest".Trim()
+    } finally {
+      Pop-Location
+    }
+    Write-Host "Hosted-agent derivative image built: $hostedDigest" -ForegroundColor Green
+    $env:HOSTED_AGENT_IMAGE_VERSION = $hostedDigest
+    $globalEnv.HOSTED_AGENT_IMAGE_VERSION = $hostedDigest
+    Push-Location $repoRoot
+    try {
+      & azd env set HOSTED_AGENT_IMAGE_VERSION $hostedDigest --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
+    } finally {
+      Pop-Location
+    }
+  }
+
   if (Test-Path -LiteralPath $dotAzure) {
     Copy-Item $dotAzure $hostedProject -Recurse -Force -Container
   }

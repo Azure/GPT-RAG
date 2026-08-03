@@ -248,6 +248,19 @@ the reusable landing zone:
   `sha256:<digest>` supplied by the operator. A mutable release tag is rejected.
   This is necessary because the `v3.9.0` orchestrator release contains source but
   no immutable published release image.
+- The published orchestrator image's baked-in entrypoint is the classic
+  Container Apps command. Foundry's container-mode hosted-agent API deploys
+  whatever `CMD`/`ENTRYPOINT` is in the image and does not read `azure.yaml`'s
+  `startupCommand`, so pointing `HOSTED_AGENT_IMAGE_VERSION` straight at the
+  classic image's digest starts the wrong process. Setting
+  `HOSTED_AGENT_AUTO_BUILD_IMAGE=true` (default `false`) makes `preDeploy`
+  derive a hosted-specific image first: an ACR Tasks build, using the same
+  private registry and agent pool as every other network-isolated build, whose
+  only instructions are `FROM <the pinned classic digest>` plus a `CMD`
+  override to the hosted entrypoint. `HOSTED_AGENT_IMAGE_VERSION` is then
+  re-pinned to the derivative image's digest before `azd deploy
+  orchestrator-agent` runs. Operators who already publish a correctly
+  configured hosted image can leave the flag off.
 - The deterministic rollback contract restores the complete `v3.7.0` classic
   pin set, resets both flags to `false`, clears hosted endpoint inputs, and
   restores `CHAT_BACKEND=orchestrator`.
