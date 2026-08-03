@@ -72,6 +72,15 @@ def compose_parameters(
     parameters["deployCosmosDb"] = {"value": panel}
 
     if hosted:
+        # This digest only feeds the landing-zone parameter document at
+        # provision time; it is informational and does not run a container.
+        # The digest that is actually deployed as the hosted agent's image is
+        # whatever HOSTED_AGENT_IMAGE_VERSION resolves to later, at `azd
+        # deploy` time, in hosted-agent/azure.yaml. When
+        # HOSTED_AGENT_AUTO_BUILD_IMAGE=true, scripts/preDeploy re-pins that
+        # env var to a freshly built derivative image before deploying (see
+        # config/deployment/hosted_image.py and ADR-0001), so the two digests
+        # may legitimately differ across a provision+deploy cycle.
         digest = (environment.get("HOSTED_AGENT_IMAGE_VERSION") or "").strip()
         if not HOSTED_IMAGE_DIGEST_PATTERN.fullmatch(digest):
             raise ValueError(

@@ -147,6 +147,39 @@ if [[ "$hosted_mode" =~ ^(1|true|t|yes|y)$ ]]; then
   [[ "$hosted_scope" == */.default ]] || { red "Hosted mode requires HOSTED_AGENT_RESOURCE_SCOPE as an explicit data-plane scope ending in '/.default'."; exit 1; }
   [ -n "$project_endpoint" ] && [ -n "$project_resource_id" ] || { red "Hosted mode requires AZURE_AI_PROJECT_ENDPOINT and AZURE_AI_PROJECT_RESOURCE_ID from provisioning."; exit 1; }
 
+  # The Foundry "Create Agent" API for container-mode hosted agents only reads the
+  # image field; startupCommand (in azure.yaml) never reaches the real wire request,
+  # so whatever CMD is baked into the published orchestrator image is what actually
+  # runs (the classic Container App entrypoint, not the hosted one). When
+  # HOSTED_AGENT_AUTO_BUILD_IMAGE=true, build a small derivative image (same
+  # digest-pinned base, CMD overridden to the hosted entrypoint) via ACR Tasks --
+  # honoring the same agent pool used for every other NETWORK_ISOLATION=true build --
+  # and point HOSTED_AGENT_IMAGE_VERSION at its digest before deploying. Defaults to
+  # false to preserve today's behavior for operators who already publish a
+  # correctly-configured hosted image themselves.
+  hosted_auto_build_image="$(get_azd_value "$repo_root" "HOSTED_AGENT_AUTO_BUILD_IMAGE" | tr '[:upper:]' '[:lower:]')"
+  if [[ "$hosted_auto_build_image" =~ ^(1|true|t|yes|y)$ ]]; then
+    acr_endpoint="$(get_azd_value "$repo_root" "AZURE_CONTAINER_REGISTRY_ENDPOINT")"
+    [ -n "$acr_endpoint" ] || { red "HOSTED_AGENT_AUTO_BUILD_IMAGE=true requires AZURE_CONTAINER_REGISTRY_ENDPOINT from provisioning."; exit 1; }
+    acr_name="${acr_endpoint%%.*}"
+    hosted_image_name="$(get_azd_value "$repo_root" "HOSTED_AGENT_IMAGE")"
+    hosted_image_name="${hosted_image_name:-gpt-rag-orchestrator}"
+    base_image_digest="$(get_azd_value "$repo_root" "HOSTED_AGENT_IMAGE_VERSION")"
+    base_image_ref="$acr_endpoint/$hosted_image_name@$base_image_digest"
+    hosted_image_tag="hosted-${base_image_digest#sha256:}"
+    hosted_image_tag="${hosted_image_tag:0:19}"
+    echo "Building hosted-agent derivative image via ACR Tasks (base: $base_image_ref)..."
+    build_args=(-m config.deployment.hosted_image --registry "$acr_name" --base-image-ref "$base_image_ref" --image-name "$hosted_image_name" --image-tag "$hosted_image_tag")
+    if [ -n "$acr_task_agent_pool" ]; then
+      build_args+=(--agent-pool "$acr_task_agent_pool")
+    fi
+    hosted_agent_digest="$(cd "$repo_root" && python3 "${build_args[@]}")" || { red "Failed to build the hosted-agent derivative image."; exit 1; }
+    [ -n "$hosted_agent_digest" ] || { red "Failed to build the hosted-agent derivative image."; exit 1; }
+    echo "Hosted-agent derivative image built: $hosted_agent_digest"
+    export HOSTED_AGENT_IMAGE_VERSION="$hosted_agent_digest"
+    (cd "$repo_root" && azd env set HOSTED_AGENT_IMAGE_VERSION "$hosted_agent_digest" --environment "$environment_name" --no-prompt >/dev/null)
+  fi
+
   copy_dot_azure "$dot_azure" "$hosted_project"
   (
     cd "$hosted_project"
