@@ -178,7 +178,7 @@ if ($hostedMode) {
     $hostedImageName = if ($globalEnv.HOSTED_AGENT_IMAGE) { "$($globalEnv.HOSTED_AGENT_IMAGE)" } else { 'gpt-rag-orchestrator' }
     $baseImageDigest = "$($globalEnv.HOSTED_AGENT_IMAGE_VERSION)"
     $baseImageRef = "$acrEndpoint/$hostedImageName@$baseImageDigest"
-    $hostedImageTag = "hosted-$($baseImageDigest -replace '^sha256:', '').Substring(0,12)"
+    $hostedImageTag = "hosted-$((($baseImageDigest -replace '^sha256:', '')).Substring(0,12))"
     Write-Host "Building hosted-agent derivative image via ACR Tasks (base: $baseImageRef)..." -ForegroundColor Cyan
     Push-Location $repoRoot
     try {
