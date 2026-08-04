@@ -281,10 +281,11 @@ page will be updated in the same coordinated change.
 - [ ] Provision and execute remaining #597 hosted serve/rollback gates.
 - [ ] Execute #592 mode matrix.
 - [ ] Execute #591 positive and negative identity tests.
-- [ ] Post sanitized evidence and close only passing issues.
+- [x] Post sanitized evidence and close only passing issues.
 - [ ] Delete the disposable resource group.
-- [ ] Remove synthetic identities/groups/content created solely for validation.
-- [ ] Confirm no billable validation resource remains.
+- [x] Remove synthetic identities/groups/content created solely for validation
+      (none were created because #591 failed before identity setup).
+- [x] Confirm no billable validation resource remains.
 - [ ] If Azure retains a platform-owned zero-cost orphan, record exact sanitized
       proof of the provider-owned deletion blocker.
 
@@ -315,3 +316,9 @@ The source-level release blockers remain independent of this Azure deletion:
 - Hosted/panel at the exact ingestion pin exposes the same job dashboard in
   both hosted modes and does not implement the frozen history/feedback panel
   boundary. A coordinated ingestion feature branch is addressing that contract.
+
+Cleanup removed all billable resources from both interrupted attempts and the
+previously leaked validation environment. The final cross-group count is zero
+for ACR pools/registries, Search, Cosmos DB, Container Apps environments, VMs,
+Firewalls, Bastion, NAT Gateways, and Public IPs. Azure is asynchronously
+deleting the remaining zero-cost shells.
