@@ -322,8 +322,13 @@ Azure's 60-character limit for ordinary CAF/azd names (61 characters for the
 `foundry_account` variant and 71 for `cognitiveservices_account`). A <=7
 character azd environment name is the exact-pin operational workaround. The
 correct fix is a bounded, collision-safe upstream naming contract with compiled
-template tests; no submodule hand-edit, AILZ tag, or umbrella pin is authorized
-in this validation.
+template tests. AILZ PR #127 merged the initial bounded form to `develop`; final
+review found it renamed even already-valid legacy SPLs. Follow-up PR #128
+preserves each legacy name independently when it fits and hashes only the
+overlength names. Its compiled-template tests pin exact per-group boundaries
+(39/38/28), boundary+1 fallback, maximum Search names, determinism,
+distinctness, and unchanged target/conditions. CI and final review pass. No
+submodule hand-edit, AILZ tag, or umbrella pin is authorized in this validation.
 
 The source-level release blockers remain independent of this Azure deletion:
 
