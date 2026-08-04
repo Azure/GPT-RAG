@@ -1696,7 +1696,7 @@ options, and a before/after table.</p>
 <tr>
 <td>Hosted, with panel</td>
 <td><code>DEPLOY_HOSTED_AGENT_ORCHESTRATION=true</code>, <code>DEPLOY_ADMINISTRATIVE_PANEL=true</code>, <code>CHAT_BACKEND=hosted_agent</code></td>
-<td>Chat still routes directly to the Microsoft Foundry hosted agent. Only the ingestion administrative backend and its panel/feedback Cosmos DB data are retained; chat does not route through that backend.</td>
+<td>Chat still routes directly to the Microsoft Foundry hosted agent. Only the ingestion administrative backend and its panel/feedback Cosmos DB data are retained. Chat does not route through that backend.</td>
 </tr>
 </tbody>
 </table>
@@ -1711,7 +1711,7 @@ options, and a before/after table.</p>
 <tbody>
 <tr>
 <td><code>CHAT_BACKEND</code></td>
-<td>Valid values are <code>orchestrator</code> (default) and <code>hosted_agent</code>. Invalid values fail startup; hosted mode never silently falls back to classic.</td>
+<td>Valid values are <code>orchestrator</code> (default) and <code>hosted_agent</code>. Invalid values fail startup. Hosted mode never silently falls back to classic.</td>
 </tr>
 <tr>
 <td><code>ORCHESTRATOR_BASE_URL</code></td>
@@ -1727,18 +1727,18 @@ options, and a before/after table.</p>
 </tr>
 <tr>
 <td><code>HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS</code></td>
-<td>Finite positive wait for the next SSE event. The UI default is <code>60</code>; never configure an infinite timeout.</td>
+<td>Finite positive wait for the next SSE event. The UI default is <code>60</code>. Never configure an infinite timeout.</td>
 </tr>
 </tbody>
 </table>
-<p>For a hosted deployment, <code>HOSTED_AGENT_IMAGE_VERSION</code> is also required before provisioning. Set it to the immutable image digest in the form <code>sha256:&lt;64-hex-characters&gt;</code>; a mutable tag such as <code>latest</code> or <code>v3.9.0</code> is not accepted.</p>
+<p>For a hosted deployment, <code>HOSTED_AGENT_IMAGE_VERSION</code> is also required before provisioning. Set it to the immutable image digest in the form <code>sha256:&lt;64-hex-characters&gt;</code>. A mutable tag such as <code>latest</code> or <code>v3.9.0</code> is not accepted.</p>
 <div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">DEPLOY_HOSTED_AGENT_ORCHESTRATION</span> <span class="n">true</span>
 <span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">DEPLOY_ADMINISTRATIVE_PANEL</span> <span class="n">false</span> <span class="c"># set true only for hosted/panel</span>
 <span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">HOSTED_AGENT_IMAGE_VERSION</span> <span class="s2">&quot;sha256:&lt;64-hex-characters&gt;&quot;</span>
 <span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">HOSTED_AGENT_RESOURCE_SCOPE</span> <span class="s2">&quot;api://&lt;application-id&gt;/.default&quot;</span>
 <span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS</span> <span class="n">60</span>
 </code></pre></div>
-<p>Treat these exact pins as one unreleased integration candidate; do not mix versions:</p>
+<p>Treat these exact pins as one unreleased integration candidate. Do not mix versions:</p>
 <table>
 <thead>
 <tr>
@@ -1761,15 +1761,16 @@ options, and a before/after table.</p>
 </tr>
 <tr>
 <td>AI Landing Zone (AILZ)</td>
-<td><code>v2.4.0</code></td>
+<td><code>v2.4.1</code></td>
 </tr>
 </tbody>
 </table>
-<p>The GitHub release APIs for UI <code>v2.5.0</code> and AILZ <code>v2.4.0</code> currently report <code>immutable=false</code>. AILZ <code>v2.4.0</code> is nevertheless protected by active exact-tag ruleset <code>20050531</code>, which blocks deletion and non-fast-forward updates to <code>refs/tags/v2.4.0</code>. UI <code>v2.5.0</code> has no equivalent mitigation and remains the immutable-tag release blocker because repository-admin permission is unavailable. Neither API metadata nor the AILZ tag ruleset implies that this combination has an Azure/GPT-RAG umbrella release.</p>
-<p>For a private ACR, build and push the hosted-agent image from a VNet-connected self-hosted runner or from the jump host. Shared ACR Tasks run outside that private network boundary and are not a private-endpoint bypass.</p>
+<p>The GitHub release APIs for UI <code>v2.5.0</code> and AILZ <code>v2.4.1</code> currently report <code>immutable=false</code>. AILZ <code>v2.4.1</code> is nevertheless protected by active exact-tag ruleset <code>20339953</code>, which blocks deletion and non-fast-forward updates to <code>refs/tags/v2.4.1</code>. UI <code>v2.5.0</code> has no equivalent mitigation and remains the immutable-tag release blocker because repository-admin permission is unavailable. Neither API metadata nor the AILZ tag ruleset implies that this combination has an Azure/GPT-RAG umbrella release.</p>
+<p>AILZ <code>v2.4.1</code> fixes provisioning of the optional VNet-injected ACR Task agent pool under <code>NETWORK_ISOLATION=true</code> by adding the required Azure Firewall network rules and ordering them after firewall provisioning.</p>
+<p>With AILZ <code>v2.4.1</code>, the dedicated VNet-connected ACR Tasks agent pool is a valid private build route for the UI, orchestrator, and ingestion images. Build and push the hosted-agent image from a VNet-connected self-hosted runner or from the jump host. Shared ACR Tasks run outside that private network boundary and are not a valid route to a private endpoint.</p>
 <h4 id="roll-back-to-the-v370-classic-release">Roll back to the v3.7.0 classic release</h4>
 <p>Roll back the entire GPT-RAG <code>v3.7.0</code> release as a unit, rather than changing only <code>CHAT_BACKEND</code> while leaving candidate manifests, hooks, or infrastructure in place. The complete classic pin set is UI <code>v2.3.13</code>, orchestrator <code>v3.8.0</code>, ingestion <code>v2.5.0</code>, and AILZ <code>v2.3.0</code>.</p>
-<p>Restore the <code>v3.7.0</code> manifest, infrastructure gitlink and <code>.gitmodules</code>, lifecycle hooks, parameters, and <code>azure.yaml</code>; set both deployment flags to <code>false</code>, publish <code>CHAT_BACKEND=orchestrator</code> and the classic <code>ORCHESTRATOR_BASE_URL</code> under the <code>gpt-rag</code> label, then run <code>azd provision</code> and <code>azd deploy</code>. This restores the full known classic configuration instead of a hybrid rollback.</p>
+<p>Restore the <code>v3.7.0</code> manifest, infrastructure gitlink and <code>.gitmodules</code>, lifecycle hooks, parameters, and <code>azure.yaml</code>. Set both deployment flags to <code>false</code>, publish <code>CHAT_BACKEND=orchestrator</code> and the classic <code>ORCHESTRATOR_BASE_URL</code> under the <code>gpt-rag</code> label, then run <code>azd provision</code> and <code>azd deploy</code>. This restores the full known classic configuration instead of a hybrid rollback.</p>
 <h3 id="retrieval-backend">Retrieval backend</h3>
 <p>GPT-RAG can retrieve grounding content directly from Azure AI Search or through a
 Foundry IQ knowledge base. Starting with GPT-RAG v3.0.2 and AI Landing Zone
@@ -1888,9 +1889,9 @@ signed-in users:</p>
 <li>Connect to the jumpbox through Azure Bastion, or use another machine with VNet/VPN access.</li>
 <li>On the jumpbox, authenticate with the VM managed identity.</li>
 <li>On the jumpbox, run <code>scripts/postProvision.ps1</code> with <code>RUN_FROM_JUMPBOX=true</code>.</li>
-<li>On the jumpbox, run <code>azd deploy</code> with <code>RUN_FROM_JUMPBOX=true</code>. If you use a dedicated VNet-connected ACR Tasks agent pool for classic components, also set <code>ACR_TASK_AGENT_POOL=build-pool</code>.</li>
+<li>On the jumpbox, run <code>azd deploy</code> with <code>RUN_FROM_JUMPBOX=true</code>. If you build the UI, orchestrator, or ingestion images with the dedicated VNet-connected ACR Tasks agent pool, set <code>ACR_TASK_AGENT_POOL=build-pool</code>.</li>
 </ol>
-<p><code>BUILD_MODE</code> is normally not required for classic component deployments. Hosted-agent images must use the private ACR build route described above; shared ACR Tasks are not a substitute for VNet connectivity.</p>
+<p><code>BUILD_MODE</code> is normally not required when deploying the UI, orchestrator, or ingestion services. Hosted-agent images must use the private ACR build route described above. Shared ACR Tasks are not a substitute for VNet connectivity.</p>
 <h3 id="regional-preflight">Regional preflight</h3>
 <p>Run preflight before every Zero Trust deployment. It is much faster to fail in
 the first few minutes than to wait for a long network-isolated deployment and
@@ -2015,8 +2016,8 @@ azd provision
 <span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">ACR_TASK_AGENT_POOL</span> <span class="n">build-pool</span>
 <span class="n">azd</span> <span class="n">deploy</span>
 </code></pre></div>
-<p>This command deploys the services selected by the active mode. Classic component scripts can use Azure Container Registry remote builds (<code>az acr build</code>) against a dedicated private ACR task agent pool. For a hosted-agent image, use a VNet-connected runner or jump host; do not rely on shared ACR Tasks to reach a private endpoint.</p>
-<p>The deploy hook uses <code>NETWORK_ISOLATION</code> as the source of truth. When <code>NETWORK_ISOLATION=true</code>, <code>azd deploy</code> fails fast unless it is running from the VNet with <code>RUN_FROM_JUMPBOX=true</code>; the older <code>AZURE_ZERO_TRUST</code> variable is not used.</p>
+<p>This command deploys the services selected by the active mode. The UI, orchestrator, and ingestion deployment scripts can use Azure Container Registry remote builds (<code>az acr build</code>) against the dedicated VNet-connected ACR Tasks agent pool provided by AILZ <code>v2.4.1</code>. For a hosted-agent image, use a VNet-connected runner or jump host. Do not rely on shared ACR Tasks to reach a private endpoint.</p>
+<p>The deploy hook uses <code>NETWORK_ISOLATION</code> as the source of truth. When <code>NETWORK_ISOLATION=true</code>, <code>azd deploy</code> fails fast unless it is running from the VNet with <code>RUN_FROM_JUMPBOX=true</code>. The older <code>AZURE_ZERO_TRUST</code> variable is not used.</p>
 <p>If you prefer to <strong>deploy a single service</strong>, for example, when updating only that service, you can deploy it individually. Below is an example using the orchestrator service. The same approach applies to other services (frontend, dataingest, mcp).</p>
 <h3 id="deploy-individual-services">Deploy Individual Services</h3>
 <p>Make sure you're logged in to Azure:</p>
@@ -2052,7 +2053,7 @@ azd<span class="w"> </span>deploy<span class="w"> </span>
 ./scripts/deploy.sh
 </code></pre></div></p>
 <h2 id="permissions">Permissions</h2>
-<p>The role tables below describe the classic default topology. Hosted/no-panel omits the orchestrator Container App assignments. Hosted/panel retains only the ingestion administrative backend and panel/feedback Cosmos DB access; the hosted-agent identity receives its own Foundry data-plane and immutable-image pull assignments during hosted deployment.</p>
+<p>The role tables below describe the classic default topology. Hosted/no-panel omits the orchestrator Container App assignments. Hosted/panel retains only the ingestion administrative backend and panel/feedback Cosmos DB access. The hosted-agent identity receives its own Foundry data-plane and immutable-image pull assignments during hosted deployment.</p>
 <p><strong>Microsoft Foundry Role and AI Search Assignments</strong></p>
 <table>
 <thead>
