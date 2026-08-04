@@ -93,9 +93,9 @@ Treat these exact pins as one unreleased integration candidate. Do not mix versi
 
 The GitHub release APIs for UI `v2.5.0` and AILZ `v2.4.1` currently report `immutable=false`. AILZ `v2.4.1` is nevertheless protected by active exact-tag ruleset `20339953`, which blocks deletion and non-fast-forward updates to `refs/tags/v2.4.1`. UI `v2.5.0` has no equivalent mitigation and remains the immutable-tag release blocker because repository-admin permission is unavailable. Neither API metadata nor the AILZ tag ruleset implies that this combination has an Azure/GPT-RAG umbrella release.
 
-AILZ `v2.4.1` fixes provisioning of the optional VNet-injected ACR Task agent pool under `NETWORK_ISOLATION=true` by adding the required Azure Firewall network rules and ordering them after firewall provisioning.
+AILZ `v2.4.1` fixes provisioning of the optional VNet-injected ACR Tasks agent pool under `NETWORK_ISOLATION=true` by adding the required Azure Firewall network rules and ordering them after firewall provisioning. The pool supports private builds for the UI, orchestrator, ingestion, and hosted-agent derivative images.
 
-With AILZ `v2.4.1`, the dedicated VNet-connected ACR Tasks agent pool is a valid private build route for the UI, orchestrator, and ingestion images. Build and push the hosted-agent image from a VNet-connected self-hosted runner or from the jump host. Shared ACR Tasks run outside that private network boundary and are not a valid route to a private endpoint.
+With AILZ `v2.4.1`, the dedicated VNet-connected ACR Tasks agent pool is a valid private build route for all images, including the hosted-agent derivative image. Shared ACR Tasks run outside that private network boundary and cannot reach a private endpoint.
 
 #### Roll back to the v3.7.0 classic release
 
@@ -180,9 +180,9 @@ Use this runbook for a clean network-isolated deployment:
 3. Connect to the jumpbox through Azure Bastion, or use another machine with VNet/VPN access.
 4. On the jumpbox, authenticate with the VM managed identity.
 5. On the jumpbox, run `scripts/postProvision.ps1` with `RUN_FROM_JUMPBOX=true`.
-6. On the jumpbox, run `azd deploy` with `RUN_FROM_JUMPBOX=true`. If you build the UI, orchestrator, or ingestion images with the dedicated VNet-connected ACR Tasks agent pool, set `ACR_TASK_AGENT_POOL=build-pool`.
+6. On the jumpbox, run `azd deploy` with `RUN_FROM_JUMPBOX=true`. To build the UI, orchestrator, ingestion, and hosted-agent derivative images with the dedicated VNet-connected ACR Tasks agent pool, set `ACR_TASK_AGENT_POOL=build-pool`.
 
-`BUILD_MODE` is normally not required when deploying the UI, orchestrator, or ingestion services. Hosted-agent images must use the private ACR build route described above. Shared ACR Tasks are not a substitute for VNet connectivity.
+`BUILD_MODE` is normally not required when deploying the UI, orchestrator, or ingestion services. The hosted-agent derivative image can use the same dedicated pool. Shared ACR Tasks cannot reach a private endpoint.
 
 ### Regional preflight
 
@@ -337,7 +337,7 @@ azd env set ACR_TASK_AGENT_POOL build-pool
 azd deploy
 ```
 
-This command deploys the services selected by the active mode. The UI, orchestrator, and ingestion deployment scripts can use Azure Container Registry remote builds (`az acr build`) against the dedicated VNet-connected ACR Tasks agent pool provided by AILZ `v2.4.1`. For a hosted-agent image, use a VNet-connected runner or jump host. Do not rely on shared ACR Tasks to reach a private endpoint.
+This command deploys the services selected by the active mode. The UI, orchestrator, ingestion, and hosted-agent derivative images can use Azure Container Registry remote builds (`az acr build`) against the dedicated VNet-connected ACR Tasks agent pool provided by AILZ `v2.4.1`. Shared ACR Tasks cannot reach a private endpoint.
 
 The deploy hook uses `NETWORK_ISOLATION` as the source of truth. When `NETWORK_ISOLATION=true`, `azd deploy` fails fast unless it is running from the VNet with `RUN_FROM_JUMPBOX=true`. The older `AZURE_ZERO_TRUST` variable is not used.
 
