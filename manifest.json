@@ -1,8 +1,8 @@
 {
   "tag": "unreleased",
   "repo": "https://github.com/azure/gpt-rag.git",
-  "ailz_tag": "v2.4.0",
-  "ailz_commit": "d5c2b5996bbaf91f6282d35de440da6341cb41f6",
+  "ailz_tag": "v2.4.1",
+  "ailz_commit": "fbc5d226543d0fb7a29ccd241c45df5c3caa82ee",
   "components": [
     {
       "name": "gpt-rag-ui",

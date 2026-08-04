@@ -15,9 +15,9 @@ class ReleasedPinTests(unittest.TestCase):
         components = {item["name"]: item for item in manifest["components"]}
 
         self.assertEqual("unreleased", manifest["tag"])
-        self.assertEqual("v2.4.0", manifest["ailz_tag"])
+        self.assertEqual("v2.4.1", manifest["ailz_tag"])
         self.assertEqual(
-            "d5c2b5996bbaf91f6282d35de440da6341cb41f6",
+            "fbc5d226543d0fb7a29ccd241c45df5c3caa82ee",
             manifest["ailz_commit"],
         )
         self.assertEqual(
@@ -44,7 +44,7 @@ class ReleasedPinTests(unittest.TestCase):
 
     def test_gitmodule_and_gitlink_match_landing_zone_release(self) -> None:
         gitmodules = (ROOT / ".gitmodules").read_text(encoding="utf-8")
-        self.assertIn("branch = v2.4.0", gitmodules)
+        self.assertIn("branch = v2.4.1", gitmodules)
 
         completed = subprocess.run(
             ["git", "ls-files", "--stage", "infra"],
@@ -54,7 +54,7 @@ class ReleasedPinTests(unittest.TestCase):
             text=True,
         )
         self.assertIn(
-            "d5c2b5996bbaf91f6282d35de440da6341cb41f6",
+            "fbc5d226543d0fb7a29ccd241c45df5c3caa82ee",
             completed.stdout,
         )
 
