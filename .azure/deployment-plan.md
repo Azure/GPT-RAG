@@ -308,6 +308,23 @@ telemetry could not run before the registry, project, and Container Apps were
 removed. A third paid deployment is prohibited until the concurrent cleanup
 actor is positively stopped.
 
+The environment remained a single East US 2 deployment. Live East US 2 Search
+allocation returned `InsufficientResourcesAvailable`, so the supported
+`AZURE_SEARCH_LOCATION=francecentral` parameter placed both Search services in
+France Central while their private endpoints and all other resources remained
+in the East US 2 environment/VNet. This was a capacity fallback inside the same
+resource group, not a second environment.
+
+A later full apply exposed a separate deterministic AILZ v2.4.1 defect after
+both France Central Search services reached `Succeeded`: generated
+`Microsoft.Search/searchServices/sharedPrivateLinkResources` names exceed
+Azure's 60-character limit for ordinary CAF/azd names (61 characters for the
+`foundry_account` variant and 71 for `cognitiveservices_account`). A <=7
+character azd environment name is the exact-pin operational workaround. The
+correct fix is a bounded, collision-safe upstream naming contract with compiled
+template tests; no submodule hand-edit, AILZ tag, or umbrella pin is authorized
+in this validation.
+
 The source-level release blockers remain independent of this Azure deletion:
 
 - #591 cannot pass at the exact pins because caller identity does not reach
