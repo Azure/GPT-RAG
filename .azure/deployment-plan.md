@@ -1,413 +1,317 @@
-# GPT-RAG issue 571 deployment preparation plan
+# Azure Deployment and Validation Plan
 
-## Status
+> **Status:** Validated
 
-Deployment Blocked
+Generated: 2026-08-04
+Issues: Azure/GPT-RAG #591, #592, #597
 
-## Mode
+## 1. Project overview
 
-MODIFY
+**Goal:** Validate classic, hosted/no-panel, and hosted/panel GPT-RAG modes in
+one disposable, fully network-isolated Azure environment. Prove the corrected
+hosted image supply chain through a dedicated VNet-connected ACR Tasks agent
+pool, live Responses behavior, immutable rollback, telemetry, and
+document-level authorization.
 
-## Issue
+**Path:** Validate and transition an existing Azure Developer CLI project.
+Infrastructure remains owned by the pinned AI Landing Zone submodule and will
+not be edited manually.
 
-- Azure/GPT-RAG#571: establish a practical governance baseline and auditable AI activity trail.
-- The user has approved autonomous preparation and implementation.
-- This plan changes the existing GPT-RAG AZD/Bicep deployment recipe in place.
-- The user has authorized one new Standard validation deployment in
-  `swedencentral`. No destructive resource operation or resource-group deletion
-  is authorized.
+## 2. Requirements
 
-## Existing deployment recipe
+| Attribute | Value |
+| --- | --- |
+| Classification | Non-production validation |
+| Scale | Single-user/synthetic test load |
+| Budget | Cost-optimized, short-lived |
+| Subscription | Authorized non-production subscription (name and ID redacted) |
+| Location | Primary services: `eastus2`; Azure AI Search: `francecentral` |
+| Network posture | `NETWORK_ISOLATION=true`; private endpoints remain closed |
+| Build route | Dedicated VNet-connected ACR Tasks agent pool, S1, one instance |
+| Cleanup | Delete the disposable resource group and all validation identities/content |
 
-- Azure Developer CLI orchestrates the existing deployment through `azure.yaml`.
-- The root repository supplies `main.parameters.json`, `manifest.json`, lifecycle hooks, and post-provision configuration.
-- `infra/` remains the pinned `Azure/bicep-ptn-aiml-landing-zone` submodule. It will not be edited in place.
-- Post-provision configuration uses Azure CLI/SDK authentication, Azure App Configuration label `gpt-rag`, Azure Key Vault, Azure Container Apps, and Azure AI Search REST APIs.
+The user explicitly authorized this subscription and autonomous execution.
+No environment name or resource-group name is recorded in this tracked plan.
 
-## Architecture
+## 3. Exact integrated pins
 
-- Pin `Azure/gpt-rag-orchestrator` v3.8.0 and `Azure/gpt-rag-ingestion` v2.5.0 in the umbrella manifest and future-minor release surfaces.
-- Seed metadata-only audit and provenance settings in App Configuration with all feature gates disabled by default.
-- Create `AUDIT_HMAC_KEY` once as a cryptographically random 256-bit Key Vault secret when Key Vault is deployed. Reuse the existing value on later runs so ordinary reprovisioning is stable; rotation is an explicit operator action that creates a new Key Vault version. If Key Vault is explicitly disabled, seed only the disabled feature gates and keep audit events off.
-- Publish only an App Configuration Key Vault reference for `AUDIT_HMAC_KEY`; never persist or display the secret value in admin settings, files, outputs, or logs.
-- Add the ten optional provenance/governance fields to the RAG Azure AI Search index.
-- Replace unconditional index delete/recreate with an in-place `PUT` update for existing indexes. Azure AI Search receives the full desired schema while preserving documents for supported additive changes; incompatible changes fail instead of falling back to deletion.
-- Preserve the existing creation path for missing indexes and leave unrelated datasource, skillset, and indexer behavior unchanged.
-- Keep the orchestrator v3.8.0 logical contract hash `825db8ef40a81e2c19e5d80d37c565b6b47fc9a6540e9881d35cc12b8fde5aab` and wire hash `066c8f5408610ab839d5121d06ca5bc59e8797e551d5c47c875c5ba52f7e0588` aligned in tests and documentation.
-
-## Configuration defaults
-
-### Orchestrator
-
-- `AUDIT_EVENTS_ENABLED=false`
-- `AUDIT_SENSITIVE_CONTENT_ENABLED=false`
-- `AUDIT_SENSITIVE_CONTENT_FIELDS=`
-- `AUDIT_ACTOR_PSEUDONYM_ENABLED=false`
-- `AUDIT_SOURCE_EVENT_LIMIT=25`
-- `AUDIT_HMAC_KEY_ID=v1`
-- `AUDIT_ADDITIONAL_REDACTED_KEYS=`
-
-### Ingestion
-
-- `INGESTION_PROVENANCE_ENABLED=false`
-- `INGESTION_REQUIRE_GOVERNANCE_METADATA=false`
-- `INGESTION_DEFAULT_CLASSIFICATION=unclassified`
-- `INGESTION_DEFAULT_RIGHT_TO_USE=not_asserted`
-
-## Azure AI Search schema
-
-The RAG index receives these optional, retrievable fields:
-
-| Field | Azure AI Search type | Attributes |
+| Component | Tag | Commit |
 | --- | --- | --- |
-| `provenance_id` | `Edm.String` | filterable |
-| `source_uri_id` | `Edm.String` | filterable |
-| `source_version_id` | `Edm.String` | filterable |
-| `content_checksum_sha256` | `Edm.String` | filterable |
-| `ingested_at` | `Edm.DateTimeOffset` | filterable, sortable |
-| `ingest_run_id` | `Edm.String` | filterable |
-| `data_classification` | `Edm.String` | filterable, facetable |
-| `right_to_use` | `Edm.String` | filterable, facetable |
-| `retention_class` | `Edm.String` | filterable, facetable |
-| `delete_after` | `Edm.String` | filterable, sortable |
+| gpt-rag-ui | `v2.5.0` | `5328ec7e222e47f56b50b077ccf8a51c30f61681` |
+| gpt-rag-orchestrator | `v3.9.0` | `779b136d4da5d4bdcf9442dc1ec7a6115571f06a` |
+| gpt-rag-ingestion | `v2.6.0` | `cb9f1a08a2e780c15ffd096f6e56c04b5e5bd4ca` |
+| AI Landing Zone | `v2.4.1` | `fbc5d226543d0fb7a29ccd241c45df5c3caa82ee` |
 
-`delete_after` records policy intent only. This solution does not automatically purge documents based on that field.
+The worktree commit equals `origin/develop` at planning time. The submodule is
+initialized at the exact landing-zone commit, and shallow component checkouts
+resolve to the exact manifest commits.
 
-## Security
+## 4. Recipe selection
 
-- Generate key material with Python's operating-system-backed `secrets` module and require exactly 32 random bytes before encoding.
-- Read existing secret metadata/value only to preserve idempotency; do not print or serialize the secret.
-- Use the existing App Configuration Key Vault reference content type.
-- Do not add the secret to the normal App Configuration plaintext import, AZD outputs, Bicep outputs, logs, changelog, or documentation examples.
-- Keep sensitive-content capture disabled independently from metadata audit events.
-- Preserve fail-closed component validation and prohibited-field redaction in the pinned runtime releases.
-- No credentials, secrets, generated resource names, or personal validation
-  environment names will be committed. Non-secret Azure scope and principal IDs
-  may be recorded when required for exact validation proof.
+**Selected:** Existing AZD + Bicep composition, with Azure CLI for quota,
+resource inspection, private ACR builds, runtime evidence, and cleanup.
 
-## Migration and rollback
+**Rationale:** `azure.yaml`, lifecycle hooks, `main.parameters.json`, and the
+pinned landing-zone module are the repository's supported deployment path.
+Direct Bicep edits or a public-network workaround would invalidate the gates.
 
-- Existing deployments receive disabled defaults, so runtime behavior remains unchanged until operators opt in.
-- The Search schema update is additive and performed in place. Existing indexed documents remain valid. Ingestion v2.5.0 emits provenance in audit events but does not populate these index fields; they remain empty unless the indexing pipeline explicitly supplies them.
-- No automatic or fallback index deletion is allowed. Unsupported schema mutations fail with an actionable error and leave the existing index intact.
-- Upgrade sequence: deploy umbrella configuration with the v3.8.0/v2.5.0 pins, run post-provisioning, verify the Key Vault reference and additive index schema, then enable metadata audit/provenance in a non-production environment.
-- Rollback sequence: set `AUDIT_EVENTS_ENABLED=false` and `INGESTION_PROVENANCE_ENABLED=false`, keep sensitive capture disabled, and redeploy the prior component tags if required.
-- Additive Search fields are harmless to older component versions and do not need removal during rollback.
-- Rotating `AUDIT_HMAC_KEY` is explicit: create a new Key Vault secret version and update `AUDIT_HMAC_KEY_ID` so evidence consumers can distinguish pseudonymization epochs.
+## 5. Architecture and execution topology
 
-## UX and documentation advisory
+### Core resources
 
-- Steve confirmed the main operator risk is the current unconditional index deletion. The implementation must use in-place updates and must not claim a safe additive migration until tests prove no delete call occurs.
-- Provide one umbrella configuration table, link to component guidance, and state that ingestion settings contain no secrets.
-- State that audit evidence supports adopter governance work but is not proof of legal or regulatory compliance.
-- State that enabling audit events requires the Key Vault secret reference and that `delete_after` does not enforce retention.
-- Update the GPT-RAG docs branch in a companion documentation PR.
+| Component | Azure service / SKU | Planned quantity |
+| --- | --- | ---: |
+| Foundry account and project | Microsoft Foundry / AIServices S0 | 1 account, 1 project |
+| Chat model | `gpt-5-nano` `2025-08-07`, GlobalStandard 100 | 1 deployment |
+| Embedding model | `text-embedding-3-large` `1`, Standard 100 | 1 deployment |
+| Search | Azure AI Search Standard | 2 services |
+| Conversation/project data | Cosmos DB serverless | 2 accounts in classic/panel |
+| Application and Foundry storage | StorageV2 Standard LRS | 2 accounts |
+| Registry | ACR Premium, public access disabled | 1 |
+| Private build compute | ACR Tasks dedicated VNet pool S1 | 1 instance / 2 vCPU |
+| Application runtime | Container Apps consumption environment | 1 |
+| Classic apps | frontend, orchestrator, dataingest | 3 |
+| Hosted apps | frontend, dataingest; no orchestrator Container App | 2 |
+| Private administration | Windows jumpbox, Bastion, NAT, Azure Firewall | 1 each |
+| Networking | VNet, isolated subnets/NSGs, private DNS, private endpoints | 1 VNet, about 15 endpoints |
+| Configuration/secrets | App Configuration + Key Vault | 1 app store, 2 vaults |
+| Observability | Log Analytics + Application Insights + AMPLS | 1 each |
 
-## Validation
+### Mode sequence
 
-- [x] All validation checks pass
-  - [x] AZD installation and authentication
-  - [x] `azure.yaml` stable-schema validation
-  - [x] Bicep compilation
-  - [x] Bicep lint execution
-  - [x] Python/config build verification
-  - [x] Focused and full relevant tests
-  - [x] Static RBAC verification
-  - [x] AZD environment/subscription/location validation
-  - [x] Required pre-provision hooks
-  - [x] `azd provision --preview --no-prompt`
-  - [x] AI Landing Zone compiled-template size gate
-  - [x] AZD package validation
-  - [x] Azure Policy validation
+1. **Classic:** provision and deploy all three exact component pins. Validate
+   private health, real streaming, two-turn continuity, citations, and
+   correlation.
+2. **Hosted/no-panel:** obtain the exact classic orchestrator digest, compose
+   hosted topology, build the corrected derivative with
+   `az acr build --agent-pool`, deploy it by immutable digest, and prove the
+   orchestrator Container App and panel-only Cosmos dependency are absent.
+3. **Hosted/panel:** enable the panel without routing chat back through the
+   orchestrator Container App; validate panel endpoints and feedback behavior.
+4. **Version reversal:** deploy two functionally equivalent corrected hosted
+   image digests, validate each live, then restore the first digest and validate
+   it again.
+5. **Classic fallback:** set hosted mode to false, reprovision/redeploy, and
+   prove the classic orchestrator and runtime contract are restored.
 
-- Focused Python unit tests for App Configuration defaults, stable secret creation/reference behavior, contract pins, Search field types, and no-delete index updates.
-- Full relevant GPT-RAG configuration test suite.
-- Python compile and JSON/schema assertions.
-- PowerShell parser and script validation; shell syntax validation when Bash is available.
-- `az bicep build --file infra/main.bicep` and the repository template-size gate when applicable.
-- Manifest/version/tag assertions against published v3.8.0 and v2.5.0 releases.
-- Docker/config validation through existing repository scripts where applicable.
-- `azd provision --preview` or the repository's non-deploy preflight only when the current authenticated AZD context is complete. Treat any empty environment resource group that AZD creates before what-if as a preview-tool side effect, not as workload provisioning.
-- Preparation and preview remain non-destructive. After region-aware validation
-  passes, hand off one `azd provision` and `azd deploy` attempt to the
-  `azure-deploy` recovery workflow.
+Local provisioning may run from the workstation. Every private data-plane
+operation, image build, component deployment, and private endpoint probe runs
+inside the VNet through the jumpbox/managed identity. ACR public network access
+must remain disabled throughout.
 
-## Role Assignment Verification
+## 6. Region and provisioning-limit validation
 
-- Status: Verified for this change.
-- Orchestrator identity: `AppConfigurationDataReader`,
-  `KeyVaultSecretsUser`, `SearchIndexDataReader`, and the existing model,
-  Cosmos, ACR, and Storage data-plane roles remain scoped through the landing
-  zone's per-resource role modules.
-- Ingestion identity: `AppConfigurationDataReader` and
-  `SearchIndexDataContributor` remain present for provenance configuration and
-  indexed-document writes.
-- No new management-plane role, resource-group role, subscription role, or
-  role-assignment resource was added by this branch.
+Current official documentation shows that `eastus2` supports both Foundry
+hosted agents and ACR Tasks dedicated agent pools. The exact model versions are
+listed by Azure in `eastus2`; `Standard_D2s_v3` is listed with no restriction.
 
-## Section 7: Validation Proof
+Eight regions in the hosted-agent/agent-pool intersection were checked with the
+current Azure CLI quota extension. `eastus2` has the best combination of zero
+DSv3 usage, zero application-network usage, full model quota, supported exact
+models, and no existing Search service. No stale region evidence was used as
+the decision.
 
-| Check | Command / proof | Result |
-| --- | --- | --- |
-| Exact source | `git rev-parse HEAD`; compare local and remote PR branch | Passed at requested and remote PR head `5ea5f7c983660db0c2ece99b9eb4fd6cd1688485` |
-| CLI versions | `azd version`; `az version --output json` | Passed, AZD v1.27.1 and Azure CLI v2.79.0 |
-| Authentication | `azd auth login --check-status`; `az account show`; `az account get-access-token --resource https://management.azure.com/` | Passed for `paulolacerda@microsoft.com`; default subscription `mcaps-paulolacerda` (`9788a92c-2f71-4629-8173-7ad449cb50e1`), tenant `16b3c013-d300-468d-ac64-7eda0820b6d3`; token tenant matched |
-| Deploying principal | `az role assignment list --assignee-object-id 88e31ae8-65b8-46a2-8b26-fad4e6c305f3 --scope /subscriptions/9788a92c-2f71-4629-8173-7ad449cb50e1 --include-inherited` | Passed; principal has inherited `Owner` at subscription scope, sufficient for previewing resource-scoped role assignments |
-| AZD schema | Azure AZD `validate_azure_yaml` on root `azure.yaml` | Passed against the official stable schema |
-| AZD environment | `azd env new <unique-local-env> --subscription 9788a92c-2f71-4629-8173-7ad449cb50e1 --location eastus2 --no-prompt`; `azd env set ...`; `azd env get-values` | Passed; isolated local environment used `eastus2`, deploying principal `88e31ae8-65b8-46a2-8b26-fad4e6c305f3`, type `User`, and Standard-mode safe preview values: `NETWORK_ISOLATION=false`, `USE_UAI=false`, `USE_CAPP_API_KEY=false`, `ENABLE_AGENTIC_RETRIEVAL=false`, `RETRIEVAL_BACKEND=foundry_iq`, `DEPLOYMENT_MODE=standalone`, and VM/Bastion/NAT/Firewall deployment flags disabled |
-| Required hook | Load `azd env get-values`; `pwsh -NoProfile -File scripts/preProvision.ps1` | Passed. GPT-RAG regional preflight: 0 failures, 2 capacity warnings; required providers and eastus2 locations passed, Container Apps quota passed, both model deployments and quotas passed. Landing-zone preflight: 0 failures, 3 warnings, 1 information item |
-| Bicep compile | `az bicep build --file infra/main.bicep` | Passed with existing pinned-submodule warnings only |
-| Bicep lint | `az bicep lint --file infra/main.bicep` | Passed with existing pinned-submodule warnings only |
-| Template size | `pwsh infra/scripts/Measure-MainJsonSize.ps1 -SkipBuild -WorkingBudgetMB 3.5 -FailThresholdMB 4.7 -ArmHardCeilingMB 5.0` | Passed authoritative gate: 4,872,869 bytes (4.647 MB). Warning above 3.5 MB working budget, below 4.7 MB fail threshold and 5.0 MB ARM ceiling |
-| Relevant tests | `python -m unittest config.governance.tests.test_setup config.search.tests.test_governance_schema config.search.tests.test_foundry_iq_templates` | Passed, 131 tests |
-| Static checks | `python -m ruff check ...`; `python -m compileall -q ...`; PowerShell AST parse; Git Bash `-n scripts/preProvision.sh scripts/postProvision.sh` | Passed |
-| Package | `azd package --no-prompt` | Passed; umbrella package completed successfully |
-| Docker | Repository scan | Not applicable: no umbrella Dockerfile or AZD service package |
-| Azure Policy | Azure Policy `policy_assignment_list` at subscription scope, followed by ARM what-if | Passed; assignments, including inherited MCAPSGov deny/audit/deploy initiatives, were reviewed and did not block the preview |
-| Static RBAC | Review `main.parameters.json`, `infra/main.bicep:3153-3525`, and `infra/constants/roles.json`; assert required role keys and Bicep mappings | Passed. Orchestrator has resource-scoped App Configuration Data Reader, Key Vault Secrets User, and Search Index Data Reader. Ingestion has resource-scoped App Configuration Data Reader, Key Vault Secrets User, and Search Index Data Contributor. The deploying principal receives resource-scoped Key Vault Contributor/Secrets Officer, App Configuration Data Owner, Search Service Contributor, and Search data roles needed by post-provision setup. This PR changes neither `infra/` nor `main.parameters.json` and adds no RBAC assignment |
-| Provision preview | `azd provision --preview --no-prompt` | Passed in 1 minute 6 seconds. ARM what-if returned a create-only workload plan with no modify/delete operations and applied no workload resources |
-| Preview side effect | `az group show`; `az resource list`; Azure activity log | AZD v1.27.1 created the empty, tagged environment resource group before running what-if at `2026-07-21T12:12:15Z`. The group contains 0 resources. It was not deleted because this validation explicitly prohibited Azure resource or resource-group deletion |
+| Resource/quota | Current | Deploy | Total | Limit | Source |
+| --- | ---: | ---: | ---: | ---: | --- |
+| Total regional vCPU | 0 | 2 | 2 | 100 | `az quota` (`Microsoft.Compute/cores`) |
+| Standard DSv3 family vCPU | 0 | 2 | 2 | 100 | `az quota` (`standardDSv3Family`) |
+| Virtual networks | 0 | 1 | 1 | 1,000 | `az quota` (`VirtualNetworks`) |
+| Public IP addresses | 0 | 3 | 3 | 1,000 | `az quota` (`PublicIPAddresses`) |
+| Private endpoints | 0 | 15 | 15 | 65,536 | `az quota` (`PrivateEndpoints`) |
+| Container Apps environments | 1 | 1 | 2 | 50 | `az quota` (`ManagedEnvironmentCount`) |
+| Storage accounts | 1 | 2 | 3 | 250 | `az quota` (`StorageAccounts`) |
+| Search Standard services in region | 0 | 2 | 2 | 16 | Resource Graph + current Microsoft service limits |
+| Cosmos DB accounts in subscription | 5 | 2 | 7 | 250 | Resource Graph + current Microsoft service limits |
+| Registries in region | 1 | 1 | 2 | 100 | Resource Graph + current Microsoft service limits |
+| ACR standard pool vCPU in new registry | 0 | 2 | 2 | 16 | `az quota` unsupported; current ACR pool documentation |
+| `gpt-5-nano` GlobalStandard kTPM | 200 | 100 | 300 | 15,000 | `az cognitiveservices usage list` |
+| `text-embedding-3-large` Standard kTPM | 0 | 100 | 100 | 350 | `az cognitiveservices usage list` |
 
-Validation status is **Validated**. All required formal checks passed at exact PR
-head `5ea5f7c983660db0c2ece99b9eb4fd6cd1688485`. The change is ready for the
-`azure-deploy` workflow, but deployment remains explicitly out of scope for this
-validation.
+`az quota list` was attempted first for Container Registry, Cosmos DB,
+Cognitive Services, and Search as required. Container Registry, Cosmos DB, and
+Cognitive Services returned `BadRequest`; Search returned an empty quota set.
+The table therefore uses service-specific CLI/Resource Graph plus current
+Microsoft documentation only for those unsupported providers.
 
-## Handoff proof required
+**Provisioning-limit status:** All planned resources are within current quota.
+Regional capacity remains a distinct Azure allocation decision and is checked
+again by the pinned landing-zone preflight and a create-only deployment
+preview before apply.
 
-- Feature branch `feature/governance-audit-umbrella-571` was created from
-  `origin/develop` commit `e6ba89f3f609d900c0dd32c26999cf7fe4e8dca0`.
-- Focused and full relevant configuration suites passed: 131 tests.
-- Ruff passed for all changed Python implementation and test files.
-- Python compilation, JSON/schema parsing, contract SHA-256 assertions, and
-  PowerShell AST parsing passed.
-- Tests prove all ten Search fields and their types/attributes, preservation of
-  operator-added fields, update-before-cleanup ordering, no index DELETE,
-  ETag-guarded updates, and `If-None-Match: *` guarded creation.
-- Tests prove 32-byte OS-random key generation, stable secret reuse, plaintext
-  key migration without rotation, preservation of operator-managed Key Vault
-  references, no plaintext deployment parameter, and fail-closed behavior when
-  audit is enabled without Key Vault.
-- The full documentation site passed `mkdocs build --strict`.
-- `az bicep build --file infra/main.bicep` succeeded with existing submodule
-  warnings. The existing AI Landing Zone v2.3.0 template is 4.647 MB and passed
-  the authoritative 4.7 MB fail threshold and 5.0 MB ARM ceiling, with a warning
-  above the 3.5 MB working budget.
-- `azd provision --preview --no-prompt` succeeded at exact PR head in eastus2
-  and returned a create-only ARM what-if plan with no modify/delete operations.
-  AZD v1.27.1 created an empty environment resource group before what-if; it has
-  0 resources and was left untouched because resource-group deletion was
-  prohibited.
-- Git Bash syntax validation passed for both lifecycle hooks. PowerShell AST
-  parsing and the Python module invoked by both hooks also passed.
-- Docker validation is not applicable because the umbrella repository has no
-  Dockerfile; the pinned component releases were verified as published,
-  non-draft, non-prerelease tags.
-- No workload resources were deployed, modified, or deleted. AZD preview itself
-  created one empty tagged environment resource group before ARM what-if; no
-  deletion was attempted.
-- Implementation commits:
-  `11d65b294cc7a2270e579deddf42c770dc9e1761` and
-  `5ea5f7c`.
-- Implementation PR, unmerged:
-  `https://github.com/Azure/GPT-RAG/pull/573`.
-- Documentation commits:
-  `2cca8c68f16e0f2ade8fdf4939cf8e9b6335fc5d` and
-  `8f00c16`.
-- Documentation PR, unmerged:
-  `https://github.com/Azure/GPT-RAG/pull/574`.
+## 7. Security and evidence constraints
 
-## Section 8: Deployment Proof
-
-- Deployment source: exact PR evidence commit
-  `a7c98f187b37360cecd1500301a47dcecfcaac78`.
-- Deployment context: the exact validated AZD environment was recreated in
-  `eastus2` with the validated Standard-mode settings, subscription, tenant,
-  deploying principal, and principal type. The empty resource group created by
-  preview was reused after confirming it had only the AZD environment tag, had
-  no `keep=true` tag, contained no resources, and had no Container Apps
-  environment or conflicting `azd-service-name` tags.
-- Pre-deploy checklist: passed. Authentication, subscription, tenant,
-  deploying principal, region, Azure Policy assignments, environment values,
-  repository commit, resource-group location/tags, and AZD recipe were
-  rechecked before provisioning.
-- Provisioning attempts: `azd provision --no-prompt` was attempted three times
-  on 2026-07-21. The first retry followed a 60-second wait; the final retry
-  followed a 300-second backoff. Every attempt stopped at Azure AI Search with
-  `InsufficientResourcesAvailable` for `eastus2`. Azure request IDs:
-  `d73cd9b4-834a-93c5-fa68-7012f02c5f88`,
-  `59685ea6-8b58-1525-25e4-89697b8fbb55`, and
-  `8bc5f789-b35f-848b-fbcb-05bc90fe71d6`.
-- Partial result: the resource group was retained with successfully created
-  platform resources, including Log Analytics, Application Insights, App
-  Configuration, Key Vault, Container Registry, Storage, Cosmos DB, and a
-  Container Apps environment. Azure AI Search, Container Apps, component
-  images, and application endpoints were not created.
-- Deployment gate: `azd deploy --no-prompt` was not run because infrastructure
-  provisioning did not complete. The mandatory ACR `AcrPull` propagation gate,
-  endpoint/health checks, live application RBAC verification, App
-  Configuration default verification, Key Vault audit-key semantics/reference
-  verification, Search schema checks, component-pin checks, safe request and
-  ingestion flows, KQL audit reconstruction, sensitive-property checks,
-  root-sentinel/event-name/event-budget checks, and overhead measurement remain
-  blocked.
-- Security and retention: no secret value was read or exposed. Key Vault
-  metadata verification was unavailable because the data-plane role assignment
-  had not been provisioned. No resource, resource group, role assignment, or
-  deployment was deleted; `azd down` and all deletion commands were not run.
-  The partial validation environment remains running for follow-up.
-- Status: **Deployment Blocked** by regional Azure AI Search capacity. A safe
-  retry is to rerun `azd provision --no-prompt` when `eastus2` capacity is
-  available, then continue with the required ACR RBAC propagation check,
-  `azd deploy --no-prompt`, and the post-deployment verification matrix.
-
-## Section 9: Sweden Central recovery plan
-
-- Authorization: on 2026-07-21 the user authorized one new, unique Standard
-  validation AZD environment in `swedencentral`, using subscription
-  `9788a92c-2f71-4629-8173-7ad449cb50e1`, tenant
-  `16b3c013-d300-468d-ac64-7eda0820b6d3`, and deploying principal
-  `88e31ae8-65b8-46a2-8b26-fad4e6c305f3` with principal type `User`.
-- Isolation: the recovery environment must be fresh and must not reuse Search
-  service `srch-c6emckf22jxl4`. That existing service proves prior regional
-  viability only; it does not guarantee new Search capacity.
-- Protected partial environment: do not modify or delete
-  `rg-gptrag-pr573-7xsurm`. Do not run `azd down` or any deletion command.
-- Configuration drift gate: preserve the validated Standard settings, including
-  `NETWORK_ISOLATION=false`, `USE_UAI=false`, `USE_CAPP_API_KEY=false`,
-  `ENABLE_AGENTIC_RETRIEVAL=false`, `RETRIEVAL_BACKEND=foundry_iq`,
-  `DEPLOYMENT_MODE=standalone`, and disabled VM, Bastion, NAT, and Firewall
-  deployment flags. Only environment/resource names and required regional
-  values may differ.
-- Region-aware gate: rerun the required pre-provision checks for
-  `swedencentral`, then run one fresh `azd provision --preview --no-prompt`.
-  Continue only if the plan is create-only and contains no modify/delete
-  operations.
-- Capacity stop condition: run one provision attempt. If Azure AI Search again
-  returns `InsufficientResourcesAvailable`, stop without retrying another
-  region and report the blocker.
-- Successful deployment gate: after provisioning, verify ACR pull roles have
-  propagated before `azd deploy --no-prompt`.
-- Verification: fully qualified endpoints and health, live RBAC, manifest
-  component versions, App Configuration safe defaults, Key Vault
-  `AUDIT-HMAC-KEY` existence and 32-byte semantics without exposing its value,
-  Key Vault reference wiring, additive Search provenance fields, minimal safe
-  request and ingestion flows, Application Insights `gptrag.audit.*` custom
-  events, root sentinel/privacy/event names, and KQL reconstruction. Keep
-  sensitive capture disabled.
-- Evidence: append exact environment, resource group, endpoints, commands,
-  timestamps, verification results, and blockers to this file; commit and push
-  the evidence to PR #573. Leave the successful environment active.
-
-## Section 10: Sweden Central validation proof
-
-- Validation source: PR head
-  `b7766419aa03375ef61de9fbe05e90b80f02a0db`. The only committed delta from
-  implementation head `5ea5f7c983660db0c2ece99b9eb4fd6cd1688485`
-  is `.azure/deployment-plan.md`; no code, Bicep, parameters, manifest, or
-  lifecycle hook changed.
-- Environment: new local AZD environment `gptrag-pr573-sw-a333b`, target resource
-  group `rg-gptrag-pr573-sw-a333b`, subscription
-  `9788a92c-2f71-4629-8173-7ad449cb50e1`, tenant
-  `16b3c013-d300-468d-ac64-7eda0820b6d3`, region `swedencentral`, deploying
-  principal `88e31ae8-65b8-46a2-8b26-fad4e6c305f3`, principal type `User`.
-- Configuration: `azd env get-values` confirmed the approved Standard settings,
-  including `NETWORK_ISOLATION=false`, `USE_UAI=false`,
-  `USE_CAPP_API_KEY=false`, `ENABLE_AGENTIC_RETRIEVAL=false`,
-  `RETRIEVAL_BACKEND=foundry_iq`, `DEPLOYMENT_MODE=standalone`, and disabled VM,
-  software, Jumpbox, Bastion, NAT Gateway, and Azure Firewall flags. Foundry,
-  Search, and Cosmos regional values are all `swedencentral`.
-- Authentication and authorization: `az account show`,
-  `az ad signed-in-user show`, and inherited role lookup confirmed the requested
-  subscription, tenant, exact principal, and inherited `Owner` at subscription
-  scope.
-- Regional evidence: existing Standard Search service
-  `srch-c6emckf22jxl4` is running in Sweden Central in the same subscription.
-  It is not referenced or reused by this environment.
-- Policy: Azure Policy assignments were refreshed. Subscription and inherited
-  MCAPSGov audit, deny, deploy/modify, security-baseline, and MFA assignments
-  remain applicable; preview found no policy blocker.
-- Provider/quota preflight: `scripts/preProvision.ps1` passed with 0 failures,
-  2 capacity warnings, and landing-zone preflight passed with 0 failures,
-  1 warning, and 1 information item. All required providers and
-  `swedencentral` locations passed. Container Apps had 50 managed environments
-  remaining. `gpt-5-nano` had 15,000 quota units remaining for a 100-unit
-  request; `text-embedding-3-large` had 350 remaining for a 100-unit request.
-  Search and Cosmos live capacity cannot be guaranteed before provisioning.
-- AZD schema: the Azure AZD stable-schema validator passed `azure.yaml`.
-- Build/what-if: the first `azd provision --preview --no-prompt` stopped before
-  Azure access because the fresh clone had not initialized the pinned `infra`
-  submodule. After `git submodule update --init --recursive` checked out
-  `1616ddd940b796c32f86e4459b079eebc254de08`, the preview passed in 1 minute
-  18 seconds. It compiled the pinned Bicep and returned create-only resources
-  with no modify/delete operations.
-- Preview safety: the preview-created resource group contains 0 resources, has
-  only the `azd-env-name=gptrag-pr573-sw-a333b` tag, and has no Container Apps
-  environment or `azd-service-name` conflict.
-- Protected environment: read-only checks confirmed
-  `rg-gptrag-pr573-7xsurm` remains in `eastus2`; no operation targeted, modified,
-  or deleted it.
-- Static RBAC and package/build proof from Section 7 remains applicable because
-  no implementation, infrastructure, parameter, manifest, or hook file changed.
-- Status: **Validated** for one `swedencentral` recovery deployment attempt. Any
-  modify/delete plan or Azure AI Search `InsufficientResourcesAvailable` result
-  is a hard stop. No deletion or `azd down` is authorized.
-
-## Section 11: Sweden Central deployment recovery proof
-
-- Attempt: one `azd provision --no-prompt` run against validated environment
-  `gptrag-pr573-sw-a333b` and resource group
-  `rg-gptrag-pr573-sw-a333b` in `swedencentral`.
-- Source: PR evidence head
-  `b7766419aa03375ef61de9fbe05e90b80f02a0db`, plus this uncommitted evidence
-  update. No implementation, Bicep, parameter, manifest, or lifecycle-hook file
+- Managed identity and least-privilege RBAC only; no credentials in source,
+  App Configuration plaintext, prompts, logs, or issue comments.
+- Never log or publish bearer tokens. Token checks record only presence/count
+  and sanitized correlation evidence.
+- Protected test content is synthetic and is never copied into issue comments.
+- Published evidence contains region, resource types, counts, states, image
+  digests, status codes, timings, and correlation identifiers, but never the
+  validation environment or resource-group name.
+- Hosted authorization must fail closed. Missing caller identity, failed native
+  trimming, or any silent managed-identity/public-document fallback fails #591.
+- Existing unrelated subscription resources are out of scope and must not be
   changed.
-- Preflight: repeated during provisioning and passed with 0 failures. Provider,
-  location, Container Apps quota, model availability, and model quota checks
-  remained successful. Search and Cosmos live-capacity warnings remained.
-- ARM deployment:
-  `gptrag-pr573-sw-a333b-1784639848`, terminal state `Failed` at
-  `2026-07-21T13:21:12.160467Z`.
-- Capacity blocker: Container Apps managed environment
-  `cae-n7t6ey-gptrag-pr573-sw-a333b` failed with
-  `ManagedEnvironmentCapacityHeavyUsageError` /
-  `AKSCapacityHeavyUsage` because a new managed-environment cluster was
-  unavailable in `swedencentral`. Azure request ID:
-  `2757ce4e-9f1a-4e61-8f23-62978db7d9fd`.
-- Independent naming blocker: the Cosmos nested deployment name
-  `umd7bs2my5f6a-sqldb-cosmosdb-n7t6ey-gptrag-pr573-sw-a333b-sdc-001`
-  was 65 characters and exceeded the ARM deployment-name maximum of 64.
-- Stop condition: the requested one-region attempt limit was reached by the
-  platform-capacity failure. No retry, alternate region, shorter environment,
-  `azd deploy`, `azd down`, or deletion command was run.
-- Partial resources retained in the Sweden Central resource group:
-  Key Vault `kv-n7t6ey-gptrag-pr573-s`, Log Analytics workspace
-  `log-n7t6ey-gptrag-pr573-sw-a333b-sdc-001`, App Configuration
-  `appcs-n7t6ey-gptrag-pr573-sw-a333b-sdc-001`, Container Registry
-  `crn7t6eygptragpr573swa333bsdc001`, Cosmos DB account
-  `cosmos-n7t6ey-gptrag-pr573-sw-a333b-sdc-001`, Storage account
-  `stn7t6eygptragpr573swa33`, Application Insights
-  `appi-n7t6ey-gptrag-pr573-sw-a333b-sdc-001`, and failed Container Apps
-  environment `cae-n7t6ey-gptrag-pr573-sw-a333b`.
-- Partial platform endpoints:
-  `https://kv-n7t6ey-gptrag-pr573-s.vault.azure.net/` and
-  `https://appcs-n7t6ey-gptrag-pr573-sw-a333b-sdc-001.azconfig.io`.
-  These resources reached management-plane `Succeeded`, but application health
-  was not testable.
-- Not created: Azure AI Search services and Container Apps. No application FQDN
-  or health endpoint exists.
-- Blocked verification: ACR `AcrPull` propagation, `azd deploy`, component
-  versions in running apps, live application RBAC, App Configuration governance
-  defaults, Key Vault `AUDIT-HMAC-KEY` existence/32-byte semantics/reference,
-  additive Search fields, safe request and ingestion flows, Application
-  Insights `gptrag.audit.*` custom events, root sentinel/privacy/event names,
-  and KQL reconstruction.
-- Security: no Key Vault secret value, connection string, token, payload, or
-  sensitive event content was read or recorded. Sensitive capture was never
-  enabled.
-- Retention: all Sweden Central partial resources remain active. The eastus2
-  group `rg-gptrag-pr573-7xsurm` remains unchanged with 9 resources. No
-  resource, group, role assignment, or deployment was deleted.
-- Status: **Deployment Blocked** by Sweden Central Container Apps platform
-  capacity, with an additional environment-name length defect that must be
-  corrected before any future attempt.
+
+The Microsoft 365 and repository search found no authoritative record naming an
+approved pair of reusable #591 user accounts. Before #591 execution, the
+identity gate therefore accepts only synthetic identities created for this
+validation or explicitly approved existing test identities with usable
+authentication. It will not select an unrelated directory user.
+
+### Role assignment verification
+
+- **Status:** Verified for provisioning.
+- The classic orchestrator has resource-scoped App Configuration Data Reader,
+  Cognitive Services User/OpenAI User, ACR Pull, Cosmos DB Built-in Data
+  Contributor, Search Index Data Reader, Storage Blob Data Reader, and Key Vault
+  Secrets User roles.
+- The frontend has resource-scoped App Configuration Data Reader, ACR Pull,
+  Storage Blob Data Reader/Delegator, and Key Vault Secrets User roles.
+- Ingestion has resource-scoped App Configuration Data Reader, Cognitive
+  Services User/OpenAI User, Cosmos DB Built-in Data Contributor, ACR Pull,
+  Search Index Data Contributor, Storage Blob Data Contributor, and Key Vault
+  Secrets User roles.
+- AILZ grants the Foundry project identity Search Index Data Reader, Storage
+  Blob Data Reader, and a registry-mode-compatible pull role when hosted mode
+  is enabled. The deployer receives Azure AI Project Manager only in hosted
+  mode.
+- The AILZ hosted-agent contract and ACR agent-pool firewall contract tests
+  passed. No subscription-wide role was added by this branch.
+- Static RBAC does not satisfy #591: the live gate still requires caller/group
+  identity to reach retrieval.
+
+## 8. Gate checklists
+
+### #597 — private hosted image supply chain
+
+- [x] Dedicated VNet-connected pool reaches `Succeeded`.
+- [x] Firewall rule collection includes all five documented service-tag paths.
+- [x] `az acr build --agent-pool` builds and pushes the corrected derivative.
+- [x] ACR remains Premium with public network access disabled.
+- [x] Tag resolves to a manifest digest and digest pull/inspection succeeds.
+- [ ] Foundry deploys and serves the immutable digest.
+- [ ] A second corrected digest serves live, then rollback to the first digest serves live.
+
+### #592 — three runtime modes
+
+- [x] Exact pin evidence captured.
+- [ ] Classic: three apps, streaming, two turns, persistence, telemetry.
+- [ ] Hosted/no-panel: two apps, no orchestrator app, hosted Responses stream,
+      managed conversation continuity, no panel.
+- [ ] Hosted/panel: hosted chat plus working administrative panel behavior.
+- [ ] Classic → hosted/no-panel → hosted/panel transition succeeds.
+- [ ] Hosted false fallback recreates and serves classic topology.
+
+### #591 — authorization isolation
+
+- [ ] Two approved synthetic/existing identities belong to different Entra groups.
+- [ ] Restricted synthetic content is indexed with the authorized group ACL.
+- [ ] Authorized identity retrieves/cites it through the hosted path.
+- [ ] Unauthorized identity cannot retrieve or infer it in answers, citations,
+      tools, direct retrieval, or telemetry.
+- [ ] Hosted/tool logs contain no bearer token or protected content.
+- [ ] Missing identity and failed downstream authorization fail closed without fallback.
+
+## 9. Validation proof
+
+| Check | Command/evidence | Result | Timestamp |
+| --- | --- | --- | --- |
+| Worktree base | `HEAD == origin/develop` | Pass | 2026-08-04 |
+| Manifest pins | `manifest.json`, submodule, exact component checkouts | Pass | 2026-08-04 |
+| Region quota scan | Current `az quota`, service usage, Resource Graph | Pass | 2026-08-04 |
+| Official region support | Hosted agents + ACR Tasks agent-pool documentation | Pass | 2026-08-04 |
+| Azure authentication | `azd auth login --check-status`; scoped `az account show` | Pass | 2026-08-04 |
+| AZD environment | Unique local environment; authorized subscription; East US 2; isolation and dedicated pool enabled | Pass | 2026-08-04 |
+| JSON/YAML contracts | Parse manifest, parameters, rollback, root and hosted AZD manifests | Pass | 2026-08-04 |
+| Python suites | `pytest tests config/search/tests config/governance/tests -q` | 166 tests and 80 subtests passed | 2026-08-04 |
+| Hook syntax | PowerShell AST parse and Git Bash `-n` for all lifecycle hooks | Pass | 2026-08-04 |
+| Bicep build/lint | Exact AILZ v2.4.1 `main.bicep` | Pass with pre-existing warnings only | 2026-08-04 |
+| Template size | Compiled template size ratchet | 4,887,679 bytes / 4.661 MiB; below 4.7 MiB fail and 5.0 MiB ceiling | 2026-08-04 |
+| Hosted contract | `Test-HostedAgentContract.ps1` | 10 checks passed | 2026-08-04 |
+| Private ACR pool contract | `Test-AcrTaskAgentPoolFirewallContract.ps1` | 8 checks passed | 2026-08-04 |
+| AILZ deterministic preflight tests | `Invoke-PreflightChecks.Tests.ps1` | 43 checks passed | 2026-08-04 |
+| Live regional preflight | GPT-RAG + AILZ checks against configured environment | 0 failures; two expected capacity/security warnings and one billing info | 2026-08-04 |
+| Package validation | `azd package --no-prompt` | Pass | 2026-08-04 |
+| Azure Policy | MCP attempted first; CLI fallback reviewed effective readable assignments | Pass; isolated topology complies with known modify policies | 2026-08-04 |
+| Provision preview | `azd provision --preview --no-prompt` | Pass in 42 seconds; create-only summary | 2026-08-04 |
+| Preview side effect | Resource count in preview-created environment group | 0 workload resources | 2026-08-04 |
+| Hosted azd extension | `azd ai agent --help` | v1.0.0-beta.8 started successfully | 2026-08-04 |
+| Private ACR pool | AILZ v2.4.1 live state | S1/count 1/VNet-connected/Succeeded | 2026-08-04 |
+| Private registry posture | Management-plane state during builds | Premium; public network access disabled | 2026-08-04 |
+| Exact orchestrator build | `az acr build --agent-pool` at commit `779b136d...` | Succeeded; base digest `sha256:04f4d947bc7703902c2a7360551ac940d3aa903cc19b82eb3b99198840283a85` | 2026-08-04 |
+| Hosted derivative A | Immutable base digest pull + hosted `CMD` build/push | Succeeded; digest `sha256:972993a914a1c841dd06f83f9721b99a6fc45c90187e15e6bf374640d618dadc` | 2026-08-04 |
+| Hosted derivative B | Second immutable rollback candidate | Succeeded; digest `sha256:eb10ee05a6541c5e452c4c88c7d8cf73846550e0c695a69419c559a80afc45a9` | 2026-08-04 |
+| Exact UI build | `az acr build --agent-pool` at commit `5328ec7e...` | Succeeded; digest `sha256:74fed3b24e6c0b8705ce3e7f26be89a8d08e78ddd3272e24a40140e2167d311a` | 2026-08-04 |
+| Exact ingestion build | `az acr build --agent-pool` at commit `cb9f1a08...` | Succeeded; digest `sha256:49b3f79a59d1ef71be742a3e75576f9b10580af90ee368e7612004767171c81f` | 2026-08-04 |
+| Azure hosted/runtime deploy | Foundry serve/rollback and mode matrix | Blocked before execution by external resource-group deletion | 2026-08-04 |
+
+**Validated by:** `azure-validate`
+
+Validation found and fixed two repository regressions before deployment:
+
+1. `util.prereqs` failed to resolve the Windows `az.cmd` shim and emitted
+   non-ASCII console output incompatible with the default Windows code page.
+2. A governance test incorrectly required the live candidate manifest to remain
+   on v3.7.0 instead of validating the preserved governance combination in the
+   explicit rollback contract.
+
+Exact-pin source review also found a release-gate gap that validation does not
+waive: the hosted UI calls the agent with its service identity, the hosted
+entrypoint builds `user_context={}`, and no caller token/group context reaches
+retrieval. #591 therefore cannot pass at these pins through the native path or
+an unapproved fallback.
+
+## 10. Documentation consistency
+
+Documentation PR #607 (AILZ v2.4.1 pin) and PR #608 (private hosted build
+guidance) are merged into the `docs` branch. If live validation reveals a
+user-visible defect requiring code/configuration changes, every affected docs
+page will be updated in the same coordinated change.
+
+## 11. Execution and cleanup
+
+- [x] Analyze workspace and exact pins.
+- [x] Confirm authorized subscription.
+- [x] Compare supported regions with current quotas.
+- [x] Select AZD/Bicep recipe and isolated architecture.
+- [x] Record user authorization of this plan from the task prompt.
+- [x] Mark plan ready for `azure-validate`.
+- [x] Complete static validation.
+- [ ] Provision and execute remaining #597 hosted serve/rollback gates.
+- [ ] Execute #592 mode matrix.
+- [ ] Execute #591 positive and negative identity tests.
+- [ ] Post sanitized evidence and close only passing issues.
+- [ ] Delete the disposable resource group.
+- [ ] Remove synthetic identities/groups/content created solely for validation.
+- [ ] Confirm no billable validation resource remains.
+- [ ] If Azure retains a platform-owned zero-cost orphan, record exact sanitized
+      proof of the provider-owned deletion blocker.
+
+No release, tag, package publication, or umbrella release preparation is in
+scope.
+
+### Deployment blocker
+
+Two independently named, actively provisioning East US 2 validation groups
+were deleted by a concurrent process authenticated as the delegated user. The
+second deletion is proven by Azure Activity Log as an explicit resource-group
+delete request at `2026-08-04T20:22:08Z` (correlation
+`502c1e98-470f-4c9c-8dda-674a734e4a75`), not an ARM capacity failure or an azd
+rollback. Azure resource-group deletion cannot be canceled.
+
+The first environment completed the AILZ v2.4.1 private build path before it was
+deleted, so the #597 pool/build/push/pull-by-digest evidence above is valid.
+Foundry hosted deployment, live digest rollback, the #592 runtime matrix, and
+telemetry could not run before the registry, project, and Container Apps were
+removed. A third paid deployment is prohibited until the concurrent cleanup
+actor is positively stopped.
+
+The source-level release blockers remain independent of this Azure deletion:
+
+- #591 cannot pass at the exact pins because caller identity does not reach
+  Toolbox/retrieval. Coordinated UI and orchestrator feature branches are
+  implementing the fail-closed native contract without tags or releases.
+- Hosted/panel at the exact ingestion pin exposes the same job dashboard in
+  both hosted modes and does not implement the frozen history/feedback panel
+  boundary. A coordinated ingestion feature branch is addressing that contract.

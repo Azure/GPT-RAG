@@ -23,7 +23,23 @@
 
 - **Released component pins.** The unreleased integration combination pins UI
   `v2.5.0`, orchestrator `v3.9.0`, ingestion `v2.6.0`, and AI Landing Zone
-  `v2.4.0` at their exact released commits.
+  `v2.4.1` at their exact released commits. AI Landing Zone `v2.4.1` adds the
+  network rules and deployment ordering required by a dedicated
+  VNet-connected ACR Tasks agent pool.
+
+### Fixed
+
+- **Regional prerequisite checks resolve Azure CLI on Windows.**
+  `util.prereqs` now uses the same explicit Azure CLI executable resolution as
+  deployment configuration, so the `az.cmd` shim no longer fails with
+  `FileNotFoundError` under `subprocess.run`. Its console messages are
+  ASCII-safe for the default Windows code page, and Azure SDK imports are
+  deferred until live checks run, allowing `python -m util.prereqs --help` to
+  work before optional dependencies are installed.
+- **Governance pin regression follows the rollback contract.** The governance
+  test now verifies the preserved `v3.7.0` component combination in
+  `config/deployment/rollback.json` instead of incorrectly requiring the live
+  unreleased manifest to remain frozen on the prior release.
 
 ### Migration and rollback
 
@@ -35,7 +51,7 @@ set, clears hosted endpoint inputs, resets both mode flags to `false`, and
 restores `CHAT_BACKEND=orchestrator`.
 
 The UI and AI Landing Zone release APIs report `immutable=false`. AI Landing
-Zone `v2.4.0` is additionally protected by active exact-tag ruleset `20050531`
+Zone `v2.4.1` is additionally protected by active exact-tag ruleset `20050531`
 against deletion and non-fast-forward updates; UI `v2.5.0` remains the
 unmitigated immutable-tag blocker because the maintainer lacks repository
 administration. This unreleased integration does not publish an umbrella
