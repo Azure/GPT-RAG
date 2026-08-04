@@ -17,17 +17,20 @@ Foundry IQ Knowledge Base:
   migration, and rollback path. It queries the GPT-RAG Search index directly
   and preserves the established security-field contract.
 - Work IQ, Fabric IQ ontology, and Fabric Data Agent sources are opt-in. Their
-  user-delegated authorization must fail closed; managed identity must not
-  replace a missing user token.
+  user-delegated authorization must fail closed per remote source; managed
+  identity must not replace a missing user token. Eligible local sources can
+  continue when a remote source is omitted.
 - `indexedOneLake` is not yet an end-to-end platform capability. The pinned
-  orchestrator can describe it and post-provision scripts seed its settings,
-  but the platform Search template does not provision or bind the source.
+  orchestrator can describe it and `scripts/postProvision.ps1` seeds its
+  settings, but the platform Search template does not provision or bind the
+  source. The POSIX post-provision path does not currently seed those settings.
 - Direct Work IQ and Fabric IQ tools in Foundry Agent Service are a viable
   future orchestration alternative, but GPT-RAG does not currently use them.
 - `gpt-rag-ingestion` can be logically unnecessary for a primary Foundry IQ
-  `azureBlob` corpus, but it is not deployment-optional today. It remains
-  required by the platform topology and by `searchIndex`, direct Search
-  rollback, uploads, SharePoint ingestion, NL2SQL, and specialized processing.
+  `azureBlob` corpus, but it is not deployment-optional today because the
+  current platform topology still deploys and discovers it. `searchIndex`,
+  uploads, SharePoint ingestion, NL2SQL, and specialized processing also need
+  GPT-RAG ingestion unless another producer implements the required contract.
 
 This ADR records the architecture already implemented across GPT-RAG platform
 release `v3.7.0` and pinned orchestrator `v3.8.0`. It does not change runtime
@@ -135,17 +138,20 @@ must observe the omission rather than assume all requested sources were bound.
 
 #### Orchestrator runtime
 
-Pinned orchestrator `v3.8.0` selects exactly one `ContextProvider` from
-`RETRIEVAL_BACKEND`. The `foundry_iq` provider uses the `2026-05-01-preview`
-Foundry IQ `retrieve` API and passes the configured Knowledge Base name,
-activity, output mode, retrieval instructions, and source-specific parameters.
-The `ai_search` provider retains the direct Search query path.
+Pinned orchestrator `v3.8.0` selects one retrieval backend/provider from
+`RETRIEVAL_BACKEND`; strategies can compose that provider with other context
+providers. The `foundry_iq` provider uses the `2026-05-01-preview` Foundry IQ
+`retrieve` API. Ordinary retrieval sends intents and source parameters. The
+MCP-enabled path can additionally send messages, `includeActivity`,
+`outputMode`, and reasoning effort. The `ai_search` provider retains the direct
+Search query path.
 
 Remote Work and Fabric sources receive the incoming user's delegated token.
-Local indexed sources can use service identity according to their configured
-authorization mode. The backend selector falls back to direct Search when the
-setting is missing or unknown in the standalone component, while the platform
-deployment explicitly sets the Foundry IQ value.
+Local indexed sources receive OBO when available and otherwise can use service
+managed identity according to their configured authorization mode. The backend
+selector falls back to direct Search when the setting is missing or unknown in
+the standalone component, while the platform deployment explicitly sets the
+Foundry IQ value.
 
 ### Prioritized characteristics
 
@@ -311,28 +317,31 @@ The following constraints are part of the decision:
 
 ### Knowledge Source contract
 
-| Source | Platform provisioning | Runtime identity | Decision status |
-| --- | --- | --- | --- |
-| `azureBlob` | Rendered and bound by `search.j2` | Managed service identity | Supported primary Foundry IQ corpus |
-| `searchIndex` | Rendered and bound by `search.j2` | Search resource identity plus configured `filterAddOn` document authorization | Supported custom-ingestion corpus |
-| `workIQ` | Opt-in, preflighted, rendered, and bound | User OBO | Supported preview; consent, tenant, licensing, and latency gates apply |
-| `fabricOntology` | Opt-in, rendered, and bound | User OBO | Supported preview; Fabric caller permissions apply |
-| `fabricDataAgent` | Opt-in, rendered, and bound | User OBO | Supported preview; Fabric caller permissions apply |
-| `indexedOneLake` | Settings seeded, but not rendered or bound by the platform template | Pre-registered source identity and Fabric RBAC; no user OBO in the pinned runtime | Externally preprovisioned/experimental; not end-to-end supported |
+| Source kind | Data access | Index owner | Requires `gpt-rag-ingestion` for that source | Query identity | Current platform registration | Decision status |
+| --- | --- | --- | --- | --- | --- | --- |
+| `azureBlob` | Indexed | Foundry IQ / Azure AI Search | No | OBO when available, otherwise service MI according to source permissions | Automated by `search.j2` | Supported primary Foundry IQ corpus |
+| `searchIndex` | Indexed | GPT-RAG or customer | Yes when GPT-RAG populates the index | OBO or service MI for native permissions; custom fields use `filterAddOn` | Automated by `search.j2` | Supported custom-ingestion corpus |
+| Conversation upload sidecar (`searchIndex`) | Indexed | GPT-RAG | Yes | Conversation-scoped `filterAddOn` | Automated when enabled | Supported optional feature |
+| `workIQ` | Live remote | Microsoft 365 | No | OBO required | Automated when enabled and consent preflight passes | Implemented preview wiring; operator live validation required |
+| `fabricOntology` | Live remote | Microsoft Fabric | No | OBO required | Automated when enabled | Implemented preview wiring; operator live validation required |
+| `fabricDataAgent` | Live remote | Microsoft Fabric | No | OBO required | Automated when enabled | Implemented preview wiring; operator live validation required |
+| `indexedOneLake` | Indexed | Foundry IQ / Azure AI Search | No | No per-user OBO requirement at retrieve time | Operator pre-registers; PowerShell post-provisioning seeds runtime keys | Externally preprovisioned/experimental; not end-to-end supported |
 
 `indexedOneLake` is a known implementation gap, not an exception to the
 support rule. The pinned orchestrator contains the source kind and platform
-post-provision scripts seed `ONELAKE_*` settings, but
+`scripts/postProvision.ps1` seeds `ONELAKE_*` settings, but
 `config/search/search.settings.j2` and `config/search/search.j2` do not create
 or bind it. A subsequent platform reprovision can therefore recreate the
 Knowledge Base without the externally attached OneLake source. End-to-end
-support requires template reconciliation, tests, operator documentation, and
-live authorization validation.
+support requires template reconciliation, POSIX post-provision parity, tests,
+operator documentation, and live authorization validation.
 
 When an operator pre-registers and binds the source, the pinned runtime can add
-`indexedOneLake` source parameters with the configured workspace and lakehouse.
-That path does not require user OBO, does not use `filterAddOn`, and does not
-trigger the remote Work/Fabric runtime extension by itself. The pre-registered
+`indexedOneLake` source parameters containing its name, kind, and reference
+flags. Workspace and lakehouse identifiers are registration-time bindings and
+runtime logging hints; they are not added to the retrieval source payload. That
+path does not require user OBO, does not use `filterAddOn`, and does not trigger
+the remote Work/Fabric runtime extension by itself. The pre-registered
 Knowledge Source's managed identity and Fabric RBAC govern indexing access.
 This shared service access must not be represented as per-user document
 authorization; any future document-level permission mode requires an explicit
@@ -392,6 +401,10 @@ For these remote sources:
 
 The current Work IQ preflight can omit the source when consent cannot be
 proved. Runtime and operational telemetry must make the omission visible.
+Fail-closed behavior applies per remote source: eligible local sources remain
+available when Work or Fabric is omitted. This is deliberate partial
+degradation, not evidence that the remote query succeeded. User-facing and
+operational telemetry must preserve that distinction.
 
 ### Document authorization
 
@@ -487,16 +500,20 @@ between the two supported backends.
 ### Roll back to direct Search
 
 1. Confirm the direct Search index is current and authorization-equivalent.
-2. Set `RETRIEVAL_BACKEND=ai_search` in App Configuration under the `gpt-rag`
-   label.
-3. Restart the orchestrator so the provider is rebuilt.
-4. Run positive and negative authorization canaries.
-5. Keep the Knowledge Base for diagnosis or disable optional source flags;
+2. Set the azd environment value `RETRIEVAL_BACKEND=ai_search` so later
+   provisioning preserves the rollback choice.
+3. Set `RETRIEVAL_BACKEND=ai_search` in App Configuration under the `gpt-rag`
+   label, or reprovision from the updated azd environment.
+4. Restart or redeploy the orchestrator so the provider is rebuilt.
+5. Run positive and negative authorization canaries.
+6. Keep the Knowledge Base for diagnosis or disable optional source flags;
    deletion is not required for runtime rollback.
 
 If no current direct Search corpus exists, this rollback is unavailable.
 Operators choosing an `azureBlob`-only primary path must either accept that
-recovery dependency or maintain a parallel Search corpus through ingestion.
+recovery dependency or maintain a parallel Search corpus through GPT-RAG
+ingestion or another producer that preserves the required index and
+authorization contracts.
 
 ### Version compatibility
 
@@ -573,32 +590,41 @@ authorization parity, citation fidelity, strategy parity, latency, cost,
 auditability, network behavior, and rollback. No production migration follows
 from the spike without a superseding ADR.
 
-## Automated fitness functions
+## Fitness functions
 
-The following checks are release gates. Existing tests cover only a subset and
-must be expanded as the implementation evolves.
+### Existing automated controls
 
-| Fitness function | Automated evidence | Pass condition |
+| Fitness function | Current evidence | Pass condition |
 | --- | --- | --- |
-| Exact pin compatibility | Manifest-driven CI checks out every pinned tag and runs integration tests | No test uses floating component branches |
 | Backend selection | Orchestrator unit tests for missing, valid, and invalid `RETRIEVAL_BACKEND` | Platform value selects the intended provider; standalone fallback remains explicit |
-| Source template completeness | Parameterized render tests for every source, enabled and disabled | Enabled source appears once and is bound once; disabled source is absent |
-| OneLake end-to-end completeness | Render, provision, reprovision, and retrieve test | `indexedOneLake` remains bound after reprovision before its status becomes supported |
+| Source template completeness | `test_foundry_iq_templates.py` renders the implemented template-backed sources enabled and disabled | Enabled source appears once and is bound once; disabled source is absent |
 | Knowledge resource ordering | Mocked management API test | Cleanup is KB then KS; creation is KS then KB; partial failure fails provisioning |
 | Unique names | Template test across all source kinds | Duplicate Knowledge Source names fail before destructive reconciliation |
-| Work IQ consent behavior | Preflight unit test and live tenant canary | Missing/inconclusive consent cannot bind or invoke Work IQ and emits an observable omission |
-| Remote-source fail-closed authorization | Negative tests with no token, wrong tenant, expired token, and unauthorized user | No remote result and no managed-identity fallback |
+| Work IQ consent behavior | Preflight unit and template tests | Missing or inconclusive consent cannot bind Work IQ and produces an observable omission |
+| Remote-source token handling | Pinned orchestrator unit tests for Work IQ and Fabric source assembly | Missing OBO omits the remote source and does not substitute managed identity |
+| Source response normalization | Pinned orchestrator tests for Work IQ, Fabric ontology, Fabric Data Agent, and OneLake | Source-specific responses preserve the shared title, link, content, and citation contract |
+
+### Required release and live-environment gates
+
+These controls are requirements for claiming production readiness or expanding
+support. They are not all automated by the current repository.
+
+| Fitness function | Required evidence | Pass condition |
+| --- | --- | --- |
+| Exact pin compatibility | Manifest-driven cross-repository CI checks out every pinned tag and runs integration tests | No integration test uses floating component branches |
+| OneLake end-to-end completeness | Render, provision, reprovision, and retrieve test | `indexedOneLake` remains bound after reprovision before its status becomes supported |
+| Work IQ live readiness | Live tenant canary with eligible license and admin consent | The source binds, retrieves authorized content, and produces observable omission on revoked consent |
 | Cross-user isolation | Two-user canary over disjoint Microsoft 365 and Fabric permissions | Each user receives only independently authorized content |
 | Direct Search document authorization | Positive and negative index tests | Existing security filters deny unauthorized documents after upgrades |
-| Secret and token hygiene | Telemetry/audit scan in CI | No bearer token, client secret, prompt excerpt, or source excerpt appears in default logs |
+| Secret and token hygiene | Telemetry and audit scan | No bearer token, client secret, prompt excerpt, or source excerpt appears in default logs |
 | Strategy parity | Common retrieval contract tests across supported agent strategies | Source inputs, citations, and authorization are strategy-independent |
-| Rollback readiness | Deployment test switches to `ai_search` and restarts | Current authorization-equivalent corpus serves successful positive and negative canaries |
+| Rollback readiness | Deployment test switches azd and runtime configuration to `ai_search` | Current authorization-equivalent corpus serves successful positive and negative canaries after restart |
 | Network isolation | Private deployment integration test per enabled source | Required endpoints resolve and connect without unintended public fallback |
 | Latency budget | Per-source canaries and percentile alerts | Operator-approved p95/p99 and timeout budgets hold; Work IQ budget is at least its documented minimum |
 | Cost budget | Tagged telemetry joined to Azure cost data | Per-source cost stays below operator-defined thresholds |
 | Preview contract drift | Scheduled schema and live smoke tests | API version, source kind, headers, and response parsing remain compatible |
 | Ingestion optionality | Two-topology deployment test, only after a separate change | No-ingestion deployment has no unresolved resource, FQDN, health, upload, or rollback dependency |
-| Documentation consistency | CI verifies source keys and support status appear in operator docs | Docs distinguish supported, experimental, and future alternatives |
+| Documentation consistency | CI or release review verifies source keys and support status in operator docs | Docs distinguish supported, experimental, and future alternatives |
 
 ## Documentation impact
 
