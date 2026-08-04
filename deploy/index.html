@@ -1766,8 +1766,8 @@ options, and a before/after table.</p>
 </tbody>
 </table>
 <p>The GitHub release APIs for UI <code>v2.5.0</code> and AILZ <code>v2.4.1</code> currently report <code>immutable=false</code>. AILZ <code>v2.4.1</code> is nevertheless protected by active exact-tag ruleset <code>20339953</code>, which blocks deletion and non-fast-forward updates to <code>refs/tags/v2.4.1</code>. UI <code>v2.5.0</code> has no equivalent mitigation and remains the immutable-tag release blocker because repository-admin permission is unavailable. Neither API metadata nor the AILZ tag ruleset implies that this combination has an Azure/GPT-RAG umbrella release.</p>
-<p>AILZ <code>v2.4.1</code> fixes provisioning of the optional VNet-injected ACR Task agent pool under <code>NETWORK_ISOLATION=true</code> by adding the required Azure Firewall network rules and ordering them after firewall provisioning.</p>
-<p>With AILZ <code>v2.4.1</code>, the dedicated VNet-connected ACR Tasks agent pool is a valid private build route for the UI, orchestrator, and ingestion images. Build and push the hosted-agent image from a VNet-connected self-hosted runner or from the jump host. Shared ACR Tasks run outside that private network boundary and are not a valid route to a private endpoint.</p>
+<p>AILZ <code>v2.4.1</code> fixes provisioning of the optional VNet-injected ACR Tasks agent pool under <code>NETWORK_ISOLATION=true</code> by adding the required Azure Firewall network rules and ordering them after firewall provisioning. The pool supports private builds for the UI, orchestrator, ingestion, and hosted-agent derivative images.</p>
+<p>With AILZ <code>v2.4.1</code>, the dedicated VNet-connected ACR Tasks agent pool is a valid private build route for all images, including the hosted-agent derivative image. Shared ACR Tasks run outside that private network boundary and cannot reach a private endpoint.</p>
 <h4 id="roll-back-to-the-v370-classic-release">Roll back to the v3.7.0 classic release</h4>
 <p>Roll back the entire GPT-RAG <code>v3.7.0</code> release as a unit, rather than changing only <code>CHAT_BACKEND</code> while leaving candidate manifests, hooks, or infrastructure in place. The complete classic pin set is UI <code>v2.3.13</code>, orchestrator <code>v3.8.0</code>, ingestion <code>v2.5.0</code>, and AILZ <code>v2.3.0</code>.</p>
 <p>Restore the <code>v3.7.0</code> manifest, infrastructure gitlink and <code>.gitmodules</code>, lifecycle hooks, parameters, and <code>azure.yaml</code>. Set both deployment flags to <code>false</code>, publish <code>CHAT_BACKEND=orchestrator</code> and the classic <code>ORCHESTRATOR_BASE_URL</code> under the <code>gpt-rag</code> label, then run <code>azd provision</code> and <code>azd deploy</code>. This restores the full known classic configuration instead of a hybrid rollback.</p>
@@ -1889,9 +1889,9 @@ signed-in users:</p>
 <li>Connect to the jumpbox through Azure Bastion, or use another machine with VNet/VPN access.</li>
 <li>On the jumpbox, authenticate with the VM managed identity.</li>
 <li>On the jumpbox, run <code>scripts/postProvision.ps1</code> with <code>RUN_FROM_JUMPBOX=true</code>.</li>
-<li>On the jumpbox, run <code>azd deploy</code> with <code>RUN_FROM_JUMPBOX=true</code>. If you build the UI, orchestrator, or ingestion images with the dedicated VNet-connected ACR Tasks agent pool, set <code>ACR_TASK_AGENT_POOL=build-pool</code>.</li>
+<li>On the jumpbox, run <code>azd deploy</code> with <code>RUN_FROM_JUMPBOX=true</code>. To build the UI, orchestrator, ingestion, and hosted-agent derivative images with the dedicated VNet-connected ACR Tasks agent pool, set <code>ACR_TASK_AGENT_POOL=build-pool</code>.</li>
 </ol>
-<p><code>BUILD_MODE</code> is normally not required when deploying the UI, orchestrator, or ingestion services. Hosted-agent images must use the private ACR build route described above. Shared ACR Tasks are not a substitute for VNet connectivity.</p>
+<p><code>BUILD_MODE</code> is normally not required when deploying the UI, orchestrator, or ingestion services. The hosted-agent derivative image can use the same dedicated pool. Shared ACR Tasks cannot reach a private endpoint.</p>
 <h3 id="regional-preflight">Regional preflight</h3>
 <p>Run preflight before every Zero Trust deployment. It is much faster to fail in
 the first few minutes than to wait for a long network-isolated deployment and
@@ -2016,7 +2016,7 @@ azd provision
 <span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">ACR_TASK_AGENT_POOL</span> <span class="n">build-pool</span>
 <span class="n">azd</span> <span class="n">deploy</span>
 </code></pre></div>
-<p>This command deploys the services selected by the active mode. The UI, orchestrator, and ingestion deployment scripts can use Azure Container Registry remote builds (<code>az acr build</code>) against the dedicated VNet-connected ACR Tasks agent pool provided by AILZ <code>v2.4.1</code>. For a hosted-agent image, use a VNet-connected runner or jump host. Do not rely on shared ACR Tasks to reach a private endpoint.</p>
+<p>This command deploys the services selected by the active mode. The UI, orchestrator, ingestion, and hosted-agent derivative images can use Azure Container Registry remote builds (<code>az acr build</code>) against the dedicated VNet-connected ACR Tasks agent pool provided by AILZ <code>v2.4.1</code>. Shared ACR Tasks cannot reach a private endpoint.</p>
 <p>The deploy hook uses <code>NETWORK_ISOLATION</code> as the source of truth. When <code>NETWORK_ISOLATION=true</code>, <code>azd deploy</code> fails fast unless it is running from the VNet with <code>RUN_FROM_JUMPBOX=true</code>. The older <code>AZURE_ZERO_TRUST</code> variable is not used.</p>
 <p>If you prefer to <strong>deploy a single service</strong>, for example, when updating only that service, you can deploy it individually. Below is an example using the orchestrator service. The same approach applies to other services (frontend, dataingest, mcp).</p>
 <h3 id="deploy-individual-services">Deploy Individual Services</h3>
