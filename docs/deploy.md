@@ -60,19 +60,19 @@ For the basic flow, the `postProvision` hook runs locally after `azd provision` 
 | --- | --- | --- |
 | Classic (default) | `DEPLOY_HOSTED_AGENT_ORCHESTRATION=false`, `DEPLOY_ADMINISTRATIVE_PANEL=false`, `CHAT_BACKEND=orchestrator` | The UI routes chat to the orchestrator Container App. The existing administrative surfaces and Cosmos DB dependencies remain. |
 | Hosted, no panel | `DEPLOY_HOSTED_AGENT_ORCHESTRATION=true`, `DEPLOY_ADMINISTRATIVE_PANEL=false`, `CHAT_BACKEND=hosted_agent` | The UI routes chat to the Microsoft Foundry hosted agent. No orchestrator Container App or panel-only Cosmos DB dependency is provisioned. |
-| Hosted, with panel | `DEPLOY_HOSTED_AGENT_ORCHESTRATION=true`, `DEPLOY_ADMINISTRATIVE_PANEL=true`, `CHAT_BACKEND=hosted_agent` | Chat still routes directly to the Microsoft Foundry hosted agent. Only the ingestion administrative backend and its panel/feedback Cosmos DB data are retained; chat does not route through that backend. |
+| Hosted, with panel | `DEPLOY_HOSTED_AGENT_ORCHESTRATION=true`, `DEPLOY_ADMINISTRATIVE_PANEL=true`, `CHAT_BACKEND=hosted_agent` | Chat still routes directly to the Microsoft Foundry hosted agent. Only the ingestion administrative backend and its panel/feedback Cosmos DB data are retained. Chat does not route through that backend. |
 
 The deployment hooks publish the shared runtime contract under the App Configuration label `gpt-rag`:
 
 | Setting | Operator contract |
 | --- | --- |
-| `CHAT_BACKEND` | Valid values are `orchestrator` (default) and `hosted_agent`. Invalid values fail startup; hosted mode never silently falls back to classic. |
+| `CHAT_BACKEND` | Valid values are `orchestrator` (default) and `hosted_agent`. Invalid values fail startup. Hosted mode never silently falls back to classic. |
 | `ORCHESTRATOR_BASE_URL` | Classic service root. The UI calls the `/orchestrator` route on this endpoint when `CHAT_BACKEND=orchestrator`. |
 | `HOSTED_AGENT_BASE_URL` | Hosted service root. The UI sends `POST /invocations` to this endpoint when `CHAT_BACKEND=hosted_agent`. |
 | `HOSTED_AGENT_RESOURCE_SCOPE` | Required explicit hosted data-plane Entra scope ending in `/.default`, for example `api://<application-id>/.default`. Do not use the Azure Resource Manager scope. |
-| `HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS` | Finite positive wait for the next SSE event. The UI default is `60`; never configure an infinite timeout. |
+| `HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS` | Finite positive wait for the next SSE event. The UI default is `60`. Never configure an infinite timeout. |
 
-For a hosted deployment, `HOSTED_AGENT_IMAGE_VERSION` is also required before provisioning. Set it to the immutable image digest in the form `sha256:<64-hex-characters>`; a mutable tag such as `latest` or `v3.9.0` is not accepted.
+For a hosted deployment, `HOSTED_AGENT_IMAGE_VERSION` is also required before provisioning. Set it to the immutable image digest in the form `sha256:<64-hex-characters>`. A mutable tag such as `latest` or `v3.9.0` is not accepted.
 
 ```powershell
 azd env set DEPLOY_HOSTED_AGENT_ORCHESTRATION true
@@ -82,7 +82,7 @@ azd env set HOSTED_AGENT_RESOURCE_SCOPE "api://<application-id>/.default"
 azd env set HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS 60
 ```
 
-Treat these exact pins as one unreleased integration candidate; do not mix versions:
+Treat these exact pins as one unreleased integration candidate. Do not mix versions:
 
 | Component | Candidate pin |
 | --- | --- |
@@ -95,13 +95,13 @@ The GitHub release APIs for UI `v2.5.0` and AILZ `v2.4.1` currently report `immu
 
 AILZ `v2.4.1` fixes provisioning of the optional VNet-injected ACR Task agent pool under `NETWORK_ISOLATION=true` by adding the required Azure Firewall network rules and ordering them after firewall provisioning.
 
-For a private ACR, build and push the hosted-agent image from a VNet-connected self-hosted runner or from the jump host. Shared ACR Tasks run outside that private network boundary and are not a private-endpoint bypass.
+With AILZ `v2.4.1`, the dedicated VNet-connected ACR Tasks agent pool is a valid private build route for the UI, orchestrator, and ingestion images. Build and push the hosted-agent image from a VNet-connected self-hosted runner or from the jump host. Shared ACR Tasks run outside that private network boundary and are not a valid route to a private endpoint.
 
 #### Roll back to the v3.7.0 classic release
 
 Roll back the entire GPT-RAG `v3.7.0` release as a unit, rather than changing only `CHAT_BACKEND` while leaving candidate manifests, hooks, or infrastructure in place. The complete classic pin set is UI `v2.3.13`, orchestrator `v3.8.0`, ingestion `v2.5.0`, and AILZ `v2.3.0`.
 
-Restore the `v3.7.0` manifest, infrastructure gitlink and `.gitmodules`, lifecycle hooks, parameters, and `azure.yaml`; set both deployment flags to `false`, publish `CHAT_BACKEND=orchestrator` and the classic `ORCHESTRATOR_BASE_URL` under the `gpt-rag` label, then run `azd provision` and `azd deploy`. This restores the full known classic configuration instead of a hybrid rollback.
+Restore the `v3.7.0` manifest, infrastructure gitlink and `.gitmodules`, lifecycle hooks, parameters, and `azure.yaml`. Set both deployment flags to `false`, publish `CHAT_BACKEND=orchestrator` and the classic `ORCHESTRATOR_BASE_URL` under the `gpt-rag` label, then run `azd provision` and `azd deploy`. This restores the full known classic configuration instead of a hybrid rollback.
 
 ### Retrieval backend
 
@@ -180,9 +180,9 @@ Use this runbook for a clean network-isolated deployment:
 3. Connect to the jumpbox through Azure Bastion, or use another machine with VNet/VPN access.
 4. On the jumpbox, authenticate with the VM managed identity.
 5. On the jumpbox, run `scripts/postProvision.ps1` with `RUN_FROM_JUMPBOX=true`.
-6. On the jumpbox, run `azd deploy` with `RUN_FROM_JUMPBOX=true`. If you use a dedicated VNet-connected ACR Tasks agent pool for classic components, also set `ACR_TASK_AGENT_POOL=build-pool`.
+6. On the jumpbox, run `azd deploy` with `RUN_FROM_JUMPBOX=true`. If you build the UI, orchestrator, or ingestion images with the dedicated VNet-connected ACR Tasks agent pool, set `ACR_TASK_AGENT_POOL=build-pool`.
 
-`BUILD_MODE` is normally not required for classic component deployments. Hosted-agent images must use the private ACR build route described above; shared ACR Tasks are not a substitute for VNet connectivity.
+`BUILD_MODE` is normally not required when deploying the UI, orchestrator, or ingestion services. Hosted-agent images must use the private ACR build route described above. Shared ACR Tasks are not a substitute for VNet connectivity.
 
 ### Regional preflight
 
@@ -337,9 +337,9 @@ azd env set ACR_TASK_AGENT_POOL build-pool
 azd deploy
 ```
 
-This command deploys the services selected by the active mode. Classic component scripts can use Azure Container Registry remote builds (`az acr build`) against a dedicated private ACR task agent pool. For a hosted-agent image, use a VNet-connected runner or jump host; do not rely on shared ACR Tasks to reach a private endpoint.
+This command deploys the services selected by the active mode. The UI, orchestrator, and ingestion deployment scripts can use Azure Container Registry remote builds (`az acr build`) against the dedicated VNet-connected ACR Tasks agent pool provided by AILZ `v2.4.1`. For a hosted-agent image, use a VNet-connected runner or jump host. Do not rely on shared ACR Tasks to reach a private endpoint.
 
-The deploy hook uses `NETWORK_ISOLATION` as the source of truth. When `NETWORK_ISOLATION=true`, `azd deploy` fails fast unless it is running from the VNet with `RUN_FROM_JUMPBOX=true`; the older `AZURE_ZERO_TRUST` variable is not used.
+The deploy hook uses `NETWORK_ISOLATION` as the source of truth. When `NETWORK_ISOLATION=true`, `azd deploy` fails fast unless it is running from the VNet with `RUN_FROM_JUMPBOX=true`. The older `AZURE_ZERO_TRUST` variable is not used.
 
 If you prefer to **deploy a single service**, for example, when updating only that service, you can deploy it individually. Below is an example using the orchestrator service. The same approach applies to other services (frontend, dataingest, mcp).
 
@@ -392,7 +392,7 @@ cd gpt-rag-orchestrator
 
 ## Permissions
 
-The role tables below describe the classic default topology. Hosted/no-panel omits the orchestrator Container App assignments. Hosted/panel retains only the ingestion administrative backend and panel/feedback Cosmos DB access; the hosted-agent identity receives its own Foundry data-plane and immutable-image pull assignments during hosted deployment.
+The role tables below describe the classic default topology. Hosted/no-panel omits the orchestrator Container App assignments. Hosted/panel retains only the ingestion administrative backend and panel/feedback Cosmos DB access. The hosted-agent identity receives its own Foundry data-plane and immutable-image pull assignments during hosted deployment.
 
 **Microsoft Foundry Role and AI Search Assignments**
 
