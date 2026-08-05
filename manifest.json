@@ -7,14 +7,14 @@
     {
       "name": "gpt-rag-ui",
       "repo": "https://github.com/azure/gpt-rag-ui.git",
-      "tag": "v2.5.0",
-      "commit": "5328ec7e222e47f56b50b077ccf8a51c30f61681"
+      "tag": "v2.5.1",
+      "commit": "971d92a8affd1c859befa4783a26eebc899b425c"
     },
     {
       "name": "gpt-rag-orchestrator",
       "repo": "https://github.com/azure/gpt-rag-orchestrator.git",
-      "tag": "v3.9.0",
-      "commit": "779b136d4da5d4bdcf9442dc1ec7a6115571f06a"
+      "tag": "v3.10.0",
+      "commit": "eaa787340c27d8df5bb550147e95c5ecd02ad385"
     },
     {
       "name": "gpt-rag-ingestion",

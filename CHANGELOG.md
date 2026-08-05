@@ -21,11 +21,11 @@
 
 ### Changed
 
-- **Released component pins.** The unreleased integration combination pins UI
-  `v2.5.0`, orchestrator `v3.9.0`, ingestion `v2.6.0`, and AI Landing Zone
-  `v2.4.1` at their exact released commits. AI Landing Zone `v2.4.1` adds the
-  network rules and deployment ordering required by a dedicated
-  VNet-connected ACR Tasks agent pool.
+- **Compatible hosted/no-panel component pins.** The unreleased integration
+  combination pins UI `v2.5.1`, orchestrator `v3.10.0`, ingestion `v2.6.0`,
+  and AI Landing Zone `v2.4.1` at their exact released commits. The UI and
+  orchestrator releases provide the delegated identity and Toolbox call-context
+  contracts required by hosted/no-panel mode.
 
 ### Fixed
 
@@ -52,7 +52,7 @@ restores `CHAT_BACKEND=orchestrator`.
 
 The UI and AI Landing Zone release APIs report `immutable=false`. AI Landing
 Zone `v2.4.1` is additionally protected by active exact-tag ruleset `20050531`
-against deletion and non-fast-forward updates; UI `v2.5.0` remains the
+against deletion and non-fast-forward updates; UI `v2.5.1` remains the
 unmitigated immutable-tag blocker because the maintainer lacks repository
 administration. This unreleased integration does not publish an umbrella
 release or activate hosted mode.
