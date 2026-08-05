@@ -5,7 +5,6 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import shutil
 import subprocess
 from typing import Mapping
 
@@ -14,19 +13,11 @@ from config.deployment.composition import (
     DeploymentMode,
     resolve_mode,
 )
+from util.azure_cli import resolve_az_command
 
 
 def _resolve_az_command() -> str:
-    """Resolve the Azure CLI executable path.
-
-    On Windows, ``az`` is a ``.cmd`` shim. ``subprocess.run`` invokes
-    ``CreateProcess`` directly and does not consult ``PATHEXT`` the way a
-    shell does, so passing the bare ``"az"`` argument fails with
-    ``FileNotFoundError: [WinError 2]`` even though ``az`` works fine from
-    an interactive shell. Resolving the executable via :func:`shutil.which`
-    keeps this cross-platform without resorting to ``shell=True``.
-    """
-    return shutil.which("az") or "az"
+    return resolve_az_command()
 
 
 def _run_az(arguments: list[str], *, required: bool = True) -> str:

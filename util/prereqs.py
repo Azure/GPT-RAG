@@ -4,11 +4,8 @@ import sys
 
 import click
 from tabulate import tabulate
-from azure.core.exceptions import HttpResponseError
-from azure.identity import DefaultAzureCredential
-from azure.mgmt.resource import ResourceManagementClient
-from azure.mgmt.cosmosdb import CosmosDBManagementClient
-from azure.mgmt.cognitiveservices import CognitiveServicesManagementClient
+
+from util.azure_cli import resolve_az_command
 
 def normalize_region(name: str) -> str:
     return name.replace(" ", "").replace("-", "").lower()
@@ -16,15 +13,26 @@ def normalize_region(name: str) -> str:
 def get_default_subscription_id() -> str:
     try:
         result = subprocess.run(
-            ["az", "account", "show", "--query", "id", "-o", "tsv"],
+            [
+                resolve_az_command(),
+                "account",
+                "show",
+                "--query",
+                "id",
+                "-o",
+                "tsv",
+            ],
             capture_output=True, text=True, check=True
         )
         return result.stdout.strip()
-    except subprocess.CalledProcessError:
+    except (OSError, subprocess.CalledProcessError):
         click.echo("ERROR: Please login to Azure using `az login`.", err=True)
         sys.exit(1)
 
 def check_cosmos_provisioning(region: str, credential, subscription_id: str) -> bool:
+    from azure.core.exceptions import HttpResponseError
+    from azure.mgmt.cosmosdb import CosmosDBManagementClient
+
     client = CosmosDBManagementClient(credential, subscription_id)
     tgt = normalize_region(region)
     try:
@@ -36,6 +44,10 @@ def check_cosmos_provisioning(region: str, credential, subscription_id: str) -> 
     return False
 
 def get_openai_usages(region: str, credential, subscription_id: str):
+    from azure.core.exceptions import HttpResponseError
+    from azure.mgmt.cognitiveservices import CognitiveServicesManagementClient
+    from azure.mgmt.resource import ResourceManagementClient
+
     rm = ResourceManagementClient(credential, subscription_id)
     rp = rm.providers.get("Microsoft.CognitiveServices")
     if rp.registration_state.lower() != "registered":
@@ -61,26 +73,35 @@ def format_usages_console(usages) -> str:
 @click.command(context_settings={"ignore_unknown_options": True})
 def main():
     """Checks Cosmos DB provisioning and Azure OpenAI usage in a region."""
-    # Always prompt for region — ensures input even when running script directly
-    region = click.prompt("Azure region (default: eastus2)", default="eastus2", show_default=True)  # :contentReference[oaicite:1]{index=1}
+    from azure.identity import DefaultAzureCredential
+
+    # Always prompt for region so direct runs cannot omit it.
+    region = click.prompt(
+        "Azure region (default: eastus2)",
+        default="eastus2",
+        show_default=True,
+    )
 
     cred = DefaultAzureCredential()
     sub = get_default_subscription_id()
 
-    click.echo(f"\n🔍 Checking Cosmos DB provisioning in '{region}'…")
+    click.echo(f"\nChecking Cosmos DB provisioning in '{region}'...")
     allowed = check_cosmos_provisioning(region, cred, sub)
     if allowed:
-        click.echo("  ✅ Provisioning allowed.")
+        click.echo("  PASS: Provisioning allowed.")
     else:
-        click.echo("  ❌ Provisioning disallowed—likely capacity constraints or subscription block.")
+        click.echo(
+            "  FAIL: Provisioning disallowed; likely capacity constraints "
+            "or a subscription block."
+        )
         click.echo("     Try another region (e.g. eastus2) or request access: https://aka.ms/cosmosdbquota")
 
-    click.echo(f"\n📊 Azure OpenAI usage in '{region}':")
+    click.echo(f"\nAzure OpenAI usage in '{region}':")
     usages = get_openai_usages(region, cred, sub)
     if usages:
         click.echo(format_usages_console(usages))
     else:
-        click.echo("  ⚠️ No Azure OpenAI usage data found or an error occurred.")
+        click.echo("  WARN: No Azure OpenAI usage data found or an error occurred.")
 
 if __name__ == "__main__":
     main()

@@ -210,7 +210,7 @@ class RunAzCommandResolutionTests(unittest.TestCase):
     executable via ``shutil.which`` first.
     """
 
-    @patch("config.deployment.appconfig.shutil.which")
+    @patch("config.deployment.appconfig.resolve_az_command")
     @patch("config.deployment.appconfig.subprocess.run")
     def test_uses_resolved_executable_path(
         self, mock_run: object, mock_which: object
@@ -222,12 +222,12 @@ class RunAzCommandResolutionTests(unittest.TestCase):
 
         result = appconfig._run_az(["group", "show"])
 
-        mock_which.assert_called_once_with("az")
+        mock_which.assert_called_once_with()
         called_args = mock_run.call_args.args[0]
         self.assertEqual(r"C:\path\to\az.cmd", called_args[0])
         self.assertEqual("ok", result)
 
-    @patch("config.deployment.appconfig.shutil.which")
+    @patch("util.azure_cli.shutil.which")
     def test_falls_back_to_bare_command_when_unresolved(
         self, mock_which: object
     ) -> None:
