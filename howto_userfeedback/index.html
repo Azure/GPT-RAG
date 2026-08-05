@@ -1525,7 +1525,7 @@
 
 
 <h1 id="user-feedback-configuration">User Feedback Configuration</h1>
-<p>GPT-RAG includes a <strong>User Feedback Loop</strong> feature that lets users evaluate assistant responses through the UI. In the classic default, feedback is processed by the orchestrator and stored in <strong>Cosmos DB</strong>. In the unreleased hosted composition, this Cosmos-backed administrative path exists only when <code>DEPLOY_ADMINISTRATIVE_PANEL=true</code>; hosted/no-panel does not provision the panel-only Cosmos dependency. See <a href="../deploy/#chat-runtime-modes-unreleased">Chat runtime modes</a>.</p>
+<p>GPT-RAG includes a <strong>User Feedback Loop</strong> feature that lets users evaluate assistant responses through the UI. In the default Container Apps topology, feedback is processed by the orchestrator and stored in <strong>Cosmos DB</strong>. The first <a href="../deploy/#chat-runtime-modes-preview">hosted-agent preview</a> supports hosted/no-panel only and does not include this feedback path. Keep <code>DEPLOY_ADMINISTRATIVE_PANEL=false</code>. Hosted feedback and panel workflows are deferred to <a href="https://github.com/Azure/GPT-RAG/issues/611">issue #611</a>.</p>
 <p><img alt="Feedback stored in Cosmos DB" src="../media/feedback_stored_in_cosmos_db.png" />
 <br><em>User feedback stored in Cosmos DB</em></p>
 <p>By default, <strong>basic feedback</strong> (thumbs up/down) is enabled, while <strong>detailed ratings</strong> (star rating and comments) are disabled. Administrators control these options through <strong>Azure App Configuration</strong>.</p>

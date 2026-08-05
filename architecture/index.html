@@ -1553,7 +1553,7 @@
 <p>The modular view is organized around <strong>Basic Deployment</strong>, <strong>Common platform services</strong>, and <strong>Zero Trust additions</strong>. Solid-color chips are standard resources, dashed orange chips are default-on or BYO-capable parameters, and solid orange chips are opt-in add-ons.</p>
 </div>
 <p><img alt="Basic Deployment architecture" src="../media/architecture_basic_deployment.svg" /></p>
-<p>The baseline corresponds to the classic <a href="../deploy/#basic-deployment">Basic Deployment</a> flow with <code>NETWORK_ISOLATION=false</code>, <code>DEPLOY_HOSTED_AGENT_ORCHESTRATION=false</code>, and <code>DEPLOY_ADMINISTRATIVE_PANEL=false</code>. It focuses on the default application and data path: users access the frontend, the orchestrator Container App coordinates AI and retrieval, ingestion indexes enterprise content, and shared platform services provide configuration, secrets, identity, storage, search, and conversation state. The <a href="../deploy/#chat-runtime-modes-unreleased">unreleased hosted modes</a> replace the chat Container App with a Microsoft Foundry hosted agent and optionally retain only the ingestion administrative backend.</p>
+<p>The baseline corresponds to the default Container Apps <a href="../deploy/#basic-deployment">Basic Deployment</a> flow with <code>NETWORK_ISOLATION=false</code>, <code>DEPLOY_HOSTED_AGENT_ORCHESTRATION=false</code>, and <code>DEPLOY_ADMINISTRATIVE_PANEL=false</code>. It focuses on the default application and data path: users access the UI, the orchestrator Container App coordinates AI and retrieval, ingestion indexes enterprise content, and shared platform services provide configuration, secrets, identity, storage, search, and conversation state. The first <a href="../deploy/#chat-runtime-modes-preview">hosted-agent preview</a> replaces the orchestrator chat runtime with a Microsoft Foundry hosted agent. This preview supports hosted/no-panel only and requires <code>DEPLOY_ADMINISTRATIVE_PANEL=false</code>.</p>
 <p><img alt="Modular architecture layers" src="../media/architecture_modular_layers.svg" /></p>
 <p>Use the table below for the deployment parameters behind each layer, and the <a href="../deploy/">Deployment Guide</a> for the full <code>azd env set</code> flows.</p>
 <h2 id="deployment-component-table">Deployment component table</h2>
@@ -1568,10 +1568,10 @@
 </thead>
 <tbody>
 <tr>
-<td>Frontend, chat runtime, ingestion</td>
+<td>UI, chat runtime, ingestion</td>
 <td>Mode-selected baseline</td>
 <td><code>DEPLOY_HOSTED_AGENT_ORCHESTRATION</code>, <code>DEPLOY_ADMINISTRATIVE_PANEL</code>, <code>manifest.json</code> components, and <code>containerAppsList</code></td>
-<td>Running classic frontend/orchestrator/ingestion, hosted chat without a panel, or hosted chat with only the ingestion administrative backend.</td>
+<td>Running the default UI/orchestrator/ingestion topology or the hosted/no-panel preview. Hosted/panel is deferred to <a href="https://github.com/Azure/GPT-RAG/issues/611">issue #611</a>.</td>
 </tr>
 <tr>
 <td>AI Foundry account, project, and model deployments</td>
@@ -1589,13 +1589,13 @@
 <td>RAG workload data services</td>
 <td>Mode-selected, parameter-controlled</td>
 <td><code>deploySearchService</code>, <code>deployStorageAccount</code>, <code>deployCosmosDb</code>, <code>storageAccountContainersList</code>, <code>databaseContainersList</code></td>
-<td>Running the indexed-document and file-storage path. Classic retains conversation/panel Cosmos DB; hosted/no-panel omits panel-only Cosmos DB; hosted/panel retains only panel/feedback data.</td>
+<td>Running the indexed-document and file-storage path. The default topology retains conversation and panel Cosmos DB. Hosted/no-panel omits panel-only Cosmos DB.</td>
 </tr>
 <tr>
 <td>App Configuration, managed identity / RBAC, Container Apps, Container Registry</td>
 <td>Required platform capabilities, topology varies by mode</td>
 <td><code>deployAppConfig</code>, <code>deployContainerApps</code>, <code>deployContainerEnv</code>, <code>deployContainerRegistry</code>, <code>useUAI</code>, service role lists</td>
-<td>Centralizing runtime settings and identities. Hosted/no-panel does not provision an orchestrator Container App; hosted/panel retains only the ingestion administrative backend.</td>
+<td>Centralizing runtime settings and identities. Hosted/no-panel does not provision an orchestrator Container App and requires <code>DEPLOY_ADMINISTRATIVE_PANEL=false</code>.</td>
 </tr>
 <tr>
 <td>Workload Key Vault and observability</td>
