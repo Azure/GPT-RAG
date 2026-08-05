@@ -50,12 +50,12 @@ scope. The deterministic rollback contract in
 set, clears hosted endpoint inputs, resets both mode flags to `false`, and
 restores `CHAT_BACKEND=orchestrator`.
 
-The UI and AI Landing Zone release APIs report `immutable=false`. AI Landing
-Zone `v2.4.1` is additionally protected by active exact-tag ruleset `20050531`
-against deletion and non-fast-forward updates; UI `v2.5.1` remains the
-unmitigated immutable-tag blocker because the maintainer lacks repository
-administration. This unreleased integration does not publish an umbrella
-release or activate hosted mode.
+The UI, orchestrator, and AI Landing Zone release APIs report
+`immutable=false`, but active semantic-version tag rulesets `20396217`,
+`20396972`, and `20396978` prevent deletion and non-fast-forward updates for
+`refs/tags/v*`. AI Landing Zone `v2.4.1` is also protected by exact-tag ruleset
+`20339953`. This unreleased integration does not publish an umbrella release or
+activate hosted mode.
 
 ## [v3.7.0] - 2026-07-21
 
