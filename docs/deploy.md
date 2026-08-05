@@ -58,7 +58,7 @@ For the basic flow, the `postProvision` hook runs locally after `azd provision` 
 
 | Mode | Required settings | Resulting topology |
 | --- | --- | --- |
-| Classic (default) | `DEPLOY_HOSTED_AGENT_ORCHESTRATION=false`, `DEPLOY_ADMINISTRATIVE_PANEL=false`, `CHAT_BACKEND=orchestrator` | The UI routes chat to the orchestrator Container App. The existing administrative surfaces and Cosmos DB dependencies remain. |
+| Default Container Apps | `DEPLOY_HOSTED_AGENT_ORCHESTRATION=false`, `DEPLOY_ADMINISTRATIVE_PANEL=false`, `CHAT_BACKEND=orchestrator` | The UI routes chat to the orchestrator Container App. The existing administrative surfaces and Cosmos DB dependencies remain. |
 | Hosted, no panel (preview) | `DEPLOY_HOSTED_AGENT_ORCHESTRATION=true`, `DEPLOY_ADMINISTRATIVE_PANEL=false`, `CHAT_BACKEND=hosted_agent` | The UI routes chat to the Microsoft Foundry hosted agent. No orchestrator Container App or panel-only Cosmos DB dependency is provisioned. |
 
 Do not set `DEPLOY_ADMINISTRATIVE_PANEL=true` for this preview. The hosted/panel topology and its user-facing history, feedback, curation, and dashboard workflows are deferred to [issue #611](https://github.com/Azure/GPT-RAG/issues/611). Draft ingestion behavior does not make those workflows available.
@@ -67,13 +67,13 @@ The deployment hooks publish the shared runtime contract under the App Configura
 
 | Setting | Operator contract |
 | --- | --- |
-| `CHAT_BACKEND` | Valid values are `orchestrator` (default) and `hosted_agent`. Invalid values fail startup. Hosted mode never silently falls back to classic. |
-| `ORCHESTRATOR_BASE_URL` | Classic service root. The UI calls the `/orchestrator` route on this endpoint when `CHAT_BACKEND=orchestrator`. |
+| `CHAT_BACKEND` | Valid values are `orchestrator` (default) and `hosted_agent`. Invalid values fail startup. Hosted mode never silently falls back to the default Container Apps runtime. |
+| `ORCHESTRATOR_BASE_URL` | Default Container Apps orchestrator service root. The UI calls the `/orchestrator` route on this endpoint when `CHAT_BACKEND=orchestrator`. |
 | `HOSTED_AGENT_BASE_URL` | Hosted service root. The UI sends `POST /invocations` to this endpoint when `CHAT_BACKEND=hosted_agent`. |
 | `HOSTED_AGENT_RESOURCE_SCOPE` | Required explicit hosted data-plane Entra scope ending in `/.default`, for example `api://<application-id>/.default`. Do not use the Azure Resource Manager scope. |
 | `HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS` | Finite positive wait for the next SSE event. The UI default is `60`. Never configure an infinite timeout. |
 
-For a hosted deployment, `HOSTED_AGENT_IMAGE_VERSION` is also required before provisioning. Set it to the immutable image digest in the form `sha256:<64-hex-characters>`. A mutable tag such as `latest` or `v3.9.0` is not accepted.
+For a hosted deployment, `HOSTED_AGENT_IMAGE_VERSION` is also required before provisioning. Set it to the immutable image digest in the form `sha256:<64-hex-characters>`. Mutable image tags, including `latest` and version tags, are not accepted.
 
 ```powershell
 azd env set DEPLOY_HOSTED_AGENT_ORCHESTRATION true
@@ -87,22 +87,22 @@ Treat these exact pins as one hosted/no-panel preview candidate. Do not mix vers
 
 | Component | Candidate pin |
 | --- | --- |
-| GPT-RAG UI | `v2.5.0` |
-| GPT-RAG orchestrator | `v3.9.0` |
-| GPT-RAG ingestion | `v2.6.0` |
-| AI Landing Zone (AILZ) | `v2.4.1` |
+| GPT-RAG UI | [`v2.5.1`](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.5.1) at [`971d92a8affd1c859befa4783a26eebc899b425c`](https://github.com/Azure/gpt-rag-ui/commit/971d92a8affd1c859befa4783a26eebc899b425c) |
+| GPT-RAG orchestrator | [`v3.10.0`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v3.10.0) at [`eaa787340c27d8df5bb550147e95c5ecd02ad385`](https://github.com/Azure/gpt-rag-orchestrator/commit/eaa787340c27d8df5bb550147e95c5ecd02ad385) |
+| GPT-RAG ingestion | [`v2.6.0`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.6.0) |
+| AI Landing Zone (AILZ) | [`v2.4.1`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.4.1) |
 
-The GitHub release APIs for UI `v2.5.0` and AILZ `v2.4.1` currently report `immutable=false`. AILZ `v2.4.1` is nevertheless protected by active exact-tag ruleset `20339953`, which blocks deletion and non-fast-forward updates to `refs/tags/v2.4.1`. UI `v2.5.0` has no equivalent mitigation and remains the immutable-tag release blocker because repository-admin permission is unavailable. Neither API metadata nor the AILZ tag ruleset implies that this combination has an Azure/GPT-RAG umbrella release. The ingestion pin also does not make the deferred hosted/panel workflows available.
+The component repositories permanently protect `refs/tags/v*` from deletion and non-fast-forward updates. These component releases form the hosted/no-panel preview candidate only. They do not imply that an Azure/GPT-RAG umbrella release exists. The ingestion pin also does not make the deferred hosted/panel workflows available.
 
 AILZ `v2.4.1` fixes provisioning of the optional VNet-injected ACR Tasks agent pool under `NETWORK_ISOLATION=true` by adding the required Azure Firewall network rules and ordering them after firewall provisioning. The pool supports private builds for the UI, orchestrator, ingestion, and hosted-agent derivative images.
 
 With AILZ `v2.4.1`, the dedicated VNet-connected ACR Tasks agent pool is a valid private build route for all images, including the hosted-agent derivative image. Shared ACR Tasks run outside that private network boundary and cannot reach a private endpoint.
 
-#### Roll back to the v3.7.0 classic release
+#### Roll back to the v3.7.0 default Container Apps release
 
-Roll back the entire GPT-RAG `v3.7.0` release as a unit, rather than changing only `CHAT_BACKEND` while leaving candidate manifests, hooks, or infrastructure in place. The complete classic pin set is UI `v2.3.13`, orchestrator `v3.8.0`, ingestion `v2.5.0`, and AILZ `v2.3.0`.
+Roll back the entire GPT-RAG `v3.7.0` release as a unit. Do not change only `CHAT_BACKEND` while leaving candidate manifests, hooks, or infrastructure in place. The complete default Container Apps pin set is UI `v2.3.13`, orchestrator `v3.8.0`, ingestion `v2.5.0`, and AILZ `v2.3.0`.
 
-Restore the `v3.7.0` manifest, infrastructure gitlink and `.gitmodules`, lifecycle hooks, parameters, and `azure.yaml`. Set both deployment flags to `false`, publish `CHAT_BACKEND=orchestrator` and the classic `ORCHESTRATOR_BASE_URL` under the `gpt-rag` label, then run `azd provision` and `azd deploy`. This restores the full known classic configuration instead of a hybrid rollback.
+Restore the `v3.7.0` manifest, infrastructure gitlink and `.gitmodules`, lifecycle hooks, parameters, and `azure.yaml`. Set both deployment flags to `false`. Publish `CHAT_BACKEND=orchestrator` and the default Container Apps `ORCHESTRATOR_BASE_URL` under the `gpt-rag` label, then run `azd provision` and `azd deploy`. This restores the full known default Container Apps configuration instead of a hybrid rollback.
 
 ### Retrieval backend
 

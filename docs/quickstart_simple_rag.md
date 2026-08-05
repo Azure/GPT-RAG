@@ -68,7 +68,7 @@ azd auth login
 azd provision
 ```
 
-**What this creates with the classic defaults (~20 Azure resources):**
+**What this creates with the default Container Apps topology (~20 Azure resources):**
 
   - **Resource Group** - Container for all resources
   - **Storage Accounts** - For documents and job logs
