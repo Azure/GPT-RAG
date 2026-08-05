@@ -76,7 +76,7 @@ azd provision
   - **Microsoft Foundry** - Foundry Account and project for agent orchestration
   - **OpenAI Models** - GPT-4o and text-embedding-3-large deployments
   - **Container Registry** - Stores Docker images
-  - **Container Apps (4)** - Frontend, orchestrator, ingestion, MCP. The unreleased [hosted modes](deploy.md#chat-runtime-modes-unreleased) use a different chat topology.
+  - **Container Apps (4)** - UI, orchestrator, ingestion, MCP. The [hosted/no-panel preview](deploy.md#chat-runtime-modes-preview) uses a different chat topology and requires `DEPLOY_ADMINISTRATIVE_PANEL=false`.
   - **App Configuration** - Centralized configuration store
   - **Key Vault** - Secrets management
   - **Cosmos DB** - Agent state and metadata

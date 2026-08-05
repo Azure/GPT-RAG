@@ -1,13 +1,13 @@
 # 🎯 Orchestrator
 
-The Orchestrator is the core engine of GPT-RAG, an agentic orchestration layer built on the Microsoft Agent Framework and Azure AI Foundry Agent Service. It coordinates agent-based RAG workflows, where each agent has a defined role, to generate accurate, context-aware responses for complex user queries. In the classic default it runs as an orchestrator Container App; the [unreleased hosted modes](deploy.md#chat-runtime-modes-unreleased) package the same chat runtime as a Microsoft Foundry hosted agent. [GitHub Repository](https://github.com/Azure/gpt-rag-orchestrator).
+The Orchestrator is the core engine of GPT-RAG, an agentic orchestration layer built on the Microsoft Agent Framework and Azure AI Foundry Agent Service. It coordinates agent-based RAG workflows, where each agent has a defined role, to generate accurate, context-aware responses for complex user queries. In the default Container Apps topology it runs as an orchestrator Container App. The first [hosted-agent preview](deploy.md#chat-runtime-modes-preview) packages the same chat runtime as a Microsoft Foundry hosted agent and supports hosted/no-panel only. [GitHub Repository](https://github.com/Azure/gpt-rag-orchestrator).
 
 ## Key Features
 
 - **Strategy-Based Architecture:** Pluggable orchestration strategies selected via Azure App Configuration (`AGENT_STRATEGY`).
 - **Context Retrieval:** Intelligent retrieval from Azure AI Search or Foundry IQ with citation support and conservative retrieval-needed triage for local MAF strategies.
 - **Microsoft Agent Framework:** Built on the Microsoft Agent Framework.
-- **Conversation Persistence:** Classic mode maintains conversation history in Cosmos DB; hosted modes use Foundry managed Conversations. Both paths stream responses over SSE.
+- **Conversation Persistence:** The default Container Apps topology maintains conversation history in Cosmos DB. The hosted/no-panel preview uses Foundry managed Conversations for runtime state, but user-facing managed Conversation history and panel integration are deferred to [issue #611](https://github.com/Azure/GPT-RAG/issues/611). Both chat paths stream responses over SSE.
 - **Extensible Design:** Easy to add new strategies by extending `BaseAgentStrategy`.
 
 ## Available Strategies
@@ -45,7 +45,7 @@ and require a signed-in user.
 
 ## Conversation History and Retrieval Controls
 
-In classic mode, long-running chats are handled in two places: the model prompt receives only a recent history window, while the Cosmos DB conversation document is compacted before persistence so it keeps useful recent context without growing indefinitely. Hosted modes use Foundry managed Conversations instead of the classic Cosmos conversation document. The default `maf_lite` strategy and the `multimodal` strategy also classify each turn as a greeting, retrieval-needed question, or no-retrieval follow-up; transformations such as "format that answer as a table" or "translate the previous answer" can skip Azure AI Search while still using the recent chat history.
+In the default Container Apps topology, long-running chats are handled in two places. The model prompt receives only a recent history window, while the Cosmos DB conversation document is compacted before persistence so it keeps useful recent context without growing indefinitely. The hosted/no-panel preview uses Foundry managed Conversations for runtime state. User-facing history and panel integration remain deferred to [issue #611](https://github.com/Azure/GPT-RAG/issues/611). The default `maf_lite` strategy and the `multimodal` strategy also classify each turn as a greeting, retrieval-needed question, or no-retrieval follow-up. Transformations such as "format that answer as a table" or "translate the previous answer" can skip Azure AI Search while still using the recent chat history.
 
 | App Configuration key | Default | Purpose |
 |-----------------------|---------|---------|

@@ -4,7 +4,7 @@ The orchestrator admin dashboard at `/dashboard` signs the operator in with Micr
 
 If you are looking for the wider authentication picture (chat UI sign-in, On-Behalf-Of, document-level access control), see [Authentication and Document-Level Security](howto_authentication.md). This page is scoped to the operator dashboard.
 
-This procedure applies to the classic orchestrator Container App. The [unreleased hosted/no-panel mode](deploy.md#chat-runtime-modes-unreleased) does not deploy it; hosted/panel routes chat to the Foundry hosted agent and retains only the ingestion administrative backend.
+This procedure applies to the orchestrator dashboard in the default Container Apps topology. The first [hosted-agent preview](deploy.md#chat-runtime-modes-preview) supports hosted/no-panel only, does not deploy this dashboard, and requires `DEPLOY_ADMINISTRATIVE_PANEL=false`. Hosted/panel is deferred to [issue #611](https://github.com/Azure/GPT-RAG/issues/611).
 
 ## What this is
 
