@@ -21,7 +21,7 @@ class ReleasedPinTests(unittest.TestCase):
             manifest["ailz_commit"],
         )
         self.assertEqual(
-            ("v3.9.0", "779b136d4da5d4bdcf9442dc1ec7a6115571f06a"),
+            ("v3.10.0", "eaa787340c27d8df5bb550147e95c5ecd02ad385"),
             (
                 components["gpt-rag-orchestrator"]["tag"],
                 components["gpt-rag-orchestrator"]["commit"],
@@ -35,7 +35,7 @@ class ReleasedPinTests(unittest.TestCase):
             ),
         )
         self.assertEqual(
-            ("v2.5.0", "5328ec7e222e47f56b50b077ccf8a51c30f61681"),
+            ("v2.5.1", "971d92a8affd1c859befa4783a26eebc899b425c"),
             (
                 components["gpt-rag-ui"]["tag"],
                 components["gpt-rag-ui"]["commit"],
