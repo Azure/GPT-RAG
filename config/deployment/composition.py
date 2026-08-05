@@ -14,6 +14,9 @@ from typing import Mapping
 
 APP_CONFIG_LABEL = "gpt-rag"
 HOSTED_IMAGE_DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-fA-F]{64}$")
+HOSTED_RESOURCE_SCOPE_PATTERN = re.compile(
+    r"^[^\s/](?:[^\s]*[^\s/])?/\.default$"
+)
 
 
 class DeploymentMode(str, Enum):
@@ -22,18 +25,305 @@ class DeploymentMode(str, Enum):
     HOSTED_PANEL = "hosted-panel"
 
 
+_KNOWN_TOPOLOGY_VALUES = {mode.value for mode in DeploymentMode}
+
+
+class DeploymentTopologyError(ValueError):
+    """Base class for GPT-RAG deployment-topology resolution failures.
+
+    Raised instead of silently falling back so operators get explicit,
+    actionable guidance (see ADR-0001 revision 5) rather than an unexpected
+    topology being provisioned or deployed.
+    """
+
+
+class HostedPanelUnsupportedError(DeploymentTopologyError):
+    """Raised when a signal would select hosted-panel mode.
+
+    The administrative-panel data plane is not implemented yet; it is
+    tracked by https://github.com/Azure/gpt-rag/issues/611. Until that lands,
+    any request that would actually select hosted-panel mode must fail
+    closed rather than silently downgrading to hosted-no-panel or classic.
+    """
+
+
+class ConflictingTopologySignalsError(DeploymentTopologyError):
+    """Raised when explicit or persisted topology signals disagree.
+
+    This is a fail-closed guard: GPT-RAG never guesses which of two
+    disagreeing signals "wins". The operator must resolve the conflict (in
+    the azd environment and/or in App Configuration) and re-run
+    provisioning.
+    """
+
+
 def is_truthy(value: str | None) -> bool:
     return (value or "").strip().lower() in {"1", "true", "t", "yes", "y"}
 
 
-def resolve_mode(environment: Mapping[str, str]) -> DeploymentMode:
-    hosted = is_truthy(environment.get("DEPLOY_HOSTED_AGENT_ORCHESTRATION"))
-    panel = is_truthy(environment.get("DEPLOY_ADMINISTRATIVE_PANEL"))
+def validate_hosted_prerequisites(
+    environment: Mapping[str, str],
+    *,
+    require_image_digest: bool = True,
+    require_foundry_project: bool = False,
+) -> None:
+    """Validate the fail-closed hosted deployment contract."""
+    scope = (environment.get("HOSTED_AGENT_RESOURCE_SCOPE") or "").strip()
+    if not HOSTED_RESOURCE_SCOPE_PATTERN.fullmatch(scope):
+        raise DeploymentTopologyError(
+            "Hosted mode requires HOSTED_AGENT_RESOURCE_SCOPE as an explicit "
+            "delegated-user data-plane scope with a non-empty resource "
+            "identifier followed by '/.default'."
+        )
+
+    if require_image_digest:
+        digest = (environment.get("HOSTED_AGENT_IMAGE_VERSION") or "").strip()
+        if not HOSTED_IMAGE_DIGEST_PATTERN.fullmatch(digest):
+            raise DeploymentTopologyError(
+                "Hosted mode requires HOSTED_AGENT_IMAGE_VERSION as an immutable "
+                "OCI digest in sha256:<64 hex characters> form."
+            )
+
+    if require_foundry_project:
+        missing = [
+            name
+            for name in (
+                "AZURE_AI_PROJECT_ENDPOINT",
+                "AZURE_AI_PROJECT_RESOURCE_ID",
+            )
+            if not (environment.get(name) or "").strip()
+        ]
+        if missing:
+            raise DeploymentTopologyError(
+                "Hosted mode requires provisioned Foundry project configuration: "
+                + ", ".join(missing)
+                + "."
+            )
+
+
+def _explicit_flag_topology(
+    environment: Mapping[str, str],
+) -> DeploymentMode | None:
+    """Interpret the legacy hosted/panel boolean-flag pair, if present.
+
+    Returns ``None`` when neither ``DEPLOY_HOSTED_AGENT_ORCHESTRATION`` nor
+    ``DEPLOY_ADMINISTRATIVE_PANEL`` is present in ``environment`` -- i.e.
+    there is nothing explicit to interpret from this signal. This preserves
+    the legacy explicit ``DEPLOY_HOSTED_AGENT_ORCHESTRATION=false`` flag as a
+    compatible way to select the classic Container Apps topology.
+
+    A panel flag is only subject to the #611 hard-failure gate when it would
+    actually select hosted-panel mode (``hosted=true and panel=true``); a
+    stray/incidental panel flag alongside ``hosted=false`` is ignored and the
+    result stays classic, matching pre-ADR-0001 behavior.
+    """
+    hosted_raw = environment.get("DEPLOY_HOSTED_AGENT_ORCHESTRATION")
+    panel_raw = environment.get("DEPLOY_ADMINISTRATIVE_PANEL")
+    if hosted_raw is None and panel_raw is None:
+        return None
+    hosted = is_truthy(hosted_raw)
+    panel = is_truthy(panel_raw)
     if not hosted:
         return DeploymentMode.CLASSIC
     if panel:
-        return DeploymentMode.HOSTED_PANEL
+        raise HostedPanelUnsupportedError(
+            "DEPLOY_ADMINISTRATIVE_PANEL=true (hosted-panel) is not "
+            "supported yet; the administrative-panel data plane is tracked "
+            "by https://github.com/Azure/gpt-rag/issues/611. Deploy with "
+            "DEPLOY_ADMINISTRATIVE_PANEL=false (or unset) to use "
+            "hosted-no-panel."
+        )
     return DeploymentMode.HOSTED_NO_PANEL
+
+
+def _explicit_topology_value(
+    environment: Mapping[str, str],
+) -> DeploymentMode | None:
+    """Interpret the canonical ``DEPLOYMENT_TOPOLOGY`` variable, if present."""
+    raw = (environment.get("DEPLOYMENT_TOPOLOGY") or "").strip().lower()
+    if not raw:
+        return None
+    if raw == DeploymentMode.HOSTED_PANEL.value:
+        raise HostedPanelUnsupportedError(
+            "DEPLOYMENT_TOPOLOGY=hosted-panel is not supported yet; the "
+            "administrative-panel data plane is tracked by "
+            "https://github.com/Azure/gpt-rag/issues/611. Use "
+            "DEPLOYMENT_TOPOLOGY=hosted-no-panel or DEPLOYMENT_TOPOLOGY="
+            "classic instead."
+        )
+    if raw not in _KNOWN_TOPOLOGY_VALUES:
+        raise DeploymentTopologyError(
+            f"Unknown DEPLOYMENT_TOPOLOGY={raw!r}; expected one of: "
+            + ", ".join(sorted(_KNOWN_TOPOLOGY_VALUES))
+        )
+    return DeploymentMode(raw)
+
+
+def resolve_explicit_topology(
+    environment: Mapping[str, str],
+    *,
+    strict_conflicts: bool = False,
+) -> DeploymentMode | None:
+    """Resolve any explicit topology signal in ``environment``.
+
+    Returns ``None`` when neither the canonical ``DEPLOYMENT_TOPOLOGY``
+    variable nor the legacy ``DEPLOY_HOSTED_AGENT_ORCHESTRATION``/
+    ``DEPLOY_ADMINISTRATIVE_PANEL`` pair is present. When both signals are
+    present, the canonical ``DEPLOYMENT_TOPOLOGY`` value is the operator
+    override and takes precedence over previously materialized compatibility
+    flags. Pass ``strict_conflicts=True`` when interpreting persisted App
+    Configuration, where disagreement represents ambiguous deployed state
+    and must fail closed.
+    """
+    topology_value = _explicit_topology_value(environment)
+    flag_value = _explicit_flag_topology(environment)
+    if (
+        topology_value is not None
+        and flag_value is not None
+        and topology_value is not flag_value
+        and strict_conflicts
+    ):
+        raise ConflictingTopologySignalsError(
+            "Conflicting deployment-topology signals: DEPLOYMENT_TOPOLOGY="
+            f"{topology_value.value!r} does not match the "
+            "DEPLOY_HOSTED_AGENT_ORCHESTRATION/DEPLOY_ADMINISTRATIVE_PANEL "
+            f"pair, which resolves to {flag_value.value!r}. Set only one of "
+            "these signals (or align them) before retrying. See ADR-0001 "
+            "for the supported migration procedure between classic and "
+            "hosted topologies."
+        )
+    return topology_value if topology_value is not None else flag_value
+
+
+def resolve_mode(environment: Mapping[str, str]) -> DeploymentMode:
+    """Resolve the deployment mode from explicit signals in ``environment``.
+
+    Kept as a simple, backward-compatible entry point for
+    ``compose_parameters``/``appconfig.build_settings``, which run after
+    ``preProvision`` has already materialized the resolved topology into the
+    environment. When nothing explicit is set, defaults to hosted-no-panel
+    (ADR-0001 revision 5's fresh-deployment default); callers that need the
+    full fresh-vs-existing/sticky/conflict contract should use
+    ``resolve_topology`` instead.
+    """
+    explicit = resolve_explicit_topology(environment)
+    if explicit is not None:
+        return explicit
+    return DeploymentMode.HOSTED_NO_PANEL
+
+
+def resolve_topology(
+    environment: Mapping[str, str],
+    *,
+    resource_group_exists: bool | None,
+    persisted_settings: Mapping[str, str] | None = None,
+) -> DeploymentMode:
+    """Resolve the deployment topology per ADR-0001 revision 5.
+
+    This is the single source of truth for the fresh-vs-existing
+    default/sticky/conflict contract, intended to be called once, at
+    ``preProvision`` time, before any later hook or Bicep composition runs:
+
+    - An explicit signal in ``environment`` (``DEPLOYMENT_TOPOLOGY``, or the
+      legacy ``DEPLOY_HOSTED_AGENT_ORCHESTRATION``/
+      ``DEPLOY_ADMINISTRATIVE_PANEL`` pair) always wins. This honors a
+      deliberate operator request, including an explicit migration between
+      topologies -- there is no silent request-time fallback.
+    - Otherwise, a genuinely fresh environment (``resource_group_exists`` is
+      falsy, i.e. no resource group has been provisioned yet) defaults to
+      hosted-no-panel.
+    - Otherwise (an existing environment with no explicit signal in the
+      current environment), the already-persisted App Configuration
+      settings decide: a topology marker recorded there is sticky and is
+      honored as-is (including a persisted hosted topology); the absence of
+      any marker means a pre-cutover environment, which stays classic;
+      internally conflicting persisted signals fail closed with migration
+      guidance rather than guessing.
+    """
+    explicit = resolve_explicit_topology(environment)
+    if explicit is not None:
+        return explicit
+
+    if not resource_group_exists:
+        return DeploymentMode.HOSTED_NO_PANEL
+
+    persisted_signals = persisted_settings or {}
+    try:
+        persisted = resolve_explicit_topology(
+            persisted_signals, strict_conflicts=True
+        )
+    except ConflictingTopologySignalsError as exc:
+        raise ConflictingTopologySignalsError(
+            "The existing deployment has conflicting persisted "
+            f"deployment-topology settings in App Configuration ({exc}). "
+            "Resolve the conflict directly in App Configuration, or set an "
+            "explicit DEPLOYMENT_TOPOLOGY in the azd environment, before "
+            "re-running provisioning. See ADR-0001 for the supported "
+            "migration procedure."
+        ) from exc
+    backend_raw = (persisted_signals.get("CHAT_BACKEND") or "").strip().lower()
+    backend_mode: DeploymentMode | None = None
+    if backend_raw:
+        if backend_raw == "orchestrator":
+            backend_mode = DeploymentMode.CLASSIC
+        elif backend_raw == "hosted_agent":
+            backend_mode = DeploymentMode.HOSTED_NO_PANEL
+        else:
+            raise DeploymentTopologyError(
+                f"The existing deployment has unknown persisted CHAT_BACKEND="
+                f"{backend_raw!r}. Set an explicit DEPLOYMENT_TOPOLOGY after "
+                "reviewing the ADR-0001 migration procedure."
+            )
+    if persisted is not None and backend_mode is not None and persisted is not backend_mode:
+        raise ConflictingTopologySignalsError(
+            "The existing deployment has conflicting persisted topology and "
+            "CHAT_BACKEND settings in App Configuration. Resolve the conflict "
+            "or set an explicit DEPLOYMENT_TOPOLOGY after following the "
+            "ADR-0001 migration procedure."
+        )
+    if persisted is not None:
+        return persisted
+    if backend_mode is not None:
+        return backend_mode
+    # No persisted topology marker: a pre-cutover, unmarked existing
+    # environment stays classic rather than silently adopting the new
+    # hosted-by-default template behavior.
+    return DeploymentMode.CLASSIC
+
+
+def describe_mode(mode: DeploymentMode) -> dict[str, object]:
+    """Describe a resolved mode as the paired settings/flags that agree with it."""
+    hosted = mode is not DeploymentMode.CLASSIC
+    panel = mode is DeploymentMode.HOSTED_PANEL
+    return {
+        "topology": mode.value,
+        "chat_backend": "hosted_agent" if hosted else "orchestrator",
+        "components": list(selected_components(mode)),
+        "deploy_hosted_agent_orchestration": hosted,
+        "deploy_administrative_panel": panel,
+    }
+
+
+def materialized_settings(mode: DeploymentMode) -> dict[str, str]:
+    """Return the paired settings to materialize into the azd environment.
+
+    Used by ``preProvision`` immediately after resolving the topology, so
+    every later hook (``preDeploy``, ``postProvision``) and the App
+    Configuration `gpt-rag` label agree on the same values -- there is a
+    single resolution, materialized once, not re-derived independently by
+    each consumer.
+    """
+    description = describe_mode(mode)
+    return {
+        "DEPLOYMENT_TOPOLOGY": str(description["topology"]),
+        "DEPLOY_HOSTED_AGENT_ORCHESTRATION": str(
+            description["deploy_hosted_agent_orchestration"]
+        ).lower(),
+        "DEPLOY_ADMINISTRATIVE_PANEL": str(
+            description["deploy_administrative_panel"]
+        ).lower(),
+        "CHAT_BACKEND": str(description["chat_backend"]),
+    }
 
 
 def selected_components(mode: DeploymentMode) -> tuple[str, ...]:
@@ -81,12 +371,8 @@ def compose_parameters(
         # env var to a freshly built derivative image before deploying (see
         # config/deployment/hosted_image.py and ADR-0001), so the two digests
         # may legitimately differ across a provision+deploy cycle.
+        validate_hosted_prerequisites(environment)
         digest = (environment.get("HOSTED_AGENT_IMAGE_VERSION") or "").strip()
-        if not HOSTED_IMAGE_DIGEST_PATTERN.fullmatch(digest):
-            raise ValueError(
-                "Hosted mode requires HOSTED_AGENT_IMAGE_VERSION as an immutable "
-                "OCI digest in sha256:<64 hex characters> form."
-            )
         parameters["hostedAgent"] = {
             "value": {
                 "name": (

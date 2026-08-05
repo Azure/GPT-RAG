@@ -4,16 +4,45 @@
 
 ### Added
 
-- **Three deterministic deployment modes.** `DEPLOY_HOSTED_AGENT_ORCHESTRATION`
-  and `DEPLOY_ADMINISTRATIVE_PANEL` default to `false` and compose classic,
-  hosted/no-panel, or hosted/panel resources without changing classic behavior.
-  Hosted chat uses the Foundry agent directly; the optional panel retains only
-  the ingestion administrative backend and its Cosmos-backed feedback/curation
-  data.
+- **Deterministic deployment topologies.** Classic, hosted/no-panel, and
+  hosted/panel remain recognized topology values, but only classic and
+  hosted/no-panel are currently deployable. `DEPLOY_ADMINISTRATIVE_PANEL`
+  defaults to `false`, and any signal that would select
+  hosted-panel mode fails closed until [issue #611](https://github.com/Azure/gpt-rag/issues/611) lands.
+- **Hosted-no-panel is now the fresh-deployment default (ADR-0001 revision
+  5).** A genuinely new environment (no existing resource group) provisions
+  `hosted-no-panel` with `CHAT_BACKEND=hosted_agent` and no orchestrator
+  Container App, without requiring any operator opt-in flag. Existing
+  environments are unaffected: a resource group that already exists is
+  "sticky" — its already-persisted App Configuration topology marker (or, for
+  pre-cutover environments with no marker at all, the classic default) is
+  honored as-is. Setting `DEPLOYMENT_TOPOLOGY=classic` explicitly always
+  selects the Container Apps orchestrator topology, in fresh or existing
+  environments; the legacy `DEPLOY_HOSTED_AGENT_ORCHESTRATION=false` flag
+  remains a compatible way to request the same fallback. There is no silent
+  request-time fallback. Genuinely conflicting persisted App Configuration
+  signals fail closed with migration guidance instead of guessing; an explicit
+  `DEPLOYMENT_TOPOLOGY` takes precedence over previously materialized
+  compatibility flags as the operator-controlled migration or rollback action.
+- **Shared, deterministic topology resolver.** `config/deployment/topology.py`
+  centralizes the fresh-vs-existing/sticky/conflict decision (resource-group
+  existence plus persisted App Configuration settings, when reachable) behind
+  a single pure function (`config.deployment.composition.resolve_topology`)
+  and a small CLI/integration wrapper, so `scripts/preProvision.ps1` and
+  `scripts/preProvision.sh` resolve and materialize the same
+  `DEPLOYMENT_TOPOLOGY` (and paired legacy flags/`CHAT_BACKEND`) into the azd
+  environment before any later hook or Bicep composition runs.
+  `scripts/preDeploy.ps1`/`.sh` and `scripts/postProvision.ps1` read that
+  materialized decision back via `config.deployment.topology --describe`
+  instead of duplicating the detection logic, so all lifecycle hooks always
+  agree.
 - **Hosted-agent azd service isolation.** An isolated child azd project deploys
   the orchestrator image through `azure.ai.agent` only in hosted modes. Hosted
   deployment rejects mutable image tags and requires an operator-supplied OCI
-  digest.
+  digest (`sha256:<64 hex characters>`), a delegated-user resource scope via
+  explicit `HOSTED_AGENT_RESOURCE_SCOPE` containing a non-empty resource
+  identifier followed by `/.default`, and a Foundry endpoint/agent id at deploy
+  time; each is validated fail-closed.
 - **Mode-aware runtime contract.** App Configuration label `gpt-rag` now owns
   `CHAT_BACKEND`, deployment topology, classic and hosted endpoints, resource
   scope, and finite SSE timeout settings. PowerShell and shell lifecycle hooks
@@ -43,19 +72,27 @@
 
 ### Migration and rollback
 
-Classic remains the default and requires no migration. Hosted modes require an
-immutable orchestrator image digest and an explicit hosted-agent data-plane
-scope. The deterministic rollback contract in
-`config/deployment/rollback.json` restores the complete `v3.7.0` classic pin
-set, clears hosted endpoint inputs, resets both mode flags to `false`, and
-restores `CHAT_BACKEND=orchestrator`.
+No existing environment is migrated by this change: an already-provisioned
+resource group is sticky and keeps whatever topology App Configuration
+already records for it (or stays classic if it predates this cutover and has
+no recorded marker), so re-running `azd provision`/`azd deploy` against an
+existing environment is a no-op with respect to topology. Only genuinely new
+environments (no existing resource group and no explicit signal) now default
+to `hosted-no-panel` instead of classic. Operators who want a new environment
+to use the classic Container Apps orchestrator must set
+`DEPLOYMENT_TOPOLOGY=classic` (or the compatible legacy
+`DEPLOY_HOSTED_AGENT_ORCHESTRATION=false`) before provisioning it; hosted
+modes additionally require an immutable orchestrator image digest and an
+explicit hosted-agent data-plane scope. The deterministic rollback contract
+in `config/deployment/rollback.json` restores the complete `v3.7.0` classic
+pin set, clears hosted endpoint inputs, resets both mode flags to `false`,
+and restores `CHAT_BACKEND=orchestrator`.
 
 The UI, orchestrator, and AI Landing Zone release APIs report
 `immutable=false`, but active semantic-version tag rulesets `20396217`,
 `20396972`, and `20396978` prevent deletion and non-fast-forward updates for
 `refs/tags/v*`. AI Landing Zone `v2.4.1` is also protected by exact-tag ruleset
-`20339953`. This unreleased integration does not publish an umbrella release or
-activate hosted mode.
+`20339953`. This unreleased integration does not publish an umbrella release.
 
 ## [v3.7.0] - 2026-07-21
 

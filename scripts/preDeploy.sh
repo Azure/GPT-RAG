@@ -96,20 +96,28 @@ global_rg="$(get_azd_value "$repo_root" "AZURE_RESOURCE_GROUP")"
 global_sub="$(get_azd_value "$repo_root" "AZURE_SUBSCRIPTION_ID")"
 network_isolation="$(get_azd_value "$repo_root" "NETWORK_ISOLATION" | tr '[:upper:]' '[:lower:]')"
 acr_task_agent_pool="$(get_azd_value "$repo_root" "ACR_TASK_AGENT_POOL")"
-hosted_mode="$(get_azd_value "$repo_root" "DEPLOY_HOSTED_AGENT_ORCHESTRATION" | tr '[:upper:]' '[:lower:]')"
-administrative_panel="$(get_azd_value "$repo_root" "DEPLOY_ADMINISTRATIVE_PANEL" | tr '[:upper:]' '[:lower:]')"
+# ADR-0001 rev. 5: read back the deployment topology that scripts/preProvision
+# already resolved and materialized into the azd environment. preDeploy must
+# never re-derive the fresh/existing/sticky decision independently --
+# config.deployment.topology --describe performs no Azure CLI lookups; it is a
+# pure read-back of DEPLOYMENT_TOPOLOGY / the legacy flag pair, so this always
+# agrees with preProvision and postProvision.
+deployment_topology_value="$(get_azd_value "$repo_root" "DEPLOYMENT_TOPOLOGY")"
+deploy_hosted_value="$(get_azd_value "$repo_root" "DEPLOY_HOSTED_AGENT_ORCHESTRATION")"
+deploy_panel_value="$(get_azd_value "$repo_root" "DEPLOY_ADMINISTRATIVE_PANEL")"
+[ -n "$deployment_topology_value" ] && export DEPLOYMENT_TOPOLOGY="$deployment_topology_value"
+[ -n "$deploy_hosted_value" ] && export DEPLOY_HOSTED_AGENT_ORCHESTRATION="$deploy_hosted_value"
+[ -n "$deploy_panel_value" ] && export DEPLOY_ADMINISTRATIVE_PANEL="$deploy_panel_value"
 
-if [[ "$hosted_mode" =~ ^(1|true|t|yes|y)$ ]]; then
-  if [[ "$administrative_panel" =~ ^(1|true|t|yes|y)$ ]]; then
-    deployment_mode="hosted-panel"
-  else
-    deployment_mode="hosted-no-panel"
-  fi
-  selected_components="gpt-rag-ui gpt-rag-ingestion"
-else
-  deployment_mode="classic"
-  selected_components="gpt-rag-ui gpt-rag-orchestrator gpt-rag-ingestion"
-fi
+command -v python3 >/dev/null 2>&1 || { red "python3 is required to resolve the GPT-RAG deployment topology."; exit 1; }
+topology_json="$(cd "$repo_root" && python3 -m config.deployment.topology --validate-hosted-deploy)" || {
+  red "Failed to resolve the GPT-RAG deployment topology. Ensure scripts/preProvision ran successfully before azd deploy."
+  exit 1
+}
+hosted_mode="$(printf "%s" "$topology_json" | jq -r '.deploy_hosted_agent_orchestration')"
+administrative_panel="$(printf "%s" "$topology_json" | jq -r '.deploy_administrative_panel')"
+deployment_mode="$(printf "%s" "$topology_json" | jq -r '.topology')"
+selected_components="$(printf "%s" "$topology_json" | jq -r '.components | join(" ")')"
 cyan "GPT-RAG deployment mode: $deployment_mode"
 
 if [ "$network_isolation" = "true" ] && [ "$(printf "%s" "${RUN_FROM_JUMPBOX:-}" | tr '[:upper:]' '[:lower:]')" != "true" ]; then

@@ -9,6 +9,18 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 ###############################################################################
+# Mirror azd environment variables into process environment
+# This avoids persisting secrets in the User environment, and makes any
+# previously-persisted GPT-RAG topology markers (AZURE_RESOURCE_GROUP,
+# APP_CONFIG_ENDPOINT, DEPLOYMENT_TOPOLOGY, ...) visible to the topology
+# resolution step below on a second/subsequent 'azd provision' run.
+# 'azd env get-values' already emits POSIX-shell-safe KEY="value" lines, so
+# eval'ing them directly (rather than piping into a subshell 'while read'
+# loop, whose exports would not survive the pipe under POSIX sh) is safe.
+###############################################################################
+eval "$(azd env get-values 2>/dev/null | sed 's/^/export /')" || true
+
+###############################################################################
 # Initialize infrastructure submodule
 ###############################################################################
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -78,6 +90,36 @@ if [ -f "$PROJECT_ROOT/manifest.json" ]; then
     echo "${CYAN}Applying project manifest.json to infra...${NC}"
     cp -f "$PROJECT_ROOT/manifest.json" "$INFRA_DIR/manifest.json"
 fi
+
+###############################################################################
+# ADR-0001 rev. 5: resolve and materialize the GPT-RAG deployment topology
+###############################################################################
+# Resolve the topology (fresh default, sticky existing/persisted-classic,
+# explicit override, or a fail-closed error with migration guidance on
+# conflicting persisted signals) before composing main.parameters.json.
+# Materializing DEPLOYMENT_TOPOLOGY (and the paired legacy flags) into both
+# the process environment and the azd environment here is what lets
+# preDeploy/postProvision read back the exact same decision later via
+# 'config.deployment.topology --describe', with no further Azure CLI lookups
+# and no duplicated detection logic.
+echo "${CYAN}Resolving GPT-RAG deployment topology...${NC}"
+TOPOLOGY_OUTPUT="$(cd "$PROJECT_ROOT" && "$PYTHON_CMD" -m config.deployment.topology)"
+TOPOLOGY_EXIT=$?
+if [ $TOPOLOGY_EXIT -ne 0 ]; then
+    echo "${YELLOW}Error: GPT-RAG deployment topology resolution failed.${NC}"
+    exit $TOPOLOGY_EXIT
+fi
+
+eval "$(printf '%s\n' "$TOPOLOGY_OUTPUT" | sed 's/^\([^=]*\)=\(.*\)$/export \1="\2"/')"
+
+printf '%s\n' "$TOPOLOGY_OUTPUT" | while IFS='=' read -r TOPO_KEY TOPO_VALUE; do
+    [ -z "$TOPO_KEY" ] && continue
+    if [ -n "${AZURE_ENV_NAME:-}" ]; then
+        azd env set "$TOPO_KEY" "$TOPO_VALUE" --environment "$AZURE_ENV_NAME" --no-prompt >/dev/null
+    else
+        azd env set "$TOPO_KEY" "$TOPO_VALUE" --no-prompt >/dev/null
+    fi
+done
 
 echo "${CYAN}Composing GPT-RAG deployment mode...${NC}"
 (

@@ -8,9 +8,15 @@ from unittest.mock import patch
 
 from config.deployment import appconfig
 from config.deployment.composition import (
+    ConflictingTopologySignalsError,
     DeploymentMode,
+    HostedPanelUnsupportedError,
     compose_parameters,
+    describe_mode,
+    materialized_settings,
+    resolve_explicit_topology,
     resolve_mode,
+    resolve_topology,
     selected_components,
 )
 from config.deployment.hosted import invocations_base_url
@@ -83,6 +89,7 @@ class DeploymentCompositionTests(unittest.TestCase):
             "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "true",
             "DEPLOY_ADMINISTRATIVE_PANEL": "false",
             "HOSTED_AGENT_IMAGE_VERSION": DIGEST,
+            "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
         }
 
         composed = compose_parameters(source_parameters(), environment)
@@ -108,36 +115,216 @@ class DeploymentCompositionTests(unittest.TestCase):
         )
         self.assertEqual("hosted_agent", settings_by_name(composed)["CHAT_BACKEND"])
 
-    def test_hosted_with_panel_keeps_only_panel_backing_resources(self) -> None:
+    def test_hosted_with_panel_fails_closed_until_611(self) -> None:
+        # Hosted-panel is not implemented yet (tracked by #611): any signal
+        # that would actually select it must fail closed rather than
+        # silently provisioning panel-adjacent resources.
         environment = {
             "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "true",
             "DEPLOY_ADMINISTRATIVE_PANEL": "true",
             "HOSTED_AGENT_IMAGE_VERSION": DIGEST,
         }
 
-        composed = compose_parameters(source_parameters(), environment)
-        parameters = composed["parameters"]
+        with self.assertRaisesRegex(HostedPanelUnsupportedError, "611"):
+            resolve_mode(environment)
+        with self.assertRaisesRegex(HostedPanelUnsupportedError, "611"):
+            compose_parameters(source_parameters(), environment)
 
-        self.assertEqual(DeploymentMode.HOSTED_PANEL, resolve_mode(environment))
-        self.assertEqual(
-            ["frontend", "dataingest"],
-            [
-                app["service_name"]
-                for app in parameters["containerAppsList"]["value"]
-            ],
-        )
-        self.assertTrue(parameters["deployCosmosDb"]["value"])
-        self.assertTrue(parameters["databaseContainersList"]["value"])
-        self.assertEqual("hosted_agent", settings_by_name(composed)["CHAT_BACKEND"])
+    def test_deployment_topology_hosted_panel_fails_closed_until_611(self) -> None:
+        environment = {"DEPLOYMENT_TOPOLOGY": "hosted-panel"}
+
+        with self.assertRaisesRegex(HostedPanelUnsupportedError, "611"):
+            resolve_mode(environment)
 
     def test_hosted_mode_rejects_mutable_image_reference(self) -> None:
         environment = {
             "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "true",
             "HOSTED_AGENT_IMAGE_VERSION": "v3.9.0",
+            "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
         }
 
         with self.assertRaisesRegex(ValueError, "immutable OCI digest"):
             compose_parameters(source_parameters(), environment)
+
+    def test_hosted_mode_rejects_missing_delegated_scope(self) -> None:
+        environment = {
+            "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+            "HOSTED_AGENT_IMAGE_VERSION": DIGEST,
+        }
+
+        with self.assertRaisesRegex(ValueError, "delegated-user data-plane scope"):
+            compose_parameters(source_parameters(), environment)
+
+
+class EnvironmentTopologyResolutionTests(unittest.TestCase):
+    """Regression tests for ADR-0001 rev. 5 fresh-vs-existing resolution.
+
+    ``resolve_topology`` is the single source of truth used by both
+    ``preProvision`` implementations (PowerShell and POSIX shell) via
+    ``config.deployment.topology``. These tests exercise it directly against
+    synthetic "resource group exists" / "persisted App Config settings"
+    inputs so the decision matrix is verified without any Azure CLI calls.
+    """
+
+    def test_fresh_deployment_defaults_to_hosted_no_panel(self) -> None:
+        mode = resolve_topology({}, resource_group_exists=False)
+
+        self.assertEqual(DeploymentMode.HOSTED_NO_PANEL, mode)
+        self.assertEqual("hosted_agent", describe_mode(mode)["chat_backend"])
+
+    def test_existing_environment_with_persisted_classic_topology_stays_classic(
+        self,
+    ) -> None:
+        mode = resolve_topology(
+            {},
+            resource_group_exists=True,
+            persisted_settings={"DEPLOYMENT_TOPOLOGY": "classic"},
+        )
+
+        self.assertEqual(DeploymentMode.CLASSIC, mode)
+
+    def test_existing_environment_with_persisted_hosted_topology_stays_hosted(
+        self,
+    ) -> None:
+        mode = resolve_topology(
+            {},
+            resource_group_exists=True,
+            persisted_settings={
+                "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "true",
+                "DEPLOY_ADMINISTRATIVE_PANEL": "false",
+            },
+        )
+
+        self.assertEqual(DeploymentMode.HOSTED_NO_PANEL, mode)
+
+    def test_existing_unmarked_pre_cutover_environment_is_classic(self) -> None:
+        # A resource group exists (this is not a fresh deployment) but no
+        # ADR-0001 topology markers were ever persisted -- this is a
+        # pre-cutover environment and must not be silently promoted to
+        # hosted just because it predates the new default.
+        mode = resolve_topology({}, resource_group_exists=True, persisted_settings={})
+
+        self.assertEqual(DeploymentMode.CLASSIC, mode)
+
+    def test_existing_environment_without_persisted_settings_argument_is_classic(
+        self,
+    ) -> None:
+        mode = resolve_topology({}, resource_group_exists=True)
+
+        self.assertEqual(DeploymentMode.CLASSIC, mode)
+
+    def test_persisted_chat_backend_is_a_topology_signal(self) -> None:
+        mode = resolve_topology(
+            {},
+            resource_group_exists=True,
+            persisted_settings={"CHAT_BACKEND": "orchestrator"},
+        )
+
+        self.assertEqual(DeploymentMode.CLASSIC, mode)
+
+    def test_conflicting_persisted_backend_fails_closed(self) -> None:
+        with self.assertRaisesRegex(
+            ConflictingTopologySignalsError, "migration"
+        ):
+            resolve_topology(
+                {},
+                resource_group_exists=True,
+                persisted_settings={
+                    "DEPLOYMENT_TOPOLOGY": "classic",
+                    "CHAT_BACKEND": "hosted_agent",
+                },
+            )
+
+    def test_explicit_topology_wins_over_fresh_default(self) -> None:
+        mode = resolve_topology(
+            {"DEPLOYMENT_TOPOLOGY": "classic"},
+            resource_group_exists=False,
+        )
+
+        self.assertEqual(DeploymentMode.CLASSIC, mode)
+
+    def test_explicit_topology_wins_over_persisted_classic(self) -> None:
+        mode = resolve_topology(
+            {"DEPLOYMENT_TOPOLOGY": "hosted-no-panel"},
+            resource_group_exists=True,
+            persisted_settings={"DEPLOYMENT_TOPOLOGY": "classic"},
+        )
+
+        self.assertEqual(DeploymentMode.HOSTED_NO_PANEL, mode)
+
+    def test_conflicting_persisted_signals_fail_with_migration_guidance(
+        self,
+    ) -> None:
+        persisted = {
+            "DEPLOYMENT_TOPOLOGY": "classic",
+            "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "true",
+            "DEPLOY_ADMINISTRATIVE_PANEL": "false",
+        }
+
+        with self.assertRaisesRegex(
+            ConflictingTopologySignalsError, "migration"
+        ):
+            resolve_topology(
+                {}, resource_group_exists=True, persisted_settings=persisted
+            )
+
+    def test_canonical_topology_overrides_stale_materialized_flags(
+        self,
+    ) -> None:
+        environment = {
+            "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+            "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "false",
+        }
+
+        self.assertEqual(
+            DeploymentMode.HOSTED_NO_PANEL,
+            resolve_explicit_topology(environment),
+        )
+        self.assertEqual(
+            DeploymentMode.HOSTED_NO_PANEL,
+            resolve_topology(environment, resource_group_exists=True),
+        )
+
+    def test_explicit_classic_rollback_overrides_materialized_hosted_flags(
+        self,
+    ) -> None:
+        environment = {
+            "DEPLOYMENT_TOPOLOGY": "classic",
+            "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "true",
+            "DEPLOY_ADMINISTRATIVE_PANEL": "false",
+            "CHAT_BACKEND": "hosted_agent",
+        }
+
+        self.assertEqual(
+            DeploymentMode.CLASSIC,
+            resolve_topology(environment, resource_group_exists=True),
+        )
+
+    def test_unknown_deployment_topology_value_fails_closed(self) -> None:
+        with self.assertRaises(Exception):
+            resolve_mode({"DEPLOYMENT_TOPOLOGY": "not-a-real-topology"})
+
+    def test_materialized_settings_agree_with_describe_mode(self) -> None:
+        for mode in (DeploymentMode.CLASSIC, DeploymentMode.HOSTED_NO_PANEL):
+            materialized = materialized_settings(mode)
+            description = describe_mode(mode)
+
+            self.assertEqual(
+                materialized["CHAT_BACKEND"], description["chat_backend"]
+            )
+            self.assertEqual(
+                materialized["DEPLOY_ADMINISTRATIVE_PANEL"] == "true",
+                description["deploy_administrative_panel"],
+            )
+            self.assertEqual(
+                materialized["DEPLOY_HOSTED_AGENT_ORCHESTRATION"] == "true",
+                description["deploy_hosted_agent_orchestration"],
+            )
+            # Materialized settings must round-trip: feeding them back
+            # through resolve_mode as an explicit signal must reproduce the
+            # same mode, since preDeploy/postProvision read them back via
+            # `--describe` with no further Azure CLI lookups.
+            self.assertEqual(mode, resolve_mode(materialized))
 
 
 class AppConfigurationContractTests(unittest.TestCase):
@@ -152,6 +339,7 @@ class AppConfigurationContractTests(unittest.TestCase):
             {
                 "AZURE_RESOURCE_GROUP": "rg-test",
                 "RESOURCE_TOKEN": "test",
+                "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "false",
             }
         )
 
@@ -172,7 +360,7 @@ class AppConfigurationContractTests(unittest.TestCase):
                 "AZURE_RESOURCE_GROUP": "rg-test",
                 "RESOURCE_TOKEN": "test",
                 "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "true",
-                "DEPLOY_ADMINISTRATIVE_PANEL": "true",
+                "DEPLOY_ADMINISTRATIVE_PANEL": "false",
                 "HOSTED_AGENT_BASE_URL": "https://agent.example.test/protocols",
                 "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
             },
@@ -189,13 +377,63 @@ class AppConfigurationContractTests(unittest.TestCase):
 
     @patch("config.deployment.appconfig._container_app", side_effect=_app)
     def test_hosted_runtime_fails_closed_without_scope(self, _mock: object) -> None:
-        with self.assertRaisesRegex(ValueError, "explicit data-plane scope"):
+        with self.assertRaisesRegex(ValueError, "delegated-user data-plane scope"):
             appconfig.build_settings(
                 {
                     "AZURE_RESOURCE_GROUP": "rg-test",
                     "RESOURCE_TOKEN": "test",
                     "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "true",
                     "HOSTED_AGENT_BASE_URL": "https://agent.example.test/protocols",
+                },
+                require_hosted_endpoint=True,
+            )
+
+    @patch("config.deployment.appconfig._container_app", side_effect=_app)
+    def test_hosted_runtime_fails_closed_with_malformed_scope(
+        self, _mock: object
+    ) -> None:
+        # A scope value that is present but does not end in '/.default' is
+        # not a valid delegated-user data-plane scope and must fail closed
+        # exactly like a missing scope, never silently coerced or accepted.
+        with self.assertRaisesRegex(ValueError, "delegated-user data-plane scope"):
+            appconfig.build_settings(
+                {
+                    "AZURE_RESOURCE_GROUP": "rg-test",
+                    "RESOURCE_TOKEN": "test",
+                    "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "true",
+                    "HOSTED_AGENT_BASE_URL": "https://agent.example.test/protocols",
+                    "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/user_impersonation",
+                },
+                require_hosted_endpoint=True,
+            )
+
+    @patch("config.deployment.appconfig._container_app", side_effect=_app)
+    def test_hosted_runtime_rejects_scope_without_resource_identifier(
+        self, _mock: object
+    ) -> None:
+        with self.assertRaisesRegex(ValueError, "non-empty resource identifier"):
+            appconfig.build_settings(
+                {
+                    "AZURE_RESOURCE_GROUP": "rg-test",
+                    "RESOURCE_TOKEN": "test",
+                    "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "true",
+                    "HOSTED_AGENT_BASE_URL": "https://agent.example.test/protocols",
+                    "HOSTED_AGENT_RESOURCE_SCOPE": "/.default",
+                },
+                require_hosted_endpoint=True,
+            )
+
+    @patch("config.deployment.appconfig._container_app", side_effect=_app)
+    def test_hosted_runtime_fails_closed_without_base_url(
+        self, _mock: object
+    ) -> None:
+        with self.assertRaisesRegex(ValueError, "HOSTED_AGENT_BASE_URL"):
+            appconfig.build_settings(
+                {
+                    "AZURE_RESOURCE_GROUP": "rg-test",
+                    "RESOURCE_TOKEN": "test",
+                    "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "true",
+                    "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
                 },
                 require_hosted_endpoint=True,
             )

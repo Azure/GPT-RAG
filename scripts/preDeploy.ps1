@@ -99,24 +99,40 @@ $dotAzure   = Join-Path $repoRoot '.azure'
 $globalEnv  = Get-AzdEnv -projectPath $repoRoot
 $globalRG   = $globalEnv.AZURE_RESOURCE_GROUP
 $globalSub  = $globalEnv.AZURE_SUBSCRIPTION_ID
-$hostedMode = "$($globalEnv.DEPLOY_HOSTED_AGENT_ORCHESTRATION)".ToLowerInvariant() -match '^(1|true|t|yes|y)$'
-$administrativePanel = $hostedMode -and ("$($globalEnv.DEPLOY_ADMINISTRATIVE_PANEL)".ToLowerInvariant() -match '^(1|true|t|yes|y)$')
-$deploymentMode = if (-not $hostedMode) { 'classic' } elseif ($administrativePanel) { 'hosted-panel' } else { 'hosted-no-panel' }
-$selectedComponents = if ($hostedMode) {
-  @('gpt-rag-ui', 'gpt-rag-ingestion')
-} else {
-  @('gpt-rag-ui', 'gpt-rag-orchestrator', 'gpt-rag-ingestion')
-}
-Write-Host "GPT-RAG deployment mode: $deploymentMode" -ForegroundColor Cyan
 
-# Make azd outputs available to component deploy scripts. In network-isolated
-# deployments the jumpbox intentionally has no Docker, so components need
-# ACR_TASK_AGENT_POOL/NETWORK_ISOLATION to select remote ACR builds.
+# Make azd outputs available to component deploy scripts (and to the topology
+# read-back below). In network-isolated deployments the jumpbox intentionally
+# has no Docker, so components need ACR_TASK_AGENT_POOL/NETWORK_ISOLATION to
+# select remote ACR builds.
 foreach ($prop in $globalEnv.PSObject.Properties) {
   if ($null -ne $prop.Value -and "$($prop.Value)" -ne '') {
     Set-Item -Path "Env:$($prop.Name)" -Value "$($prop.Value)"
   }
 }
+
+# ADR-0001 rev. 5: read back the deployment topology that scripts/preProvision
+# already resolved and materialized into the azd environment (mirrored into
+# process env above). preDeploy must never re-derive the fresh/existing/sticky
+# decision independently -- config.deployment.topology --describe performs no
+# Azure CLI lookups; it is a pure read-back of DEPLOYMENT_TOPOLOGY / the legacy
+# flag pair, so this always agrees with preProvision and postProvision.
+Push-Location $repoRoot
+try {
+  $topologyJson = & python -m config.deployment.topology --validate-hosted-deploy
+  $topologyExitCode = $LASTEXITCODE
+} finally {
+  Pop-Location
+}
+if ($topologyExitCode -ne 0 -or -not $topologyJson) {
+  Write-Error "Failed to resolve the GPT-RAG deployment topology. Ensure scripts/preProvision ran successfully before azd deploy."
+  exit 1
+}
+$topologyInfo = ("$topologyJson").Trim() | ConvertFrom-Json
+$hostedMode = [bool]$topologyInfo.deploy_hosted_agent_orchestration
+$administrativePanel = [bool]$topologyInfo.deploy_administrative_panel
+$deploymentMode = [string]$topologyInfo.topology
+$selectedComponents = @($topologyInfo.components)
+Write-Host "GPT-RAG deployment mode: $deploymentMode" -ForegroundColor Cyan
 
 $networkIsolation = "$($globalEnv.NETWORK_ISOLATION)".ToLowerInvariant() -eq 'true'
 $runningFromJumpbox = "$($env:RUN_FROM_JUMPBOX)".ToLowerInvariant() -eq 'true'

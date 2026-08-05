@@ -12,6 +12,7 @@ from config.deployment.composition import (
     APP_CONFIG_LABEL,
     DeploymentMode,
     resolve_mode,
+    validate_hosted_prerequisites,
 )
 from util.azure_cli import resolve_az_command
 
@@ -105,15 +106,15 @@ def build_settings(
 
     hosted_base_url = (environment.get("HOSTED_AGENT_BASE_URL") or "").strip()
     hosted_scope = (environment.get("HOSTED_AGENT_RESOURCE_SCOPE") or "").strip()
+    if hosted:
+        validate_hosted_prerequisites(
+            environment,
+            require_image_digest=False,
+        )
     if hosted and require_hosted_endpoint:
         if not hosted_base_url:
             raise ValueError(
                 "Hosted deployment completed without HOSTED_AGENT_BASE_URL."
-            )
-        if not hosted_scope.endswith("/.default"):
-            raise ValueError(
-                "HOSTED_AGENT_RESOURCE_SCOPE must be the explicit data-plane "
-                "scope ending in '/.default'."
             )
 
     container_apps = [

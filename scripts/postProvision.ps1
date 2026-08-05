@@ -230,10 +230,22 @@ function Set-GptRagAppConfiguration {
     $environmentName = Get-OptionalEnvValue 'AZURE_ENV_NAME' (Get-OptionalEnvValue 'ENVIRONMENT_NAME')
     $deploymentName = Get-OptionalEnvValue 'DEPLOYMENT_NAME'
     $release = Get-OptionalEnvValue 'RELEASE'
-    $hostedMode = Test-Truthy (Get-OptionalEnvValue 'DEPLOY_HOSTED_AGENT_ORCHESTRATION' 'false')
-    $administrativePanel = $hostedMode -and (Test-Truthy (Get-OptionalEnvValue 'DEPLOY_ADMINISTRATIVE_PANEL' 'false'))
+    # ADR-0001 rev. 5: read back the deployment topology that scripts/preProvision
+    # already resolved and materialized into the azd environment (mirrored into
+    # process env above), rather than re-deriving the fresh/existing/sticky
+    # decision here. config.deployment.topology --describe performs no Azure CLI
+    # lookups; it is a pure read-back of DEPLOYMENT_TOPOLOGY / the legacy flag
+    # pair, so postProvision always agrees with preProvision's decision.
+    $topologyJson = Invoke-PythonModule -ModuleName 'config.deployment.topology' -Arguments @('--describe')
+    if ($LASTEXITCODE -ne 0 -or -not $topologyJson) {
+        Write-Error "Failed to resolve the GPT-RAG deployment topology. Ensure scripts/preProvision ran successfully before postProvision."
+        exit 1
+    }
+    $topologyInfo = ([string]$topologyJson).Trim() | ConvertFrom-Json
+    $hostedMode = [bool]$topologyInfo.deploy_hosted_agent_orchestration
+    $administrativePanel = [bool]$topologyInfo.deploy_administrative_panel
     $cosmosEnabled = (-not $hostedMode) -or $administrativePanel
-    $deploymentTopology = if (-not $hostedMode) { 'classic' } elseif ($administrativePanel) { 'hosted-panel' } else { 'hosted-no-panel' }
+    $deploymentTopology = [string]$topologyInfo.topology
 
     $appConfigName = Get-AppConfigResourceName -Endpoint $Endpoint
     $nameSuffix = $resourceToken

@@ -4,6 +4,21 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+#-------------------------------------------------------------------------------
+# Mirror azd environment variables into process environment
+# This avoids persisting secrets in the User environment (registry), and makes
+# any previously-persisted GPT-RAG topology markers (AZURE_RESOURCE_GROUP,
+# APP_CONFIG_ENDPOINT, DEPLOYMENT_TOPOLOGY, ...) visible to the topology
+# resolution step below on a second/subsequent 'azd provision' run.
+#-------------------------------------------------------------------------------
+& azd env get-values | ForEach-Object {
+  if ($_ -match '^([^=]+)=(.*)$') {
+    $k = $matches[1]
+    $v = $matches[2] -replace '^"|"$'
+    Set-Item -Path Env:$k -Value $v
+  }
+}
+
 # Initialize infrastructure submodule
 $projectRoot = Join-Path $PSScriptRoot ".."
 $infraDir = Join-Path $projectRoot "infra"
@@ -65,6 +80,41 @@ if (Test-Path $manifestSource) {
 
 $parameterSource = Join-Path $projectRoot "main.parameters.json"
 $parameterDestination = Join-Path $infraDir "main.parameters.json"
+
+# ADR-0001 rev. 5: resolve and materialize the GPT-RAG deployment topology
+# (fresh default, sticky existing/persisted-classic, explicit override, or a
+# fail-closed error with migration guidance on conflicting persisted signals)
+# before composing main.parameters.json. Materializing DEPLOYMENT_TOPOLOGY
+# (and the paired legacy flags) into both the process environment and the azd
+# environment here is what lets preDeploy/postProvision read back the exact
+# same decision later via 'config.deployment.topology --describe', with no
+# further Azure CLI lookups and no duplicated detection logic.
+Write-Host "Resolving GPT-RAG deployment topology..." -ForegroundColor Cyan
+Push-Location $projectRoot
+try {
+    $topologyOutput = & python -m config.deployment.topology
+    $topologyExitCode = $LASTEXITCODE
+} finally {
+    Pop-Location
+}
+if ($topologyExitCode -ne 0) {
+    Write-Host "Error: GPT-RAG deployment topology resolution failed." -ForegroundColor Red
+    exit $topologyExitCode
+}
+$azureEnvName = $env:AZURE_ENV_NAME
+foreach ($line in $topologyOutput) {
+    if ("$line" -match '^([^=]+)=(.*)$') {
+        $name = $matches[1]
+        $value = $matches[2]
+        Set-Item -Path "Env:$name" -Value $value
+        if ($azureEnvName) {
+            & azd env set $name $value --environment $azureEnvName --no-prompt | Out-Null
+        } else {
+            & azd env set $name $value --no-prompt | Out-Null
+        }
+    }
+}
+
 Write-Host "Composing GPT-RAG deployment mode..." -ForegroundColor Cyan
 Push-Location $projectRoot
 try {
