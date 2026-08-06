@@ -69,9 +69,39 @@ The deployment hooks publish the shared runtime contract under the App Configura
 | --- | --- |
 | `CHAT_BACKEND` | Valid values are `orchestrator` (default) and `hosted_agent`. Invalid values fail startup. Hosted mode never silently falls back to classic. |
 | `ORCHESTRATOR_BASE_URL` | Classic service root. The UI calls the `/orchestrator` route on this endpoint when `CHAT_BACKEND=orchestrator`. |
-| `HOSTED_AGENT_BASE_URL` | Hosted service root. The UI sends canonical `POST /responses` requests to this endpoint when `CHAT_BACKEND=hosted_agent`. `POST /invocations` remains a compatibility alias over the same request validation, identity guard, and Responses API SSE handler. |
+| `HOSTED_AGENT_BASE_URL` | Hosted service root. The UI sends canonical Responses protocol v2 requests to `POST /responses` when `CHAT_BACKEND=hosted_agent`. The separate `POST /invocations` endpoint retains the legacy messages-based invocation contract. |
 | `HOSTED_AGENT_RESOURCE_SCOPE` | Required explicit hosted data-plane Entra scope ending in `/.default`, for example `api://<application-id>/.default`. Do not use the Azure Resource Manager scope. |
 | `HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS` | Finite positive wait for the next SSE event. The UI default is `60`. Never configure an infinite timeout. |
+
+`POST /responses` and `POST /invocations` are distinct protocols, not aliases, and their request bodies are not interchangeable. The canonical Responses protocol v2 route accepts the supported streaming subset of the Azure AI Responses create contract:
+
+```json
+{
+  "input": "What is the document retention policy?",
+  "stream": true,
+  "store": true,
+  "conversation": {
+    "id": "<conversation-id>"
+  }
+}
+```
+
+The compatibility `POST /invocations` route retains the legacy messages-based schema:
+
+```json
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "What is the document retention policy?"
+    }
+  ],
+  "conversation_id": "<conversation-id>",
+  "metadata": {}
+}
+```
+
+Both routes stream SSE responses, but each validates its own protocol-specific input before entering the shared hosted execution path. See the Microsoft Foundry [hosted-agent protocol comparison](https://learn.microsoft.com/azure/foundry/agents/concepts/hosted-agents#key-concepts).
 
 For a hosted deployment, `HOSTED_AGENT_IMAGE_VERSION` is also required before provisioning. Set it to the immutable image digest in the form `sha256:<64-hex-characters>`. A mutable tag such as `latest` or `v3.9.0` is not accepted.
 
