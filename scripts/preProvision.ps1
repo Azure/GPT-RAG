@@ -1,3 +1,29 @@
+###############################################################################
+# DEPRECATED VERSION - DEPLOYMENT GUARD
+###############################################################################
+if ($env:AZURE_ALLOW_DEPRECATED_VERSION -ne "true") {
+    Write-Host ""
+    Write-Host "==============================================================================" -ForegroundColor Red
+    Write-Host "  DEPLOYMENT BLOCKED - THIS VERSION IS DEPRECATED" -ForegroundColor Red
+    Write-Host "==============================================================================" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "  This release of the GPT-RAG accelerator contains a known ingestion defect"
+    Write-Host "  that can reprocess the same documents repeatedly, resulting in unexpected"
+    Write-Host "  Document Intelligence consumption."
+    Write-Host ""
+    Write-Host "    Details:  https://github.com/Azure/GPT-RAG/issues/437"
+    Write-Host ""
+    Write-Host "  Please deploy the latest release instead:"
+    Write-Host ""
+    Write-Host "    https://github.com/Azure/GPT-RAG/releases/latest"
+    Write-Host ""
+    Write-Host "==============================================================================" -ForegroundColor Red
+    Write-Host "  To run this version anyway, set AZURE_ALLOW_DEPRECATED_VERSION=true" -ForegroundColor Red
+    Write-Host "==============================================================================" -ForegroundColor Red
+    Write-Host ""
+    exit 1
+}
+
 # predeployment-network-warning.ps1
 # Displays a warning to the user if AZURE_NETWORK_ISOLATION is set
 
