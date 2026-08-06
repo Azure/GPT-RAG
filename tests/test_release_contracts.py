@@ -290,6 +290,22 @@ class LifecycleParityTests(unittest.TestCase):
             (scripts / "postProvision.sh").read_text(encoding="utf-8-sig"),
         )
 
+    def test_postprovision_fails_closed_when_foundry_project_is_unresolved(
+        self,
+    ) -> None:
+        content = (ROOT / "scripts" / "postProvision.ps1").read_text(
+            encoding="utf-8-sig"
+        )
+
+        self.assertIn(
+            "Microsoft.CognitiveServices/accounts/projects",
+            content,
+        )
+        self.assertIn("$foundryProjects.Count -ne 1", content)
+        self.assertIn("AI_FOUNDRY_PROJECT_NAME", content)
+        self.assertNotIn("aifoundry-default-project", content)
+        self.assertNotIn("cognitiveservices account list-projects", content)
+
     def test_predeploy_hooks_gate_cutover_on_success_marker(self) -> None:
         scripts = ROOT / "scripts"
         for name in ("preDeploy.ps1", "preDeploy.sh"):

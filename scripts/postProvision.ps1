@@ -309,15 +309,50 @@ function Set-GptRagAppConfiguration {
         -Type 'Microsoft.CognitiveServices/accounts' `
         -Fallback "aif-$nameSuffix"
 
-    # AI Foundry project (child of foundry account) - resolve via CLI
-    $foundryProjectName = 'aifoundry-default-project'
-    try {
-        $projJson = az cognitiveservices account list-projects -g $resourceGroup -n $foundryName -o json 2>$null
-        if ($LASTEXITCODE -eq 0 -and $projJson) {
-            $projs = $projJson | ConvertFrom-Json
-            if ($projs.Count -ge 1) { $foundryProjectName = $projs[0].name }
+    # Resolve the project through generic ARM discovery because the specialized
+    # project-list command is absent from some supported Azure CLI versions.
+    $requestedFoundryProjectName = Get-OptionalEnvValue 'AI_FOUNDRY_PROJECT_NAME'
+    $foundryAccountResourceId = "/subscriptions/$subscriptionId/resourceGroups/$resourceGroup/providers/Microsoft.CognitiveServices/accounts/$foundryName"
+    $projectJson = Invoke-NativeCommand {
+        & az resource list `
+            --subscription $subscriptionId `
+            --resource-group $resourceGroup `
+            --resource-type 'Microsoft.CognitiveServices/accounts/projects' `
+            -o json 2>$null
+    }
+    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($projectJson)) {
+        Write-Error "Failed to discover the AI Foundry project under '$foundryName'."
+        exit 1
+    }
+
+    $foundryProjects = @(
+        $projectJson |
+            ConvertFrom-Json |
+            Where-Object {
+                $_.id.StartsWith(
+                    "$foundryAccountResourceId/projects/",
+                    [StringComparison]::OrdinalIgnoreCase
+                )
+            }
+    )
+    if (-not [string]::IsNullOrWhiteSpace($requestedFoundryProjectName)) {
+        $foundryProjects = @(
+            $foundryProjects |
+                Where-Object {
+                    (Split-Path $_.id -Leaf) -eq $requestedFoundryProjectName
+                }
+        )
+    }
+    if ($foundryProjects.Count -ne 1) {
+        $selectionHint = if ([string]::IsNullOrWhiteSpace($requestedFoundryProjectName)) {
+            'Set AI_FOUNDRY_PROJECT_NAME when the account contains more than one project.'
+        } else {
+            "No unique project matched AI_FOUNDRY_PROJECT_NAME='$requestedFoundryProjectName'."
         }
-    } catch { }
+        Write-Error "Expected exactly one AI Foundry project under '$foundryName', found $($foundryProjects.Count). $selectionHint"
+        exit 1
+    }
+    $foundryProjectName = Split-Path $foundryProjects[0].id -Leaf
 
     # Container Registry / Container Apps Env / Log Analytics / App Insights
     $acrName = _resolveResource `
