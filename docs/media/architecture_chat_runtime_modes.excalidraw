@@ -53,7 +53,7 @@
       "y": 117,
       "width": 1250,
       "height": 60,
-      "text": "Implementation merged but unreleased: component / AILZ tags, final umbrella pins, integrated validation, and GPT-RAG release remain. v3.7.0 stays classic.",
+      "text": "Unreleased target: AILZ correction merged at cacf418; UI and AILZ tags, final pins, validation, and GPT-RAG release remain. v3.7.0 stays classic.",
       "fontSize": 13,
       "fontFamily": 2,
       "strokeColor": "#000000",

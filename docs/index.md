@@ -24,13 +24,19 @@ and required-vs-configurable deployment table.
     The diagram below is the approved target, not shipped behavior. The
     platform implementation merged in
     [Azure/GPT-RAG PR #617](https://github.com/Azure/GPT-RAG/pull/617). UI
-    release [PR #94](https://github.com/Azure/gpt-rag-ui/pull/94) and AI Landing
-    Zone release
+    release [PR #94](https://github.com/Azure/gpt-rag-ui/pull/94) merged. AI
+    Landing Zone
     [PR #131](https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/131)
-    also merged, but UI `v2.6.0` and AI Landing Zone `v2.5.0` tags and GitHub
-    Releases are not published. Final umbrella pins, integrated validation,
-    and a new GPT-RAG release remain. Current published GPT-RAG `v3.7.0` stays
-    classic.
+    initially stamped and merged the unpublished `v2.5.0` state as
+    [`a6ae728`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/commit/a6ae7284d654abb7ec53810cb8765b2975b51baa);
+    [PR #132](https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/132)
+    fixed the local/CI size-gate defaults, and
+    [PR #133](https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/133)
+    merged the correction to `main`. AILZ `main` and `develop` now both point to
+    [`cacf418`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/commit/cacf418216ce7381d06263e0dd704a86b8a6f225),
+    but no AILZ `v2.5.0` tag or GitHub Release exists. UI `v2.6.0`, final
+    umbrella pins, integrated validation, and a new GPT-RAG release also remain
+    unpublished. Current published GPT-RAG `v3.7.0` stays classic.
 
 ![Chat runtime modes and hosted deployment lifecycle](media/architecture_chat_runtime_modes.svg)
 
