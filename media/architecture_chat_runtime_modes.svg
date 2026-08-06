@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1000" viewBox="0 0 1400 1000" role="img" aria-labelledby="title desc">
+  <title id="title">GPT-RAG chat runtime modes and hosted image preparation</title>
+  <desc id="desc">Comparison of the target hosted-no-panel default for fresh deployments and the explicit Container Apps fallback. The hosted path exchanges the signed-in user token on behalf of the user, calls the Foundry hosted agent with a delegated token, passes only opaque Foundry call context to Toolbox, and returns authorization-trimmed retrieval. Runtime failures do not silently switch modes. A separate two-phase deployment flow builds through public ACR Tasks or a dedicated private VNet agent pool, resolves an immutable digest, and then deploys the hosted handoff.</desc>
+  <defs>
+    <marker id="arrow-blue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#385a8d"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#107c10"/>
+    </marker>
+    <marker id="arrow-orange" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#d97706"/>
+    </marker>
+    <style>
+      .title { font: 700 29px 'Segoe UI', Arial, sans-serif; fill: #000000; }
+      .subtitle { font: 400 15px 'Segoe UI', Arial, sans-serif; fill: #000000; }
+      .section-title { font: 700 18px 'Segoe UI', Arial, sans-serif; fill: #000000; }
+      .box-title { font: 700 14px 'Segoe UI', Arial, sans-serif; fill: #000000; }
+      .box-text { font: 400 12px 'Segoe UI', Arial, sans-serif; fill: #000000; }
+      .small { font: 600 11px 'Segoe UI', Arial, sans-serif; fill: #000000; }
+      .status { font: 600 12px 'Segoe UI', Arial, sans-serif; fill: #000000; }
+      .blue-arrow { stroke: #385a8d; stroke-width: 2.4; fill: none; marker-end: url(#arrow-blue); }
+      .green-arrow { stroke: #107c10; stroke-width: 2.6; fill: none; marker-end: url(#arrow-green); }
+      .orange-arrow { stroke: #d97706; stroke-width: 2.4; fill: none; marker-end: url(#arrow-orange); }
+      .fallback-arrow { stroke: #605e5c; stroke-width: 2.3; stroke-dasharray: 8 5; fill: none; marker-end: url(#arrow-blue); }
+    </style>
+  </defs>
+
+  <rect width="1400" height="1000" fill="#f7faff"/>
+  <text x="50" y="48" class="title">Chat runtime modes and hosted deployment lifecycle</text>
+  <text x="50" y="75" class="subtitle">A deployment chooses one runtime. Identity, authorization, conversation, and cost semantics never change silently during a request.</text>
+
+  <rect x="50" y="94" width="1300" height="44" rx="12" fill="#fff4ce" stroke="#f7630c" stroke-width="1.5"/>
+  <text x="72" y="121" class="status">Implementation merged but unreleased: component / AILZ tags, final umbrella pins, integrated validation, and GPT-RAG release remain. v3.7.0 stays classic.</text>
+
+  <rect x="50" y="162" width="1300" height="108" rx="20" fill="#edf7ff" stroke="#3f7dc7" stroke-width="2"/>
+  <text x="74" y="191" class="section-title">Shared entry and topology selection</text>
+  <rect x="82" y="208" width="170" height="44" rx="11" fill="#ffffff" stroke="#4d89d8"/>
+  <text x="116" y="235" class="box-title">Signed-in user</text>
+  <rect x="302" y="208" width="220" height="44" rx="11" fill="#ffffff" stroke="#4d89d8"/>
+  <text x="351" y="235" class="box-title">Web UI - Container Apps</text>
+  <rect x="572" y="199" width="350" height="62" rx="12" fill="#ffffff" stroke="#4d89d8"/>
+  <text x="610" y="224" class="box-title">Resolved deployment topology</text>
+  <text x="601" y="245" class="box-text">fresh: hosted-no-panel | explicit/sticky: classic</text>
+  <rect x="972" y="208" width="330" height="44" rx="11" fill="#ffffff" stroke="#4d89d8"/>
+  <text x="1013" y="235" class="box-title">Ingestion remains in Container Apps</text>
+  <path class="blue-arrow" d="M252 230 L299 230"/>
+  <path class="blue-arrow" d="M522 230 L569 230"/>
+
+  <rect x="50" y="295" width="840" height="390" rx="22" fill="#eef8f2" stroke="#107c10" stroke-width="2.5"/>
+  <text x="76" y="328" class="section-title">Hosted/no-panel - target default for fresh deployments</text>
+  <text x="76" y="351" class="box-text">DEPLOYMENT_TOPOLOGY=hosted-no-panel | CHAT_BACKEND=hosted_agent | DEPLOY_ADMINISTRATIVE_PANEL=false</text>
+
+  <rect x="82" y="382" width="204" height="82" rx="14" fill="#ffffff" stroke="#68ad82"/>
+  <text x="111" y="409" class="box-title">UI OBO exchange</text>
+  <text x="102" y="431" class="box-text">Signed-in user token</text>
+  <text x="98" y="451" class="box-text">to delegated data-plane token</text>
+
+  <rect x="342" y="382" width="220" height="82" rx="14" fill="#dff6dd" stroke="#107c10" stroke-width="2"/>
+  <text x="375" y="409" class="box-title">Foundry Hosted Agent</text>
+  <text x="371" y="431" class="box-text">Responses / Invocations</text>
+  <text x="372" y="451" class="box-text">Managed Conversations</text>
+
+  <rect x="618" y="382" width="224" height="82" rx="14" fill="#e8daef" stroke="#5c2d91" stroke-width="2"/>
+  <text x="655" y="409" class="box-title">Toolbox / MCP tools</text>
+  <text x="641" y="431" class="box-text">Receives opaque Foundry</text>
+  <text x="646" y="451" class="box-text">call context, not tokens</text>
+
+  <path class="green-arrow" d="M286 423 L339 423"/>
+  <text x="292" y="407" class="small">delegated bearer</text>
+  <path class="green-arrow" d="M562 423 L615 423"/>
+  <text x="568" y="407" class="small">x-agent-foundry-call-id</text>
+
+  <rect x="180" y="516" width="570" height="112" rx="16" fill="#fff7ec" stroke="#dfaa57" stroke-width="2"/>
+  <text x="314" y="546" class="box-title">Authorization-trimmed retrieval</text>
+  <text x="213" y="570" class="box-text">Toolbox resolves the opaque call context to the delegated user identity.</text>
+  <text x="220" y="592" class="box-text">Foundry IQ / Azure AI Search enforce native per-user document access.</text>
+  <text x="264" y="614" class="box-text">Missing or malformed context fails closed before retrieval.</text>
+  <path class="orange-arrow" d="M730 464 C730 490, 690 501, 650 514"/>
+
+  <rect x="76" y="648" width="788" height="24" rx="10" fill="#fde7e9" stroke="#d13438"/>
+  <text x="98" y="665" class="small">No orchestrator Container App and no panel-only Cosmos DB. Hosted failure is terminal; rollback is an explicit deployment.</text>
+
+  <rect x="920" y="295" width="430" height="390" rx="22" fill="#f3f2f1" stroke="#605e5c" stroke-width="2.5" stroke-dasharray="9 6"/>
+  <text x="946" y="328" class="section-title">Explicit Container Apps fallback</text>
+  <text x="946" y="351" class="box-text">DEPLOYMENT_TOPOLOGY=classic | CHAT_BACKEND=orchestrator</text>
+  <rect x="974" y="382" width="322" height="82" rx="14" fill="#ffffff" stroke="#605e5c"/>
+  <text x="1031" y="409" class="box-title">Orchestrator Container App</text>
+  <text x="1036" y="431" class="box-text">Supported classic runtime</text>
+  <text x="1009" y="451" class="box-text">Selected before provision/deploy</text>
+  <rect x="974" y="516" width="322" height="112" rx="16" fill="#ffffff" stroke="#605e5c"/>
+  <text x="1020" y="545" class="box-title">Classic authorized retrieval</text>
+  <text x="1002" y="570" class="box-text">Existing classic deployments stay sticky.</text>
+  <text x="1000" y="592" class="box-text">Fallback preserves classic history/panel data.</text>
+  <text x="1002" y="614" class="box-text">Migration and rollback are operator actions.</text>
+  <path class="fallback-arrow" d="M1135 464 L1135 513"/>
+
+  <rect x="877" y="446" width="30" height="88" rx="8" fill="#fde7e9" stroke="#d13438" stroke-width="2"/>
+  <line x1="884" y1="455" x2="900" y2="525" stroke="#d13438" stroke-width="3"/>
+  <line x1="900" y1="455" x2="884" y2="525" stroke="#d13438" stroke-width="3"/>
+  <text x="846" y="552" class="small" transform="rotate(-90 846 552)">NO SILENT FALLBACK</text>
+
+  <rect x="50" y="714" width="1300" height="236" rx="22" fill="#fff7ec" stroke="#d97706" stroke-width="2.5"/>
+  <text x="76" y="747" class="section-title">Two-phase hosted image preparation and deployment</text>
+  <text x="76" y="770" class="box-text">Build activity happens between two provision operations; request processing never triggers an image build or topology switch.</text>
+
+  <rect x="78" y="808" width="170" height="76" rx="13" fill="#ffffff" stroke="#dfaa57"/>
+  <text x="108" y="837" class="box-title">1. azd provision</text>
+  <text x="96" y="860" class="box-text">Prepare prerequisites</text>
+
+  <rect x="294" y="795" width="280" height="102" rx="13" fill="#fff4ce" stroke="#d97706" stroke-width="2"/>
+  <text x="339" y="824" class="box-title">2. Prepare hosted image</text>
+  <text x="321" y="847" class="box-text">Public: shared ACR Tasks</text>
+  <text x="315" y="869" class="box-text">Private: dedicated VNet agent pool</text>
+  <text x="326" y="889" class="small">Pinned source + hosted entrypoint</text>
+
+  <rect x="620" y="808" width="180" height="76" rx="13" fill="#ffffff" stroke="#dfaa57"/>
+  <text x="648" y="837" class="box-title">Immutable digest</text>
+  <text x="645" y="860" class="box-text">sha256:&lt;64 hex&gt;</text>
+
+  <rect x="846" y="808" width="174" height="76" rx="13" fill="#ffffff" stroke="#dfaa57"/>
+  <text x="872" y="837" class="box-title">3. azd provision</text>
+  <text x="868" y="860" class="box-text">Materialize handoff</text>
+
+  <rect x="1066" y="808" width="250" height="76" rx="13" fill="#dff6dd" stroke="#107c10" stroke-width="2"/>
+  <text x="1125" y="837" class="box-title">4. azd deploy</text>
+  <text x="1094" y="860" class="box-text">Deploy digest-backed hosted agent</text>
+
+  <path class="orange-arrow" d="M248 846 L291 846"/>
+  <path class="orange-arrow" d="M574 846 L617 846"/>
+  <path class="orange-arrow" d="M800 846 L843 846"/>
+  <path class="orange-arrow" d="M1020 846 L1063 846"/>
+
+  <rect x="50" y="968" width="1300" height="20" rx="9" fill="#ffffff" stroke="#d8e3f5"/>
+  <text x="72" y="982" class="small">Hosted/panel is not shown as a supported mode: issue #611 remains open and DEPLOY_ADMINISTRATIVE_PANEL stays false.</text>
+</svg>

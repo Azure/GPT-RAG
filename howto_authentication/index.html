@@ -442,6 +442,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture_legacy_diagram_handoff/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Legacy diagram update handoff
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1868,7 +1889,20 @@ metadata_security_group_ids
 <em>/subscriptions/&lt;subscriptionId&gt;/resourceGroups/&lt;resourceGroup&gt;/providers/Microsoft.Storage/storageAccounts/&lt;storageAccount&gt;/blobServices/default/containers/&lt;container&gt;</em></p>
 </blockquote>
 <h2 id="admin-access-for-the-operator-dashboards">Admin Access for the Operator Dashboards</h2>
-<p>In the default Container Apps topology, the orchestrator and ingestion service each ship a small operator dashboard. The orchestrator dashboard is mounted at <code>/dashboard</code> on the orchestrator Container App and the ingestion dashboard is mounted at <code>/dashboard</code> on the ingestion Container App. Both surfaces let an operator inspect runs, conversations, and a curated set of runtime settings, and the ingestion dashboard also lets an operator trigger a scheduled job on demand. The first <a href="../deploy/#chat-runtime-modes-preview">hosted-agent preview</a> supports hosted/no-panel only, omits these administrative surfaces, and requires <code>DEPLOY_ADMINISTRATIVE_PANEL=false</code>. Hosted/panel is deferred to <a href="https://github.com/Azure/GPT-RAG/issues/611">issue #611</a>.</p>
+<p>In the currently released classic Container Apps topology, the orchestrator
+and ingestion service each ship a small operator dashboard. The orchestrator
+dashboard is mounted at <code>/dashboard</code> on the orchestrator Container App and the
+ingestion dashboard is mounted at <code>/dashboard</code> on the ingestion Container App.
+Both surfaces let an operator inspect runs, conversations, and a curated set of
+runtime settings, and the ingestion dashboard also lets an operator trigger a
+scheduled job on demand. The
+<a href="../deploy/#chat-runtime-modes-upcoming-hosted-default-release">upcoming hosted-default topology</a>
+is hosted/no-panel, omits these administrative surfaces, and requires
+<code>DEPLOY_ADMINISTRATIVE_PANEL=false</code>. That default still depends on
+unpublished component and AI Landing Zone tags, final umbrella pins, integrated
+validation, and a new GPT-RAG release. The platform implementation is merged
+but unreleased. Hosted/panel is deferred to
+<a href="https://github.com/Azure/GPT-RAG/issues/611">issue #611</a>.</p>
 <p>Admin access is enforced through an <strong>Entra ID App Role named <code>Admin</code></strong> added to the same App Registration you created for user sign-in. The token the caller presents to <code>/api/dashboard/*</code> (or the ingestion equivalents) must carry <code>Admin</code> in its <code>roles</code> claim.</p>
 <p>This section explains how to add the role, assign users, request the correct scope, and debug the most common error (a 403 response even though the role is assigned).</p>
 <blockquote>

@@ -16,7 +16,7 @@
         <link rel="prev" href="../quickstart_nl2sql/">
       
       
-        <link rel="next" href="../governance_overview/">
+        <link rel="next" href="../architecture_legacy_diagram_handoff/">
       
       
       <link rel="icon" href="../favicon.ico">
@@ -490,6 +490,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#chat-runtime-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Chat runtime modes
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#complementary-modular-views" class="md-nav__link">
     <span class="md-ellipsis">
       Complementary modular views
@@ -520,6 +529,27 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture_legacy_diagram_handoff/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Legacy diagram update handoff
+  </span>
+  
+
+      </a>
     </li>
   
 
@@ -1541,19 +1571,74 @@
   <h1>Overview</h1>
 
 <h2 id="architecture">Architecture</h2>
-<p>GPT-RAG is modular. The full Zero Trust diagram shows a hardened, full-capability reference architecture; it is not the minimum footprint required to evaluate or run the accelerator. Start with the <strong>Basic Deployment</strong> baseline, then add network isolation, enterprise integration, public ingress, or AI capabilities only when the scenario requires them.</p>
+<p>GPT-RAG is modular. The accepted hosted-default architecture makes Microsoft
+Foundry hosted/no-panel the target for genuinely fresh deployments and keeps
+the Container Apps orchestrator as an explicit supported fallback. Existing
+deployments retain their persisted topology during upgrade. Network isolation,
+enterprise integration, public ingress, and optional AI capabilities remain
+separate choices.</p>
+<div class="admonition warning">
+<p class="admonition-title">Implementation merged; release gates remain</p>
+<p>The hosted-default implementation merged to <code>develop</code> in
+<a href="https://github.com/Azure/GPT-RAG/pull/617">Azure/GPT-RAG PR #617</a> as
+<a href="https://github.com/Azure/GPT-RAG/commit/b614d0ad19a66cbc06b34a3ad764b0d94428999f"><code>b614d0a</code></a>.
+UI release PR
+<a href="https://github.com/Azure/gpt-rag-ui/pull/94">#94</a> merged to <code>main</code> as
+<a href="https://github.com/Azure/gpt-rag-ui/commit/763fa7eb2135037382673d2eb968421f084941cc"><code>763fa7e</code></a>,
+and AI Landing Zone release PR
+<a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/131">#131</a> merged
+to <code>main</code> as
+<a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/commit/a6ae7284d654abb7ec53810cb8765b2975b51baa"><code>a6ae728</code></a>.
+However, UI <code>v2.6.0</code> and AI Landing Zone <code>v2.5.0</code> tags and GitHub Releases
+are not published, and final umbrella pins, integrated validation, and the
+GPT-RAG release remain incomplete. The diagrams document the approved
+target, not shipped behavior. Current published GPT-RAG <code>v3.7.0</code> remains
+classic.</p>
+</div>
 <h2 id="full-zero-trust-reference">Full Zero Trust reference</h2>
-<p>The existing architecture diagram remains the full network-isolated reference view. Use it when discussing hardened deployments, while the complementary diagrams below explain the baseline and optional layers.</p>
+<p>The existing PNG and Visio remain the full network-isolated reference view.
+Use them when discussing hardened deployments. Maintainers should apply the
+<a href="../architecture_legacy_diagram_handoff/">legacy diagram update handoff</a> before
+the hosted-default release so those manually maintained assets match the
+focused editable SVG and Excalidraw views below.</p>
 <p><img alt="Zero Trust Architecture" src="../media/architecture_zero_trust.png" /></p>
 <p><a href="../media/GPT-RAG.vsdx">Download Visio Diagram</a></p>
 <hr />
+<h2 id="chat-runtime-modes">Chat runtime modes</h2>
+<p><img alt="Chat runtime modes and hosted deployment lifecycle" src="../media/architecture_chat_runtime_modes.svg" /></p>
+<p><a href="../media/architecture_chat_runtime_modes.excalidraw">Edit the chat runtime diagram in Excalidraw</a></p>
+<p>The fresh-deployment target sends chat from the Web UI to a Microsoft Foundry
+hosted agent. The UI performs an on-behalf-of exchange for the signed-in user,
+the hosted agent passes only opaque Foundry call context to Toolbox, and
+Foundry IQ or Azure AI Search applies native authorization trimming. Missing
+identity, call context, configuration, authorization, network, protocol, or
+runtime state fails closed. A request never silently switches to the
+Container Apps orchestrator.</p>
+<p>The classic runtime remains selectable through an explicit deployment
+operation. Pre-cutover deployments without a topology marker remain classic,
+and any persisted topology stays sticky until an operator deliberately
+migrates it. Hosted/panel is not part of the target default:
+<code>DEPLOY_ADMINISTRATIVE_PANEL=false</code> remains required while
+<a href="https://github.com/Azure/GPT-RAG/issues/611">issue #611</a> is open.</p>
+<p>The lower lane in the diagram shows the planned two-phase hosted image flow:
+provision prerequisites, build through public ACR Tasks or the dedicated
+VNet-connected ACR Tasks agent pool, resolve the hosted image to an immutable
+<code>sha256</code> digest, provision the digest-backed hosted handoff, and deploy.</p>
 <h2 id="complementary-modular-views">Complementary modular views</h2>
 <div class="admonition note">
 <p class="admonition-title">How to read these diagrams</p>
-<p>The modular view is organized around <strong>Basic Deployment</strong>, <strong>Common platform services</strong>, and <strong>Zero Trust additions</strong>. Solid-color chips are standard resources, dashed orange chips are default-on or BYO-capable parameters, and solid orange chips are opt-in add-ons.</p>
+<p>The modular view is organized around <strong>Basic Deployment</strong>, <strong>Common
+platform services</strong>, and <strong>Zero Trust additions</strong>. Hosted chat is a
+mode-selected baseline runtime, not an optional AI capability. Solid-color
+chips are standard resources, dashed orange chips are default-on or
+BYO-capable parameters, and solid orange chips are opt-in add-ons.</p>
 </div>
 <p><img alt="Basic Deployment architecture" src="../media/architecture_basic_deployment.svg" /></p>
-<p>The baseline corresponds to the default Container Apps <a href="../deploy/#basic-deployment">Basic Deployment</a> flow with <code>NETWORK_ISOLATION=false</code>, <code>DEPLOY_HOSTED_AGENT_ORCHESTRATION=false</code>, and <code>DEPLOY_ADMINISTRATIVE_PANEL=false</code>. It focuses on the default application and data path: users access the UI, the orchestrator Container App coordinates AI and retrieval, ingestion indexes enterprise content, and shared platform services provide configuration, secrets, identity, storage, search, and conversation state. The first <a href="../deploy/#chat-runtime-modes-preview">hosted-agent preview</a> replaces the orchestrator chat runtime with a Microsoft Foundry hosted agent. This preview supports hosted/no-panel only and requires <code>DEPLOY_ADMINISTRATIVE_PANEL=false</code>.</p>
+<p>The Basic diagram shows the target <a href="../deploy/#chat-runtime-modes-upcoming-hosted-default-release">fresh deployment</a>
+with <code>NETWORK_ISOLATION=false</code>: Web UI and ingestion remain in Container Apps,
+while hosted/no-panel handles chat through Toolbox and authorization-trimmed
+retrieval. The orchestrator Container App appears only as the explicit
+fallback. The panel is absent and its flag remains <code>false</code>.</p>
 <p><img alt="Modular architecture layers" src="../media/architecture_modular_layers.svg" /></p>
 <p>Use the table below for the deployment parameters behind each layer, and the <a href="../deploy/">Deployment Guide</a> for the full <code>azd env set</code> flows.</p>
 <h2 id="deployment-component-table">Deployment component table</h2>
@@ -1570,8 +1655,8 @@
 <tr>
 <td>UI, chat runtime, ingestion</td>
 <td>Mode-selected baseline</td>
-<td><code>DEPLOY_HOSTED_AGENT_ORCHESTRATION</code>, <code>DEPLOY_ADMINISTRATIVE_PANEL</code>, <code>manifest.json</code> components, and <code>containerAppsList</code></td>
-<td>Running the default UI/orchestrator/ingestion topology or the hosted/no-panel preview. Hosted/panel is deferred to <a href="https://github.com/Azure/GPT-RAG/issues/611">issue #611</a>.</td>
+<td>Canonical <code>DEPLOYMENT_TOPOLOGY</code>; materialized <code>DEPLOY_HOSTED_AGENT_ORCHESTRATION</code>, <code>DEPLOY_ADMINISTRATIVE_PANEL</code>, <code>CHAT_BACKEND</code>; <code>manifest.json</code> components; <code>containerAppsList</code></td>
+<td>After the gated release, fresh environments select hosted/no-panel, existing topologies stay sticky, and <code>classic</code> explicitly selects the Container Apps fallback. Hosted/panel is deferred to <a href="https://github.com/Azure/GPT-RAG/issues/611">issue #611</a>.</td>
 </tr>
 <tr>
 <td>AI Foundry account, project, and model deployments</td>
@@ -1589,13 +1674,13 @@
 <td>RAG workload data services</td>
 <td>Mode-selected, parameter-controlled</td>
 <td><code>deploySearchService</code>, <code>deployStorageAccount</code>, <code>deployCosmosDb</code>, <code>storageAccountContainersList</code>, <code>databaseContainersList</code></td>
-<td>Running the indexed-document and file-storage path. The default topology retains conversation and panel Cosmos DB. Hosted/no-panel omits panel-only Cosmos DB.</td>
+<td>Running indexed-document and file-storage paths. Hosted/no-panel uses Foundry managed Conversations and omits panel-only Cosmos DB; classic preserves its existing state path.</td>
 </tr>
 <tr>
-<td>App Configuration, managed identity / RBAC, Container Apps, Container Registry</td>
+<td>App Configuration, identity / RBAC, Container Apps, Container Registry</td>
 <td>Required platform capabilities, topology varies by mode</td>
 <td><code>deployAppConfig</code>, <code>deployContainerApps</code>, <code>deployContainerEnv</code>, <code>deployContainerRegistry</code>, <code>useUAI</code>, service role lists</td>
-<td>Centralizing runtime settings and identities. Hosted/no-panel does not provision an orchestrator Container App and requires <code>DEPLOY_ADMINISTRATIVE_PANEL=false</code>.</td>
+<td>Publishing the sticky topology and runtime contract, hosting UI/ingestion, and preparing immutable images. Hosted/no-panel does not provision an orchestrator Container App.</td>
 </tr>
 <tr>
 <td>Workload Key Vault and observability</td>
@@ -1613,7 +1698,7 @@
 <td>Azure Firewall, Jumpbox, Bastion, NAT Gateway, private ACR build pool</td>
 <td>Zero Trust operations/build options</td>
 <td><code>DEPLOY_AZURE_FIREWALL</code>, <code>DEPLOY_JUMPBOX</code>, <code>DEPLOY_BASTION</code>, <code>DEPLOY_NAT_GATEWAY</code>, <code>DEPLOY_ACR_TASK_AGENT_POOL</code>, <code>EXISTING_JUMPBOX_RESOURCE_ID</code>, <code>EXISTING_BASTION_RESOURCE_ID</code>, <code>EXISTING_NAT_GATEWAY_RESOURCE_ID</code></td>
-<td>Operating from inside the VNet, reusing central access/egress resources, or enabling a private ACR Task agent pool. In GPT-RAG, the ACR agent pool defaults to off and is opt-in.</td>
+<td>Operating inside the VNet or reusing central access/egress resources. The gated hosted flow uses the dedicated VNet-connected ACR Tasks agent pool for private builds; shared ACR Tasks cannot reach a private endpoint.</td>
 </tr>
 <tr>
 <td>Application Gateway WAF public ingress</td>
@@ -1631,7 +1716,7 @@
 <td>Scenario capabilities</td>
 <td>Optional feature add-ons</td>
 <td><code>DEPLOY_SPEECH_SERVICE</code>, <code>DEPLOY_GROUNDING_WITH_BING</code>, <code>ENABLE_AGENTIC_RETRIEVAL</code></td>
-<td>Enabling voice, Bing grounding, or agentic retrieval scenarios. MCP/tool-hosting and NL2SQL application behavior are configured outside the Bicep-deployed infrastructure shown in this diagram.</td>
+<td>Enabling voice, Bing grounding, or agentic retrieval scenarios. The hosted runtime is not classified as an optional capability. MCP tool selection and NL2SQL application behavior remain separately configured.</td>
 </tr>
 </tbody>
 </table>

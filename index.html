@@ -516,6 +516,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="architecture_legacy_diagram_handoff/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Legacy diagram update handoff
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1535,11 +1556,31 @@
 <p>Designed with Zero-Trust security and Infrastructure as Code (IaC) principles from the ground up, GPT-RAG accelerates production deployments while ensuring consistency, governance, and operational excellence. It supports text, image, and voice scenarios, enabling organizations to rapidly create rich multimodal experiences.</p>
 <p><a class="md-button--pill" href="https://github.com/azure/gpt-rag/releases/latest">Latest Stable Release v3.7.0 <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5.5 7A1.5 1.5 0 0 1 4 5.5 1.5 1.5 0 0 1 5.5 4 1.5 1.5 0 0 1 7 5.5 1.5 1.5 0 0 1 5.5 7m15.91 4.58-9-9C12.05 2.22 11.55 2 11 2H4c-1.11 0-2 .89-2 2v7c0 .55.22 1.05.59 1.41l8.99 9c.37.36.87.59 1.42.59s1.05-.23 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.56-.23-1.06-.59-1.42"/></svg></span></a></p>
 <h2 id="architecture-at-a-glance">Architecture at a glance</h2>
-<p>GPT-RAG can start as a basic deployment and expand into Zero Trust, public ingress, existing-platform integration, or optional AI capabilities as needed. See the <a href="architecture/">Architecture</a> page for the required-vs-configurable deployment table.</p>
-<p><img alt="Zero Trust Architecture" src="media/architecture_zero_trust.png" />
-<em>Full Zero Trust reference architecture. This is the complete network-isolated view, not the minimum basic deployment.</em></p>
-<p>The complementary modular view below separates the basic deployment from optional add-on layers.</p>
+<p>GPT-RAG can start as a Basic deployment and expand into Zero Trust, public
+ingress, existing-platform integration, or optional AI capabilities. The
+approved target makes Microsoft Foundry hosted/no-panel the fresh-deployment
+chat runtime and retains the Container Apps orchestrator as an explicit
+fallback. See the <a href="architecture/">Architecture</a> page for the mode contract
+and required-vs-configurable deployment table.</p>
+<div class="admonition warning">
+<p class="admonition-title">Hosted-default release dependency</p>
+<p>The diagram below is the approved target, not shipped behavior. The
+platform implementation merged in
+<a href="https://github.com/Azure/GPT-RAG/pull/617">Azure/GPT-RAG PR #617</a>. UI
+release <a href="https://github.com/Azure/gpt-rag-ui/pull/94">PR #94</a> and AI Landing
+Zone release
+<a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/131">PR #131</a>
+also merged, but UI <code>v2.6.0</code> and AI Landing Zone <code>v2.5.0</code> tags and GitHub
+Releases are not published. Final umbrella pins, integrated validation,
+and a new GPT-RAG release remain. Current published GPT-RAG <code>v3.7.0</code> stays
+classic.</p>
+</div>
+<p><img alt="Chat runtime modes and hosted deployment lifecycle" src="media/architecture_chat_runtime_modes.svg" /></p>
 <p><img alt="Modular architecture layers" src="media/architecture_modular_layers.svg" /></p>
+<p><img alt="Zero Trust Architecture" src="media/architecture_zero_trust.png" />
+<em>Full Zero Trust reference architecture. This is the complete network-isolated
+view, not the minimum Basic deployment. The focused SVG above is the source of
+truth for the pending hosted-default runtime update.</em></p>
 <h2 id="governance">Governance</h2>
 <p>Before connecting enterprise data or relying on telemetry as evidence, review
 <a href="governance_overview/">Governance and responsible operation</a>. It explains
