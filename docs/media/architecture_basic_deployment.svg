@@ -1,96 +1,116 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-labelledby="title desc">
-  <title id="title">GPT-RAG Basic Deployment architecture</title>
-  <desc id="desc">Baseline GPT-RAG architecture for NETWORK_ISOLATION=false showing frontend, orchestrator, ingestion, AI Foundry, search, storage, Cosmos DB, App Configuration, Key Vault, identity, observability, Container Apps, and Container Registry.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820" role="img" aria-labelledby="title desc">
+  <title id="title">GPT-RAG hosted-default Basic Deployment target architecture</title>
+  <desc id="desc">Target fresh-deployment architecture. The platform implementation is merged but unreleased pending component and AI Landing Zone tags, final umbrella pins, integrated validation, and a GPT-RAG release. Users access the Web UI in Azure Container Apps. The UI uses delegated on-behalf-of authorization to call a Microsoft Foundry hosted agent, which passes opaque call context to Toolbox and MCP tools for authorization-trimmed retrieval. Ingestion remains in Container Apps. The orchestrator Container App is shown only as an explicit deployment fallback, with no request-time silent fallback. The administrative panel is absent.</desc>
   <defs>
     <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
       <path d="M2,2 L10,6 L2,10 Z" fill="#385a8d"/>
     </marker>
+    <marker id="arrow-green" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#107c10"/>
+    </marker>
     <style>
-      .title { font: 700 28px 'Segoe UI', Arial, sans-serif; fill: #14345f; }
-      .subtitle { font: 400 16px 'Segoe UI', Arial, sans-serif; fill: #4c607a; }
-      .zone-title { font: 700 16px 'Segoe UI', Arial, sans-serif; fill: #14345f; }
-      .box-title { font: 700 15px 'Segoe UI', Arial, sans-serif; fill: #12385f; }
-      .box-text { font: 400 12px 'Segoe UI', Arial, sans-serif; fill: #43536b; }
-      .note { font: 600 13px 'Segoe UI', Arial, sans-serif; fill: #7a4a00; }
+      .title { font: 700 27px 'Segoe UI', Arial, sans-serif; fill: #000000; }
+      .subtitle { font: 400 15px 'Segoe UI', Arial, sans-serif; fill: #000000; }
+      .zone-title { font: 700 16px 'Segoe UI', Arial, sans-serif; fill: #000000; }
+      .box-title { font: 700 14px 'Segoe UI', Arial, sans-serif; fill: #000000; }
+      .box-text { font: 400 12px 'Segoe UI', Arial, sans-serif; fill: #000000; }
+      .small { font: 600 11px 'Segoe UI', Arial, sans-serif; fill: #000000; }
+      .status { font: 600 12px 'Segoe UI', Arial, sans-serif; fill: #000000; }
       .arrow { stroke: #385a8d; stroke-width: 2.5; fill: none; marker-end: url(#arrow); }
-      .soft-arrow { stroke: #6f7f99; stroke-width: 2; stroke-dasharray: 6 5; fill: none; marker-end: url(#arrow); }
+      .hosted-arrow { stroke: #107c10; stroke-width: 2.7; fill: none; marker-end: url(#arrow-green); }
+      .fallback-arrow { stroke: #6f7f99; stroke-width: 2.2; stroke-dasharray: 7 5; fill: none; marker-end: url(#arrow); }
+      .data-arrow { stroke: #7a4a00; stroke-width: 2.2; fill: none; marker-end: url(#arrow); }
     </style>
   </defs>
-  <rect width="1280" height="720" fill="#f7faff"/>
-  <text x="50" y="55" class="title">Basic Deployment baseline</text>
-  <text x="50" y="82" class="subtitle">Default evaluation/runtime view with NETWORK_ISOLATION=false. Optional Zero Trust networking is not shown in this baseline.</text>
 
-  <rect x="48" y="112" width="1184" height="560" rx="24" fill="#ffffff" stroke="#d8e3f5" stroke-width="2"/>
+  <rect width="1280" height="820" fill="#f7faff"/>
+  <text x="46" y="46" class="title">Basic Deployment: hosted-default target</text>
+  <text x="46" y="72" class="subtitle">Fresh deployments use hosted/no-panel after release gates pass; UI and ingestion remain in Azure Container Apps.</text>
 
-  <rect x="82" y="148" width="200" height="116" rx="18" fill="#eaf3ff" stroke="#4d89d8" stroke-width="2"/>
-  <text x="112" y="185" class="box-title">Users</text>
-  <text x="112" y="211" class="box-text">Browser or client</text>
-  <text x="112" y="233" class="box-text">Chat and uploads</text>
+  <rect x="46" y="91" width="1188" height="42" rx="12" fill="#fff4ce" stroke="#f7630c" stroke-width="1.5"/>
+  <text x="66" y="117" class="status">Implementation merged but unreleased: component / AILZ tags, final umbrella pins, validation, and GPT-RAG release remain. v3.7.0 stays classic.</text>
 
-  <rect x="350" y="132" width="530" height="170" rx="20" fill="#edf7ff" stroke="#3f7dc7" stroke-width="2"/>
-  <text x="378" y="163" class="zone-title">Application runtime - Azure Container Apps</text>
-  <rect x="380" y="188" width="135" height="76" rx="14" fill="#ffffff" stroke="#4d89d8" stroke-width="2"/>
-  <text x="405" y="218" class="box-title">Frontend</text>
-  <text x="403" y="242" class="box-text">Web UI</text>
-  <rect x="560" y="188" width="145" height="76" rx="14" fill="#ffffff" stroke="#4d89d8" stroke-width="2"/>
-  <text x="586" y="218" class="box-title">Orchestrator</text>
-  <text x="582" y="242" class="box-text">Agent workflow</text>
-  <rect x="750" y="188" width="105" height="76" rx="14" fill="#ffffff" stroke="#4d89d8" stroke-width="2"/>
-  <text x="772" y="218" class="box-title">Ingestion</text>
-  <text x="772" y="242" class="box-text">Indexing</text>
+  <rect x="46" y="153" width="1188" height="312" rx="22" fill="#ffffff" stroke="#d8e3f5" stroke-width="2"/>
+  <text x="70" y="181" class="zone-title">Request path</text>
 
-  <rect x="940" y="148" width="230" height="116" rx="18" fill="#eef8f2" stroke="#4a9f6f" stroke-width="2"/>
-  <text x="970" y="185" class="box-title">Container Registry</text>
-  <text x="970" y="211" class="box-text">Service images</text>
-  <text x="970" y="233" class="box-text">Used by deploy scripts</text>
+  <rect x="70" y="205" width="150" height="100" rx="16" fill="#eaf3ff" stroke="#4d89d8" stroke-width="2"/>
+  <text x="108" y="239" class="box-title">Signed-in user</text>
+  <text x="96" y="263" class="box-text">Browser or client</text>
+  <text x="93" y="284" class="box-text">Chat and uploads</text>
 
-  <path class="arrow" d="M282 206 C310 206, 330 226, 377 226"/>
-  <path class="arrow" d="M515 226 L558 226"/>
-  <path class="arrow" d="M705 226 L748 226"/>
-  <path class="soft-arrow" d="M940 206 C906 206, 890 226, 856 226"/>
+  <rect x="270" y="192" width="350" height="126" rx="18" fill="#edf7ff" stroke="#3f7dc7" stroke-width="2"/>
+  <text x="292" y="218" class="zone-title">Azure Container Apps</text>
+  <rect x="292" y="235" width="132" height="62" rx="12" fill="#ffffff" stroke="#4d89d8" stroke-width="1.7"/>
+  <text x="328" y="262" class="box-title">Web UI</text>
+  <text x="309" y="283" class="box-text">Chat BFF + OBO</text>
+  <rect x="447" y="235" width="150" height="62" rx="12" fill="#ffffff" stroke="#4d89d8" stroke-width="1.7"/>
+  <text x="486" y="262" class="box-title">Ingestion</text>
+  <text x="466" y="283" class="box-text">Indexes content</text>
 
-  <rect x="82" y="344" width="330" height="236" rx="20" fill="#f2f7ff" stroke="#94b8e8" stroke-width="2"/>
-  <text x="112" y="378" class="zone-title">Configuration and security</text>
-  <rect x="112" y="405" width="125" height="64" rx="12" fill="#ffffff" stroke="#86aee5"/>
-  <text x="129" y="433" class="box-title">App Config</text>
-  <text x="127" y="454" class="box-text">Runtime settings</text>
-  <rect x="260" y="405" width="125" height="64" rx="12" fill="#ffffff" stroke="#86aee5"/>
-  <text x="283" y="433" class="box-title">Key Vault</text>
-  <text x="286" y="454" class="box-text">Secrets</text>
-  <rect x="112" y="490" width="273" height="64" rx="12" fill="#ffffff" stroke="#86aee5"/>
-  <text x="151" y="518" class="box-title">Managed identity and RBAC</text>
-  <text x="163" y="539" class="box-text">No credentials hard-coded in services</text>
+  <rect x="675" y="192" width="250" height="126" rx="18" fill="#dff6dd" stroke="#107c10" stroke-width="2.5"/>
+  <text x="700" y="219" class="zone-title">Microsoft Foundry</text>
+  <text x="704" y="248" class="box-title">Hosted Agent</text>
+  <text x="704" y="270" class="box-text">Fresh-deployment target</text>
+  <text x="704" y="291" class="box-text">Managed Conversations</text>
 
-  <rect x="464" y="344" width="365" height="236" rx="20" fill="#fff7ec" stroke="#dfaa57" stroke-width="2"/>
-  <text x="494" y="378" class="zone-title">Data and AI baseline</text>
-  <rect x="494" y="405" width="145" height="64" rx="12" fill="#ffffff" stroke="#dfaa57"/>
-  <text x="518" y="433" class="box-title">AI Foundry</text>
-  <text x="516" y="454" class="box-text">Models / OpenAI</text>
-  <rect x="660" y="405" width="140" height="64" rx="12" fill="#ffffff" stroke="#dfaa57"/>
-  <text x="690" y="433" class="box-title">AI Search</text>
-  <text x="684" y="454" class="box-text">Indexes</text>
-  <rect x="494" y="490" width="145" height="64" rx="12" fill="#ffffff" stroke="#dfaa57"/>
-  <text x="532" y="518" class="box-title">Storage</text>
-  <text x="521" y="539" class="box-text">Documents</text>
-  <rect x="660" y="490" width="140" height="64" rx="12" fill="#ffffff" stroke="#dfaa57"/>
-  <text x="692" y="518" class="box-title">Cosmos DB</text>
-  <text x="679" y="539" class="box-text">State / metadata</text>
+  <rect x="980" y="192" width="220" height="126" rx="18" fill="#e8daef" stroke="#5c2d91" stroke-width="2"/>
+  <text x="1003" y="219" class="zone-title">Toolbox / MCP tools</text>
+  <text x="1003" y="248" class="box-text">Opaque Foundry call context</text>
+  <text x="1003" y="270" class="box-text">Identity-aware tool calls</text>
+  <text x="1003" y="291" class="box-text">No bearer token in payload</text>
 
-  <rect x="880" y="344" width="290" height="236" rx="20" fill="#eef8f2" stroke="#68ad82" stroke-width="2"/>
-  <text x="910" y="378" class="zone-title">Recommended support</text>
-  <rect x="910" y="405" width="230" height="64" rx="12" fill="#ffffff" stroke="#68ad82"/>
-  <text x="950" y="433" class="box-title">Application Insights</text>
-  <text x="953" y="454" class="box-text">Application telemetry</text>
-  <rect x="910" y="490" width="230" height="64" rx="12" fill="#ffffff" stroke="#68ad82"/>
-  <text x="958" y="518" class="box-title">Log Analytics</text>
-  <text x="957" y="539" class="box-text">Central diagnostics</text>
+  <path class="arrow" d="M220 255 L290 255"/>
+  <path class="hosted-arrow" d="M424 255 L672 255"/>
+  <text x="477" y="239" class="small">delegated user OBO</text>
+  <path class="hosted-arrow" d="M925 255 L977 255"/>
+  <text x="931" y="238" class="small">opaque context</text>
 
-  <path class="soft-arrow" d="M620 302 C600 325, 585 357, 567 405"/>
-  <path class="soft-arrow" d="M800 264 C775 310, 740 352, 730 405"/>
-  <path class="soft-arrow" d="M632 264 C620 310, 620 350, 620 405"/>
-  <path class="soft-arrow" d="M560 264 C490 308, 390 356, 322 405"/>
-  <path class="soft-arrow" d="M704 264 C790 318, 900 350, 1024 405"/>
+  <rect x="270" y="350" width="655" height="82" rx="16" fill="#f3f2f1" stroke="#605e5c" stroke-width="2" stroke-dasharray="8 5"/>
+  <text x="292" y="378" class="box-title">Explicit fallback: orchestrator in Azure Container Apps</text>
+  <text x="292" y="401" class="box-text">Selected only by deployment topology / CHAT_BACKEND=orchestrator; existing classic deployments remain sticky.</text>
+  <text x="292" y="420" class="box-text">No request-time switch from hosted to classic after configuration, authentication, network, protocol, or runtime failure.</text>
+  <path class="fallback-arrow" d="M358 297 C358 325, 380 337, 430 348"/>
+  <path class="fallback-arrow" d="M925 391 C975 391, 1000 335, 1050 318"/>
 
-  <rect x="82" y="606" width="1088" height="42" rx="14" fill="#fff4db" stroke="#e6b24f"/>
-  <text x="112" y="632" class="note">Not in this baseline view: private endpoints, Private DNS, Azure Firewall, jumpbox/Bastion, NAT Gateway, ACR private build pool, and Application Gateway WAF.</text>
+  <rect x="46" y="493" width="378" height="238" rx="20" fill="#f2f7ff" stroke="#94b8e8" stroke-width="2"/>
+  <text x="70" y="523" class="zone-title">Configuration and security</text>
+  <rect x="70" y="545" width="145" height="62" rx="12" fill="#ffffff" stroke="#86aee5"/>
+  <text x="91" y="571" class="box-title">App Configuration</text>
+  <text x="93" y="592" class="box-text">Sticky topology</text>
+  <rect x="235" y="545" width="165" height="62" rx="12" fill="#ffffff" stroke="#86aee5"/>
+  <text x="273" y="571" class="box-title">Key Vault</text>
+  <text x="255" y="592" class="box-text">Secrets / OBO config</text>
+  <rect x="70" y="628" width="330" height="70" rx="12" fill="#ffffff" stroke="#86aee5"/>
+  <text x="135" y="655" class="box-title">Managed identity, delegated identity, and RBAC</text>
+  <text x="113" y="678" class="box-text">Explicit scopes; fail closed on missing authorization context</text>
+
+  <rect x="450" y="493" width="474" height="238" rx="20" fill="#fff7ec" stroke="#dfaa57" stroke-width="2"/>
+  <text x="474" y="523" class="zone-title">Authorization-trimmed data and AI path</text>
+  <rect x="474" y="545" width="190" height="62" rx="12" fill="#ffffff" stroke="#dfaa57"/>
+  <text x="516" y="571" class="box-title">Foundry IQ / AI Search</text>
+  <text x="500" y="592" class="box-text">Per-user document trimming</text>
+  <rect x="687" y="545" width="213" height="62" rx="12" fill="#ffffff" stroke="#dfaa57"/>
+  <text x="739" y="571" class="box-title">Model deployments</text>
+  <text x="723" y="592" class="box-text">Responses and grounding</text>
+  <rect x="474" y="628" width="190" height="70" rx="12" fill="#ffffff" stroke="#dfaa57"/>
+  <text x="536" y="655" class="box-title">Storage</text>
+  <text x="505" y="678" class="box-text">Documents and artifacts</text>
+  <rect x="687" y="628" width="213" height="70" rx="12" fill="#ffffff" stroke="#dfaa57"/>
+  <text x="747" y="655" class="box-title">Conversation state</text>
+  <text x="708" y="678" class="box-text">Foundry managed; no panel-only DB</text>
+
+  <path class="data-arrow" d="M1090 318 C1090 470, 800 470, 620 544"/>
+  <path class="data-arrow" d="M522 297 C522 430, 540 475, 569 543"/>
+
+  <rect x="950" y="493" width="284" height="238" rx="20" fill="#eef8f2" stroke="#68ad82" stroke-width="2"/>
+  <text x="974" y="523" class="zone-title">Platform support</text>
+  <rect x="974" y="545" width="236" height="62" rx="12" fill="#ffffff" stroke="#68ad82"/>
+  <text x="1024" y="571" class="box-title">Container Registry</text>
+  <text x="1001" y="592" class="box-text">Immutable service image digests</text>
+  <rect x="974" y="628" width="236" height="70" rx="12" fill="#ffffff" stroke="#68ad82"/>
+  <text x="1018" y="655" class="box-title">Application Insights</text>
+  <text x="1028" y="678" class="box-text">Logs and diagnostics</text>
+
+  <rect x="46" y="757" width="1188" height="40" rx="12" fill="#fde7e9" stroke="#d13438"/>
+  <text x="68" y="782" class="status">Administrative panel is absent in hosted/no-panel and DEPLOY_ADMINISTRATIVE_PANEL remains false. Hosted/panel stays blocked by issue #611.</text>
 </svg>

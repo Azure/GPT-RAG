@@ -286,7 +286,20 @@ Examples of how to populate `metadata_security_user_ids` and `metadata_security_
 
 ## Admin Access for the Operator Dashboards
 
-In the default Container Apps topology, the orchestrator and ingestion service each ship a small operator dashboard. The orchestrator dashboard is mounted at `/dashboard` on the orchestrator Container App and the ingestion dashboard is mounted at `/dashboard` on the ingestion Container App. Both surfaces let an operator inspect runs, conversations, and a curated set of runtime settings, and the ingestion dashboard also lets an operator trigger a scheduled job on demand. The first [hosted-agent preview](deploy.md#chat-runtime-modes-preview) supports hosted/no-panel only, omits these administrative surfaces, and requires `DEPLOY_ADMINISTRATIVE_PANEL=false`. Hosted/panel is deferred to [issue #611](https://github.com/Azure/GPT-RAG/issues/611).
+In the currently released classic Container Apps topology, the orchestrator
+and ingestion service each ship a small operator dashboard. The orchestrator
+dashboard is mounted at `/dashboard` on the orchestrator Container App and the
+ingestion dashboard is mounted at `/dashboard` on the ingestion Container App.
+Both surfaces let an operator inspect runs, conversations, and a curated set of
+runtime settings, and the ingestion dashboard also lets an operator trigger a
+scheduled job on demand. The
+[upcoming hosted-default topology](deploy.md#chat-runtime-modes-upcoming-hosted-default-release)
+is hosted/no-panel, omits these administrative surfaces, and requires
+`DEPLOY_ADMINISTRATIVE_PANEL=false`. That default still depends on
+unpublished component and AI Landing Zone tags, final umbrella pins, integrated
+validation, and a new GPT-RAG release. The platform implementation is merged
+but unreleased. Hosted/panel is deferred to
+[issue #611](https://github.com/Azure/GPT-RAG/issues/611).
 
 Admin access is enforced through an **Entra ID App Role named `Admin`** added to the same App Registration you created for user sign-in. The token the caller presents to `/api/dashboard/*` (or the ingestion equivalents) must carry `Admin` in its `roles` claim.
 
