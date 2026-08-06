@@ -9,8 +9,9 @@ classic Container Apps topology and in the explicit classic fallback. The
 [upcoming hosted-default topology](deploy.md#chat-runtime-modes-upcoming-hosted-default-release)
 is hosted/no-panel, does not deploy this dashboard, and requires
 `DEPLOY_ADMINISTRATIVE_PANEL=false`. It still depends on
-[Azure/GPT-RAG PR #617](https://github.com/Azure/GPT-RAG/pull/617) and new
-releases. Hosted/panel is deferred to
+unpublished component and AI Landing Zone tags, final umbrella pins, integrated
+validation, and a new GPT-RAG release. The platform implementation is merged
+but unreleased. Hosted/panel is deferred to
 [issue #611](https://github.com/Azure/GPT-RAG/issues/611).
 
 ## What this is

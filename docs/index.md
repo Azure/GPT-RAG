@@ -21,11 +21,13 @@ fallback. See the [Architecture](architecture.md) page for the mode contract
 and required-vs-configurable deployment table.
 
 !!! warning "Hosted-default release dependency"
-    The diagram below is the approved target, not shipped behavior. UI
-    [PR #93](https://github.com/Azure/gpt-rag-ui/pull/93) is merged, but
-    [Azure/GPT-RAG PR #617](https://github.com/Azure/GPT-RAG/pull/617) and the
-    required component and umbrella releases are still pending. Current
-    published releases remain classic.
+    The diagram below is the approved target, not shipped behavior. The
+    platform implementation merged in
+    [Azure/GPT-RAG PR #617](https://github.com/Azure/GPT-RAG/pull/617), and the
+    UI and AI Landing Zone release PRs merged, but their planned tags and
+    GitHub Releases are not published. Final umbrella pins, integrated
+    validation, and a new GPT-RAG release remain. Current published GPT-RAG
+    `v3.7.0` stays classic.
 
 ![Chat runtime modes and hosted deployment lifecycle](media/architecture_chat_runtime_modes.svg)
 

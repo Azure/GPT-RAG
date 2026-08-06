@@ -49,19 +49,23 @@ Some transient Azure capacity failures are not exposed by reliable pre-create AP
 
 For current published releases, the `postProvision` hook runs locally after
 `azd provision`, and `azd deploy` deploys the UI, orchestrator, and ingestion
-services in the classic Container Apps topology. The approved target changes
-the fresh-deployment default only after the platform and release gates below
-are complete.
+services in the classic Container Apps topology. The hosted-default
+implementation is merged to `develop`, but the fresh-deployment default changes
+only after the release gates below are complete.
 
 ### Chat runtime modes (upcoming hosted-default release)
 
 !!! warning "Do not treat the target default as shipped"
-    UI [PR #93](https://github.com/Azure/gpt-rag-ui/pull/93) is merged. The
-    umbrella implementation in [Azure/GPT-RAG PR #617](https://github.com/Azure/GPT-RAG/pull/617)
-    is not merged, and the required component, AI Landing Zone, and GPT-RAG
-    umbrella releases have not published. Current published releases remain
-    classic. Use the workflow in this section only with the release that
-    explicitly announces the hosted-default contract.
+    The umbrella implementation merged to `develop` in
+    [Azure/GPT-RAG PR #617](https://github.com/Azure/GPT-RAG/pull/617).
+    UI release PR
+    [#94](https://github.com/Azure/gpt-rag-ui/pull/94) and AI Landing Zone
+    release PR [#131](https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/131)
+    merged to their main branches, but the planned UI `v2.6.0` and AI Landing
+    Zone `v2.5.0` tags and GitHub Releases are not published. Final umbrella
+    pins, integrated validation, and a new GPT-RAG release also remain. Current
+    published GPT-RAG `v3.7.0` stays classic. Use this workflow only with the
+    release that explicitly announces the hosted-default contract.
 
 The upcoming release resolves one canonical topology before provisioning and
 materializes the corresponding legacy flags and App Configuration values.
@@ -87,7 +91,7 @@ Configuration label `gpt-rag`:
 | `DEPLOYMENT_TOPOLOGY` | Canonical deployment choice: `hosted-no-panel` or `classic`. `hosted-panel` fails closed while #611 is open. |
 | `CHAT_BACKEND` | The upcoming UI release treats missing or blank as `hosted_agent`; the umbrella deployment always publishes the resolved sticky value. `orchestrator` is the explicit fallback. Unknown values fail startup. Environment configuration takes precedence over App Configuration. |
 | `ORCHESTRATOR_BASE_URL` | Classic service root, used only when `CHAT_BACKEND=orchestrator`. |
-| `HOSTED_AGENT_BASE_URL` | Required HTTPS hosted service root. The UI sends `POST /invocations` when `CHAT_BACKEND=hosted_agent`. |
+| `HOSTED_AGENT_BASE_URL` | Required HTTPS hosted service root. The UI sends canonical Responses protocol v2 requests to `POST /responses` when `CHAT_BACKEND=hosted_agent`. The separate `POST /invocations` endpoint retains the legacy messages-based invocation contract. |
 | `HOSTED_AGENT_RESOURCE_SCOPE` | Required explicit non-ARM hosted data-plane Entra scope ending in `/.default`, for example `api://<application-id>/.default`. |
 | `HOSTED_AGENT_AUTH_MODE` | `user_delegated` is the default and required release path. The UI exchanges the signed-in user's token on behalf of the user. `service_identity` is an explicit reviewed exception, never an implicit fallback. |
 | `HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS` | Finite positive wait for the next SSE event. The UI default is `60`; an infinite timeout is rejected. |
@@ -98,6 +102,36 @@ runtime failures are terminal for startup or the affected request. The UI does
 not silently switch to the orchestrator or to managed identity. Foundry passes
 opaque `x-agent-foundry-call-id` context to Toolbox; user and delegated bearer
 tokens are not copied into tool payloads or client-defined identity headers.
+
+`POST /responses` and `POST /invocations` are distinct protocols, not aliases, and their request bodies are not interchangeable. The canonical Responses protocol v2 route accepts the supported streaming subset of the Azure AI Responses create contract:
+
+```json
+{
+  "input": "What is the document retention policy?",
+  "stream": true,
+  "store": true,
+  "conversation": {
+    "id": "<conversation-id>"
+  }
+}
+```
+
+The compatibility `POST /invocations` route retains the legacy messages-based schema:
+
+```json
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "What is the document retention policy?"
+    }
+  ],
+  "conversation_id": "<conversation-id>",
+  "metadata": {}
+}
+```
+
+Both routes stream SSE responses, but each validates its own protocol-specific input before entering the shared hosted execution path. See the Microsoft Foundry [hosted-agent protocol comparison](https://learn.microsoft.com/azure/foundry/agents/concepts/hosted-agents#key-concepts).
 
 #### Two-phase hosted deployment
 
@@ -443,10 +477,11 @@ cd gpt-rag-orchestrator
 ## Permissions
 
 The role tables below describe the currently released classic Container Apps
-topology. The upcoming hosted/no-panel target omits the orchestrator Container
-App assignments and adds Foundry data-plane, delegated-user, Toolbox, and
-immutable-image pull assignments. It still depends on platform PR #617 and new
-releases. Hosted/panel remains unsupported and is tracked by
+topology. The merged but unreleased hosted/no-panel implementation omits the
+orchestrator Container App assignments and adds Foundry data-plane,
+delegated-user, Toolbox, and immutable-image pull assignments. Component and AI
+Landing Zone tags, final umbrella pins, integrated validation, and the GPT-RAG
+release remain outstanding. Hosted/panel remains unsupported and is tracked by
 [issue #611](https://github.com/Azure/GPT-RAG/issues/611).
 
 **Microsoft Foundry Role and AI Search Assignments**

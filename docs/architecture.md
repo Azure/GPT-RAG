@@ -7,14 +7,17 @@ deployments retain their persisted topology during upgrade. Network isolation,
 enterprise integration, public ingress, and optional AI capabilities remain
 separate choices.
 
-!!! warning "Target architecture pending platform and release gates"
-    UI [PR #93](https://github.com/Azure/gpt-rag-ui/pull/93) is merged, but the
-    umbrella implementation in [Azure/GPT-RAG PR #617](https://github.com/Azure/GPT-RAG/pull/617)
-    is not merged and no hosted-default GPT-RAG release has published. The
-    diagrams on this page document the approved target. Until #617 merges and
-    the required component, AI Landing Zone, and umbrella releases publish,
-    current published releases continue to use the classic Container Apps
-    default.
+!!! warning "Implementation merged; release gates remain"
+    The hosted-default implementation merged to `develop` in
+    [Azure/GPT-RAG PR #617](https://github.com/Azure/GPT-RAG/pull/617).
+    UI release PR
+    [#94](https://github.com/Azure/gpt-rag-ui/pull/94) and AI Landing Zone
+    release PR [#131](https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/131)
+    also merged, but the planned UI `v2.6.0` and AI Landing Zone `v2.5.0` tags
+    and GitHub Releases are not published. The diagrams document the approved
+    target. Current published GPT-RAG `v3.7.0` remains classic until those
+    releases publish and final umbrella pins, integrated validation, and the
+    GPT-RAG release complete.
 
 ## Full Zero Trust reference
 

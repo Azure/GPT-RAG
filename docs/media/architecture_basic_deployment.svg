@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820" role="img" aria-labelledby="title desc">
   <title id="title">GPT-RAG hosted-default Basic Deployment target architecture</title>
-  <desc id="desc">Target fresh-deployment architecture, pending platform pull request 617 and new releases. Users access the Web UI in Azure Container Apps. The UI uses delegated on-behalf-of authorization to call a Microsoft Foundry hosted agent, which passes opaque call context to Toolbox and MCP tools for authorization-trimmed retrieval. Ingestion remains in Container Apps. The orchestrator Container App is shown only as an explicit deployment fallback, with no request-time silent fallback. The administrative panel is absent.</desc>
+  <desc id="desc">Target fresh-deployment architecture. The platform implementation is merged but unreleased pending component and AI Landing Zone tags, final umbrella pins, integrated validation, and a GPT-RAG release. Users access the Web UI in Azure Container Apps. The UI uses delegated on-behalf-of authorization to call a Microsoft Foundry hosted agent, which passes opaque call context to Toolbox and MCP tools for authorization-trimmed retrieval. Ingestion remains in Container Apps. The orchestrator Container App is shown only as an explicit deployment fallback, with no request-time silent fallback. The administrative panel is absent.</desc>
   <defs>
     <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
       <path d="M2,2 L10,6 L2,10 Z" fill="#385a8d"/>
@@ -28,7 +28,7 @@
   <text x="46" y="72" class="subtitle">Fresh deployments use hosted/no-panel after release gates pass; UI and ingestion remain in Azure Container Apps.</text>
 
   <rect x="46" y="91" width="1188" height="42" rx="12" fill="#fff4ce" stroke="#f7630c" stroke-width="1.5"/>
-  <text x="66" y="117" class="status">Release dependency: Azure/GPT-RAG #617 must merge and required component / umbrella releases must publish. Current published releases remain classic.</text>
+  <text x="66" y="117" class="status">Implementation merged but unreleased: component / AILZ tags, final umbrella pins, validation, and GPT-RAG release remain. v3.7.0 stays classic.</text>
 
   <rect x="46" y="153" width="1188" height="312" rx="22" fill="#ffffff" stroke="#d8e3f5" stroke-width="2"/>
   <text x="70" y="181" class="zone-title">Request path</text>

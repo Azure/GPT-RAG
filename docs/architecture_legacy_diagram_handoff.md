@@ -7,9 +7,9 @@ chat-runtime views.
 
 !!! warning "Release status"
     Draw the hosted/no-panel path as the **target fresh-deployment default** and
-    label it **Pending Azure/GPT-RAG #617 + required releases**. Do not label it
-    shipped until the platform PR merges and the component and umbrella
-    releases publish.
+    label it **Implementation merged; releases and final pins pending**. Do not
+    label it shipped until the planned component and AI Landing Zone tags,
+    final umbrella pins, integrated validation, and GPT-RAG release publish.
 
 ## Shapes and labels
 
@@ -27,7 +27,7 @@ Add or update these shapes in the application/runtime area:
 | Mode annotation | `Fresh target default: hosted-no-panel` | Place above the hosted-agent lane. |
 | Fallback annotation | `Explicit/sticky classic topology` | Place above the orchestrator fallback. |
 | Panel annotation | `Administrative panel absent; DEPLOY_ADMINISTRATIVE_PANEL=false` | Place below the hosted lane. |
-| Release annotation | `Pending Azure/GPT-RAG #617 + required releases` | Place in an amber status banner below the diagram title. |
+| Release annotation | `Implementation merged; releases and final pins pending` | Place in an amber status banner below the diagram title. |
 
 ## Connections and labels
 
@@ -69,7 +69,7 @@ The two alternatives converge on the same `immutable sha256 digest` shape.
 - Purple solid border/fill: Toolbox and MCP tools.
 - Orange solid border/fill: build and immutable-image lifecycle.
 - Red stop marker: prohibited request-time cross-backend fallback.
-- Amber banner: unmerged PR or unpublished release dependency.
+- Amber banner: unpublished release, final-pin, or validation dependency.
 - Use black text throughout and preserve the existing typeface, spacing, icon
   family, title, and accessibility contrast.
 

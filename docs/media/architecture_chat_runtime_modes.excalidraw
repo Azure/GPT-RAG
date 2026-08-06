@@ -53,7 +53,7 @@
       "y": 117,
       "width": 1250,
       "height": 60,
-      "text": "Target contract: UI #93 is merged; platform #617 is not merged; new component and umbrella releases are still required before this is the supported default.",
+      "text": "Implementation merged but unreleased: component / AILZ tags, final umbrella pins, integrated validation, and GPT-RAG release remain. v3.7.0 stays classic.",
       "fontSize": 13,
       "fontFamily": 2,
       "strokeColor": "#000000",

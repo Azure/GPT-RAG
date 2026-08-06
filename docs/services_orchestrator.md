@@ -8,16 +8,16 @@ published releases run it as an orchestrator Container App. The
 [upcoming hosted-default topology](deploy.md#chat-runtime-modes-upcoming-hosted-default-release)
 packages the same chat runtime as a Microsoft Foundry hosted agent for fresh
 deployments and retains the Container Apps adapter as an explicit fallback.
-That default still depends on
-[Azure/GPT-RAG PR #617](https://github.com/Azure/GPT-RAG/pull/617) and new
-releases; hosted/panel remains unsupported. [GitHub Repository](https://github.com/Azure/gpt-rag-orchestrator).
+The platform implementation is merged but remains unreleased pending component
+and AI Landing Zone tags, final umbrella pins, integrated validation, and a new
+GPT-RAG release; hosted/panel remains unsupported. [GitHub Repository](https://github.com/Azure/gpt-rag-orchestrator).
 
 ## Key Features
 
 - **Strategy-Based Architecture:** Pluggable orchestration strategies selected via Azure App Configuration (`AGENT_STRATEGY`).
 - **Context Retrieval:** Intelligent retrieval from Azure AI Search or Foundry IQ with citation support and conservative retrieval-needed triage for local MAF strategies.
 - **Microsoft Agent Framework:** Built on the Microsoft Agent Framework.
-- **Conversation Persistence:** The currently released classic Container Apps topology maintains conversation history in Cosmos DB. The upcoming hosted/no-panel target uses Foundry managed Conversations for runtime state after platform PR #617 and new releases ship. User-facing managed Conversation history and panel integration are deferred to [issue #611](https://github.com/Azure/GPT-RAG/issues/611). Both chat paths stream responses over SSE.
+- **Conversation Persistence:** The currently released classic Container Apps topology maintains conversation history in Cosmos DB. The upcoming hosted/no-panel target uses Foundry managed Conversations for runtime state after its component and umbrella releases publish. The platform implementation is merged but unreleased. User-facing managed Conversation history and panel integration are deferred to [issue #611](https://github.com/Azure/GPT-RAG/issues/611). Both chat paths stream responses over SSE.
 - **Extensible Design:** Easy to add new strategies by extending `BaseAgentStrategy`.
 
 ## Available Strategies
@@ -60,8 +60,9 @@ are handled in two places. The model prompt receives only a recent history
 window, while the Cosmos DB conversation document is compacted before
 persistence so it keeps useful recent context without growing indefinitely.
 The upcoming hosted/no-panel target uses Foundry managed Conversations for
-runtime state after platform PR #617 and new releases ship. User-facing history
-and panel integration remain deferred to
+runtime state after its component and umbrella releases publish. The platform
+implementation is merged but unreleased. User-facing history and panel
+integration remain deferred to
 [issue #611](https://github.com/Azure/GPT-RAG/issues/611). The default
 `maf_lite` strategy and the `multimodal` strategy also classify each turn as a
 greeting, retrieval-needed question, or no-retrieval follow-up. Transformations
