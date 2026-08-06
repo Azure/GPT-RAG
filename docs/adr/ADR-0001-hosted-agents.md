@@ -1,16 +1,18 @@
 # ADR-0001: How GPT-RAG will support Microsoft Foundry hosted agents
 
-Status: Accepted (revision 4, implementation boundary implemented by issue #595)
-Date: 2026-07-27
+Status: Accepted (revision 5, hosted-default promotion approved; default-changing
+release gated by issues #591, #592, #597, and #589; panel separately gated by
+#611)
+Date: 2026-08-05
 Deciders: Paulo (GPT-RAG maintainer), with architecture analysis (Martin) and
 implementation analysis (Guido).
 
 ## TL;DR (one sentence)
 
-We decided to package the GPT-RAG orchestration as a Foundry hosted agent, with
-the UI talking directly to it and the orchestrator Azure Container Apps becoming
-optional (administrative panel backend only), switched on by a provisioning
-flag, so the customer has one less resource to operate.
+We decided that fresh GPT-RAG deployments will use Microsoft Foundry hosted
+orchestration by default, without the administrative panel, while Azure
+Container Apps remains an explicit, supported fallback and existing deployments
+do not switch runtimes during upgrade without operator consent.
 
 Non-negotiable requirement: Option 1 is only acceptable if it preserves,
 end to end, the native document-level security provided by Foundry IQ and Azure
@@ -28,6 +30,151 @@ that framing Option 2 does not deliver what the customer asks for, because it
 keeps Container Apps running. Only Option 1 removes a resource from the operator
 bill.
 
+Revision 5 changes the promotion policy, not the runtime architecture. Revisions
+1 through 4 made hosted/no-panel an opt-in preview and kept Container Apps as the
+default. After the hosted implementation and exact component pins landed through
+PR #614, the maintainer explicitly chose hosted/no-panel as the future default
+for fresh deployments. This revision supersedes earlier default/opt-in language
+in this ADR. It does not change an implementation default, deploy Azure
+resources, update the published documentation, or publish a release by itself.
+Revision 4 remains the implementation boundary implemented by issue #595.
+
+## Revision 5: hosted-default promotion contract
+
+### Prioritized architectural characteristics
+
+The characteristics below are ordered. A lower-priority benefit cannot waive a
+higher-priority gate.
+
+1. **Document authorization and identity integrity.** The hosted path must prove
+   an authorized-user allow and unauthorized-user deny through UI, hosted agent,
+   Toolbox, Foundry IQ, and Azure AI Search. The signed-in user uses delegated
+   authorization; managed identity or a group-filter fallback is not acceptable
+   evidence for the default path. Bearer tokens and protected content must be
+   absent from logs.
+2. **Chat correctness and fail-closed behavior.** Responses streaming, two-turn
+   managed Conversation continuity, citations, correlation, and the supported
+   strategy set must work without an orchestrator Container App. Missing caller
+   context, identity, endpoint, or downstream authorization fails explicitly;
+   the UI never silently changes to Container Apps.
+3. **Safe deployment and upgrade compatibility.** A fresh Basic deployment and
+   a fresh network-isolated deployment must select hosted/no-panel without extra
+   mode flags, deploy no orchestrator Container App, and use immutable component
+   and image digests. Existing environments remain on their persisted topology
+   during upgrade until an operator runs the documented migration.
+4. **Operability and reversibility.** Container Apps remains maintained,
+   tested, documented, and selectable with one explicit topology setting. A
+   fallback redeploy must restore classic chat without deleting hosted
+   Conversations or panel data and without hand-editing App Configuration.
+5. **Cost and operator burden.** Hosted/no-panel removes the always-deployed
+   orchestrator Container App and panel-only Cosmos dependency. Release evidence
+   must disclose Foundry session pricing, measured cold/resume behavior, and a
+   representative hosted-versus-classic cost comparison rather than assuming
+   that fewer resources always means lower total cost.
+
+### Alternatives considered for the product default
+
+| Alternative | Benefits | Costs and risks | Identity, network, compatibility, and reversibility |
+| --- | --- | --- | --- |
+| Keep Container Apps as the default | Lowest migration risk; current OBO, panel, and operational model remain unchanged. | Does not deliver the intended managed-agent experience or remove the orchestrator resource; hosted remains easy to miss and under-exercised. | Strongest current compatibility. Hosted security and private-build paths stay secondary. Reversal is trivial because nothing changes. |
+| **Hosted/no-panel by default, Container Apps as explicit fallback (chosen)** | Makes the managed Foundry runtime the normal fresh-deploy experience, removes the orchestrator Container App, and keeps a recovery path. | Puts hosted preview constraints, per-session limits, immutable 100% traffic switching, and Foundry pricing on the default path. Requires sticky upgrade semantics and two runtimes to remain supportable. | Requires delegated caller identity through Toolbox and negative authorization proof; requires a validated private ACR build/pull route; preserves existing deployments and supports explicit fallback. |
+| Hosted-only | Simplest long-term topology and smallest runtime support matrix. | Removes the proven recovery path while hosted agents have no SLA, no canary, strict resource ceilings, and incomplete panel support. Existing deployments would face a forced migration. | Unacceptable until hosted operation, identity, strategy compatibility, and panel parity have substantially stronger evidence. Reversal would require reintroducing a removed runtime. |
+
+### Default, migration, and configuration semantics
+
+- The target default for a **new environment created after the default-changing
+  release** is hosted/no-panel:
+  `DEPLOY_HOSTED_AGENT_ORCHESTRATION=true`,
+  `DEPLOY_ADMINISTRATIVE_PANEL=false`, `CHAT_BACKEND=hosted_agent`.
+- `DEPLOY_ADMINISTRATIVE_PANEL` remains `false` by default and must fail
+  validation if enabled in a release until #611 closes with the managed
+  Conversation history, feedback, curation, dashboard, identity, and live
+  hosted/panel gates.
+- Container Apps remains the explicit fallback:
+  `DEPLOY_HOSTED_AGENT_ORCHESTRATION=false`,
+  `DEPLOY_ADMINISTRATIVE_PANEL=false`, `CHAT_BACKEND=orchestrator`.
+- An existing environment with a persisted classic topology must not become
+  hosted merely because a template or environment-variable fallback changes.
+  Before the default changes, the umbrella implementation must materialize or
+  infer an explicit sticky topology from the deployed `DEPLOYMENT_TOPOLOGY` and
+  App Configuration state. Valid topology values remain `classic`,
+  `hosted-no-panel`, and `hosted-panel`. An existing deployment with no topology
+  marker is treated as pre-cutover `classic`; genuinely conflicting persisted
+  signals fail with migration guidance.
+- Migration is an operator action that validates prerequisites, pins the hosted
+  image digest, changes the topology, provisions/deploys hosted/no-panel, proves
+  a smoke request, and only then removes or deactivates the classic chat path.
+  No Cosmos-to-Foundry history backfill is required; classic history remains
+  readable in the fallback deployment and new hosted history starts in Foundry
+  managed Conversations.
+- Runtime failure never causes an automatic cross-backend fallback. That would
+  change identity, authorization, conversation, and cost semantics inside a
+  user request. Rollback is an explicit deployment operation.
+
+### Repository and contract handoff
+
+| Repository | Required implementation handoff before the default changes |
+| --- | --- |
+| `Azure/GPT-RAG` | Own fresh-versus-existing topology selection, sticky upgrade detection, paired PowerShell/shell lifecycle behavior, `main.parameters.json`, App Configuration publication, immutable manifest pins, hosted image orchestration, rollback contract, release tests, and the later docs/release handoff. The AI Landing Zone stays accelerator-neutral. |
+| `Azure/gpt-rag-ui` | Make `hosted_agent` the fresh-deploy backend selected from App Configuration; require signed-in-user OBO for the hosted data-plane scope; preserve explicit `orchestrator` fallback; stream Responses and map managed Conversation IDs; fail closed with no managed-identity or silent backend fallback. Keep panel surfaces disabled until #611. |
+| `Azure/gpt-rag-orchestrator` | Maintain the runtime-neutral core and both adapters; publish/run the hosted entrypoint from an immutable image; propagate only the opaque Foundry call context to Toolbox; preserve managed Conversations, bounds, timeouts, telemetry redaction, and the eligible-strategy gates; keep the classic adapter release-compatible. |
+| `Azure/gpt-rag-ingestion` | Keep hosted retrieval behind the delegated-token, identity-aware, fail-closed contract and INV-002 evidence; preserve document ACL metadata and bounded outputs. Do not promote draft panel/history endpoints before #611. |
+| `Azure/bicep-ptn-aiml-landing-zone` | Continue to expose generic hosted-agent, private networking, RBAC, private ACR pull, and dedicated VNet-connected ACR Tasks pool primitives. Complete and release the private-network naming/build fixes required by #597, but do not encode GPT-RAG's product default. |
+| `Azure/GPT-RAG` `docs` branch | In the implementation/release change, replace current opt-in guidance with fresh-deploy, existing-upgrade, migration, cost, rollback, and no-panel-default guidance. Do not claim hosted/panel support before #611. |
+
+`Azure/gpt-rag-mcp` is not on the current default-change critical path. Add it
+only if the validated Toolbox contract requires a runtime change in that
+repository.
+
+### Fitness functions and promotion gates
+
+| Priority | Fitness function | Passing evidence |
+| --- | --- | --- |
+| P0 | Delegated authorization is preserved end to end. | #591 closes with isolated two-user/two-group allow and deny tests through chat, citations, Toolbox/retrieval, and direct citation access; malformed/missing context fails closed; token/protected-content log scans are clean. |
+| P0 | Hosted/no-panel serves correct chat behavior. | #592 closes with Responses streaming, two-turn managed Conversation continuity, correlation, supported-strategy smoke coverage, and zero orchestrator Container Apps. |
+| P0 | Private deployment and immutable image operation work. | #597 closes with fresh network-isolated provision, dedicated VNet-connected ACR Tasks build, private Foundry image pull with ACR public access disabled, digest verification, previous-version rollback, and cleanup. |
+| P1 | Fresh and upgrade semantics are deterministic. | Contract tests prove fresh Basic and isolated environments select hosted/no-panel; fixtures for pre-cutover classic environments remain classic; ambiguous state fails; explicit fallback recreates classic in one deployment cycle without data deletion. |
+| P1 | Cross-platform and cross-repository contracts agree. | PowerShell/shell parity tests pass; exact released component commits and AILZ tag are pinned; UI, orchestrator, ingestion, and umbrella contract suites pass at those pins. |
+| P2 | Resource bounds and cost are understood. | Each enabled strategy meets the existing startup, idle/resume, concurrency, and memory gates; release evidence publishes a representative Foundry-session versus classic cost comparison and identifies preview/SLA limits. Cost is a disclosure and explicit maintainer-approval gate, not a universal savings threshold; no savings claim is made unless the measured profile supports it. |
+| P2 | Operator guidance matches the release. | #589 updates the `docs` branch and release material after the implementation lands; docs explicitly keep the panel off until #611 and include migration and fallback procedures. |
+
+### Adoption order
+
+1. Merge this ADR-only revision. It authorizes no runtime-default change.
+2. Close the live security, runtime, and private-network evidence gaps in #591,
+   #592, and #597 using exact immutable component pins.
+3. Release and pin any required component and AI Landing Zone fixes with human
+   approval.
+4. Implement the umbrella fresh-default and sticky-upgrade contracts in a
+   separate focused change; keep `DEPLOY_ADMINISTRATIVE_PANEL=false`.
+5. Validate the exact integrated combination in fresh Basic, fresh isolated,
+   pre-cutover classic upgrade, explicit migration, and explicit fallback
+   scenarios.
+6. Update the `docs` branch and prepare the release through #589. Only that
+   release changes the supported product default.
+7. Complete and independently promote hosted/panel through #611; it is not a
+   prerequisite for hosted/no-panel to become the chat default.
+
+### Open blockers at acceptance of revision 5
+
+- #591 remains open until the exact released pins pass the isolated delegated
+  identity and two-user document-authorization proof.
+- #592 remains open until the corrected hosted/no-panel runtime passes the
+  minimal live streaming, managed Conversation continuity, telemetry, rollback,
+  and cleanup sequence.
+- #597 remains open until the private ACR route, dedicated VNet-connected ACR
+  Tasks pool, hosted derivative image, private pull, and digest rollback pass
+  together. Any required AI Landing Zone fix must be independently reviewed,
+  released, and pinned before it counts as evidence.
+- #589 remains the documentation and umbrella-release gate. The published docs
+  currently describe Container Apps as the default and hosted/no-panel as an
+  opt-in preview; that is accurate until the implementation and release change.
+- #611 blocks only hosted/panel. It requires the managed Conversation history
+  API, panel frontend, feedback/curation contract, fail-closed identity behavior,
+  exact pins, and live validation. The panel flag stays false until it closes.
+- #576 remains the parent delivery record and should close only after the
+  hosted-default release evidence is complete.
+
 ## Context and problem
 
 Before deciding anything we need to agree on vocabulary, because the word "agent"
@@ -43,16 +190,16 @@ the portal and consumed by id or name. Prompt agents are out of scope for this
 decision. Here we only mean the strict sense: code in a container, managed by
 Foundry.
 
-To ground this in what exists today: the GPT-RAG orchestrator (repository
-Azure/gpt-rag-orchestrator, version 3.9.0, Python with FastAPI) runs on Azure
-Container Apps and has a multi-strategy router. It selects the strategy through a
-configuration called AGENT_STRATEGY, and there are already strategies built on
-Microsoft Agent Framework (maf_lite, maf_agent_service) and on Semantic Kernel
+To ground this in what exists today: the integrated candidate pins the GPT-RAG
+orchestrator (repository Azure/gpt-rag-orchestrator, version 3.10.0, Python with
+FastAPI), which supports both Container Apps and hosted adapters and has a
+multi-strategy router. It selects the strategy through a configuration called
+AGENT_STRATEGY, and there are already strategies built on Microsoft Agent
+Framework (maf_lite, maf_agent_service) and on Semantic Kernel
 (single_agent_rag, mcp, nl2sql, multimodal). The UI (repository gpt-rag-ui, a
-Chainlit app in Python) talks to the orchestrator over HTTP and receives the
-response as a stream, and there are also routes for conversation history,
-feedback, and an administrative dashboard. Keep these details in mind, because
-they weigh on the design.
+Chainlit app in Python) receives the response as a stream, and there are also
+routes for conversation history, feedback, and an administrative dashboard.
+Keep these details in mind, because they weigh on the design.
 
 An important finding from the code review: the maf_agent_service strategy
 already publishes to the Foundry Agent Service declaratively, with create_version
@@ -71,8 +218,9 @@ almost opposite.
 We package the GPT-RAG orchestration core as a hosted agent and let Foundry host
 and manage the runtime. The agent exposes the protocols Foundry expects
 (Responses and Invocations). The UI now talks to this agent for chat. The
-orchestrator Azure Container Apps stops being mandatory and only comes up when
-the customer wants the administrative panel.
+orchestrator Azure Container Apps stops being mandatory and remains the explicit
+classic fallback. A smaller administrative backend may be added later, but the
+panel path is disabled until #611 closes.
 
 The analogy is moving into a fully serviced furnished apartment. The building
 handles maintenance, front-desk security, and infrastructure. In exchange you
@@ -199,23 +347,24 @@ the activity of reviewing content inside that panel.
 ### The provisioning flag
 
 Two flags in the format the infra already uses (deployXxx with a value coming
-from an environment variable), with defaults that preserve current behavior:
-- DEPLOY_HOSTED_AGENT_ORCHESTRATION, default false. Turns on the hosted agent
-  mode: provisions the agent, points the UI at it, and makes the orchestrator
-  Container Apps conditional.
+from an environment variable) select the topology:
+- DEPLOY_HOSTED_AGENT_ORCHESTRATION. The implemented baseline defaults to false
+  today. The default-changing release will set it to true only for fresh
+  environments and preserve an existing environment's persisted topology.
 - DEPLOY_ADMINISTRATIVE_PANEL, default false. When true in hosted agent mode,
   brings up the smaller Container Apps only to serve history, feedback, and the
-  dashboard.
+  dashboard. It remains unsupported and blocked from promotion until #611.
 
 Three resulting modes:
-- Classic (default): hosted agent off. Orchestrator on Container Apps, UI talks
-  to it, panel included. This is today's behavior and the supported path while
-  hosted agents are in preview.
-- Hosted agent without panel: flag on, panel off. The hosted agent comes up, the
+- Classic (explicit fallback, and sticky for existing classic environments):
+  hosted agent off. Orchestrator on Container Apps and UI talks to it.
+- Hosted agent without panel (target default for fresh environments): flag on,
+  panel off. The hosted agent comes up, the
   UI points at it, the orchestrator Container Apps does not come up, history via
   Foundry Conversations. This is the field's "one less resource".
-- Hosted agent with panel: flag on, panel on. Hosted agent for chat, smaller
-  data-ingestion Container Apps only as the administrative backend.
+- Hosted agent with panel (deferred until #611): flag on, panel on. Hosted agent
+  for chat, smaller data-ingestion Container Apps only as the administrative
+  backend.
 
 At deployment time Azure/GPT-RAG composes the landing-zone parameter document,
 then deploys the agent through an isolated `azure.ai.agent` service only when
@@ -227,9 +376,12 @@ Issue #595 fixes the ownership boundary rather than putting product policy into
 the reusable landing zone:
 
 - Azure/GPT-RAG owns `DEPLOY_HOSTED_AGENT_ORCHESTRATION` and
-  `DEPLOY_ADMINISTRATIVE_PANEL`, both defaulting to `false`. Its pre-provision
-  composer converts those flags into the three resource compositions.
-- The AI Landing Zone remains accelerator-neutral. Version `v2.4.0` accepts the
+  `DEPLOY_ADMINISTRATIVE_PANEL`. The implemented revision-4 baseline defaults
+  both to `false`; revision 5 requires hosted/no-panel for fresh environments,
+  sticky topology for upgrades, and keeps the panel default `false`. Its
+  pre-provision composer converts those flags into the three resource
+  compositions.
+- The AI Landing Zone remains accelerator-neutral. Version `v2.4.1` accepts the
   generic hosted-agent inputs, provisions the shared Foundry and registry
   prerequisites, and returns handoff outputs. It does not choose GPT-RAG's mode,
   remove Container Apps, select components, or publish GPT-RAG runtime keys.
@@ -245,9 +397,10 @@ the reusable landing zone:
   label. The hosted base URL is derived from azd's Invocations protocol endpoint
   so the UI can append `/invocations` without duplicating that path.
 - Hosted mode requires `HOSTED_AGENT_IMAGE_VERSION` to be an immutable
-  `sha256:<digest>` supplied by the operator. A mutable release tag is rejected.
-  This is necessary because the `v3.9.0` orchestrator release contains source but
-  no immutable published release image.
+  `sha256:<digest>`. A mutable release tag is rejected. The implemented baseline
+  accepts an operator-supplied digest; before hosted becomes the fresh default,
+  deployment must automatically resolve or build a hosted-ready immutable image
+  so a fresh deployment does not depend on an undocumented manual prerequisite.
 - The published orchestrator image's baked-in entrypoint is the classic
   Container Apps command. Foundry's container-mode hosted-agent API deploys
   whatever `CMD`/`ENTRYPOINT` is in the image and does not read `azure.yaml`'s
@@ -260,13 +413,15 @@ the reusable landing zone:
   override to the hosted entrypoint. `HOSTED_AGENT_IMAGE_VERSION` is then
   re-pinned to the derivative image's digest before `azd deploy
   orchestrator-agent` runs. Operators who already publish a correctly
-  configured hosted image can leave the flag off.
+  configured hosted image can leave the flag off. The default-changing release
+  must either select this automatic build path or pin a published image whose
+  baked-in entrypoint already satisfies the hosted contract.
 - The deterministic rollback contract restores the complete `v3.7.0` classic
   pin set, resets both flags to `false`, clears hosted endpoint inputs, and
   restores `CHAT_BACKEND=orchestrator`.
 
 No files inside the landing-zone submodule are changed by this implementation.
-The integration is limited to the exact `v2.4.0` tag/gitlink and its published
+The integration is limited to the exact `v2.4.1` tag/gitlink and its published
 parameter/output contract.
 
 ### User identity and document-level security
@@ -435,8 +590,10 @@ preview without SLA, and tools only via the Toolbox MCP.
 
 We are going with Option 1, in the mode designed above: the orchestration becomes
 a hosted agent, the Chainlit UI talks to it as a thin BFF, and the orchestrator
-Azure Container Apps becomes optional, surviving only as the administrative panel
-backend, switched on by a provisioning flag.
+Azure Container Apps becomes an explicit supported fallback. Fresh environments
+select hosted/no-panel after the promotion gates pass. Existing environments
+retain their persisted topology, and the administrative panel stays off until
+#611.
 
 The why, in plain terms:
 - Delivers what the field asked for: one less resource for the customer to
@@ -445,8 +602,8 @@ The why, in plain terms:
   versioning.
 - Reuses what already exists in code, because maf_agent_service already talks to
   the Agent Service declaratively.
-- Keeps the classic Container Apps mode as a supported fallback while the feature
-  is in preview, so the change is opt-in and breaks no one.
+- Keeps the classic Container Apps mode as a supported explicit fallback and
+  protects existing deployments from an implicit runtime migration.
 
 ## Consequences
 
@@ -491,9 +648,10 @@ This is the architecture-level plan, in dependency order.
 
 ## Risks
 
-- Preview without SLA on the critical path. Mitigation: keep the classic mode as
-  the default and fallback, and keep the hosted agent as opt-in documented as
-  preview.
+- Preview without SLA on the critical path. Mitigation: make hosted the fresh
+  default only after the P0 gates pass, preserve classic as an explicit
+  supported fallback, keep existing deployments sticky, and document preview
+  limits and recovery before release.
 - Immutable version serving 100% of the traffic, no canary. Mitigation: publish
   and validate in a separate environment before switching the production version,
   and have the rollback by version reversal documented.
@@ -512,21 +670,21 @@ gates for implementation tracks.
 
 | Area | Frozen decision | Contract owner(s) | Release blocker if violated |
 | --- | --- | --- | --- |
-| History and feedback ownership | Hosted modes use Foundry managed Conversations for chat history. Feedback and administrative curation metadata remain in Cosmos and are only available when the administrative panel is deployed. | gpt-rag-orchestrator, gpt-rag-ui, Azure/GPT-RAG | Hosted/no-panel requires orchestrator Container Apps for chat persistence. |
+| History and feedback ownership | Hosted modes use Foundry managed Conversations for chat history. Feedback and administrative curation metadata remain in Cosmos and are only available when the administrative panel is deployed. | gpt-rag-orchestrator, gpt-rag-ui, Azure/GPT-RAG | Hosted/no-panel chat persistence falls back to orchestrator Container Apps instead of Foundry managed Conversations. |
 | Identity propagation and fallback policy | Primary path is Toolbox identity passthrough so Foundry IQ and AI Search apply native document trimming. Group-filter fallback is allowed only as an explicit temporary override for preview environments and cannot be the default release path. | gpt-rag-orchestrator, gpt-rag-ui | Any unauthorized document retrieval on hosted path; fallback enabled by default in a release candidate. |
 | Strategy eligibility under 2 vCPU / 4 GiB | The initial shared hosted-agent implementation scope is maf_lite, maf_agent_service, single_agent_rag, and mcp, subject to the hosted runtime gates below. nl2sql and multimodal remain classic-only until their investigations pass. | gpt-rag-orchestrator | nl2sql or multimodal enabled in the shared hosted agent without the required bounds, profiling evidence, and approval. |
-| Chat/backend configuration contract | `CHAT_BACKEND` values are `orchestrator` (default) and `hosted_agent`. Deployment flags remain `DEPLOY_HOSTED_AGENT_ORCHESTRATION` (default `false`) and `DEPLOY_ADMINISTRATIVE_PANEL` (default `false`). App Configuration label `gpt-rag` must publish backend selector plus both endpoint outputs (`orchestrator` and hosted agent) so the UI can switch without code changes. | Azure/GPT-RAG, gpt-rag-ui | Missing selector/endpoint outputs or ambiguous ownership of the keys. |
+| Chat/backend configuration contract | `CHAT_BACKEND` values remain `orchestrator` and `hosted_agent`. The default-changing release selects `hosted_agent` only for fresh environments and preserves the persisted selector for upgrades. `DEPLOY_ADMINISTRATIVE_PANEL` remains default `false`. App Configuration label `gpt-rag` must publish backend selector plus both endpoint outputs so the UI can switch through an explicit deployment operation. | Azure/GPT-RAG, gpt-rag-ui | Missing selector/endpoint outputs, ambiguous key ownership, implicit upgrade migration, or request-time backend fallback. |
 | Administrative panel boundary | Hosted/no-panel mode provisions no orchestrator Container Apps. Hosted/panel mode retains the ingestion Container Apps as the panel-only administrative backend (history, feedback, dashboard) and does not route chat through Container Apps. | Azure/GPT-RAG, gpt-rag-ingestion, gpt-rag-ui | Any hosted deployment with orchestrator app provisioned; hosted/panel chat routed to Container Apps. |
-| Private ACR build route | The automated baseline is a VNet-connected self-hosted CI runner or agent that runs the build from inside the VNet, as documented by Microsoft. A jump host is the interactive fallback. A dedicated VNet-connected ACR Tasks agent pool is an optional optimization pending validation; shared ACR Tasks are not a private-endpoint bypass. | Azure/GPT-RAG, bicep-ptn-aiml-landing-zone | No validated private-build route for hosted mode before release sign-off, or public ACR access enabled as an implicit workaround. |
+| Private ACR build route | The network-isolated automated baseline is the dedicated VNet-connected ACR Tasks agent pool supplied by the AI Landing Zone. A VNet-connected self-hosted runner or jump host is a separately validated contingency, not an implicit bypass. Shared ACR Tasks cannot reach a private endpoint. | Azure/GPT-RAG, bicep-ptn-aiml-landing-zone | Dedicated-pool build or private Foundry pull is unproven, shared ACR Tasks are used for private ACR, or public ACR access is enabled as an implicit workaround. |
 | Validation environment target | Validation must run in a dedicated non-production environment pair: one Basic topology and one network-isolated topology with private endpoints and private ACR support. | Azure/GPT-RAG | Hosted modes promoted without evidence from both topology classes. |
 
 ### Measurable release gates by topology
 
 | Mode | Required evidence gates | Rollback trigger |
 | --- | --- | --- |
-| Classic (default fallback) | `DEPLOY_HOSTED_AGENT_ORCHESTRATION=false`; orchestrator Container Apps deployed; UI `CHAT_BACKEND=orchestrator`; regression checks for history and feedback pass. | Any regression in classic chat, history, or feedback after hosted changes. |
-| Hosted / no-panel | `DEPLOY_HOSTED_AGENT_ORCHESTRATION=true`, `DEPLOY_ADMINISTRATIVE_PANEL=false`; zero orchestrator Container Apps provisioned; UI `CHAT_BACKEND=hosted_agent`; two-user authorization negative test proves restricted user cannot retrieve protected content. | Unauthorized retrieval, missing hosted endpoint, or orchestrator app unexpectedly provisioned. |
-| Hosted / panel | `DEPLOY_HOSTED_AGENT_ORCHESTRATION=true`, `DEPLOY_ADMINISTRATIVE_PANEL=true`; hosted path serves chat; panel endpoints serve history/feedback/dashboard; Cosmos contains panel feedback records only. | Chat flow depends on Container Apps or panel APIs unavailable in hosted/panel mode. |
+| Classic (explicit fallback and sticky upgrade mode) | `DEPLOY_HOSTED_AGENT_ORCHESTRATION=false`; orchestrator Container Apps deployed; UI `CHAT_BACKEND=orchestrator`; regression checks for history and feedback pass; pre-cutover classic upgrade remains classic. | Any regression in classic chat, history, or feedback, or an existing deployment changes topology without operator migration. |
+| Hosted / no-panel (fresh target default) | `DEPLOY_HOSTED_AGENT_ORCHESTRATION=true`, `DEPLOY_ADMINISTRATIVE_PANEL=false`; zero orchestrator Container Apps provisioned; UI `CHAT_BACKEND=hosted_agent`; two-user authorization negative test proves restricted user cannot retrieve protected content. | Unauthorized retrieval, missing hosted endpoint, orchestrator app unexpectedly provisioned, or silent runtime fallback. |
+| Hosted / panel (deferred to #611) | Not promotable while #611 is open. When enabled later: `DEPLOY_HOSTED_AGENT_ORCHESTRATION=true`, `DEPLOY_ADMINISTRATIVE_PANEL=true`; hosted path serves chat; panel endpoints serve history/feedback/dashboard; Cosmos contains panel feedback records only. | Panel enabled by default or presented as supported before #611; chat flow depends on Container Apps; panel APIs fail open or return success-shaped placeholders. |
 
 Cross-cutting hosted runtime gates:
 
@@ -538,7 +696,7 @@ Cross-cutting hosted runtime gates:
 - A network-isolated release must build and push from inside the VNet and prove
   that Foundry can pull the image while ACR public access remains disabled.
 
-### Adoption order and migration
+### Revision-4 implementation order and migration baseline
 
 1. Freeze configuration contracts and App Configuration key ownership in
    Azure/GPT-RAG.
@@ -551,8 +709,8 @@ Cross-cutting hosted runtime gates:
 Migration boundaries:
 - No mandatory backfill from Cosmos to Foundry Conversations is required for
   hosted/no-panel adoption.
-- Existing classic deployments keep Cosmos-backed history/feedback and remain
-  supported fallback.
+- Existing classic deployments keep Cosmos-backed history/feedback, retain
+  their topology across upgrades, and remain a supported fallback.
 
 ### Time-bounded investigations required before relaxing the freeze
 
@@ -568,11 +726,12 @@ Migration boundaries:
   Decision criterion: the selected retrieval path preserves actual image
   behavior, private Blob access succeeds, payloads remain bounded, and the
   cross-cutting RSS and startup gates pass.
-- **INV-004 (due 2026-08-21):** evaluate a dedicated VNet-connected ACR Tasks
-  agent pool as an optional alternative to the self-hosted runner. Decision
-  criterion: the selected region supports the preview pool, Premium ACR is
-  acceptable, private DNS and endpoint access work, least-privilege build and
-  Foundry pull both succeed, and azd integration requires no public ACR access.
+- **INV-004 (selected; live evidence remains in #597):** use the dedicated
+  VNet-connected ACR Tasks agent pool as the network-isolated automated
+  baseline. Promotion still requires the selected region to support the pool,
+  Premium ACR cost to be accepted, private DNS and endpoint access to work,
+  least-privilege build and Foundry pull to succeed, and azd integration to
+  require no public ACR access.
 
 ## Review trigger
 
