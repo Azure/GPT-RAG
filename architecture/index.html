@@ -1585,15 +1585,19 @@ separate choices.</p>
 UI release PR
 <a href="https://github.com/Azure/gpt-rag-ui/pull/94">#94</a> merged to <code>main</code> as
 <a href="https://github.com/Azure/gpt-rag-ui/commit/763fa7eb2135037382673d2eb968421f084941cc"><code>763fa7e</code></a>,
-and AI Landing Zone release PR
-<a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/131">#131</a> merged
-to <code>main</code> as
+while AI Landing Zone
+<a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/131">PR #131</a>
+initially stamped and merged the unpublished <code>v2.5.0</code> state as
 <a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/commit/a6ae7284d654abb7ec53810cb8765b2975b51baa"><code>a6ae728</code></a>.
-However, UI <code>v2.6.0</code> and AI Landing Zone <code>v2.5.0</code> tags and GitHub Releases
-are not published, and final umbrella pins, integrated validation, and the
-GPT-RAG release remain incomplete. The diagrams document the approved
-target, not shipped behavior. Current published GPT-RAG <code>v3.7.0</code> remains
-classic.</p>
+<a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/132">PR #132</a>
+then fixed the local/CI size-gate defaults, and
+<a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/133">PR #133</a>
+merged that correction to <code>main</code>. AILZ <code>main</code> and <code>develop</code> now both point
+to <a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/commit/cacf418216ce7381d06263e0dd704a86b8a6f225"><code>cacf418</code></a>.
+No AILZ <code>v2.5.0</code> tag or GitHub Release exists; UI <code>v2.6.0</code> is also
+unpublished. Final umbrella pins, integrated validation, and the GPT-RAG
+release remain incomplete. The diagrams document the approved target, not
+shipped behavior. Current published GPT-RAG <code>v3.7.0</code> remains classic.</p>
 </div>
 <h2 id="full-zero-trust-reference">Full Zero Trust reference</h2>
 <p>The existing PNG and Visio remain the full network-isolated reference view.
