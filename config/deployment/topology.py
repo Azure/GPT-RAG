@@ -28,6 +28,7 @@ from config.deployment.composition import (
     DeploymentMode,
     DeploymentTopologyError,
     HOSTED_CUTOVER_COMPLETE,
+    HOSTED_IMAGE_DIGEST_PATTERN,
     PRESERVE_CLASSIC_RUNTIME,
     describe_mode,
     hosted_cutover_ready,
@@ -47,6 +48,13 @@ _PERSISTED_KEYS = (
     "DEPLOY_ADMINISTRATIVE_PANEL",
     "CHAT_BACKEND",
 )
+_LOCAL_RUNTIME_MARKERS = (
+    "CHAT_BACKEND",
+    PRESERVE_CLASSIC_RUNTIME,
+    HOSTED_CUTOVER_COMPLETE,
+    "HOSTED_AGENT_BASE_URL",
+    "HOSTED_AGENT_IMAGE_VERSION",
+)
 
 
 @dataclass(frozen=True)
@@ -63,12 +71,29 @@ def _local_migration_state(
     raw_preserve = environment.get(PRESERVE_CLASSIC_RUNTIME)
     if raw_preserve is None:
         backend = (environment.get("CHAT_BACKEND") or "").strip().lower()
-        if backend == "hosted_agent" or hosted_cutover_ready(environment):
+        legacy_hosted = bool(
+            mode is DeploymentMode.HOSTED_NO_PANEL
+            and is_truthy(
+                environment.get("DEPLOY_HOSTED_AGENT_ORCHESTRATION")
+            )
+            and (environment.get("HOSTED_AGENT_BASE_URL") or "").strip()
+            and HOSTED_IMAGE_DIGEST_PATTERN.fullmatch(
+                (environment.get("HOSTED_AGENT_IMAGE_VERSION") or "").strip()
+            )
+        )
+        if (
+            backend == "hosted_agent"
+            or hosted_cutover_ready(environment)
+            or legacy_hosted
+        ):
             return False
-        # Existing environments without a hosted marker are pre-cutover
-        # classic by ADR-0001. Preserve them without requiring access to a
-        # private App Configuration endpoint from the provisioning client.
-        return mode is not DeploymentMode.CLASSIC
+        if backend == "orchestrator":
+            return mode is not DeploymentMode.CLASSIC
+        # An explicit hosted selection without a durable runtime marker may
+        # be either a classic migration or incomplete hosted state. Resolve
+        # that ambiguity from persisted state and fail closed if it is
+        # unavailable.
+        return None
     normalized_preserve = raw_preserve.strip().lower()
     if normalized_preserve not in {"true", "false"}:
         raise DeploymentTopologyError(
@@ -214,6 +239,17 @@ def resolve_environment_plan(
         return TopologyResolution(explicit)
 
     rg_exists = resource_group_exists(resource_group_name, subscription_id)
+    has_local_runtime_marker = any(
+        (environment.get(key) or "").strip()
+        for key in _LOCAL_RUNTIME_MARKERS
+    )
+    if explicit is None and rg_exists and not has_local_runtime_marker:
+        # ADR-0001 defines an existing environment without any local topology
+        # marker as pre-cutover classic. In particular, do not require a
+        # workstation to reach a network-isolated App Configuration data
+        # plane merely to preserve that safe state.
+        return TopologyResolution(DeploymentMode.CLASSIC)
+
     materialized_preservation = (
         _local_migration_state(environment, explicit)
         if explicit is not None and rg_exists
