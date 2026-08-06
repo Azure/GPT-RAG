@@ -1715,7 +1715,7 @@ options, and a before/after table.</p>
 </tr>
 <tr>
 <td><code>HOSTED_AGENT_BASE_URL</code></td>
-<td>Hosted service root. The UI sends <code>POST /invocations</code> to this endpoint when <code>CHAT_BACKEND=hosted_agent</code>.</td>
+<td>Hosted service root. The UI sends canonical <code>POST /responses</code> requests to this endpoint when <code>CHAT_BACKEND=hosted_agent</code>. <code>POST /invocations</code> remains a compatibility alias over the same request validation, identity guard, and Responses API SSE handler.</td>
 </tr>
 <tr>
 <td><code>HOSTED_AGENT_RESOURCE_SCOPE</code></td>
