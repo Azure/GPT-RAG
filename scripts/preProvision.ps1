@@ -118,7 +118,16 @@ foreach ($line in $topologyOutput) {
 Write-Host "Composing GPT-RAG deployment mode..." -ForegroundColor Cyan
 Push-Location $projectRoot
 try {
-    & python -m config.deployment.composition --input $parameterSource --output $parameterDestination
+    $hostedSourceCommit = (
+        Get-Content -LiteralPath $manifestSource -Raw |
+            ConvertFrom-Json
+    ).components |
+        Where-Object { $_.name -eq 'gpt-rag-orchestrator' } |
+        Select-Object -ExpandProperty commit -First 1
+    & python -m config.deployment.composition `
+        --input $parameterSource `
+        --output $parameterDestination `
+        --hosted-source-commit $hostedSourceCommit
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Error: GPT-RAG deployment mode composition failed." -ForegroundColor Red
         exit $LASTEXITCODE

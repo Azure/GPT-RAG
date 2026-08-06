@@ -118,7 +118,7 @@ foreach ($prop in $globalEnv.PSObject.Properties) {
 # flag pair, so this always agrees with preProvision and postProvision.
 Push-Location $repoRoot
 try {
-  $topologyJson = & python -m config.deployment.topology --validate-hosted-deploy
+  $topologyJson = & python -m config.deployment.topology --describe
   $topologyExitCode = $LASTEXITCODE
 } finally {
   Pop-Location
@@ -164,69 +164,33 @@ if ($hostedMode) {
     Write-Error "Hosted agent azd project not found at $hostedProject."
     exit 1
   }
-  if (-not $globalEnv.HOSTED_AGENT_RESOURCE_SCOPE -or -not "$($globalEnv.HOSTED_AGENT_RESOURCE_SCOPE)".EndsWith('/.default')) {
-    Write-Error "Hosted mode requires HOSTED_AGENT_RESOURCE_SCOPE as an explicit data-plane scope ending in '/.default'."
+  if (
+    "$($globalEnv.HOSTED_AGENT_PREPARED)".ToLowerInvariant() -ne 'true' -or
+    "$($globalEnv.DEPLOY_HOSTED_AGENT)".ToLowerInvariant() -ne 'true'
+  ) {
+    Write-Error @"
+Hosted prerequisites are prepared, but the immutable deploy handoff is not materialized.
+Run:
+  pwsh scripts/prepareHostedDeployment.ps1
+  azd provision
+  azd deploy
+The preparation command builds the manifest-pinned image and stores only its immutable digest.
+"@
     exit 1
   }
-  if (-not $globalEnv.AZURE_AI_PROJECT_ENDPOINT -or -not $globalEnv.AZURE_AI_PROJECT_RESOURCE_ID) {
-    Write-Error "Hosted mode requires AZURE_AI_PROJECT_ENDPOINT and AZURE_AI_PROJECT_RESOURCE_ID from provisioning."
-    exit 1
+  Push-Location $repoRoot
+  try {
+    & python -m config.deployment.topology --validate-hosted-deploy | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+      Write-Error "Hosted deployment prerequisites or immutable image digest are invalid."
+      exit $LASTEXITCODE
+    }
+  } finally {
+    Pop-Location
   }
 
-  # The Foundry "Create Agent" API for container-mode hosted agents only reads the
-  # image field; startupCommand (above, in azure.yaml) never reaches the real wire
-  # request, so whatever CMD is baked into the published orchestrator image is what
-  # actually runs. That image's CMD is the classic Container App entrypoint, not the
-  # hosted one. When HOSTED_AGENT_AUTO_BUILD_IMAGE=true, build a small derivative
-  # image (same digest-pinned base, CMD overridden to the hosted entrypoint) via ACR
-  # Tasks -- honoring the same VNet-injected agent pool used for every other
-  # NETWORK_ISOLATION=true build -- and point HOSTED_AGENT_IMAGE_VERSION at its
-  # digest before deploying. Defaults to false to preserve today's behavior for
-  # operators who already publish a correctly-configured hosted image themselves.
-  $hostedAutoBuildImage = "$($globalEnv.HOSTED_AGENT_AUTO_BUILD_IMAGE)".ToLowerInvariant() -match '^(1|true|t|yes|y)$'
-  if ($hostedAutoBuildImage) {
-    $acrEndpoint = "$($globalEnv.AZURE_CONTAINER_REGISTRY_ENDPOINT)"
-    if (-not $acrEndpoint) {
-      Write-Error "HOSTED_AGENT_AUTO_BUILD_IMAGE=true requires AZURE_CONTAINER_REGISTRY_ENDPOINT from provisioning."
-      exit 1
-    }
-    $acrName = $acrEndpoint.Split('.')[0]
-    $hostedImageName = if ($globalEnv.HOSTED_AGENT_IMAGE) { "$($globalEnv.HOSTED_AGENT_IMAGE)" } else { 'gpt-rag-orchestrator' }
-    $baseImageDigest = "$($globalEnv.HOSTED_AGENT_IMAGE_VERSION)"
-    $baseImageRef = "$acrEndpoint/$hostedImageName@$baseImageDigest"
-    $hostedImageTag = "hosted-$((($baseImageDigest -replace '^sha256:', '')).Substring(0,12))"
-    Write-Host "Building hosted-agent derivative image via ACR Tasks (base: $baseImageRef)..." -ForegroundColor Cyan
-    Push-Location $repoRoot
-    try {
-      $buildArgs = @(
-        '-m', 'config.deployment.hosted_image',
-        '--registry', $acrName,
-        '--base-image-ref', $baseImageRef,
-        '--image-name', $hostedImageName,
-        '--image-tag', $hostedImageTag
-      )
-      if ($globalEnv.ACR_TASK_AGENT_POOL) {
-        $buildArgs += @('--agent-pool', "$($globalEnv.ACR_TASK_AGENT_POOL)")
-      }
-      $hostedDigest = & python @buildArgs
-      if ($LASTEXITCODE -ne 0 -or -not $hostedDigest) {
-        Write-Error "Failed to build the hosted-agent derivative image."
-        exit $LASTEXITCODE
-      }
-      $hostedDigest = "$hostedDigest".Trim()
-    } finally {
-      Pop-Location
-    }
-    Write-Host "Hosted-agent derivative image built: $hostedDigest" -ForegroundColor Green
-    $env:HOSTED_AGENT_IMAGE_VERSION = $hostedDigest
-    $globalEnv.HOSTED_AGENT_IMAGE_VERSION = $hostedDigest
-    Push-Location $repoRoot
-    try {
-      & azd env set HOSTED_AGENT_IMAGE_VERSION $hostedDigest --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
-    } finally {
-      Pop-Location
-    }
-  }
+  $hostedDigest = "$($globalEnv.HOSTED_AGENT_IMAGE_VERSION)".Trim()
+  Write-Host "Hosted-agent deploy handoff ready: $hostedDigest" -ForegroundColor Green
 
   if (Test-Path -LiteralPath $dotAzure) {
     Copy-Item $dotAzure $hostedProject -Recurse -Force -Container
@@ -234,6 +198,7 @@ if ($hostedMode) {
 
   Push-Location $hostedProject
   try {
+    & azd env set HOSTED_AGENT_IMAGE_VERSION $hostedDigest --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
     & azd env set FOUNDRY_PROJECT_ENDPOINT "$($globalEnv.AZURE_AI_PROJECT_ENDPOINT)" --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
     & azd env set AZURE_AI_PROJECT_ID "$($globalEnv.AZURE_AI_PROJECT_RESOURCE_ID)" --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
     & azd deploy orchestrator-agent --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt

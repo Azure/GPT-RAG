@@ -122,11 +122,13 @@ printf '%s\n' "$TOPOLOGY_OUTPUT" | while IFS='=' read -r TOPO_KEY TOPO_VALUE; do
 done
 
 echo "${CYAN}Composing GPT-RAG deployment mode...${NC}"
+HOSTED_SOURCE_COMMIT="$("$PYTHON_CMD" -c 'import json,sys; print(next(c[\"commit\"] for c in json.load(open(sys.argv[1], encoding=\"utf-8\"))[\"components\"] if c[\"name\"] == \"gpt-rag-orchestrator\"))' "$PROJECT_ROOT/manifest.json")"
 (
     cd "$PROJECT_ROOT" &&
     "$PYTHON_CMD" -m config.deployment.composition \
         --input "$PROJECT_ROOT/main.parameters.json" \
-        --output "$INFRA_DIR/main.parameters.json"
+        --output "$INFRA_DIR/main.parameters.json" \
+        --hosted-source-commit "$HOSTED_SOURCE_COMMIT"
 )
 COMPOSE_EXIT=$?
 if [ $COMPOSE_EXIT -ne 0 ]; then

@@ -52,7 +52,8 @@
     
     "deployAiFoundry":                      { "value": "true" },
     "deployAAfAgentSvc":                    { "value": "${DEPLOY_AAF_AGENT_SVC=true}" },
-    "deployHostedAgent":                    { "value": "${DEPLOY_HOSTED_AGENT_ORCHESTRATION=true}" },
+    "prepareHostedAgent":                   { "value": "${PREPARE_HOSTED_AGENT=false}" },
+    "deployHostedAgent":                    { "value": "${DEPLOY_HOSTED_AGENT=false}" },
     "hostedAgent":                          { "value": {
       "name": "${HOSTED_AGENT_NAME=gpt-rag-orchestrator}",
       "image": "${HOSTED_AGENT_IMAGE=gpt-rag-orchestrator}",

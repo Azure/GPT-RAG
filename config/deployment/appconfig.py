@@ -106,6 +106,9 @@ def build_settings(
 
     hosted_base_url = (environment.get("HOSTED_AGENT_BASE_URL") or "").strip()
     hosted_scope = (environment.get("HOSTED_AGENT_RESOURCE_SCOPE") or "").strip()
+    hosted_image_version = (
+        environment.get("HOSTED_AGENT_IMAGE_VERSION") or ""
+    ).strip()
     if hosted:
         validate_hosted_prerequisites(
             environment,
@@ -147,6 +150,13 @@ def build_settings(
 
     return {
         "DEPLOY_HOSTED_AGENT_ORCHESTRATION": str(hosted).lower(),
+        "PREPARE_HOSTED_AGENT": str(hosted).lower(),
+        "DEPLOY_HOSTED_AGENT": (
+            environment.get("DEPLOY_HOSTED_AGENT") or "false"
+        ).strip().lower(),
+        "HOSTED_AGENT_PREPARED": (
+            environment.get("HOSTED_AGENT_PREPARED") or str(hosted)
+        ).strip().lower(),
         "DEPLOY_ADMINISTRATIVE_PANEL": str(
             mode is DeploymentMode.HOSTED_PANEL
         ).lower(),
@@ -158,6 +168,9 @@ def build_settings(
         "INGESTION_BASE_URL": f"https://{dataingest['fqdn']}",
         "HOSTED_AGENT_BASE_URL": hosted_base_url,
         "HOSTED_AGENT_RESOURCE_SCOPE": hosted_scope,
+        "HOSTED_AGENT_IMAGE_VERSION": (
+            hosted_image_version if hosted else ""
+        ),
         "HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS": (
             environment.get("HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS") or "60"
         ),

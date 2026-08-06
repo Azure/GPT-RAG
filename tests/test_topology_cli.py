@@ -192,6 +192,46 @@ class MainCliTests(unittest.TestCase):
         self.assertEqual(1, exit_code)
         self.assertIn("AZURE_AI_PROJECT_ENDPOINT", mock_print.call_args.args[0])
 
+    def test_validate_hosted_context_allows_digest_to_be_prepared_later(
+        self,
+    ) -> None:
+        argv = ["prog", "--validate-hosted-context"]
+        env = {
+            "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+            "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "true",
+            "DEPLOY_ADMINISTRATIVE_PANEL": "false",
+            "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
+            "AZURE_AI_PROJECT_ENDPOINT": "https://project.example.test",
+            "AZURE_AI_PROJECT_RESOURCE_ID": "/subscriptions/test/projects/p",
+        }
+        with patch("sys.argv", argv), patch("os.environ", env):
+            with patch("builtins.print") as mock_print:
+                exit_code = topology.main()
+
+        self.assertEqual(0, exit_code)
+        (payload,) = mock_print.call_args_list[0].args
+        self.assertEqual("hosted-no-panel", json.loads(payload)["topology"])
+
+    def test_validate_hosted_deploy_rejects_unprepared_image(self) -> None:
+        argv = ["prog", "--validate-hosted-deploy"]
+        env = {
+            "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+            "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "true",
+            "DEPLOY_ADMINISTRATIVE_PANEL": "false",
+            "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
+            "AZURE_AI_PROJECT_ENDPOINT": "https://project.example.test",
+            "AZURE_AI_PROJECT_RESOURCE_ID": "/subscriptions/test/projects/p",
+        }
+        with patch("sys.argv", argv), patch("os.environ", env):
+            with patch("builtins.print") as mock_print:
+                exit_code = topology.main()
+
+        self.assertEqual(1, exit_code)
+        self.assertIn(
+            "HOSTED_AGENT_IMAGE_VERSION",
+            mock_print.call_args.args[0],
+        )
+
     def test_canonical_topology_overrides_stale_compatibility_flag(
         self,
     ) -> None:

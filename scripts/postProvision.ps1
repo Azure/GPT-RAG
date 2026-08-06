@@ -450,11 +450,15 @@ function Set-GptRagAppConfiguration {
         DEPLOYMENT_NAME = $deploymentName
         RESOURCE_TOKEN = $resourceToken
         DEPLOY_HOSTED_AGENT_ORCHESTRATION = "$hostedMode".ToLowerInvariant()
+        PREPARE_HOSTED_AGENT = (Get-OptionalEnvValue 'PREPARE_HOSTED_AGENT' "$hostedMode".ToLowerInvariant())
+        DEPLOY_HOSTED_AGENT = (Get-OptionalEnvValue 'DEPLOY_HOSTED_AGENT' 'false')
+        HOSTED_AGENT_PREPARED = (Get-OptionalEnvValue 'HOSTED_AGENT_PREPARED' "$hostedMode".ToLowerInvariant())
         DEPLOY_ADMINISTRATIVE_PANEL = "$administrativePanel".ToLowerInvariant()
         DEPLOYMENT_TOPOLOGY = $deploymentTopology
         CHAT_BACKEND = if ($hostedMode) { 'hosted_agent' } else { 'orchestrator' }
         HOSTED_AGENT_BASE_URL = (Get-OptionalEnvValue 'HOSTED_AGENT_BASE_URL')
         HOSTED_AGENT_RESOURCE_SCOPE = (Get-OptionalEnvValue 'HOSTED_AGENT_RESOURCE_SCOPE')
+        HOSTED_AGENT_IMAGE_VERSION = (Get-OptionalEnvValue 'HOSTED_AGENT_IMAGE_VERSION')
         HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS = (Get-OptionalEnvValue 'HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS' '60')
         SEARCH_RAG_INDEX_NAME = $ragIndexName
         ENABLE_AGENTIC_RETRIEVAL = (Get-OptionalEnvValue 'ENABLE_AGENTIC_RETRIEVAL' 'false')

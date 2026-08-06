@@ -56,15 +56,20 @@ class DeploymentCompositionTests(unittest.TestCase):
             [app["service_name"] for app in apps],
         )
         self.assertTrue(parameters["deployCosmosDb"]["value"])
+        self.assertFalse(parameters["prepareHostedAgent"]["value"])
         self.assertFalse(parameters["deployHostedAgent"]["value"])
         self.assertEqual(
             {
                 "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "false",
+                "PREPARE_HOSTED_AGENT": "false",
+                "DEPLOY_HOSTED_AGENT": "false",
+                "HOSTED_AGENT_PREPARED": "false",
                 "DEPLOY_ADMINISTRATIVE_PANEL": "false",
                 "DEPLOYMENT_TOPOLOGY": "classic",
                 "CHAT_BACKEND": "orchestrator",
                 "HOSTED_AGENT_BASE_URL": "",
                 "HOSTED_AGENT_RESOURCE_SCOPE": "",
+                "HOSTED_AGENT_IMAGE_VERSION": "",
                 "HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS": "60",
             },
             settings_by_name(composed),
@@ -109,11 +114,63 @@ class DeploymentCompositionTests(unittest.TestCase):
             [app["service_name"] for app in apps],
         )
         self.assertFalse(parameters["deployCosmosDb"]["value"])
+        self.assertTrue(parameters["prepareHostedAgent"]["value"])
+        self.assertTrue(parameters["deployHostedAgent"]["value"])
         self.assertEqual([], parameters["databaseContainersList"]["value"])
         self.assertNotIn(
             "CosmosDBBuiltInDataContributor", dataingest["roles"]
         )
         self.assertEqual("hosted_agent", settings_by_name(composed)["CHAT_BACKEND"])
+
+    def test_fresh_hosted_composition_allows_automatic_image_preparation(
+        self,
+    ) -> None:
+        environment = {
+            "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+            "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
+        }
+
+        composed = compose_parameters(source_parameters(), environment)
+
+        self.assertTrue(composed["parameters"]["prepareHostedAgent"]["value"])
+        self.assertFalse(composed["parameters"]["deployHostedAgent"]["value"])
+        self.assertEqual(
+            "",
+            composed["parameters"]["hostedAgent"]["value"]["version"],
+        )
+
+    def test_digest_materializes_deploy_handoff(self) -> None:
+        environment = {
+            "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+            "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
+            "HOSTED_AGENT_IMAGE_VERSION": DIGEST,
+        }
+
+        composed = compose_parameters(source_parameters(), environment)
+
+        self.assertTrue(composed["parameters"]["prepareHostedAgent"]["value"])
+        self.assertTrue(composed["parameters"]["deployHostedAgent"]["value"])
+        self.assertEqual(
+            DIGEST,
+            composed["parameters"]["hostedAgent"]["value"]["version"],
+        )
+
+    def test_generated_digest_must_match_manifest_source_commit(self) -> None:
+        environment = {
+            "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+            "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
+            "HOSTED_AGENT_IMAGE_VERSION": DIGEST,
+            "HOSTED_AGENT_IMAGE_SOURCE_COMMIT": "a" * 40,
+        }
+
+        with self.assertRaisesRegex(
+            ValueError, "manifest.json now pins"
+        ):
+            compose_parameters(
+                source_parameters(),
+                environment,
+                expected_hosted_source_commit="b" * 40,
+            )
 
     def test_hosted_with_panel_fails_closed_until_611(self) -> None:
         # Hosted-panel is not implemented yet (tracked by #611): any signal
@@ -140,6 +197,16 @@ class DeploymentCompositionTests(unittest.TestCase):
         environment = {
             "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "true",
             "HOSTED_AGENT_IMAGE_VERSION": "v3.9.0",
+            "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
+        }
+
+        with self.assertRaisesRegex(ValueError, "immutable OCI digest"):
+            compose_parameters(source_parameters(), environment)
+
+    def test_hosted_mode_rejects_noncanonical_uppercase_digest(self) -> None:
+        environment = {
+            "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "true",
+            "HOSTED_AGENT_IMAGE_VERSION": "sha256:" + ("A" * 64),
             "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
         }
 
@@ -363,6 +430,7 @@ class AppConfigurationContractTests(unittest.TestCase):
                 "DEPLOY_ADMINISTRATIVE_PANEL": "false",
                 "HOSTED_AGENT_BASE_URL": "https://agent.example.test/protocols",
                 "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
+                "HOSTED_AGENT_IMAGE_VERSION": DIGEST,
             },
             require_hosted_endpoint=True,
         )
@@ -373,6 +441,7 @@ class AppConfigurationContractTests(unittest.TestCase):
             "https://agent.example.test/protocols",
             settings["HOSTED_AGENT_BASE_URL"],
         )
+        self.assertEqual(DIGEST, settings["HOSTED_AGENT_IMAGE_VERSION"])
         self.assertEqual(2, len(json.loads(settings["CONTAINER_APPS"])))
 
     @patch("config.deployment.appconfig._container_app", side_effect=_app)

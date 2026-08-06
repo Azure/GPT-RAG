@@ -9,15 +9,18 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
-class ReleasedPinTests(unittest.TestCase):
+class IntegrationPinTests(unittest.TestCase):
     def test_manifest_contains_exact_released_pins(self) -> None:
         manifest = json.loads((ROOT / "manifest.json").read_text(encoding="utf-8"))
         components = {item["name"]: item for item in manifest["components"]}
 
         self.assertEqual("unreleased", manifest["tag"])
-        self.assertEqual("v2.4.1", manifest["ailz_tag"])
         self.assertEqual(
-            "fbc5d226543d0fb7a29ccd241c45df5c3caa82ee",
+            "placerda-prepare-hosted-agent-contract",
+            manifest["ailz_tag"],
+        )
+        self.assertEqual(
+            "6869d30f0ddcd9076cb5c1b35d25cca7d49f5572",
             manifest["ailz_commit"],
         )
         self.assertEqual(
@@ -44,18 +47,21 @@ class ReleasedPinTests(unittest.TestCase):
 
     def test_gitmodule_and_gitlink_match_landing_zone_release(self) -> None:
         gitmodules = (ROOT / ".gitmodules").read_text(encoding="utf-8")
-        self.assertIn("branch = v2.4.1", gitmodules)
+        self.assertIn(
+            "branch = placerda-prepare-hosted-agent-contract",
+            gitmodules,
+        )
 
         completed = subprocess.run(
-            ["git", "ls-files", "--stage", "infra"],
+            ["git", "-C", "infra", "rev-parse", "HEAD"],
             cwd=ROOT,
             check=True,
             capture_output=True,
             text=True,
         )
         self.assertIn(
-            "fbc5d226543d0fb7a29ccd241c45df5c3caa82ee",
-            completed.stdout,
+            "6869d30f0ddcd9076cb5c1b35d25cca7d49f5572",
+            completed.stdout.strip(),
         )
 
     def test_rollback_restores_full_classic_release_contract(self) -> None:
@@ -78,6 +84,8 @@ class ReleasedPinTests(unittest.TestCase):
         self.assertEqual(
             "false", rollback["azd"]["DEPLOY_HOSTED_AGENT_ORCHESTRATION"]
         )
+        self.assertEqual("false", rollback["azd"]["PREPARE_HOSTED_AGENT"])
+        self.assertEqual("false", rollback["azd"]["DEPLOY_HOSTED_AGENT"])
         self.assertEqual(
             "false", rollback["azd"]["DEPLOY_ADMINISTRATIVE_PANEL"]
         )
@@ -87,6 +95,9 @@ class ReleasedPinTests(unittest.TestCase):
         self.assertEqual(
             {
                 "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "false",
+                "PREPARE_HOSTED_AGENT": "false",
+                "DEPLOY_HOSTED_AGENT": "false",
+                "HOSTED_AGENT_PREPARED": "false",
                 "DEPLOY_ADMINISTRATIVE_PANEL": "false",
                 "CHAT_BACKEND": "orchestrator",
                 "DEPLOYMENT_TOPOLOGY": "classic",
@@ -199,7 +210,6 @@ class LifecycleParityTests(unittest.TestCase):
                 self.assertIn("config.deployment.topology", content)
                 self.assertIn("--validate-hosted-deploy", content)
                 self.assertIn("deploy_hosted_agent_orchestration", content)
-                self.assertIn("gpt-rag-orchestrator", content)
                 self.assertIn("azd deploy orchestrator-agent", content)
                 self.assertIn(
                     "AGENT_ORCHESTRATOR_AGENT_INVOCATIONS_ENDPOINT", content
@@ -208,29 +218,64 @@ class LifecycleParityTests(unittest.TestCase):
     def test_both_predeploy_hooks_fail_closed_on_missing_hosted_prerequisites(
         self,
     ) -> None:
-        # ADR-0001 rev. 5 requirement: hosted deploys must fail closed (never
-        # silently fall back) when any of the digest/scope/Foundry
-        # prerequisites are missing or malformed. Assert both hooks enforce
-        # the same three checks: an explicit '/.default' data-plane scope,
-        # a provisioned Foundry project endpoint + resource id, and a
-        # digest-pinned (sha256) hosted image reference.
+        # preDeploy accepts only the second, digest-backed handoff phase.
         scripts = ROOT / "scripts"
 
         ps1 = (scripts / "preDeploy.ps1").read_text(encoding="utf-8-sig")
         self.assertIn("HOSTED_AGENT_RESOURCE_SCOPE", ps1)
-        self.assertIn("/.default", ps1)
         self.assertIn("AZURE_AI_PROJECT_ENDPOINT", ps1)
         self.assertIn("AZURE_AI_PROJECT_RESOURCE_ID", ps1)
         self.assertIn("FOUNDRY_PROJECT_ENDPOINT", ps1)
-        self.assertIn("config.deployment.hosted_image", ps1)
+        self.assertIn("--validate-hosted-deploy", ps1)
+        self.assertIn("HOSTED_AGENT_PREPARED", ps1)
+        self.assertIn("DEPLOY_HOSTED_AGENT", ps1)
 
         sh = (scripts / "preDeploy.sh").read_text(encoding="utf-8-sig")
         self.assertIn("HOSTED_AGENT_RESOURCE_SCOPE", sh)
-        self.assertIn("*/.default", sh)
         self.assertIn("AZURE_AI_PROJECT_ENDPOINT", sh)
         self.assertIn("AZURE_AI_PROJECT_RESOURCE_ID", sh)
         self.assertIn("FOUNDRY_PROJECT_ENDPOINT", sh)
-        self.assertIn("config.deployment.hosted_image", sh)
+        self.assertIn("--validate-hosted-deploy", sh)
+        self.assertIn("HOSTED_AGENT_PREPARED", sh)
+        self.assertIn("DEPLOY_HOSTED_AGENT", sh)
+
+    def test_hosted_image_preparation_is_pinned_parity_safe_and_classic_build_free(
+        self,
+    ) -> None:
+        scripts = ROOT / "scripts"
+        ps1 = (scripts / "prepareHostedDeployment.ps1").read_text(
+            encoding="utf-8-sig"
+        )
+        sh = (scripts / "prepareHostedDeployment.sh").read_text(
+            encoding="utf-8-sig"
+        )
+
+        for token in (
+            "config.deployment.hosted_prepare",
+            "manifest.json",
+            "azd env get-values",
+        ):
+            with self.subTest(token=token):
+                self.assertIn(token, ps1)
+                self.assertIn(token, sh)
+
+        for name in ("preDeploy.ps1", "preDeploy.sh"):
+            content = (scripts / name).read_text(encoding="utf-8-sig")
+            self.assertNotIn("config.deployment.hosted_image", content)
+            self.assertNotIn("azd provision --environment", content)
+
+    def test_exact_upstream_prepare_deploy_contract_is_mapped(self) -> None:
+        parameters = json.loads(
+            (ROOT / "main.parameters.json").read_text(encoding="utf-8")
+        )["parameters"]
+        self.assertEqual(
+            "${PREPARE_HOSTED_AGENT=false}",
+            parameters["prepareHostedAgent"]["value"],
+        )
+        self.assertEqual(
+            "${DEPLOY_HOSTED_AGENT=false}",
+            parameters["deployHostedAgent"]["value"],
+        )
 
     def test_both_predeploy_hooks_filter_manifest_components_by_topology(
         self,

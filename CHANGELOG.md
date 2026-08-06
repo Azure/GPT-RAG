@@ -37,24 +37,37 @@
   instead of duplicating the detection logic, so all lifecycle hooks always
   agree.
 - **Hosted-agent azd service isolation.** An isolated child azd project deploys
-  the orchestrator image through `azure.ai.agent` only in hosted modes. Hosted
-  deployment rejects mutable image tags and requires an operator-supplied OCI
-  digest (`sha256:<64 hex characters>`), a delegated-user resource scope via
-  explicit `HOSTED_AGENT_RESOURCE_SCOPE` containing a non-empty resource
-  identifier followed by `/.default`, and a Foundry endpoint/agent id at deploy
-  time; each is validated fail-closed.
+  the orchestrator image through `azure.ai.agent` only in hosted modes. Fresh
+  hosted environments use an explicit two-phase contract: the first
+  `azd provision` sets `prepareHostedAgent=true` and
+  `deployHostedAgent=false`, exposing Foundry, registry, network, and private
+  build prerequisites without accepting an empty or placeholder image digest.
+  `scripts/prepareHostedDeployment.ps1` and `.sh` then clone the exact
+  manifest-pinned orchestrator commit, build it through ACR Tasks, create the
+  hosted-entrypoint derivative through the same build path, resolve the pushed
+  manifest to a canonical lowercase immutable digest, and materialize that
+  digest into the azd environment. A second explicit `azd provision` enables
+  the digest-backed deploy handoff, after which `azd deploy` invokes
+  `azure.ai.agent`. Network-isolated builds validate and use the dedicated
+  VNet-injected ACR Tasks agent pool. An explicit digest remains supported as a
+  no-build override; mutable or malformed values always fail closed. Hosted
+  mode also requires a delegated-user resource scope via explicit
+  `HOSTED_AGENT_RESOURCE_SCOPE` containing a non-empty resource identifier
+  followed by `/.default`.
 - **Mode-aware runtime contract.** App Configuration label `gpt-rag` now owns
   `CHAT_BACKEND`, deployment topology, classic and hosted endpoints, resource
-  scope, and finite SSE timeout settings. PowerShell and shell lifecycle hooks
-  consume the same composition and publication modules.
+  scope, the resolved hosted image digest, and finite SSE timeout settings.
+  PowerShell and shell lifecycle hooks consume the same composition and
+  publication modules.
 
 ### Changed
 
 - **Compatible hosted/no-panel component pins.** The unreleased integration
-  combination pins UI `v2.5.1`, orchestrator `v3.10.0`, ingestion `v2.6.0`,
-  and AI Landing Zone `v2.4.1` at their exact released commits. The UI and
-  orchestrator releases provide the delegated identity and Toolbox call-context
-  contracts required by hosted/no-panel mode.
+  combination preserves UI `v2.5.1`, orchestrator `v3.10.0`, and ingestion
+  `v2.6.0` at their exact released commits. It temporarily pins AI Landing Zone
+  PR #130 commit `6869d30f0ddcd9076cb5c1b35d25cca7d49f5572` for the additive
+  `prepareHostedAgent` contract; final merge and release require replacing the
+  PR branch pin with the new minor release tag after that upstream PR merges.
 
 ### Fixed
 
@@ -81,18 +94,23 @@ environments (no existing resource group and no explicit signal) now default
 to `hosted-no-panel` instead of classic. Operators who want a new environment
 to use the classic Container Apps orchestrator must set
 `DEPLOYMENT_TOPOLOGY=classic` (or the compatible legacy
-`DEPLOY_HOSTED_AGENT_ORCHESTRATION=false`) before provisioning it; hosted
-modes additionally require an immutable orchestrator image digest and an
-explicit hosted-agent data-plane scope. The deterministic rollback contract
+`DEPLOY_HOSTED_AGENT_ORCHESTRATION=false`) before provisioning it. Hosted
+deployments use `azd provision`, the platform-specific
+`scripts/prepareHostedDeployment` command, a second `azd provision`, and then
+`azd deploy`. The preparation command automatically creates an immutable image
+from the pinned orchestrator source unless the operator supplies an explicit
+canonical digest override; an explicit hosted-agent data-plane scope remains
+required. The deterministic rollback contract
 in `config/deployment/rollback.json` restores the complete `v3.7.0` classic
 pin set, clears hosted endpoint inputs, resets both mode flags to `false`,
 and restores `CHAT_BACKEND=orchestrator`.
 
-The UI, orchestrator, and AI Landing Zone release APIs report
+The UI, orchestrator, and latest released AI Landing Zone tag APIs report
 `immutable=false`, but active semantic-version tag rulesets `20396217`,
 `20396972`, and `20396978` prevent deletion and non-fast-forward updates for
 `refs/tags/v*`. AI Landing Zone `v2.4.1` is also protected by exact-tag ruleset
-`20339953`. This unreleased integration does not publish an umbrella release.
+`20339953`; the temporary PR #130 commit pin is not a release pin. This
+unreleased integration does not publish an umbrella release.
 
 ## [v3.7.0] - 2026-07-21
 

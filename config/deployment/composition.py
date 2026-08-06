@@ -13,7 +13,7 @@ from typing import Mapping
 
 
 APP_CONFIG_LABEL = "gpt-rag"
-HOSTED_IMAGE_DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-fA-F]{64}$")
+HOSTED_IMAGE_DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 HOSTED_RESOURCE_SCOPE_PATTERN = re.compile(
     r"^[^\s/](?:[^\s]*[^\s/])?/\.default$"
 )
@@ -76,8 +76,8 @@ def validate_hosted_prerequisites(
             "identifier followed by '/.default'."
         )
 
-    if require_image_digest:
-        digest = (environment.get("HOSTED_AGENT_IMAGE_VERSION") or "").strip()
+    digest = (environment.get("HOSTED_AGENT_IMAGE_VERSION") or "").strip()
+    if require_image_digest or digest:
         if not HOSTED_IMAGE_DIGEST_PATTERN.fullmatch(digest):
             raise DeploymentTopologyError(
                 "Hosted mode requires HOSTED_AGENT_IMAGE_VERSION as an immutable "
@@ -348,6 +348,8 @@ def _setting(name: str, value: str) -> dict[str, str]:
 def compose_parameters(
     source: Mapping[str, object],
     environment: Mapping[str, str],
+    *,
+    expected_hosted_source_commit: str | None = None,
 ) -> dict[str, object]:
     result = copy.deepcopy(source)
     parameters = result.get("parameters")
@@ -358,21 +360,38 @@ def compose_parameters(
     hosted = mode is not DeploymentMode.CLASSIC
     panel = mode is not DeploymentMode.HOSTED_NO_PANEL
 
-    parameters["deployHostedAgent"] = {"value": hosted}
+    digest = (environment.get("HOSTED_AGENT_IMAGE_VERSION") or "").strip()
+    generated_source_commit = (
+        environment.get("HOSTED_AGENT_IMAGE_SOURCE_COMMIT") or ""
+    ).strip()
+    deploy_hosted = hosted and bool(digest)
+
+    if deploy_hosted:
+        validate_hosted_prerequisites(environment)
+        if (
+            generated_source_commit
+            and expected_hosted_source_commit
+            and generated_source_commit.lower()
+            != expected_hosted_source_commit.lower()
+        ):
+            raise DeploymentTopologyError(
+                "The generated HOSTED_AGENT_IMAGE_VERSION was built from "
+                f"{generated_source_commit}, but manifest.json now pins "
+                f"{expected_hosted_source_commit}. Run the hosted image "
+                "preparation command again before provisioning the deploy "
+                "handoff."
+            )
+    elif hosted:
+        validate_hosted_prerequisites(
+            environment,
+            require_image_digest=False,
+        )
+
+    parameters["prepareHostedAgent"] = {"value": hosted}
+    parameters["deployHostedAgent"] = {"value": deploy_hosted}
     parameters["deployCosmosDb"] = {"value": panel}
 
     if hosted:
-        # This digest only feeds the landing-zone parameter document at
-        # provision time; it is informational and does not run a container.
-        # The digest that is actually deployed as the hosted agent's image is
-        # whatever HOSTED_AGENT_IMAGE_VERSION resolves to later, at `azd
-        # deploy` time, in hosted-agent/azure.yaml. When
-        # HOSTED_AGENT_AUTO_BUILD_IMAGE=true, scripts/preDeploy re-pins that
-        # env var to a freshly built derivative image before deploying (see
-        # config/deployment/hosted_image.py and ADR-0001), so the two digests
-        # may legitimately differ across a provision+deploy cycle.
-        validate_hosted_prerequisites(environment)
-        digest = (environment.get("HOSTED_AGENT_IMAGE_VERSION") or "").strip()
         parameters["hostedAgent"] = {
             "value": {
                 "name": (
@@ -449,6 +468,9 @@ def compose_parameters(
                 "DEPLOY_HOSTED_AGENT_ORCHESTRATION",
                 str(hosted).lower(),
             ),
+            _setting("PREPARE_HOSTED_AGENT", str(hosted).lower()),
+            _setting("DEPLOY_HOSTED_AGENT", str(deploy_hosted).lower()),
+            _setting("HOSTED_AGENT_PREPARED", str(hosted).lower()),
             _setting(
                 "DEPLOY_ADMINISTRATIVE_PANEL",
                 str(panel and hosted).lower(),
@@ -462,6 +484,10 @@ def compose_parameters(
             _setting(
                 "HOSTED_AGENT_RESOURCE_SCOPE",
                 environment.get("HOSTED_AGENT_RESOURCE_SCOPE", ""),
+            ),
+            _setting(
+                "HOSTED_AGENT_IMAGE_VERSION",
+                environment.get("HOSTED_AGENT_IMAGE_VERSION", ""),
             ),
             _setting(
                 "HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS",
@@ -478,9 +504,15 @@ def compose_file(
     input_path: Path,
     output_path: Path,
     environment: Mapping[str, str],
+    *,
+    expected_hosted_source_commit: str | None = None,
 ) -> DeploymentMode:
     source = json.loads(input_path.read_text(encoding="utf-8-sig"))
-    composed = compose_parameters(source, environment)
+    composed = compose_parameters(
+        source,
+        environment,
+        expected_hosted_source_commit=expected_hosted_source_commit,
+    )
     output_path.write_text(
         json.dumps(composed, indent=2) + "\n",
         encoding="utf-8",
@@ -492,9 +524,15 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--hosted-source-commit", default=None)
     args = parser.parse_args()
 
-    mode = compose_file(args.input, args.output, os.environ)
+    mode = compose_file(
+        args.input,
+        args.output,
+        os.environ,
+        expected_hosted_source_commit=args.hosted_source_commit,
+    )
     print(mode.value)
     return 0
 

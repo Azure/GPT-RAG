@@ -201,6 +201,16 @@ def main() -> int:
         ),
     )
     parser.add_argument(
+        "--validate-hosted-context",
+        action="store_true",
+        help=(
+            "Describe the already-materialized topology and validate hosted "
+            "scope and provisioned Foundry project settings without requiring "
+            "an image digest. Used immediately before automatic image "
+            "preparation."
+        ),
+    )
+    parser.add_argument(
         "--resource-group-name",
         default=None,
         help=(
@@ -227,11 +237,18 @@ def main() -> int:
     args = parser.parse_args()
 
     try:
-        if args.describe or args.validate_hosted_deploy:
+        if (
+            args.describe
+            or args.validate_hosted_deploy
+            or args.validate_hosted_context
+        ):
             mode = resolve_mode(os.environ)
-            if args.validate_hosted_deploy and mode is not DeploymentMode.CLASSIC:
+            if (
+                args.validate_hosted_deploy or args.validate_hosted_context
+            ) and mode is not DeploymentMode.CLASSIC:
                 validate_hosted_prerequisites(
                     os.environ,
+                    require_image_digest=not args.validate_hosted_context,
                     require_foundry_project=True,
                 )
             _print_description(mode)
