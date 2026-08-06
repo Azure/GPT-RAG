@@ -4,7 +4,14 @@ The orchestrator admin dashboard at `/dashboard` signs the operator in with Micr
 
 If you are looking for the wider authentication picture (chat UI sign-in, On-Behalf-Of, document-level access control), see [Authentication and Document-Level Security](howto_authentication.md). This page is scoped to the operator dashboard.
 
-This procedure applies to the orchestrator dashboard in the default Container Apps topology. The first [hosted-agent preview](deploy.md#chat-runtime-modes-preview) supports hosted/no-panel only, does not deploy this dashboard, and requires `DEPLOY_ADMINISTRATIVE_PANEL=false`. Hosted/panel is deferred to [issue #611](https://github.com/Azure/GPT-RAG/issues/611).
+This procedure applies to the orchestrator dashboard in the currently released
+classic Container Apps topology and in the explicit classic fallback. The
+[upcoming hosted-default topology](deploy.md#chat-runtime-modes-upcoming-hosted-default-release)
+is hosted/no-panel, does not deploy this dashboard, and requires
+`DEPLOY_ADMINISTRATIVE_PANEL=false`. It still depends on
+[Azure/GPT-RAG PR #617](https://github.com/Azure/GPT-RAG/pull/617) and new
+releases. Hosted/panel is deferred to
+[issue #611](https://github.com/Azure/GPT-RAG/issues/611).
 
 ## What this is
 

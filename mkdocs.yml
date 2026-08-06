@@ -47,6 +47,7 @@ nav:
     - NL2SQL: quickstart_nl2sql.md
   - Architecture:
     - Overview: architecture.md
+    - Legacy diagram update handoff: architecture_legacy_diagram_handoff.md
   - Governance:
     - Overview and responsibilities: governance_overview.md
     - Audit Contract v1: governance_audit_contract_v1.md

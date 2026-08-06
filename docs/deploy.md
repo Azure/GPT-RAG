@@ -47,62 +47,111 @@ azd deploy
 
 Some transient Azure capacity failures are not exposed by reliable pre-create APIs. For example, Cosmos DB can still fail later with regional high-demand `ServiceUnavailable`; the preflight reports this limitation explicitly. Use `GPT_RAG_REGIONAL_PREFLIGHT_SKIP=true` only to bypass GPT-RAG regional checks, or `PREFLIGHT_SKIP=true` to bypass all preflight hooks.
 
-For the basic flow, the `postProvision` hook runs locally after `azd provision` and configures GPT-RAG data-plane resources such as App Configuration and search setup. With the default Container Apps topology, `azd deploy` then deploys the UI, orchestrator, and ingestion services.
+For current published releases, the `postProvision` hook runs locally after
+`azd provision`, and `azd deploy` deploys the UI, orchestrator, and ingestion
+services in the classic Container Apps topology. The approved target changes
+the fresh-deployment default only after the platform and release gates below
+are complete.
 
-### Chat runtime modes (preview)
+### Chat runtime modes (upcoming hosted-default release)
 
-!!! warning "The first hosted preview is no-panel only"
-    The first Microsoft Foundry hosted-agent preview supports hosted/no-panel only and requires `DEPLOY_ADMINISTRATIVE_PANEL=false`. Hosted/panel is not supported or promoted in this preview because the managed Foundry Conversation history integration and panel frontend are incomplete. Follow [issue #611](https://github.com/Azure/GPT-RAG/issues/611) for that work.
+!!! warning "Do not treat the target default as shipped"
+    UI [PR #93](https://github.com/Azure/gpt-rag-ui/pull/93) is merged. The
+    umbrella implementation in [Azure/GPT-RAG PR #617](https://github.com/Azure/GPT-RAG/pull/617)
+    is not merged, and the required component, AI Landing Zone, and GPT-RAG
+    umbrella releases have not published. Current published releases remain
+    classic. Use the workflow in this section only with the release that
+    explicitly announces the hosted-default contract.
 
-`DEPLOY_HOSTED_AGENT_ORCHESTRATION` and `DEPLOY_ADMINISTRATIVE_PANEL` both default to `false`. Both false values preserve the default Container Apps topology, which remains the supported default and fallback. Set `DEPLOY_HOSTED_AGENT_ORCHESTRATION=true` only to evaluate the hosted/no-panel preview. Keep `DEPLOY_ADMINISTRATIVE_PANEL=false`.
+The upcoming release resolves one canonical topology before provisioning and
+materializes the corresponding legacy flags and App Configuration values.
+Topology never changes automatically during a chat request.
 
-| Mode | Required settings | Resulting topology |
+| Environment or operator choice | Resolved settings | Resulting topology |
 | --- | --- | --- |
-| Classic (default) | `DEPLOY_HOSTED_AGENT_ORCHESTRATION=false`, `DEPLOY_ADMINISTRATIVE_PANEL=false`, `CHAT_BACKEND=orchestrator` | The UI routes chat to the orchestrator Container App. The existing administrative surfaces and Cosmos DB dependencies remain. |
-| Hosted, no panel (preview) | `DEPLOY_HOSTED_AGENT_ORCHESTRATION=true`, `DEPLOY_ADMINISTRATIVE_PANEL=false`, `CHAT_BACKEND=hosted_agent` | The UI routes chat to the Microsoft Foundry hosted agent. No orchestrator Container App or panel-only Cosmos DB dependency is provisioned. |
+| Genuinely fresh environment after the gated release | `DEPLOYMENT_TOPOLOGY=hosted-no-panel`, `DEPLOY_HOSTED_AGENT_ORCHESTRATION=true`, `DEPLOY_ADMINISTRATIVE_PANEL=false`, `CHAT_BACKEND=hosted_agent` | Web UI and ingestion remain in Container Apps. Chat runs in a Microsoft Foundry hosted agent. No orchestrator Container App or panel-only Cosmos DB is provisioned. |
+| Existing environment with persisted topology | Existing topology and `CHAT_BACKEND` stay sticky. An unmarked pre-cutover environment resolves to `classic`. | Upgrade does not implicitly migrate identity, conversation, authorization, or cost semantics. |
+| Explicit Container Apps fallback | `DEPLOYMENT_TOPOLOGY=classic`, materialized hosted and panel flags `false`, `CHAT_BACKEND=orchestrator` | UI routes chat to the orchestrator Container App. Classic history and panel data remain available. |
+| Explicit migration to hosted/no-panel | `DEPLOYMENT_TOPOLOGY=hosted-no-panel`, delegated hosted scope configured, panel `false` | Runs the two-phase hosted lifecycle below, then validates the hosted request path before the classic chat path is removed or deactivated. |
 
-Do not set `DEPLOY_ADMINISTRATIVE_PANEL=true` for this preview. The hosted/panel topology and its user-facing history, feedback, curation, and dashboard workflows are deferred to [issue #611](https://github.com/Azure/GPT-RAG/issues/611). Draft ingestion behavior does not make those workflows available.
+Do not select `hosted-panel`. Hosted/panel history, feedback, curation, and
+dashboard workflows remain blocked by
+[issue #611](https://github.com/Azure/GPT-RAG/issues/611), and
+`DEPLOY_ADMINISTRATIVE_PANEL=false` remains required.
 
-The deployment hooks publish the shared runtime contract under the App Configuration label `gpt-rag`:
+The deployment hooks publish the shared runtime contract under the App
+Configuration label `gpt-rag`:
 
 | Setting | Operator contract |
 | --- | --- |
-| `CHAT_BACKEND` | Valid values are `orchestrator` (default) and `hosted_agent`. Invalid values fail startup. Hosted mode never silently falls back to classic. |
-| `ORCHESTRATOR_BASE_URL` | Classic service root. The UI calls the `/orchestrator` route on this endpoint when `CHAT_BACKEND=orchestrator`. |
-| `HOSTED_AGENT_BASE_URL` | Hosted service root. The UI sends `POST /invocations` to this endpoint when `CHAT_BACKEND=hosted_agent`. |
-| `HOSTED_AGENT_RESOURCE_SCOPE` | Required explicit hosted data-plane Entra scope ending in `/.default`, for example `api://<application-id>/.default`. Do not use the Azure Resource Manager scope. |
-| `HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS` | Finite positive wait for the next SSE event. The UI default is `60`. Never configure an infinite timeout. |
+| `DEPLOYMENT_TOPOLOGY` | Canonical deployment choice: `hosted-no-panel` or `classic`. `hosted-panel` fails closed while #611 is open. |
+| `CHAT_BACKEND` | The upcoming UI release treats missing or blank as `hosted_agent`; the umbrella deployment always publishes the resolved sticky value. `orchestrator` is the explicit fallback. Unknown values fail startup. Environment configuration takes precedence over App Configuration. |
+| `ORCHESTRATOR_BASE_URL` | Classic service root, used only when `CHAT_BACKEND=orchestrator`. |
+| `HOSTED_AGENT_BASE_URL` | Required HTTPS hosted service root. The UI sends `POST /invocations` when `CHAT_BACKEND=hosted_agent`. |
+| `HOSTED_AGENT_RESOURCE_SCOPE` | Required explicit non-ARM hosted data-plane Entra scope ending in `/.default`, for example `api://<application-id>/.default`. |
+| `HOSTED_AGENT_AUTH_MODE` | `user_delegated` is the default and required release path. The UI exchanges the signed-in user's token on behalf of the user. `service_identity` is an explicit reviewed exception, never an implicit fallback. |
+| `HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS` | Finite positive wait for the next SSE event. The UI default is `60`; an infinite timeout is rejected. |
+| `HOSTED_AGENT_IMAGE_VERSION` | Canonical lowercase immutable digest in `sha256:<64-hex-characters>` form. Mutable tags are rejected. |
 
-For a hosted deployment, `HOSTED_AGENT_IMAGE_VERSION` is also required before provisioning. Set it to the immutable image digest in the form `sha256:<64-hex-characters>`. A mutable tag such as `latest` or `v3.9.0` is not accepted.
+Hosted configuration, authentication, connection, timeout, protocol, and
+runtime failures are terminal for startup or the affected request. The UI does
+not silently switch to the orchestrator or to managed identity. Foundry passes
+opaque `x-agent-foundry-call-id` context to Toolbox; user and delegated bearer
+tokens are not copied into tool payloads or client-defined identity headers.
+
+#### Two-phase hosted deployment
+
+For a fresh hosted deployment, configure the delegated data-plane scope before
+the first provision:
 
 ```powershell
-azd env set DEPLOY_HOSTED_AGENT_ORCHESTRATION true
-azd env set DEPLOY_ADMINISTRATIVE_PANEL false # required for this preview
-azd env set HOSTED_AGENT_IMAGE_VERSION "sha256:<64-hex-characters>"
 azd env set HOSTED_AGENT_RESOURCE_SCOPE "api://<application-id>/.default"
 azd env set HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS 60
+azd provision
+pwsh scripts/prepareHostedDeployment.ps1
+azd provision
+azd deploy
 ```
 
-Treat these exact pins as one hosted/no-panel preview candidate. Do not mix versions:
+On POSIX systems, use `scripts/prepareHostedDeployment.sh` for the preparation
+step. For an explicit migration, set
+`DEPLOYMENT_TOPOLOGY=hosted-no-panel` before the first `azd provision`.
 
-| Component | Candidate pin |
-| --- | --- |
-| GPT-RAG UI | `v2.5.0` |
-| GPT-RAG orchestrator | `v3.9.0` |
-| GPT-RAG ingestion | `v2.6.0` |
-| AI Landing Zone (AILZ) | `v2.4.1` |
+The first provision creates hosted prerequisites with image preparation
+enabled but hosted deployment disabled. The preparation command clones and
+verifies the manifest-pinned orchestrator source, builds the standard image and
+the hosted-entrypoint derivative, resolves the pushed manifest to an immutable
+digest, and persists that digest and source provenance. The second provision
+materializes the digest-backed hosted handoff; `azd deploy` then deploys the
+hosted agent.
 
-The GitHub release APIs for UI `v2.5.0` and AILZ `v2.4.1` currently report `immutable=false`. AILZ `v2.4.1` is nevertheless protected by active exact-tag ruleset `20339953`, which blocks deletion and non-fast-forward updates to `refs/tags/v2.4.1`. UI `v2.5.0` has no equivalent mitigation and remains the immutable-tag release blocker because repository-admin permission is unavailable. Neither API metadata nor the AILZ tag ruleset implies that this combination has an Azure/GPT-RAG umbrella release. The ingestion pin also does not make the deferred hosted/panel workflows available.
+Public deployments use shared ACR Tasks. Network-isolated deployments use the
+dedicated VNet-connected ACR Tasks agent pool; shared ACR Tasks cannot reach a
+private endpoint. Operators may pass an already-built immutable
+`sha256:<64-hex-characters>` digest to the preparation command to skip builds.
+No lifecycle hook recursively invokes `azd provision`.
 
-AILZ `v2.4.1` fixes provisioning of the optional VNet-injected ACR Tasks agent pool under `NETWORK_ISOLATION=true` by adding the required Azure Firewall network rules and ordering them after firewall provisioning. The pool supports private builds for the UI, orchestrator, ingestion, and hosted-agent derivative images.
+#### Explicit fallback after the hosted-default release
 
-With AILZ `v2.4.1`, the dedicated VNet-connected ACR Tasks agent pool is a valid private build route for all images, including the hosted-agent derivative image. Shared ACR Tasks run outside that private network boundary and cannot reach a private endpoint.
+Fallback is a deployment operation, not a request-time retry:
 
-#### Roll back to the v3.7.0 classic release
+```powershell
+azd env set DEPLOYMENT_TOPOLOGY classic
+azd provision
+azd deploy
+```
 
-Roll back the entire GPT-RAG `v3.7.0` release as a unit, rather than changing only `CHAT_BACKEND` while leaving candidate manifests, hooks, or infrastructure in place. The complete classic pin set is UI `v2.3.13`, orchestrator `v3.8.0`, ingestion `v2.5.0`, and AILZ `v2.3.0`.
+This restores the orchestrator Container App and publishes
+`CHAT_BACKEND=orchestrator` without deleting hosted Conversations or existing
+classic panel data.
 
-Restore the `v3.7.0` manifest, infrastructure gitlink and `.gitmodules`, lifecycle hooks, parameters, and `azure.yaml`. Set both deployment flags to `false`, publish `CHAT_BACKEND=orchestrator` and the classic `ORCHESTRATOR_BASE_URL` under the `gpt-rag` label, then run `azd provision` and `azd deploy`. This restores the full known classic configuration instead of a hybrid rollback.
+#### Current classic release
+
+GPT-RAG `v3.7.0` remains the latest published umbrella release at the time this
+target architecture was documented. Its classic pin set is UI `v2.3.13`,
+orchestrator `v3.8.0`, ingestion `v2.5.0`, and AI Landing Zone `v2.3.0`.
+Do not combine the upcoming topology contract with those released hooks or
+manifests.
 
 ### Retrieval backend
 
@@ -393,7 +442,12 @@ cd gpt-rag-orchestrator
 
 ## Permissions
 
-The role tables below describe the default Container Apps topology. Hosted/no-panel omits the orchestrator Container App assignments. The hosted-agent identity receives its own Foundry data-plane and immutable-image pull assignments during hosted deployment. Hosted/panel remains unsupported in this preview and is tracked by [issue #611](https://github.com/Azure/GPT-RAG/issues/611).
+The role tables below describe the currently released classic Container Apps
+topology. The upcoming hosted/no-panel target omits the orchestrator Container
+App assignments and adds Foundry data-plane, delegated-user, Toolbox, and
+immutable-image pull assignments. It still depends on platform PR #617 and new
+releases. Hosted/panel remains unsupported and is tracked by
+[issue #611](https://github.com/Azure/GPT-RAG/issues/611).
 
 **Microsoft Foundry Role and AI Search Assignments**
 

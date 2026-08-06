@@ -13,14 +13,28 @@ Designed with Zero-Trust security and Infrastructure as Code (IaC) principles fr
 
 ## Architecture at a glance
 
-GPT-RAG can start as a basic deployment and expand into Zero Trust, public ingress, existing-platform integration, or optional AI capabilities as needed. See the [Architecture](architecture.md) page for the required-vs-configurable deployment table.
+GPT-RAG can start as a Basic deployment and expand into Zero Trust, public
+ingress, existing-platform integration, or optional AI capabilities. The
+approved target makes Microsoft Foundry hosted/no-panel the fresh-deployment
+chat runtime and retains the Container Apps orchestrator as an explicit
+fallback. See the [Architecture](architecture.md) page for the mode contract
+and required-vs-configurable deployment table.
 
-![Zero Trust Architecture](media/architecture_zero_trust.png)
-*Full Zero Trust reference architecture. This is the complete network-isolated view, not the minimum basic deployment.*
+!!! warning "Hosted-default release dependency"
+    The diagram below is the approved target, not shipped behavior. UI
+    [PR #93](https://github.com/Azure/gpt-rag-ui/pull/93) is merged, but
+    [Azure/GPT-RAG PR #617](https://github.com/Azure/GPT-RAG/pull/617) and the
+    required component and umbrella releases are still pending. Current
+    published releases remain classic.
 
-The complementary modular view below separates the basic deployment from optional add-on layers.
+![Chat runtime modes and hosted deployment lifecycle](media/architecture_chat_runtime_modes.svg)
 
 ![Modular architecture layers](media/architecture_modular_layers.svg)
+
+![Zero Trust Architecture](media/architecture_zero_trust.png)
+*Full Zero Trust reference architecture. This is the complete network-isolated
+view, not the minimum Basic deployment. The focused SVG above is the source of
+truth for the pending hosted-default runtime update.*
 
 ## Governance
 
