@@ -199,8 +199,11 @@ The preparation command builds the manifest-pinned image and stores only its imm
   Push-Location $hostedProject
   try {
     & azd env set HOSTED_AGENT_IMAGE_VERSION $hostedDigest --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
+    if ($LASTEXITCODE -ne 0) { Write-Error "Failed to set hosted image digest in the child azd project."; exit $LASTEXITCODE }
     & azd env set FOUNDRY_PROJECT_ENDPOINT "$($globalEnv.AZURE_AI_PROJECT_ENDPOINT)" --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
+    if ($LASTEXITCODE -ne 0) { Write-Error "Failed to set Foundry endpoint in the child azd project."; exit $LASTEXITCODE }
     & azd env set AZURE_AI_PROJECT_ID "$($globalEnv.AZURE_AI_PROJECT_RESOURCE_ID)" --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
+    if ($LASTEXITCODE -ne 0) { Write-Error "Failed to set Foundry project ID in the child azd project."; exit $LASTEXITCODE }
     & azd deploy orchestrator-agent --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt
     if ($LASTEXITCODE -ne 0) {
       Write-Error "Hosted orchestrator deployment failed."
@@ -230,17 +233,6 @@ The preparation command builds the manifest-pinned image and stores only its imm
   }
   $env:HOSTED_AGENT_BASE_URL = $hostedBaseUrl
   $env:HOSTED_AGENT_RESOURCE_SCOPE = "$($globalEnv.HOSTED_AGENT_RESOURCE_SCOPE)"
-  Push-Location $repoRoot
-  try {
-    & azd env set HOSTED_AGENT_BASE_URL $hostedBaseUrl --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
-    & python -m config.deployment.appconfig --require-hosted-endpoint
-    if ($LASTEXITCODE -ne 0) {
-      Write-Error "Failed to publish the hosted-agent endpoint contract."
-      exit $LASTEXITCODE
-    }
-  } finally {
-    Pop-Location
-  }
 }
 
 foreach ($c in $manifest.components) {
@@ -258,12 +250,22 @@ foreach ($c in $manifest.components) {
   $refType = $null; $ref = $null
   if ($desiredTag) {
     if (Tag-Exists $repo $desiredTag) { $refType = 'tag'; $ref = $desiredTag }
-    else { Write-Warning ("{0}: tag '{1}' not found. Skipping." -f $name, $desiredTag); continue }
+    else {
+      Write-Warning ("{0}: tag '{1}' not found. Skipping." -f $name, $desiredTag)
+      if ($hostedMode) { $hadErrors = $true }
+      continue
+    }
   } elseif ($desiredBranch) {
     if (Branch-Exists $repo $desiredBranch) { $refType = 'branch'; $ref = $desiredBranch }
-    else { Write-Warning ("{0}: branch '{1}' not found. Skipping." -f $name, $desiredBranch); continue }
+    else {
+      Write-Warning ("{0}: branch '{1}' not found. Skipping." -f $name, $desiredBranch)
+      if ($hostedMode) { $hadErrors = $true }
+      continue
+    }
   } else {
-    Write-Warning ("{0}: neither tag nor branch specified. Skipping." -f $name); continue
+    Write-Warning ("{0}: neither tag nor branch specified. Skipping." -f $name)
+    if ($hostedMode) { $hadErrors = $true }
+    continue
   }
 
   # Target folder (sibling to gpt-rag)
@@ -345,9 +347,51 @@ foreach ($c in $manifest.components) {
     }
   } else {
     Write-Host ("{0}: no scripts\deploy.ps1 found, skipping child deploy." -f $name)
+    if ($hostedMode) { $hadErrors = $true }
   }
 }
 
 if ($hadErrors) { Write-Error "One or more components failed. See logs above."; exit 1 }
+
+if ($hostedMode) {
+  $env:HOSTED_CUTOVER_COMPLETE = 'true'
+  $migratingClassicRuntime = "$($env:PRESERVE_CLASSIC_RUNTIME)".ToLowerInvariant() -eq 'true'
+  Push-Location $repoRoot
+  try {
+    & python -m config.deployment.appconfig --require-hosted-endpoint
+    if ($LASTEXITCODE -ne 0) {
+      Write-Error "Failed to publish the hosted-agent endpoint contract."
+      exit $LASTEXITCODE
+    }
+    & azd env set HOSTED_AGENT_BASE_URL $hostedBaseUrl --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+      if ($migratingClassicRuntime) {
+        $env:HOSTED_CUTOVER_COMPLETE = 'false'
+        & python -m config.deployment.appconfig | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+          Write-Error "Hosted endpoint persistence and classic-selector compensation both failed."
+          exit 1
+        }
+      }
+      Write-Error "Hosted cutover endpoint could not be persisted."
+      exit 1
+    }
+    & azd env set HOSTED_CUTOVER_COMPLETE true --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+      if ($migratingClassicRuntime) {
+        $env:HOSTED_CUTOVER_COMPLETE = 'false'
+        & python -m config.deployment.appconfig | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+          Write-Error "Hosted marker persistence and classic-selector compensation both failed."
+          exit 1
+        }
+      }
+      Write-Error "Hosted cutover success marker could not be persisted."
+      exit 1
+    }
+  } finally {
+    Pop-Location
+  }
+}
 
 Write-Host "All components processed." -ForegroundColor Green

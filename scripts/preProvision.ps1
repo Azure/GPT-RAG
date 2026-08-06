@@ -23,6 +23,16 @@ $ErrorActionPreference = 'Stop'
 $projectRoot = Join-Path $PSScriptRoot ".."
 $infraDir = Join-Path $projectRoot "infra"
 $mainBicep = Join-Path $infraDir "main.bicep"
+$manifestSource = Join-Path $projectRoot "manifest.json"
+if (-not (Test-Path $manifestSource)) {
+    Write-Host "Error: manifest.json is required to resolve the infrastructure release pin." -ForegroundColor Red
+    exit 1
+}
+$expectedInfraCommit = (Get-Content -LiteralPath $manifestSource -Raw | ConvertFrom-Json).ailz_commit
+if (-not $expectedInfraCommit -or $expectedInfraCommit -notmatch '^[0-9a-f]{40}$') {
+    Write-Host "Error: manifest.json must define ailz_commit as a lowercase 40-character Git SHA." -ForegroundColor Red
+    exit 1
+}
 
 Write-Host "Initializing infrastructure submodule..." -ForegroundColor Cyan
 git submodule update --init --recursive 2>$null
@@ -34,38 +44,46 @@ git submodule update --init --recursive 2>$null
 if (-not (Test-Path $mainBicep)) {
     Write-Host "Submodule content not found. Cloning infra repo directly (azd init scenario)..." -ForegroundColor Cyan
 
-    # Extract infra repo URL and branch from .gitmodules
+    # Extract the infra repo URL from .gitmodules.
     $gitmodulesPath = Join-Path $projectRoot ".gitmodules"
     $infraUrl = $null
-    $infraRef = "main"  # safe default
     if (Test-Path $gitmodulesPath) {
         $urlMatch = Select-String -Path $gitmodulesPath -Pattern 'url\s*=\s*(.+)' | Select-Object -First 1
         if ($urlMatch) { $infraUrl = $urlMatch.Matches.Groups[1].Value.Trim() }
-        $branchMatch = Select-String -Path $gitmodulesPath -Pattern 'branch\s*=\s*(.+)' | Select-Object -First 1
-        if ($branchMatch) { $infraRef = $branchMatch.Matches.Groups[1].Value.Trim() }
     }
     if (-not $infraUrl) {
         Write-Host "Error: Could not determine infra repository URL from .gitmodules." -ForegroundColor Red
         exit 1
     }
-    Write-Host "  Infra repo: $infraUrl @ $infraRef (from .gitmodules)" -ForegroundColor Cyan
+    Write-Host "  Infra repo: $infraUrl @ $expectedInfraCommit (from manifest.json)" -ForegroundColor Cyan
 
-    # Remove the empty infra directory and clone at the correct tag
+    # Initialize only the repository metadata. The exact manifest commit is
+    # fetched and checked out by the common path below.
     if (Test-Path $infraDir) { Remove-Item -Path $infraDir -Recurse -Force }
-    git -c advice.detachedHead=false clone --depth 1 --branch $infraRef $infraUrl $infraDir
+    New-Item -ItemType Directory -Path $infraDir -Force | Out-Null
+    git -C $infraDir init --quiet
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "Error: Failed to clone infra repository ($infraUrl @ $infraRef)." -ForegroundColor Red
+        Write-Host "Error: Failed to initialize infra repository ($infraUrl)." -ForegroundColor Red
         exit 1
     }
-    Write-Host "Infrastructure submodule cloned successfully." -ForegroundColor Green
+    git -C $infraDir remote add origin $infraUrl
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Error: Failed to configure infra repository origin ($infraUrl)." -ForegroundColor Red
+        exit 1
+    }
 }
 
-$manifestSource = Join-Path $projectRoot "manifest.json"
-if (-not (Test-Path $manifestSource)) {
-    Write-Host "Error: manifest.json is required to verify the infrastructure release pin." -ForegroundColor Red
+Write-Host "Fetching exact infrastructure commit $expectedInfraCommit..." -ForegroundColor Cyan
+git -C $infraDir fetch --depth 1 origin $expectedInfraCommit
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Error: Failed to fetch infra commit $expectedInfraCommit." -ForegroundColor Red
     exit 1
 }
-$expectedInfraCommit = (Get-Content -LiteralPath $manifestSource -Raw | ConvertFrom-Json).ailz_commit
+git -C $infraDir -c advice.detachedHead=false checkout --detach $expectedInfraCommit
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Error: Failed to check out infra commit $expectedInfraCommit." -ForegroundColor Red
+    exit 1
+}
 $actualInfraCommitOutput = & git -C $infraDir rev-parse HEAD 2>$null
 $revParseExitCode = $LASTEXITCODE
 $actualInfraCommit = if ($actualInfraCommitOutput) { "$actualInfraCommitOutput".Trim() } else { '' }
@@ -111,6 +129,10 @@ foreach ($line in $topologyOutput) {
             & azd env set $name $value --environment $azureEnvName --no-prompt | Out-Null
         } else {
             & azd env set $name $value --no-prompt | Out-Null
+        }
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "Error: Failed to persist resolved topology setting $name." -ForegroundColor Red
+            exit $LASTEXITCODE
         }
     }
 }
