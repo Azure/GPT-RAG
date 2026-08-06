@@ -5,6 +5,13 @@ import subprocess
 import unittest
 from pathlib import Path
 
+from config.deployment.composition import (
+    DeploymentMode,
+    compose_parameters,
+    materialized_settings,
+    resolve_mode,
+)
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -136,6 +143,14 @@ class IntegrationPinTests(unittest.TestCase):
         self.assertEqual(
             "false", rollback["azd"]["DEPLOY_ADMINISTRATIVE_PANEL"]
         )
+        self.assertEqual("classic", rollback["azd"]["DEPLOYMENT_TOPOLOGY"])
+        self.assertEqual("orchestrator", rollback["azd"]["CHAT_BACKEND"])
+        self.assertEqual(
+            "false", rollback["azd"]["PRESERVE_CLASSIC_RUNTIME"]
+        )
+        self.assertEqual(
+            "false", rollback["azd"]["HOSTED_CUTOVER_COMPLETE"]
+        )
         self.assertEqual(
             "orchestrator", rollback["appConfiguration"]["CHAT_BACKEND"]
         )
@@ -158,6 +173,50 @@ class IntegrationPinTests(unittest.TestCase):
                 for key, value in rollback["appConfiguration"].items()
                 if key != "label"
             },
+        )
+
+    def test_rollback_overrides_materialized_hosted_state_before_composition(
+        self,
+    ) -> None:
+        rollback = json.loads(
+            (ROOT / "config" / "deployment" / "rollback.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        environment = materialized_settings(
+            DeploymentMode.HOSTED_NO_PANEL,
+            hosted_cutover_complete=True,
+        )
+        environment.update(
+            {
+                "PREPARE_HOSTED_AGENT": "true",
+                "DEPLOY_HOSTED_AGENT": "true",
+                "HOSTED_AGENT_BASE_URL": (
+                    "https://agent.example.test/protocols"
+                ),
+                "HOSTED_AGENT_IMAGE_VERSION": "sha256:" + ("a" * 64),
+                "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
+            }
+        )
+
+        environment.update(rollback["azd"])
+        composed = compose_parameters(
+            json.loads(
+                (ROOT / "main.parameters.json").read_text(encoding="utf-8")
+            ),
+            environment,
+        )
+        parameters = composed["parameters"]
+
+        self.assertEqual(DeploymentMode.CLASSIC, resolve_mode(environment))
+        self.assertFalse(parameters["prepareHostedAgent"]["value"])
+        self.assertFalse(parameters["deployHostedAgent"]["value"])
+        self.assertIn(
+            "orchestrator",
+            [
+                app["service_name"]
+                for app in parameters["containerAppsList"]["value"]
+            ],
         )
 
 

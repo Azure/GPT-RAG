@@ -12,6 +12,8 @@
   "azd": {
     "DEPLOYMENT_TOPOLOGY": "classic",
     "CHAT_BACKEND": "orchestrator",
+    "PRESERVE_CLASSIC_RUNTIME": "false",
+    "HOSTED_CUTOVER_COMPLETE": "false",
     "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "false",
     "PREPARE_HOSTED_AGENT": "false",
     "DEPLOY_HOSTED_AGENT": "false",
