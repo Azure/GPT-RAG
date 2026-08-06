@@ -58,6 +58,14 @@ if ! printf '%s\n' "$EXPECTED_INFRA_COMMIT" | grep -Eq '^[0-9a-f]{40}$'; then
     exit 1
 fi
 
+# Provisioning owns these generated infra overrides. Restore only those files,
+# then fail closed if any unrelated submodule changes remain.
+(cd "$PROJECT_ROOT" && "$PYTHON_CMD" -m config.deployment.infra_checkout --infra-dir "$INFRA_DIR")
+INFRA_CHECKOUT_EXIT=$?
+if [ $INFRA_CHECKOUT_EXIT -ne 0 ]; then
+    exit $INFRA_CHECKOUT_EXIT
+fi
+
 echo "${CYAN}Initializing infrastructure submodule...${NC}"
 git submodule update --init --recursive 2>/dev/null
 

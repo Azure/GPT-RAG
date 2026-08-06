@@ -202,6 +202,19 @@ class LifecycleParityTests(unittest.TestCase):
                 self.assertIn("^[0-9a-f]{40}$", content)
                 self.assertNotIn("clone --depth 1 --branch", content)
 
+    def test_preprovision_hooks_prepare_infra_before_moving_the_pin(self) -> None:
+        scripts = ROOT / "scripts"
+        for name in ("preProvision.ps1", "preProvision.sh"):
+            with self.subTest(script=name):
+                content = (scripts / name).read_text(encoding="utf-8-sig")
+                prepare = content.index("config.deployment.infra_checkout")
+                submodule_update = content.index("git submodule update")
+                exact_checkout = content.index("checkout --detach")
+                self.assertLess(prepare, submodule_update)
+                self.assertLess(prepare, exact_checkout)
+        shell = (scripts / "preProvision.sh").read_text(encoding="utf-8-sig")
+        self.assertIn("exit $INFRA_CHECKOUT_EXIT", shell)
+
     def test_postprovision_hooks_delegate_runtime_switch_to_shared_publisher(
         self,
     ) -> None:
