@@ -230,10 +230,25 @@ function Set-GptRagAppConfiguration {
     $environmentName = Get-OptionalEnvValue 'AZURE_ENV_NAME' (Get-OptionalEnvValue 'ENVIRONMENT_NAME')
     $deploymentName = Get-OptionalEnvValue 'DEPLOYMENT_NAME'
     $release = Get-OptionalEnvValue 'RELEASE'
-    $hostedMode = Test-Truthy (Get-OptionalEnvValue 'DEPLOY_HOSTED_AGENT_ORCHESTRATION' 'false')
-    $administrativePanel = $hostedMode -and (Test-Truthy (Get-OptionalEnvValue 'DEPLOY_ADMINISTRATIVE_PANEL' 'false'))
+    # ADR-0001 rev. 5: read back the deployment topology that scripts/preProvision
+    # already resolved and materialized into the azd environment (mirrored into
+    # process env above), rather than re-deriving the fresh/existing/sticky
+    # decision here. config.deployment.topology --describe performs no Azure CLI
+    # lookups; it is a pure read-back of DEPLOYMENT_TOPOLOGY / the legacy flag
+    # pair, so postProvision always agrees with preProvision's decision.
+    $topologyJson = Invoke-PythonModule -ModuleName 'config.deployment.topology' -Arguments @('--describe')
+    if ($LASTEXITCODE -ne 0 -or -not $topologyJson) {
+        Write-Error "Failed to resolve the GPT-RAG deployment topology. Ensure scripts/preProvision ran successfully before postProvision."
+        exit 1
+    }
+    $topologyInfo = ([string]$topologyJson).Trim() | ConvertFrom-Json
+    # The requested topology remains hosted throughout migration, while the
+    # shared resolver reports a classic effective runtime until both the
+    # immutable image and hosted endpoint exist.
+    $runtimeTopology = [string]$topologyInfo.runtime_topology
+    $hostedMode = $runtimeTopology -ne 'classic'
+    $administrativePanel = $runtimeTopology -eq 'hosted-panel'
     $cosmosEnabled = (-not $hostedMode) -or $administrativePanel
-    $deploymentTopology = if (-not $hostedMode) { 'classic' } elseif ($administrativePanel) { 'hosted-panel' } else { 'hosted-no-panel' }
 
     $appConfigName = Get-AppConfigResourceName -Endpoint $Endpoint
     $nameSuffix = $resourceToken
@@ -437,13 +452,6 @@ function Set-GptRagAppConfiguration {
         ENVIRONMENT_NAME = $environmentName
         DEPLOYMENT_NAME = $deploymentName
         RESOURCE_TOKEN = $resourceToken
-        DEPLOY_HOSTED_AGENT_ORCHESTRATION = "$hostedMode".ToLowerInvariant()
-        DEPLOY_ADMINISTRATIVE_PANEL = "$administrativePanel".ToLowerInvariant()
-        DEPLOYMENT_TOPOLOGY = $deploymentTopology
-        CHAT_BACKEND = if ($hostedMode) { 'hosted_agent' } else { 'orchestrator' }
-        HOSTED_AGENT_BASE_URL = (Get-OptionalEnvValue 'HOSTED_AGENT_BASE_URL')
-        HOSTED_AGENT_RESOURCE_SCOPE = (Get-OptionalEnvValue 'HOSTED_AGENT_RESOURCE_SCOPE')
-        HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS = (Get-OptionalEnvValue 'HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS' '60')
         SEARCH_RAG_INDEX_NAME = $ragIndexName
         ENABLE_AGENTIC_RETRIEVAL = (Get-OptionalEnvValue 'ENABLE_AGENTIC_RETRIEVAL' 'false')
         RETRIEVAL_BACKEND = $retrievalBackend

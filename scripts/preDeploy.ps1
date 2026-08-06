@@ -110,24 +110,40 @@ $dotAzure   = Join-Path $repoRoot '.azure'
 $globalEnv  = Get-AzdEnv -projectPath $repoRoot
 $globalRG   = $globalEnv.AZURE_RESOURCE_GROUP
 $globalSub  = $globalEnv.AZURE_SUBSCRIPTION_ID
-$hostedMode = "$($globalEnv.DEPLOY_HOSTED_AGENT_ORCHESTRATION)".ToLowerInvariant() -match '^(1|true|t|yes|y)$'
-$administrativePanel = $hostedMode -and ("$($globalEnv.DEPLOY_ADMINISTRATIVE_PANEL)".ToLowerInvariant() -match '^(1|true|t|yes|y)$')
-$deploymentMode = if (-not $hostedMode) { 'classic' } elseif ($administrativePanel) { 'hosted-panel' } else { 'hosted-no-panel' }
-$selectedComponents = if ($hostedMode) {
-  @('gpt-rag-ui', 'gpt-rag-ingestion')
-} else {
-  @('gpt-rag-ui', 'gpt-rag-orchestrator', 'gpt-rag-ingestion')
-}
-Write-Host "GPT-RAG deployment mode: $deploymentMode" -ForegroundColor Cyan
 
-# Make azd outputs available to component deploy scripts. In network-isolated
-# deployments the jumpbox intentionally has no Docker, so components need
-# ACR_TASK_AGENT_POOL/NETWORK_ISOLATION to select remote ACR builds.
+# Make azd outputs available to component deploy scripts (and to the topology
+# read-back below). In network-isolated deployments the jumpbox intentionally
+# has no Docker, so components need ACR_TASK_AGENT_POOL/NETWORK_ISOLATION to
+# select remote ACR builds.
 foreach ($prop in $globalEnv.PSObject.Properties) {
   if ($null -ne $prop.Value -and "$($prop.Value)" -ne '') {
     Set-Item -Path "Env:$($prop.Name)" -Value "$($prop.Value)"
   }
 }
+
+# ADR-0001 rev. 5: read back the deployment topology that scripts/preProvision
+# already resolved and materialized into the azd environment (mirrored into
+# process env above). preDeploy must never re-derive the fresh/existing/sticky
+# decision independently -- config.deployment.topology --describe performs no
+# Azure CLI lookups; it is a pure read-back of DEPLOYMENT_TOPOLOGY / the legacy
+# flag pair, so this always agrees with preProvision and postProvision.
+Push-Location $repoRoot
+try {
+  $topologyJson = Invoke-PythonModule -ModuleName 'config.deployment.topology' -Arguments @('--describe')
+  $topologyExitCode = $LASTEXITCODE
+} finally {
+  Pop-Location
+}
+if ($topologyExitCode -ne 0 -or -not $topologyJson) {
+  Write-Error "Failed to resolve the GPT-RAG deployment topology. Ensure scripts/preProvision ran successfully before azd deploy."
+  exit 1
+}
+$topologyInfo = ("$topologyJson").Trim() | ConvertFrom-Json
+$hostedMode = [bool]$topologyInfo.deploy_hosted_agent_orchestration
+$administrativePanel = [bool]$topologyInfo.deploy_administrative_panel
+$deploymentMode = [string]$topologyInfo.topology
+$selectedComponents = @($topologyInfo.components)
+Write-Host "GPT-RAG deployment mode: $deploymentMode" -ForegroundColor Cyan
 
 $networkIsolation = "$($globalEnv.NETWORK_ISOLATION)".ToLowerInvariant() -eq 'true'
 $runningFromJumpbox = "$($env:RUN_FROM_JUMPBOX)".ToLowerInvariant() -eq 'true'
@@ -159,68 +175,33 @@ if ($hostedMode) {
     Write-Error "Hosted agent azd project not found at $hostedProject."
     exit 1
   }
-  if (-not $globalEnv.HOSTED_AGENT_RESOURCE_SCOPE -or -not "$($globalEnv.HOSTED_AGENT_RESOURCE_SCOPE)".EndsWith('/.default')) {
-    Write-Error "Hosted mode requires HOSTED_AGENT_RESOURCE_SCOPE as an explicit data-plane scope ending in '/.default'."
+  if (
+    "$($globalEnv.HOSTED_AGENT_PREPARED)".ToLowerInvariant() -ne 'true' -or
+    "$($globalEnv.DEPLOY_HOSTED_AGENT)".ToLowerInvariant() -ne 'true'
+  ) {
+    Write-Error @"
+Hosted prerequisites are prepared, but the immutable deploy handoff is not materialized.
+Run:
+  pwsh scripts/prepareHostedDeployment.ps1
+  azd provision
+  azd deploy
+The preparation command builds the manifest-pinned image and stores only its immutable digest.
+"@
     exit 1
   }
-  if (-not $globalEnv.AZURE_AI_PROJECT_ENDPOINT -or -not $globalEnv.AZURE_AI_PROJECT_RESOURCE_ID) {
-    Write-Error "Hosted mode requires AZURE_AI_PROJECT_ENDPOINT and AZURE_AI_PROJECT_RESOURCE_ID from provisioning."
-    exit 1
+  Push-Location $repoRoot
+  try {
+    Invoke-PythonModule -ModuleName 'config.deployment.topology' -Arguments @('--validate-hosted-deploy') | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+      Write-Error "Hosted deployment prerequisites or immutable image digest are invalid."
+      exit $LASTEXITCODE
+    }
+  } finally {
+    Pop-Location
   }
 
-  # The Foundry "Create Agent" API for container-mode hosted agents only reads the
-  # image field; startupCommand (above, in azure.yaml) never reaches the real wire
-  # request, so whatever CMD is baked into the published orchestrator image is what
-  # actually runs. That image's CMD is the classic Container App entrypoint, not the
-  # hosted one. When HOSTED_AGENT_AUTO_BUILD_IMAGE=true, build a small derivative
-  # image (same digest-pinned base, CMD overridden to the hosted entrypoint) via ACR
-  # Tasks -- honoring the same VNet-injected agent pool used for every other
-  # NETWORK_ISOLATION=true build -- and point HOSTED_AGENT_IMAGE_VERSION at its
-  # digest before deploying. Defaults to false to preserve today's behavior for
-  # operators who already publish a correctly-configured hosted image themselves.
-  $hostedAutoBuildImage = "$($globalEnv.HOSTED_AGENT_AUTO_BUILD_IMAGE)".ToLowerInvariant() -match '^(1|true|t|yes|y)$'
-  if ($hostedAutoBuildImage) {
-    $acrEndpoint = "$($globalEnv.AZURE_CONTAINER_REGISTRY_ENDPOINT)"
-    if (-not $acrEndpoint) {
-      Write-Error "HOSTED_AGENT_AUTO_BUILD_IMAGE=true requires AZURE_CONTAINER_REGISTRY_ENDPOINT from provisioning."
-      exit 1
-    }
-    $acrName = $acrEndpoint.Split('.')[0]
-    $hostedImageName = if ($globalEnv.HOSTED_AGENT_IMAGE) { "$($globalEnv.HOSTED_AGENT_IMAGE)" } else { 'gpt-rag-orchestrator' }
-    $baseImageDigest = "$($globalEnv.HOSTED_AGENT_IMAGE_VERSION)"
-    $baseImageRef = "$acrEndpoint/$hostedImageName@$baseImageDigest"
-    $hostedImageTag = "hosted-$((($baseImageDigest -replace '^sha256:', '')).Substring(0,12))"
-    Write-Host "Building hosted-agent derivative image via ACR Tasks (base: $baseImageRef)..." -ForegroundColor Cyan
-    Push-Location $repoRoot
-    try {
-      $buildArgs = @(
-        '--registry', $acrName,
-        '--base-image-ref', $baseImageRef,
-        '--image-name', $hostedImageName,
-        '--image-tag', $hostedImageTag
-      )
-      if ($globalEnv.ACR_TASK_AGENT_POOL) {
-        $buildArgs += @('--agent-pool', "$($globalEnv.ACR_TASK_AGENT_POOL)")
-      }
-      $hostedDigest = Invoke-PythonModule -ModuleName 'config.deployment.hosted_image' -Arguments $buildArgs
-      if ($LASTEXITCODE -ne 0 -or -not $hostedDigest) {
-        Write-Error "Failed to build the hosted-agent derivative image."
-        exit $LASTEXITCODE
-      }
-      $hostedDigest = "$hostedDigest".Trim()
-    } finally {
-      Pop-Location
-    }
-    Write-Host "Hosted-agent derivative image built: $hostedDigest" -ForegroundColor Green
-    $env:HOSTED_AGENT_IMAGE_VERSION = $hostedDigest
-    $globalEnv.HOSTED_AGENT_IMAGE_VERSION = $hostedDigest
-    Push-Location $repoRoot
-    try {
-      & azd env set HOSTED_AGENT_IMAGE_VERSION $hostedDigest --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
-    } finally {
-      Pop-Location
-    }
-  }
+  $hostedDigest = "$($globalEnv.HOSTED_AGENT_IMAGE_VERSION)".Trim()
+  Write-Host "Hosted-agent deploy handoff ready: $hostedDigest" -ForegroundColor Green
 
   if (Test-Path -LiteralPath $dotAzure) {
     Copy-Item $dotAzure $hostedProject -Recurse -Force -Container
@@ -228,11 +209,20 @@ if ($hostedMode) {
 
   Push-Location $hostedProject
   try {
+    & azd env set HOSTED_AGENT_IMAGE_VERSION $hostedDigest --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
+    if ($LASTEXITCODE -ne 0) { Write-Error "Failed to set hosted image digest in the child azd project."; exit $LASTEXITCODE }
     & azd env set FOUNDRY_PROJECT_ENDPOINT "$($globalEnv.AZURE_AI_PROJECT_ENDPOINT)" --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
+    if ($LASTEXITCODE -ne 0) { Write-Error "Failed to set Foundry endpoint in the child azd project."; exit $LASTEXITCODE }
     & azd env set AZURE_AI_PROJECT_ID "$($globalEnv.AZURE_AI_PROJECT_RESOURCE_ID)" --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
+    if ($LASTEXITCODE -ne 0) { Write-Error "Failed to set Foundry project ID in the child azd project."; exit $LASTEXITCODE }
     & azd deploy orchestrator-agent --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt
     if ($LASTEXITCODE -ne 0) {
       Write-Error "Hosted orchestrator deployment failed."
+      exit $LASTEXITCODE
+    }
+    & azd ai agent invoke --protocol invocations --new-session --timeout 180 --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt "Reply with exactly: GPT-RAG hosted smoke OK." | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+      Write-Error "Hosted orchestrator smoke request failed; the classic chat path remains active."
       exit $LASTEXITCODE
     }
     $hostedEnv = Get-AzdEnv -projectPath $hostedProject
@@ -259,17 +249,6 @@ if ($hostedMode) {
   }
   $env:HOSTED_AGENT_BASE_URL = $hostedBaseUrl
   $env:HOSTED_AGENT_RESOURCE_SCOPE = "$($globalEnv.HOSTED_AGENT_RESOURCE_SCOPE)"
-  Push-Location $repoRoot
-  try {
-    & azd env set HOSTED_AGENT_BASE_URL $hostedBaseUrl --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
-    Invoke-PythonModule -ModuleName 'config.deployment.appconfig' -Arguments @('--require-hosted-endpoint')
-    if ($LASTEXITCODE -ne 0) {
-      Write-Error "Failed to publish the hosted-agent endpoint contract."
-      exit $LASTEXITCODE
-    }
-  } finally {
-    Pop-Location
-  }
 }
 
 foreach ($c in $manifest.components) {
@@ -287,12 +266,22 @@ foreach ($c in $manifest.components) {
   $refType = $null; $ref = $null
   if ($desiredTag) {
     if (Tag-Exists $repo $desiredTag) { $refType = 'tag'; $ref = $desiredTag }
-    else { Write-Warning ("{0}: tag '{1}' not found. Skipping." -f $name, $desiredTag); continue }
+    else {
+      Write-Warning ("{0}: tag '{1}' not found. Skipping." -f $name, $desiredTag)
+      if ($hostedMode) { $hadErrors = $true }
+      continue
+    }
   } elseif ($desiredBranch) {
     if (Branch-Exists $repo $desiredBranch) { $refType = 'branch'; $ref = $desiredBranch }
-    else { Write-Warning ("{0}: branch '{1}' not found. Skipping." -f $name, $desiredBranch); continue }
+    else {
+      Write-Warning ("{0}: branch '{1}' not found. Skipping." -f $name, $desiredBranch)
+      if ($hostedMode) { $hadErrors = $true }
+      continue
+    }
   } else {
-    Write-Warning ("{0}: neither tag nor branch specified. Skipping." -f $name); continue
+    Write-Warning ("{0}: neither tag nor branch specified. Skipping." -f $name)
+    if ($hostedMode) { $hadErrors = $true }
+    continue
   }
 
   # Target folder (sibling to gpt-rag)
@@ -374,9 +363,51 @@ foreach ($c in $manifest.components) {
     }
   } else {
     Write-Host ("{0}: no scripts\deploy.ps1 found, skipping child deploy." -f $name)
+    if ($hostedMode) { $hadErrors = $true }
   }
 }
 
 if ($hadErrors) { Write-Error "One or more components failed. See logs above."; exit 1 }
+
+if ($hostedMode) {
+  $env:HOSTED_CUTOVER_COMPLETE = 'true'
+  $migratingClassicRuntime = "$($env:PRESERVE_CLASSIC_RUNTIME)".ToLowerInvariant() -eq 'true'
+  Push-Location $repoRoot
+  try {
+    Invoke-PythonModule -ModuleName 'config.deployment.appconfig' -Arguments @('--require-hosted-endpoint')
+    if ($LASTEXITCODE -ne 0) {
+      Write-Error "Failed to publish the hosted-agent endpoint contract."
+      exit $LASTEXITCODE
+    }
+    & azd env set HOSTED_AGENT_BASE_URL $hostedBaseUrl --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+      if ($migratingClassicRuntime) {
+        $env:HOSTED_CUTOVER_COMPLETE = 'false'
+        Invoke-PythonModule -ModuleName 'config.deployment.appconfig' | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+          Write-Error "Hosted endpoint persistence and classic-selector compensation both failed."
+          exit 1
+        }
+      }
+      Write-Error "Hosted cutover endpoint could not be persisted."
+      exit 1
+    }
+    & azd env set HOSTED_CUTOVER_COMPLETE true --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+      if ($migratingClassicRuntime) {
+        $env:HOSTED_CUTOVER_COMPLETE = 'false'
+        Invoke-PythonModule -ModuleName 'config.deployment.appconfig' | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+          Write-Error "Hosted marker persistence and classic-selector compensation both failed."
+          exit 1
+        }
+      }
+      Write-Error "Hosted cutover success marker could not be persisted."
+      exit 1
+    }
+  } finally {
+    Pop-Location
+  }
+}
 
 Write-Host "All components processed." -ForegroundColor Green

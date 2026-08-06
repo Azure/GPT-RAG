@@ -10,20 +10,32 @@
     "gpt-rag-ingestion": "v2.5.0"
   },
   "azd": {
+    "DEPLOYMENT_TOPOLOGY": "classic",
+    "CHAT_BACKEND": "orchestrator",
+    "PRESERVE_CLASSIC_RUNTIME": "false",
+    "HOSTED_CUTOVER_COMPLETE": "false",
     "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "false",
+    "PREPARE_HOSTED_AGENT": "false",
+    "DEPLOY_HOSTED_AGENT": "false",
     "DEPLOY_ADMINISTRATIVE_PANEL": "false",
     "HOSTED_AGENT_IMAGE_VERSION": "",
+    "HOSTED_AGENT_IMAGE_SOURCE_COMMIT": "",
+    "HOSTED_AGENT_IMAGE_STARTUP_COMMAND_SHA256": "",
     "HOSTED_AGENT_BASE_URL": "",
     "HOSTED_AGENT_RESOURCE_SCOPE": ""
   },
   "appConfiguration": {
     "label": "gpt-rag",
     "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "false",
+    "PREPARE_HOSTED_AGENT": "false",
+    "DEPLOY_HOSTED_AGENT": "false",
+    "HOSTED_AGENT_PREPARED": "false",
     "DEPLOY_ADMINISTRATIVE_PANEL": "false",
     "CHAT_BACKEND": "orchestrator",
     "DEPLOYMENT_TOPOLOGY": "classic",
     "HOSTED_AGENT_BASE_URL": "",
     "HOSTED_AGENT_RESOURCE_SCOPE": "",
+    "HOSTED_AGENT_IMAGE_VERSION": "",
     "HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS": "60"
   }
 }

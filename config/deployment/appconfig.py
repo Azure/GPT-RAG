@@ -12,6 +12,8 @@ from config.deployment.composition import (
     APP_CONFIG_LABEL,
     DeploymentMode,
     resolve_mode,
+    resolve_runtime_mode,
+    validate_hosted_prerequisites,
 )
 from util.azure_cli import resolve_az_command
 
@@ -89,6 +91,24 @@ def build_settings(
         "dataingest": f"ca-{resource_token}-dataingest",
         "orchestrator": f"ca-{resource_token}-orchestrator",
     }
+    hosted_base_url = (environment.get("HOSTED_AGENT_BASE_URL") or "").strip()
+    hosted_scope = (environment.get("HOSTED_AGENT_RESOURCE_SCOPE") or "").strip()
+    hosted_image_version = (
+        environment.get("HOSTED_AGENT_IMAGE_VERSION") or ""
+    ).strip()
+    if hosted:
+        validate_hosted_prerequisites(
+            environment,
+            require_image_digest=False,
+        )
+    if hosted and require_hosted_endpoint:
+        if not hosted_base_url:
+            raise ValueError(
+                "Hosted deployment completed without HOSTED_AGENT_BASE_URL."
+            )
+    runtime_mode = resolve_runtime_mode(mode, environment)
+    runtime_hosted = runtime_mode is not DeploymentMode.CLASSIC
+
     frontend = _container_app(
         resource_group, app_names["frontend"], required=True
     )
@@ -99,22 +119,9 @@ def build_settings(
         _container_app(
             resource_group, app_names["orchestrator"], required=True
         )
-        if mode is DeploymentMode.CLASSIC
+        if runtime_mode is DeploymentMode.CLASSIC
         else {"fqdn": "", "principalId": ""}
     )
-
-    hosted_base_url = (environment.get("HOSTED_AGENT_BASE_URL") or "").strip()
-    hosted_scope = (environment.get("HOSTED_AGENT_RESOURCE_SCOPE") or "").strip()
-    if hosted and require_hosted_endpoint:
-        if not hosted_base_url:
-            raise ValueError(
-                "Hosted deployment completed without HOSTED_AGENT_BASE_URL."
-            )
-        if not hosted_scope.endswith("/.default"):
-            raise ValueError(
-                "HOSTED_AGENT_RESOURCE_SCOPE must be the explicit data-plane "
-                "scope ending in '/.default'."
-            )
 
     container_apps = [
         {
@@ -132,7 +139,7 @@ def build_settings(
             "fqdn": dataingest["fqdn"],
         },
     ]
-    if mode is DeploymentMode.CLASSIC:
+    if runtime_mode is DeploymentMode.CLASSIC:
         container_apps.insert(
             0,
             {
@@ -145,18 +152,30 @@ def build_settings(
         )
 
     return {
-        "DEPLOY_HOSTED_AGENT_ORCHESTRATION": str(hosted).lower(),
+        "DEPLOY_HOSTED_AGENT_ORCHESTRATION": str(runtime_hosted).lower(),
+        "PREPARE_HOSTED_AGENT": str(hosted).lower(),
+        "DEPLOY_HOSTED_AGENT": (
+            environment.get("DEPLOY_HOSTED_AGENT") or "false"
+        ).strip().lower(),
+        "HOSTED_AGENT_PREPARED": (
+            environment.get("HOSTED_AGENT_PREPARED") or str(hosted)
+        ).strip().lower(),
         "DEPLOY_ADMINISTRATIVE_PANEL": str(
-            mode is DeploymentMode.HOSTED_PANEL
+            runtime_mode is DeploymentMode.HOSTED_PANEL
         ).lower(),
-        "DEPLOYMENT_TOPOLOGY": mode.value,
-        "CHAT_BACKEND": "hosted_agent" if hosted else "orchestrator",
+        "DEPLOYMENT_TOPOLOGY": runtime_mode.value,
+        "CHAT_BACKEND": (
+            "hosted_agent" if runtime_hosted else "orchestrator"
+        ),
         "ORCHESTRATOR_BASE_URL": (
             f"https://{orchestrator['fqdn']}" if orchestrator["fqdn"] else ""
         ),
         "INGESTION_BASE_URL": f"https://{dataingest['fqdn']}",
         "HOSTED_AGENT_BASE_URL": hosted_base_url,
         "HOSTED_AGENT_RESOURCE_SCOPE": hosted_scope,
+        "HOSTED_AGENT_IMAGE_VERSION": (
+            hosted_image_version if hosted else ""
+        ),
         "HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS": (
             environment.get("HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS") or "60"
         ),
@@ -167,7 +186,7 @@ def build_settings(
         "DATA_INGEST_APP_ENDPOINT": f"https://{dataingest['fqdn']}",
         "ORCHESTRATOR_APP_NAME": (
             app_names["orchestrator"]
-            if mode is DeploymentMode.CLASSIC
+            if runtime_mode is DeploymentMode.CLASSIC
             else ""
         ),
         "FRONTEND_APP_NAME": app_names["frontend"],
@@ -179,7 +198,15 @@ def build_settings(
 
 
 def publish_settings(endpoint: str, settings: Mapping[str, str]) -> None:
-    for key, value in settings.items():
+    ordered_settings = [
+        (key, value)
+        for key, value in settings.items()
+        if key != "CHAT_BACKEND"
+    ]
+    if "CHAT_BACKEND" in settings:
+        ordered_settings.append(("CHAT_BACKEND", settings["CHAT_BACKEND"]))
+
+    for key, value in ordered_settings:
         _run_az(
             [
                 "appconfig",
