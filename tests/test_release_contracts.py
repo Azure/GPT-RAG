@@ -140,6 +140,9 @@ class LifecycleParityTests(unittest.TestCase):
                 self.assertIn("gpt-rag-ingestion", content)
                 self.assertIn("gpt-rag-ui", content)
                 self.assertIn("azd deploy orchestrator-agent", content)
+                self.assertIn("PYTHONPATH", content)
+                if name == "preDeploy.ps1":
+                    self.assertIn("runpy.run_module", content)
                 self.assertIn(
                     "AGENT_ORCHESTRATOR_AGENT_INVOCATIONS_ENDPOINT", content
                 )

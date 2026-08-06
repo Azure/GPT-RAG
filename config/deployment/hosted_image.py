@@ -26,6 +26,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -36,6 +37,14 @@ HOSTED_STARTUP_COMMAND_DEFAULT = (
 )
 HOSTED_PORT_DEFAULT = 8088
 DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-fA-F]{64}$")
+
+
+def resolve_azure_cli_executable() -> str:
+    """Return the executable path for Azure CLI across native platforms."""
+    executable = shutil.which("az") or shutil.which("az.cmd")
+    if not executable:
+        raise RuntimeError("Azure CLI executable was not found in PATH.")
+    return executable
 
 
 def render_hosted_dockerfile(
@@ -115,7 +124,7 @@ def resolve_pushed_digest(
     """Look up the digest that was just pushed for ``image_name:image_tag``."""
     result = subprocess.run(
         [
-            "az",
+            resolve_azure_cli_executable(),
             "acr",
             "repository",
             "show",
@@ -163,6 +172,7 @@ def build_hosted_image(
             context_dir=tmp,
             agent_pool=agent_pool,
         )
+        args[0] = resolve_azure_cli_executable()
         subprocess.run(args, check=True)
     return resolve_pushed_digest(
         registry=registry, image_name=image_name, image_tag=image_tag
