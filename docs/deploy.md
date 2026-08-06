@@ -116,7 +116,7 @@ tokens are not copied into tool payloads or client-defined identity headers.
 
 `POST /responses` and `POST /invocations` are distinct protocols, not aliases, and their request bodies are not interchangeable. Microsoft Foundry hosts the canonical Responses protocol v2 route through `azure-ai-agentserver-responses`. It accepts a non-empty string `input`; set `stream` to `true` for an SSE lifecycle or `false` for a synchronous JSON response. `store` accepts `true` or `false`, and `background` enables background execution. The route also supports `previous_response_id`, string-valued `metadata`, and the platform-injected `agent_reference`.
 
-Managed `conversation` accepts either a non-empty id string or an object containing only `{"id": "<non-empty-id>"}`. Invalid conversation identifiers are rejected rather than creating a new thread. List and multimodal input are rejected, as are request fields outside the supported Responses contract.
+Managed `conversation` accepts either a non-empty id string or an object containing only `{"id": "<non-empty-id>"}`. `conversation` and `previous_response_id` are mutually exclusive to prevent history from crossing conversation boundaries. Invalid conversation identifiers are rejected rather than creating a new thread. List and multimodal input are rejected, as are request fields outside the supported Responses contract.
 
 ```json
 {
@@ -159,7 +159,7 @@ Responses protocol v2 also owns the stored-response lifecycle:
 | `POST /responses/{response_id}/cancel` | Cancel an in-flight background response. |
 | `DELETE /responses/{response_id}` | Delete a stored response. |
 
-These storage routes belong to the Responses protocol and do not accept the legacy invocation body. For Toolbox-backed configurations, the hosted identity guard validates `x-agent-foundry-call-id` before create, retrieve, input-item listing, cancellation, or deletion can access the protocol provider.
+These storage routes belong to the Responses protocol and do not accept the legacy invocation body. For Toolbox-backed configurations, the hosted identity guard validates `x-agent-foundry-call-id` before create, retrieve, input-item listing, cancellation, or deletion can access the protocol provider. Values containing surrounding whitespace are rejected rather than trimmed, and the provider receives the exact validated value unchanged.
 
 #### Two-phase hosted deployment
 
