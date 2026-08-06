@@ -62,15 +62,20 @@ only after the release gates below are complete.
     UI release PR
     [#94](https://github.com/Azure/gpt-rag-ui/pull/94) merged to `main` as
     [`763fa7e`](https://github.com/Azure/gpt-rag-ui/commit/763fa7eb2135037382673d2eb968421f084941cc),
-    and AI Landing Zone release PR
-    [#131](https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/131) merged
-    to `main` as
+    while AI Landing Zone
+    [PR #131](https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/131)
+    initially stamped and merged the unpublished `v2.5.0` state as
     [`a6ae728`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/commit/a6ae7284d654abb7ec53810cb8765b2975b51baa).
-    However, UI `v2.6.0` and AI Landing Zone `v2.5.0` tags and GitHub Releases
-    are not published. Final umbrella pins, integrated validation, and a new
-    GPT-RAG release also remain. Current published GPT-RAG `v3.7.0` stays
-    classic. Use this workflow only with the release that explicitly announces
-    the hosted-default contract.
+    [PR #132](https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/132)
+    then fixed the local/CI size-gate defaults, and
+    [PR #133](https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/133)
+    merged that correction to `main`. AILZ `main` and `develop` now both point
+    to [`cacf418`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/commit/cacf418216ce7381d06263e0dd704a86b8a6f225).
+    No AILZ `v2.5.0` tag or GitHub Release exists; UI `v2.6.0` is also
+    unpublished. Final umbrella pins, integrated validation, and a new GPT-RAG
+    release remain. Current published GPT-RAG `v3.7.0` stays classic. Use this
+    workflow only with the release that explicitly announces the hosted-default
+    contract.
 
 The upcoming release resolves one canonical topology before provisioning and
 materializes the corresponding legacy flags and App Configuration values.

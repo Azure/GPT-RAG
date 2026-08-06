@@ -28,7 +28,7 @@
   <text x="46" y="72" class="subtitle">Fresh deployments use hosted/no-panel after release gates pass; UI and ingestion remain in Azure Container Apps.</text>
 
   <rect x="46" y="91" width="1188" height="42" rx="12" fill="#fff4ce" stroke="#f7630c" stroke-width="1.5"/>
-  <text x="66" y="117" class="status">Implementation merged but unreleased: component / AILZ tags, final umbrella pins, validation, and GPT-RAG release remain. v3.7.0 stays classic.</text>
+  <text x="66" y="117" class="status">Unreleased target: AILZ correction merged at cacf418; UI and AILZ tags, final pins, validation, and GPT-RAG release remain. v3.7.0 stays classic.</text>
 
   <rect x="46" y="153" width="1188" height="312" rx="22" fill="#ffffff" stroke="#d8e3f5" stroke-width="2"/>
   <text x="70" y="181" class="zone-title">Request path</text>
