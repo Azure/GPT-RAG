@@ -108,7 +108,7 @@ not silently switch to the orchestrator or to managed identity. Foundry passes
 opaque `x-agent-foundry-call-id` context to Toolbox; user and delegated bearer
 tokens are not copied into tool payloads or client-defined identity headers.
 
-`POST /responses` and `POST /invocations` are distinct protocols, not aliases, and their request bodies are not interchangeable. The canonical Responses protocol v2 route accepts the supported streaming subset of the Azure AI Responses create contract:
+`POST /responses` and `POST /invocations` are distinct protocols, not aliases, and their request bodies are not interchangeable. The canonical Responses protocol v2 route accepts the documented string `input` contract. Set `stream` to `true` for an SSE lifecycle or `false` for a synchronous JSON response. `store` controls whether the protocol storage routes can retrieve the response. The route also supports managed `conversation` identity and `previous_response_id`; array and multimodal input are rejected.
 
 ```json
 {
@@ -136,7 +136,18 @@ The compatibility `POST /invocations` route retains the legacy messages-based sc
 }
 ```
 
-Both routes stream SSE responses, but each validates its own protocol-specific input before entering the shared hosted execution path. See the Microsoft Foundry [hosted-agent protocol comparison](https://learn.microsoft.com/azure/foundry/agents/concepts/hosted-agents#key-concepts).
+The Responses route returns either SSE or synchronous JSON according to `stream`; the legacy Invocations route streams SSE. Each validates its own protocol-specific input before entering the shared hosted execution path. See the Microsoft Foundry [hosted-agent protocol comparison](https://learn.microsoft.com/azure/foundry/agents/concepts/hosted-agents#key-concepts).
+
+Responses protocol v2 also owns the stored-response lifecycle:
+
+| Route | Purpose |
+| --- | --- |
+| `GET /responses/{response_id}` | Retrieve a stored response. Responses created with `store=false` are not available. |
+| `GET /responses/{response_id}/input_items` | List the input items recorded for a stored response. |
+| `POST /responses/{response_id}/cancel` | Cancel an in-flight background response. |
+| `DELETE /responses/{response_id}` | Delete a stored response. |
+
+These storage routes belong to the Responses protocol and do not accept the legacy invocation body. The same hosted identity guard applies before a Toolbox-backed strategy can create, retrieve, list, cancel, or delete a response.
 
 #### Two-phase hosted deployment
 
