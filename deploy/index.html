@@ -1817,7 +1817,7 @@ runtime failures are terminal for startup or the affected request. The UI does
 not silently switch to the orchestrator or to managed identity. Foundry passes
 opaque <code>x-agent-foundry-call-id</code> context to Toolbox; user and delegated bearer
 tokens are not copied into tool payloads or client-defined identity headers.</p>
-<p><code>POST /responses</code> and <code>POST /invocations</code> are distinct protocols, not aliases, and their request bodies are not interchangeable. The canonical Responses protocol v2 route accepts the supported streaming subset of the Azure AI Responses create contract:</p>
+<p><code>POST /responses</code> and <code>POST /invocations</code> are distinct protocols, not aliases, and their request bodies are not interchangeable. The canonical Responses protocol v2 route accepts the documented string <code>input</code> contract. Set <code>stream</code> to <code>true</code> for an SSE lifecycle or <code>false</code> for a synchronous JSON response. <code>store</code> controls whether the protocol storage routes can retrieve the response. The route also supports managed <code>conversation</code> identity and <code>previous_response_id</code>; array and multimodal input are rejected.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;input&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;What is the document retention policy?&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;stream&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
@@ -1839,7 +1839,35 @@ tokens are not copied into tool payloads or client-defined identity headers.</p>
 <span class="w">  </span><span class="nt">&quot;metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>Both routes stream SSE responses, but each validates its own protocol-specific input before entering the shared hosted execution path. See the Microsoft Foundry <a href="https://learn.microsoft.com/azure/foundry/agents/concepts/hosted-agents#key-concepts">hosted-agent protocol comparison</a>.</p>
+<p>The Responses route returns either SSE or synchronous JSON according to <code>stream</code>; the legacy Invocations route streams SSE. Each validates its own protocol-specific input before entering the shared hosted execution path. See the Microsoft Foundry <a href="https://learn.microsoft.com/azure/foundry/agents/concepts/hosted-agents#key-concepts">hosted-agent protocol comparison</a>.</p>
+<p>Responses protocol v2 also owns the stored-response lifecycle:</p>
+<table>
+<thead>
+<tr>
+<th>Route</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /responses/{response_id}</code></td>
+<td>Retrieve a stored response. Responses created with <code>store=false</code> are not available.</td>
+</tr>
+<tr>
+<td><code>GET /responses/{response_id}/input_items</code></td>
+<td>List the input items recorded for a stored response.</td>
+</tr>
+<tr>
+<td><code>POST /responses/{response_id}/cancel</code></td>
+<td>Cancel an in-flight background response.</td>
+</tr>
+<tr>
+<td><code>DELETE /responses/{response_id}</code></td>
+<td>Delete a stored response.</td>
+</tr>
+</tbody>
+</table>
+<p>These storage routes belong to the Responses protocol and do not accept the legacy invocation body. The same hosted identity guard applies before a Toolbox-backed strategy can create, retrieve, list, cancel, or delete a response.</p>
 <h4 id="two-phase-hosted-deployment">Two-phase hosted deployment</h4>
 <p>For a fresh hosted deployment, configure the delegated data-plane scope before
 the first provision:</p>
