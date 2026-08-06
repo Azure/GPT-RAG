@@ -1,3 +1,26 @@
+###############################################################################
+# DEPRECATED VERSION - DEPLOYMENT GUARD
+###############################################################################
+if ($env:AZURE_ALLOW_DEPRECATED_VERSION -ne "true") {
+    Write-Host ""
+    Write-Host "==============================================================================" -ForegroundColor Red
+    Write-Host "  DEPLOYMENT BLOCKED - THIS VERSION IS DEPRECATED" -ForegroundColor Red
+    Write-Host "==============================================================================" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "  This is a legacy release of the GPT-RAG accelerator. It is no longer"
+    Write-Host "  supported and does not receive fixes or security updates."
+    Write-Host ""
+    Write-Host "  Please deploy the latest release instead:"
+    Write-Host ""
+    Write-Host "    https://github.com/Azure/GPT-RAG/releases/latest"
+    Write-Host ""
+    Write-Host "==============================================================================" -ForegroundColor Red
+    Write-Host "  To run this version anyway, set AZURE_ALLOW_DEPRECATED_VERSION=true" -ForegroundColor Red
+    Write-Host "==============================================================================" -ForegroundColor Red
+    Write-Host ""
+    exit 1
+}
+
 ## Provides a head's up to user for AZURE_NETWORK_ISOLATION
 
 # Check if AZURE_NETWORK_ISOLATION environment variable is defined

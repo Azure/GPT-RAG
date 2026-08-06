@@ -1,5 +1,28 @@
 #!/bin/sh
 
+###############################################################################
+# DEPRECATED VERSION - DEPLOYMENT GUARD
+###############################################################################
+if [ "$AZURE_ALLOW_DEPRECATED_VERSION" != "true" ]; then
+    echo ""
+    echo "=============================================================================="
+    echo "  DEPLOYMENT BLOCKED - THIS VERSION IS DEPRECATED"
+    echo "=============================================================================="
+    echo ""
+    echo "  This is a legacy release of the GPT-RAG accelerator. It is no longer"
+    echo "  supported and does not receive fixes or security updates."
+    echo ""
+    echo "  Please deploy the latest release instead:"
+    echo ""
+    echo "    https://github.com/Azure/GPT-RAG/releases/latest"
+    echo ""
+    echo "=============================================================================="
+    echo "  To run this version anyway, set AZURE_ALLOW_DEPRECATED_VERSION=true"
+    echo "=============================================================================="
+    echo ""
+    exit 1
+fi
+
 ## Provides a head's up to user for AZURE_NETWORK_ISOLATION
 
 YELLOW='\033[0;33m'
