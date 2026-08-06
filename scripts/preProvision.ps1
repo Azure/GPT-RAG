@@ -34,6 +34,19 @@ if (-not $expectedInfraCommit -or $expectedInfraCommit -notmatch '^[0-9a-f]{40}$
     exit 1
 }
 
+# Provisioning owns these generated infra overrides. Restore only those files,
+# then fail closed if any unrelated submodule changes remain.
+Push-Location $projectRoot
+try {
+    & python -m config.deployment.infra_checkout --infra-dir $infraDir
+    $infraCheckoutExitCode = $LASTEXITCODE
+} finally {
+    Pop-Location
+}
+if ($infraCheckoutExitCode -ne 0) {
+    exit $infraCheckoutExitCode
+}
+
 Write-Host "Initializing infrastructure submodule..." -ForegroundColor Cyan
 git submodule update --init --recursive 2>$null
 
