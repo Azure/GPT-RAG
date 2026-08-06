@@ -194,6 +194,46 @@ class LifecycleParityTests(unittest.TestCase):
                     (scripts / shell).read_text(encoding="utf-8-sig"),
                 )
 
+    def test_preprovision_hooks_fetch_and_checkout_exact_manifest_commit(
+        self,
+    ) -> None:
+        scripts = ROOT / "scripts"
+        for name in ("preProvision.ps1", "preProvision.sh"):
+            with self.subTest(script=name):
+                content = (scripts / name).read_text(encoding="utf-8-sig")
+                self.assertIn("ailz_commit", content)
+                self.assertIn("fetch --depth 1 origin", content)
+                self.assertIn("checkout --detach", content)
+                self.assertIn("^[0-9a-f]{40}$", content)
+                self.assertNotIn("clone --depth 1 --branch", content)
+
+    def test_postprovision_hooks_delegate_runtime_switch_to_shared_publisher(
+        self,
+    ) -> None:
+        scripts = ROOT / "scripts"
+        ps1 = (scripts / "postProvision.ps1").read_text(encoding="utf-8-sig")
+        settings_block = ps1.split("$settings = [ordered]@{", 1)[1].split(
+            "}", 1
+        )[0]
+        self.assertNotIn("CHAT_BACKEND", settings_block)
+        self.assertIn("config.deployment.appconfig", ps1)
+        self.assertIn("$topologyInfo.runtime_topology", ps1)
+        self.assertIn(
+            "config.deployment.appconfig",
+            (scripts / "postProvision.sh").read_text(encoding="utf-8-sig"),
+        )
+
+    def test_predeploy_hooks_gate_cutover_on_success_marker(self) -> None:
+        scripts = ROOT / "scripts"
+        for name in ("preDeploy.ps1", "preDeploy.sh"):
+            with self.subTest(script=name):
+                content = (scripts / name).read_text(encoding="utf-8-sig")
+                self.assertIn("HOSTED_CUTOVER_COMPLETE", content)
+                self.assertIn(
+                    "config.deployment.appconfig --require-hosted-endpoint",
+                    content,
+                )
+
     def test_lifecycle_hooks_resolve_topology_through_shared_module(self) -> None:
         # ADR-0001 rev. 5: config.deployment.topology is the single source of
         # truth for the fresh-vs-existing/sticky/conflict decision.
@@ -268,61 +308,44 @@ class LifecycleParityTests(unittest.TestCase):
                     "AGENT_ORCHESTRATOR_AGENT_INVOCATIONS_ENDPOINT", content
                 )
 
+    def test_both_predeploy_hooks_export_azd_values_for_final_cutover(
+        self,
+    ) -> None:
+        scripts = ROOT / "scripts"
+        ps1 = (scripts / "preDeploy.ps1").read_text(encoding="utf-8-sig")
         sh = (scripts / "preDeploy.sh").read_text(encoding="utf-8-sig")
-        self.assertIn("jq -er '.deploy_hosted_agent_orchestration", sh)
-        self.assertIn(
-            "Resolved topology JSON is incomplete or invalid",
-            sh,
-        )
 
-    def test_hosted_migration_cuts_over_only_after_smoke_request(self) -> None:
+        self.assertIn('Set-Item -Path "Env:$($prop.Name)"', ps1)
+        self.assertIn("azd env get-values", sh)
+        self.assertIn('export "$key=$value"', sh)
+        for content in (ps1, sh):
+            self.assertIn("config.deployment.appconfig", content)
+
+    def test_both_predeploy_hooks_cut_over_after_components_and_persist_last(
+        self,
+    ) -> None:
         scripts = ROOT / "scripts"
         for name in ("preDeploy.ps1", "preDeploy.sh"):
             with self.subTest(script=name):
                 content = (scripts / name).read_text(encoding="utf-8-sig")
-                smoke = content.index("azd ai agent invoke")
-                publish = content.index(
-                    "config.deployment.appconfig --require-hosted-endpoint"
+                component_failure_gate = content.rindex(
+                    "One or more components failed"
                 )
-                clear = content.index("HOSTED_AGENT_MIGRATION false")
-
-                self.assertLess(
-                    content.index("azd deploy orchestrator-agent"),
-                    smoke,
+                publisher = content.index(
+                    "config.deployment.appconfig",
+                    component_failure_gate,
                 )
-                self.assertLess(smoke, publish)
-                self.assertLess(publish, clear)
-                self.assertIn("HOSTED_AGENT_MIGRATION", content)
-
-        sh = (scripts / "preDeploy.sh").read_text(encoding="utf-8-sig")
-        self.assertLess(
-            sh.index(
-                "Failed to publish the hosted-agent endpoint contract; "
-                "the migration marker remains active."
-            ),
-            sh.index("HOSTED_AGENT_MIGRATION false"),
-        )
-        self.assertIn(
-            '>/dev/null &&\n    azd env set HOSTED_AGENT_MIGRATION false',
-            sh,
-        )
-        self.assertIn(
-            'HOSTED_AGENT_IMAGE_VERSION "$hosted_agent_digest" '
-            '--environment "$environment_name" --no-prompt >/dev/null &&',
-            sh,
-        )
-
-        ps1 = (scripts / "preDeploy.ps1").read_text(encoding="utf-8-sig")
-        for key in (
-            "HOSTED_AGENT_IMAGE_VERSION",
-            "FOUNDRY_PROJECT_ENDPOINT",
-            "AZURE_AI_PROJECT_ID",
-        ):
-            with self.subTest(handoff=key):
-                self.assertIn(
-                    f"Failed to hand off {key}",
-                    ps1,
+                endpoint_persistence = content.index(
+                    "azd env set HOSTED_AGENT_BASE_URL",
+                    publisher,
                 )
+                marker_persistence = content.index(
+                    "azd env set HOSTED_CUTOVER_COMPLETE true",
+                    publisher,
+                )
+                self.assertLess(component_failure_gate, publisher)
+                self.assertLess(publisher, endpoint_persistence)
+                self.assertLess(endpoint_persistence, marker_persistence)
 
     def test_both_predeploy_hooks_fail_closed_on_missing_hosted_prerequisites(
         self,

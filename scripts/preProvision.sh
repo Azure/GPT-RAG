@@ -38,6 +38,26 @@ else
 fi
 EXPECTED_INFRA_COMMIT="$("$PYTHON_CMD" -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["ailz_commit"])' "$PROJECT_ROOT/manifest.json")"
 
+PYTHON_CMD=""
+if command -v python3 >/dev/null 2>&1; then
+    PYTHON_CMD="python3"
+elif command -v python >/dev/null 2>&1; then
+    PYTHON_CMD="python"
+else
+    echo "${YELLOW}Error: Python is required to resolve the infrastructure release pin.${NC}"
+    exit 1
+fi
+
+if [ ! -f "$PROJECT_ROOT/manifest.json" ]; then
+    echo "${YELLOW}Error: manifest.json is required to resolve the infrastructure release pin.${NC}"
+    exit 1
+fi
+EXPECTED_INFRA_COMMIT="$("$PYTHON_CMD" -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["ailz_commit"])' "$PROJECT_ROOT/manifest.json")"
+if ! printf '%s\n' "$EXPECTED_INFRA_COMMIT" | grep -Eq '^[0-9a-f]{40}$'; then
+    echo "${YELLOW}Error: manifest.json must define ailz_commit as a lowercase 40-character Git SHA.${NC}"
+    exit 1
+fi
+
 echo "${CYAN}Initializing infrastructure submodule...${NC}"
 git submodule update --init --recursive 2>/dev/null
 
@@ -48,39 +68,40 @@ git submodule update --init --recursive 2>/dev/null
 if [ ! -f "$MAIN_BICEP" ]; then
     echo "${CYAN}Submodule content not found. Cloning infra repo directly (azd init scenario)...${NC}"
 
-    # Extract infra repo URL and branch from .gitmodules
+    # Extract the infra repo URL from .gitmodules.
     GITMODULES="$PROJECT_ROOT/.gitmodules"
     INFRA_URL=""
-    INFRA_REF="main"  # safe default
     if [ -f "$GITMODULES" ]; then
         INFRA_URL=$(grep -m1 'url\s*=' "$GITMODULES" | sed 's/.*=\s*//' | xargs)
-        BRANCH=$(grep -m1 'branch\s*=' "$GITMODULES" | sed 's/.*=\s*//' | xargs)
-        if [ -n "$BRANCH" ]; then
-            INFRA_REF="$BRANCH"
-        fi
     fi
     if [ -z "$INFRA_URL" ]; then
         echo "${YELLOW}Error: Could not determine infra repository URL from .gitmodules.${NC}"
         exit 1
     fi
-    echo "${CYAN}  Infra repo: $INFRA_URL @ $INFRA_REF, pinned to $EXPECTED_INFRA_COMMIT${NC}"
+    echo "${CYAN}  Infra repo: $INFRA_URL @ $EXPECTED_INFRA_COMMIT (from manifest.json)${NC}"
 
-    # Materialize the exact manifest pin; the configured branch may advance.
+    # Initialize only the repository metadata. The exact manifest commit is
+    # fetched and checked out by the common path below.
     rm -rf "$INFRA_DIR"
-    git clone --filter=blob:none --no-checkout "$INFRA_URL" "$INFRA_DIR"
-    if [ $? -ne 0 ]; then
-        echo "${YELLOW}Error: Failed to clone infra repository ($INFRA_URL).${NC}"
+    mkdir -p "$INFRA_DIR"
+    if ! git -C "$INFRA_DIR" init --quiet; then
+        echo "${YELLOW}Error: Failed to initialize infra repository ($INFRA_URL).${NC}"
         exit 1
     fi
-    if ! git -C "$INFRA_DIR" fetch --depth 1 origin "$EXPECTED_INFRA_COMMIT"; then
-        echo "${YELLOW}Error: Failed to fetch infra commit $EXPECTED_INFRA_COMMIT.${NC}"
+    if ! git -C "$INFRA_DIR" remote add origin "$INFRA_URL"; then
+        echo "${YELLOW}Error: Failed to configure infra repository origin ($INFRA_URL).${NC}"
         exit 1
     fi
-    if ! git -C "$INFRA_DIR" -c advice.detachedHead=false checkout --detach "$EXPECTED_INFRA_COMMIT"; then
-        echo "${YELLOW}Error: Failed to check out infra commit $EXPECTED_INFRA_COMMIT.${NC}"
-        exit 1
-    fi
-    echo "${GREEN}Infrastructure submodule cloned successfully.${NC}"
+fi
+
+echo "${CYAN}Fetching exact infrastructure commit $EXPECTED_INFRA_COMMIT...${NC}"
+if ! git -C "$INFRA_DIR" fetch --depth 1 origin "$EXPECTED_INFRA_COMMIT"; then
+    echo "${YELLOW}Error: Failed to fetch infra commit $EXPECTED_INFRA_COMMIT.${NC}"
+    exit 1
+fi
+if ! git -C "$INFRA_DIR" -c advice.detachedHead=false checkout --detach "$EXPECTED_INFRA_COMMIT"; then
+    echo "${YELLOW}Error: Failed to check out infra commit $EXPECTED_INFRA_COMMIT.${NC}"
+    exit 1
 fi
 
 ###############################################################################
@@ -119,22 +140,27 @@ fi
 
 eval "$(printf '%s\n' "$TOPOLOGY_OUTPUT" | sed 's/^\([^=]*\)=\(.*\)$/export \1="\2"/')"
 
+TOPOLOGY_PERSIST_FAILED=false
 while IFS='=' read -r TOPO_KEY TOPO_VALUE; do
     [ -z "$TOPO_KEY" ] && continue
     if [ -n "${AZURE_ENV_NAME:-}" ]; then
         if ! azd env set "$TOPO_KEY" "$TOPO_VALUE" --environment "$AZURE_ENV_NAME" --no-prompt >/dev/null; then
-            echo "${YELLOW}Error: Failed to persist deployment topology setting $TOPO_KEY.${NC}"
-            exit 1
+            TOPOLOGY_PERSIST_FAILED=true
+            break
         fi
     else
         if ! azd env set "$TOPO_KEY" "$TOPO_VALUE" --no-prompt >/dev/null; then
-            echo "${YELLOW}Error: Failed to persist deployment topology setting $TOPO_KEY.${NC}"
-            exit 1
+            TOPOLOGY_PERSIST_FAILED=true
+            break
         fi
     fi
 done <<EOF
 $TOPOLOGY_OUTPUT
 EOF
+if [ "$TOPOLOGY_PERSIST_FAILED" = "true" ]; then
+    echo "${YELLOW}Error: Failed to persist the resolved deployment topology.${NC}"
+    exit 1
+fi
 
 echo "${CYAN}Composing GPT-RAG deployment mode...${NC}"
 HOSTED_SOURCE_COMMIT="$("$PYTHON_CMD" -c 'import json,sys; print(next(c[\"commit\"] for c in json.load(open(sys.argv[1], encoding=\"utf-8\"))[\"components\"] if c[\"name\"] == \"gpt-rag-orchestrator\"))' "$PROJECT_ROOT/manifest.json")"

@@ -20,17 +20,22 @@ import json
 import os
 import subprocess
 import sys
+from dataclasses import dataclass
 from typing import Mapping
 
 from config.deployment.composition import (
     APP_CONFIG_LABEL,
     DeploymentMode,
     DeploymentTopologyError,
+    HOSTED_CUTOVER_COMPLETE,
+    PRESERVE_CLASSIC_RUNTIME,
     describe_mode,
+    hosted_cutover_ready,
     is_truthy,
     materialized_settings,
     resolve_explicit_topology,
     resolve_mode,
+    resolve_runtime_mode,
     resolve_topology,
     validate_hosted_prerequisites,
 )
@@ -42,6 +47,42 @@ _PERSISTED_KEYS = (
     "DEPLOY_ADMINISTRATIVE_PANEL",
     "CHAT_BACKEND",
 )
+
+
+@dataclass(frozen=True)
+class TopologyResolution:
+    mode: DeploymentMode
+    preserve_classic_runtime: bool = False
+
+
+def _local_migration_state(
+    environment: Mapping[str, str],
+    mode: DeploymentMode,
+) -> bool | None:
+    """Classify explicit hosted migration without private data-plane I/O."""
+    raw_preserve = environment.get(PRESERVE_CLASSIC_RUNTIME)
+    if raw_preserve is None:
+        backend = (environment.get("CHAT_BACKEND") or "").strip().lower()
+        if backend == "hosted_agent" or hosted_cutover_ready(environment):
+            return False
+        # Existing environments without a hosted marker are pre-cutover
+        # classic by ADR-0001. Preserve them without requiring access to a
+        # private App Configuration endpoint from the provisioning client.
+        return mode is not DeploymentMode.CLASSIC
+    normalized_preserve = raw_preserve.strip().lower()
+    if normalized_preserve not in {"true", "false"}:
+        raise DeploymentTopologyError(
+            f"{PRESERVE_CLASSIC_RUNTIME} must be 'true' or 'false'."
+        )
+    if is_truthy(normalized_preserve):
+        return resolve_runtime_mode(mode, environment) is DeploymentMode.CLASSIC
+
+    backend = (environment.get("CHAT_BACKEND") or "").strip().lower()
+    if backend == "orchestrator":
+        return mode is not DeploymentMode.CLASSIC
+    if backend == "hosted_agent":
+        return False
+    return None
 
 
 def _run_az(arguments: list[str]) -> tuple[int, str, str]:
@@ -189,27 +230,95 @@ def resolve_environment_topology(
     subscription_id: str | None = None,
     app_config_endpoint: str | None = None,
 ) -> DeploymentMode:
-    mode, _ = resolve_environment_topology_context(
+    return resolve_environment_plan(
+        environment,
+        resource_group_name=resource_group_name,
+        subscription_id=subscription_id,
+        app_config_endpoint=app_config_endpoint,
+    ).mode
+
+
+def resolve_environment_plan(
+    environment: Mapping[str, str],
+    *,
+    resource_group_name: str | None = None,
+    subscription_id: str | None = None,
+    app_config_endpoint: str | None = None,
+) -> TopologyResolution:
+    """I/O-aware wrapper around ``resolve_topology`` for use at preProvision time.
+
+    Detects whether the environment is fresh (no resource group yet) or
+    existing, reads any persisted topology markers for existing
+    environments, and delegates the actual decision to the pure
+    ``resolve_topology`` function. Explicit classic remains a direct rollback.
+    Explicit hosted additionally classifies the current deployed runtime so a
+    classic-to-hosted migration can retain classic during its prepare-only
+    phase without changing the fresh-hosted fail-closed contract.
+    """
+    explicit = resolve_explicit_topology(environment)
+    if explicit is DeploymentMode.CLASSIC:
+        return TopologyResolution(explicit)
+
+    rg_exists = resource_group_exists(resource_group_name, subscription_id)
+    materialized_preservation = (
+        _local_migration_state(environment, explicit)
+        if explicit is not None and rg_exists
+        else None
+    )
+    if materialized_preservation is not None:
+        return TopologyResolution(explicit, materialized_preservation)
+
+    persisted = read_persisted_settings(app_config_endpoint) if rg_exists else {}
+    mode = resolve_topology(
         environment,
         resource_group_name=resource_group_name,
         subscription_id=subscription_id,
         app_config_endpoint=app_config_endpoint,
     )
-    return mode
+    preserve_classic_runtime = False
+    if explicit is not None and rg_exists:
+        current_mode = resolve_topology(
+            {},
+            resource_group_exists=True,
+            persisted_settings=persisted,
+        )
+        preserve_classic_runtime = current_mode is DeploymentMode.CLASSIC
+    return TopologyResolution(mode, preserve_classic_runtime)
 
 
-def _print_materialized(
-    mode: DeploymentMode,
-    hosted_migration: bool = False,
-) -> None:
-    settings = materialized_settings(mode)
-    settings["HOSTED_AGENT_MIGRATION"] = str(hosted_migration).lower()
-    for key, value in settings.items():
+def _print_materialized(resolution: TopologyResolution) -> None:
+    runtime_environment = dict(os.environ)
+    runtime_environment[PRESERVE_CLASSIC_RUNTIME] = str(
+        resolution.preserve_classic_runtime
+    ).lower()
+    for key, value in materialized_settings(
+        resolution.mode,
+        preserve_classic_runtime=resolution.preserve_classic_runtime,
+        runtime_mode=resolve_runtime_mode(
+            resolution.mode,
+            runtime_environment,
+        ),
+        hosted_cutover_complete=is_truthy(
+            os.environ.get(HOSTED_CUTOVER_COMPLETE)
+        )
+        and not resolution.preserve_classic_runtime,
+    ).items():
         print(f"{key}={value}")
 
 
 def _print_description(mode: DeploymentMode) -> None:
-    print(json.dumps(describe_mode(mode)))
+    preserve_classic_runtime = (
+        os.environ.get(PRESERVE_CLASSIC_RUNTIME, "").lower() == "true"
+    )
+    print(
+        json.dumps(
+            describe_mode(
+                mode,
+                preserve_classic_runtime=preserve_classic_runtime,
+                runtime_mode=resolve_runtime_mode(mode, os.environ),
+            )
+        )
+    )
 
 
 def main() -> int:
@@ -300,13 +409,13 @@ def main() -> int:
             subscription_id = args.subscription_id or os.environ.get(
                 "AZURE_SUBSCRIPTION_ID"
             )
-            mode, hosted_migration = resolve_environment_topology_context(
+            resolution = resolve_environment_plan(
                 os.environ,
                 resource_group_name=resource_group_name,
                 subscription_id=subscription_id,
                 app_config_endpoint=app_config_endpoint,
             )
-            _print_materialized(mode, hosted_migration)
+            _print_materialized(resolution)
     except DeploymentTopologyError as exc:
         print(str(exc), file=sys.stderr)
         return 1

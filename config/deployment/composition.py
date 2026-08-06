@@ -14,6 +14,8 @@ from typing import Mapping
 
 
 APP_CONFIG_LABEL = "gpt-rag"
+PRESERVE_CLASSIC_RUNTIME = "PRESERVE_CLASSIC_RUNTIME"
+HOSTED_CUTOVER_COMPLETE = "HOSTED_CUTOVER_COMPLETE"
 HOSTED_IMAGE_DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 HOSTED_STARTUP_COMMAND_DEFAULT = (
     "uvicorn src.api.hosted_entrypoint:app --host 0.0.0.0 --port 8088"
@@ -129,6 +131,31 @@ def validate_hosted_prerequisites(
                 + ", ".join(missing)
                 + "."
             )
+
+
+def hosted_cutover_ready(environment: Mapping[str, str]) -> bool:
+    """Return whether the successful hosted cutover contract is materialized."""
+    endpoint = (environment.get("HOSTED_AGENT_BASE_URL") or "").strip()
+    digest = (environment.get("HOSTED_AGENT_IMAGE_VERSION") or "").strip()
+    return bool(
+        endpoint
+        and HOSTED_IMAGE_DIGEST_PATTERN.fullmatch(digest)
+        and is_truthy(environment.get(HOSTED_CUTOVER_COMPLETE))
+    )
+
+
+def resolve_runtime_mode(
+    mode: DeploymentMode,
+    environment: Mapping[str, str],
+) -> DeploymentMode:
+    """Keep a migrating classic runtime until hosted cutover inputs exist."""
+    if mode is DeploymentMode.CLASSIC or not is_truthy(
+        environment.get(PRESERVE_CLASSIC_RUNTIME)
+    ):
+        return mode
+    if hosted_cutover_ready(environment):
+        return mode
+    return DeploymentMode.CLASSIC
 
 
 def _explicit_flag_topology(
@@ -323,20 +350,39 @@ def resolve_topology(
     return DeploymentMode.CLASSIC
 
 
-def describe_mode(mode: DeploymentMode) -> dict[str, object]:
+def describe_mode(
+    mode: DeploymentMode,
+    *,
+    preserve_classic_runtime: bool = False,
+    runtime_mode: DeploymentMode | None = None,
+) -> dict[str, object]:
     """Describe a resolved mode as the paired settings/flags that agree with it."""
     hosted = mode is not DeploymentMode.CLASSIC
     panel = mode is DeploymentMode.HOSTED_PANEL
+    effective_runtime = runtime_mode or mode
     return {
         "topology": mode.value,
         "chat_backend": "hosted_agent" if hosted else "orchestrator",
         "components": list(selected_components(mode)),
         "deploy_hosted_agent_orchestration": hosted,
         "deploy_administrative_panel": panel,
+        "preserve_classic_runtime": preserve_classic_runtime,
+        "runtime_topology": effective_runtime.value,
+        "runtime_chat_backend": (
+            "hosted_agent"
+            if effective_runtime is not DeploymentMode.CLASSIC
+            else "orchestrator"
+        ),
     }
 
 
-def materialized_settings(mode: DeploymentMode) -> dict[str, str]:
+def materialized_settings(
+    mode: DeploymentMode,
+    *,
+    preserve_classic_runtime: bool = False,
+    runtime_mode: DeploymentMode | None = None,
+    hosted_cutover_complete: bool = False,
+) -> dict[str, str]:
     """Return the paired settings to materialize into the azd environment.
 
     Used by ``preProvision`` immediately after resolving the topology, so
@@ -345,16 +391,27 @@ def materialized_settings(mode: DeploymentMode) -> dict[str, str]:
     single resolution, materialized once, not re-derived independently by
     each consumer.
     """
-    description = describe_mode(mode)
+    effective_runtime = runtime_mode or (
+        DeploymentMode.CLASSIC if preserve_classic_runtime else mode
+    )
+    description = describe_mode(
+        mode,
+        preserve_classic_runtime=preserve_classic_runtime,
+        runtime_mode=effective_runtime,
+    )
     return {
         "DEPLOYMENT_TOPOLOGY": str(description["topology"]),
         "DEPLOY_HOSTED_AGENT_ORCHESTRATION": str(
-            description["deploy_hosted_agent_orchestration"]
+            effective_runtime is not DeploymentMode.CLASSIC
         ).lower(),
         "DEPLOY_ADMINISTRATIVE_PANEL": str(
-            description["deploy_administrative_panel"]
+            effective_runtime is DeploymentMode.HOSTED_PANEL
         ).lower(),
-        "CHAT_BACKEND": str(description["chat_backend"]),
+        "CHAT_BACKEND": str(description["runtime_chat_backend"]),
+        PRESERVE_CLASSIC_RUNTIME: str(preserve_classic_runtime).lower(),
+        HOSTED_CUTOVER_COMPLETE: str(
+            mode is not DeploymentMode.CLASSIC and hosted_cutover_complete
+        ).lower(),
     }
 
 
@@ -390,11 +447,10 @@ def compose_parameters(
 
     mode = resolve_mode(environment)
     hosted = mode is not DeploymentMode.CLASSIC
-    panel = mode is not DeploymentMode.HOSTED_NO_PANEL
-    hosted_migration = hosted and is_truthy(
-        environment.get("HOSTED_AGENT_MIGRATION")
+    panel = mode is DeploymentMode.HOSTED_PANEL
+    preserve_classic_runtime = hosted and is_truthy(
+        environment.get(PRESERVE_CLASSIC_RUNTIME)
     )
-    network_isolation = is_truthy(environment.get("NETWORK_ISOLATION"))
 
     digest = (environment.get("HOSTED_AGENT_IMAGE_VERSION") or "").strip()
     generated_source_commit = (
@@ -404,6 +460,12 @@ def compose_parameters(
         environment.get("HOSTED_AGENT_IMAGE_STARTUP_COMMAND_SHA256") or ""
     ).strip()
     deploy_hosted = hosted and bool(digest)
+    runtime_mode = resolve_runtime_mode(mode, environment)
+    preserving_classic_runtime = (
+        preserve_classic_runtime
+        and runtime_mode is DeploymentMode.CLASSIC
+    )
+    runtime_hosted = runtime_mode is not DeploymentMode.CLASSIC
 
     if deploy_hosted:
         validate_hosted_prerequisites(environment)
@@ -440,8 +502,12 @@ def compose_parameters(
 
     parameters["prepareHostedAgent"] = {"value": hosted}
     parameters["deployHostedAgent"] = {"value": deploy_hosted}
-    parameters["deployCosmosDb"] = {"value": panel or hosted_migration}
-    if hosted and network_isolation:
+    parameters["deployCosmosDb"] = {
+        "value": mode is DeploymentMode.CLASSIC
+        or panel
+        or preserving_classic_runtime
+    }
+    if hosted and is_truthy(environment.get("NETWORK_ISOLATION")):
         parameters["deployAcrTaskAgentPool"] = {"value": True}
 
     if hosted:
@@ -495,13 +561,16 @@ def compose_parameters(
         raise ValueError("containerAppsList must contain an array value.")
 
     apps = apps_parameter["value"]
-    if hosted and not hosted_migration:
+    if hosted and not preserving_classic_runtime:
         apps = [
             app
             for app in apps
             if isinstance(app, dict) and app.get("service_name") != "orchestrator"
         ]
-    if mode is DeploymentMode.HOSTED_NO_PANEL and not hosted_migration:
+    if (
+        mode is DeploymentMode.HOSTED_NO_PANEL
+        and not preserving_classic_runtime
+    ):
         for app in apps:
             if app.get("service_name") == "dataingest":
                 app["roles"] = [
@@ -511,35 +580,26 @@ def compose_parameters(
                 ]
     parameters["containerAppsList"] = {"value": apps}
 
-    if mode is DeploymentMode.HOSTED_NO_PANEL and not hosted_migration:
+    if (
+        mode is DeploymentMode.HOSTED_NO_PANEL
+        and not preserving_classic_runtime
+    ):
         parameters["databaseContainersList"] = {"value": []}
 
     parameters["additionalAppConfigurationSettings"] = {
         "value": [
             _setting(
                 "DEPLOY_HOSTED_AGENT_ORCHESTRATION",
-                str(hosted).lower(),
+                str(runtime_hosted).lower(),
             ),
             _setting("PREPARE_HOSTED_AGENT", str(hosted).lower()),
             _setting("DEPLOY_HOSTED_AGENT", str(deploy_hosted).lower()),
             _setting("HOSTED_AGENT_PREPARED", str(hosted).lower()),
             _setting(
                 "DEPLOY_ADMINISTRATIVE_PANEL",
-                str(panel and hosted).lower(),
+                str(runtime_mode is DeploymentMode.HOSTED_PANEL).lower(),
             ),
-            _setting("DEPLOYMENT_TOPOLOGY", mode.value),
-            _setting(
-                "HOSTED_AGENT_MIGRATION",
-                str(hosted_migration).lower(),
-            ),
-            _setting(
-                "CHAT_BACKEND",
-                (
-                    "hosted_agent"
-                    if hosted and not hosted_migration
-                    else "orchestrator"
-                ),
-            ),
+            _setting("DEPLOYMENT_TOPOLOGY", runtime_mode.value),
             _setting(
                 "HOSTED_AGENT_BASE_URL",
                 environment.get("HOSTED_AGENT_BASE_URL", ""),
@@ -557,6 +617,12 @@ def compose_parameters(
                 environment.get(
                     "HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS", "60"
                 ),
+            ),
+            # The routing selector is intentionally last so endpoint and
+            # immutable-image prerequisites materialize before cutover.
+            _setting(
+                "CHAT_BACKEND",
+                "hosted_agent" if runtime_hosted else "orchestrator",
             ),
         ]
     }

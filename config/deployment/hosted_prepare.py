@@ -184,19 +184,14 @@ def persist_digest(
 ) -> None:
     environment_name = _required(environment, "AZURE_ENV_NAME")
     azd = shutil.which("azd") or "azd"
+    # Clear the digest first and write it last. Any interrupted sequence then
+    # remains fail-closed instead of accepting a generated digest without its
+    # manifest source provenance.
     values = (
         ("HOSTED_AGENT_IMAGE_VERSION", ""),
         (
             "HOSTED_AGENT_IMAGE_SOURCE_COMMIT",
             generated_source_commit or "",
-        ),
-        (
-            "HOSTED_AGENT_IMAGE_STARTUP_COMMAND_SHA256",
-            (
-                hosted_startup_command_sha256(environment)
-                if generated_source_commit
-                else ""
-            ),
         ),
         ("HOSTED_AGENT_IMAGE_VERSION", digest),
     )
