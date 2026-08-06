@@ -69,7 +69,7 @@ The deployment hooks publish the shared runtime contract under the App Configura
 | --- | --- |
 | `CHAT_BACKEND` | Valid values are `orchestrator` (default) and `hosted_agent`. Invalid values fail startup. Hosted mode never silently falls back to classic. |
 | `ORCHESTRATOR_BASE_URL` | Classic service root. The UI calls the `/orchestrator` route on this endpoint when `CHAT_BACKEND=orchestrator`. |
-| `HOSTED_AGENT_BASE_URL` | Hosted service root. The UI sends `POST /invocations` to this endpoint when `CHAT_BACKEND=hosted_agent`. |
+| `HOSTED_AGENT_BASE_URL` | Hosted service root. The UI sends canonical `POST /responses` requests to this endpoint when `CHAT_BACKEND=hosted_agent`. `POST /invocations` remains a compatibility alias over the same request validation, identity guard, and Responses API SSE handler. |
 | `HOSTED_AGENT_RESOURCE_SCOPE` | Required explicit hosted data-plane Entra scope ending in `/.default`, for example `api://<application-id>/.default`. Do not use the Azure Resource Manager scope. |
 | `HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS` | Finite positive wait for the next SSE event. The UI default is `60`. Never configure an infinite timeout. |
 
