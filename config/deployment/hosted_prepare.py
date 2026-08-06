@@ -173,11 +173,18 @@ def persist_digest(
 ) -> None:
     environment_name = _required(environment, "AZURE_ENV_NAME")
     azd = shutil.which("azd") or "azd"
-    values = {
-        "HOSTED_AGENT_IMAGE_VERSION": digest,
-        "HOSTED_AGENT_IMAGE_SOURCE_COMMIT": generated_source_commit or "",
-    }
-    for name, value in values.items():
+    # Clear the digest first and write it last. Any interrupted sequence then
+    # remains fail-closed instead of accepting a generated digest without its
+    # manifest source provenance.
+    values = (
+        ("HOSTED_AGENT_IMAGE_VERSION", ""),
+        (
+            "HOSTED_AGENT_IMAGE_SOURCE_COMMIT",
+            generated_source_commit or "",
+        ),
+        ("HOSTED_AGENT_IMAGE_VERSION", digest),
+    )
+    for name, value in values:
         subprocess.run(
             [
                 azd,

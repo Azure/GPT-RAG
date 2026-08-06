@@ -12,6 +12,7 @@ from config.deployment.composition import (
     APP_CONFIG_LABEL,
     DeploymentMode,
     resolve_mode,
+    resolve_runtime_mode,
     validate_hosted_prerequisites,
 )
 from util.azure_cli import resolve_az_command
@@ -90,20 +91,6 @@ def build_settings(
         "dataingest": f"ca-{resource_token}-dataingest",
         "orchestrator": f"ca-{resource_token}-orchestrator",
     }
-    frontend = _container_app(
-        resource_group, app_names["frontend"], required=True
-    )
-    dataingest = _container_app(
-        resource_group, app_names["dataingest"], required=True
-    )
-    orchestrator = (
-        _container_app(
-            resource_group, app_names["orchestrator"], required=True
-        )
-        if mode is DeploymentMode.CLASSIC
-        else {"fqdn": "", "principalId": ""}
-    )
-
     hosted_base_url = (environment.get("HOSTED_AGENT_BASE_URL") or "").strip()
     hosted_scope = (environment.get("HOSTED_AGENT_RESOURCE_SCOPE") or "").strip()
     hosted_image_version = (
@@ -119,6 +106,22 @@ def build_settings(
             raise ValueError(
                 "Hosted deployment completed without HOSTED_AGENT_BASE_URL."
             )
+    runtime_mode = resolve_runtime_mode(mode, environment)
+    runtime_hosted = runtime_mode is not DeploymentMode.CLASSIC
+
+    frontend = _container_app(
+        resource_group, app_names["frontend"], required=True
+    )
+    dataingest = _container_app(
+        resource_group, app_names["dataingest"], required=True
+    )
+    orchestrator = (
+        _container_app(
+            resource_group, app_names["orchestrator"], required=True
+        )
+        if runtime_mode is DeploymentMode.CLASSIC
+        else {"fqdn": "", "principalId": ""}
+    )
 
     container_apps = [
         {
@@ -136,7 +139,7 @@ def build_settings(
             "fqdn": dataingest["fqdn"],
         },
     ]
-    if mode is DeploymentMode.CLASSIC:
+    if runtime_mode is DeploymentMode.CLASSIC:
         container_apps.insert(
             0,
             {
@@ -149,7 +152,7 @@ def build_settings(
         )
 
     return {
-        "DEPLOY_HOSTED_AGENT_ORCHESTRATION": str(hosted).lower(),
+        "DEPLOY_HOSTED_AGENT_ORCHESTRATION": str(runtime_hosted).lower(),
         "PREPARE_HOSTED_AGENT": str(hosted).lower(),
         "DEPLOY_HOSTED_AGENT": (
             environment.get("DEPLOY_HOSTED_AGENT") or "false"
@@ -158,10 +161,12 @@ def build_settings(
             environment.get("HOSTED_AGENT_PREPARED") or str(hosted)
         ).strip().lower(),
         "DEPLOY_ADMINISTRATIVE_PANEL": str(
-            mode is DeploymentMode.HOSTED_PANEL
+            runtime_mode is DeploymentMode.HOSTED_PANEL
         ).lower(),
-        "DEPLOYMENT_TOPOLOGY": mode.value,
-        "CHAT_BACKEND": "hosted_agent" if hosted else "orchestrator",
+        "DEPLOYMENT_TOPOLOGY": runtime_mode.value,
+        "CHAT_BACKEND": (
+            "hosted_agent" if runtime_hosted else "orchestrator"
+        ),
         "ORCHESTRATOR_BASE_URL": (
             f"https://{orchestrator['fqdn']}" if orchestrator["fqdn"] else ""
         ),
@@ -181,7 +186,7 @@ def build_settings(
         "DATA_INGEST_APP_ENDPOINT": f"https://{dataingest['fqdn']}",
         "ORCHESTRATOR_APP_NAME": (
             app_names["orchestrator"]
-            if mode is DeploymentMode.CLASSIC
+            if runtime_mode is DeploymentMode.CLASSIC
             else ""
         ),
         "FRONTEND_APP_NAME": app_names["frontend"],
@@ -193,7 +198,15 @@ def build_settings(
 
 
 def publish_settings(endpoint: str, settings: Mapping[str, str]) -> None:
-    for key, value in settings.items():
+    ordered_settings = [
+        (key, value)
+        for key, value in settings.items()
+        if key != "CHAT_BACKEND"
+    ]
+    if "CHAT_BACKEND" in settings:
+        ordered_settings.append(("CHAT_BACKEND", settings["CHAT_BACKEND"]))
+
+    for key, value in ordered_settings:
         _run_az(
             [
                 "appconfig",

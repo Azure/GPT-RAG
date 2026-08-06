@@ -91,6 +91,18 @@ command -v jq >/dev/null 2>&1 || { red "jq is required to parse $manifest_path. 
 base_dir="$(cd "$repo_root/.." && pwd -P)"
 dot_azure="$repo_root/.azure"
 
+# Mirror the materialized azd environment before invoking shared Python
+# publishers. In particular, the final hosted cutover requires App
+# Configuration, resource-group, resource-token, and deploy-handoff values
+# that are not inherited by a clean shell merely because get_azd_value reads
+# them into local variables below.
+while IFS='=' read -r key value; do
+  [[ -z "$key" ]] && continue
+  value="${value%\"}"
+  value="${value#\"}"
+  export "$key=$value"
+done < <(cd "$repo_root" && azd env get-values)
+
 # ---------- Global env & RG early check ----------
 global_rg="$(get_azd_value "$repo_root" "AZURE_RESOURCE_GROUP")"
 global_sub="$(get_azd_value "$repo_root" "AZURE_SUBSCRIPTION_ID")"
@@ -173,9 +185,9 @@ if [[ "$hosted_mode" =~ ^(1|true|t|yes|y)$ ]]; then
   copy_dot_azure "$dot_azure" "$hosted_project"
   (
     cd "$hosted_project"
-    azd env set HOSTED_AGENT_IMAGE_VERSION "$hosted_agent_digest" --environment "$environment_name" --no-prompt >/dev/null
-    azd env set FOUNDRY_PROJECT_ENDPOINT "$project_endpoint" --environment "$environment_name" --no-prompt >/dev/null
-    azd env set AZURE_AI_PROJECT_ID "$project_resource_id" --environment "$environment_name" --no-prompt >/dev/null
+    azd env set HOSTED_AGENT_IMAGE_VERSION "$hosted_agent_digest" --environment "$environment_name" --no-prompt >/dev/null || exit 1
+    azd env set FOUNDRY_PROJECT_ENDPOINT "$project_endpoint" --environment "$environment_name" --no-prompt >/dev/null || exit 1
+    azd env set AZURE_AI_PROJECT_ID "$project_resource_id" --environment "$environment_name" --no-prompt >/dev/null || exit 1
     azd deploy orchestrator-agent --environment "$environment_name" --no-prompt
   ) || { red "Hosted orchestrator deployment failed."; exit 1; }
 
@@ -188,11 +200,6 @@ if [[ "$hosted_mode" =~ ^(1|true|t|yes|y)$ ]]; then
 
   export HOSTED_AGENT_BASE_URL="$hosted_base_url"
   export HOSTED_AGENT_RESOURCE_SCOPE="$hosted_scope"
-  (
-    cd "$repo_root"
-    azd env set HOSTED_AGENT_BASE_URL "$hosted_base_url" --environment "$environment_name" --no-prompt >/dev/null
-    python3 -m config.deployment.appconfig --require-hosted-endpoint
-  ) || { red "Failed to publish the hosted-agent endpoint contract."; exit 1; }
 fi
 
 # ---------- Iterate components ----------
@@ -211,18 +218,28 @@ while IFS= read -r comp; do
   ref_type=""; ref=""
   if [ -n "$c_tag" ]; then
     if tag_exists "$repo" "$c_tag"; then ref_type="tag"; ref="$c_tag"
-    else yellow "$name: tag '$c_tag' not found. Skipping."; continue
+    else
+      yellow "$name: tag '$c_tag' not found. Skipping."
+      [ "$hosted_mode" = "true" ] && had_errors=1
+      continue
     fi
   elif [ -n "$release_default" ]; then
     if tag_exists "$repo" "$release_default"; then ref_type="tag"; ref="$release_default"
-    else yellow "$name: tag '$release_default' not found. Skipping."; continue
+    else
+      yellow "$name: tag '$release_default' not found. Skipping."
+      [ "$hosted_mode" = "true" ] && had_errors=1
+      continue
     fi
   elif [ -n "$c_branch" ]; then
     if branch_exists "$repo" "$c_branch"; then ref_type="branch"; ref="$c_branch"
-    else yellow "$name: branch '$c_branch' not found. Skipping."; continue
+    else
+      yellow "$name: branch '$c_branch' not found. Skipping."
+      [ "$hosted_mode" = "true" ] && had_errors=1
+      continue
     fi
   else
     yellow "$name: neither tag nor branch specified. Skipping."
+    [ "$hosted_mode" = "true" ] && had_errors=1
     continue
   fi
 
@@ -280,12 +297,45 @@ while IFS= read -r comp; do
     fi
   else
     echo "$name: no scripts/deploy.sh found, skipping child deploy."
+    [ "$hosted_mode" = "true" ] && had_errors=1
   fi
 done < <(jq -c '.components[]' "$manifest_path")
 
 if [ "$had_errors" -ne 0 ]; then
   red "One or more components failed. See logs above."
   exit 1
+fi
+
+if [[ "$hosted_mode" =~ ^(1|true|t|yes|y)$ ]]; then
+  export HOSTED_CUTOVER_COMPLETE=true
+  migrating_classic_runtime=false
+  [[ "$(printf "%s" "${PRESERVE_CLASSIC_RUNTIME:-}" | tr '[:upper:]' '[:lower:]')" = "true" ]] && migrating_classic_runtime=true
+  (
+    cd "$repo_root"
+    python3 -m config.deployment.appconfig --require-hosted-endpoint
+  ) || { red "Failed to publish the hosted-agent endpoint contract."; exit 1; }
+  if ! azd env set HOSTED_AGENT_BASE_URL "$hosted_base_url" --environment "$environment_name" --no-prompt >/dev/null; then
+    if [ "$migrating_classic_runtime" = "true" ]; then
+      export HOSTED_CUTOVER_COMPLETE=false
+      (cd "$repo_root" && python3 -m config.deployment.appconfig >/dev/null) || {
+        red "Hosted endpoint persistence and classic-selector compensation both failed."
+        exit 1
+      }
+    fi
+    red "Hosted cutover endpoint could not be persisted."
+    exit 1
+  fi
+  azd env set HOSTED_CUTOVER_COMPLETE true --environment "$environment_name" --no-prompt >/dev/null || {
+    if [ "$migrating_classic_runtime" = "true" ]; then
+      export HOSTED_CUTOVER_COMPLETE=false
+      (cd "$repo_root" && python3 -m config.deployment.appconfig >/dev/null) || {
+        red "Hosted marker persistence and classic-selector compensation both failed."
+        exit 1
+      }
+    fi
+    red "Hosted cutover success marker could not be persisted."
+    exit 1
+  }
 fi
 
 green "All components processed."

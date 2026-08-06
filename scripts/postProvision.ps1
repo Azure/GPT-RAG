@@ -242,10 +242,13 @@ function Set-GptRagAppConfiguration {
         exit 1
     }
     $topologyInfo = ([string]$topologyJson).Trim() | ConvertFrom-Json
-    $hostedMode = [bool]$topologyInfo.deploy_hosted_agent_orchestration
-    $administrativePanel = [bool]$topologyInfo.deploy_administrative_panel
+    # The requested topology remains hosted throughout migration, while the
+    # shared resolver reports a classic effective runtime until both the
+    # immutable image and hosted endpoint exist.
+    $runtimeTopology = [string]$topologyInfo.runtime_topology
+    $hostedMode = $runtimeTopology -ne 'classic'
+    $administrativePanel = $runtimeTopology -eq 'hosted-panel'
     $cosmosEnabled = (-not $hostedMode) -or $administrativePanel
-    $deploymentTopology = [string]$topologyInfo.topology
 
     $appConfigName = Get-AppConfigResourceName -Endpoint $Endpoint
     $nameSuffix = $resourceToken
@@ -449,17 +452,6 @@ function Set-GptRagAppConfiguration {
         ENVIRONMENT_NAME = $environmentName
         DEPLOYMENT_NAME = $deploymentName
         RESOURCE_TOKEN = $resourceToken
-        DEPLOY_HOSTED_AGENT_ORCHESTRATION = "$hostedMode".ToLowerInvariant()
-        PREPARE_HOSTED_AGENT = (Get-OptionalEnvValue 'PREPARE_HOSTED_AGENT' "$hostedMode".ToLowerInvariant())
-        DEPLOY_HOSTED_AGENT = (Get-OptionalEnvValue 'DEPLOY_HOSTED_AGENT' 'false')
-        HOSTED_AGENT_PREPARED = (Get-OptionalEnvValue 'HOSTED_AGENT_PREPARED' "$hostedMode".ToLowerInvariant())
-        DEPLOY_ADMINISTRATIVE_PANEL = "$administrativePanel".ToLowerInvariant()
-        DEPLOYMENT_TOPOLOGY = $deploymentTopology
-        CHAT_BACKEND = if ($hostedMode) { 'hosted_agent' } else { 'orchestrator' }
-        HOSTED_AGENT_BASE_URL = (Get-OptionalEnvValue 'HOSTED_AGENT_BASE_URL')
-        HOSTED_AGENT_RESOURCE_SCOPE = (Get-OptionalEnvValue 'HOSTED_AGENT_RESOURCE_SCOPE')
-        HOSTED_AGENT_IMAGE_VERSION = (Get-OptionalEnvValue 'HOSTED_AGENT_IMAGE_VERSION')
-        HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS = (Get-OptionalEnvValue 'HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS' '60')
         SEARCH_RAG_INDEX_NAME = $ragIndexName
         ENABLE_AGENTIC_RETRIEVAL = (Get-OptionalEnvValue 'ENABLE_AGENTIC_RETRIEVAL' 'false')
         RETRIEVAL_BACKEND = $retrievalBackend

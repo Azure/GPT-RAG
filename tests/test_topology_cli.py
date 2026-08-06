@@ -130,10 +130,10 @@ class ResolveEnvironmentTopologyTests(unittest.TestCase):
 
     @patch("config.deployment.topology.read_persisted_settings")
     @patch("config.deployment.topology.resource_group_exists")
-    def test_explicit_environment_signal_wins_without_reading_persisted_settings(
+    def test_explicit_hosted_fresh_environment_skips_persisted_settings(
         self, mock_rg_exists: object, mock_read_settings: object
     ) -> None:
-        mock_rg_exists.return_value = True
+        mock_rg_exists.return_value = False
 
         mode = topology.resolve_environment_topology(
             {"DEPLOYMENT_TOPOLOGY": "hosted-no-panel"},
@@ -142,6 +142,142 @@ class ResolveEnvironmentTopologyTests(unittest.TestCase):
         )
 
         self.assertEqual(DeploymentMode.HOSTED_NO_PANEL, mode)
+        mock_read_settings.assert_not_called()
+
+    @patch("config.deployment.topology.read_persisted_settings")
+    @patch("config.deployment.topology.resource_group_exists")
+    def test_explicit_classic_skips_all_azure_lookups(
+        self, mock_rg_exists: object, mock_read_settings: object
+    ) -> None:
+        mode = topology.resolve_environment_topology(
+            {"DEPLOYMENT_TOPOLOGY": "classic"},
+            resource_group_name="rg-test",
+            app_config_endpoint="https://x",
+        )
+
+        self.assertEqual(DeploymentMode.CLASSIC, mode)
+        mock_rg_exists.assert_not_called()
+        mock_read_settings.assert_not_called()
+
+    @patch("config.deployment.topology.read_persisted_settings")
+    @patch("config.deployment.topology.resource_group_exists")
+    def test_explicit_hosted_migration_preserves_existing_classic_runtime(
+        self, mock_rg_exists: object, mock_read_settings: object
+    ) -> None:
+        mock_rg_exists.return_value = True
+        mock_read_settings.return_value = {
+            "DEPLOYMENT_TOPOLOGY": "classic",
+            "CHAT_BACKEND": "orchestrator",
+        }
+
+        resolution = topology.resolve_environment_plan(
+            {"DEPLOYMENT_TOPOLOGY": "hosted-no-panel"},
+            resource_group_name="rg-test",
+            app_config_endpoint="https://x",
+        )
+
+        self.assertEqual(DeploymentMode.HOSTED_NO_PANEL, resolution.mode)
+        self.assertTrue(resolution.preserve_classic_runtime)
+
+    @patch("config.deployment.topology.read_persisted_settings")
+    @patch("config.deployment.topology.resource_group_exists")
+    def test_explicit_hosted_existing_hosted_does_not_preserve_classic(
+        self, mock_rg_exists: object, mock_read_settings: object
+    ) -> None:
+        mock_rg_exists.return_value = True
+        mock_read_settings.return_value = {
+            "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+            "CHAT_BACKEND": "hosted_agent",
+        }
+
+        resolution = topology.resolve_environment_plan(
+            {
+                "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+                "CHAT_BACKEND": "hosted_agent",
+            },
+            resource_group_name="rg-test",
+            app_config_endpoint="https://x",
+        )
+
+        self.assertFalse(resolution.preserve_classic_runtime)
+
+    @patch("config.deployment.topology.read_persisted_settings")
+    @patch("config.deployment.topology.resource_group_exists")
+    def test_unmarked_existing_hosted_request_preserves_classic_without_lookup(
+        self, mock_rg_exists: object, mock_read_settings: object
+    ) -> None:
+        mock_rg_exists.return_value = True
+
+        resolution = topology.resolve_environment_plan(
+            {"DEPLOYMENT_TOPOLOGY": "hosted-no-panel"},
+            resource_group_name="rg-test",
+            app_config_endpoint="https://private.example.test",
+        )
+
+        self.assertTrue(resolution.preserve_classic_runtime)
+        mock_read_settings.assert_not_called()
+
+    @patch("config.deployment.topology.read_persisted_settings")
+    @patch("config.deployment.topology.resource_group_exists")
+    def test_materialized_fresh_hosted_skips_private_appconfig_lookup(
+        self, mock_rg_exists: object, mock_read_settings: object
+    ) -> None:
+        mock_rg_exists.return_value = True
+
+        resolution = topology.resolve_environment_plan(
+            {
+                "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+                "CHAT_BACKEND": "hosted_agent",
+                "PRESERVE_CLASSIC_RUNTIME": "false",
+            },
+            resource_group_name="rg-test",
+            app_config_endpoint="https://private.example.test",
+        )
+
+        self.assertFalse(resolution.preserve_classic_runtime)
+        mock_read_settings.assert_not_called()
+
+    @patch("config.deployment.topology.read_persisted_settings")
+    @patch("config.deployment.topology.resource_group_exists")
+    def test_materialized_classic_detects_migration_without_private_lookup(
+        self, mock_rg_exists: object, mock_read_settings: object
+    ) -> None:
+        mock_rg_exists.return_value = True
+
+        resolution = topology.resolve_environment_plan(
+            {
+                "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+                "CHAT_BACKEND": "orchestrator",
+                "PRESERVE_CLASSIC_RUNTIME": "false",
+            },
+            resource_group_name="rg-test",
+            app_config_endpoint="https://private.example.test",
+        )
+
+        self.assertTrue(resolution.preserve_classic_runtime)
+        mock_read_settings.assert_not_called()
+
+    @patch("config.deployment.topology.read_persisted_settings")
+    @patch("config.deployment.topology.resource_group_exists")
+    def test_materialized_migration_clears_after_cutover_without_private_lookup(
+        self, mock_rg_exists: object, mock_read_settings: object
+    ) -> None:
+        mock_rg_exists.return_value = True
+
+        resolution = topology.resolve_environment_plan(
+            {
+                "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+                "CHAT_BACKEND": "hosted_agent",
+                "PRESERVE_CLASSIC_RUNTIME": "true",
+                "HOSTED_CUTOVER_COMPLETE": "true",
+                "HOSTED_AGENT_BASE_URL": "https://agent.example.test/protocols",
+                "HOSTED_AGENT_IMAGE_VERSION": "sha256:" + ("a" * 64),
+            },
+            resource_group_name="rg-test",
+            app_config_endpoint="https://private.example.test",
+        )
+
+        self.assertFalse(resolution.preserve_classic_runtime)
         mock_read_settings.assert_not_called()
 
 
@@ -160,6 +296,7 @@ class MainCliTests(unittest.TestCase):
         printed = "\n".join(call.args[0] for call in mock_print.call_args_list)
         self.assertIn("DEPLOYMENT_TOPOLOGY=hosted-no-panel", printed)
         self.assertIn("CHAT_BACKEND=hosted_agent", printed)
+        self.assertIn("PRESERVE_CLASSIC_RUNTIME=false", printed)
 
     def test_describe_mode_prints_json_without_any_azure_cli_call(self) -> None:
         argv = ["prog", "--describe"]
@@ -175,6 +312,110 @@ class MainCliTests(unittest.TestCase):
         description = json.loads(payload)
         self.assertEqual("classic", description["topology"])
         self.assertEqual("orchestrator", description["chat_backend"])
+
+    def test_describe_preserves_migrating_runtime_until_cutover(self) -> None:
+        argv = ["prog", "--describe"]
+        env = {
+            "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+            "PRESERVE_CLASSIC_RUNTIME": "true",
+            "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
+            "HOSTED_AGENT_IMAGE_VERSION": "sha256:" + ("a" * 64),
+        }
+        with patch("sys.argv", argv), patch("os.environ", env):
+            with patch("builtins.print") as mock_print:
+                exit_code = topology.main()
+
+        self.assertEqual(0, exit_code)
+        description = json.loads(mock_print.call_args.args[0])
+        self.assertEqual("hosted-no-panel", description["topology"])
+        self.assertTrue(description["deploy_hosted_agent_orchestration"])
+        self.assertEqual("classic", description["runtime_topology"])
+        self.assertEqual("orchestrator", description["runtime_chat_backend"])
+
+    @patch(
+        "config.deployment.topology.read_persisted_settings",
+        return_value={
+            "DEPLOYMENT_TOPOLOGY": "classic",
+            "CHAT_BACKEND": "orchestrator",
+        },
+    )
+    @patch("config.deployment.topology.resource_group_exists", return_value=True)
+    def test_materialize_preserves_migrating_runtime_until_cutover(
+        self,
+        _mock_rg_exists: object,
+        _mock_read_settings: object,
+    ) -> None:
+        argv = ["prog"]
+        env = {
+            "AZURE_RESOURCE_GROUP": "rg-test",
+            "APP_CONFIG_ENDPOINT": "https://x",
+            "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+            "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
+            "HOSTED_AGENT_IMAGE_VERSION": "sha256:" + ("a" * 64),
+        }
+        with patch("sys.argv", argv), patch("os.environ", env):
+            with patch("builtins.print") as mock_print:
+                exit_code = topology.main()
+
+        self.assertEqual(0, exit_code)
+        printed = "\n".join(call.args[0] for call in mock_print.call_args_list)
+        self.assertIn("DEPLOYMENT_TOPOLOGY=hosted-no-panel", printed)
+        self.assertIn("DEPLOY_HOSTED_AGENT_ORCHESTRATION=false", printed)
+        self.assertIn("CHAT_BACKEND=orchestrator", printed)
+        self.assertIn("PRESERVE_CLASSIC_RUNTIME=true", printed)
+
+    @patch(
+        "config.deployment.topology.read_persisted_settings",
+        return_value={
+            "DEPLOYMENT_TOPOLOGY": "classic",
+            "CHAT_BACKEND": "orchestrator",
+        },
+    )
+    @patch("config.deployment.topology.resource_group_exists", return_value=True)
+    def test_materialize_switches_migrating_runtime_after_cutover(
+        self,
+        _mock_rg_exists: object,
+        _mock_read_settings: object,
+    ) -> None:
+        argv = ["prog"]
+        env = {
+            "AZURE_RESOURCE_GROUP": "rg-test",
+            "APP_CONFIG_ENDPOINT": "https://x",
+            "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+            "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
+            "HOSTED_CUTOVER_COMPLETE": "true",
+            "HOSTED_AGENT_BASE_URL": "https://agent.example",
+            "HOSTED_AGENT_IMAGE_VERSION": "sha256:" + ("a" * 64),
+        }
+        with patch("sys.argv", argv), patch("os.environ", env):
+            with patch("builtins.print") as mock_print:
+                exit_code = topology.main()
+
+        self.assertEqual(0, exit_code)
+        printed = "\n".join(call.args[0] for call in mock_print.call_args_list)
+        self.assertIn("DEPLOYMENT_TOPOLOGY=hosted-no-panel", printed)
+        self.assertIn("DEPLOY_HOSTED_AGENT_ORCHESTRATION=true", printed)
+        self.assertIn("CHAT_BACKEND=hosted_agent", printed)
+        self.assertIn("PRESERVE_CLASSIC_RUNTIME=false", printed)
+
+    def test_describe_reports_hosted_runtime_after_cutover(self) -> None:
+        argv = ["prog", "--describe"]
+        env = {
+            "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+            "PRESERVE_CLASSIC_RUNTIME": "true",
+            "HOSTED_CUTOVER_COMPLETE": "true",
+            "HOSTED_AGENT_BASE_URL": "https://agent.example.test/protocols",
+            "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
+            "HOSTED_AGENT_IMAGE_VERSION": "sha256:" + ("a" * 64),
+        }
+        with patch("sys.argv", argv), patch("os.environ", env):
+            with patch("builtins.print") as mock_print:
+                exit_code = topology.main()
+
+        self.assertEqual(0, exit_code)
+        description = json.loads(mock_print.call_args.args[0])
+        self.assertEqual("hosted-no-panel", description["runtime_topology"])
+        self.assertEqual("hosted_agent", description["runtime_chat_backend"])
 
     def test_validate_hosted_deploy_rejects_missing_foundry_project(self) -> None:
         argv = ["prog", "--validate-hosted-deploy"]
