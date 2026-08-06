@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import copy
+import hashlib
 import json
 import os
 import re
@@ -14,6 +15,9 @@ from typing import Mapping
 
 APP_CONFIG_LABEL = "gpt-rag"
 HOSTED_IMAGE_DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
+HOSTED_STARTUP_COMMAND_DEFAULT = (
+    "uvicorn src.api.hosted_entrypoint:app --host 0.0.0.0 --port 8088"
+)
 HOSTED_RESOURCE_SCOPE_PATTERN = re.compile(
     r"^[^\s/](?:[^\s]*[^\s/])?/\.default$"
 )
@@ -61,6 +65,19 @@ def is_truthy(value: str | None) -> bool:
     return (value or "").strip().lower() in {"1", "true", "t", "yes", "y"}
 
 
+def hosted_startup_command(environment: Mapping[str, str]) -> str:
+    return (
+        environment.get("HOSTED_AGENT_STARTUP_COMMAND")
+        or HOSTED_STARTUP_COMMAND_DEFAULT
+    )
+
+
+def hosted_startup_command_sha256(environment: Mapping[str, str]) -> str:
+    return hashlib.sha256(
+        hosted_startup_command(environment).encode("utf-8")
+    ).hexdigest()
+
+
 def validate_hosted_prerequisites(
     environment: Mapping[str, str],
     *,
@@ -68,6 +85,19 @@ def validate_hosted_prerequisites(
     require_foundry_project: bool = False,
 ) -> None:
     """Validate the fail-closed hosted deployment contract."""
+    configured_startup_command = (
+        environment.get("HOSTED_AGENT_STARTUP_COMMAND") or ""
+    ).strip()
+    if (
+        configured_startup_command
+        and configured_startup_command != HOSTED_STARTUP_COMMAND_DEFAULT
+    ):
+        raise DeploymentTopologyError(
+            "Custom HOSTED_AGENT_STARTUP_COMMAND values are not supported by "
+            "the azure.ai.agent deployment manifest; use the default hosted "
+            "entrypoint."
+        )
+
     scope = (environment.get("HOSTED_AGENT_RESOURCE_SCOPE") or "").strip()
     if not HOSTED_RESOURCE_SCOPE_PATTERN.fullmatch(scope):
         raise DeploymentTopologyError(
@@ -176,6 +206,8 @@ def resolve_explicit_topology(
     and must fail closed.
     """
     topology_value = _explicit_topology_value(environment)
+    if topology_value is not None and not strict_conflicts:
+        return topology_value
     flag_value = _explicit_flag_topology(environment)
     if (
         topology_value is not None
@@ -359,10 +391,17 @@ def compose_parameters(
     mode = resolve_mode(environment)
     hosted = mode is not DeploymentMode.CLASSIC
     panel = mode is not DeploymentMode.HOSTED_NO_PANEL
+    hosted_migration = hosted and is_truthy(
+        environment.get("HOSTED_AGENT_MIGRATION")
+    )
+    network_isolation = is_truthy(environment.get("NETWORK_ISOLATION"))
 
     digest = (environment.get("HOSTED_AGENT_IMAGE_VERSION") or "").strip()
     generated_source_commit = (
         environment.get("HOSTED_AGENT_IMAGE_SOURCE_COMMIT") or ""
+    ).strip()
+    generated_startup_command_sha256 = (
+        environment.get("HOSTED_AGENT_IMAGE_STARTUP_COMMAND_SHA256") or ""
     ).strip()
     deploy_hosted = hosted and bool(digest)
 
@@ -381,6 +420,18 @@ def compose_parameters(
                 "preparation command again before provisioning the deploy "
                 "handoff."
             )
+        if (
+            generated_source_commit
+            and generated_startup_command_sha256
+            and generated_startup_command_sha256
+            != hosted_startup_command_sha256(environment)
+        ):
+            raise DeploymentTopologyError(
+                "The generated HOSTED_AGENT_IMAGE_VERSION does not match "
+                "the configured HOSTED_AGENT_STARTUP_COMMAND. Run the hosted "
+                "image preparation command again before provisioning the "
+                "deploy handoff."
+            )
     elif hosted:
         validate_hosted_prerequisites(
             environment,
@@ -389,7 +440,9 @@ def compose_parameters(
 
     parameters["prepareHostedAgent"] = {"value": hosted}
     parameters["deployHostedAgent"] = {"value": deploy_hosted}
-    parameters["deployCosmosDb"] = {"value": panel}
+    parameters["deployCosmosDb"] = {"value": panel or hosted_migration}
+    if hosted and network_isolation:
+        parameters["deployAcrTaskAgentPool"] = {"value": True}
 
     if hosted:
         parameters["hostedAgent"] = {
@@ -404,8 +457,7 @@ def compose_parameters(
                 ),
                 "version": digest,
                 "startupCommand": (
-                    environment.get("HOSTED_AGENT_STARTUP_COMMAND")
-                    or "uvicorn src.api.hosted_entrypoint:app --host 0.0.0.0 --port 8088"
+                    hosted_startup_command(environment)
                 ),
                 "runtime": {
                     "cpu": environment.get("HOSTED_AGENT_CONTAINER_CPU") or "2",
@@ -443,13 +495,13 @@ def compose_parameters(
         raise ValueError("containerAppsList must contain an array value.")
 
     apps = apps_parameter["value"]
-    if hosted:
+    if hosted and not hosted_migration:
         apps = [
             app
             for app in apps
             if isinstance(app, dict) and app.get("service_name") != "orchestrator"
         ]
-    if mode is DeploymentMode.HOSTED_NO_PANEL:
+    if mode is DeploymentMode.HOSTED_NO_PANEL and not hosted_migration:
         for app in apps:
             if app.get("service_name") == "dataingest":
                 app["roles"] = [
@@ -459,7 +511,7 @@ def compose_parameters(
                 ]
     parameters["containerAppsList"] = {"value": apps}
 
-    if mode is DeploymentMode.HOSTED_NO_PANEL:
+    if mode is DeploymentMode.HOSTED_NO_PANEL and not hosted_migration:
         parameters["databaseContainersList"] = {"value": []}
 
     parameters["additionalAppConfigurationSettings"] = {
@@ -476,7 +528,18 @@ def compose_parameters(
                 str(panel and hosted).lower(),
             ),
             _setting("DEPLOYMENT_TOPOLOGY", mode.value),
-            _setting("CHAT_BACKEND", "hosted_agent" if hosted else "orchestrator"),
+            _setting(
+                "HOSTED_AGENT_MIGRATION",
+                str(hosted_migration).lower(),
+            ),
+            _setting(
+                "CHAT_BACKEND",
+                (
+                    "hosted_agent"
+                    if hosted and not hosted_migration
+                    else "orchestrator"
+                ),
+            ),
             _setting(
                 "HOSTED_AGENT_BASE_URL",
                 environment.get("HOSTED_AGENT_BASE_URL", ""),

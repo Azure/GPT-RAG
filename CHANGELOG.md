@@ -24,6 +24,13 @@
   signals fail closed with migration guidance instead of guessing; an explicit
   `DEPLOYMENT_TOPOLOGY` takes precedence over previously materialized
   compatibility flags as the operator-controlled migration or rollback action.
+  An explicit classic-to-hosted migration now keeps the orchestrator Container
+  App, Cosmos data, and `CHAT_BACKEND=orchestrator` active through both hosted
+  preparation phases. `azd deploy` switches App Configuration to
+  `CHAT_BACKEND=hosted_agent` and clears the migration marker only after the
+  hosted deployment returns a valid endpoint and an `azd ai agent invoke`
+  smoke request succeeds; classic resources are eligible for removal only on
+  a later explicit provision.
 - **Shared, deterministic topology resolver.** `config/deployment/topology.py`
   centralizes the fresh-vs-existing/sticky/conflict decision (resource-group
   existence plus persisted App Configuration settings, when reachable) behind

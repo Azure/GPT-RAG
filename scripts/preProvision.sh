@@ -27,6 +27,16 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$SCRIPT_DIR/.."
 INFRA_DIR="$PROJECT_ROOT/infra"
 MAIN_BICEP="$INFRA_DIR/main.bicep"
+PYTHON_CMD=""
+if command -v python3 >/dev/null 2>&1; then
+    PYTHON_CMD="python3"
+elif command -v python >/dev/null 2>&1; then
+    PYTHON_CMD="python"
+else
+    echo "${YELLOW}Error: Python is required to compose the GPT-RAG deployment mode.${NC}"
+    exit 1
+fi
+EXPECTED_INFRA_COMMIT="$("$PYTHON_CMD" -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["ailz_commit"])' "$PROJECT_ROOT/manifest.json")"
 
 echo "${CYAN}Initializing infrastructure submodule...${NC}"
 git submodule update --init --recursive 2>/dev/null
@@ -53,13 +63,21 @@ if [ ! -f "$MAIN_BICEP" ]; then
         echo "${YELLOW}Error: Could not determine infra repository URL from .gitmodules.${NC}"
         exit 1
     fi
-    echo "${CYAN}  Infra repo: $INFRA_URL @ $INFRA_REF (from .gitmodules)${NC}"
+    echo "${CYAN}  Infra repo: $INFRA_URL @ $INFRA_REF, pinned to $EXPECTED_INFRA_COMMIT${NC}"
 
-    # Remove the empty infra directory and clone at the correct tag
+    # Materialize the exact manifest pin; the configured branch may advance.
     rm -rf "$INFRA_DIR"
-    git -c advice.detachedHead=false clone --depth 1 --branch "$INFRA_REF" "$INFRA_URL" "$INFRA_DIR"
+    git clone --filter=blob:none --no-checkout "$INFRA_URL" "$INFRA_DIR"
     if [ $? -ne 0 ]; then
-        echo "${YELLOW}Error: Failed to clone infra repository ($INFRA_URL @ $INFRA_REF).${NC}"
+        echo "${YELLOW}Error: Failed to clone infra repository ($INFRA_URL).${NC}"
+        exit 1
+    fi
+    if ! git -C "$INFRA_DIR" fetch --depth 1 origin "$EXPECTED_INFRA_COMMIT"; then
+        echo "${YELLOW}Error: Failed to fetch infra commit $EXPECTED_INFRA_COMMIT.${NC}"
+        exit 1
+    fi
+    if ! git -C "$INFRA_DIR" -c advice.detachedHead=false checkout --detach "$EXPECTED_INFRA_COMMIT"; then
+        echo "${YELLOW}Error: Failed to check out infra commit $EXPECTED_INFRA_COMMIT.${NC}"
         exit 1
     fi
     echo "${GREEN}Infrastructure submodule cloned successfully.${NC}"
@@ -69,17 +87,6 @@ fi
 # Override submodule files with project-level overrides
 ###############################################################################
 
-PYTHON_CMD=""
-if command -v python3 >/dev/null 2>&1; then
-    PYTHON_CMD="python3"
-elif command -v python >/dev/null 2>&1; then
-    PYTHON_CMD="python"
-else
-    echo "${YELLOW}Error: Python is required to compose the GPT-RAG deployment mode.${NC}"
-    exit 1
-fi
-
-EXPECTED_INFRA_COMMIT="$("$PYTHON_CMD" -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["ailz_commit"])' "$PROJECT_ROOT/manifest.json")"
 ACTUAL_INFRA_COMMIT="$(git -C "$INFRA_DIR" rev-parse HEAD 2>/dev/null || true)"
 if [ -z "$EXPECTED_INFRA_COMMIT" ] || [ "$ACTUAL_INFRA_COMMIT" != "$EXPECTED_INFRA_COMMIT" ]; then
     echo "${YELLOW}Error: infra must resolve to $EXPECTED_INFRA_COMMIT but is at $ACTUAL_INFRA_COMMIT.${NC}"
@@ -112,14 +119,22 @@ fi
 
 eval "$(printf '%s\n' "$TOPOLOGY_OUTPUT" | sed 's/^\([^=]*\)=\(.*\)$/export \1="\2"/')"
 
-printf '%s\n' "$TOPOLOGY_OUTPUT" | while IFS='=' read -r TOPO_KEY TOPO_VALUE; do
+while IFS='=' read -r TOPO_KEY TOPO_VALUE; do
     [ -z "$TOPO_KEY" ] && continue
     if [ -n "${AZURE_ENV_NAME:-}" ]; then
-        azd env set "$TOPO_KEY" "$TOPO_VALUE" --environment "$AZURE_ENV_NAME" --no-prompt >/dev/null
+        if ! azd env set "$TOPO_KEY" "$TOPO_VALUE" --environment "$AZURE_ENV_NAME" --no-prompt >/dev/null; then
+            echo "${YELLOW}Error: Failed to persist deployment topology setting $TOPO_KEY.${NC}"
+            exit 1
+        fi
     else
-        azd env set "$TOPO_KEY" "$TOPO_VALUE" --no-prompt >/dev/null
+        if ! azd env set "$TOPO_KEY" "$TOPO_VALUE" --no-prompt >/dev/null; then
+            echo "${YELLOW}Error: Failed to persist deployment topology setting $TOPO_KEY.${NC}"
+            exit 1
+        fi
     fi
-done
+done <<EOF
+$TOPOLOGY_OUTPUT
+EOF
 
 echo "${CYAN}Composing GPT-RAG deployment mode...${NC}"
 HOSTED_SOURCE_COMMIT="$("$PYTHON_CMD" -c 'import json,sys; print(next(c[\"commit\"] for c in json.load(open(sys.argv[1], encoding=\"utf-8\"))[\"components\"] if c[\"name\"] == \"gpt-rag-orchestrator\"))' "$PROJECT_ROOT/manifest.json")"

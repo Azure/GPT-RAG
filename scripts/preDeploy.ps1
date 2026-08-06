@@ -199,11 +199,28 @@ The preparation command builds the manifest-pinned image and stores only its imm
   Push-Location $hostedProject
   try {
     & azd env set HOSTED_AGENT_IMAGE_VERSION $hostedDigest --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+      Write-Error "Failed to hand off HOSTED_AGENT_IMAGE_VERSION to the hosted deployment."
+      exit $LASTEXITCODE
+    }
     & azd env set FOUNDRY_PROJECT_ENDPOINT "$($globalEnv.AZURE_AI_PROJECT_ENDPOINT)" --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+      Write-Error "Failed to hand off FOUNDRY_PROJECT_ENDPOINT to the hosted deployment."
+      exit $LASTEXITCODE
+    }
     & azd env set AZURE_AI_PROJECT_ID "$($globalEnv.AZURE_AI_PROJECT_RESOURCE_ID)" --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+      Write-Error "Failed to hand off AZURE_AI_PROJECT_ID to the hosted deployment."
+      exit $LASTEXITCODE
+    }
     & azd deploy orchestrator-agent --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt
     if ($LASTEXITCODE -ne 0) {
       Write-Error "Hosted orchestrator deployment failed."
+      exit $LASTEXITCODE
+    }
+    & azd ai agent invoke --protocol invocations --new-session --timeout 180 --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt "Reply with exactly: GPT-RAG hosted smoke OK." | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+      Write-Error "Hosted orchestrator smoke request failed; the classic chat path remains active."
       exit $LASTEXITCODE
     }
     $hostedEnv = Get-AzdEnv -projectPath $hostedProject
@@ -230,12 +247,22 @@ The preparation command builds the manifest-pinned image and stores only its imm
   }
   $env:HOSTED_AGENT_BASE_URL = $hostedBaseUrl
   $env:HOSTED_AGENT_RESOURCE_SCOPE = "$($globalEnv.HOSTED_AGENT_RESOURCE_SCOPE)"
+  $env:HOSTED_AGENT_MIGRATION = 'false'
   Push-Location $repoRoot
   try {
-    & azd env set HOSTED_AGENT_BASE_URL $hostedBaseUrl --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
     & python -m config.deployment.appconfig --require-hosted-endpoint
     if ($LASTEXITCODE -ne 0) {
       Write-Error "Failed to publish the hosted-agent endpoint contract."
+      exit $LASTEXITCODE
+    }
+    & azd env set HOSTED_AGENT_BASE_URL $hostedBaseUrl --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+      Write-Error "Failed to persist HOSTED_AGENT_BASE_URL after hosted cutover."
+      exit $LASTEXITCODE
+    }
+    & azd env set HOSTED_AGENT_MIGRATION false --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+      Write-Error "Hosted endpoint was published, but the migration marker could not be cleared."
       exit $LASTEXITCODE
     }
   } finally {

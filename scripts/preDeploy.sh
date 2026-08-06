@@ -114,10 +114,13 @@ topology_json="$(cd "$repo_root" && python3 -m config.deployment.topology --desc
   red "Failed to resolve the GPT-RAG deployment topology. Ensure scripts/preProvision ran successfully before azd deploy."
   exit 1
 }
-hosted_mode="$(printf "%s" "$topology_json" | jq -r '.deploy_hosted_agent_orchestration')"
-administrative_panel="$(printf "%s" "$topology_json" | jq -r '.deploy_administrative_panel')"
-deployment_mode="$(printf "%s" "$topology_json" | jq -r '.topology')"
-selected_components="$(printf "%s" "$topology_json" | jq -r '.components | join(" ")')"
+hosted_mode="$(printf "%s" "$topology_json" | jq -er '.deploy_hosted_agent_orchestration | if type == "boolean" then tostring else error("invalid hosted mode") end')" &&
+administrative_panel="$(printf "%s" "$topology_json" | jq -er '.deploy_administrative_panel | if type == "boolean" then tostring else error("invalid panel mode") end')" &&
+deployment_mode="$(printf "%s" "$topology_json" | jq -er '.topology | select(. == "classic" or . == "hosted-no-panel")')" &&
+selected_components="$(printf "%s" "$topology_json" | jq -er '.components | if type == "array" and length > 0 then join(" ") else error("invalid component selection") end')" || {
+  red "Resolved topology JSON is incomplete or invalid; refusing to select a deployment path."
+  exit 1
+}
 cyan "GPT-RAG deployment mode: $deployment_mode"
 
 if [ "$network_isolation" = "true" ] && [ "$(printf "%s" "${RUN_FROM_JUMPBOX:-}" | tr '[:upper:]' '[:lower:]')" != "true" ]; then
@@ -150,6 +153,7 @@ if [[ "$hosted_mode" =~ ^(1|true|t|yes|y)$ ]]; then
   project_endpoint="$(get_azd_value "$repo_root" "AZURE_AI_PROJECT_ENDPOINT")"
   project_resource_id="$(get_azd_value "$repo_root" "AZURE_AI_PROJECT_RESOURCE_ID")"
   environment_name="$(get_azd_value "$repo_root" "AZURE_ENV_NAME")"
+  hosted_startup_command="$(get_azd_value "$repo_root" "HOSTED_AGENT_STARTUP_COMMAND")"
   hosted_prepared="$(get_azd_value "$repo_root" "HOSTED_AGENT_PREPARED" | tr '[:upper:]' '[:lower:]')"
   deploy_hosted="$(get_azd_value "$repo_root" "DEPLOY_HOSTED_AGENT" | tr '[:upper:]' '[:lower:]')"
   hosted_agent_digest="$(get_azd_value "$repo_root" "HOSTED_AGENT_IMAGE_VERSION")"
@@ -163,6 +167,9 @@ if [[ "$hosted_mode" =~ ^(1|true|t|yes|y)$ ]]; then
   export HOSTED_AGENT_RESOURCE_SCOPE="$hosted_scope"
   export AZURE_AI_PROJECT_ENDPOINT="$project_endpoint"
   export AZURE_AI_PROJECT_RESOURCE_ID="$project_resource_id"
+  export HOSTED_AGENT_STARTUP_COMMAND="$hosted_startup_command"
+  export HOSTED_AGENT_PREPARED="$hosted_prepared"
+  export DEPLOY_HOSTED_AGENT="$deploy_hosted"
   export HOSTED_AGENT_IMAGE_VERSION="$hosted_agent_digest"
   (cd "$repo_root" && python3 -m config.deployment.topology --validate-hosted-deploy >/dev/null) || {
     red "Hosted deployment prerequisites or immutable image digest are invalid."
@@ -173,11 +180,15 @@ if [[ "$hosted_mode" =~ ^(1|true|t|yes|y)$ ]]; then
   copy_dot_azure "$dot_azure" "$hosted_project"
   (
     cd "$hosted_project"
-    azd env set HOSTED_AGENT_IMAGE_VERSION "$hosted_agent_digest" --environment "$environment_name" --no-prompt >/dev/null
-    azd env set FOUNDRY_PROJECT_ENDPOINT "$project_endpoint" --environment "$environment_name" --no-prompt >/dev/null
-    azd env set AZURE_AI_PROJECT_ID "$project_resource_id" --environment "$environment_name" --no-prompt >/dev/null
+    azd env set HOSTED_AGENT_IMAGE_VERSION "$hosted_agent_digest" --environment "$environment_name" --no-prompt >/dev/null &&
+    azd env set FOUNDRY_PROJECT_ENDPOINT "$project_endpoint" --environment "$environment_name" --no-prompt >/dev/null &&
+    azd env set AZURE_AI_PROJECT_ID "$project_resource_id" --environment "$environment_name" --no-prompt >/dev/null &&
     azd deploy orchestrator-agent --environment "$environment_name" --no-prompt
   ) || { red "Hosted orchestrator deployment failed."; exit 1; }
+  (
+    cd "$hosted_project"
+    azd ai agent invoke --protocol invocations --new-session --timeout 180 --environment "$environment_name" --no-prompt "Reply with exactly: GPT-RAG hosted smoke OK." >/dev/null
+  ) || { red "Hosted orchestrator smoke request failed; the classic chat path remains active."; exit 1; }
 
   invocations_endpoint="$(get_azd_value "$hosted_project" "AGENT_ORCHESTRATOR_AGENT_INVOCATIONS_ENDPOINT")"
   [ -n "$invocations_endpoint" ] || { red "Hosted deployment did not publish AGENT_ORCHESTRATOR_AGENT_INVOCATIONS_ENDPOINT."; exit 1; }
@@ -188,11 +199,16 @@ if [[ "$hosted_mode" =~ ^(1|true|t|yes|y)$ ]]; then
 
   export HOSTED_AGENT_BASE_URL="$hosted_base_url"
   export HOSTED_AGENT_RESOURCE_SCOPE="$hosted_scope"
+  export HOSTED_AGENT_MIGRATION=false
   (
     cd "$repo_root"
-    azd env set HOSTED_AGENT_BASE_URL "$hosted_base_url" --environment "$environment_name" --no-prompt >/dev/null
     python3 -m config.deployment.appconfig --require-hosted-endpoint
-  ) || { red "Failed to publish the hosted-agent endpoint contract."; exit 1; }
+  ) || { red "Failed to publish the hosted-agent endpoint contract; the migration marker remains active."; exit 1; }
+  (
+    cd "$repo_root"
+    azd env set HOSTED_AGENT_BASE_URL "$hosted_base_url" --environment "$environment_name" --no-prompt >/dev/null &&
+    azd env set HOSTED_AGENT_MIGRATION false --environment "$environment_name" --no-prompt >/dev/null
+  ) || { red "Hosted endpoint was published, but the cutover state could not be persisted."; exit 1; }
 fi
 
 # ---------- Iterate components ----------

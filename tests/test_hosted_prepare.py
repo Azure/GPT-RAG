@@ -4,6 +4,7 @@ import subprocess
 import unittest
 from unittest.mock import MagicMock, patch
 
+from config.deployment.composition import hosted_startup_command_sha256
 from config.deployment.hosted_prepare import (
     persist_digest,
     prepare_environment,
@@ -81,6 +82,22 @@ class PrepareEnvironmentTests(unittest.TestCase):
             mock_prepare.call_args.kwargs["source_commit"],
         )
         self.assertIsNone(mock_prepare.call_args.kwargs["agent_pool"])
+
+    @patch("config.deployment.hosted_prepare.prepare_hosted_image")
+    def test_custom_startup_command_fails_closed(
+        self,
+        mock_prepare: MagicMock,
+    ) -> None:
+        with self.assertRaisesRegex(
+            ValueError, "Custom HOSTED_AGENT_STARTUP_COMMAND"
+        ):
+            prepare_environment(
+                hosted_environment(
+                    HOSTED_AGENT_STARTUP_COMMAND="python -m custom.hosted"
+                ),
+                MANIFEST,
+            )
+        mock_prepare.assert_not_called()
 
     @patch("config.deployment.hosted_prepare.resolve_az_command")
     @patch("config.deployment.hosted_prepare.prepare_hosted_image")
@@ -179,6 +196,29 @@ class PrepareEnvironmentTests(unittest.TestCase):
         self.assertEqual(SOURCE_COMMIT, source_commit)
         self.assertIsNone(mock_prepare.call_args.kwargs["image_version"])
 
+    @patch("config.deployment.hosted_prepare.prepare_hosted_image")
+    def test_changed_startup_command_fails_before_digest_reuse(
+        self,
+        mock_prepare: MagicMock,
+    ) -> None:
+        original_environment = hosted_environment()
+
+        with self.assertRaisesRegex(
+            ValueError, "Custom HOSTED_AGENT_STARTUP_COMMAND"
+        ):
+            prepare_environment(
+                hosted_environment(
+                    HOSTED_AGENT_IMAGE_VERSION=DIGEST,
+                    HOSTED_AGENT_IMAGE_SOURCE_COMMIT=SOURCE_COMMIT,
+                    HOSTED_AGENT_IMAGE_STARTUP_COMMAND_SHA256=(
+                        hosted_startup_command_sha256(original_environment)
+                    ),
+                    HOSTED_AGENT_STARTUP_COMMAND="python -m custom.hosted",
+                ),
+                MANIFEST,
+            )
+        mock_prepare.assert_not_called()
+
 
 class PersistDigestTests(unittest.TestCase):
     @patch("config.deployment.hosted_prepare.shutil.which")
@@ -197,10 +237,16 @@ class PersistDigestTests(unittest.TestCase):
             SOURCE_COMMIT,
         )
 
-        self.assertEqual(2, mock_run.call_count)
+        self.assertEqual(4, mock_run.call_count)
         commands = [call.args[0] for call in mock_run.call_args_list]
-        self.assertIn("HOSTED_AGENT_IMAGE_VERSION", commands[0])
+        digest_index = commands[0].index("HOSTED_AGENT_IMAGE_VERSION")
+        self.assertEqual("", commands[0][digest_index + 1])
         self.assertIn("HOSTED_AGENT_IMAGE_SOURCE_COMMIT", commands[1])
+        self.assertIn(
+            "HOSTED_AGENT_IMAGE_STARTUP_COMMAND_SHA256",
+            commands[2],
+        )
+        self.assertIn("HOSTED_AGENT_IMAGE_VERSION", commands[3])
 
     @patch("config.deployment.hosted_prepare.shutil.which")
     @patch("config.deployment.hosted_prepare.subprocess.run")
@@ -228,6 +274,46 @@ class PersistDigestTests(unittest.TestCase):
             "HOSTED_AGENT_IMAGE_SOURCE_COMMIT"
         )
         self.assertEqual("", source_command[source_index + 1])
+
+    @patch("config.deployment.hosted_prepare.shutil.which")
+    @patch("config.deployment.hosted_prepare.subprocess.run")
+    def test_partial_persistence_never_leaves_digest_without_provenance(
+        self,
+        mock_run: MagicMock,
+        mock_which: MagicMock,
+    ) -> None:
+        mock_which.return_value = "azd"
+        mock_run.side_effect = [
+            subprocess.CompletedProcess([], 0),
+            subprocess.CompletedProcess([], 0),
+            subprocess.CompletedProcess([], 0),
+            subprocess.CalledProcessError(1, ["azd"]),
+        ]
+
+        with self.assertRaises(subprocess.CalledProcessError):
+            persist_digest(
+                {"AZURE_ENV_NAME": "test"},
+                DIGEST,
+                SOURCE_COMMIT,
+            )
+
+        commands = [call.args[0] for call in mock_run.call_args_list]
+        first_digest_index = commands[0].index(
+            "HOSTED_AGENT_IMAGE_VERSION"
+        )
+        source_index = commands[1].index(
+            "HOSTED_AGENT_IMAGE_SOURCE_COMMIT"
+        )
+        startup_index = commands[2].index(
+            "HOSTED_AGENT_IMAGE_STARTUP_COMMAND_SHA256"
+        )
+        final_digest_index = commands[3].index(
+            "HOSTED_AGENT_IMAGE_VERSION"
+        )
+        self.assertEqual("", commands[0][first_digest_index + 1])
+        self.assertEqual(SOURCE_COMMIT, commands[1][source_index + 1])
+        self.assertEqual(64, len(commands[2][startup_index + 1]))
+        self.assertEqual(DIGEST, commands[3][final_digest_index + 1])
 
 
 if __name__ == "__main__":

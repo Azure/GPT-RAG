@@ -64,6 +64,50 @@ class IntegrationPinTests(unittest.TestCase):
             completed.stdout.strip(),
         )
 
+    def test_zip_fallback_materializes_exact_landing_zone_commit(self) -> None:
+        scripts = ROOT / "scripts"
+        ps1 = (scripts / "preProvision.ps1").read_text(encoding="utf-8-sig")
+        sh = (scripts / "preProvision.sh").read_text(encoding="utf-8-sig")
+
+        self.assertIn(
+            "git -C $infraDir fetch --depth 1 origin $expectedInfraCommit",
+            ps1,
+        )
+        self.assertIn(
+            "checkout --detach $expectedInfraCommit",
+            ps1,
+        )
+        self.assertIn(
+            'git -C "$INFRA_DIR" fetch --depth 1 origin "$EXPECTED_INFRA_COMMIT"',
+            sh,
+        )
+        self.assertIn(
+            'checkout --detach "$EXPECTED_INFRA_COMMIT"',
+            sh,
+        )
+
+    def test_preprovision_fails_when_topology_persistence_fails(self) -> None:
+        scripts = ROOT / "scripts"
+        ps1 = (scripts / "preProvision.ps1").read_text(encoding="utf-8-sig")
+        sh = (scripts / "preProvision.sh").read_text(encoding="utf-8-sig")
+
+        self.assertIn(
+            "Failed to persist deployment topology setting $name",
+            ps1,
+        )
+        self.assertIn(
+            "if ($LASTEXITCODE -ne 0)",
+            ps1,
+        )
+        self.assertIn(
+            "Failed to persist deployment topology setting $TOPO_KEY",
+            sh,
+        )
+        self.assertIn(
+            'if ! azd env set "$TOPO_KEY" "$TOPO_VALUE"',
+            sh,
+        )
+
     def test_rollback_restores_full_classic_release_contract(self) -> None:
         rollback = json.loads(
             (ROOT / "config" / "deployment" / "rollback.json").read_text(
@@ -84,11 +128,18 @@ class IntegrationPinTests(unittest.TestCase):
         self.assertEqual(
             "false", rollback["azd"]["DEPLOY_HOSTED_AGENT_ORCHESTRATION"]
         )
+        self.assertEqual("classic", rollback["azd"]["DEPLOYMENT_TOPOLOGY"])
+        self.assertEqual("orchestrator", rollback["azd"]["CHAT_BACKEND"])
         self.assertEqual("false", rollback["azd"]["PREPARE_HOSTED_AGENT"])
         self.assertEqual("false", rollback["azd"]["DEPLOY_HOSTED_AGENT"])
         self.assertEqual(
+            "",
+            rollback["azd"]["HOSTED_AGENT_IMAGE_STARTUP_COMMAND_SHA256"],
+        )
+        self.assertEqual(
             "false", rollback["azd"]["DEPLOY_ADMINISTRATIVE_PANEL"]
         )
+        self.assertEqual("false", rollback["azd"]["HOSTED_AGENT_MIGRATION"])
         self.assertEqual(
             "orchestrator", rollback["appConfiguration"]["CHAT_BACKEND"]
         )
@@ -99,10 +150,12 @@ class IntegrationPinTests(unittest.TestCase):
                 "DEPLOY_HOSTED_AGENT": "false",
                 "HOSTED_AGENT_PREPARED": "false",
                 "DEPLOY_ADMINISTRATIVE_PANEL": "false",
+                "HOSTED_AGENT_MIGRATION": "false",
                 "CHAT_BACKEND": "orchestrator",
                 "DEPLOYMENT_TOPOLOGY": "classic",
                 "HOSTED_AGENT_BASE_URL": "",
                 "HOSTED_AGENT_RESOURCE_SCOPE": "",
+                "HOSTED_AGENT_IMAGE_VERSION": "",
                 "HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS": "60",
             },
             {
@@ -215,6 +268,62 @@ class LifecycleParityTests(unittest.TestCase):
                     "AGENT_ORCHESTRATOR_AGENT_INVOCATIONS_ENDPOINT", content
                 )
 
+        sh = (scripts / "preDeploy.sh").read_text(encoding="utf-8-sig")
+        self.assertIn("jq -er '.deploy_hosted_agent_orchestration", sh)
+        self.assertIn(
+            "Resolved topology JSON is incomplete or invalid",
+            sh,
+        )
+
+    def test_hosted_migration_cuts_over_only_after_smoke_request(self) -> None:
+        scripts = ROOT / "scripts"
+        for name in ("preDeploy.ps1", "preDeploy.sh"):
+            with self.subTest(script=name):
+                content = (scripts / name).read_text(encoding="utf-8-sig")
+                smoke = content.index("azd ai agent invoke")
+                publish = content.index(
+                    "config.deployment.appconfig --require-hosted-endpoint"
+                )
+                clear = content.index("HOSTED_AGENT_MIGRATION false")
+
+                self.assertLess(
+                    content.index("azd deploy orchestrator-agent"),
+                    smoke,
+                )
+                self.assertLess(smoke, publish)
+                self.assertLess(publish, clear)
+                self.assertIn("HOSTED_AGENT_MIGRATION", content)
+
+        sh = (scripts / "preDeploy.sh").read_text(encoding="utf-8-sig")
+        self.assertLess(
+            sh.index(
+                "Failed to publish the hosted-agent endpoint contract; "
+                "the migration marker remains active."
+            ),
+            sh.index("HOSTED_AGENT_MIGRATION false"),
+        )
+        self.assertIn(
+            '>/dev/null &&\n    azd env set HOSTED_AGENT_MIGRATION false',
+            sh,
+        )
+        self.assertIn(
+            'HOSTED_AGENT_IMAGE_VERSION "$hosted_agent_digest" '
+            '--environment "$environment_name" --no-prompt >/dev/null &&',
+            sh,
+        )
+
+        ps1 = (scripts / "preDeploy.ps1").read_text(encoding="utf-8-sig")
+        for key in (
+            "HOSTED_AGENT_IMAGE_VERSION",
+            "FOUNDRY_PROJECT_ENDPOINT",
+            "AZURE_AI_PROJECT_ID",
+        ):
+            with self.subTest(handoff=key):
+                self.assertIn(
+                    f"Failed to hand off {key}",
+                    ps1,
+                )
+
     def test_both_predeploy_hooks_fail_closed_on_missing_hosted_prerequisites(
         self,
     ) -> None:
@@ -238,6 +347,18 @@ class LifecycleParityTests(unittest.TestCase):
         self.assertIn("--validate-hosted-deploy", sh)
         self.assertIn("HOSTED_AGENT_PREPARED", sh)
         self.assertIn("DEPLOY_HOSTED_AGENT", sh)
+        self.assertIn(
+            'export HOSTED_AGENT_PREPARED="$hosted_prepared"',
+            sh,
+        )
+        self.assertIn(
+            'export DEPLOY_HOSTED_AGENT="$deploy_hosted"',
+            sh,
+        )
+        self.assertIn(
+            'export HOSTED_AGENT_STARTUP_COMMAND="$hosted_startup_command"',
+            sh,
+        )
 
     def test_hosted_image_preparation_is_pinned_parity_safe_and_classic_build_free(
         self,
@@ -294,7 +415,7 @@ class LifecycleParityTests(unittest.TestCase):
 
         sh = (scripts / "preDeploy.sh").read_text(encoding="utf-8-sig")
         self.assertIn("selected_components", sh)
-        self.assertIn(".components | join(\" \")", sh)
+        self.assertIn('then join(" ")', sh)
         self.assertIn(".name", sh)
 
     def test_hosted_manifest_contains_no_secret_values(self) -> None:

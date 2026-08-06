@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import subprocess
 import tempfile
 import unittest
@@ -263,7 +264,10 @@ class PrepareHostedImageTests(unittest.TestCase):
         )
         self.assertIsNone(mock_build_source.call_args.kwargs["agent_pool"])
         self.assertEqual(
-            "hosted-eaa787340c27",
+            "hosted-eaa787340c27-"
+            + hashlib.sha256(
+                HOSTED_STARTUP_COMMAND_DEFAULT.encode("utf-8")
+            ).hexdigest()[:12],
             mock_build_hosted.call_args.kwargs["image_tag"],
         )
         self.assertEqual(

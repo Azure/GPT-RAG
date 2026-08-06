@@ -27,6 +27,7 @@ from config.deployment.composition import (
     DeploymentMode,
     DeploymentTopologyError,
     describe_mode,
+    is_truthy,
     materialized_settings,
     resolve_explicit_topology,
     resolve_mode,
@@ -135,6 +136,52 @@ def read_persisted_settings(endpoint: str | None) -> dict[str, str]:
     return settings
 
 
+def resolve_environment_topology_context(
+    environment: Mapping[str, str],
+    *,
+    resource_group_name: str | None = None,
+    subscription_id: str | None = None,
+    app_config_endpoint: str | None = None,
+) -> tuple[DeploymentMode, bool]:
+    """I/O-aware wrapper around ``resolve_topology`` for use at preProvision time.
+
+    Detects whether the environment is fresh (no resource group yet) or
+    existing, reads any persisted topology markers for existing
+    environments, and delegates the actual decision to the pure
+    ``resolve_topology`` function. An explicit classic signal wins without
+    lookups. An explicit hosted signal classifies the existing persisted
+    topology so a classic-to-hosted migration keeps the classic runtime
+    active until the hosted endpoint has been deployed and published.
+    """
+    explicit = resolve_explicit_topology(environment)
+    if explicit is not None:
+        if explicit is DeploymentMode.CLASSIC:
+            return explicit, False
+        if is_truthy(environment.get("HOSTED_AGENT_MIGRATION")):
+            return explicit, True
+        rg_exists = resource_group_exists(resource_group_name, subscription_id)
+        if not rg_exists:
+            return explicit, False
+        persisted = read_persisted_settings(app_config_endpoint)
+        previous_mode = resolve_topology(
+            {},
+            resource_group_exists=True,
+            persisted_settings=persisted,
+        )
+        return explicit, previous_mode is DeploymentMode.CLASSIC
+
+    rg_exists = resource_group_exists(resource_group_name, subscription_id)
+    persisted = read_persisted_settings(app_config_endpoint) if rg_exists else {}
+    return (
+        resolve_topology(
+            environment,
+            resource_group_exists=rg_exists,
+            persisted_settings=persisted,
+        ),
+        False,
+    )
+
+
 def resolve_environment_topology(
     environment: Mapping[str, str],
     *,
@@ -142,31 +189,22 @@ def resolve_environment_topology(
     subscription_id: str | None = None,
     app_config_endpoint: str | None = None,
 ) -> DeploymentMode:
-    """I/O-aware wrapper around ``resolve_topology`` for use at preProvision time.
-
-    Detects whether the environment is fresh (no resource group yet) or
-    existing, reads any persisted topology markers for existing
-    environments, and delegates the actual decision to the pure
-    ``resolve_topology`` function. An explicit signal in ``environment``
-    always wins (see ``resolve_topology``), so this skips the Azure CLI
-    lookups entirely in that case -- an explicit request must never depend
-    on, or be delayed by, being able to reach Azure to classify the
-    environment as fresh or existing.
-    """
-    if resolve_explicit_topology(environment) is not None:
-        return resolve_topology(environment, resource_group_exists=None)
-
-    rg_exists = resource_group_exists(resource_group_name, subscription_id)
-    persisted = read_persisted_settings(app_config_endpoint) if rg_exists else {}
-    return resolve_topology(
+    mode, _ = resolve_environment_topology_context(
         environment,
-        resource_group_exists=rg_exists,
-        persisted_settings=persisted,
+        resource_group_name=resource_group_name,
+        subscription_id=subscription_id,
+        app_config_endpoint=app_config_endpoint,
     )
+    return mode
 
 
-def _print_materialized(mode: DeploymentMode) -> None:
-    for key, value in materialized_settings(mode).items():
+def _print_materialized(
+    mode: DeploymentMode,
+    hosted_migration: bool = False,
+) -> None:
+    settings = materialized_settings(mode)
+    settings["HOSTED_AGENT_MIGRATION"] = str(hosted_migration).lower()
+    for key, value in settings.items():
         print(f"{key}={value}")
 
 
@@ -262,13 +300,13 @@ def main() -> int:
             subscription_id = args.subscription_id or os.environ.get(
                 "AZURE_SUBSCRIPTION_ID"
             )
-            mode = resolve_environment_topology(
+            mode, hosted_migration = resolve_environment_topology_context(
                 os.environ,
                 resource_group_name=resource_group_name,
                 subscription_id=subscription_id,
                 app_config_endpoint=app_config_endpoint,
             )
-            _print_materialized(mode)
+            _print_materialized(mode, hosted_migration)
     except DeploymentTopologyError as exc:
         print(str(exc), file=sys.stderr)
         return 1

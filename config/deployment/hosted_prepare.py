@@ -13,6 +13,8 @@ from typing import Mapping
 
 from config.deployment.composition import (
     DeploymentMode,
+    hosted_startup_command,
+    hosted_startup_command_sha256,
     is_truthy,
     resolve_mode,
     validate_hosted_prerequisites,
@@ -99,6 +101,9 @@ def prepare_environment(
     generated_commit = (
         environment.get("HOSTED_AGENT_IMAGE_SOURCE_COMMIT") or ""
     ).strip()
+    generated_startup_command_sha256 = (
+        environment.get("HOSTED_AGENT_IMAGE_STARTUP_COMMAND_SHA256") or ""
+    ).strip()
 
     if current_digest and not generated_commit:
         digest = prepare_hosted_image(
@@ -115,7 +120,12 @@ def prepare_environment(
         )
         return digest, None
 
-    if current_digest and generated_commit.lower() == source_commit.lower():
+    if (
+        current_digest
+        and generated_commit.lower() == source_commit.lower()
+        and generated_startup_command_sha256
+        == hosted_startup_command_sha256(environment)
+    ):
         digest = prepare_hosted_image(
             image_version=current_digest,
             registry="",
@@ -159,6 +169,7 @@ def prepare_environment(
         source_repo=component["repo"],
         source_ref=component["source_ref"],
         source_commit=source_commit,
+        startup_command=hosted_startup_command(environment),
         agent_pool=agent_pool or None,
         resource_group=_required(environment, "AZURE_RESOURCE_GROUP"),
         azure_cli=resolve_az_command(),
@@ -173,11 +184,23 @@ def persist_digest(
 ) -> None:
     environment_name = _required(environment, "AZURE_ENV_NAME")
     azd = shutil.which("azd") or "azd"
-    values = {
-        "HOSTED_AGENT_IMAGE_VERSION": digest,
-        "HOSTED_AGENT_IMAGE_SOURCE_COMMIT": generated_source_commit or "",
-    }
-    for name, value in values.items():
+    values = (
+        ("HOSTED_AGENT_IMAGE_VERSION", ""),
+        (
+            "HOSTED_AGENT_IMAGE_SOURCE_COMMIT",
+            generated_source_commit or "",
+        ),
+        (
+            "HOSTED_AGENT_IMAGE_STARTUP_COMMAND_SHA256",
+            (
+                hosted_startup_command_sha256(environment)
+                if generated_source_commit
+                else ""
+            ),
+        ),
+        ("HOSTED_AGENT_IMAGE_VERSION", digest),
+    )
+    for name, value in values:
         subprocess.run(
             [
                 azd,

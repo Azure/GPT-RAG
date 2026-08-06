@@ -24,6 +24,7 @@ the VNet-injected agent pool used by ``NETWORK_ISOLATION=true`` deployments.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import subprocess
@@ -304,8 +305,9 @@ def prepare_hosted_image(
         )
 
     source_tag = source_commit[:12].lower()
+    startup_tag = hashlib.sha256(startup_command.encode("utf-8")).hexdigest()[:12]
     base_tag = f"hosted-base-{source_tag}"
-    hosted_tag = f"hosted-{source_tag}"
+    hosted_tag = f"hosted-{source_tag}-{startup_tag}"
     with tempfile.TemporaryDirectory(prefix="hosted-agent-source-") as tmp:
         source_dir = Path(tmp) / "orchestrator"
         clone_pinned_source(

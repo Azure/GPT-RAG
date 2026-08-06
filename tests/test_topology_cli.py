@@ -130,18 +130,52 @@ class ResolveEnvironmentTopologyTests(unittest.TestCase):
 
     @patch("config.deployment.topology.read_persisted_settings")
     @patch("config.deployment.topology.resource_group_exists")
-    def test_explicit_environment_signal_wins_without_reading_persisted_settings(
+    def test_explicit_classic_wins_without_reading_persisted_settings(
         self, mock_rg_exists: object, mock_read_settings: object
     ) -> None:
-        mock_rg_exists.return_value = True
-
         mode = topology.resolve_environment_topology(
+            {"DEPLOYMENT_TOPOLOGY": "classic"},
+            resource_group_name="rg-test",
+            app_config_endpoint="https://x",
+        )
+
+        self.assertEqual(DeploymentMode.CLASSIC, mode)
+        mock_rg_exists.assert_not_called()
+        mock_read_settings.assert_not_called()
+
+    @patch("config.deployment.topology.read_persisted_settings")
+    @patch("config.deployment.topology.resource_group_exists", return_value=True)
+    def test_explicit_hosted_detects_existing_classic_migration(
+        self, _mock_rg_exists: object, mock_read_settings: object
+    ) -> None:
+        mock_read_settings.return_value = {"DEPLOYMENT_TOPOLOGY": "classic"}
+
+        mode, migrating = topology.resolve_environment_topology_context(
             {"DEPLOYMENT_TOPOLOGY": "hosted-no-panel"},
             resource_group_name="rg-test",
             app_config_endpoint="https://x",
         )
 
         self.assertEqual(DeploymentMode.HOSTED_NO_PANEL, mode)
+        self.assertTrue(migrating)
+
+    @patch("config.deployment.topology.read_persisted_settings")
+    @patch("config.deployment.topology.resource_group_exists")
+    def test_materialized_migration_stays_sticky_without_azure_lookup(
+        self, mock_rg_exists: object, mock_read_settings: object
+    ) -> None:
+        mode, migrating = topology.resolve_environment_topology_context(
+            {
+                "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+                "HOSTED_AGENT_MIGRATION": "true",
+            },
+            resource_group_name="rg-test",
+            app_config_endpoint="https://x",
+        )
+
+        self.assertEqual(DeploymentMode.HOSTED_NO_PANEL, mode)
+        self.assertTrue(migrating)
+        mock_rg_exists.assert_not_called()
         mock_read_settings.assert_not_called()
 
 
@@ -160,6 +194,7 @@ class MainCliTests(unittest.TestCase):
         printed = "\n".join(call.args[0] for call in mock_print.call_args_list)
         self.assertIn("DEPLOYMENT_TOPOLOGY=hosted-no-panel", printed)
         self.assertIn("CHAT_BACKEND=hosted_agent", printed)
+        self.assertIn("HOSTED_AGENT_MIGRATION=false", printed)
 
     def test_describe_mode_prints_json_without_any_azure_cli_call(self) -> None:
         argv = ["prog", "--describe"]

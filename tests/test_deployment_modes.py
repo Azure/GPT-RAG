@@ -66,6 +66,7 @@ class DeploymentCompositionTests(unittest.TestCase):
                 "HOSTED_AGENT_PREPARED": "false",
                 "DEPLOY_ADMINISTRATIVE_PANEL": "false",
                 "DEPLOYMENT_TOPOLOGY": "classic",
+                "HOSTED_AGENT_MIGRATION": "false",
                 "CHAT_BACKEND": "orchestrator",
                 "HOSTED_AGENT_BASE_URL": "",
                 "HOSTED_AGENT_RESOURCE_SCOPE": "",
@@ -122,6 +123,32 @@ class DeploymentCompositionTests(unittest.TestCase):
         )
         self.assertEqual("hosted_agent", settings_by_name(composed)["CHAT_BACKEND"])
 
+    def test_classic_to_hosted_migration_preserves_classic_until_cutover(
+        self,
+    ) -> None:
+        environment = {
+            "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+            "HOSTED_AGENT_MIGRATION": "true",
+            "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
+            "HOSTED_AGENT_IMAGE_VERSION": DIGEST,
+        }
+
+        composed = compose_parameters(source_parameters(), environment)
+        parameters = composed["parameters"]
+        apps = parameters["containerAppsList"]["value"]
+        settings = settings_by_name(composed)
+
+        self.assertEqual(
+            ["orchestrator", "frontend", "dataingest"],
+            [app["service_name"] for app in apps],
+        )
+        self.assertTrue(parameters["deployCosmosDb"]["value"])
+        self.assertNotEqual([], parameters["databaseContainersList"]["value"])
+        self.assertTrue(parameters["prepareHostedAgent"]["value"])
+        self.assertTrue(parameters["deployHostedAgent"]["value"])
+        self.assertEqual("true", settings["HOSTED_AGENT_MIGRATION"])
+        self.assertEqual("orchestrator", settings["CHAT_BACKEND"])
+
     def test_fresh_hosted_composition_allows_automatic_image_preparation(
         self,
     ) -> None:
@@ -155,6 +182,19 @@ class DeploymentCompositionTests(unittest.TestCase):
             composed["parameters"]["hostedAgent"]["value"]["version"],
         )
 
+    def test_network_isolated_hosted_mode_provisions_acr_agent_pool(self) -> None:
+        environment = {
+            "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+            "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
+            "NETWORK_ISOLATION": "true",
+        }
+
+        composed = compose_parameters(source_parameters(), environment)
+
+        self.assertTrue(
+            composed["parameters"]["deployAcrTaskAgentPool"]["value"]
+        )
+
     def test_generated_digest_must_match_manifest_source_commit(self) -> None:
         environment = {
             "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
@@ -172,6 +212,24 @@ class DeploymentCompositionTests(unittest.TestCase):
                 expected_hosted_source_commit="b" * 40,
             )
 
+    def test_generated_digest_must_match_startup_command(self) -> None:
+        environment = {
+            "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+            "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
+            "HOSTED_AGENT_IMAGE_VERSION": DIGEST,
+            "HOSTED_AGENT_IMAGE_SOURCE_COMMIT": "a" * 40,
+            "HOSTED_AGENT_IMAGE_STARTUP_COMMAND_SHA256": "0" * 64,
+        }
+
+        with self.assertRaisesRegex(
+            ValueError, "does not match.*HOSTED_AGENT_STARTUP_COMMAND"
+        ):
+            compose_parameters(
+                source_parameters(),
+                environment,
+                expected_hosted_source_commit="a" * 40,
+            )
+
     def test_hosted_with_panel_fails_closed_until_611(self) -> None:
         # Hosted-panel is not implemented yet (tracked by #611): any signal
         # that would actually select it must fail closed rather than
@@ -186,6 +244,28 @@ class DeploymentCompositionTests(unittest.TestCase):
             resolve_mode(environment)
         with self.assertRaisesRegex(HostedPanelUnsupportedError, "611"):
             compose_parameters(source_parameters(), environment)
+
+    def test_legacy_generated_digest_without_startup_provenance_remains_valid(
+        self,
+    ) -> None:
+        manifest = json.loads(
+            (ROOT / "manifest.json").read_text(encoding="utf-8")
+        )
+        orchestrator = next(
+            component
+            for component in manifest["components"]
+            if component["name"] == "gpt-rag-orchestrator"
+        )
+        environment = {
+            "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+            "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
+            "HOSTED_AGENT_IMAGE_VERSION": DIGEST,
+            "HOSTED_AGENT_IMAGE_SOURCE_COMMIT": orchestrator["commit"],
+        }
+
+        composed = compose_parameters(source_parameters(), environment)
+
+        self.assertTrue(composed["parameters"]["deployHostedAgent"]["value"])
 
     def test_deployment_topology_hosted_panel_fails_closed_until_611(self) -> None:
         environment = {"DEPLOYMENT_TOPOLOGY": "hosted-panel"}
@@ -358,7 +438,7 @@ class EnvironmentTopologyResolutionTests(unittest.TestCase):
         environment = {
             "DEPLOYMENT_TOPOLOGY": "classic",
             "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "true",
-            "DEPLOY_ADMINISTRATIVE_PANEL": "false",
+            "DEPLOY_ADMINISTRATIVE_PANEL": "true",
             "CHAT_BACKEND": "hosted_agent",
         }
 
@@ -443,6 +523,52 @@ class AppConfigurationContractTests(unittest.TestCase):
         )
         self.assertEqual(DIGEST, settings["HOSTED_AGENT_IMAGE_VERSION"])
         self.assertEqual(2, len(json.loads(settings["CONTAINER_APPS"])))
+
+    @patch("config.deployment.appconfig._container_app", side_effect=_app)
+    def test_hosted_migration_keeps_orchestrator_contract_until_cutover(
+        self, _mock: object
+    ) -> None:
+        settings = appconfig.build_settings(
+            {
+                "AZURE_RESOURCE_GROUP": "rg-test",
+                "RESOURCE_TOKEN": "test",
+                "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+                "HOSTED_AGENT_MIGRATION": "true",
+                "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
+                "HOSTED_AGENT_IMAGE_VERSION": DIGEST,
+            }
+        )
+
+        self.assertEqual("true", settings["HOSTED_AGENT_MIGRATION"])
+        self.assertEqual("orchestrator", settings["CHAT_BACKEND"])
+        self.assertEqual(
+            "https://ca-test-orchestrator.example.test",
+            settings["ORCHESTRATOR_BASE_URL"],
+        )
+        self.assertEqual(3, len(json.loads(settings["CONTAINER_APPS"])))
+
+    @patch("config.deployment.appconfig._container_app", side_effect=_app)
+    def test_hosted_cutover_publishes_backend_selector_last(
+        self, _mock: object
+    ) -> None:
+        settings = appconfig.build_settings(
+            {
+                "AZURE_RESOURCE_GROUP": "rg-test",
+                "RESOURCE_TOKEN": "test",
+                "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+                "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
+                "HOSTED_AGENT_BASE_URL": "https://agent.example.test/protocols",
+                "HOSTED_AGENT_IMAGE_VERSION": DIGEST,
+            },
+            require_hosted_endpoint=True,
+        )
+
+        keys = list(settings)
+        self.assertLess(
+            keys.index("HOSTED_AGENT_BASE_URL"),
+            keys.index("HOSTED_AGENT_MIGRATION"),
+        )
+        self.assertEqual("CHAT_BACKEND", keys[-1])
 
     @patch("config.deployment.appconfig._container_app", side_effect=_app)
     def test_hosted_runtime_fails_closed_without_scope(self, _mock: object) -> None:

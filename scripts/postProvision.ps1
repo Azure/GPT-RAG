@@ -243,8 +243,10 @@ function Set-GptRagAppConfiguration {
     }
     $topologyInfo = ([string]$topologyJson).Trim() | ConvertFrom-Json
     $hostedMode = [bool]$topologyInfo.deploy_hosted_agent_orchestration
+    $hostedMigration = $hostedMode -and ((Get-OptionalEnvValue 'HOSTED_AGENT_MIGRATION' 'false') -eq 'true')
+    $classicRuntimeActive = (-not $hostedMode) -or $hostedMigration
     $administrativePanel = [bool]$topologyInfo.deploy_administrative_panel
-    $cosmosEnabled = (-not $hostedMode) -or $administrativePanel
+    $cosmosEnabled = $classicRuntimeActive -or $administrativePanel
     $deploymentTopology = [string]$topologyInfo.topology
 
     $appConfigName = Get-AppConfigResourceName -Endpoint $Endpoint
@@ -370,11 +372,11 @@ function Set-GptRagAppConfiguration {
     $logAnalyticsResourceId = "$resourceGroupId/providers/Microsoft.OperationalInsights/workspaces/$logAnalyticsName"
 
     $frontendFqdn = Invoke-AzTsv -Arguments @('containerapp', 'show', '-g', $resourceGroup, '-n', $frontendAppName, '--query', 'properties.configuration.ingress.fqdn') -Description "$frontendAppName FQDN" -Required
-    $orchestratorFqdn = if ($hostedMode) { '' } else { Invoke-AzTsv -Arguments @('containerapp', 'show', '-g', $resourceGroup, '-n', $orchestratorAppName, '--query', 'properties.configuration.ingress.fqdn') -Description "$orchestratorAppName FQDN" -Required }
+    $orchestratorFqdn = if ($classicRuntimeActive) { Invoke-AzTsv -Arguments @('containerapp', 'show', '-g', $resourceGroup, '-n', $orchestratorAppName, '--query', 'properties.configuration.ingress.fqdn') -Description "$orchestratorAppName FQDN" -Required } else { '' }
     $dataIngestFqdn = Invoke-AzTsv -Arguments @('containerapp', 'show', '-g', $resourceGroup, '-n', $dataIngestAppName, '--query', 'properties.configuration.ingress.fqdn') -Description "$dataIngestAppName FQDN" -Required
 
     $frontendPrincipalId = Invoke-AzTsv -Arguments @('containerapp', 'show', '-g', $resourceGroup, '-n', $frontendAppName, '--query', 'identity.principalId') -Description "$frontendAppName principal id"
-    $orchestratorPrincipalId = if ($hostedMode) { '' } else { Invoke-AzTsv -Arguments @('containerapp', 'show', '-g', $resourceGroup, '-n', $orchestratorAppName, '--query', 'identity.principalId') -Description "$orchestratorAppName principal id" }
+    $orchestratorPrincipalId = if ($classicRuntimeActive) { Invoke-AzTsv -Arguments @('containerapp', 'show', '-g', $resourceGroup, '-n', $orchestratorAppName, '--query', 'identity.principalId') -Description "$orchestratorAppName principal id" } else { '' }
     $dataIngestPrincipalId = Invoke-AzTsv -Arguments @('containerapp', 'show', '-g', $resourceGroup, '-n', $dataIngestAppName, '--query', 'identity.principalId') -Description "$dataIngestAppName principal id"
     $containerEnvPrincipalId = Invoke-AzTsv -Arguments @('resource', 'show', '--ids', $containerEnvResourceId, '--query', 'identity.principalId') -Description 'Container Apps Environment principal id'
     $searchPrincipalId = Invoke-AzTsv -Arguments @('resource', 'show', '--ids', $searchResourceId, '--query', 'identity.principalId') -Description 'Search service principal id'
@@ -386,7 +388,7 @@ function Set-GptRagAppConfiguration {
         [ordered]@{ name = $frontendAppName; serviceName = 'frontend'; canonical_name = 'FRONTEND_APP'; principalId = $frontendPrincipalId; fqdn = $frontendFqdn },
         [ordered]@{ name = $dataIngestAppName; serviceName = 'dataingest'; canonical_name = 'DATA_INGEST_APP'; principalId = $dataIngestPrincipalId; fqdn = $dataIngestFqdn }
     )
-    if (-not $hostedMode) {
+    if ($classicRuntimeActive) {
         $containerApps = @(
             [ordered]@{ name = $orchestratorAppName; serviceName = 'orchestrator'; canonical_name = 'ORCHESTRATOR_APP'; principalId = $orchestratorPrincipalId; fqdn = $orchestratorFqdn }
         ) + $containerApps
@@ -455,7 +457,8 @@ function Set-GptRagAppConfiguration {
         HOSTED_AGENT_PREPARED = (Get-OptionalEnvValue 'HOSTED_AGENT_PREPARED' "$hostedMode".ToLowerInvariant())
         DEPLOY_ADMINISTRATIVE_PANEL = "$administrativePanel".ToLowerInvariant()
         DEPLOYMENT_TOPOLOGY = $deploymentTopology
-        CHAT_BACKEND = if ($hostedMode) { 'hosted_agent' } else { 'orchestrator' }
+        HOSTED_AGENT_MIGRATION = "$hostedMigration".ToLowerInvariant()
+        CHAT_BACKEND = if ($hostedMode -and -not $hostedMigration) { 'hosted_agent' } else { 'orchestrator' }
         HOSTED_AGENT_BASE_URL = (Get-OptionalEnvValue 'HOSTED_AGENT_BASE_URL')
         HOSTED_AGENT_RESOURCE_SCOPE = (Get-OptionalEnvValue 'HOSTED_AGENT_RESOURCE_SCOPE')
         HOSTED_AGENT_IMAGE_VERSION = (Get-OptionalEnvValue 'HOSTED_AGENT_IMAGE_VERSION')
@@ -601,7 +604,7 @@ function Set-GptRagAppConfiguration {
         ORCHESTRATOR_APP_ENDPOINT = if ($orchestratorFqdn) { "https://$orchestratorFqdn" } else { '' }
         FRONTEND_APP_ENDPOINT = "https://$frontendFqdn"
         DATA_INGEST_APP_ENDPOINT = "https://$dataIngestFqdn"
-        ORCHESTRATOR_APP_NAME = if ($hostedMode) { '' } else { $orchestratorAppName }
+        ORCHESTRATOR_APP_NAME = if ($classicRuntimeActive) { $orchestratorAppName } else { '' }
         FRONTEND_APP_NAME = $frontendAppName
         DATA_INGEST_APP_NAME = $dataIngestAppName
 

@@ -23,6 +23,12 @@ $ErrorActionPreference = 'Stop'
 $projectRoot = Join-Path $PSScriptRoot ".."
 $infraDir = Join-Path $projectRoot "infra"
 $mainBicep = Join-Path $infraDir "main.bicep"
+$manifestSource = Join-Path $projectRoot "manifest.json"
+if (-not (Test-Path $manifestSource)) {
+    Write-Host "Error: manifest.json is required to verify the infrastructure release pin." -ForegroundColor Red
+    exit 1
+}
+$expectedInfraCommit = (Get-Content -LiteralPath $manifestSource -Raw | ConvertFrom-Json).ailz_commit
 
 Write-Host "Initializing infrastructure submodule..." -ForegroundColor Cyan
 git submodule update --init --recursive 2>$null
@@ -48,24 +54,29 @@ if (-not (Test-Path $mainBicep)) {
         Write-Host "Error: Could not determine infra repository URL from .gitmodules." -ForegroundColor Red
         exit 1
     }
-    Write-Host "  Infra repo: $infraUrl @ $infraRef (from .gitmodules)" -ForegroundColor Cyan
+    Write-Host "  Infra repo: $infraUrl @ $infraRef, pinned to $expectedInfraCommit" -ForegroundColor Cyan
 
-    # Remove the empty infra directory and clone at the correct tag
+    # Remove the empty directory and materialize the exact manifest pin. The
+    # configured branch can advance independently of this integration commit.
     if (Test-Path $infraDir) { Remove-Item -Path $infraDir -Recurse -Force }
-    git -c advice.detachedHead=false clone --depth 1 --branch $infraRef $infraUrl $infraDir
+    git clone --filter=blob:none --no-checkout $infraUrl $infraDir
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "Error: Failed to clone infra repository ($infraUrl @ $infraRef)." -ForegroundColor Red
+        Write-Host "Error: Failed to clone infra repository ($infraUrl)." -ForegroundColor Red
+        exit 1
+    }
+    git -C $infraDir fetch --depth 1 origin $expectedInfraCommit
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Error: Failed to fetch infra commit $expectedInfraCommit." -ForegroundColor Red
+        exit 1
+    }
+    git -C $infraDir -c advice.detachedHead=false checkout --detach $expectedInfraCommit
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Error: Failed to check out infra commit $expectedInfraCommit." -ForegroundColor Red
         exit 1
     }
     Write-Host "Infrastructure submodule cloned successfully." -ForegroundColor Green
 }
 
-$manifestSource = Join-Path $projectRoot "manifest.json"
-if (-not (Test-Path $manifestSource)) {
-    Write-Host "Error: manifest.json is required to verify the infrastructure release pin." -ForegroundColor Red
-    exit 1
-}
-$expectedInfraCommit = (Get-Content -LiteralPath $manifestSource -Raw | ConvertFrom-Json).ailz_commit
 $actualInfraCommitOutput = & git -C $infraDir rev-parse HEAD 2>$null
 $revParseExitCode = $LASTEXITCODE
 $actualInfraCommit = if ($actualInfraCommitOutput) { "$actualInfraCommitOutput".Trim() } else { '' }
@@ -111,6 +122,10 @@ foreach ($line in $topologyOutput) {
             & azd env set $name $value --environment $azureEnvName --no-prompt | Out-Null
         } else {
             & azd env set $name $value --no-prompt | Out-Null
+        }
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "Error: Failed to persist deployment topology setting $name." -ForegroundColor Red
+            exit $LASTEXITCODE
         }
     }
 }

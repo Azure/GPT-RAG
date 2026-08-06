@@ -11,6 +11,7 @@ from typing import Mapping
 from config.deployment.composition import (
     APP_CONFIG_LABEL,
     DeploymentMode,
+    is_truthy,
     resolve_mode,
     validate_hosted_prerequisites,
 )
@@ -82,6 +83,10 @@ def build_settings(
 ) -> dict[str, str]:
     mode = resolve_mode(environment)
     hosted = mode is not DeploymentMode.CLASSIC
+    hosted_migration = hosted and is_truthy(
+        environment.get("HOSTED_AGENT_MIGRATION")
+    )
+    classic_runtime_active = not hosted or hosted_migration
     resource_group = _required(environment, "AZURE_RESOURCE_GROUP")
     resource_token = _required(environment, "RESOURCE_TOKEN")
 
@@ -100,7 +105,7 @@ def build_settings(
         _container_app(
             resource_group, app_names["orchestrator"], required=True
         )
-        if mode is DeploymentMode.CLASSIC
+        if classic_runtime_active
         else {"fqdn": "", "principalId": ""}
     )
 
@@ -136,7 +141,7 @@ def build_settings(
             "fqdn": dataingest["fqdn"],
         },
     ]
-    if mode is DeploymentMode.CLASSIC:
+    if classic_runtime_active:
         container_apps.insert(
             0,
             {
@@ -156,12 +161,11 @@ def build_settings(
         ).strip().lower(),
         "HOSTED_AGENT_PREPARED": (
             environment.get("HOSTED_AGENT_PREPARED") or str(hosted)
-        ).strip().lower(),
+        ).strip().lower(        ),
         "DEPLOY_ADMINISTRATIVE_PANEL": str(
             mode is DeploymentMode.HOSTED_PANEL
         ).lower(),
         "DEPLOYMENT_TOPOLOGY": mode.value,
-        "CHAT_BACKEND": "hosted_agent" if hosted else "orchestrator",
         "ORCHESTRATOR_BASE_URL": (
             f"https://{orchestrator['fqdn']}" if orchestrator["fqdn"] else ""
         ),
@@ -181,13 +185,19 @@ def build_settings(
         "DATA_INGEST_APP_ENDPOINT": f"https://{dataingest['fqdn']}",
         "ORCHESTRATOR_APP_NAME": (
             app_names["orchestrator"]
-            if mode is DeploymentMode.CLASSIC
+            if classic_runtime_active
             else ""
         ),
         "FRONTEND_APP_NAME": app_names["frontend"],
         "DATA_INGEST_APP_NAME": app_names["dataingest"],
         "CONTAINER_APPS": json.dumps(
             container_apps, separators=(",", ":")
+        ),
+        "HOSTED_AGENT_MIGRATION": str(hosted_migration).lower(),
+        "CHAT_BACKEND": (
+            "hosted_agent"
+            if hosted and not hosted_migration
+            else "orchestrator"
         ),
     }
 
