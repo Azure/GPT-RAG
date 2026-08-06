@@ -106,6 +106,7 @@ Configuration label `gpt-rag`:
 | `HOSTED_AGENT_AUTH_MODE` | `user_delegated` is the default and required release path. The UI exchanges the signed-in user's token on behalf of the user. `service_identity` is an explicit reviewed exception, never an implicit fallback. |
 | `HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS` | Finite positive wait for the next SSE event. The UI default is `60`; an infinite timeout is rejected. |
 | `HOSTED_AGENT_IMAGE_VERSION` | Canonical lowercase immutable digest in `sha256:<64-hex-characters>` form. Mutable tags are rejected. |
+| `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` | Generative-AI prompt and completion telemetry capture. Defaults to `false`. Set to `true` only when the deployment's data-handling policy explicitly permits sensitive content telemetry. |
 
 Hosted configuration, authentication, connection, timeout, protocol, and
 runtime failures are terminal for startup or the affected request. The UI does
@@ -113,15 +114,21 @@ not silently switch to the orchestrator or to managed identity. Foundry passes
 opaque `x-agent-foundry-call-id` context to Toolbox; user and delegated bearer
 tokens are not copied into tool payloads or client-defined identity headers.
 
-`POST /responses` and `POST /invocations` are distinct protocols, not aliases, and their request bodies are not interchangeable. The canonical Responses protocol v2 route accepts the documented string `input` contract. Set `stream` to `true` for an SSE lifecycle or `false` for a synchronous JSON response. `store` controls whether the protocol storage routes can retrieve the response. The route also supports managed `conversation` identity and `previous_response_id`; array and multimodal input are rejected.
+`POST /responses` and `POST /invocations` are distinct protocols, not aliases, and their request bodies are not interchangeable. Microsoft Foundry hosts the canonical Responses protocol v2 route through `azure-ai-agentserver-responses`. It accepts a non-empty string `input`; set `stream` to `true` for an SSE lifecycle or `false` for a synchronous JSON response. `store` accepts `true` or `false`, and `background` enables background execution. The route also supports `previous_response_id`, string-valued `metadata`, and the platform-injected `agent_reference`.
+
+Managed `conversation` accepts either a non-empty id string or an object containing only `{"id": "<non-empty-id>"}`. `conversation` and `previous_response_id` are mutually exclusive to prevent history from crossing conversation boundaries. Invalid conversation identifiers are rejected rather than creating a new thread. List and multimodal input are rejected, as are request fields outside the supported Responses contract.
 
 ```json
 {
   "input": "What is the document retention policy?",
   "stream": true,
   "store": true,
+  "background": false,
   "conversation": {
     "id": "<conversation-id>"
+  },
+  "metadata": {
+    "correlation_id": "<correlation-id>"
   }
 }
 ```
@@ -152,7 +159,7 @@ Responses protocol v2 also owns the stored-response lifecycle:
 | `POST /responses/{response_id}/cancel` | Cancel an in-flight background response. |
 | `DELETE /responses/{response_id}` | Delete a stored response. |
 
-These storage routes belong to the Responses protocol and do not accept the legacy invocation body. The same hosted identity guard applies before a Toolbox-backed strategy can create, retrieve, list, cancel, or delete a response.
+These storage routes belong to the Responses protocol and do not accept the legacy invocation body. For Toolbox-backed configurations, the hosted identity guard validates `x-agent-foundry-call-id` before create, retrieve, input-item listing, cancellation, or deletion can access the protocol provider. Values containing surrounding whitespace are rejected rather than trimmed, and the provider receives the exact validated value unchanged.
 
 #### Two-phase hosted deployment
 
