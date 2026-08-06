@@ -79,6 +79,13 @@
 
 ### Fixed
 
+- **AI Foundry project endpoint discovery.** Windows post-provisioning now
+  resolves project child resources through the generic ARM resource API,
+  validates an explicit `AI_FOUNDRY_PROJECT_NAME` when supplied, and fails
+  closed unless exactly one project is selected. It no longer silently
+  publishes an invalid `aifoundry-default-project` endpoint when the installed
+  Azure CLI lacks the specialized project-list command.
+
 - **Windows jumpbox deployment imports the repository package reliably.**
   `preDeploy.ps1` now establishes the repository root on `PYTHONPATH` and
   invokes deployment modules through `runpy`, avoiding Windows Python
