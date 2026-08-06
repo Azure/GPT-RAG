@@ -57,15 +57,20 @@ only after the release gates below are complete.
 
 !!! warning "Do not treat the target default as shipped"
     The umbrella implementation merged to `develop` in
-    [Azure/GPT-RAG PR #617](https://github.com/Azure/GPT-RAG/pull/617).
+    [Azure/GPT-RAG PR #617](https://github.com/Azure/GPT-RAG/pull/617) as
+    [`b614d0a`](https://github.com/Azure/GPT-RAG/commit/b614d0ad19a66cbc06b34a3ad764b0d94428999f).
     UI release PR
-    [#94](https://github.com/Azure/gpt-rag-ui/pull/94) and AI Landing Zone
-    release PR [#131](https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/131)
-    merged to their main branches, but the planned UI `v2.6.0` and AI Landing
-    Zone `v2.5.0` tags and GitHub Releases are not published. Final umbrella
-    pins, integrated validation, and a new GPT-RAG release also remain. Current
-    published GPT-RAG `v3.7.0` stays classic. Use this workflow only with the
-    release that explicitly announces the hosted-default contract.
+    [#94](https://github.com/Azure/gpt-rag-ui/pull/94) merged to `main` as
+    [`763fa7e`](https://github.com/Azure/gpt-rag-ui/commit/763fa7eb2135037382673d2eb968421f084941cc),
+    and AI Landing Zone release PR
+    [#131](https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/131) merged
+    to `main` as
+    [`a6ae728`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/commit/a6ae7284d654abb7ec53810cb8765b2975b51baa).
+    However, UI `v2.6.0` and AI Landing Zone `v2.5.0` tags and GitHub Releases
+    are not published. Final umbrella pins, integrated validation, and a new
+    GPT-RAG release also remain. Current published GPT-RAG `v3.7.0` stays
+    classic. Use this workflow only with the release that explicitly announces
+    the hosted-default contract.
 
 The upcoming release resolves one canonical topology before provisioning and
 materializes the corresponding legacy flags and App Configuration values.
@@ -90,7 +95,7 @@ Configuration label `gpt-rag`:
 | --- | --- |
 | `DEPLOYMENT_TOPOLOGY` | Canonical deployment choice: `hosted-no-panel` or `classic`. `hosted-panel` fails closed while #611 is open. |
 | `CHAT_BACKEND` | The upcoming UI release treats missing or blank as `hosted_agent`; the umbrella deployment always publishes the resolved sticky value. `orchestrator` is the explicit fallback. Unknown values fail startup. Environment configuration takes precedence over App Configuration. |
-| `ORCHESTRATOR_BASE_URL` | Classic service root, used only when `CHAT_BACKEND=orchestrator`. |
+| `ORCHESTRATOR_BASE_URL` | Classic service root, used only when `CHAT_BACKEND=orchestrator`. The UI calls the `/orchestrator` route on this endpoint. |
 | `HOSTED_AGENT_BASE_URL` | Required HTTPS hosted service root. The UI sends canonical Responses protocol v2 requests to `POST /responses` when `CHAT_BACKEND=hosted_agent`. The separate `POST /invocations` endpoint retains the legacy messages-based invocation contract. |
 | `HOSTED_AGENT_RESOURCE_SCOPE` | Required explicit non-ARM hosted data-plane Entra scope ending in `/.default`, for example `api://<application-id>/.default`. |
 | `HOSTED_AGENT_AUTH_MODE` | `user_delegated` is the default and required release path. The UI exchanges the signed-in user's token on behalf of the user. `service_identity` is an explicit reviewed exception, never an implicit fallback. |

@@ -23,11 +23,14 @@ and required-vs-configurable deployment table.
 !!! warning "Hosted-default release dependency"
     The diagram below is the approved target, not shipped behavior. The
     platform implementation merged in
-    [Azure/GPT-RAG PR #617](https://github.com/Azure/GPT-RAG/pull/617), and the
-    UI and AI Landing Zone release PRs merged, but their planned tags and
-    GitHub Releases are not published. Final umbrella pins, integrated
-    validation, and a new GPT-RAG release remain. Current published GPT-RAG
-    `v3.7.0` stays classic.
+    [Azure/GPT-RAG PR #617](https://github.com/Azure/GPT-RAG/pull/617). UI
+    release [PR #94](https://github.com/Azure/gpt-rag-ui/pull/94) and AI Landing
+    Zone release
+    [PR #131](https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/131)
+    also merged, but UI `v2.6.0` and AI Landing Zone `v2.5.0` tags and GitHub
+    Releases are not published. Final umbrella pins, integrated validation,
+    and a new GPT-RAG release remain. Current published GPT-RAG `v3.7.0` stays
+    classic.
 
 ![Chat runtime modes and hosted deployment lifecycle](media/architecture_chat_runtime_modes.svg)
 

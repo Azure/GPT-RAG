@@ -9,15 +9,20 @@ separate choices.
 
 !!! warning "Implementation merged; release gates remain"
     The hosted-default implementation merged to `develop` in
-    [Azure/GPT-RAG PR #617](https://github.com/Azure/GPT-RAG/pull/617).
+    [Azure/GPT-RAG PR #617](https://github.com/Azure/GPT-RAG/pull/617) as
+    [`b614d0a`](https://github.com/Azure/GPT-RAG/commit/b614d0ad19a66cbc06b34a3ad764b0d94428999f).
     UI release PR
-    [#94](https://github.com/Azure/gpt-rag-ui/pull/94) and AI Landing Zone
-    release PR [#131](https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/131)
-    also merged, but the planned UI `v2.6.0` and AI Landing Zone `v2.5.0` tags
-    and GitHub Releases are not published. The diagrams document the approved
-    target. Current published GPT-RAG `v3.7.0` remains classic until those
-    releases publish and final umbrella pins, integrated validation, and the
-    GPT-RAG release complete.
+    [#94](https://github.com/Azure/gpt-rag-ui/pull/94) merged to `main` as
+    [`763fa7e`](https://github.com/Azure/gpt-rag-ui/commit/763fa7eb2135037382673d2eb968421f084941cc),
+    and AI Landing Zone release PR
+    [#131](https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/131) merged
+    to `main` as
+    [`a6ae728`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/commit/a6ae7284d654abb7ec53810cb8765b2975b51baa).
+    However, UI `v2.6.0` and AI Landing Zone `v2.5.0` tags and GitHub Releases
+    are not published, and final umbrella pins, integrated validation, and the
+    GPT-RAG release remain incomplete. The diagrams document the approved
+    target, not shipped behavior. Current published GPT-RAG `v3.7.0` remains
+    classic.
 
 ## Full Zero Trust reference
 
