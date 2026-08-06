@@ -711,6 +711,7 @@ Migration boundaries:
   hosted/no-panel adoption.
 - Existing classic deployments keep Cosmos-backed history/feedback, retain
   their topology across upgrades, and remain a supported fallback.
+
 ### Time-bounded investigations required before relaxing the freeze
 
 - **INV-001 (due 2026-08-21):** bound and profile hosted nl2sql. Before
