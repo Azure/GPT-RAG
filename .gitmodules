@@ -1,5 +1,5 @@
 [submodule "infra"]
 	path = infra
 	url = https://github.com/Azure/bicep-ptn-aiml-landing-zone.git
-	branch = placerda-prepare-hosted-agent-contract
+	branch = develop
 	ignore = dirty

@@ -65,9 +65,10 @@
 - **Compatible hosted/no-panel component pins.** The unreleased integration
   combination preserves UI `v2.5.1`, orchestrator `v3.10.0`, and ingestion
   `v2.6.0` at their exact released commits. It temporarily pins AI Landing Zone
-  PR #130 commit `6869d30f0ddcd9076cb5c1b35d25cca7d49f5572` for the additive
-  `prepareHostedAgent` contract; final merge and release require replacing the
-  PR branch pin with the new minor release tag after that upstream PR merges.
+  `develop` commit `1775f871641311868a15792bf3dc836024c9fb20`, which contains
+  the merged PR #130 additive `prepareHostedAgent` contract. Final release
+  preparation must replace this interim source pin with the new minor release
+  tag and matching commit.
 
 ### Fixed
 

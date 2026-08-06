@@ -10,17 +10,17 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class IntegrationPinTests(unittest.TestCase):
-    def test_manifest_contains_exact_released_pins(self) -> None:
+    def test_manifest_contains_exact_integration_pins(self) -> None:
         manifest = json.loads((ROOT / "manifest.json").read_text(encoding="utf-8"))
         components = {item["name"]: item for item in manifest["components"]}
 
         self.assertEqual("unreleased", manifest["tag"])
         self.assertEqual(
-            "placerda-prepare-hosted-agent-contract",
+            "develop",
             manifest["ailz_tag"],
         )
         self.assertEqual(
-            "6869d30f0ddcd9076cb5c1b35d25cca7d49f5572",
+            "1775f871641311868a15792bf3dc836024c9fb20",
             manifest["ailz_commit"],
         )
         self.assertEqual(
@@ -45,10 +45,10 @@ class IntegrationPinTests(unittest.TestCase):
             ),
         )
 
-    def test_gitmodule_and_gitlink_match_landing_zone_release(self) -> None:
+    def test_gitmodule_and_gitlink_match_landing_zone_integration_pin(self) -> None:
         gitmodules = (ROOT / ".gitmodules").read_text(encoding="utf-8")
         self.assertIn(
-            "branch = placerda-prepare-hosted-agent-contract",
+            "branch = develop",
             gitmodules,
         )
 
@@ -60,7 +60,7 @@ class IntegrationPinTests(unittest.TestCase):
             text=True,
         )
         self.assertIn(
-            "6869d30f0ddcd9076cb5c1b35d25cca7d49f5572",
+            "1775f871641311868a15792bf3dc836024c9fb20",
             completed.stdout.strip(),
         )
 

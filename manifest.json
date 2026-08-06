@@ -1,8 +1,8 @@
 {
   "tag": "unreleased",
   "repo": "https://github.com/azure/gpt-rag.git",
-  "ailz_tag": "placerda-prepare-hosted-agent-contract",
-  "ailz_commit": "6869d30f0ddcd9076cb5c1b35d25cca7d49f5572",
+  "ailz_tag": "develop",
+  "ailz_commit": "1775f871641311868a15792bf3dc836024c9fb20",
   "components": [
     {
       "name": "gpt-rag-ui",
