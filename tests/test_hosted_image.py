@@ -14,9 +14,11 @@ from config.deployment.hosted_image import (
     build_acr_build_args,
     build_hosted_image,
     build_source_image,
+    main as hosted_image_main,
     parse_digest_from_build_output,
     prepare_hosted_image,
     render_hosted_dockerfile,
+    resolve_azure_cli_executable,
     resolve_pushed_digest,
     validate_digest,
 )
@@ -131,8 +133,11 @@ class ParseDigestFromBuildOutputTests(unittest.TestCase):
 
 
 class ResolvePushedDigestTests(unittest.TestCase):
+    @patch("config.deployment.hosted_image.resolve_azure_cli_executable", return_value="az")
     @patch("config.deployment.hosted_image.subprocess.run")
-    def test_returns_digest_from_az_cli(self, mock_run: MagicMock) -> None:
+    def test_returns_digest_from_az_cli(
+        self, mock_run: MagicMock, _mock_cli: MagicMock
+    ) -> None:
         mock_run.return_value = subprocess.CompletedProcess(
             args=[], returncode=0, stdout=f"{BASE_DIGEST}\n", stderr=""
         )
@@ -164,8 +169,11 @@ class ResolvePushedDigestTests(unittest.TestCase):
             called_args,
         )
 
+    @patch("config.deployment.hosted_image.resolve_azure_cli_executable", return_value="az")
     @patch("config.deployment.hosted_image.subprocess.run")
-    def test_raises_on_unexpected_output(self, mock_run: MagicMock) -> None:
+    def test_raises_on_unexpected_output(
+        self, mock_run: MagicMock, _mock_cli: MagicMock
+    ) -> None:
         mock_run.return_value = subprocess.CompletedProcess(
             args=[], returncode=0, stdout="not-a-digest\n", stderr=""
         )
@@ -179,10 +187,14 @@ class ResolvePushedDigestTests(unittest.TestCase):
 
 
 class BuildHostedImageTests(unittest.TestCase):
+    @patch("config.deployment.hosted_image.resolve_azure_cli_executable", return_value="az")
     @patch("config.deployment.hosted_image.resolve_pushed_digest")
     @patch("config.deployment.hosted_image.subprocess.run")
     def test_builds_then_resolves_digest(
-        self, mock_run: MagicMock, mock_resolve: MagicMock
+        self,
+        mock_run: MagicMock,
+        mock_resolve: MagicMock,
+        _mock_cli: MagicMock,
     ) -> None:
         mock_run.return_value = subprocess.CompletedProcess(args=[], returncode=0)
         mock_resolve.return_value = BASE_DIGEST
@@ -208,12 +220,45 @@ class BuildHostedImageTests(unittest.TestCase):
             azure_cli="az",
         )
 
+    @patch("config.deployment.hosted_image.build_hosted_image")
+    @patch(
+        "config.deployment.hosted_image.resolve_az_command",
+        return_value=r"C:\Program Files\Azure CLI\az.cmd",
+    )
+    def test_cli_uses_resolved_windows_azure_cli(
+        self, _mock_resolve_cli: MagicMock, mock_build: MagicMock
+    ) -> None:
+        mock_build.return_value = HOSTED_DIGEST
+
+        result = hosted_image_main(
+            [
+                "--registry",
+                "myregistry",
+                "--registry-endpoint",
+                "myregistry.azurecr.io",
+                "--base-image-ref",
+                BASE_IMAGE_REF,
+                "--image-tag",
+                "v3.9.0-hosted",
+            ]
+        )
+
+        self.assertEqual(0, result)
+        self.assertEqual(
+            r"C:\Program Files\Azure CLI\az.cmd",
+            mock_build.call_args.kwargs["azure_cli"],
+        )
+
 
 class BuildSourceImageTests(unittest.TestCase):
+    @patch("config.deployment.hosted_image.resolve_azure_cli_executable", return_value="az")
     @patch("config.deployment.hosted_image.resolve_pushed_digest")
     @patch("config.deployment.hosted_image.subprocess.run")
     def test_public_basic_build_uses_standard_acr_task(
-        self, mock_run: MagicMock, mock_resolve: MagicMock
+        self,
+        mock_run: MagicMock,
+        mock_resolve: MagicMock,
+        _mock_cli: MagicMock,
     ) -> None:
         mock_resolve.return_value = BASE_DIGEST
         with tempfile.TemporaryDirectory() as tmp:
@@ -231,6 +276,27 @@ class BuildSourceImageTests(unittest.TestCase):
         args = mock_run.call_args.args[0]
         self.assertEqual(["az", "acr", "build"], args[:3])
         self.assertNotIn("--agent-pool", args)
+
+
+class ResolveAzureCliExecutableTests(unittest.TestCase):
+    @patch("config.deployment.hosted_image.shutil.which")
+    def test_falls_back_to_az_cmd_for_windows_installations(
+        self, mock_which: MagicMock
+    ) -> None:
+        mock_which.side_effect = [None, r"C:\Program Files\Azure CLI\az.cmd"]
+
+        executable = resolve_azure_cli_executable()
+
+        self.assertEqual(r"C:\Program Files\Azure CLI\az.cmd", executable)
+        self.assertEqual(
+            [unittest.mock.call("az"), unittest.mock.call("az.cmd")],
+            mock_which.call_args_list,
+        )
+
+    @patch("config.deployment.hosted_image.shutil.which", return_value=None)
+    def test_raises_when_azure_cli_is_missing(self, _mock_which: MagicMock) -> None:
+        with self.assertRaisesRegex(RuntimeError, "Azure CLI executable"):
+            resolve_azure_cli_executable()
 
 
 class PrepareHostedImageTests(unittest.TestCase):

@@ -296,10 +296,18 @@ class LifecycleParityTests(unittest.TestCase):
             with self.subTest(script=name):
                 content = (scripts / name).read_text(encoding="utf-8-sig")
                 self.assertIn("HOSTED_CUTOVER_COMPLETE", content)
-                self.assertIn(
-                    "config.deployment.appconfig --require-hosted-endpoint",
-                    content,
-                )
+                if name == "preDeploy.ps1":
+                    self.assertIn(
+                        "Invoke-PythonModule -ModuleName "
+                        "'config.deployment.appconfig' -Arguments "
+                        "@('--require-hosted-endpoint')",
+                        content,
+                    )
+                else:
+                    self.assertIn(
+                        "config.deployment.appconfig --require-hosted-endpoint",
+                        content,
+                    )
 
     def test_lifecycle_hooks_resolve_topology_through_shared_module(self) -> None:
         # ADR-0001 rev. 5: config.deployment.topology is the single source of
@@ -371,6 +379,9 @@ class LifecycleParityTests(unittest.TestCase):
                 self.assertIn("--validate-hosted-deploy", content)
                 self.assertIn("deploy_hosted_agent_orchestration", content)
                 self.assertIn("azd deploy orchestrator-agent", content)
+                self.assertIn("PYTHONPATH", content)
+                if name == "preDeploy.ps1":
+                    self.assertIn("runpy.run_module", content)
                 self.assertIn(
                     "AGENT_ORCHESTRATOR_AGENT_INVOCATIONS_ENDPOINT", content
                 )

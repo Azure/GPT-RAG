@@ -79,6 +79,14 @@
 
 ### Fixed
 
+- **Windows jumpbox deployment imports the repository package reliably.**
+  `preDeploy.ps1` now establishes the repository root on `PYTHONPATH` and
+  invokes deployment modules through `runpy`, avoiding Windows Python
+  installations that omit the current directory from `sys.path`. The shell
+  hook now exports the equivalent repository-root import path.
+- **Hosted-image builds resolve the Azure CLI launcher on Windows.**
+  The ACR Tasks helper resolves both `az` and the Windows `az.cmd` shim before
+  calling `subprocess.run`, and fails clearly when Azure CLI is unavailable.
 - **Regional prerequisite checks resolve Azure CLI on Windows.**
   `util.prereqs` now uses the same explicit Azure CLI executable resolution as
   deployment configuration, so the `az.cmd` shim no longer fails with

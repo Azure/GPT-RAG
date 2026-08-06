@@ -89,6 +89,17 @@ $start    = if ($PSScriptRoot) { $PSScriptRoot } else { (Get-Location).Path }
 $repoRoot = Find-RepoRoot $start
 if (-not $repoRoot) { Write-Error "Run this from inside a gpt-rag repo."; exit 1 }
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) { Write-Error "Git not found in PATH."; exit 1 }
+$pathSeparator = [IO.Path]::PathSeparator
+$env:PYTHONPATH = if ($env:PYTHONPATH) { "$repoRoot$pathSeparator$($env:PYTHONPATH)" } else { $repoRoot }
+$env:GPT_RAG_REPO_ROOT = $repoRoot
+
+function Invoke-PythonModule {
+  param(
+    [Parameter(Mandatory = $true)][string]$ModuleName,
+    [string[]]$Arguments = @()
+  )
+  & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['GPT_RAG_REPO_ROOT']); sys.argv = ['$ModuleName'] + sys.argv[1:]; runpy.run_module('$ModuleName', run_name='__main__')" @Arguments
+}
 
 $manifestPath = Join-Path $repoRoot 'manifest.json'
 if (-not (Test-Path -LiteralPath $manifestPath)) { Write-Error "manifest.json not found at $manifestPath"; exit 1 }
@@ -118,7 +129,7 @@ foreach ($prop in $globalEnv.PSObject.Properties) {
 # flag pair, so this always agrees with preProvision and postProvision.
 Push-Location $repoRoot
 try {
-  $topologyJson = & python -m config.deployment.topology --describe
+  $topologyJson = Invoke-PythonModule -ModuleName 'config.deployment.topology' -Arguments @('--describe')
   $topologyExitCode = $LASTEXITCODE
 } finally {
   Pop-Location
@@ -180,7 +191,7 @@ The preparation command builds the manifest-pinned image and stores only its imm
   }
   Push-Location $repoRoot
   try {
-    & python -m config.deployment.topology --validate-hosted-deploy | Out-Null
+    Invoke-PythonModule -ModuleName 'config.deployment.topology' -Arguments @('--validate-hosted-deploy') | Out-Null
     if ($LASTEXITCODE -ne 0) {
       Write-Error "Hosted deployment prerequisites or immutable image digest are invalid."
       exit $LASTEXITCODE
@@ -226,7 +237,7 @@ The preparation command builds the manifest-pinned image and stores only its imm
   }
   Push-Location $repoRoot
   try {
-    $hostedBaseUrlOutput = & python -m config.deployment.hosted --invocations-endpoint $invocationsEndpoint
+    $hostedBaseUrlOutput = Invoke-PythonModule -ModuleName 'config.deployment.hosted' -Arguments @('--invocations-endpoint', $invocationsEndpoint)
     $hostedExitCode = $LASTEXITCODE
     $hostedBaseUrl = if ($hostedBaseUrlOutput) { "$hostedBaseUrlOutput".Trim() } else { '' }
     if ($hostedExitCode -ne 0 -or -not $hostedBaseUrl) {
@@ -363,7 +374,7 @@ if ($hostedMode) {
   $migratingClassicRuntime = "$($env:PRESERVE_CLASSIC_RUNTIME)".ToLowerInvariant() -eq 'true'
   Push-Location $repoRoot
   try {
-    & python -m config.deployment.appconfig --require-hosted-endpoint
+    Invoke-PythonModule -ModuleName 'config.deployment.appconfig' -Arguments @('--require-hosted-endpoint')
     if ($LASTEXITCODE -ne 0) {
       Write-Error "Failed to publish the hosted-agent endpoint contract."
       exit $LASTEXITCODE
@@ -372,7 +383,7 @@ if ($hostedMode) {
     if ($LASTEXITCODE -ne 0) {
       if ($migratingClassicRuntime) {
         $env:HOSTED_CUTOVER_COMPLETE = 'false'
-        & python -m config.deployment.appconfig | Out-Null
+        Invoke-PythonModule -ModuleName 'config.deployment.appconfig' | Out-Null
         if ($LASTEXITCODE -ne 0) {
           Write-Error "Hosted endpoint persistence and classic-selector compensation both failed."
           exit 1
@@ -385,7 +396,7 @@ if ($hostedMode) {
     if ($LASTEXITCODE -ne 0) {
       if ($migratingClassicRuntime) {
         $env:HOSTED_CUTOVER_COMPLETE = 'false'
-        & python -m config.deployment.appconfig | Out-Null
+        Invoke-PythonModule -ModuleName 'config.deployment.appconfig' | Out-Null
         if ($LASTEXITCODE -ne 0) {
           Write-Error "Hosted marker persistence and classic-selector compensation both failed."
           exit 1

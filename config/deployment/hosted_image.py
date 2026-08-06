@@ -27,6 +27,7 @@ import argparse
 import hashlib
 import json
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -41,6 +42,19 @@ HOSTED_PORT_DEFAULT = 8088
 BASE_IMAGE_NAME_DEFAULT = "azure-gpt-rag/orchestrator"
 DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 COMMIT_PATTERN = re.compile(r"^[0-9a-fA-F]{40}$")
+
+
+def resolve_azure_cli_executable() -> str:
+    """Return the executable path for Azure CLI across native platforms."""
+    executable = shutil.which("az") or shutil.which("az.cmd")
+    if not executable:
+        raise RuntimeError("Azure CLI executable was not found in PATH.")
+    return executable
+
+
+def _resolved_azure_cli(azure_cli: str) -> str:
+    """Resolve the default launcher while preserving an injected executable."""
+    return resolve_azure_cli_executable() if azure_cli == "az" else azure_cli
 
 
 def render_hosted_dockerfile(
@@ -137,7 +151,7 @@ def resolve_pushed_digest(
     """Look up the digest that was just pushed for ``image_name:image_tag``."""
     result = subprocess.run(
         [
-            azure_cli,
+            _resolved_azure_cli(azure_cli),
             "acr",
             "repository",
             "show",
@@ -177,7 +191,7 @@ def validate_acr_agent_pool(
         )
     subprocess.run(
         [
-            azure_cli,
+            _resolved_azure_cli(azure_cli),
             "acr",
             "agentpool",
             "show",
@@ -260,6 +274,7 @@ def build_source_image(
         agent_pool=agent_pool,
         azure_cli=azure_cli,
     )
+    args[0] = _resolved_azure_cli(azure_cli)
     subprocess.run(args, check=True, stdout=sys.stderr)
     return resolve_pushed_digest(
         registry=registry,
@@ -365,6 +380,7 @@ def build_hosted_image(
             agent_pool=agent_pool,
             azure_cli=azure_cli,
         )
+        args[0] = _resolved_azure_cli(azure_cli)
         subprocess.run(args, check=True, stdout=sys.stderr)
     return resolve_pushed_digest(
         registry=registry,
