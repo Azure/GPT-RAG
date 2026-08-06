@@ -115,18 +115,22 @@ class ResolveEnvironmentTopologyTests(unittest.TestCase):
 
     @patch("config.deployment.topology.read_persisted_settings")
     @patch("config.deployment.topology.resource_group_exists")
-    def test_existing_environment_reads_persisted_settings(
+    def test_unmarked_existing_environment_stays_classic_without_private_lookup(
         self, mock_rg_exists: object, mock_read_settings: object
     ) -> None:
         mock_rg_exists.return_value = True
-        mock_read_settings.return_value = {"DEPLOYMENT_TOPOLOGY": "classic"}
+        mock_read_settings.side_effect = RuntimeError(
+            "private App Configuration is inaccessible"
+        )
 
         mode = topology.resolve_environment_topology(
-            {}, resource_group_name="rg-test", app_config_endpoint="https://x"
+            {},
+            resource_group_name="rg-test",
+            app_config_endpoint="https://private.example.test",
         )
 
         self.assertEqual(DeploymentMode.CLASSIC, mode)
-        mock_read_settings.assert_called_once_with("https://x")
+        mock_read_settings.assert_not_called()
 
     @patch("config.deployment.topology.read_persisted_settings")
     @patch("config.deployment.topology.resource_group_exists")
@@ -178,6 +182,7 @@ class ResolveEnvironmentTopologyTests(unittest.TestCase):
 
         self.assertEqual(DeploymentMode.HOSTED_NO_PANEL, resolution.mode)
         self.assertTrue(resolution.preserve_classic_runtime)
+        mock_read_settings.assert_called_once_with("https://x")
 
     @patch("config.deployment.topology.read_persisted_settings")
     @patch("config.deployment.topology.resource_group_exists")
@@ -203,10 +208,11 @@ class ResolveEnvironmentTopologyTests(unittest.TestCase):
 
     @patch("config.deployment.topology.read_persisted_settings")
     @patch("config.deployment.topology.resource_group_exists")
-    def test_unmarked_existing_hosted_request_preserves_classic_without_lookup(
+    def test_ambiguous_existing_hosted_request_preserves_persisted_classic(
         self, mock_rg_exists: object, mock_read_settings: object
     ) -> None:
         mock_rg_exists.return_value = True
+        mock_read_settings.return_value = {}
 
         resolution = topology.resolve_environment_plan(
             {"DEPLOYMENT_TOPOLOGY": "hosted-no-panel"},
@@ -215,6 +221,66 @@ class ResolveEnvironmentTopologyTests(unittest.TestCase):
         )
 
         self.assertTrue(resolution.preserve_classic_runtime)
+        mock_read_settings.assert_called_once_with(
+            "https://private.example.test"
+        )
+
+    @patch("config.deployment.topology.read_persisted_settings")
+    @patch("config.deployment.topology.resource_group_exists")
+    def test_ambiguous_explicit_hosted_request_fails_when_state_is_inaccessible(
+        self, mock_rg_exists: object, mock_read_settings: object
+    ) -> None:
+        mock_rg_exists.return_value = True
+        mock_read_settings.side_effect = topology.DeploymentTopologyError(
+            "cannot safely continue"
+        )
+
+        with self.assertRaisesRegex(Exception, "cannot safely continue"):
+            topology.resolve_environment_plan(
+                {"DEPLOY_HOSTED_AGENT_ORCHESTRATION": "true"},
+                resource_group_name="rg-test",
+                app_config_endpoint="https://private.example.test",
+            )
+
+    @patch("config.deployment.topology.read_persisted_settings")
+    @patch("config.deployment.topology.resource_group_exists")
+    def test_partial_local_state_fails_when_persisted_state_is_inaccessible(
+        self, mock_rg_exists: object, mock_read_settings: object
+    ) -> None:
+        mock_rg_exists.return_value = True
+        mock_read_settings.side_effect = topology.DeploymentTopologyError(
+            "cannot safely continue"
+        )
+
+        with self.assertRaisesRegex(Exception, "cannot safely continue"):
+            topology.resolve_environment_plan(
+                {"CHAT_BACKEND": "hosted_agent"},
+                resource_group_name="rg-test",
+                app_config_endpoint="https://private.example.test",
+            )
+
+    @patch("config.deployment.topology.read_persisted_settings")
+    @patch("config.deployment.topology.resource_group_exists")
+    def test_legacy_hosted_contract_stays_hosted_without_private_lookup(
+        self, mock_rg_exists: object, mock_read_settings: object
+    ) -> None:
+        mock_rg_exists.return_value = True
+
+        resolution = topology.resolve_environment_plan(
+            {
+                "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "true",
+                "DEPLOY_ADMINISTRATIVE_PANEL": "false",
+                "HOSTED_AGENT_BASE_URL": (
+                    "https://agent.example.test/protocols"
+                ),
+                "HOSTED_AGENT_IMAGE_VERSION": "sha256:" + ("a" * 64),
+            },
+            resource_group_name="rg-test",
+            app_config_endpoint="https://private.example.test",
+        )
+
+        self.assertEqual(DeploymentMode.HOSTED_NO_PANEL, resolution.mode)
+        self.assertFalse(resolution.preserve_classic_runtime)
         mock_read_settings.assert_not_called()
 
     @patch("config.deployment.topology.read_persisted_settings")
