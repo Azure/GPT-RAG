@@ -83,6 +83,7 @@ fi
 
 repo_root="$(find_repo_root "$start_dir")" || { red "Run this from inside a gpt-rag repo."; exit 1; }
 command -v git >/dev/null 2>&1 || { red "Git not found in PATH."; exit 1; }
+export PYTHONPATH="$repo_root${PYTHONPATH:+:$PYTHONPATH}"
 
 manifest_path="$repo_root/manifest.json"
 [ -f "$manifest_path" ] || { red "manifest.json not found at $manifest_path"; exit 1; }

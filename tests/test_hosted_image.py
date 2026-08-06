@@ -11,6 +11,7 @@ from config.deployment.hosted_image import (
     build_hosted_image,
     parse_digest_from_build_output,
     render_hosted_dockerfile,
+    resolve_azure_cli_executable,
     resolve_pushed_digest,
 )
 
@@ -116,8 +117,11 @@ class ParseDigestFromBuildOutputTests(unittest.TestCase):
 
 
 class ResolvePushedDigestTests(unittest.TestCase):
+    @patch("config.deployment.hosted_image.resolve_azure_cli_executable", return_value="az")
     @patch("config.deployment.hosted_image.subprocess.run")
-    def test_returns_digest_from_az_cli(self, mock_run: MagicMock) -> None:
+    def test_returns_digest_from_az_cli(
+        self, mock_run: MagicMock, _mock_cli: MagicMock
+    ) -> None:
         mock_run.return_value = subprocess.CompletedProcess(
             args=[], returncode=0, stdout=f"{BASE_DIGEST}\n", stderr=""
         )
@@ -149,8 +153,11 @@ class ResolvePushedDigestTests(unittest.TestCase):
             called_args,
         )
 
+    @patch("config.deployment.hosted_image.resolve_azure_cli_executable", return_value="az")
     @patch("config.deployment.hosted_image.subprocess.run")
-    def test_raises_on_unexpected_output(self, mock_run: MagicMock) -> None:
+    def test_raises_on_unexpected_output(
+        self, mock_run: MagicMock, _mock_cli: MagicMock
+    ) -> None:
         mock_run.return_value = subprocess.CompletedProcess(
             args=[], returncode=0, stdout="not-a-digest\n", stderr=""
         )
@@ -164,10 +171,14 @@ class ResolvePushedDigestTests(unittest.TestCase):
 
 
 class BuildHostedImageTests(unittest.TestCase):
+    @patch("config.deployment.hosted_image.resolve_azure_cli_executable", return_value="az")
     @patch("config.deployment.hosted_image.resolve_pushed_digest")
     @patch("config.deployment.hosted_image.subprocess.run")
     def test_builds_then_resolves_digest(
-        self, mock_run: MagicMock, mock_resolve: MagicMock
+        self,
+        mock_run: MagicMock,
+        mock_resolve: MagicMock,
+        _mock_cli: MagicMock,
     ) -> None:
         mock_run.return_value = subprocess.CompletedProcess(args=[], returncode=0)
         mock_resolve.return_value = BASE_DIGEST
@@ -191,6 +202,27 @@ class BuildHostedImageTests(unittest.TestCase):
             image_name="gpt-rag-orchestrator",
             image_tag="v3.9.0-hosted",
         )
+
+
+class ResolveAzureCliExecutableTests(unittest.TestCase):
+    @patch("config.deployment.hosted_image.shutil.which")
+    def test_falls_back_to_az_cmd_for_windows_installations(
+        self, mock_which: MagicMock
+    ) -> None:
+        mock_which.side_effect = [None, r"C:\Program Files\Azure CLI\az.cmd"]
+
+        executable = resolve_azure_cli_executable()
+
+        self.assertEqual(r"C:\Program Files\Azure CLI\az.cmd", executable)
+        self.assertEqual(
+            [unittest.mock.call("az"), unittest.mock.call("az.cmd")],
+            mock_which.call_args_list,
+        )
+
+    @patch("config.deployment.hosted_image.shutil.which", return_value=None)
+    def test_raises_when_azure_cli_is_missing(self, _mock_which: MagicMock) -> None:
+        with self.assertRaisesRegex(RuntimeError, "Azure CLI executable"):
+            resolve_azure_cli_executable()
 
 
 if __name__ == "__main__":

@@ -89,6 +89,17 @@ $start    = if ($PSScriptRoot) { $PSScriptRoot } else { (Get-Location).Path }
 $repoRoot = Find-RepoRoot $start
 if (-not $repoRoot) { Write-Error "Run this from inside a gpt-rag repo."; exit 1 }
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) { Write-Error "Git not found in PATH."; exit 1 }
+$pathSeparator = [IO.Path]::PathSeparator
+$env:PYTHONPATH = if ($env:PYTHONPATH) { "$repoRoot$pathSeparator$($env:PYTHONPATH)" } else { $repoRoot }
+$env:GPT_RAG_REPO_ROOT = $repoRoot
+
+function Invoke-PythonModule {
+  param(
+    [Parameter(Mandatory = $true)][string]$ModuleName,
+    [string[]]$Arguments = @()
+  )
+  & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['GPT_RAG_REPO_ROOT']); sys.argv = ['$ModuleName'] + sys.argv[1:]; runpy.run_module('$ModuleName', run_name='__main__')" @Arguments
+}
 
 $manifestPath = Join-Path $repoRoot 'manifest.json'
 if (-not (Test-Path -LiteralPath $manifestPath)) { Write-Error "manifest.json not found at $manifestPath"; exit 1 }
@@ -183,7 +194,6 @@ if ($hostedMode) {
     Push-Location $repoRoot
     try {
       $buildArgs = @(
-        '-m', 'config.deployment.hosted_image',
         '--registry', $acrName,
         '--base-image-ref', $baseImageRef,
         '--image-name', $hostedImageName,
@@ -192,7 +202,7 @@ if ($hostedMode) {
       if ($globalEnv.ACR_TASK_AGENT_POOL) {
         $buildArgs += @('--agent-pool', "$($globalEnv.ACR_TASK_AGENT_POOL)")
       }
-      $hostedDigest = & python @buildArgs
+      $hostedDigest = Invoke-PythonModule -ModuleName 'config.deployment.hosted_image' -Arguments $buildArgs
       if ($LASTEXITCODE -ne 0 -or -not $hostedDigest) {
         Write-Error "Failed to build the hosted-agent derivative image."
         exit $LASTEXITCODE
@@ -237,7 +247,7 @@ if ($hostedMode) {
   }
   Push-Location $repoRoot
   try {
-    $hostedBaseUrlOutput = & python -m config.deployment.hosted --invocations-endpoint $invocationsEndpoint
+    $hostedBaseUrlOutput = Invoke-PythonModule -ModuleName 'config.deployment.hosted' -Arguments @('--invocations-endpoint', $invocationsEndpoint)
     $hostedExitCode = $LASTEXITCODE
     $hostedBaseUrl = if ($hostedBaseUrlOutput) { "$hostedBaseUrlOutput".Trim() } else { '' }
     if ($hostedExitCode -ne 0 -or -not $hostedBaseUrl) {
@@ -252,7 +262,7 @@ if ($hostedMode) {
   Push-Location $repoRoot
   try {
     & azd env set HOSTED_AGENT_BASE_URL $hostedBaseUrl --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
-    & python -m config.deployment.appconfig --require-hosted-endpoint
+    Invoke-PythonModule -ModuleName 'config.deployment.appconfig' -Arguments @('--require-hosted-endpoint')
     if ($LASTEXITCODE -ne 0) {
       Write-Error "Failed to publish the hosted-agent endpoint contract."
       exit $LASTEXITCODE
