@@ -1715,7 +1715,7 @@ options, and a before/after table.</p>
 </tr>
 <tr>
 <td><code>HOSTED_AGENT_BASE_URL</code></td>
-<td>Hosted service root. The UI sends canonical <code>POST /responses</code> requests to this endpoint when <code>CHAT_BACKEND=hosted_agent</code>. <code>POST /invocations</code> remains a compatibility alias over the same request validation, identity guard, and Responses API SSE handler.</td>
+<td>Hosted service root. The UI sends canonical Responses protocol v2 requests to <code>POST /responses</code> when <code>CHAT_BACKEND=hosted_agent</code>. The separate <code>POST /invocations</code> endpoint retains the legacy messages-based invocation contract.</td>
 </tr>
 <tr>
 <td><code>HOSTED_AGENT_RESOURCE_SCOPE</code></td>
@@ -1727,6 +1727,29 @@ options, and a before/after table.</p>
 </tr>
 </tbody>
 </table>
+<p><code>POST /responses</code> and <code>POST /invocations</code> are distinct protocols, not aliases, and their request bodies are not interchangeable. The canonical Responses protocol v2 route accepts the supported streaming subset of the Azure AI Responses create contract:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;input&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;What is the document retention policy?&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;stream&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;store&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;conversation&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;conversation-id&gt;&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The compatibility <code>POST /invocations</code> route retains the legacy messages-based schema:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;messages&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;What is the document retention policy?&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;conversation_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;conversation-id&gt;&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Both routes stream SSE responses, but each validates its own protocol-specific input before entering the shared hosted execution path. See the Microsoft Foundry <a href="https://learn.microsoft.com/azure/foundry/agents/concepts/hosted-agents#key-concepts">hosted-agent protocol comparison</a>.</p>
 <p>For a hosted deployment, <code>HOSTED_AGENT_IMAGE_VERSION</code> is also required before provisioning. Set it to the immutable image digest in the form <code>sha256:&lt;64-hex-characters&gt;</code>. A mutable tag such as <code>latest</code> or <code>v3.9.0</code> is not accepted.</p>
 <div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">DEPLOY_HOSTED_AGENT_ORCHESTRATION</span> <span class="n">true</span>
 <span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">DEPLOY_ADMINISTRATIVE_PANEL</span> <span class="n">false</span> <span class="c"># required for this preview</span>
