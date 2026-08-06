@@ -27,6 +27,8 @@ from config.deployment.composition import (
     DeploymentMode,
     DeploymentTopologyError,
     describe_mode,
+    effective_runtime_mode,
+    is_truthy,
     materialized_settings,
     resolve_explicit_topology,
     resolve_mode,
@@ -153,20 +155,69 @@ def resolve_environment_topology(
     on, or be delayed by, being able to reach Azure to classify the
     environment as fresh or existing.
     """
-    if resolve_explicit_topology(environment) is not None:
-        return resolve_topology(environment, resource_group_exists=None)
+    return resolve_environment_contract(
+        environment,
+        resource_group_name=resource_group_name,
+        subscription_id=subscription_id,
+        app_config_endpoint=app_config_endpoint,
+    )[0]
+
+
+def resolve_environment_contract(
+    environment: Mapping[str, str],
+    *,
+    resource_group_name: str | None = None,
+    subscription_id: str | None = None,
+    app_config_endpoint: str | None = None,
+) -> tuple[DeploymentMode, str]:
+    """Resolve target topology and the runtime backend safe to materialize."""
+    explicit = resolve_explicit_topology(environment)
+    current_backend = (environment.get("CHAT_BACKEND") or "").strip().lower()
+    if current_backend not in {"", "orchestrator", "hosted_agent"}:
+        raise DeploymentTopologyError(
+            f"Unknown CHAT_BACKEND={current_backend!r}; expected 'orchestrator' "
+            "or 'hosted_agent'."
+        )
+
+    if explicit is DeploymentMode.CLASSIC:
+        return explicit, "orchestrator"
+    if explicit is not None and current_backend == "hosted_agent":
+        return explicit, current_backend
+    if explicit is not None:
+        rg_exists = resource_group_exists(resource_group_name, subscription_id)
+        return explicit, "orchestrator" if rg_exists else "hosted_agent"
 
     rg_exists = resource_group_exists(resource_group_name, subscription_id)
     persisted = read_persisted_settings(app_config_endpoint) if rg_exists else {}
-    return resolve_topology(
+    mode = resolve_topology(
         environment,
         resource_group_exists=rg_exists,
         persisted_settings=persisted,
     )
+    return mode, str(describe_mode(mode)["chat_backend"])
 
 
-def _print_materialized(mode: DeploymentMode) -> None:
-    for key, value in materialized_settings(mode).items():
+def _print_materialized(
+    mode: DeploymentMode,
+    *,
+    environment: Mapping[str, str],
+) -> None:
+    settings = materialized_settings(mode)
+    deploy_hosted = (
+        is_truthy(environment.get("DEPLOY_HOSTED_AGENT"))
+        and bool((environment.get("HOSTED_AGENT_IMAGE_VERSION") or "").strip())
+    )
+    runtime_mode = effective_runtime_mode(
+        mode,
+        environment,
+        deploy_hosted=deploy_hosted,
+    )
+    settings["CHAT_BACKEND"] = (
+        "orchestrator"
+        if runtime_mode is DeploymentMode.CLASSIC
+        else "hosted_agent"
+    )
+    for key, value in settings.items():
         print(f"{key}={value}")
 
 
@@ -262,13 +313,18 @@ def main() -> int:
             subscription_id = args.subscription_id or os.environ.get(
                 "AZURE_SUBSCRIPTION_ID"
             )
-            mode = resolve_environment_topology(
+            mode, runtime_backend = resolve_environment_contract(
                 os.environ,
                 resource_group_name=resource_group_name,
                 subscription_id=subscription_id,
                 app_config_endpoint=app_config_endpoint,
             )
-            _print_materialized(mode)
+            materialized_environment = dict(os.environ)
+            materialized_environment["CHAT_BACKEND"] = runtime_backend
+            _print_materialized(
+                mode,
+                environment=materialized_environment,
+            )
     except DeploymentTopologyError as exc:
         print(str(exc), file=sys.stderr)
         return 1

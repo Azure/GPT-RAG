@@ -336,6 +336,31 @@ def selected_components(mode: DeploymentMode) -> tuple[str, ...]:
     return ("gpt-rag-ui", "gpt-rag-ingestion")
 
 
+def effective_runtime_mode(
+    mode: DeploymentMode,
+    environment: Mapping[str, str],
+    *,
+    deploy_hosted: bool,
+) -> DeploymentMode:
+    """Keep an existing classic runtime until hosted cutover is materialized."""
+    if mode is DeploymentMode.CLASSIC:
+        return mode
+
+    backend = (environment.get("CHAT_BACKEND") or "").strip().lower()
+    if backend not in {"", "orchestrator", "hosted_agent"}:
+        raise DeploymentTopologyError(
+            f"Unknown CHAT_BACKEND={backend!r}; expected 'orchestrator' or "
+            "'hosted_agent'."
+        )
+    if backend != "orchestrator":
+        return mode
+
+    endpoint = (environment.get("HOSTED_AGENT_BASE_URL") or "").strip()
+    if deploy_hosted and endpoint:
+        return mode
+    return DeploymentMode.CLASSIC
+
+
 def _setting(name: str, value: str) -> dict[str, str]:
     return {
         "name": name,
@@ -358,13 +383,19 @@ def compose_parameters(
 
     mode = resolve_mode(environment)
     hosted = mode is not DeploymentMode.CLASSIC
-    panel = mode is not DeploymentMode.HOSTED_NO_PANEL
 
     digest = (environment.get("HOSTED_AGENT_IMAGE_VERSION") or "").strip()
     generated_source_commit = (
         environment.get("HOSTED_AGENT_IMAGE_SOURCE_COMMIT") or ""
     ).strip()
     deploy_hosted = hosted and bool(digest)
+    runtime_mode = effective_runtime_mode(
+        mode,
+        environment,
+        deploy_hosted=deploy_hosted,
+    )
+    runtime_hosted = runtime_mode is not DeploymentMode.CLASSIC
+    runtime_panel = runtime_mode is DeploymentMode.HOSTED_PANEL
 
     if deploy_hosted:
         validate_hosted_prerequisites(environment)
@@ -389,7 +420,11 @@ def compose_parameters(
 
     parameters["prepareHostedAgent"] = {"value": hosted}
     parameters["deployHostedAgent"] = {"value": deploy_hosted}
-    parameters["deployCosmosDb"] = {"value": panel}
+    parameters["deployCosmosDb"] = {
+        "value": runtime_mode is DeploymentMode.CLASSIC or runtime_panel
+    }
+    if hosted and is_truthy(environment.get("NETWORK_ISOLATION")):
+        parameters["deployAcrTaskAgentPool"] = {"value": True}
 
     if hosted:
         parameters["hostedAgent"] = {
@@ -443,13 +478,13 @@ def compose_parameters(
         raise ValueError("containerAppsList must contain an array value.")
 
     apps = apps_parameter["value"]
-    if hosted:
+    if runtime_hosted:
         apps = [
             app
             for app in apps
             if isinstance(app, dict) and app.get("service_name") != "orchestrator"
         ]
-    if mode is DeploymentMode.HOSTED_NO_PANEL:
+    if runtime_mode is DeploymentMode.HOSTED_NO_PANEL:
         for app in apps:
             if app.get("service_name") == "dataingest":
                 app["roles"] = [
@@ -459,35 +494,53 @@ def compose_parameters(
                 ]
     parameters["containerAppsList"] = {"value": apps}
 
-    if mode is DeploymentMode.HOSTED_NO_PANEL:
+    if runtime_mode is DeploymentMode.HOSTED_NO_PANEL:
         parameters["databaseContainersList"] = {"value": []}
 
     parameters["additionalAppConfigurationSettings"] = {
         "value": [
             _setting(
                 "DEPLOY_HOSTED_AGENT_ORCHESTRATION",
-                str(hosted).lower(),
+                str(runtime_hosted).lower(),
             ),
-            _setting("PREPARE_HOSTED_AGENT", str(hosted).lower()),
-            _setting("DEPLOY_HOSTED_AGENT", str(deploy_hosted).lower()),
-            _setting("HOSTED_AGENT_PREPARED", str(hosted).lower()),
+            _setting("PREPARE_HOSTED_AGENT", str(runtime_hosted).lower()),
+            _setting(
+                "DEPLOY_HOSTED_AGENT",
+                str(deploy_hosted and runtime_hosted).lower(),
+            ),
+            _setting("HOSTED_AGENT_PREPARED", str(runtime_hosted).lower()),
             _setting(
                 "DEPLOY_ADMINISTRATIVE_PANEL",
-                str(panel and hosted).lower(),
+                str(runtime_panel).lower(),
             ),
-            _setting("DEPLOYMENT_TOPOLOGY", mode.value),
-            _setting("CHAT_BACKEND", "hosted_agent" if hosted else "orchestrator"),
+            _setting("DEPLOYMENT_TOPOLOGY", runtime_mode.value),
+            _setting(
+                "CHAT_BACKEND",
+                "hosted_agent" if runtime_hosted else "orchestrator",
+            ),
             _setting(
                 "HOSTED_AGENT_BASE_URL",
-                environment.get("HOSTED_AGENT_BASE_URL", ""),
+                (
+                    environment.get("HOSTED_AGENT_BASE_URL", "")
+                    if runtime_hosted
+                    else ""
+                ),
             ),
             _setting(
                 "HOSTED_AGENT_RESOURCE_SCOPE",
-                environment.get("HOSTED_AGENT_RESOURCE_SCOPE", ""),
+                (
+                    environment.get("HOSTED_AGENT_RESOURCE_SCOPE", "")
+                    if runtime_hosted
+                    else ""
+                ),
             ),
             _setting(
                 "HOSTED_AGENT_IMAGE_VERSION",
-                environment.get("HOSTED_AGENT_IMAGE_VERSION", ""),
+                (
+                    environment.get("HOSTED_AGENT_IMAGE_VERSION", "")
+                    if runtime_hosted
+                    else ""
+                ),
             ),
             _setting(
                 "HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS",

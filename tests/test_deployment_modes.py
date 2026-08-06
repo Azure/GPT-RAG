@@ -138,6 +138,95 @@ class DeploymentCompositionTests(unittest.TestCase):
             "",
             composed["parameters"]["hostedAgent"]["value"]["version"],
         )
+        self.assertEqual(
+            ["frontend", "dataingest"],
+            [
+                app["service_name"]
+                for app in composed["parameters"]["containerAppsList"]["value"]
+            ],
+        )
+        self.assertEqual("hosted_agent", settings_by_name(composed)["CHAT_BACKEND"])
+
+    def test_private_hosted_composition_requests_dedicated_acr_agent_pool(
+        self,
+    ) -> None:
+        composed = compose_parameters(
+            source_parameters(),
+            {
+                "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+                "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
+                "NETWORK_ISOLATION": "true",
+            },
+        )
+
+        self.assertTrue(
+            composed["parameters"]["deployAcrTaskAgentPool"]["value"]
+        )
+
+    def test_classic_composition_does_not_request_acr_agent_pool(self) -> None:
+        composed = compose_parameters(
+            source_parameters(),
+            {
+                "DEPLOYMENT_TOPOLOGY": "classic",
+                "NETWORK_ISOLATION": "true",
+            },
+        )
+
+        self.assertEqual(
+            "${DEPLOY_ACR_TASK_AGENT_POOL=false}",
+            composed["parameters"]["deployAcrTaskAgentPool"]["value"],
+        )
+
+    def test_prepare_only_classic_migration_preserves_runtime(self) -> None:
+        composed = compose_parameters(
+            source_parameters(),
+            {
+                "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+                "CHAT_BACKEND": "orchestrator",
+                "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
+            },
+        )
+        parameters = composed["parameters"]
+
+        self.assertTrue(parameters["prepareHostedAgent"]["value"])
+        self.assertFalse(parameters["deployHostedAgent"]["value"])
+        self.assertTrue(parameters["deployCosmosDb"]["value"])
+        self.assertEqual(
+            ["orchestrator", "frontend", "dataingest"],
+            [
+                app["service_name"]
+                for app in parameters["containerAppsList"]["value"]
+            ],
+        )
+        settings = settings_by_name(composed)
+        self.assertEqual("classic", settings["DEPLOYMENT_TOPOLOGY"])
+        self.assertEqual("orchestrator", settings["CHAT_BACKEND"])
+        self.assertEqual(
+            "false", settings["DEPLOY_HOSTED_AGENT_ORCHESTRATION"]
+        )
+
+    def test_classic_migration_cuts_over_after_endpoint_materializes(self) -> None:
+        composed = compose_parameters(
+            source_parameters(),
+            {
+                "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+                "CHAT_BACKEND": "orchestrator",
+                "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
+                "HOSTED_AGENT_IMAGE_VERSION": DIGEST,
+                "HOSTED_AGENT_BASE_URL": "https://agent.example.test/protocols",
+            },
+        )
+
+        self.assertEqual(
+            ["frontend", "dataingest"],
+            [
+                app["service_name"]
+                for app in composed["parameters"]["containerAppsList"]["value"]
+            ],
+        )
+        settings = settings_by_name(composed)
+        self.assertEqual("hosted-no-panel", settings["DEPLOYMENT_TOPOLOGY"])
+        self.assertEqual("hosted_agent", settings["CHAT_BACKEND"])
 
     def test_digest_materializes_deploy_handoff(self) -> None:
         environment = {
@@ -431,6 +520,7 @@ class AppConfigurationContractTests(unittest.TestCase):
                 "HOSTED_AGENT_BASE_URL": "https://agent.example.test/protocols",
                 "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
                 "HOSTED_AGENT_IMAGE_VERSION": DIGEST,
+                "DEPLOY_HOSTED_AGENT": "true",
             },
             require_hosted_endpoint=True,
         )
@@ -442,6 +532,47 @@ class AppConfigurationContractTests(unittest.TestCase):
             settings["HOSTED_AGENT_BASE_URL"],
         )
         self.assertEqual(DIGEST, settings["HOSTED_AGENT_IMAGE_VERSION"])
+        self.assertEqual(2, len(json.loads(settings["CONTAINER_APPS"])))
+
+    @patch("config.deployment.appconfig._container_app", side_effect=_app)
+    def test_prepare_only_migration_publishes_classic_runtime(
+        self, _mock: object
+    ) -> None:
+        settings = appconfig.build_settings(
+            {
+                "AZURE_RESOURCE_GROUP": "rg-test",
+                "RESOURCE_TOKEN": "test",
+                "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+                "CHAT_BACKEND": "orchestrator",
+                "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
+            }
+        )
+
+        self.assertEqual("classic", settings["DEPLOYMENT_TOPOLOGY"])
+        self.assertEqual("orchestrator", settings["CHAT_BACKEND"])
+        self.assertEqual(
+            "https://ca-test-orchestrator.example.test",
+            settings["ORCHESTRATOR_BASE_URL"],
+        )
+        self.assertEqual(3, len(json.loads(settings["CONTAINER_APPS"])))
+
+    @patch("config.deployment.appconfig._container_app", side_effect=_app)
+    def test_fresh_hosted_runtime_remains_fail_closed_without_endpoint(
+        self, _mock: object
+    ) -> None:
+        settings = appconfig.build_settings(
+            {
+                "AZURE_RESOURCE_GROUP": "rg-test",
+                "RESOURCE_TOKEN": "test",
+                "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+                "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
+            }
+        )
+
+        self.assertEqual("hosted-no-panel", settings["DEPLOYMENT_TOPOLOGY"])
+        self.assertEqual("hosted_agent", settings["CHAT_BACKEND"])
+        self.assertEqual("", settings["ORCHESTRATOR_BASE_URL"])
+        self.assertEqual("", settings["HOSTED_AGENT_BASE_URL"])
         self.assertEqual(2, len(json.loads(settings["CONTAINER_APPS"])))
 
     @patch("config.deployment.appconfig._container_app", side_effect=_app)
@@ -503,6 +634,8 @@ class AppConfigurationContractTests(unittest.TestCase):
                     "RESOURCE_TOKEN": "test",
                     "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "true",
                     "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
+                    "HOSTED_AGENT_IMAGE_VERSION": DIGEST,
+                    "DEPLOY_HOSTED_AGENT": "true",
                 },
                 require_hosted_endpoint=True,
             )

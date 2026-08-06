@@ -130,19 +130,61 @@ class ResolveEnvironmentTopologyTests(unittest.TestCase):
 
     @patch("config.deployment.topology.read_persisted_settings")
     @patch("config.deployment.topology.resource_group_exists")
-    def test_explicit_environment_signal_wins_without_reading_persisted_settings(
+    def test_explicit_environment_signal_with_backend_skips_persisted_settings(
         self, mock_rg_exists: object, mock_read_settings: object
     ) -> None:
         mock_rg_exists.return_value = True
 
         mode = topology.resolve_environment_topology(
-            {"DEPLOYMENT_TOPOLOGY": "hosted-no-panel"},
+            {
+                "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+                "CHAT_BACKEND": "hosted_agent",
+            },
             resource_group_name="rg-test",
             app_config_endpoint="https://x",
         )
 
         self.assertEqual(DeploymentMode.HOSTED_NO_PANEL, mode)
         mock_read_settings.assert_not_called()
+
+    @patch(
+        "config.deployment.topology.read_persisted_settings",
+        return_value={},
+    )
+    @patch(
+        "config.deployment.topology.resource_group_exists",
+        return_value=True,
+    )
+    def test_explicit_migration_from_unmarked_existing_environment_is_classic(
+        self, _mock_rg_exists: object, mock_read_settings: object
+    ) -> None:
+        mode, backend = topology.resolve_environment_contract(
+            {"DEPLOYMENT_TOPOLOGY": "hosted-no-panel"},
+            resource_group_name="rg-test",
+            app_config_endpoint="https://x",
+        )
+
+        self.assertEqual(DeploymentMode.HOSTED_NO_PANEL, mode)
+        self.assertEqual("orchestrator", backend)
+        mock_read_settings.assert_not_called()
+
+    @patch(
+        "config.deployment.topology.resource_group_exists",
+        return_value=False,
+    )
+    def test_fresh_hosted_ignores_stale_classic_backend(
+        self, _mock_rg_exists: object
+    ) -> None:
+        mode, backend = topology.resolve_environment_contract(
+            {
+                "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+                "CHAT_BACKEND": "orchestrator",
+            },
+            resource_group_name="rg-test",
+        )
+
+        self.assertEqual(DeploymentMode.HOSTED_NO_PANEL, mode)
+        self.assertEqual("hosted_agent", backend)
 
 
 class MainCliTests(unittest.TestCase):
@@ -160,6 +202,35 @@ class MainCliTests(unittest.TestCase):
         printed = "\n".join(call.args[0] for call in mock_print.call_args_list)
         self.assertIn("DEPLOYMENT_TOPOLOGY=hosted-no-panel", printed)
         self.assertIn("CHAT_BACKEND=hosted_agent", printed)
+
+    @patch(
+        "config.deployment.topology.read_persisted_settings",
+        return_value={},
+    )
+    @patch(
+        "config.deployment.topology.resource_group_exists",
+        return_value=True,
+    )
+    def test_prepare_only_migration_preserves_materialized_classic_backend(
+        self,
+        _mock_rg_exists: object,
+        _mock_read_settings: object,
+    ) -> None:
+        argv = ["prog"]
+        env = {
+            "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+            "CHAT_BACKEND": "orchestrator",
+            "AZURE_RESOURCE_GROUP": "rg-test",
+            "APP_CONFIG_ENDPOINT": "https://x",
+        }
+        with patch("sys.argv", argv), patch("os.environ", env):
+            with patch("builtins.print") as mock_print:
+                exit_code = topology.main()
+
+        self.assertEqual(0, exit_code)
+        printed = "\n".join(call.args[0] for call in mock_print.call_args_list)
+        self.assertIn("DEPLOYMENT_TOPOLOGY=hosted-no-panel", printed)
+        self.assertIn("CHAT_BACKEND=orchestrator", printed)
 
     def test_describe_mode_prints_json_without_any_azure_cli_call(self) -> None:
         argv = ["prog", "--describe"]

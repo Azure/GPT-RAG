@@ -11,6 +11,8 @@ from typing import Mapping
 from config.deployment.composition import (
     APP_CONFIG_LABEL,
     DeploymentMode,
+    effective_runtime_mode,
+    is_truthy,
     resolve_mode,
     validate_hosted_prerequisites,
 )
@@ -84,6 +86,34 @@ def build_settings(
     hosted = mode is not DeploymentMode.CLASSIC
     resource_group = _required(environment, "AZURE_RESOURCE_GROUP")
     resource_token = _required(environment, "RESOURCE_TOKEN")
+    hosted_base_url = (environment.get("HOSTED_AGENT_BASE_URL") or "").strip()
+    hosted_scope = (environment.get("HOSTED_AGENT_RESOURCE_SCOPE") or "").strip()
+    hosted_image_version = (
+        environment.get("HOSTED_AGENT_IMAGE_VERSION") or ""
+    ).strip()
+    deploy_hosted = is_truthy(environment.get("DEPLOY_HOSTED_AGENT"))
+
+    if hosted:
+        validate_hosted_prerequisites(
+            environment,
+            require_image_digest=require_hosted_endpoint,
+        )
+    if hosted and require_hosted_endpoint:
+        if not hosted_base_url:
+            raise ValueError(
+                "Hosted deployment completed without HOSTED_AGENT_BASE_URL."
+            )
+        if not deploy_hosted:
+            raise ValueError(
+                "Hosted deployment completed without DEPLOY_HOSTED_AGENT=true."
+            )
+
+    runtime_mode = effective_runtime_mode(
+        mode,
+        environment,
+        deploy_hosted=deploy_hosted,
+    )
+    runtime_hosted = runtime_mode is not DeploymentMode.CLASSIC
 
     app_names = {
         "frontend": f"ca-{resource_token}-frontend",
@@ -100,25 +130,9 @@ def build_settings(
         _container_app(
             resource_group, app_names["orchestrator"], required=True
         )
-        if mode is DeploymentMode.CLASSIC
+        if runtime_mode is DeploymentMode.CLASSIC
         else {"fqdn": "", "principalId": ""}
     )
-
-    hosted_base_url = (environment.get("HOSTED_AGENT_BASE_URL") or "").strip()
-    hosted_scope = (environment.get("HOSTED_AGENT_RESOURCE_SCOPE") or "").strip()
-    hosted_image_version = (
-        environment.get("HOSTED_AGENT_IMAGE_VERSION") or ""
-    ).strip()
-    if hosted:
-        validate_hosted_prerequisites(
-            environment,
-            require_image_digest=False,
-        )
-    if hosted and require_hosted_endpoint:
-        if not hosted_base_url:
-            raise ValueError(
-                "Hosted deployment completed without HOSTED_AGENT_BASE_URL."
-            )
 
     container_apps = [
         {
@@ -136,7 +150,7 @@ def build_settings(
             "fqdn": dataingest["fqdn"],
         },
     ]
-    if mode is DeploymentMode.CLASSIC:
+    if runtime_mode is DeploymentMode.CLASSIC:
         container_apps.insert(
             0,
             {
@@ -149,19 +163,17 @@ def build_settings(
         )
 
     return {
-        "DEPLOY_HOSTED_AGENT_ORCHESTRATION": str(hosted).lower(),
-        "PREPARE_HOSTED_AGENT": str(hosted).lower(),
-        "DEPLOY_HOSTED_AGENT": (
-            environment.get("DEPLOY_HOSTED_AGENT") or "false"
-        ).strip().lower(),
-        "HOSTED_AGENT_PREPARED": (
-            environment.get("HOSTED_AGENT_PREPARED") or str(hosted)
-        ).strip().lower(),
-        "DEPLOY_ADMINISTRATIVE_PANEL": str(
-            mode is DeploymentMode.HOSTED_PANEL
+        "DEPLOY_HOSTED_AGENT_ORCHESTRATION": str(runtime_hosted).lower(),
+        "PREPARE_HOSTED_AGENT": str(runtime_hosted).lower(),
+        "DEPLOY_HOSTED_AGENT": str(
+            deploy_hosted and runtime_hosted
         ).lower(),
-        "DEPLOYMENT_TOPOLOGY": mode.value,
-        "CHAT_BACKEND": "hosted_agent" if hosted else "orchestrator",
+        "HOSTED_AGENT_PREPARED": str(runtime_hosted).lower(),
+        "DEPLOY_ADMINISTRATIVE_PANEL": str(
+            runtime_mode is DeploymentMode.HOSTED_PANEL
+        ).lower(),
+        "DEPLOYMENT_TOPOLOGY": runtime_mode.value,
+        "CHAT_BACKEND": "hosted_agent" if runtime_hosted else "orchestrator",
         "ORCHESTRATOR_BASE_URL": (
             f"https://{orchestrator['fqdn']}" if orchestrator["fqdn"] else ""
         ),
@@ -169,7 +181,7 @@ def build_settings(
         "HOSTED_AGENT_BASE_URL": hosted_base_url,
         "HOSTED_AGENT_RESOURCE_SCOPE": hosted_scope,
         "HOSTED_AGENT_IMAGE_VERSION": (
-            hosted_image_version if hosted else ""
+            hosted_image_version if runtime_hosted else ""
         ),
         "HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS": (
             environment.get("HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS") or "60"
@@ -181,7 +193,7 @@ def build_settings(
         "DATA_INGEST_APP_ENDPOINT": f"https://{dataingest['fqdn']}",
         "ORCHESTRATOR_APP_NAME": (
             app_names["orchestrator"]
-            if mode is DeploymentMode.CLASSIC
+            if runtime_mode is DeploymentMode.CLASSIC
             else ""
         ),
         "FRONTEND_APP_NAME": app_names["frontend"],

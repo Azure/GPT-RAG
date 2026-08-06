@@ -19,58 +19,80 @@ $ErrorActionPreference = 'Stop'
   }
 }
 
-# Initialize infrastructure submodule
+# Materialize the exact infrastructure commit pinned by manifest.json
 $projectRoot = Join-Path $PSScriptRoot ".."
 $infraDir = Join-Path $projectRoot "infra"
 $mainBicep = Join-Path $infraDir "main.bicep"
-
-Write-Host "Initializing infrastructure submodule..." -ForegroundColor Cyan
-git submodule update --init --recursive 2>$null
-
-# Fallback: when the repo was scaffolded via 'azd init' (ZIP download), the git
-# index has no submodule gitlink entries, so 'git submodule update' silently does
-# nothing and infra/ remains empty.  Detect that case and clone the landing-zone
-# repo directly.
-if (-not (Test-Path $mainBicep)) {
-    Write-Host "Submodule content not found. Cloning infra repo directly (azd init scenario)..." -ForegroundColor Cyan
-
-    # Extract infra repo URL and branch from .gitmodules
-    $gitmodulesPath = Join-Path $projectRoot ".gitmodules"
-    $infraUrl = $null
-    $infraRef = "main"  # safe default
-    if (Test-Path $gitmodulesPath) {
-        $urlMatch = Select-String -Path $gitmodulesPath -Pattern 'url\s*=\s*(.+)' | Select-Object -First 1
-        if ($urlMatch) { $infraUrl = $urlMatch.Matches.Groups[1].Value.Trim() }
-        $branchMatch = Select-String -Path $gitmodulesPath -Pattern 'branch\s*=\s*(.+)' | Select-Object -First 1
-        if ($branchMatch) { $infraRef = $branchMatch.Matches.Groups[1].Value.Trim() }
-    }
-    if (-not $infraUrl) {
-        Write-Host "Error: Could not determine infra repository URL from .gitmodules." -ForegroundColor Red
-        exit 1
-    }
-    Write-Host "  Infra repo: $infraUrl @ $infraRef (from .gitmodules)" -ForegroundColor Cyan
-
-    # Remove the empty infra directory and clone at the correct tag
-    if (Test-Path $infraDir) { Remove-Item -Path $infraDir -Recurse -Force }
-    git -c advice.detachedHead=false clone --depth 1 --branch $infraRef $infraUrl $infraDir
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "Error: Failed to clone infra repository ($infraUrl @ $infraRef)." -ForegroundColor Red
-        exit 1
-    }
-    Write-Host "Infrastructure submodule cloned successfully." -ForegroundColor Green
-}
-
 $manifestSource = Join-Path $projectRoot "manifest.json"
+$gitmodulesPath = Join-Path $projectRoot ".gitmodules"
+
 if (-not (Test-Path $manifestSource)) {
     Write-Host "Error: manifest.json is required to verify the infrastructure release pin." -ForegroundColor Red
     exit 1
 }
 $expectedInfraCommit = (Get-Content -LiteralPath $manifestSource -Raw | ConvertFrom-Json).ailz_commit
+if (-not $expectedInfraCommit -or $expectedInfraCommit -notmatch '^[0-9a-fA-F]{40}$') {
+    Write-Host "Error: manifest.json must contain a full 40-character ailz_commit." -ForegroundColor Red
+    exit 1
+}
+$urlMatch = Select-String -Path $gitmodulesPath -Pattern 'url\s*=\s*(.+)' | Select-Object -First 1
+$infraUrl = if ($urlMatch) { $urlMatch.Matches.Groups[1].Value.Trim() } else { $null }
+if (-not $infraUrl) {
+    Write-Host "Error: Could not determine infra repository URL from .gitmodules." -ForegroundColor Red
+    exit 1
+}
+
+Write-Host "Materializing infrastructure commit $expectedInfraCommit..." -ForegroundColor Cyan
+if (-not (Test-Path $infraDir)) {
+    New-Item -ItemType Directory -Path $infraDir | Out-Null
+}
+if (-not (Test-Path (Join-Path $infraDir '.git'))) {
+    & git -C $infraDir init | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Error: Failed to initialize the infra repository." -ForegroundColor Red
+        exit 1
+    }
+}
+& git -C $infraDir remote get-url origin 2>$null | Out-Null
+if ($LASTEXITCODE -eq 0) {
+    & git -C $infraDir remote set-url origin $infraUrl
+} else {
+    & git -C $infraDir remote add origin $infraUrl
+}
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Error: Failed to configure the infra repository remote." -ForegroundColor Red
+    exit 1
+}
+& git -C $infraDir fetch --depth 1 origin $expectedInfraCommit
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Error: Failed to fetch pinned infra commit $expectedInfraCommit." -ForegroundColor Red
+    exit 1
+}
+& git -C $infraDir -c advice.detachedHead=false checkout --detach --force FETCH_HEAD
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Error: Failed to check out pinned infra commit $expectedInfraCommit." -ForegroundColor Red
+    exit 1
+}
+& git -C $infraDir clean -ffdx
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Error: Failed to clean stale files from the pinned infra checkout." -ForegroundColor Red
+    exit 1
+}
+& git -C $infraDir submodule update --init --recursive
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Error: Failed to initialize nested infrastructure submodules." -ForegroundColor Red
+    exit 1
+}
+
 $actualInfraCommitOutput = & git -C $infraDir rev-parse HEAD 2>$null
 $revParseExitCode = $LASTEXITCODE
 $actualInfraCommit = if ($actualInfraCommitOutput) { "$actualInfraCommitOutput".Trim() } else { '' }
 if ($revParseExitCode -ne 0 -or -not $expectedInfraCommit -or $actualInfraCommit -ne $expectedInfraCommit) {
     Write-Host "Error: infra must resolve to $expectedInfraCommit but is at $actualInfraCommit." -ForegroundColor Red
+    exit 1
+}
+if (-not (Test-Path $mainBicep)) {
+    Write-Host "Error: Pinned infra commit does not contain main.bicep." -ForegroundColor Red
     exit 1
 }
 if (Test-Path $manifestSource) {

@@ -276,6 +276,23 @@ class LifecycleParityTests(unittest.TestCase):
             "${DEPLOY_HOSTED_AGENT=false}",
             parameters["deployHostedAgent"]["value"],
         )
+        self.assertEqual(
+            "${DEPLOY_ACR_TASK_AGENT_POOL=false}",
+            parameters["deployAcrTaskAgentPool"]["value"],
+        )
+
+    def test_preprovision_fetches_exact_manifest_infra_commit(self) -> None:
+        scripts = ROOT / "scripts"
+        ps1 = (scripts / "preProvision.ps1").read_text(encoding="utf-8-sig")
+        sh = (scripts / "preProvision.sh").read_text(encoding="utf-8-sig")
+
+        for content in (ps1, sh):
+            with self.subTest(script="powershell" if content is ps1 else "shell"):
+                self.assertIn("ailz_commit", content)
+                self.assertIn("fetch --depth 1 origin", content)
+                self.assertIn("checkout --detach --force FETCH_HEAD", content)
+                self.assertIn("clean -ffdx", content)
+                self.assertNotIn("clone --depth 1 --branch", content)
 
     def test_both_predeploy_hooks_filter_manifest_components_by_topology(
         self,

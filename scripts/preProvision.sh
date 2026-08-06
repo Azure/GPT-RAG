@@ -21,53 +21,14 @@ NC='\033[0m' # No Color
 eval "$(azd env get-values 2>/dev/null | sed 's/^/export /')" || true
 
 ###############################################################################
-# Initialize infrastructure submodule
+# Materialize the exact infrastructure commit pinned by manifest.json
 ###############################################################################
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$SCRIPT_DIR/.."
 INFRA_DIR="$PROJECT_ROOT/infra"
 MAIN_BICEP="$INFRA_DIR/main.bicep"
-
-echo "${CYAN}Initializing infrastructure submodule...${NC}"
-git submodule update --init --recursive 2>/dev/null
-
-# Fallback: when the repo was scaffolded via 'azd init' (ZIP download), the git
-# index has no submodule gitlink entries, so 'git submodule update' silently does
-# nothing and infra/ remains empty.  Detect that case and clone the landing-zone
-# repo directly.
-if [ ! -f "$MAIN_BICEP" ]; then
-    echo "${CYAN}Submodule content not found. Cloning infra repo directly (azd init scenario)...${NC}"
-
-    # Extract infra repo URL and branch from .gitmodules
-    GITMODULES="$PROJECT_ROOT/.gitmodules"
-    INFRA_URL=""
-    INFRA_REF="main"  # safe default
-    if [ -f "$GITMODULES" ]; then
-        INFRA_URL=$(grep -m1 'url\s*=' "$GITMODULES" | sed 's/.*=\s*//' | xargs)
-        BRANCH=$(grep -m1 'branch\s*=' "$GITMODULES" | sed 's/.*=\s*//' | xargs)
-        if [ -n "$BRANCH" ]; then
-            INFRA_REF="$BRANCH"
-        fi
-    fi
-    if [ -z "$INFRA_URL" ]; then
-        echo "${YELLOW}Error: Could not determine infra repository URL from .gitmodules.${NC}"
-        exit 1
-    fi
-    echo "${CYAN}  Infra repo: $INFRA_URL @ $INFRA_REF (from .gitmodules)${NC}"
-
-    # Remove the empty infra directory and clone at the correct tag
-    rm -rf "$INFRA_DIR"
-    git -c advice.detachedHead=false clone --depth 1 --branch "$INFRA_REF" "$INFRA_URL" "$INFRA_DIR"
-    if [ $? -ne 0 ]; then
-        echo "${YELLOW}Error: Failed to clone infra repository ($INFRA_URL @ $INFRA_REF).${NC}"
-        exit 1
-    fi
-    echo "${GREEN}Infrastructure submodule cloned successfully.${NC}"
-fi
-
-###############################################################################
-# Override submodule files with project-level overrides
-###############################################################################
+GITMODULES="$PROJECT_ROOT/.gitmodules"
+MANIFEST="$PROJECT_ROOT/manifest.json"
 
 PYTHON_CMD=""
 if command -v python3 >/dev/null 2>&1; then
@@ -79,12 +40,67 @@ else
     exit 1
 fi
 
-EXPECTED_INFRA_COMMIT="$("$PYTHON_CMD" -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["ailz_commit"])' "$PROJECT_ROOT/manifest.json")"
+if [ ! -f "$MANIFEST" ]; then
+    echo "${YELLOW}Error: manifest.json is required to verify the infrastructure release pin.${NC}"
+    exit 1
+fi
+EXPECTED_INFRA_COMMIT="$("$PYTHON_CMD" -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["ailz_commit"])' "$MANIFEST")"
+case "$EXPECTED_INFRA_COMMIT" in
+    *[!0-9a-fA-F]*|'') echo "${YELLOW}Error: manifest.json must contain a full 40-character ailz_commit.${NC}"; exit 1 ;;
+esac
+if [ "${#EXPECTED_INFRA_COMMIT}" -ne 40 ]; then
+    echo "${YELLOW}Error: manifest.json must contain a full 40-character ailz_commit.${NC}"
+    exit 1
+fi
+INFRA_URL=$(grep -m1 'url[[:space:]]*=' "$GITMODULES" | sed 's/.*=[[:space:]]*//' | xargs)
+if [ -z "$INFRA_URL" ]; then
+    echo "${YELLOW}Error: Could not determine infra repository URL from .gitmodules.${NC}"
+    exit 1
+fi
+
+echo "${CYAN}Materializing infrastructure commit $EXPECTED_INFRA_COMMIT...${NC}"
+mkdir -p "$INFRA_DIR"
+if [ ! -e "$INFRA_DIR/.git" ]; then
+    git -C "$INFRA_DIR" init >/dev/null || {
+        echo "${YELLOW}Error: Failed to initialize the infra repository.${NC}"
+        exit 1
+    }
+fi
+if git -C "$INFRA_DIR" remote get-url origin >/dev/null 2>&1; then
+    git -C "$INFRA_DIR" remote set-url origin "$INFRA_URL"
+else
+    git -C "$INFRA_DIR" remote add origin "$INFRA_URL"
+fi
+git -C "$INFRA_DIR" fetch --depth 1 origin "$EXPECTED_INFRA_COMMIT" || {
+    echo "${YELLOW}Error: Failed to fetch pinned infra commit $EXPECTED_INFRA_COMMIT.${NC}"
+    exit 1
+}
+git -C "$INFRA_DIR" -c advice.detachedHead=false checkout --detach --force FETCH_HEAD || {
+    echo "${YELLOW}Error: Failed to check out pinned infra commit $EXPECTED_INFRA_COMMIT.${NC}"
+    exit 1
+}
+git -C "$INFRA_DIR" clean -ffdx || {
+    echo "${YELLOW}Error: Failed to clean stale files from the pinned infra checkout.${NC}"
+    exit 1
+}
+git -C "$INFRA_DIR" submodule update --init --recursive || {
+    echo "${YELLOW}Error: Failed to initialize nested infrastructure submodules.${NC}"
+    exit 1
+}
+
 ACTUAL_INFRA_COMMIT="$(git -C "$INFRA_DIR" rev-parse HEAD 2>/dev/null || true)"
 if [ -z "$EXPECTED_INFRA_COMMIT" ] || [ "$ACTUAL_INFRA_COMMIT" != "$EXPECTED_INFRA_COMMIT" ]; then
     echo "${YELLOW}Error: infra must resolve to $EXPECTED_INFRA_COMMIT but is at $ACTUAL_INFRA_COMMIT.${NC}"
     exit 1
 fi
+if [ ! -f "$MAIN_BICEP" ]; then
+    echo "${YELLOW}Error: Pinned infra commit does not contain main.bicep.${NC}"
+    exit 1
+fi
+
+###############################################################################
+# Override submodule files with project-level overrides
+###############################################################################
 
 if [ -f "$PROJECT_ROOT/manifest.json" ]; then
     echo "${CYAN}Applying project manifest.json to infra...${NC}"

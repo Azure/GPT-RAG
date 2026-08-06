@@ -242,10 +242,23 @@ function Set-GptRagAppConfiguration {
         exit 1
     }
     $topologyInfo = ([string]$topologyJson).Trim() | ConvertFrom-Json
-    $hostedMode = [bool]$topologyInfo.deploy_hosted_agent_orchestration
+    $targetHostedMode = [bool]$topologyInfo.deploy_hosted_agent_orchestration
+    $currentChatBackend = (Get-OptionalEnvValue 'CHAT_BACKEND').ToLowerInvariant()
+    $hostedCutoverReady = (
+        (Test-Truthy (Get-OptionalEnvValue 'DEPLOY_HOSTED_AGENT' 'false')) -and
+        -not [string]::IsNullOrWhiteSpace((Get-OptionalEnvValue 'HOSTED_AGENT_IMAGE_VERSION')) -and
+        -not [string]::IsNullOrWhiteSpace((Get-OptionalEnvValue 'HOSTED_AGENT_BASE_URL'))
+    )
+    $hostedMode = $targetHostedMode -and (
+        $currentChatBackend -ne 'orchestrator' -or $hostedCutoverReady
+    )
     $administrativePanel = [bool]$topologyInfo.deploy_administrative_panel
     $cosmosEnabled = (-not $hostedMode) -or $administrativePanel
-    $deploymentTopology = [string]$topologyInfo.topology
+    $deploymentTopology = if ($hostedMode) {
+        [string]$topologyInfo.topology
+    } else {
+        'classic'
+    }
 
     $appConfigName = Get-AppConfigResourceName -Endpoint $Endpoint
     $nameSuffix = $resourceToken
