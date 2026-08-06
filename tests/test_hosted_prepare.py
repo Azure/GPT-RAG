@@ -237,19 +237,21 @@ class PersistDigestTests(unittest.TestCase):
             SOURCE_COMMIT,
         )
 
-        self.assertEqual(3, mock_run.call_count)
+        self.assertEqual(4, mock_run.call_count)
         commands = [call.args[0] for call in mock_run.call_args_list]
         self.assertEqual(
             [
                 "HOSTED_AGENT_IMAGE_VERSION",
                 "HOSTED_AGENT_IMAGE_SOURCE_COMMIT",
+                "HOSTED_AGENT_IMAGE_STARTUP_COMMAND_SHA256",
                 "HOSTED_AGENT_IMAGE_VERSION",
             ],
             [command[3] for command in commands],
         )
         self.assertEqual("", commands[0][4])
         self.assertEqual(SOURCE_COMMIT, commands[1][4])
-        self.assertEqual(DIGEST, commands[2][4])
+        self.assertEqual(64, len(commands[2][4]))
+        self.assertEqual(DIGEST, commands[3][4])
 
     @patch("config.deployment.hosted_prepare.shutil.which")
     @patch("config.deployment.hosted_prepare.subprocess.run")

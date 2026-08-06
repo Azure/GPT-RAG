@@ -193,6 +193,14 @@ def persist_digest(
             "HOSTED_AGENT_IMAGE_SOURCE_COMMIT",
             generated_source_commit or "",
         ),
+        (
+            "HOSTED_AGENT_IMAGE_STARTUP_COMMAND_SHA256",
+            (
+                hosted_startup_command_sha256(environment)
+                if generated_source_commit
+                else ""
+            ),
+        ),
         ("HOSTED_AGENT_IMAGE_VERSION", digest),
     )
     for name, value in values:

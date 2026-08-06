@@ -66,7 +66,6 @@ class DeploymentCompositionTests(unittest.TestCase):
                 "HOSTED_AGENT_PREPARED": "false",
                 "DEPLOY_ADMINISTRATIVE_PANEL": "false",
                 "DEPLOYMENT_TOPOLOGY": "classic",
-                "HOSTED_AGENT_MIGRATION": "false",
                 "CHAT_BACKEND": "orchestrator",
                 "HOSTED_AGENT_BASE_URL": "",
                 "HOSTED_AGENT_RESOURCE_SCOPE": "",
@@ -122,32 +121,6 @@ class DeploymentCompositionTests(unittest.TestCase):
             "CosmosDBBuiltInDataContributor", dataingest["roles"]
         )
         self.assertEqual("hosted_agent", settings_by_name(composed)["CHAT_BACKEND"])
-
-    def test_classic_to_hosted_migration_preserves_classic_until_cutover(
-        self,
-    ) -> None:
-        environment = {
-            "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
-            "HOSTED_AGENT_MIGRATION": "true",
-            "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
-            "HOSTED_AGENT_IMAGE_VERSION": DIGEST,
-        }
-
-        composed = compose_parameters(source_parameters(), environment)
-        parameters = composed["parameters"]
-        apps = parameters["containerAppsList"]["value"]
-        settings = settings_by_name(composed)
-
-        self.assertEqual(
-            ["orchestrator", "frontend", "dataingest"],
-            [app["service_name"] for app in apps],
-        )
-        self.assertTrue(parameters["deployCosmosDb"]["value"])
-        self.assertNotEqual([], parameters["databaseContainersList"]["value"])
-        self.assertTrue(parameters["prepareHostedAgent"]["value"])
-        self.assertTrue(parameters["deployHostedAgent"]["value"])
-        self.assertEqual("true", settings["HOSTED_AGENT_MIGRATION"])
-        self.assertEqual("orchestrator", settings["CHAT_BACKEND"])
 
     def test_fresh_hosted_composition_allows_automatic_image_preparation(
         self,

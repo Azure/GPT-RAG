@@ -92,7 +92,7 @@ class IntegrationPinTests(unittest.TestCase):
         sh = (scripts / "preProvision.sh").read_text(encoding="utf-8-sig")
 
         self.assertIn(
-            "Failed to persist deployment topology setting $name",
+            "Failed to persist resolved topology setting $name",
             ps1,
         )
         self.assertIn(
@@ -100,13 +100,10 @@ class IntegrationPinTests(unittest.TestCase):
             ps1,
         )
         self.assertIn(
-            "Failed to persist deployment topology setting $TOPO_KEY",
+            "Failed to persist the resolved deployment topology",
             sh,
         )
-        self.assertIn(
-            'if ! azd env set "$TOPO_KEY" "$TOPO_VALUE"',
-            sh,
-        )
+        self.assertIn('if ! azd env set "$TOPO_KEY" "$TOPO_VALUE"', sh)
 
     def test_rollback_restores_full_classic_release_contract(self) -> None:
         rollback = json.loads(
@@ -139,7 +136,6 @@ class IntegrationPinTests(unittest.TestCase):
         self.assertEqual(
             "false", rollback["azd"]["DEPLOY_ADMINISTRATIVE_PANEL"]
         )
-        self.assertEqual("false", rollback["azd"]["HOSTED_AGENT_MIGRATION"])
         self.assertEqual(
             "orchestrator", rollback["appConfiguration"]["CHAT_BACKEND"]
         )
@@ -150,7 +146,6 @@ class IntegrationPinTests(unittest.TestCase):
                 "DEPLOY_HOSTED_AGENT": "false",
                 "HOSTED_AGENT_PREPARED": "false",
                 "DEPLOY_ADMINISTRATIVE_PANEL": "false",
-                "HOSTED_AGENT_MIGRATION": "false",
                 "CHAT_BACKEND": "orchestrator",
                 "DEPLOYMENT_TOPOLOGY": "classic",
                 "HOSTED_AGENT_BASE_URL": "",

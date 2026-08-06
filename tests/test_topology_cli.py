@@ -136,48 +136,12 @@ class ResolveEnvironmentTopologyTests(unittest.TestCase):
         mock_rg_exists.return_value = False
 
         mode = topology.resolve_environment_topology(
-            {"DEPLOYMENT_TOPOLOGY": "classic"},
-            resource_group_name="rg-test",
-            app_config_endpoint="https://x",
-        )
-
-        self.assertEqual(DeploymentMode.CLASSIC, mode)
-        mock_rg_exists.assert_not_called()
-        mock_read_settings.assert_not_called()
-
-    @patch("config.deployment.topology.read_persisted_settings")
-    @patch("config.deployment.topology.resource_group_exists", return_value=True)
-    def test_explicit_hosted_detects_existing_classic_migration(
-        self, _mock_rg_exists: object, mock_read_settings: object
-    ) -> None:
-        mock_read_settings.return_value = {"DEPLOYMENT_TOPOLOGY": "classic"}
-
-        mode, migrating = topology.resolve_environment_topology_context(
             {"DEPLOYMENT_TOPOLOGY": "hosted-no-panel"},
             resource_group_name="rg-test",
             app_config_endpoint="https://x",
         )
 
         self.assertEqual(DeploymentMode.HOSTED_NO_PANEL, mode)
-        self.assertTrue(migrating)
-
-    @patch("config.deployment.topology.read_persisted_settings")
-    @patch("config.deployment.topology.resource_group_exists")
-    def test_materialized_migration_stays_sticky_without_azure_lookup(
-        self, mock_rg_exists: object, mock_read_settings: object
-    ) -> None:
-        mode, migrating = topology.resolve_environment_topology_context(
-            {
-                "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
-                "HOSTED_AGENT_MIGRATION": "true",
-            },
-            resource_group_name="rg-test",
-            app_config_endpoint="https://x",
-        )
-
-        self.assertEqual(DeploymentMode.HOSTED_NO_PANEL, mode)
-        self.assertTrue(migrating)
-        mock_rg_exists.assert_not_called()
         mock_read_settings.assert_not_called()
 
     @patch("config.deployment.topology.read_persisted_settings")
