@@ -734,7 +734,20 @@ if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
 }
 
 #-------------------------------------------------------------------------------
-# 2) AI Foundry Setup
+# 2) Hosted conversation continuity
+#-------------------------------------------------------------------------------
+if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
+    Write-Host "`n🔐 Hosted conversation continuity configuration..."
+    Write-Host "🚀 Running config.continuity.setup..."
+    Invoke-PythonModule -ModuleName 'config.continuity.setup'
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    Write-Host "✅ Hosted conversation continuity configuration finished."
+} else {
+    Write-Host "⏭️  Skipping hosted continuity setup (missing APP_CONFIG_ENDPOINT)."
+}
+
+#-------------------------------------------------------------------------------
+# 3) AI Foundry Setup
 #-------------------------------------------------------------------------------
 if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
     Write-Host "`n📑 AI Foundry Setup..."
@@ -747,7 +760,7 @@ if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
 }
 
 #-------------------------------------------------------------------------------
-# 3) Container Apps Setup
+# 4) Container Apps Setup
 #-------------------------------------------------------------------------------
 if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
     Write-Host "`n🔍 ContainerApp setup..."
@@ -760,7 +773,7 @@ if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
 }
 
 #-------------------------------------------------------------------------------
-# 4) AI Search Setup
+# 5) AI Search Setup
 #-------------------------------------------------------------------------------
 if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
     Write-Host "🔍 AI Search setup..."

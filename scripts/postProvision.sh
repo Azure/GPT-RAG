@@ -128,7 +128,15 @@ python -m config.governance.setup
 echo "✅ Governance and audit configuration finished."
 
 ###############################################################################
-# 2) AI Foundry Setup
+# 2) Hosted conversation continuity
+###############################################################################
+echo
+echo "🔐 Hosted conversation continuity configuration…"
+python -m config.continuity.setup
+echo "✅ Hosted conversation continuity configuration finished."
+
+###############################################################################
+# 3) AI Foundry Setup
 ###############################################################################
 echo
 echo "📑 AI Foundry Setup…"
@@ -141,7 +149,7 @@ echo "📑 AI Foundry Setup…"
 }
 
 ###############################################################################
-# 3) Container Apps Setup
+# 4) Container Apps Setup
 ###############################################################################
 echo
 echo "🔍 ContainerApp setup…"
@@ -154,7 +162,7 @@ echo "🔍 ContainerApp setup…"
 }
 
 ###############################################################################
-# 4) AI Search Setup
+# 5) AI Search Setup
 ###############################################################################
 echo
 echo "🔍 AI Search setup…"
