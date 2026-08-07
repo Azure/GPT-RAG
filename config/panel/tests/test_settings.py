@@ -28,6 +28,13 @@ class PanelSettingsTests(unittest.TestCase):
         )
         self.assertEqual(published["PANEL_CURSOR_TTL_SECONDS"], "600")
         self.assertEqual(published["PANEL_OVERVIEW_MIN_CARDINALITY"], "5")
+        # gpt-rag-ingestion operator surfaces (PR #274, merge 5569dd6): safe
+        # defaults, never invented as enabled/populated.
+        self.assertEqual(
+            published["PANEL_OPERATOR_SURFACES_ENABLED"], "false"
+        )
+        self.assertEqual(published["PANEL_OPERATOR_APP_ROLE"], "")
+        self.assertEqual(published["PANEL_OPERATOR_GROUP_ID"], "")
 
     def test_owner_binding_validated_gate_forced_false_even_if_set(self) -> None:
         published = settings.public_settings(
@@ -44,6 +51,33 @@ class PanelSettingsTests(unittest.TestCase):
         # the live-evidence gate is force-disabled.
         self.assertEqual(
             published["PANEL_CONVERSATION_ENUMERATION_MODE"], "delegated"
+        )
+
+    def test_operator_surfaces_enabled_gate_forced_false_even_if_set(
+        self,
+    ) -> None:
+        # Mirrors PANEL_HISTORY_OWNER_BINDING_VALIDATED: no dedicated
+        # evidence-gate verification procedure for the operator surfaces
+        # ships in this change, so this stays force-published false even if
+        # an operator sets it locally, regardless of the ingestion component
+        # work (PR #274) having landed.
+        published = settings.public_settings(
+            {
+                "PANEL_OPERATOR_SURFACES_ENABLED": "true",
+                "PANEL_OPERATOR_APP_ROLE": "PanelOperator",
+                "PANEL_OPERATOR_GROUP_ID": "11111111-1111-1111-1111-111111111111",
+            }
+        )
+
+        self.assertEqual(
+            published["PANEL_OPERATOR_SURFACES_ENABLED"], "false"
+        )
+        # The role/group are plain operator inputs -- pass through
+        # unmodified, unlike the forced-false enabled gate above.
+        self.assertEqual(published["PANEL_OPERATOR_APP_ROLE"], "PanelOperator")
+        self.assertEqual(
+            published["PANEL_OPERATOR_GROUP_ID"],
+            "11111111-1111-1111-1111-111111111111",
         )
 
     def test_container_names_are_overridable(self) -> None:

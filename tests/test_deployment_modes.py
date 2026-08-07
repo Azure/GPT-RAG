@@ -574,6 +574,32 @@ class PanelPlatformContractTests(unittest.TestCase):
 
         self.assertNotIn("CosmosDBBuiltInDataContributor", dataingest["roles"])
 
+    def test_dataingest_keeps_existing_blob_role_for_corpus_curation(self) -> None:
+        # gpt-rag-ingestion's corpus-curation decisions (PR #274) are written
+        # to the existing per-file-log blob control store this identity
+        # already owns, via Blob Storage ETag optimistic concurrency -- never
+        # Cosmos. This asserts that identity's existing blob RBAC (already
+        # sufficient for the classic Files tab's blocked/unblock flow) is
+        # untouched by the hosted-mode Cosmos-role stripping above.
+        # (Hosted-panel itself still fails closed -- see
+        # test_hosted_with_panel_fails_closed_until_611 -- so only
+        # hosted-no-panel is reachable through compose_parameters today; the
+        # role list dataingest would carry under hosted-panel is unaffected
+        # by this stripping code path either way, since it only ever removes
+        # CosmosDBBuiltInDataContributor.)
+        environment = {
+            "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "true",
+            "DEPLOY_ADMINISTRATIVE_PANEL": "false",
+            "HOSTED_AGENT_IMAGE_VERSION": DIGEST,
+            "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
+        }
+
+        composed = compose_parameters(source_parameters(), environment)
+        apps = composed["parameters"]["containerAppsList"]["value"]
+        dataingest = next(app for app in apps if app["service_name"] == "dataingest")
+
+        self.assertIn("StorageBlobDataContributor", dataingest["roles"])
+
     def test_panel_app_configuration_defaults_are_published_and_safe(self) -> None:
         environment = {
             "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "false",
@@ -596,6 +622,11 @@ class PanelPlatformContractTests(unittest.TestCase):
         )
         self.assertEqual(settings["PANEL_CURSOR_TTL_SECONDS"], "600")
         self.assertEqual(settings["PANEL_OVERVIEW_MIN_CARDINALITY"], "5")
+        # gpt-rag-ingestion operator surfaces (PR #274, merge 5569dd6):
+        # exact key names, safe defaults, feature never set true here.
+        self.assertEqual(settings["PANEL_OPERATOR_SURFACES_ENABLED"], "false")
+        self.assertEqual(settings["PANEL_OPERATOR_APP_ROLE"], "")
+        self.assertEqual(settings["PANEL_OPERATOR_GROUP_ID"], "")
 
     def test_panel_owner_binding_validated_gate_cannot_be_set_via_environment(
         self,
@@ -610,6 +641,28 @@ class PanelPlatformContractTests(unittest.TestCase):
         settings = settings_by_name(composed)
 
         self.assertEqual(settings["PANEL_HISTORY_OWNER_BINDING_VALIDATED"], "false")
+
+    def test_panel_operator_surfaces_enabled_gate_cannot_be_set_via_environment(
+        self,
+    ) -> None:
+        environment = {
+            "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "false",
+            "DEPLOY_ADMINISTRATIVE_PANEL": "false",
+            "PANEL_OPERATOR_SURFACES_ENABLED": "true",
+            "PANEL_OPERATOR_APP_ROLE": "PanelOperator",
+            "PANEL_OPERATOR_GROUP_ID": "11111111-1111-1111-1111-111111111111",
+        }
+
+        composed = compose_parameters(source_parameters(), environment)
+        settings = settings_by_name(composed)
+
+        self.assertEqual(settings["PANEL_OPERATOR_SURFACES_ENABLED"], "false")
+        # Role/group are plain operator inputs -- pass through unmodified.
+        self.assertEqual(settings["PANEL_OPERATOR_APP_ROLE"], "PanelOperator")
+        self.assertEqual(
+            settings["PANEL_OPERATOR_GROUP_ID"],
+            "11111111-1111-1111-1111-111111111111",
+        )
 
     def test_no_panel_containers_or_settings_leak_into_classic_composition(
         self,
