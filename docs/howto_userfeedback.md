@@ -5,9 +5,11 @@ assistant responses through the UI. In the currently released classic
 Container Apps topology and the explicit classic fallback, feedback is
 processed by the orchestrator and stored in **Cosmos DB**. The published
 [hosted component matrix](hosted_agent_release_matrix.md) implements separate
-user history, feedback, and delete APIs in UI `v2.6.0`, but hosted-panel is not
-published as a GPT-RAG umbrella topology. Keep
-`DEPLOY_ADMINISTRATIVE_PANEL=false` in released umbrella deployments.
+user history, feedback, and delete APIs in UI `v2.6.0`. Hosted-panel is now an
+explicit supported topology in the pinned umbrella matrix, but
+`PANEL_HISTORY_ENABLED` and `PANEL_HISTORY_OWNER_BINDING_VALIDATED` remain
+deployment-published `false`, so these routes continue to return 503 until
+their separate evidence procedure completes.
 
 For the component contract, the UI BFF checks the caller's validated `oid`
 against the owner index before reading managed Conversation messages or

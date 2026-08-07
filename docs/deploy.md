@@ -53,14 +53,15 @@ ingestion services in the classic Container Apps topology.
 
 ### Chat runtime modes
 
-!!! warning "The component matrix is not an umbrella release"
+!!! warning "Exact matrix pinned; evidence-gated surfaces remain off"
     UI `v2.6.0`, orchestrator `v4.0.0`, ingestion `v2.7.0`, and AILZ `v2.5.0`
-    are published. GPT-RAG has not published an umbrella release that pins and
-    validates them together, and its current `develop` manifest still references
-    older component versions. Continue to use the classic instructions above.
-    The hosted workflow below describes the pending umbrella contract and must
-    not be applied to a released GPT-RAG manifest. See the
-    [exact component matrix](hosted_agent_release_matrix.md).
+    are pinned by the umbrella integration at their exact release commits.
+    Classic, hosted/no-panel, and explicitly selected hosted-panel are supported
+    topologies. The manifest's umbrella tag remains `unreleased`; use a GPT-RAG
+    source or release that contains these pins. Continuity, user-history,
+    owner-binding validation, and operator-surface evidence gates remain
+    deployment-published `false`; no live validation result is implied. See the
+    [exact supported matrix](hosted_agent_release_matrix.md).
 
 The platform implementation resolves one canonical topology before provisioning
 and materializes the corresponding legacy flags and App Configuration values.
@@ -68,24 +69,26 @@ Topology never changes automatically during a chat request.
 
 | Environment or operator choice | Resolved settings | Resulting topology |
 | --- | --- | --- |
-| Genuinely fresh environment after a future umbrella release | `DEPLOYMENT_TOPOLOGY=hosted-no-panel`, `DEPLOY_HOSTED_AGENT_ORCHESTRATION=true`, `DEPLOY_ADMINISTRATIVE_PANEL=false`, `CHAT_BACKEND=hosted_agent` | Web UI and ingestion remain in Container Apps. Chat runs in a Microsoft Foundry hosted agent. No orchestrator Container App or panel-only Cosmos DB is provisioned. |
+| Genuinely fresh environment | `DEPLOYMENT_TOPOLOGY=hosted-no-panel`, `DEPLOY_HOSTED_AGENT_ORCHESTRATION=true`, `DEPLOY_ADMINISTRATIVE_PANEL=false`, `CHAT_BACKEND=hosted_agent` | Web UI and ingestion remain in Container Apps. Chat runs in a Microsoft Foundry hosted agent. No orchestrator Container App or panel-only Cosmos DB is provisioned. |
 | Existing environment with persisted topology | Existing topology and `CHAT_BACKEND` stay sticky. An unmarked pre-cutover environment resolves to `classic`. | Upgrade does not implicitly migrate identity, conversation, authorization, or cost semantics. |
 | Explicit Container Apps fallback | `DEPLOYMENT_TOPOLOGY=classic`, materialized hosted and panel flags `false`, `CHAT_BACKEND=orchestrator` | UI routes chat to the orchestrator Container App. Classic history and panel data remain available. |
 | Explicit migration to hosted/no-panel | `DEPLOYMENT_TOPOLOGY=hosted-no-panel`, delegated hosted scope configured, panel `false` | Runs the two-phase hosted lifecycle below, then validates the hosted request path before the classic chat path is removed or deactivated. |
+| Explicit hosted panel | `DEPLOYMENT_TOPOLOGY=hosted-panel`, hosted and administrative-panel flags `true`, `CHAT_BACKEND=hosted_agent` | Deploys UI and ingestion, omits the orchestrator Container App, and provisions only the owner-index and feedback metadata containers. User-history and operator routes remain off/503 because their evidence gates stay `false`. |
 
-Do not select `hosted-panel`. UI and ingestion component endpoints exist, but
-the platform selector still rejects this topology and force-disables its
-evidence gates. `DEPLOY_ADMINISTRATIVE_PANEL=false` remains required.
+Hosted-panel is never selected implicitly. Operators must set
+`DEPLOYMENT_TOPOLOGY=hosted-panel` or explicitly set both legacy hosted and
+administrative-panel flags to `true`. A stray panel flag while hosted
+orchestration is `false` remains classic.
 
 The deployment hooks publish the shared runtime contract under the App
 Configuration label `gpt-rag`:
 
 | Setting | Operator contract |
 | --- | --- |
-| `DEPLOYMENT_TOPOLOGY` | Canonical deployment choice: `hosted-no-panel` or `classic`. `hosted-panel` still fails platform selection. |
+| `DEPLOYMENT_TOPOLOGY` | Canonical deployment choice: `hosted-no-panel`, `hosted-panel`, or `classic`. Hosted-panel requires explicit selection. |
 | `CHAT_BACKEND` | UI `v2.6.0` treats missing or blank as `hosted_agent`; an umbrella deployment must publish the resolved sticky value. `orchestrator` is the explicit fallback. Unknown values fail startup. Environment configuration takes precedence over App Configuration. |
 | `ORCHESTRATOR_BASE_URL` | Classic service root, used only when `CHAT_BACKEND=orchestrator`. The UI calls the `/orchestrator` route on this endpoint. |
-| `HOSTED_AGENT_BASE_URL` | Required HTTPS hosted service root. Orchestrator `v4.0.0` defines stateless `POST /responses`; UI `v2.6.0` currently sends complete ordered messages through the distinct `POST /invocations` compatibility route. A future umbrella release must align the live call route with the protocol evidence it validates. |
+| `HOSTED_AGENT_BASE_URL` | Required HTTPS hosted service root. Orchestrator `v4.0.0` defines stateless `POST /responses`; UI `v2.6.0` currently sends complete ordered messages through the distinct `POST /invocations` compatibility route. Continuity remains off until the live call route satisfies the protocol evidence gate. |
 | `HOSTED_AGENT_RESOURCE_SCOPE` | Required explicit non-ARM hosted data-plane Entra scope ending in `/.default`, for example `api://<application-id>/.default`. |
 | `HOSTED_AGENT_AUTH_MODE` | `user_delegated` is the default and required continuity path. Under OQ-OWN, it means the trusted UI BFF derives `x-ms-user-identity`; it does not mean an OBO token is sent to the agent. OBO remains a separate retrieval flow. `service_identity` is an explicit reviewed exception that is incompatible with owner-bound continuity, so continuity stays off/503 in that mode. |
 | `HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS` | Finite positive wait for the next SSE event. The UI default is `60`; an infinite timeout is rejected. |
@@ -100,10 +103,10 @@ tokens are not copied into tool payloads or client-defined identity headers.
 
 #### Hosted conversation continuity platform gate
 
-!!! danger "Delegated owner binding remains umbrella-gated"
+!!! danger "Delegated owner binding remains evidence-gated"
     `HOSTED_CONTINUITY_ENABLED` defaults to `false` and must stay false. The
-    component releases are published, but deployment must still pin them
-    together and prove the live 100%-routed Responses protocol `2.0.0`, trusted
+    exact component releases are pinned, but deployment must still prove the
+    live 100%-routed Responses protocol `2.0.0`, trusted
     UI BFF identity derivation, and the two exact direct agent-scoped roles
     before recording
     `HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true`. Otherwise compatible
@@ -209,13 +212,13 @@ owned by the trusted UI BFF. See the
 
 #### Two-phase hosted deployment
 
-For a fresh hosted deployment, configure the delegated data-plane scope before
-the first provision:
+For a fresh hosted/no-panel deployment, configure the delegated data-plane scope
+before the first provision:
 
 ```powershell
 azd env set HOSTED_AGENT_RESOURCE_SCOPE "api://<application-id>/.default"
 azd env set HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS 60
-# Keep continuity disabled until an umbrella release pins the matrix and validates ownership.
+# Keep continuity disabled until live protocol, identity, and role evidence validates ownership.
 azd env set HOSTED_CONTINUITY_ENABLED false
 azd provision
 pwsh scripts/prepareHostedDeployment.ps1
@@ -226,6 +229,19 @@ azd deploy
 On POSIX systems, use `scripts/prepareHostedDeployment.sh` for the preparation
 step. For an explicit migration, set
 `DEPLOYMENT_TOPOLOGY=hosted-no-panel` before the first `azd provision`.
+
+For the supported hosted-panel topology, use the same two-phase flow with:
+
+```powershell
+azd env set DEPLOYMENT_TOPOLOGY hosted-panel
+azd env set HOSTED_CONTINUITY_ENABLED false
+```
+
+This composes UI and ingestion plus only the two panel metadata containers.
+`PANEL_HISTORY_ENABLED`, `PANEL_HISTORY_OWNER_BINDING_VALIDATED`, and
+`PANEL_OPERATOR_SURFACES_ENABLED` remain deployment-published `false`; do not
+override them before their separate evidence and authorization procedures
+complete. The corresponding routes return HTTP 503 while disabled.
 
 The first provision creates hosted prerequisites with image preparation
 enabled but hosted deployment disabled. The preparation command clones and
@@ -259,8 +275,10 @@ classic panel data.
 
 GPT-RAG `v3.7.0` remains the latest published umbrella release at the time this
 matrix was documented. Its classic pin set is UI `v2.3.13`, orchestrator
-`v3.8.0`, ingestion `v2.5.0`, and AI Landing Zone `v2.3.0`. Do not combine the
-component-only hosted matrix with those released hooks or manifests.
+`v3.8.0`, ingestion `v2.5.0`, and AI Landing Zone `v2.3.0`. The exact hosted
+matrix is pinned by the current integration manifest, whose umbrella tag remains
+`unreleased`; do not mix its topology/configuration contract into the older
+`v3.7.0` hooks or manifest.
 
 ### Retrieval backend
 
@@ -551,13 +569,12 @@ cd gpt-rag-orchestrator
 
 ## Permissions
 
-The role tables below describe the currently released classic Container Apps
-topology. The component-level hosted/no-panel implementation omits the
+The role tables below describe the classic Container Apps topology. The pinned
+hosted matrix omits the
 orchestrator Container App assignments and adds Foundry data-plane,
-delegated-user, Toolbox, and immutable-image pull assignments. Its exact
-component tags are published, but final umbrella pins, integrated validation,
-and a GPT-RAG release remain outstanding. Hosted-panel remains
-platform-blocked.
+delegated-user, Toolbox, and immutable-image pull assignments. Hosted-panel
+adds only the narrow panel metadata-container assignments; its user and
+operator surfaces remain off/503 behind independent evidence gates.
 
 **Microsoft Foundry Role and AI Search Assignments**
 

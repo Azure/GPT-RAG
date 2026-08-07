@@ -6,12 +6,12 @@ diagrams remain the editable source for the focused Basic, modular-layer, and
 chat-runtime views.
 
 !!! warning "Release status"
-    Draw the hosted/no-panel path as the **target fresh-deployment default** and
-    label it **OQ-OWN pivot merged; release gate off/503**. Do not label it
-    shipped until final umbrella pins,
-    `HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED`, integrated validation, and
-    the GPT-RAG release publish. UI `v2.6.0`, orchestrator `v4.0.0`, ingestion
-    `v2.7.0`, and AILZ `v2.5.0` are published as component releases.
+    Draw the hosted/no-panel path as the **supported fresh-deployment default**
+    and label it **exact matrix pinned; continuity off/503 pending evidence**.
+    Label hosted-panel as **supported only when explicitly selected; history and
+    operator APIs off/503 pending evidence**. UI `v2.6.0`, orchestrator
+    `v4.0.0`, ingestion `v2.7.0`, and AILZ `v2.5.0` are pinned by the umbrella
+    integration.
 
 ## Shapes and labels
 
@@ -31,8 +31,8 @@ Add or update these shapes in the application/runtime area:
 | Fallback runtime shape | `Container Apps orchestrator - explicit fallback` | Place below the primary request path with a dashed border. Keep it inside Container Apps. |
 | Mode annotation | `Fresh target default: hosted-no-panel` | Place above the hosted-agent lane. |
 | Fallback annotation | `Explicit/sticky classic topology` | Place above the orchestrator fallback. |
-| Panel annotation | `Administrative panel absent; DEPLOY_ADMINISTRATIVE_PANEL=false` | Place below the hosted lane. |
-| Release annotation | `Component matrix published; umbrella pins pending; continuity off/503` | Place in an amber status banner below the diagram title. |
+| Panel annotation | `Fresh default: panel absent. Explicit hosted-panel: metadata Cosmos only; user/operator routes off/503 pending evidence.` | Place below the hosted lane. |
+| Release annotation | `Exact matrix pinned; continuity and panel evidence gates off/503` | Place in an amber status banner below the diagram title. |
 
 ## Connections and labels
 

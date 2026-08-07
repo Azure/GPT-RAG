@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820" role="img" aria-labelledby="title desc">
   <title id="title">GPT-RAG hosted-default Basic Deployment target architecture</title>
-  <desc id="desc">Target fresh-deployment architecture. UI v2.6.0, orchestrator v4.0.0, ingestion v2.7.0, and AILZ v2.5.0 are published as component releases, but GPT-RAG umbrella pins, owner-binding validation, integrated validation, and an umbrella release are pending. The trusted UI BFF derives x-ms-user-identity and calls the Microsoft Foundry hosted agent using Responses 2.0.0. A distinct OBO bearer token authorizes downstream retrieval. The hosted runtime receives no identity-header source, key, Conversation or impersonation RBAC, or Cosmos DB. Ingestion remains in Container Apps. The orchestrator Container App is shown only as an explicit deployment fallback, with no request-time silent fallback. The administrative panel is absent.</desc>
+  <desc id="desc">Fresh hosted-no-panel architecture in the exact umbrella-pinned UI v2.6.0, orchestrator v4.0.0, ingestion v2.7.0, and AILZ v2.5.0 matrix. Live continuity and panel evidence gates remain off and this diagram does not assert their validation. The trusted UI BFF derives x-ms-user-identity and calls the Microsoft Foundry hosted agent using Responses 2.0.0. A distinct OBO bearer token authorizes downstream retrieval. The hosted runtime receives no identity-header source, key, Conversation or impersonation RBAC, or Cosmos DB. Ingestion remains in Container Apps. The orchestrator Container App is shown only as an explicit deployment fallback, with no request-time silent fallback. The administrative panel is absent in this fresh-default mode.</desc>
   <defs>
     <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
       <path d="M2,2 L10,6 L2,10 Z" fill="#385a8d"/>
@@ -28,7 +28,7 @@
   <text x="46" y="72" class="subtitle">Fresh deployments use hosted/no-panel after release gates pass; UI and ingestion remain in Azure Container Apps.</text>
 
   <rect x="46" y="91" width="1188" height="42" rx="12" fill="#fff4ce" stroke="#f7630c" stroke-width="1.5"/>
-  <text x="66" y="117" class="status">Component matrix published; GPT-RAG umbrella pins, owner validation, and integrated release pending. Continuity off/503.</text>
+  <text x="66" y="117" class="status">Exact matrix pinned; live continuity and panel evidence gates remain off/503. No validation result is implied.</text>
 
   <rect x="46" y="153" width="1188" height="312" rx="22" fill="#ffffff" stroke="#d8e3f5" stroke-width="2"/>
   <text x="70" y="181" class="zone-title">Request path</text>

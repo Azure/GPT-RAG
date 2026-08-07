@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1000" viewBox="0 0 1400 1000" role="img" aria-labelledby="title desc">
   <title id="title">GPT-RAG chat runtime modes and hosted image preparation</title>
-  <desc id="desc">Comparison of the target hosted-no-panel default for fresh deployments and the explicit Container Apps fallback. The trusted UI BFF derives x-ms-user-identity for Responses 2.0.0 conversation ownership. The distinct OBO bearer token authorizes downstream retrieval. Only opaque Foundry call context reaches Toolbox. Runtime failures do not silently switch modes. A separate two-phase deployment flow builds through public ACR Tasks or a dedicated private VNet agent pool, resolves an immutable digest, and then deploys the hosted handoff.</desc>
+  <desc id="desc">Comparison of the hosted-no-panel default for fresh deployments, explicitly selected hosted-panel, and the explicit Container Apps fallback in the exact umbrella-pinned matrix. Hosted-panel provisions only metadata Cosmos containers while its user and operator evidence gates remain off. The trusted UI BFF derives x-ms-user-identity for Responses 2.0.0 conversation ownership. The distinct OBO bearer token authorizes downstream retrieval. Only opaque Foundry call context reaches Toolbox. Runtime failures do not silently switch modes. A separate two-phase deployment flow builds through public ACR Tasks or a dedicated private VNet agent pool, resolves an immutable digest, and then deploys the hosted handoff.</desc>
   <defs>
     <marker id="arrow-blue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
       <path d="M2,2 L10,6 L2,10 Z" fill="#385a8d"/>
@@ -31,7 +31,7 @@
   <text x="50" y="75" class="subtitle">A deployment chooses one runtime. Identity, authorization, conversation, and cost semantics never change silently during a request.</text>
 
   <rect x="50" y="94" width="1300" height="44" rx="12" fill="#fff4ce" stroke="#f7630c" stroke-width="1.5"/>
-  <text x="72" y="121" class="status">Component matrix published; GPT-RAG umbrella pins, owner validation, and integrated release pending. Continuity off/503.</text>
+  <text x="72" y="121" class="status">Exact matrix pinned; continuity and panel evidence gates remain off/503. No live validation result is implied.</text>
 
   <rect x="50" y="162" width="1300" height="108" rx="20" fill="#edf7ff" stroke="#3f7dc7" stroke-width="2"/>
   <text x="74" y="191" class="section-title">Shared entry and topology selection</text>
@@ -41,7 +41,7 @@
   <text x="351" y="235" class="box-title">Web UI - Container Apps</text>
   <rect x="572" y="199" width="350" height="62" rx="12" fill="#ffffff" stroke="#4d89d8"/>
   <text x="610" y="224" class="box-title">Resolved deployment topology</text>
-  <text x="601" y="245" class="box-text">fresh: hosted-no-panel | explicit/sticky: classic</text>
+  <text x="601" y="245" class="box-text">fresh: hosted-no-panel | explicit: hosted-panel/classic | sticky: persisted</text>
   <rect x="972" y="208" width="330" height="44" rx="11" fill="#ffffff" stroke="#4d89d8"/>
   <text x="1013" y="235" class="box-title">Ingestion remains in Container Apps</text>
   <path class="blue-arrow" d="M252 230 L299 230"/>
@@ -132,5 +132,5 @@
   <path class="orange-arrow" d="M1020 846 L1063 846"/>
 
   <rect x="50" y="968" width="1300" height="20" rx="9" fill="#ffffff" stroke="#d8e3f5"/>
-  <text x="72" y="982" class="small">Hosted/panel is not shown as a supported mode: platform selection remains blocked and DEPLOY_ADMINISTRATIVE_PANEL stays false.</text>
+  <text x="72" y="982" class="small">Explicit hosted-panel is supported: UI + ingestion + metadata Cosmos only; user-history and operator routes remain off/503 pending evidence.</text>
 </svg>

@@ -6,9 +6,10 @@ If you are looking for the wider authentication picture (chat UI sign-in, On-Beh
 
 This procedure applies to the orchestrator dashboard in the currently released
 classic Container Apps topology and in the explicit classic fallback. The
-[hosted component matrix](hosted_agent_release_matrix.md) is hosted/no-panel,
-does not deploy this dashboard, and has not been published as a GPT-RAG umbrella
-release. Hosted-panel remains platform-blocked.
+[hosted supported matrix](hosted_agent_release_matrix.md) keeps hosted/no-panel
+as the fresh default and supports explicit hosted-panel selection. The
+hosted-panel user-history and operator routes remain off/503 because their
+independent evidence gates are deployment-published `false`.
 
 ## What this is
 
