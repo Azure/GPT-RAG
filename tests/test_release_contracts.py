@@ -566,6 +566,8 @@ class LifecycleParityTests(unittest.TestCase):
             encoding="utf-8"
         )
         self.assertIn("host: azure.ai.agent", content)
+        self.assertIn("language: docker", content)
+        self.assertIn("remoteBuild: true", content)
         self.assertIn("protocol: responses", content)
         self.assertIn("protocol: invocations", content)
         self.assertNotIn("API_KEY", content)
