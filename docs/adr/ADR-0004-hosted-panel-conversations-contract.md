@@ -17,9 +17,17 @@ orchestrator Container Apps optional, and froze two facts that bind this ADR:
 - Hosted versions are immutable; update = publish + switch, rollback = revert.
 
 ADR-0003 made multi-turn continuity **application-managed against managed
-Conversations**, keyed by a stable logical conversation ID carried in Responses
-**request metadata** (never the top-level `conversation` routing parameter,
-which 404s across version replacement).
+Conversations**. The client-held reference to the managed Conversation is a
+**BFF-issued opaque locator handle** — never the raw resource ID, never
+self-authorizing, and never carried as caller-controllable request metadata
+that a service could act on. In `capability` mode (fallback/pre-gate default)
+this handle is a signed, owner-bound capability combining the locator with an
+`oid`-bound authorization check; in `delegated` mode (chosen/default once
+ADR-0003's own environment evidence gate is met) the handle is a locator only,
+and authorization is enforced per-request by the Foundry platform itself via a
+BFF-asserted `x-ms-user-identity` header derived server-side from the
+validated `oid`. Neither mode uses the top-level `conversation` routing
+parameter, which 404s across version replacement.
 
 **Reconciliation with the approved zero-RBAC invariant (this revision).** A
 subsequent security review tightened the container invariant beyond ADR-0003's
@@ -39,8 +47,9 @@ location only**: the container becomes **purely stateless** — it receives a
 the "canonical stateless Responses input" ADR-0003 confirmed remains viable —
 and **all** managed-Conversation create/read/append/delete plus the owner index
 move to the **authenticated UI BFF**, which is the only component holding the
-user identity. ADR-0003's other freezes (managed Conversations as SoR, logical
-ID in metadata, no top-level `conversation` param, bounded replay) are
+user identity. ADR-0003's other freezes (managed Conversations as SoR,
+opaque-locator-not-raw-ID, no top-level `conversation` param, bounded replay,
+and the two-mechanism owner-binding selector gated by live evidence) are
 unchanged; only *who* touches the Conversations data plane changes.
 
 Issue #611 requires the **optional panel** to finish the feature, not just ship
@@ -109,29 +118,41 @@ Conversations. Four constraints are non-negotiable:
    conversation content into Cosmos**. Cosmos carries only feedback and
    curation **metadata** where strictly necessary.
 
-The evolving decision, under live **OQ-OWN** testing, is the **owner-binding
-mechanism used by the authenticated UI BFF**. Two concerns must be separated,
-because conflating them created a contradiction (a Cosmos-backed owner index
-cannot be the default in hosted/no-panel, where **no Cosmos is deployed**):
+The evolving decision, previously under live **OQ-OWN** testing and now
+**resolved for ADR-0003's hosted-continuity call path**
+([`gpt-rag#591`](https://github.com/Azure/GPT-RAG/issues/591#issuecomment-5212288245)),
+is the **owner-binding mechanism used by the authenticated UI BFF**. Two
+concerns must be separated, because conflating them created a contradiction (a
+Cosmos-backed owner index cannot be the default in hosted/no-panel, where **no
+Cosmos is deployed**):
 
 - **Per-conversation owner binding (continuity + single-conversation history) —
-  required in ALL hosted modes including no-panel.** Baseline is a
-  **server-issued, signed, opaque, owner-bound conversation capability** minted
-  by the BFF from the validated user token; it requires **no persistent store**
-  and therefore holds in no-panel with zero Cosmos. The target, when **OQ-OWN**
-  proves it, is **delegated OBO** reads where Foundry enforces per-user access
-  natively.
+  required in ALL hosted modes including no-panel.** Fallback/pre-gate default
+  is a **server-issued, signed, opaque, owner-bound conversation capability**
+  minted by the BFF from the validated user token; it requires **no persistent
+  store** and therefore holds in no-panel with zero Cosmos. The chosen target
+  is the **native delegated header** mechanism (`x-ms-user-identity`, asserted
+  server-side by the BFF from the validated `oid`, on protocol `responses`
+  2.0.0, with narrow `Foundry Agent Consumer` + custom
+  `UserIdentityImpersonation` RBAC at agent scope), where Foundry enforces
+  per-user access to the response chain/history natively. ADR-0003 has already
+  validated this mechanism for the BFF↔hosted-agent continuity call path; this
+  ADR's panel history/read call path requires its **own** independent
+  confirmation (`PANEL_HISTORY_OWNER_BINDING_VALIDATED`) before switching —
+  the ADR-0003 evidence is strong precedent, not a substitute.
 - **Cross-conversation enumeration (the panel "list my conversations") — a
   panel-only feature.** It legitimately requires a metadata store and therefore
   exists **only** when `DEPLOY_ADMINISTRATIVE_PANEL=true`, backed by the
-  BFF-authored **owner index** in panel Cosmos (or delegated enumeration under
-  OBO). In hosted/no-panel there is simply **no enumeration endpoint** — the user
-  continues the conversation they hold a capability for; there is no list to
-  recover. This is expected and acceptable.
+  BFF-authored **owner index** in panel Cosmos (or delegated enumeration once
+  the panel's own gate is met). In hosted/no-panel there is simply **no
+  enumeration endpoint** — the user continues the conversation they hold a
+  capability for (or that the delegated mechanism authorizes); there is no
+  list to recover. This is expected and acceptable.
 
 In both concerns the authority is the BFF, never the container. This ADR decides
-everything invariant across the OQ-OWN outcome and makes only the BFF mechanism
-selectable, defaulting to the store-free capability until OQ-OWN passes.
+everything invariant across the owner-binding mechanism and makes only the BFF
+mechanism selectable, defaulting to the store-free capability until this ADR's
+own environment evidence gate is met.
 
 ### Resolving the no-panel / no-Cosmos continuity contradiction
 
@@ -153,9 +174,12 @@ conversation capability**:
   signature with the active key, (2) checks `expiry`, and (3) asserts the
   capability's `oid` **equals the current authenticated user's `oid`**. Only then
   does it read prior items by `conversation_resource_id` and assemble stateless
-  input. Any failure → uniform **404**. A raw caller-selected conversation ID is
-  never accepted; the only accepted reference is a signed capability whose owner
-  is re-checked against the live token.
+  input. Any failure → uniform **404**. The managed-Conversations **read itself**
+  is always driven by a verified capability, never a bare ID: in no-panel the
+  client holds nothing else, so this is the only path; in panel, a client-passed
+  `{id}` may additionally gate entry to this step (see "Panel `{id}` is a lookup
+  key" below), but the read step's own reference is still the capability, whose
+  owner is re-checked against the live token every time.
 - **Signing key.** A secret in **Key Vault** referenced from App Configuration,
   reusing the existing `AUDIT-HMAC-KEY` provisioning precedent (created from
   cryptographically random bits when absent, only its reference stored in App
@@ -226,9 +250,11 @@ gated by the panel flag.
 
 - `Azure/GPT-RAG` (this repo) — App Configuration contract (label `gpt-rag`),
   the versioned `contracts/conversations-panel-v1` schema, the panel deploy flag
-  wiring, this ADR. Infra must assign managed-Conversations data-plane RBAC to
-  the **UI BFF identity only** (Option A) or none (Option B/OBO), and **never**
-  to the hosted agent / container identity.
+  wiring, this ADR. Infra must assign managed-Conversations data-plane RBAC (or,
+  for delegated mode, `Foundry Agent Consumer` + custom `UserIdentityImpersonation`
+  at agent scope) to the **UI BFF's endpoint-call identity only** (capability
+  mode: Option A; delegated mode: Option B) and **never** to the hosted agent /
+  container identity.
 - `Azure/gpt-rag-ui` — **exclusive owner** of all managed-Conversation
   create/read/append/delete and the owner index, and of user-facing
   list/read/feedback/deletion. It is the only component holding the user token,
@@ -266,7 +292,7 @@ gated by the panel flag.
 
 ## Alternatives considered
 
-### Option A: BFF-minted signed owner-bound capability for continuity (all modes), plus a panel-only owner index for enumeration (chosen baseline)
+### Option A: BFF-minted signed owner-bound capability for continuity (all modes), plus a panel-only owner index for enumeration (fallback/pre-gate default)
 
 The **UI BFF** is the sole component that touches the Conversations data plane.
 On the first turn the **authenticated BFF** (holding the validated user token,
@@ -281,7 +307,11 @@ output; it writes nothing.
 - Per-conversation reads (all modes): the BFF verifies the capability signature,
   checks expiry/`key_id`, and asserts the capability `oid` **equals the live
   authenticated `oid`**; only then reads items by `conversation_resource_id`.
-  Any failure → **404**. A raw caller-selected ID is never accepted.
+  Any failure → **404**. A raw caller-selected ID is never *self-authorizing*:
+  in no-panel the client holds only the capability, never a bare ID; in panel,
+  a client-passed `{id}` is accepted solely as a lookup key that must first
+  clear the capability/owner-index gate before the BFF treats it as
+  `conversation_resource_id` (see "Panel `{id}` is a lookup key" below).
 - Enumeration (**panel only**, `DEPLOY_ADMINISTRATIVE_PANEL=true`): the BFF also
   records a **minimal owner-index** row — `principal_id → {conversation_id,
   title, timestamps}` — in the panel Cosmos container so the panel can list the
@@ -296,10 +326,11 @@ output; it writes nothing.
 - Operator surfaces (gpt-rag-ingestion): overview reads **counts over metadata**
   only; corpus curation operates on documents ingestion already indexes — never
   on conversation content.
-- Benefits: works today in **every** mode with no store for continuity; no
-  dependency on unproven delegated auth; **container holds zero Conversations
-  RBAC**; owner authority is the authenticated BFF; matches the `POST /retrieve`
-  fail-closed idiom and the `AUDIT-HMAC-KEY` Key Vault precedent.
+- Benefits: works today in **every** mode with no store for continuity; remains
+  fully specified and available as the **safe fallback/alternative** even after
+  Option B's mechanism is chosen for a given call path; **container holds zero
+  Conversations RBAC**; owner authority is the authenticated BFF; matches the
+  `POST /retrieve` fail-closed idiom and the `AUDIT-HMAC-KEY` Key Vault precedent.
 - Costs and risks: the **BFF service identity** holds Conversations read/write
   RBAC, so the confused-deputy risk is concentrated there and mitigated by the
   capability `oid`-equality gate. No-panel lacks fine-grained per-capability
@@ -319,30 +350,57 @@ output; it writes nothing.
 - Reversibility: continuity mechanism is a single selector; panel enumeration is
   behind the panel flag; when a surface is off it returns 503 and writes nothing.
 
-### Option B: Native delegated (OBO) reads/writes against managed Conversations from the BFF (preferred target, gated on OQ-OWN)
+### Option B: Native delegated-header reads against managed Conversations from the BFF (native, chosen/default once its own environment evidence gate is met)
 
-The BFF exchanges the user token (OBO) for a token that reads **and writes**
-managed Conversations **as the user**, so Foundry/Conversations enforces per-user
-authorization natively — the same philosophy as `POST /retrieve` forwarding the
-user bearer to Search. No GPT-RAG-authored owner index is needed, and the **BFF
-holds no standing Conversations RBAC**.
+The BFF asserts a trusted, server-derived `x-ms-user-identity` header (from the
+validated `oid`, never from the client) on hosted agents running container
+protocol `responses` 2.0.0, so Foundry/Conversations enforces per-user
+authorization on the response chain and `get_history` natively — the same
+philosophy as `POST /retrieve` forwarding the user bearer to Search. No
+GPT-RAG-authored owner index is needed for the mechanism itself (the panel's
+own enumeration index, described below, is a separate concern), and the BFF's
+endpoint-call identity holds only the narrow `Foundry Agent Consumer` role plus
+the custom `UserIdentityImpersonation` data action, both scoped to the agent.
 
 - Benefits: authorization enforced by the platform at the data plane; no
-  GPT-RAG-owned ownership state; cleanest confused-deputy elimination; the BFF
-  needs no ambient Conversations role; smallest long-term surface.
-- Costs and risks: **depends on OQ-OWN** — whether the managed Conversations data
-  API accepts a delegated user token and enforces per-user/owner access. If it
-  only accepts a service credential, Option B collapses into a service-read and
-  is **unsafe by itself**; it must not ship without native per-user enforcement
-  proven.
+  GPT-RAG-owned ownership state for the read/write path itself; cleanest
+  confused-deputy elimination; the BFF needs no ambient standing Conversations
+  RBAC (only the narrow agent-scoped roles above); smallest long-term surface.
+- **OQ-OWN resolved for ADR-0003's hosted-continuity call path**: live evidence
+  ([`gpt-rag#591`](https://github.com/Azure/GPT-RAG/issues/591#issuecomment-5212288245),
+  cleanup:
+  [comment](https://github.com/Azure/GPT-RAG/issues/591#issuecomment-5212334345))
+  proves managed Conversations enforces per-user isolation of the response
+  chain/`get_history` for the BFF↔hosted-agent call path in ADR-0003, on
+  protocol `responses` 2.0.0 with the narrow RBAC above. This is **strong,
+  directly relevant precedent** for the panel's read/history call shape, which
+  is expected to traverse the same call path. It does **not** by itself flip
+  this ADR's own gate (`PANEL_HISTORY_OWNER_BINDING_VALIDATED`, distinct from
+  ADR-0003's `HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED`): the panel's
+  implementation must independently confirm the same protocol version and RBAC
+  shape apply to its own history/read calls before this option engages for the
+  panel path — per the discipline that each independent call path requires its
+  own live evidence, not an inherited assumption. Until then, the panel
+  continues to rely on Option A (fallback) for its own history/read gate, even
+  though ADR-0003 has already moved to `delegated` for its call path.
 - Security and identity: strongest when supported; the container still holds no
-  role — the **user's** delegated token authorizes reads/writes, minted by the
-  BFF which already holds the user token.
-- Operational consequences: no index to keep consistent; requires a Conversations
-  query-token audience config, analogous to `HOSTED_RETRIEVAL_TOKEN_AUDIENCE`.
+  role — the BFF's own narrowly-scoped, agent-assigned identity asserts the
+  validated identity, minted server-side by the BFF which already holds the
+  user's validated `oid`. The asserted identity is middle-tier-asserted, not
+  cryptographically proven by the platform, so the BFF remains the trust
+  boundary; the header is never accepted from the client.
+- Operational consequences: no index to keep consistent for the read/write
+  mechanism itself; requires `HOSTED_CONVERSATION_PROTOCOL_VERSION` and the
+  narrow RBAC assignment, analogous to `HOSTED_RETRIEVAL_TOKEN_AUDIENCE`'s
+  role in INV-002. Live evidence also shows the platform does **not** fence
+  session **membership** (a differently asserted identity can enter a session
+  another identity's request created), even though it does fence the response
+  chain/history — so no unpartitioned container/session-keyed data may ever be
+  stored, in either the panel or no-panel case.
 - Component compatibility: same repo set; the mechanism differs only inside the
-  BFF behind the selector.
-- Reversibility: single flag; can fall back to Option A.
+  BFF behind the selector; shares the same App Configuration keys as ADR-0003.
+- Reversibility: single flag per its own gate; falls back to Option A
+  automatically pre-gate or if the gate is ever unmet.
 
 ### Option C: A service identity (container or panel) reads/writes by caller-supplied conversation ID or caller-supplied owner (rejected)
 
@@ -408,22 +466,45 @@ to the safe state:
    to compute that already runs.
 
 3. **Owner-binding is invariant; the BFF mechanism is a selector; continuity is
-   store-free.** Ship **Option A** baseline: per-conversation owner binding
-   (continuity + single-conversation history in **all** modes) via a **BFF-minted
-   signed owner-bound capability** that needs **no store**, plus a **panel-only**
+   safe pre-gate.** Ship **Option A** (capability, store-free) as the
+   **fallback/pre-gate default**: per-conversation owner binding (continuity +
+   single-conversation history in **all** modes) via a **BFF-minted signed
+   owner-bound capability** that needs **no store**, plus a **panel-only**
    owner index (Cosmos) for cross-conversation enumeration. Adopt **Option B
-   (native delegated OBO)** the moment **OQ-OWN** proves managed Conversations
-   enforces per-user authorization for delegated tokens. Both keep the
-   **container at zero Conversations RBAC** and both fail closed. **Option C is
-   prohibited.** No-panel has no enumeration endpoint and no Cosmos; continuity
-   still works via the capability.
+   (native delegated header)** for the panel's history/read call path once
+   this ADR's **own** environment evidence gate
+   (`PANEL_HISTORY_OWNER_BINDING_VALIDATED`) confirms the same protocol
+   version and RBAC shape that ADR-0003 already validated for the
+   BFF↔hosted-agent continuity path apply to the panel's calls too. **ADR-0003's
+   OQ-OWN resolution**
+   ([`gpt-rag#591`](https://github.com/Azure/GPT-RAG/issues/591#issuecomment-5212288245))
+   is strong, directly relevant precedent — it is **not** a substitute for this
+   ADR's own gate, because each independent call path requires its own live
+   evidence. Both mechanisms keep the **container at zero Conversations
+   RBAC** and both fail closed. **Option C is prohibited.** No-panel has no
+   enumeration endpoint and no Cosmos; continuity still works via the active
+   owner-binding mechanism (capability pre-gate, or delegated once its own
+   gate is met).
 
-4. **Fail-closed by default.** Every panel surface is disabled unless the panel
-   is deployed **and** its evidence gate is set, mirroring `POST /retrieve`.
-   Until owner-binding is validated, hosted history keeps returning the safe
-   status (503 when the surface exists but is gated off; 501 remains acceptable
-   only where no endpoint is wired yet). No service-identity-by-caller-ID read
-   and no caller-asserted ownership is shipped in any state.
+4. **Fail-closed by default.** Every user-facing history/feedback panel surface
+   is disabled unless the panel is deployed (`DEPLOY_ADMINISTRATIVE_PANEL` +
+   `PANEL_HISTORY_ENABLED`), mirroring `POST /retrieve`; operator surfaces
+   (corpus curation, overview metrics) have their own independent
+   deploy/role-authorization requirement and are never gated by owner-binding
+   evidence. The deploy gate is independent of the owner-binding mechanism:
+   **`capability` mode requires no additional gate** and is the safe
+   pre-gate/fallback default the moment the panel is deployed. Only the
+   **switch to `delegated`** additionally requires
+   `PANEL_HISTORY_OWNER_BINDING_VALIDATED`; until that gate is set, the panel
+   continues serving history/feedback/deletion via `capability` — an unmet
+   gate never itself produces an error response, it only selects which
+   mechanism enforces ownership. A genuine **503** is reserved for the
+   history/feedback surface (or, for operator endpoints, the panel/admin app)
+   being undeployed; a genuine **502** is reserved for the underlying
+   managed-Conversations/downstream dependency itself failing (501 remains
+   acceptable only where no endpoint is wired yet). No
+   service-identity-by-caller-ID read and no caller-asserted ownership is
+   shipped in any state.
 
 5. **Content confinement.** Managed Conversations remains the sole store of chat
    content. Cosmos (panel-only) carries feedback and curation **metadata** and
@@ -471,7 +552,14 @@ Error semantics (uniform): **401** missing/invalid bearer; **403** wrong token
 type/audience (app-only token on a user surface, or missing operator role);
 **404** not-owner or missing (never 403 for ownership, to avoid existence
 disclosure); **422** schema/bounds violation; **502** managed-Conversations or
-downstream failure; **503** surface deployed but evidence gate unset. Retention:
+other downstream dependency **actually failing** (network/service error) —
+never used for gate state; **503** the user history/feedback surface itself is
+undeployed (`DEPLOY_ADMINISTRATIVE_PANEL` or `PANEL_HISTORY_ENABLED` is
+`false`) or, for operator surfaces, the panel/ingestion-admin app is
+undeployed — never used for an unmet owner-binding evidence gate. An unmet
+`PANEL_HISTORY_OWNER_BINDING_VALIDATED` gate produces **no error at all**: the
+BFF falls back to `capability`/`owner_index` transparently, so gate state
+alone never surfaces as either a 502 or a 503. Retention:
 deletion is a hard delete of managed-Conversation items plus panel metadata;
 `delete_after`-style policy intent is recorded but GPT-RAG performs no automatic
 scheduled deletion (consistent with v3.7.0 governance guidance).
@@ -482,17 +570,32 @@ Continuity keys (apply in **all** hosted modes, including no-panel; no store).
 Authoritatively defined in ADR-0003; restated here for context — ADR-0003 is
 the source of truth if wording ever diverges:
 
-- `HOSTED_CONVERSATION_OWNER_BINDING` (default `capability`; alt `delegated`) —
-  selects per-conversation owner binding: BFF-minted signed capability (A) vs.
-  delegated OBO (B). `delegated` is inert until
-  **`HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED`** (ADR-0003) is `true` for
-  the hosted continuity call path — this is a **different, independent** gate
-  from the panel-only `PANEL_HISTORY_OWNER_BINDING_VALIDATED` below; neither
-  substitutes for the other.
+- `HOSTED_CONVERSATION_OWNER_BINDING` (default `delegated`; alt `capability`) —
+  selects per-conversation owner binding: native delegated header (B, chosen/
+  default) vs. BFF-minted signed capability (A, fallback). `delegated` is
+  active only once **`HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED`** (ADR-0003)
+  — the hosted-continuity environment evidence gate confirming protocol
+  `responses` 2.0.0 and the narrow RBAC shape — is `true`; otherwise the
+  selector falls back to `capability` automatically. This is a **different,
+  independent** gate from the panel-only
+  `PANEL_HISTORY_OWNER_BINDING_VALIDATED` below; neither substitutes for the
+  other, even though ADR-0003's resolution
+  ([`gpt-rag#591`](https://github.com/Azure/GPT-RAG/issues/591#issuecomment-5212288245))
+  is strong precedent for the panel's own gate.
+- `HOSTED_CONVERSATION_PROTOCOL_VERSION` (ADR-0003; expected `responses/2.0.0`
+  when `HOSTED_CONVERSATION_OWNER_BINDING=delegated`) — restated here for
+  context; ADR-0003 is authoritative.
 - `HOSTED_CONVERSATION_CAPABILITY_KEY` — **Key Vault reference** to the HMAC/JWS
   signing key, provisioned like `AUDIT-HMAC-KEY` (created from random bits when
   absent; only the reference is stored in App Config). Present in all modes; no
-  Cosmos, no storage account.
+  Cosmos, no storage account. Required in **both** modes: `capability` mode
+  signs/verifies the full owner-bound capability (locator +
+  `oid` claim/check); `delegated` mode signs/verifies the same locator shape
+  **minus** the `oid` claim/check (integrity/non-guessability only — the
+  Foundry platform's own per-request identity check via `x-ms-user-identity`
+  is what authorizes the read). The key is never unneeded once `delegated`
+  is active; only the `oid`-check step is skipped.
+
 - `HOSTED_CONVERSATION_CAPABILITY_KEY_ID` (default `v1`) — active signing key
   version; advance to rotate (previous key retained for a bounded overlap).
 - `HOSTED_CONVERSATION_CAPABILITY_TTL_SECONDS` (default e.g. `3600`) — capability
@@ -526,17 +629,19 @@ Panel keys (apply **only** when the administrative panel is deployed):
 
 | Threat | Vector | Mitigation in this ADR |
 | --- | --- | --- |
-| **Cross-user conversation IDs (IDOR)** | Caller passes another user's `conversation_id` | Only a signed capability is accepted; the BFF re-checks the capability `oid` equals the live token `oid` before any read; miss → 404. A raw caller ID never drives a read (A) or the read is delegated as the user (B) |
+| **Cross-user conversation IDs (IDOR)** | Caller passes another user's `conversation_id` (no-panel: no such surface exists; panel: as the `{id}` path segment) | No-panel: the client never holds a bare ID, only its own signed capability, so there is nothing to guess-and-pass. Panel: `{id}` is accepted only as a **lookup key** — the BFF performs an owner-index check (`principal_id == live oid`, Option A) or equivalent delegated per-user authorization (Option B) *before* treating it as `conversation_resource_id`; a foreign ID fails that check. Either way, the ID is never *self-authorizing* and never drives a read on its own; miss → 404 |
 | **Capability theft / replay** | Attacker presents a stolen capability | A capability alone is **insufficient**: reads also require a valid Entra token whose `oid` matches the capability `oid`, so a different user fails the equality check (→404). Short TTL + rolling re-mint bound the window; key rotation performs bulk revocation |
 | **Capability forgery** | Attacker mints/edits a capability | Signed with a Key Vault key held only by the BFF; edits break the signature (→404); the container has no signing key and cannot mint |
 | **Direct agent/Foundry callers** | Direct caller reaches the container and tries to read/enumerate/own conversations | Container holds **zero Conversations RBAC** and never touches the data plane; it only consumes BFF-supplied stateless input, and cannot mint capabilities. It reads, writes, and owns nothing |
 | **Ownership forgery** | Caller-supplied owner in request metadata to claim a conversation | Ownership originates only from a BFF mint (capability) over a validated token `oid`; the container writes no ownership, so caller metadata can never establish ownership |
-| **Service-identity confused deputy** | A service credential reads by caller ID | Prohibited (Option C rejected). Only the **BFF identity** holds Conversations RBAC (Option A) or none (Option B/OBO); every BFF read is gated by the capability `oid`-equality check |
+| **Service-identity confused deputy** | A service credential reads by caller ID | Prohibited (Option C rejected). Conversations RBAC exists **only** on the BFF's endpoint-call identity — never the container — whether via Option A's read/write role or Option B's narrow `Foundry Agent Consumer` + `UserIdentityImpersonation`; every BFF read is gated by the capability `oid`-equality check (A) or the server-derived identity header (B) |
 | **Support/admin over-reach** | Operator role reads protected user chat content | Operator surfaces expose metadata/counts and **corpus** artifacts only; ingestion has no conversation-content access; raw conversation content is not provided and would require a separate, elevated, audited path (out of scope, denied by default) |
 | **Document-citation leakage** | Re-rendered history shows citations to documents the user has since lost access to | History stores **citation references**, not document content; render re-checks access (native trimming) before resolving a citation; snapshot-vs-live divergence recorded as OQ-611-CITE |
 | **Telemetry leakage** | Content or IDs in logs/metrics | `audit-event-v1` metadata-only; correlation IDs only; overview metrics thresholded; capability signatures/keys never logged; no conversation body or document content in any log/metric |
 | **Existence disclosure** | 403-vs-404 oracle reveals a conversation exists | Uniform **404** for bad/expired/wrong-`oid`/retired-key capability and for missing |
 | **Pagination tampering** | Caller forges cursor to page another user's data | Opaque, signed, expiring cursors bound to the authenticated principal |
+| **Session-membership not fenced (delegated mode)** | Platform lets a differently-asserted identity "enter" a session/conversation another identity's request created, even though it fences the response chain/history | ADR-0003's invariant carries over: **never store unpartitioned container/session-keyed data** in either mode; panel Cosmos stores only owner-index/metadata keyed by `principal_id`, never session-keyed content; per-read owner/oid check (both mechanisms) still gates every content read regardless of session membership |
+| **Header spoofing / trust-boundary drift (delegated mode)** | Attacker or misconfigured client attempts to supply `x-ms-user-identity` directly | The header is asserted **server-side only** by the BFF from its own validated `oid`; it is never accepted from client input; the BFF remains the sole trust boundary, mirroring ADR-0003 |
 
 ## Consequences
 
@@ -548,17 +653,31 @@ Panel keys (apply **only** when the administrative panel is deployed):
   ingestion apps; works in the network-isolated topology.
 - Container holds **zero Conversations RBAC**, managed-Conversations-as-SoR, and
   no-Cosmos-chat freezes (ADR-0001/0003) are preserved and strengthened.
-- Safe under OQ-OWN uncertainty: the safe mechanism ships now; the preferred
-  native mechanism is a config flip once proven.
+- **OQ-OWN resolved for ADR-0003's call path**
+  ([`gpt-rag#591`](https://github.com/Azure/GPT-RAG/issues/591#issuecomment-5212288245)):
+  live evidence is strong precedent that the same delegated-header mechanism
+  will validate for the panel's history/read call path too, once independently
+  confirmed via this ADR's own gate. Safe under continued uncertainty for the
+  panel's own gate: the fallback mechanism ships now and works regardless; the
+  chosen native mechanism is a config flip once this ADR's own evidence gate
+  passes.
 
 ### Negative or accepted
 
-- Baseline Option A adds a GPT-RAG-owned owner index that must stay consistent
+- Fallback Option A adds a GPT-RAG-owned owner index that must stay consistent
   with the SoR (bounded blast radius: at worst a 404 or a stale list row, never
-  content disclosure), and concentrates Conversations RBAC on the **BFF identity**.
+  content disclosure), and concentrates Conversations RBAC on the **BFF
+  identity** while capability mode is active (pre-gate, or as fallback).
 - The BFF now owns per-turn read-prior-items + assemble-stateless-input + append
   (moved out of the container per the stricter invariant). This adds BFF logic
   and the bounded-replay policy (ADR-0003) now lives entirely in the BFF.
+- **Delegated mode (once this ADR's own gate is met)**: the asserted identity is
+  middle-tier-asserted, not cryptographically proven by the platform, so the BFF
+  remains the trust boundary; the header is never accepted from the client.
+  Platform session-membership is not fenced (a differently asserted identity can
+  "enter" a session another identity's request created) even though the
+  response chain/history is fenced — this is why unpartitioned
+  container/session-keyed data must never be stored, in either mode.
 - Audience split means two backends implement one contract; the shared
   `contracts/` schema and conformance tests keep them aligned.
 - Citation snapshot-vs-live access divergence is an accepted, documented risk
@@ -566,7 +685,9 @@ Panel keys (apply **only** when the administrative panel is deployed):
 - **ADR-0003 has been revised** (see its revision note): its in-container
   persist/replay design is superseded on location — the BFF, not the
   container, reads/appends managed Conversations. Its other freezes are
-  retained.
+  retained, including the delegated-header RBAC (`Foundry Agent Consumer` +
+  custom `UserIdentityImpersonation`) belonging solely to the BFF's
+  endpoint-call identity, never the container.
 
 ## Adoption and migration
 
@@ -588,33 +709,45 @@ Coordinated, ordered change (compatible-commit discipline per AGENTS.md):
    capability minting in the container (it has no authenticated identity or key).
    Emit `audit-event-v1` for the turn only.
 3. **gpt-rag-ui** — the BFF becomes the **exclusive** Conversations owner and the
-   **sole capability minter/verifier**. Continuity (all modes,
-   `HOSTED_CONVERSATION_OWNER_BINDING=capability`): on create, allocate the
-   managed Conversation and mint a signed owner-bound capability from the
-   validated `oid`; per turn, verify capability (signature + expiry + `oid`
-   equality) → read prior items by `conversation_resource_id` → assemble complete
-   stateless input → call container → append items → re-mint a fresh capability.
-   Panel (when deployed): also write/read the owner index for enumeration behind
-   `PANEL_HISTORY_ENABLED` + (`delegated` requires
+   **sole capability minter/verifier and header asserter**. Continuity (all
+   modes): once `HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED` (ADR-0003) is
+   met, assert `x-ms-user-identity` server-side from the validated `oid` on
+   protocol `responses` 2.0.0 (`delegated`, chosen/default); otherwise (or as
+   fallback) mint/verify the signed owner-bound capability from the validated
+   `oid` (`capability`): on create, allocate the managed Conversation and mint
+   a signed owner-bound capability; per turn, verify capability (signature +
+   expiry + `oid` equality) → read prior items by `conversation_resource_id` →
+   assemble complete stateless input → call container → append items →
+   re-mint a fresh capability. Panel (when deployed): also write/read the
+   owner index for enumeration behind `PANEL_HISTORY_ENABLED` + (`delegated`
+   requires
    `PANEL_HISTORY_OWNER_BINDING_VALIDATED`); implement history/feedback/deletion.
-   Never accept a raw caller-selected ID.
+   Never accept a raw caller-selected ID as self-authorizing (panel `{id}` is a
+   lookup key gated by an owner check, never trusted on its own). No
+   `UserIdentityImpersonation` RBAC or signing key on the container.
 4. **gpt-rag-ingestion** — implement operator **overview (metadata counts)** and
    **corpus/document curation** routers behind `DEPLOY_ADMINISTRATIVE_PANEL`,
    replacing the 501 for those surfaces; **no conversation-content access or
    conversation-content curation**; fail-closed 503 when gated off; operator-role
    check plus existing bearer patterns.
 5. Revalidate in Basic and network-isolated topologies; run the two-user negative
-   suite, the direct-caller anti-spoof test, and a **capability
-   theft/expiry/rotation** test; validate **no-panel continuity with zero Cosmos**;
-   then update `manifest.json` pins for all changed components together.
+   suite, the direct-caller anti-spoof test, the **capability
+   theft/expiry/rotation** test, and (once each ADR's own gate is met)
+   **delegated-header tests** (header spoofing rejected, cross-user 404,
+   session-join-does-not-leak-history); validate **no-panel continuity with
+   zero Cosmos**; then update `manifest.json` pins for all changed components
+   together.
 
 Migration boundaries: no backfill. Existing classic Cosmos-backed history is
 untouched and remains the classic path. Hosted/no-panel provisions **no Cosmos**
-and uses store-free capability continuity; hosted/panel adds the Cosmos owner
-index for enumeration only.
+and uses the active owner-binding mechanism (capability pre-gate/fallback, or
+delegated once its own gate is met) for continuity; hosted/panel adds the
+Cosmos owner index for enumeration only, used only pre-gate/as fallback for
+the panel's own enumeration/read gate.
 
-Rollback: flip `HOSTED_CONVERSATION_OWNER_BINDING`/`PANEL_HISTORY_ENABLED`/
-`DEPLOY_ADMINISTRATIVE_PANEL` as needed and revert the coordinated manifest pin.
+Rollback: flip `HOSTED_CONVERSATION_OWNER_BINDING` back to `capability`,
+`PANEL_HISTORY_ENABLED`/`DEPLOY_ADMINISTRATIVE_PANEL` as needed, and revert the
+coordinated manifest pin.
 Because managed Conversations is SoR, the capability is stateless, and Cosmos
 holds only metadata, no chat-content migration is needed either direction;
 owner-index rows are metadata and can be dropped; rotating
@@ -622,9 +755,11 @@ owner-index rows are metadata and can be dropped; rotating
 
 ## Compliance verification (fitness functions)
 
-- **FF-1 Owner gate (deterministic):** `GET /messages`, feedback, and delete for
-  a capability whose `oid` ≠ live token `oid`, or an absent/forged capability,
-  return **404**; a raw caller-selected ID is never accepted. Unit + contract.
+- **FF-1 Owner gate (deterministic):** panel `GET .../messages`, feedback, and
+  delete for an `{id}` whose owner-index check fails (capability `oid` ≠ live
+  token `oid`, or an absent/forged capability, or no matching owner-index row)
+  return **404**; the `{id}` is accepted only as a lookup key and is never
+  self-authorizing on its own. Unit + contract.
 - **FF-1b Capability lifecycle (deterministic):** a tampered signature, expired
   capability, or capability minted under a retired `key_id` (past overlap) all
   return **404**; a valid capability with matching `oid` succeeds; a successful
@@ -643,18 +778,27 @@ owner-index rows are metadata and can be dropped; rotating
   responses contain only counts and suppress sub-threshold buckets.
 - **FF-4 Container zero-RBAC (strengthened):** infra/RBAC assertion that the
   hosted agent/container identity holds **no** Conversations data-plane role
-  (read *or* write) and has **no** capability signing key; a container-originated
-  read/append/create attempt fails at the platform. Conversations RBAC exists
-  **only** on the BFF identity (Option A) or nowhere (Option B/OBO).
+  (read *or* write), **no** `UserIdentityImpersonation` action, and has **no**
+  capability signing key; a container-originated read/append/create attempt
+  fails at the platform. Conversations RBAC exists **only** on the BFF's
+  endpoint-call identity (capability mode: read/write role; delegated mode:
+  `Foundry Agent Consumer` + `UserIdentityImpersonation`, both agent-scoped) —
+  never on the container.
 - **FF-4b Anti-spoof / direct caller (live):** a direct Foundry call to the
   container cannot create, own, read, or append a conversation, and cannot mint a
-  capability; caller-supplied owner metadata never establishes ownership; the only
-  conversations that exist are those the authenticated BFF created from a
-  validated token.
-- **FF-5 Fail-closed gating:** panel user history endpoints return **503** unless
-  `PANEL_HISTORY_ENABLED` (and, for `delegated`, `PANEL_HISTORY_OWNER_BINDING_VALIDATED`);
-  operator endpoints return **503** unless `DEPLOY_ADMINISTRATIVE_PANEL`;
-  `HOSTED_CONVERSATION_OWNER_BINDING=delegated` is inert until its validated gate.
+  capability or assert an identity header; caller-supplied owner metadata never
+  establishes ownership; the only conversations that exist are those the
+  authenticated BFF created from a validated token.
+- **FF-5 Fail-closed gating:** panel user history endpoints return **503**
+  unless `PANEL_HISTORY_ENABLED` (independent of owner-binding mechanism);
+  operator endpoints return **503** unless `DEPLOY_ADMINISTRATIVE_PANEL`. An
+  unmet owner-binding gate never itself produces a 503: with
+  `PANEL_HISTORY_OWNER_BINDING_VALIDATED` unset, the panel continues serving
+  via `capability`; likewise `HOSTED_CONVERSATION_OWNER_BINDING=delegated`
+  falls back to `capability` automatically until
+  `HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED` (ADR-0003) is `true`, and
+  `PANEL_CONVERSATION_ENUMERATION_MODE=delegated` falls back to `owner_index`
+  until `PANEL_HISTORY_OWNER_BINDING_VALIDATED` is `true`.
 - **FF-6 Token-type enforcement:** user surfaces reject app-only tokens (403,
   reusing the `idtyp`/`scp` checks); operator surfaces reject end-user tokens
   lacking the operator role (403).
@@ -664,71 +808,112 @@ owner-index rows are metadata and can be dropped; rotating
   consumers.
 - **FF-8 Error-semantics matrix:** 401/403/404/422/502/503 mapping verified per
   the table, including uniform 404 for bad/expired/wrong-`oid` capability vs
-  missing.
+  missing, and (delegated mode) bad/missing identity header vs missing.
 - **FF-9 No conversation-content curation on operator surface:** ingestion
   operator endpoints expose no conversation body; corpus-curation touches only
   documents ingestion already indexes.
+- **FF-10 Evidence-gate scope (static/documentation):** `PANEL_HISTORY_OWNER_BINDING_VALIDATED`
+  is verified to be a distinct config key from ADR-0003's
+  `HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED`, and neither key's flip auto-sets
+  the other; each ADR's gate is a protocol+RBAC-shape confirmation for its own
+  call path, not a shared or inherited claim.
+- **FF-11 Header derivation only (static/contract):** panel and continuity code
+  paths never construct, forward, or accept an `x-ms-user-identity` value from
+  request/query/cookie input under any panel or no-panel configuration; the only
+  legitimate source is the BFF's own server-side derivation from the validated
+  `oid` (reuses ADR-0003 FF-11).
 
 ## Documentation impact
 
 Update the hosted-agent operator page on the `docs` branch: panel modes and
 flags, the `conversations-panel-v1` contract, the **stateless-container /
-BFF-exclusive-Conversations** model and the owner-binding model with its OQ-OWN
-gate, the audience split (user history/feedback in the UI, operator overview and
-**corpus** curation in the ingestion admin app — no conversation-content
-curation), the zero-Conversations-RBAC container guarantee, content-confinement
-guarantees, retention/deletion semantics, and the citation snapshot caveat. Note
-that ADR-0003 is superseded on persistence location and must be updated.
+BFF-exclusive-Conversations** model, and the owner-binding model — the native
+delegated header (`x-ms-user-identity`, chosen/default once each call path's
+own environment evidence gate is met) and the capability (fallback/pre-gate
+default), the two independent per-call-path gates
+(`HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED` for continuity,
+`PANEL_HISTORY_OWNER_BINDING_VALIDATED` for the panel), and the invariant that
+unpartitioned container/session-keyed data is never stored because platform
+session-membership is not fenced even though the response chain/history is.
+Also cover the audience split (user history/feedback in the UI, operator
+overview and **corpus** curation in the ingestion admin app — no
+conversation-content curation), the zero-Conversations-RBAC container
+guarantee (including no `UserIdentityImpersonation` on the container), content-
+confinement guarantees, retention/deletion semantics, and the citation
+snapshot caveat. Note that ADR-0003 is superseded on persistence location and
+must be updated.
 
 ## Review trigger
 
 Reassess when any of the following occurs:
 
-- **OQ-OWN resolves (two independent, per-call-path gates — neither substitutes
-  for the other):**
-  - Hosted continuity call path: managed Conversations data API confirms
-    per-user authorization for delegated tokens on the **BFF's per-turn
-    read/append path** — switch `HOSTED_CONVERSATION_OWNER_BINDING` to
-    `delegated` only after setting **`HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED`**
-    (ADR-0003) true for that exact call path.
-  - Panel history/enumeration call path: the same API property confirmed
-    separately for the **panel's list/read path** — switch
-    `PANEL_CONVERSATION_ENUMERATION_MODE` (and, for per-conversation panel
-    reads, the delegated-read branch) to `delegated` only after setting
-    **`PANEL_HISTORY_OWNER_BINDING_VALIDATED`** (this ADR) true for that exact
-    call path. This gate never unlocks `HOSTED_CONVERSATION_OWNER_BINDING`,
-    and the ADR-0003 gate never unlocks panel delegated enumeration/reads —
-    each path requires its own live evidence per the "exact call path"
-    requirement.
+- **OQ-OWN (two independent, per-call-path gates — neither substitutes for the
+  other):**
+  - Hosted continuity call path: **resolved**
+    ([`gpt-rag#591`](https://github.com/Azure/GPT-RAG/issues/591#issuecomment-5212288245),
+    cleanup:
+    [comment](https://github.com/Azure/GPT-RAG/issues/591#issuecomment-5212334345)) —
+    live evidence confirms managed Conversations enforces per-user isolation
+    of the response chain/history on the **BFF's per-turn read/append path**
+    for protocol `responses` 2.0.0 with the narrow RBAC. ADR-0003 has switched
+    `HOSTED_CONVERSATION_OWNER_BINDING` to `delegated` for that path.
+  - Panel history/enumeration call path: **still pending** — the same API
+    property must be confirmed **separately** for the **panel's list/read
+    path** before switching `PANEL_CONVERSATION_ENUMERATION_MODE` (and, for
+    per-conversation panel reads, the delegated-read branch) to `delegated`,
+    by setting **`PANEL_HISTORY_OWNER_BINDING_VALIDATED`** (this ADR) true for
+    that exact call path. The ADR-0003 resolution is strong precedent (same
+    protocol/RBAC shape, same BFF component) but does **not** auto-set this
+    gate — each path requires its own live evidence per the "exact call path"
+    requirement established in this ADR.
 - Foundry changes managed-Conversations identity/RBAC, ordering, or deletion
   semantics.
+- Foundry changes platform session-membership fencing behavior (currently:
+  session membership is not fenced, but the response chain/history is).
 - Any FF regresses in validation or production, or a security review reports a
   cross-user or service-identity read path, or a capability theft/forgery path.
 - Hosted agents leave preview or change header/identity propagation.
 
 ## Open questions
 
-- **OQ-OWN (governs the binding mechanism, not continuity availability):** Does
-  the managed Conversations data API accept a **delegated user token** and enforce
-  per-user (owner-bound) authorization? If yes → `delegated` (Option B) may
-  supersede the capability **for reads** and the owner index is dropped for reads.
-  If no → the **capability** (Option A) remains the store-free continuity binding
-  and Option C stays prohibited. Note: continuity is **not** blocked on OQ-OWN —
-  the capability works today with zero store; OQ-OWN only decides whether the
-  platform can enforce reads natively instead.
+- **OQ-OWN (governs the binding mechanism, not continuity availability) —
+  RESOLVED for ADR-0003's hosted-continuity call path; STILL PENDING for this
+  ADR's panel history/enumeration call path.** Live evidence
+  ([`gpt-rag#591`](https://github.com/Azure/GPT-RAG/issues/591#issuecomment-5212288245))
+  confirms managed Conversations accepts a BFF-asserted, server-derived
+  `x-ms-user-identity` header and enforces per-user (owner-bound)
+  authorization on the response chain/history, on protocol `responses` 2.0.0
+  with narrow RBAC (`Foundry Agent Consumer` + custom
+  `UserIdentityImpersonation` at agent scope) — for the **hosted-continuity**
+  call path specifically. This is strong precedent, but this ADR's **own**
+  gate (`PANEL_HISTORY_OWNER_BINDING_VALIDATED`) requires the panel's list/read
+  call path to be independently confirmed before `delegated`/Option B engages
+  for the panel. Residual/still-open regardless of this ADR's own gate outcome:
+  (a) the asserted identity is middle-tier-trusted, not cryptographically
+  proven by the platform; (b) platform session-membership is not fenced
+  (motivating the never-store-unpartitioned-session-data invariant above);
+  (c) this does not resolve issue #591's separate document-level-authorization
+  question. Until this ADR's own gate passes, the **capability** (Option A)
+  remains the fallback/pre-gate default continuity and enumeration binding,
+  and Option C stays prohibited. Note: continuity is **not** blocked on this
+  ADR's own gate — the capability works today with zero store; the gate only
+  decides whether the panel's platform enforces reads natively instead.
 - **OQ-611-CAP (capability primitives):** Confirm the signing algorithm and key
   handling (HMAC vs JWS), Key Vault provisioning parity with `AUDIT-HMAC-KEY`,
   the TTL/rolling-re-mint values, and the rotation overlap window. Confirm the
   client persistence surface (Chainlit session vs `HttpOnly` cookie) meets the
   restart/browser requirements without exposing the capability to scripts.
 - **OQ-611-OWNERSTAMP:** Confirm the **BFF** can durably record ownership — via a
-  signed capability (Option A, no store) or via managed-Conversation ownership
-  established by the user's delegated identity (Option B) — and that it survives
-  version replacement (ADR-0003). The **container never records ownership**.
+  signed capability (Option A, no store) or via the delegated-header mechanism
+  (Option B, BFF-asserted `x-ms-user-identity` from the validated `oid`) — and
+  that it survives version replacement (ADR-0003). The **container never
+  records ownership**.
 - **OQ-611-BFF-RBAC:** For Option A, confirm the minimal Conversations data-plane
   role the **BFF identity** needs (read + append + delete for owner-gated
   operations) scoped without granting the container any role. For Option B,
-  confirm the BFF can operate with **no standing Conversations RBAC** using OBO.
+  confirm the BFF's endpoint-call identity operates with only the narrow
+  `Foundry Agent Consumer` + custom `UserIdentityImpersonation` roles at agent
+  scope — no standing Conversations read/write RBAC.
 - **OQ-611-REVOKE:** Confirm the acceptability of no fine-grained per-capability
   revocation in no-panel (bounded by short TTL + rolling re-mint + key rotation),
   or define a minimal revocation signal that does not reintroduce an always-on
