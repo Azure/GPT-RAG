@@ -449,6 +449,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../hosted_agent_release_matrix/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hosted-agent release matrix
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../hosted_continuity_platform_contract/" class="md-nav__link">
         
   
@@ -697,6 +718,21 @@
       Conversation History and Retrieval Controls
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Conversation History and Retrieval Controls">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hosted-v400-request-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hosted v4.0.0 request contract
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1598,24 +1634,22 @@
 built on the Microsoft Agent Framework and Azure AI Foundry Agent Service. It
 coordinates agent-based RAG workflows, where each agent has a defined role, to
 generate accurate, context-aware responses for complex user queries. Current
-published releases run it as an orchestrator Container App. The
-<a href="../deploy/#chat-runtime-modes-upcoming-hosted-default-release">upcoming hosted-default topology</a>
-packages the same chat runtime as a Microsoft Foundry hosted agent for fresh
-deployments and retains the Container Apps adapter as an explicit fallback.
-AILZ <code>v2.5.0</code> is published, but the platform implementation remains unreleased
-pending the remaining compatible component tags, final umbrella pins,
-integrated validation, and a new GPT-RAG release. The separate
+GPT-RAG umbrella releases run it as an orchestrator Container App. Orchestrator
+<code>v4.0.0</code> also packages the runtime as a Microsoft Foundry hosted agent, but the
+<a href="../hosted_agent_release_matrix/">exact hosted component matrix</a> has not been
+pinned by a GPT-RAG umbrella release. The separate
 <a href="../hosted_continuity_platform_contract/">hosted continuity platform contract</a>
 uses delegated <code>x-ms-user-identity</code> in the platform pivot merged by PR #633, but
-remains disabled pending compatible component pins and
-<code>HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED</code>; hosted/panel remains unsupported.
+remains disabled pending umbrella validation and
+<code>HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED</code>; hosted-panel remains
+platform-blocked.
 <a href="https://github.com/Azure/gpt-rag-orchestrator">GitHub Repository</a>.</p>
 <h2 id="key-features">Key Features</h2>
 <ul>
 <li><strong>Strategy-Based Architecture:</strong> Pluggable orchestration strategies selected via Azure App Configuration (<code>AGENT_STRATEGY</code>).</li>
 <li><strong>Context Retrieval:</strong> Intelligent retrieval from Azure AI Search or Foundry IQ with citation support and conservative retrieval-needed triage for local MAF strategies.</li>
 <li><strong>Microsoft Agent Framework:</strong> Built on the Microsoft Agent Framework.</li>
-<li><strong>Conversation Persistence:</strong> The currently released classic Container Apps topology maintains conversation history in Cosmos DB. The upcoming hosted/no-panel target uses Foundry managed Conversations for runtime state after its component and umbrella releases publish. The platform implementation is merged but unreleased. User-facing managed Conversation history and panel integration are deferred to <a href="https://github.com/Azure/GPT-RAG/issues/611">issue #611</a>. Both chat paths stream responses over SSE.</li>
+<li><strong>Conversation Persistence:</strong> The currently released classic Container Apps topology maintains conversation history in Cosmos DB. In the hosted component matrix, the UI BFF owns managed Conversations and sends complete ordered input to the stateless runtime. Hosted/no-panel has no Cosmos continuity store. Both chat paths stream responses over SSE.</li>
 <li><strong>Extensible Design:</strong> Easy to add new strategies by extending <code>BaseAgentStrategy</code>.</li>
 </ul>
 <h2 id="available-strategies">Available Strategies</h2>
@@ -1691,11 +1725,9 @@ and require a signed-in user.</p>
 are handled in two places. The model prompt receives only a recent history
 window, while the Cosmos DB conversation document is compacted before
 persistence so it keeps useful recent context without growing indefinitely.
-The upcoming hosted/no-panel target uses Foundry managed Conversations for
-runtime state after its component and umbrella releases publish. The platform
-implementation is merged but unreleased. User-facing history and panel
-integration remain deferred to
-<a href="https://github.com/Azure/GPT-RAG/issues/611">issue #611</a>. The default
+In the hosted component matrix, UI <code>v2.6.0</code> owns managed-Conversation lifecycle
+and orchestrator <code>v4.0.0</code> is stateless. User-facing list/read/feedback/delete
+routes exist in the UI component, but umbrella panel gates remain off. The default
 <code>maf_lite</code> strategy and the <code>multimodal</code> strategy also classify each turn as a
 greeting, retrieval-needed question, or no-retrieval follow-up. Transformations
 such as "format that answer as a table" or "translate the previous answer" can
@@ -1767,6 +1799,18 @@ compatible component set is validated, the trusted UI BFF will derive
 distinct from OBO retrieval. The hosted runtime is not an identity-header
 source and receives no key, Conversation or impersonation RBAC, or Cosmos DB in
 hosted/no-panel. Capability/HMAC remains a disabled fallback only.</p>
+<h3 id="hosted-v400-request-contract">Hosted <code>v4.0.0</code> request contract</h3>
+<p>Hosted <code>POST /responses</code> rejects top-level <code>conversation</code> and
+<code>previous_response_id</code> with HTTP 422. The caller must send the complete bounded,
+oldest-to-newest text history as <code>input</code> for every turn. A plain non-empty string
+is valid for one turn; a message array must be non-empty and end in a non-empty
+user message. The runtime constructs no managed-Conversations client and
+performs no create, read, append, or delete operation.</p>
+<p><code>POST /invocations</code> remains a distinct compatibility contract. Its opaque
+<code>conversation_id</code> is only echoed and used for local retrieval scoping; it is not
+managed state or authorization. UI <code>v2.6.0</code> currently replays complete ordered
+messages through this compatibility path. See
+<a href="../hosted_agent_release_matrix/#stateless-hosted-runtime-contract">Stateless hosted runtime contract</a>.</p>
 <h2 id="visual-guide">Visual Guide</h2>
 <p>New to the Orchestrator? Check out the <a href="../orchestrator_visual_guide/">Orchestrator Visual Guide</a> for a visual walkthrough of the architecture and key components.</p>
 <h2 id="repository">Repository</h2>

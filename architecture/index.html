@@ -16,7 +16,7 @@
         <link rel="prev" href="../quickstart_nl2sql/">
       
       
-        <link rel="next" href="../hosted_continuity_platform_contract/">
+        <link rel="next" href="../hosted_agent_release_matrix/">
       
       
       <link rel="icon" href="../favicon.ico">
@@ -529,6 +529,27 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hosted_agent_release_matrix/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hosted-agent release matrix
+  </span>
+  
+
+      </a>
     </li>
   
 
@@ -1599,43 +1620,21 @@ deployments retain their persisted topology during upgrade. Network isolation,
 enterprise integration, public ingress, and optional AI capabilities remain
 separate choices.</p>
 <div class="admonition warning">
-<p class="admonition-title">Implementation merged; release gates remain</p>
-<p>The hosted-default implementation merged to <code>develop</code> in
-<a href="https://github.com/Azure/GPT-RAG/pull/617">Azure/GPT-RAG PR #617</a> as
-<a href="https://github.com/Azure/GPT-RAG/commit/b614d0ad19a66cbc06b34a3ad764b0d94428999f"><code>b614d0a</code></a>.
-UI release PR
-<a href="https://github.com/Azure/gpt-rag-ui/pull/94">#94</a> merged to <code>main</code> as
-<a href="https://github.com/Azure/gpt-rag-ui/commit/763fa7eb2135037382673d2eb968421f084941cc"><code>763fa7e</code></a>,
-while AI Landing Zone
-<a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/131">PR #131</a>
-initially stamped and merged the unpublished <code>v2.5.0</code> state as
-<a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/commit/a6ae7284d654abb7ec53810cb8765b2975b51baa"><code>a6ae728</code></a>.
-<a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/132">PR #132</a>
-then fixed the local/CI size-gate defaults, and
-<a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/133">PR #133</a>
-merged that correction to <code>main</code>. AILZ <code>main</code> and <code>develop</code> now both point
-to <a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/commit/cacf418216ce7381d06263e0dd704a86b8a6f225"><code>cacf418</code></a>.
-AILZ <a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.5.0"><code>v2.5.0</code></a>
-is published; UI <code>v2.6.0</code> remains unpublished. The capability-first
-continuity contract merged in
-<a href="https://github.com/Azure/GPT-RAG/pull/630">PR #630</a>, but live OQ-OWN
-evidence supersedes it with a delegated <code>x-ms-user-identity</code> primary path.
-The platform pivot merged to <code>develop</code> in
-<a href="https://github.com/Azure/GPT-RAG/pull/633">PR #633</a> at
-<a href="https://github.com/Azure/GPT-RAG/commit/86b17b0af672edefe6842cba0f1a8ff77ab23038"><code>86b17b0</code></a>.
-Compatible pins, integrated validation, and the GPT-RAG release remain
-incomplete. Keep <code>HOSTED_CONTINUITY_ENABLED=false</code>; compatible history
-endpoints must return HTTP 503 until
-<code>HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true</code>. The diagrams document
-the approved target, not shipped behavior. Current published GPT-RAG
-<code>v3.7.0</code> remains classic.</p>
+<p class="admonition-title">Component matrix published; umbrella gate remains</p>
+<p>UI <code>v2.6.0</code>, orchestrator <code>v4.0.0</code>, ingestion <code>v2.7.0</code>, and AILZ <code>v2.5.0</code>
+implement the hosted component contracts, including the delegated
+<code>x-ms-user-identity</code> pivot. GPT-RAG has not published or repinned them as one
+umbrella release. Current umbrella deployments remain classic; continuity
+stays off/503 and <code>hosted-panel</code> still fails platform selection. The
+<a href="../hosted_agent_release_matrix/">hosted-agent release matrix</a> distinguishes
+implemented component behavior from integrated deployment support.</p>
 </div>
 <h2 id="full-zero-trust-reference">Full Zero Trust reference</h2>
 <p>The existing PNG and Visio remain the full network-isolated reference view.
 Use them when discussing hardened deployments. Maintainers should apply the
-<a href="../architecture_legacy_diagram_handoff/">legacy diagram update handoff</a> before
-the hosted-default release so those manually maintained assets match the
-focused editable SVG and Excalidraw views below.</p>
+<a href="../architecture_legacy_diagram_handoff/">legacy diagram update handoff</a> when an
+umbrella release ships so those manually maintained assets match the focused
+editable SVG and Excalidraw views below.</p>
 <p><img alt="Zero Trust Architecture" src="../media/architecture_zero_trust.png" /></p>
 <p><a href="../media/GPT-RAG.vsdx">Download Visio Diagram</a></p>
 <hr />
@@ -1666,9 +1665,8 @@ for the disabled-by-default gate, exact roles, limits, and cleanup lifecycle.</p
 <p>The classic runtime remains selectable through an explicit deployment
 operation. Pre-cutover deployments without a topology marker remain classic,
 and any persisted topology stays sticky until an operator deliberately
-migrates it. Hosted/panel is not part of the target default:
-<code>DEPLOY_ADMINISTRATIVE_PANEL=false</code> remains required while
-<a href="https://github.com/Azure/GPT-RAG/issues/611">issue #611</a> is open.</p>
+migrates it. Hosted-panel is not part of the target default: platform selection
+remains blocked and <code>DEPLOY_ADMINISTRATIVE_PANEL=false</code> is required.</p>
 <p>The lower lane in the diagram shows the planned two-phase hosted image flow:
 provision prerequisites, build through public ACR Tasks or the dedicated
 VNet-connected ACR Tasks agent pool, resolve the hosted image to an immutable
@@ -1683,7 +1681,7 @@ chips are standard resources, dashed orange chips are default-on or
 BYO-capable parameters, and solid orange chips are opt-in add-ons.</p>
 </div>
 <p><img alt="Basic Deployment architecture" src="../media/architecture_basic_deployment.svg" /></p>
-<p>The Basic diagram shows the target <a href="../deploy/#chat-runtime-modes-upcoming-hosted-default-release">fresh deployment</a>
+<p>The Basic diagram shows the target <a href="../deploy/#chat-runtime-modes">fresh deployment</a>
 with <code>NETWORK_ISOLATION=false</code>: Web UI and ingestion remain in Container Apps,
 while hosted/no-panel handles chat through Toolbox and authorization-trimmed
 retrieval. The orchestrator Container App appears only as the explicit
@@ -1705,7 +1703,7 @@ fallback. The panel is absent and its flag remains <code>false</code>.</p>
 <td>UI, chat runtime, ingestion</td>
 <td>Mode-selected baseline</td>
 <td>Canonical <code>DEPLOYMENT_TOPOLOGY</code>; materialized <code>DEPLOY_HOSTED_AGENT_ORCHESTRATION</code>, <code>DEPLOY_ADMINISTRATIVE_PANEL</code>, <code>CHAT_BACKEND</code>; <code>manifest.json</code> components; <code>containerAppsList</code></td>
-<td>After the gated release, fresh environments select hosted/no-panel, existing topologies stay sticky, and <code>classic</code> explicitly selects the Container Apps fallback. Hosted/panel is deferred to <a href="https://github.com/Azure/GPT-RAG/issues/611">issue #611</a>.</td>
+<td>The component matrix implements hosted/no-panel, but no umbrella release pins it. Existing topologies stay sticky, <code>classic</code> selects the Container Apps fallback, and hosted-panel remains platform-blocked.</td>
 </tr>
 <tr>
 <td>AI Foundry account, project, and model deployments</td>

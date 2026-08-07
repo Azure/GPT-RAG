@@ -449,6 +449,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../hosted_agent_release_matrix/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hosted-agent release matrix
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../hosted_continuity_platform_contract/" class="md-nav__link">
         
   
@@ -1678,7 +1699,7 @@
 
 
 <h1 id="authentication-and-document-level-security">Authentication and Document-Level Security</h1>
-<p>This page explains how authentication works in GPT-RAG, from the GPT-RAG UI sign-in to querying Azure AI Search with document-level access control enabled (POSIX-like ACL / RBAC scopes). The classic runtime forwards a user token to the orchestrator, which produces the correct user-context token for Azure AI Search. The upcoming hosted runtime preserves a stricter UI BFF ownership boundary described below.</p>
+<p>This page explains how authentication works in GPT-RAG, from the GPT-RAG UI sign-in to querying Azure AI Search with document-level access control enabled (POSIX-like ACL / RBAC scopes). The classic runtime forwards a user token to the orchestrator, which produces the correct user-context token for Azure AI Search. The published hosted component matrix defines a stricter UI BFF ownership boundary described below.</p>
 <blockquote>
 <p>In OAuth mode, the orchestrator receives a user access token (for the orchestrator API) and then performs an On-Behalf-Of (OBO) exchange to obtain a separate token for Azure AI Search. The two tokens have different audiences and are not interchangeable.</p>
 </blockquote>
@@ -1687,8 +1708,9 @@
 <p>Live OQ-OWN evidence supersedes the capability-first contract from
 <a href="https://github.com/Azure/GPT-RAG/pull/630">PR #630</a>. The delegated
 <code>x-ms-user-identity</code> platform pivot merged to <code>develop</code> in
-<a href="https://github.com/Azure/GPT-RAG/pull/633">PR #633</a>. Compatible component
-pins and the GPT-RAG release remain unpublished. Keep
+<a href="https://github.com/Azure/GPT-RAG/pull/633">PR #633</a>. UI <code>v2.6.0</code>,
+orchestrator <code>v4.0.0</code>, ingestion <code>v2.7.0</code>, and AILZ <code>v2.5.0</code> are published,
+but no GPT-RAG umbrella release pins them together. Keep
 <code>HOSTED_CONTINUITY_ENABLED=false</code>; compatible history endpoints return HTTP
 503 until <code>HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true</code>, and the current
 published release continues to use the classic flow.</p>
@@ -1707,10 +1729,11 @@ App directly, and do not treat CORS or an origin allowlist as authentication.</p
 </div>
 <h2 id="concepts">Concepts</h2>
 <h3 id="hosted-conversation-ownership-boundary">Hosted Conversation ownership boundary</h3>
-<p>For the upcoming compatible hosted topology, the trusted UI BFF derives
-<code>x-ms-user-identity</code> from the authenticated server-side principal and sends it
-on Responses protocol <code>2.0.0</code>. The browser cannot choose the owner, and the
-hosted runtime must not source or replace the identity header.</p>
+<p>For the hosted component matrix, the trusted UI BFF validates and canonicalizes
+the signed-in user's Entra <code>oid</code>, derives <code>x-ms-user-identity</code> only from that
+server-side value, and uses its own service token for managed-Conversation
+operations. Browser-supplied owner/header values are never authoritative, and
+the hosted runtime must not source or replace the identity header.</p>
 <p>This owner header is distinct from OBO. <code>x-ms-user-identity</code> binds Foundry
 Conversation ownership; OBO obtains a delegated bearer token for a downstream
 retrieval audience. Activation requires direct assignments to the UI BFF, at
@@ -1721,6 +1744,8 @@ GPT-RAG custom role <strong>GPT-RAG Hosted Agent User Identity Impersonation</st
 The hosted runtime receives no key, Conversation or impersonation RBAC, or
 Cosmos DB in hosted/no-panel. Capability/HMAC remains a disabled
 fallback and is not provisioned or required on the primary path. See the
+<a href="../hosted_agent_release_matrix/#delegated-owner-binding">hosted-agent release matrix</a>
+for exact component behavior and the
 <a href="../hosted_continuity_platform_contract/">hosted conversation continuity platform contract</a>
 for the owner-validation, protocol, role, and lifecycle requirements.</p>
 <h3 id="classic-container-apps-token-flow">Classic Container Apps token flow</h3>
@@ -1970,14 +1995,17 @@ ingestion dashboard is mounted at <code>/dashboard</code> on the ingestion Conta
 Both surfaces let an operator inspect runs, conversations, and a curated set of
 runtime settings, and the ingestion dashboard also lets an operator trigger a
 scheduled job on demand. The
-<a href="../deploy/#chat-runtime-modes-upcoming-hosted-default-release">upcoming hosted-default topology</a>
-is hosted/no-panel, omits these administrative surfaces, and requires
-<code>DEPLOY_ADMINISTRATIVE_PANEL=false</code>. AILZ <code>v2.5.0</code> is published, but that
-default still depends on the remaining compatible component tags, final
-umbrella pins, integrated validation, and a new GPT-RAG release. The platform
-implementation is merged but unreleased. Hosted/panel is deferred to
-<a href="https://github.com/Azure/GPT-RAG/issues/611">issue #611</a>.</p>
+<a href="../hosted_agent_release_matrix/">published hosted component matrix</a>
+defines hosted/no-panel, which omits these administrative surfaces and requires
+<code>DEPLOY_ADMINISTRATIVE_PANEL=false</code>; no GPT-RAG umbrella release pins that
+matrix, and hosted-panel remains platform-blocked.</p>
 <p>Admin access is enforced through an <strong>Entra ID App Role named <code>Admin</code></strong> added to the same App Registration you created for user sign-in. The token the caller presents to <code>/api/dashboard/*</code> (or the ingestion equivalents) must carry <code>Admin</code> in its <code>roles</code> claim.</p>
+<p>The ingestion <code>v2.7.0</code> metadata-only Overview and Curation APIs use their own
+explicit <code>PANEL_OPERATOR_APP_ROLE</code> or <code>PANEL_OPERATOR_GROUP_ID</code> gate. Their Vite
+tabs do not acquire a browser token or add an <code>Authorization</code> header, so they
+require an approved reverse-auth proxy to supply the delegated bearer and
+otherwise expose the real 401/403/503 response. This is not the orchestrator
+dashboard's MSAL flow.</p>
 <p>This section explains how to add the role, assign users, request the correct scope, and debug the most common error (a 403 response even though the role is assigned).</p>
 <blockquote>
 <p>The orchestrator dashboard SPA performs its own Microsoft Entra ID sign-in (MSAL, Authorization Code + PKCE) independent of the chat UI. If you are enabling sign-in specifically for the orchestrator dashboard, follow <a href="../howto_dashboard_signin/">Admin Dashboard Sign-in</a> for the SPA-specific setup: adding a Single-page application redirect URI, exposing the <code>access_as_user</code> scope, and the <code>OAUTH_AZURE_AD_TENANT_ID</code>, <code>OAUTH_AZURE_AD_CLIENT_ID</code>, and optional <code>OAUTH_AZURE_AD_API_SCOPE</code> App Configuration keys. The rest of this section covers the <code>Admin</code> app role itself, which is shared by both dashboards.</p>

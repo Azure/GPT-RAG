@@ -523,6 +523,27 @@
   
   
     <li class="md-nav__item">
+      <a href="hosted_agent_release_matrix/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hosted-agent release matrix
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="hosted_continuity_platform_contract/" class="md-nav__link">
         
   
@@ -1584,40 +1605,22 @@ chat runtime and retains the Container Apps orchestrator as an explicit
 fallback. See the <a href="architecture/">Architecture</a> page for the mode contract
 and required-vs-configurable deployment table.</p>
 <div class="admonition warning">
-<p class="admonition-title">Hosted-default release dependency</p>
-<p>The diagram below is the approved target, not shipped behavior. The
-platform implementation merged in
-<a href="https://github.com/Azure/GPT-RAG/pull/617">Azure/GPT-RAG PR #617</a>. UI
-release <a href="https://github.com/Azure/gpt-rag-ui/pull/94">PR #94</a> merged. AI
-Landing Zone
-<a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/131">PR #131</a>
-initially stamped and merged the unpublished <code>v2.5.0</code> state as
-<a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/commit/a6ae7284d654abb7ec53810cb8765b2975b51baa"><code>a6ae728</code></a>;
-<a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/132">PR #132</a>
-fixed the local/CI size-gate defaults, and
-<a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/133">PR #133</a>
-merged the correction to <code>main</code>. AILZ <code>main</code> and <code>develop</code> now both point to
-<a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/commit/cacf418216ce7381d06263e0dd704a86b8a6f225"><code>cacf418</code></a>.
-AILZ <a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.5.0"><code>v2.5.0</code></a>
-is published. UI <code>v2.6.0</code>, final umbrella pins, integrated validation, and a
-new GPT-RAG release remain unpublished. The capability-first continuity
-contract from
-<a href="https://github.com/Azure/GPT-RAG/pull/630">PR #630</a> has been superseded by
-the OQ-OWN delegated <code>x-ms-user-identity</code> architecture. The platform pivot
-merged to <code>develop</code> in
-<a href="https://github.com/Azure/GPT-RAG/pull/633">PR #633</a> at
-<a href="https://github.com/Azure/GPT-RAG/commit/86b17b0af672edefe6842cba0f1a8ff77ab23038"><code>86b17b0</code></a>.
-Compatible component pins and the GPT-RAG release remain unpublished, so
-continuity stays off and compatible history endpoints return HTTP 503 until
-<code>HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true</code>. Current published
-GPT-RAG <code>v3.7.0</code> stays classic.</p>
+<p class="admonition-title">Published components are not an umbrella release</p>
+<p>UI <code>v2.6.0</code>, orchestrator <code>v4.0.0</code>, ingestion <code>v2.7.0</code>, and AILZ <code>v2.5.0</code>
+are published. GPT-RAG has not published an umbrella release that pins and
+validates this matrix; its current <code>develop</code> manifest still references older
+components. Released GPT-RAG deployments remain classic, continuity stays
+off/503, and hosted-panel remains platform-blocked. See the
+<a href="hosted_agent_release_matrix/">hosted-agent component release matrix</a> for
+the exact runtime, identity, RBAC, panel, data, and rollback contracts.</p>
 </div>
 <p><img alt="Chat runtime modes and hosted deployment lifecycle" src="media/architecture_chat_runtime_modes.svg" /></p>
 <p><img alt="Modular architecture layers" src="media/architecture_modular_layers.svg" /></p>
 <p><img alt="Zero Trust Architecture" src="media/architecture_zero_trust.png" />
 <em>Full Zero Trust reference architecture. This is the complete network-isolated
-view, not the minimum Basic deployment. The focused SVG above is the source of
-truth for the pending hosted-default runtime update.</em></p>
+view, not the minimum Basic deployment. The focused SVG above describes the
+component-level hosted design; the matrix page records its umbrella release
+gate.</em></p>
 <h2 id="governance">Governance</h2>
 <p>Before connecting enterprise data or relying on telemetry as evidence, review
 <a href="governance_overview/">Governance and responsible operation</a>. It explains

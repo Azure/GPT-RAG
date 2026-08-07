@@ -449,6 +449,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../hosted_agent_release_matrix/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hosted-agent release matrix
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../hosted_continuity_platform_contract/" class="md-nav__link">
         
   
@@ -1643,13 +1664,9 @@
 <p>If you are looking for the wider authentication picture (chat UI sign-in, On-Behalf-Of, document-level access control), see <a href="../howto_authentication/">Authentication and Document-Level Security</a>. This page is scoped to the operator dashboard.</p>
 <p>This procedure applies to the orchestrator dashboard in the currently released
 classic Container Apps topology and in the explicit classic fallback. The
-<a href="../deploy/#chat-runtime-modes-upcoming-hosted-default-release">upcoming hosted-default topology</a>
-is hosted/no-panel, does not deploy this dashboard, and requires
-<code>DEPLOY_ADMINISTRATIVE_PANEL=false</code>. AILZ <code>v2.5.0</code> is published, but it still
-depends on the remaining compatible component tags, final umbrella pins,
-integrated validation, and a new GPT-RAG release. The platform implementation
-is merged but unreleased. Hosted/panel is deferred to
-<a href="https://github.com/Azure/GPT-RAG/issues/611">issue #611</a>.</p>
+<a href="../hosted_agent_release_matrix/">hosted component matrix</a> is hosted/no-panel,
+does not deploy this dashboard, and has not been published as a GPT-RAG umbrella
+release. Hosted-panel remains platform-blocked.</p>
 <h2 id="what-this-is">What this is</h2>
 <p>Until this release, the orchestrator dashboard SPA had no real sign-in. The <code>require_admin</code> gate on <code>/api/dashboard/*</code> existed, but the only way to feed it a token was to paste one into browser storage. That is now replaced by a proper Entra ID sign-in flow inside the SPA using MSAL (Authorization Code + PKCE, redirect flow):</p>
 <ol>
@@ -1660,6 +1677,16 @@ is merged but unreleased. Hosted/panel is deferred to
 <li>If the user is signed in but the token does not carry the <code>Admin</code> app role, the SPA renders a clear "access denied" state instead of the dashboard.</li>
 </ol>
 <p>The chat UI is not affected. Only the orchestrator dashboard uses this new flow.</p>
+<div class="admonition important">
+<p class="admonition-title">The ingestion operator tabs use a different browser client</p>
+<p>The ingestion <code>v2.7.0</code> Overview and Curation tabs do not initialize MSAL,
+acquire an access token, or attach <code>Authorization</code> to their panel requests.
+They display the API's real 401/403/503 response unless an approved
+same-origin reverse-auth proxy adds a delegated operator bearer. Do not
+apply the orchestrator dashboard sign-in instructions below to that Vite
+client. See
+<a href="../hosted_agent_release_matrix/#operator-overview-and-corpus-curation">Operator overview and corpus curation</a>.</p>
+</div>
 <pre class="mermaid"><code>sequenceDiagram
     autonumber
     participant SPA as Dashboard SPA

@@ -354,13 +354,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#chat-runtime-modes-upcoming-hosted-default-release" class="md-nav__link">
+  <a href="#chat-runtime-modes" class="md-nav__link">
     <span class="md-ellipsis">
-      Chat runtime modes (upcoming hosted-default release)
+      Chat runtime modes
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Chat runtime modes (upcoming hosted-default release)">
+    <nav class="md-nav" aria-label="Chat runtime modes">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -382,9 +382,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#explicit-fallback-after-the-hosted-default-release" class="md-nav__link">
+  <a href="#explicit-classic-fallback" class="md-nav__link">
     <span class="md-ellipsis">
-      Explicit fallback after the hosted-default release
+      Explicit classic fallback
     </span>
   </a>
   
@@ -632,6 +632,27 @@
   
   <span class="md-ellipsis">
     Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hosted_agent_release_matrix/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hosted-agent release matrix
   </span>
   
 
@@ -1736,46 +1757,22 @@ options, and a before/after table.</p>
 </blockquote>
 <p><code>azd provision</code> runs GPT-RAG preflight checks before Azure Resource Manager deployment starts. These checks validate the selected region, jumpbox VM SKU restrictions, provider/location support for AI Search, Cosmos DB, Container Apps, and AI Foundry/Cognitive Services, and Azure OpenAI model quota for the configured deployments. If model quota is insufficient, the hook fails early and suggests candidate regions when possible.</p>
 <p>Some transient Azure capacity failures are not exposed by reliable pre-create APIs. For example, Cosmos DB can still fail later with regional high-demand <code>ServiceUnavailable</code>; the preflight reports this limitation explicitly. Use <code>GPT_RAG_REGIONAL_PREFLIGHT_SKIP=true</code> only to bypass GPT-RAG regional checks, or <code>PREFLIGHT_SKIP=true</code> to bypass all preflight hooks.</p>
-<p>For current published releases, the <code>postProvision</code> hook runs locally after
-<code>azd provision</code>, and <code>azd deploy</code> deploys the UI, orchestrator, and ingestion
-services in the classic Container Apps topology. The hosted-default
-implementation is merged to <code>develop</code>, but the fresh-deployment default changes
-only after the release gates below are complete.</p>
-<h3 id="chat-runtime-modes-upcoming-hosted-default-release">Chat runtime modes (upcoming hosted-default release)</h3>
+<p>For current published GPT-RAG umbrella releases, the <code>postProvision</code> hook runs
+locally after <code>azd provision</code>, and <code>azd deploy</code> deploys the UI, orchestrator, and
+ingestion services in the classic Container Apps topology.</p>
+<h3 id="chat-runtime-modes">Chat runtime modes</h3>
 <div class="admonition warning">
-<p class="admonition-title">Do not treat the target default as shipped</p>
-<p>The umbrella implementation merged to <code>develop</code> in
-<a href="https://github.com/Azure/GPT-RAG/pull/617">Azure/GPT-RAG PR #617</a> as
-<a href="https://github.com/Azure/GPT-RAG/commit/b614d0ad19a66cbc06b34a3ad764b0d94428999f"><code>b614d0a</code></a>.
-UI release PR
-<a href="https://github.com/Azure/gpt-rag-ui/pull/94">#94</a> merged to <code>main</code> as
-<a href="https://github.com/Azure/gpt-rag-ui/commit/763fa7eb2135037382673d2eb968421f084941cc"><code>763fa7e</code></a>,
-while AI Landing Zone
-<a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/131">PR #131</a>
-initially stamped and merged the unpublished <code>v2.5.0</code> state as
-<a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/commit/a6ae7284d654abb7ec53810cb8765b2975b51baa"><code>a6ae728</code></a>.
-<a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/132">PR #132</a>
-then fixed the local/CI size-gate defaults, and
-<a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/133">PR #133</a>
-merged that correction to <code>main</code>. AILZ <code>main</code> and <code>develop</code> now both point
-to <a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/commit/cacf418216ce7381d06263e0dd704a86b8a6f225"><code>cacf418</code></a>.
-AILZ <a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.5.0"><code>v2.5.0</code></a>
-is published; UI <code>v2.6.0</code> remains unpublished. The capability-first
-continuity contract merged in
-<a href="https://github.com/Azure/GPT-RAG/pull/630">PR #630</a>, but live OQ-OWN
-evidence supersedes it with delegated <code>x-ms-user-identity</code>. The platform
-pivot merged to <code>develop</code> in
-<a href="https://github.com/Azure/GPT-RAG/pull/633">PR #633</a> at
-<a href="https://github.com/Azure/GPT-RAG/commit/86b17b0af672edefe6842cba0f1a8ff77ab23038"><code>86b17b0</code></a>.
-Compatible component pins, integrated validation, and a new GPT-RAG release
-remain unpublished. Continuity stays off and compatible history endpoints
-return HTTP 503 until the exact validation gate passes. Current published
-GPT-RAG <code>v3.7.0</code> stays classic.
-Use this workflow only with the release that explicitly announces the
-hosted-default contract.</p>
+<p class="admonition-title">The component matrix is not an umbrella release</p>
+<p>UI <code>v2.6.0</code>, orchestrator <code>v4.0.0</code>, ingestion <code>v2.7.0</code>, and AILZ <code>v2.5.0</code>
+are published. GPT-RAG has not published an umbrella release that pins and
+validates them together, and its current <code>develop</code> manifest still references
+older component versions. Continue to use the classic instructions above.
+The hosted workflow below describes the pending umbrella contract and must
+not be applied to a released GPT-RAG manifest. See the
+<a href="../hosted_agent_release_matrix/">exact component matrix</a>.</p>
 </div>
-<p>The upcoming release resolves one canonical topology before provisioning and
-materializes the corresponding legacy flags and App Configuration values.
+<p>The platform implementation resolves one canonical topology before provisioning
+and materializes the corresponding legacy flags and App Configuration values.
 Topology never changes automatically during a chat request.</p>
 <table>
 <thead>
@@ -1787,7 +1784,7 @@ Topology never changes automatically during a chat request.</p>
 </thead>
 <tbody>
 <tr>
-<td>Genuinely fresh environment after the gated release</td>
+<td>Genuinely fresh environment after a future umbrella release</td>
 <td><code>DEPLOYMENT_TOPOLOGY=hosted-no-panel</code>, <code>DEPLOY_HOSTED_AGENT_ORCHESTRATION=true</code>, <code>DEPLOY_ADMINISTRATIVE_PANEL=false</code>, <code>CHAT_BACKEND=hosted_agent</code></td>
 <td>Web UI and ingestion remain in Container Apps. Chat runs in a Microsoft Foundry hosted agent. No orchestrator Container App or panel-only Cosmos DB is provisioned.</td>
 </tr>
@@ -1808,10 +1805,9 @@ Topology never changes automatically during a chat request.</p>
 </tr>
 </tbody>
 </table>
-<p>Do not select <code>hosted-panel</code>. Hosted/panel history, feedback, curation, and
-dashboard workflows remain blocked by
-<a href="https://github.com/Azure/GPT-RAG/issues/611">issue #611</a>, and
-<code>DEPLOY_ADMINISTRATIVE_PANEL=false</code> remains required.</p>
+<p>Do not select <code>hosted-panel</code>. UI and ingestion component endpoints exist, but
+the platform selector still rejects this topology and force-disables its
+evidence gates. <code>DEPLOY_ADMINISTRATIVE_PANEL=false</code> remains required.</p>
 <p>The deployment hooks publish the shared runtime contract under the App
 Configuration label <code>gpt-rag</code>:</p>
 <table>
@@ -1824,11 +1820,11 @@ Configuration label <code>gpt-rag</code>:</p>
 <tbody>
 <tr>
 <td><code>DEPLOYMENT_TOPOLOGY</code></td>
-<td>Canonical deployment choice: <code>hosted-no-panel</code> or <code>classic</code>. <code>hosted-panel</code> fails closed while #611 is open.</td>
+<td>Canonical deployment choice: <code>hosted-no-panel</code> or <code>classic</code>. <code>hosted-panel</code> still fails platform selection.</td>
 </tr>
 <tr>
 <td><code>CHAT_BACKEND</code></td>
-<td>The upcoming UI release treats missing or blank as <code>hosted_agent</code>; the umbrella deployment always publishes the resolved sticky value. <code>orchestrator</code> is the explicit fallback. Unknown values fail startup. Environment configuration takes precedence over App Configuration.</td>
+<td>UI <code>v2.6.0</code> treats missing or blank as <code>hosted_agent</code>; an umbrella deployment must publish the resolved sticky value. <code>orchestrator</code> is the explicit fallback. Unknown values fail startup. Environment configuration takes precedence over App Configuration.</td>
 </tr>
 <tr>
 <td><code>ORCHESTRATOR_BASE_URL</code></td>
@@ -1836,7 +1832,7 @@ Configuration label <code>gpt-rag</code>:</p>
 </tr>
 <tr>
 <td><code>HOSTED_AGENT_BASE_URL</code></td>
-<td>Required HTTPS hosted service root. A compatible OQ-OWN UI sends Responses protocol <code>2.0.0</code> requests to <code>POST /responses</code> when <code>CHAT_BACKEND=hosted_agent</code>. The separate <code>POST /invocations</code> endpoint retains the legacy messages-based invocation contract but does not satisfy delegated continuity.</td>
+<td>Required HTTPS hosted service root. Orchestrator <code>v4.0.0</code> defines stateless <code>POST /responses</code>; UI <code>v2.6.0</code> currently sends complete ordered messages through the distinct <code>POST /invocations</code> compatibility route. A future umbrella release must align the live call route with the protocol evidence it validates.</td>
 </tr>
 <tr>
 <td><code>HOSTED_AGENT_RESOURCE_SCOPE</code></td>
@@ -1867,12 +1863,12 @@ opaque <code>x-agent-foundry-call-id</code> context to Toolbox; user and delegat
 tokens are not copied into tool payloads or client-defined identity headers.</p>
 <h4 id="hosted-conversation-continuity-platform-gate">Hosted conversation continuity platform gate</h4>
 <div class="admonition danger">
-<p class="admonition-title">Delegated owner binding remains release-gated</p>
-<p><code>HOSTED_CONTINUITY_ENABLED</code> defaults to <code>false</code> and must stay false until the
-compatible components are published. PR #633 provides the platform pivot,
-but deployment must still prove the live 100%-routed Responses protocol
-<code>2.0.0</code>, trusted UI BFF identity derivation, and the two exact direct
-agent-scoped roles before recording
+<p class="admonition-title">Delegated owner binding remains umbrella-gated</p>
+<p><code>HOSTED_CONTINUITY_ENABLED</code> defaults to <code>false</code> and must stay false. The
+component releases are published, but deployment must still pin them
+together and prove the live 100%-routed Responses protocol <code>2.0.0</code>, trusted
+UI BFF identity derivation, and the two exact direct agent-scoped roles
+before recording
 <code>HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true</code>. Otherwise compatible
 history endpoints return HTTP 503.</p>
 </div>
@@ -1960,19 +1956,30 @@ only if a future release explicitly selects and validates capability mode. See
 the
 <a href="../hosted_continuity_platform_contract/">hosted conversation continuity platform contract</a>
 for the complete trust and rollout boundary.</p>
-<p><code>POST /responses</code> and <code>POST /invocations</code> are distinct protocols, not aliases, and their request bodies are not interchangeable. Microsoft Foundry hosts the Responses protocol <code>2.0.0</code> route through <code>azure-ai-agentserver-responses</code>. It accepts a non-empty string <code>input</code>; set <code>stream</code> to <code>true</code> for an SSE lifecycle or <code>false</code> for a synchronous JSON response. <code>store</code> accepts <code>true</code> or <code>false</code>, and <code>background</code> enables background execution. The route also supports <code>previous_response_id</code>, string-valued <code>metadata</code>, and the platform-injected <code>agent_reference</code>.</p>
-<p>Managed <code>conversation</code> accepts either a non-empty id string or an object containing only <code>{"id": "&lt;non-empty-id&gt;"}</code>. <code>conversation</code> and <code>previous_response_id</code> are mutually exclusive to prevent history from crossing conversation boundaries. Invalid conversation identifiers are rejected rather than creating a new thread. List and multimodal input are rejected, as are request fields outside the supported Responses contract.</p>
+<p><code>POST /responses</code> and <code>POST /invocations</code> are distinct protocols, not aliases,
+and their request bodies are not interchangeable. Orchestrator <code>v4.0.0</code>
+implements a stateless hosted Responses contract: callers send complete ordered
+text history in <code>input</code> on every request. A non-empty string is valid for one
+turn. An array must be non-empty, text-only, ordered oldest to newest, and end
+with a non-empty user message. Top-level <code>conversation</code> and
+<code>previous_response_id</code> are rejected with HTTP 422.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;input&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;What is the document retention policy?&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;input&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;What is the document retention policy?&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;assistant&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;The policy states 30 days.&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Who approves an exception?&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
 <span class="w">  </span><span class="nt">&quot;stream&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;store&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;background&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;conversation&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;conversation-id&gt;&quot;</span>
-<span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;correlation_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;correlation-id&gt;&quot;</span>
-<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="nt">&quot;store&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>The compatibility <code>POST /invocations</code> route retains the legacy messages-based schema:</p>
@@ -1987,41 +1994,18 @@ for the complete trust and rollout boundary.</p>
 <span class="w">  </span><span class="nt">&quot;metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>The Responses route returns either SSE or synchronous JSON according to <code>stream</code>; the legacy Invocations route streams SSE. Each validates its own protocol-specific input before entering the shared hosted execution path. See the Microsoft Foundry <a href="https://learn.microsoft.com/azure/foundry/agents/concepts/hosted-agents#key-concepts">hosted-agent protocol comparison</a>.</p>
-<p>Responses protocol <code>2.0.0</code> also owns the stored-response lifecycle:</p>
-<table>
-<thead>
-<tr>
-<th>Route</th>
-<th>Purpose</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>GET /responses/{response_id}</code></td>
-<td>Retrieve a stored response. Responses created with <code>store=false</code> are not available.</td>
-</tr>
-<tr>
-<td><code>GET /responses/{response_id}/input_items</code></td>
-<td>List the input items recorded for a stored response.</td>
-</tr>
-<tr>
-<td><code>POST /responses/{response_id}/cancel</code></td>
-<td>Cancel an in-flight background response.</td>
-</tr>
-<tr>
-<td><code>DELETE /responses/{response_id}</code></td>
-<td>Delete a stored response.</td>
-</tr>
-</tbody>
-</table>
-<p>These storage routes belong to the Responses protocol and do not accept the legacy invocation body. For Toolbox-backed configurations, the hosted identity guard validates <code>x-agent-foundry-call-id</code> before create, retrieve, input-item listing, cancellation, or deletion can access the protocol provider. Values containing surrounding whitespace are rejected rather than trimmed, and the provider receives the exact validated value unchanged.</p>
+<p>The hosted runtime constructs no managed-Conversations client and performs zero
+managed state operations. The compatibility <code>conversation_id</code> is an opaque label
+for tagging and local retrieval scoping only; it is not an ownership credential.
+Managed history, user list/read/feedback/delete, and opaque handle validation are
+owned by the trusted UI BFF. See the
+<a href="../hosted_agent_release_matrix/#stateless-hosted-runtime-contract">hosted-agent release matrix</a>.</p>
 <h4 id="two-phase-hosted-deployment">Two-phase hosted deployment</h4>
 <p>For a fresh hosted deployment, configure the delegated data-plane scope before
 the first provision:</p>
 <div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">HOSTED_AGENT_RESOURCE_SCOPE</span> <span class="s2">&quot;api://&lt;application-id&gt;/.default&quot;</span>
 <span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS</span> <span class="n">60</span>
-<span class="c"># Keep continuity disabled until compatible component pins and owner validation publish.</span>
+<span class="c"># Keep continuity disabled until an umbrella release pins the matrix and validates ownership.</span>
 <span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">HOSTED_CONTINUITY_ENABLED</span> <span class="n">false</span>
 <span class="n">azd</span> <span class="n">provision</span>
 <span class="n">pwsh</span> <span class="n">scripts</span><span class="p">/</span><span class="n">prepareHostedDeployment</span><span class="p">.</span><span class="n">ps1</span>
@@ -2043,7 +2027,7 @@ dedicated VNet-connected ACR Tasks agent pool; shared ACR Tasks cannot reach a
 private endpoint. Operators may pass an already-built immutable
 <code>sha256:&lt;64-hex-characters&gt;</code> digest to the preparation command to skip builds.
 No lifecycle hook recursively invokes <code>azd provision</code>.</p>
-<h4 id="explicit-fallback-after-the-hosted-default-release">Explicit fallback after the hosted-default release</h4>
+<h4 id="explicit-classic-fallback">Explicit classic fallback</h4>
 <p>Fallback is a deployment operation, not a request-time retry:</p>
 <div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">DEPLOYMENT_TOPOLOGY</span> <span class="n">classic</span>
 <span class="n">azd</span> <span class="n">provision</span>
@@ -2054,10 +2038,9 @@ No lifecycle hook recursively invokes <code>azd provision</code>.</p>
 classic panel data.</p>
 <h4 id="current-classic-release">Current classic release</h4>
 <p>GPT-RAG <code>v3.7.0</code> remains the latest published umbrella release at the time this
-target architecture was documented. Its classic pin set is UI <code>v2.3.13</code>,
-orchestrator <code>v3.8.0</code>, ingestion <code>v2.5.0</code>, and AI Landing Zone <code>v2.3.0</code>.
-Do not combine the upcoming topology contract with those released hooks or
-manifests.</p>
+matrix was documented. Its classic pin set is UI <code>v2.3.13</code>, orchestrator
+<code>v3.8.0</code>, ingestion <code>v2.5.0</code>, and AI Landing Zone <code>v2.3.0</code>. Do not combine the
+component-only hosted matrix with those released hooks or manifests.</p>
 <h3 id="retrieval-backend">Retrieval backend</h3>
 <p>GPT-RAG can retrieve grounding content directly from Azure AI Search or through a
 Foundry IQ knowledge base. Starting with GPT-RAG v3.0.2 and AI Landing Zone
@@ -2341,12 +2324,12 @@ azd<span class="w"> </span>deploy<span class="w"> </span>
 </code></pre></div></p>
 <h2 id="permissions">Permissions</h2>
 <p>The role tables below describe the currently released classic Container Apps
-topology. The merged but unreleased hosted/no-panel implementation omits the
+topology. The component-level hosted/no-panel implementation omits the
 orchestrator Container App assignments and adds Foundry data-plane,
-delegated-user, Toolbox, and immutable-image pull assignments. Component and AI
-Landing Zone tags, final umbrella pins, integrated validation, and the GPT-RAG
-release remain outstanding. Hosted/panel remains unsupported and is tracked by
-<a href="https://github.com/Azure/GPT-RAG/issues/611">issue #611</a>.</p>
+delegated-user, Toolbox, and immutable-image pull assignments. Its exact
+component tags are published, but final umbrella pins, integrated validation,
+and a GPT-RAG release remain outstanding. Hosted-panel remains
+platform-blocked.</p>
 <p><strong>Microsoft Foundry Role and AI Search Assignments</strong></p>
 <table>
 <thead>

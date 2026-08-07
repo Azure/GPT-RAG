@@ -449,6 +449,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../hosted_agent_release_matrix/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hosted-agent release matrix
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../hosted_continuity_platform_contract/" class="md-nav__link">
         
   
@@ -1570,15 +1591,20 @@
 <p>GPT-RAG includes a <strong>User Feedback Loop</strong> feature that lets users evaluate
 assistant responses through the UI. In the currently released classic
 Container Apps topology and the explicit classic fallback, feedback is
-processed by the orchestrator and stored in <strong>Cosmos DB</strong>. The
-<a href="../deploy/#chat-runtime-modes-upcoming-hosted-default-release">upcoming hosted-default topology</a>
-is hosted/no-panel and does not include this feedback path. AILZ <code>v2.5.0</code> is
-published, but the implementation remains unreleased pending the remaining
-compatible component tags, final umbrella pins, integrated validation, and a
-new GPT-RAG release. Keep
-<code>DEPLOY_ADMINISTRATIVE_PANEL=false</code>; hosted feedback and panel workflows are
-deferred to
-<a href="https://github.com/Azure/GPT-RAG/issues/611">issue #611</a>.</p>
+processed by the orchestrator and stored in <strong>Cosmos DB</strong>. The published
+<a href="../hosted_agent_release_matrix/">hosted component matrix</a> implements separate
+user history, feedback, and delete APIs in UI <code>v2.6.0</code>, but hosted-panel is not
+published as a GPT-RAG umbrella topology. Keep
+<code>DEPLOY_ADMINISTRATIVE_PANEL=false</code> in released umbrella deployments.</p>
+<p>For the component contract, the UI BFF checks the caller's validated <code>oid</code>
+against the owner index before reading managed Conversation messages or
+metadata. Missing and non-owner resources both return opaque 404. Feedback
+stores bounded, sanitized rating/category/comment/message-reference metadata
+only; message bodies and citations remain in managed Conversations. Delete
+removes the managed Conversation first and then metadata, returning an explicit
+<code>partial</code> result if metadata cleanup fails. Signed pagination cursors are
+<code>oid</code>-bound and expiring; tampered, expired, or cross-user cursors return 422.
+These routes return 503 while panel/history gates are off.</p>
 <p><img alt="Feedback stored in Cosmos DB" src="../media/feedback_stored_in_cosmos_db.png" />
 <br><em>User feedback stored in Cosmos DB</em></p>
 <p>By default, <strong>basic feedback</strong> (thumbs up/down) is enabled, while <strong>detailed ratings</strong> (star rating and comments) are disabled. Administrators control these options through <strong>Azure App Configuration</strong>.</p>

@@ -13,10 +13,10 @@
       
       
       
-        <link rel="prev" href="../deploy/">
+        <link rel="prev" href="../architecture/">
       
       
-        <link rel="next" href="../quickstart_nl2sql/">
+        <link rel="next" href="../hosted_continuity_platform_contract/">
       
       
       <link rel="icon" href="../favicon.ico">
@@ -24,7 +24,7 @@
     
     
       
-        <title>Simple RAG - GPT-RAG</title>
+        <title>Hosted-agent release matrix - GPT-RAG</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#simple-rag-quick-start-guide" class="md-skip">
+        <a href="#hosted-agent-component-release-matrix" class="md-skip">
           Skip to content
         </a>
       
@@ -111,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Simple RAG
+              Hosted-agent release matrix
             
           </span>
         </div>
@@ -306,19 +306,17 @@
       
   
   
-    
   
   
-  
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
         
           
           <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
@@ -332,7 +330,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             Quick Start Guides
@@ -343,19 +341,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../quickstart_simple_rag/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -364,7 +353,6 @@
   
 
       </a>
-      
     </li>
   
 
@@ -402,17 +390,19 @@
       
   
   
+    
   
   
+  
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
         
           
           <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
@@ -426,7 +416,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             Architecture
@@ -458,10 +448,30 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../hosted_agent_release_matrix/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Hosted-agent release matrix
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -470,6 +480,122 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#exact-published-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exact published matrix
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#modes-and-defaults" class="md-nav__link">
+    <span class="md-ellipsis">
+      Modes and defaults
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stateless-hosted-runtime-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      Stateless hosted runtime contract
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#delegated-owner-binding" class="md-nav__link">
+    <span class="md-ellipsis">
+      Delegated owner binding
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Delegated owner binding">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#protocol-and-rbac-evidence-gate" class="md-nav__link">
+    <span class="md-ellipsis">
+      Protocol and RBAC evidence gate
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#opaque-handle-failures" class="md-nav__link">
+    <span class="md-ellipsis">
+      Opaque handle failures
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#user-panel-surfaces" class="md-nav__link">
+    <span class="md-ellipsis">
+      User panel surfaces
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#operator-overview-and-corpus-curation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Operator overview and corpus curation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-confinement" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data confinement
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#operator-verification-and-rollback" class="md-nav__link">
+    <span class="md-ellipsis">
+      Operator verification and rollback
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1530,307 +1656,389 @@
   
 
 
-<h1 id="simple-rag-quick-start-guide">Simple RAG Quick Start Guide</h1>
-<p>Get document-based AI question answering working in <strong>60 minutes</strong> using <strong>GPT-RAG's automated deployment</strong>.</p>
-<p>This quickstart enables a public access solution which is for testing purposes only!</p>
-<p><strong>Prerequisites</strong></p>
-<p><strong>You must have:</strong></p>
+<h1 id="hosted-agent-component-release-matrix">Hosted-agent component release matrix</h1>
+<p>This page records the exact hosted-agent component releases published on
+2026-08-07 and the integration boundary that still applies to the GPT-RAG
+umbrella deployment.</p>
+<div class="admonition warning">
+<p class="admonition-title">Components are published; there is no integrated umbrella release</p>
+<p>The four releases below exist, but GPT-RAG has not published an umbrella
+release that pins and validates them together. The current <code>develop</code>
+manifest still references UI <code>v2.5.1</code>, orchestrator <code>v3.10.0</code>, ingestion
+<code>v2.6.0</code>, and an AILZ development commit. Keep the released GPT-RAG
+deployment on its documented classic topology. Do not infer that installing
+these four tags independently is a supported production upgrade.</p>
+</div>
+<h2 id="exact-published-matrix">Exact published matrix</h2>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Release</th>
+<th>Reviewed release commit</th>
+<th>Relevant contract</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GPT-RAG UI</td>
+<td><a href="https://github.com/Azure/gpt-rag-ui/releases/tag/v2.6.0"><code>v2.6.0</code></a></td>
+<td><a href="https://github.com/Azure/gpt-rag-ui/commit/81d6515d8fc365402e958e861b671af037a4cc75"><code>81d6515</code></a></td>
+<td>Hosted/no-panel is the fresh UI default when <code>CHAT_BACKEND</code> is absent; continuity and panel surfaces remain opt-in and fail closed.</td>
+</tr>
+<tr>
+<td>GPT-RAG orchestrator</td>
+<td><a href="https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.0.0"><code>v4.0.0</code></a></td>
+<td><a href="https://github.com/Azure/gpt-rag-orchestrator/commit/1033d0690736f9787e5f227559dc4071d2043b79"><code>1033d06</code></a></td>
+<td>Canonical hosted <code>/responses</code> is stateless and requires caller-supplied ordered input.</td>
+</tr>
+<tr>
+<td>GPT-RAG ingestion</td>
+<td><a href="https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.7.0"><code>v2.7.0</code></a></td>
+<td><a href="https://github.com/Azure/gpt-rag-ingestion/commit/84b927769ef0839110f2d68e3ca471e2260567cf"><code>84b9277</code></a></td>
+<td>Metadata-only operator overview and document/corpus curation APIs.</td>
+</tr>
+<tr>
+<td>AI Landing Zone</td>
+<td><a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.5.0"><code>v2.5.0</code></a></td>
+<td><a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/commit/cacf418216ce7381d06263e0dd704a86b8a6f225"><code>cacf418</code></a></td>
+<td>Two-phase hosted-agent prerequisite/handoff support; both hosted flags default to <code>false</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>The matrix implements the component portions of
+<a href="https://github.com/Azure/GPT-RAG/blob/develop/docs/adr/ADR-0003-hosted-conversation-continuity.md">ADR-0003</a>
+and
+<a href="https://github.com/Azure/GPT-RAG/blob/develop/docs/adr/ADR-0004-hosted-panel-conversations-contract.md">ADR-0004</a>.
+It does not close their umbrella rollout and evidence gates.</p>
+<h2 id="modes-and-defaults">Modes and defaults</h2>
+<table>
+<thead>
+<tr>
+<th>Surface</th>
+<th>Current behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Published GPT-RAG umbrella release</td>
+<td>Classic Container Apps topology.</td>
+</tr>
+<tr>
+<td>Fresh UI <code>v2.6.0</code> process with no <code>CHAT_BACKEND</code> value</td>
+<td>Selects <code>hosted_agent</code>; invalid or incomplete hosted configuration fails startup.</td>
+</tr>
+<tr>
+<td>Existing umbrella deployment</td>
+<td>Its persisted topology is sticky. An unmarked pre-cutover deployment stays <code>classic</code>.</td>
+</tr>
+<tr>
+<td><code>DEPLOYMENT_TOPOLOGY=classic</code></td>
+<td>Explicit supported fallback; deploys UI, orchestrator, and ingestion Container Apps.</td>
+</tr>
+<tr>
+<td><code>DEPLOYMENT_TOPOLOGY=hosted-no-panel</code></td>
+<td>Implemented on <code>develop</code>, but not published as an integrated umbrella release. UI and ingestion remain in Container Apps; chat uses the hosted agent; no panel Cosmos containers are selected.</td>
+</tr>
+<tr>
+<td><code>DEPLOYMENT_TOPOLOGY=hosted-panel</code></td>
+<td>Platform selection still fails closed. Component endpoints exist, but the umbrella forces panel evidence flags off and does not publish this topology.</td>
+</tr>
+<tr>
+<td><code>HOSTED_CONTINUITY_ENABLED</code></td>
+<td><code>false</code>. The platform publisher force-seeds it to <code>false</code>.</td>
+</tr>
+<tr>
+<td><code>HOSTED_CONVERSATION_OWNER_BINDING</code></td>
+<td><code>delegated</code> when continuity is enabled; <code>capability</code> is an explicit fallback only.</td>
+</tr>
+<tr>
+<td><code>PANEL_HISTORY_ENABLED</code> / <code>PANEL_OPERATOR_SURFACES_ENABLED</code></td>
+<td><code>false</code>; operator enablement is not part of the current umbrella release.</td>
+</tr>
+<tr>
+<td>AILZ <code>PREPARE_HOSTED_AGENT</code> / <code>deployHostedAgent</code></td>
+<td>Both default to <code>false</code>. <code>deployHostedAgent=true</code> requires an immutable <code>sha256:</code> image digest.</td>
+</tr>
+</tbody>
+</table>
+<p>The platform contract publishes hosted history limits of 100 items and 32,000
+estimated tokens with <code>drop_oldest</code>. UI <code>v2.6.0</code> has standalone code defaults of
+40 items and 8,000 tokens when those App Configuration values are absent.
+An integrated release must publish one reviewed set; operators must not assume
+the UI fallback values equal the pending umbrella values.</p>
+<h2 id="stateless-hosted-runtime-contract">Stateless hosted runtime contract</h2>
+<p>Orchestrator <code>v4.0.0</code> performs no managed-Conversations create, read, append, or
+delete operation in the hosted container. The caller supplies the complete,
+bounded, oldest-to-newest history on every request.</p>
+<p>For canonical <code>POST /responses</code>:</p>
 <ul>
-<li>Azure subscription with permissions to create resources</li>
-<li>Azure Developer CLI (azd): 1.21.1+</li>
-<li>Azure CLI (az): 2.79.0+</li>
-<li>PowerShell 7.5+</li>
-<li>Docker Desktop installed and running</li>
-<li>Git &amp; Python 3.11+</li>
+<li><code>input</code> may be a non-empty string for a single turn or a non-empty ordered
+  array of text-only <code>{role, content}</code> messages;</li>
+<li>an array must end in a non-empty <code>user</code> message;</li>
+<li>top-level <code>conversation</code> and <code>previous_response_id</code> are unsupported and each
+  returns HTTP 422;</li>
+<li>there is no server fallback or deprecation path that reconstructs history;</li>
+<li>the runtime builds only local, ephemeral strategy state and disables
+  model-side storage for the generation call; and</li>
+<li>classic non-hosted <code>/responses</code> behavior is unchanged.</li>
 </ul>
-<p><strong>What You'll Accomplish</strong></p>
-<p>By the end of this guide:</p>
-<ul>
-<li>Deploy complete GPT-RAG infrastructure (~20 Azure resources)</li>
-<li>Upload documents to Azure Blob Storage</li>
-<li>Enable automated document ingestion and indexing</li>
-<li>Configure Foundry search connection</li>
-<li>Generate embeddings with text-embedding-3-large</li>
-<li>Ask questions about your documents using GPT-4o</li>
-<li>Get answers grounded in your data with citations</li>
-</ul>
-<p><strong>Step 1: Initialize GPT-RAG Project (5 min)</strong></p>
-<div class="highlight"><pre><span></span><code><span class="c"># Create fresh directory</span>
-<span class="n">mkdir</span> <span class="n">C</span><span class="p">:\</span><span class="n">MyCode</span><span class="p">\</span><span class="n">my-gpt-rag</span>
-<span class="nb">cd </span><span class="n">C</span><span class="p">:\</span><span class="n">MyCode</span><span class="p">\</span><span class="n">my-gpt-rag</span>
-
-<span class="c"># Initialize from template</span>
-<span class="n">azd</span> <span class="n">init</span> <span class="n">-t</span> <span class="n">azure</span><span class="p">/</span><span class="n">gpt-rag</span>
-</code></pre></div>
-<p><strong>You'll be prompted for:</strong></p>
-<ol>
-<li><strong>Environment name</strong> - Choose a short name (e.g., <code>myrag</code>, <code>demorag</code>)</li>
-<li><strong>Azure subscription</strong> - Select from list</li>
-<li><strong>Azure region</strong> - Choose wisely:<ul>
-<li><strong>East US 2</strong> - Best OpenAI quota availability</li>
-<li><strong>West US</strong> - Good quota, lower latency for West Coast</li>
-<li><strong>East US</strong> - Backup option if East US 2 full</li>
-<li>⚠️ <strong>North Europe, West Europe</strong> - Often quota-constrained</li>
-</ul>
-</li>
-</ol>
-<p><strong>💡 Note:</strong> If you have quota limitations, see the Troubleshooting section at the end for how to adjust model capacity.</p>
-<hr />
-<p><strong>Step 2: Authenticate Azure CLIs (2 min)</strong></p>
-<div class="highlight"><pre><span></span><code><span class="c"># Login to Azure CLI (yes, both required)</span>
-<span class="n">az</span> <span class="n">login</span>
-<span class="n">azd</span> <span class="n">auth</span> <span class="n">login</span>
-</code></pre></div>
-<hr />
-<p><strong>Step 3: Provision Infrastructure (30 min)</strong></p>
-<div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">provision</span>
-</code></pre></div>
-<p><strong>What this creates with the classic defaults (~20 Azure resources):</strong></p>
-<ul>
-<li><strong>Resource Group</strong> - Container for all resources</li>
-<li><strong>Storage Accounts</strong> - For documents and job logs</li>
-<li><strong>AI Search Services (2)</strong> - Main index (srch-<em>) and Foundry index (srch-aif-</em>)</li>
-<li><strong>Microsoft Foundry</strong> - Foundry Account and project for agent orchestration</li>
-<li><strong>OpenAI Models</strong> - GPT-4o and text-embedding-3-large deployments</li>
-<li><strong>Container Registry</strong> - Stores Docker images</li>
-<li><strong>Container Apps (4)</strong> - UI, orchestrator, ingestion, MCP in the currently released classic topology. The <a href="../hosted_agent_release_matrix/">hosted-agent component matrix</a> keeps UI and ingestion in Container Apps and removes the orchestrator Container App from the hosted chat path, but no GPT-RAG umbrella release pins that matrix yet.</li>
-<li><strong>App Configuration</strong> - Centralized configuration store</li>
-<li><strong>Key Vault</strong> - Secrets management</li>
-<li><strong>Cosmos DB</strong> - Agent state and metadata</li>
-<li><strong>Log Analytics</strong> - Monitoring and diagnostics</li>
-<li><strong>Managed Identities</strong> - Secure service-to-service auth</li>
-</ul>
-<p>⏳ <strong>Wait ~27 minutes for provisioning to complete.</strong></p>
-<p><strong>Save your resource prefix:</strong></p>
-<p>After provisioning completes, you'll see output like:
-<div class="highlight"><pre><span></span><code>Resource prefix: y5sbzlaazfxok
-</code></pre></div></p>
-<p><strong>Keep this prefix handy</strong> - you'll use it to identify your resources in Azure Portal.</p>
-<hr />
-<p><strong>Step 4: Start Docker and Deploy Services (35 min)</strong></p>
-<p><strong>⚠️ CRITICAL:</strong> Docker must be running before <code>azd deploy</code>!</p>
-<p><strong>A. Start Docker Desktop</strong></p>
-<p><strong>B. Deploy Services</strong></p>
-<div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">deploy</span>
-</code></pre></div>
-<p><strong>What this does:</strong></p>
-<ol>
-<li>
-<p><strong>Clones 4 service repositories</strong> from GitHub:</p>
-<ul>
-<li><code>gpt-rag-frontend</code> - React web interface</li>
-<li><code>gpt-rag-orchestrator</code> - Agent orchestration and RAG logic</li>
-<li><code>gpt-rag-ingestion</code> - Document processing and indexing</li>
-<li><code>gpt-rag-mcp</code> - Model Context Protocol integration</li>
-</ul>
-</li>
-<li>
-<p><strong>Builds Docker images locally</strong>:</p>
-<ul>
-<li>Creates containers for each service</li>
-<li>Tags them with version info</li>
-<li>Requires ~5-10 GB disk space</li>
-</ul>
-</li>
-<li>
-<p><strong>Pushes images to Azure Container Registry</strong>:</p>
-<ul>
-<li>Uploads to <code>cr{prefix}.azurecr.io</code></li>
-<li>Typically 1-2 GB total</li>
-</ul>
-</li>
-<li>
-<p><strong>Deploys to Container Apps</strong>:</p>
-<ul>
-<li>Creates 4 container apps</li>
-<li>Configures networking, secrets, environment variables</li>
-<li>Sets up auto-scaling rules</li>
-</ul>
-</li>
-</ol>
-<p>⏳ <strong>Wait ~30 minutes for deployment to complete.</strong></p>
-<hr />
-<p><strong>Step 5: Upload Documents and Verify Indexing (10 min)</strong></p>
-<p><strong>A. Upload Your Documents</strong></p>
-<p><strong>Azure Portal → Storage accounts → st<code>&lt;prefix&gt;</code> → Containers → documents → Upload</strong></p>
-<p><strong>Supported formats:</strong></p>
-<ul>
-<li><strong>PDF</strong> - Most common (OCR with Document Intelligence)</li>
-<li><strong>Word</strong> (.docx) - Extracts text and tables</li>
-<li><strong>PowerPoint</strong> (.pptx) - Extracts slides and speaker notes</li>
-<li><strong>Excel</strong> (.xlsx) - Extracts sheets and data (v4.0+)</li>
-<li><strong>Text</strong> (.txt, .md) - Direct text ingestion</li>
-<li><strong>Images</strong> (.jpg, .png, .bmp, .tiff) - OCR extraction</li>
-<li><strong>HTML</strong> - Web page content extraction</li>
-</ul>
-<p><strong>What happens after upload:</strong></p>
-<ol>
-<li>File stored in <code>documents</code> container</li>
-<li>Ingestion service monitors for new files</li>
-<li>On next CRON run or restart, files are processed</li>
-<li>Azure Document Intelligence extracts text (OCR for images/PDFs)</li>
-<li>Text chunked into semantic segments</li>
-<li>Embeddings generated with text-embedding-3-large</li>
-<li>Chunks uploaded to AI Search index <code>ragindex-{prefix}</code></li>
-</ol>
-<p><strong>B. Trigger Document Indexing</strong></p>
-<p>The indexing service runs automatically:</p>
-<ul>
-<li><strong>On container startup</strong> (immediate first run)</li>
-<li><strong>Hourly on CRON</strong> (at :10 minutes past the hour)</li>
-</ul>
-<p><strong>Option 1: Wait for next CRON run</strong> (up to 60 minutes)</p>
-<p><strong>Option 2: Force immediate indexing by restarting:</strong></p>
-<p><strong>Azure Portal → Container Apps → ca-<code>&lt;prefix&gt;</code>-dataingest</strong></p>
-<ol>
-<li>Click <strong>Stop</strong></li>
-<li>Wait 10 seconds</li>
-<li>Click <strong>Start</strong></li>
-</ol>
-<p><strong>Why restart?</strong> The indexer runs on CRON schedule (hourly at :10 past). Restarting triggers it to run immediately instead of waiting up to an hour.</p>
-<p><strong>C. Verify Indexing Completed</strong></p>
-<p><strong>Azure Portal → AI Search → srch-<code>&lt;prefix&gt;</code> → Indexes → ragindex-<code>&lt;prefix&gt;</code></strong></p>
-<ul>
-<li><strong>Document count &gt; 0</strong> (indicates chunks were indexed)</li>
-</ul>
-<hr />
-<p><strong>Step 6: Access Frontend and Test! (3 min)</strong></p>
-<p><strong>Azure Portal → Container Apps → ca-<code>&lt;prefix&gt;</code>-frontend → Overview</strong></p>
-<p>Copy the <strong>Application URL</strong> and open it in your browser. You should see the GPT-RAG chat interface.</p>
-<p><strong>Try these test questions:</strong></p>
-<ol>
-<li>"What is this document about?"</li>
-<li>"Summarize the key points from my document"</li>
-<li>"What does the document say about [specific topic]?"</li>
-</ol>
-<p><strong>Expected response:</strong></p>
-<ul>
-<li>Natural language answer based on your document</li>
-<li><strong>Citations</strong> showing which chunks were used</li>
-<li><strong>Source references</strong> with page numbers (if PDF)</li>
-<li>Response generated by GPT-4o using retrieved context</li>
-</ul>
-<hr />
-<p><strong>Troubleshooting Common Issues</strong></p>
-<p><strong>Issue 1: Quota Exceeded Errors</strong></p>
-<p><strong>Error during provision:</strong>
-<div class="highlight"><pre><span></span><code>Deployment failed: Quota exceeded for model gpt-4o
-</code></pre></div></p>
-<p><strong>Background:</strong> The default deployment requires 80 TPM total (40 for GPT-4o + 40 for text-embedding-3-large). Many subscriptions don't have this quota available.</p>
-<p><strong>Solution A: Reduce Model Capacity</strong></p>
-<p>Edit <code>infra/main.parameters.json</code> BEFORE running <code>azd provision</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">&quot;modelDeploymentList&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;chat&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;format&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;OpenAI&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;gpt-4o&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-11-20&quot;</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;sku&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GlobalStandard&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;capacity&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span>
-<span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text-embedding&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;format&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;OpenAI&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text-embedding-3-large&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;sku&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Standard&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;capacity&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span>
-<span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">]</span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;input&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;What is the retention period?&quot;</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;assistant&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;The policy states 30 days.&quot;</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Who approves an exception?&quot;</span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;stream&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;store&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
 <span class="p">}</span>
 </code></pre></div>
-<p><strong>Capacity guidelines:</strong></p>
-<ul>
-<li><strong>8 TPM</strong> - Good for testing/demos (supports ~5-10 users)</li>
-<li><strong>16 TPM</strong> - Better for development (supports ~15-20 users)</li>
-<li><strong>40 TPM</strong> - Production (default, supports ~50+ users)</li>
-<li><strong>Minimum: 4 TPM</strong> - Will work but responses may be slower</li>
-</ul>
-<p><strong>Solution B: Check Available Quota</strong></p>
-<div class="highlight"><pre><span></span><code><span class="c"># List your OpenAI resources and regions</span>
-<span class="n">az</span> <span class="n">cognitiveservices</span> <span class="n">account</span> <span class="n">list</span> <span class="p">`</span>
-  <span class="p">-</span><span class="n">-subscription</span> <span class="s2">&quot;&lt;your-subscription-id&gt;&quot;</span> <span class="p">`</span>
-  <span class="p">-</span><span class="n">-query</span> <span class="s2">&quot;[?kind==&#39;OpenAI&#39;].{Name:name, ResourceGroup:resourceGroup, Location:location}&quot;</span> <span class="p">`</span>
-  <span class="n">-o</span> <span class="n">table</span>
-</code></pre></div>
-<p><strong>Check quota in Azure Portal:</strong>
-- Go to any OpenAI resource → Quotas
-- Look at TPM (Tokens Per Minute) for gpt-4o and text-embedding-3-large
-- Note which regions have available quota</p>
-<p><strong>Solution C: Try Different Region</strong></p>
-<p>If you've already started provisioning, delete the failed resource group and try a different region:</p>
-<div class="highlight"><pre><span></span><code><span class="n">az</span> <span class="nb">group </span><span class="n">delete</span> <span class="p">-</span><span class="n">-name</span> <span class="p">&lt;</span><span class="n">your-rg</span><span class="p">&gt;</span> <span class="p">-</span><span class="n">-yes</span>
-<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">AZURE_LOCATION</span> <span class="n">eastus</span>
-<span class="n">azd</span> <span class="n">provision</span>
-</code></pre></div>
-<p><strong>Issue 2: "ServiceInvocationException" Error</strong></p>
-<p><strong>Error message:</strong>
-<div class="highlight"><pre><span></span><code>ServiceInvocationException: Error at: project_client.agents.threads.create()
-</code></pre></div></p>
-<p><strong>Root cause:</strong> Foundry capabilities host lacks vector store connections (immutable configuration).</p>
-<p><strong>Workaround:</strong></p>
+<p><code>POST /invocations</code> remains a distinct compatibility protocol. Its
+<code>conversation_id</code> is only an opaque label for response tagging and
+conversation-scoped retrieval; it does not authorize or select a managed
+Conversation. UI <code>v2.6.0</code> currently sends complete ordered messages through
+this compatibility route. An integrated umbrella cutover must explicitly align
+the UI call route with the protocol and role evidence it validates.</p>
+<h2 id="delegated-owner-binding">Delegated owner binding</h2>
+<p>The trusted UI BFF owns managed-Conversation lifecycle. For every create, read,
+append, or delete in delegated mode, it:</p>
 <ol>
-<li>Check orchestrator logs: <code>ca-&lt;prefix&gt;-orchestrator</code> → Logs → Console logs</li>
-<li>Verify SEARCH_CONNECTION_ID is correctly set in App Configuration</li>
-<li>Try restarting orchestrator again</li>
-<li>If persists, check Foundry Connections page for connection status</li>
+<li>validates the signed-in user's Entra token;</li>
+<li>normalizes the validated <code>oid</code>;</li>
+<li>acquires its own service-identity Foundry token; and</li>
+<li>derives <code>x-ms-user-identity</code> only from that server-side <code>oid</code>.</li>
 </ol>
-<p><strong>Note:</strong> This is a known issue with the current GPT-RAG template. The Foundry agent infrastructure may need manual configuration.</p>
-<p><strong>Issue 3: No Documents Indexed</strong></p>
-<p><strong>Symptoms:</strong></p>
+<p>The browser cannot submit or override the owner header. The hosted runtime is
+not an identity-header source and receives no managed-Conversations RBAC.</p>
+<p>The owner header is not an OAuth On-Behalf-Of token. OBO is used only for
+downstream retrieval authorization, such as Toolbox passing a user bearer to
+Foundry IQ or Azure AI Search for native permission trimming. Owner binding and
+retrieval authorization have different audiences and must not be substituted.</p>
+<h3 id="protocol-and-rbac-evidence-gate">Protocol and RBAC evidence gate</h3>
+<p>UI <code>v2.6.0</code> accepts an attested Responses protocol version <code>&gt;= 2.0.0</code>. The
+pending GPT-RAG platform validator is deliberately stricter: it requires the
+live endpoint to route 100% to one agent version declaring exactly one
+Responses <code>2.0.0</code> protocol entry.</p>
+<p>The same validator requires exactly these direct assignments to the UI BFF:</p>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Required permission</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Built-in <strong>Foundry Agent Consumer</strong> (<code>eed3b665-ab3a-47b6-8f48-c9382fb1dad6</code>)</td>
+<td>Exactly <code>Microsoft.CognitiveServices/accounts/AIServices/endpoints/interact/action</code> in <code>DataActions</code>, with no control-plane actions.</td>
+</tr>
+<tr>
+<td>Custom <strong>GPT-RAG Hosted Agent User Identity Impersonation</strong> (<code>bef66abe-a495-530a-be1d-5d882fecff03</code>)</td>
+<td>Exactly <code>Microsoft.CognitiveServices/accounts/AIServices/agents/endpoints/UserIdentityImpersonation/action</code>, with no other actions or exclusions.</td>
+</tr>
+</tbody>
+</table>
+<p>Both assignments must be direct <code>ServicePrincipal</code> assignments at the
+individual agent resource:</p>
+<div class="highlight"><pre><span></span><code>/subscriptions/&lt;sub&gt;/resourceGroups/&lt;rg&gt;/providers/Microsoft.CognitiveServices/
+accounts/&lt;account&gt;/projects/&lt;project&gt;/agents/&lt;agent&gt;
+</code></pre></div>
+<p>The custom role definition is assignable only within the hosted-agent resource
+group. Project-, account-, resource-group-, subscription-, inherited-,
+group-derived-, wildcard-, custom-equivalent-, or extra-DataAction assignments
+do not satisfy the gate. <strong>Foundry User</strong> and <strong>Project Runtime User</strong> are not
+substitutes.</p>
+<p>If protocol, role definition, principal type, assignment scope, or identity
+source cannot be proven, <code>HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED</code> remains
+<code>false</code>, continuity remains off, and compatible continuity/history operations
+fail closed with HTTP 503.</p>
+<h2 id="opaque-handle-failures">Opaque handle failures</h2>
+<p>A genuinely absent handle starts a new conversation. A presented handle that is
+foreign, stale, deleted, malformed, forged, expired, signed by a retired key, or
+bound to another <code>oid</code> produces one opaque not-found result.</p>
+<p>The BFF must not create a replacement conversation, invoke the hosted agent, or
+append a turn after such a failure. This prevents a success-shaped new chat from
+becoming an ownership or existence oracle. Transport and dependency failures
+remain explicit 5xx failures; they are not converted to not-found.</p>
+<h2 id="user-panel-surfaces">User panel surfaces</h2>
+<p>UI <code>v2.6.0</code> includes owner-gated endpoints for:</p>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /panel/conversations</code></td>
+<td>Lists metadata for only the caller's owner-index rows, using an opaque signed, expiring, <code>oid</code>-bound cursor.</td>
+</tr>
+<tr>
+<td><code>GET /panel/conversations/{id}/messages</code></td>
+<td>Checks ownership before reading ordered content live from managed Conversations.</td>
+</tr>
+<tr>
+<td><code>POST /panel/conversations/{id}/feedback</code> / <code>GET /panel/conversations/{id}/feedback</code></td>
+<td>Stores and reads bounded metadata-only rating, category, comment, and message reference.</td>
+</tr>
+<tr>
+<td><code>DELETE /panel/conversations/{id}</code></td>
+<td>Deletes the managed Conversation first, then panel metadata. Metadata cleanup failure returns <code>partial</code>, not a false success.</td>
+</tr>
+</tbody>
+</table>
+<p>Missing and non-owner resources both return 404. Invalid or cross-user cursors
+return 422. Missing/invalid delegated tokens return 401; app-only tokens return
+403. Downstream store failure returns 502. Undeployed or disabled user panel
+surfaces return 503.</p>
+<h2 id="operator-overview-and-corpus-curation">Operator overview and corpus curation</h2>
+<p>Ingestion <code>v2.7.0</code> includes:</p>
 <ul>
-<li>AI Search index shows 0 documents</li>
-<li>Answers are generic, not grounded in your data</li>
+<li><code>GET /panel/overview/metrics</code>;</li>
+<li><code>GET /panel/corpus-curation/queue</code>; and</li>
+<li><code>POST /panel/corpus-curation/{item_id}/decision</code>.</li>
 </ul>
-<p><strong>Checks:</strong></p>
+<p>Overview reads aggregate counts only from the panel owner-index and feedback
+metadata containers. Any bucket below <code>PANEL_OVERVIEW_MIN_CARDINALITY</code> (default
+<code>5</code>) is returned as <code>null</code>, not as a small exact count.</p>
+<p>Corpus curation covers documents already handled by ingestion. The queue uses
+the existing per-file-log Blob store, and <code>approve</code>, <code>reject</code>, or <code>defer</code>
+decisions use the Blob's ETag for optimistic concurrency. It does not curate or
+read conversation content and does not write curation decisions to Cosmos.</p>
+<p>Operator endpoints require:</p>
+<ul>
+<li><code>DEPLOY_ADMINISTRATIVE_PANEL=true</code>;</li>
+<li><code>PANEL_OPERATOR_SURFACES_ENABLED=true</code>;</li>
+<li>an explicit <code>PANEL_OPERATOR_APP_ROLE</code> or <code>PANEL_OPERATOR_GROUP_ID</code>; and</li>
+<li>a validated delegated user bearer carrying that role or group.</li>
+</ul>
+<p>App-only tokens are rejected. The current umbrella publisher forces
+<code>PANEL_OPERATOR_SURFACES_ENABLED=false</code>, so these APIs are component capability,
+not an enabled umbrella feature.</p>
+<div class="admonition important">
+<p class="admonition-title">Released ingestion dashboard browser-auth status</p>
+<p>The ingestion <code>v2.7.0</code> Vite dashboard does not initialize MSAL, acquire an
+access token, or add an <code>Authorization</code> header for the new operator panel
+requests. Its <code>panelFetch</code> uses plain browser <code>fetch</code>. The Overview and
+Curation tabs therefore show the backend's real 401/403/503 response unless
+an approved same-origin reverse-auth proxy adds the delegated operator
+bearer. This differs from the classic orchestrator dashboard, whose SPA has
+a working MSAL Authorization Code + PKCE flow.</p>
+</div>
+<h2 id="data-confinement">Data confinement</h2>
+<p>Managed Conversations is the only chat-content store for the hosted design.</p>
+<ul>
+<li>Hosted/no-panel provisions no panel Cosmos containers and has no Cosmos
+  continuity fallback.</li>
+<li>Hosted/panel, when a future umbrella release enables it, uses only
+  <code>panel-conversation-owner-index</code> and <code>panel-feedback</code>, partitioned by
+  <code>/principal_id</code>.</li>
+<li>Cosmos may contain identifiers, titles, timestamps, principal IDs, ratings,
+  category codes, bounded comments, and message references.</li>
+<li>Cosmos must never contain message bodies, citations, retrieved document
+  content, or corpus document content.</li>
+<li>The hosted runtime identity has no Conversations role, impersonation role,
+  capability key, or panel Cosmos role.</li>
+</ul>
+<h2 id="operator-verification-and-rollback">Operator verification and rollback</h2>
+<p>There is currently no supported umbrella command sequence that enables this
+matrix. The platform intentionally force-publishes continuity and operator
+evidence flags as <code>false</code>. Before a future umbrella release enables them,
+release validation must:</p>
 <ol>
-<li><strong>Verify upload:</strong> Storage account → <code>documents</code> container → your file should be there</li>
-<li><strong>Check indexer logs:</strong> <code>ca-&lt;prefix&gt;-dataingest</code> → Logs → Look for errors</li>
-<li><strong>Verify format:</strong> Ensure file is supported (PDF, DOCX, TXT, etc.)</li>
-<li><strong>Restart indexer:</strong> Deactivate/Activate <code>ca-&lt;prefix&gt;-dataingest</code></li>
+<li>pin all four exact releases together;</li>
+<li>deploy the immutable hosted image and verify the live Responses protocol;</li>
+<li>verify the two exact direct UI BFF role assignments at individual-agent
+   scope and reject broader or extra access;</li>
+<li>verify browser-supplied owner headers are ignored and the BFF derives only
+   the validated <code>oid</code>;</li>
+<li>run two-user negative tests for cross-user read, continuation, history,
+   feedback, and delete;</li>
+<li>prove the runtime performs zero managed-Conversations operations and
+   hosted/no-panel constructs no Cosmos client;</li>
+<li>inject read/append failures and prove they cannot produce a success-shaped
+   new conversation;</li>
+<li>validate Basic and network-isolated deployments; and</li>
+<li>separately validate panel user auth and the ingestion browser operator-token
+   path before enabling panel flags.</li>
 </ol>
-<hr />
-<p><strong>Congratulations!</strong> You've deployed a production-ready RAG system. </p>
-<p><strong>What You Just Enabled 🪄</strong></p>
-<p><strong>🧠 Intelligent Document Understanding</strong></p>
-<p><strong><code>Semantic chunking</code></strong> - Documents split into meaningful segments (not arbitrary 512-char blocks)</p>
-<p><strong><code>Vector embeddings</code></strong> - text-embedding-3-large generates 3072-dimensional embeddings</p>
-<p><strong><code>Hybrid search</code></strong> - Combines keyword (BM25) and semantic (vector) search for best results</p>
-<p><strong><code>OCR extraction</code></strong> - Azure Document Intelligence handles PDFs, images, scanned documents</p>
-<p><strong><code>Multi-format support</code></strong> - PDF, Word, PowerPoint, Excel, text, images, HTML</p>
-<p><strong>🎯 Grounded Response Generation</strong></p>
-<p><strong><code>Retrieval-Augmented Generation (RAG)</code></strong> - GPT-4o generates answers using retrieved document chunks</p>
-<p><strong><code>Citation tracking</code></strong> - Every answer links back to source documents and specific passages</p>
-<p><strong><code>Relevance filtering</code></strong> - Only high-confidence matches are sent to GPT-4o (reduces hallucination)</p>
-<p><strong><code>Context windowing</code></strong> - Smart selection of most relevant chunks (handles long documents)</p>
-<p><strong>🔄 Automated Ingestion Pipeline</strong></p>
-<p><strong><code>Change detection</code></strong> - Only re-indexes modified files (checks ETag and lastModified)</p>
-<p><strong><code>CRON scheduling</code></strong> - Runs hourly at :10 past (configurable)</p>
-<p><strong><code>Startup sync</code></strong> - Indexes on container start for immediate availability</p>
-<p><strong><code>Detailed logging</code></strong> - Per-file and per-run logs in blob storage</p>
-<p><strong><code>Error handling</code></strong> - Failed files logged without blocking successful files</p>
-<p><strong>🔐 Enterprise-Ready Architecture</strong></p>
-<p><strong><code>Managed identities</code></strong> - No passwords stored, secure service-to-service auth</p>
-<p><strong><code>Role-based access</code></strong> - Uses Azure RBAC for all resources</p>
-<p><strong><code>Centralized config</code></strong> - App Configuration for runtime settings (no redeployment needed)</p>
-<p><strong><code>Secrets management</code></strong> - Key Vault for sensitive data</p>
-<p><strong><code>Monitoring</code></strong> - Log Analytics and Application Insights built-in</p>
-<p><strong><code>Scalability</code></strong> - Container Apps auto-scale based on load</p>
-<p><strong>🎨 User-Friendly Interface</strong></p>
-<p><strong><code>Web UI</code></strong> - Modern, responsive chat interface</p>
-<p><strong><code>Real-time responses</code></strong> - Streaming responses </p>
-<p><strong><code>Citation preview</code></strong> - Click citations to see source context</p>
-<p><strong><code>Multi-turn conversations</code></strong> - Maintains context across questions</p>
-<p><strong><code>Feedback loop</code></strong> - Users can rate answers for quality tracking</p>
+<p>The pending configuration contract uses:</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Required value or default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>HOSTED_CONTINUITY_ENABLED</code></td>
+<td><code>false</code> until all evidence passes</td>
+</tr>
+<tr>
+<td><code>HOSTED_CONVERSATION_OWNER_BINDING</code></td>
+<td><code>delegated</code>; explicit fallback <code>capability</code></td>
+</tr>
+<tr>
+<td><code>HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED</code></td>
+<td><code>false</code> until protocol and RBAC validation</td>
+</tr>
+<tr>
+<td><code>HOSTED_CONVERSATION_DELEGATED_IDENTITY_HEADER</code></td>
+<td><code>x-ms-user-identity</code></td>
+</tr>
+<tr>
+<td><code>HOSTED_CONVERSATION_DELEGATED_IDENTITY_SOURCE</code></td>
+<td><code>authenticated_ui_bff_principal</code></td>
+</tr>
+<tr>
+<td><code>HOSTED_AGENT_RESPONSES_PROTOCOL_VERSION</code></td>
+<td>platform contract: exactly <code>2.0.0</code></td>
+</tr>
+<tr>
+<td><code>HOSTED_AGENT_PROTOCOL_VERSION</code></td>
+<td>UI <code>v2.6.0</code> continuity attestation: <code>&gt;=2.0.0</code>; the pending integration must reconcile/publish both names consistently</td>
+</tr>
+<tr>
+<td><code>HOSTED_CONTINUITY_UNAVAILABLE_STATUS_CODE</code></td>
+<td><code>503</code></td>
+</tr>
+<tr>
+<td><code>HOSTED_HISTORY_MAX_ITEMS</code> / <code>HOSTED_HISTORY_MAX_TOKENS</code></td>
+<td>pending umbrella defaults <code>100</code> / <code>32000</code></td>
+</tr>
+<tr>
+<td><code>HOSTED_HISTORY_TRUNCATION</code></td>
+<td><code>drop_oldest</code></td>
+</tr>
+<tr>
+<td><code>PANEL_HISTORY_ENABLED</code> / <code>PANEL_OPERATOR_SURFACES_ENABLED</code></td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>PANEL_CONVERSATION_ENUMERATION_MODE</code></td>
+<td><code>owner_index</code></td>
+</tr>
+<tr>
+<td><code>PANEL_CURSOR_TTL_SECONDS</code> / <code>PANEL_OVERVIEW_MIN_CARDINALITY</code></td>
+<td><code>600</code> / <code>5</code></td>
+</tr>
+</tbody>
+</table>
+<p>Rollback is a deployment/configuration operation, never a request-time retry:</p>
+<ol>
+<li>set <code>HOSTED_CONTINUITY_ENABLED=false</code>;</li>
+<li>select <code>DEPLOYMENT_TOPOLOGY=classic</code> and <code>CHAT_BACKEND=orchestrator</code>;</li>
+<li>re-provision and redeploy the manifest-pinned classic components;</li>
+<li>remove the UI BFF's exact agent-scoped Consumer and impersonation
+   assignments; and</li>
+<li>disable panel flags before removing panel-only metadata containers.</li>
+</ol>
+<p>Managed Conversations remains the system of record, so rollback does not
+require copying chat content into Cosmos. Panel owner-index and feedback rows
+are metadata and may be retained or removed under the deployment's retention
+policy.</p>
 
 
 
