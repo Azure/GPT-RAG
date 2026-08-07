@@ -249,6 +249,21 @@ The preparation command builds the manifest-pinned image and stores only its imm
   }
   $env:HOSTED_AGENT_BASE_URL = $hostedBaseUrl
   $env:HOSTED_AGENT_RESOURCE_SCOPE = "$($globalEnv.HOSTED_AGENT_RESOURCE_SCOPE)"
+
+  $continuityVenv = Join-Path ([IO.Path]::GetTempPath()) "gpt-rag-continuity-$([guid]::NewGuid().ToString('N'))"
+  try {
+    & python -m venv $continuityVenv
+    if ($LASTEXITCODE -ne 0) { throw "Failed to create the continuity activation virtual environment." }
+    $continuityPython = Join-Path $continuityVenv 'Scripts/python.exe'
+    & $continuityPython -m pip install --quiet --disable-pip-version-check -r (Join-Path $repoRoot 'config/requirements.txt')
+    if ($LASTEXITCODE -ne 0) { throw "Failed to install continuity activation dependencies." }
+    & $continuityPython -c "import os, runpy, sys; sys.path.insert(0, os.environ['GPT_RAG_REPO_ROOT']); sys.argv = ['config.continuity.setup', '--activate']; runpy.run_module('config.continuity.setup', run_name='__main__')"
+    if ($LASTEXITCODE -ne 0) { throw "Hosted continuity activation failed closed." }
+  } finally {
+    if (Test-Path -LiteralPath $continuityVenv) {
+      Remove-Item -LiteralPath $continuityVenv -Recurse -Force -ErrorAction SilentlyContinue
+    }
+  }
 }
 
 foreach ($c in $manifest.components) {

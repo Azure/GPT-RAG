@@ -212,6 +212,19 @@ if [[ "$hosted_mode" =~ ^(1|true|t|yes|y)$ ]]; then
 
   export HOSTED_AGENT_BASE_URL="$hosted_base_url"
   export HOSTED_AGENT_RESOURCE_SCOPE="$hosted_scope"
+
+  continuity_venv="$(mktemp -d)"
+  if ! (
+    python3 -m venv "$continuity_venv" &&
+    "$continuity_venv/bin/python" -m pip install --quiet --disable-pip-version-check -r "$repo_root/config/requirements.txt" &&
+    cd "$repo_root" &&
+    "$continuity_venv/bin/python" -m config.continuity.setup --activate
+  ); then
+    rm -rf "$continuity_venv"
+    red "Hosted continuity activation failed closed."
+    exit 1
+  fi
+  rm -rf "$continuity_venv"
 fi
 
 # ---------- Iterate components ----------
