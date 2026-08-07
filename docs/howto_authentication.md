@@ -7,10 +7,12 @@ This page explains how authentication works in GPT-RAG, from the GPT-RAG UI sign
 !!! warning "Hosted continuity remains disabled"
     Live OQ-OWN evidence supersedes the capability-first contract from
     [PR #630](https://github.com/Azure/GPT-RAG/pull/630). The delegated
-    `x-ms-user-identity` platform pivot, compatible component pins, and
-    `OWNER_BINDING_VALIDATED` gate are not published. Keep
+    `x-ms-user-identity` platform pivot merged to `develop` in
+    [PR #633](https://github.com/Azure/GPT-RAG/pull/633). Compatible component
+    pins and the GPT-RAG release remain unpublished. Keep
     `HOSTED_CONTINUITY_ENABLED=false`; compatible history endpoints return HTTP
-    503 and the current published release continues to use the classic flow.
+    503 until `HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true`, and the current
+    published release continues to use the classic flow.
 
 ## Embed GPT-RAG in a portal
 
@@ -38,7 +40,8 @@ This owner header is distinct from OBO. `x-ms-user-identity` binds Foundry
 Conversation ownership; OBO obtains a delegated bearer token for a downstream
 retrieval audience. Activation requires direct assignments to the UI BFF, at
 the individual hosted-agent scope, of Foundry Agent Consumer and the exact
-GPT-RAG custom role containing only
+GPT-RAG custom role **GPT-RAG Hosted Agent User Identity Impersonation**
+(`bef66abe-a495-530a-be1d-5d882fecff03`) containing only
 `Microsoft.CognitiveServices/accounts/AIServices/agents/endpoints/UserIdentityImpersonation/action`.
 The hosted runtime receives no key, Conversation or impersonation RBAC, or
 Cosmos DB in hosted/no-panel. Capability/HMAC remains a disabled

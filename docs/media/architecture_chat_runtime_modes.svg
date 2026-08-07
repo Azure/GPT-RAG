@@ -31,7 +31,7 @@
   <text x="50" y="75" class="subtitle">A deployment chooses one runtime. Identity, authorization, conversation, and cost semantics never change silently during a request.</text>
 
   <rect x="50" y="94" width="1300" height="44" rx="12" fill="#fff4ce" stroke="#f7630c" stroke-width="1.5"/>
-  <text x="72" y="121" class="status">Unreleased target: AILZ v2.5.0 published; OQ-OWN pivot, remaining pins, OWNER_BINDING_VALIDATED, and GPT-RAG release pending. Continuity off/503.</text>
+  <text x="72" y="121" class="status">Unreleased target: AILZ v2.5.0 published; OQ-OWN pivot merged; compatible pins, owner validation, and GPT-RAG release pending. Continuity off/503.</text>
 
   <rect x="50" y="162" width="1300" height="108" rx="20" fill="#edf7ff" stroke="#3f7dc7" stroke-width="2"/>
   <text x="74" y="191" class="section-title">Shared entry and topology selection</text>

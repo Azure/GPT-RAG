@@ -76,10 +76,13 @@ only after the release gates below are complete.
     continuity contract merged in
     [PR #630](https://github.com/Azure/GPT-RAG/pull/630), but live OQ-OWN
     evidence supersedes it with delegated `x-ms-user-identity`. The platform
-    pivot, compatible component pins, and `OWNER_BINDING_VALIDATED` gate are not
-    published. Continuity remains off and compatible history endpoints must
-    return HTTP 503. Final umbrella pins, integrated validation, and a new
-    GPT-RAG release remain. Current published GPT-RAG `v3.7.0` stays classic.
+    pivot merged to `develop` in
+    [PR #633](https://github.com/Azure/GPT-RAG/pull/633) at
+    [`86b17b0`](https://github.com/Azure/GPT-RAG/commit/86b17b0af672edefe6842cba0f1a8ff77ab23038).
+    Compatible component pins, integrated validation, and a new GPT-RAG release
+    remain unpublished. Continuity stays off and compatible history endpoints
+    return HTTP 503 until the exact validation gate passes. Current published
+    GPT-RAG `v3.7.0` stays classic.
     Use this workflow only with the release that explicitly announces the
     hosted-default contract.
 
@@ -107,7 +110,7 @@ Configuration label `gpt-rag`:
 | `DEPLOYMENT_TOPOLOGY` | Canonical deployment choice: `hosted-no-panel` or `classic`. `hosted-panel` fails closed while #611 is open. |
 | `CHAT_BACKEND` | The upcoming UI release treats missing or blank as `hosted_agent`; the umbrella deployment always publishes the resolved sticky value. `orchestrator` is the explicit fallback. Unknown values fail startup. Environment configuration takes precedence over App Configuration. |
 | `ORCHESTRATOR_BASE_URL` | Classic service root, used only when `CHAT_BACKEND=orchestrator`. The UI calls the `/orchestrator` route on this endpoint. |
-| `HOSTED_AGENT_BASE_URL` | Required HTTPS hosted service root. The pending OQ-OWN UI sends Responses protocol `2.0.0` requests to `POST /responses` when `CHAT_BACKEND=hosted_agent`. The separate `POST /invocations` endpoint retains the legacy messages-based invocation contract but does not satisfy delegated continuity. |
+| `HOSTED_AGENT_BASE_URL` | Required HTTPS hosted service root. A compatible OQ-OWN UI sends Responses protocol `2.0.0` requests to `POST /responses` when `CHAT_BACKEND=hosted_agent`. The separate `POST /invocations` endpoint retains the legacy messages-based invocation contract but does not satisfy delegated continuity. |
 | `HOSTED_AGENT_RESOURCE_SCOPE` | Required explicit non-ARM hosted data-plane Entra scope ending in `/.default`, for example `api://<application-id>/.default`. |
 | `HOSTED_AGENT_AUTH_MODE` | `user_delegated` is the default and required continuity path. Under OQ-OWN, it means the trusted UI BFF derives `x-ms-user-identity`; it does not mean an OBO token is sent to the agent. OBO remains a separate retrieval flow. `service_identity` is an explicit reviewed exception that is incompatible with owner-bound continuity, so continuity stays off/503 in that mode. |
 | `HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS` | Finite positive wait for the next SSE event. The UI default is `60`; an infinite timeout is rejected. |
@@ -122,13 +125,14 @@ tokens are not copied into tool payloads or client-defined identity headers.
 
 #### Hosted conversation continuity platform gate
 
-!!! danger "Delegated owner binding is pending"
+!!! danger "Delegated owner binding remains release-gated"
     `HOSTED_CONTINUITY_ENABLED` defaults to `false` and must stay false until the
-    OQ-OWN platform pivot and compatible components are published. The
-    deployment must prove Responses protocol `2.0.0`, trusted UI BFF identity
-    derivation, and the two exact direct agent-scoped roles before recording
-    `OWNER_BINDING_VALIDATED=true`. Otherwise compatible history endpoints
-    return HTTP 503.
+    compatible components are published. PR #633 provides the platform pivot,
+    but deployment must still prove the live 100%-routed Responses protocol
+    `2.0.0`, trusted UI BFF identity derivation, and the two exact direct
+    agent-scoped roles before recording
+    `HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true`. Otherwise compatible
+    history endpoints return HTTP 503.
 
 The trusted UI BFF derives `x-ms-user-identity` from the authenticated
 server-side principal and sends it on the hosted Responses request. This owner
@@ -138,21 +142,31 @@ with its own audience and bearer token.
 Activation assigns only the UI BFF:
 
 - built-in **Foundry Agent Consumer**
-  (`eed3b665-ab3a-47b6-8f48-c9382fb1dad6`); and
-- the exact GPT-RAG custom role containing only the reviewed
+  (`eed3b665-ab3a-47b6-8f48-c9382fb1dad6`), whose only DataAction is
+  `Microsoft.CognitiveServices/accounts/AIServices/endpoints/interact/action`;
+  and
+- custom **GPT-RAG Hosted Agent User Identity Impersonation**
+  (`bef66abe-a495-530a-be1d-5d882fecff03`), containing only the reviewed
   `Microsoft.CognitiveServices/accounts/AIServices/agents/endpoints/UserIdentityImpersonation/action`
   DataAction.
 
-Both assignments must be direct and scoped to the individual hosted agent.
-Broader, inherited, group-derived, wildcard, or extra-DataAction access fails
-validation. The hosted runtime is not an identity-header source and receives no
-key, Conversation or impersonation RBAC, or Cosmos DB in hosted/no-panel.
+Both assignments must be direct `ServicePrincipal` assignments scoped to the
+individual hosted agent. Broader, inherited, group-derived, wildcard,
+custom-equivalent, or extra-DataAction access fails validation. **Foundry User**
+and **Project Runtime User** are prohibited substitutes. The hosted runtime is
+not an identity-header source and receives no key, Conversation or impersonation
+RBAC, or Cosmos DB in hosted/no-panel.
 
 | Setting or gate | Required posture |
 | --- | --- |
 | `HOSTED_CONTINUITY_ENABLED` | `false` until delegated owner binding validates; false/missing validation means history HTTP 503. |
-| `OWNER_BINDING_VALIDATED` | Becomes `true` only after the live protocol, identity-source, role-definition, assignment, and scope checks pass. |
+| `HOSTED_CONVERSATION_OWNER_BINDING` | Defaults to `delegated`; `capability` is the only accepted explicit fallback. |
+| `HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED` | Becomes `true` only after the live protocol, identity-source, role-definition, assignment, and scope checks pass. |
+| `HOSTED_CONVERSATION_DELEGATED_IDENTITY_HEADER` | Must be exactly `x-ms-user-identity`. |
+| `HOSTED_CONVERSATION_DELEGATED_IDENTITY_SOURCE` | Must be exactly `authenticated_ui_bff_principal`. |
 | `HOSTED_CONVERSATIONS_TOKEN_AUDIENCE` | Exact Foundry audience `https://ai.azure.com`; distinct from `x-ms-user-identity` and downstream OBO audiences. |
+| `HOSTED_AGENT_RESPONSES_PROTOCOL_VERSION` | Must be exactly `2.0.0`. |
+| `HOSTED_CONTINUITY_UNAVAILABLE_STATUS_CODE` | Must be `503`. |
 | `HOSTED_HISTORY_MAX_ITEMS` | Default `100`; accepted range 1-1,000. |
 | `HOSTED_HISTORY_MAX_TOKENS` | Default `32000`; accepted range 1-1,000,000. |
 | `HOSTED_HISTORY_TRUNCATION` | Must be `drop_oldest`. |

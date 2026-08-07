@@ -12,9 +12,10 @@ AILZ `v2.5.0` is published, but the platform implementation remains unreleased
 pending the remaining compatible component tags, final umbrella pins,
 integrated validation, and a new GPT-RAG release. The separate
 [hosted continuity platform contract](hosted_continuity_platform_contract.md)
-is pivoting to delegated `x-ms-user-identity`, but remains disabled pending the
-OQ-OWN platform follow-up, compatible component pins, and
-`OWNER_BINDING_VALIDATED`; hosted/panel remains unsupported. [GitHub Repository](https://github.com/Azure/gpt-rag-orchestrator).
+uses delegated `x-ms-user-identity` in the platform pivot merged by PR #633, but
+remains disabled pending compatible component pins and
+`HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED`; hosted/panel remains unsupported.
+[GitHub Repository](https://github.com/Azure/gpt-rag-orchestrator).
 
 ## Key Features
 
