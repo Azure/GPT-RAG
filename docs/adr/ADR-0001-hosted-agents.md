@@ -353,7 +353,9 @@ from an environment variable) select the topology:
   environments and preserve an existing environment's persisted topology.
 - DEPLOY_ADMINISTRATIVE_PANEL, default false. When true in hosted agent mode,
   brings up the smaller Container Apps only to serve history, feedback, and the
-  dashboard. It remains unsupported and blocked from promotion until #611.
+  dashboard. It is supported by the coordinated hosted-panel release matrix;
+  its history and operator surfaces remain independently disabled by default
+  and fail closed until their explicit evidence/configuration gates are met.
 
 Three resulting modes:
 - Classic (explicit fallback, and sticky for existing classic environments):
@@ -362,7 +364,7 @@ Three resulting modes:
   panel off. The hosted agent comes up, the
   UI points at it, the orchestrator Container Apps does not come up, history via
   Foundry Conversations. This is the field's "one less resource".
-- Hosted agent with panel (deferred until #611): flag on, panel on. Hosted agent
+- Hosted agent with panel: flag on, panel on. Hosted agent
   for chat, smaller data-ingestion Container Apps only as the administrative
   backend.
 
@@ -710,7 +712,7 @@ gates for implementation tracks.
 | --- | --- | --- |
 | Classic (explicit fallback and sticky upgrade mode) | `DEPLOY_HOSTED_AGENT_ORCHESTRATION=false`; orchestrator Container Apps deployed; UI `CHAT_BACKEND=orchestrator`; regression checks for history and feedback pass; pre-cutover classic upgrade remains classic. | Any regression in classic chat, history, or feedback, or an existing deployment changes topology without operator migration. |
 | Hosted / no-panel (fresh target default) | `DEPLOY_HOSTED_AGENT_ORCHESTRATION=true`, `DEPLOY_ADMINISTRATIVE_PANEL=false`; zero orchestrator Container Apps provisioned; UI `CHAT_BACKEND=hosted_agent`; two-user authorization negative test proves restricted user cannot retrieve protected content. | Unauthorized retrieval, missing hosted endpoint, orchestrator app unexpectedly provisioned, or silent runtime fallback. |
-| Hosted / panel (deferred to #611) | Not promotable while #611 is open. When enabled later: `DEPLOY_HOSTED_AGENT_ORCHESTRATION=true`, `DEPLOY_ADMINISTRATIVE_PANEL=true`; hosted path serves chat; panel endpoints serve history/feedback/dashboard; Cosmos contains panel feedback records only. | Panel enabled by default or presented as supported before #611; chat flow depends on Container Apps; panel APIs fail open or return success-shaped placeholders. |
+| Hosted / panel (issue #611 integration) | Explicit `DEPLOYMENT_TOPOLOGY=hosted-panel` materializes `DEPLOY_HOSTED_AGENT_ORCHESTRATION=true` and `DEPLOY_ADMINISTRATIVE_PANEL=true`; hosted compute serves chat while panel endpoints serve owner-bound history/feedback and authorized operator surfaces. Cosmos contains panel metadata only, and the independent history/operator evidence gates remain disabled until their live prerequisites pass. | Panel enabled by default; chat flow depends on Container Apps; hosted compute receives Conversations RBAC; panel APIs, owner binding, or operator authorization fail open or return success-shaped placeholders. |
 
 Cross-cutting hosted runtime gates:
 

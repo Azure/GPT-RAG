@@ -57,6 +57,37 @@ class ResourceGroupExistsTests(unittest.TestCase):
             topology.resource_group_exists("rg-test")
 
 
+class ResourceGroupHasResourcesTests(unittest.TestCase):
+    @patch("config.deployment.topology.subprocess.run")
+    def test_true_when_resource_group_contains_resources(
+        self, mock_run: object
+    ) -> None:
+        mock_run.return_value = _completed(
+            0, "/subscriptions/test/resourceGroups/rg-test/providers/test"
+        )
+
+        self.assertTrue(
+            topology.resource_group_has_resources(
+                "rg-test", "subscription-test"
+            )
+        )
+
+    @patch("config.deployment.topology.subprocess.run")
+    def test_false_when_resource_group_is_empty(self, mock_run: object) -> None:
+        mock_run.return_value = _completed(0, "")
+
+        self.assertFalse(topology.resource_group_has_resources("rg-test"))
+
+    @patch("config.deployment.topology.subprocess.run")
+    def test_fails_closed_when_resource_query_fails(
+        self, mock_run: object
+    ) -> None:
+        mock_run.return_value = _completed(1, "", "ERROR: forbidden")
+
+        with self.assertRaisesRegex(Exception, "cannot safely continue"):
+            topology.resource_group_has_resources("rg-test")
+
+
 class ReadPersistedSettingsTests(unittest.TestCase):
     def test_empty_endpoint_short_circuits_without_calling_az(self) -> None:
         with patch("config.deployment.topology.subprocess.run") as mock_run:
@@ -133,19 +164,26 @@ class ResolveEnvironmentTopologyTests(unittest.TestCase):
         mock_read_settings.assert_not_called()
 
     @patch("config.deployment.topology.read_persisted_settings")
+    @patch(
+        "config.deployment.topology.resource_group_has_resources",
+        return_value=False,
+    )
     @patch("config.deployment.topology.resource_group_exists")
-    def test_explicit_hosted_fresh_environment_skips_persisted_settings(
-        self, mock_rg_exists: object, mock_read_settings: object
+    def test_explicit_hosted_empty_azd_resource_group_is_fresh(
+        self,
+        mock_rg_exists: object,
+        _mock_has_resources: object,
+        mock_read_settings: object,
     ) -> None:
-        mock_rg_exists.return_value = False
+        mock_rg_exists.return_value = True
 
         mode = topology.resolve_environment_topology(
-            {"DEPLOYMENT_TOPOLOGY": "hosted-no-panel"},
+            {"DEPLOYMENT_TOPOLOGY": "hosted-panel"},
             resource_group_name="rg-test",
             app_config_endpoint="https://x",
         )
 
-        self.assertEqual(DeploymentMode.HOSTED_NO_PANEL, mode)
+        self.assertEqual(DeploymentMode.HOSTED_PANEL, mode)
         mock_read_settings.assert_not_called()
 
     @patch("config.deployment.topology.read_persisted_settings")
@@ -164,9 +202,16 @@ class ResolveEnvironmentTopologyTests(unittest.TestCase):
         mock_read_settings.assert_not_called()
 
     @patch("config.deployment.topology.read_persisted_settings")
+    @patch(
+        "config.deployment.topology.resource_group_has_resources",
+        return_value=True,
+    )
     @patch("config.deployment.topology.resource_group_exists")
     def test_explicit_hosted_migration_preserves_existing_classic_runtime(
-        self, mock_rg_exists: object, mock_read_settings: object
+        self,
+        mock_rg_exists: object,
+        _mock_has_resources: object,
+        mock_read_settings: object,
     ) -> None:
         mock_rg_exists.return_value = True
         mock_read_settings.return_value = {
@@ -207,9 +252,16 @@ class ResolveEnvironmentTopologyTests(unittest.TestCase):
         self.assertFalse(resolution.preserve_classic_runtime)
 
     @patch("config.deployment.topology.read_persisted_settings")
+    @patch(
+        "config.deployment.topology.resource_group_has_resources",
+        return_value=True,
+    )
     @patch("config.deployment.topology.resource_group_exists")
     def test_ambiguous_existing_hosted_request_preserves_persisted_classic(
-        self, mock_rg_exists: object, mock_read_settings: object
+        self,
+        mock_rg_exists: object,
+        _mock_has_resources: object,
+        mock_read_settings: object,
     ) -> None:
         mock_rg_exists.return_value = True
         mock_read_settings.return_value = {}
@@ -226,9 +278,16 @@ class ResolveEnvironmentTopologyTests(unittest.TestCase):
         )
 
     @patch("config.deployment.topology.read_persisted_settings")
+    @patch(
+        "config.deployment.topology.resource_group_has_resources",
+        return_value=True,
+    )
     @patch("config.deployment.topology.resource_group_exists")
     def test_ambiguous_explicit_hosted_request_fails_when_state_is_inaccessible(
-        self, mock_rg_exists: object, mock_read_settings: object
+        self,
+        mock_rg_exists: object,
+        _mock_has_resources: object,
+        mock_read_settings: object,
     ) -> None:
         mock_rg_exists.return_value = True
         mock_read_settings.side_effect = topology.DeploymentTopologyError(

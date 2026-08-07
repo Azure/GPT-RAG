@@ -42,11 +42,8 @@ Reversible: deleting the two container-scoped assignments (or simply setting
 calls this script) fully revokes panel Cosmos access without touching any
 other container, account, or identity.
 
-No-op unless ``DEPLOY_ADMINISTRATIVE_PANEL`` is ``true`` -- which, as of this
-change, cannot yet be reached through normal topology resolution (hosted-panel
-topology selection still fails closed pending the remaining
-https://github.com/Azure/gpt-rag/issues/611 component work in
-gpt-rag-ingestion). This script exists so the platform contract -- the exact,
+No-op unless ``DEPLOY_ADMINISTRATIVE_PANEL`` is ``true``. This script implements
+the platform contract -- the exact,
 reviewed, narrow-scope RBAC shape -- is ready the moment that gate lifts.
 """
 

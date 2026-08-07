@@ -86,11 +86,8 @@ def public_settings(environment: Mapping[str, str]) -> dict[str, str]:
     flag fail closed regardless of what an operator may have set locally.
 
     While ``DEPLOY_ADMINISTRATIVE_PANEL``/``PANEL_HISTORY_ENABLED`` are
-    ``false`` (today's default and only supported state -- hosted-panel
-    topology selection itself still fails closed pending
-    https://github.com/Azure/gpt-rag/issues/611's remaining component work),
-    every value here stays at its safe default and no Cosmos container or
-    RBAC assignment is provisioned (see
+    ``false`` (the safe defaults), every value here stays inert and no panel
+    Cosmos container or RBAC assignment is provisioned (see
     ``config.deployment.composition.panel_database_containers`` and
     ``config.panel.setup``).
     """

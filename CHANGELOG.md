@@ -31,10 +31,9 @@
   agent/container identity is never resolved or granted any role. The panel's
   pagination cursor reuses the UI's existing `CHAINLIT_AUTH_SECRET`
   (already Key-Vault-backed); no new secret or Key Vault RBAC was introduced.
-  `DEPLOY_ADMINISTRATIVE_PANEL=true` (hosted-panel topology selection) still
-  fails closed pending the remaining gpt-rag-ingestion operator-surface work;
-  this change is the platform-layer prerequisite, with no other runtime
-  behavior change.
+  This platform-layer prerequisite remained inert until the coordinated
+  integration matrix below lifted the topology block; the independent
+  history and operator evidence gates remain disabled by default.
 - **Hosted panel operator-surface App Configuration keys (issue #611,
   ADR-0004, reconciling gpt-rag-ingestion PR #274, merge
   `5569dd6af3ecb317e1037108cb21859f1b2185a1`).** Added
@@ -53,17 +52,15 @@
   explicit expected-key-set fixture guarding against future drift between
   this repository's published defaults and what `gpt-rag-ingestion` (PR #274)
   and `gpt-rag-ui` (PR #99) actually consume. Updated ADR-0004's adoption
-  status: the ingestion operator-surface component work is now done: the
-  `DEPLOY_ADMINISTRATIVE_PANEL=true` topology gate remains fail-closed
-  (`HostedPanelUnsupportedError`) as a deliberate, separate decision gated on
-  the still-open live evidence-gate procedures, not on any remaining
-  component implementation. No manifest/pin or release change in this
-  revision.
+  status: the ingestion operator-surface component work is now done. The
+  coordinated matrix below lifts only the explicit hosted-panel topology
+  block; the separate live evidence and authorization gates remain fail
+  closed.
 - **Deterministic deployment topologies.** Classic, hosted/no-panel, and
-  hosted/panel remain recognized topology values, but only classic and
-  hosted/no-panel are currently deployable. `DEPLOY_ADMINISTRATIVE_PANEL`
-  defaults to `false`, and any signal that would select
-  hosted-panel mode fails closed until [issue #611](https://github.com/Azure/gpt-rag/issues/611) lands.
+  hosted/panel are deployable topology values. Hosted-panel requires explicit
+  operator selection; `DEPLOY_ADMINISTRATIVE_PANEL` defaults to `false`.
+  Panel history and operator routes remain independently fail closed behind
+  their disabled-by-default evidence and authorization gates.
 - **Hosted-no-panel is now the fresh-deployment default (ADR-0001 revision
   5).** A genuinely new environment (no existing resource group) provisions
   `hosted-no-panel` with `CHAT_BACKEND=hosted_agent` and no orchestrator
@@ -88,9 +85,13 @@
   a later explicit provision.
 - **Shared, deterministic topology resolver.** `config/deployment/topology.py`
   centralizes the fresh-vs-existing/sticky/conflict decision (resource-group
-  existence plus persisted App Configuration settings, when reachable) behind
-  a single pure function (`config.deployment.composition.resolve_topology`)
-  and a small CLI/integration wrapper, so `scripts/preProvision.ps1` and
+  existence and contents plus persisted App Configuration settings, when
+  reachable) behind a single pure function
+  (`config.deployment.composition.resolve_topology`) and a small
+  CLI/integration wrapper. An empty resource group pre-created by azd is
+  treated as fresh, so an unrelated process-level App Configuration endpoint
+  cannot influence first provision; groups with deployed resources retain
+  fail-closed persisted-state checks. `scripts/preProvision.ps1` and
   `scripts/preProvision.sh` resolve and materialize the same
   `DEPLOYMENT_TOPOLOGY` (and paired legacy flags/`CHAT_BACKEND`) into the azd
   environment before any later hook or Bicep composition runs.
@@ -124,6 +125,21 @@
 
 ### Changed
 
+- **Hosted administrative panel integration matrix (issue #611).** Explicit
+  hosted-panel topology selection is now composed with UI `v2.6.0`
+  (`81d6515d8fc365402e958e861b671af037a4cc75`), orchestrator `v4.0.0`
+  (`1033d0690736f9787e5f227559dc4071d2043b79`), ingestion `v2.7.0`
+  (`84b927769ef0839110f2d68e3ca471e2260567cf`), and AI Landing Zone
+  `v2.5.0` (`cacf418216ce7381d06263e0dd704a86b8a6f225`). The hosted
+  container remains stateless with zero Conversations RBAC; hosted-panel
+  provisions only the metadata-only owner-index and feedback containers.
+  `PANEL_HISTORY_ENABLED`, `PANEL_HISTORY_OWNER_BINDING_VALIDATED`, and
+  `PANEL_OPERATOR_SURFACES_ENABLED` remain deployment-published `false`, so
+  all user-history and operator surfaces stay fail closed until their
+  independent evidence and authorization gates are explicitly completed.
+  The released ingestion browser/operator path validates delegated bearer
+  tokens, rejects app-only identities, and requires exact configured app-role
+  or group membership.
 - **Hosted continuity ownership is delegated and fail closed.** The trusted UI
   BFF now derives `x-ms-user-identity` from the authenticated server-side
   principal, independently of OBO retrieval tokens. Continuity activates only
@@ -133,13 +149,9 @@
   ownership key. The HMAC capability contract remains an explicit disabled
   fallback and delegated mode provisions no capability secret, vault role, or
   App Configuration reference.
-- **Compatible hosted/no-panel component pins.** The unreleased integration
-  combination preserves UI `v2.5.1`, orchestrator `v3.10.0`, and ingestion
-  `v2.6.0` at their exact released commits. It temporarily pins AI Landing Zone
-  `develop` commit `1775f871641311868a15792bf3dc836024c9fb20`, which contains
-  the merged PR #130 additive `prepareHostedAgent` contract. Final release
-  preparation must replace this interim source pin with the new minor release
-  tag and matching commit.
+- **Released AI Landing Zone pin.** The temporary AI Landing Zone `develop`
+  source pin is replaced by released tag `v2.5.0` at exact commit
+  `cacf418216ce7381d06263e0dd704a86b8a6f225`.
 
 ### Fixed
 
@@ -157,7 +169,12 @@
   hook now exports the equivalent repository-root import path.
 - **Hosted-image builds resolve the Azure CLI launcher on Windows.**
   The ACR Tasks helper resolves both `az` and the Windows `az.cmd` shim before
-  calling `subprocess.run`, and fails clearly when Azure CLI is unavailable.
+  calling `subprocess.run`, uses an absolute Dockerfile path for temporary
+  pinned-source contexts, and fails clearly when Azure CLI is unavailable.
+  Private builds queue without streaming Unicode logs through the Windows
+  console and resolve their immutable output digest from the management-plane
+  ACR run record, so digest materialization does not require public registry
+  data-plane access.
 - **Regional prerequisite checks resolve Azure CLI on Windows.**
   `util.prereqs` now uses the same explicit Azure CLI executable resolution as
   deployment configuration, so the `az.cmd` shim no longer fails with
