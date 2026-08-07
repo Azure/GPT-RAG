@@ -8,10 +8,10 @@ chat-runtime views.
 !!! warning "Release status"
     Draw the hosted/no-panel path as the **target fresh-deployment default** and
     label it **OQ-OWN pivot merged; release gate off/503**. Do not label it
-    shipped until the remaining compatible component tags, final umbrella pins,
+    shipped until final umbrella pins,
     `HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED`, integrated validation, and
-    the GPT-RAG release publish. AILZ `v2.5.0` is published and platform PR
-    #633 is merged to `develop`.
+    the GPT-RAG release publish. UI `v2.6.0`, orchestrator `v4.0.0`, ingestion
+    `v2.7.0`, and AILZ `v2.5.0` are published as component releases.
 
 ## Shapes and labels
 
@@ -32,7 +32,7 @@ Add or update these shapes in the application/runtime area:
 | Mode annotation | `Fresh target default: hosted-no-panel` | Place above the hosted-agent lane. |
 | Fallback annotation | `Explicit/sticky classic topology` | Place above the orchestrator fallback. |
 | Panel annotation | `Administrative panel absent; DEPLOY_ADMINISTRATIVE_PANEL=false` | Place below the hosted lane. |
-| Release annotation | `OQ-OWN pivot merged; compatible pins pending; continuity off/503` | Place in an amber status banner below the diagram title. |
+| Release annotation | `Component matrix published; umbrella pins pending; continuity off/503` | Place in an amber status banner below the diagram title. |
 
 ## Connections and labels
 

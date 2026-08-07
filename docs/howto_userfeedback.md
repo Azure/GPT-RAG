@@ -3,15 +3,21 @@
 GPT-RAG includes a **User Feedback Loop** feature that lets users evaluate
 assistant responses through the UI. In the currently released classic
 Container Apps topology and the explicit classic fallback, feedback is
-processed by the orchestrator and stored in **Cosmos DB**. The
-[upcoming hosted-default topology](deploy.md#chat-runtime-modes-upcoming-hosted-default-release)
-is hosted/no-panel and does not include this feedback path. AILZ `v2.5.0` is
-published, but the implementation remains unreleased pending the remaining
-compatible component tags, final umbrella pins, integrated validation, and a
-new GPT-RAG release. Keep
-`DEPLOY_ADMINISTRATIVE_PANEL=false`; hosted feedback and panel workflows are
-deferred to
-[issue #611](https://github.com/Azure/GPT-RAG/issues/611).
+processed by the orchestrator and stored in **Cosmos DB**. The published
+[hosted component matrix](hosted_agent_release_matrix.md) implements separate
+user history, feedback, and delete APIs in UI `v2.6.0`, but hosted-panel is not
+published as a GPT-RAG umbrella topology. Keep
+`DEPLOY_ADMINISTRATIVE_PANEL=false` in released umbrella deployments.
+
+For the component contract, the UI BFF checks the caller's validated `oid`
+against the owner index before reading managed Conversation messages or
+metadata. Missing and non-owner resources both return opaque 404. Feedback
+stores bounded, sanitized rating/category/comment/message-reference metadata
+only; message bodies and citations remain in managed Conversations. Delete
+removes the managed Conversation first and then metadata, returning an explicit
+`partial` result if metadata cleanup fails. Signed pagination cursors are
+`oid`-bound and expiring; tampered, expired, or cross-user cursors return 422.
+These routes return 503 while panel/history gates are off.
 
 ![Feedback stored in Cosmos DB](media/feedback_stored_in_cosmos_db.png)
 <br>*User feedback stored in Cosmos DB*

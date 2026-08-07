@@ -4,6 +4,20 @@ patch, and fix, see the [GitHub releases](https://github.com/Azure/GPT-RAG/relea
 
 > 📌 [Check out what's coming next](https://github.com/orgs/Azure/projects/536/views/6)  (Azure org only)
 
+### August 2026
+
+- **Hosted-agent component matrix published (no umbrella release).** UI
+  `v2.6.0`, orchestrator `v4.0.0`, ingestion `v2.7.0`, and AILZ `v2.5.0`
+  publish the stateless runtime, delegated owner binding, owner-gated user
+  history/feedback/delete APIs, metadata-only operator APIs, and two-phase
+  hosted handoff contracts. GPT-RAG has not
+  published an umbrella release that pins them together; released deployments
+  remain classic, continuity remains off/503, and hosted-panel is
+  platform-blocked. The ingestion operator tabs also require surrounding
+  infrastructure to supply a delegated bearer because their Vite client does
+  not acquire one. See the
+  [hosted-agent component release matrix](hosted_agent_release_matrix.md).
+
 ### July 2026
 
 - **Governance audit and provenance integration ([GPT-RAG v3.7.0](https://github.com/Azure/GPT-RAG/releases/tag/v3.7.0)).**
