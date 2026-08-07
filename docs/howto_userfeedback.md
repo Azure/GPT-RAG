@@ -5,9 +5,10 @@ assistant responses through the UI. In the currently released classic
 Container Apps topology and the explicit classic fallback, feedback is
 processed by the orchestrator and stored in **Cosmos DB**. The
 [upcoming hosted-default topology](deploy.md#chat-runtime-modes-upcoming-hosted-default-release)
-is hosted/no-panel and does not include this feedback path. Its implementation
-is merged but remains unreleased pending component and AI Landing Zone tags,
-final umbrella pins, integrated validation, and a new GPT-RAG release. Keep
+is hosted/no-panel and does not include this feedback path. AILZ `v2.5.0` is
+published, but the implementation remains unreleased pending the remaining
+compatible component tags, final umbrella pins, integrated validation, and a
+new GPT-RAG release. Keep
 `DEPLOY_ADMINISTRATIVE_PANEL=false`; hosted feedback and panel workflows are
 deferred to
 [issue #611](https://github.com/Azure/GPT-RAG/issues/611).

@@ -4,12 +4,13 @@ This page explains how authentication works in GPT-RAG, from the GPT-RAG UI sign
 
 > In OAuth mode, the orchestrator receives a user access token (for the orchestrator API) and then performs an On-Behalf-Of (OBO) exchange to obtain a separate token for Azure AI Search. The two tokens have different audiences and are not interchangeable.
 
-!!! warning "Hosted continuity is a disabled platform contract"
-    The secure hosted-continuity contract merged in
-    [PR #630](https://github.com/Azure/GPT-RAG/pull/630), but compatible
-    component pins and owner-binding validation are not complete. Keep
-    `HOSTED_CONTINUITY_ENABLED=false`; the current published release continues
-    to use the classic flow documented on this page.
+!!! warning "Hosted continuity remains disabled"
+    Live OQ-OWN evidence supersedes the capability-first contract from
+    [PR #630](https://github.com/Azure/GPT-RAG/pull/630). The delegated
+    `x-ms-user-identity` platform pivot, compatible component pins, and
+    `OWNER_BINDING_VALIDATED` gate are not published. Keep
+    `HOSTED_CONTINUITY_ENABLED=false`; compatible history endpoints return HTTP
+    503 and the current published release continues to use the classic flow.
 
 ## Embed GPT-RAG in a portal
 
@@ -28,19 +29,21 @@ authentication modes, browser security controls, and rollout.
 
 ### Hosted Conversation ownership boundary
 
-For the upcoming compatible hosted topology, the UI BFF derives the caller
-`oid` from the authenticated server-side principal and exclusively creates and
-verifies an opaque owner-bound capability exchanged with the client. The UI BFF
-is also the only component allowed to create, read, append to, or delete Foundry
-managed Conversations.
+For the upcoming compatible hosted topology, the trusted UI BFF derives
+`x-ms-user-identity` from the authenticated server-side principal and sends it
+on Responses protocol `2.0.0`. The browser cannot choose the owner, and the
+hosted runtime must not source or replace the identity header.
 
-The hosted runtime receives neither the capability HMAC key nor the raw `oid`
-and has no Conversations data-plane RBAC. App Configuration contains only a Key
-Vault reference to a capability secret in a dedicated UI BFF vault. The UI BFF
-receives Foundry Agent Consumer only at the individual agent scope; this does
-not grant the hosted identity Conversation access. See the
+This owner header is distinct from OBO. `x-ms-user-identity` binds Foundry
+Conversation ownership; OBO obtains a delegated bearer token for a downstream
+retrieval audience. Activation requires direct assignments to the UI BFF, at
+the individual hosted-agent scope, of Foundry Agent Consumer and the exact
+GPT-RAG custom role containing only the reviewed `UserIdentityImpersonation`
+DataAction. The hosted runtime receives no key, Conversation or impersonation
+RBAC, or Cosmos DB in hosted/no-panel. Capability/HMAC remains a disabled
+fallback and is not provisioned or required on the primary path. See the
 [hosted conversation continuity platform contract](hosted_continuity_platform_contract.md)
-for the owner-validation gate, audience, TTL, role, and lifecycle requirements.
+for the owner-validation, protocol, role, and lifecycle requirements.
 
 ### Classic Container Apps token flow
 
@@ -320,10 +323,10 @@ runtime settings, and the ingestion dashboard also lets an operator trigger a
 scheduled job on demand. The
 [upcoming hosted-default topology](deploy.md#chat-runtime-modes-upcoming-hosted-default-release)
 is hosted/no-panel, omits these administrative surfaces, and requires
-`DEPLOY_ADMINISTRATIVE_PANEL=false`. That default still depends on
-unpublished component and AI Landing Zone tags, final umbrella pins, integrated
-validation, and a new GPT-RAG release. The platform implementation is merged
-but unreleased. Hosted/panel is deferred to
+`DEPLOY_ADMINISTRATIVE_PANEL=false`. AILZ `v2.5.0` is published, but that
+default still depends on the remaining compatible component tags, final
+umbrella pins, integrated validation, and a new GPT-RAG release. The platform
+implementation is merged but unreleased. Hosted/panel is deferred to
 [issue #611](https://github.com/Azure/GPT-RAG/issues/611).
 
 Admin access is enforced through an **Entra ID App Role named `Admin`** added to the same App Registration you created for user sign-in. The token the caller presents to `/api/dashboard/*` (or the ingestion equivalents) must carry `Admin` in its `roles` claim.

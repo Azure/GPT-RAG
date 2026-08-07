@@ -8,12 +8,13 @@ published releases run it as an orchestrator Container App. The
 [upcoming hosted-default topology](deploy.md#chat-runtime-modes-upcoming-hosted-default-release)
 packages the same chat runtime as a Microsoft Foundry hosted agent for fresh
 deployments and retains the Container Apps adapter as an explicit fallback.
-The platform implementation is merged but remains unreleased pending component
-and AI Landing Zone tags, final umbrella pins, integrated validation, and a new
-GPT-RAG release. The separate
+AILZ `v2.5.0` is published, but the platform implementation remains unreleased
+pending the remaining compatible component tags, final umbrella pins,
+integrated validation, and a new GPT-RAG release. The separate
 [hosted continuity platform contract](hosted_continuity_platform_contract.md)
-is also merged, but remains disabled pending compatible component pins and
-owner-binding validation; hosted/panel remains unsupported. [GitHub Repository](https://github.com/Azure/gpt-rag-orchestrator).
+is pivoting to delegated `x-ms-user-identity`, but remains disabled pending the
+OQ-OWN platform follow-up, compatible component pins, and
+`OWNER_BINDING_VALIDATED`; hosted/panel remains unsupported. [GitHub Repository](https://github.com/Azure/gpt-rag-orchestrator).
 
 ## Key Features
 
@@ -86,10 +87,11 @@ skip Azure AI Search while still using the recent chat history.
 | `ENABLE_NO_RETRIEVAL_FOLLOWUP_DETECTION` | `true` | Allows no-retrieval follow-ups to skip Azure AI Search; ambiguous turns still retrieve. |
 
 The hosted limits are inactive while `HOSTED_CONTINUITY_ENABLED=false`. When a
-compatible component set is eventually validated, the UI BFF - not the hosted
-orchestrator - will own Foundry managed Conversation CRUD and capability
-verification. The hosted runtime will receive no capability key, raw `oid`, or
-Conversations RBAC.
+compatible component set is validated, the trusted UI BFF will derive
+`x-ms-user-identity` for Responses protocol `2.0.0`. That owner header is
+distinct from OBO retrieval. The hosted runtime is not an identity-header
+source and receives no key, Conversation or impersonation RBAC, or Cosmos DB in
+hosted/no-panel. Capability/HMAC remains a disabled fallback only.
 
 ## Visual Guide
 
