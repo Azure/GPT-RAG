@@ -175,6 +175,10 @@
   console and resolve their immutable output digest from the management-plane
   ACR run record, so digest materialization does not require public registry
   data-plane access.
+- **Foundry IQ ingestion honors the Search managed-identity mode.**
+  Blob knowledge sources now bind the Search service's configured
+  user-assigned identity instead of implicitly selecting a nonexistent system
+  identity in UAI-based deployments.
 - **Regional prerequisite checks resolve Azure CLI on Windows.**
   `util.prereqs` now uses the same explicit Azure CLI executable resolution as
   deployment configuration, so the `az.cmd` shim no longer fails with
