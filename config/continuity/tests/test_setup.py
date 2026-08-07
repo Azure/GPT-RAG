@@ -18,6 +18,51 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 
 
 class ContinuitySetupTests(TestCase):
+    @patch.object(setup, "get_configuration_setting_or_none", return_value=None)
+    @patch.object(setup, "_run_az", return_value="")
+    def test_disabled_continuity_allows_fresh_frontend_without_identity(
+        self,
+        run_az,
+        get_setting,
+    ):
+        setup.reconcile_disabled_continuity(
+            Mock(),
+            {
+                "AZURE_RESOURCE_GROUP": "rg",
+                "FRONTEND_APP_NAME": "frontend",
+            },
+        )
+
+        run_az.assert_called_once()
+        self.assertFalse(run_az.call_args.kwargs["required"])
+        get_setting.assert_called_once()
+
+    @patch.object(
+        setup,
+        "get_configuration_setting_or_none",
+        return_value=SimpleNamespace(value="reference"),
+    )
+    @patch.object(setup, "_run_az", return_value="")
+    def test_disabled_continuity_fails_closed_without_identity_when_capability_exists(
+        self,
+        run_az,
+        get_setting,
+    ):
+        with self.assertRaisesRegex(
+            RuntimeError,
+            "capability reference still exists",
+        ):
+            setup.reconcile_disabled_continuity(
+                Mock(),
+                {
+                    "AZURE_RESOURCE_GROUP": "rg",
+                    "FRONTEND_APP_NAME": "frontend",
+                },
+            )
+
+        run_az.assert_called_once()
+        get_setting.assert_called_once()
+
     def test_safe_defaults_disable_continuity_and_prefer_delegation(self):
         values = dict(setup.DEFAULT_SETTINGS)
 
