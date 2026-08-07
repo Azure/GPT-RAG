@@ -13,6 +13,13 @@ from pathlib import Path
 from typing import Mapping
 
 from config.continuity.settings import public_settings as continuity_public_settings
+from config.panel.settings import (
+    FEEDBACK_CONTAINER_CONFIG_KEY,
+    FEEDBACK_CONTAINER_NAME,
+    OWNER_INDEX_CONTAINER_CONFIG_KEY,
+    OWNER_INDEX_CONTAINER_NAME,
+    public_settings as panel_public_settings,
+)
 
 
 APP_CONFIG_LABEL = "gpt-rag"
@@ -417,6 +424,36 @@ def materialized_settings(
     }
 
 
+def resolve_database_containers(
+    mode: DeploymentMode,
+    existing_containers: list[dict[str, object]],
+    *,
+    preserving_classic_runtime: bool = False,
+) -> list[dict[str, object]]:
+    """Return the exact ``databaseContainersList`` value for ``mode``.
+
+    A small, directly-testable pure function (mirrors ``describe_mode``/
+    ``materialized_settings`` in this module, which also take ``mode`` as a
+    plain argument) so the panel/no-panel container-list contract can be unit
+    tested without needing ``resolve_mode`` to accept a hosted-panel
+    environment signal, which still fails closed pending the remaining
+    https://github.com/Azure/gpt-rag/issues/611 component work.
+
+    - Classic (or a migrating hosted deployment still preserving the classic
+      runtime): the static classic list is unchanged.
+    - Hosted/no-panel: no Cosmos containers at all (ADR-0001/0004).
+    - Hosted/panel: *only* the two panel metadata containers (owner index,
+      feedback) -- never the classic ``conversations``/``datasources``/
+      ``prompts``/``mcp`` list -- so panel Cosmos never mixes protected chat
+      content with metadata in the shared account/database.
+    """
+    if preserving_classic_runtime or mode is DeploymentMode.CLASSIC:
+        return existing_containers
+    if mode is DeploymentMode.HOSTED_PANEL:
+        return panel_database_containers()
+    return []
+
+
 def selected_components(mode: DeploymentMode) -> tuple[str, ...]:
     if mode is DeploymentMode.CLASSIC:
         return (
@@ -425,6 +462,42 @@ def selected_components(mode: DeploymentMode) -> tuple[str, ...]:
             "gpt-rag-ingestion",
         )
     return ("gpt-rag-ui", "gpt-rag-ingestion")
+
+
+def panel_database_containers() -> list[dict[str, object]]:
+    """Return the exact, reversible Cosmos containers for hosted/panel mode.
+
+    Used only when ``mode is DeploymentMode.HOSTED_PANEL`` -- see
+    ``compose_parameters``. Both containers are partitioned by
+    ``/principal_id`` (matching the classic ``conversations`` container
+    convention) and carry metadata only: the owner index (conversation
+    id/title/timestamps) and feedback (rating/category/comment/message
+    reference) -- never message content, citations, or document content
+    (ADR-0004). Deliberately distinct from the classic ``conversations``
+    chat-content container, and hosted/panel provisions *only* these two
+    containers -- not the classic mode's ``conversations``/``datasources``/
+    ``prompts``/``mcp`` list -- so switching topologies never mixes protected
+    chat content with panel metadata in one container. Each entry's
+    ``canonical_name`` is published verbatim to App Configuration (label
+    ``gpt-rag``) by the generic AILZ database-container-list mechanism,
+    matching the exact keys ``gpt-rag-ui``'s merged panel configuration
+    already consumes (``PANEL_OWNER_INDEX_DATABASE_CONTAINER``,
+    ``PANEL_FEEDBACK_DATABASE_CONTAINER``). Container-scoped Cosmos RBAC for
+    these containers is assigned separately by ``config.panel.setup`` (never
+    through the generic account-scope ``containerAppsList`` role loop).
+    """
+    return [
+        {
+            "name": OWNER_INDEX_CONTAINER_NAME,
+            "canonical_name": OWNER_INDEX_CONTAINER_CONFIG_KEY,
+            "partitionKey": "/principal_id",
+        },
+        {
+            "name": FEEDBACK_CONTAINER_NAME,
+            "canonical_name": FEEDBACK_CONTAINER_CONFIG_KEY,
+            "partitionKey": "/principal_id",
+        },
+    ]
 
 
 def _setting(name: str, value: str) -> dict[str, str]:
@@ -569,10 +642,13 @@ def compose_parameters(
             for app in apps
             if isinstance(app, dict) and app.get("service_name") != "orchestrator"
         ]
-    if (
-        mode is DeploymentMode.HOSTED_NO_PANEL
-        and not preserving_classic_runtime
-    ):
+    if hosted and not preserving_classic_runtime:
+        # Neither hosted topology grants Cosmos RBAC to dataingest through
+        # the generic account-scope role loop. Hosted/no-panel has no Cosmos
+        # at all; hosted/panel assigns dataingest a narrow, container-scoped
+        # Data Reader role (aggregate overview counts only) exclusively via
+        # config.panel.setup, never the account-wide Data Contributor role
+        # this static list otherwise grants in classic mode.
         for app in apps:
             if app.get("service_name") == "dataingest":
                 app["roles"] = [
@@ -582,11 +658,19 @@ def compose_parameters(
                 ]
     parameters["containerAppsList"] = {"value": apps}
 
-    if (
-        mode is DeploymentMode.HOSTED_NO_PANEL
-        and not preserving_classic_runtime
-    ):
-        parameters["databaseContainersList"] = {"value": []}
+    databases_parameter = parameters.get("databaseContainersList")
+    existing_containers = (
+        databases_parameter.get("value")
+        if isinstance(databases_parameter, dict)
+        else None
+    )
+    parameters["databaseContainersList"] = {
+        "value": resolve_database_containers(
+            mode,
+            existing_containers if isinstance(existing_containers, list) else [],
+            preserving_classic_runtime=preserving_classic_runtime,
+        )
+    }
 
     parameters["additionalAppConfigurationSettings"] = {
         "value": [
@@ -623,6 +707,10 @@ def compose_parameters(
             *[
                 _setting(name, value)
                 for name, value in continuity_public_settings(environment).items()
+            ],
+            *[
+                _setting(name, value)
+                for name, value in panel_public_settings(environment).items()
             ],
             # The routing selector is intentionally last so endpoint and
             # immutable-image prerequisites materialize before cutover.

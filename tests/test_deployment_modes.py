@@ -14,12 +14,20 @@ from config.deployment.composition import (
     compose_parameters,
     describe_mode,
     materialized_settings,
+    panel_database_containers,
+    resolve_database_containers,
     resolve_explicit_topology,
     resolve_mode,
     resolve_topology,
     selected_components,
 )
 from config.deployment.hosted import invocations_base_url
+from config.panel.settings import (
+    FEEDBACK_CONTAINER_CONFIG_KEY,
+    FEEDBACK_CONTAINER_NAME,
+    OWNER_INDEX_CONTAINER_CONFIG_KEY,
+    OWNER_INDEX_CONTAINER_NAME,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -462,6 +470,176 @@ class DeploymentCompositionTests(unittest.TestCase):
 
         with self.assertRaisesRegex(ValueError, "delegated-user data-plane scope"):
             compose_parameters(source_parameters(), environment)
+
+
+class PanelPlatformContractTests(unittest.TestCase):
+    """Issue #611 / ADR-0004 platform-contract composition.
+
+    ``DeploymentMode.HOSTED_PANEL`` still cannot be reached through
+    ``resolve_mode``/``compose_parameters`` (hosted-panel topology selection
+    fails closed pending the remaining gpt-rag-ingestion operator work), so
+    these tests exercise the pure, directly-testable composition helpers
+    with ``mode`` passed explicitly -- exactly like the existing
+    ``describe_mode``/``materialized_settings`` tests elsewhere in this
+    module -- to prove the container/RBAC/App-Configuration contract is
+    correct and ready without changing any currently reachable behavior.
+    """
+
+    def test_panel_database_containers_are_metadata_only_and_distinct(self) -> None:
+        containers = panel_database_containers()
+        names = {container["name"] for container in containers}
+        canonical_names = {container["canonical_name"] for container in containers}
+
+        self.assertEqual(names, {OWNER_INDEX_CONTAINER_NAME, FEEDBACK_CONTAINER_NAME})
+        self.assertEqual(
+            canonical_names,
+            {OWNER_INDEX_CONTAINER_CONFIG_KEY, FEEDBACK_CONTAINER_CONFIG_KEY},
+        )
+        # Never the classic chat-content/orchestrator containers.
+        self.assertNotIn("conversations", names)
+        self.assertNotIn("datasources", names)
+        self.assertNotIn("prompts", names)
+        self.assertNotIn("mcp", names)
+        for container in containers:
+            self.assertEqual(container["partitionKey"], "/principal_id")
+
+    def test_resolve_database_containers_classic_keeps_existing_list(self) -> None:
+        existing = [{"name": "conversations", "canonical_name": "X"}]
+
+        result = resolve_database_containers(DeploymentMode.CLASSIC, existing)
+
+        self.assertEqual(result, existing)
+
+    def test_resolve_database_containers_hosted_no_panel_has_zero_cosmos(self) -> None:
+        existing = [{"name": "conversations", "canonical_name": "X"}]
+
+        result = resolve_database_containers(
+            DeploymentMode.HOSTED_NO_PANEL, existing
+        )
+
+        self.assertEqual(result, [])
+
+    def test_resolve_database_containers_hosted_panel_uses_only_panel_containers(
+        self,
+    ) -> None:
+        existing = [{"name": "conversations", "canonical_name": "X"}]
+
+        result = resolve_database_containers(DeploymentMode.HOSTED_PANEL, existing)
+
+        self.assertEqual(result, panel_database_containers())
+        names = {container["name"] for container in result}
+        self.assertNotIn("conversations", names)
+
+    def test_resolve_database_containers_preserving_classic_runtime_wins(self) -> None:
+        existing = [{"name": "conversations", "canonical_name": "X"}]
+
+        result = resolve_database_containers(
+            DeploymentMode.HOSTED_PANEL,
+            existing,
+            preserving_classic_runtime=True,
+        )
+
+        self.assertEqual(result, existing)
+
+    def test_container_app_gets_no_cosmos_conversations_role(self) -> None:
+        # The hosted agent/orchestrator identity is unconditionally removed
+        # from containerAppsList in every hosted mode (no-panel and panel
+        # share this same code path), so it can never receive
+        # CosmosDBBuiltInDataContributor (or any other role) through the
+        # generic account-scope role loop.
+        environment = {
+            "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "true",
+            "DEPLOY_ADMINISTRATIVE_PANEL": "false",
+            "HOSTED_AGENT_IMAGE_VERSION": DIGEST,
+            "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
+        }
+
+        composed = compose_parameters(source_parameters(), environment)
+        apps = composed["parameters"]["containerAppsList"]["value"]
+
+        service_names = {app["service_name"] for app in apps}
+        self.assertNotIn("orchestrator", service_names)
+
+    def test_dataingest_loses_account_scope_cosmos_role_in_hosted_mode(self) -> None:
+        environment = {
+            "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "true",
+            "DEPLOY_ADMINISTRATIVE_PANEL": "false",
+            "HOSTED_AGENT_IMAGE_VERSION": DIGEST,
+            "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
+        }
+
+        composed = compose_parameters(source_parameters(), environment)
+        apps = composed["parameters"]["containerAppsList"]["value"]
+        dataingest = next(app for app in apps if app["service_name"] == "dataingest")
+
+        self.assertNotIn("CosmosDBBuiltInDataContributor", dataingest["roles"])
+
+    def test_panel_app_configuration_defaults_are_published_and_safe(self) -> None:
+        environment = {
+            "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "false",
+            "DEPLOY_ADMINISTRATIVE_PANEL": "false",
+        }
+
+        composed = compose_parameters(source_parameters(), environment)
+        settings = settings_by_name(composed)
+
+        self.assertEqual(settings["PANEL_HISTORY_ENABLED"], "false")
+        self.assertEqual(settings["PANEL_HISTORY_OWNER_BINDING_VALIDATED"], "false")
+        self.assertEqual(
+            settings["PANEL_CONVERSATION_ENUMERATION_MODE"], "owner_index"
+        )
+        self.assertEqual(
+            settings[OWNER_INDEX_CONTAINER_CONFIG_KEY], OWNER_INDEX_CONTAINER_NAME
+        )
+        self.assertEqual(
+            settings[FEEDBACK_CONTAINER_CONFIG_KEY], FEEDBACK_CONTAINER_NAME
+        )
+        self.assertEqual(settings["PANEL_CURSOR_TTL_SECONDS"], "600")
+        self.assertEqual(settings["PANEL_OVERVIEW_MIN_CARDINALITY"], "5")
+
+    def test_panel_owner_binding_validated_gate_cannot_be_set_via_environment(
+        self,
+    ) -> None:
+        environment = {
+            "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "false",
+            "DEPLOY_ADMINISTRATIVE_PANEL": "false",
+            "PANEL_HISTORY_OWNER_BINDING_VALIDATED": "true",
+        }
+
+        composed = compose_parameters(source_parameters(), environment)
+        settings = settings_by_name(composed)
+
+        self.assertEqual(settings["PANEL_HISTORY_OWNER_BINDING_VALIDATED"], "false")
+
+    def test_no_panel_containers_or_settings_leak_into_classic_composition(
+        self,
+    ) -> None:
+        composed = compose_parameters(
+            source_parameters(),
+            {
+                "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "false",
+                "DEPLOY_ADMINISTRATIVE_PANEL": "false",
+            },
+        )
+        containers = composed["parameters"]["databaseContainersList"]["value"]
+        names = {container["name"] for container in containers}
+
+        self.assertNotIn(OWNER_INDEX_CONTAINER_NAME, names)
+        self.assertNotIn(FEEDBACK_CONTAINER_NAME, names)
+
+    def test_no_panel_containers_leak_into_hosted_no_panel_composition(self) -> None:
+        environment = {
+            "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "true",
+            "DEPLOY_ADMINISTRATIVE_PANEL": "false",
+            "HOSTED_AGENT_IMAGE_VERSION": DIGEST,
+            "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
+        }
+
+        composed = compose_parameters(source_parameters(), environment)
+
+        self.assertEqual(
+            [], composed["parameters"]["databaseContainersList"]["value"]
+        )
 
 
 class EnvironmentTopologyResolutionTests(unittest.TestCase):

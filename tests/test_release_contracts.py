@@ -248,6 +248,18 @@ class LifecycleParityTests(unittest.TestCase):
                     (scripts / shell).read_text(encoding="utf-8-sig"),
                 )
 
+    def test_postprovision_hooks_invoke_panel_setup_module(self) -> None:
+        # Issue #611 / ADR-0004: the container-scoped panel Cosmos RBAC
+        # script must run from both the PowerShell and POSIX shell
+        # postProvision hooks, with parity, exactly like every other
+        # config.*.setup module.
+        scripts = ROOT / "scripts"
+        ps1 = (scripts / "postProvision.ps1").read_text(encoding="utf-8-sig")
+        sh = (scripts / "postProvision.sh").read_text(encoding="utf-8-sig")
+
+        self.assertIn("config.panel.setup", ps1)
+        self.assertIn("config.panel.setup", sh)
+
     def test_preprovision_hooks_fetch_and_checkout_exact_manifest_commit(
         self,
     ) -> None:
