@@ -68,9 +68,10 @@ For hosted continuity, the trusted UI BFF derives `x-ms-user-identity` from the
 authenticated server-side principal and sends it on Responses protocol `2.0.0`.
 This delegated owner binding is distinct from OBO retrieval tokens. Activation
 requires direct individual-agent-scope assignments of Foundry Agent Consumer
-and the exact GPT-RAG custom `UserIdentityImpersonation` DataAction role, plus
-`OWNER_BINDING_VALIDATED=true`. The hosted runtime is not an identity-header
-source and gets no key, Conversation or impersonation RBAC, or Cosmos DB in
+and the exact GPT-RAG custom role containing only
+`Microsoft.CognitiveServices/accounts/AIServices/agents/endpoints/UserIdentityImpersonation/action`,
+plus `OWNER_BINDING_VALIDATED=true`. The hosted runtime is not an
+identity-header source and gets no key, Conversation or impersonation RBAC, or Cosmos DB in
 hosted/no-panel. Capability/HMAC remains a disabled fallback. See the
 [hosted conversation continuity platform contract](hosted_continuity_platform_contract.md)
 for the disabled-by-default gate, exact roles, limits, and cleanup lifecycle.

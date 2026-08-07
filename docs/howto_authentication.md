@@ -38,9 +38,10 @@ This owner header is distinct from OBO. `x-ms-user-identity` binds Foundry
 Conversation ownership; OBO obtains a delegated bearer token for a downstream
 retrieval audience. Activation requires direct assignments to the UI BFF, at
 the individual hosted-agent scope, of Foundry Agent Consumer and the exact
-GPT-RAG custom role containing only the reviewed `UserIdentityImpersonation`
-DataAction. The hosted runtime receives no key, Conversation or impersonation
-RBAC, or Cosmos DB in hosted/no-panel. Capability/HMAC remains a disabled
+GPT-RAG custom role containing only
+`Microsoft.CognitiveServices/accounts/AIServices/agents/endpoints/UserIdentityImpersonation/action`.
+The hosted runtime receives no key, Conversation or impersonation RBAC, or
+Cosmos DB in hosted/no-panel. Capability/HMAC remains a disabled
 fallback and is not provisioned or required on the primary path. See the
 [hosted conversation continuity platform contract](hosted_continuity_platform_contract.md)
 for the owner-validation, protocol, role, and lifecycle requirements.

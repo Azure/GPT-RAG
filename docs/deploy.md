@@ -140,7 +140,8 @@ Activation assigns only the UI BFF:
 - built-in **Foundry Agent Consumer**
   (`eed3b665-ab3a-47b6-8f48-c9382fb1dad6`); and
 - the exact GPT-RAG custom role containing only the reviewed
-  `UserIdentityImpersonation` DataAction.
+  `Microsoft.CognitiveServices/accounts/AIServices/agents/endpoints/UserIdentityImpersonation/action`
+  DataAction.
 
 Both assignments must be direct and scoped to the individual hosted agent.
 Broader, inherited, group-derived, wildcard, or extra-DataAction access fails

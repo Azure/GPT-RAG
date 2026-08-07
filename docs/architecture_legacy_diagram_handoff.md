@@ -23,7 +23,7 @@ Add or update these shapes in the application/runtime area:
 | Existing ingestion shape | `Ingestion` | Keep in Container Apps and connected to Storage / AI Search indexing. |
 | New primary runtime shape | `Microsoft Foundry Hosted Agent` | Place to the right of Web UI, outside the Container Apps boundary and inside the Microsoft Foundry boundary. |
 | New owner-binding annotation | `x-ms-user-identity; Responses 2.0.0` | Place on the UI BFF to hosted-agent connection and distinguish it from OBO retrieval. |
-| New role annotation | `Direct agent scope: Foundry Agent Consumer + exact UserIdentityImpersonation DataAction role` | Attach to the UI BFF identity and individual hosted agent only. |
+| New role annotation | `Direct agent scope: Foundry Agent Consumer + exact Microsoft.CognitiveServices/accounts/AIServices/agents/endpoints/UserIdentityImpersonation/action role` | Attach to the UI BFF identity and individual hosted agent only. |
 | New state shape | `Foundry managed Conversations` | Place in the Foundry boundary. Mark the hosted runtime as having no Conversation or impersonation RBAC. |
 | New tool boundary | `Toolbox / MCP tools` | Place to the right of the hosted agent. |
 | New retrieval shape | `Authorization-trimmed retrieval` | Place below Toolbox and connect to Foundry IQ / Azure AI Search. |

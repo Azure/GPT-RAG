@@ -54,7 +54,7 @@ Activation must prove all of these conditions together:
 | Protocol | Hosted requests use Responses protocol `2.0.0`. Other protocol versions or the legacy Invocations contract do not satisfy OQ-OWN. |
 | Owner header | The trusted UI BFF derives and sends `x-ms-user-identity`; client-supplied identity is not authoritative. |
 | Invocation role | Built-in **Foundry Agent Consumer** (`eed3b665-ab3a-47b6-8f48-c9382fb1dad6`) is assigned directly to the UI BFF at the individual hosted-agent scope. |
-| Impersonation role | The exact GPT-RAG custom role containing only the reviewed `UserIdentityImpersonation` DataAction is assigned directly to the UI BFF at the same individual agent scope. |
+| Impersonation role | The exact GPT-RAG custom role containing only `Microsoft.CognitiveServices/accounts/AIServices/agents/endpoints/UserIdentityImpersonation/action` is assigned directly to the UI BFF at the same individual agent scope. |
 | Validation result | Deployment records `OWNER_BINDING_VALIDATED=true` only after the live role definitions, direct assignments, exact scope, protocol, and identity-source behavior pass validation. |
 
 Broader project-, account-, resource-group-, subscription-, or
@@ -132,8 +132,9 @@ Activation occurs only after the individual hosted agent exists:
 2. The hosted agent is deployed with Responses protocol `2.0.0`.
 3. Validation proves the trusted UI BFF is the identity-header source, validates
    the live built-in Foundry Agent Consumer definition and the exact GPT-RAG
-   custom `UserIdentityImpersonation` DataAction role, and verifies both direct
-   assignments at the individual agent scope.
+   custom role containing only
+   `Microsoft.CognitiveServices/accounts/AIServices/agents/endpoints/UserIdentityImpersonation/action`,
+   and verifies both direct assignments at the individual agent scope.
 4. The platform records `OWNER_BINDING_VALIDATED=true`.
 5. Only then may the compatible UI enable continuity. Otherwise history remains
    unavailable with HTTP 503.
