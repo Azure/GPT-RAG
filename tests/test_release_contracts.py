@@ -420,7 +420,7 @@ class LifecycleParityTests(unittest.TestCase):
                 self.assertIn("--validate-hosted-deploy", content)
                 self.assertIn("deploy_hosted_agent_orchestration", content)
                 self.assertIn("azd deploy orchestrator-agent", content)
-                self.assertIn("HOSTED_AGENT_IMAGE_REFERENCE", content)
+                self.assertIn("AZD_AGENT_SKIP_ACR", content)
                 self.assertIn("PYTHONPATH", content)
                 if name == "preDeploy.ps1":
                     self.assertIn("runpy.run_module", content)
@@ -568,7 +568,6 @@ class LifecycleParityTests(unittest.TestCase):
         self.assertIn("host: azure.ai.agent", content)
         self.assertIn("protocol: responses", content)
         self.assertIn("protocol: invocations", content)
-        self.assertIn("image: ${HOSTED_AGENT_IMAGE_REFERENCE}", content)
         self.assertNotIn("API_KEY", content)
         self.assertNotIn("PASSWORD", content)
         self.assertNotIn("InstrumentationKey=", content)
