@@ -24,9 +24,13 @@ separate choices.
     merged that correction to `main`. AILZ `main` and `develop` now both point
     to [`cacf418`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/commit/cacf418216ce7381d06263e0dd704a86b8a6f225).
     No AILZ `v2.5.0` tag or GitHub Release exists; UI `v2.6.0` is also
-    unpublished. Final umbrella pins, integrated validation, and the GPT-RAG
-    release remain incomplete. The diagrams document the approved target, not
-    shipped behavior. Current published GPT-RAG `v3.7.0` remains classic.
+    unpublished. The secure hosted-continuity platform contract merged in
+    [PR #630](https://github.com/Azure/GPT-RAG/pull/630), but compatible
+    component pins and owner-binding validation remain incomplete. Keep
+    `HOSTED_CONTINUITY_ENABLED=false`. Final umbrella pins, integrated
+    validation, and the GPT-RAG release remain incomplete. The diagrams
+    document the approved target, not shipped behavior. Current published
+    GPT-RAG `v3.7.0` remains classic.
 
 ## Full Zero Trust reference
 
@@ -55,6 +59,14 @@ Foundry IQ or Azure AI Search applies native authorization trimming. Missing
 identity, call context, configuration, authorization, network, protocol, or
 runtime state fails closed. A request never silently switches to the
 Container Apps orchestrator.
+
+For hosted continuity, the UI BFF is the exclusive owner of Foundry managed
+Conversation operations and owner-bound capability issuance and verification.
+The hosted runtime receives no capability key, raw caller object ID, or
+Conversations RBAC. App Configuration holds only a reference to a capability
+secret in a dedicated UI BFF Key Vault. See the
+[hosted conversation continuity platform contract](hosted_continuity_platform_contract.md)
+for the disabled-by-default gate, exact roles, limits, and cleanup lifecycle.
 
 The classic runtime remains selectable through an explicit deployment
 operation. Pre-cutover deployments without a topology marker remain classic,
@@ -97,8 +109,8 @@ Use the table below for the deployment parameters behind each layer, and the [De
 | AI Foundry account, project, and model deployments | Required AI control plane | `deployAiFoundry`, `deployAfProject`, `deployAAfAgentSvc`, `modelDeploymentList` | Provisioning Azure AI Foundry / Azure OpenAI and the model deployments used by GPT-RAG. |
 | AI Foundry associated resources | Default-created or BYO-capable | `aiSearchResourceId`, `aiFoundryStorageAccountResourceId`, `aiFoundryCosmosDBAccountResourceId`, `keyVaultResourceId`, `aiFoundryStorageSku` | Letting the AI Foundry module create its required Storage, Search, Cosmos DB, and Key Vault resources, or reusing existing ones. |
 | RAG workload data services | Mode-selected, parameter-controlled | `deploySearchService`, `deployStorageAccount`, `deployCosmosDb`, `storageAccountContainersList`, `databaseContainersList` | Running indexed-document and file-storage paths. Hosted/no-panel uses Foundry managed Conversations and omits panel-only Cosmos DB; classic preserves its existing state path. |
-| App Configuration, identity / RBAC, Container Apps, Container Registry | Required platform capabilities, topology varies by mode | `deployAppConfig`, `deployContainerApps`, `deployContainerEnv`, `deployContainerRegistry`, `useUAI`, service role lists | Publishing the sticky topology and runtime contract, hosting UI/ingestion, and preparing immutable images. Hosted/no-panel does not provision an orchestrator Container App. |
-| Workload Key Vault and observability | Default support, parameter-controlled or reusable | `deployKeyVault`, `deployLogAnalytics`, `deployAppInsights`, `EXISTING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID`, `EXISTING_APPLICATION_INSIGHTS_RESOURCE_ID`, `EXISTING_APPLICATION_INSIGHTS_CONNECTION_STRING` | Storing workload secrets and capturing telemetry. Application Insights is created or wired only when an effective Log Analytics workspace is available. |
+| App Configuration, identity / RBAC, Container Apps, Container Registry | Required platform capabilities, topology varies by mode | `deployAppConfig`, `deployContainerApps`, `deployContainerEnv`, `deployContainerRegistry`, `useUAI`, service role lists | Publishing the sticky topology and runtime contract, hosting UI/ingestion, and preparing immutable images. Hosted/no-panel does not provision an orchestrator Container App. Hosted continuity publishes only a Key Vault reference and grants Foundry Agent Consumer solely to the UI BFF at the individual agent scope after validation. |
+| Workload Key Vault, dedicated UI BFF Key Vault, and observability | Default support plus a continuity-specific boundary | `deployKeyVault`, `HOSTED_CONTINUITY_KEY_VAULT_URI` or `HOSTED_CONTINUITY_KEY_VAULT_NAME`, `deployLogAnalytics`, `deployAppInsights`, `EXISTING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID`, `EXISTING_APPLICATION_INSIGHTS_RESOURCE_ID`, `EXISTING_APPLICATION_INSIGHTS_CONNECTION_STRING` | Storing workload secrets and capturing telemetry. Hosted continuity requires a separate UI BFF vault and secret-scoped read access; the shared workload vault and hosted runtime are excluded from the capability-key boundary. Application Insights is created or wired only when an effective Log Analytics workspace is available. |
 | Zero Trust private networking | Optional security posture | `networkIsolation`, `allowedIpRanges`, `useExistingVNet`, `deploySubnets`, `policyManagedPrivateDns`, `EXISTING_PRIVATE_DNS_ZONE_*` | Requiring private endpoints, private DNS, VNet integration, NSGs, and internal Container Apps ingress. |
 | Azure Firewall, Jumpbox, Bastion, NAT Gateway, private ACR build pool | Zero Trust operations/build options | `DEPLOY_AZURE_FIREWALL`, `DEPLOY_JUMPBOX`, `DEPLOY_BASTION`, `DEPLOY_NAT_GATEWAY`, `DEPLOY_ACR_TASK_AGENT_POOL`, `EXISTING_JUMPBOX_RESOURCE_ID`, `EXISTING_BASTION_RESOURCE_ID`, `EXISTING_NAT_GATEWAY_RESOURCE_ID` | Operating inside the VNet or reusing central access/egress resources. The gated hosted flow uses the dedicated VNet-connected ACR Tasks agent pool for private builds; shared ACR Tasks cannot reach a private endpoint. |
 | Application Gateway WAF public ingress | Optional entry layer | `publicIngress.enabled` | Exposing one private Container App through controlled public HTTPS/WAF. See [Application Gateway](howto_app_gateway.md). |

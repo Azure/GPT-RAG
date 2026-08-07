@@ -168,6 +168,22 @@ and bounded enums instead of trying to sanitize arbitrary objects.
 
 ## Retention, access, and export
 
+Hosted continuity adds a separate bounded-history and key-retention boundary.
+The merged [hosted conversation continuity platform contract](hosted_continuity_platform_contract.md)
+defaults to `HOSTED_CONTINUITY_ENABLED=false` pending compatible component pins
+and owner-binding validation. Its `HOSTED_HISTORY_MAX_ITEMS`,
+`HOSTED_HISTORY_MAX_TOKENS`, and mandatory `drop_oldest` behavior bound context
+supplied through the compatible runtime; they do not define how long Foundry
+Conversations must be retained or satisfy records-management obligations.
+
+When continuity is disabled with the platform-managed reference intact,
+reconciliation removes the Key Vault reference and the UI BFF's exact agent-
+and secret-scoped role assignments but deliberately retains capability-secret
+version history. Do not delete the reference out of band before reconciliation;
+setup uses it to resolve the exact secret scope. Operators must define when old
+secret versions and managed Conversations are deleted, who can perform those
+deletions, and what rollback or investigation period is required.
+
 GPT-RAG's current AI Landing Zone template configures the Log Analytics
 workspace for 30 days of retention. A reused workspace or table-level override
 can differ, so inspect the deployed settings rather than assuming the template

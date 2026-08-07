@@ -1,8 +1,15 @@
 # Authentication and Document-Level Security
 
-This page explains how authentication works in GPT-RAG, from the GPT-RAG UI sign-in to querying Azure AI Search with document-level access control enabled (POSIX-like ACL / RBAC scopes). The key idea is intentionally simple: when authentication is configured, the UI forwards a single user token to the orchestrator, and the orchestrator takes responsibility for producing the correct “user context” token required by Azure AI Search.
+This page explains how authentication works in GPT-RAG, from the GPT-RAG UI sign-in to querying Azure AI Search with document-level access control enabled (POSIX-like ACL / RBAC scopes). The classic runtime forwards a user token to the orchestrator, which produces the correct user-context token for Azure AI Search. The upcoming hosted runtime preserves a stricter UI BFF ownership boundary described below.
 
 > In OAuth mode, the orchestrator receives a user access token (for the orchestrator API) and then performs an On-Behalf-Of (OBO) exchange to obtain a separate token for Azure AI Search. The two tokens have different audiences and are not interchangeable.
+
+!!! warning "Hosted continuity is a disabled platform contract"
+    The secure hosted-continuity contract merged in
+    [PR #630](https://github.com/Azure/GPT-RAG/pull/630), but compatible
+    component pins and owner-binding validation are not complete. Keep
+    `HOSTED_CONTINUITY_ENABLED=false`; the current published release continues
+    to use the classic flow documented on this page.
 
 ## Embed GPT-RAG in a portal
 
@@ -18,6 +25,24 @@ authentication modes, browser security controls, and rollout.
     App directly, and do not treat CORS or an origin allowlist as authentication.
 
 ## Concepts
+
+### Hosted Conversation ownership boundary
+
+For the upcoming compatible hosted topology, the UI BFF derives the caller
+`oid` from the authenticated server-side principal and exclusively creates and
+verifies an opaque owner-bound capability exchanged with the client. The UI BFF
+is also the only component allowed to create, read, append to, or delete Foundry
+managed Conversations.
+
+The hosted runtime receives neither the capability HMAC key nor the raw `oid`
+and has no Conversations data-plane RBAC. App Configuration contains only a Key
+Vault reference to a capability secret in a dedicated UI BFF vault. The UI BFF
+receives Foundry Agent Consumer only at the individual agent scope; this does
+not grant the hosted identity Conversation access. See the
+[hosted conversation continuity platform contract](hosted_continuity_platform_contract.md)
+for the owner-validation gate, audience, TTL, role, and lifecycle requirements.
+
+### Classic Container Apps token flow
 
 GPT-RAG uses Microsoft Entra ID authentication end-to-end, and Azure [AI Search document-level access control (POSIX-like ACL / RBAC scopes)](https://learn.microsoft.com/en-us/azure/search/search-document-level-access-overview) relies on three related steps:
 

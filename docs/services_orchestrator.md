@@ -10,7 +10,10 @@ packages the same chat runtime as a Microsoft Foundry hosted agent for fresh
 deployments and retains the Container Apps adapter as an explicit fallback.
 The platform implementation is merged but remains unreleased pending component
 and AI Landing Zone tags, final umbrella pins, integrated validation, and a new
-GPT-RAG release; hosted/panel remains unsupported. [GitHub Repository](https://github.com/Azure/gpt-rag-orchestrator).
+GPT-RAG release. The separate
+[hosted continuity platform contract](hosted_continuity_platform_contract.md)
+is also merged, but remains disabled pending compatible component pins and
+owner-binding validation; hosted/panel remains unsupported. [GitHub Repository](https://github.com/Azure/gpt-rag-orchestrator).
 
 ## Key Features
 
@@ -75,9 +78,18 @@ skip Azure AI Search while still using the recent chat history.
 | `CONVERSATION_HISTORY_COMPACTION_ENABLED` | `true` | Enables compaction before saving a conversation document to Cosmos DB. |
 | `CONVERSATION_HISTORY_MAX_PERSISTED_MESSAGES` | `200` | Maximum recent messages kept in the persisted conversation document. |
 | `CONVERSATION_HISTORY_MAX_BYTES` | `1500000` | Serialized size target for the persisted conversation document. |
+| `HOSTED_HISTORY_MAX_ITEMS` | `100` | Maximum managed history items supplied to the compatible hosted contract; accepted range 1-1,000. |
+| `HOSTED_HISTORY_MAX_TOKENS` | `32000` | Token budget for managed hosted history; accepted range 1-1,000,000. |
+| `HOSTED_HISTORY_TRUNCATION` | `drop_oldest` | The only accepted hosted overflow behavior. |
 | `RETRIEVAL_INTENT_HISTORY_MESSAGES` | `4` | Recent messages sent only to the retrieval-needed classifier. |
 | `RETRIEVAL_INTENT_HISTORY_MAX_CHARS` | `4000` | Character budget for classifier history. |
 | `ENABLE_NO_RETRIEVAL_FOLLOWUP_DETECTION` | `true` | Allows no-retrieval follow-ups to skip Azure AI Search; ambiguous turns still retrieve. |
+
+The hosted limits are inactive while `HOSTED_CONTINUITY_ENABLED=false`. When a
+compatible component set is eventually validated, the UI BFF - not the hosted
+orchestrator - will own Foundry managed Conversation CRUD and capability
+verification. The hosted runtime will receive no capability key, raw `oid`, or
+Conversations RBAC.
 
 ## Visual Guide
 

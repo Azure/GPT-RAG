@@ -7,9 +7,10 @@ chat-runtime views.
 
 !!! warning "Release status"
     Draw the hosted/no-panel path as the **target fresh-deployment default** and
-    label it **Implementation merged; releases and final pins pending**. Do not
-    label it shipped until the planned component and AI Landing Zone tags,
-    final umbrella pins, integrated validation, and GPT-RAG release publish.
+    label it **Platform contracts merged; compatible pins and owner validation
+    pending**. Do not label it shipped until the planned component and AI
+    Landing Zone tags, final umbrella pins, owner-binding validation, integrated
+    validation, and GPT-RAG release publish. Show hosted continuity as disabled.
 
 ## Shapes and labels
 
@@ -18,33 +19,45 @@ Add or update these shapes in the application/runtime area:
 | Shape | Exact label | Placement |
 | --- | --- | --- |
 | Existing application host boundary | `Azure Container Apps` | Keep around the Web UI and ingestion services. |
-| Existing UI shape | `Web UI` | Keep in Container Apps at the request-path entry. |
+| Existing UI shape | `Web UI / BFF` | Keep in Container Apps at the request-path entry and make it the exclusive owner of Foundry Conversation operations and capabilities. |
 | Existing ingestion shape | `Ingestion` | Keep in Container Apps and connected to Storage / AI Search indexing. |
 | New primary runtime shape | `Microsoft Foundry Hosted Agent` | Place to the right of Web UI, outside the Container Apps boundary and inside the Microsoft Foundry boundary. |
+| New state shape | `Foundry managed Conversations` | Connect only to the UI BFF. Do not connect it to the hosted runtime. |
+| New secret shape | `Dedicated UI BFF Key Vault` | Connect only to the UI BFF and label the connection `individual capability-secret scope`. |
+| App Configuration annotation | `Key Vault reference only` | Place between App Configuration and the UI BFF. Do not show a plaintext capability key. |
 | New tool boundary | `Toolbox / MCP tools` | Place to the right of the hosted agent. |
 | New retrieval shape | `Authorization-trimmed retrieval` | Place below Toolbox and connect to Foundry IQ / Azure AI Search. |
 | Fallback runtime shape | `Container Apps orchestrator - explicit fallback` | Place below the primary request path with a dashed border. Keep it inside Container Apps. |
 | Mode annotation | `Fresh target default: hosted-no-panel` | Place above the hosted-agent lane. |
 | Fallback annotation | `Explicit/sticky classic topology` | Place above the orchestrator fallback. |
 | Panel annotation | `Administrative panel absent; DEPLOY_ADMINISTRATIVE_PANEL=false` | Place below the hosted lane. |
-| Release annotation | `Implementation merged; releases and final pins pending` | Place in an amber status banner below the diagram title. |
+| Release annotation | `Platform contracts merged; continuity disabled; compatible pins and owner validation pending` | Place in an amber status banner below the diagram title. |
 
 ## Connections and labels
 
-1. Connect `Signed-in user` to `Web UI`.
-2. Connect `Web UI` to `Microsoft Foundry Hosted Agent` and label the connection
+1. Connect `Signed-in user` to `Web UI / BFF`.
+2. Connect `Web UI / BFF` to `Microsoft Foundry Hosted Agent` and label the connection
    `delegated user OBO`.
-3. Connect `Microsoft Foundry Hosted Agent` to `Toolbox / MCP tools` and label
+3. Connect `Web UI / BFF` to `Foundry managed Conversations` and label it
+   `exclusive CRUD; owner-bound capability`.
+4. Connect `Dedicated UI BFF Key Vault` to `Web UI / BFF` and label it
+   `HMAC key; secret-scoped read`.
+5. Connect App Configuration to `Web UI / BFF` and label it
+   `Key Vault reference only`.
+6. Connect `Microsoft Foundry Hosted Agent` to `Toolbox / MCP tools` and label
    the connection `opaque x-agent-foundry-call-id`.
-4. Connect `Toolbox / MCP tools` to `Authorization-trimmed retrieval`.
-5. Connect `Authorization-trimmed retrieval` to Foundry IQ / Azure AI Search
+7. Connect `Toolbox / MCP tools` to `Authorization-trimmed retrieval`.
+8. Connect `Authorization-trimmed retrieval` to Foundry IQ / Azure AI Search
    and label it `native per-user document authorization`.
-6. Keep the ingestion-to-Storage / AI Search indexing connections unchanged.
-7. Draw a dashed connection from `Web UI` to
+9. Keep the ingestion-to-Storage / AI Search indexing connections unchanged.
+10. Draw a dashed connection from `Web UI / BFF` to
    `Container Apps orchestrator - explicit fallback`.
-8. Place a red stop marker between the hosted and fallback lanes with the label
+11. Place a red stop marker between the hosted and fallback lanes with the label
    `No request-time silent fallback`. Do not connect the lanes as an automatic
    failover path.
+12. Add red stop markers from the hosted runtime to both the capability secret
+   and managed Conversations with the labels `No key or raw oid` and
+   `No Conversations RBAC`.
 
 ## Hosted image preparation inset
 
