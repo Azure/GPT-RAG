@@ -4,14 +4,16 @@ services:
   orchestrator-agent:
     host: azure.ai.agent
     project: .
-    image: ${AZURE_CONTAINER_REGISTRY_ENDPOINT}/${HOSTED_AGENT_IMAGE=gpt-rag-orchestrator}@${HOSTED_AGENT_IMAGE_VERSION}
+    image: ${HOSTED_AGENT_IMAGE_REFERENCE}
     kind: hosted
     # NOTE: The azure.ai.agent azd extension (v1.0.0-beta.8) reads name, container.resources,
     # protocols[].version and startupCommand directly from this file to build the Foundry
     # "Create Agent" REST payload, bypassing azd's core ${VAR=default} interpolation (confirmed
     # via "template.name not in valid format" and Go-struct type errors when templated). The
     # `image` field above and the `env:` block below use azd's separate, core/host-agnostic
-    # interpolation engine and resolve correctly, so they stay templated. These agent-definition
+    # interpolation engine and resolve correctly, so they stay templated. The deploy hooks
+    # materialize the complete digest-pinned image as one value because azd does not reliably
+    # compose multiple placeholders inside a container reference. These agent-definition
     # fields are hardcoded to composition.py's own defaults (config/deployment/composition.py) so
     # `azd deploy` from this directory works out of the box; to customize, edit this file directly
     # instead of `azd env set HOSTED_AGENT_*`, which only affects the separate `azd provision`

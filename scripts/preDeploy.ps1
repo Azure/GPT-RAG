@@ -201,6 +201,14 @@ The preparation command builds the manifest-pinned image and stores only its imm
   }
 
   $hostedDigest = "$($globalEnv.HOSTED_AGENT_IMAGE_VERSION)".Trim()
+  $registryEndpoint = "$($globalEnv.AZURE_CONTAINER_REGISTRY_ENDPOINT)".Trim().TrimEnd('/')
+  $hostedImageName = "$($globalEnv.HOSTED_AGENT_IMAGE)".Trim().Trim('/')
+  if (-not $hostedImageName) { $hostedImageName = 'gpt-rag-orchestrator' }
+  if (-not $registryEndpoint) {
+    Write-Error "AZURE_CONTAINER_REGISTRY_ENDPOINT is required to materialize the hosted image reference."
+    exit 1
+  }
+  $hostedImageReference = "$registryEndpoint/$hostedImageName@$hostedDigest"
   Write-Host "Hosted-agent deploy handoff ready: $hostedDigest" -ForegroundColor Green
 
   if (Test-Path -LiteralPath $dotAzure) {
@@ -209,8 +217,8 @@ The preparation command builds the manifest-pinned image and stores only its imm
 
   Push-Location $hostedProject
   try {
-    & azd env set HOSTED_AGENT_IMAGE_VERSION $hostedDigest --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
-    if ($LASTEXITCODE -ne 0) { Write-Error "Failed to set hosted image digest in the child azd project."; exit $LASTEXITCODE }
+    & azd env set HOSTED_AGENT_IMAGE_REFERENCE $hostedImageReference --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
+    if ($LASTEXITCODE -ne 0) { Write-Error "Failed to set hosted image reference in the child azd project."; exit $LASTEXITCODE }
     & azd env set FOUNDRY_PROJECT_ENDPOINT "$($globalEnv.AZURE_AI_PROJECT_ENDPOINT)" --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
     if ($LASTEXITCODE -ne 0) { Write-Error "Failed to set Foundry endpoint in the child azd project."; exit $LASTEXITCODE }
     & azd env set AZURE_AI_PROJECT_ID "$($globalEnv.AZURE_AI_PROJECT_RESOURCE_ID)" --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
