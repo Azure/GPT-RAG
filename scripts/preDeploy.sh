@@ -221,7 +221,7 @@ if [[ "$hosted_mode" =~ ^(1|true|t|yes|y)$ ]]; then
     "$continuity_venv/bin/python" -m config.continuity.setup --activate
   ); then
     rm -rf "$continuity_venv"
-    red "Hosted continuity activation failed closed."
+    red "Hosted continuity Responses 2.0.0 and exact agent-scope RBAC validation failed closed."
     exit 1
   fi
   rm -rf "$continuity_venv"

@@ -116,7 +116,7 @@ higher-priority gate.
 | Repository | Required implementation handoff before the default changes |
 | --- | --- |
 | `Azure/GPT-RAG` | Own fresh-versus-existing topology selection, sticky upgrade detection, paired PowerShell/shell lifecycle behavior, `main.parameters.json`, App Configuration publication, immutable manifest pins, hosted image orchestration, rollback contract, release tests, and the later docs/release handoff. The AI Landing Zone stays accelerator-neutral. |
-| `Azure/gpt-rag-ui` | Make `hosted_agent` the fresh-deploy backend selected from App Configuration; require signed-in-user OBO for the hosted data-plane scope; preserve explicit `orchestrator` fallback; stream Responses and map managed Conversation IDs; fail closed with no managed-identity or silent backend fallback. Keep panel surfaces disabled until #611. |
+| `Azure/gpt-rag-ui` | Make `hosted_agent` the fresh-deploy backend selected from App Configuration; call the hosted endpoint as the trusted UI BFF and derive `x-ms-user-identity` only from its authenticated server-side principal; keep OBO tokens separate and limited to retrieval authorization; preserve explicit `orchestrator` fallback; stream Responses and map managed response IDs; fail closed with no silent backend fallback. Keep panel surfaces disabled until #611. |
 | `Azure/gpt-rag-orchestrator` | Maintain the runtime-neutral core and both adapters; publish/run the hosted entrypoint from an immutable image; propagate only the opaque Foundry call context to Toolbox; preserve managed Conversations, bounds, timeouts, telemetry redaction, and the eligible-strategy gates; keep the classic adapter release-compatible. |
 | `Azure/gpt-rag-ingestion` | Keep hosted retrieval behind the delegated-token, identity-aware, fail-closed contract and INV-002 evidence; preserve document ACL metadata and bounded outputs. Do not promote draft panel/history endpoints before #611. |
 | `Azure/bicep-ptn-aiml-landing-zone` | Continue to expose generic hosted-agent, private networking, RBAC, private ACR pull, and dedicated VNet-connected ACR Tasks pool primitives. Complete and release the private-network naming/build fixes required by #597, but do not encode GPT-RAG's product default. |
@@ -423,6 +423,32 @@ the reusable landing zone:
 No files inside the landing-zone submodule are changed by this implementation.
 The integration is limited to the exact `v2.4.1` tag/gitlink and its published
 parameter/output contract.
+
+### Hosted conversation ownership
+
+Live OQ-OWN evidence changes the continuity decision from capability-first to
+delegated ownership. The trusted UI BFF calls the hosted Responses 2.0.0
+endpoint with `x-ms-user-identity`, derived only from the authenticated
+server-side user principal. The header is an opaque Foundry conversation
+partition key. It is not browser input and it is not an OBO retrieval token.
+OBO remains a separate downstream authorization flow for Foundry IQ, Toolbox,
+and document-level retrieval.
+
+The UI BFF receives Foundry Agent Consumer
+(`eed3b665-ab3a-47b6-8f48-c9382fb1dad6`) and the GPT-RAG custom
+user-identity impersonation role
+(`bef66abe-a495-530a-be1d-5d882fecff03`) directly at the individual hosted
+agent scope. The custom role has no `Actions` and exactly
+`Microsoft.CognitiveServices/accounts/AIServices/agents/endpoints/UserIdentityImpersonation/action`
+as its only `DataAction`. Foundry User, Project Runtime User, inherited/group
+assignments, and broader scopes are not approved substitutes. The hosted
+container receives neither role.
+
+Continuity remains disabled with an HTTP 503 runtime contract until setup
+confirms the live routed Responses protocol is exactly 2.0.0 and both direct
+role assignments match. The HMAC capability envelope remains a disabled,
+explicit fallback. Delegated mode provisions no capability vault, secret,
+secret role, key, or App Configuration reference.
 
 ### User identity and document-level security
 

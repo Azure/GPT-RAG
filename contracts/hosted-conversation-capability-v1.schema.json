@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Azure/GPT-RAG/contracts/hosted-conversation-capability-v1.schema.json",
   "title": "GPT-RAG hosted conversation capability v1",
-  "description": "Owner-bound capability created and verified exclusively by the UI BFF. The hosted container receives this opaque signed envelope and never receives the HMAC key or a raw caller identity for conversation ownership decisions.",
+  "description": "Disabled fallback owner-bound capability created, retained, and verified exclusively by the UI BFF when HOSTED_CONVERSATION_OWNER_BINDING=capability. The hosted container receives neither this envelope nor the HMAC key.",
   "type": "object",
   "additionalProperties": false,
   "required": [

@@ -18,32 +18,44 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 
 
 class ContinuitySetupTests(TestCase):
-    def test_safe_defaults_disable_continuity_and_require_capabilities(self):
+    def test_safe_defaults_disable_continuity_and_prefer_delegation(self):
         values = dict(setup.DEFAULT_SETTINGS)
 
         settings = setup.validate_continuity_settings(values)
 
         self.assertFalse(settings.enabled)
-        self.assertEqual(settings.owner_binding, "capability")
+        self.assertEqual(settings.owner_binding, "delegated")
         self.assertFalse(settings.owner_binding_validated)
+        self.assertEqual(
+            settings.delegated_identity_header,
+            "x-ms-user-identity",
+        )
+        self.assertEqual(
+            settings.delegated_identity_source,
+            "authenticated_ui_bff_principal",
+        )
+        self.assertEqual(settings.responses_protocol_version, "2.0.0")
+        self.assertEqual(settings.unavailable_status_code, 503)
         self.assertEqual(
             settings.token_audience,
             "https://ai.azure.com",
         )
         self.assertEqual(settings.history_truncation, "drop_oldest")
 
-    def test_enabled_continuity_fails_closed_without_validated_binding(self):
+    def test_activation_request_can_start_with_validation_false(self):
         values = {
             **setup.DEFAULT_SETTINGS,
             "HOSTED_CONTINUITY_ENABLED": "true",
         }
 
-        with self.assertRaisesRegex(ValueError, "OWNER_BINDING_VALIDATED=true"):
-            setup.validate_continuity_settings(
-                values,
-                deployment_topology="hosted-no-panel",
-                chat_backend="hosted_agent",
-            )
+        settings = setup.validate_continuity_settings(
+            values,
+            deployment_topology="hosted-no-panel",
+            chat_backend="hosted_agent",
+            deploy_key_vault=False,
+        )
+        self.assertTrue(settings.enabled)
+        self.assertFalse(settings.owner_binding_validated)
 
     def test_raw_caller_identity_binding_is_rejected_even_while_disabled(self):
         values = {
@@ -51,7 +63,7 @@ class ContinuitySetupTests(TestCase):
             "HOSTED_CONVERSATION_OWNER_BINDING": "oid",
         }
 
-        with self.assertRaisesRegex(ValueError, "raw caller identifiers"):
+        with self.assertRaisesRegex(ValueError, "'delegated' or 'capability'"):
             setup.validate_continuity_settings(values)
 
     def test_enabled_continuity_requires_hosted_no_panel_contract(self):
@@ -86,7 +98,7 @@ class ContinuitySetupTests(TestCase):
         }
 
         with patch.dict(os.environ, environment, clear=True):
-            with self.assertRaisesRegex(ValueError, "raw caller identifiers"):
+            with self.assertRaisesRegex(ValueError, "'delegated' or 'capability'"):
                 setup.main()
 
         create_credential.assert_called_once()
@@ -94,9 +106,96 @@ class ContinuitySetupTests(TestCase):
             call.args[0]
             for call in app_config_client.set_configuration_setting.call_args_list
         ]
-        self.assertEqual(len(published), 1)
+        self.assertEqual(len(published), 2)
         self.assertEqual(published[0].key, "HOSTED_CONTINUITY_ENABLED")
         self.assertEqual(published[0].value, "false")
+        self.assertEqual(
+            published[1].key,
+            "HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED",
+        )
+        self.assertEqual(published[1].value, "false")
+
+    def test_capability_fallback_requires_key_vault_only_when_enabled(self):
+        values = {
+            **setup.DEFAULT_SETTINGS,
+            "HOSTED_CONTINUITY_ENABLED": "true",
+            "HOSTED_CONVERSATION_OWNER_BINDING": "capability",
+        }
+        with self.assertRaisesRegex(ValueError, "Capability fallback"):
+            setup.validate_continuity_settings(
+                values,
+                deployment_topology="hosted-no-panel",
+                chat_backend="hosted_agent",
+                deploy_key_vault=False,
+            )
+
+    @patch.object(setup, "SecretClient")
+    @patch.object(setup, "reconcile_delegated_binding")
+    @patch.object(setup, "configure_frontend_roles")
+    @patch.object(setup, "seed_continuity_settings")
+    @patch.object(setup, "effective_continuity_values")
+    @patch.object(setup, "create_credential")
+    @patch.object(setup, "AzureAppConfigurationClient")
+    def test_delegated_activation_never_provisions_capability_material(
+        self,
+        app_config_client_type,
+        create_credential,
+        effective_values,
+        seed_settings,
+        configure_roles,
+        reconcile_delegated,
+        secret_client_type,
+    ):
+        effective_values.return_value = {
+            **setup.DEFAULT_SETTINGS,
+            "HOSTED_CONTINUITY_ENABLED": "true",
+        }
+        access = setup.ContinuityAccess(
+            frontend_principal_id="frontend-principal",
+            hosted_agent_principal_id="hosted-principal",
+            agent_scope=(
+                "/subscriptions/sub/resourceGroups/rg/providers/"
+                "Microsoft.CognitiveServices/accounts/aif/projects/project/"
+                "agents/gpt-rag-orchestrator"
+            ),
+            routed_version="7",
+            role_actions={
+                setup.FOUNDRY_AGENT_CONSUMER_ROLE_ID: "created",
+                setup.USER_IDENTITY_IMPERSONATION_ROLE_ID: "created",
+            },
+        )
+        configure_roles.return_value = access
+        environment = {
+            "APP_CONFIG_ENDPOINT": "https://appcs.example.azconfig.io",
+            "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+            "CHAT_BACKEND": "hosted_agent",
+            "DEPLOY_KEY_VAULT": "false",
+        }
+
+        with patch.dict(os.environ, environment, clear=True):
+            setup.main(activate=True)
+
+        secret_client_type.assert_not_called()
+        reconcile_delegated.assert_called_once_with(
+            app_config_client_type.return_value,
+            access,
+        )
+        app_config_client = app_config_client_type.return_value
+        published = [
+            call.args[0]
+            for call in app_config_client.set_configuration_setting.call_args_list
+        ]
+        self.assertEqual(
+            [(item.key, item.value) for item in published],
+            [
+                ("HOSTED_CONTINUITY_ENABLED", "false"),
+                ("HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED", "false"),
+                ("HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED", "true"),
+                ("HOSTED_CONTINUITY_ENABLED", "true"),
+            ],
+        )
+        seed_settings.assert_called_once()
+        create_credential.assert_called_once()
 
     def test_secret_creation_and_rotation_are_idempotent_by_key_id(self):
         missing = Mock()
@@ -375,72 +474,228 @@ class ContinuitySetupTests(TestCase):
         with self.assertRaisesRegex(RuntimeError, "least-privilege"):
             setup.validate_foundry_agent_consumer_role(role)
 
-    @patch.object(setup, "_run_az")
-    def test_role_assignment_targets_only_frontend_at_agent_scope(self, run_az):
+    def test_custom_role_has_exactly_one_data_action_and_no_actions(self):
+        assignable_scope = "/subscriptions/sub/resourceGroups/rg"
         role = {
-            "name": setup.FOUNDRY_AGENT_CONSUMER_ROLE_ID,
-            "roleName": setup.FOUNDRY_AGENT_CONSUMER_ROLE_NAME,
-            "roleType": "BuiltInRole",
+            "name": setup.USER_IDENTITY_IMPERSONATION_ROLE_ID,
+            "roleName": setup.USER_IDENTITY_IMPERSONATION_ROLE_NAME,
+            "roleType": "CustomRole",
+            "assignableScopes": [assignable_scope],
             "permissions": [
                 {
                     "actions": [],
                     "notActions": [],
-                    "dataActions": [setup.FOUNDRY_AGENT_INTERACT_DATA_ACTION],
+                    "dataActions": [
+                        setup.USER_IDENTITY_IMPERSONATION_DATA_ACTION
+                    ],
                     "notDataActions": [],
                 }
             ],
         }
-        assignment = [
-            {
-                "roleDefinitionId": (
-                    "/subscriptions/sub/providers/Microsoft.Authorization/"
-                    "roleDefinitions/"
-                    f"{setup.FOUNDRY_AGENT_CONSUMER_ROLE_ID}"
-                ),
-                "scope": (
-                    "/subscriptions/sub/resourceGroups/rg/providers/"
-                    "Microsoft.CognitiveServices/accounts/aif/projects/project/"
-                    "agents/gpt-rag-orchestrator"
-                ),
-                "principalId": "frontend-principal",
-                "principalType": "ServicePrincipal",
-            }
-        ]
+        setup.validate_user_identity_impersonation_role(
+            role,
+            assignable_scope,
+        )
+        role["permissions"][0]["actions"] = ["Microsoft.Resources/*/read"]
+        with self.assertRaisesRegex(RuntimeError, "no Actions"):
+            setup.validate_user_identity_impersonation_role(
+                role,
+                assignable_scope,
+            )
+
+    @patch.object(setup, "_run_az")
+    def test_custom_role_creation_is_resource_group_assignable(self, run_az):
+        project_scope = (
+            "/subscriptions/sub/resourceGroups/rg/providers/"
+            "Microsoft.CognitiveServices/accounts/aif/projects/project"
+        )
+        assignable_scope = "/subscriptions/sub/resourceGroups/rg"
+        created_role = {
+            "name": setup.USER_IDENTITY_IMPERSONATION_ROLE_ID,
+            "roleName": setup.USER_IDENTITY_IMPERSONATION_ROLE_NAME,
+            "roleType": "CustomRole",
+            "assignableScopes": [assignable_scope],
+            "permissions": [
+                {
+                    "actions": [],
+                    "notActions": [],
+                    "dataActions": [
+                        setup.USER_IDENTITY_IMPERSONATION_DATA_ACTION
+                    ],
+                    "notDataActions": [],
+                }
+            ],
+        }
+        run_az.side_effect = ["[]", "", json.dumps([created_role])]
+
+        self.assertTrue(
+            setup.ensure_user_identity_impersonation_role(project_scope)
+        )
+
+        create_arguments = run_az.call_args_list[1].args[0]
+        definition = json.loads(
+            create_arguments[
+                create_arguments.index("--role-definition") + 1
+            ]
+        )
+        self.assertEqual(definition["Actions"], [])
+        self.assertEqual(definition["NotActions"], [])
+        self.assertEqual(
+            definition["DataActions"],
+            [setup.USER_IDENTITY_IMPERSONATION_DATA_ACTION],
+        )
+        self.assertEqual(definition["NotDataActions"], [])
+        self.assertEqual(definition["AssignableScopes"], [assignable_scope])
+
+    @patch.object(setup, "_run_az")
+    def test_live_protocol_verifies_routed_responses_2_0_0(self, run_az):
         run_az.side_effect = [
-            json.dumps([role]),
-            "[]",
-            "[]",
-            "",
-            json.dumps(assignment),
+            json.dumps(
+                {
+                    "instance_identity": {"principal_id": "hosted-principal"},
+                    "agent_endpoint": {
+                        "protocol_configuration": {"responses": {}},
+                        "version_selector": {
+                            "version_selection_rules": [
+                                {
+                                    "type": "FixedRatio",
+                                    "agent_version": "7",
+                                    "traffic_percentage": 100,
+                                }
+                            ]
+                        },
+                    },
+                }
+            ),
+            json.dumps(
+                {
+                    "definition": {
+                        "protocol_versions": [
+                            {"protocol": "responses", "version": "2.0.0"},
+                            {"protocol": "invocations", "version": "1.0.0"},
+                        ]
+                    }
+                }
+            ),
         ]
+        contract = setup.verify_live_hosted_agent_contract(
+            "https://account.services.ai.azure.com/api/projects/project",
+            "gpt-rag-orchestrator",
+        )
+        self.assertEqual(contract.principal_id, "hosted-principal")
+        self.assertEqual(contract.routed_version, "7")
+        for call in run_az.call_args_list:
+            self.assertIn("https://ai.azure.com", call.args[0])
+
+    @patch.object(setup, "_run_az")
+    def test_live_protocol_rejects_non_2_0_0_version(self, run_az):
+        run_az.side_effect = [
+            json.dumps(
+                {
+                    "instance_identity": {"principal_id": "hosted-principal"},
+                    "agent_endpoint": {
+                        "protocol_configuration": {"responses": {}},
+                        "version_selector": {
+                            "version_selection_rules": [
+                                {
+                                    "type": "FixedRatio",
+                                    "agent_version": "1",
+                                    "traffic_percentage": 100,
+                                }
+                            ]
+                        },
+                    },
+                }
+            ),
+            json.dumps(
+                {
+                    "definition": {
+                        "protocol_versions": [
+                            {"protocol": "responses", "version": "1.0.0"}
+                        ]
+                    }
+                }
+            ),
+        ]
+        with self.assertRaisesRegex(RuntimeError, "2.0.0 exactly"):
+            setup.verify_live_hosted_agent_contract(
+                "https://account.services.ai.azure.com/api/projects/project",
+                "gpt-rag-orchestrator",
+            )
+
+    @patch.object(setup, "_run_az")
+    @patch.object(setup, "_role_assignments")
+    @patch.object(setup, "ensure_user_identity_impersonation_role")
+    @patch.object(setup, "verify_live_foundry_agent_consumer_role")
+    def test_role_assignments_target_only_frontend_at_agent_scope(
+        self,
+        verify_consumer,
+        ensure_impersonation,
+        role_assignments,
+        run_az,
+    ):
         scope = (
             "/subscriptions/sub/resourceGroups/rg/providers/"
             "Microsoft.CognitiveServices/accounts/aif/projects/project/"
             "agents/gpt-rag-orchestrator"
         )
+        project_scope = scope.rsplit("/agents/", 1)[0]
+        assignments = [
+            {
+                "roleDefinitionId": (
+                    "/subscriptions/sub/providers/Microsoft.Authorization/"
+                    f"roleDefinitions/{role_id}"
+                ),
+                "scope": scope,
+                "principalId": "frontend-principal",
+                "principalType": "ServicePrincipal",
+            }
+            for role_id in (
+                setup.FOUNDRY_AGENT_CONSUMER_ROLE_ID,
+                setup.USER_IDENTITY_IMPERSONATION_ROLE_ID,
+            )
+        ]
+        role_assignments.side_effect = [[], [], [], assignments]
+        ensure_impersonation.return_value = True
+        run_az.return_value = ""
 
-        created = setup.ensure_frontend_agent_consumer_assignment(
+        actions = setup.ensure_frontend_continuity_assignments(
             "frontend-principal",
             scope,
+            project_scope,
             hosted_agent_principal_id="hosted-principal",
         )
 
-        self.assertTrue(created)
-        create_call = run_az.call_args_list[3]
-        arguments = create_call.args[0]
-        self.assertIn("frontend-principal", arguments)
-        self.assertNotIn("hosted-principal", arguments)
-        self.assertEqual(arguments[arguments.index("--scope") + 1], scope)
         self.assertEqual(
-            arguments[arguments.index("--role") + 1],
-            setup.FOUNDRY_AGENT_CONSUMER_ROLE_ID,
+            set(actions),
+            {
+                setup.FOUNDRY_AGENT_CONSUMER_ROLE_ID,
+                setup.USER_IDENTITY_IMPERSONATION_ROLE_ID,
+            },
         )
+        self.assertEqual(len(run_az.call_args_list), 2)
+        for call in run_az.call_args_list:
+            arguments = call.args[0]
+            self.assertIn("frontend-principal", arguments)
+            self.assertNotIn("hosted-principal", arguments)
+            self.assertEqual(arguments[arguments.index("--scope") + 1], scope)
+        self.assertEqual(
+            {
+                call.args[0][call.args[0].index("--role") + 1]
+                for call in run_az.call_args_list
+            },
+            set(actions),
+        )
+        verify_consumer.assert_called_once()
+        ensure_impersonation.assert_called_once_with(project_scope)
 
     @patch.object(setup, "_role_assignments")
+    @patch.object(setup, "ensure_user_identity_impersonation_role")
     @patch.object(setup, "verify_live_foundry_agent_consumer_role")
     def test_hosted_container_with_conversation_role_fails_closed(
         self,
         verify_role,
+        ensure_impersonation,
         role_assignments,
     ):
         role_assignments.return_value = [
@@ -454,17 +709,115 @@ class ContinuitySetupTests(TestCase):
         ]
 
         with self.assertRaisesRegex(RuntimeError, "hosted container identity"):
-            setup.ensure_frontend_agent_consumer_assignment(
+            setup.ensure_frontend_continuity_assignments(
                 "frontend-principal",
                 (
                     "/subscriptions/sub/resourceGroups/rg/providers/"
                     "Microsoft.CognitiveServices/accounts/aif/projects/project/"
                     "agents/gpt-rag-orchestrator"
                 ),
+                (
+                    "/subscriptions/sub/resourceGroups/rg/providers/"
+                    "Microsoft.CognitiveServices/accounts/aif/projects/project"
+                ),
                 hosted_agent_principal_id="hosted-principal",
             )
 
         verify_role.assert_called_once()
+        ensure_impersonation.assert_called_once()
+
+    @patch.object(setup, "_role_assignments")
+    @patch.object(setup, "ensure_user_identity_impersonation_role")
+    @patch.object(setup, "verify_live_foundry_agent_consumer_role")
+    def test_group_derived_ui_impersonation_role_fails_closed(
+        self,
+        verify_role,
+        ensure_impersonation,
+        role_assignments,
+    ):
+        scope = (
+            "/subscriptions/sub/resourceGroups/rg/providers/"
+            "Microsoft.CognitiveServices/accounts/aif/projects/project/"
+            "agents/gpt-rag-orchestrator"
+        )
+        role_assignments.side_effect = [
+            [],
+            [],
+            [
+                {
+                    "roleDefinitionId": (
+                        "/subscriptions/sub/providers/Microsoft.Authorization/"
+                        "roleDefinitions/"
+                        f"{setup.USER_IDENTITY_IMPERSONATION_ROLE_ID}"
+                    ),
+                    "scope": scope,
+                    "principalId": "group-principal",
+                    "principalType": "Group",
+                }
+            ],
+        ]
+
+        with self.assertRaisesRegex(RuntimeError, "group-derived"):
+            setup.ensure_frontend_continuity_assignments(
+                "frontend-principal",
+                scope,
+                scope.rsplit("/agents/", 1)[0],
+                hosted_agent_principal_id="hosted-principal",
+            )
+
+        verify_role.assert_called_once()
+        ensure_impersonation.assert_called_once()
+
+    @patch.object(setup, "ensure_user_identity_impersonation_role")
+    @patch.object(setup, "verify_live_foundry_agent_consumer_role")
+    def test_ui_and_hosted_container_cannot_share_identity_case_insensitively(
+        self,
+        verify_role,
+        ensure_impersonation,
+    ):
+        scope = (
+            "/subscriptions/sub/resourceGroups/rg/providers/"
+            "Microsoft.CognitiveServices/accounts/aif/projects/project/"
+            "agents/gpt-rag-orchestrator"
+        )
+        with self.assertRaisesRegex(RuntimeError, "must not share an identity"):
+            setup.ensure_frontend_continuity_assignments(
+                "A0B1C2D3",
+                scope,
+                scope.rsplit("/agents/", 1)[0],
+                hosted_agent_principal_id="a0b1c2d3",
+            )
+        verify_role.assert_called_once()
+        ensure_impersonation.assert_called_once()
+
+    @patch.object(setup, "_role_assignments")
+    @patch.object(setup, "ensure_user_identity_impersonation_role")
+    @patch.object(setup, "verify_live_foundry_agent_consumer_role")
+    def test_foundry_user_role_is_never_an_approved_substitute(
+        self,
+        verify_role,
+        ensure_impersonation,
+        role_assignments,
+    ):
+        scope = (
+            "/subscriptions/sub/resourceGroups/rg/providers/"
+            "Microsoft.CognitiveServices/accounts/aif/projects/project/"
+            "agents/gpt-rag-orchestrator"
+        )
+        role_assignments.side_effect = [
+            [],
+            [],
+            [{"roleDefinitionName": "Foundry User"}],
+        ]
+        with self.assertRaisesRegex(RuntimeError, "broad Foundry User"):
+            setup.ensure_frontend_continuity_assignments(
+                "frontend-principal",
+                scope,
+                scope.rsplit("/agents/", 1)[0],
+                hosted_agent_principal_id="hosted-principal",
+            )
+        verify_role.assert_called_once()
+        ensure_impersonation.assert_called_once()
 
     def test_no_panel_composition_has_no_cosmos_or_hosted_container_rbac(self):
         parameters = json.loads(
@@ -517,6 +870,7 @@ class ContinuitySetupTests(TestCase):
         )
         self.assertNotIn("secret", schema["required"])
         self.assertNotIn("key", schema["required"])
+        self.assertIn("Disabled fallback", schema["description"])
 
     def test_hooks_keep_powershell_and_shell_continuity_parity(self):
         powershell_script = (REPO_ROOT / "scripts" / "postProvision.ps1").read_text(

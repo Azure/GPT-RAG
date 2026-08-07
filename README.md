@@ -36,6 +36,16 @@ Head to the documentation site for the complete guides:
 ![Zero Trust Architecture](media/architecture_zero_trust.png)
 *Zero-Trust Architecture*
 
+### Hosted conversation continuity
+
+Hosted continuity uses Responses protocol 2.0.0 with delegated
+`x-ms-user-identity` ownership from the trusted UI BFF. Activation fails closed
+until the UI identity has the exact Foundry Agent Consumer role and GPT-RAG
+user-identity impersonation role directly at the individual agent scope. The
+hosted container receives neither role, no ownership key, and no Cosmos DB in
+the no-panel topology. See the [shared ownership contract](contracts/README.md)
+for role IDs, validation rules, and the disabled capability fallback.
+
 ## AI Agent Capabilities
 
 The accelerator supports a broad range of enterprise scenarios, from customer support to decision automation, by enabling systems to process complex queries across large data collections. It is designed for seamless integration into existing environments and can be adapted to both straightforward and advanced operational patterns.

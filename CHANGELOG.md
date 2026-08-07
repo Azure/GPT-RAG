@@ -69,6 +69,15 @@
 
 ### Changed
 
+- **Hosted continuity ownership is delegated and fail closed.** The trusted UI
+  BFF now derives `x-ms-user-identity` from the authenticated server-side
+  principal, independently of OBO retrieval tokens. Continuity activates only
+  after the live routed Responses protocol is exactly 2.0.0 and the UI BFF has
+  direct, exact agent-scoped Foundry Agent Consumer plus GPT-RAG user-identity
+  impersonation assignments. The hosted container receives neither role nor an
+  ownership key. The HMAC capability contract remains an explicit disabled
+  fallback and delegated mode provisions no capability secret, vault role, or
+  App Configuration reference.
 - **Compatible hosted/no-panel component pins.** The unreleased integration
   combination preserves UI `v2.5.1`, orchestrator `v3.10.0`, and ingestion
   `v2.6.0` at their exact released commits. It temporarily pins AI Landing Zone
