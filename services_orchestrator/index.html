@@ -449,6 +449,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../hosted_continuity_platform_contract/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hosted continuity platform contract
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../architecture_legacy_diagram_handoff/" class="md-nav__link">
         
   
@@ -1583,7 +1604,10 @@ packages the same chat runtime as a Microsoft Foundry hosted agent for fresh
 deployments and retains the Container Apps adapter as an explicit fallback.
 The platform implementation is merged but remains unreleased pending component
 and AI Landing Zone tags, final umbrella pins, integrated validation, and a new
-GPT-RAG release; hosted/panel remains unsupported. <a href="https://github.com/Azure/gpt-rag-orchestrator">GitHub Repository</a>.</p>
+GPT-RAG release. The separate
+<a href="../hosted_continuity_platform_contract/">hosted continuity platform contract</a>
+is also merged, but remains disabled pending compatible component pins and
+owner-binding validation; hosted/panel remains unsupported. <a href="https://github.com/Azure/gpt-rag-orchestrator">GitHub Repository</a>.</p>
 <h2 id="key-features">Key Features</h2>
 <ul>
 <li><strong>Strategy-Based Architecture:</strong> Pluggable orchestration strategies selected via Azure App Configuration (<code>AGENT_STRATEGY</code>).</li>
@@ -1704,6 +1728,21 @@ skip Azure AI Search while still using the recent chat history.</p>
 <td>Serialized size target for the persisted conversation document.</td>
 </tr>
 <tr>
+<td><code>HOSTED_HISTORY_MAX_ITEMS</code></td>
+<td><code>100</code></td>
+<td>Maximum managed history items supplied to the compatible hosted contract; accepted range 1-1,000.</td>
+</tr>
+<tr>
+<td><code>HOSTED_HISTORY_MAX_TOKENS</code></td>
+<td><code>32000</code></td>
+<td>Token budget for managed hosted history; accepted range 1-1,000,000.</td>
+</tr>
+<tr>
+<td><code>HOSTED_HISTORY_TRUNCATION</code></td>
+<td><code>drop_oldest</code></td>
+<td>The only accepted hosted overflow behavior.</td>
+</tr>
+<tr>
 <td><code>RETRIEVAL_INTENT_HISTORY_MESSAGES</code></td>
 <td><code>4</code></td>
 <td>Recent messages sent only to the retrieval-needed classifier.</td>
@@ -1720,6 +1759,11 @@ skip Azure AI Search while still using the recent chat history.</p>
 </tr>
 </tbody>
 </table>
+<p>The hosted limits are inactive while <code>HOSTED_CONTINUITY_ENABLED=false</code>. When a
+compatible component set is eventually validated, the UI BFF - not the hosted
+orchestrator - will own Foundry managed Conversation CRUD and capability
+verification. The hosted runtime will receive no capability key, raw <code>oid</code>, or
+Conversations RBAC.</p>
 <h2 id="visual-guide">Visual Guide</h2>
 <p>New to the Orchestrator? Check out the <a href="../orchestrator_visual_guide/">Orchestrator Visual Guide</a> for a visual walkthrough of the architecture and key components.</p>
 <h2 id="repository">Repository</h2>

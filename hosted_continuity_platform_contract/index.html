@@ -13,10 +13,10 @@
       
       
       
-        <link rel="prev" href="../hosted_continuity_platform_contract/">
+        <link rel="prev" href="../architecture/">
       
       
-        <link rel="next" href="../governance_overview/">
+        <link rel="next" href="../architecture_legacy_diagram_handoff/">
       
       
       <link rel="icon" href="../favicon.ico">
@@ -24,7 +24,7 @@
     
     
       
-        <title>Legacy diagram update handoff - GPT-RAG</title>
+        <title>Hosted continuity platform contract - GPT-RAG</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#legacy-architecture-diagram-update-handoff" class="md-skip">
+        <a href="#hosted-conversation-continuity-platform-contract" class="md-skip">
           Skip to content
         </a>
       
@@ -111,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Legacy diagram update handoff
+              Hosted continuity platform contract
             
           </span>
         </div>
@@ -448,27 +448,6 @@
                 
   
   
-  
-  
-    <li class="md-nav__item">
-      <a href="../hosted_continuity_platform_contract/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Hosted continuity platform contract
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
     
   
   
@@ -485,7 +464,7 @@
           
   
   <span class="md-ellipsis">
-    Legacy diagram update handoff
+    Hosted continuity platform contract
   </span>
   
 
@@ -496,7 +475,7 @@
         
   
   <span class="md-ellipsis">
-    Legacy diagram update handoff
+    Hosted continuity platform contract
   </span>
   
 
@@ -518,45 +497,54 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#shapes-and-labels" class="md-nav__link">
+  <a href="#trust-boundary" class="md-nav__link">
     <span class="md-ellipsis">
-      Shapes and labels
+      Trust boundary
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#connections-and-labels" class="md-nav__link">
+  <a href="#configuration-contract" class="md-nav__link">
     <span class="md-ellipsis">
-      Connections and labels
+      Configuration contract
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#hosted-image-preparation-inset" class="md-nav__link">
+  <a href="#dedicated-key-vault-and-app-configuration" class="md-nav__link">
     <span class="md-ellipsis">
-      Hosted image preparation inset
+      Dedicated Key Vault and App Configuration
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#legend-and-visual-treatment" class="md-nav__link">
+  <a href="#foundry-role-boundary" class="md-nav__link">
     <span class="md-ellipsis">
-      Legend and visual treatment
+      Foundry role boundary
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#remove-or-relabel" class="md-nav__link">
+  <a href="#activation-and-disabled-reconciliation" class="md-nav__link">
     <span class="md-ellipsis">
-      Remove or relabel
+      Activation and disabled reconciliation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#release-and-rollout-gate" class="md-nav__link">
+    <span class="md-ellipsis">
+      Release and rollout gate
     </span>
   </a>
   
@@ -566,6 +554,27 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture_legacy_diagram_handoff/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Legacy diagram update handoff
+  </span>
+  
+
+      </a>
     </li>
   
 
@@ -1584,166 +1593,210 @@
   
 
 
-<h1 id="legacy-architecture-diagram-update-handoff">Legacy architecture diagram update handoff</h1>
-<p>Use this checklist to manually update <code>media/GPT-RAG.vsdx</code>, then export the
-updated full reference view to <code>media/architecture_zero_trust.png</code>. The SVG
-diagrams remain the editable source for the focused Basic, modular-layer, and
-chat-runtime views.</p>
+<h1 id="hosted-conversation-continuity-platform-contract">Hosted conversation continuity platform contract</h1>
+<p>GPT-RAG has a platform contract for preserving hosted chat continuity with
+Microsoft Foundry managed Conversations. The contract was merged to <code>develop</code>
+in <a href="https://github.com/Azure/GPT-RAG/pull/630">Azure/GPT-RAG PR #630</a>.</p>
 <div class="admonition warning">
-<p class="admonition-title">Release status</p>
-<p>Draw the hosted/no-panel path as the <strong>target fresh-deployment default</strong> and
-label it <strong>Platform contracts merged; compatible pins and owner validation
-pending</strong>. Do not label it shipped until the planned component and AI
-Landing Zone tags, final umbrella pins, owner-binding validation, integrated
-validation, and GPT-RAG release publish. Show hosted continuity as disabled.</p>
+<p class="admonition-title">Merged platform contract; keep it disabled</p>
+<p>This is not a released end-to-end feature. Compatible UI and hosted-runtime
+component pins, final umbrella pins, and integrated validation are still
+required. Keep <code>HOSTED_CONTINUITY_ENABLED=false</code> until the UI BFF
+implementation has completed owner-binding validation and the compatible
+component set is published.</p>
 </div>
-<h2 id="shapes-and-labels">Shapes and labels</h2>
-<p>Add or update these shapes in the application/runtime area:</p>
+<p>The contract is fail closed. It does not grant the hosted runtime authority over
+conversation ownership or Foundry Conversations. The UI BFF is the only
+component that creates, reads, appends to, or deletes managed Conversations and
+the only component that creates and verifies the owner-bound capability.</p>
+<h2 id="trust-boundary">Trust boundary</h2>
+<pre class="mermaid"><code>flowchart LR
+  User[Signed-in user] --&gt; UI[UI BFF]
+  UI --&gt;|create, read, append, delete| Conv[Foundry managed Conversations]
+  UI --&gt;|delegated request| Agent[Foundry hosted agent]
+  UI --&gt;|read one capability secret| KV[Dedicated UI BFF Key Vault]
+  AppConfig[App Configuration&lt;br/&gt;Key Vault reference only] --&gt; UI
+  Agent --&gt; Tools[Toolbox and retrieval]
+
+  UI -. opaque capability to client .-&gt; User
+  KV -. no key access .-&gt; Agent
+  Conv -. no Conversations RBAC .-&gt; Agent</code></pre>
+<p>The UI BFF derives the lowercase Microsoft Entra object ID (<code>oid</code>) from the
+authenticated server-side principal. It signs the versioned capability with
+HMAC-SHA256 and verifies the owner, expiry, schema, canonical framing, and
+signature before every Conversation operation. The browser may retain the
+opaque capability, but it does not choose or alter the owner.</p>
+<p>The UI BFF remains the authority that issues and verifies capabilities. An
+opaque signed envelope does not grant the hosted runtime ownership authority.
+The hosted runtime receives no HMAC key, raw <code>oid</code>, capability-key permission,
+or Foundry Conversations data-plane role.</p>
+<h2 id="configuration-contract">Configuration contract</h2>
+<p>Post-provisioning seeds these values under the App Configuration label
+<code>gpt-rag</code>. Invalid values fail setup; validation failure writes
+<code>HOSTED_CONTINUITY_ENABLED=false</code>.</p>
 <table>
 <thead>
 <tr>
-<th>Shape</th>
-<th>Exact label</th>
-<th>Placement</th>
+<th>App Configuration key</th>
+<th>Default</th>
+<th>Validation and purpose</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Existing application host boundary</td>
-<td><code>Azure Container Apps</code></td>
-<td>Keep around the Web UI and ingestion services.</td>
+<td><code>HOSTED_CONTINUITY_ENABLED</code></td>
+<td><code>false</code></td>
+<td>Master gate. Must remain disabled until compatible components are pinned and owner binding has been validated. Enabling also requires a hosted topology, <code>CHAT_BACKEND=hosted_agent</code>, and Key Vault deployment.</td>
 </tr>
 <tr>
-<td>Existing UI shape</td>
-<td><code>Web UI / BFF</code></td>
-<td>Keep in Container Apps at the request-path entry and make it the exclusive owner of Foundry Conversation operations and capabilities.</td>
+<td><code>HOSTED_CONVERSATION_OWNER_BINDING</code></td>
+<td><code>capability</code></td>
+<td>The only accepted ownership boundary. Raw caller identifiers are not a supported substitute.</td>
 </tr>
 <tr>
-<td>Existing ingestion shape</td>
-<td><code>Ingestion</code></td>
-<td>Keep in Container Apps and connected to Storage / AI Search indexing.</td>
+<td><code>HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED</code></td>
+<td><code>false</code></td>
+<td>Explicit compatibility gate. <code>HOSTED_CONTINUITY_ENABLED=true</code> is rejected unless this is exactly <code>true</code>.</td>
 </tr>
 <tr>
-<td>New primary runtime shape</td>
-<td><code>Microsoft Foundry Hosted Agent</code></td>
-<td>Place to the right of Web UI, outside the Container Apps boundary and inside the Microsoft Foundry boundary.</td>
+<td><code>HOSTED_CONVERSATIONS_TOKEN_AUDIENCE</code></td>
+<td><code>https://ai.azure.com</code></td>
+<td>Exact audience required for Foundry Conversations access by the UI BFF.</td>
 </tr>
 <tr>
-<td>New state shape</td>
-<td><code>Foundry managed Conversations</code></td>
-<td>Connect only to the UI BFF. Do not connect it to the hosted runtime.</td>
+<td><code>HOSTED_CONVERSATION_CAPABILITY_KEY_ID</code></td>
+<td><code>v1</code></td>
+<td>Non-secret key-version identifier. Must contain 1-64 letters, digits, periods, underscores, or hyphens and start with a letter or digit. Advancing it creates a new secret version while preserving prior versions.</td>
 </tr>
 <tr>
-<td>New secret shape</td>
-<td><code>Dedicated UI BFF Key Vault</code></td>
-<td>Connect only to the UI BFF and label the connection <code>individual capability-secret scope</code>.</td>
+<td><code>HOSTED_CONVERSATION_CAPABILITY_TTL_SECONDS</code></td>
+<td><code>900</code></td>
+<td>Capability lifetime. Accepted range is 60-3,600 seconds.</td>
 </tr>
 <tr>
-<td>App Configuration annotation</td>
-<td><code>Key Vault reference only</code></td>
-<td>Place between App Configuration and the UI BFF. Do not show a plaintext capability key.</td>
+<td><code>HOSTED_HISTORY_MAX_ITEMS</code></td>
+<td><code>100</code></td>
+<td>Maximum managed history items supplied to the compatible UI BFF/runtime contract. Accepted range is 1-1,000.</td>
 </tr>
 <tr>
-<td>New tool boundary</td>
-<td><code>Toolbox / MCP tools</code></td>
-<td>Place to the right of the hosted agent.</td>
+<td><code>HOSTED_HISTORY_MAX_TOKENS</code></td>
+<td><code>32000</code></td>
+<td>Maximum history token budget. Accepted range is 1-1,000,000.</td>
 </tr>
 <tr>
-<td>New retrieval shape</td>
-<td><code>Authorization-trimmed retrieval</code></td>
-<td>Place below Toolbox and connect to Foundry IQ / Azure AI Search.</td>
-</tr>
-<tr>
-<td>Fallback runtime shape</td>
-<td><code>Container Apps orchestrator - explicit fallback</code></td>
-<td>Place below the primary request path with a dashed border. Keep it inside Container Apps.</td>
-</tr>
-<tr>
-<td>Mode annotation</td>
-<td><code>Fresh target default: hosted-no-panel</code></td>
-<td>Place above the hosted-agent lane.</td>
-</tr>
-<tr>
-<td>Fallback annotation</td>
-<td><code>Explicit/sticky classic topology</code></td>
-<td>Place above the orchestrator fallback.</td>
-</tr>
-<tr>
-<td>Panel annotation</td>
-<td><code>Administrative panel absent; DEPLOY_ADMINISTRATIVE_PANEL=false</code></td>
-<td>Place below the hosted lane.</td>
-</tr>
-<tr>
-<td>Release annotation</td>
-<td><code>Platform contracts merged; continuity disabled; compatible pins and owner validation pending</code></td>
-<td>Place in an amber status banner below the diagram title.</td>
+<td><code>HOSTED_HISTORY_TRUNCATION</code></td>
+<td><code>drop_oldest</code></td>
+<td>The only accepted overflow policy. It preserves the newest bounded context.</td>
 </tr>
 </tbody>
 </table>
-<h2 id="connections-and-labels">Connections and labels</h2>
+<p>These limits are compatibility and safety controls, not a records-retention
+policy. Foundry Conversation deletion, organizational retention, backup, and
+legal-hold requirements remain operator responsibilities.</p>
+<h2 id="dedicated-key-vault-and-app-configuration">Dedicated Key Vault and App Configuration</h2>
+<p>An enabled deployment must identify a dedicated UI BFF Key Vault through one of
+these deployment inputs:</p>
+<div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">HOSTED_CONTINUITY_KEY_VAULT_URI</span> <span class="s2">&quot;https://&lt;ui-bff-vault&gt;.vault.azure.net/&quot;</span>
+<span class="c"># Or:</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">HOSTED_CONTINUITY_KEY_VAULT_NAME</span> <span class="s2">&quot;&lt;ui-bff-vault&gt;&quot;</span>
+</code></pre></div>
+<p>The shared workload vault identified by <code>KEY_VAULT_URI</code> is rejected. The
+platform creates or reuses the <code>HOSTED-CONVERSATION-CAPABILITY-KEY</code> secret and
+grants the UI BFF <strong>Key Vault Secrets User</strong> only at that individual secret
+scope. Effective inherited, group-derived, custom, or broader secret-read
+access fails validation. The hosted identity must have no effective access to
+the capability secret.</p>
+<p>App Configuration never stores the HMAC key. It stores
+<code>HOSTED_CONVERSATION_CAPABILITY_KEY</code> only as a Key Vault reference to the
+dedicated secret. A plaintext value, a malformed reference, or a reference to a
+different vault or secret fails closed.</p>
+<h2 id="foundry-role-boundary">Foundry role boundary</h2>
+<p>Activation verifies the live built-in <strong>Foundry Agent Consumer</strong> role before
+using it:</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Required value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Role ID</td>
+<td><code>eed3b665-ab3a-47b6-8f48-c9382fb1dad6</code></td>
+</tr>
+<tr>
+<td>Principal</td>
+<td>UI BFF managed identity only</td>
+</tr>
+<tr>
+<td>Scope</td>
+<td>The individual hosted agent resource</td>
+</tr>
+<tr>
+<td>Hosted runtime assignment</td>
+<td>None</td>
+</tr>
+</tbody>
+</table>
+<p>The role must still be the built-in role with the reviewed single endpoint
+interaction data action. Custom roles and assignments inherited from a project,
+account, subscription, management group, or group membership are not accepted
+as substitutes. The UI BFF and hosted runtime must not share an identity.</p>
+<p>This role lets the UI BFF invoke the one hosted agent. It does not grant the
+hosted runtime access to Foundry Conversations, and it must not be broadened to
+the Foundry project or account.</p>
+<h2 id="activation-and-disabled-reconciliation">Activation and disabled reconciliation</h2>
+<p>Continuity setup is deliberately ordered after the hosted agent resource
+exists:</p>
 <ol>
-<li>Connect <code>Signed-in user</code> to <code>Web UI / BFF</code>.</li>
-<li>Connect <code>Web UI / BFF</code> to <code>Microsoft Foundry Hosted Agent</code> and label the connection
-   <code>delegated user OBO</code>.</li>
-<li>Connect <code>Web UI / BFF</code> to <code>Foundry managed Conversations</code> and label it
-   <code>exclusive CRUD; owner-bound capability</code>.</li>
-<li>Connect <code>Dedicated UI BFF Key Vault</code> to <code>Web UI / BFF</code> and label it
-   <code>HMAC key; secret-scoped read</code>.</li>
-<li>Connect App Configuration to <code>Web UI / BFF</code> and label it
-   <code>Key Vault reference only</code>.</li>
-<li>Connect <code>Microsoft Foundry Hosted Agent</code> to <code>Toolbox / MCP tools</code> and label
-   the connection <code>opaque x-agent-foundry-call-id</code>.</li>
-<li>Connect <code>Toolbox / MCP tools</code> to <code>Authorization-trimmed retrieval</code>.</li>
-<li>Connect <code>Authorization-trimmed retrieval</code> to Foundry IQ / Azure AI Search
-   and label it <code>native per-user document authorization</code>.</li>
-<li>Keep the ingestion-to-Storage / AI Search indexing connections unchanged.</li>
-<li>Draw a dashed connection from <code>Web UI / BFF</code> to
-   <code>Container Apps orchestrator - explicit fallback</code>.</li>
-<li>Place a red stop marker between the hosted and fallback lanes with the label
-   <code>No request-time silent fallback</code>. Do not connect the lanes as an automatic
-   failover path.</li>
-<li>Add red stop markers from the hosted runtime to both the capability secret
-   and managed Conversations with the labels <code>No key or raw oid</code> and
-   <code>No Conversations RBAC</code>.</li>
+<li>Post-provisioning validates and seeds the configuration while forcing
+   continuity disabled. It does not publish the capability reference or grant
+   continuity-specific roles.</li>
+<li>The hosted agent is deployed.</li>
+<li>The activation gate validates the live Foundry role definition, distinct
+   identities, exact agent and secret scopes, dedicated vault, capability key,
+   and owner-binding flag.</li>
+<li>Only after every check succeeds does setup publish the Key Vault reference
+   and set <code>HOSTED_CONTINUITY_ENABLED=true</code>.</li>
 </ol>
-<h2 id="hosted-image-preparation-inset">Hosted image preparation inset</h2>
-<p>Add a small deployment inset near Container Registry with this left-to-right
-flow:</p>
-<p><code>azd provision (prerequisites)</code> -&gt; <code>ACR build</code> -&gt; <code>immutable sha256 digest</code> -&gt;
-<code>azd provision (hosted handoff)</code> -&gt; <code>azd deploy</code></p>
-<p>Split <code>ACR build</code> into two labeled alternatives:</p>
+<p>Disabling the feature is also reconciled, not merely hidden behind a flag. With
+the platform-managed capability reference still present, the next setup pass
+removes:</p>
 <ul>
-<li><code>Public: shared ACR Tasks</code></li>
-<li><code>Private: dedicated VNet ACR Tasks agent pool</code></li>
+<li>the UI BFF's exact Foundry Agent Consumer assignment at the individual agent;</li>
+<li>the UI BFF's exact Key Vault Secrets User assignment at the capability
+  secret; and</li>
+<li>the <code>HOSTED_CONVERSATION_CAPABILITY_KEY</code> App Configuration reference.</li>
 </ul>
-<p>The two alternatives converge on the same <code>immutable sha256 digest</code> shape.</p>
-<h2 id="legend-and-visual-treatment">Legend and visual treatment</h2>
-<ul>
-<li>Green solid border/fill: target hosted request path.</li>
-<li>Blue solid border/fill: shared UI and ingestion services in Container Apps.</li>
-<li>Gray dashed border: explicit Container Apps fallback.</li>
-<li>Purple solid border/fill: Toolbox and MCP tools.</li>
-<li>Orange solid border/fill: build and immutable-image lifecycle.</li>
-<li>Red stop marker: prohibited request-time cross-backend fallback.</li>
-<li>Amber banner: unpublished release, final-pin, or validation dependency.</li>
-<li>Use black text throughout and preserve the existing typeface, spacing, icon
-  family, title, and accessibility contrast.</li>
-</ul>
-<h2 id="remove-or-relabel">Remove or relabel</h2>
-<ul>
-<li>Remove any direct <code>Web UI -&gt; Orchestrator</code> connection presented as the fresh
-  default.</li>
-<li>Remove any label that classifies hosted agents as an optional AI capability.</li>
-<li>Remove the orchestrator Container App from the primary hosted lane.</li>
-<li>Remove the administrative panel and panel-only Cosmos DB from hosted/no-panel.</li>
-<li>Relabel generic <code>Orchestrator</code> shapes so the hosted shape and explicit
-  Container Apps fallback cannot be confused.</li>
-<li>Remove any automatic or request-time failover arrow between hosted and
-  classic modes.</li>
-</ul>
-<p>After editing the Visio source, export the full page to
-<code>architecture_zero_trust.png</code> at the existing canvas size and verify that all
-labels remain readable at the published documentation width.</p>
+<p>The capability secret and its previous versions remain in Key Vault. Retaining
+that key history supports controlled rollback and investigation; removing old
+versions is a separate operator retention decision.</p>
+<p>Do not manually delete the App Configuration reference before running disabled
+reconciliation. The reference is how setup resolves the exact capability-secret
+scope. If it was removed out of band, inspect and remove the UI BFF's exact
+secret-scoped assignment separately; the agent-scoped Foundry assignment is
+still reconciled independently.</p>
+<h2 id="release-and-rollout-gate">Release and rollout gate</h2>
+<p>Do not enable this contract against the currently published classic component
+set or by mixing arbitrary component branches. A release may enable continuity
+only after all of the following are true:</p>
+<ol>
+<li>The UI BFF exclusively implements managed Conversation CRUD and capability
+   issuance/verification.</li>
+<li>The hosted runtime accepts neither the capability key nor raw <code>oid</code> and has
+   no Conversations RBAC.</li>
+<li>The owner-binding compatibility test sets
+   <code>HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true</code>.</li>
+<li>Compatible UI, hosted-runtime, AI Landing Zone, and umbrella pins are
+   published and validated together.</li>
+<li>Deployment tests confirm activation occurs only after the individual hosted
+   agent exists and disabled reconciliation removes only the exact
+   continuity-specific grants and reference.</li>
+</ol>
+<p>Until then, the documented platform contract is available for component
+implementation and review, but <code>HOSTED_CONTINUITY_ENABLED=false</code> is the required
+operational posture.</p>
 
 
 

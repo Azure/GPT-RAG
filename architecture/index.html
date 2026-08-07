@@ -16,7 +16,7 @@
         <link rel="prev" href="../quickstart_nl2sql/">
       
       
-        <link rel="next" href="../architecture_legacy_diagram_handoff/">
+        <link rel="next" href="../hosted_continuity_platform_contract/">
       
       
       <link rel="icon" href="../favicon.ico">
@@ -529,6 +529,27 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hosted_continuity_platform_contract/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hosted continuity platform contract
+  </span>
+  
+
+      </a>
     </li>
   
 
@@ -1595,9 +1616,13 @@ then fixed the local/CI size-gate defaults, and
 merged that correction to <code>main</code>. AILZ <code>main</code> and <code>develop</code> now both point
 to <a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/commit/cacf418216ce7381d06263e0dd704a86b8a6f225"><code>cacf418</code></a>.
 No AILZ <code>v2.5.0</code> tag or GitHub Release exists; UI <code>v2.6.0</code> is also
-unpublished. Final umbrella pins, integrated validation, and the GPT-RAG
-release remain incomplete. The diagrams document the approved target, not
-shipped behavior. Current published GPT-RAG <code>v3.7.0</code> remains classic.</p>
+unpublished. The secure hosted-continuity platform contract merged in
+<a href="https://github.com/Azure/GPT-RAG/pull/630">PR #630</a>, but compatible
+component pins and owner-binding validation remain incomplete. Keep
+<code>HOSTED_CONTINUITY_ENABLED=false</code>. Final umbrella pins, integrated
+validation, and the GPT-RAG release remain incomplete. The diagrams
+document the approved target, not shipped behavior. Current published
+GPT-RAG <code>v3.7.0</code> remains classic.</p>
 </div>
 <h2 id="full-zero-trust-reference">Full Zero Trust reference</h2>
 <p>The existing PNG and Visio remain the full network-isolated reference view.
@@ -1618,6 +1643,13 @@ Foundry IQ or Azure AI Search applies native authorization trimming. Missing
 identity, call context, configuration, authorization, network, protocol, or
 runtime state fails closed. A request never silently switches to the
 Container Apps orchestrator.</p>
+<p>For hosted continuity, the UI BFF is the exclusive owner of Foundry managed
+Conversation operations and owner-bound capability issuance and verification.
+The hosted runtime receives no capability key, raw caller object ID, or
+Conversations RBAC. App Configuration holds only a reference to a capability
+secret in a dedicated UI BFF Key Vault. See the
+<a href="../hosted_continuity_platform_contract/">hosted conversation continuity platform contract</a>
+for the disabled-by-default gate, exact roles, limits, and cleanup lifecycle.</p>
 <p>The classic runtime remains selectable through an explicit deployment
 operation. Pre-cutover deployments without a topology marker remain classic,
 and any persisted topology stays sticky until an operator deliberately
@@ -1684,13 +1716,13 @@ fallback. The panel is absent and its flag remains <code>false</code>.</p>
 <td>App Configuration, identity / RBAC, Container Apps, Container Registry</td>
 <td>Required platform capabilities, topology varies by mode</td>
 <td><code>deployAppConfig</code>, <code>deployContainerApps</code>, <code>deployContainerEnv</code>, <code>deployContainerRegistry</code>, <code>useUAI</code>, service role lists</td>
-<td>Publishing the sticky topology and runtime contract, hosting UI/ingestion, and preparing immutable images. Hosted/no-panel does not provision an orchestrator Container App.</td>
+<td>Publishing the sticky topology and runtime contract, hosting UI/ingestion, and preparing immutable images. Hosted/no-panel does not provision an orchestrator Container App. Hosted continuity publishes only a Key Vault reference and grants Foundry Agent Consumer solely to the UI BFF at the individual agent scope after validation.</td>
 </tr>
 <tr>
-<td>Workload Key Vault and observability</td>
-<td>Default support, parameter-controlled or reusable</td>
-<td><code>deployKeyVault</code>, <code>deployLogAnalytics</code>, <code>deployAppInsights</code>, <code>EXISTING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID</code>, <code>EXISTING_APPLICATION_INSIGHTS_RESOURCE_ID</code>, <code>EXISTING_APPLICATION_INSIGHTS_CONNECTION_STRING</code></td>
-<td>Storing workload secrets and capturing telemetry. Application Insights is created or wired only when an effective Log Analytics workspace is available.</td>
+<td>Workload Key Vault, dedicated UI BFF Key Vault, and observability</td>
+<td>Default support plus a continuity-specific boundary</td>
+<td><code>deployKeyVault</code>, <code>HOSTED_CONTINUITY_KEY_VAULT_URI</code> or <code>HOSTED_CONTINUITY_KEY_VAULT_NAME</code>, <code>deployLogAnalytics</code>, <code>deployAppInsights</code>, <code>EXISTING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID</code>, <code>EXISTING_APPLICATION_INSIGHTS_RESOURCE_ID</code>, <code>EXISTING_APPLICATION_INSIGHTS_CONNECTION_STRING</code></td>
+<td>Storing workload secrets and capturing telemetry. Hosted continuity requires a separate UI BFF vault and secret-scoped read access; the shared workload vault and hosted runtime are excluded from the capability-key boundary. Application Insights is created or wired only when an effective Log Analytics workspace is available.</td>
 </tr>
 <tr>
 <td>Zero Trust private networking</td>

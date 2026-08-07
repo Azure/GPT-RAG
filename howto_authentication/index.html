@@ -449,6 +449,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../hosted_continuity_platform_contract/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hosted continuity platform contract
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../architecture_legacy_diagram_handoff/" class="md-nav__link">
         
   
@@ -890,6 +911,30 @@
       Concepts
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Concepts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hosted-conversation-ownership-boundary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hosted Conversation ownership boundary
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#classic-container-apps-token-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Classic Container Apps token flow
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1633,10 +1678,18 @@
 
 
 <h1 id="authentication-and-document-level-security">Authentication and Document-Level Security</h1>
-<p>This page explains how authentication works in GPT-RAG, from the GPT-RAG UI sign-in to querying Azure AI Search with document-level access control enabled (POSIX-like ACL / RBAC scopes). The key idea is intentionally simple: when authentication is configured, the UI forwards a single user token to the orchestrator, and the orchestrator takes responsibility for producing the correct “user context” token required by Azure AI Search.</p>
+<p>This page explains how authentication works in GPT-RAG, from the GPT-RAG UI sign-in to querying Azure AI Search with document-level access control enabled (POSIX-like ACL / RBAC scopes). The classic runtime forwards a user token to the orchestrator, which produces the correct user-context token for Azure AI Search. The upcoming hosted runtime preserves a stricter UI BFF ownership boundary described below.</p>
 <blockquote>
 <p>In OAuth mode, the orchestrator receives a user access token (for the orchestrator API) and then performs an On-Behalf-Of (OBO) exchange to obtain a separate token for Azure AI Search. The two tokens have different audiences and are not interchangeable.</p>
 </blockquote>
+<div class="admonition warning">
+<p class="admonition-title">Hosted continuity is a disabled platform contract</p>
+<p>The secure hosted-continuity contract merged in
+<a href="https://github.com/Azure/GPT-RAG/pull/630">PR #630</a>, but compatible
+component pins and owner-binding validation are not complete. Keep
+<code>HOSTED_CONTINUITY_ENABLED=false</code>; the current published release continues
+to use the classic flow documented on this page.</p>
+</div>
 <h2 id="embed-gpt-rag-in-a-portal">Embed GPT-RAG in a portal</h2>
 <p>To add GPT-RAG chat to an existing portal, follow the
 <a href="https://github.com/Azure/gpt-rag-ui/blob/1ef6f9e88022e3168b8caf9c867f090eb632f562/docs/copilot-embedding.md">Chainlit Copilot embedding guide</a>.
@@ -1650,6 +1703,20 @@ authenticated front door or gateway. Do not expose the internal Container
 App directly, and do not treat CORS or an origin allowlist as authentication.</p>
 </div>
 <h2 id="concepts">Concepts</h2>
+<h3 id="hosted-conversation-ownership-boundary">Hosted Conversation ownership boundary</h3>
+<p>For the upcoming compatible hosted topology, the UI BFF derives the caller
+<code>oid</code> from the authenticated server-side principal and exclusively creates and
+verifies an opaque owner-bound capability exchanged with the client. The UI BFF
+is also the only component allowed to create, read, append to, or delete Foundry
+managed Conversations.</p>
+<p>The hosted runtime receives neither the capability HMAC key nor the raw <code>oid</code>
+and has no Conversations data-plane RBAC. App Configuration contains only a Key
+Vault reference to a capability secret in a dedicated UI BFF vault. The UI BFF
+receives Foundry Agent Consumer only at the individual agent scope; this does
+not grant the hosted identity Conversation access. See the
+<a href="../hosted_continuity_platform_contract/">hosted conversation continuity platform contract</a>
+for the owner-validation gate, audience, TTL, role, and lifecycle requirements.</p>
+<h3 id="classic-container-apps-token-flow">Classic Container Apps token flow</h3>
 <p>GPT-RAG uses Microsoft Entra ID authentication end-to-end, and Azure <a href="https://learn.microsoft.com/en-us/azure/search/search-document-level-access-overview">AI Search document-level access control (POSIX-like ACL / RBAC scopes)</a> relies on three related steps:</p>
 <p>1) The UI signs the user in and sends an access token to the orchestrator. This token is meant for the orchestrator API.</p>
 <p>2) The orchestrator validates the incoming token (signature, issuer, and audience) and extracts the user identity (for example, user object ID). This is how the orchestrator knows which user is calling.</p>

@@ -449,6 +449,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../hosted_continuity_platform_contract/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hosted continuity platform contract
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../architecture_legacy_diagram_handoff/" class="md-nav__link">
         
   
@@ -1823,6 +1844,20 @@ names, never the omitted values. A successful redaction flag does not prove that
 all sensitive information was found, so producers must use allowlisted fields
 and bounded enums instead of trying to sanitize arbitrary objects.</p>
 <h2 id="retention-access-and-export">Retention, access, and export</h2>
+<p>Hosted continuity adds a separate bounded-history and key-retention boundary.
+The merged <a href="../hosted_continuity_platform_contract/">hosted conversation continuity platform contract</a>
+defaults to <code>HOSTED_CONTINUITY_ENABLED=false</code> pending compatible component pins
+and owner-binding validation. Its <code>HOSTED_HISTORY_MAX_ITEMS</code>,
+<code>HOSTED_HISTORY_MAX_TOKENS</code>, and mandatory <code>drop_oldest</code> behavior bound context
+supplied through the compatible runtime; they do not define how long Foundry
+Conversations must be retained or satisfy records-management obligations.</p>
+<p>When continuity is disabled with the platform-managed reference intact,
+reconciliation removes the Key Vault reference and the UI BFF's exact agent-
+and secret-scoped role assignments but deliberately retains capability-secret
+version history. Do not delete the reference out of band before reconciliation;
+setup uses it to resolve the exact secret scope. Operators must define when old
+secret versions and managed Conversations are deleted, who can perform those
+deletions, and what rollback or investigation period is required.</p>
 <p>GPT-RAG's current AI Landing Zone template configures the Log Analytics
 workspace for 30 days of retention. A reused workspace or table-level override
 can differ, so inspect the deployed settings rather than assuming the template
