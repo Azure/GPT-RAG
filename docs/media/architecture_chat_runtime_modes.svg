@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1000" viewBox="0 0 1400 1000" role="img" aria-labelledby="title desc">
   <title id="title">GPT-RAG chat runtime modes and hosted image preparation</title>
-  <desc id="desc">Comparison of the target hosted-no-panel default for fresh deployments and the explicit Container Apps fallback. The hosted path exchanges the signed-in user token on behalf of the user, calls the Foundry hosted agent with a delegated token, passes only opaque Foundry call context to Toolbox, and returns authorization-trimmed retrieval. Runtime failures do not silently switch modes. A separate two-phase deployment flow builds through public ACR Tasks or a dedicated private VNet agent pool, resolves an immutable digest, and then deploys the hosted handoff.</desc>
+  <desc id="desc">Comparison of the target hosted-no-panel default for fresh deployments and the explicit Container Apps fallback. The trusted UI BFF derives x-ms-user-identity for Responses 2.0.0 conversation ownership. The distinct OBO bearer token authorizes downstream retrieval. Only opaque Foundry call context reaches Toolbox. Runtime failures do not silently switch modes. A separate two-phase deployment flow builds through public ACR Tasks or a dedicated private VNet agent pool, resolves an immutable digest, and then deploys the hosted handoff.</desc>
   <defs>
     <marker id="arrow-blue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
       <path d="M2,2 L10,6 L2,10 Z" fill="#385a8d"/>
@@ -31,7 +31,7 @@
   <text x="50" y="75" class="subtitle">A deployment chooses one runtime. Identity, authorization, conversation, and cost semantics never change silently during a request.</text>
 
   <rect x="50" y="94" width="1300" height="44" rx="12" fill="#fff4ce" stroke="#f7630c" stroke-width="1.5"/>
-  <text x="72" y="121" class="status">Unreleased target: AILZ correction merged at cacf418; UI and AILZ tags, final pins, validation, and GPT-RAG release remain. v3.7.0 stays classic.</text>
+  <text x="72" y="121" class="status">Unreleased target: AILZ v2.5.0 published; OQ-OWN pivot, remaining pins, OWNER_BINDING_VALIDATED, and GPT-RAG release pending. Continuity off/503.</text>
 
   <rect x="50" y="162" width="1300" height="108" rx="20" fill="#edf7ff" stroke="#3f7dc7" stroke-width="2"/>
   <text x="74" y="191" class="section-title">Shared entry and topology selection</text>
@@ -52,13 +52,13 @@
   <text x="76" y="351" class="box-text">DEPLOYMENT_TOPOLOGY=hosted-no-panel | CHAT_BACKEND=hosted_agent | DEPLOY_ADMINISTRATIVE_PANEL=false</text>
 
   <rect x="82" y="382" width="204" height="82" rx="14" fill="#ffffff" stroke="#68ad82"/>
-  <text x="111" y="409" class="box-title">UI OBO exchange</text>
-  <text x="102" y="431" class="box-text">Signed-in user token</text>
-  <text x="98" y="451" class="box-text">to delegated data-plane token</text>
+  <text x="128" y="409" class="box-title">Trusted UI BFF</text>
+  <text x="99" y="431" class="box-text">Derives x-ms-user-identity</text>
+  <text x="119" y="451" class="box-text">not an OBO token</text>
 
   <rect x="342" y="382" width="220" height="82" rx="14" fill="#dff6dd" stroke="#107c10" stroke-width="2"/>
   <text x="375" y="409" class="box-title">Foundry Hosted Agent</text>
-  <text x="371" y="431" class="box-text">Responses / Invocations</text>
+  <text x="393" y="431" class="box-text">Responses 2.0.0</text>
   <text x="372" y="451" class="box-text">Managed Conversations</text>
 
   <rect x="618" y="382" width="224" height="82" rx="14" fill="#e8daef" stroke="#5c2d91" stroke-width="2"/>
@@ -67,19 +67,19 @@
   <text x="646" y="451" class="box-text">call context, not tokens</text>
 
   <path class="green-arrow" d="M286 423 L339 423"/>
-  <text x="292" y="407" class="small">delegated bearer</text>
+  <text x="296" y="407" class="small">owner header</text>
   <path class="green-arrow" d="M562 423 L615 423"/>
   <text x="568" y="407" class="small">x-agent-foundry-call-id</text>
 
   <rect x="180" y="516" width="570" height="112" rx="16" fill="#fff7ec" stroke="#dfaa57" stroke-width="2"/>
   <text x="314" y="546" class="box-title">Authorization-trimmed retrieval</text>
-  <text x="213" y="570" class="box-text">Toolbox resolves the opaque call context to the delegated user identity.</text>
-  <text x="220" y="592" class="box-text">Foundry IQ / Azure AI Search enforce native per-user document access.</text>
-  <text x="264" y="614" class="box-text">Missing or malformed context fails closed before retrieval.</text>
+  <text x="211" y="570" class="box-text">Toolbox resolves opaque context to the delegated retrieval identity.</text>
+  <text x="181" y="592" class="box-text">A separate OBO token lets Foundry IQ / AI Search enforce per-user access.</text>
+  <text x="203" y="614" class="box-text">Missing or malformed retrieval context fails closed before data access.</text>
   <path class="orange-arrow" d="M730 464 C730 490, 690 501, 650 514"/>
 
   <rect x="76" y="648" width="788" height="24" rx="10" fill="#fde7e9" stroke="#d13438"/>
-  <text x="98" y="665" class="small">No orchestrator Container App and no panel-only Cosmos DB. Hosted failure is terminal; rollback is an explicit deployment.</text>
+  <text x="98" y="665" class="small">Hosted runtime has no identity-header source, key, Conversation/impersonation RBAC, or Cosmos DB. Capability/HMAC fallback stays disabled.</text>
 
   <rect x="920" y="295" width="430" height="390" rx="22" fill="#f3f2f1" stroke="#605e5c" stroke-width="2.5" stroke-dasharray="9 6"/>
   <text x="946" y="328" class="section-title">Explicit Container Apps fallback</text>

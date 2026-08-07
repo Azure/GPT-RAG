@@ -33,13 +33,16 @@ and required-vs-configurable deployment table.
     fixed the local/CI size-gate defaults, and
     [PR #133](https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/133)
     merged the correction to `main`. AILZ `main` and `develop` now both point to
-    [`cacf418`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/commit/cacf418216ce7381d06263e0dd704a86b8a6f225),
-    but no AILZ `v2.5.0` tag or GitHub Release exists. UI `v2.6.0`, final
-    umbrella pins, integrated validation, and a new GPT-RAG release also remain
-    unpublished. The secure hosted-continuity platform contract merged in
-    [PR #630](https://github.com/Azure/GPT-RAG/pull/630), but it remains
-    disabled by default pending compatible component pins and completed
-    owner-binding validation. Current published GPT-RAG `v3.7.0` stays classic.
+    [`cacf418`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/commit/cacf418216ce7381d06263e0dd704a86b8a6f225).
+    AILZ [`v2.5.0`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.5.0)
+    is published. UI `v2.6.0`, final umbrella pins, integrated validation, and a
+    new GPT-RAG release remain unpublished. The capability-first continuity
+    contract from
+    [PR #630](https://github.com/Azure/GPT-RAG/pull/630) has been superseded by
+    the pending OQ-OWN delegated `x-ms-user-identity` architecture. The platform
+    pivot, compatible component pins, and `OWNER_BINDING_VALIDATED` gate are not
+    published, so continuity remains off and compatible history endpoints must
+    return HTTP 503. Current published GPT-RAG `v3.7.0` stays classic.
 
 ![Chat runtime modes and hosted deployment lifecycle](media/architecture_chat_runtime_modes.svg)
 

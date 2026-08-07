@@ -71,14 +71,17 @@ only after the release gates below are complete.
     [PR #133](https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/133)
     merged that correction to `main`. AILZ `main` and `develop` now both point
     to [`cacf418`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/commit/cacf418216ce7381d06263e0dd704a86b8a6f225).
-    No AILZ `v2.5.0` tag or GitHub Release exists; UI `v2.6.0` is also
-    unpublished. The secure hosted-continuity platform contract merged in
-    [PR #630](https://github.com/Azure/GPT-RAG/pull/630), but it is disabled by
-    default and still awaits compatible component pins and completed
-    owner-binding validation. Final umbrella pins, integrated validation, and a
-    new GPT-RAG release remain. Current published GPT-RAG `v3.7.0` stays
-    classic. Use this workflow only with the release that explicitly announces
-    the hosted-default contract.
+    AILZ [`v2.5.0`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.5.0)
+    is published; UI `v2.6.0` remains unpublished. The capability-first
+    continuity contract merged in
+    [PR #630](https://github.com/Azure/GPT-RAG/pull/630), but live OQ-OWN
+    evidence supersedes it with delegated `x-ms-user-identity`. The platform
+    pivot, compatible component pins, and `OWNER_BINDING_VALIDATED` gate are not
+    published. Continuity remains off and compatible history endpoints must
+    return HTTP 503. Final umbrella pins, integrated validation, and a new
+    GPT-RAG release remain. Current published GPT-RAG `v3.7.0` stays classic.
+    Use this workflow only with the release that explicitly announces the
+    hosted-default contract.
 
 The upcoming release resolves one canonical topology before provisioning and
 materializes the corresponding legacy flags and App Configuration values.
@@ -104,9 +107,9 @@ Configuration label `gpt-rag`:
 | `DEPLOYMENT_TOPOLOGY` | Canonical deployment choice: `hosted-no-panel` or `classic`. `hosted-panel` fails closed while #611 is open. |
 | `CHAT_BACKEND` | The upcoming UI release treats missing or blank as `hosted_agent`; the umbrella deployment always publishes the resolved sticky value. `orchestrator` is the explicit fallback. Unknown values fail startup. Environment configuration takes precedence over App Configuration. |
 | `ORCHESTRATOR_BASE_URL` | Classic service root, used only when `CHAT_BACKEND=orchestrator`. The UI calls the `/orchestrator` route on this endpoint. |
-| `HOSTED_AGENT_BASE_URL` | Required HTTPS hosted service root. The UI sends canonical Responses protocol v2 requests to `POST /responses` when `CHAT_BACKEND=hosted_agent`. The separate `POST /invocations` endpoint retains the legacy messages-based invocation contract. |
+| `HOSTED_AGENT_BASE_URL` | Required HTTPS hosted service root. The pending OQ-OWN UI sends Responses protocol `2.0.0` requests to `POST /responses` when `CHAT_BACKEND=hosted_agent`. The separate `POST /invocations` endpoint retains the legacy messages-based invocation contract but does not satisfy delegated continuity. |
 | `HOSTED_AGENT_RESOURCE_SCOPE` | Required explicit non-ARM hosted data-plane Entra scope ending in `/.default`, for example `api://<application-id>/.default`. |
-| `HOSTED_AGENT_AUTH_MODE` | `user_delegated` is the default and required release path. The UI exchanges the signed-in user's token on behalf of the user. `service_identity` is an explicit reviewed exception, never an implicit fallback. |
+| `HOSTED_AGENT_AUTH_MODE` | `user_delegated` is the default and required continuity path. Under OQ-OWN, it means the trusted UI BFF derives `x-ms-user-identity`; it does not mean an OBO token is sent to the agent. OBO remains a separate retrieval flow. `service_identity` is an explicit reviewed exception that is incompatible with owner-bound continuity, so continuity stays off/503 in that mode. |
 | `HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS` | Finite positive wait for the next SSE event. The UI default is `60`; an infinite timeout is rejected. |
 | `HOSTED_AGENT_IMAGE_VERSION` | Canonical lowercase immutable digest in `sha256:<64-hex-characters>` form. Mutable tags are rejected. |
 | `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` | Generative-AI prompt and completion telemetry capture. Defaults to `false`. Set to `true` only when the deployment's data-handling policy explicitly permits sensitive content telemetry. |
@@ -119,50 +122,52 @@ tokens are not copied into tool payloads or client-defined identity headers.
 
 #### Hosted conversation continuity platform gate
 
-!!! danger "Do not enable with unpublished or incompatible components"
-    `HOSTED_CONTINUITY_ENABLED` defaults to `false` and must stay false until a
-    compatible UI BFF and hosted runtime are pinned and
-    `HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true` has been established by
-    integrated validation. The merged platform contract does not make the
-    current published release continuity-compatible.
+!!! danger "Delegated owner binding is pending"
+    `HOSTED_CONTINUITY_ENABLED` defaults to `false` and must stay false until the
+    OQ-OWN platform pivot and compatible components are published. The
+    deployment must prove Responses protocol `2.0.0`, trusted UI BFF identity
+    derivation, and the two exact direct agent-scoped roles before recording
+    `OWNER_BINDING_VALIDATED=true`. Otherwise compatible history endpoints
+    return HTTP 503.
 
-The UI BFF exclusively creates, reads, appends to, and deletes Foundry managed
-Conversations and creates and verifies the owner-bound capability. The hosted
-runtime gets no HMAC key, raw caller `oid`, or Conversations RBAC. App
-Configuration stores only `HOSTED_CONVERSATION_CAPABILITY_KEY` as a reference
-to the capability secret in a dedicated UI BFF Key Vault.
+The trusted UI BFF derives `x-ms-user-identity` from the authenticated
+server-side principal and sends it on the hosted Responses request. This owner
+header is not an OBO token: OBO remains a separate downstream retrieval flow
+with its own audience and bearer token.
 
-| Setting | Default | Accepted contract |
-| --- | --- | --- |
-| `HOSTED_CONTINUITY_ENABLED` | `false` | Requires hosted topology, `CHAT_BACKEND=hosted_agent`, Key Vault deployment, and validated owner binding. |
-| `HOSTED_CONVERSATION_OWNER_BINDING` | `capability` | Must remain `capability`. |
-| `HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED` | `false` | Must be exactly `true` before activation is permitted. |
-| `HOSTED_CONVERSATIONS_TOKEN_AUDIENCE` | `https://ai.azure.com` | Exact Foundry Conversations audience. |
-| `HOSTED_CONVERSATION_CAPABILITY_KEY_ID` | `v1` | Safe 1-64 character non-secret key-version identifier. |
-| `HOSTED_CONVERSATION_CAPABILITY_TTL_SECONDS` | `900` | 60-3,600 seconds. |
-| `HOSTED_HISTORY_MAX_ITEMS` | `100` | 1-1,000 items. |
-| `HOSTED_HISTORY_MAX_TOKENS` | `32000` | 1-1,000,000 tokens. |
-| `HOSTED_HISTORY_TRUNCATION` | `drop_oldest` | The only accepted history overflow policy. |
+Activation assigns only the UI BFF:
 
-Provide the dedicated vault through
-`HOSTED_CONTINUITY_KEY_VAULT_URI=https://<name>.vault.azure.net/` or
-`HOSTED_CONTINUITY_KEY_VAULT_NAME=<name>`. Reusing the shared workload
-`KEY_VAULT_URI` is rejected. Activation assigns built-in **Foundry Agent
-Consumer** (`eed3b665-ab3a-47b6-8f48-c9382fb1dad6`) only to the UI BFF at the
-individual agent scope and secret-read access only at the individual capability
-secret. Broader, inherited, group-derived, or custom access fails validation.
+- built-in **Foundry Agent Consumer**
+  (`eed3b665-ab3a-47b6-8f48-c9382fb1dad6`); and
+- the exact GPT-RAG custom role containing only the reviewed
+  `Microsoft.CognitiveServices/accounts/AIServices/agents/endpoints/UserIdentityImpersonation/action`
+  DataAction.
 
-Post-provisioning seeds configuration while continuity remains disabled.
-Activation runs only after the hosted agent exists. With the platform-managed
-reference intact, disabled reconciliation removes that reference and the exact
-UI BFF agent- and secret-scoped role assignments while retaining capability
-secret version history in Key Vault. Do not delete the reference out of band
-before reconciliation because setup uses it to resolve the exact secret scope.
-See the
+Both assignments must be direct and scoped to the individual hosted agent.
+Broader, inherited, group-derived, wildcard, or extra-DataAction access fails
+validation. The hosted runtime is not an identity-header source and receives no
+key, Conversation or impersonation RBAC, or Cosmos DB in hosted/no-panel.
+
+| Setting or gate | Required posture |
+| --- | --- |
+| `HOSTED_CONTINUITY_ENABLED` | `false` until delegated owner binding validates; false/missing validation means history HTTP 503. |
+| `OWNER_BINDING_VALIDATED` | Becomes `true` only after the live protocol, identity-source, role-definition, assignment, and scope checks pass. |
+| `HOSTED_CONVERSATIONS_TOKEN_AUDIENCE` | Exact Foundry audience `https://ai.azure.com`; distinct from `x-ms-user-identity` and downstream OBO audiences. |
+| `HOSTED_HISTORY_MAX_ITEMS` | Default `100`; accepted range 1-1,000. |
+| `HOSTED_HISTORY_MAX_TOKENS` | Default `32000`; accepted range 1-1,000,000. |
+| `HOSTED_HISTORY_TRUNCATION` | Must be `drop_oldest`. |
+
+Capability/HMAC is a disabled fallback only. The delegated primary path does
+not create a capability key, require
+`HOSTED_CONTINUITY_KEY_VAULT_URI`/`HOSTED_CONTINUITY_KEY_VAULT_NAME`, publish
+`HOSTED_CONVERSATION_CAPABILITY_KEY`, or grant a capability-secret role.
+Fallback key ID, TTL, vault, reference, and retained key-history behavior apply
+only if a future release explicitly selects and validates capability mode. See
+the
 [hosted conversation continuity platform contract](hosted_continuity_platform_contract.md)
 for the complete trust and rollout boundary.
 
-`POST /responses` and `POST /invocations` are distinct protocols, not aliases, and their request bodies are not interchangeable. Microsoft Foundry hosts the canonical Responses protocol v2 route through `azure-ai-agentserver-responses`. It accepts a non-empty string `input`; set `stream` to `true` for an SSE lifecycle or `false` for a synchronous JSON response. `store` accepts `true` or `false`, and `background` enables background execution. The route also supports `previous_response_id`, string-valued `metadata`, and the platform-injected `agent_reference`.
+`POST /responses` and `POST /invocations` are distinct protocols, not aliases, and their request bodies are not interchangeable. Microsoft Foundry hosts the Responses protocol `2.0.0` route through `azure-ai-agentserver-responses`. It accepts a non-empty string `input`; set `stream` to `true` for an SSE lifecycle or `false` for a synchronous JSON response. `store` accepts `true` or `false`, and `background` enables background execution. The route also supports `previous_response_id`, string-valued `metadata`, and the platform-injected `agent_reference`.
 
 Managed `conversation` accepts either a non-empty id string or an object containing only `{"id": "<non-empty-id>"}`. `conversation` and `previous_response_id` are mutually exclusive to prevent history from crossing conversation boundaries. Invalid conversation identifiers are rejected rather than creating a new thread. List and multimodal input are rejected, as are request fields outside the supported Responses contract.
 
@@ -198,7 +203,7 @@ The compatibility `POST /invocations` route retains the legacy messages-based sc
 
 The Responses route returns either SSE or synchronous JSON according to `stream`; the legacy Invocations route streams SSE. Each validates its own protocol-specific input before entering the shared hosted execution path. See the Microsoft Foundry [hosted-agent protocol comparison](https://learn.microsoft.com/azure/foundry/agents/concepts/hosted-agents#key-concepts).
 
-Responses protocol v2 also owns the stored-response lifecycle:
+Responses protocol `2.0.0` also owns the stored-response lifecycle:
 
 | Route | Purpose |
 | --- | --- |

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820" role="img" aria-labelledby="title desc">
   <title id="title">GPT-RAG hosted-default Basic Deployment target architecture</title>
-  <desc id="desc">Target fresh-deployment architecture. The platform implementation is merged but unreleased pending component and AI Landing Zone tags, final umbrella pins, integrated validation, and a GPT-RAG release. Users access the Web UI in Azure Container Apps. The UI uses delegated on-behalf-of authorization to call a Microsoft Foundry hosted agent, which passes opaque call context to Toolbox and MCP tools for authorization-trimmed retrieval. Ingestion remains in Container Apps. The orchestrator Container App is shown only as an explicit deployment fallback, with no request-time silent fallback. The administrative panel is absent.</desc>
+  <desc id="desc">Target fresh-deployment architecture. AILZ v2.5.0 is published, but the OQ-OWN platform pivot, remaining component pins, owner-binding validation, integrated validation, and a GPT-RAG release are pending. The trusted UI BFF derives x-ms-user-identity and calls the Microsoft Foundry hosted agent using Responses 2.0.0. A distinct OBO bearer token authorizes downstream retrieval. The hosted runtime receives no identity-header source, key, Conversation or impersonation RBAC, or Cosmos DB. Ingestion remains in Container Apps. The orchestrator Container App is shown only as an explicit deployment fallback, with no request-time silent fallback. The administrative panel is absent.</desc>
   <defs>
     <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
       <path d="M2,2 L10,6 L2,10 Z" fill="#385a8d"/>
@@ -28,7 +28,7 @@
   <text x="46" y="72" class="subtitle">Fresh deployments use hosted/no-panel after release gates pass; UI and ingestion remain in Azure Container Apps.</text>
 
   <rect x="46" y="91" width="1188" height="42" rx="12" fill="#fff4ce" stroke="#f7630c" stroke-width="1.5"/>
-  <text x="66" y="117" class="status">Unreleased target: AILZ correction merged at cacf418; UI and AILZ tags, final pins, validation, and GPT-RAG release remain. v3.7.0 stays classic.</text>
+  <text x="66" y="117" class="status">Unreleased target: AILZ v2.5.0 published; OQ-OWN pivot, remaining pins, OWNER_BINDING_VALIDATED, and GPT-RAG release pending. Off/503.</text>
 
   <rect x="46" y="153" width="1188" height="312" rx="22" fill="#ffffff" stroke="#d8e3f5" stroke-width="2"/>
   <text x="70" y="181" class="zone-title">Request path</text>
@@ -41,8 +41,8 @@
   <rect x="270" y="192" width="350" height="126" rx="18" fill="#edf7ff" stroke="#3f7dc7" stroke-width="2"/>
   <text x="292" y="218" class="zone-title">Azure Container Apps</text>
   <rect x="292" y="235" width="132" height="62" rx="12" fill="#ffffff" stroke="#4d89d8" stroke-width="1.7"/>
-  <text x="328" y="262" class="box-title">Web UI</text>
-  <text x="309" y="283" class="box-text">Chat BFF + OBO</text>
+  <text x="308" y="262" class="box-title">Trusted UI BFF</text>
+  <text x="302" y="283" class="box-text">Owner header source</text>
   <rect x="447" y="235" width="150" height="62" rx="12" fill="#ffffff" stroke="#4d89d8" stroke-width="1.7"/>
   <text x="486" y="262" class="box-title">Ingestion</text>
   <text x="466" y="283" class="box-text">Indexes content</text>
@@ -50,7 +50,7 @@
   <rect x="675" y="192" width="250" height="126" rx="18" fill="#dff6dd" stroke="#107c10" stroke-width="2.5"/>
   <text x="700" y="219" class="zone-title">Microsoft Foundry</text>
   <text x="704" y="248" class="box-title">Hosted Agent</text>
-  <text x="704" y="270" class="box-text">Fresh-deployment target</text>
+  <text x="704" y="270" class="box-text">Responses 2.0.0</text>
   <text x="704" y="291" class="box-text">Managed Conversations</text>
 
   <rect x="980" y="192" width="220" height="126" rx="18" fill="#e8daef" stroke="#5c2d91" stroke-width="2"/>
@@ -61,7 +61,7 @@
 
   <path class="arrow" d="M220 255 L290 255"/>
   <path class="hosted-arrow" d="M424 255 L672 255"/>
-  <text x="477" y="239" class="small">delegated user OBO</text>
+  <text x="438" y="239" class="small">x-ms-user-identity; Responses 2.0.0</text>
   <path class="hosted-arrow" d="M925 255 L977 255"/>
   <text x="931" y="238" class="small">opaque context</text>
 
@@ -79,10 +79,11 @@
   <text x="93" y="592" class="box-text">Sticky topology</text>
   <rect x="235" y="545" width="165" height="62" rx="12" fill="#ffffff" stroke="#86aee5"/>
   <text x="273" y="571" class="box-title">Key Vault</text>
-  <text x="255" y="592" class="box-text">Secrets / OBO config</text>
+  <text x="253" y="592" class="box-text">Workload secrets only</text>
   <rect x="70" y="628" width="330" height="70" rx="12" fill="#ffffff" stroke="#86aee5"/>
-  <text x="135" y="655" class="box-title">Managed identity, delegated identity, and RBAC</text>
-  <text x="113" y="678" class="box-text">Explicit scopes; fail closed on missing authorization context</text>
+  <text x="145" y="655" class="box-title">Direct agent-scoped UI BFF roles</text>
+  <text x="103" y="676" class="box-text">Agent Consumer + exact impersonation DataAction</text>
+  <text x="151" y="692" class="small">OWNER_BINDING_VALIDATED or 503</text>
 
   <rect x="450" y="493" width="474" height="238" rx="20" fill="#fff7ec" stroke="#dfaa57" stroke-width="2"/>
   <text x="474" y="523" class="zone-title">Authorization-trimmed data and AI path</text>
@@ -112,5 +113,5 @@
   <text x="1028" y="678" class="box-text">Logs and diagnostics</text>
 
   <rect x="46" y="757" width="1188" height="40" rx="12" fill="#fde7e9" stroke="#d13438"/>
-  <text x="68" y="782" class="status">Administrative panel is absent in hosted/no-panel and DEPLOY_ADMINISTRATIVE_PANEL remains false. Hosted/panel stays blocked by issue #611.</text>
+  <text x="68" y="782" class="status">Hosted runtime has no owner-header source, key, Conversation/impersonation RBAC, or Cosmos. Capability/HMAC fallback remains disabled.</text>
 </svg>
