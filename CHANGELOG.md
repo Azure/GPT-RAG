@@ -35,6 +35,30 @@
   fails closed pending the remaining gpt-rag-ingestion operator-surface work;
   this change is the platform-layer prerequisite, with no other runtime
   behavior change.
+- **Hosted panel operator-surface App Configuration keys (issue #611,
+  ADR-0004, reconciling gpt-rag-ingestion PR #274, merge
+  `5569dd6af3ecb317e1037108cb21859f1b2185a1`).** Added
+  `PANEL_OPERATOR_SURFACES_ENABLED` (forced `false`, mirroring
+  `PANEL_HISTORY_OWNER_BINDING_VALIDATED`'s no-evidence-gate-yet pattern),
+  `PANEL_OPERATOR_APP_ROLE` (`""`), and `PANEL_OPERATOR_GROUP_ID` (`""`) to
+  `config.panel.settings`, matching exactly the App Configuration keys the
+  now-merged `gpt-rag-ingestion` operator overview/corpus-curation surfaces
+  consume — no invented keys, no key set true. `PANEL_OVERVIEW_MIN_CARDINALITY`
+  (`5`), `PANEL_CURSOR_TTL_SECONDS` (`600`), and the panel Cosmos container
+  keys were already published with matching defaults and needed no change.
+  `DATABASE_ACCOUNT_NAME`/`DATABASE_NAME`/`STORAGE_ACCOUNT_NAME` and the
+  reserved per-app `DATA_INGEST_APP_APIKEY` Key Vault reference are already
+  published unconditionally by the AI Landing Zone submodule and are not
+  duplicated here. Added `config/panel/tests/test_operator_contract.py`, an
+  explicit expected-key-set fixture guarding against future drift between
+  this repository's published defaults and what `gpt-rag-ingestion` (PR #274)
+  and `gpt-rag-ui` (PR #99) actually consume. Updated ADR-0004's adoption
+  status: the ingestion operator-surface component work is now done: the
+  `DEPLOY_ADMINISTRATIVE_PANEL=true` topology gate remains fail-closed
+  (`HostedPanelUnsupportedError`) as a deliberate, separate decision gated on
+  the still-open live evidence-gate procedures, not on any remaining
+  component implementation. No manifest/pin or release change in this
+  revision.
 - **Deterministic deployment topologies.** Classic, hosted/no-panel, and
   hosted/panel remain recognized topology values, but only classic and
   hosted/no-panel are currently deployable. `DEPLOY_ADMINISTRATIVE_PANEL`

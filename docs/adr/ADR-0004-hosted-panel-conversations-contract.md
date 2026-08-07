@@ -4,14 +4,20 @@
 boundary is merged in gpt-rag-orchestrator **PR #308**, merge
 `a828253b85c6ed7a63f6085c1666f75a9ca2b7d8`; the gpt-rag-ui user-facing
 history/feedback/deletion surfaces are merged in gpt-rag-ui **PR #99**, merge
-`ee3b53b29019e675c1e9ff19ee607cea361e5a8e` (not yet reflected in
+`ee3b53b29019e675c1e9ff19ee607cea361e5a8e`; the gpt-rag-ingestion
+operator-facing overview/corpus-curation surfaces are merged in
+gpt-rag-ingestion **PR #274**, merge
+`5569dd6af3ecb317e1037108cb21859f1b2185a1` (neither is yet reflected in
 `manifest.json`'s pin); the Azure/GPT-RAG platform layer — the versioned
 `contracts/conversations-panel-v1` schema, the panel Cosmos container/RBAC
 composition helpers (`config.deployment.composition.panel_database_containers`,
-`config.panel.setup`), and the App Configuration keys — is implemented as of
-this revision; the gpt-rag-ingestion operator surfaces and the coordinated
-`manifest.json` pin bump that lifts the `DEPLOY_ADMINISTRATIVE_PANEL=true`
-fail-closed gate remain pending as adoption work — see "Adoption and
+`config.panel.setup`), and the App Configuration keys, including the
+ingestion operator-surface keys (`PANEL_OPERATOR_SURFACES_ENABLED`,
+`PANEL_OPERATOR_APP_ROLE`, `PANEL_OPERATOR_GROUP_ID`) — is implemented as of
+this revision; the coordinated `manifest.json` pin bump that would lift the
+`DEPLOY_ADMINISTRATIVE_PANEL=true` fail-closed gate remains pending as
+adoption work, now gated on the still-open evidence-gate procedures below
+rather than on any remaining component implementation — see "Adoption and
 migration")<br>
 **Date:** 2026-08-07<br>
 **Owners:** GPT-RAG maintainer (Paulo), architecture analysis, with gpt-rag-ui,
@@ -742,8 +748,11 @@ Coordinated, ordered change (compatible-commit discipline per AGENTS.md):
    `PANEL_CONVERSATION_ENUMERATION_MODE`, `PANEL_CONVERSATIONS_TOKEN_AUDIENCE`,
    `PANEL_CONVERSATIONS_TENANT_ID`, `PANEL_OWNER_INDEX_DATABASE_CONTAINER`,
    `PANEL_FEEDBACK_DATABASE_CONTAINER`, `PANEL_CURSOR_TTL_SECONDS`,
-   `PANEL_OVERVIEW_MIN_CARDINALITY`) are published by
-   `config.panel.settings.public_settings`, merged into
+   `PANEL_OVERVIEW_MIN_CARDINALITY`, and — matching the now-merged
+   gpt-rag-ingestion operator surfaces (PR #274) exactly —
+   `PANEL_OPERATOR_SURFACES_ENABLED` (forced `false`),
+   `PANEL_OPERATOR_APP_ROLE` (`""`), `PANEL_OPERATOR_GROUP_ID` (`""`)) are
+   published by `config.panel.settings.public_settings`, merged into
    `compose_parameters`'s `additionalAppConfigurationSettings`. The panel Cosmos
    containers (owner index, feedback — metadata only, `/principal_id`
    partitioned) are composed by
@@ -760,9 +769,12 @@ Coordinated, ordered change (compatible-commit discipline per AGENTS.md):
    here. **`DEPLOY_ADMINISTRATIVE_PANEL=true` (hosted-panel topology
    selection) still fails closed** at `config.deployment.topology`/
    `composition` (`HostedPanelUnsupportedError`) and `manifest.json` is not
-   repinned in this revision — both remain gated on the still-pending
-   gpt-rag-ingestion operator-surface work below, consistent with "no runtime
-   behavior change yet."
+   repinned in this revision. Unlike the previous revision, this is no longer
+   blocked on remaining `gpt-rag-ingestion` component work — that work has
+   landed (PR #274) — but on the still-open evidence-gate procedures for
+   `PANEL_HISTORY_OWNER_BINDING_VALIDATED` and the newly forced-false
+   `PANEL_OPERATOR_SURFACES_ENABLED` (see "Review trigger" below), consistent
+   with "no runtime behavior change yet."
 2. **gpt-rag-orchestrator** — make the hosted agent/container **stateless**:
    remove any managed-Conversations read/append/persist from the container and
    confirm it consumes only the BFF-supplied complete ordered input. Remove any
@@ -793,6 +805,30 @@ Coordinated, ordered change (compatible-commit discipline per AGENTS.md):
    replacing the 501 for those surfaces; **no conversation-content access or
    conversation-content curation**; fail-closed 503 when gated off; operator-role
    check plus existing bearer patterns.
+
+   **Status (this revision): done.** Merged in gpt-rag-ingestion **PR #274**,
+   merge `5569dd6af3ecb317e1037108cb21859f1b2185a1`: `GET
+   /panel/overview/metrics` (aggregate `COUNT(1)` Cosmos Data Reader reads
+   over the owner-index/feedback panel containers, suppressed below
+   `PANEL_OVERVIEW_MIN_CARDINALITY`), `GET /panel/corpus-curation/queue`, and
+   `POST /panel/corpus-curation/{item_id}/decision` (decisions persisted to
+   the existing per-file-log blob control store via Blob Storage ETag
+   optimistic concurrency, not Cosmos — this identity's Cosmos grant is
+   Data Reader only). Fails closed (503) unless
+   `DEPLOY_ADMINISTRATIVE_PANEL=true`, `PANEL_OPERATOR_SURFACES_ENABLED=true`,
+   and an explicit `PANEL_OPERATOR_APP_ROLE`/`PANEL_OPERATOR_GROUP_ID` is
+   configured; every endpoint requires a validated delegated operator bearer
+   (app-only tokens always rejected). No new Conversations-data-plane RBAC
+   or Key Vault secret was introduced (cursor signing reuses
+   `DATA_INGEST_APP_APIKEY`). This platform repository now publishes
+   `PANEL_OPERATOR_SURFACES_ENABLED` (forced `false`), `PANEL_OPERATOR_APP_ROLE`,
+   and `PANEL_OPERATOR_GROUP_ID` with matching names and safe defaults (see
+   `contracts/README.md`); the ingestion identity's Cosmos RBAC (Data Reader
+   only, container-scoped, no Conversations role) is asserted structurally by
+   `config.panel.setup`/`tests/test_deployment_modes.py`
+   (`test_dataingest_loses_account_scope_cosmos_role_in_hosted_mode`) and
+   `config/panel/tests/test_setup.py`
+   (`test_frontend_gets_contributor_ingestion_gets_reader`).
 5. Revalidate in Basic and network-isolated topologies; run the two-user negative
    suite, the direct-caller anti-spoof test, the **capability
    theft/expiry/rotation** test, and (once each ADR's own gate is met)

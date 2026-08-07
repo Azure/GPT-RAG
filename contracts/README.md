@@ -169,15 +169,32 @@ safely inert by `config.panel.settings.public_settings`; matches the merged
 | `PANEL_OVERVIEW_MIN_CARDINALITY` | `5` | Operator overview metric bucket-suppression threshold. |
 
 Operator-role authorization for the ingestion admin surfaces reuses
-ingestion's existing admin-dashboard bearer/role pattern; this repository
-does not introduce a separate config key for it, to avoid inventing a
-duplicate the ingestion implementation does not (yet) define.
+ingestion's existing admin-dashboard bearer/role pattern (the same
+`OAUTH_AZURE_AD_TENANT_ID`/`OAUTH_AZURE_AD_CLIENT_ID` pair `require_admin`
+validates); this repository does not introduce a separate audience/config
+key for token validation. `gpt-rag-ingestion` PR #274 (merge
+`5569dd6af3ecb317e1037108cb21859f1b2185a1`) does define the operator
+authorization *inputs* below (`PANEL_OPERATOR_SURFACES_ENABLED`,
+`PANEL_OPERATOR_APP_ROLE`, `PANEL_OPERATOR_GROUP_ID`), which this repository
+now publishes with matching names and safe defaults -- no invented
+duplicates.
 
-As of this change, hosted-panel topology selection (`DEPLOY_ADMINISTRATIVE_PANEL=true`)
-still fails closed at `config.deployment.topology`/`composition` pending the
-remaining `gpt-rag-ingestion` operator-surface work tracked by
-[issue #611](https://github.com/Azure/gpt-rag/issues/611); this contract,
-the Cosmos container/RBAC composition helpers, and the App Configuration
-keys are the platform-layer prerequisites that let that gate lift without
-further GPT-RAG-repository changes once the remaining component work lands.
+| Key | Default | Notes |
+| --- | --- | --- |
+| `PANEL_OPERATOR_SURFACES_ENABLED` | `false` (forced) | Gates the ingestion operator overview/corpus-curation endpoints (fail-closed 503). Forced `false` here the same way `PANEL_HISTORY_OWNER_BINDING_VALIDATED` is: no dedicated evidence-gate verification procedure ships in this change, even though the ingestion component work itself (PR #274) has landed. |
+| `PANEL_OPERATOR_APP_ROLE` | `""` | Operator Entra app role name (`roles` claim); a plain operator input, published empty and safely overridable once an operator is ready to name a real role. |
+| `PANEL_OPERATOR_GROUP_ID` | `""` | Operator Entra group object id (`groups` claim); same as above. At least one of role/group must be set (in addition to `PANEL_OPERATOR_SURFACES_ENABLED=true`) before ingestion's operator surfaces stop returning 503. |
+
+As of this change, hosted-panel topology selection
+(`DEPLOY_ADMINISTRATIVE_PANEL=true`) still fails closed at
+`config.deployment.topology`/`composition`
+(`HostedPanelUnsupportedError`); this is now a **deliberate, separate**
+decision distinct from component readiness -- the `gpt-rag-ingestion`
+operator-surface component work this platform contract was blocking on has
+landed (PR #274). Lifting the topology gate and repinning `manifest.json`
+for all changed components together remain their own coordinated follow-up,
+gated on the still-pending live evidence procedures for
+`PANEL_HISTORY_OWNER_BINDING_VALIDATED` and `PANEL_OPERATOR_SURFACES_ENABLED`
+(see ADR-0004's "Adoption and migration" and "Review trigger" sections),
+not on any further GPT-RAG-repository platform-contract change.
 
