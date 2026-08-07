@@ -6,13 +6,15 @@ The trusted UI BFF derives `x-ms-user-identity` from the authenticated
 server-side principal and sends it on the hosted Responses request. This is the
 preferred and default continuity architecture.
 
-!!! danger "Pivot merged; release gate remains closed"
+!!! danger "Component matrix published; umbrella gate remains closed"
     The OQ-OWN platform pivot merged in
     [PR #633](https://github.com/Azure/GPT-RAG/pull/633) at
     [`86b17b0`](https://github.com/Azure/GPT-RAG/commit/86b17b0af672edefe6842cba0f1a8ff77ab23038),
-    but compatible component pins and a GPT-RAG release are not published yet.
-    Keep `HOSTED_CONTINUITY_ENABLED=false`. Until deployment proves the exact
-    owner-binding role and protocol contract and records
+    and UI `v2.6.0`, orchestrator `v4.0.0`, ingestion `v2.7.0`, and AILZ
+    `v2.5.0` are now published. GPT-RAG has not published an umbrella release
+    that pins and validates them together. Keep `HOSTED_CONTINUITY_ENABLED=false`.
+    Until deployment proves the exact owner-binding role and protocol contract
+    and records
     `HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true`, continuity endpoints
     must fail closed with HTTP 503 rather than use an unvalidated owner path.
 
@@ -20,6 +22,11 @@ The previous capability/HMAC design is not the primary path. It remains a
 disabled fallback only. A primary delegated deployment does not create a
 capability key, require a dedicated continuity Key Vault, or publish a
 capability Key Vault reference.
+
+See the [hosted-agent component release matrix](hosted_agent_release_matrix.md)
+for the exact release commits, stateless `/responses` behavior, user and
+operator endpoints, Cosmos confinement, current browser operator authentication
+status, and rollback procedure.
 
 ## Primary delegated trust boundary
 
@@ -111,6 +118,10 @@ controls:
 
 The history bounds limit context supplied through the compatible hosted path.
 They do not define records retention, legal hold, backup, or deletion policy.
+UI `v2.6.0` falls back locally to 40 items and 8,000 tokens if these values are
+absent; the pending platform contract publishes 100 and 32,000. The umbrella
+release must publish the reviewed platform values rather than rely on UI
+fallbacks.
 
 ## Disabled capability/HMAC fallback
 
@@ -159,9 +170,10 @@ delegated-only deployment has no capability reference or secret role to remove.
 
 ## Release and rollout gate
 
-Do not enable this contract against the current published classic component set
-or the capability-first platform implementation alone. A release may enable
-delegated continuity only after all of the following are true:
+Do not enable this contract by combining the published component tags manually
+or against the capability-first platform implementation alone. A GPT-RAG
+umbrella release may enable delegated continuity only after all of the following
+are true:
 
 1. The OQ-OWN platform pivot from PR #633 is present.
 2. The UI BFF derives `x-ms-user-identity` from the authenticated server-side
@@ -170,7 +182,7 @@ delegated continuity only after all of the following are true:
 4. The two exact direct agent-scoped UI BFF roles pass live validation.
 5. The hosted runtime has no identity-header source, key, Conversation or
    impersonation RBAC, or Cosmos dependency in hosted/no-panel.
-6. Compatible component and umbrella pins are published and validated together.
+6. The exact component and umbrella pins are published and validated together.
 
 Until those gates pass, `HOSTED_CONTINUITY_ENABLED=false` and HTTP 503 are the
 required operational behavior.

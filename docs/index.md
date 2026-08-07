@@ -20,33 +20,14 @@ chat runtime and retains the Container Apps orchestrator as an explicit
 fallback. See the [Architecture](architecture.md) page for the mode contract
 and required-vs-configurable deployment table.
 
-!!! warning "Hosted-default release dependency"
-    The diagram below is the approved target, not shipped behavior. The
-    platform implementation merged in
-    [Azure/GPT-RAG PR #617](https://github.com/Azure/GPT-RAG/pull/617). UI
-    release [PR #94](https://github.com/Azure/gpt-rag-ui/pull/94) merged. AI
-    Landing Zone
-    [PR #131](https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/131)
-    initially stamped and merged the unpublished `v2.5.0` state as
-    [`a6ae728`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/commit/a6ae7284d654abb7ec53810cb8765b2975b51baa);
-    [PR #132](https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/132)
-    fixed the local/CI size-gate defaults, and
-    [PR #133](https://github.com/Azure/bicep-ptn-aiml-landing-zone/pull/133)
-    merged the correction to `main`. AILZ `main` and `develop` now both point to
-    [`cacf418`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/commit/cacf418216ce7381d06263e0dd704a86b8a6f225).
-    AILZ [`v2.5.0`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.5.0)
-    is published. UI `v2.6.0`, final umbrella pins, integrated validation, and a
-    new GPT-RAG release remain unpublished. The capability-first continuity
-    contract from
-    [PR #630](https://github.com/Azure/GPT-RAG/pull/630) has been superseded by
-    the OQ-OWN delegated `x-ms-user-identity` architecture. The platform pivot
-    merged to `develop` in
-    [PR #633](https://github.com/Azure/GPT-RAG/pull/633) at
-    [`86b17b0`](https://github.com/Azure/GPT-RAG/commit/86b17b0af672edefe6842cba0f1a8ff77ab23038).
-    Compatible component pins and the GPT-RAG release remain unpublished, so
-    continuity stays off and compatible history endpoints return HTTP 503 until
-    `HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true`. Current published
-    GPT-RAG `v3.7.0` stays classic.
+!!! warning "Published components are not an umbrella release"
+    UI `v2.6.0`, orchestrator `v4.0.0`, ingestion `v2.7.0`, and AILZ `v2.5.0`
+    are published. GPT-RAG has not published an umbrella release that pins and
+    validates this matrix; its current `develop` manifest still references older
+    components. Released GPT-RAG deployments remain classic, continuity stays
+    off/503, and hosted-panel remains platform-blocked. See the
+    [hosted-agent component release matrix](hosted_agent_release_matrix.md) for
+    the exact runtime, identity, RBAC, panel, data, and rollback contracts.
 
 ![Chat runtime modes and hosted deployment lifecycle](media/architecture_chat_runtime_modes.svg)
 
@@ -54,8 +35,9 @@ and required-vs-configurable deployment table.
 
 ![Zero Trust Architecture](media/architecture_zero_trust.png)
 *Full Zero Trust reference architecture. This is the complete network-isolated
-view, not the minimum Basic deployment. The focused SVG above is the source of
-truth for the pending hosted-default runtime update.*
+view, not the minimum Basic deployment. The focused SVG above describes the
+component-level hosted design; the matrix page records its umbrella release
+gate.*
 
 ## Governance
 

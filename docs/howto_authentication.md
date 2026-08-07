@@ -1,6 +1,6 @@
 # Authentication and Document-Level Security
 
-This page explains how authentication works in GPT-RAG, from the GPT-RAG UI sign-in to querying Azure AI Search with document-level access control enabled (POSIX-like ACL / RBAC scopes). The classic runtime forwards a user token to the orchestrator, which produces the correct user-context token for Azure AI Search. The upcoming hosted runtime preserves a stricter UI BFF ownership boundary described below.
+This page explains how authentication works in GPT-RAG, from the GPT-RAG UI sign-in to querying Azure AI Search with document-level access control enabled (POSIX-like ACL / RBAC scopes). The classic runtime forwards a user token to the orchestrator, which produces the correct user-context token for Azure AI Search. The published hosted component matrix defines a stricter UI BFF ownership boundary described below.
 
 > In OAuth mode, the orchestrator receives a user access token (for the orchestrator API) and then performs an On-Behalf-Of (OBO) exchange to obtain a separate token for Azure AI Search. The two tokens have different audiences and are not interchangeable.
 
@@ -8,8 +8,9 @@ This page explains how authentication works in GPT-RAG, from the GPT-RAG UI sign
     Live OQ-OWN evidence supersedes the capability-first contract from
     [PR #630](https://github.com/Azure/GPT-RAG/pull/630). The delegated
     `x-ms-user-identity` platform pivot merged to `develop` in
-    [PR #633](https://github.com/Azure/GPT-RAG/pull/633). Compatible component
-    pins and the GPT-RAG release remain unpublished. Keep
+    [PR #633](https://github.com/Azure/GPT-RAG/pull/633). UI `v2.6.0`,
+    orchestrator `v4.0.0`, ingestion `v2.7.0`, and AILZ `v2.5.0` are published,
+    but no GPT-RAG umbrella release pins them together. Keep
     `HOSTED_CONTINUITY_ENABLED=false`; compatible history endpoints return HTTP
     503 until `HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true`, and the current
     published release continues to use the classic flow.
@@ -31,10 +32,11 @@ authentication modes, browser security controls, and rollout.
 
 ### Hosted Conversation ownership boundary
 
-For the upcoming compatible hosted topology, the trusted UI BFF derives
-`x-ms-user-identity` from the authenticated server-side principal and sends it
-on Responses protocol `2.0.0`. The browser cannot choose the owner, and the
-hosted runtime must not source or replace the identity header.
+For the hosted component matrix, the trusted UI BFF validates and canonicalizes
+the signed-in user's Entra `oid`, derives `x-ms-user-identity` only from that
+server-side value, and uses its own service token for managed-Conversation
+operations. Browser-supplied owner/header values are never authoritative, and
+the hosted runtime must not source or replace the identity header.
 
 This owner header is distinct from OBO. `x-ms-user-identity` binds Foundry
 Conversation ownership; OBO obtains a delegated bearer token for a downstream
@@ -46,6 +48,8 @@ GPT-RAG custom role **GPT-RAG Hosted Agent User Identity Impersonation**
 The hosted runtime receives no key, Conversation or impersonation RBAC, or
 Cosmos DB in hosted/no-panel. Capability/HMAC remains a disabled
 fallback and is not provisioned or required on the primary path. See the
+[hosted-agent release matrix](hosted_agent_release_matrix.md#delegated-owner-binding)
+for exact component behavior and the
 [hosted conversation continuity platform contract](hosted_continuity_platform_contract.md)
 for the owner-validation, protocol, role, and lifecycle requirements.
 
@@ -325,15 +329,19 @@ ingestion dashboard is mounted at `/dashboard` on the ingestion Container App.
 Both surfaces let an operator inspect runs, conversations, and a curated set of
 runtime settings, and the ingestion dashboard also lets an operator trigger a
 scheduled job on demand. The
-[upcoming hosted-default topology](deploy.md#chat-runtime-modes-upcoming-hosted-default-release)
-is hosted/no-panel, omits these administrative surfaces, and requires
-`DEPLOY_ADMINISTRATIVE_PANEL=false`. AILZ `v2.5.0` is published, but that
-default still depends on the remaining compatible component tags, final
-umbrella pins, integrated validation, and a new GPT-RAG release. The platform
-implementation is merged but unreleased. Hosted/panel is deferred to
-[issue #611](https://github.com/Azure/GPT-RAG/issues/611).
+[published hosted component matrix](hosted_agent_release_matrix.md)
+defines hosted/no-panel, which omits these administrative surfaces and requires
+`DEPLOY_ADMINISTRATIVE_PANEL=false`; no GPT-RAG umbrella release pins that
+matrix, and hosted-panel remains platform-blocked.
 
 Admin access is enforced through an **Entra ID App Role named `Admin`** added to the same App Registration you created for user sign-in. The token the caller presents to `/api/dashboard/*` (or the ingestion equivalents) must carry `Admin` in its `roles` claim.
+
+The ingestion `v2.7.0` metadata-only Overview and Curation APIs use their own
+explicit `PANEL_OPERATOR_APP_ROLE` or `PANEL_OPERATOR_GROUP_ID` gate. Their Vite
+tabs do not acquire a browser token or add an `Authorization` header, so they
+require an approved reverse-auth proxy to supply the delegated bearer and
+otherwise expose the real 401/403/503 response. This is not the orchestrator
+dashboard's MSAL flow.
 
 This section explains how to add the role, assign users, request the correct scope, and debug the most common error (a 403 response even though the role is assigned).
 

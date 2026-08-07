@@ -6,13 +6,9 @@ If you are looking for the wider authentication picture (chat UI sign-in, On-Beh
 
 This procedure applies to the orchestrator dashboard in the currently released
 classic Container Apps topology and in the explicit classic fallback. The
-[upcoming hosted-default topology](deploy.md#chat-runtime-modes-upcoming-hosted-default-release)
-is hosted/no-panel, does not deploy this dashboard, and requires
-`DEPLOY_ADMINISTRATIVE_PANEL=false`. AILZ `v2.5.0` is published, but it still
-depends on the remaining compatible component tags, final umbrella pins,
-integrated validation, and a new GPT-RAG release. The platform implementation
-is merged but unreleased. Hosted/panel is deferred to
-[issue #611](https://github.com/Azure/GPT-RAG/issues/611).
+[hosted component matrix](hosted_agent_release_matrix.md) is hosted/no-panel,
+does not deploy this dashboard, and has not been published as a GPT-RAG umbrella
+release. Hosted-panel remains platform-blocked.
 
 ## What this is
 
@@ -25,6 +21,15 @@ Until this release, the orchestrator dashboard SPA had no real sign-in. The `req
 5. If the user is signed in but the token does not carry the `Admin` app role, the SPA renders a clear "access denied" state instead of the dashboard.
 
 The chat UI is not affected. Only the orchestrator dashboard uses this new flow.
+
+!!! important "The ingestion operator tabs use a different browser client"
+    The ingestion `v2.7.0` Overview and Curation tabs do not initialize MSAL,
+    acquire an access token, or attach `Authorization` to their panel requests.
+    They display the API's real 401/403/503 response unless an approved
+    same-origin reverse-auth proxy adds a delegated operator bearer. Do not
+    apply the orchestrator dashboard sign-in instructions below to that Vite
+    client. See
+    [Operator overview and corpus curation](hosted_agent_release_matrix.md#operator-overview-and-corpus-curation).
 
 ```mermaid
 sequenceDiagram
