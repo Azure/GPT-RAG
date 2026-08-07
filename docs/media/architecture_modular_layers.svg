@@ -20,7 +20,7 @@
   <text x="48" y="80" class="subtitle">The chat runtime is mode-selected inside the baseline: hosted for fresh deployments after release gates, Container Apps as explicit fallback.</text>
 
   <rect x="48" y="101" width="1004" height="42" rx="12" fill="#fff4ce" stroke="#f7630c" stroke-width="1.5"/>
-  <text x="68" y="127" class="note">Unreleased target: AILZ v2.5.0 published; OQ-OWN pivot, remaining component pins, owner validation, and GPT-RAG release remain.</text>
+  <text x="68" y="127" class="note">Unreleased target: AILZ v2.5.0 published; OQ-OWN pivot merged; compatible pins, owner validation, and GPT-RAG release remain.</text>
 
   <rect x="50" y="161" width="22" height="16" rx="4" fill="#3f7dc7"/>
   <text x="84" y="174" class="legend">Basic baseline</text>

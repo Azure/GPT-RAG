@@ -7,10 +7,11 @@ chat-runtime views.
 
 !!! warning "Release status"
     Draw the hosted/no-panel path as the **target fresh-deployment default** and
-    label it **OQ-OWN delegated pivot pending; continuity off/503**. Do not label
-    it shipped until the platform pivot, remaining compatible component tags,
-    final umbrella pins, `OWNER_BINDING_VALIDATED`, integrated validation, and
-    the GPT-RAG release publish. AILZ `v2.5.0` is already published.
+    label it **OQ-OWN pivot merged; release gate off/503**. Do not label it
+    shipped until the remaining compatible component tags, final umbrella pins,
+    `HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED`, integrated validation, and
+    the GPT-RAG release publish. AILZ `v2.5.0` is published and platform PR
+    #633 is merged to `develop`.
 
 ## Shapes and labels
 
@@ -23,7 +24,7 @@ Add or update these shapes in the application/runtime area:
 | Existing ingestion shape | `Ingestion` | Keep in Container Apps and connected to Storage / AI Search indexing. |
 | New primary runtime shape | `Microsoft Foundry Hosted Agent` | Place to the right of Web UI, outside the Container Apps boundary and inside the Microsoft Foundry boundary. |
 | New owner-binding annotation | `x-ms-user-identity; Responses 2.0.0` | Place on the UI BFF to hosted-agent connection and distinguish it from OBO retrieval. |
-| New role annotation | `Direct agent scope: Foundry Agent Consumer + exact Microsoft.CognitiveServices/accounts/AIServices/agents/endpoints/UserIdentityImpersonation/action role` | Attach to the UI BFF identity and individual hosted agent only. |
+| New role annotation | `Direct agent scope: Foundry Agent Consumer eed3b665-ab3a-47b6-8f48-c9382fb1dad6 + GPT-RAG Hosted Agent User Identity Impersonation bef66abe-a495-530a-be1d-5d882fecff03` | Attach to the UI BFF identity and individual hosted agent only; the custom role contains only `Microsoft.CognitiveServices/accounts/AIServices/agents/endpoints/UserIdentityImpersonation/action`. |
 | New state shape | `Foundry managed Conversations` | Place in the Foundry boundary. Mark the hosted runtime as having no Conversation or impersonation RBAC. |
 | New tool boundary | `Toolbox / MCP tools` | Place to the right of the hosted agent. |
 | New retrieval shape | `Authorization-trimmed retrieval` | Place below Toolbox and connect to Foundry IQ / Azure AI Search. |
@@ -31,7 +32,7 @@ Add or update these shapes in the application/runtime area:
 | Mode annotation | `Fresh target default: hosted-no-panel` | Place above the hosted-agent lane. |
 | Fallback annotation | `Explicit/sticky classic topology` | Place above the orchestrator fallback. |
 | Panel annotation | `Administrative panel absent; DEPLOY_ADMINISTRATIVE_PANEL=false` | Place below the hosted lane. |
-| Release annotation | `OQ-OWN delegated pivot pending; continuity off/503` | Place in an amber status banner below the diagram title. |
+| Release annotation | `OQ-OWN pivot merged; compatible pins pending; continuity off/503` | Place in an amber status banner below the diagram title. |
 
 ## Connections and labels
 

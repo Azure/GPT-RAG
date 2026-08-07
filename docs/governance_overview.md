@@ -169,10 +169,11 @@ and bounded enums instead of trying to sanitize arbitrary objects.
 ## Retention, access, and export
 
 Hosted continuity adds a delegated owner-binding and bounded-history boundary.
-The pending [hosted conversation continuity platform contract](hosted_continuity_platform_contract.md)
+The release-gated [hosted conversation continuity platform contract](hosted_continuity_platform_contract.md)
 defaults to `HOSTED_CONTINUITY_ENABLED=false` until Responses protocol `2.0.0`,
 trusted UI BFF `x-ms-user-identity` derivation, the two exact direct
-agent-scoped roles, and `OWNER_BINDING_VALIDATED` pass together. The owner
+agent-scoped roles, and `HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED` pass
+together. The owner
 header is distinct from OBO retrieval and must not be accepted from an
 untrusted client. Its `HOSTED_HISTORY_MAX_ITEMS`, `HOSTED_HISTORY_MAX_TOKENS`,
 and mandatory `drop_oldest` behavior bound context supplied through the

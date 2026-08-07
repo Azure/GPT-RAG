@@ -39,10 +39,14 @@ and required-vs-configurable deployment table.
     new GPT-RAG release remain unpublished. The capability-first continuity
     contract from
     [PR #630](https://github.com/Azure/GPT-RAG/pull/630) has been superseded by
-    the pending OQ-OWN delegated `x-ms-user-identity` architecture. The platform
-    pivot, compatible component pins, and `OWNER_BINDING_VALIDATED` gate are not
-    published, so continuity remains off and compatible history endpoints must
-    return HTTP 503. Current published GPT-RAG `v3.7.0` stays classic.
+    the OQ-OWN delegated `x-ms-user-identity` architecture. The platform pivot
+    merged to `develop` in
+    [PR #633](https://github.com/Azure/GPT-RAG/pull/633) at
+    [`86b17b0`](https://github.com/Azure/GPT-RAG/commit/86b17b0af672edefe6842cba0f1a8ff77ab23038).
+    Compatible component pins and the GPT-RAG release remain unpublished, so
+    continuity stays off and compatible history endpoints return HTTP 503 until
+    `HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true`. Current published
+    GPT-RAG `v3.7.0` stays classic.
 
 ![Chat runtime modes and hosted deployment lifecycle](media/architecture_chat_runtime_modes.svg)
 
