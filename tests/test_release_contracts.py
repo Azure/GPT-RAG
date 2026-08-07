@@ -313,6 +313,18 @@ class LifecycleParityTests(unittest.TestCase):
             "Microsoft.CognitiveServices/accounts/projects",
             content,
         )
+
+    def test_postprovision_preserves_search_user_assigned_identity(self) -> None:
+        content = (ROOT / "scripts" / "postProvision.ps1").read_text(
+            encoding="utf-8-sig"
+        )
+
+        self.assertIn("Get-UserAssignedIdentityResourceId", content)
+        self.assertIn(
+            "SEARCH_SERVICE_UAI_RESOURCE_ID = $searchServiceUaiResourceId",
+            content,
+        )
+        self.assertNotIn("SEARCH_SERVICE_UAI_RESOURCE_ID = ''", content)
         self.assertIn("$foundryProjects.Count -ne 1", content)
         self.assertIn("AI_FOUNDRY_PROJECT_NAME", content)
         self.assertNotIn("aifoundry-default-project", content)
