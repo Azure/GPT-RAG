@@ -72,10 +72,13 @@ only after the release gates below are complete.
     merged that correction to `main`. AILZ `main` and `develop` now both point
     to [`cacf418`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/commit/cacf418216ce7381d06263e0dd704a86b8a6f225).
     No AILZ `v2.5.0` tag or GitHub Release exists; UI `v2.6.0` is also
-    unpublished. Final umbrella pins, integrated validation, and a new GPT-RAG
-    release remain. Current published GPT-RAG `v3.7.0` stays classic. Use this
-    workflow only with the release that explicitly announces the hosted-default
-    contract.
+    unpublished. The secure hosted-continuity platform contract merged in
+    [PR #630](https://github.com/Azure/GPT-RAG/pull/630), but it is disabled by
+    default and still awaits compatible component pins and completed
+    owner-binding validation. Final umbrella pins, integrated validation, and a
+    new GPT-RAG release remain. Current published GPT-RAG `v3.7.0` stays
+    classic. Use this workflow only with the release that explicitly announces
+    the hosted-default contract.
 
 The upcoming release resolves one canonical topology before provisioning and
 materializes the corresponding legacy flags and App Configuration values.
@@ -113,6 +116,51 @@ runtime failures are terminal for startup or the affected request. The UI does
 not silently switch to the orchestrator or to managed identity. Foundry passes
 opaque `x-agent-foundry-call-id` context to Toolbox; user and delegated bearer
 tokens are not copied into tool payloads or client-defined identity headers.
+
+#### Hosted conversation continuity platform gate
+
+!!! danger "Do not enable with unpublished or incompatible components"
+    `HOSTED_CONTINUITY_ENABLED` defaults to `false` and must stay false until a
+    compatible UI BFF and hosted runtime are pinned and
+    `HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true` has been established by
+    integrated validation. The merged platform contract does not make the
+    current published release continuity-compatible.
+
+The UI BFF exclusively creates, reads, appends to, and deletes Foundry managed
+Conversations and creates and verifies the owner-bound capability. The hosted
+runtime gets no HMAC key, raw caller `oid`, or Conversations RBAC. App
+Configuration stores only `HOSTED_CONVERSATION_CAPABILITY_KEY` as a reference
+to the capability secret in a dedicated UI BFF Key Vault.
+
+| Setting | Default | Accepted contract |
+| --- | --- | --- |
+| `HOSTED_CONTINUITY_ENABLED` | `false` | Requires hosted topology, `CHAT_BACKEND=hosted_agent`, Key Vault deployment, and validated owner binding. |
+| `HOSTED_CONVERSATION_OWNER_BINDING` | `capability` | Must remain `capability`. |
+| `HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED` | `false` | Must be exactly `true` before activation is permitted. |
+| `HOSTED_CONVERSATIONS_TOKEN_AUDIENCE` | `https://ai.azure.com` | Exact Foundry Conversations audience. |
+| `HOSTED_CONVERSATION_CAPABILITY_KEY_ID` | `v1` | Safe 1-64 character non-secret key-version identifier. |
+| `HOSTED_CONVERSATION_CAPABILITY_TTL_SECONDS` | `900` | 60-3,600 seconds. |
+| `HOSTED_HISTORY_MAX_ITEMS` | `100` | 1-1,000 items. |
+| `HOSTED_HISTORY_MAX_TOKENS` | `32000` | 1-1,000,000 tokens. |
+| `HOSTED_HISTORY_TRUNCATION` | `drop_oldest` | The only accepted history overflow policy. |
+
+Provide the dedicated vault through
+`HOSTED_CONTINUITY_KEY_VAULT_URI=https://<name>.vault.azure.net/` or
+`HOSTED_CONTINUITY_KEY_VAULT_NAME=<name>`. Reusing the shared workload
+`KEY_VAULT_URI` is rejected. Activation assigns built-in **Foundry Agent
+Consumer** (`eed3b665-ab3a-47b6-8f48-c9382fb1dad6`) only to the UI BFF at the
+individual agent scope and secret-read access only at the individual capability
+secret. Broader, inherited, group-derived, or custom access fails validation.
+
+Post-provisioning seeds configuration while continuity remains disabled.
+Activation runs only after the hosted agent exists. With the platform-managed
+reference intact, disabled reconciliation removes that reference and the exact
+UI BFF agent- and secret-scoped role assignments while retaining capability
+secret version history in Key Vault. Do not delete the reference out of band
+before reconciliation because setup uses it to resolve the exact secret scope.
+See the
+[hosted conversation continuity platform contract](hosted_continuity_platform_contract.md)
+for the complete trust and rollout boundary.
 
 `POST /responses` and `POST /invocations` are distinct protocols, not aliases, and their request bodies are not interchangeable. Microsoft Foundry hosts the canonical Responses protocol v2 route through `azure-ai-agentserver-responses`. It accepts a non-empty string `input`; set `stream` to `true` for an SSE lifecycle or `false` for a synchronous JSON response. `store` accepts `true` or `false`, and `background` enables background execution. The route also supports `previous_response_id`, string-valued `metadata`, and the platform-injected `agent_reference`.
 
@@ -169,6 +217,8 @@ the first provision:
 ```powershell
 azd env set HOSTED_AGENT_RESOURCE_SCOPE "api://<application-id>/.default"
 azd env set HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS 60
+# Keep continuity disabled until compatible component pins and owner validation publish.
+azd env set HOSTED_CONTINUITY_ENABLED false
 azd provision
 pwsh scripts/prepareHostedDeployment.ps1
 azd provision

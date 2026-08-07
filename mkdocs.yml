@@ -47,6 +47,7 @@ nav:
     - NL2SQL: quickstart_nl2sql.md
   - Architecture:
     - Overview: architecture.md
+    - Hosted continuity platform contract: hosted_continuity_platform_contract.md
     - Legacy diagram update handoff: architecture_legacy_diagram_handoff.md
   - Governance:
     - Overview and responsibilities: governance_overview.md

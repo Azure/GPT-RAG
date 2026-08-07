@@ -36,7 +36,10 @@ and required-vs-configurable deployment table.
     [`cacf418`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/commit/cacf418216ce7381d06263e0dd704a86b8a6f225),
     but no AILZ `v2.5.0` tag or GitHub Release exists. UI `v2.6.0`, final
     umbrella pins, integrated validation, and a new GPT-RAG release also remain
-    unpublished. Current published GPT-RAG `v3.7.0` stays classic.
+    unpublished. The secure hosted-continuity platform contract merged in
+    [PR #630](https://github.com/Azure/GPT-RAG/pull/630), but it remains
+    disabled by default pending compatible component pins and completed
+    owner-binding validation. Current published GPT-RAG `v3.7.0` stays classic.
 
 ![Chat runtime modes and hosted deployment lifecycle](media/architecture_chat_runtime_modes.svg)
 
