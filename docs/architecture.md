@@ -7,14 +7,15 @@ deployments retain their persisted topology during upgrade. Network isolation,
 enterprise integration, public ingress, and optional AI capabilities remain
 separate choices.
 
-!!! warning "Component matrix published; umbrella gate remains"
+!!! warning "Exact matrix pinned; live evidence gates remain"
     UI `v2.6.0`, orchestrator `v4.0.0`, ingestion `v2.7.0`, and AILZ `v2.5.0`
-    implement the hosted component contracts, including the delegated
-    `x-ms-user-identity` pivot. GPT-RAG has not published or repinned them as one
-    umbrella release. Current umbrella deployments remain classic; continuity
-    stays off/503 and `hosted-panel` still fails platform selection. The
-    [hosted-agent release matrix](hosted_agent_release_matrix.md) distinguishes
-    implemented component behavior from integrated deployment support.
+    are pinned by the umbrella integration and implement the delegated
+    `x-ms-user-identity` contract. Classic, hosted/no-panel, and explicitly
+    selected hosted-panel are supported topologies. Continuity, user-history,
+    owner-binding validation, and operator-surface gates remain
+    deployment-published `false`, so their routes stay off/503; no live
+    validation result is implied. See the
+    [hosted-agent supported matrix](hosted_agent_release_matrix.md).
 
 ## Full Zero Trust reference
 
@@ -62,8 +63,10 @@ for the disabled-by-default gate, exact roles, limits, and cleanup lifecycle.
 The classic runtime remains selectable through an explicit deployment
 operation. Pre-cutover deployments without a topology marker remain classic,
 and any persisted topology stays sticky until an operator deliberately
-migrates it. Hosted-panel is not part of the target default: platform selection
-remains blocked and `DEPLOY_ADMINISTRATIVE_PANEL=false` is required.
+migrates it. Hosted-panel is not the fresh default, but an operator may select
+it explicitly. It provisions UI, ingestion, and only the metadata owner-index
+and feedback Cosmos containers. Its user-history and operator routes remain
+off/503 behind independent evidence gates.
 
 The lower lane in the diagram shows the planned two-phase hosted image flow:
 provision prerequisites, build through public ACR Tasks or the dedicated
@@ -95,7 +98,7 @@ Use the table below for the deployment parameters behind each layer, and the [De
 
 | Layer | Posture | Controlled by | Include when |
 | --- | --- | --- | --- |
-| UI, chat runtime, ingestion | Mode-selected baseline | Canonical `DEPLOYMENT_TOPOLOGY`; materialized `DEPLOY_HOSTED_AGENT_ORCHESTRATION`, `DEPLOY_ADMINISTRATIVE_PANEL`, `CHAT_BACKEND`; `manifest.json` components; `containerAppsList` | The component matrix implements hosted/no-panel, but no umbrella release pins it. Existing topologies stay sticky, `classic` selects the Container Apps fallback, and hosted-panel remains platform-blocked. |
+| UI, chat runtime, ingestion | Mode-selected baseline | Canonical `DEPLOYMENT_TOPOLOGY`; materialized `DEPLOY_HOSTED_AGENT_ORCHESTRATION`, `DEPLOY_ADMINISTRATIVE_PANEL`, `CHAT_BACKEND`; `manifest.json` components; `containerAppsList` | The umbrella manifest pins the exact supported matrix. Existing topologies stay sticky, `classic` selects the Container Apps fallback, hosted/no-panel is the fresh default, and hosted-panel requires explicit operator selection while its independent evidence gates remain off/503. |
 | AI Foundry account, project, and model deployments | Required AI control plane | `deployAiFoundry`, `deployAfProject`, `deployAAfAgentSvc`, `modelDeploymentList` | Provisioning Azure AI Foundry / Azure OpenAI and the model deployments used by GPT-RAG. |
 | AI Foundry associated resources | Default-created or BYO-capable | `aiSearchResourceId`, `aiFoundryStorageAccountResourceId`, `aiFoundryCosmosDBAccountResourceId`, `keyVaultResourceId`, `aiFoundryStorageSku` | Letting the AI Foundry module create its required Storage, Search, Cosmos DB, and Key Vault resources, or reusing existing ones. |
 | RAG workload data services | Mode-selected, parameter-controlled | `deploySearchService`, `deployStorageAccount`, `deployCosmosDb`, `storageAccountContainersList`, `databaseContainersList` | Running indexed-document and file-storage paths. Hosted/no-panel uses Foundry managed Conversations and omits panel-only Cosmos DB; classic preserves its existing state path. |

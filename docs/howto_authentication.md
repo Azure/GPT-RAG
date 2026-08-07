@@ -9,8 +9,8 @@ This page explains how authentication works in GPT-RAG, from the GPT-RAG UI sign
     [PR #630](https://github.com/Azure/GPT-RAG/pull/630). The delegated
     `x-ms-user-identity` platform pivot merged to `develop` in
     [PR #633](https://github.com/Azure/GPT-RAG/pull/633). UI `v2.6.0`,
-    orchestrator `v4.0.0`, ingestion `v2.7.0`, and AILZ `v2.5.0` are published,
-    but no GPT-RAG umbrella release pins them together. Keep
+    orchestrator `v4.0.0`, ingestion `v2.7.0`, and AILZ `v2.5.0` are pinned by
+    the umbrella integration. Keep
     `HOSTED_CONTINUITY_ENABLED=false`; compatible history endpoints return HTTP
     503 until `HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true`, and the current
     published release continues to use the classic flow.
@@ -331,8 +331,9 @@ runtime settings, and the ingestion dashboard also lets an operator trigger a
 scheduled job on demand. The
 [published hosted component matrix](hosted_agent_release_matrix.md)
 defines hosted/no-panel, which omits these administrative surfaces and requires
-`DEPLOY_ADMINISTRATIVE_PANEL=false`; no GPT-RAG umbrella release pins that
-matrix, and hosted-panel remains platform-blocked.
+`DEPLOY_ADMINISTRATIVE_PANEL=false`. Hosted-panel is an explicit supported
+topology in the pinned matrix, but its user-history and operator routes remain
+off/503 behind separate deployment-published evidence gates.
 
 Admin access is enforced through an **Entra ID App Role named `Admin`** added to the same App Registration you created for user sign-in. The token the caller presents to `/api/dashboard/*` (or the ingestion equivalents) must carry `Admin` in its `roles` claim.
 

@@ -6,15 +6,14 @@ The trusted UI BFF derives `x-ms-user-identity` from the authenticated
 server-side principal and sends it on the hosted Responses request. This is the
 preferred and default continuity architecture.
 
-!!! danger "Component matrix published; umbrella gate remains closed"
+!!! danger "Exact matrix pinned; continuity evidence gate remains closed"
     The OQ-OWN platform pivot merged in
     [PR #633](https://github.com/Azure/GPT-RAG/pull/633) at
     [`86b17b0`](https://github.com/Azure/GPT-RAG/commit/86b17b0af672edefe6842cba0f1a8ff77ab23038),
-    and UI `v2.6.0`, orchestrator `v4.0.0`, ingestion `v2.7.0`, and AILZ
-    `v2.5.0` are now published. GPT-RAG has not published an umbrella release
-    that pins and validates them together. Keep `HOSTED_CONTINUITY_ENABLED=false`.
-    Until deployment proves the exact owner-binding role and protocol contract
-    and records
+    and the umbrella integration now pins UI `v2.6.0`, orchestrator `v4.0.0`,
+    ingestion `v2.7.0`, and AILZ `v2.5.0` at their exact release commits.
+    Keep `HOSTED_CONTINUITY_ENABLED=false` until deployment proves the exact
+    owner-binding role and protocol contract and records
     `HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true`, continuity endpoints
     must fail closed with HTTP 503 rather than use an unvalidated owner path.
 
@@ -119,9 +118,10 @@ controls:
 The history bounds limit context supplied through the compatible hosted path.
 They do not define records retention, legal hold, backup, or deletion policy.
 UI `v2.6.0` falls back locally to 40 items and 8,000 tokens if these values are
-absent; the pending platform contract publishes 100 and 32,000. The umbrella
-release must publish the reviewed platform values rather than rely on UI
-fallbacks.
+absent. The umbrella integration publishes the reviewed platform values of 100
+and 32,000 rather than relying on UI fallbacks. This publication does not open
+the continuity gate; live protocol, identity, role, and owner-binding evidence
+is still required.
 
 ## Disabled capability/HMAC fallback
 
@@ -182,7 +182,7 @@ are true:
 4. The two exact direct agent-scoped UI BFF roles pass live validation.
 5. The hosted runtime has no identity-header source, key, Conversation or
    impersonation RBAC, or Cosmos dependency in hosted/no-panel.
-6. The exact component and umbrella pins are published and validated together.
+6. The exact component pins are present in the umbrella manifest.
 
 Until those gates pass, `HOSTED_CONTINUITY_ENABLED=false` and HTTP 503 are the
 required operational behavior.

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1100" height="1220" viewBox="0 0 1100 1220" role="img" aria-labelledby="title desc">
   <title id="title">GPT-RAG modular deployment layers with mode-selected chat runtime</title>
-  <desc id="desc">Modular architecture layers showing the target fresh-deployment baseline after release gates. Web UI and ingestion run in Container Apps. The mode-selected chat runtime uses Microsoft Foundry hosted agent for fresh deployments and an orchestrator Container App only as an explicit fallback. Hosted runtime is part of the baseline, not an optional AI capability. Zero Trust and scenario add-ons remain separate layers.</desc>
+  <desc id="desc">Modular architecture layers for the exact umbrella-pinned hosted matrix. Web UI and ingestion run in Container Apps. The mode-selected chat runtime uses Microsoft Foundry hosted agent for fresh deployments, supports explicitly selected hosted-panel with metadata-only Cosmos, and uses an orchestrator Container App only as an explicit fallback. Hosted runtime is part of the baseline, not an optional AI capability. Live continuity and panel evidence gates remain off. Zero Trust and scenario add-ons remain separate layers.</desc>
   <defs>
     <style>
       .title { font: 700 29px 'Segoe UI', Arial, sans-serif; fill: #000000; }
@@ -20,7 +20,7 @@
   <text x="48" y="80" class="subtitle">The chat runtime is mode-selected inside the baseline: hosted for fresh deployments after release gates, Container Apps as explicit fallback.</text>
 
   <rect x="48" y="101" width="1004" height="42" rx="12" fill="#fff4ce" stroke="#f7630c" stroke-width="1.5"/>
-  <text x="68" y="127" class="note">Component matrix published; GPT-RAG umbrella pins, owner validation, and integrated release remain.</text>
+  <text x="68" y="127" class="note">Exact matrix pinned; continuity and panel evidence gates remain off/503. No live validation result is implied.</text>
 
   <rect x="50" y="161" width="22" height="16" rx="4" fill="#3f7dc7"/>
   <text x="84" y="174" class="legend">Basic baseline</text>
