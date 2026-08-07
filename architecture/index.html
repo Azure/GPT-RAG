@@ -545,7 +545,7 @@
         
   
   <span class="md-ellipsis">
-    Hosted-agent release matrix
+    Hosted-agent supported matrix
   </span>
   
 
@@ -1620,14 +1620,15 @@ deployments retain their persisted topology during upgrade. Network isolation,
 enterprise integration, public ingress, and optional AI capabilities remain
 separate choices.</p>
 <div class="admonition warning">
-<p class="admonition-title">Component matrix published; umbrella gate remains</p>
+<p class="admonition-title">Exact matrix pinned; live evidence gates remain</p>
 <p>UI <code>v2.6.0</code>, orchestrator <code>v4.0.0</code>, ingestion <code>v2.7.0</code>, and AILZ <code>v2.5.0</code>
-implement the hosted component contracts, including the delegated
-<code>x-ms-user-identity</code> pivot. GPT-RAG has not published or repinned them as one
-umbrella release. Current umbrella deployments remain classic; continuity
-stays off/503 and <code>hosted-panel</code> still fails platform selection. The
-<a href="../hosted_agent_release_matrix/">hosted-agent release matrix</a> distinguishes
-implemented component behavior from integrated deployment support.</p>
+are pinned by the umbrella integration and implement the delegated
+<code>x-ms-user-identity</code> contract. Classic, hosted/no-panel, and explicitly
+selected hosted-panel are supported topologies. Continuity, user-history,
+owner-binding validation, and operator-surface gates remain
+deployment-published <code>false</code>, so their routes stay off/503; no live
+validation result is implied. See the
+<a href="../hosted_agent_release_matrix/">hosted-agent supported matrix</a>.</p>
 </div>
 <h2 id="full-zero-trust-reference">Full Zero Trust reference</h2>
 <p>The existing PNG and Visio remain the full network-isolated reference view.
@@ -1665,8 +1666,10 @@ for the disabled-by-default gate, exact roles, limits, and cleanup lifecycle.</p
 <p>The classic runtime remains selectable through an explicit deployment
 operation. Pre-cutover deployments without a topology marker remain classic,
 and any persisted topology stays sticky until an operator deliberately
-migrates it. Hosted-panel is not part of the target default: platform selection
-remains blocked and <code>DEPLOY_ADMINISTRATIVE_PANEL=false</code> is required.</p>
+migrates it. Hosted-panel is not the fresh default, but an operator may select
+it explicitly. It provisions UI, ingestion, and only the metadata owner-index
+and feedback Cosmos containers. Its user-history and operator routes remain
+off/503 behind independent evidence gates.</p>
 <p>The lower lane in the diagram shows the planned two-phase hosted image flow:
 provision prerequisites, build through public ACR Tasks or the dedicated
 VNet-connected ACR Tasks agent pool, resolve the hosted image to an immutable
@@ -1703,7 +1706,7 @@ fallback. The panel is absent and its flag remains <code>false</code>.</p>
 <td>UI, chat runtime, ingestion</td>
 <td>Mode-selected baseline</td>
 <td>Canonical <code>DEPLOYMENT_TOPOLOGY</code>; materialized <code>DEPLOY_HOSTED_AGENT_ORCHESTRATION</code>, <code>DEPLOY_ADMINISTRATIVE_PANEL</code>, <code>CHAT_BACKEND</code>; <code>manifest.json</code> components; <code>containerAppsList</code></td>
-<td>The component matrix implements hosted/no-panel, but no umbrella release pins it. Existing topologies stay sticky, <code>classic</code> selects the Container Apps fallback, and hosted-panel remains platform-blocked.</td>
+<td>The umbrella manifest pins the exact supported matrix. Existing topologies stay sticky, <code>classic</code> selects the Container Apps fallback, hosted/no-panel is the fresh default, and hosted-panel requires explicit operator selection while its independent evidence gates remain off/503.</td>
 </tr>
 <tr>
 <td>AI Foundry account, project, and model deployments</td>

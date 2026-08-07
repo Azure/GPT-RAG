@@ -453,7 +453,7 @@
         
   
   <span class="md-ellipsis">
-    Hosted-agent release matrix
+    Hosted-agent supported matrix
   </span>
   
 
@@ -1636,13 +1636,14 @@ coordinates agent-based RAG workflows, where each agent has a defined role, to
 generate accurate, context-aware responses for complex user queries. Current
 GPT-RAG umbrella releases run it as an orchestrator Container App. Orchestrator
 <code>v4.0.0</code> also packages the runtime as a Microsoft Foundry hosted agent, but the
-<a href="../hosted_agent_release_matrix/">exact hosted component matrix</a> has not been
-pinned by a GPT-RAG umbrella release. The separate
+<a href="../hosted_agent_release_matrix/">exact hosted supported matrix</a> is now pinned
+by the umbrella integration. The separate
 <a href="../hosted_continuity_platform_contract/">hosted continuity platform contract</a>
 uses delegated <code>x-ms-user-identity</code> in the platform pivot merged by PR #633, but
-remains disabled pending umbrella validation and
-<code>HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED</code>; hosted-panel remains
-platform-blocked.
+remains disabled pending live evidence and
+<code>HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED</code>. Hosted-panel is explicitly
+selectable, but its user-history and operator surfaces remain off/503 behind
+independent gates.
 <a href="https://github.com/Azure/gpt-rag-orchestrator">GitHub Repository</a>.</p>
 <h2 id="key-features">Key Features</h2>
 <ul>

@@ -24,7 +24,7 @@
     
     
       
-        <title>Hosted-agent release matrix - GPT-RAG</title>
+        <title>Hosted-agent supported matrix - GPT-RAG</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#hosted-agent-component-release-matrix" class="md-skip">
+        <a href="#hosted-agent-supported-release-matrix" class="md-skip">
           Skip to content
         </a>
       
@@ -111,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Hosted-agent release matrix
+              Hosted-agent supported matrix
             
           </span>
         </div>
@@ -464,7 +464,7 @@
           
   
   <span class="md-ellipsis">
-    Hosted-agent release matrix
+    Hosted-agent supported matrix
   </span>
   
 
@@ -475,7 +475,7 @@
         
   
   <span class="md-ellipsis">
-    Hosted-agent release matrix
+    Hosted-agent supported matrix
   </span>
   
 
@@ -1656,18 +1656,21 @@
   
 
 
-<h1 id="hosted-agent-component-release-matrix">Hosted-agent component release matrix</h1>
-<p>This page records the exact hosted-agent component releases published on
-2026-08-07 and the integration boundary that still applies to the GPT-RAG
-umbrella deployment.</p>
+<h1 id="hosted-agent-supported-release-matrix">Hosted-agent supported release matrix</h1>
+<p>This page records the exact hosted-agent component releases pinned by the
+GPT-RAG umbrella integration on 2026-08-07 and the independent evidence gates
+that remain fail closed.</p>
 <div class="admonition warning">
-<p class="admonition-title">Components are published; there is no integrated umbrella release</p>
-<p>The four releases below exist, but GPT-RAG has not published an umbrella
-release that pins and validates them together. The current <code>develop</code>
-manifest still references UI <code>v2.5.1</code>, orchestrator <code>v3.10.0</code>, ingestion
-<code>v2.6.0</code>, and an AILZ development commit. Keep the released GPT-RAG
-deployment on its documented classic topology. Do not infer that installing
-these four tags independently is a supported production upgrade.</p>
+<p class="admonition-title">Pins are integrated; live evidence gates remain closed</p>
+<p>The umbrella <code>manifest.json</code> pins all four exact releases below and explicit
+<code>hosted-panel</code> topology selection is supported. The manifest's umbrella tag
+remains <code>unreleased</code>; use only a GPT-RAG source or release that contains
+these pins rather than combining component tags independently.
+<code>HOSTED_CONTINUITY_ENABLED</code>, <code>PANEL_HISTORY_ENABLED</code>,
+<code>PANEL_HISTORY_OWNER_BINDING_VALIDATED</code>, and
+<code>PANEL_OPERATOR_SURFACES_ENABLED</code> remain deployment-published <code>false</code>.
+This documentation does not claim that their separate live evidence and
+authorization procedures have completed.</p>
 </div>
 <h2 id="exact-published-matrix">Exact published matrix</h2>
 <table>
@@ -1710,7 +1713,8 @@ these four tags independently is a supported production upgrade.</p>
 <a href="https://github.com/Azure/GPT-RAG/blob/develop/docs/adr/ADR-0003-hosted-conversation-continuity.md">ADR-0003</a>
 and
 <a href="https://github.com/Azure/GPT-RAG/blob/develop/docs/adr/ADR-0004-hosted-panel-conversations-contract.md">ADR-0004</a>.
-It does not close their umbrella rollout and evidence gates.</p>
+It completes their coordinated pin and topology-composition step. It does not
+close their independent live evidence and authorization gates.</p>
 <h2 id="modes-and-defaults">Modes and defaults</h2>
 <table>
 <thead>
@@ -1721,8 +1725,8 @@ It does not close their umbrella rollout and evidence gates.</p>
 </thead>
 <tbody>
 <tr>
-<td>Published GPT-RAG umbrella release</td>
-<td>Classic Container Apps topology.</td>
+<td>Umbrella integration manifest</td>
+<td>Pins the exact matrix above; its umbrella <code>tag</code> remains <code>unreleased</code> until release engineering stamps a GPT-RAG release.</td>
 </tr>
 <tr>
 <td>Fresh UI <code>v2.6.0</code> process with no <code>CHAT_BACKEND</code> value</td>
@@ -1738,11 +1742,11 @@ It does not close their umbrella rollout and evidence gates.</p>
 </tr>
 <tr>
 <td><code>DEPLOYMENT_TOPOLOGY=hosted-no-panel</code></td>
-<td>Implemented on <code>develop</code>, but not published as an integrated umbrella release. UI and ingestion remain in Container Apps; chat uses the hosted agent; no panel Cosmos containers are selected.</td>
+<td>Fresh-deployment default. UI and ingestion remain in Container Apps; chat uses the hosted agent; no panel Cosmos containers are selected.</td>
 </tr>
 <tr>
 <td><code>DEPLOYMENT_TOPOLOGY=hosted-panel</code></td>
-<td>Platform selection still fails closed. Component endpoints exist, but the umbrella forces panel evidence flags off and does not publish this topology.</td>
+<td>Explicit supported topology. Deploys UI and ingestion, omits the orchestrator Container App, and provisions only the owner-index and feedback metadata containers. User-history and operator routes still return 503 because their independent gates remain <code>false</code>.</td>
 </tr>
 <tr>
 <td><code>HOSTED_CONTINUITY_ENABLED</code></td>
@@ -1753,8 +1757,8 @@ It does not close their umbrella rollout and evidence gates.</p>
 <td><code>delegated</code> when continuity is enabled; <code>capability</code> is an explicit fallback only.</td>
 </tr>
 <tr>
-<td><code>PANEL_HISTORY_ENABLED</code> / <code>PANEL_OPERATOR_SURFACES_ENABLED</code></td>
-<td><code>false</code>; operator enablement is not part of the current umbrella release.</td>
+<td><code>PANEL_HISTORY_ENABLED</code> / <code>PANEL_HISTORY_OWNER_BINDING_VALIDATED</code> / <code>PANEL_OPERATOR_SURFACES_ENABLED</code></td>
+<td>Deployment-published <code>false</code>; topology support does not imply live surface enablement.</td>
 </tr>
 <tr>
 <td>AILZ <code>PREPARE_HOSTED_AGENT</code> / <code>deployHostedAgent</code></td>
@@ -1765,8 +1769,8 @@ It does not close their umbrella rollout and evidence gates.</p>
 <p>The platform contract publishes hosted history limits of 100 items and 32,000
 estimated tokens with <code>drop_oldest</code>. UI <code>v2.6.0</code> has standalone code defaults of
 40 items and 8,000 tokens when those App Configuration values are absent.
-An integrated release must publish one reviewed set; operators must not assume
-the UI fallback values equal the pending umbrella values.</p>
+The umbrella publishes the reviewed 100/32,000 values; operators must not
+remove them and then assume the UI fallback values are equivalent.</p>
 <h2 id="stateless-hosted-runtime-contract">Stateless hosted runtime contract</h2>
 <p>Orchestrator <code>v4.0.0</code> performs no managed-Conversations create, read, append, or
 delete operation in the hosted container. The caller supplies the complete,
@@ -1816,7 +1820,7 @@ Foundry IQ or Azure AI Search for native permission trimming. Owner binding and
 retrieval authorization have different audiences and must not be substituted.</p>
 <h3 id="protocol-and-rbac-evidence-gate">Protocol and RBAC evidence gate</h3>
 <p>UI <code>v2.6.0</code> accepts an attested Responses protocol version <code>&gt;= 2.0.0</code>. The
-pending GPT-RAG platform validator is deliberately stricter: it requires the
+GPT-RAG platform validator is deliberately stricter: it requires the
 live endpoint to route 100% to one agent version declaring exactly one
 Responses <code>2.0.0</code> protocol entry.</p>
 <p>The same validator requires exactly these direct assignments to the UI BFF:</p>
@@ -1913,9 +1917,10 @@ read conversation content and does not write curation decisions to Cosmos.</p>
 <li>an explicit <code>PANEL_OPERATOR_APP_ROLE</code> or <code>PANEL_OPERATOR_GROUP_ID</code>; and</li>
 <li>a validated delegated user bearer carrying that role or group.</li>
 </ul>
-<p>App-only tokens are rejected. The current umbrella publisher forces
-<code>PANEL_OPERATOR_SURFACES_ENABLED=false</code>, so these APIs are component capability,
-not an enabled umbrella feature.</p>
+<p>App-only tokens are rejected. The umbrella publisher keeps
+<code>PANEL_OPERATOR_SURFACES_ENABLED=false</code>, so an explicitly deployed
+hosted-panel topology still returns 503 from these routes until the separate
+operator evidence and authorization gate is completed.</p>
 <div class="admonition important">
 <p class="admonition-title">Released ingestion dashboard browser-auth status</p>
 <p>The ingestion <code>v2.7.0</code> Vite dashboard does not initialize MSAL, acquire an
@@ -1931,7 +1936,7 @@ a working MSAL Authorization Code + PKCE flow.</p>
 <ul>
 <li>Hosted/no-panel provisions no panel Cosmos containers and has no Cosmos
   continuity fallback.</li>
-<li>Hosted/panel, when a future umbrella release enables it, uses only
+<li>Hosted-panel uses only
   <code>panel-conversation-owner-index</code> and <code>panel-feedback</code>, partitioned by
   <code>/principal_id</code>.</li>
 <li>Cosmos may contain identifiers, titles, timestamps, principal IDs, ratings,
@@ -1942,12 +1947,25 @@ a working MSAL Authorization Code + PKCE flow.</p>
   capability key, or panel Cosmos role.</li>
 </ul>
 <h2 id="operator-verification-and-rollback">Operator verification and rollback</h2>
-<p>There is currently no supported umbrella command sequence that enables this
-matrix. The platform intentionally force-publishes continuity and operator
-evidence flags as <code>false</code>. Before a future umbrella release enables them,
-release validation must:</p>
+<p>The matrix and all three topologies are composed by the umbrella integration.
+For an explicit hosted-panel deployment, select the topology before the first
+provision:</p>
+<div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">DEPLOYMENT_TOPOLOGY</span> <span class="n">hosted-panel</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">HOSTED_AGENT_RESOURCE_SCOPE</span> <span class="s2">&quot;api://&lt;application-id&gt;/.default&quot;</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">HOSTED_CONTINUITY_ENABLED</span> <span class="n">false</span>
+<span class="n">azd</span> <span class="n">provision</span>
+<span class="n">pwsh</span> <span class="n">scripts</span><span class="p">/</span><span class="n">prepareHostedDeployment</span><span class="p">.</span><span class="n">ps1</span>
+<span class="n">azd</span> <span class="n">provision</span>
+<span class="n">azd</span> <span class="n">deploy</span>
+</code></pre></div>
+<p>On POSIX systems, use <code>scripts/prepareHostedDeployment.sh</code>. The first provision
+creates hosted prerequisites and the two metadata containers. The preparation
+step resolves an immutable image digest; the second provision materializes the
+hosted handoff. UI and ingestion are deployed, but the orchestrator Container
+App is omitted. Do not override the deployment-published panel or continuity
+evidence flags: their routes intentionally remain off/503.</p>
+<p>Before those independent live surfaces can be enabled, validation must:</p>
 <ol>
-<li>pin all four exact releases together;</li>
 <li>deploy the immutable hosted image and verify the live Responses protocol;</li>
 <li>verify the two exact direct UI BFF role assignments at individual-agent
    scope and reject broader or extra access;</li>
@@ -1963,7 +1981,7 @@ release validation must:</p>
 <li>separately validate panel user auth and the ingestion browser operator-token
    path before enabling panel flags.</li>
 </ol>
-<p>The pending configuration contract uses:</p>
+<p>The configuration contract uses:</p>
 <table>
 <thead>
 <tr>
@@ -1998,7 +2016,7 @@ release validation must:</p>
 </tr>
 <tr>
 <td><code>HOSTED_AGENT_PROTOCOL_VERSION</code></td>
-<td>UI <code>v2.6.0</code> continuity attestation: <code>&gt;=2.0.0</code>; the pending integration must reconcile/publish both names consistently</td>
+<td>UI <code>v2.6.0</code> continuity attestation: <code>&gt;=2.0.0</code>; deployments must keep it consistent with the exact platform Responses setting</td>
 </tr>
 <tr>
 <td><code>HOSTED_CONTINUITY_UNAVAILABLE_STATUS_CODE</code></td>
@@ -2006,15 +2024,15 @@ release validation must:</p>
 </tr>
 <tr>
 <td><code>HOSTED_HISTORY_MAX_ITEMS</code> / <code>HOSTED_HISTORY_MAX_TOKENS</code></td>
-<td>pending umbrella defaults <code>100</code> / <code>32000</code></td>
+<td>umbrella defaults <code>100</code> / <code>32000</code></td>
 </tr>
 <tr>
 <td><code>HOSTED_HISTORY_TRUNCATION</code></td>
 <td><code>drop_oldest</code></td>
 </tr>
 <tr>
-<td><code>PANEL_HISTORY_ENABLED</code> / <code>PANEL_OPERATOR_SURFACES_ENABLED</code></td>
-<td><code>false</code></td>
+<td><code>PANEL_HISTORY_ENABLED</code> / <code>PANEL_HISTORY_OWNER_BINDING_VALIDATED</code> / <code>PANEL_OPERATOR_SURFACES_ENABLED</code></td>
+<td>deployment-published <code>false</code></td>
 </tr>
 <tr>
 <td><code>PANEL_CONVERSATION_ENUMERATION_MODE</code></td>

@@ -527,7 +527,7 @@
         
   
   <span class="md-ellipsis">
-    Hosted-agent release matrix
+    Hosted-agent supported matrix
   </span>
   
 
@@ -1605,13 +1605,13 @@ chat runtime and retains the Container Apps orchestrator as an explicit
 fallback. See the <a href="architecture/">Architecture</a> page for the mode contract
 and required-vs-configurable deployment table.</p>
 <div class="admonition warning">
-<p class="admonition-title">Published components are not an umbrella release</p>
-<p>UI <code>v2.6.0</code>, orchestrator <code>v4.0.0</code>, ingestion <code>v2.7.0</code>, and AILZ <code>v2.5.0</code>
-are published. GPT-RAG has not published an umbrella release that pins and
-validates this matrix; its current <code>develop</code> manifest still references older
-components. Released GPT-RAG deployments remain classic, continuity stays
-off/503, and hosted-panel remains platform-blocked. See the
-<a href="hosted_agent_release_matrix/">hosted-agent component release matrix</a> for
+<p class="admonition-title">Exact matrix pinned; evidence gates remain fail closed</p>
+<p>The umbrella integration pins UI <code>v2.6.0</code>, orchestrator <code>v4.0.0</code>, ingestion
+<code>v2.7.0</code>, and AILZ <code>v2.5.0</code>. Explicit hosted-panel topology selection is
+supported, but continuity, user-history, owner-binding validation, and
+operator-surface gates remain deployment-published <code>false</code>; this page does
+not claim live validation has completed. See the
+<a href="hosted_agent_release_matrix/">hosted-agent supported release matrix</a> for
 the exact runtime, identity, RBAC, panel, data, and rollback contracts.</p>
 </div>
 <p><img alt="Chat runtime modes and hosted deployment lifecycle" src="media/architecture_chat_runtime_modes.svg" /></p>

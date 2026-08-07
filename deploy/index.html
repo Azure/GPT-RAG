@@ -652,7 +652,7 @@
         
   
   <span class="md-ellipsis">
-    Hosted-agent release matrix
+    Hosted-agent supported matrix
   </span>
   
 
@@ -1762,14 +1762,15 @@ locally after <code>azd provision</code>, and <code>azd deploy</code> deploys th
 ingestion services in the classic Container Apps topology.</p>
 <h3 id="chat-runtime-modes">Chat runtime modes</h3>
 <div class="admonition warning">
-<p class="admonition-title">The component matrix is not an umbrella release</p>
+<p class="admonition-title">Exact matrix pinned; evidence-gated surfaces remain off</p>
 <p>UI <code>v2.6.0</code>, orchestrator <code>v4.0.0</code>, ingestion <code>v2.7.0</code>, and AILZ <code>v2.5.0</code>
-are published. GPT-RAG has not published an umbrella release that pins and
-validates them together, and its current <code>develop</code> manifest still references
-older component versions. Continue to use the classic instructions above.
-The hosted workflow below describes the pending umbrella contract and must
-not be applied to a released GPT-RAG manifest. See the
-<a href="../hosted_agent_release_matrix/">exact component matrix</a>.</p>
+are pinned by the umbrella integration at their exact release commits.
+Classic, hosted/no-panel, and explicitly selected hosted-panel are supported
+topologies. The manifest's umbrella tag remains <code>unreleased</code>; use a GPT-RAG
+source or release that contains these pins. Continuity, user-history,
+owner-binding validation, and operator-surface evidence gates remain
+deployment-published <code>false</code>; no live validation result is implied. See the
+<a href="../hosted_agent_release_matrix/">exact supported matrix</a>.</p>
 </div>
 <p>The platform implementation resolves one canonical topology before provisioning
 and materializes the corresponding legacy flags and App Configuration values.
@@ -1784,7 +1785,7 @@ Topology never changes automatically during a chat request.</p>
 </thead>
 <tbody>
 <tr>
-<td>Genuinely fresh environment after a future umbrella release</td>
+<td>Genuinely fresh environment</td>
 <td><code>DEPLOYMENT_TOPOLOGY=hosted-no-panel</code>, <code>DEPLOY_HOSTED_AGENT_ORCHESTRATION=true</code>, <code>DEPLOY_ADMINISTRATIVE_PANEL=false</code>, <code>CHAT_BACKEND=hosted_agent</code></td>
 <td>Web UI and ingestion remain in Container Apps. Chat runs in a Microsoft Foundry hosted agent. No orchestrator Container App or panel-only Cosmos DB is provisioned.</td>
 </tr>
@@ -1803,11 +1804,17 @@ Topology never changes automatically during a chat request.</p>
 <td><code>DEPLOYMENT_TOPOLOGY=hosted-no-panel</code>, delegated hosted scope configured, panel <code>false</code></td>
 <td>Runs the two-phase hosted lifecycle below, then validates the hosted request path before the classic chat path is removed or deactivated.</td>
 </tr>
+<tr>
+<td>Explicit hosted panel</td>
+<td><code>DEPLOYMENT_TOPOLOGY=hosted-panel</code>, hosted and administrative-panel flags <code>true</code>, <code>CHAT_BACKEND=hosted_agent</code></td>
+<td>Deploys UI and ingestion, omits the orchestrator Container App, and provisions only the owner-index and feedback metadata containers. User-history and operator routes remain off/503 because their evidence gates stay <code>false</code>.</td>
+</tr>
 </tbody>
 </table>
-<p>Do not select <code>hosted-panel</code>. UI and ingestion component endpoints exist, but
-the platform selector still rejects this topology and force-disables its
-evidence gates. <code>DEPLOY_ADMINISTRATIVE_PANEL=false</code> remains required.</p>
+<p>Hosted-panel is never selected implicitly. Operators must set
+<code>DEPLOYMENT_TOPOLOGY=hosted-panel</code> or explicitly set both legacy hosted and
+administrative-panel flags to <code>true</code>. A stray panel flag while hosted
+orchestration is <code>false</code> remains classic.</p>
 <p>The deployment hooks publish the shared runtime contract under the App
 Configuration label <code>gpt-rag</code>:</p>
 <table>
@@ -1820,7 +1827,7 @@ Configuration label <code>gpt-rag</code>:</p>
 <tbody>
 <tr>
 <td><code>DEPLOYMENT_TOPOLOGY</code></td>
-<td>Canonical deployment choice: <code>hosted-no-panel</code> or <code>classic</code>. <code>hosted-panel</code> still fails platform selection.</td>
+<td>Canonical deployment choice: <code>hosted-no-panel</code>, <code>hosted-panel</code>, or <code>classic</code>. Hosted-panel requires explicit selection.</td>
 </tr>
 <tr>
 <td><code>CHAT_BACKEND</code></td>
@@ -1832,7 +1839,7 @@ Configuration label <code>gpt-rag</code>:</p>
 </tr>
 <tr>
 <td><code>HOSTED_AGENT_BASE_URL</code></td>
-<td>Required HTTPS hosted service root. Orchestrator <code>v4.0.0</code> defines stateless <code>POST /responses</code>; UI <code>v2.6.0</code> currently sends complete ordered messages through the distinct <code>POST /invocations</code> compatibility route. A future umbrella release must align the live call route with the protocol evidence it validates.</td>
+<td>Required HTTPS hosted service root. Orchestrator <code>v4.0.0</code> defines stateless <code>POST /responses</code>; UI <code>v2.6.0</code> currently sends complete ordered messages through the distinct <code>POST /invocations</code> compatibility route. Continuity remains off until the live call route satisfies the protocol evidence gate.</td>
 </tr>
 <tr>
 <td><code>HOSTED_AGENT_RESOURCE_SCOPE</code></td>
@@ -1863,10 +1870,10 @@ opaque <code>x-agent-foundry-call-id</code> context to Toolbox; user and delegat
 tokens are not copied into tool payloads or client-defined identity headers.</p>
 <h4 id="hosted-conversation-continuity-platform-gate">Hosted conversation continuity platform gate</h4>
 <div class="admonition danger">
-<p class="admonition-title">Delegated owner binding remains umbrella-gated</p>
+<p class="admonition-title">Delegated owner binding remains evidence-gated</p>
 <p><code>HOSTED_CONTINUITY_ENABLED</code> defaults to <code>false</code> and must stay false. The
-component releases are published, but deployment must still pin them
-together and prove the live 100%-routed Responses protocol <code>2.0.0</code>, trusted
+exact component releases are pinned, but deployment must still prove the
+live 100%-routed Responses protocol <code>2.0.0</code>, trusted
 UI BFF identity derivation, and the two exact direct agent-scoped roles
 before recording
 <code>HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true</code>. Otherwise compatible
@@ -2001,11 +2008,11 @@ Managed history, user list/read/feedback/delete, and opaque handle validation ar
 owned by the trusted UI BFF. See the
 <a href="../hosted_agent_release_matrix/#stateless-hosted-runtime-contract">hosted-agent release matrix</a>.</p>
 <h4 id="two-phase-hosted-deployment">Two-phase hosted deployment</h4>
-<p>For a fresh hosted deployment, configure the delegated data-plane scope before
-the first provision:</p>
+<p>For a fresh hosted/no-panel deployment, configure the delegated data-plane scope
+before the first provision:</p>
 <div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">HOSTED_AGENT_RESOURCE_SCOPE</span> <span class="s2">&quot;api://&lt;application-id&gt;/.default&quot;</span>
 <span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS</span> <span class="n">60</span>
-<span class="c"># Keep continuity disabled until an umbrella release pins the matrix and validates ownership.</span>
+<span class="c"># Keep continuity disabled until live protocol, identity, and role evidence validates ownership.</span>
 <span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">HOSTED_CONTINUITY_ENABLED</span> <span class="n">false</span>
 <span class="n">azd</span> <span class="n">provision</span>
 <span class="n">pwsh</span> <span class="n">scripts</span><span class="p">/</span><span class="n">prepareHostedDeployment</span><span class="p">.</span><span class="n">ps1</span>
@@ -2015,6 +2022,15 @@ the first provision:</p>
 <p>On POSIX systems, use <code>scripts/prepareHostedDeployment.sh</code> for the preparation
 step. For an explicit migration, set
 <code>DEPLOYMENT_TOPOLOGY=hosted-no-panel</code> before the first <code>azd provision</code>.</p>
+<p>For the supported hosted-panel topology, use the same two-phase flow with:</p>
+<div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">DEPLOYMENT_TOPOLOGY</span> <span class="n">hosted-panel</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">HOSTED_CONTINUITY_ENABLED</span> <span class="n">false</span>
+</code></pre></div>
+<p>This composes UI and ingestion plus only the two panel metadata containers.
+<code>PANEL_HISTORY_ENABLED</code>, <code>PANEL_HISTORY_OWNER_BINDING_VALIDATED</code>, and
+<code>PANEL_OPERATOR_SURFACES_ENABLED</code> remain deployment-published <code>false</code>; do not
+override them before their separate evidence and authorization procedures
+complete. The corresponding routes return HTTP 503 while disabled.</p>
 <p>The first provision creates hosted prerequisites with image preparation
 enabled but hosted deployment disabled. The preparation command clones and
 verifies the manifest-pinned orchestrator source, builds the standard image and
@@ -2039,8 +2055,10 @@ classic panel data.</p>
 <h4 id="current-classic-release">Current classic release</h4>
 <p>GPT-RAG <code>v3.7.0</code> remains the latest published umbrella release at the time this
 matrix was documented. Its classic pin set is UI <code>v2.3.13</code>, orchestrator
-<code>v3.8.0</code>, ingestion <code>v2.5.0</code>, and AI Landing Zone <code>v2.3.0</code>. Do not combine the
-component-only hosted matrix with those released hooks or manifests.</p>
+<code>v3.8.0</code>, ingestion <code>v2.5.0</code>, and AI Landing Zone <code>v2.3.0</code>. The exact hosted
+matrix is pinned by the current integration manifest, whose umbrella tag remains
+<code>unreleased</code>; do not mix its topology/configuration contract into the older
+<code>v3.7.0</code> hooks or manifest.</p>
 <h3 id="retrieval-backend">Retrieval backend</h3>
 <p>GPT-RAG can retrieve grounding content directly from Azure AI Search or through a
 Foundry IQ knowledge base. Starting with GPT-RAG v3.0.2 and AI Landing Zone
@@ -2323,13 +2341,12 @@ azd<span class="w"> </span>deploy<span class="w"> </span>
 ./scripts/deploy.sh
 </code></pre></div></p>
 <h2 id="permissions">Permissions</h2>
-<p>The role tables below describe the currently released classic Container Apps
-topology. The component-level hosted/no-panel implementation omits the
+<p>The role tables below describe the classic Container Apps topology. The pinned
+hosted matrix omits the
 orchestrator Container App assignments and adds Foundry data-plane,
-delegated-user, Toolbox, and immutable-image pull assignments. Its exact
-component tags are published, but final umbrella pins, integrated validation,
-and a GPT-RAG release remain outstanding. Hosted-panel remains
-platform-blocked.</p>
+delegated-user, Toolbox, and immutable-image pull assignments. Hosted-panel
+adds only the narrow panel metadata-container assignments; its user and
+operator surfaces remain off/503 behind independent evidence gates.</p>
 <p><strong>Microsoft Foundry Role and AI Search Assignments</strong></p>
 <table>
 <thead>

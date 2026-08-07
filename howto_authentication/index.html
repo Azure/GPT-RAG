@@ -453,7 +453,7 @@
         
   
   <span class="md-ellipsis">
-    Hosted-agent release matrix
+    Hosted-agent supported matrix
   </span>
   
 
@@ -1709,8 +1709,8 @@
 <a href="https://github.com/Azure/GPT-RAG/pull/630">PR #630</a>. The delegated
 <code>x-ms-user-identity</code> platform pivot merged to <code>develop</code> in
 <a href="https://github.com/Azure/GPT-RAG/pull/633">PR #633</a>. UI <code>v2.6.0</code>,
-orchestrator <code>v4.0.0</code>, ingestion <code>v2.7.0</code>, and AILZ <code>v2.5.0</code> are published,
-but no GPT-RAG umbrella release pins them together. Keep
+orchestrator <code>v4.0.0</code>, ingestion <code>v2.7.0</code>, and AILZ <code>v2.5.0</code> are pinned by
+the umbrella integration. Keep
 <code>HOSTED_CONTINUITY_ENABLED=false</code>; compatible history endpoints return HTTP
 503 until <code>HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true</code>, and the current
 published release continues to use the classic flow.</p>
@@ -1997,8 +1997,9 @@ runtime settings, and the ingestion dashboard also lets an operator trigger a
 scheduled job on demand. The
 <a href="../hosted_agent_release_matrix/">published hosted component matrix</a>
 defines hosted/no-panel, which omits these administrative surfaces and requires
-<code>DEPLOY_ADMINISTRATIVE_PANEL=false</code>; no GPT-RAG umbrella release pins that
-matrix, and hosted-panel remains platform-blocked.</p>
+<code>DEPLOY_ADMINISTRATIVE_PANEL=false</code>. Hosted-panel is an explicit supported
+topology in the pinned matrix, but its user-history and operator routes remain
+off/503 behind separate deployment-published evidence gates.</p>
 <p>Admin access is enforced through an <strong>Entra ID App Role named <code>Admin</code></strong> added to the same App Registration you created for user sign-in. The token the caller presents to <code>/api/dashboard/*</code> (or the ingestion equivalents) must carry <code>Admin</code> in its <code>roles</code> claim.</p>
 <p>The ingestion <code>v2.7.0</code> metadata-only Overview and Curation APIs use their own
 explicit <code>PANEL_OPERATOR_APP_ROLE</code> or <code>PANEL_OPERATOR_GROUP_ID</code> gate. Their Vite
