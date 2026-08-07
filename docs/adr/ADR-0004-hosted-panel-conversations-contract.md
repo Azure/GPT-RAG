@@ -1,6 +1,10 @@
 # ADR-0004: Owner-bound managed-Conversations panel contract to finish the hosted-agent feature (issue #611)
 
-**Status:** Proposed<br>
+**Status:** Accepted (contract frozen; the container zero-RBAC / stateless
+boundary is merged in gpt-rag-orchestrator **PR #308**, merge
+`a828253b85c6ed7a63f6085c1666f75a9ca2b7d8`; the gpt-rag-ui panel/owner-index and
+gpt-rag-ingestion operator surfaces, the `conversations-panel-v1` contract, and
+infra wiring remain pending as adoption work — see "Adoption and migration")<br>
 **Date:** 2026-08-07<br>
 **Owners:** GPT-RAG maintainer (Paulo), architecture analysis, with gpt-rag-ui,
 gpt-rag-orchestrator, and gpt-rag-ingestion component owners
@@ -20,10 +24,11 @@ ADR-0003 made multi-turn continuity **application-managed against managed
 Conversations**. The client-held reference to the managed Conversation is a
 **BFF-issued opaque locator handle** — never the raw resource ID, never
 self-authorizing, and never carried as caller-controllable request metadata
-that a service could act on. In `capability` mode (fallback/pre-gate default)
-this handle is a signed, owner-bound capability combining the locator with an
-`oid`-bound authorization check; in `delegated` mode (chosen/default once
-ADR-0003's own environment evidence gate is met) the handle is a locator only,
+that a service could act on. In `capability` mode (an **optional,
+disabled-by-default** fallback an operator may explicitly select) this handle
+is a signed, owner-bound capability combining the locator with an `oid`-bound
+authorization check; in `delegated` mode (chosen/default once ADR-0003's own
+environment evidence gate is met) the handle is a locator only,
 and authorization is enforced per-request by the Foundry platform itself via a
 BFF-asserted `x-ms-user-identity` header derived server-side from the
 validated `oid`. Neither mode uses the top-level `conversation` routing
@@ -127,15 +132,18 @@ Cosmos-backed owner index cannot be the default in hosted/no-panel, where **no
 Cosmos is deployed**):
 
 - **Per-conversation owner binding (continuity + single-conversation history) —
-  required in ALL hosted modes including no-panel.** Fallback/pre-gate default
-  is a **server-issued, signed, opaque, owner-bound conversation capability**
-  minted by the BFF from the validated user token; it requires **no persistent
-  store** and therefore holds in no-panel with zero Cosmos. The chosen target
-  is the **native delegated header** mechanism (`x-ms-user-identity`, asserted
+  required in ALL hosted modes including no-panel.** The chosen/default is the
+  **native delegated header** mechanism (`x-ms-user-identity`, asserted
   server-side by the BFF from the validated `oid`, on protocol `responses`
-  2.0.0, with narrow `Foundry Agent Consumer` + custom
+  >= 2.0.0, with narrow `Foundry Agent Consumer` + custom
   `UserIdentityImpersonation` RBAC at agent scope), where Foundry enforces
-  per-user access to the response chain/history natively. ADR-0003 has already
+  per-user access to the response chain/history natively; it engages once
+  ADR-0003's environment evidence gate is met, and until then continuity fails
+  closed with 503. The **optional, disabled-by-default** fallback an operator
+  may explicitly opt into is a **server-issued, signed, opaque, owner-bound
+  conversation capability** minted by the BFF from the validated user token; it
+  requires **no persistent store** and therefore holds in no-panel with zero
+  Cosmos. ADR-0003 has already
   validated this mechanism for the BFF↔hosted-agent continuity call path; this
   ADR's panel history/read call path requires its **own** independent
   confirmation (`PANEL_HISTORY_OWNER_BINDING_VALIDATED`) before switching —
@@ -151,16 +159,21 @@ Cosmos is deployed**):
 
 In both concerns the authority is the BFF, never the container. This ADR decides
 everything invariant across the owner-binding mechanism and makes only the BFF
-mechanism selectable, defaulting to the store-free capability until this ADR's
-own environment evidence gate is met.
+mechanism selectable. For **continuity** the default is `delegated`, engaging
+once ADR-0003's environment evidence gate is met; until then continuity fails
+closed with 503 and the store-free `capability` is an optional operator opt-in.
+For the **panel** the pre-gate/fallback mechanism is the `owner_index`, until
+this ADR's own environment evidence gate is met.
 
 ### Resolving the no-panel / no-Cosmos continuity contradiction
 
 The prior revision wrongly made the Cosmos owner index the default owner-binding
 for continuity. But continuity is needed in hosted/no-panel, where no Cosmos is
-provisioned. The smallest enforceable fix that adds **no chat content, no new
-always-on compute, and no store in no-panel** is a **signed owner-bound
-conversation capability**:
+provisioned. The chosen/default is the native `delegated` header (post-gate; see
+ADR-0003); the **optional, disabled-by-default** fallback that adds **no chat
+content, no new always-on compute, and no store in no-panel** — available when
+the gate is unmet only if an operator explicitly opts in — is a **signed
+owner-bound conversation capability**:
 
 - **Shape.** An opaque token = `base64url(payload) . base64url(HMAC/JWS over
   payload)` where payload = `{ oid, conversation_resource_id, issued_at, expiry,
@@ -292,7 +305,7 @@ gated by the panel flag.
 
 ## Alternatives considered
 
-### Option A: BFF-minted signed owner-bound capability for continuity (all modes), plus a panel-only owner index for enumeration (fallback/pre-gate default)
+### Option A: BFF-minted signed owner-bound capability for continuity (all modes), plus a panel-only owner index for enumeration (panel pre-gate/fallback default; continuity opt-in only)
 
 The **UI BFF** is the sole component that touches the Conversations data plane.
 On the first turn the **authenticated BFF** (holding the validated user token,
@@ -465,12 +478,14 @@ to the safe state:
    the **user** history/feedback views. Smallest safe footprint: endpoints attach
    to compute that already runs.
 
-3. **Owner-binding is invariant; the BFF mechanism is a selector; continuity is
-   safe pre-gate.** Ship **Option A** (capability, store-free) as the
-   **fallback/pre-gate default**: per-conversation owner binding (continuity +
-   single-conversation history in **all** modes) via a **BFF-minted signed
-   owner-bound capability** that needs **no store**, plus a **panel-only**
-   owner index (Cosmos) for cross-conversation enumeration. Adopt **Option B
+3. **Owner-binding is invariant; the BFF mechanism is a selector.** For
+   **continuity** (ADR-0003, authoritative): `delegated` is the chosen/default
+   and engages once ADR-0003's environment evidence gate is met; until then
+   continuity **fails closed with 503** and the store-free **capability**
+   (Option A) is an **optional, disabled-by-default** operator opt-in, never
+   auto-engaged. For the **panel**: ship **Option A** — the **panel-only**
+   owner index (Cosmos) for cross-conversation enumeration and owner-gated
+   reads — as the panel's pre-gate/fallback mechanism, and adopt **Option B
    (native delegated header)** for the panel's history/read call path once
    this ADR's **own** environment evidence gate
    (`PANEL_HISTORY_OWNER_BINDING_VALIDATED`) confirms the same protocol
@@ -482,23 +497,24 @@ to the safe state:
    ADR's own gate, because each independent call path requires its own live
    evidence. Both mechanisms keep the **container at zero Conversations
    RBAC** and both fail closed. **Option C is prohibited.** No-panel has no
-   enumeration endpoint and no Cosmos; continuity still works via the active
-   owner-binding mechanism (capability pre-gate, or delegated once its own
-   gate is met).
+   enumeration endpoint and no Cosmos; continuity there is `delegated`
+   (post-gate) or the explicit `capability` opt-in, never an auto-fallback.
 
 4. **Fail-closed by default.** Every user-facing history/feedback panel surface
    is disabled unless the panel is deployed (`DEPLOY_ADMINISTRATIVE_PANEL` +
    `PANEL_HISTORY_ENABLED`), mirroring `POST /retrieve`; operator surfaces
    (corpus curation, overview metrics) have their own independent
    deploy/role-authorization requirement and are never gated by owner-binding
-   evidence. The deploy gate is independent of the owner-binding mechanism:
-   **`capability` mode requires no additional gate** and is the safe
-   pre-gate/fallback default the moment the panel is deployed. Only the
-   **switch to `delegated`** additionally requires
-   `PANEL_HISTORY_OWNER_BINDING_VALIDATED`; until that gate is set, the panel
-   continues serving history/feedback/deletion via `capability` — an unmet
-   gate never itself produces an error response, it only selects which
-   mechanism enforces ownership. A genuine **503** is reserved for the
+   evidence. The deploy gate is independent of the owner-binding mechanism: the
+   panel's **`owner_index`** read/enumeration path (Option A) requires no
+   additional owner-binding gate and is the panel's pre-gate/fallback default
+   the moment the panel is deployed. Only the **switch to `delegated`**
+   additionally requires `PANEL_HISTORY_OWNER_BINDING_VALIDATED`; until that
+   gate is set, the panel continues serving history/feedback/deletion via
+   `owner_index` — an unmet panel gate never itself produces an error response,
+   it only selects which mechanism enforces ownership. (Continuity is governed
+   separately by ADR-0003, where an unmet gate fails closed with 503.) A
+   genuine **503** is reserved for the
    history/feedback surface (or, for operator endpoints, the panel/admin app)
    being undeployed; a genuine **502** is reserved for the underlying
    managed-Conversations/downstream dependency itself failing (501 remains
@@ -557,9 +573,14 @@ never used for gate state; **503** the user history/feedback surface itself is
 undeployed (`DEPLOY_ADMINISTRATIVE_PANEL` or `PANEL_HISTORY_ENABLED` is
 `false`) or, for operator surfaces, the panel/ingestion-admin app is
 undeployed — never used for an unmet owner-binding evidence gate. An unmet
-`PANEL_HISTORY_OWNER_BINDING_VALIDATED` gate produces **no error at all**: the
-BFF falls back to `capability`/`owner_index` transparently, so gate state
-alone never surfaces as either a 502 or a 503. Retention:
+**panel** `PANEL_HISTORY_OWNER_BINDING_VALIDATED` gate produces **no error at
+all**: the panel falls back to its `owner_index` enumeration/read path
+transparently, so panel gate state alone never surfaces as either a 502 or a
+503. (The **continuity** gate behaves differently and is authoritative in
+ADR-0003: with `HOSTED_CONVERSATION_OWNER_BINDING=delegated` and its gate
+unmet, the continuity path **fails closed with 503** and does **not**
+auto-fall-back — `capability` continuity is an explicit operator opt-in.)
+Retention:
 deletion is a hard delete of managed-Conversation items plus panel metadata;
 `delete_after`-style policy intent is recorded but GPT-RAG performs no automatic
 scheduled deletion (consistent with v3.7.0 governance guidance).
@@ -570,16 +591,19 @@ Continuity keys (apply in **all** hosted modes, including no-panel; no store).
 Authoritatively defined in ADR-0003; restated here for context — ADR-0003 is
 the source of truth if wording ever diverges:
 
-- `HOSTED_CONVERSATION_OWNER_BINDING` (default `delegated`; alt `capability`) —
-  selects per-conversation owner binding: native delegated header (B, chosen/
-  default) vs. BFF-minted signed capability (A, fallback). `delegated` is
-  active only once **`HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED`** (ADR-0003)
-  — the hosted-continuity environment evidence gate confirming protocol
-  `responses` 2.0.0 and the narrow RBAC shape — is `true`; otherwise the
-  selector falls back to `capability` automatically. This is a **different,
-  independent** gate from the panel-only
-  `PANEL_HISTORY_OWNER_BINDING_VALIDATED` below; neither substitutes for the
-  other, even though ADR-0003's resolution
+- `HOSTED_CONVERSATION_OWNER_BINDING` (default `delegated`; explicit opt-in alt
+  `capability`) — selects per-conversation owner binding: native delegated
+  header (B, chosen/default) vs. BFF-minted signed capability (A, optional
+  fallback). `delegated` is active only once
+  **`HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED`** (ADR-0003) — the
+  hosted-continuity environment evidence gate confirming protocol `responses`
+  >= 2.0.0 and the narrow RBAC shape — is `true`; until then the continuity
+  path **fails closed with 503** and the BFF auto-engages **nothing**.
+  `capability` runs **only** when an operator explicitly sets this key to
+  `capability` (disabled by default; never auto-selected), per ADR-0003 (the
+  source of truth for this key). This is a **different, independent** gate from
+  the panel-only `PANEL_HISTORY_OWNER_BINDING_VALIDATED` below; neither
+  substitutes for the other, even though ADR-0003's resolution
   ([`gpt-rag#591`](https://github.com/Azure/GPT-RAG/issues/591#issuecomment-5212288245))
   is strong precedent for the panel's own gate.
 - `HOSTED_CONVERSATION_PROTOCOL_VERSION` (ADR-0003; expected `responses/2.0.0`
@@ -712,8 +736,10 @@ Coordinated, ordered change (compatible-commit discipline per AGENTS.md):
    **sole capability minter/verifier and header asserter**. Continuity (all
    modes): once `HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED` (ADR-0003) is
    met, assert `x-ms-user-identity` server-side from the validated `oid` on
-   protocol `responses` 2.0.0 (`delegated`, chosen/default); otherwise (or as
-   fallback) mint/verify the signed owner-bound capability from the validated
+   protocol `responses` >= 2.0.0 (`delegated`, chosen/default); until that gate
+   is met the continuity path **fails closed with 503** (no auto-fallback)
+   unless an operator explicitly opts into `capability`, in which case
+   mint/verify the signed owner-bound capability from the validated
    `oid` (`capability`): on create, allocate the managed Conversation and mint
    a signed owner-bound capability; per turn, verify capability (signature +
    expiry + `oid` equality) → read prior items by `conversation_resource_id` →
@@ -740,10 +766,11 @@ Coordinated, ordered change (compatible-commit discipline per AGENTS.md):
 
 Migration boundaries: no backfill. Existing classic Cosmos-backed history is
 untouched and remains the classic path. Hosted/no-panel provisions **no Cosmos**
-and uses the active owner-binding mechanism (capability pre-gate/fallback, or
-delegated once its own gate is met) for continuity; hosted/panel adds the
-Cosmos owner index for enumeration only, used only pre-gate/as fallback for
-the panel's own enumeration/read gate.
+and uses `delegated` for continuity once the ADR-0003 gate is met; until then
+continuity is **off (503)** unless an operator explicitly opts into the
+optional `capability` fallback. Hosted/panel adds the Cosmos owner index for
+enumeration only, used as the panel's own pre-gate/fallback enumeration/read
+mechanism.
 
 Rollback: flip `HOSTED_CONVERSATION_OWNER_BINDING` back to `capability`,
 `PANEL_HISTORY_ENABLED`/`DEPLOY_ADMINISTRATIVE_PANEL` as needed, and revert the
@@ -792,13 +819,14 @@ owner-index rows are metadata and can be dropped; rotating
 - **FF-5 Fail-closed gating:** panel user history endpoints return **503**
   unless `PANEL_HISTORY_ENABLED` (independent of owner-binding mechanism);
   operator endpoints return **503** unless `DEPLOY_ADMINISTRATIVE_PANEL`. An
-  unmet owner-binding gate never itself produces a 503: with
+  unmet **panel** owner-binding gate never itself produces a 503: with
   `PANEL_HISTORY_OWNER_BINDING_VALIDATED` unset, the panel continues serving
-  via `capability`; likewise `HOSTED_CONVERSATION_OWNER_BINDING=delegated`
-  falls back to `capability` automatically until
-  `HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED` (ADR-0003) is `true`, and
-  `PANEL_CONVERSATION_ENUMERATION_MODE=delegated` falls back to `owner_index`
-  until `PANEL_HISTORY_OWNER_BINDING_VALIDATED` is `true`.
+  via `owner_index`, and `PANEL_CONVERSATION_ENUMERATION_MODE=delegated` falls
+  back to `owner_index` until that gate is `true`. The **continuity** gate is
+  stricter (per ADR-0003): `HOSTED_CONVERSATION_OWNER_BINDING=delegated` with
+  `HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED` unset **fails closed with 503**
+  and does **not** auto-fall-back to `capability`; `capability` continuity runs
+  only when explicitly selected.
 - **FF-6 Token-type enforcement:** user surfaces reject app-only tokens (403,
   reusing the `idtyp`/`scp` checks); operator surfaces reject end-user tokens
   lacking the operator role (403).
@@ -893,11 +921,15 @@ Reassess when any of the following occurs:
   proven by the platform; (b) platform session-membership is not fenced
   (motivating the never-store-unpartitioned-session-data invariant above);
   (c) this does not resolve issue #591's separate document-level-authorization
-  question. Until this ADR's own gate passes, the **capability** (Option A)
-  remains the fallback/pre-gate default continuity and enumeration binding,
-  and Option C stays prohibited. Note: continuity is **not** blocked on this
-  ADR's own gate — the capability works today with zero store; the gate only
-  decides whether the panel's platform enforces reads natively instead.
+  question. Until this ADR's own (panel) gate passes, the panel's `owner_index`
+  (Option A enumeration) remains the panel's pre-gate/fallback read/enumeration
+  binding, and Option C stays prohibited. For **continuity** (ADR-0003), the
+  `capability` fallback is an **optional, disabled-by-default** operator opt-in,
+  not an auto-engaged default: with `delegated` selected and its gate unmet,
+  continuity **fails closed with 503**. Note: the panel enumeration feature is
+  **not** blocked on this ADR's own gate — `owner_index` works today with panel
+  Cosmos; the gate only decides whether the panel's platform enforces reads
+  natively instead.
 - **OQ-611-CAP (capability primitives):** Confirm the signing algorithm and key
   handling (HMAC vs JWS), Key Vault provisioning parity with `AUDIT-HMAC-KEY`,
   the TTL/rolling-re-mint values, and the rotation overlap window. Confirm the
