@@ -1,0 +1,247 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Azure/GPT-RAG/contracts/conversations-panel-v1.schema.json",
+  "title": "GPT-RAG conversations-panel v1",
+  "description": "Shared wire contract for the optional hosted administrative panel (issue #611, ADR-0004). This document has no single top-level instance; every shape is defined under $defs and referenced by consumers via a JSON Pointer fragment, e.g. '#/$defs/ConversationsListResponse'. Every object shape is strict (additionalProperties: false); unknown fields are a schema violation (HTTP 422), never silently ignored. Consumed by gpt-rag-ui (user-facing surfaces) and gpt-rag-ingestion (operator-facing surfaces); the hosted agent/container never implements or consumes any shape here (it holds zero managed-Conversations RBAC and is stateless). Cosmos-backed shapes (owner index, feedback, corpus curation, overview) carry metadata only -- identifiers, titles, timestamps, ratings, category codes, counts -- and never message bodies, citations, or document content. Managed Conversations remains the sole store of chat content; MessageItem.content is read live from Foundry managed Conversations, not from Cosmos.",
+  "$defs": {
+    "CorrelationId": {
+      "type": "string",
+      "pattern": "^req_[0-9a-f]{32}$",
+      "description": "Reused verbatim from audit-event-v1's correlation_id so panel requests join operator audit trails. Server-generated; never accepted from client input."
+    },
+    "Cursor": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048,
+      "description": "Opaque, signed, expiring pagination cursor bound to the authenticated caller's principal (oid) or, for operator surfaces, the requesting operator session. Never a raw offset or caller-supplied identifier. An invalid, expired, or cross-principal cursor is a 422 schema/bounds violation, not a 401/403/404."
+    },
+    "ConversationSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "created_at", "updated_at"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "description": "Owner-index lookup key equal to the managed Conversation's opaque conversation_resource_id. Never self-authorizing: every per-conversation endpoint re-checks ownership before using it to reach the managed-Conversations store."
+        },
+        "title": { "type": "string", "maxLength": 256 },
+        "created_at": { "type": "string", "format": "date-time" },
+        "updated_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "ConversationsListResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items"],
+      "properties": {
+        "items": {
+          "type": "array",
+          "maxItems": 50,
+          "items": { "$ref": "#/$defs/ConversationSummary" }
+        },
+        "next_cursor": {
+          "anyOf": [{ "$ref": "#/$defs/Cursor" }, { "type": "null" }]
+        }
+      },
+      "description": "GET /panel/conversations response. Rows are always filtered server-side to the authenticated principal (owner-index principal_id == live oid, or an equivalent delegated per-user authorization); a caller never sees another principal's rows, and disabling the panel omits this endpoint entirely (503) rather than returning an empty page."
+    },
+    "MessageItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "content"],
+      "properties": {
+        "role": { "type": "string", "enum": ["user", "assistant", "system", "tool"] },
+        "content": { "type": "string", "maxLength": 20000 }
+      },
+      "description": "One ordered item read live from managed Conversations (the system of record) after the owner gate passes. Never persisted to Cosmos."
+    },
+    "MessagesResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items"],
+      "properties": {
+        "items": {
+          "type": "array",
+          "maxItems": 200,
+          "items": { "$ref": "#/$defs/MessageItem" }
+        }
+      },
+      "description": "GET /panel/conversations/{id}/messages response. {id} is accepted only as a lookup key: the owner gate (owner-index row principal_id == live oid, or delegated per-user authorization) must pass before this endpoint ever reads the managed-Conversations store. A failed gate (missing row, foreign owner, forged/expired capability) returns the identical 404 used for a genuinely missing conversation -- never a distinguishable 403 -- to avoid an existence oracle."
+    },
+    "FeedbackCreateRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["feedback_id", "message_ref"],
+      "properties": {
+        "feedback_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "description": "Client-chosen idempotency key. Re-posting the same feedback_id upserts the identical record instead of creating a duplicate."
+        },
+        "message_ref": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "rating": {
+          "anyOf": [
+            { "type": "integer", "minimum": -5, "maximum": 5 },
+            { "type": "null" }
+          ]
+        },
+        "category": {
+          "anyOf": [
+            { "type": "string", "maxLength": 64 },
+            { "type": "null" }
+          ]
+        },
+        "comment": {
+          "anyOf": [
+            { "type": "string", "maxLength": 2000 },
+            { "type": "null" }
+          ],
+          "description": "Genuine user-authored feedback text, bounded and sanitized. Must never carry the underlying chat transcript, a citation, or document content -- a violation is a governance/content-confinement defect, not merely a schema one."
+        }
+      }
+    },
+    "FeedbackRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["feedback_id", "message_ref", "rating", "category", "comment", "created_at"],
+      "properties": {
+        "feedback_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "message_ref": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "rating": {
+          "anyOf": [
+            { "type": "integer", "minimum": -5, "maximum": 5 },
+            { "type": "null" }
+          ]
+        },
+        "category": {
+          "anyOf": [{ "type": "string", "maxLength": 64 }, { "type": "null" }]
+        },
+        "comment": {
+          "anyOf": [{ "type": "string", "maxLength": 2000 }, { "type": "null" }]
+        },
+        "created_at": { "type": "string", "format": "date-time" }
+      },
+      "description": "POST .../feedback response body and one item of FeedbackListResponse. Stored in the panel feedback Cosmos container (partition key /principal_id) -- metadata only."
+    },
+    "FeedbackListResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items"],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/FeedbackRecord" }
+        }
+      },
+      "description": "GET /panel/conversations/{id}/feedback response, gated by the same owner check as MessagesResponse."
+    },
+    "DeleteConversationResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": { "enum": ["deleted", "partial"] },
+        "detail": { "type": "string", "maxLength": 512 }
+      },
+      "description": "DELETE /panel/conversations/{id} response. 'deleted' only after the managed-Conversation delete itself succeeds. A subsequent panel-metadata cleanup failure (feedback rows, owner-index row) is reported as 'partial' with a human-readable detail -- never silently reported as a plain success."
+    },
+    "OperatorOverviewMetricsResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "generated_at", "correlation_id", "counts"],
+      "properties": {
+        "schema_version": { "const": 1 },
+        "generated_at": { "type": "string", "format": "date-time" },
+        "correlation_id": { "$ref": "#/$defs/CorrelationId" },
+        "counts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "conversation_count",
+            "feedback_count",
+            "corpus_pending_count",
+            "corpus_decided_count"
+          ],
+          "properties": {
+            "conversation_count": { "$ref": "#/$defs/SuppressibleCount" },
+            "feedback_count": { "$ref": "#/$defs/SuppressibleCount" },
+            "corpus_pending_count": { "$ref": "#/$defs/SuppressibleCount" },
+            "corpus_decided_count": { "$ref": "#/$defs/SuppressibleCount" }
+          }
+        }
+      },
+      "description": "GET /panel/overview/metrics response (gpt-rag-ingestion, operator role only). Aggregate counts over panel metadata; never a content join. Each bucket below PANEL_OVERVIEW_MIN_CARDINALITY is suppressed (null) rather than disclosing a small exact count."
+    },
+    "SuppressibleCount": {
+      "anyOf": [
+        { "type": "integer", "minimum": 0 },
+        { "type": "null" }
+      ],
+      "description": "Null means the underlying bucket is below PANEL_OVERVIEW_MIN_CARDINALITY and has been suppressed, not that the count is zero."
+    },
+    "CorpusCurationItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["item_id", "document_id", "title", "reason_code", "submitted_at"],
+      "properties": {
+        "item_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "document_id": { "type": "string", "minLength": 1, "maxLength": 512 },
+        "title": { "type": "string", "maxLength": 512 },
+        "reason_code": { "type": "string", "maxLength": 64 },
+        "submitted_at": { "type": "string", "format": "date-time" }
+      },
+      "description": "A document/knowledge-base curation item ingestion already indexes and has content access to. Never derived from, or referencing, conversation content."
+    },
+    "CorpusCurationQueueResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items"],
+      "properties": {
+        "items": {
+          "type": "array",
+          "maxItems": 100,
+          "items": { "$ref": "#/$defs/CorpusCurationItem" }
+        },
+        "next_cursor": {
+          "anyOf": [{ "$ref": "#/$defs/Cursor" }, { "type": "null" }]
+        }
+      },
+      "description": "GET /panel/corpus-curation/queue response (gpt-rag-ingestion, operator role only)."
+    },
+    "CorpusCurationDecisionRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["decision"],
+      "properties": {
+        "decision": { "enum": ["approve", "reject", "defer"] },
+        "note": {
+          "anyOf": [{ "type": "string", "maxLength": 2000 }, { "type": "null" }]
+        }
+      },
+      "description": "POST /panel/corpus-curation/{item_id}/decision request body."
+    },
+    "CorpusCurationDecisionResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["item_id", "decision", "decided_at"],
+      "properties": {
+        "item_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "decision": { "enum": ["approve", "reject", "defer"] },
+        "decided_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["detail"],
+      "properties": {
+        "detail": { "type": "string", "maxLength": 512 },
+        "correlation_id": { "$ref": "#/$defs/CorrelationId" }
+      },
+      "description": "Uniform error body for every non-2xx panel response. Error-code matrix: 401 missing/invalid bearer; 403 wrong token type/audience (app-only token on a user surface, or an end-user token lacking the operator role on an operator surface); 404 not-owner or missing (identical for both -- never 403 for ownership, to avoid an existence oracle); 422 schema/bounds violation (includes a tampered/expired/cross-principal cursor); 502 the managed-Conversations store or panel metadata store actually failing (never used for gate state); 503 the surface itself is undeployed (DEPLOY_ADMINISTRATIVE_PANEL / PANEL_HISTORY_ENABLED false, or the operator admin app undeployed) -- never used for an unmet owner-binding evidence gate, which instead falls back to owner_index with no error at all."
+    }
+  }
+}

@@ -786,6 +786,19 @@ if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
 }
 
 #-------------------------------------------------------------------------------
+# 6) Administrative panel Cosmos RBAC (issue #611, ADR-0004)
+#-------------------------------------------------------------------------------
+if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
+    Write-Host "`n🔐 Administrative panel Cosmos RBAC..."
+    Write-Host "🚀 Running config.panel.setup..."
+    Invoke-PythonModule -ModuleName 'config.panel.setup'
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    Write-Host "✅ Administrative panel Cosmos RBAC finished (no-op unless DEPLOY_ADMINISTRATIVE_PANEL=true)."
+} else {
+    Write-Host "⏭️  Skipping administrative panel Cosmos RBAC (missing APP_CONFIG_ENDPOINT)."
+}
+
+#-------------------------------------------------------------------------------
 # Cleaning up
 #-------------------------------------------------------------------------------
 # Write-Host "`n🧹 Cleaning Python environment up..."

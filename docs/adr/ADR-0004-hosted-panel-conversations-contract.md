@@ -2,9 +2,17 @@
 
 **Status:** Accepted (contract frozen; the container zero-RBAC / stateless
 boundary is merged in gpt-rag-orchestrator **PR #308**, merge
-`a828253b85c6ed7a63f6085c1666f75a9ca2b7d8`; the gpt-rag-ui panel/owner-index and
-gpt-rag-ingestion operator surfaces, the `conversations-panel-v1` contract, and
-infra wiring remain pending as adoption work — see "Adoption and migration")<br>
+`a828253b85c6ed7a63f6085c1666f75a9ca2b7d8`; the gpt-rag-ui user-facing
+history/feedback/deletion surfaces are merged in gpt-rag-ui **PR #99**, merge
+`ee3b53b29019e675c1e9ff19ee607cea361e5a8e` (not yet reflected in
+`manifest.json`'s pin); the Azure/GPT-RAG platform layer — the versioned
+`contracts/conversations-panel-v1` schema, the panel Cosmos container/RBAC
+composition helpers (`config.deployment.composition.panel_database_containers`,
+`config.panel.setup`), and the App Configuration keys — is implemented as of
+this revision; the gpt-rag-ingestion operator surfaces and the coordinated
+`manifest.json` pin bump that lifts the `DEPLOY_ADMINISTRATIVE_PANEL=true`
+fail-closed gate remain pending as adoption work — see "Adoption and
+migration")<br>
 **Date:** 2026-08-07<br>
 **Owners:** GPT-RAG maintainer (Paulo), architecture analysis, with gpt-rag-ui,
 gpt-rag-orchestrator, and gpt-rag-ingestion component owners
@@ -726,6 +734,35 @@ Coordinated, ordered change (compatible-commit discipline per AGENTS.md):
    data-plane roles to the **BFF identity only** and **removing any such role from
    the hosted agent/container identity**. Publish this ADR. No runtime behavior
    change yet.
+
+   **Status (this revision):** done. `contracts/conversations-panel-v1.schema.json`
+   + `.sha256` are published (see `contracts/README.md`). The panel App
+   Configuration keys (`PANEL_HISTORY_ENABLED`,
+   `PANEL_HISTORY_OWNER_BINDING_VALIDATED`,
+   `PANEL_CONVERSATION_ENUMERATION_MODE`, `PANEL_CONVERSATIONS_TOKEN_AUDIENCE`,
+   `PANEL_CONVERSATIONS_TENANT_ID`, `PANEL_OWNER_INDEX_DATABASE_CONTAINER`,
+   `PANEL_FEEDBACK_DATABASE_CONTAINER`, `PANEL_CURSOR_TTL_SECONDS`,
+   `PANEL_OVERVIEW_MIN_CARDINALITY`) are published by
+   `config.panel.settings.public_settings`, merged into
+   `compose_parameters`'s `additionalAppConfigurationSettings`. The panel Cosmos
+   containers (owner index, feedback — metadata only, `/principal_id`
+   partitioned) are composed by
+   `config.deployment.composition.panel_database_containers`/
+   `resolve_database_containers` for `DeploymentMode.HOSTED_PANEL`, reusing the
+   generic AILZ database-container-list mechanism (no `infra` submodule edit).
+   Container-scoped (never account-scope) Cosmos RBAC — Data Contributor for
+   the `gpt-rag-ui` BFF identity, Data Reader for `gpt-rag-ingestion` (operator
+   overview counts only), and nothing for the hosted agent/container identity —
+   is assigned by the new `config.panel.setup` postProvision hook, invoked from
+   both `scripts/postProvision.ps1` and `.sh`. The continuity capability
+   signing key (`HOSTED_CONVERSATION_CAPABILITY_KEY`) was already provisioned
+   by `config.continuity.setup` in an earlier revision and needed no change
+   here. **`DEPLOY_ADMINISTRATIVE_PANEL=true` (hosted-panel topology
+   selection) still fails closed** at `config.deployment.topology`/
+   `composition` (`HostedPanelUnsupportedError`) and `manifest.json` is not
+   repinned in this revision — both remain gated on the still-pending
+   gpt-rag-ingestion operator-surface work below, consistent with "no runtime
+   behavior change yet."
 2. **gpt-rag-orchestrator** — make the hosted agent/container **stateless**:
    remove any managed-Conversations read/append/persist from the container and
    confirm it consumes only the BFF-supplied complete ordered input. Remove any

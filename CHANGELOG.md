@@ -4,6 +4,37 @@
 
 ### Added
 
+- **Hosted administrative panel platform contract (issue #611, ADR-0004).**
+  Published the versioned `contracts/conversations-panel-v1` JSON Schema
+  (+ `.sha256` pin) covering the user-facing history/messages/feedback/delete
+  surfaces and the operator-facing overview/corpus-curation surfaces, with
+  strict `extra=forbid` semantics, a uniform error matrix, opaque
+  signed/expiring cursors, and `audit-event-v1`-compatible correlation IDs.
+  Added `config.panel.settings` (App Configuration defaults for
+  `PANEL_HISTORY_ENABLED`, `PANEL_HISTORY_OWNER_BINDING_VALIDATED`,
+  `PANEL_CONVERSATION_ENUMERATION_MODE`, `PANEL_CONVERSATIONS_TOKEN_AUDIENCE`,
+  `PANEL_CONVERSATIONS_TENANT_ID`, `PANEL_OWNER_INDEX_DATABASE_CONTAINER`,
+  `PANEL_FEEDBACK_DATABASE_CONTAINER`, `PANEL_CURSOR_TTL_SECONDS`,
+  `PANEL_OVERVIEW_MIN_CARDINALITY` — all published unconditionally and safely
+  inert, matching the already-merged `gpt-rag-ui` panel configuration exactly)
+  and `config.deployment.composition.panel_database_containers`/
+  `resolve_database_containers`, which provision exactly two
+  metadata-only, `/principal_id`-partitioned Cosmos containers (owner index,
+  feedback) for hosted/panel — never the classic
+  `conversations`/`datasources`/`prompts`/`mcp` list, so switching topologies
+  can never mix protected chat content with panel metadata. Added
+  `config.panel.setup`, a new `postProvision` hook (wired into both
+  `scripts/postProvision.ps1` and `.sh`) that assigns **container-scoped**
+  (never account-scope) Cosmos SQL role assignments: Data Contributor for the
+  `gpt-rag-ui` BFF identity and Data Reader for `gpt-rag-ingestion` (operator
+  overview counts only) on the two panel containers — the hosted
+  agent/container identity is never resolved or granted any role. The panel's
+  pagination cursor reuses the UI's existing `CHAINLIT_AUTH_SECRET`
+  (already Key-Vault-backed); no new secret or Key Vault RBAC was introduced.
+  `DEPLOY_ADMINISTRATIVE_PANEL=true` (hosted-panel topology selection) still
+  fails closed pending the remaining gpt-rag-ingestion operator-surface work;
+  this change is the platform-layer prerequisite, with no other runtime
+  behavior change.
 - **Deterministic deployment topologies.** Classic, hosted/no-panel, and
   hosted/panel remain recognized topology values, but only classic and
   hosted/no-panel are currently deployable. `DEPLOY_ADMINISTRATIVE_PANEL`

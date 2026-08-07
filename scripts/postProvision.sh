@@ -175,6 +175,19 @@ echo "🔍 AI Search setup…"
 }
 
 ###############################################################################
+# 6) Administrative panel Cosmos RBAC (issue #611, ADR-0004)
+###############################################################################
+echo
+echo "🔐 Administrative panel Cosmos RBAC…"
+{
+  echo "🚀 Running config.panel.setup…"
+  python -m config.panel.setup
+  echo "✅ Administrative panel Cosmos RBAC finished (no-op unless DEPLOY_ADMINISTRATIVE_PANEL=true)."
+} || {
+  echo "❗️ Error during administrative panel Cosmos RBAC setup. Skipping it."
+}
+
+###############################################################################
 # Cleaning up
 ###############################################################################
 echo
