@@ -325,6 +325,7 @@ class LifecycleParityTests(unittest.TestCase):
             content,
         )
         self.assertNotIn("SEARCH_SERVICE_UAI_RESOURCE_ID = ''", content)
+        self.assertIn('Set-Item -Path "Env:$key" -Value $flatSettings[$key]', content)
         self.assertIn("$foundryProjects.Count -ne 1", content)
         self.assertIn("AI_FOUNDRY_PROJECT_NAME", content)
         self.assertNotIn("aifoundry-default-project", content)

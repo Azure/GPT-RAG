@@ -696,6 +696,9 @@ function Set-GptRagAppConfiguration {
         $value = $settings[$key]
         $flatSettings[$key] = if ($null -eq $value) { '' } else { "$value" }
     }
+    foreach ($key in $flatSettings.Keys) {
+        Set-Item -Path "Env:$key" -Value $flatSettings[$key]
+    }
 
     $tempFile = Join-Path ([System.IO.Path]::GetTempPath()) "gpt-rag-appconfig-$([Guid]::NewGuid().ToString('N')).json"
     try {
