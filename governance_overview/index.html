@@ -1845,10 +1845,11 @@ all sensitive information was found, so producers must use allowlisted fields
 and bounded enums instead of trying to sanitize arbitrary objects.</p>
 <h2 id="retention-access-and-export">Retention, access, and export</h2>
 <p>Hosted continuity adds a delegated owner-binding and bounded-history boundary.
-The pending <a href="../hosted_continuity_platform_contract/">hosted conversation continuity platform contract</a>
+The release-gated <a href="../hosted_continuity_platform_contract/">hosted conversation continuity platform contract</a>
 defaults to <code>HOSTED_CONTINUITY_ENABLED=false</code> until Responses protocol <code>2.0.0</code>,
 trusted UI BFF <code>x-ms-user-identity</code> derivation, the two exact direct
-agent-scoped roles, and <code>OWNER_BINDING_VALIDATED</code> pass together. The owner
+agent-scoped roles, and <code>HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED</code> pass
+together. The owner
 header is distinct from OBO retrieval and must not be accepted from an
 untrusted client. Its <code>HOSTED_HISTORY_MAX_ITEMS</code>, <code>HOSTED_HISTORY_MAX_TOKENS</code>,
 and mandatory <code>drop_oldest</code> behavior bound context supplied through the

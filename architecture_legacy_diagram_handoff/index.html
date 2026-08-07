@@ -481,17 +481,6 @@
         
       
       
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Legacy diagram update handoff
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -501,70 +490,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#shapes-and-labels" class="md-nav__link">
-    <span class="md-ellipsis">
-      Shapes and labels
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#connections-and-labels" class="md-nav__link">
-    <span class="md-ellipsis">
-      Connections and labels
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#hosted-image-preparation-inset" class="md-nav__link">
-    <span class="md-ellipsis">
-      Hosted image preparation inset
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#legend-and-visual-treatment" class="md-nav__link">
-    <span class="md-ellipsis">
-      Legend and visual treatment
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#remove-or-relabel" class="md-nav__link">
-    <span class="md-ellipsis">
-      Remove or relabel
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
       
     </li>
   
@@ -1592,10 +1517,11 @@ chat-runtime views.</p>
 <div class="admonition warning">
 <p class="admonition-title">Release status</p>
 <p>Draw the hosted/no-panel path as the <strong>target fresh-deployment default</strong> and
-label it <strong>OQ-OWN delegated pivot pending; continuity off/503</strong>. Do not label
-it shipped until the platform pivot, remaining compatible component tags,
-final umbrella pins, <code>OWNER_BINDING_VALIDATED</code>, integrated validation, and
-the GPT-RAG release publish. AILZ <code>v2.5.0</code> is already published.</p>
+label it <strong>OQ-OWN pivot merged; release gate off/503</strong>. Do not label it
+shipped until the remaining compatible component tags, final umbrella pins,
+<code>HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED</code>, integrated validation, and
+the GPT-RAG release publish. AILZ <code>v2.5.0</code> is published and platform PR</p>
+<h1 id="633-is-merged-to-develop">633 is merged to <code>develop</code>.</h1>
 </div>
 <h2 id="shapes-and-labels">Shapes and labels</h2>
 <p>Add or update these shapes in the application/runtime area:</p>
@@ -1635,8 +1561,8 @@ the GPT-RAG release publish. AILZ <code>v2.5.0</code> is already published.</p>
 </tr>
 <tr>
 <td>New role annotation</td>
-<td><code>Direct agent scope: Foundry Agent Consumer + exact Microsoft.CognitiveServices/accounts/AIServices/agents/endpoints/UserIdentityImpersonation/action role</code></td>
-<td>Attach to the UI BFF identity and individual hosted agent only.</td>
+<td><code>Direct agent scope: Foundry Agent Consumer eed3b665-ab3a-47b6-8f48-c9382fb1dad6 + GPT-RAG Hosted Agent User Identity Impersonation bef66abe-a495-530a-be1d-5d882fecff03</code></td>
+<td>Attach to the UI BFF identity and individual hosted agent only; the custom role contains only <code>Microsoft.CognitiveServices/accounts/AIServices/agents/endpoints/UserIdentityImpersonation/action</code>.</td>
 </tr>
 <tr>
 <td>New state shape</td>
@@ -1675,7 +1601,7 @@ the GPT-RAG release publish. AILZ <code>v2.5.0</code> is already published.</p>
 </tr>
 <tr>
 <td>Release annotation</td>
-<td><code>OQ-OWN delegated pivot pending; continuity off/503</code></td>
+<td><code>OQ-OWN pivot merged; compatible pins pending; continuity off/503</code></td>
 <td>Place in an amber status banner below the diagram title.</td>
 </tr>
 </tbody>

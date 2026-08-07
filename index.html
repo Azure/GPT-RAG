@@ -1603,10 +1603,14 @@ is published. UI <code>v2.6.0</code>, final umbrella pins, integrated validation
 new GPT-RAG release remain unpublished. The capability-first continuity
 contract from
 <a href="https://github.com/Azure/GPT-RAG/pull/630">PR #630</a> has been superseded by
-the pending OQ-OWN delegated <code>x-ms-user-identity</code> architecture. The platform
-pivot, compatible component pins, and <code>OWNER_BINDING_VALIDATED</code> gate are not
-published, so continuity remains off and compatible history endpoints must
-return HTTP 503. Current published GPT-RAG <code>v3.7.0</code> stays classic.</p>
+the OQ-OWN delegated <code>x-ms-user-identity</code> architecture. The platform pivot
+merged to <code>develop</code> in
+<a href="https://github.com/Azure/GPT-RAG/pull/633">PR #633</a> at
+<a href="https://github.com/Azure/GPT-RAG/commit/86b17b0af672edefe6842cba0f1a8ff77ab23038"><code>86b17b0</code></a>.
+Compatible component pins and the GPT-RAG release remain unpublished, so
+continuity stays off and compatible history endpoints return HTTP 503 until
+<code>HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true</code>. Current published
+GPT-RAG <code>v3.7.0</code> stays classic.</p>
 </div>
 <p><img alt="Chat runtime modes and hosted deployment lifecycle" src="media/architecture_chat_runtime_modes.svg" /></p>
 <p><img alt="Modular architecture layers" src="media/architecture_modular_layers.svg" /></p>

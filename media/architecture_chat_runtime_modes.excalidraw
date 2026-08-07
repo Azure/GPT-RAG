@@ -53,7 +53,7 @@
       "y": 117,
       "width": 1250,
       "height": 60,
-      "text": "Unreleased target: AILZ v2.5.0 published; OQ-OWN pivot, remaining component pins, OWNER_BINDING_VALIDATED, and GPT-RAG release pending. Continuity off/503.",
+      "text": "Unreleased target: AILZ v2.5.0 published; OQ-OWN pivot merged; compatible pins, owner validation, and GPT-RAG release pending. Continuity off/503.",
       "fontSize": 13,
       "fontFamily": 2,
       "strokeColor": "#000000",

@@ -1764,10 +1764,13 @@ is published; UI <code>v2.6.0</code> remains unpublished. The capability-first
 continuity contract merged in
 <a href="https://github.com/Azure/GPT-RAG/pull/630">PR #630</a>, but live OQ-OWN
 evidence supersedes it with delegated <code>x-ms-user-identity</code>. The platform
-pivot, compatible component pins, and <code>OWNER_BINDING_VALIDATED</code> gate are not
-published. Continuity remains off and compatible history endpoints must
-return HTTP 503. Final umbrella pins, integrated validation, and a new
-GPT-RAG release remain. Current published GPT-RAG <code>v3.7.0</code> stays classic.
+pivot merged to <code>develop</code> in
+<a href="https://github.com/Azure/GPT-RAG/pull/633">PR #633</a> at
+<a href="https://github.com/Azure/GPT-RAG/commit/86b17b0af672edefe6842cba0f1a8ff77ab23038"><code>86b17b0</code></a>.
+Compatible component pins, integrated validation, and a new GPT-RAG release
+remain unpublished. Continuity stays off and compatible history endpoints
+return HTTP 503 until the exact validation gate passes. Current published
+GPT-RAG <code>v3.7.0</code> stays classic.
 Use this workflow only with the release that explicitly announces the
 hosted-default contract.</p>
 </div>
@@ -1833,7 +1836,7 @@ Configuration label <code>gpt-rag</code>:</p>
 </tr>
 <tr>
 <td><code>HOSTED_AGENT_BASE_URL</code></td>
-<td>Required HTTPS hosted service root. The pending OQ-OWN UI sends Responses protocol <code>2.0.0</code> requests to <code>POST /responses</code> when <code>CHAT_BACKEND=hosted_agent</code>. The separate <code>POST /invocations</code> endpoint retains the legacy messages-based invocation contract but does not satisfy delegated continuity.</td>
+<td>Required HTTPS hosted service root. A compatible OQ-OWN UI sends Responses protocol <code>2.0.0</code> requests to <code>POST /responses</code> when <code>CHAT_BACKEND=hosted_agent</code>. The separate <code>POST /invocations</code> endpoint retains the legacy messages-based invocation contract but does not satisfy delegated continuity.</td>
 </tr>
 <tr>
 <td><code>HOSTED_AGENT_RESOURCE_SCOPE</code></td>
@@ -1864,13 +1867,14 @@ opaque <code>x-agent-foundry-call-id</code> context to Toolbox; user and delegat
 tokens are not copied into tool payloads or client-defined identity headers.</p>
 <h4 id="hosted-conversation-continuity-platform-gate">Hosted conversation continuity platform gate</h4>
 <div class="admonition danger">
-<p class="admonition-title">Delegated owner binding is pending</p>
+<p class="admonition-title">Delegated owner binding remains release-gated</p>
 <p><code>HOSTED_CONTINUITY_ENABLED</code> defaults to <code>false</code> and must stay false until the
-OQ-OWN platform pivot and compatible components are published. The
-deployment must prove Responses protocol <code>2.0.0</code>, trusted UI BFF identity
-derivation, and the two exact direct agent-scoped roles before recording
-<code>OWNER_BINDING_VALIDATED=true</code>. Otherwise compatible history endpoints
-return HTTP 503.</p>
+compatible components are published. PR #633 provides the platform pivot,
+but deployment must still prove the live 100%-routed Responses protocol
+<code>2.0.0</code>, trusted UI BFF identity derivation, and the two exact direct
+agent-scoped roles before recording
+<code>HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true</code>. Otherwise compatible
+history endpoints return HTTP 503.</p>
 </div>
 <p>The trusted UI BFF derives <code>x-ms-user-identity</code> from the authenticated
 server-side principal and sends it on the hosted Responses request. This owner
@@ -1879,15 +1883,20 @@ with its own audience and bearer token.</p>
 <p>Activation assigns only the UI BFF:</p>
 <ul>
 <li>built-in <strong>Foundry Agent Consumer</strong>
-  (<code>eed3b665-ab3a-47b6-8f48-c9382fb1dad6</code>); and</li>
-<li>the exact GPT-RAG custom role containing only the reviewed
+  (<code>eed3b665-ab3a-47b6-8f48-c9382fb1dad6</code>), whose only DataAction is
+  <code>Microsoft.CognitiveServices/accounts/AIServices/endpoints/interact/action</code>;
+  and</li>
+<li>custom <strong>GPT-RAG Hosted Agent User Identity Impersonation</strong>
+  (<code>bef66abe-a495-530a-be1d-5d882fecff03</code>), containing only the reviewed
   <code>Microsoft.CognitiveServices/accounts/AIServices/agents/endpoints/UserIdentityImpersonation/action</code>
   DataAction.</li>
 </ul>
-<p>Both assignments must be direct and scoped to the individual hosted agent.
-Broader, inherited, group-derived, wildcard, or extra-DataAction access fails
-validation. The hosted runtime is not an identity-header source and receives no
-key, Conversation or impersonation RBAC, or Cosmos DB in hosted/no-panel.</p>
+<p>Both assignments must be direct <code>ServicePrincipal</code> assignments scoped to the
+individual hosted agent. Broader, inherited, group-derived, wildcard,
+custom-equivalent, or extra-DataAction access fails validation. <strong>Foundry User</strong>
+and <strong>Project Runtime User</strong> are prohibited substitutes. The hosted runtime is
+not an identity-header source and receives no key, Conversation or impersonation
+RBAC, or Cosmos DB in hosted/no-panel.</p>
 <table>
 <thead>
 <tr>
@@ -1901,12 +1910,32 @@ key, Conversation or impersonation RBAC, or Cosmos DB in hosted/no-panel.</p>
 <td><code>false</code> until delegated owner binding validates; false/missing validation means history HTTP 503.</td>
 </tr>
 <tr>
-<td><code>OWNER_BINDING_VALIDATED</code></td>
+<td><code>HOSTED_CONVERSATION_OWNER_BINDING</code></td>
+<td>Defaults to <code>delegated</code>; <code>capability</code> is the only accepted explicit fallback.</td>
+</tr>
+<tr>
+<td><code>HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED</code></td>
 <td>Becomes <code>true</code> only after the live protocol, identity-source, role-definition, assignment, and scope checks pass.</td>
+</tr>
+<tr>
+<td><code>HOSTED_CONVERSATION_DELEGATED_IDENTITY_HEADER</code></td>
+<td>Must be exactly <code>x-ms-user-identity</code>.</td>
+</tr>
+<tr>
+<td><code>HOSTED_CONVERSATION_DELEGATED_IDENTITY_SOURCE</code></td>
+<td>Must be exactly <code>authenticated_ui_bff_principal</code>.</td>
 </tr>
 <tr>
 <td><code>HOSTED_CONVERSATIONS_TOKEN_AUDIENCE</code></td>
 <td>Exact Foundry audience <code>https://ai.azure.com</code>; distinct from <code>x-ms-user-identity</code> and downstream OBO audiences.</td>
+</tr>
+<tr>
+<td><code>HOSTED_AGENT_RESPONSES_PROTOCOL_VERSION</code></td>
+<td>Must be exactly <code>2.0.0</code>.</td>
+</tr>
+<tr>
+<td><code>HOSTED_CONTINUITY_UNAVAILABLE_STATUS_CODE</code></td>
+<td>Must be <code>503</code>.</td>
 </tr>
 <tr>
 <td><code>HOSTED_HISTORY_MAX_ITEMS</code></td>

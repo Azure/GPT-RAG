@@ -1603,17 +1603,21 @@
 
 
 <h1 id="hosted-conversation-continuity-platform-contract">Hosted conversation continuity platform contract</h1>
-<p>GPT-RAG is pivoting hosted conversation ownership to delegated user identity.
+<p>GPT-RAG has pivoted hosted conversation ownership to delegated user identity on
+the <code>develop</code> branch.
 The trusted UI BFF derives <code>x-ms-user-identity</code> from the authenticated
 server-side principal and sends it on the hosted Responses request. This is the
 preferred and default continuity architecture.</p>
 <div class="admonition danger">
-<p class="admonition-title">Pivot pending; continuity stays off</p>
-<p>The OQ-OWN platform follow-up and compatible component pins are not merged
-and published yet. Keep <code>HOSTED_CONTINUITY_ENABLED=false</code>. Until the
-deployment proves the exact owner-binding role and protocol contract and
-records <code>OWNER_BINDING_VALIDATED=true</code>, continuity endpoints must fail
-closed with HTTP 503 rather than use an unvalidated owner path.</p>
+<p class="admonition-title">Pivot merged; release gate remains closed</p>
+<p>The OQ-OWN platform pivot merged in
+<a href="https://github.com/Azure/GPT-RAG/pull/633">PR #633</a> at
+<a href="https://github.com/Azure/GPT-RAG/commit/86b17b0af672edefe6842cba0f1a8ff77ab23038"><code>86b17b0</code></a>,
+but compatible component pins and a GPT-RAG release are not published yet.
+Keep <code>HOSTED_CONTINUITY_ENABLED=false</code>. Until deployment proves the exact
+owner-binding role and protocol contract and records
+<code>HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true</code>, continuity endpoints
+must fail closed with HTTP 503 rather than use an unvalidated owner path.</p>
 </div>
 <p>The previous capability/HMAC design is not the primary path. It remains a
 disabled fallback only. A primary delegated deployment does not create a
@@ -1653,30 +1657,35 @@ substituted for each other.</p>
 <tbody>
 <tr>
 <td>Protocol</td>
-<td>Hosted requests use Responses protocol <code>2.0.0</code>. Other protocol versions or the legacy Invocations contract do not satisfy OQ-OWN.</td>
+<td>The live endpoint exposes Responses and routes 100% through one fixed-ratio agent version whose definition declares exactly one Responses protocol <code>2.0.0</code> entry. Other protocol versions or the legacy Invocations contract do not satisfy OQ-OWN.</td>
 </tr>
 <tr>
 <td>Owner header</td>
-<td>The trusted UI BFF derives and sends <code>x-ms-user-identity</code>; client-supplied identity is not authoritative.</td>
+<td><code>HOSTED_CONVERSATION_DELEGATED_IDENTITY_HEADER=x-ms-user-identity</code> and <code>HOSTED_CONVERSATION_DELEGATED_IDENTITY_SOURCE=authenticated_ui_bff_principal</code>. Client-supplied identity is not authoritative.</td>
 </tr>
 <tr>
 <td>Invocation role</td>
-<td>Built-in <strong>Foundry Agent Consumer</strong> (<code>eed3b665-ab3a-47b6-8f48-c9382fb1dad6</code>) is assigned directly to the UI BFF at the individual hosted-agent scope.</td>
+<td>Built-in <strong>Foundry Agent Consumer</strong> (<code>eed3b665-ab3a-47b6-8f48-c9382fb1dad6</code>) has no control-plane <code>Actions</code> and exactly <code>Microsoft.CognitiveServices/accounts/AIServices/endpoints/interact/action</code> in <code>DataActions</code>.</td>
 </tr>
 <tr>
 <td>Impersonation role</td>
-<td>The exact GPT-RAG custom role containing only <code>Microsoft.CognitiveServices/accounts/AIServices/agents/endpoints/UserIdentityImpersonation/action</code> is assigned directly to the UI BFF at the same individual agent scope.</td>
+<td>Custom <strong>GPT-RAG Hosted Agent User Identity Impersonation</strong> (<code>bef66abe-a495-530a-be1d-5d882fecff03</code>) has no <code>Actions</code>, <code>NotActions</code>, or <code>NotDataActions</code> and exactly <code>Microsoft.CognitiveServices/accounts/AIServices/agents/endpoints/UserIdentityImpersonation/action</code> in <code>DataActions</code>. Its only assignable scope is the hosted agent resource group.</td>
+</tr>
+<tr>
+<td>Assignments</td>
+<td>Both roles are direct <code>ServicePrincipal</code> assignments to the UI BFF at <code>/subscriptions/{subscription}/resourceGroups/{resourceGroup}/providers/Microsoft.CognitiveServices/accounts/{account}/projects/{project}/agents/{agent}</code>.</td>
 </tr>
 <tr>
 <td>Validation result</td>
-<td>Deployment records <code>OWNER_BINDING_VALIDATED=true</code> only after the live role definitions, direct assignments, exact scope, protocol, and identity-source behavior pass validation.</td>
+<td>Deployment records <code>HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true</code> only after the live role definitions, direct assignments, exact scope, protocol, and identity-source behavior pass validation.</td>
 </tr>
 </tbody>
 </table>
 <p>Broader project-, account-, resource-group-, subscription-, or
 management-group-scoped assignments do not satisfy the gate. Inherited,
-group-derived, wildcard, or extra-DataAction roles are rejected. The UI BFF and
-hosted runtime must use distinct identities.</p>
+group-derived, wildcard, custom-equivalent, or extra-DataAction roles are
+rejected. <strong>Foundry User</strong> and <strong>Project Runtime User</strong> are prohibited
+substitutes. The UI BFF and hosted runtime must use distinct identities.</p>
 <p>If any protocol, identity, role-definition, assignment, or scope check fails,
 setup keeps <code>HOSTED_CONTINUITY_ENABLED=false</code>. Compatible UI history operations
 must return HTTP 503 while the owner-binding gate is false or unavailable; they
@@ -1709,15 +1718,35 @@ controls:</p>
 <tbody>
 <tr>
 <td><code>HOSTED_CONTINUITY_ENABLED</code></td>
-<td>Defaults to <code>false</code>. May become <code>true</code> only after the delegated owner-binding gate succeeds.</td>
+<td>Defaults to <code>false</code>. May become <code>true</code> only after the selected owner-binding gate succeeds.</td>
 </tr>
 <tr>
-<td><code>OWNER_BINDING_VALIDATED</code></td>
-<td>Defaults or resolves to false until live protocol and role validation succeeds. A false or missing value forces continuity off/503.</td>
+<td><code>HOSTED_CONVERSATION_OWNER_BINDING</code></td>
+<td>Defaults to <code>delegated</code>; <code>capability</code> is the only accepted explicit fallback value.</td>
+</tr>
+<tr>
+<td><code>HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED</code></td>
+<td>Defaults or resolves to <code>false</code> until live protocol and role validation succeeds. A false or missing value forces continuity off/503.</td>
+</tr>
+<tr>
+<td><code>HOSTED_CONVERSATION_DELEGATED_IDENTITY_HEADER</code></td>
+<td>Must be exactly <code>x-ms-user-identity</code>.</td>
+</tr>
+<tr>
+<td><code>HOSTED_CONVERSATION_DELEGATED_IDENTITY_SOURCE</code></td>
+<td>Must be exactly <code>authenticated_ui_bff_principal</code>; browser identity and OBO retrieval tokens are rejected as ownership inputs.</td>
 </tr>
 <tr>
 <td><code>HOSTED_CONVERSATIONS_TOKEN_AUDIENCE</code></td>
 <td>Remains the exact Foundry audience <code>https://ai.azure.com</code> for the UI BFF's Foundry access token. It is not the <code>x-ms-user-identity</code> value and is distinct from downstream OBO audiences.</td>
+</tr>
+<tr>
+<td><code>HOSTED_AGENT_RESPONSES_PROTOCOL_VERSION</code></td>
+<td>Must be exactly <code>2.0.0</code>.</td>
+</tr>
+<tr>
+<td><code>HOSTED_CONTINUITY_UNAVAILABLE_STATUS_CODE</code></td>
+<td>Must be <code>503</code>.</td>
 </tr>
 <tr>
 <td><code>HOSTED_HISTORY_MAX_ITEMS</code></td>
@@ -1755,11 +1784,11 @@ separate release explicitly selects and validates that mode.</p>
 </tr>
 <tr>
 <td><code>HOSTED_CONVERSATION_CAPABILITY_KEY_ID</code></td>
-<td>Non-secret key-version identifier used only by the disabled capability mode.</td>
+<td>Defaults to <code>v1</code>; accepts 1-64 safe identifier characters. Used only by the disabled capability mode.</td>
 </tr>
 <tr>
 <td><code>HOSTED_CONVERSATION_CAPABILITY_TTL_SECONDS</code></td>
-<td>Capability lifetime used only by the disabled capability mode.</td>
+<td>Defaults to <code>900</code>; accepted range 60-3,600 seconds. Used only by the disabled capability mode.</td>
 </tr>
 <tr>
 <td><code>HOSTED_CONTINUITY_KEY_VAULT_URI</code> / <code>HOSTED_CONTINUITY_KEY_VAULT_NAME</code></td>
@@ -1783,10 +1812,11 @@ a prerequisite for delegated ownership.</p>
 <li>The hosted agent is deployed with Responses protocol <code>2.0.0</code>.</li>
 <li>Validation proves the trusted UI BFF is the identity-header source, validates
    the live built-in Foundry Agent Consumer definition and the exact GPT-RAG
-   custom role containing only
+   custom role (<code>bef66abe-a495-530a-be1d-5d882fecff03</code>) containing only
    <code>Microsoft.CognitiveServices/accounts/AIServices/agents/endpoints/UserIdentityImpersonation/action</code>,
    and verifies both direct assignments at the individual agent scope.</li>
-<li>The platform records <code>OWNER_BINDING_VALIDATED=true</code>.</li>
+<li>The platform records
+   <code>HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true</code>.</li>
 <li>Only then may the compatible UI enable continuity. Otherwise history remains
    unavailable with HTTP 503.</li>
 </ol>
@@ -1800,7 +1830,7 @@ delegated-only deployment has no capability reference or secret role to remove.<
 or the capability-first platform implementation alone. A release may enable
 delegated continuity only after all of the following are true:</p>
 <ol>
-<li>The OQ-OWN platform pivot PR is merged.</li>
+<li>The OQ-OWN platform pivot from PR #633 is present.</li>
 <li>The UI BFF derives <code>x-ms-user-identity</code> from the authenticated server-side
    principal and clients cannot select the owner.</li>
 <li>Responses protocol <code>2.0.0</code> is pinned across the UI and hosted runtime.</li>

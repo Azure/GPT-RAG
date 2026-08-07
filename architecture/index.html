@@ -1620,12 +1620,15 @@ is published; UI <code>v2.6.0</code> remains unpublished. The capability-first
 continuity contract merged in
 <a href="https://github.com/Azure/GPT-RAG/pull/630">PR #630</a>, but live OQ-OWN
 evidence supersedes it with a delegated <code>x-ms-user-identity</code> primary path.
-The platform pivot, compatible pins, and <code>OWNER_BINDING_VALIDATED</code> gate are
-not published. Keep <code>HOSTED_CONTINUITY_ENABLED=false</code>; compatible history
-endpoints must return HTTP 503. Final umbrella pins, integrated validation,
-and the GPT-RAG release remain incomplete. The diagrams document the
-approved target, not shipped behavior. Current published GPT-RAG <code>v3.7.0</code>
-remains classic.</p>
+The platform pivot merged to <code>develop</code> in
+<a href="https://github.com/Azure/GPT-RAG/pull/633">PR #633</a> at
+<a href="https://github.com/Azure/GPT-RAG/commit/86b17b0af672edefe6842cba0f1a8ff77ab23038"><code>86b17b0</code></a>.
+Compatible pins, integrated validation, and the GPT-RAG release remain
+incomplete. Keep <code>HOSTED_CONTINUITY_ENABLED=false</code>; compatible history
+endpoints must return HTTP 503 until
+<code>HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true</code>. The diagrams document
+the approved target, not shipped behavior. Current published GPT-RAG
+<code>v3.7.0</code> remains classic.</p>
 </div>
 <h2 id="full-zero-trust-reference">Full Zero Trust reference</h2>
 <p>The existing PNG and Visio remain the full network-isolated reference view.
@@ -1640,7 +1643,7 @@ focused editable SVG and Excalidraw views below.</p>
 <p><img alt="Chat runtime modes and hosted deployment lifecycle" src="../media/architecture_chat_runtime_modes.svg" /></p>
 <p><a href="../media/architecture_chat_runtime_modes.excalidraw">Edit the chat runtime diagram in Excalidraw</a></p>
 <p>The fresh-deployment target sends chat from the Web UI to a Microsoft Foundry
-hosted agent. For the pending OQ-OWN path, the trusted UI BFF authenticates to
+hosted agent. For the release-gated OQ-OWN path, the trusted UI BFF authenticates to
 the individual agent and derives the delegated owner header; OBO is reserved
 for downstream retrieval. The hosted agent passes only opaque Foundry call
 context to Toolbox, and Foundry IQ or Azure AI Search applies native
@@ -1651,9 +1654,11 @@ never silently switches to the Container Apps orchestrator.</p>
 authenticated server-side principal and sends it on Responses protocol <code>2.0.0</code>.
 This delegated owner binding is distinct from OBO retrieval tokens. Activation
 requires direct individual-agent-scope assignments of Foundry Agent Consumer
-and the exact GPT-RAG custom role containing only
+(<code>eed3b665-ab3a-47b6-8f48-c9382fb1dad6</code>) and the exact GPT-RAG custom role
+<strong>GPT-RAG Hosted Agent User Identity Impersonation</strong>
+(<code>bef66abe-a495-530a-be1d-5d882fecff03</code>) containing only
 <code>Microsoft.CognitiveServices/accounts/AIServices/agents/endpoints/UserIdentityImpersonation/action</code>,
-plus <code>OWNER_BINDING_VALIDATED=true</code>. The hosted runtime is not an
+plus <code>HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true</code>. The hosted runtime is not an
 identity-header source and gets no key, Conversation or impersonation RBAC, or Cosmos DB in
 hosted/no-panel. Capability/HMAC remains a disabled fallback. See the
 <a href="../hosted_continuity_platform_contract/">hosted conversation continuity platform contract</a>
