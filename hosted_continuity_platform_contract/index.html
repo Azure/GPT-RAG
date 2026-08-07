@@ -497,9 +497,27 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#trust-boundary" class="md-nav__link">
+  <a href="#primary-delegated-trust-boundary" class="md-nav__link">
     <span class="md-ellipsis">
-      Trust boundary
+      Primary delegated trust boundary
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#required-protocol-and-role-gate" class="md-nav__link">
+    <span class="md-ellipsis">
+      Required protocol and role gate
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#runtime-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Runtime isolation
     </span>
   </a>
   
@@ -515,18 +533,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#dedicated-key-vault-and-app-configuration" class="md-nav__link">
+  <a href="#disabled-capabilityhmac-fallback" class="md-nav__link">
     <span class="md-ellipsis">
-      Dedicated Key Vault and App Configuration
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#foundry-role-boundary" class="md-nav__link">
-    <span class="md-ellipsis">
-      Foundry role boundary
+      Disabled capability/HMAC fallback
     </span>
   </a>
   
@@ -1594,209 +1603,214 @@
 
 
 <h1 id="hosted-conversation-continuity-platform-contract">Hosted conversation continuity platform contract</h1>
-<p>GPT-RAG has a platform contract for preserving hosted chat continuity with
-Microsoft Foundry managed Conversations. The contract was merged to <code>develop</code>
-in <a href="https://github.com/Azure/GPT-RAG/pull/630">Azure/GPT-RAG PR #630</a>.</p>
-<div class="admonition warning">
-<p class="admonition-title">Merged platform contract; keep it disabled</p>
-<p>This is not a released end-to-end feature. Compatible UI and hosted-runtime
-component pins, final umbrella pins, and integrated validation are still
-required. Keep <code>HOSTED_CONTINUITY_ENABLED=false</code> until the UI BFF
-implementation has completed owner-binding validation and the compatible
-component set is published.</p>
+<p>GPT-RAG is pivoting hosted conversation ownership to delegated user identity.
+The trusted UI BFF derives <code>x-ms-user-identity</code> from the authenticated
+server-side principal and sends it on the hosted Responses request. This is the
+preferred and default continuity architecture.</p>
+<div class="admonition danger">
+<p class="admonition-title">Pivot pending; continuity stays off</p>
+<p>The OQ-OWN platform follow-up and compatible component pins are not merged
+and published yet. Keep <code>HOSTED_CONTINUITY_ENABLED=false</code>. Until the
+deployment proves the exact owner-binding role and protocol contract and
+records <code>OWNER_BINDING_VALIDATED=true</code>, continuity endpoints must fail
+closed with HTTP 503 rather than use an unvalidated owner path.</p>
 </div>
-<p>The contract is fail closed. It does not grant the hosted runtime authority over
-conversation ownership or Foundry Conversations. The UI BFF is the only
-component that creates, reads, appends to, or deletes managed Conversations and
-the only component that creates and verifies the owner-bound capability.</p>
-<h2 id="trust-boundary">Trust boundary</h2>
+<p>The previous capability/HMAC design is not the primary path. It remains a
+disabled fallback only. A primary delegated deployment does not create a
+capability key, require a dedicated continuity Key Vault, or publish a
+capability Key Vault reference.</p>
+<h2 id="primary-delegated-trust-boundary">Primary delegated trust boundary</h2>
 <pre class="mermaid"><code>flowchart LR
-  User[Signed-in user] --&gt; UI[UI BFF]
-  UI --&gt;|create, read, append, delete| Conv[Foundry managed Conversations]
-  UI --&gt;|delegated request| Agent[Foundry hosted agent]
-  UI --&gt;|read one capability secret| KV[Dedicated UI BFF Key Vault]
-  AppConfig[App Configuration&lt;br/&gt;Key Vault reference only] --&gt; UI
+  User[Signed-in user] --&gt; UI[Trusted UI BFF]
+  UI --&gt;|derive x-ms-user-identity| Owner[Delegated owner context]
+  Owner --&gt;|Responses protocol 2.0.0| Agent[Foundry hosted agent]
   Agent --&gt; Tools[Toolbox and retrieval]
+  Tools --&gt;|separate OBO token when required| Sources[Foundry IQ / Azure AI Search]
+  Agent --&gt; Conv[Foundry managed Conversations]
 
-  UI -. opaque capability to client .-&gt; User
-  KV -. no key access .-&gt; Agent
-  Conv -. no Conversations RBAC .-&gt; Agent</code></pre>
-<p>The UI BFF derives the lowercase Microsoft Entra object ID (<code>oid</code>) from the
-authenticated server-side principal. It signs the versioned capability with
-HMAC-SHA256 and verifies the owner, expiry, schema, canonical framing, and
-signature before every Conversation operation. The browser may retain the
-opaque capability, but it does not choose or alter the owner.</p>
-<p>The UI BFF remains the authority that issues and verifies capabilities. An
-opaque signed envelope does not grant the hosted runtime ownership authority.
-The hosted runtime receives no HMAC key, raw <code>oid</code>, capability-key permission,
-or Foundry Conversations data-plane role.</p>
-<h2 id="configuration-contract">Configuration contract</h2>
-<p>Post-provisioning seeds these values under the App Configuration label
-<code>gpt-rag</code>. Invalid values fail setup; validation failure writes
-<code>HOSTED_CONTINUITY_ENABLED=false</code>.</p>
+  UI -. direct agent-scoped roles .-&gt; Agent
+  User -. cannot source identity header .-&gt; Agent
+  Agent -. no conversation or impersonation RBAC .-&gt; Conv</code></pre>
+<p>Only the trusted UI BFF may source <code>x-ms-user-identity</code>. It derives the value
+from the authenticated server-side principal; it does not accept a browser-
+selected owner and the hosted runtime must not synthesize, replace, or derive
+the header.</p>
+<p>The delegated owner header is not an OAuth On-Behalf-Of token. It binds the
+Foundry Conversation owner for Responses protocol <code>2.0.0</code>. OBO remains a
+separate downstream retrieval flow used when Foundry IQ, Azure AI Search, Work
+IQ, or another source needs a delegated bearer token to enforce source
+permissions. The two mechanisms have different audiences and must not be
+substituted for each other.</p>
+<h2 id="required-protocol-and-role-gate">Required protocol and role gate</h2>
+<p>Activation must prove all of these conditions together:</p>
 <table>
 <thead>
 <tr>
-<th>App Configuration key</th>
-<th>Default</th>
-<th>Validation and purpose</th>
+<th>Gate</th>
+<th>Required contract</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Protocol</td>
+<td>Hosted requests use Responses protocol <code>2.0.0</code>. Other protocol versions or the legacy Invocations contract do not satisfy OQ-OWN.</td>
+</tr>
+<tr>
+<td>Owner header</td>
+<td>The trusted UI BFF derives and sends <code>x-ms-user-identity</code>; client-supplied identity is not authoritative.</td>
+</tr>
+<tr>
+<td>Invocation role</td>
+<td>Built-in <strong>Foundry Agent Consumer</strong> (<code>eed3b665-ab3a-47b6-8f48-c9382fb1dad6</code>) is assigned directly to the UI BFF at the individual hosted-agent scope.</td>
+</tr>
+<tr>
+<td>Impersonation role</td>
+<td>The exact GPT-RAG custom role containing only <code>Microsoft.CognitiveServices/accounts/AIServices/agents/endpoints/UserIdentityImpersonation/action</code> is assigned directly to the UI BFF at the same individual agent scope.</td>
+</tr>
+<tr>
+<td>Validation result</td>
+<td>Deployment records <code>OWNER_BINDING_VALIDATED=true</code> only after the live role definitions, direct assignments, exact scope, protocol, and identity-source behavior pass validation.</td>
+</tr>
+</tbody>
+</table>
+<p>Broader project-, account-, resource-group-, subscription-, or
+management-group-scoped assignments do not satisfy the gate. Inherited,
+group-derived, wildcard, or extra-DataAction roles are rejected. The UI BFF and
+hosted runtime must use distinct identities.</p>
+<p>If any protocol, identity, role-definition, assignment, or scope check fails,
+setup keeps <code>HOSTED_CONTINUITY_ENABLED=false</code>. Compatible UI history operations
+must return HTTP 503 while the owner-binding gate is false or unavailable; they
+must not silently fall back to an unbound Conversation.</p>
+<h2 id="runtime-isolation">Runtime isolation</h2>
+<p>The hosted runtime executes the agent but is not an identity or persistence
+authority. In hosted/no-panel it receives:</p>
+<ul>
+<li>no authority to source <code>x-ms-user-identity</code>;</li>
+<li>no capability or HMAC key;</li>
+<li>no Foundry Conversation data-plane role;</li>
+<li>no <code>UserIdentityImpersonation</code> role;</li>
+<li>no broader assignment that grants either Conversation or impersonation
+  actions; and</li>
+<li>no Cosmos DB conversation store.</li>
+</ul>
+<p>Foundry managed Conversations provide hosted state. The no-panel topology does
+not provision panel-only Cosmos DB, and the hosted runtime cannot use Cosmos as
+a continuity fallback.</p>
+<h2 id="configuration-contract">Configuration contract</h2>
+<p>The platform and compatible components must treat these settings as fail-closed
+controls:</p>
+<table>
+<thead>
+<tr>
+<th>Setting or gate</th>
+<th>Required posture</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>HOSTED_CONTINUITY_ENABLED</code></td>
-<td><code>false</code></td>
-<td>Master gate. Must remain disabled until compatible components are pinned and owner binding has been validated. Enabling also requires a hosted topology, <code>CHAT_BACKEND=hosted_agent</code>, and Key Vault deployment.</td>
+<td>Defaults to <code>false</code>. May become <code>true</code> only after the delegated owner-binding gate succeeds.</td>
 </tr>
 <tr>
-<td><code>HOSTED_CONVERSATION_OWNER_BINDING</code></td>
-<td><code>capability</code></td>
-<td>The only accepted ownership boundary. Raw caller identifiers are not a supported substitute.</td>
-</tr>
-<tr>
-<td><code>HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED</code></td>
-<td><code>false</code></td>
-<td>Explicit compatibility gate. <code>HOSTED_CONTINUITY_ENABLED=true</code> is rejected unless this is exactly <code>true</code>.</td>
+<td><code>OWNER_BINDING_VALIDATED</code></td>
+<td>Defaults or resolves to false until live protocol and role validation succeeds. A false or missing value forces continuity off/503.</td>
 </tr>
 <tr>
 <td><code>HOSTED_CONVERSATIONS_TOKEN_AUDIENCE</code></td>
-<td><code>https://ai.azure.com</code></td>
-<td>Exact audience required for Foundry Conversations access by the UI BFF.</td>
-</tr>
-<tr>
-<td><code>HOSTED_CONVERSATION_CAPABILITY_KEY_ID</code></td>
-<td><code>v1</code></td>
-<td>Non-secret key-version identifier. Must contain 1-64 letters, digits, periods, underscores, or hyphens and start with a letter or digit. Advancing it creates a new secret version while preserving prior versions.</td>
-</tr>
-<tr>
-<td><code>HOSTED_CONVERSATION_CAPABILITY_TTL_SECONDS</code></td>
-<td><code>900</code></td>
-<td>Capability lifetime. Accepted range is 60-3,600 seconds.</td>
+<td>Remains the exact Foundry audience <code>https://ai.azure.com</code> for the UI BFF's Foundry access token. It is not the <code>x-ms-user-identity</code> value and is distinct from downstream OBO audiences.</td>
 </tr>
 <tr>
 <td><code>HOSTED_HISTORY_MAX_ITEMS</code></td>
-<td><code>100</code></td>
-<td>Maximum managed history items supplied to the compatible UI BFF/runtime contract. Accepted range is 1-1,000.</td>
+<td>Default <code>100</code>; accepted range 1-1,000.</td>
 </tr>
 <tr>
 <td><code>HOSTED_HISTORY_MAX_TOKENS</code></td>
-<td><code>32000</code></td>
-<td>Maximum history token budget. Accepted range is 1-1,000,000.</td>
+<td>Default <code>32000</code>; accepted range 1-1,000,000.</td>
 </tr>
 <tr>
 <td><code>HOSTED_HISTORY_TRUNCATION</code></td>
-<td><code>drop_oldest</code></td>
-<td>The only accepted overflow policy. It preserves the newest bounded context.</td>
+<td>Must be <code>drop_oldest</code>.</td>
 </tr>
 </tbody>
 </table>
-<p>These limits are compatibility and safety controls, not a records-retention
-policy. Foundry Conversation deletion, organizational retention, backup, and
-legal-hold requirements remain operator responsibilities.</p>
-<h2 id="dedicated-key-vault-and-app-configuration">Dedicated Key Vault and App Configuration</h2>
-<p>An enabled deployment must identify a dedicated UI BFF Key Vault through one of
-these deployment inputs:</p>
-<div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">HOSTED_CONTINUITY_KEY_VAULT_URI</span> <span class="s2">&quot;https://&lt;ui-bff-vault&gt;.vault.azure.net/&quot;</span>
-<span class="c"># Or:</span>
-<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">HOSTED_CONTINUITY_KEY_VAULT_NAME</span> <span class="s2">&quot;&lt;ui-bff-vault&gt;&quot;</span>
-</code></pre></div>
-<p>The shared workload vault identified by <code>KEY_VAULT_URI</code> is rejected. The
-platform creates or reuses the <code>HOSTED-CONVERSATION-CAPABILITY-KEY</code> secret and
-grants the UI BFF <strong>Key Vault Secrets User</strong> only at that individual secret
-scope. Effective inherited, group-derived, custom, or broader secret-read
-access fails validation. The hosted identity must have no effective access to
-the capability secret.</p>
-<p>App Configuration never stores the HMAC key. It stores
-<code>HOSTED_CONVERSATION_CAPABILITY_KEY</code> only as a Key Vault reference to the
-dedicated secret. A plaintext value, a malformed reference, or a reference to a
-different vault or secret fails closed.</p>
-<h2 id="foundry-role-boundary">Foundry role boundary</h2>
-<p>Activation verifies the live built-in <strong>Foundry Agent Consumer</strong> role before
-using it:</p>
+<p>The history bounds limit context supplied through the compatible hosted path.
+They do not define records retention, legal hold, backup, or deletion policy.</p>
+<h2 id="disabled-capabilityhmac-fallback">Disabled capability/HMAC fallback</h2>
+<p>The owner-bound capability contract from
+<a href="https://github.com/Azure/GPT-RAG/pull/630">PR #630</a> is retained only as an
+explicit fallback for future compatibility work. It is disabled unless a
+separate release explicitly selects and validates that mode.</p>
+<p>These settings and resources are fallback-only:</p>
 <table>
 <thead>
 <tr>
-<th>Property</th>
-<th>Required value</th>
+<th>Fallback surface</th>
+<th>Posture</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Role ID</td>
-<td><code>eed3b665-ab3a-47b6-8f48-c9382fb1dad6</code></td>
+<td><code>HOSTED_CONVERSATION_OWNER_BINDING=capability</code></td>
+<td>Never selected implicitly by the delegated primary path.</td>
 </tr>
 <tr>
-<td>Principal</td>
-<td>UI BFF managed identity only</td>
+<td><code>HOSTED_CONVERSATION_CAPABILITY_KEY_ID</code></td>
+<td>Non-secret key-version identifier used only by the disabled capability mode.</td>
 </tr>
 <tr>
-<td>Scope</td>
-<td>The individual hosted agent resource</td>
+<td><code>HOSTED_CONVERSATION_CAPABILITY_TTL_SECONDS</code></td>
+<td>Capability lifetime used only by the disabled capability mode.</td>
 </tr>
 <tr>
-<td>Hosted runtime assignment</td>
-<td>None</td>
+<td><code>HOSTED_CONTINUITY_KEY_VAULT_URI</code> / <code>HOSTED_CONTINUITY_KEY_VAULT_NAME</code></td>
+<td>Optional fallback inputs; not provisioned or required for delegated continuity.</td>
+</tr>
+<tr>
+<td><code>HOSTED_CONVERSATION_CAPABILITY_KEY</code></td>
+<td>Optional fallback Key Vault reference; absent on the primary delegated path.</td>
 </tr>
 </tbody>
 </table>
-<p>The role must still be the built-in role with the reviewed single endpoint
-interaction data action. Custom roles and assignments inherited from a project,
-account, subscription, management group, or group membership are not accepted
-as substitutes. The UI BFF and hosted runtime must not share an identity.</p>
-<p>This role lets the UI BFF invoke the one hosted agent. It does not grant the
-hosted runtime access to Foundry Conversations, and it must not be broadened to
-the Foundry project or account.</p>
+<p>The primary path must not create <code>HOSTED-CONVERSATION-CAPABILITY-KEY</code>, grant a
+capability-secret role, or publish <code>HOSTED_CONVERSATION_CAPABILITY_KEY</code>.
+Existing fallback key versions may be retained for rollback or investigation
+when disabling a previously provisioned capability deployment, but they are not
+a prerequisite for delegated ownership.</p>
 <h2 id="activation-and-disabled-reconciliation">Activation and disabled reconciliation</h2>
-<p>Continuity setup is deliberately ordered after the hosted agent resource
-exists:</p>
+<p>Activation occurs only after the individual hosted agent exists:</p>
 <ol>
-<li>Post-provisioning validates and seeds the configuration while forcing
-   continuity disabled. It does not publish the capability reference or grant
-   continuity-specific roles.</li>
-<li>The hosted agent is deployed.</li>
-<li>The activation gate validates the live Foundry role definition, distinct
-   identities, exact agent and secret scopes, dedicated vault, capability key,
-   and owner-binding flag.</li>
-<li>Only after every check succeeds does setup publish the Key Vault reference
-   and set <code>HOSTED_CONTINUITY_ENABLED=true</code>.</li>
+<li>Provisioning seeds continuity disabled.</li>
+<li>The hosted agent is deployed with Responses protocol <code>2.0.0</code>.</li>
+<li>Validation proves the trusted UI BFF is the identity-header source, validates
+   the live built-in Foundry Agent Consumer definition and the exact GPT-RAG
+   custom role containing only
+   <code>Microsoft.CognitiveServices/accounts/AIServices/agents/endpoints/UserIdentityImpersonation/action</code>,
+   and verifies both direct assignments at the individual agent scope.</li>
+<li>The platform records <code>OWNER_BINDING_VALIDATED=true</code>.</li>
+<li>Only then may the compatible UI enable continuity. Otherwise history remains
+   unavailable with HTTP 503.</li>
 </ol>
-<p>Disabling the feature is also reconciled, not merely hidden behind a flag. With
-the platform-managed capability reference still present, the next setup pass
-removes:</p>
-<ul>
-<li>the UI BFF's exact Foundry Agent Consumer assignment at the individual agent;</li>
-<li>the UI BFF's exact Key Vault Secrets User assignment at the capability
-  secret; and</li>
-<li>the <code>HOSTED_CONVERSATION_CAPABILITY_KEY</code> App Configuration reference.</li>
-</ul>
-<p>The capability secret and its previous versions remain in Key Vault. Retaining
-that key history supports controlled rollback and investigation; removing old
-versions is a separate operator retention decision.</p>
-<p>Do not manually delete the App Configuration reference before running disabled
-reconciliation. The reference is how setup resolves the exact capability-secret
-scope. If it was removed out of band, inspect and remove the UI BFF's exact
-secret-scoped assignment separately; the agent-scoped Foundry assignment is
-still reconciled independently.</p>
+<p>Disabled reconciliation removes the UI BFF's exact agent-scoped invocation and
+impersonation assignments. If a prior fallback capability deployment exists,
+reconciliation also removes its App Configuration reference and exact
+secret-scoped role while retaining Key Vault secret-version history. A
+delegated-only deployment has no capability reference or secret role to remove.</p>
 <h2 id="release-and-rollout-gate">Release and rollout gate</h2>
-<p>Do not enable this contract against the currently published classic component
-set or by mixing arbitrary component branches. A release may enable continuity
-only after all of the following are true:</p>
+<p>Do not enable this contract against the current published classic component set
+or the capability-first platform implementation alone. A release may enable
+delegated continuity only after all of the following are true:</p>
 <ol>
-<li>The UI BFF exclusively implements managed Conversation CRUD and capability
-   issuance/verification.</li>
-<li>The hosted runtime accepts neither the capability key nor raw <code>oid</code> and has
-   no Conversations RBAC.</li>
-<li>The owner-binding compatibility test sets
-   <code>HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true</code>.</li>
-<li>Compatible UI, hosted-runtime, AI Landing Zone, and umbrella pins are
-   published and validated together.</li>
-<li>Deployment tests confirm activation occurs only after the individual hosted
-   agent exists and disabled reconciliation removes only the exact
-   continuity-specific grants and reference.</li>
+<li>The OQ-OWN platform pivot PR is merged.</li>
+<li>The UI BFF derives <code>x-ms-user-identity</code> from the authenticated server-side
+   principal and clients cannot select the owner.</li>
+<li>Responses protocol <code>2.0.0</code> is pinned across the UI and hosted runtime.</li>
+<li>The two exact direct agent-scoped UI BFF roles pass live validation.</li>
+<li>The hosted runtime has no identity-header source, key, Conversation or
+   impersonation RBAC, or Cosmos dependency in hosted/no-panel.</li>
+<li>Compatible component and umbrella pins are published and validated together.</li>
 </ol>
-<p>Until then, the documented platform contract is available for component
-implementation and review, but <code>HOSTED_CONTINUITY_ENABLED=false</code> is the required
-operational posture.</p>
+<p>Until those gates pass, <code>HOSTED_CONTINUITY_ENABLED=false</code> and HTTP 503 are the
+required operational behavior.</p>
 
 
 

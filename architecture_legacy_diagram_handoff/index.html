@@ -1592,10 +1592,10 @@ chat-runtime views.</p>
 <div class="admonition warning">
 <p class="admonition-title">Release status</p>
 <p>Draw the hosted/no-panel path as the <strong>target fresh-deployment default</strong> and
-label it <strong>Platform contracts merged; compatible pins and owner validation
-pending</strong>. Do not label it shipped until the planned component and AI
-Landing Zone tags, final umbrella pins, owner-binding validation, integrated
-validation, and GPT-RAG release publish. Show hosted continuity as disabled.</p>
+label it <strong>OQ-OWN delegated pivot pending; continuity off/503</strong>. Do not label
+it shipped until the platform pivot, remaining compatible component tags,
+final umbrella pins, <code>OWNER_BINDING_VALIDATED</code>, integrated validation, and
+the GPT-RAG release publish. AILZ <code>v2.5.0</code> is already published.</p>
 </div>
 <h2 id="shapes-and-labels">Shapes and labels</h2>
 <p>Add or update these shapes in the application/runtime area:</p>
@@ -1615,8 +1615,8 @@ validation, and GPT-RAG release publish. Show hosted continuity as disabled.</p>
 </tr>
 <tr>
 <td>Existing UI shape</td>
-<td><code>Web UI / BFF</code></td>
-<td>Keep in Container Apps at the request-path entry and make it the exclusive owner of Foundry Conversation operations and capabilities.</td>
+<td><code>Trusted Web UI / BFF</code></td>
+<td>Keep in Container Apps at the request-path entry and make it the only source of the delegated owner header.</td>
 </tr>
 <tr>
 <td>Existing ingestion shape</td>
@@ -1629,19 +1629,19 @@ validation, and GPT-RAG release publish. Show hosted continuity as disabled.</p>
 <td>Place to the right of Web UI, outside the Container Apps boundary and inside the Microsoft Foundry boundary.</td>
 </tr>
 <tr>
+<td>New owner-binding annotation</td>
+<td><code>x-ms-user-identity; Responses 2.0.0</code></td>
+<td>Place on the UI BFF to hosted-agent connection and distinguish it from OBO retrieval.</td>
+</tr>
+<tr>
+<td>New role annotation</td>
+<td><code>Direct agent scope: Foundry Agent Consumer + exact Microsoft.CognitiveServices/accounts/AIServices/agents/endpoints/UserIdentityImpersonation/action role</code></td>
+<td>Attach to the UI BFF identity and individual hosted agent only.</td>
+</tr>
+<tr>
 <td>New state shape</td>
 <td><code>Foundry managed Conversations</code></td>
-<td>Connect only to the UI BFF. Do not connect it to the hosted runtime.</td>
-</tr>
-<tr>
-<td>New secret shape</td>
-<td><code>Dedicated UI BFF Key Vault</code></td>
-<td>Connect only to the UI BFF and label the connection <code>individual capability-secret scope</code>.</td>
-</tr>
-<tr>
-<td>App Configuration annotation</td>
-<td><code>Key Vault reference only</code></td>
-<td>Place between App Configuration and the UI BFF. Do not show a plaintext capability key.</td>
+<td>Place in the Foundry boundary. Mark the hosted runtime as having no Conversation or impersonation RBAC.</td>
 </tr>
 <tr>
 <td>New tool boundary</td>
@@ -1675,36 +1675,35 @@ validation, and GPT-RAG release publish. Show hosted continuity as disabled.</p>
 </tr>
 <tr>
 <td>Release annotation</td>
-<td><code>Platform contracts merged; continuity disabled; compatible pins and owner validation pending</code></td>
+<td><code>OQ-OWN delegated pivot pending; continuity off/503</code></td>
 <td>Place in an amber status banner below the diagram title.</td>
 </tr>
 </tbody>
 </table>
 <h2 id="connections-and-labels">Connections and labels</h2>
 <ol>
-<li>Connect <code>Signed-in user</code> to <code>Web UI / BFF</code>.</li>
-<li>Connect <code>Web UI / BFF</code> to <code>Microsoft Foundry Hosted Agent</code> and label the connection
-   <code>delegated user OBO</code>.</li>
-<li>Connect <code>Web UI / BFF</code> to <code>Foundry managed Conversations</code> and label it
-   <code>exclusive CRUD; owner-bound capability</code>.</li>
-<li>Connect <code>Dedicated UI BFF Key Vault</code> to <code>Web UI / BFF</code> and label it
-   <code>HMAC key; secret-scoped read</code>.</li>
-<li>Connect App Configuration to <code>Web UI / BFF</code> and label it
-   <code>Key Vault reference only</code>.</li>
+<li>Connect <code>Signed-in user</code> to <code>Trusted Web UI / BFF</code>.</li>
+<li>Connect <code>Trusted Web UI / BFF</code> to <code>Microsoft Foundry Hosted Agent</code> and label
+   the connection <code>x-ms-user-identity; Responses 2.0.0</code>.</li>
+<li>Add a separate UI BFF-to-retrieval annotation for <code>OBO bearer token</code> and
+   state that it is not the Conversation owner header.</li>
+<li>Attach the two exact direct individual-agent-scope role labels to the UI BFF,
+   not the hosted runtime.</li>
 <li>Connect <code>Microsoft Foundry Hosted Agent</code> to <code>Toolbox / MCP tools</code> and label
    the connection <code>opaque x-agent-foundry-call-id</code>.</li>
 <li>Connect <code>Toolbox / MCP tools</code> to <code>Authorization-trimmed retrieval</code>.</li>
 <li>Connect <code>Authorization-trimmed retrieval</code> to Foundry IQ / Azure AI Search
    and label it <code>native per-user document authorization</code>.</li>
 <li>Keep the ingestion-to-Storage / AI Search indexing connections unchanged.</li>
-<li>Draw a dashed connection from <code>Web UI / BFF</code> to
+<li>Draw a dashed connection from <code>Trusted Web UI / BFF</code> to
    <code>Container Apps orchestrator - explicit fallback</code>.</li>
 <li>Place a red stop marker between the hosted and fallback lanes with the label
    <code>No request-time silent fallback</code>. Do not connect the lanes as an automatic
    failover path.</li>
-<li>Add red stop markers from the hosted runtime to both the capability secret
-   and managed Conversations with the labels <code>No key or raw oid</code> and
-   <code>No Conversations RBAC</code>.</li>
+<li>Add red stop markers from the hosted runtime to the identity-header source,
+   Conversation/impersonation RBAC, and Cosmos DB.</li>
+<li>Do not draw a capability key or continuity Key Vault on the primary path.
+   If capability/HMAC appears, place it in a disabled fallback inset only.</li>
 </ol>
 <h2 id="hosted-image-preparation-inset">Hosted image preparation inset</h2>
 <p>Add a small deployment inset near Container Registry with this left-to-right

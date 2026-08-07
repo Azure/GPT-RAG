@@ -1602,12 +1602,13 @@ published releases run it as an orchestrator Container App. The
 <a href="../deploy/#chat-runtime-modes-upcoming-hosted-default-release">upcoming hosted-default topology</a>
 packages the same chat runtime as a Microsoft Foundry hosted agent for fresh
 deployments and retains the Container Apps adapter as an explicit fallback.
-The platform implementation is merged but remains unreleased pending component
-and AI Landing Zone tags, final umbrella pins, integrated validation, and a new
-GPT-RAG release. The separate
+AILZ <code>v2.5.0</code> is published, but the platform implementation remains unreleased
+pending the remaining compatible component tags, final umbrella pins,
+integrated validation, and a new GPT-RAG release. The separate
 <a href="../hosted_continuity_platform_contract/">hosted continuity platform contract</a>
-is also merged, but remains disabled pending compatible component pins and
-owner-binding validation; hosted/panel remains unsupported. <a href="https://github.com/Azure/gpt-rag-orchestrator">GitHub Repository</a>.</p>
+is pivoting to delegated <code>x-ms-user-identity</code>, but remains disabled pending the
+OQ-OWN platform follow-up, compatible component pins, and
+<code>OWNER_BINDING_VALIDATED</code>; hosted/panel remains unsupported. <a href="https://github.com/Azure/gpt-rag-orchestrator">GitHub Repository</a>.</p>
 <h2 id="key-features">Key Features</h2>
 <ul>
 <li><strong>Strategy-Based Architecture:</strong> Pluggable orchestration strategies selected via Azure App Configuration (<code>AGENT_STRATEGY</code>).</li>
@@ -1760,10 +1761,11 @@ skip Azure AI Search while still using the recent chat history.</p>
 </tbody>
 </table>
 <p>The hosted limits are inactive while <code>HOSTED_CONTINUITY_ENABLED=false</code>. When a
-compatible component set is eventually validated, the UI BFF - not the hosted
-orchestrator - will own Foundry managed Conversation CRUD and capability
-verification. The hosted runtime will receive no capability key, raw <code>oid</code>, or
-Conversations RBAC.</p>
+compatible component set is validated, the trusted UI BFF will derive
+<code>x-ms-user-identity</code> for Responses protocol <code>2.0.0</code>. That owner header is
+distinct from OBO retrieval. The hosted runtime is not an identity-header
+source and receives no key, Conversation or impersonation RBAC, or Cosmos DB in
+hosted/no-panel. Capability/HMAC remains a disabled fallback only.</p>
 <h2 id="visual-guide">Visual Guide</h2>
 <p>New to the Orchestrator? Check out the <a href="../orchestrator_visual_guide/">Orchestrator Visual Guide</a> for a visual walkthrough of the architecture and key components.</p>
 <h2 id="repository">Repository</h2>

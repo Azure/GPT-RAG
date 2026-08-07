@@ -1645,10 +1645,10 @@
 classic Container Apps topology and in the explicit classic fallback. The
 <a href="../deploy/#chat-runtime-modes-upcoming-hosted-default-release">upcoming hosted-default topology</a>
 is hosted/no-panel, does not deploy this dashboard, and requires
-<code>DEPLOY_ADMINISTRATIVE_PANEL=false</code>. It still depends on
-unpublished component and AI Landing Zone tags, final umbrella pins, integrated
-validation, and a new GPT-RAG release. The platform implementation is merged
-but unreleased. Hosted/panel is deferred to
+<code>DEPLOY_ADMINISTRATIVE_PANEL=false</code>. AILZ <code>v2.5.0</code> is published, but it still
+depends on the remaining compatible component tags, final umbrella pins,
+integrated validation, and a new GPT-RAG release. The platform implementation
+is merged but unreleased. Hosted/panel is deferred to
 <a href="https://github.com/Azure/GPT-RAG/issues/611">issue #611</a>.</p>
 <h2 id="what-this-is">What this is</h2>
 <p>Until this release, the orchestrator dashboard SPA had no real sign-in. The <code>require_admin</code> gate on <code>/api/dashboard/*</code> existed, but the only way to feed it a token was to paste one into browser storage. That is now replaced by a proper Entra ID sign-in flow inside the SPA using MSAL (Authorization Code + PKCE, redirect flow):</p>
