@@ -1,6 +1,12 @@
 # ADR-0003: Multi-turn continuity for the hosted-agent Responses path across compute/version replacement
 
-**Status:** Proposed<br>
+**Status:** Accepted (decision and live evidence sufficient; the orchestrator
+container boundary that makes the hosted agent stateless and rejects the
+top-level `conversation` / `previous_response_id` continuity params is merged in
+gpt-rag-orchestrator **PR #308**, merge
+`a828253b85c6ed7a63f6085c1666f75a9ca2b7d8`; the gpt-rag-ui BFF continuity
+implementation and the App Configuration/contract wiring in this repo remain
+pending as adoption work — see "Adoption and migration")<br>
 **Date:** 2026-08-07<br>
 **Owners:** GPT-RAG maintainer (Paulo), architecture analysis, with gpt-rag-ui and gpt-rag-orchestrator component owners (revised after independent security review)
 
@@ -47,9 +53,12 @@
 >    **supersedes `capability` as the default** owner-binding mechanism: the
 >    **native delegated-header mechanism becomes the chosen/default** binding
 >    once an **environment evidence gate** confirms the deployed protocol
->    version and RBAC shape; `capability` becomes the **optional, safe
->    fallback/alternative** (used automatically pre-gate or if the gate is
->    ever unmet), not the primary requirement. This changes only *which
+>    version and RBAC shape; `capability` becomes an **optional,
+>    disabled-by-default fallback** an operator may **explicitly** select
+>    (never auto-engaged, never the required primary). Until the gate passes,
+>    hosted multi-turn continuity stays **off** and the continuity path
+>    **fails closed with 503** (mirroring the `POST /retrieve` disabled-gate
+>    idiom) rather than silently running any mechanism. This changes only *which
 >    mechanism authorizes a read*; it does **not** change the BFF-mediated,
 >    stateless, cross-version replay mechanism below (Option C) — the
 >    top-level `conversation` parameter and `previous_response_id` remain
@@ -69,8 +78,13 @@ switch, rollback = revert version**.
 
 The canonical Foundry Responses v2 path is implemented in
 `Azure/gpt-rag-orchestrator` `develop` (through PR #304). The hosted agent
-container explicitly persists user and assistant items into Foundry managed
-Conversations.
+container originally persisted user and assistant items into Foundry managed
+Conversations. That in-container persistence is now **superseded**:
+gpt-rag-orchestrator **PR #308** (merge
+`a828253b85c6ed7a63f6085c1666f75a9ca2b7d8`) implements the stateless container
+boundary — the container holds zero Conversations RBAC and **rejects** the
+top-level `conversation` / `previous_response_id` continuity params — matching
+the decision below.
 
 ### Observed blocker (evidence)
 
@@ -253,13 +267,15 @@ history-blind**. Each turn:
    **`delegated`** (**chosen/default** once the environment evidence gate
    confirms protocol + RBAC — native, per-user platform enforcement via a
    BFF-asserted `x-ms-user-identity` header derived server-side from the
-   validated `oid`; see "Delegated header mechanism" below) or **`capability`**
-   (**optional, safe fallback/alternative** — used automatically before the
-   gate is met, or if it is ever unmet — **store-free**: a server-issued,
-   signed, opaque, owner-bound capability whose embedded `oid` the BFF
-   re-checks against the live token before any read; works in **hosted/no-panel
-   with zero Cosmos**). A raw caller-selected ID is never accepted under either
-   mechanism. Non-owner, forged/expired capability, bad/missing header, and
+   validated `oid`; see "Delegated header mechanism" below). Until that gate
+   passes, hosted continuity stays **off** and this path **fails closed with
+   503** — the BFF auto-engages **no** mechanism. As an **optional,
+   disabled-by-default** alternative an operator may **explicitly** select
+   **`capability`** (never auto-engaged, never the required primary —
+   **store-free**: a server-issued, signed, opaque, owner-bound capability
+   whose embedded `oid` the BFF re-checks against the live token before any
+   read; works in **hosted/no-panel with zero Cosmos**). A raw caller-selected
+   ID is never accepted under either mechanism. Non-owner, forged/expired capability, bad/missing header, and
    missing all return an **indistinguishable 404**. (The panel-only **owner
    index** in Cosmos is used solely for cross-conversation *enumeration* when
    the panel is deployed; it is **not** the continuity binding.)
@@ -393,12 +409,16 @@ resolves OQ-OWN for the hosted-continuity call path. The mechanism:
 - **Environment evidence gate:** `delegated` is the **chosen/default** owner-
   binding mechanism, but it only actually engages once **environment evidence**
   confirms, for the specific deployment: (1) the target hosted agent runs
-  protocol `responses` 2.0.0, and (2) the BFF's endpoint-call identity holds
-  exactly the narrow RBAC shape above (no broader Foundry role). Until both are
-  confirmed, the BFF automatically falls back to `capability` — it never fails
-  open to an unbound/unauthenticated read. This is an environment/deploy-time
-  confirmation, not a requirement to repeat the full live two-identity
-  experiment per deployment.
+  protocol `responses` >= 2.0.0, and (2) the BFF's endpoint-call identity holds
+  exactly the narrow RBAC shape above (`Foundry Agent Consumer` + custom
+  `UserIdentityImpersonation` at agent scope, no broader Foundry role). Until
+  **both** are confirmed, hosted multi-turn continuity stays **off** and the
+  continuity path **fails closed with 503** — the BFF auto-engages **no**
+  mechanism and **never** fails open to an unbound/unauthenticated read.
+  `capability` is available only if an operator **explicitly** selects it
+  (disabled by default; never auto-engaged; not the required primary). This
+  gate is an environment/deploy-time confirmation, not a requirement to repeat
+  the full live two-identity experiment per deployment.
 - **Unaffected invariants:** the container remains **stateless with zero
   Conversations RBAC** — the impersonation/consumer RBAC belongs to the BFF's
   endpoint-call identity, never the container/hosted-agent identity, which has
@@ -472,9 +492,12 @@ prohibited (Option B withdrawn).**
 
 The **owner-binding mechanism is a selector** consistent with ADR-0004. Live
 OQ-OWN evidence (issue #591) resolves the hosted-continuity call path, so the
-selector now defaults to the **native, chosen** mechanism once an environment
-evidence gate confirms protocol + RBAC, with the store-free mechanism retained
-as the safe fallback:
+selector defaults to the **native, chosen** `delegated` mechanism, which
+engages only once an environment evidence gate confirms protocol + RBAC. Until
+that gate passes, continuity stays **off** and the path **fails closed with
+503**; the store-free `capability` mechanism is retained as an **optional,
+disabled-by-default** fallback an operator may **explicitly** select (never
+auto-engaged, never the required primary):
 
 - `delegated` (**chosen/default, post-gate**): native per-user enforcement via
   a BFF-asserted `x-ms-user-identity` header, derived server-side from the
@@ -488,15 +511,17 @@ as the safe fallback:
   RBAC confirmed) is `true` for the deployment; see "Delegated header
   mechanism" above for the full mechanism, residual-trust caveats, and scope
   limits.
-- `capability` (**optional, safe fallback/alternative**): a server-issued,
+- `capability` (**optional, disabled-by-default fallback**): a server-issued,
   signed, opaque, owner-bound capability minted by the BFF from the validated
   user `oid` (`{oid, conversation_resource_id, issued_at, expiry, key_id}`).
   The BFF re-checks the capability `oid` against the live token before any
   read. Requires **no store** (signing key in Key Vault, provisioned like
-  `AUDIT-HMAC-KEY`), so it works in **hosted/no-panel with zero Cosmos**. Used
-  automatically before the environment evidence gate is met, or if it is ever
-  unmet; remains fully specified and available as a rollback/defense-in-depth
-  option even after `delegated` is chosen.
+  `AUDIT-HMAC-KEY`), so it works in **hosted/no-panel with zero Cosmos**.
+  **Disabled by default and never auto-engaged**; an operator must
+  **explicitly** select it. It remains fully specified and available as an
+  optional rollback/defense-in-depth option even after `delegated` is chosen,
+  but pre-gate the default behavior is a fail-closed **503**, not silent
+  capability activation.
 
 A raw caller-selected conversation ID is **never** accepted as a read key. The
 panel-only **owner index** (Cosmos) exists solely for cross-conversation
@@ -539,11 +564,17 @@ These align with ADR-0004's panel keys and the `POST /retrieve` idiom.
 
 - `HOSTED_CONTINUITY_ENABLED` (default `false`) — when `false`, the hosted path
   is **single-turn stateless** (no server history, safe). When `true`, the BFF
-  performs owner-bound read + bounded replay + append.
-- `HOSTED_CONVERSATION_OWNER_BINDING` (default `delegated`; alt `capability`) —
-  selects the owner-binding mechanism. `delegated` only actually engages once
-  the environment evidence gate is `true` for the deployment; until then, the
-  BFF automatically falls back to `capability`. Same key as ADR-0004.
+  performs owner-bound read + bounded replay + append **only** if the selected
+  binding is active (`delegated` with its gate met, or an explicit `capability`
+  opt-in); otherwise the continuity path fails closed with **503** (no
+  auto-fallback).
+- `HOSTED_CONVERSATION_OWNER_BINDING` (default `delegated`; explicit opt-in alt
+  `capability`) — selects the owner-binding mechanism. `delegated` only
+  actually engages once the environment evidence gate is `true` for the
+  deployment; until then, the continuity path **fails closed with 503** and the
+  BFF auto-engages **nothing**. `capability` is used **only** when an operator
+  explicitly sets this key to `capability` (disabled by default; never
+  auto-selected). Same key as ADR-0004.
 - `HOSTED_CONVERSATION_CAPABILITY_KEY` / `HOSTED_CONVERSATION_CAPABILITY_KEY_ID` /
   `HOSTED_CONVERSATION_CAPABILITY_TTL_SECONDS` — Key Vault-referenced signing key
   (provisioned like `AUDIT-HMAC-KEY`), active key version for rotation, and
@@ -557,7 +588,10 @@ These align with ADR-0004's panel keys and the `POST /retrieve` idiom.
   role). This mirrors `HOSTED_RETRIEVAL_INV_002_VALIDATED`'s pattern but checks
   protocol/RBAC shape rather than repeating the live two-identity experiment
   per deployment (that experiment is recorded once, in `gpt-rag#591`).
-  Continuity stays on the safe `capability` path unless this is `true`.
+  Continuity stays **off** and the continuity path **returns 503** unless this
+  is `true` (with `delegated` selected); it does **not** silently fall back to
+  `capability`. An operator wanting pre-gate continuity must **explicitly** set
+  `HOSTED_CONVERSATION_OWNER_BINDING=capability`.
 - `HOSTED_CONVERSATION_PROTOCOL_VERSION` (expected `responses/2.0.0`) —
   records/asserts the hosted agent's container protocol version; part of the
   environment evidence gate check in (1) above.
@@ -609,11 +643,11 @@ continuity across the platform's own immutable-version replacement. Therefore:
   identity remain cleanly separated; INV-002 / `POST /retrieve` untouched.
 - **OQ-OWN resolved for this call path**: live evidence (`gpt-rag#591`) proves
   native per-user enforcement via the delegated header on protocol `responses`
-  2.0.0. `delegated` ships as the **chosen/default** mechanism once the
-  environment evidence gate confirms protocol + RBAC; **store-free
-  `capability`** remains fully specified and available as the safe
-  pre-gate/rollback fallback. Reversible behind one App Configuration switch
-  either way.
+  2.0.0. `delegated` ships as the **chosen/default** mechanism, engaging once
+  the environment evidence gate confirms protocol + RBAC; until then continuity
+  **fails closed with 503**. **Store-free `capability`** remains fully specified
+  as an **optional, disabled-by-default** rollback/opt-in fallback (never
+  auto-engaged). Reversible behind one App Configuration switch either way.
 
 ### Negative or accepted
 
@@ -657,9 +691,11 @@ Coordinated, ordered change (compatible-commit discipline per AGENTS.md):
    `HOSTED_CONVERSATION_PROTOCOL_VERSION`,
    `HOSTED_CONVERSATIONS_TOKEN_AUDIENCE`, `HOSTED_HISTORY_MAX_ITEMS`,
    `HOSTED_HISTORY_MAX_TOKENS`, `HOSTED_HISTORY_TRUNCATION`, all defaulting to the
-   safe pre-gate state (continuity off, `delegated` selector present but
-   inactive until its validation gate is `true`, falling back to `capability`
-   in the interim). Add the `contracts/` continuity/capability envelope schema
+   safe pre-gate state (continuity off; `delegated` selector present but
+   inactive until its validation gate is `true`; **no auto-fallback** — the
+   continuity path returns **503** until the gate passes or an operator
+   **explicitly** opts into `capability`). Add the `contracts/`
+   continuity/capability envelope schema
    + `.sha256` if a typed field is warranted. Publish this ADR. No runtime
    behavior change yet.
 2. **gpt-rag-orchestrator** — reduce the hosted-agent Responses v2 adapter to
@@ -699,11 +735,13 @@ Coordinated, ordered change (compatible-commit discipline per AGENTS.md):
 Migration boundaries: no backfill required. Existing managed-Conversation items
 are read by the BFF via owner-bound lookup; only the read/append **owner** and
 the routing mechanism change. Classic mode is unaffected. Before the
-environment evidence gate is met, or in `capability` mode, a conversation
-without a live capability (e.g., browser/session loss in no-panel) starts
-fresh — an accepted, safe default (no content disclosure); the optional panel
-adds enumeration-based recovery. Backfill of panel owner-index rows, if
-desired, is a separate metadata-only migration.
+environment evidence gate is met, hosted continuity is **off** (the path
+returns **503**) unless an operator has **explicitly** opted into `capability`;
+in `capability` mode a conversation without a live capability (e.g.,
+browser/session loss in no-panel) starts fresh — an accepted, safe default (no
+content disclosure); the optional panel adds enumeration-based recovery.
+Backfill of panel owner-index rows, if desired, is a separate metadata-only
+migration.
 
 Rollback: flip `HOSTED_CONTINUITY_ENABLED` off (path degrades to safe single-turn
 stateless), or flip `HOSTED_CONVERSATION_OWNER_BINDING` back to `capability`,
@@ -729,10 +767,14 @@ owner-index rows can be dropped.
 - **NST-4 Fail-closed on read/append failure:** injected read failure and injected
   append failure each return an error and do **not** start a fresh thread or
   stream a success-shaped completion.
-- **NST-5 Fallback when gate unmet:** with `HOSTED_CONVERSATION_OWNER_BINDING=delegated`
-  but `HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=false`, continuity
-  automatically uses the safe `capability` mechanism (never a native delegated
-  read, never fails open, never a bare service read).
+- **NST-5 Fail-closed when gate unmet (no auto-fallback):** with
+  `HOSTED_CONVERSATION_OWNER_BINDING=delegated` but
+  `HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=false`, the continuity path
+  **fails closed with 503** — it does **not** perform a native delegated read,
+  does **not** auto-engage `capability`, never fails open, and never issues a
+  bare service read. `capability` runs **only** when an operator explicitly
+  sets `HOSTED_CONVERSATION_OWNER_BINDING=capability`, and even then never a
+  bare service read.
 - **NST-6 No content leakage to Cosmos/telemetry:** after turns, assert no message
   body or document content in Cosmos (owner index metadata only) or in
   `audit-event-v1`.
@@ -758,11 +800,14 @@ owner-index rows can be dropped.
   asserted identity's request still receives **404** on that session's
   response chain and `get_history` — session **membership** is not a
   substitute for response-chain ownership.
-- **NST-12 RBAC narrowness:** `Foundry Agent Consumer` alone (without the
-  custom `UserIdentityImpersonation` action) is insufficient for the BFF's
-  endpoint-call identity to assert `x-ms-user-identity` — an infra/RBAC
-  assertion confirms no built-in Foundry role includes the impersonation
-  action and that it is assigned only at agent scope.
+- **NST-12 RBAC narrowness / impersonation required:** `Foundry Agent Consumer`
+  alone (without the custom `UserIdentityImpersonation` action) is insufficient
+  for the BFF's endpoint-call identity to assert `x-ms-user-identity`; a call
+  that omits the impersonation grant, or omits the asserted-identity header on a
+  delegated session, is rejected with **403** (live evidence: no-impersonation
+  header → 403; a non-delegated request into a delegated session → 403). An
+  infra/RBAC assertion confirms no built-in Foundry role includes the
+  impersonation action and that it is assigned only at agent scope.
 
 ## Operational behaviors
 
@@ -885,10 +930,12 @@ Reassess when any of the following occurs:
   ([`gpt-rag#591`](https://github.com/Azure/GPT-RAG/issues/591#issuecomment-5212288245))
   confirms cross-user 404 on `previous_response_id` continuation and stored-response
   read, on protocol `responses` 2.0.0, with narrow `Foundry Agent Consumer` +
-  custom `UserIdentityImpersonation` RBAC at agent scope. `delegated`
-  supersedes `capability` as the default once the environment evidence gate
-  (protocol + RBAC) is met for the deployment; `capability` remains the
-  fully-specified fallback (zero Cosmos in no-panel either way). **Residual/still
+  custom `UserIdentityImpersonation` RBAC at agent scope. `delegated` is the
+  chosen/default and engages once the environment evidence gate (protocol +
+  RBAC) is met for the deployment; until then continuity **fails closed with
+  503** (no auto-fallback). `capability` remains a fully-specified **optional,
+  disabled-by-default** fallback an operator may explicitly select (zero Cosmos
+  in no-panel either way). **Residual/still
   open:** (a) the asserted header is middle-tier-trusted, not
   cryptographically proven by the platform — treat as a residual-trust
   invariant, not a closed risk; (b) session **membership** is not fenced by the
