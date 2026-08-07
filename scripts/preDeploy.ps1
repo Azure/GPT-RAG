@@ -258,7 +258,7 @@ The preparation command builds the manifest-pinned image and stores only its imm
     & $continuityPython -m pip install --quiet --disable-pip-version-check -r (Join-Path $repoRoot 'config/requirements.txt')
     if ($LASTEXITCODE -ne 0) { throw "Failed to install continuity activation dependencies." }
     & $continuityPython -c "import os, runpy, sys; sys.path.insert(0, os.environ['GPT_RAG_REPO_ROOT']); sys.argv = ['config.continuity.setup', '--activate']; runpy.run_module('config.continuity.setup', run_name='__main__')"
-    if ($LASTEXITCODE -ne 0) { throw "Hosted continuity activation failed closed." }
+    if ($LASTEXITCODE -ne 0) { throw "Hosted continuity Responses 2.0.0 and exact agent-scope RBAC validation failed closed." }
   } finally {
     if (Test-Path -LiteralPath $continuityVenv) {
       Remove-Item -LiteralPath $continuityVenv -Recurse -Force -ErrorAction SilentlyContinue

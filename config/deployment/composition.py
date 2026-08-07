@@ -12,6 +12,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Mapping
 
+from config.continuity.settings import public_settings as continuity_public_settings
+
 
 APP_CONFIG_LABEL = "gpt-rag"
 PRESERVE_CLASSIC_RUNTIME = "PRESERVE_CLASSIC_RUNTIME"
@@ -618,6 +620,10 @@ def compose_parameters(
                     "HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS", "60"
                 ),
             ),
+            *[
+                _setting(name, value)
+                for name, value in continuity_public_settings(environment).items()
+            ],
             # The routing selector is intentionally last so endpoint and
             # immutable-image prerequisites materialize before cutover.
             _setting(

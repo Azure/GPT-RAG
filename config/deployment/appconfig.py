@@ -8,6 +8,7 @@ import os
 import subprocess
 from typing import Mapping
 
+from config.continuity.settings import public_settings as continuity_public_settings
 from config.deployment.composition import (
     APP_CONFIG_LABEL,
     DeploymentMode,
@@ -194,6 +195,7 @@ def build_settings(
         "CONTAINER_APPS": json.dumps(
             container_apps, separators=(",", ":")
         ),
+        **continuity_public_settings(environment),
     }
 
 

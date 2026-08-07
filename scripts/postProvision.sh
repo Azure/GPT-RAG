@@ -131,9 +131,9 @@ echo "✅ Governance and audit configuration finished."
 # 2) Hosted conversation continuity
 ###############################################################################
 echo
-echo "🔐 Hosted conversation continuity configuration…"
+echo "🔐 Publishing fail-closed delegated continuity defaults…"
 python -m config.continuity.setup
-echo "✅ Hosted conversation continuity configuration finished."
+echo "✅ Fail-closed delegated continuity defaults published."
 
 ###############################################################################
 # 3) AI Foundry Setup

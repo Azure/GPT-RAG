@@ -737,11 +737,11 @@ if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
 # 2) Hosted conversation continuity
 #-------------------------------------------------------------------------------
 if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
-    Write-Host "`n🔐 Hosted conversation continuity configuration..."
+    Write-Host "`n🔐 Publishing fail-closed delegated continuity defaults..."
     Write-Host "🚀 Running config.continuity.setup..."
     Invoke-PythonModule -ModuleName 'config.continuity.setup'
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-    Write-Host "✅ Hosted conversation continuity configuration finished."
+    Write-Host "✅ Fail-closed delegated continuity defaults published."
 } else {
     Write-Host "⏭️  Skipping hosted continuity setup (missing APP_CONFIG_ENDPOINT)."
 }

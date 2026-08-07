@@ -58,21 +58,36 @@ class DeploymentCompositionTests(unittest.TestCase):
         self.assertTrue(parameters["deployCosmosDb"]["value"])
         self.assertFalse(parameters["prepareHostedAgent"]["value"])
         self.assertFalse(parameters["deployHostedAgent"]["value"])
+        settings = settings_by_name(composed)
+        expected = {
+            "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "false",
+            "PREPARE_HOSTED_AGENT": "false",
+            "DEPLOY_HOSTED_AGENT": "false",
+            "HOSTED_AGENT_PREPARED": "false",
+            "DEPLOY_ADMINISTRATIVE_PANEL": "false",
+            "DEPLOYMENT_TOPOLOGY": "classic",
+            "CHAT_BACKEND": "orchestrator",
+            "HOSTED_AGENT_BASE_URL": "",
+            "HOSTED_AGENT_RESOURCE_SCOPE": "",
+            "HOSTED_AGENT_IMAGE_VERSION": "",
+            "HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS": "60",
+        }
+        self.assertTrue(expected.items() <= settings.items())
         self.assertEqual(
-            {
-                "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "false",
-                "PREPARE_HOSTED_AGENT": "false",
-                "DEPLOY_HOSTED_AGENT": "false",
-                "HOSTED_AGENT_PREPARED": "false",
-                "DEPLOY_ADMINISTRATIVE_PANEL": "false",
-                "DEPLOYMENT_TOPOLOGY": "classic",
-                "CHAT_BACKEND": "orchestrator",
-                "HOSTED_AGENT_BASE_URL": "",
-                "HOSTED_AGENT_RESOURCE_SCOPE": "",
-                "HOSTED_AGENT_IMAGE_VERSION": "",
-                "HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS": "60",
-            },
-            settings_by_name(composed),
+            settings["HOSTED_CONVERSATION_OWNER_BINDING"],
+            "delegated",
+        )
+        self.assertEqual(
+            settings["HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED"],
+            "false",
+        )
+        self.assertEqual(
+            settings["HOSTED_AGENT_RESPONSES_PROTOCOL_VERSION"],
+            "2.0.0",
+        )
+        self.assertEqual(
+            settings["HOSTED_CONTINUITY_UNAVAILABLE_STATUS_CODE"],
+            "503",
         )
 
     def test_panel_flag_does_not_change_classic_mode(self) -> None:
@@ -685,6 +700,8 @@ class AppConfigurationContractTests(unittest.TestCase):
                 "HOSTED_AGENT_BASE_URL": "https://agent.example.test/protocols",
                 "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
                 "HOSTED_AGENT_IMAGE_VERSION": DIGEST,
+                "HOSTED_CONTINUITY_ENABLED": "true",
+                "HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED": "true",
             },
             require_hosted_endpoint=True,
         )
@@ -697,6 +714,12 @@ class AppConfigurationContractTests(unittest.TestCase):
         )
         self.assertEqual(DIGEST, settings["HOSTED_AGENT_IMAGE_VERSION"])
         self.assertEqual(2, len(json.loads(settings["CONTAINER_APPS"])))
+        self.assertEqual("delegated", settings["HOSTED_CONVERSATION_OWNER_BINDING"])
+        self.assertEqual("false", settings["HOSTED_CONTINUITY_ENABLED"])
+        self.assertEqual(
+            "false",
+            settings["HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED"],
+        )
 
     @patch("config.deployment.appconfig._container_app", side_effect=_app)
     def test_prepare_only_migration_keeps_classic_runtime_settings(

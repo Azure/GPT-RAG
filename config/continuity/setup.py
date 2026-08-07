@@ -16,7 +16,7 @@ import subprocess
 from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any
-from urllib.parse import urlparse
+from urllib.parse import quote, urlparse
 
 from azure.appconfiguration import AzureAppConfigurationClient, ConfigurationSetting
 from azure.core.exceptions import ResourceNotFoundError
@@ -27,6 +27,14 @@ from azure.identity import (
 )
 from azure.keyvault.secrets import SecretClient
 
+from config.continuity.settings import (
+    CONTINUITY_UNAVAILABLE_STATUS_CODE,
+    DEFAULT_SETTINGS,
+    DELEGATED_IDENTITY_HEADER,
+    DELEGATED_IDENTITY_SOURCE,
+    FOUNDRY_TOKEN_AUDIENCE,
+    RESPONSES_PROTOCOL_VERSION,
+)
 from util.azure_cli import resolve_az_command
 
 
@@ -41,7 +49,15 @@ FOUNDRY_AGENT_CONSUMER_ROLE_NAME = "Foundry Agent Consumer"
 FOUNDRY_AGENT_INTERACT_DATA_ACTION = (
     "Microsoft.CognitiveServices/accounts/AIServices/endpoints/interact/action"
 )
-FOUNDRY_TOKEN_AUDIENCE = "https://ai.azure.com"
+USER_IDENTITY_IMPERSONATION_ROLE_ID = "bef66abe-a495-530a-be1d-5d882fecff03"
+USER_IDENTITY_IMPERSONATION_ROLE_NAME = (
+    "GPT-RAG Hosted Agent User Identity Impersonation"
+)
+USER_IDENTITY_IMPERSONATION_DATA_ACTION = (
+    "Microsoft.CognitiveServices/accounts/AIServices/agents/endpoints/"
+    "UserIdentityImpersonation/action"
+)
+FOUNDRY_DATA_PLANE_API_VERSION = "v1"
 KEY_VAULT_SECRETS_USER_ROLE_ID = "4633458b-17de-408a-b874-0445c86b69e6"
 KEY_VAULT_SECRET_GET_DATA_ACTION = (
     "Microsoft.KeyVault/vaults/secrets/getSecret/action"
@@ -53,25 +69,16 @@ AGENT_SCOPE_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
-DEFAULT_SETTINGS: Mapping[str, str] = {
-    "HOSTED_CONTINUITY_ENABLED": "false",
-    "HOSTED_CONVERSATION_OWNER_BINDING": "capability",
-    "HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED": "false",
-    "HOSTED_CONVERSATIONS_TOKEN_AUDIENCE": FOUNDRY_TOKEN_AUDIENCE,
-    "HOSTED_CONVERSATION_CAPABILITY_KEY_ID": "v1",
-    "HOSTED_CONVERSATION_CAPABILITY_TTL_SECONDS": "900",
-    "HOSTED_HISTORY_MAX_ITEMS": "100",
-    "HOSTED_HISTORY_MAX_TOKENS": "32000",
-    "HOSTED_HISTORY_TRUNCATION": "drop_oldest",
-}
-
-
 @dataclass(frozen=True)
 class ContinuitySettings:
     enabled: bool
     owner_binding: str
     owner_binding_validated: bool
+    delegated_identity_header: str
+    delegated_identity_source: str
     token_audience: str
+    responses_protocol_version: str
+    unavailable_status_code: int
     key_id: str
     capability_ttl_seconds: int
     history_max_items: int
@@ -120,7 +127,22 @@ def validate_continuity_settings(
             "HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED",
             values["HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED"],
         ),
+        delegated_identity_header=values[
+            "HOSTED_CONVERSATION_DELEGATED_IDENTITY_HEADER"
+        ].strip(),
+        delegated_identity_source=values[
+            "HOSTED_CONVERSATION_DELEGATED_IDENTITY_SOURCE"
+        ].strip(),
         token_audience=values["HOSTED_CONVERSATIONS_TOKEN_AUDIENCE"].strip(),
+        responses_protocol_version=values[
+            "HOSTED_AGENT_RESPONSES_PROTOCOL_VERSION"
+        ].strip(),
+        unavailable_status_code=_bounded_integer(
+            "HOSTED_CONTINUITY_UNAVAILABLE_STATUS_CODE",
+            values["HOSTED_CONTINUITY_UNAVAILABLE_STATUS_CODE"],
+            100,
+            599,
+        ),
         key_id=values["HOSTED_CONVERSATION_CAPABILITY_KEY_ID"].strip(),
         capability_ttl_seconds=_bounded_integer(
             "HOSTED_CONVERSATION_CAPABILITY_TTL_SECONDS",
@@ -143,15 +165,37 @@ def validate_continuity_settings(
         history_truncation=values["HOSTED_HISTORY_TRUNCATION"].strip(),
     )
 
-    if settings.owner_binding != "capability":
+    if settings.owner_binding not in {"delegated", "capability"}:
         raise ValueError(
-            "HOSTED_CONVERSATION_OWNER_BINDING must be 'capability'; raw caller "
-            "identifiers are not a supported ownership boundary."
+            "HOSTED_CONVERSATION_OWNER_BINDING must be 'delegated' or "
+            "'capability'."
+        )
+    if settings.delegated_identity_header != DELEGATED_IDENTITY_HEADER:
+        raise ValueError(
+            "HOSTED_CONVERSATION_DELEGATED_IDENTITY_HEADER must be "
+            f"{DELEGATED_IDENTITY_HEADER!r}."
+        )
+    if settings.delegated_identity_source != DELEGATED_IDENTITY_SOURCE:
+        raise ValueError(
+            "HOSTED_CONVERSATION_DELEGATED_IDENTITY_SOURCE must be "
+            f"{DELEGATED_IDENTITY_SOURCE!r}; browser-supplied identities and "
+            "OBO retrieval tokens are not ownership inputs."
         )
     if settings.token_audience != FOUNDRY_TOKEN_AUDIENCE:
         raise ValueError(
             "HOSTED_CONVERSATIONS_TOKEN_AUDIENCE must be "
             f"{FOUNDRY_TOKEN_AUDIENCE!r}."
+        )
+    if settings.responses_protocol_version != RESPONSES_PROTOCOL_VERSION:
+        raise ValueError(
+            "HOSTED_AGENT_RESPONSES_PROTOCOL_VERSION must be exactly "
+            f"{RESPONSES_PROTOCOL_VERSION!r}."
+        )
+    if settings.unavailable_status_code != int(
+        CONTINUITY_UNAVAILABLE_STATUS_CODE
+    ):
+        raise ValueError(
+            "HOSTED_CONTINUITY_UNAVAILABLE_STATUS_CODE must be 503."
         )
     if not KEY_ID_PATTERN.fullmatch(settings.key_id):
         raise ValueError(
@@ -161,14 +205,9 @@ def validate_continuity_settings(
     if settings.history_truncation != "drop_oldest":
         raise ValueError("HOSTED_HISTORY_TRUNCATION must be 'drop_oldest'.")
     if settings.enabled:
-        if not settings.owner_binding_validated:
+        if settings.owner_binding == "capability" and not deploy_key_vault:
             raise ValueError(
-                "HOSTED_CONTINUITY_ENABLED requires "
-                "HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true."
-            )
-        if not deploy_key_vault:
-            raise ValueError(
-                "HOSTED_CONTINUITY_ENABLED requires DEPLOY_KEY_VAULT=true."
+                "Capability fallback requires DEPLOY_KEY_VAULT=true."
             )
         if deployment_topology not in {"hosted-no-panel", "hosted-panel"}:
             raise ValueError(
@@ -396,6 +435,10 @@ def ensure_frontend_capability_secret_access(
     if not any(
         _assignment_has_role(assignment, KEY_VAULT_SECRETS_USER_ROLE_ID)
         and _same_scope(assignment.get("scope"), secret_scope)
+        and _is_direct_service_principal_assignment(
+            assignment,
+            frontend_principal_id,
+        )
         for assignment in _role_assignments(
             frontend_principal_id,
             secret_scope,
@@ -440,11 +483,27 @@ def seed_continuity_settings(
 
 
 def set_continuity_enabled(app_config_client: Any, enabled: bool) -> None:
+    _set_boolean_setting(app_config_client, "HOSTED_CONTINUITY_ENABLED", enabled)
+
+
+def set_owner_binding_validated(app_config_client: Any, validated: bool) -> None:
+    _set_boolean_setting(
+        app_config_client,
+        "HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED",
+        validated,
+    )
+
+
+def _set_boolean_setting(
+    app_config_client: Any,
+    key: str,
+    value: bool,
+) -> None:
     app_config_client.set_configuration_setting(
         ConfigurationSetting(
-            key="HOSTED_CONTINUITY_ENABLED",
+            key=key,
             label=LABEL,
-            value=str(enabled).lower(),
+            value=str(value).lower(),
             content_type="text/plain",
         )
     )
@@ -599,6 +658,219 @@ def hosted_agent_scope(project_resource_id: str, agent_name: str) -> str:
     return scope
 
 
+def foundry_role_assignable_scope(project_resource_id: str) -> str:
+    marker = "/providers/"
+    normalized = project_resource_id.rstrip("/")
+    position = normalized.lower().find(marker)
+    if position <= 0 or "/projects/" not in normalized.lower():
+        raise ValueError(
+            "AI_FOUNDRY_PROJECT_RESOURCE_ID must identify a Foundry project."
+        )
+    return normalized[:position]
+
+
+def validate_user_identity_impersonation_role(
+    role_definition: Mapping[str, Any],
+    assignable_scope: str,
+) -> None:
+    permissions = role_definition.get("permissions") or []
+    permission = permissions[0] if len(permissions) == 1 else {}
+    data_actions = {
+        str(item).lower() for item in permission.get("dataActions") or []
+    }
+    assignable_scopes = {
+        str(item).rstrip("/").lower()
+        for item in role_definition.get("assignableScopes") or []
+    }
+    if (
+        role_definition.get("name") != USER_IDENTITY_IMPERSONATION_ROLE_ID
+        or role_definition.get("roleName")
+        != USER_IDENTITY_IMPERSONATION_ROLE_NAME
+        or role_definition.get("roleType") != "CustomRole"
+        or len(permissions) != 1
+        or permission.get("actions")
+        or permission.get("notActions")
+        or permission.get("notDataActions")
+        or data_actions
+        != {USER_IDENTITY_IMPERSONATION_DATA_ACTION.lower()}
+        or assignable_scopes != {assignable_scope.rstrip("/").lower()}
+    ):
+        raise RuntimeError(
+            "The GPT-RAG user-identity impersonation role must have no Actions "
+            "and exactly the reviewed UserIdentityImpersonation DataAction."
+        )
+
+
+def ensure_user_identity_impersonation_role(
+    project_resource_id: str,
+) -> bool:
+    assignable_scope = foundry_role_assignable_scope(project_resource_id)
+    result = json.loads(
+        _run_az(
+            [
+                "role",
+                "definition",
+                "list",
+                "--name",
+                USER_IDENTITY_IMPERSONATION_ROLE_ID,
+                "--output",
+                "json",
+            ],
+            required=False,
+        )
+        or "[]"
+    )
+    if result:
+        if len(result) != 1:
+            raise RuntimeError(
+                "The GPT-RAG user-identity impersonation role was not found uniquely."
+            )
+        validate_user_identity_impersonation_role(result[0], assignable_scope)
+        return False
+
+    definition = {
+        "Name": USER_IDENTITY_IMPERSONATION_ROLE_NAME,
+        "Id": USER_IDENTITY_IMPERSONATION_ROLE_ID,
+        "IsCustom": True,
+        "Description": (
+            "Allows the GPT-RAG UI BFF to assert a server-derived hosted-agent "
+            "user identity. Assign only at an individual hosted-agent scope."
+        ),
+        "Actions": [],
+        "NotActions": [],
+        "DataActions": [USER_IDENTITY_IMPERSONATION_DATA_ACTION],
+        "NotDataActions": [],
+        "AssignableScopes": [assignable_scope],
+    }
+    _run_az(
+        [
+            "role",
+            "definition",
+            "create",
+            "--role-definition",
+            json.dumps(definition, separators=(",", ":")),
+            "--output",
+            "none",
+        ],
+        required=False,
+    )
+    created = json.loads(
+        _run_az(
+            [
+                "role",
+                "definition",
+                "list",
+                "--name",
+                USER_IDENTITY_IMPERSONATION_ROLE_ID,
+                "--output",
+                "json",
+            ]
+        )
+    )
+    if len(created) != 1:
+        raise RuntimeError(
+            "Failed to verify the GPT-RAG user-identity impersonation role."
+        )
+    validate_user_identity_impersonation_role(created[0], assignable_scope)
+    return True
+
+
+@dataclass(frozen=True)
+class HostedAgentContract:
+    principal_id: str
+    routed_version: str
+
+
+def verify_live_hosted_agent_contract(
+    project_endpoint: str,
+    agent_name: str,
+) -> HostedAgentContract:
+    endpoint = project_endpoint.strip().rstrip("/")
+    parsed = urlparse(endpoint)
+    if parsed.scheme != "https" or not parsed.netloc:
+        raise ValueError("AI_FOUNDRY_PROJECT_ENDPOINT must be an HTTPS endpoint.")
+    agent_url = (
+        f"{endpoint}/agents/{quote(agent_name.strip(), safe='')}"
+        f"?api-version={FOUNDRY_DATA_PLANE_API_VERSION}"
+    )
+    agent = json.loads(
+        _run_az(
+            [
+                "rest",
+                "--method",
+                "GET",
+                "--url",
+                agent_url,
+                "--resource",
+                FOUNDRY_TOKEN_AUDIENCE,
+                "--output",
+                "json",
+            ]
+        )
+    )
+    identity = agent.get("instance_identity") or {}
+    principal_id = str(identity.get("principal_id") or "").strip()
+    endpoint_config = agent.get("agent_endpoint") or {}
+    protocol_config = endpoint_config.get("protocol_configuration") or {}
+    selector = endpoint_config.get("version_selector") or {}
+    rules = selector.get("version_selection_rules") or []
+    if (
+        not principal_id
+        or not isinstance(protocol_config, Mapping)
+        or "responses" not in protocol_config
+        or len(rules) != 1
+        or str(rules[0].get("type") or "").lower() != "fixedratio"
+        or int(rules[0].get("traffic_percentage") or 0) != 100
+    ):
+        raise RuntimeError(
+            "The live hosted-agent endpoint does not expose one fully routed "
+            "Responses protocol version."
+        )
+    routed_version = str(rules[0].get("agent_version") or "").strip()
+    if not routed_version:
+        raise RuntimeError("The live hosted-agent routed version is missing.")
+    version_url = (
+        f"{endpoint}/agents/{quote(agent_name.strip(), safe='')}/versions/"
+        f"{quote(routed_version, safe='')}"
+        f"?api-version={FOUNDRY_DATA_PLANE_API_VERSION}"
+    )
+    version = json.loads(
+        _run_az(
+            [
+                "rest",
+                "--method",
+                "GET",
+                "--url",
+                version_url,
+                "--resource",
+                FOUNDRY_TOKEN_AUDIENCE,
+                "--output",
+                "json",
+            ]
+        )
+    )
+    definition = version.get("definition") or {}
+    protocol_versions = definition.get("protocol_versions") or []
+    responses = [
+        item
+        for item in protocol_versions
+        if str(item.get("protocol") or "").lower() == "responses"
+    ]
+    if (
+        len(responses) != 1
+        or str(responses[0].get("version") or "")
+        != RESPONSES_PROTOCOL_VERSION
+    ):
+        raise RuntimeError(
+            "The routed hosted agent must declare Responses protocol version "
+            f"{RESPONSES_PROTOCOL_VERSION} exactly."
+        )
+    return HostedAgentContract(
+        principal_id=principal_id,
+        routed_version=routed_version,
+    )
+
+
 def _role_assignments(
     principal_id: str,
     scope: str,
@@ -684,20 +956,18 @@ def _is_direct_service_principal_assignment(
 
 
 def _role_grants_data_action(role_id: str, required_action: str) -> bool:
-    if (
-        required_action.lower() == FOUNDRY_AGENT_INTERACT_DATA_ACTION.lower()
-        and role_id.rstrip("/").lower().endswith(
-            f"/{FOUNDRY_AGENT_CONSUMER_ROLE_ID}"
-        )
-    ):
-        return True
-    if (
-        required_action.lower() == KEY_VAULT_SECRET_GET_DATA_ACTION.lower()
-        and role_id.rstrip("/").lower().endswith(
-            f"/{KEY_VAULT_SECRETS_USER_ROLE_ID}"
-        )
-    ):
-        return True
+    normalized_role = role_id.rstrip("/").lower()
+    required = required_action.lower()
+    reviewed_roles = {
+        FOUNDRY_AGENT_CONSUMER_ROLE_ID: FOUNDRY_AGENT_INTERACT_DATA_ACTION,
+        USER_IDENTITY_IMPERSONATION_ROLE_ID: (
+            USER_IDENTITY_IMPERSONATION_DATA_ACTION
+        ),
+        KEY_VAULT_SECRETS_USER_ROLE_ID: KEY_VAULT_SECRET_GET_DATA_ACTION,
+    }
+    for reviewed_role_id, reviewed_action in reviewed_roles.items():
+        if normalized_role.endswith(f"/{reviewed_role_id}"):
+            return required == reviewed_action.lower()
     definitions = json.loads(
         _run_az(
             [
@@ -713,7 +983,6 @@ def _role_grants_data_action(role_id: str, required_action: str) -> bool:
     )
     if len(definitions) != 1:
         raise RuntimeError(f"Role definition {role_id!r} was not found uniquely.")
-    required = required_action.lower()
     for permission in definitions[0].get("permissions") or []:
         allowed = any(
             fnmatch.fnmatchcase(required, str(pattern).lower())
@@ -728,7 +997,23 @@ def _role_grants_data_action(role_id: str, required_action: str) -> bool:
     return False
 
 
-def _reject_broad_or_unapproved_interact_access(
+def _is_approved_continuity_assignment(
+    assignment: Mapping[str, Any],
+    principal_id: str,
+    agent_scope: str,
+) -> bool:
+    approved_roles = {
+        FOUNDRY_AGENT_CONSUMER_ROLE_ID,
+        USER_IDENTITY_IMPERSONATION_ROLE_ID,
+    }
+    return (
+        any(_assignment_has_role(assignment, role_id) for role_id in approved_roles)
+        and _same_scope(assignment.get("scope"), agent_scope)
+        and _is_direct_service_principal_assignment(assignment, principal_id)
+    )
+
+
+def _reject_broad_or_unapproved_continuity_access(
     principal_id: str,
     agent_scope: str,
     *,
@@ -740,91 +1025,165 @@ def _reject_broad_or_unapproved_interact_access(
         include_inherited=True,
     )
     for assignment in assignments:
+        role_name = str(assignment.get("roleDefinitionName") or "")
+        if role_name in {"Foundry User", "Project Runtime User"}:
+            raise RuntimeError(
+                f"{identity_name} must not receive the broad {role_name} role."
+            )
         role_id = str(assignment.get("roleDefinitionId") or "")
-        if not role_id or not _role_grants_data_action(
-            role_id,
-            FOUNDRY_AGENT_INTERACT_DATA_ACTION,
-        ):
+        grants_continuity = role_id and any(
+            _role_grants_data_action(role_id, action)
+            for action in (
+                FOUNDRY_AGENT_INTERACT_DATA_ACTION,
+                USER_IDENTITY_IMPERSONATION_DATA_ACTION,
+            )
+        )
+        if not grants_continuity:
             continue
         if (
             identity_name == "UI BFF"
-            and _assignment_has_role(
+            and _is_approved_continuity_assignment(
                 assignment,
-                FOUNDRY_AGENT_CONSUMER_ROLE_ID,
+                principal_id,
+                agent_scope,
+            )
+        ):
+            continue
+        raise RuntimeError(
+            f"{identity_name} has unapproved, inherited, group-derived, or "
+            "broader Foundry continuity access."
+        )
+    return assignments
+
+
+def _reconcile_hosted_container_continuity_access(
+    principal_id: str,
+    agent_scope: str,
+) -> None:
+    assignments = _role_assignments(
+        principal_id,
+        agent_scope,
+        include_inherited=True,
+    )
+    for assignment in assignments:
+        role_id = str(assignment.get("roleDefinitionId") or "")
+        if not role_id or not any(
+            _role_grants_data_action(role_id, action)
+            for action in (
+                FOUNDRY_AGENT_INTERACT_DATA_ACTION,
+                USER_IDENTITY_IMPERSONATION_DATA_ACTION,
+            )
+        ):
+            continue
+        removable = (
+            any(
+                _assignment_has_role(assignment, approved_role)
+                for approved_role in (
+                    FOUNDRY_AGENT_CONSUMER_ROLE_ID,
+                    USER_IDENTITY_IMPERSONATION_ROLE_ID,
+                )
             )
             and _same_scope(assignment.get("scope"), agent_scope)
             and _is_direct_service_principal_assignment(
                 assignment,
                 principal_id,
             )
-        ):
-            continue
-        raise RuntimeError(
-            f"{identity_name} has unapproved or broader inherited Foundry "
-            "endpoint interaction access."
         )
-    return assignments
+        if not removable:
+            raise RuntimeError(
+                "hosted container identity has inherited, group-derived, custom, "
+                "or broader Foundry continuity access."
+            )
+        _delete_assignment(assignment)
+    _reject_broad_or_unapproved_continuity_access(
+        principal_id,
+        agent_scope,
+        identity_name="hosted container identity",
+    )
 
 
-def ensure_frontend_agent_consumer_assignment(
+def ensure_frontend_continuity_assignments(
     frontend_principal_id: str,
     agent_scope: str,
+    project_resource_id: str,
     *,
-    hosted_agent_principal_id: str = "",
-) -> bool:
-    """Assign endpoint interaction only to the UI BFF at one hosted agent scope."""
+    hosted_agent_principal_id: str,
+) -> dict[str, str]:
+    """Assign the two approved roles directly to the UI BFF at one agent."""
     verify_live_foundry_agent_consumer_role()
-    if hosted_agent_principal_id:
-        if hmac.compare_digest(frontend_principal_id, hosted_agent_principal_id):
-            raise RuntimeError(
-                "The UI BFF and hosted container must not share an identity."
-            )
-        _reject_broad_or_unapproved_interact_access(
-            hosted_agent_principal_id,
-            agent_scope,
-            identity_name="hosted container identity",
+    ensure_user_identity_impersonation_role(project_resource_id)
+    if hmac.compare_digest(
+        frontend_principal_id.lower(),
+        hosted_agent_principal_id.lower(),
+    ):
+        raise RuntimeError(
+            "The UI BFF and hosted container must not share an identity."
         )
-
-    frontend_assignments = _reject_broad_or_unapproved_interact_access(
+    _reconcile_hosted_container_continuity_access(
+        hosted_agent_principal_id,
+        agent_scope,
+    )
+    frontend_assignments = _reject_broad_or_unapproved_continuity_access(
         frontend_principal_id,
         agent_scope,
         identity_name="UI BFF",
     )
-    if any(
-        _assignment_has_role(assignment, FOUNDRY_AGENT_CONSUMER_ROLE_ID)
-        and _same_scope(assignment.get("scope"), agent_scope)
-        for assignment in frontend_assignments
-    ):
-        return False
-    _run_az(
-        [
-            "role",
-            "assignment",
-            "create",
-            "--assignee-object-id",
-            frontend_principal_id,
-            "--assignee-principal-type",
-            "ServicePrincipal",
-            "--role",
-            FOUNDRY_AGENT_CONSUMER_ROLE_ID,
-            "--scope",
-            agent_scope,
-            "--output",
-            "none",
-        ],
-        required=False,
+    role_ids = (
+        FOUNDRY_AGENT_CONSUMER_ROLE_ID,
+        USER_IDENTITY_IMPERSONATION_ROLE_ID,
     )
-    if not any(
-        _assignment_has_role(assignment, FOUNDRY_AGENT_CONSUMER_ROLE_ID)
-        and _same_scope(assignment.get("scope"), agent_scope)
-        for assignment in _role_assignments(
-            frontend_principal_id,
-            agent_scope,
-            include_inherited=True,
+    actions: dict[str, str] = {}
+    for role_id in role_ids:
+        direct = any(
+            _assignment_has_role(assignment, role_id)
+            and _is_approved_continuity_assignment(
+                assignment,
+                frontend_principal_id,
+                agent_scope,
+            )
+            for assignment in frontend_assignments
         )
-    ):
-        raise RuntimeError("Failed to verify the UI BFF Foundry Agent Consumer role.")
-    return True
+        actions[role_id] = "reused" if direct else "created"
+        if direct:
+            continue
+        _run_az(
+            [
+                "role",
+                "assignment",
+                "create",
+                "--assignee-object-id",
+                frontend_principal_id,
+                "--assignee-principal-type",
+                "ServicePrincipal",
+                "--role",
+                role_id,
+                "--scope",
+                agent_scope,
+                "--output",
+                "none",
+            ],
+            required=False,
+        )
+
+    verified = _reject_broad_or_unapproved_continuity_access(
+        frontend_principal_id,
+        agent_scope,
+        identity_name="UI BFF",
+    )
+    for role_id in role_ids:
+        if not any(
+            _assignment_has_role(assignment, role_id)
+            and _is_approved_continuity_assignment(
+                assignment,
+                frontend_principal_id,
+                agent_scope,
+            )
+            for assignment in verified
+        ):
+            raise RuntimeError(
+                f"Failed to verify direct UI BFF role {role_id} at agent scope."
+            )
+    return actions
 
 
 def _app_config_value(app_config_client: Any, key: str) -> str:
@@ -832,10 +1191,19 @@ def _app_config_value(app_config_client: Any, key: str) -> str:
     return "" if setting is None else str(setting.value or "").strip()
 
 
-def configure_frontend_role(
+@dataclass(frozen=True)
+class ContinuityAccess:
+    frontend_principal_id: str
+    hosted_agent_principal_id: str
+    agent_scope: str
+    routed_version: str
+    role_actions: Mapping[str, str]
+
+
+def configure_frontend_roles(
     app_config_client: Any,
     environ: Mapping[str, str] = os.environ,
-) -> bool:
+) -> ContinuityAccess:
     project_resource_id = (
         environ.get("AI_FOUNDRY_PROJECT_RESOURCE_ID")
         or _app_config_value(app_config_client, "AI_FOUNDRY_PROJECT_RESOURCE_ID")
@@ -854,10 +1222,20 @@ def configure_frontend_role(
         or (f"ca-{resource_token}-frontend" if resource_token else "")
     ).strip()
     agent_name = (environ.get("HOSTED_AGENT_NAME") or "gpt-rag-orchestrator").strip()
-    if not project_resource_id or not resource_group or not frontend_name:
+    project_endpoint = (
+        environ.get("AI_FOUNDRY_PROJECT_ENDPOINT")
+        or _app_config_value(app_config_client, "AI_FOUNDRY_PROJECT_ENDPOINT")
+    ).strip()
+    if (
+        not project_resource_id
+        or not project_endpoint
+        or not resource_group
+        or not frontend_name
+    ):
         raise RuntimeError(
-            "AI_FOUNDRY_PROJECT_RESOURCE_ID, AZURE_RESOURCE_GROUP, and "
-            "FRONTEND_APP_NAME are required for hosted continuity RBAC."
+            "AI_FOUNDRY_PROJECT_RESOURCE_ID, AI_FOUNDRY_PROJECT_ENDPOINT, "
+            "AZURE_RESOURCE_GROUP, and FRONTEND_APP_NAME are required for "
+            "hosted continuity RBAC."
         )
 
     frontend_principal_id = _run_az(
@@ -875,23 +1253,22 @@ def configure_frontend_role(
         ]
     )
     scope = hosted_agent_scope(project_resource_id, agent_name)
-    hosted_principal_id = _run_az(
-        [
-            "resource",
-            "show",
-            "--ids",
-            scope,
-            "--query",
-            "identity.principalId",
-            "--output",
-            "tsv",
-        ],
-        required=False,
+    contract = verify_live_hosted_agent_contract(
+        project_endpoint,
+        agent_name,
     )
-    return ensure_frontend_agent_consumer_assignment(
-        frontend_principal_id,
-        scope,
-        hosted_agent_principal_id=hosted_principal_id,
+    role_actions = ensure_frontend_continuity_assignments(
+        frontend_principal_id=frontend_principal_id,
+        agent_scope=scope,
+        project_resource_id=project_resource_id,
+        hosted_agent_principal_id=contract.principal_id,
+    )
+    return ContinuityAccess(
+        frontend_principal_id=frontend_principal_id,
+        hosted_agent_principal_id=contract.principal_id,
+        agent_scope=scope,
+        routed_version=contract.routed_version,
+        role_actions=role_actions,
     )
 
 
@@ -943,14 +1320,31 @@ def reconcile_disabled_continuity(
         ).strip()
         agent_scope = hosted_agent_scope(project_resource_id, agent_name)
         for assignment in assignments:
-            if _assignment_has_role(
-                assignment,
-                FOUNDRY_AGENT_CONSUMER_ROLE_ID,
+            if (
+                _assignment_has_role(
+                    assignment,
+                    FOUNDRY_AGENT_CONSUMER_ROLE_ID,
+                )
+                or _assignment_has_role(
+                    assignment,
+                    USER_IDENTITY_IMPERSONATION_ROLE_ID,
+                )
             ) and _same_scope(assignment.get("scope"), agent_scope):
                 _delete_assignment(assignment)
 
     if capability_reference is None:
         return
+    _remove_capability_fallback(
+        app_config_client,
+        capability_reference,
+        frontend_principal_id,
+        hosted_agent_principal_id="",
+    )
+
+
+def _capability_secret_scope_from_reference(
+    capability_reference: Any,
+) -> str:
     if not (capability_reference.content_type or "").startswith(
         "application/vnd.microsoft.appconfig.keyvaultref+json"
     ):
@@ -965,16 +1359,110 @@ def reconcile_disabled_continuity(
             f"{CAPABILITY_CONFIG_KEY} does not reference the capability secret."
         )
     vault_uri = secret_uri[: -len(expected_suffix)].rstrip("/") + "/"
-    secret_scope = capability_secret_scope(vault_uri)
-    for assignment in assignments:
-        if _assignment_has_role(
-            assignment,
-            KEY_VAULT_SECRETS_USER_ROLE_ID,
-        ) and _same_scope(assignment.get("scope"), secret_scope):
+    return capability_secret_scope(vault_uri)
+
+
+def _remove_capability_fallback(
+    app_config_client: Any,
+    capability_reference: Any,
+    frontend_principal_id: str,
+    *,
+    hosted_agent_principal_id: str,
+) -> None:
+    secret_scope = _capability_secret_scope_from_reference(capability_reference)
+    frontend_assignments = _role_assignments(
+        frontend_principal_id,
+        secret_scope,
+        include_inherited=True,
+    )
+    for assignment in frontend_assignments:
+        role_id = str(assignment.get("roleDefinitionId") or "")
+        if not role_id or not _role_grants_data_action(
+            role_id,
+            KEY_VAULT_SECRET_GET_DATA_ACTION,
+        ):
+            continue
+        if (
+            _assignment_has_role(
+                assignment,
+                KEY_VAULT_SECRETS_USER_ROLE_ID,
+            )
+            and _same_scope(assignment.get("scope"), secret_scope)
+            and _is_direct_service_principal_assignment(
+                assignment,
+                frontend_principal_id,
+            )
+        ):
             _delete_assignment(assignment)
+            continue
+        raise RuntimeError(
+            "UI BFF has inherited, group-derived, custom, or broader capability "
+            "secret access that cannot be safely reconciled."
+        )
+    if hosted_agent_principal_id:
+        for assignment in _role_assignments(
+            hosted_agent_principal_id,
+            secret_scope,
+            include_inherited=True,
+        ):
+            role_id = str(assignment.get("roleDefinitionId") or "")
+            if role_id and _role_grants_data_action(
+                role_id,
+                KEY_VAULT_SECRET_GET_DATA_ACTION,
+            ):
+                removable = (
+                    _assignment_has_role(
+                        assignment,
+                        KEY_VAULT_SECRETS_USER_ROLE_ID,
+                    )
+                    and _same_scope(assignment.get("scope"), secret_scope)
+                    and _is_direct_service_principal_assignment(
+                        assignment,
+                        hosted_agent_principal_id,
+                    )
+                )
+                if not removable:
+                    raise RuntimeError(
+                        "Hosted container identity has inherited, group-derived, "
+                        "custom, or broader capability secret access."
+                    )
+                _delete_assignment(assignment)
+        for assignment in _role_assignments(
+            hosted_agent_principal_id,
+            secret_scope,
+            include_inherited=True,
+        ):
+            role_id = str(assignment.get("roleDefinitionId") or "")
+            if role_id and _role_grants_data_action(
+                role_id,
+                KEY_VAULT_SECRET_GET_DATA_ACTION,
+            ):
+                raise RuntimeError(
+                    "Failed to remove capability secret access from the hosted "
+                    "container identity."
+                )
     app_config_client.delete_configuration_setting(
         key=CAPABILITY_CONFIG_KEY,
         label=LABEL,
+    )
+
+
+def reconcile_delegated_binding(
+    app_config_client: Any,
+    access: ContinuityAccess,
+) -> None:
+    """Remove active capability indirection when delegated ownership is selected."""
+    capability_reference = get_configuration_setting_or_none(
+        app_config_client,
+        CAPABILITY_CONFIG_KEY,
+    )
+    if capability_reference is None:
+        return
+    _remove_capability_fallback(
+        app_config_client,
+        capability_reference,
+        access.frontend_principal_id,
+        hosted_agent_principal_id=access.hosted_agent_principal_id,
     )
 
 
@@ -1005,22 +1493,39 @@ def main(*, activate: bool = False) -> None:
         )
     except (KeyError, ValueError):
         set_continuity_enabled(app_config_client, False)
+        set_owner_binding_validated(app_config_client, False)
         raise
 
     if not settings.enabled:
+        set_continuity_enabled(app_config_client, False)
+        set_owner_binding_validated(app_config_client, False)
         reconcile_disabled_continuity(app_config_client)
-        seed_continuity_settings(app_config_client)
+        seed_continuity_settings(
+            app_config_client,
+            excluded_keys=frozenset(
+                {
+                    "HOSTED_CONTINUITY_ENABLED",
+                    "HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED",
+                }
+            ),
+        )
         logging.info(
-            "Hosted continuity remains disabled; capability credentials and "
-            "data-plane role assignments were not provisioned."
+            "Hosted continuity remains disabled with the 503 contract; "
+            "continuity credentials and data-plane role assignments were removed."
         )
         return
 
     set_continuity_enabled(app_config_client, False)
+    set_owner_binding_validated(app_config_client, False)
     if not activate:
         seed_continuity_settings(
             app_config_client,
-            excluded_keys=frozenset({"HOSTED_CONTINUITY_ENABLED"}),
+            excluded_keys=frozenset(
+                {
+                    "HOSTED_CONTINUITY_ENABLED",
+                    "HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED",
+                }
+            ),
         )
         logging.info(
             "Hosted continuity activation deferred until the hosted agent "
@@ -1028,91 +1533,50 @@ def main(*, activate: bool = False) -> None:
         )
         return
 
-    if not deploy_key_vault:
-        logging.warning(
-            "Hosted continuity remains disabled because Key Vault is disabled."
+    access = configure_frontend_roles(app_config_client)
+    capability_action = "disabled"
+    if settings.owner_binding == "delegated":
+        reconcile_delegated_binding(app_config_client, access)
+    else:
+        vault_uri = resolve_capability_vault_uri()
+        secret_scope = capability_secret_scope(vault_uri)
+        secret_client = SecretClient(vault_url=vault_uri, credential=credential)
+        secret_action = ensure_capability_secret(secret_client, settings.key_id)
+        secret_role_action = (
+            "created"
+            if ensure_frontend_capability_secret_access(
+                access.frontend_principal_id,
+                secret_scope,
+                hosted_agent_principal_id=access.hosted_agent_principal_id,
+            )
+            else "reused"
         )
-        return
-
-    topology = (
-        os.environ.get("DEPLOYMENT_TOPOLOGY")
-        or _app_config_value(app_config_client, "DEPLOYMENT_TOPOLOGY")
-    ).strip()
-    role_action = "not applicable"
-    if topology in {"hosted-no-panel", "hosted-panel"}:
-        role_action = "created" if configure_frontend_role(app_config_client) else "reused"
-
-    project_resource_id = (
-        os.environ.get("AI_FOUNDRY_PROJECT_RESOURCE_ID")
-        or _app_config_value(app_config_client, "AI_FOUNDRY_PROJECT_RESOURCE_ID")
-    ).strip()
-    agent_name = (
-        os.environ.get("HOSTED_AGENT_NAME") or "gpt-rag-orchestrator"
-    ).strip()
-    agent_scope = hosted_agent_scope(project_resource_id, agent_name)
-    hosted_principal_id = _run_az(
-        [
-            "resource",
-            "show",
-            "--ids",
-            agent_scope,
-            "--query",
-            "identity.principalId",
-            "--output",
-            "tsv",
-        ],
-        required=False,
-    )
-    resource_group = (
-        os.environ.get("AZURE_RESOURCE_GROUP")
-        or _app_config_value(app_config_client, "AZURE_RESOURCE_GROUP")
-    ).strip()
-    frontend_name = (
-        os.environ.get("FRONTEND_APP_NAME")
-        or _app_config_value(app_config_client, "FRONTEND_APP_NAME")
-    ).strip()
-    frontend_principal_id = _run_az(
-        [
-            "containerapp",
-            "show",
-            "--resource-group",
-            resource_group,
-            "--name",
-            frontend_name,
-            "--query",
-            "identity.principalId",
-            "--output",
-            "tsv",
-        ]
-    )
-
-    vault_uri = resolve_capability_vault_uri()
-    secret_scope = capability_secret_scope(vault_uri)
-    secret_client = SecretClient(vault_url=vault_uri, credential=credential)
-    secret_action = ensure_capability_secret(secret_client, settings.key_id)
-    secret_role_action = (
-        "created"
-        if ensure_frontend_capability_secret_access(
-            frontend_principal_id,
-            secret_scope,
-            hosted_agent_principal_id=hosted_principal_id,
+        publish_capability_key_reference(app_config_client, vault_uri)
+        capability_action = (
+            f"secret {secret_action}, UI BFF secret role {secret_role_action}"
         )
-        else "reused"
-    )
+
     seed_continuity_settings(
         app_config_client,
-        excluded_keys=frozenset({"HOSTED_CONTINUITY_ENABLED"}),
+        excluded_keys=frozenset(
+            {
+                "HOSTED_CONTINUITY_ENABLED",
+                "HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED",
+            }
+        ),
     )
-    publish_capability_key_reference(app_config_client, vault_uri)
+    set_owner_binding_validated(app_config_client, True)
     set_continuity_enabled(app_config_client, True)
 
     logging.info(
-        "Hosted continuity configuration applied: enabled=%s, capability secret "
-        "%s, UI BFF secret role %s, UI BFF agent-scoped role %s.",
-        settings.enabled,
-        secret_action,
-        secret_role_action,
-        role_action,
+        "Hosted continuity enabled with binding=%s after Responses %s validation; "
+        "agent scope=%s, consumer role=%s, impersonation role=%s, capability=%s.",
+        settings.owner_binding,
+        RESPONSES_PROTOCOL_VERSION,
+        access.agent_scope,
+        access.role_actions[FOUNDRY_AGENT_CONSUMER_ROLE_ID],
+        access.role_actions[USER_IDENTITY_IMPERSONATION_ROLE_ID],
+        capability_action,
     )
 
 
