@@ -47,7 +47,7 @@ nav:
     - NL2SQL: quickstart_nl2sql.md
   - Architecture:
     - Overview: architecture.md
-    - Hosted-agent supported matrix: hosted_agent_release_matrix.md
+    - Hosted-agent integration matrix: hosted_agent_release_matrix.md
     - Hosted continuity platform contract: hosted_continuity_platform_contract.md
     - Legacy diagram update handoff: architecture_legacy_diagram_handoff.md
   - Governance:

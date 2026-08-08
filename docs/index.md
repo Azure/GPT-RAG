@@ -20,13 +20,14 @@ chat runtime and retains the Container Apps orchestrator as an explicit
 fallback. See the [Architecture](architecture.md) page for the mode contract
 and required-vs-configurable deployment table.
 
-!!! warning "Exact matrix pinned; evidence gates remain fail closed"
+!!! warning "Exact matrix pinned; runtime validation and release remain blocked"
     The umbrella integration pins UI `v2.6.0`, orchestrator `v4.0.0`, ingestion
     `v2.7.0`, and AILZ `v2.5.0`. Explicit hosted-panel topology selection is
     supported, but continuity, user-history, owner-binding validation, and
-    operator-surface gates remain deployment-published `false`; this page does
-    not claim live validation has completed. See the
-    [hosted-agent supported release matrix](hosted_agent_release_matrix.md) for
+    operator-surface gates remain deployment-published `false`. The latest
+    runtime attempt activated the agent version but session readiness returned
+    HTTP 424, so the integration is not validated or shipped. See the
+    [hosted-agent integration matrix](hosted_agent_release_matrix.md) for
     the exact runtime, identity, RBAC, panel, data, and rollback contracts.
 
 ![Chat runtime modes and hosted deployment lifecycle](media/architecture_chat_runtime_modes.svg)

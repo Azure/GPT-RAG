@@ -7,15 +7,16 @@ deployments retain their persisted topology during upgrade. Network isolation,
 enterprise integration, public ingress, and optional AI capabilities remain
 separate choices.
 
-!!! warning "Exact matrix pinned; live evidence gates remain"
+!!! warning "Exact matrix pinned; runtime validation and release remain blocked"
     UI `v2.6.0`, orchestrator `v4.0.0`, ingestion `v2.7.0`, and AILZ `v2.5.0`
     are pinned by the umbrella integration and implement the delegated
     `x-ms-user-identity` contract. Classic, hosted/no-panel, and explicitly
     selected hosted-panel are supported topologies. Continuity, user-history,
     owner-binding validation, and operator-surface gates remain
-    deployment-published `false`, so their routes stay off/503; no live
-    validation result is implied. See the
-    [hosted-agent supported matrix](hosted_agent_release_matrix.md).
+    deployment-published `false`, so their routes stay off/503. The agent version
+    became active in the latest runtime attempt, but session readiness returned
+    HTTP 424. The integration is not runtime-validated or shipped. See the
+    [hosted-agent integration matrix](hosted_agent_release_matrix.md).
 
 ## Full Zero Trust reference
 
@@ -72,6 +73,9 @@ The lower lane in the diagram shows the planned two-phase hosted image flow:
 provision prerequisites, build through public ACR Tasks or the dedicated
 VNet-connected ACR Tasks agent pool, resolve the hosted image to an immutable
 `sha256` digest, provision the digest-backed hosted handoff, and deploy.
+The child hosted service remains a Docker service with remote build enabled,
+while `AZD_AGENT_SKIP_ACR=true` selects the already-prepared image during the
+child deployment.
 
 ## Complementary modular views
 
@@ -98,11 +102,11 @@ Use the table below for the deployment parameters behind each layer, and the [De
 
 | Layer | Posture | Controlled by | Include when |
 | --- | --- | --- | --- |
-| UI, chat runtime, ingestion | Mode-selected baseline | Canonical `DEPLOYMENT_TOPOLOGY`; materialized `DEPLOY_HOSTED_AGENT_ORCHESTRATION`, `DEPLOY_ADMINISTRATIVE_PANEL`, `CHAT_BACKEND`; `manifest.json` components; `containerAppsList` | The umbrella manifest pins the exact supported matrix. Existing topologies stay sticky, `classic` selects the Container Apps fallback, hosted/no-panel is the fresh default, and hosted-panel requires explicit operator selection while its independent evidence gates remain off/503. |
+| UI, chat runtime, ingestion | Mode-selected baseline | Canonical `DEPLOYMENT_TOPOLOGY`; materialized `DEPLOY_HOSTED_AGENT_ORCHESTRATION`, `DEPLOY_ADMINISTRATIVE_PANEL`, `CHAT_BACKEND`; `manifest.json` components; `containerAppsList` | The umbrella manifest pins the exact integration matrix. Existing topologies stay sticky, `classic` selects the Container Apps fallback, hosted/no-panel is the fresh default, and hosted-panel requires explicit operator selection while its independent evidence gates remain off/503. Runtime readiness is not yet validated. |
 | AI Foundry account, project, and model deployments | Required AI control plane | `deployAiFoundry`, `deployAfProject`, `deployAAfAgentSvc`, `modelDeploymentList` | Provisioning Azure AI Foundry / Azure OpenAI and the model deployments used by GPT-RAG. |
 | AI Foundry associated resources | Default-created or BYO-capable | `aiSearchResourceId`, `aiFoundryStorageAccountResourceId`, `aiFoundryCosmosDBAccountResourceId`, `keyVaultResourceId`, `aiFoundryStorageSku` | Letting the AI Foundry module create its required Storage, Search, Cosmos DB, and Key Vault resources, or reusing existing ones. |
-| RAG workload data services | Mode-selected, parameter-controlled | `deploySearchService`, `deployStorageAccount`, `deployCosmosDb`, `storageAccountContainersList`, `databaseContainersList` | Running indexed-document and file-storage paths. Hosted/no-panel uses Foundry managed Conversations and omits panel-only Cosmos DB; classic preserves its existing state path. |
-| App Configuration, identity / RBAC, Container Apps, Container Registry | Required platform capabilities, topology varies by mode | `deployAppConfig`, `deployContainerApps`, `deployContainerEnv`, `deployContainerRegistry`, `useUAI`, service role lists | Publishing the sticky topology and runtime contract, hosting UI/ingestion, and preparing immutable images. Hosted/no-panel does not provision an orchestrator Container App. Delegated continuity grants the two exact direct agent-scoped roles only to the UI BFF after protocol and owner-binding validation. |
+| RAG workload data services | Mode-selected, parameter-controlled | `deploySearchService`, `deployStorageAccount`, `deployCosmosDb`, `storageAccountContainersList`, `databaseContainersList`, `SEARCH_SERVICE_UAI_RESOURCE_ID` | Running indexed-document and file-storage paths. Private Search uses its explicit Search UAI. Hosted/no-panel uses Foundry managed Conversations and omits panel-only Cosmos DB; classic preserves its existing state path. |
+| App Configuration, identity / RBAC, Container Apps, Container Registry | Required platform capabilities, topology varies by mode | `deployAppConfig`, `deployContainerApps`, `deployContainerEnv`, `deployContainerRegistry`, `useUAI`, service role lists | Publishing the sticky topology and runtime contract, hosting UI/ingestion, and preparing immutable images. Hosted/no-panel does not provision an orchestrator Container App. Hosted-panel resolves exactly one managed-identity principal per Container App and limits Cosmos grants to frontend Contributor plus ingestion Reader on the two panel containers. Delegated continuity grants the two exact direct agent-scoped roles only to the UI BFF after protocol and owner-binding validation. |
 | Workload Key Vault and observability | Default support, parameter-controlled or reusable | `deployKeyVault`, `deployLogAnalytics`, `deployAppInsights`, `EXISTING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID`, `EXISTING_APPLICATION_INSIGHTS_RESOURCE_ID`, `EXISTING_APPLICATION_INSIGHTS_CONNECTION_STRING` | Storing workload secrets and capturing telemetry. The delegated primary continuity path does not provision or require a capability key or dedicated continuity vault; those inputs remain disabled fallback-only. Application Insights is created or wired only when an effective Log Analytics workspace is available. |
 | Zero Trust private networking | Optional security posture | `networkIsolation`, `allowedIpRanges`, `useExistingVNet`, `deploySubnets`, `policyManagedPrivateDns`, `EXISTING_PRIVATE_DNS_ZONE_*` | Requiring private endpoints, private DNS, VNet integration, NSGs, and internal Container Apps ingress. |
 | Azure Firewall, Jumpbox, Bastion, NAT Gateway, private ACR build pool | Zero Trust operations/build options | `DEPLOY_AZURE_FIREWALL`, `DEPLOY_JUMPBOX`, `DEPLOY_BASTION`, `DEPLOY_NAT_GATEWAY`, `DEPLOY_ACR_TASK_AGENT_POOL`, `EXISTING_JUMPBOX_RESOURCE_ID`, `EXISTING_BASTION_RESOURCE_ID`, `EXISTING_NAT_GATEWAY_RESOURCE_ID` | Operating inside the VNet or reusing central access/egress resources. The gated hosted flow uses the dedicated VNet-connected ACR Tasks agent pool for private builds; shared ACR Tasks cannot reach a private endpoint. |

@@ -76,7 +76,7 @@ azd provision
   - **Microsoft Foundry** - Foundry Account and project for agent orchestration
   - **OpenAI Models** - GPT-4o and text-embedding-3-large deployments
   - **Container Registry** - Stores Docker images
-  - **Container Apps (4)** - UI, orchestrator, ingestion, MCP in the currently released classic topology. The [hosted-agent supported matrix](hosted_agent_release_matrix.md) pins UI, orchestrator runtime, ingestion, and AILZ releases; hosted/no-panel and explicit hosted-panel keep UI and ingestion in Container Apps and omit the orchestrator Container App from the hosted chat path.
+  - **Container Apps (4)** - UI, orchestrator, ingestion, MCP in the currently released classic topology. The [hosted-agent integration matrix](hosted_agent_release_matrix.md) pins UI, orchestrator runtime, ingestion, and AILZ releases; hosted/no-panel and explicit hosted-panel keep UI and ingestion in Container Apps and omit the orchestrator Container App from the hosted chat path. The hosted integration is not yet shipped because runtime session readiness remains blocked.
   - **App Configuration** - Centralized configuration store
   - **Key Vault** - Secrets management
   - **Cosmos DB** - Agent state and metadata

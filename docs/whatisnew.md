@@ -6,15 +6,17 @@ patch, and fix, see the [GitHub releases](https://github.com/Azure/GPT-RAG/relea
 
 ### August 2026
 
-- **Hosted-agent supported matrix pinned.** UI
+- **Hosted-agent integration matrix pinned (not yet shipped).** UI
   `v2.6.0`, orchestrator `v4.0.0`, ingestion `v2.7.0`, and AILZ `v2.5.0`
   publish the stateless runtime, delegated owner binding, owner-gated user
   history/feedback/delete APIs, metadata-only operator APIs, and two-phase
   hosted handoff contracts. The umbrella integration pins their exact release
   commits and supports explicitly selected hosted-panel composition with only
   metadata Cosmos containers. Continuity, user-history, owner-binding, and
-  operator evidence gates remain deployment-published false/off/503; no live
-  validation result is implied. The ingestion operator tabs also require surrounding
+  operator evidence gates remain deployment-published false/off/503. The agent
+  version became active during validation, but session readiness returned HTTP
+  424, so this integration is not runtime-validated or shipped. The ingestion
+  operator tabs also require surrounding
   infrastructure to supply a delegated bearer because their Vite client does
   not acquire one. See the
   [hosted-agent component release matrix](hosted_agent_release_matrix.md).

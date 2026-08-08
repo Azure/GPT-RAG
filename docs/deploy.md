@@ -53,15 +53,17 @@ ingestion services in the classic Container Apps topology.
 
 ### Chat runtime modes
 
-!!! warning "Exact matrix pinned; evidence-gated surfaces remain off"
+!!! warning "Exact matrix pinned; runtime validation and release remain blocked"
     UI `v2.6.0`, orchestrator `v4.0.0`, ingestion `v2.7.0`, and AILZ `v2.5.0`
     are pinned by the umbrella integration at their exact release commits.
     Classic, hosted/no-panel, and explicitly selected hosted-panel are supported
     topologies. The manifest's umbrella tag remains `unreleased`; use a GPT-RAG
     source or release that contains these pins. Continuity, user-history,
     owner-binding validation, and operator-surface evidence gates remain
-    deployment-published `false`; no live validation result is implied. See the
-    [exact supported matrix](hosted_agent_release_matrix.md).
+    deployment-published `false`. The agent version became active in the latest
+    runtime attempt, but session readiness returned HTTP 424. The integration is
+    not runtime-validated or shipped. See the
+    [exact integration matrix](hosted_agent_release_matrix.md).
 
 The platform implementation resolves one canonical topology before provisioning
 and materializes the corresponding legacy flags and App Configuration values.
@@ -93,6 +95,7 @@ Configuration label `gpt-rag`:
 | `HOSTED_AGENT_AUTH_MODE` | `user_delegated` is the default and required continuity path. Under OQ-OWN, it means the trusted UI BFF derives `x-ms-user-identity`; it does not mean an OBO token is sent to the agent. OBO remains a separate retrieval flow. `service_identity` is an explicit reviewed exception that is incompatible with owner-bound continuity, so continuity stays off/503 in that mode. |
 | `HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS` | Finite positive wait for the next SSE event. The UI default is `60`; an infinite timeout is rejected. |
 | `HOSTED_AGENT_IMAGE_VERSION` | Canonical lowercase immutable digest in `sha256:<64-hex-characters>` form. Mutable tags are rejected. |
+| `SEARCH_SERVICE_UAI_RESOURCE_ID` | Required identity boundary for private Search. Post-provisioning preserves an explicit value or resolves the single Search user-assigned identity from the Search resource; it must not publish an empty replacement. |
 | `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` | Generative-AI prompt and completion telemetry capture. Defaults to `false`. Set to `true` only when the deployment's data-handling policy explicitly permits sensitive content telemetry. |
 
 Hosted configuration, authentication, connection, timeout, protocol, and
@@ -243,6 +246,14 @@ This composes UI and ingestion plus only the two panel metadata containers.
 override them before their separate evidence and authorization procedures
 complete. The corresponding routes return HTTP 503 while disabled.
 
+Panel post-provisioning resolves exactly one managed-identity principal from the
+frontend Container App and exactly one from ingestion. It then creates only
+container-scoped Cosmos SQL grants on `panel-conversation-owner-index` and
+`panel-feedback`: **Cosmos DB Built-in Data Contributor** for frontend and
+**Cosmos DB Built-in Data Reader** for ingestion. Missing or ambiguous
+Container App identities fail setup. Do not substitute account-scope grants,
+grant ingestion write access, or grant the hosted agent any panel Cosmos role.
+
 The first provision creates hosted prerequisites with image preparation
 enabled but hosted deployment disabled. The preparation command clones and
 verifies the manifest-pinned orchestrator source, builds the standard image and
@@ -256,6 +267,21 @@ dedicated VNet-connected ACR Tasks agent pool; shared ACR Tasks cannot reach a
 private endpoint. Operators may pass an already-built immutable
 `sha256:<64-hex-characters>` digest to the preparation command to skip builds.
 No lifecycle hook recursively invokes `azd provision`.
+
+The child `hosted-agent/azure.yaml` service definition is part of the prebuilt
+handoff contract. It must declare `language: docker` and
+`docker.remoteBuild: true`. The parent pre-deploy hook sets
+`AZD_AGENT_SKIP_ACR=true` in the child azd environment before
+`azd deploy orchestrator-agent`, so the already-prepared immutable image is used
+instead of triggering another ACR build. Do not remove any of these three
+settings from a prebuilt hosted deployment.
+
+!!! danger "Current runtime readiness blocker"
+    The latest implementation validation activated the agent version, but a new
+    session readiness request returned HTTP 424. This is not a successful hosted
+    runtime validation. Keep continuity and panel evidence gates false/off/503,
+    keep the classic rollback available, and do not describe the integrated
+    matrix as shipped until readiness and the remaining live checks pass.
 
 #### Explicit classic fallback
 

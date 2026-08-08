@@ -1,10 +1,10 @@
-# Hosted-agent supported release matrix
+# Hosted-agent integration matrix
 
 This page records the exact hosted-agent component releases pinned by the
 GPT-RAG umbrella integration on 2026-08-07 and the independent evidence gates
 that remain fail closed.
 
-!!! warning "Pins are integrated; live evidence gates remain closed"
+!!! warning "Pins are integrated; runtime validation and release remain blocked"
     The umbrella `manifest.json` pins all four exact releases below and explicit
     `hosted-panel` topology selection is supported. The manifest's umbrella tag
     remains `unreleased`; use only a GPT-RAG source or release that contains
@@ -13,9 +13,12 @@ that remain fail closed.
     `PANEL_HISTORY_OWNER_BINDING_VALIDATED`, and
     `PANEL_OPERATOR_SURFACES_ENABLED` remain deployment-published `false`.
     This documentation does not claim that their separate live evidence and
-    authorization procedures have completed.
+    authorization procedures have completed. The hosted agent version became
+    active during validation, but session readiness returned HTTP 424. Treat the
+    matrix as implemented configuration, not as a validated or shipped umbrella
+    release.
 
-## Exact published matrix
+## Exact integrated matrix
 
 | Component | Release | Reviewed release commit | Relevant contract |
 | --- | --- | --- | --- |
@@ -221,6 +224,23 @@ Managed Conversations is the only chat-content store for the hosted design.
 - The hosted runtime identity has no Conversations role, impersonation role,
   capability key, or panel Cosmos role.
 
+### Deployment identity boundaries
+
+- A private Azure AI Search deployment uses its explicit Search user-assigned
+  identity. `postProvision` preserves `SEARCH_SERVICE_UAI_RESOURCE_ID` when
+  already supplied or resolves it from the Search resource; it must not replace
+  the value with an empty identity.
+- Panel setup resolves exactly one managed-identity principal from each target
+  Container App. Zero or multiple distinct principals fail setup rather than
+  guessing.
+- The frontend principal receives **Cosmos DB Built-in Data Contributor** and
+  the ingestion principal receives **Cosmos DB Built-in Data Reader**, each
+  scoped separately to only `panel-conversation-owner-index` and
+  `panel-feedback`.
+- Neither principal receives panel access at Cosmos account scope. Ingestion
+  receives no panel write access, and the hosted agent receives no panel Cosmos
+  role.
+
 ## Operator verification and rollback
 
 The matrix and all three topologies are composed by the umbrella integration.
@@ -244,6 +264,23 @@ hosted handoff. UI and ingestion are deployed, but the orchestrator Container
 App is omitted. Do not override the deployment-published panel or continuity
 evidence flags: their routes intentionally remain off/503.
 
+The generated `hosted-agent/azure.yaml` prebuilt-image path must retain:
+
+```yaml
+services:
+  orchestrator-agent:
+    host: azure.ai.agent
+    language: docker
+    docker:
+      remoteBuild: true
+```
+
+Before the child project runs `azd deploy orchestrator-agent`, the pre-deploy
+hook sets `AZD_AGENT_SKIP_ACR=true` alongside the immutable
+`HOSTED_AGENT_IMAGE_VERSION`. These settings tell the `azure.ai.agent` host to
+deploy the prepared digest without replacing the reviewed Docker service
+contract or launching a second ACR build.
+
 Before those independent live surfaces can be enabled, validation must:
 
 1. deploy the immutable hosted image and verify the live Responses protocol;
@@ -260,6 +297,11 @@ Before those independent live surfaces can be enabled, validation must:
 7. validate Basic and network-isolated deployments; and
 8. separately validate panel user auth and the ingestion browser operator-token
    path before enabling panel flags.
+
+The latest runtime attempt does not satisfy item 1: the agent version reached
+active state, but session readiness returned HTTP 424. Preserve the fail-closed
+flags and do not describe this integration as runtime-validated or shipped until
+readiness and the remaining evidence steps succeed.
 
 The configuration contract uses:
 
