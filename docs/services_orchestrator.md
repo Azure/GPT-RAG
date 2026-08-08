@@ -6,14 +6,16 @@ coordinates agent-based RAG workflows, where each agent has a defined role, to
 generate accurate, context-aware responses for complex user queries. Current
 GPT-RAG umbrella releases run it as an orchestrator Container App. Orchestrator
 `v4.0.0` also packages the runtime as a Microsoft Foundry hosted agent, but the
-[exact hosted supported matrix](hosted_agent_release_matrix.md) is now pinned
+[exact hosted integration matrix](hosted_agent_release_matrix.md) is now pinned
 by the umbrella integration. The separate
 [hosted continuity platform contract](hosted_continuity_platform_contract.md)
 uses delegated `x-ms-user-identity` in the platform pivot merged by PR #633, but
 remains disabled pending live evidence and
 `HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED`. Hosted-panel is explicitly
 selectable, but its user-history and operator surfaces remain off/503 behind
-independent gates.
+independent gates. The latest hosted agent version became active, but session
+readiness returned HTTP 424, so the integration is not runtime-validated or
+shipped.
 [GitHub Repository](https://github.com/Azure/gpt-rag-orchestrator).
 
 ## Key Features
