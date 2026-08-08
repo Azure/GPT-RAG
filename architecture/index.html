@@ -545,7 +545,7 @@
         
   
   <span class="md-ellipsis">
-    Hosted-agent supported matrix
+    Hosted-agent integration matrix
   </span>
   
 
@@ -1620,15 +1620,16 @@ deployments retain their persisted topology during upgrade. Network isolation,
 enterprise integration, public ingress, and optional AI capabilities remain
 separate choices.</p>
 <div class="admonition warning">
-<p class="admonition-title">Exact matrix pinned; live evidence gates remain</p>
+<p class="admonition-title">Exact matrix pinned; runtime validation and release remain blocked</p>
 <p>UI <code>v2.6.0</code>, orchestrator <code>v4.0.0</code>, ingestion <code>v2.7.0</code>, and AILZ <code>v2.5.0</code>
 are pinned by the umbrella integration and implement the delegated
 <code>x-ms-user-identity</code> contract. Classic, hosted/no-panel, and explicitly
 selected hosted-panel are supported topologies. Continuity, user-history,
 owner-binding validation, and operator-surface gates remain
-deployment-published <code>false</code>, so their routes stay off/503; no live
-validation result is implied. See the
-<a href="../hosted_agent_release_matrix/">hosted-agent supported matrix</a>.</p>
+deployment-published <code>false</code>, so their routes stay off/503. The agent version
+became active in the latest runtime attempt, but session readiness returned
+HTTP 424. The integration is not runtime-validated or shipped. See the
+<a href="../hosted_agent_release_matrix/">hosted-agent integration matrix</a>.</p>
 </div>
 <h2 id="full-zero-trust-reference">Full Zero Trust reference</h2>
 <p>The existing PNG and Visio remain the full network-isolated reference view.
@@ -1673,7 +1674,10 @@ off/503 behind independent evidence gates.</p>
 <p>The lower lane in the diagram shows the planned two-phase hosted image flow:
 provision prerequisites, build through public ACR Tasks or the dedicated
 VNet-connected ACR Tasks agent pool, resolve the hosted image to an immutable
-<code>sha256</code> digest, provision the digest-backed hosted handoff, and deploy.</p>
+<code>sha256</code> digest, provision the digest-backed hosted handoff, and deploy.
+The child hosted service remains a Docker service with remote build enabled,
+while <code>AZD_AGENT_SKIP_ACR=true</code> selects the already-prepared image during the
+child deployment.</p>
 <h2 id="complementary-modular-views">Complementary modular views</h2>
 <div class="admonition note">
 <p class="admonition-title">How to read these diagrams</p>
@@ -1706,7 +1710,7 @@ fallback. The panel is absent and its flag remains <code>false</code>.</p>
 <td>UI, chat runtime, ingestion</td>
 <td>Mode-selected baseline</td>
 <td>Canonical <code>DEPLOYMENT_TOPOLOGY</code>; materialized <code>DEPLOY_HOSTED_AGENT_ORCHESTRATION</code>, <code>DEPLOY_ADMINISTRATIVE_PANEL</code>, <code>CHAT_BACKEND</code>; <code>manifest.json</code> components; <code>containerAppsList</code></td>
-<td>The umbrella manifest pins the exact supported matrix. Existing topologies stay sticky, <code>classic</code> selects the Container Apps fallback, hosted/no-panel is the fresh default, and hosted-panel requires explicit operator selection while its independent evidence gates remain off/503.</td>
+<td>The umbrella manifest pins the exact integration matrix. Existing topologies stay sticky, <code>classic</code> selects the Container Apps fallback, hosted/no-panel is the fresh default, and hosted-panel requires explicit operator selection while its independent evidence gates remain off/503. Runtime readiness is not yet validated.</td>
 </tr>
 <tr>
 <td>AI Foundry account, project, and model deployments</td>
@@ -1723,14 +1727,14 @@ fallback. The panel is absent and its flag remains <code>false</code>.</p>
 <tr>
 <td>RAG workload data services</td>
 <td>Mode-selected, parameter-controlled</td>
-<td><code>deploySearchService</code>, <code>deployStorageAccount</code>, <code>deployCosmosDb</code>, <code>storageAccountContainersList</code>, <code>databaseContainersList</code></td>
-<td>Running indexed-document and file-storage paths. Hosted/no-panel uses Foundry managed Conversations and omits panel-only Cosmos DB; classic preserves its existing state path.</td>
+<td><code>deploySearchService</code>, <code>deployStorageAccount</code>, <code>deployCosmosDb</code>, <code>storageAccountContainersList</code>, <code>databaseContainersList</code>, <code>SEARCH_SERVICE_UAI_RESOURCE_ID</code></td>
+<td>Running indexed-document and file-storage paths. Private Search uses its explicit Search UAI. Hosted/no-panel uses Foundry managed Conversations and omits panel-only Cosmos DB; classic preserves its existing state path.</td>
 </tr>
 <tr>
 <td>App Configuration, identity / RBAC, Container Apps, Container Registry</td>
 <td>Required platform capabilities, topology varies by mode</td>
 <td><code>deployAppConfig</code>, <code>deployContainerApps</code>, <code>deployContainerEnv</code>, <code>deployContainerRegistry</code>, <code>useUAI</code>, service role lists</td>
-<td>Publishing the sticky topology and runtime contract, hosting UI/ingestion, and preparing immutable images. Hosted/no-panel does not provision an orchestrator Container App. Delegated continuity grants the two exact direct agent-scoped roles only to the UI BFF after protocol and owner-binding validation.</td>
+<td>Publishing the sticky topology and runtime contract, hosting UI/ingestion, and preparing immutable images. Hosted/no-panel does not provision an orchestrator Container App. Hosted-panel resolves exactly one managed-identity principal per Container App and limits Cosmos grants to frontend Contributor plus ingestion Reader on the two panel containers. Delegated continuity grants the two exact direct agent-scoped roles only to the UI BFF after protocol and owner-binding validation.</td>
 </tr>
 <tr>
 <td>Workload Key Vault and observability</td>

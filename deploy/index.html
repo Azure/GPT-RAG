@@ -652,7 +652,7 @@
         
   
   <span class="md-ellipsis">
-    Hosted-agent supported matrix
+    Hosted-agent integration matrix
   </span>
   
 
@@ -1762,15 +1762,17 @@ locally after <code>azd provision</code>, and <code>azd deploy</code> deploys th
 ingestion services in the classic Container Apps topology.</p>
 <h3 id="chat-runtime-modes">Chat runtime modes</h3>
 <div class="admonition warning">
-<p class="admonition-title">Exact matrix pinned; evidence-gated surfaces remain off</p>
+<p class="admonition-title">Exact matrix pinned; runtime validation and release remain blocked</p>
 <p>UI <code>v2.6.0</code>, orchestrator <code>v4.0.0</code>, ingestion <code>v2.7.0</code>, and AILZ <code>v2.5.0</code>
 are pinned by the umbrella integration at their exact release commits.
 Classic, hosted/no-panel, and explicitly selected hosted-panel are supported
 topologies. The manifest's umbrella tag remains <code>unreleased</code>; use a GPT-RAG
 source or release that contains these pins. Continuity, user-history,
 owner-binding validation, and operator-surface evidence gates remain
-deployment-published <code>false</code>; no live validation result is implied. See the
-<a href="../hosted_agent_release_matrix/">exact supported matrix</a>.</p>
+deployment-published <code>false</code>. The agent version became active in the latest
+runtime attempt, but session readiness returned HTTP 424. The integration is
+not runtime-validated or shipped. See the
+<a href="../hosted_agent_release_matrix/">exact integration matrix</a>.</p>
 </div>
 <p>The platform implementation resolves one canonical topology before provisioning
 and materializes the corresponding legacy flags and App Configuration values.
@@ -1856,6 +1858,10 @@ Configuration label <code>gpt-rag</code>:</p>
 <tr>
 <td><code>HOSTED_AGENT_IMAGE_VERSION</code></td>
 <td>Canonical lowercase immutable digest in <code>sha256:&lt;64-hex-characters&gt;</code> form. Mutable tags are rejected.</td>
+</tr>
+<tr>
+<td><code>SEARCH_SERVICE_UAI_RESOURCE_ID</code></td>
+<td>Required identity boundary for private Search. Post-provisioning preserves an explicit value or resolves the single Search user-assigned identity from the Search resource; it must not publish an empty replacement.</td>
 </tr>
 <tr>
 <td><code>OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT</code></td>
@@ -2031,6 +2037,13 @@ step. For an explicit migration, set
 <code>PANEL_OPERATOR_SURFACES_ENABLED</code> remain deployment-published <code>false</code>; do not
 override them before their separate evidence and authorization procedures
 complete. The corresponding routes return HTTP 503 while disabled.</p>
+<p>Panel post-provisioning resolves exactly one managed-identity principal from the
+frontend Container App and exactly one from ingestion. It then creates only
+container-scoped Cosmos SQL grants on <code>panel-conversation-owner-index</code> and
+<code>panel-feedback</code>: <strong>Cosmos DB Built-in Data Contributor</strong> for frontend and
+<strong>Cosmos DB Built-in Data Reader</strong> for ingestion. Missing or ambiguous
+Container App identities fail setup. Do not substitute account-scope grants,
+grant ingestion write access, or grant the hosted agent any panel Cosmos role.</p>
 <p>The first provision creates hosted prerequisites with image preparation
 enabled but hosted deployment disabled. The preparation command clones and
 verifies the manifest-pinned orchestrator source, builds the standard image and
@@ -2043,6 +2056,21 @@ dedicated VNet-connected ACR Tasks agent pool; shared ACR Tasks cannot reach a
 private endpoint. Operators may pass an already-built immutable
 <code>sha256:&lt;64-hex-characters&gt;</code> digest to the preparation command to skip builds.
 No lifecycle hook recursively invokes <code>azd provision</code>.</p>
+<p>The child <code>hosted-agent/azure.yaml</code> service definition is part of the prebuilt
+handoff contract. It must declare <code>language: docker</code> and
+<code>docker.remoteBuild: true</code>. The parent pre-deploy hook sets
+<code>AZD_AGENT_SKIP_ACR=true</code> in the child azd environment before
+<code>azd deploy orchestrator-agent</code>, so the already-prepared immutable image is used
+instead of triggering another ACR build. Do not remove any of these three
+settings from a prebuilt hosted deployment.</p>
+<div class="admonition danger">
+<p class="admonition-title">Current runtime readiness blocker</p>
+<p>The latest implementation validation activated the agent version, but a new
+session readiness request returned HTTP 424. This is not a successful hosted
+runtime validation. Keep continuity and panel evidence gates false/off/503,
+keep the classic rollback available, and do not describe the integrated
+matrix as shipped until readiness and the remaining live checks pass.</p>
+</div>
 <h4 id="explicit-classic-fallback">Explicit classic fallback</h4>
 <p>Fallback is a deployment operation, not a request-time retry:</p>
 <div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">DEPLOYMENT_TOPOLOGY</span> <span class="n">classic</span>

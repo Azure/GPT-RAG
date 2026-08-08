@@ -24,7 +24,7 @@
     
     
       
-        <title>Hosted-agent supported matrix - GPT-RAG</title>
+        <title>Hosted-agent integration matrix - GPT-RAG</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#hosted-agent-supported-release-matrix" class="md-skip">
+        <a href="#hosted-agent-integration-matrix" class="md-skip">
           Skip to content
         </a>
       
@@ -111,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Hosted-agent supported matrix
+              Hosted-agent integration matrix
             
           </span>
         </div>
@@ -464,7 +464,7 @@
           
   
   <span class="md-ellipsis">
-    Hosted-agent supported matrix
+    Hosted-agent integration matrix
   </span>
   
 
@@ -475,7 +475,7 @@
         
   
   <span class="md-ellipsis">
-    Hosted-agent supported matrix
+    Hosted-agent integration matrix
   </span>
   
 
@@ -497,9 +497,9 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#exact-published-matrix" class="md-nav__link">
+  <a href="#exact-integrated-matrix" class="md-nav__link">
     <span class="md-ellipsis">
-      Exact published matrix
+      Exact integrated matrix
     </span>
   </a>
   
@@ -580,6 +580,21 @@
       Data confinement
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Data confinement">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#deployment-identity-boundaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deployment identity boundaries
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1656,12 +1671,12 @@
   
 
 
-<h1 id="hosted-agent-supported-release-matrix">Hosted-agent supported release matrix</h1>
+<h1 id="hosted-agent-integration-matrix">Hosted-agent integration matrix</h1>
 <p>This page records the exact hosted-agent component releases pinned by the
 GPT-RAG umbrella integration on 2026-08-07 and the independent evidence gates
 that remain fail closed.</p>
 <div class="admonition warning">
-<p class="admonition-title">Pins are integrated; live evidence gates remain closed</p>
+<p class="admonition-title">Pins are integrated; runtime validation and release remain blocked</p>
 <p>The umbrella <code>manifest.json</code> pins all four exact releases below and explicit
 <code>hosted-panel</code> topology selection is supported. The manifest's umbrella tag
 remains <code>unreleased</code>; use only a GPT-RAG source or release that contains
@@ -1670,9 +1685,12 @@ these pins rather than combining component tags independently.
 <code>PANEL_HISTORY_OWNER_BINDING_VALIDATED</code>, and
 <code>PANEL_OPERATOR_SURFACES_ENABLED</code> remain deployment-published <code>false</code>.
 This documentation does not claim that their separate live evidence and
-authorization procedures have completed.</p>
+authorization procedures have completed. The hosted agent version became
+active during validation, but session readiness returned HTTP 424. Treat the
+matrix as implemented configuration, not as a validated or shipped umbrella
+release.</p>
 </div>
-<h2 id="exact-published-matrix">Exact published matrix</h2>
+<h2 id="exact-integrated-matrix">Exact integrated matrix</h2>
 <table>
 <thead>
 <tr>
@@ -1946,6 +1964,23 @@ a working MSAL Authorization Code + PKCE flow.</p>
 <li>The hosted runtime identity has no Conversations role, impersonation role,
   capability key, or panel Cosmos role.</li>
 </ul>
+<h3 id="deployment-identity-boundaries">Deployment identity boundaries</h3>
+<ul>
+<li>A private Azure AI Search deployment uses its explicit Search user-assigned
+  identity. <code>postProvision</code> preserves <code>SEARCH_SERVICE_UAI_RESOURCE_ID</code> when
+  already supplied or resolves it from the Search resource; it must not replace
+  the value with an empty identity.</li>
+<li>Panel setup resolves exactly one managed-identity principal from each target
+  Container App. Zero or multiple distinct principals fail setup rather than
+  guessing.</li>
+<li>The frontend principal receives <strong>Cosmos DB Built-in Data Contributor</strong> and
+  the ingestion principal receives <strong>Cosmos DB Built-in Data Reader</strong>, each
+  scoped separately to only <code>panel-conversation-owner-index</code> and
+  <code>panel-feedback</code>.</li>
+<li>Neither principal receives panel access at Cosmos account scope. Ingestion
+  receives no panel write access, and the hosted agent receives no panel Cosmos
+  role.</li>
+</ul>
 <h2 id="operator-verification-and-rollback">Operator verification and rollback</h2>
 <p>The matrix and all three topologies are composed by the umbrella integration.
 For an explicit hosted-panel deployment, select the topology before the first
@@ -1964,6 +1999,19 @@ step resolves an immutable image digest; the second provision materializes the
 hosted handoff. UI and ingestion are deployed, but the orchestrator Container
 App is omitted. Do not override the deployment-published panel or continuity
 evidence flags: their routes intentionally remain off/503.</p>
+<p>The generated <code>hosted-agent/azure.yaml</code> prebuilt-image path must retain:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">orchestrator-agent</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">azure.ai.agent</span>
+<span class="w">    </span><span class="nt">language</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker</span>
+<span class="w">    </span><span class="nt">docker</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">remoteBuild</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+<p>Before the child project runs <code>azd deploy orchestrator-agent</code>, the pre-deploy
+hook sets <code>AZD_AGENT_SKIP_ACR=true</code> alongside the immutable
+<code>HOSTED_AGENT_IMAGE_VERSION</code>. These settings tell the <code>azure.ai.agent</code> host to
+deploy the prepared digest without replacing the reviewed Docker service
+contract or launching a second ACR build.</p>
 <p>Before those independent live surfaces can be enabled, validation must:</p>
 <ol>
 <li>deploy the immutable hosted image and verify the live Responses protocol;</li>
@@ -1981,6 +2029,10 @@ evidence flags: their routes intentionally remain off/503.</p>
 <li>separately validate panel user auth and the ingestion browser operator-token
    path before enabling panel flags.</li>
 </ol>
+<p>The latest runtime attempt does not satisfy item 1: the agent version reached
+active state, but session readiness returned HTTP 424. Preserve the fail-closed
+flags and do not describe this integration as runtime-validated or shipped until
+readiness and the remaining evidence steps succeed.</p>
 <p>The configuration contract uses:</p>
 <table>
 <thead>
