@@ -127,8 +127,8 @@
 
 - **Hosted administrative panel integration matrix (issue #611).** Explicit
   hosted-panel topology selection is now composed with UI `v2.6.0`
-  (`81d6515d8fc365402e958e861b671af037a4cc75`), orchestrator `v4.0.0`
-  (`1033d0690736f9787e5f227559dc4071d2043b79`), ingestion `v2.7.0`
+  (`81d6515d8fc365402e958e861b671af037a4cc75`), orchestrator `v4.0.1`
+  (`7e22840ba0e96a5ce237cf2657795768f88e3955`), ingestion `v2.7.0`
   (`84b927769ef0839110f2d68e3ca471e2260567cf`), and AI Landing Zone
   `v2.5.0` (`cacf418216ce7381d06263e0dd704a86b8a6f225`). The hosted
   container remains stateless with zero Conversations RBAC; hosted-panel
@@ -190,6 +190,33 @@
   test now verifies the preserved `v3.7.0` component combination in
   `config/deployment/rollback.json` instead of incorrectly requiring the live
   unreleased manifest to remain frozen on the prior release.
+- **Root-caused and fixed the hosted-agent session-readiness HTTP 424
+  blocker (issue #576).** The previous integration attempt's network-isolated
+  live validation reached agent-version `active` state but every session
+  invoke returned HTTP 424 `session_not_ready`. Root-caused to a circular
+  import in `gpt-rag-orchestrator`: `src/api/hosted_entrypoint.py` imports
+  `dependencies` first (it is intentionally Cosmos-free and never "warms up"
+  `connectors` first, unlike the classic `main.py` entrypoint); `dependencies.py`
+  eagerly imported `connectors.appconfig` at module level, and
+  `connectors/__init__.py` eagerly imports several submodules
+  (`cosmosdb`, `search`, `aifoundry`) that each import `dependencies` back at
+  *their* module level — an import-time cycle that crashed the container's
+  Python process before uvicorn could ever bind a port or serve
+  `GET /readiness`, exactly matching Microsoft Foundry's documented
+  `424 session_not_ready` failure mode ("container started but `/readiness`
+  didn't return HTTP 200 within the timeout"). Reproduced deterministically
+  with a fresh-interpreter import test mirroring the container's startup
+  command (no live Azure deployment required to diagnose or confirm the fix).
+  Fixed upstream in
+  [gpt-rag-orchestrator PR #311](https://github.com/Azure/gpt-rag-orchestrator/pull/311)
+  by deferring `AppConfigClient` construction into `get_config()`, released as
+  [`v4.0.1`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.0.1)
+  (patch, no behavior change beyond the import fix; 720 tests passing). The
+  umbrella pin above is bumped to `v4.0.1` accordingly. **This fixes the
+  specific crash that produced the HTTP 424 symptom; it does not by itself
+  constitute the network-isolated live validation this integration still
+  requires** — see the "Migration and rollback" note below for the current
+  validation status.
 
 ### Migration and rollback
 

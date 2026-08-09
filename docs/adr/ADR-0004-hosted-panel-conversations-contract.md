@@ -767,7 +767,7 @@ Coordinated, ordered change (compatible-commit discipline per AGENTS.md):
    by `config.continuity.setup` in an earlier revision and needed no change
    here. `DEPLOY_ADMINISTRATIVE_PANEL=true` now selects hosted-panel only when
    hosted orchestration is also explicitly selected. The coordinated manifest
-   pins UI `v2.6.0`, orchestrator `v4.0.0`, ingestion `v2.7.0`, and AI Landing
+   pins UI `v2.6.0`, orchestrator `v4.0.1`, ingestion `v2.7.0`, and AI Landing
    Zone `v2.5.0` at their exact released commits. This lifts only the topology
    composition block: `PANEL_HISTORY_ENABLED`,
    `PANEL_HISTORY_OWNER_BINDING_VALIDATED`, and
