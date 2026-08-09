@@ -1685,9 +1685,15 @@ these pins rather than combining component tags independently.
 <code>PANEL_HISTORY_OWNER_BINDING_VALIDATED</code>, and
 <code>PANEL_OPERATOR_SURFACES_ENABLED</code> remain deployment-published <code>false</code>.
 This documentation does not claim that their separate live evidence and
-authorization procedures have completed. The hosted agent version became
-active during validation, but session readiness returned HTTP 424. Treat the
-matrix as implemented configuration, not as a validated or shipped umbrella
+authorization procedures have completed. A prior validation attempt saw
+the hosted agent version become active while session readiness returned
+HTTP 424; that crash was root-caused to a <code>gpt-rag-orchestrator</code> circular
+import and fixed in
+<a href="https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.0.1">orchestrator <code>v4.0.1</code></a>
+(pinned below). Fixing that crash is a code-level correction, not a
+substitute for the network-isolated live validation matrix below, which
+has not yet been re-run. Treat the matrix as implemented and
+crash-fixed configuration, not as a validated or shipped umbrella
 release.</p>
 </div>
 <h2 id="exact-integrated-matrix">Exact integrated matrix</h2>
@@ -1709,9 +1715,9 @@ release.</p>
 </tr>
 <tr>
 <td>GPT-RAG orchestrator</td>
-<td><a href="https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.0.0"><code>v4.0.0</code></a></td>
-<td><a href="https://github.com/Azure/gpt-rag-orchestrator/commit/1033d0690736f9787e5f227559dc4071d2043b79"><code>1033d06</code></a></td>
-<td>Canonical hosted <code>/responses</code> is stateless and requires caller-supplied ordered input.</td>
+<td><a href="https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.0.1"><code>v4.0.1</code></a></td>
+<td><a href="https://github.com/Azure/gpt-rag-orchestrator/commit/7e22840ba0e96a5ce237cf2657795768f88e3955"><code>7e22840</code></a></td>
+<td>Canonical hosted <code>/responses</code> is stateless and requires caller-supplied ordered input. Fixes the <code>dependencies</code>/<code>connectors</code> circular import that crashed the hosted entrypoint on startup (<a href="https://github.com/Azure/gpt-rag-orchestrator/pull/311">PR #311</a>).</td>
 </tr>
 <tr>
 <td>GPT-RAG ingestion</td>
@@ -1790,7 +1796,7 @@ estimated tokens with <code>drop_oldest</code>. UI <code>v2.6.0</code> has stand
 The umbrella publishes the reviewed 100/32,000 values; operators must not
 remove them and then assume the UI fallback values are equivalent.</p>
 <h2 id="stateless-hosted-runtime-contract">Stateless hosted runtime contract</h2>
-<p>Orchestrator <code>v4.0.0</code> performs no managed-Conversations create, read, append, or
+<p>Orchestrator <code>v4.0.1</code> performs no managed-Conversations create, read, append, or
 delete operation in the hosted container. The caller supplies the complete,
 bounded, oldest-to-newest history on every request.</p>
 <p>For canonical <code>POST /responses</code>:</p>
@@ -2029,10 +2035,20 @@ contract or launching a second ACR build.</p>
 <li>separately validate panel user auth and the ingestion browser operator-token
    path before enabling panel flags.</li>
 </ol>
-<p>The latest runtime attempt does not satisfy item 1: the agent version reached
-active state, but session readiness returned HTTP 424. Preserve the fail-closed
-flags and do not describe this integration as runtime-validated or shipped until
-readiness and the remaining evidence steps succeed.</p>
+<p>The prior runtime attempt did not satisfy item 1: the agent version reached
+active state, but session readiness returned HTTP 424. That specific crash
+was root-caused to a <code>dependencies</code>/<code>connectors</code> circular import in the
+hosted entrypoint (<code>src/api/hosted_entrypoint.py</code> imports <code>dependencies</code>
+before anything else in the process has "warmed up" <code>connectors</code>, unlike
+the classic entrypoint) and fixed in
+<a href="https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.0.1">orchestrator <code>v4.0.1</code></a>
+(<a href="https://github.com/Azure/gpt-rag-orchestrator/pull/311">PR #311</a>), pinned
+above. Fixing the crash is necessary but not sufficient: item 1 and the
+remaining evidence steps must still be re-run against a live,
+network-isolated deployment before this integration can be described as
+validated. Preserve the fail-closed flags and do not describe this
+integration as runtime-validated or shipped until readiness and the
+remaining evidence steps succeed.</p>
 <p>The configuration contract uses:</p>
 <table>
 <thead>
