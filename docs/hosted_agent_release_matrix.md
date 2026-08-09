@@ -13,9 +13,15 @@ that remain fail closed.
     `PANEL_HISTORY_OWNER_BINDING_VALIDATED`, and
     `PANEL_OPERATOR_SURFACES_ENABLED` remain deployment-published `false`.
     This documentation does not claim that their separate live evidence and
-    authorization procedures have completed. The hosted agent version became
-    active during validation, but session readiness returned HTTP 424. Treat the
-    matrix as implemented configuration, not as a validated or shipped umbrella
+    authorization procedures have completed. A prior validation attempt saw
+    the hosted agent version become active while session readiness returned
+    HTTP 424; that crash was root-caused to a `gpt-rag-orchestrator` circular
+    import and fixed in
+    [orchestrator `v4.0.1`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.0.1)
+    (pinned below). Fixing that crash is a code-level correction, not a
+    substitute for the network-isolated live validation matrix below, which
+    has not yet been re-run. Treat the matrix as implemented and
+    crash-fixed configuration, not as a validated or shipped umbrella
     release.
 
 ## Exact integrated matrix
@@ -23,7 +29,7 @@ that remain fail closed.
 | Component | Release | Reviewed release commit | Relevant contract |
 | --- | --- | --- | --- |
 | GPT-RAG UI | [`v2.6.0`](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.6.0) | [`81d6515`](https://github.com/Azure/gpt-rag-ui/commit/81d6515d8fc365402e958e861b671af037a4cc75) | Hosted/no-panel is the fresh UI default when `CHAT_BACKEND` is absent; continuity and panel surfaces remain opt-in and fail closed. |
-| GPT-RAG orchestrator | [`v4.0.0`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.0.0) | [`1033d06`](https://github.com/Azure/gpt-rag-orchestrator/commit/1033d0690736f9787e5f227559dc4071d2043b79) | Canonical hosted `/responses` is stateless and requires caller-supplied ordered input. |
+| GPT-RAG orchestrator | [`v4.0.1`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.0.1) | [`7e22840`](https://github.com/Azure/gpt-rag-orchestrator/commit/7e22840ba0e96a5ce237cf2657795768f88e3955) | Canonical hosted `/responses` is stateless and requires caller-supplied ordered input. Fixes the `dependencies`/`connectors` circular import that crashed the hosted entrypoint on startup ([PR #311](https://github.com/Azure/gpt-rag-orchestrator/pull/311)). |
 | GPT-RAG ingestion | [`v2.7.0`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.7.0) | [`84b9277`](https://github.com/Azure/gpt-rag-ingestion/commit/84b927769ef0839110f2d68e3ca471e2260567cf) | Metadata-only operator overview and document/corpus curation APIs. |
 | AI Landing Zone | [`v2.5.0`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.5.0) | [`cacf418`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/commit/cacf418216ce7381d06263e0dd704a86b8a6f225) | Two-phase hosted-agent prerequisite/handoff support; both hosted flags default to `false`. |
 
@@ -57,7 +63,7 @@ remove them and then assume the UI fallback values are equivalent.
 
 ## Stateless hosted runtime contract
 
-Orchestrator `v4.0.0` performs no managed-Conversations create, read, append, or
+Orchestrator `v4.0.1` performs no managed-Conversations create, read, append, or
 delete operation in the hosted container. The caller supplies the complete,
 bounded, oldest-to-newest history on every request.
 
@@ -298,10 +304,20 @@ Before those independent live surfaces can be enabled, validation must:
 8. separately validate panel user auth and the ingestion browser operator-token
    path before enabling panel flags.
 
-The latest runtime attempt does not satisfy item 1: the agent version reached
-active state, but session readiness returned HTTP 424. Preserve the fail-closed
-flags and do not describe this integration as runtime-validated or shipped until
-readiness and the remaining evidence steps succeed.
+The prior runtime attempt did not satisfy item 1: the agent version reached
+active state, but session readiness returned HTTP 424. That specific crash
+was root-caused to a `dependencies`/`connectors` circular import in the
+hosted entrypoint (`src/api/hosted_entrypoint.py` imports `dependencies`
+before anything else in the process has "warmed up" `connectors`, unlike
+the classic entrypoint) and fixed in
+[orchestrator `v4.0.1`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.0.1)
+([PR #311](https://github.com/Azure/gpt-rag-orchestrator/pull/311)), pinned
+above. Fixing the crash is necessary but not sufficient: item 1 and the
+remaining evidence steps must still be re-run against a live,
+network-isolated deployment before this integration can be described as
+validated. Preserve the fail-closed flags and do not describe this
+integration as runtime-validated or shipped until readiness and the
+remaining evidence steps succeed.
 
 The configuration contract uses:
 

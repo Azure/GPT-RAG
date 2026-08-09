@@ -10,7 +10,7 @@ preferred and default continuity architecture.
     The OQ-OWN platform pivot merged in
     [PR #633](https://github.com/Azure/GPT-RAG/pull/633) at
     [`86b17b0`](https://github.com/Azure/GPT-RAG/commit/86b17b0af672edefe6842cba0f1a8ff77ab23038),
-    and the umbrella integration now pins UI `v2.6.0`, orchestrator `v4.0.0`,
+    and the umbrella integration now pins UI `v2.6.0`, orchestrator `v4.0.1`,
     ingestion `v2.7.0`, and AILZ `v2.5.0` at their exact release commits.
     Keep `HOSTED_CONTINUITY_ENABLED=false` until deployment proves the exact
     owner-binding role and protocol contract and records
