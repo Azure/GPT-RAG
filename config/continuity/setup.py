@@ -1306,8 +1306,17 @@ def reconcile_disabled_continuity(
             "identity.principalId",
             "--output",
             "tsv",
-        ]
+        ],
+        required=False,
     )
+    if not frontend_principal_id:
+        if capability_reference is not None:
+            raise RuntimeError(
+                "The frontend managed identity is unavailable while a hosted "
+                "conversation capability reference still exists; refusing "
+                "incomplete continuity cleanup."
+            )
+        return
     assignments = _all_direct_role_assignments(frontend_principal_id)
 
     project_resource_id = (

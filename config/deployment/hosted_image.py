@@ -26,11 +26,13 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import shutil
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 from util.azure_cli import resolve_az_command
@@ -42,6 +44,8 @@ HOSTED_PORT_DEFAULT = 8088
 BASE_IMAGE_NAME_DEFAULT = "azure-gpt-rag/orchestrator"
 DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 COMMIT_PATTERN = re.compile(r"^[0-9a-fA-F]{40}$")
+ACR_BUILD_TIMEOUT_SECONDS = 8 * 60 * 60
+ACR_BUILD_POLL_SECONDS = 5
 
 
 def resolve_azure_cli_executable() -> str:
@@ -120,12 +124,94 @@ def build_acr_build_args(
     return args
 
 
+def run_acr_build_and_wait(
+    args: list[str],
+    *,
+    registry: str,
+    image_name: str,
+    image_tag: str,
+    azure_cli: str = "az",
+    poll_interval: float = ACR_BUILD_POLL_SECONDS,
+    timeout: float = ACR_BUILD_TIMEOUT_SECONDS,
+) -> str:
+    """Queue an ACR build and resolve its digest through management-plane state."""
+    environment = os.environ.copy()
+    environment.setdefault("PYTHONUTF8", "1")
+    environment.setdefault("PYTHONIOENCODING", "utf-8")
+    queued = subprocess.run(
+        [*args, "--no-logs", "--output", "json"],
+        check=True,
+        capture_output=True,
+        text=True,
+        env=environment,
+    )
+    try:
+        run_id = str(json.loads(queued.stdout).get("runId") or "").strip()
+    except json.JSONDecodeError as exc:
+        raise RuntimeError("ACR build did not return valid run metadata.") from exc
+    if not run_id:
+        raise RuntimeError("ACR build did not return a run ID.")
+
+    deadline = time.monotonic() + timeout
+    terminal_failures = {"Canceled", "Cancelled", "Error", "Failed", "Timeout"}
+    while True:
+        result = subprocess.run(
+            [
+                _resolved_azure_cli(azure_cli),
+                "acr",
+                "task",
+                "show-run",
+                "--registry",
+                registry,
+                "--run-id",
+                run_id,
+                "--output",
+                "json",
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+            env=environment,
+        )
+        try:
+            run = json.loads(result.stdout)
+        except json.JSONDecodeError as exc:
+            raise RuntimeError(
+                f"ACR build run {run_id!r} returned invalid metadata."
+            ) from exc
+
+        status = str(run.get("status") or "").strip()
+        if status == "Succeeded":
+            for image in run.get("outputImages") or []:
+                if (
+                    image.get("repository") == image_name
+                    and image.get("tag") == image_tag
+                ):
+                    return validate_digest(
+                        str(image.get("digest") or ""),
+                        name="ACR build output digest",
+                    )
+            raise RuntimeError(
+                f"ACR build run {run_id!r} succeeded without the expected "
+                f"image {image_name}:{image_tag}."
+            )
+        if status in terminal_failures:
+            detail = run.get("error") or run.get("statusMessage") or status
+            raise RuntimeError(
+                f"ACR build run {run_id!r} ended with {status}: {detail}"
+            )
+        if time.monotonic() >= deadline:
+            raise RuntimeError(
+                f"Timed out waiting for ACR build run {run_id!r} after "
+                f"{timeout:g} seconds."
+            )
+        time.sleep(poll_interval)
+
+
 def parse_digest_from_build_output(output: str) -> str | None:
     """Best-effort extraction of the pushed manifest digest from ``az acr
-    build`` text output (used when ``--query``/JSON parsing of the run isn't
-    available; callers should prefer looking up the digest via
-    ``az acr repository show-manifests`` after a successful build, which is
-    what the CLI entrypoint below does)."""
+    build`` text output. The managed build path uses the ACR management-plane
+    run record instead so it also works with private registry data planes."""
     match = re.search(r"sha256:[0-9a-fA-F]{64}", output)
     return match.group(0) if match else None
 
@@ -269,14 +355,14 @@ def build_source_image(
         registry=registry,
         image_name=image_name,
         image_tag=image_tag,
-        dockerfile_path="Dockerfile",
+        dockerfile_path=str(dockerfile_path),
         context_dir=str(source_dir),
         agent_pool=agent_pool,
         azure_cli=azure_cli,
     )
     args[0] = _resolved_azure_cli(azure_cli)
-    subprocess.run(args, check=True, stdout=sys.stderr)
-    return resolve_pushed_digest(
+    return run_acr_build_and_wait(
+        args,
         registry=registry,
         image_name=image_name,
         image_tag=image_tag,
@@ -381,13 +467,13 @@ def build_hosted_image(
             azure_cli=azure_cli,
         )
         args[0] = _resolved_azure_cli(azure_cli)
-        subprocess.run(args, check=True, stdout=sys.stderr)
-    return resolve_pushed_digest(
-        registry=registry,
-        image_name=image_name,
-        image_tag=image_tag,
-        azure_cli=azure_cli,
-    )
+        return run_acr_build_and_wait(
+            args,
+            registry=registry,
+            image_name=image_name,
+            image_tag=image_tag,
+            azure_cli=azure_cli,
+        )
 
 
 def main(argv: list[str] | None = None) -> int:

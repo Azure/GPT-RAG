@@ -80,6 +80,49 @@ class ScopePathTests(unittest.TestCase):
 
 
 class ConfigurePanelRbacTests(unittest.TestCase):
+    def test_resolves_single_user_assigned_container_app_identity(self) -> None:
+        identity = {
+            "/subscriptions/sub/resourceGroups/rg/providers/"
+            "Microsoft.ManagedIdentity/userAssignedIdentities/frontend": {
+                "clientId": "client",
+                "principalId": "frontend-principal",
+            }
+        }
+        with patch.object(
+            setup,
+            "_run_az",
+            side_effect=["", json.dumps(identity)],
+        ) as run_az:
+            principal_id = setup.resolve_container_app_principal_id(
+                "rg",
+                "frontend",
+            )
+
+        self.assertEqual(principal_id, "frontend-principal")
+        self.assertFalse(run_az.call_args_list[0].kwargs["required"])
+        self.assertEqual(
+            run_az.call_args_list[1].args[0][
+                run_az.call_args_list[1].args[0].index("--query") + 1
+            ],
+            "identity.userAssignedIdentities",
+        )
+
+    def test_rejects_ambiguous_user_assigned_container_app_identities(self) -> None:
+        identities = {
+            "first": {"principalId": "principal-1"},
+            "second": {"principalId": "principal-2"},
+        }
+        with patch.object(
+            setup,
+            "_run_az",
+            side_effect=["", json.dumps(identities)],
+        ):
+            with self.assertRaisesRegex(
+                setup.PanelRbacError,
+                "exactly one managed-identity principal",
+            ):
+                setup.resolve_container_app_principal_id("rg", "frontend")
+
     def test_noop_when_panel_not_deployed(self) -> None:
         with patch.object(setup, "_run_az") as run_az:
             created = setup.configure_panel_rbac({"DEPLOY_ADMINISTRATIVE_PANEL": "false"})

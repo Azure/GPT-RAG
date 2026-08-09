@@ -42,11 +42,8 @@ Reversible: deleting the two container-scoped assignments (or simply setting
 calls this script) fully revokes panel Cosmos access without touching any
 other container, account, or identity.
 
-No-op unless ``DEPLOY_ADMINISTRATIVE_PANEL`` is ``true`` -- which, as of this
-change, cannot yet be reached through normal topology resolution (hosted-panel
-topology selection still fails closed pending the remaining
-https://github.com/Azure/gpt-rag/issues/611 component work in
-gpt-rag-ingestion). This script exists so the platform contract -- the exact,
+No-op unless ``DEPLOY_ADMINISTRATIVE_PANEL`` is ``true``. This script implements
+the platform contract -- the exact,
 reviewed, narrow-scope RBAC shape -- is ready the moment that gate lifts.
 """
 
@@ -193,15 +190,45 @@ def resolve_container_app_principal_id(resource_group: str, app_name: str) -> st
             "identity.principalId",
             "--output",
             "tsv",
-        ]
+        ],
+        required=False,
     )
     principal_id = output.strip()
-    if not principal_id or principal_id.lower() == "none":
+    if principal_id and principal_id.lower() != "none":
+        return principal_id
+
+    identities_json = _run_az(
+        [
+            "containerapp",
+            "show",
+            "--resource-group",
+            resource_group,
+            "--name",
+            app_name,
+            "--query",
+            "identity.userAssignedIdentities",
+            "--output",
+            "json",
+        ]
+    )
+    try:
+        identities = json.loads(identities_json)
+    except json.JSONDecodeError as exc:
         raise PanelRbacError(
-            f"Container app {app_name!r} has no principal ID; cannot assign "
-            "panel Cosmos RBAC without a resolvable managed identity."
+            f"Container app {app_name!r} returned malformed managed identities."
+        ) from exc
+    principal_ids = {
+        str(identity.get("principalId") or "").strip()
+        for identity in identities.values()
+        if isinstance(identity, Mapping)
+    }
+    principal_ids.discard("")
+    if len(principal_ids) != 1:
+        raise PanelRbacError(
+            f"Container app {app_name!r} must expose exactly one managed-identity "
+            "principal for panel Cosmos RBAC."
         )
-    return principal_id
+    return principal_ids.pop()
 
 
 def existing_cosmos_sql_role_assignment(

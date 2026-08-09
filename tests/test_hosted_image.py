@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import subprocess
 import tempfile
 import unittest
@@ -20,6 +21,7 @@ from config.deployment.hosted_image import (
     render_hosted_dockerfile,
     resolve_azure_cli_executable,
     resolve_pushed_digest,
+    run_acr_build_and_wait,
     validate_digest,
 )
 
@@ -186,18 +188,95 @@ class ResolvePushedDigestTests(unittest.TestCase):
             )
 
 
+class RunAcrBuildAndWaitTests(unittest.TestCase):
+    @patch("config.deployment.hosted_image.resolve_azure_cli_executable", return_value="az")
+    @patch("config.deployment.hosted_image.subprocess.run")
+    def test_returns_expected_digest_from_management_plane_run(
+        self, mock_run: MagicMock, _mock_cli: MagicMock
+    ) -> None:
+        mock_run.side_effect = [
+            subprocess.CompletedProcess(
+                args=[],
+                returncode=0,
+                stdout=json.dumps({"runId": "abc"}),
+                stderr="",
+            ),
+            subprocess.CompletedProcess(
+                args=[],
+                returncode=0,
+                stdout=json.dumps(
+                    {
+                        "status": "Succeeded",
+                        "outputImages": [
+                            {
+                                "repository": "gpt-rag-orchestrator",
+                                "tag": "v3.9.0-hosted",
+                                "digest": BASE_DIGEST,
+                            }
+                        ],
+                    }
+                ),
+                stderr="",
+            ),
+        ]
+
+        digest = run_acr_build_and_wait(
+            ["az", "acr", "build"],
+            registry="myregistry",
+            image_name="gpt-rag-orchestrator",
+            image_tag="v3.9.0-hosted",
+            poll_interval=0,
+        )
+
+        self.assertEqual(BASE_DIGEST, digest)
+        self.assertEqual(
+            ["--no-logs", "--output", "json"],
+            mock_run.call_args_list[0].args[0][-3:],
+        )
+        self.assertEqual(
+            ["az", "acr", "task", "show-run"],
+            mock_run.call_args_list[1].args[0][:4],
+        )
+
+    @patch("config.deployment.hosted_image.resolve_azure_cli_executable", return_value="az")
+    @patch("config.deployment.hosted_image.subprocess.run")
+    def test_fails_closed_when_build_run_fails(
+        self, mock_run: MagicMock, _mock_cli: MagicMock
+    ) -> None:
+        mock_run.side_effect = [
+            subprocess.CompletedProcess(
+                args=[],
+                returncode=0,
+                stdout=json.dumps({"runId": "abc"}),
+                stderr="",
+            ),
+            subprocess.CompletedProcess(
+                args=[],
+                returncode=0,
+                stdout=json.dumps({"status": "Failed", "error": "build failed"}),
+                stderr="",
+            ),
+        ]
+
+        with self.assertRaisesRegex(RuntimeError, "build failed"):
+            run_acr_build_and_wait(
+                ["az", "acr", "build"],
+                registry="myregistry",
+                image_name="gpt-rag-orchestrator",
+                image_tag="v3.9.0-hosted",
+                poll_interval=0,
+            )
+
+
 class BuildHostedImageTests(unittest.TestCase):
     @patch("config.deployment.hosted_image.resolve_azure_cli_executable", return_value="az")
-    @patch("config.deployment.hosted_image.resolve_pushed_digest")
-    @patch("config.deployment.hosted_image.subprocess.run")
+    @patch("config.deployment.hosted_image.run_acr_build_and_wait")
     def test_builds_then_resolves_digest(
         self,
-        mock_run: MagicMock,
-        mock_resolve: MagicMock,
+        mock_build: MagicMock,
         _mock_cli: MagicMock,
     ) -> None:
-        mock_run.return_value = subprocess.CompletedProcess(args=[], returncode=0)
-        mock_resolve.return_value = BASE_DIGEST
+        mock_build.return_value = BASE_DIGEST
 
         digest = build_hosted_image(
             registry="myregistry",
@@ -208,17 +287,21 @@ class BuildHostedImageTests(unittest.TestCase):
         )
 
         self.assertEqual(BASE_DIGEST, digest)
-        mock_run.assert_called_once()
-        build_args = mock_run.call_args.args[0]
+        mock_build.assert_called_once()
+        build_args = mock_build.call_args.args[0]
         self.assertEqual(build_args[0:3], ["az", "acr", "build"])
         self.assertIn("--agent-pool", build_args)
         self.assertIn("build-pool", build_args)
-        mock_resolve.assert_called_once_with(
-            registry="myregistry",
-            image_name="gpt-rag-orchestrator",
-            image_tag="v3.9.0-hosted",
-            azure_cli="az",
+        self.assertEqual("myregistry", mock_build.call_args.kwargs["registry"])
+        self.assertEqual(
+            "gpt-rag-orchestrator",
+            mock_build.call_args.kwargs["image_name"],
         )
+        self.assertEqual(
+            "v3.9.0-hosted",
+            mock_build.call_args.kwargs["image_tag"],
+        )
+        self.assertEqual("az", mock_build.call_args.kwargs["azure_cli"])
 
     @patch("config.deployment.hosted_image.build_hosted_image")
     @patch(
@@ -252,15 +335,13 @@ class BuildHostedImageTests(unittest.TestCase):
 
 class BuildSourceImageTests(unittest.TestCase):
     @patch("config.deployment.hosted_image.resolve_azure_cli_executable", return_value="az")
-    @patch("config.deployment.hosted_image.resolve_pushed_digest")
-    @patch("config.deployment.hosted_image.subprocess.run")
+    @patch("config.deployment.hosted_image.run_acr_build_and_wait")
     def test_public_basic_build_uses_standard_acr_task(
         self,
-        mock_run: MagicMock,
-        mock_resolve: MagicMock,
+        mock_build: MagicMock,
         _mock_cli: MagicMock,
     ) -> None:
-        mock_resolve.return_value = BASE_DIGEST
+        mock_build.return_value = BASE_DIGEST
         with tempfile.TemporaryDirectory() as tmp:
             source_dir = Path(tmp)
             (source_dir / "Dockerfile").write_text("FROM scratch\n")
@@ -273,8 +354,10 @@ class BuildSourceImageTests(unittest.TestCase):
             )
 
         self.assertEqual(BASE_DIGEST, digest)
-        args = mock_run.call_args.args[0]
+        args = mock_build.call_args.args[0]
         self.assertEqual(["az", "acr", "build"], args[:3])
+        self.assertEqual(str(source_dir / "Dockerfile"), args[args.index("--file") + 1])
+        self.assertEqual(str(source_dir), args[args.index("--file") + 2])
         self.assertNotIn("--agent-pool", args)
 
 

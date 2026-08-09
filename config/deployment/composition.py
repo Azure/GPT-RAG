@@ -52,16 +52,6 @@ class DeploymentTopologyError(ValueError):
     """
 
 
-class HostedPanelUnsupportedError(DeploymentTopologyError):
-    """Raised when a signal would select hosted-panel mode.
-
-    The administrative-panel data plane is not implemented yet; it is
-    tracked by https://github.com/Azure/gpt-rag/issues/611. Until that lands,
-    any request that would actually select hosted-panel mode must fail
-    closed rather than silently downgrading to hosted-no-panel or classic.
-    """
-
-
 class ConflictingTopologySignalsError(DeploymentTopologyError):
     """Raised when explicit or persisted topology signals disagree.
 
@@ -178,9 +168,8 @@ def _explicit_flag_topology(
     the legacy explicit ``DEPLOY_HOSTED_AGENT_ORCHESTRATION=false`` flag as a
     compatible way to select the classic Container Apps topology.
 
-    A panel flag is only subject to the #611 hard-failure gate when it would
-    actually select hosted-panel mode (``hosted=true and panel=true``); a
-    stray/incidental panel flag alongside ``hosted=false`` is ignored and the
+    A panel flag selects hosted-panel only when hosted orchestration is also
+    enabled. A stray panel flag alongside ``hosted=false`` is ignored and the
     result stays classic, matching pre-ADR-0001 behavior.
     """
     hosted_raw = environment.get("DEPLOY_HOSTED_AGENT_ORCHESTRATION")
@@ -192,13 +181,7 @@ def _explicit_flag_topology(
     if not hosted:
         return DeploymentMode.CLASSIC
     if panel:
-        raise HostedPanelUnsupportedError(
-            "DEPLOY_ADMINISTRATIVE_PANEL=true (hosted-panel) is not "
-            "supported yet; the administrative-panel data plane is tracked "
-            "by https://github.com/Azure/gpt-rag/issues/611. Deploy with "
-            "DEPLOY_ADMINISTRATIVE_PANEL=false (or unset) to use "
-            "hosted-no-panel."
-        )
+        return DeploymentMode.HOSTED_PANEL
     return DeploymentMode.HOSTED_NO_PANEL
 
 
@@ -209,14 +192,6 @@ def _explicit_topology_value(
     raw = (environment.get("DEPLOYMENT_TOPOLOGY") or "").strip().lower()
     if not raw:
         return None
-    if raw == DeploymentMode.HOSTED_PANEL.value:
-        raise HostedPanelUnsupportedError(
-            "DEPLOYMENT_TOPOLOGY=hosted-panel is not supported yet; the "
-            "administrative-panel data plane is tracked by "
-            "https://github.com/Azure/gpt-rag/issues/611. Use "
-            "DEPLOYMENT_TOPOLOGY=hosted-no-panel or DEPLOYMENT_TOPOLOGY="
-            "classic instead."
-        )
     if raw not in _KNOWN_TOPOLOGY_VALUES:
         raise DeploymentTopologyError(
             f"Unknown DEPLOYMENT_TOPOLOGY={raw!r}; expected one of: "
@@ -342,7 +317,19 @@ def resolve_topology(
                 f"{backend_raw!r}. Set an explicit DEPLOYMENT_TOPOLOGY after "
                 "reviewing the ADR-0001 migration procedure."
             )
-    if persisted is not None and backend_mode is not None and persisted is not backend_mode:
+    persisted_backend = (
+        "orchestrator"
+        if persisted is DeploymentMode.CLASSIC
+        else "hosted_agent"
+        if persisted is not None
+        else None
+    )
+    if (
+        persisted_backend is not None
+        and backend_mode is not None
+        and persisted_backend
+        != ("orchestrator" if backend_mode is DeploymentMode.CLASSIC else "hosted_agent")
+    ):
         raise ConflictingTopologySignalsError(
             "The existing deployment has conflicting persisted topology and "
             "CHAT_BACKEND settings in App Configuration. Resolve the conflict "
@@ -435,9 +422,7 @@ def resolve_database_containers(
     A small, directly-testable pure function (mirrors ``describe_mode``/
     ``materialized_settings`` in this module, which also take ``mode`` as a
     plain argument) so the panel/no-panel container-list contract can be unit
-    tested without needing ``resolve_mode`` to accept a hosted-panel
-    environment signal, which still fails closed pending the remaining
-    https://github.com/Azure/gpt-rag/issues/611 component work.
+    tested directly.
 
     - Classic (or a migrating hosted deployment still preserving the classic
       runtime): the static classic list is unchanged.

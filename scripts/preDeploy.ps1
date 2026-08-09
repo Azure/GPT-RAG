@@ -211,6 +211,8 @@ The preparation command builds the manifest-pinned image and stores only its imm
   try {
     & azd env set HOSTED_AGENT_IMAGE_VERSION $hostedDigest --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
     if ($LASTEXITCODE -ne 0) { Write-Error "Failed to set hosted image digest in the child azd project."; exit $LASTEXITCODE }
+    & azd env set AZD_AGENT_SKIP_ACR true --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
+    if ($LASTEXITCODE -ne 0) { Write-Error "Failed to select the pre-built hosted image deploy path."; exit $LASTEXITCODE }
     & azd env set FOUNDRY_PROJECT_ENDPOINT "$($globalEnv.AZURE_AI_PROJECT_ENDPOINT)" --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
     if ($LASTEXITCODE -ne 0) { Write-Error "Failed to set Foundry endpoint in the child azd project."; exit $LASTEXITCODE }
     & azd env set AZURE_AI_PROJECT_ID "$($globalEnv.AZURE_AI_PROJECT_RESOURCE_ID)" --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null

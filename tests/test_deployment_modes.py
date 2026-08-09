@@ -10,7 +10,6 @@ from config.deployment import appconfig
 from config.deployment.composition import (
     ConflictingTopologySignalsError,
     DeploymentMode,
-    HostedPanelUnsupportedError,
     compose_parameters,
     describe_mode,
     materialized_settings,
@@ -399,20 +398,33 @@ class DeploymentCompositionTests(unittest.TestCase):
                 expected_hosted_source_commit="a" * 40,
             )
 
-    def test_hosted_with_panel_fails_closed_until_611(self) -> None:
-        # Hosted-panel is not implemented yet (tracked by #611): any signal
-        # that would actually select it must fail closed rather than
-        # silently provisioning panel-adjacent resources.
+    def test_hosted_with_panel_composes_only_panel_resources(self) -> None:
         environment = {
             "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "true",
             "DEPLOY_ADMINISTRATIVE_PANEL": "true",
             "HOSTED_AGENT_IMAGE_VERSION": DIGEST,
+            "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
         }
 
-        with self.assertRaisesRegex(HostedPanelUnsupportedError, "611"):
-            resolve_mode(environment)
-        with self.assertRaisesRegex(HostedPanelUnsupportedError, "611"):
-            compose_parameters(source_parameters(), environment)
+        composed = compose_parameters(source_parameters(), environment)
+        parameters = composed["parameters"]
+        apps = parameters["containerAppsList"]["value"]
+
+        self.assertEqual(DeploymentMode.HOSTED_PANEL, resolve_mode(environment))
+        self.assertEqual(
+            ["frontend", "dataingest"],
+            [app["service_name"] for app in apps],
+        )
+        self.assertTrue(parameters["deployCosmosDb"]["value"])
+        self.assertEqual(
+            panel_database_containers(),
+            parameters["databaseContainersList"]["value"],
+        )
+        settings = settings_by_name(composed)
+        self.assertEqual("hosted_agent", settings["CHAT_BACKEND"])
+        self.assertEqual("true", settings["DEPLOY_ADMINISTRATIVE_PANEL"])
+        self.assertEqual("false", settings["PANEL_HISTORY_ENABLED"])
+        self.assertEqual("false", settings["PANEL_OPERATOR_SURFACES_ENABLED"])
 
     def test_legacy_generated_digest_without_startup_provenance_remains_valid(
         self,
@@ -436,11 +448,10 @@ class DeploymentCompositionTests(unittest.TestCase):
 
         self.assertTrue(composed["parameters"]["deployHostedAgent"]["value"])
 
-    def test_deployment_topology_hosted_panel_fails_closed_until_611(self) -> None:
+    def test_deployment_topology_hosted_panel_resolves(self) -> None:
         environment = {"DEPLOYMENT_TOPOLOGY": "hosted-panel"}
 
-        with self.assertRaisesRegex(HostedPanelUnsupportedError, "611"):
-            resolve_mode(environment)
+        self.assertEqual(DeploymentMode.HOSTED_PANEL, resolve_mode(environment))
 
     def test_hosted_mode_rejects_mutable_image_reference(self) -> None:
         environment = {
@@ -475,14 +486,9 @@ class DeploymentCompositionTests(unittest.TestCase):
 class PanelPlatformContractTests(unittest.TestCase):
     """Issue #611 / ADR-0004 platform-contract composition.
 
-    ``DeploymentMode.HOSTED_PANEL`` still cannot be reached through
-    ``resolve_mode``/``compose_parameters`` (hosted-panel topology selection
-    fails closed pending the remaining gpt-rag-ingestion operator work), so
-    these tests exercise the pure, directly-testable composition helpers
-    with ``mode`` passed explicitly -- exactly like the existing
-    ``describe_mode``/``materialized_settings`` tests elsewhere in this
-    module -- to prove the container/RBAC/App-Configuration contract is
-    correct and ready without changing any currently reachable behavior.
+    The topology is deployable only with explicit operator selection. Its
+    user-history and operator surfaces remain independently fail closed behind
+    their disabled-by-default evidence gates.
     """
 
     def test_panel_database_containers_are_metadata_only_and_distinct(self) -> None:
@@ -581,12 +587,9 @@ class PanelPlatformContractTests(unittest.TestCase):
         # Cosmos. This asserts that identity's existing blob RBAC (already
         # sufficient for the classic Files tab's blocked/unblock flow) is
         # untouched by the hosted-mode Cosmos-role stripping above.
-        # (Hosted-panel itself still fails closed -- see
-        # test_hosted_with_panel_fails_closed_until_611 -- so only
-        # hosted-no-panel is reachable through compose_parameters today; the
-        # role list dataingest would carry under hosted-panel is unaffected
-        # by this stripping code path either way, since it only ever removes
-        # CosmosDBBuiltInDataContributor.)
+        # Hosted-panel uses the same hosted component path; this stripping
+        # removes only CosmosDBBuiltInDataContributor and leaves the existing
+        # blob role unchanged.
         environment = {
             "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "true",
             "DEPLOY_ADMINISTRATIVE_PANEL": "false",
@@ -736,6 +739,22 @@ class EnvironmentTopologyResolutionTests(unittest.TestCase):
 
         self.assertEqual(DeploymentMode.HOSTED_NO_PANEL, mode)
 
+    def test_existing_environment_with_persisted_panel_topology_stays_panel(
+        self,
+    ) -> None:
+        mode = resolve_topology(
+            {},
+            resource_group_exists=True,
+            persisted_settings={
+                "DEPLOYMENT_TOPOLOGY": "hosted-panel",
+                "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "true",
+                "DEPLOY_ADMINISTRATIVE_PANEL": "true",
+                "CHAT_BACKEND": "hosted_agent",
+            },
+        )
+
+        self.assertEqual(DeploymentMode.HOSTED_PANEL, mode)
+
     def test_existing_unmarked_pre_cutover_environment_is_classic(self) -> None:
         # A resource group exists (this is not a fresh deployment) but no
         # ADR-0001 topology markers were ever persisted -- this is a
@@ -844,7 +863,7 @@ class EnvironmentTopologyResolutionTests(unittest.TestCase):
             resolve_mode({"DEPLOYMENT_TOPOLOGY": "not-a-real-topology"})
 
     def test_materialized_settings_agree_with_describe_mode(self) -> None:
-        for mode in (DeploymentMode.CLASSIC, DeploymentMode.HOSTED_NO_PANEL):
+        for mode in DeploymentMode:
             materialized = materialized_settings(mode)
             description = describe_mode(mode)
 

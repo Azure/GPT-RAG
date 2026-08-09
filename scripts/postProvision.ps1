@@ -135,6 +135,44 @@ function Invoke-AzTsv {
     return ($output | Select-Object -First 1).Trim()
 }
 
+function Get-UserAssignedIdentityResourceId {
+    param(
+        [AllowEmptyString()][string]$ResourceId,
+        [Parameter(Mandatory = $true)][string]$Description
+    )
+    if ([string]::IsNullOrWhiteSpace($ResourceId)) {
+        return ''
+    }
+
+    $identityJson = Invoke-NativeCommand {
+        & az resource show --ids $ResourceId --query identity.userAssignedIdentities -o json 2>$null
+    }
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Failed to resolve the user-assigned identity for $Description."
+        exit 1
+    }
+    if ([string]::IsNullOrWhiteSpace($identityJson) -or $identityJson.Trim() -eq 'null') {
+        return ''
+    }
+
+    try {
+        $identityMap = $identityJson | ConvertFrom-Json
+        $identities = @($identityMap.PSObject.Properties)
+    }
+    catch {
+        Write-Error "The user-assigned identity response for $Description was malformed."
+        exit 1
+    }
+    if ($identities.Count -gt 1) {
+        Write-Error "Multiple user-assigned identities are attached to $Description; refusing an ambiguous selection."
+        exit 1
+    }
+    if ($identities.Count -eq 1) {
+        return $identities[0].Name
+    }
+    return ''
+}
+
 function Get-AppConfigResourceName {
     param([Parameter(Mandatory = $true)][string]$Endpoint)
     return (($Endpoint -replace '^https?://', '') -replace '\.azconfig\.io/?$', '')
@@ -478,6 +516,12 @@ function Set-GptRagAppConfiguration {
     else {
         ''
     }
+    $searchServiceUaiResourceId = Get-OptionalEnvValue 'SEARCH_SERVICE_UAI_RESOURCE_ID'
+    if (-not $searchServiceUaiResourceId) {
+        $searchServiceUaiResourceId = Get-UserAssignedIdentityResourceId `
+            -ResourceId $searchResourceId `
+            -Description 'Azure AI Search'
+    }
 
     $settings = [ordered]@{
         AZURE_TENANT_ID = $tenantId
@@ -577,7 +621,7 @@ function Set-GptRagAppConfiguration {
         CONTAINER_ENV_RESOURCE_ID = $containerEnvResourceId
         AI_FOUNDRY_ACCOUNT_RESOURCE_ID = $foundryResourceId
         AI_FOUNDRY_PROJECT_RESOURCE_ID = $foundryProjectResourceId
-        SEARCH_SERVICE_UAI_RESOURCE_ID = ''
+        SEARCH_SERVICE_UAI_RESOURCE_ID = $searchServiceUaiResourceId
         KNOWLEDGE_BASE_CONNECTION_ID = $knowledgeBaseConnectionId
         SEARCH_SERVICE_RESOURCE_ID = $searchResourceId
         AZURE_SPEECH_RESOURCE_ID = (Get-OptionalEnvValue 'AZURE_SPEECH_RESOURCE_ID')
@@ -651,6 +695,9 @@ function Set-GptRagAppConfiguration {
     foreach ($key in $settings.Keys) {
         $value = $settings[$key]
         $flatSettings[$key] = if ($null -eq $value) { '' } else { "$value" }
+    }
+    foreach ($key in $flatSettings.Keys) {
+        Set-Item -Path "Env:$key" -Value $flatSettings[$key]
     }
 
     $tempFile = Join-Path ([System.IO.Path]::GetTempPath()) "gpt-rag-appconfig-$([Guid]::NewGuid().ToString('N')).json"

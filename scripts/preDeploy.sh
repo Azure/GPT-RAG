@@ -194,6 +194,7 @@ if [[ "$hosted_mode" =~ ^(1|true|t|yes|y)$ ]]; then
   (
     cd "$hosted_project"
     azd env set HOSTED_AGENT_IMAGE_VERSION "$hosted_agent_digest" --environment "$environment_name" --no-prompt >/dev/null || exit 1
+    azd env set AZD_AGENT_SKIP_ACR true --environment "$environment_name" --no-prompt >/dev/null || exit 1
     azd env set FOUNDRY_PROJECT_ENDPOINT "$project_endpoint" --environment "$environment_name" --no-prompt >/dev/null || exit 1
     azd env set AZURE_AI_PROJECT_ID "$project_resource_id" --environment "$environment_name" --no-prompt >/dev/null || exit 1
     azd deploy orchestrator-agent --environment "$environment_name" --no-prompt

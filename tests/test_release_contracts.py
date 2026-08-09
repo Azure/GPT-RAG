@@ -23,29 +23,29 @@ class IntegrationPinTests(unittest.TestCase):
 
         self.assertEqual("unreleased", manifest["tag"])
         self.assertEqual(
-            "develop",
+            "v2.5.0",
             manifest["ailz_tag"],
         )
         self.assertEqual(
-            "1775f871641311868a15792bf3dc836024c9fb20",
+            "cacf418216ce7381d06263e0dd704a86b8a6f225",
             manifest["ailz_commit"],
         )
         self.assertEqual(
-            ("v3.10.0", "eaa787340c27d8df5bb550147e95c5ecd02ad385"),
+            ("v4.0.1", "7e22840ba0e96a5ce237cf2657795768f88e3955"),
             (
                 components["gpt-rag-orchestrator"]["tag"],
                 components["gpt-rag-orchestrator"]["commit"],
             ),
         )
         self.assertEqual(
-            ("v2.6.0", "cb9f1a08a2e780c15ffd096f6e56c04b5e5bd4ca"),
+            ("v2.7.0", "84b927769ef0839110f2d68e3ca471e2260567cf"),
             (
                 components["gpt-rag-ingestion"]["tag"],
                 components["gpt-rag-ingestion"]["commit"],
             ),
         )
         self.assertEqual(
-            ("v2.5.1", "971d92a8affd1c859befa4783a26eebc899b425c"),
+            ("v2.6.0", "81d6515d8fc365402e958e861b671af037a4cc75"),
             (
                 components["gpt-rag-ui"]["tag"],
                 components["gpt-rag-ui"]["commit"],
@@ -55,7 +55,7 @@ class IntegrationPinTests(unittest.TestCase):
     def test_gitmodule_and_gitlink_match_landing_zone_integration_pin(self) -> None:
         gitmodules = (ROOT / ".gitmodules").read_text(encoding="utf-8")
         self.assertIn(
-            "branch = develop",
+            "branch = v2.5.0",
             gitmodules,
         )
 
@@ -67,7 +67,7 @@ class IntegrationPinTests(unittest.TestCase):
             text=True,
         )
         self.assertIn(
-            "1775f871641311868a15792bf3dc836024c9fb20",
+            "cacf418216ce7381d06263e0dd704a86b8a6f225",
             completed.stdout.strip(),
         )
 
@@ -313,6 +313,19 @@ class LifecycleParityTests(unittest.TestCase):
             "Microsoft.CognitiveServices/accounts/projects",
             content,
         )
+
+    def test_postprovision_preserves_search_user_assigned_identity(self) -> None:
+        content = (ROOT / "scripts" / "postProvision.ps1").read_text(
+            encoding="utf-8-sig"
+        )
+
+        self.assertIn("Get-UserAssignedIdentityResourceId", content)
+        self.assertIn(
+            "SEARCH_SERVICE_UAI_RESOURCE_ID = $searchServiceUaiResourceId",
+            content,
+        )
+        self.assertNotIn("SEARCH_SERVICE_UAI_RESOURCE_ID = ''", content)
+        self.assertIn('Set-Item -Path "Env:$key" -Value $flatSettings[$key]', content)
         self.assertIn("$foundryProjects.Count -ne 1", content)
         self.assertIn("AI_FOUNDRY_PROJECT_NAME", content)
         self.assertNotIn("aifoundry-default-project", content)
@@ -407,6 +420,7 @@ class LifecycleParityTests(unittest.TestCase):
                 self.assertIn("--validate-hosted-deploy", content)
                 self.assertIn("deploy_hosted_agent_orchestration", content)
                 self.assertIn("azd deploy orchestrator-agent", content)
+                self.assertIn("AZD_AGENT_SKIP_ACR", content)
                 self.assertIn("PYTHONPATH", content)
                 if name == "preDeploy.ps1":
                     self.assertIn("runpy.run_module", content)
@@ -552,6 +566,8 @@ class LifecycleParityTests(unittest.TestCase):
             encoding="utf-8"
         )
         self.assertIn("host: azure.ai.agent", content)
+        self.assertIn("language: docker", content)
+        self.assertIn("remoteBuild: true", content)
         self.assertIn("protocol: responses", content)
         self.assertIn("protocol: invocations", content)
         self.assertNotIn("API_KEY", content)

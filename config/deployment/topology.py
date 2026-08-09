@@ -126,9 +126,9 @@ def resource_group_exists(
 ) -> bool:
     """Return ``True`` only when ``name`` is non-empty and Azure confirms it exists.
 
-    A genuinely fresh azd environment has no resource-group name at all yet
-    (Bicep has not run), so this short-circuits to ``False`` without any
-    Azure CLI call in that case.
+    A fresh azd environment may already have an empty resource group because
+    azd creates it before running preprovision. Call
+    ``resource_group_has_resources`` when that distinction matters.
     """
     name = (name or "").strip()
     if not name:
@@ -149,6 +149,36 @@ def resource_group_exists(
             f"{stdout!r}."
         )
     return normalized == "true"
+
+
+def resource_group_has_resources(
+    name: str | None,
+    subscription_id: str | None = None,
+) -> bool:
+    """Return whether an existing resource group contains deployed resources."""
+    name = (name or "").strip()
+    if not name:
+        return False
+    arguments = [
+        "resource",
+        "list",
+        "--resource-group",
+        name,
+        "--query",
+        "[0].id",
+        "--output",
+        "tsv",
+    ]
+    if (subscription_id or "").strip():
+        arguments.extend(["--subscription", subscription_id.strip()])
+    returncode, stdout, stderr = _run_az(arguments)
+    if returncode != 0:
+        raise DeploymentTopologyError(
+            "Unable to determine whether the Azure resource group contains "
+            f"resources; topology selection cannot safely continue: "
+            f"{stderr or stdout}"
+        )
+    return bool(stdout.strip())
 
 
 def read_persisted_settings(endpoint: str | None) -> dict[str, str]:
@@ -226,9 +256,9 @@ def resolve_environment_plan(
 ) -> TopologyResolution:
     """I/O-aware wrapper around ``resolve_topology`` for use at preProvision time.
 
-    Detects whether the environment is fresh (no resource group yet) or
-    existing, reads any persisted topology markers for existing
-    environments, and delegates the actual decision to the pure
+    Detects whether the environment is fresh (no resource group or an empty
+    group pre-created by azd) or existing, reads any persisted topology markers
+    for existing environments, and delegates the actual decision to the pure
     ``resolve_topology`` function. Explicit classic remains a direct rollback.
     Explicit hosted additionally classifies the current deployed runtime so a
     classic-to-hosted migration can retain classic during its prepare-only
@@ -243,6 +273,18 @@ def resolve_environment_plan(
         (environment.get(key) or "").strip()
         for key in _LOCAL_RUNTIME_MARKERS
     )
+    if (
+        explicit is not None
+        and rg_exists
+        and not has_local_runtime_marker
+        and not resource_group_has_resources(
+            resource_group_name, subscription_id
+        )
+    ):
+        # azd creates the target resource group before running preprovision.
+        # An empty group is therefore still a fresh environment and must not
+        # inherit an unrelated process-level App Configuration endpoint.
+        return TopologyResolution(explicit)
     if explicit is None and rg_exists and not has_local_runtime_marker:
         # ADR-0001 defines an existing environment without any local topology
         # marker as pre-cutover classic. In particular, do not require a

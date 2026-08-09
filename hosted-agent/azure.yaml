@@ -4,7 +4,10 @@ services:
   orchestrator-agent:
     host: azure.ai.agent
     project: .
+    language: docker
     image: ${AZURE_CONTAINER_REGISTRY_ENDPOINT}/${HOSTED_AGENT_IMAGE=gpt-rag-orchestrator}@${HOSTED_AGENT_IMAGE_VERSION}
+    docker:
+      remoteBuild: true
     kind: hosted
     # NOTE: The azure.ai.agent azd extension (v1.0.0-beta.8) reads name, container.resources,
     # protocols[].version and startupCommand directly from this file to build the Foundry
