@@ -218,6 +218,26 @@
   requires** — see the "Migration and rollback" note below for the current
   validation status.
 
+- **Hosted agent no longer crashes every live request with HTTP 500 under
+  Foundry's hosted-agent sandbox.** Live network-isolated validation (issue
+  #592) reproduced a deterministic HTTP 500 (`{"detail":"internal server
+  error"}`) on every `/responses` and `/invocations` call against a
+  successfully created, `active` hosted agent. Root-caused via Application
+  Insights exception traces to `azure-monitor-opentelemetry>=1.8`, which
+  `environ.setdefault`s `OTEL_EXPERIMENTAL_RESOURCE_DETECTORS` to
+  `azure_app_service,azure_vm` unless that variable is already present. The
+  Foundry hosted-agent sandbox is neither an Azure VM nor an App Service, so
+  the `azure_vm` detector's IMDS probe
+  (`http://169.254.169.254/metadata/instance/compute`) always fails with
+  connection-refused; that failure was observed to escape
+  `azure-ai-agentserver-core`'s own `try`/`except` around
+  `configure_observability()` and surface later as an unhandled exception
+  during live request handling. `hosted-agent/azure.yaml` now pins
+  `OTEL_EXPERIMENTAL_RESOURCE_DETECTORS: ""` in the hosted agent's `env:`
+  block so `environ.setdefault` never applies it; this is a deployment
+  configuration fix in this repository, not a `gpt-rag-orchestrator` code
+  change. No behavior change for classic-mode telemetry.
+
 ### Migration and rollback
 
 No existing environment is migrated by this change: an already-provisioned

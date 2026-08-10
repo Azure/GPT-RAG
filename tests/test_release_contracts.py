@@ -575,6 +575,21 @@ class LifecycleParityTests(unittest.TestCase):
         self.assertNotIn("InstrumentationKey=", content)
         self.assertNotIn("AccountKey=", content)
 
+    def test_hosted_manifest_disables_azure_vm_resource_detector(self) -> None:
+        # Live validation (see docs/adr history and issue #592) reproduced HTTP 500
+        # on every hosted /responses and /invocations call: azure-monitor-opentelemetry
+        # defaults OTEL_EXPERIMENTAL_RESOURCE_DETECTORS to "azure_app_service,azure_vm"
+        # via environ.setdefault(...) whenever the variable is not already present.
+        # The Foundry hosted-agent sandbox exposes neither IMDS (169.254.169.254) nor
+        # the App Service resource detector's expected environment, so both detectors
+        # fail; that failure was observed escaping the SDK's own configure_observability
+        # guard and crashing live request handling. Pinning this env var explicitly
+        # (to a value the SDK's environ.setdefault will not override) is the fix.
+        content = (ROOT / "hosted-agent" / "azure.yaml").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("OTEL_EXPERIMENTAL_RESOURCE_DETECTORS:", content)
+
 
 if __name__ == "__main__":
     unittest.main()

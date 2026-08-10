@@ -40,3 +40,15 @@ services:
       # name for Foundry hosted agents (all FOUNDRY_*/AGENT_* vars, plus this one, are reserved
       # per the container-image-spec) and the Create Agent API rejects it if present. The
       # platform auto-injects telemetry wiring for hosted agents.
+      # OTEL_EXPERIMENTAL_RESOURCE_DETECTORS is set to empty to disable
+      # azure-monitor-opentelemetry's default Azure resource detectors ("azure_app_service",
+      # "azure_vm"). azure-monitor-opentelemetry>=1.8 unconditionally enables both via
+      # environ.setdefault(...) unless this variable is already present. The Foundry
+      # hosted-agent sandbox is neither an App Service nor a VM, so the "azure_vm" detector's
+      # IMDS probe (http://169.254.169.254/metadata/instance/compute) always fails with
+      # "Connection refused"; that failure was observed to escape the SDK's own
+      # try/except around configure_observability() and surface later as an unhandled
+      # exception during live request handling (HTTP 500 on every /responses and
+      # /invocations call). Setting this explicitly here -- before the SDK's
+      # environ.setdefault runs -- prevents both detectors from ever being registered.
+      OTEL_EXPERIMENTAL_RESOURCE_DETECTORS: ""
