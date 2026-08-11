@@ -236,7 +236,18 @@
   `OTEL_EXPERIMENTAL_RESOURCE_DETECTORS: ""` in the hosted agent's `env:`
   block so `environ.setdefault` never applies it; this is a deployment
   configuration fix in this repository, not a `gpt-rag-orchestrator` code
-  change. No behavior change for classic-mode telemetry.
+  change. No behavior change for classic-mode telemetry. **Follow-up:** live
+  re-validation with that fix alone still reproduced the same IMDS failure
+  reaching request handling. Traced it to a second, independent source:
+  `azure-monitor-opentelemetry-exporter`'s own "statsbeat" SDK
+  self-monitoring subsystem (`_get_azure_compute_metadata` in
+  `statsbeat/_statsbeat_metrics.py`) probes the same IMDS endpoint to
+  attribute usage metrics to a resource-provider type, and is not gated by
+  `OTEL_EXPERIMENTAL_RESOURCE_DETECTORS`. `hosted-agent/azure.yaml` now also
+  pins `APPLICATIONINSIGHTS_STATSBEAT_DISABLED_ALL: "true"`. Statsbeat is
+  Microsoft's own SDK-usage telemetry, not GPT-RAG application telemetry;
+  disabling it does not affect Application Insights traces, logs, or metrics
+  for GPT-RAG requests.
 
 ### Migration and rollback
 
