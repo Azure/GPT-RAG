@@ -31,7 +31,7 @@ class IntegrationPinTests(unittest.TestCase):
             manifest["ailz_commit"],
         )
         self.assertEqual(
-            ("v4.0.1", "7e22840ba0e96a5ce237cf2657795768f88e3955"),
+            ("v4.0.2", "c653b3ec0a553f55244e197f3be993ad33ffe02f"),
             (
                 components["gpt-rag-orchestrator"]["tag"],
                 components["gpt-rag-orchestrator"]["commit"],
