@@ -152,6 +152,19 @@
 - **Released AI Landing Zone pin.** The temporary AI Landing Zone `develop`
   source pin is replaced by released tag `v2.5.0` at exact commit
   `cacf418216ce7381d06263e0dd704a86b8a6f225`.
+- **AI Landing Zone pin updated to `v2.5.1`
+  (`9cc5859af5c8ab3b31709c9e16e0db11a170a404`).** Patch release: Azure
+  Firewall's `AllowContainerAppsPlatform` Application Rule now also allows the
+  Microsoft Foundry Agent Service's `agent365.svc.cloud.microsoft`
+  observability endpoint for hosted agents under network isolation. Live
+  Azure validation of a network-isolated deployment had shown the capability
+  host and hosted-agent runtime start successfully, but every hosted-agent
+  request then failed because the runtime's own post-startup
+  observability/telemetry call had no firewall allow rule. Strictly additive
+  allow-list change; deployments without `NETWORK_ISOLATION=true` and the
+  Azure Firewall are unaffected. `.gitmodules` and the `infra` submodule
+  gitlink are updated to match. See
+  [AILZ `v2.5.1`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.5.1).
 
 ### Fixed
 
