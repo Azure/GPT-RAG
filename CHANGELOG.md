@@ -165,6 +165,29 @@
   Azure Firewall are unaffected. `.gitmodules` and the `infra` submodule
   gitlink are updated to match. See
   [AILZ `v2.5.1`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.5.1).
+- **Orchestrator pin updated to `v4.0.2`
+  (`c653b3ec0a553f55244e197f3be993ad33ffe02f`).** Closes the store-false wire
+  contract gap recorded in the hosted-agent integration matrix: the hosted
+  outer `POST /responses` now unconditionally forces `store: false` before
+  the pinned `azure-ai-agentserver-responses==2.0.0b1` host's auto-activated
+  `FoundryStorageProvider` can run, for both streaming and non-streaming
+  requests, regardless of what a caller sends or omits. Previously an omitted
+  or `true` `store` deterministically failed with a platform `storage_error`
+  under network isolation; only an explicit `store: false` succeeded.
+  `background: true` now returns an explicit HTTP 422 instead of the SDK's
+  generic 400, since it requires `store: true` and is no longer a reachable
+  combination once `store` is force-overridden. Released upstream as
+  [gpt-rag-orchestrator PR #313](https://github.com/Azure/gpt-rag-orchestrator/pull/313),
+  shipped in
+  [`v4.0.2`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.0.2)
+  (722 tests passing upstream). Classic (non-hosted, Cosmos-backed)
+  `/responses` and `/invocations` behavior are unaffected; the change is
+  scoped to the hosted entrypoint's `create_response` guard only. **This is a
+  code-level fix pinned into the umbrella manifest; it does not by itself
+  constitute the network-isolated live re-run of the exact `store`
+  unset/`true`/`false` matrix that the hosted-agent integration matrix
+  documentation still requires before the store-false contract can be
+  described as validated.**
 
 ### Fixed
 
