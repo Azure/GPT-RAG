@@ -31,7 +31,7 @@ that remain fail closed.
 | GPT-RAG UI | [`v2.6.0`](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.6.0) | [`81d6515`](https://github.com/Azure/gpt-rag-ui/commit/81d6515d8fc365402e958e861b671af037a4cc75) | Hosted/no-panel is the fresh UI default when `CHAT_BACKEND` is absent; continuity and panel surfaces remain opt-in and fail closed. |
 | GPT-RAG orchestrator | [`v4.0.1`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.0.1) | [`7e22840`](https://github.com/Azure/gpt-rag-orchestrator/commit/7e22840ba0e96a5ce237cf2657795768f88e3955) | Canonical hosted `/responses` is stateless and requires caller-supplied ordered input. Fixes the `dependencies`/`connectors` circular import that crashed the hosted entrypoint on startup ([PR #311](https://github.com/Azure/gpt-rag-orchestrator/pull/311)). |
 | GPT-RAG ingestion | [`v2.7.0`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.7.0) | [`84b9277`](https://github.com/Azure/gpt-rag-ingestion/commit/84b927769ef0839110f2d68e3ca471e2260567cf) | Metadata-only operator overview and document/corpus curation APIs. |
-| AI Landing Zone | [`v2.5.0`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.5.0) | [`cacf418`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/commit/cacf418216ce7381d06263e0dd704a86b8a6f225) | Two-phase hosted-agent prerequisite/handoff support; both hosted flags default to `false`. |
+| AI Landing Zone | [`v2.5.1`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.5.1) | [`9cc5859`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/commit/9cc5859af5c8ab3b31709c9e16e0db11a170a404) | Two-phase hosted-agent prerequisite/handoff support; both hosted flags default to `false`. Also allows the Foundry Agent Service's `agent365.svc.cloud.microsoft` observability endpoint through Azure Firewall under network isolation (`v2.5.1`, patch). |
 
 The matrix implements the component portions of
 [ADR-0003](https://github.com/Azure/GPT-RAG/blob/develop/docs/adr/ADR-0003-hosted-conversation-continuity.md)
@@ -97,6 +97,39 @@ conversation-scoped retrieval; it does not authorize or select a managed
 Conversation. UI `v2.6.0` currently sends complete ordered messages through
 this compatibility route. An integrated umbrella cutover must explicitly align
 the UI call route with the protocol and role evidence it validates.
+
+## Store false wire contract
+
+!!! warning "Additional confirmed gap; fix pending release and re-pin"
+    Exact-matrix live validation against a network-isolated deployment showed
+    that `POST /responses` succeeds when the caller sends `store: false`, but
+    an **omitted or `true`** `store` deterministically fails with a platform
+    `storage_error`. Root cause: the pinned
+    `azure-ai-agentserver-responses==2.0.0b1` host auto-activates its own
+    network-bound Foundry storage provider whenever the process detects it is
+    running as a hosted agent and no explicit `store` override is supplied —
+    true of every real deployment — and only calls that provider when the
+    **caller's** `store` is true (an omitted `store` defaults to `true` per the
+    Responses contract). Orchestrator `v4.0.1`'s already-stateless design
+    (previous section) hardcodes `store: False` only on the *separate, inner*
+    call the hosted strategy makes to the model; it does not touch the
+    *outer*, wire-level `store` field on the incoming request, which is the
+    one the auto-activated provider reads.
+
+    A fix that forces `store: False` unconditionally on every hosted
+    `POST /responses` call — regardless of what a caller sends or omits, for
+    both streaming and non-streaming requests, and rejecting
+    `background: true` (which requires `store: true` in the pinned SDK) — is
+    proposed in
+    [orchestrator PR #313](https://github.com/Azure/gpt-rag-orchestrator/pull/313).
+    That PR is **open, not yet released, and not yet pinned** by this
+    umbrella's `manifest.json`, which still pins orchestrator `v4.0.1`
+    (the version with the gap). Do not describe the store contract as fixed,
+    validated, or safe under network isolation until: the PR is reviewed and
+    released; the umbrella manifest is re-pinned to the released version; and
+    the exact matrix (`store` unset / `true` / `false`, under
+    `NETWORK_ISOLATION=true`, streaming and non-streaming) is re-run live and
+    passes. This warning must remain until that re-run is recorded here.
 
 ## Delegated owner binding
 
