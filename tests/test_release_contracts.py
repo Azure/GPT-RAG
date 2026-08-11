@@ -590,6 +590,20 @@ class LifecycleParityTests(unittest.TestCase):
         )
         self.assertIn("OTEL_EXPERIMENTAL_RESOURCE_DETECTORS:", content)
 
+    def test_hosted_manifest_disables_statsbeat_imds_probe(self) -> None:
+        # Live re-validation of the resource-detector fix above still
+        # reproduced the same IMDS failure reaching request handling:
+        # azure-monitor-opentelemetry-exporter's own "statsbeat" SDK
+        # self-monitoring subsystem probes the same IMDS endpoint
+        # independently of OTEL_EXPERIMENTAL_RESOURCE_DETECTORS. Disabling
+        # statsbeat entirely removes that second IMDS call.
+        content = (ROOT / "hosted-agent" / "azure.yaml").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn(
+            'APPLICATIONINSIGHTS_STATSBEAT_DISABLED_ALL: "true"', content
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -52,3 +52,15 @@ services:
       # /invocations call). Setting this explicitly here -- before the SDK's
       # environ.setdefault runs -- prevents both detectors from ever being registered.
       OTEL_EXPERIMENTAL_RESOURCE_DETECTORS: ""
+      # APPLICATIONINSIGHTS_STATSBEAT_DISABLED_ALL disables azure-monitor-opentelemetry-
+      # exporter's separate "statsbeat" SDK self-monitoring subsystem
+      # (azure.monitor.opentelemetry.exporter.statsbeat), which independently probes the
+      # same IMDS compute-metadata endpoint (_get_azure_compute_metadata in
+      # statsbeat/_statsbeat_metrics.py) to attribute usage metrics to a resource-provider
+      # type (App Service / Functions / AKS / VM). This path is separate from, and not
+      # gated by, OTEL_EXPERIMENTAL_RESOURCE_DETECTORS above, and live validation showed
+      # the IMDS failure still reaching request handling with only that first variable
+      # set. Statsbeat is Microsoft's own SDK-usage telemetry (not GPT-RAG application
+      # telemetry); disabling it does not affect Application Insights traces, logs, or
+      # metrics for GPT-RAG requests.
+      APPLICATIONINSIGHTS_STATSBEAT_DISABLED_ALL: "true"
