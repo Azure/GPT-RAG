@@ -524,6 +524,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#store-false-wire-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      Store false wire contract
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#delegated-owner-binding" class="md-nav__link">
     <span class="md-ellipsis">
       Delegated owner binding
@@ -1727,9 +1736,9 @@ release.</p>
 </tr>
 <tr>
 <td>AI Landing Zone</td>
-<td><a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.5.0"><code>v2.5.0</code></a></td>
-<td><a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/commit/cacf418216ce7381d06263e0dd704a86b8a6f225"><code>cacf418</code></a></td>
-<td>Two-phase hosted-agent prerequisite/handoff support; both hosted flags default to <code>false</code>.</td>
+<td><a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.5.1"><code>v2.5.1</code></a></td>
+<td><a href="https://github.com/Azure/bicep-ptn-aiml-landing-zone/commit/9cc5859af5c8ab3b31709c9e16e0db11a170a404"><code>9cc5859</code></a></td>
+<td>Two-phase hosted-agent prerequisite/handoff support; both hosted flags default to <code>false</code>. Also allows the Foundry Agent Service's <code>agent365.svc.cloud.microsoft</code> observability endpoint through Azure Firewall under network isolation (<code>v2.5.1</code>, patch).</td>
 </tr>
 </tbody>
 </table>
@@ -1827,6 +1836,38 @@ conversation-scoped retrieval; it does not authorize or select a managed
 Conversation. UI <code>v2.6.0</code> currently sends complete ordered messages through
 this compatibility route. An integrated umbrella cutover must explicitly align
 the UI call route with the protocol and role evidence it validates.</p>
+<h2 id="store-false-wire-contract">Store false wire contract</h2>
+<div class="admonition warning">
+<p class="admonition-title">Additional confirmed gap; fix pending release and re-pin</p>
+<p>Exact-matrix live validation against a network-isolated deployment showed
+that <code>POST /responses</code> succeeds when the caller sends <code>store: false</code>, but
+an <strong>omitted or <code>true</code></strong> <code>store</code> deterministically fails with a platform
+<code>storage_error</code>. Root cause: the pinned
+<code>azure-ai-agentserver-responses==2.0.0b1</code> host auto-activates its own
+network-bound Foundry storage provider whenever the process detects it is
+running as a hosted agent and no explicit <code>store</code> override is supplied —
+true of every real deployment — and only calls that provider when the
+<strong>caller's</strong> <code>store</code> is true (an omitted <code>store</code> defaults to <code>true</code> per the
+Responses contract). Orchestrator <code>v4.0.1</code>'s already-stateless design
+(previous section) hardcodes <code>store: False</code> only on the <em>separate, inner</em>
+call the hosted strategy makes to the model; it does not touch the
+<em>outer</em>, wire-level <code>store</code> field on the incoming request, which is the
+one the auto-activated provider reads.</p>
+<p>A fix that forces <code>store: False</code> unconditionally on every hosted
+<code>POST /responses</code> call — regardless of what a caller sends or omits, for
+both streaming and non-streaming requests, and rejecting
+<code>background: true</code> (which requires <code>store: true</code> in the pinned SDK) — is
+proposed in
+<a href="https://github.com/Azure/gpt-rag-orchestrator/pull/313">orchestrator PR #313</a>.
+That PR is <strong>open, not yet released, and not yet pinned</strong> by this
+umbrella's <code>manifest.json</code>, which still pins orchestrator <code>v4.0.1</code>
+(the version with the gap). Do not describe the store contract as fixed,
+validated, or safe under network isolation until: the PR is reviewed and
+released; the umbrella manifest is re-pinned to the released version; and
+the exact matrix (<code>store</code> unset / <code>true</code> / <code>false</code>, under
+<code>NETWORK_ISOLATION=true</code>, streaming and non-streaming) is re-run live and
+passes. This warning must remain until that re-run is recorded here.</p>
+</div>
 <h2 id="delegated-owner-binding">Delegated owner binding</h2>
 <p>The trusted UI BFF owns managed-Conversation lifecycle. For every create, read,
 append, or delete in delegated mode, it:</p>
