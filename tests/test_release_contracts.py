@@ -23,11 +23,11 @@ class IntegrationPinTests(unittest.TestCase):
 
         self.assertEqual("unreleased", manifest["tag"])
         self.assertEqual(
-            "v2.5.0",
+            "v2.5.1",
             manifest["ailz_tag"],
         )
         self.assertEqual(
-            "cacf418216ce7381d06263e0dd704a86b8a6f225",
+            "9cc5859af5c8ab3b31709c9e16e0db11a170a404",
             manifest["ailz_commit"],
         )
         self.assertEqual(
@@ -55,7 +55,7 @@ class IntegrationPinTests(unittest.TestCase):
     def test_gitmodule_and_gitlink_match_landing_zone_integration_pin(self) -> None:
         gitmodules = (ROOT / ".gitmodules").read_text(encoding="utf-8")
         self.assertIn(
-            "branch = v2.5.0",
+            "branch = v2.5.1",
             gitmodules,
         )
 
@@ -67,7 +67,7 @@ class IntegrationPinTests(unittest.TestCase):
             text=True,
         )
         self.assertIn(
-            "cacf418216ce7381d06263e0dd704a86b8a6f225",
+            "9cc5859af5c8ab3b31709c9e16e0db11a170a404",
             completed.stdout.strip(),
         )
 
