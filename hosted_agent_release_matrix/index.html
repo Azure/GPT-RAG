@@ -1724,9 +1724,9 @@ release.</p>
 </tr>
 <tr>
 <td>GPT-RAG orchestrator</td>
-<td><a href="https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.0.1"><code>v4.0.1</code></a></td>
-<td><a href="https://github.com/Azure/gpt-rag-orchestrator/commit/7e22840ba0e96a5ce237cf2657795768f88e3955"><code>7e22840</code></a></td>
-<td>Canonical hosted <code>/responses</code> is stateless and requires caller-supplied ordered input. Fixes the <code>dependencies</code>/<code>connectors</code> circular import that crashed the hosted entrypoint on startup (<a href="https://github.com/Azure/gpt-rag-orchestrator/pull/311">PR #311</a>).</td>
+<td><a href="https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.0.2"><code>v4.0.2</code></a></td>
+<td><a href="https://github.com/Azure/gpt-rag-orchestrator/commit/c653b3ec0a553f55244e197f3be993ad33ffe02f"><code>c653b3e</code></a></td>
+<td>Canonical hosted <code>/responses</code> is stateless and requires caller-supplied ordered input. Fixes the <code>dependencies</code>/<code>connectors</code> circular import that crashed the hosted entrypoint on startup (<a href="https://github.com/Azure/gpt-rag-orchestrator/pull/311">PR #311</a>), released in <code>v4.0.1</code>. Unconditionally forces <code>store: false</code> on every hosted <code>POST /responses</code> call and rejects <code>background: true</code> with HTTP 422 (<a href="https://github.com/Azure/gpt-rag-orchestrator/pull/313">PR #313</a>), released in <code>v4.0.2</code>; see "Store false wire contract" below — this closes the code gap but the live network-isolated re-run remains pending.</td>
 </tr>
 <tr>
 <td>GPT-RAG ingestion</td>
@@ -1805,7 +1805,7 @@ estimated tokens with <code>drop_oldest</code>. UI <code>v2.6.0</code> has stand
 The umbrella publishes the reviewed 100/32,000 values; operators must not
 remove them and then assume the UI fallback values are equivalent.</p>
 <h2 id="stateless-hosted-runtime-contract">Stateless hosted runtime contract</h2>
-<p>Orchestrator <code>v4.0.1</code> performs no managed-Conversations create, read, append, or
+<p>Orchestrator <code>v4.0.2</code> performs no managed-Conversations create, read, append, or
 delete operation in the hosted container. The caller supplies the complete,
 bounded, oldest-to-newest history on every request.</p>
 <p>For canonical <code>POST /responses</code>:</p>
@@ -1838,35 +1838,38 @@ this compatibility route. An integrated umbrella cutover must explicitly align
 the UI call route with the protocol and role evidence it validates.</p>
 <h2 id="store-false-wire-contract">Store false wire contract</h2>
 <div class="admonition warning">
-<p class="admonition-title">Additional confirmed gap; fix pending release and re-pin</p>
-<p>Exact-matrix live validation against a network-isolated deployment showed
-that <code>POST /responses</code> succeeds when the caller sends <code>store: false</code>, but
-an <strong>omitted or <code>true</code></strong> <code>store</code> deterministically fails with a platform
-<code>storage_error</code>. Root cause: the pinned
+<p class="admonition-title">Gap fixed and pinned; live network-isolated re-run still pending</p>
+<p>A prior exact-matrix live validation against a network-isolated deployment
+showed that <code>POST /responses</code> succeeded when the caller sent
+<code>store: false</code>, but an <strong>omitted or <code>true</code></strong> <code>store</code> deterministically
+failed with a platform <code>storage_error</code>. Root cause: the pinned
 <code>azure-ai-agentserver-responses==2.0.0b1</code> host auto-activates its own
 network-bound Foundry storage provider whenever the process detects it is
 running as a hosted agent and no explicit <code>store</code> override is supplied —
 true of every real deployment — and only calls that provider when the
 <strong>caller's</strong> <code>store</code> is true (an omitted <code>store</code> defaults to <code>true</code> per the
 Responses contract). Orchestrator <code>v4.0.1</code>'s already-stateless design
-(previous section) hardcodes <code>store: False</code> only on the <em>separate, inner</em>
-call the hosted strategy makes to the model; it does not touch the
+(previous section) hardcoded <code>store: False</code> only on the <em>separate, inner</em>
+call the hosted strategy makes to the model; it did not touch the
 <em>outer</em>, wire-level <code>store</code> field on the incoming request, which is the
 one the auto-activated provider reads.</p>
-<p>A fix that forces <code>store: False</code> unconditionally on every hosted
+<p>The fix that forces <code>store: False</code> unconditionally on every hosted
 <code>POST /responses</code> call — regardless of what a caller sends or omits, for
 both streaming and non-streaming requests, and rejecting
-<code>background: true</code> (which requires <code>store: true</code> in the pinned SDK) — is
-proposed in
-<a href="https://github.com/Azure/gpt-rag-orchestrator/pull/313">orchestrator PR #313</a>.
-That PR is <strong>open, not yet released, and not yet pinned</strong> by this
-umbrella's <code>manifest.json</code>, which still pins orchestrator <code>v4.0.1</code>
-(the version with the gap). Do not describe the store contract as fixed,
-validated, or safe under network isolation until: the PR is reviewed and
-released; the umbrella manifest is re-pinned to the released version; and
-the exact matrix (<code>store</code> unset / <code>true</code> / <code>false</code>, under
-<code>NETWORK_ISOLATION=true</code>, streaming and non-streaming) is re-run live and
-passes. This warning must remain until that re-run is recorded here.</p>
+<code>background: true</code> with HTTP 422 (it requires <code>store: true</code> in the pinned
+SDK) — merged as
+<a href="https://github.com/Azure/gpt-rag-orchestrator/pull/313">orchestrator PR #313</a>
+and released as
+<a href="https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.0.2"><code>v4.0.2</code></a>
+(commit
+<a href="https://github.com/Azure/gpt-rag-orchestrator/commit/c653b3ec0a553f55244e197f3be993ad33ffe02f"><code>c653b3e</code></a>,
+722 tests passing upstream). This umbrella's <code>manifest.json</code> now pins that
+released commit. <strong>This is a code-level fix and re-pin, not yet a live
+re-validation.</strong> Do not describe the store contract as validated or safe
+under network isolation until the exact matrix (<code>store</code> unset / <code>true</code> /
+<code>false</code>, under <code>NETWORK_ISOLATION=true</code>, streaming and non-streaming) is
+re-run live against this pin and passes. This warning must remain until
+that re-run is recorded here.</p>
 </div>
 <h2 id="delegated-owner-binding">Delegated owner binding</h2>
 <p>The trusted UI BFF owns managed-Conversation lifecycle. For every create, read,
