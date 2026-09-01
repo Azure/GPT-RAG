@@ -21,7 +21,7 @@ jobs:
       AZURE_PRINCIPAL_ID: f4be7297-7532-4582-b0b5-53e7413879dd
     steps:
       - name: Checkout repository
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           submodules: recursive
 
@@ -31,7 +31,7 @@ jobs:
           version: 1.28.1
 
       - name: Sign in to Azure with GitHub OIDC
-        uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5
+        uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2.3.0
         with:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
