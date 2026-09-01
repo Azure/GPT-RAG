@@ -15,5 +15,6 @@ updates:
         patterns: ["*"]
     schedule:
       interval: "weekly"
+    target-branch: "develop"
     cooldown:
       default-days: 7
