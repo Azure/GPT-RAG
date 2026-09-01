@@ -296,18 +296,51 @@ function Set-GptRagAppConfiguration {
     # legacy "<prefix>-$nameSuffix" pattern. Discover actual names by listing resources
     # in the RG; fall back to the legacy derivation only when discovery finds nothing.
     function _resolveResource {
-        param([string]$Type, [string]$Fallback, [scriptblock]$Filter = $null)
+        param(
+            [string]$Type,
+            [string]$Fallback,
+            [scriptblock]$Filter = $null,
+            [string]$PreferredName = ''
+        )
         try {
             $json = az resource list -g $resourceGroup --resource-type $Type -o json 2>$null
             if ($LASTEXITCODE -ne 0 -or -not $json) { return $Fallback }
             $items = $json | ConvertFrom-Json
             if ($null -eq $items) { return $Fallback }
             if ($Filter) { $items = @($items | Where-Object $Filter) }
+            if (-not [string]::IsNullOrWhiteSpace($PreferredName)) {
+                $preferredMatches = @(
+                    $items | Where-Object {
+                        $_.name.Equals(
+                            $PreferredName,
+                            [StringComparison]::OrdinalIgnoreCase
+                        )
+                    }
+                )
+                if ($preferredMatches.Count -eq 1) {
+                    return $preferredMatches[0].name
+                }
+                throw "Configured resource '$PreferredName' did not uniquely match type '$Type' in resource group '$resourceGroup'."
+            }
             if ($items.Count -eq 1) { return $items[0].name }
             if ($items.Count -eq 0) { return $Fallback }
+            $locationMatches = @(
+                $items | Where-Object {
+                    $_.location -and $_.location.Equals(
+                        $location,
+                        [StringComparison]::OrdinalIgnoreCase
+                    )
+                }
+            )
+            if ($locationMatches.Count -eq 1) {
+                return $locationMatches[0].name
+            }
             Write-Warning "Multiple '$Type' resources matched; falling back to legacy name '$Fallback'."
             return $Fallback
         } catch {
+            if (-not [string]::IsNullOrWhiteSpace($PreferredName)) {
+                throw
+            }
             return $Fallback
         }
     }
@@ -316,17 +349,20 @@ function Set-GptRagAppConfiguration {
     $storageName = _resolveResource `
         -Type 'Microsoft.Storage/storageAccounts' `
         -Fallback "st$nameSuffix" `
-        -Filter { -not $_.name.StartsWith('staif') }
+        -Filter { -not $_.name.StartsWith('staif') } `
+        -PreferredName (Get-OptionalEnvValue 'AZURE_STORAGE_ACCOUNT_NAME')
     $foundryStorageName = _resolveResource `
         -Type 'Microsoft.Storage/storageAccounts' `
         -Fallback "staif$nameSuffix" `
-        -Filter { $_.name.StartsWith('staif') }
+        -Filter { $_.name.StartsWith('staif') } `
+        -PreferredName (Get-OptionalEnvValue 'AZURE_AI_FOUNDRY_STORAGE_ACCOUNT_NAME')
 
     # Key Vault: main workload vs AI Foundry KV (prefix "kv-ai")
     $keyVaultName = _resolveResource `
         -Type 'Microsoft.KeyVault/vaults' `
         -Fallback "kv-$nameSuffix" `
-        -Filter { -not $_.name.StartsWith('kv-ai') }
+        -Filter { -not $_.name.StartsWith('kv-ai') } `
+        -PreferredName (Get-OptionalEnvValue 'KEY_VAULT_NAME')
 
     # Cosmos: main vs AI Foundry-project cosmos (prefix "cosmos-aif")
     $cosmosName = if ($cosmosEnabled) {
@@ -340,12 +376,22 @@ function Set-GptRagAppConfiguration {
     $searchName = _resolveResource `
         -Type 'Microsoft.Search/searchServices' `
         -Fallback "srch-$nameSuffix" `
-        -Filter { -not $_.name.StartsWith('srch-aif') }
+        -Filter { -not $_.name.StartsWith('srch-aif') } `
+        -PreferredName (Get-OptionalEnvValue 'AZURE_AI_SEARCH_NAME')
 
     # AI Foundry Cognitive account (kind = AIServices) - LZ v2.2.0 deploys a single one
+    $foundryProjectResourceId = Get-OptionalEnvValue 'AZURE_AI_PROJECT_RESOURCE_ID'
+    $preferredFoundryName = Get-OptionalEnvValue 'AZURE_AI_FOUNDRY_NAME'
+    if (
+        -not $preferredFoundryName -and
+        $foundryProjectResourceId -match '/accounts/([^/]+)/projects/'
+    ) {
+        $preferredFoundryName = $matches[1]
+    }
     $foundryName = _resolveResource `
         -Type 'Microsoft.CognitiveServices/accounts' `
-        -Fallback "aif-$nameSuffix"
+        -Fallback "aif-$nameSuffix" `
+        -PreferredName $preferredFoundryName
 
     # Resolve the project through generic ARM discovery because the specialized
     # project-list command is absent from some supported Azure CLI versions.
@@ -395,7 +441,10 @@ function Set-GptRagAppConfiguration {
     # Container Registry / Container Apps Env / Log Analytics / App Insights
     $acrName = _resolveResource `
         -Type 'Microsoft.ContainerRegistry/registries' `
-        -Fallback "cr$nameSuffix"
+        -Fallback "cr$nameSuffix" `
+        -PreferredName (
+            (Get-OptionalEnvValue 'AZURE_CONTAINER_REGISTRY_ENDPOINT') -replace '\..*$', ''
+        )
     $containerEnvName = _resolveResource `
         -Type 'Microsoft.App/managedEnvironments' `
         -Fallback "cae-$nameSuffix"

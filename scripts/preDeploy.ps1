@@ -222,10 +222,30 @@ The preparation command builds the manifest-pinned image and stores only its imm
       Write-Error "Hosted orchestrator deployment failed."
       exit $LASTEXITCODE
     }
-    & azd ai agent invoke --protocol invocations --new-session --timeout 180 --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt "Reply with exactly: GPT-RAG hosted smoke OK." | Out-Null
-    if ($LASTEXITCODE -ne 0) {
-      Write-Error "Hosted orchestrator smoke request failed; the classic chat path remains active."
-      exit $LASTEXITCODE
+    $smokePayloadPath = Join-Path ([IO.Path]::GetTempPath()) "gpt-rag-hosted-smoke-$([guid]::NewGuid().ToString('N')).json"
+    try {
+      [IO.File]::WriteAllText(
+        $smokePayloadPath,
+        '{"messages":[{"role":"user","content":"Reply with exactly: GPT-RAG hosted smoke OK."}]}',
+        [Text.UTF8Encoding]::new($false)
+      )
+      $smokeOutput = (
+        & azd ai agent invoke --protocol invocations --new-session --timeout 180 --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt --input-file $smokePayloadPath 2>&1 |
+          Out-String
+      )
+      $smokeExitCode = $LASTEXITCODE
+      if (
+        $smokeExitCode -ne 0 -or
+        $smokeOutput -match '"type"\s*:\s*"error"' -or
+        $smokeOutput -notmatch [regex]::Escape('GPT-RAG hosted smoke OK.')
+      ) {
+        Write-Host $smokeOutput
+        Write-Error "Hosted orchestrator smoke request failed; the classic chat path remains active."
+        if ($smokeExitCode -ne 0) { exit $smokeExitCode }
+        exit 1
+      }
+    } finally {
+      Remove-Item -LiteralPath $smokePayloadPath -Force -ErrorAction SilentlyContinue
     }
     $hostedEnv = Get-AzdEnv -projectPath $hostedProject
   } finally {
@@ -252,18 +272,17 @@ The preparation command builds the manifest-pinned image and stores only its imm
   $env:HOSTED_AGENT_BASE_URL = $hostedBaseUrl
   $env:HOSTED_AGENT_RESOURCE_SCOPE = "$($globalEnv.HOSTED_AGENT_RESOURCE_SCOPE)"
 
-  $continuityVenv = Join-Path ([IO.Path]::GetTempPath()) "gpt-rag-continuity-$([guid]::NewGuid().ToString('N'))"
+  $continuityPackages = Join-Path ([IO.Path]::GetTempPath()) "gpt-rag-continuity-$([guid]::NewGuid().ToString('N'))"
   try {
-    & python -m venv $continuityVenv
-    if ($LASTEXITCODE -ne 0) { throw "Failed to create the continuity activation virtual environment." }
-    $continuityPython = Join-Path $continuityVenv 'Scripts/python.exe'
-    & $continuityPython -m pip install --quiet --disable-pip-version-check -r (Join-Path $repoRoot 'config/requirements.txt')
+    & python -m pip install --quiet --disable-pip-version-check --target $continuityPackages -r (Join-Path $repoRoot 'config/requirements.txt')
     if ($LASTEXITCODE -ne 0) { throw "Failed to install continuity activation dependencies." }
-    & $continuityPython -c "import os, runpy, sys; sys.path.insert(0, os.environ['GPT_RAG_REPO_ROOT']); sys.argv = ['config.continuity.setup', '--activate']; runpy.run_module('config.continuity.setup', run_name='__main__')"
+    $env:GPT_RAG_CONTINUITY_PACKAGES = $continuityPackages
+    & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['GPT_RAG_REPO_ROOT']); sys.path.insert(0, os.environ['GPT_RAG_CONTINUITY_PACKAGES']); sys.argv = ['config.continuity.setup', '--activate']; runpy.run_module('config.continuity.setup', run_name='__main__')"
     if ($LASTEXITCODE -ne 0) { throw "Hosted continuity Responses 2.0.0 and exact agent-scope RBAC validation failed closed." }
   } finally {
-    if (Test-Path -LiteralPath $continuityVenv) {
-      Remove-Item -LiteralPath $continuityVenv -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item Env:GPT_RAG_CONTINUITY_PACKAGES -ErrorAction SilentlyContinue
+    if (Test-Path -LiteralPath $continuityPackages) {
+      Remove-Item -LiteralPath $continuityPackages -Recurse -Force -ErrorAction SilentlyContinue
     }
   }
 }
