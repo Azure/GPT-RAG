@@ -199,10 +199,24 @@ if [[ "$hosted_mode" =~ ^(1|true|t|yes|y)$ ]]; then
     azd env set AZURE_AI_PROJECT_ID "$project_resource_id" --environment "$environment_name" --no-prompt >/dev/null || exit 1
     azd deploy orchestrator-agent --environment "$environment_name" --no-prompt
   ) || { red "Hosted orchestrator deployment failed."; exit 1; }
-  (
+  smoke_payload="$(mktemp)"
+  printf '%s\n' '{"messages":[{"role":"user","content":"Reply with exactly: GPT-RAG hosted smoke OK."}]}' >"$smoke_payload"
+  if ! smoke_output="$(
     cd "$hosted_project"
-    azd ai agent invoke --protocol invocations --new-session --timeout 180 --environment "$environment_name" --no-prompt "Reply with exactly: GPT-RAG hosted smoke OK." >/dev/null
-  ) || { red "Hosted orchestrator smoke request failed; the classic chat path remains active."; exit 1; }
+    azd ai agent invoke --protocol invocations --new-session --timeout 180 --environment "$environment_name" --no-prompt --input-file "$smoke_payload" 2>&1
+  )"; then
+    rm -f "$smoke_payload"
+    printf '%s\n' "$smoke_output"
+    red "Hosted orchestrator smoke request failed; the classic chat path remains active."
+    exit 1
+  fi
+  rm -f "$smoke_payload"
+  if printf '%s\n' "$smoke_output" | grep -Eq '"type"[[:space:]]*:[[:space:]]*"error"' ||
+     ! printf '%s\n' "$smoke_output" | grep -Fq 'GPT-RAG hosted smoke OK.'; then
+    printf '%s\n' "$smoke_output"
+    red "Hosted orchestrator smoke response did not complete successfully; the classic chat path remains active."
+    exit 1
+  fi
 
   invocations_endpoint="$(get_azd_value "$hosted_project" "AGENT_ORCHESTRATOR_AGENT_INVOCATIONS_ENDPOINT")"
   [ -n "$invocations_endpoint" ] || { red "Hosted deployment did not publish AGENT_ORCHESTRATOR_AGENT_INVOCATIONS_ENDPOINT."; exit 1; }
@@ -214,18 +228,17 @@ if [[ "$hosted_mode" =~ ^(1|true|t|yes|y)$ ]]; then
   export HOSTED_AGENT_BASE_URL="$hosted_base_url"
   export HOSTED_AGENT_RESOURCE_SCOPE="$hosted_scope"
 
-  continuity_venv="$(mktemp -d)"
+  continuity_packages="$(mktemp -d)"
   if ! (
-    python3 -m venv "$continuity_venv" &&
-    "$continuity_venv/bin/python" -m pip install --quiet --disable-pip-version-check -r "$repo_root/config/requirements.txt" &&
+    python3 -m pip install --quiet --disable-pip-version-check --target "$continuity_packages" -r "$repo_root/config/requirements.txt" &&
     cd "$repo_root" &&
-    "$continuity_venv/bin/python" -m config.continuity.setup --activate
+    PYTHONPATH="$repo_root:$continuity_packages${PYTHONPATH:+:$PYTHONPATH}" python3 -m config.continuity.setup --activate
   ); then
-    rm -rf "$continuity_venv"
+    rm -rf "$continuity_packages"
     red "Hosted continuity Responses 2.0.0 and exact agent-scope RBAC validation failed closed."
     exit 1
   fi
-  rm -rf "$continuity_venv"
+  rm -rf "$continuity_packages"
 fi
 
 # ---------- Iterate components ----------

@@ -4,6 +4,14 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+function Invoke-PythonModule {
+    param(
+        [Parameter(Mandatory = $true)][string]$ModuleName,
+        [string[]]$Arguments = @()
+    )
+    & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['GPT_RAG_REPO_ROOT']); sys.argv = ['$ModuleName'] + sys.argv[1:]; runpy.run_module('$ModuleName', run_name='__main__')" @Arguments
+}
+
 #-------------------------------------------------------------------------------
 # Mirror azd environment variables into process environment
 # This avoids persisting secrets in the User environment (registry), and makes
@@ -38,7 +46,11 @@ if (-not $expectedInfraCommit -or $expectedInfraCommit -notmatch '^[0-9a-f]{40}$
 # then fail closed if any unrelated submodule changes remain.
 Push-Location $projectRoot
 try {
-    & python -m config.deployment.infra_checkout --infra-dir $infraDir
+    $env:GPT_RAG_REPO_ROOT = (Resolve-Path $projectRoot).Path
+    Invoke-PythonModule -ModuleName 'config.deployment.infra_checkout' -Arguments @(
+        '--infra-dir',
+        $infraDir
+    )
     $infraCheckoutExitCode = $LASTEXITCODE
 } finally {
     Pop-Location
@@ -123,7 +135,7 @@ $parameterDestination = Join-Path $infraDir "main.parameters.json"
 Write-Host "Resolving GPT-RAG deployment topology..." -ForegroundColor Cyan
 Push-Location $projectRoot
 try {
-    $topologyOutput = & python -m config.deployment.topology
+    $topologyOutput = Invoke-PythonModule -ModuleName 'config.deployment.topology'
     $topologyExitCode = $LASTEXITCODE
 } finally {
     Pop-Location
@@ -159,10 +171,14 @@ try {
     ).components |
         Where-Object { $_.name -eq 'gpt-rag-orchestrator' } |
         Select-Object -ExpandProperty commit -First 1
-    & python -m config.deployment.composition `
-        --input $parameterSource `
-        --output $parameterDestination `
-        --hosted-source-commit $hostedSourceCommit
+    Invoke-PythonModule -ModuleName 'config.deployment.composition' -Arguments @(
+        '--input',
+        $parameterSource,
+        '--output',
+        $parameterDestination,
+        '--hosted-source-commit',
+        $hostedSourceCommit
+    )
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Error: GPT-RAG deployment mode composition failed." -ForegroundColor Red
         exit $LASTEXITCODE

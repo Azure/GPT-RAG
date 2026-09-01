@@ -314,6 +314,69 @@ class LifecycleParityTests(unittest.TestCase):
             content,
         )
 
+    def test_postprovision_disambiguates_resources_by_explicit_name_or_location(
+        self,
+    ) -> None:
+        content = (ROOT / "scripts" / "postProvision.ps1").read_text(
+            encoding="utf-8-sig"
+        )
+
+        self.assertIn("$preferredMatches = @(", content)
+        self.assertIn("-PreferredName (Get-OptionalEnvValue 'KEY_VAULT_NAME')", content)
+        self.assertIn(
+            "-PreferredName (Get-OptionalEnvValue 'AZURE_AI_SEARCH_NAME')",
+            content,
+        )
+        self.assertIn("$foundryProjectResourceId -match '/accounts/([^/]+)/projects/'", content)
+        self.assertIn("$locationMatches = @(", content)
+        self.assertIn("[StringComparison]::OrdinalIgnoreCase", content)
+        self.assertIn("return $locationMatches[0].name", content)
+        self.assertIn("throw", content)
+
+    def test_windows_lifecycle_python_modules_support_jumpbox_python(self) -> None:
+        for relative_path in (
+            "scripts/preProvision.ps1",
+            "scripts/prepareHostedDeployment.ps1",
+        ):
+            content = (ROOT / relative_path).read_text(encoding="utf-8-sig")
+            self.assertIn("sys.path.insert(0", content, relative_path)
+            self.assertIn("runpy.run_module", content, relative_path)
+
+    def test_hosted_smoke_uses_json_invocations_contract(self) -> None:
+        for relative_path in (
+            "scripts/preDeploy.ps1",
+            "scripts/preDeploy.sh",
+        ):
+            content = (ROOT / relative_path).read_text(encoding="utf-8-sig")
+            self.assertIn("--input-file", content, relative_path)
+            self.assertIn(
+                '{"messages":[{"role":"user","content":',
+                content,
+                relative_path,
+            )
+            self.assertIn("GPT-RAG hosted smoke OK.", content, relative_path)
+            self.assertIn('"type"', content, relative_path)
+            self.assertIn('"error"', content, relative_path)
+        self.assertIn(
+            "$smokeOutput -notmatch",
+            (ROOT / "scripts" / "preDeploy.ps1").read_text(
+                encoding="utf-8-sig"
+            ),
+        )
+        self.assertIn(
+            "grep -Fq 'GPT-RAG hosted smoke OK.'",
+            (ROOT / "scripts" / "preDeploy.sh").read_text(
+                encoding="utf-8-sig"
+            ),
+        )
+        for relative_path in (
+            "scripts/preDeploy.ps1",
+            "scripts/preDeploy.sh",
+        ):
+            content = (ROOT / relative_path).read_text(encoding="utf-8-sig")
+            self.assertIn("--target", content, relative_path)
+            self.assertNotIn("-m venv", content, relative_path)
+
     def test_postprovision_preserves_search_user_assigned_identity(self) -> None:
         content = (ROOT / "scripts" / "postProvision.ps1").read_text(
             encoding="utf-8-sig"
@@ -372,6 +435,10 @@ class LifecycleParityTests(unittest.TestCase):
                     "-m config.deployment.topology\n" in content
                     or "-m config.deployment.topology)" in content
                     or "-m config.deployment.topology\"" in content
+                    or (
+                        "Invoke-PythonModule -ModuleName "
+                        "'config.deployment.topology'" in content
+                    )
                 )
 
         for name in (
