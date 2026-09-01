@@ -1,3 +1,4 @@
 contracts/*.json text eol=lf
 contracts/*.sha256 text eol=lf
 config/search/tests/test_foundry_iq_templates.py -text whitespace=cr-at-eol
+.github/workflows/*.lock.yml linguist-generated=true
