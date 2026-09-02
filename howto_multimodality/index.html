@@ -1811,7 +1811,7 @@ Azure AI Search Index
 <div class="highlight"><pre><span></span><code>az<span class="w"> </span>cognitiveservices<span class="w"> </span>account<span class="w"> </span>deployment<span class="w"> </span>list<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--name<span class="w"> </span>&lt;your-ai-services-name&gt;<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--resource-group<span class="w"> </span>&lt;your-resource-group&gt;<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--query<span class="w"> </span><span class="s2">&quot;[].{name:name, model:properties.model.name}&quot;</span><span class="w"> </span>-o<span class="w"> </span>table
+<span class="w">  </span>--query<span class="w"> </span><span class="s2">"[].{name:name, model:properties.model.name}"</span><span class="w"> </span>-o<span class="w"> </span>table
 </code></pre></div>
 <p>If you don't have a vision-capable deployment, create one in the Azure portal under your Azure AI Services resource &gt; Model deployments.</p>
 <p><strong>2) Configure the App Configuration settings.</strong></p>

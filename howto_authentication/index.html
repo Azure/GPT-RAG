@@ -1891,7 +1891,7 @@ metadata_security_rbac_scope
 Grant admin consent
 </code></pre></div>
 <p>CLI alternative if Azure Cognitive Search does not appear in the picker. First, discover the Azure AI Search resource application ID and the scope ID.</p>
-<div class="highlight"><pre><span></span><code>az rest --method GET --url &quot;https://graph.microsoft.com/v1.0/servicePrincipals?$filter=servicePrincipalNames/any(s:s eq &#39;https://search.azure.com&#39;)&amp;$select=appId,displayName,oauth2PermissionScopes&quot; --query &quot;value[0].{resourceAppId:appId,scopeId:oauth2PermissionScopes[?value==&#39;user_impersonation&#39;].id | [0],name:displayName}&quot;
+<div class="highlight"><pre><span></span><code>az rest --method GET --url "https://graph.microsoft.com/v1.0/servicePrincipals?$filter=servicePrincipalNames/any(s:s eq 'https://search.azure.com')&amp;$select=appId,displayName,oauth2PermissionScopes" --query "value[0].{resourceAppId:appId,scopeId:oauth2PermissionScopes[?value=='user_impersonation'].id | [0],name:displayName}"
 </code></pre></div>
 <p>Then add the permission and grant consent.</p>
 <div class="highlight"><pre><span></span><code>az ad app permission add --id &lt;replace-by-app-client-id&gt; --api &lt;SEARCH_RESOURCE_APP_ID&gt; --api-permissions &lt;SCOPE_ID&gt;=Scope
@@ -1978,10 +1978,10 @@ metadata_security_group_ids
 <p>Note: For SharePoint ingestion, you don't need any additional steps. The GPT-RAG ingestion pipeline typically derives the user and group ACLs from the source SharePoint document or list item permissions and populates the same fields automatically.</p>
 </blockquote>
 <p>Examples of how to populate <code>metadata_security_user_ids</code> and <code>metadata_security_group_ids</code>.</p>
-<div class="highlight"><pre><span></span><code>[&quot;11111111-1111-1111-1111-111111111111&quot;]
-[&quot;11111111-1111-1111-1111-111111111111&quot;,&quot;22222222-2222-2222-2222-222222222222&quot;]
+<div class="highlight"><pre><span></span><code>["11111111-1111-1111-1111-111111111111"]
+["11111111-1111-1111-1111-111111111111","22222222-2222-2222-2222-222222222222"]
 11111111-1111-1111-1111-111111111111,22222222-2222-2222-2222-222222222222
-[&#39;11111111-1111-1111-1111-111111111111&#39;,&#39;22222222-2222-2222-2222-222222222222&#39;]
+['11111111-1111-1111-1111-111111111111','22222222-2222-2222-2222-222222222222']
 </code></pre></div>
 <blockquote>
 <p>Note: For Blob Storage ingestion, the GPT-RAG ingestion pipeline will populate <code>metadata_security_rbac_scope</code> automatically. The value is the Azure resource ID of the container, for example:
@@ -2085,13 +2085,13 @@ dashboard's MSAL flow.</p>
 </table>
 <p>The <code>Value</code> field is what the dashboards check. It must be exactly <code>Admin</code> (case-sensitive).</p>
 <p><strong>CLI</strong></p>
-<div class="highlight"><pre><span></span><code>az ad app update --id &lt;replace-by-app-client-id&gt; --app-roles &#39;[{
-  &quot;allowedMemberTypes&quot;: [&quot;User&quot;],
-  &quot;description&quot;: &quot;Grants access to the GPT-RAG operator dashboards.&quot;,
-  &quot;displayName&quot;: &quot;Admin&quot;,
-  &quot;isEnabled&quot;: true,
-  &quot;value&quot;: &quot;Admin&quot;
-}]&#39;
+<div class="highlight"><pre><span></span><code>az ad app update --id &lt;replace-by-app-client-id&gt; --app-roles '[{
+  "allowedMemberTypes": ["User"],
+  "description": "Grants access to the GPT-RAG operator dashboards.",
+  "displayName": "Admin",
+  "isEnabled": true,
+  "value": "Admin"
+}]'
 </code></pre></div>
 <blockquote>
 <p>Note: <code>az ad app update --app-roles</code> replaces the full list. If the App Registration already defines other app roles, include them in the same JSON array.</p>
@@ -2209,9 +2209,9 @@ dashboard's MSAL flow.</p>
 <li>Paste the token into <a href="https://jwt.ms">https://jwt.ms</a> and look at the claims.</li>
 </ol>
 <p>You should see:</p>
-<div class="highlight"><pre><span></span><code>&quot;aud&quot;: &quot;api://&lt;OAUTH_AZURE_AD_CLIENT_ID&gt;&quot;,
-&quot;roles&quot;: [&quot;Admin&quot;],
-&quot;scp&quot;: &quot;user_impersonation&quot;
+<div class="highlight"><pre><span></span><code>"aud": "api://&lt;OAUTH_AZURE_AD_CLIENT_ID&gt;",
+"roles": ["Admin"],
+"scp": "user_impersonation"
 </code></pre></div>
 <p>If <code>roles</code> is missing, work down this checklist:</p>
 <table>

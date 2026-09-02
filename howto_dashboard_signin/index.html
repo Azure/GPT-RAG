@@ -1783,46 +1783,46 @@ client. See
 </li>
 </ol>
 <p>The manifest fragment is:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">&quot;oauth2Permissions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<div class="highlight"><pre><span></span><code><span class="nt">"oauth2Permissions"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">  </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;adminConsentDescription&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Allows the orchestrator dashboard to call the orchestrator API on behalf of the signed-in user.&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;adminConsentDisplayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Access GPT-RAG orchestrator as the signed-in user&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;generate-a-guid&gt;&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;isEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;User&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;userConsentDescription&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Allow the orchestrator dashboard to call the orchestrator API on your behalf.&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;userConsentDisplayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Access GPT-RAG orchestrator as you&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;access_as_user&quot;</span>
+<span class="w">    </span><span class="nt">"adminConsentDescription"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Allows the orchestrator dashboard to call the orchestrator API on behalf of the signed-in user."</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"adminConsentDisplayName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Access GPT-RAG orchestrator as the signed-in user"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;generate-a-guid&gt;"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"isEnabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"User"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"userConsentDescription"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Allow the orchestrator dashboard to call the orchestrator API on your behalf."</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"userConsentDisplayName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Access GPT-RAG orchestrator as you"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"access_as_user"</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">]</span>
 </code></pre></div>
 <p>If you also use the chat UI, you can keep its existing <code>user_impersonation</code> scope. Both scopes coexist on the same registration and both return tokens whose audience is your API.</p>
 <p>While in the manifest, set <code>accessTokenAcceptedVersion</code> to <code>2</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">&quot;accessTokenAcceptedVersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span>
+<div class="highlight"><pre><span></span><code><span class="nt">"accessTokenAcceptedVersion"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span>
 </code></pre></div>
 <p>The orchestrator validates both v1 and v2 tokens, but v2 is the recommended default and is what the SPA will receive.</p>
 <h2 id="3-add-the-admin-app-role">3) Add the <code>Admin</code> app role</h2>
 <p>The gate on <code>/api/dashboard/*</code> checks that the caller's access token carries <code>Admin</code> in its <code>roles</code> claim. Add the role on the same App Registration.</p>
 <p>Manifest fragment:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">&quot;appRoles&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<div class="highlight"><pre><span></span><code><span class="nt">"appRoles"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">  </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;allowedMemberTypes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;User&quot;</span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Grants access to the GPT-RAG operator dashboards.&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Admin&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;generate-a-guid&gt;&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;isEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Admin&quot;</span>
+<span class="w">    </span><span class="nt">"allowedMemberTypes"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"User"</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Grants access to the GPT-RAG operator dashboards."</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"displayName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Admin"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;generate-a-guid&gt;"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"isEnabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Admin"</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">]</span>
 </code></pre></div>
 <p>Or via the CLI:</p>
-<div class="highlight"><pre><span></span><code>az ad app update --id &lt;orchestrator-client-id&gt; --app-roles &#39;[{
-  &quot;allowedMemberTypes&quot;: [&quot;User&quot;],
-  &quot;description&quot;: &quot;Grants access to the GPT-RAG operator dashboards.&quot;,
-  &quot;displayName&quot;: &quot;Admin&quot;,
-  &quot;isEnabled&quot;: true,
-  &quot;value&quot;: &quot;Admin&quot;
-}]&#39;
+<div class="highlight"><pre><span></span><code>az ad app update --id &lt;orchestrator-client-id&gt; --app-roles '[{
+  "allowedMemberTypes": ["User"],
+  "description": "Grants access to the GPT-RAG operator dashboards.",
+  "displayName": "Admin",
+  "isEnabled": true,
+  "value": "Admin"
+}]'
 </code></pre></div>
 <p>The <code>Value</code> field is what the backend compares. It is case-sensitive and must be exactly <code>Admin</code>.</p>
 <p>Note that <code>az ad app update --app-roles</code> replaces the full list. If the registration already defines other app roles (for example ingestion roles), include them all in the same JSON array.</p>
@@ -1861,15 +1861,15 @@ client. See
 </ul>
 <p>The unauthenticated <code>GET /api/dashboard/auth-config</code> response looks like this when auth is on:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;auth_enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;client_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;00000000-0000-0000-0000-000000000000&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;tenant_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;11111111-1111-1111-1111-111111111111&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;authority&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://login.microsoftonline.com/11111111-1111-1111-1111-111111111111&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;api_scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;api://00000000-0000-0000-0000-000000000000/access_as_user&quot;</span>
+<span class="w">  </span><span class="nt">"auth_enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"client_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"00000000-0000-0000-0000-000000000000"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"tenant_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"11111111-1111-1111-1111-111111111111"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"authority"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://login.microsoftonline.com/11111111-1111-1111-1111-111111111111"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"api_scope"</span><span class="p">:</span><span class="w"> </span><span class="s2">"api://00000000-0000-0000-0000-000000000000/access_as_user"</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>And when auth is off:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"> </span><span class="nt">&quot;auth_enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"> </span><span class="nt">"auth_enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
 <h2 id="5-assign-the-admin-role-to-a-user">5) Assign the <code>Admin</code> role to a user</h2>
 <p>App role assignments live on the <strong>Enterprise application</strong>, not on the App Registration.</p>
@@ -1884,14 +1884,14 @@ client. See
 <div class="highlight"><pre><span></span><code>CLIENT_ID=&lt;orchestrator-client-id&gt;
 USER_UPN=&lt;user@yourtenant.onmicrosoft.com&gt;
 
-SP_ID=$(az ad sp list --filter &quot;appId eq &#39;$CLIENT_ID&#39;&quot; --query &quot;[0].id&quot; -o tsv)
-ROLE_ID=$(az ad sp show --id &quot;$SP_ID&quot; --query &quot;appRoles[?value==&#39;Admin&#39;].id | [0]&quot; -o tsv)
-USER_ID=$(az ad user show --id &quot;$USER_UPN&quot; --query id -o tsv)
+SP_ID=$(az ad sp list --filter "appId eq '$CLIENT_ID'" --query "[0].id" -o tsv)
+ROLE_ID=$(az ad sp show --id "$SP_ID" --query "appRoles[?value=='Admin'].id | [0]" -o tsv)
+USER_ID=$(az ad user show --id "$USER_UPN" --query id -o tsv)
 
 az rest --method POST \
-  --uri &quot;https://graph.microsoft.com/v1.0/servicePrincipals/$SP_ID/appRoleAssignments&quot; \
-  --headers &quot;Content-Type=application/json&quot; \
-  --body &quot;{\&quot;principalId\&quot;:\&quot;$USER_ID\&quot;,\&quot;resourceId\&quot;:\&quot;$SP_ID\&quot;,\&quot;appRoleId\&quot;:\&quot;$ROLE_ID\&quot;}&quot;
+  --uri "https://graph.microsoft.com/v1.0/servicePrincipals/$SP_ID/appRoleAssignments" \
+  --headers "Content-Type=application/json" \
+  --body "{\"principalId\":\"$USER_ID\",\"resourceId\":\"$SP_ID\",\"appRoleId\":\"$ROLE_ID\"}"
 </code></pre></div>
 <p>For production, prefer assigning a security group. Access tokens issued before an assignment do not carry the role; the user must sign out and back in (or wait for their token to expire) after being assigned.</p>
 <h2 id="6-verify">6) Verify</h2>
@@ -1923,9 +1923,9 @@ az rest --method POST \
 </tbody>
 </table>
 <p>Quick token check. In DevTools <strong>Network</strong> tab, open any <code>/api/dashboard/*</code> request, copy the <code>Authorization</code> header value, paste it into <code>https://jwt.ms</code>, and confirm:</p>
-<div class="highlight"><pre><span></span><code>&quot;aud&quot;: &quot;api://&lt;OAUTH_AZURE_AD_CLIENT_ID&gt;&quot;,
-&quot;roles&quot;: [&quot;Admin&quot;],
-&quot;scp&quot;: &quot;access_as_user&quot;
+<div class="highlight"><pre><span></span><code>"aud": "api://&lt;OAUTH_AZURE_AD_CLIENT_ID&gt;",
+"roles": ["Admin"],
+"scp": "access_as_user"
 </code></pre></div>
 <h2 id="troubleshooting">Troubleshooting</h2>
 <table>

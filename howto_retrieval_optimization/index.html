@@ -1755,10 +1755,10 @@ the same experiment makes the result impossible to attribute.</p>
 <p>Use JSON Lines so every question has a durable ID:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">New-Item</span> <span class="n">-ItemType</span> <span class="n">Directory</span> <span class="n">-Force</span> <span class="p">.\</span><span class="n">retrieval-lab</span> <span class="p">|</span> <span class="nb">Out-Null</span>
 
-<span class="sh">@&#39;</span>
-<span class="sh">{&quot;id&quot;:&quot;fuel-pressure&quot;,&quot;split&quot;:&quot;tune&quot;,&quot;query&quot;:&quot;How is fuel pressure maintained in the fuel delivery system?&quot;}</span>
-<span class="sh">{&quot;id&quot;:&quot;pressure-failure&quot;,&quot;split&quot;:&quot;held_out&quot;,&quot;query&quot;:&quot;What happens when fuel pressure is too low?&quot;}</span>
-<span class="sh">&#39;@</span> <span class="p">|</span> <span class="nb">Set-Content</span> <span class="p">.\</span><span class="n">retrieval-lab</span><span class="p">\</span><span class="n">questions</span><span class="p">.</span><span class="n">jsonl</span>
+<span class="sh">@'</span>
+<span class="sh">{"id":"fuel-pressure","split":"tune","query":"How is fuel pressure maintained in the fuel delivery system?"}</span>
+<span class="sh">{"id":"pressure-failure","split":"held_out","query":"What happens when fuel pressure is too low?"}</span>
+<span class="sh">'@</span> <span class="p">|</span> <span class="nb">Set-Content</span> <span class="p">.\</span><span class="n">retrieval-lab</span><span class="p">\</span><span class="n">questions</span><span class="p">.</span><span class="n">jsonl</span>
 </code></pre></div>
 <p>The <a href="../assets/vw-fuel-system.pdf">fuel-system PDF</a> is available for a small
 walkthrough. Ingest it before using the sample questions. Your generated chunk
@@ -1787,15 +1787,15 @@ supplied it. Run it from the deployed GPT-RAG project after selecting the
 correct <code>azd</code> environment.</p>
 <div class="highlight"><pre><span></span><code><span class="nv">$env:APP_CONFIG_ENDPOINT</span> <span class="p">=</span> <span class="n">azd</span> <span class="n">env</span> <span class="nb">get-value</span> <span class="n">APP_CONFIG_ENDPOINT</span>
 <span class="k">if</span> <span class="p">(</span><span class="o">-not</span> <span class="nv">$env:APP_CONFIG_ENDPOINT</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">throw</span> <span class="s2">&quot;APP_CONFIG_ENDPOINT is not set in the selected azd environment.&quot;</span>
+    <span class="k">throw</span> <span class="s2">"APP_CONFIG_ENDPOINT is not set in the selected azd environment."</span>
 <span class="p">}</span>
 
-<span class="nv">$script:AppConfigName</span> <span class="p">=</span> <span class="p">(</span><span class="no">[uri]</span><span class="nv">$env:APP_CONFIG_ENDPOINT</span><span class="p">).</span><span class="n">Host</span><span class="p">.</span><span class="n">Split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="n">0</span><span class="p">]</span>
+<span class="nv">$script:AppConfigName</span> <span class="p">=</span> <span class="p">(</span><span class="no">[uri]</span><span class="nv">$env:APP_CONFIG_ENDPOINT</span><span class="p">).</span><span class="n">Host</span><span class="p">.</span><span class="n">Split</span><span class="p">(</span><span class="s1">'.'</span><span class="p">)[</span><span class="n">0</span><span class="p">]</span>
 
 <span class="k">function</span> <span class="nb">Get-ActiveSetting</span> <span class="p">{</span>
     <span class="k">param</span><span class="p">([</span><span class="k">Parameter</span><span class="p">(</span><span class="k">Mandatory</span><span class="p">)]</span><span class="no">[string]</span><span class="nv">$Key</span><span class="p">)</span>
 
-    <span class="k">foreach</span> <span class="p">(</span><span class="nv">$label</span> <span class="k">in</span> <span class="p">@(</span><span class="s1">&#39;orchestrator&#39;</span><span class="p">,</span> <span class="s1">&#39;gpt-rag-orchestrator&#39;</span><span class="p">,</span> <span class="s1">&#39;gpt-rag&#39;</span><span class="p">,</span> <span class="s1">&#39;\0&#39;</span><span class="p">))</span> <span class="p">{</span>
+    <span class="k">foreach</span> <span class="p">(</span><span class="nv">$label</span> <span class="k">in</span> <span class="p">@(</span><span class="s1">'orchestrator'</span><span class="p">,</span> <span class="s1">'gpt-rag-orchestrator'</span><span class="p">,</span> <span class="s1">'gpt-rag'</span><span class="p">,</span> <span class="s1">'\0'</span><span class="p">))</span> <span class="p">{</span>
         <span class="nv">$json</span> <span class="p">=</span> <span class="n">az</span> <span class="n">appconfig</span> <span class="n">kv</span> <span class="n">show</span> <span class="p">`</span>
             <span class="p">-</span><span class="n">-name</span> <span class="nv">$script:AppConfigName</span> <span class="p">`</span>
             <span class="p">-</span><span class="n">-key</span> <span class="nv">$Key</span> <span class="p">`</span>
@@ -1805,7 +1805,7 @@ correct <code>azd</code> environment.</p>
 
         <span class="k">if</span> <span class="p">(</span><span class="nv">$LASTEXITCODE</span> <span class="o">-eq</span> <span class="n">0</span> <span class="o">-and</span> <span class="nv">$json</span><span class="p">)</span> <span class="p">{</span>
             <span class="nv">$item</span> <span class="p">=</span> <span class="nv">$json</span> <span class="p">|</span> <span class="nb">ConvertFrom-Json</span>
-            <span class="nv">$displayLabel</span> <span class="p">=</span> <span class="k">if</span> <span class="p">(</span><span class="nv">$label</span> <span class="o">-eq</span> <span class="s1">&#39;\0&#39;</span><span class="p">)</span> <span class="p">{</span> <span class="s1">&#39;&lt;no label&gt;&#39;</span> <span class="p">}</span> <span class="k">else</span> <span class="p">{</span> <span class="nv">$label</span> <span class="p">}</span>
+            <span class="nv">$displayLabel</span> <span class="p">=</span> <span class="k">if</span> <span class="p">(</span><span class="nv">$label</span> <span class="o">-eq</span> <span class="s1">'\0'</span><span class="p">)</span> <span class="p">{</span> <span class="s1">'&lt;no label&gt;'</span> <span class="p">}</span> <span class="k">else</span> <span class="p">{</span> <span class="nv">$label</span> <span class="p">}</span>
             <span class="k">return</span> <span class="no">[pscustomobject]</span><span class="p">@{</span>
                 <span class="n">Key</span> <span class="p">=</span> <span class="nv">$Key</span>
                 <span class="n">Value</span> <span class="p">=</span> <span class="no">[string]</span><span class="nv">$item</span><span class="p">.</span><span class="n">value</span>
@@ -1814,30 +1814,30 @@ correct <code>azd</code> environment.</p>
         <span class="p">}</span>
     <span class="p">}</span>
 
-    <span class="k">return</span> <span class="no">[pscustomobject]</span><span class="p">@{</span> <span class="n">Key</span> <span class="p">=</span> <span class="nv">$Key</span><span class="p">;</span> <span class="n">Value</span> <span class="p">=</span> <span class="s1">&#39;&#39;</span><span class="p">;</span> <span class="n">Label</span> <span class="p">=</span> <span class="s1">&#39;&lt;not set&gt;&#39;</span> <span class="p">}</span>
+    <span class="k">return</span> <span class="no">[pscustomobject]</span><span class="p">@{</span> <span class="n">Key</span> <span class="p">=</span> <span class="nv">$Key</span><span class="p">;</span> <span class="n">Value</span> <span class="p">=</span> <span class="s1">''</span><span class="p">;</span> <span class="n">Label</span> <span class="p">=</span> <span class="s1">'&lt;not set&gt;'</span> <span class="p">}</span>
 <span class="p">}</span>
 
 <span class="nv">$keys</span> <span class="p">=</span> <span class="p">@(</span>
-    <span class="s1">&#39;AGENT_STRATEGY&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;RETRIEVAL_BACKEND&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;SEARCH_SERVICE_QUERY_ENDPOINT&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;SEARCH_API_VERSION&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;SEARCH_RAG_INDEX_NAME&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;SEARCH_RAGINDEX_TOP_K&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;SEARCH_APPROACH&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;SEARCH_USE_SEMANTIC&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;SEARCH_SEMANTIC_SEARCH_CONFIG&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;AI_FOUNDRY_ACCOUNT_ENDPOINT&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;EMBEDDING_DEPLOYMENT_NAME&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;OPENAI_API_VERSION&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;KNOWLEDGE_BASE_ENDPOINT&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;KNOWLEDGE_BASE_NAME&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;FOUNDRY_IQ_API_VERSION&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;FOUNDRY_IQ_KNOWLEDGE_SOURCE_NAME&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;FOUNDRY_IQ_KNOWLEDGE_SOURCE_KIND&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;FOUNDRY_IQ_FILTER_ADD_ON_ENABLED&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;FOUNDRY_IQ_MAX_OUTPUT_DOCUMENTS&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;FOUNDRY_IQ_FORWARD_SOURCE_AUTH&#39;</span>
+    <span class="s1">'AGENT_STRATEGY'</span><span class="p">,</span>
+    <span class="s1">'RETRIEVAL_BACKEND'</span><span class="p">,</span>
+    <span class="s1">'SEARCH_SERVICE_QUERY_ENDPOINT'</span><span class="p">,</span>
+    <span class="s1">'SEARCH_API_VERSION'</span><span class="p">,</span>
+    <span class="s1">'SEARCH_RAG_INDEX_NAME'</span><span class="p">,</span>
+    <span class="s1">'SEARCH_RAGINDEX_TOP_K'</span><span class="p">,</span>
+    <span class="s1">'SEARCH_APPROACH'</span><span class="p">,</span>
+    <span class="s1">'SEARCH_USE_SEMANTIC'</span><span class="p">,</span>
+    <span class="s1">'SEARCH_SEMANTIC_SEARCH_CONFIG'</span><span class="p">,</span>
+    <span class="s1">'AI_FOUNDRY_ACCOUNT_ENDPOINT'</span><span class="p">,</span>
+    <span class="s1">'EMBEDDING_DEPLOYMENT_NAME'</span><span class="p">,</span>
+    <span class="s1">'OPENAI_API_VERSION'</span><span class="p">,</span>
+    <span class="s1">'KNOWLEDGE_BASE_ENDPOINT'</span><span class="p">,</span>
+    <span class="s1">'KNOWLEDGE_BASE_NAME'</span><span class="p">,</span>
+    <span class="s1">'FOUNDRY_IQ_API_VERSION'</span><span class="p">,</span>
+    <span class="s1">'FOUNDRY_IQ_KNOWLEDGE_SOURCE_NAME'</span><span class="p">,</span>
+    <span class="s1">'FOUNDRY_IQ_KNOWLEDGE_SOURCE_KIND'</span><span class="p">,</span>
+    <span class="s1">'FOUNDRY_IQ_FILTER_ADD_ON_ENABLED'</span><span class="p">,</span>
+    <span class="s1">'FOUNDRY_IQ_MAX_OUTPUT_DOCUMENTS'</span><span class="p">,</span>
+    <span class="s1">'FOUNDRY_IQ_FORWARD_SOURCE_AUTH'</span>
 <span class="p">)</span>
 
 <span class="nv">$active</span> <span class="p">=</span> <span class="nv">$keys</span> <span class="p">|</span> <span class="k">ForEach</span><span class="n">-Object</span> <span class="p">{</span> <span class="nb">Get-ActiveSetting</span> <span class="nv">$_</span> <span class="p">}</span>
@@ -1846,7 +1846,7 @@ correct <code>azd</code> environment.</p>
 
 <span class="k">foreach</span> <span class="p">(</span><span class="nv">$setting</span> <span class="k">in</span> <span class="nv">$active</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="p">(</span><span class="nv">$setting</span><span class="p">.</span><span class="n">Value</span><span class="p">)</span> <span class="p">{</span>
-        <span class="no">[Environment]</span><span class="p">::</span><span class="n">SetEnvironmentVariable</span><span class="p">(</span><span class="nv">$setting</span><span class="p">.</span><span class="n">Key</span><span class="p">,</span> <span class="nv">$setting</span><span class="p">.</span><span class="n">Value</span><span class="p">,</span> <span class="s1">&#39;Process&#39;</span><span class="p">)</span>
+        <span class="no">[Environment]</span><span class="p">::</span><span class="n">SetEnvironmentVariable</span><span class="p">(</span><span class="nv">$setting</span><span class="p">.</span><span class="n">Key</span><span class="p">,</span> <span class="nv">$setting</span><span class="p">.</span><span class="n">Value</span><span class="p">,</span> <span class="s1">'Process'</span><span class="p">)</span>
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -1858,9 +1858,9 @@ default instead of inventing a name:</p>
         <span class="p">-</span><span class="n">-query</span> <span class="n">accessToken</span> <span class="p">`</span>
         <span class="p">-</span><span class="n">-output</span> <span class="n">tsv</span>
 
-    <span class="nv">$headers</span> <span class="p">=</span> <span class="p">@{</span> <span class="n">Authorization</span> <span class="p">=</span> <span class="s2">&quot;Bearer $searchToken&quot;</span> <span class="p">}</span>
-    <span class="nv">$indexUri</span> <span class="p">=</span> <span class="s1">&#39;{0}/indexes/{1}?api-version={2}&#39;</span> <span class="o">-f</span> <span class="p">`</span>
-        <span class="nv">$env:SEARCH_SERVICE_QUERY_ENDPOINT</span><span class="p">.</span><span class="n">TrimEnd</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">),</span> <span class="p">`</span>
+    <span class="nv">$headers</span> <span class="p">=</span> <span class="p">@{</span> <span class="n">Authorization</span> <span class="p">=</span> <span class="s2">"Bearer $searchToken"</span> <span class="p">}</span>
+    <span class="nv">$indexUri</span> <span class="p">=</span> <span class="s1">'{0}/indexes/{1}?api-version={2}'</span> <span class="o">-f</span> <span class="p">`</span>
+        <span class="nv">$env:SEARCH_SERVICE_QUERY_ENDPOINT</span><span class="p">.</span><span class="n">TrimEnd</span><span class="p">(</span><span class="s1">'/'</span><span class="p">),</span> <span class="p">`</span>
         <span class="no">[uri]</span><span class="p">::</span><span class="n">EscapeDataString</span><span class="p">(</span><span class="nv">$env:SEARCH_RAG_INDEX_NAME</span><span class="p">),</span> <span class="p">`</span>
         <span class="nv">$env:SEARCH_API_VERSION</span>
 
@@ -1887,11 +1887,11 @@ them from a checkout of this documentation:</p>
 <li><a href="../assets/retrieval_optimization/evaluate_retrieval.py"><code>evaluate_retrieval.py</code></a></li>
 </ul>
 <p>Download them and create an isolated environment on Windows:</p>
-<div class="highlight"><pre><span></span><code><span class="nv">$tools</span> <span class="p">=</span> <span class="s1">&#39;.\retrieval-lab\tools&#39;</span>
+<div class="highlight"><pre><span></span><code><span class="nv">$tools</span> <span class="p">=</span> <span class="s1">'.\retrieval-lab\tools'</span>
 <span class="nb">New-Item</span> <span class="n">-ItemType</span> <span class="n">Directory</span> <span class="n">-Force</span> <span class="nv">$tools</span> <span class="p">|</span> <span class="nb">Out-Null</span>
-<span class="nv">$rawBase</span> <span class="p">=</span> <span class="s1">&#39;https://raw.githubusercontent.com/Azure/GPT-RAG/docs/docs/assets/retrieval_optimization&#39;</span>
-<span class="k">foreach</span> <span class="p">(</span><span class="nv">$file</span> <span class="k">in</span> <span class="p">@(</span><span class="s1">&#39;retrieve.py&#39;</span><span class="p">,</span> <span class="s1">&#39;pool_candidates.py&#39;</span><span class="p">,</span> <span class="s1">&#39;evaluate_retrieval.py&#39;</span><span class="p">))</span> <span class="p">{</span>
-    <span class="nb">Invoke-WebRequest</span> <span class="s2">&quot;$rawBase/$file&quot;</span> <span class="n">-OutFile</span> <span class="s2">&quot;$tools\$file&quot;</span>
+<span class="nv">$rawBase</span> <span class="p">=</span> <span class="s1">'https://raw.githubusercontent.com/Azure/GPT-RAG/docs/docs/assets/retrieval_optimization'</span>
+<span class="k">foreach</span> <span class="p">(</span><span class="nv">$file</span> <span class="k">in</span> <span class="p">@(</span><span class="s1">'retrieve.py'</span><span class="p">,</span> <span class="s1">'pool_candidates.py'</span><span class="p">,</span> <span class="s1">'evaluate_retrieval.py'</span><span class="p">))</span> <span class="p">{</span>
+    <span class="nb">Invoke-WebRequest</span> <span class="s2">"$rawBase/$file"</span> <span class="n">-OutFile</span> <span class="s2">"$tools\$file"</span>
 <span class="p">}</span>
 
 <span class="n">python</span> <span class="n">-m</span> <span class="n">venv</span> <span class="p">.\</span><span class="n">retrieval-lab</span><span class="p">\.</span><span class="n">venv</span>
@@ -1928,7 +1928,7 @@ other request-specific security behavior through the live orchestrator.</p>
 <h2 id="4-capture-baselines">4. Capture baselines</h2>
 <p>Use a new output directory for every run. The helper refuses to overwrite an
 existing run.</p>
-<div class="highlight"><pre><span></span><code><span class="nv">$runs</span> <span class="p">=</span> <span class="s1">&#39;.\retrieval-lab\runs&#39;</span>
+<div class="highlight"><pre><span></span><code><span class="nv">$runs</span> <span class="p">=</span> <span class="s1">'.\retrieval-lab\runs'</span>
 <span class="nb">New-Item</span> <span class="n">-ItemType</span> <span class="n">Directory</span> <span class="n">-Force</span> <span class="nv">$runs</span> <span class="p">|</span> <span class="nb">Out-Null</span>
 
 <span class="nv">$foundryTopK</span> <span class="p">=</span> <span class="k">if</span> <span class="p">(</span><span class="nv">$env:FOUNDRY_IQ_MAX_OUTPUT_DOCUMENTS</span><span class="p">)</span> <span class="p">{</span>
@@ -1937,37 +1937,37 @@ existing run.</p>
     <span class="n">5</span>
 <span class="p">}</span>
 
-<span class="nv">$stamp</span> <span class="p">=</span> <span class="nb">Get-Date</span> <span class="n">-Format</span> <span class="s1">&#39;yyyyMMdd-HHmmss&#39;</span>
-<span class="nv">$foundryBaseline</span> <span class="p">=</span> <span class="s2">&quot;$runs\$stamp-foundry-iq-baseline&quot;</span>
-<span class="n">python</span> <span class="s2">&quot;$tools\retrieve.py&quot;</span> <span class="p">`</span>
+<span class="nv">$stamp</span> <span class="p">=</span> <span class="nb">Get-Date</span> <span class="n">-Format</span> <span class="s1">'yyyyMMdd-HHmmss'</span>
+<span class="nv">$foundryBaseline</span> <span class="p">=</span> <span class="s2">"$runs\$stamp-foundry-iq-baseline"</span>
+<span class="n">python</span> <span class="s2">"$tools\retrieve.py"</span> <span class="p">`</span>
     <span class="p">-</span><span class="n">-backend</span> <span class="n">foundry_iq</span> <span class="p">`</span>
     <span class="p">-</span><span class="n">-questions</span> <span class="p">.\</span><span class="n">retrieval-lab</span><span class="p">\</span><span class="n">questions</span><span class="p">.</span><span class="n">jsonl</span> <span class="p">`</span>
     <span class="p">-</span><span class="n">-split</span> <span class="n">tune</span> <span class="p">`</span>
     <span class="p">-</span><span class="n">-top-k</span> <span class="nv">$foundryTopK</span> <span class="p">`</span>
     <span class="p">-</span><span class="n">-out</span> <span class="nv">$foundryBaseline</span>
 
-<span class="nv">$searchApproach</span> <span class="p">=</span> <span class="k">if</span> <span class="p">(</span><span class="nv">$env:SEARCH_APPROACH</span><span class="p">)</span> <span class="p">{</span> <span class="nv">$env:SEARCH_APPROACH</span> <span class="p">}</span> <span class="k">else</span> <span class="p">{</span> <span class="s1">&#39;hybrid&#39;</span> <span class="p">}</span>
+<span class="nv">$searchApproach</span> <span class="p">=</span> <span class="k">if</span> <span class="p">(</span><span class="nv">$env:SEARCH_APPROACH</span><span class="p">)</span> <span class="p">{</span> <span class="nv">$env:SEARCH_APPROACH</span> <span class="p">}</span> <span class="k">else</span> <span class="p">{</span> <span class="s1">'hybrid'</span> <span class="p">}</span>
 <span class="nv">$searchTopK</span> <span class="p">=</span> <span class="k">if</span> <span class="p">(</span><span class="nv">$env:SEARCH_RAGINDEX_TOP_K</span><span class="p">)</span> <span class="p">{</span>
     <span class="no">[int]</span><span class="nv">$env:SEARCH_RAGINDEX_TOP_K</span>
 <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
     <span class="n">5</span>
 <span class="p">}</span>
 <span class="nv">$searchArgs</span> <span class="p">=</span> <span class="p">@(</span>
-    <span class="s2">&quot;$tools\retrieve.py&quot;</span><span class="p">,</span>
-    <span class="s1">&#39;--backend&#39;</span><span class="p">,</span> <span class="s1">&#39;ai_search&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;--questions&#39;</span><span class="p">,</span> <span class="s1">&#39;.\retrieval-lab\questions.jsonl&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;--split&#39;</span><span class="p">,</span> <span class="s1">&#39;tune&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;--approach&#39;</span><span class="p">,</span> <span class="nv">$searchApproach</span><span class="p">,</span>
-    <span class="s1">&#39;--top-k&#39;</span><span class="p">,</span> <span class="nv">$searchTopK</span>
+    <span class="s2">"$tools\retrieve.py"</span><span class="p">,</span>
+    <span class="s1">'--backend'</span><span class="p">,</span> <span class="s1">'ai_search'</span><span class="p">,</span>
+    <span class="s1">'--questions'</span><span class="p">,</span> <span class="s1">'.\retrieval-lab\questions.jsonl'</span><span class="p">,</span>
+    <span class="s1">'--split'</span><span class="p">,</span> <span class="s1">'tune'</span><span class="p">,</span>
+    <span class="s1">'--approach'</span><span class="p">,</span> <span class="nv">$searchApproach</span><span class="p">,</span>
+    <span class="s1">'--top-k'</span><span class="p">,</span> <span class="nv">$searchTopK</span>
 <span class="p">)</span>
-<span class="nv">$searchArgs</span> <span class="p">+=</span> <span class="k">if</span> <span class="p">(</span><span class="nv">$env:SEARCH_USE_SEMANTIC</span> <span class="o">-eq</span> <span class="s1">&#39;true&#39;</span><span class="p">)</span> <span class="p">{</span>
-    <span class="s1">&#39;--semantic&#39;</span>
+<span class="nv">$searchArgs</span> <span class="p">+=</span> <span class="k">if</span> <span class="p">(</span><span class="nv">$env:SEARCH_USE_SEMANTIC</span> <span class="o">-eq</span> <span class="s1">'true'</span><span class="p">)</span> <span class="p">{</span>
+    <span class="s1">'--semantic'</span>
 <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-    <span class="s1">&#39;--no-semantic&#39;</span>
+    <span class="s1">'--no-semantic'</span>
 <span class="p">}</span>
-<span class="nv">$stamp</span> <span class="p">=</span> <span class="nb">Get-Date</span> <span class="n">-Format</span> <span class="s1">&#39;yyyyMMdd-HHmmss&#39;</span>
-<span class="nv">$searchBaseline</span> <span class="p">=</span> <span class="s2">&quot;$runs\$stamp-ai-search-baseline&quot;</span>
-<span class="nv">$searchArgs</span> <span class="p">+=</span> <span class="p">@(</span><span class="s1">&#39;--out&#39;</span><span class="p">,</span> <span class="nv">$searchBaseline</span><span class="p">)</span>
+<span class="nv">$stamp</span> <span class="p">=</span> <span class="nb">Get-Date</span> <span class="n">-Format</span> <span class="s1">'yyyyMMdd-HHmmss'</span>
+<span class="nv">$searchBaseline</span> <span class="p">=</span> <span class="s2">"$runs\$stamp-ai-search-baseline"</span>
+<span class="nv">$searchArgs</span> <span class="p">+=</span> <span class="p">@(</span><span class="s1">'--out'</span><span class="p">,</span> <span class="nv">$searchBaseline</span><span class="p">)</span>
 <span class="n">python</span> <span class="nv">@searchArgs</span>
 </code></pre></div>
 <p>The example records <code>5</code> when a deployed document limit is missing instead of
@@ -2033,21 +2033,21 @@ Pool and de-duplicate their candidates <strong>within each backend</strong>:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">New-Item</span> <span class="n">-ItemType</span> <span class="n">Directory</span> <span class="n">-Force</span> <span class="p">.\</span><span class="n">retrieval-lab</span><span class="p">\</span><span class="n">qrels</span><span class="p">\</span><span class="n">foundry_iq</span> <span class="p">|</span> <span class="nb">Out-Null</span>
 <span class="nb">New-Item</span> <span class="n">-ItemType</span> <span class="n">Directory</span> <span class="n">-Force</span> <span class="p">.\</span><span class="n">retrieval-lab</span><span class="p">\</span><span class="n">qrels</span><span class="p">\</span><span class="n">ai_search</span> <span class="p">|</span> <span class="nb">Out-Null</span>
 
-<span class="n">python</span> <span class="s2">&quot;$tools\pool_candidates.py&quot;</span> <span class="p">`</span>
+<span class="n">python</span> <span class="s2">"$tools\pool_candidates.py"</span> <span class="p">`</span>
     <span class="p">-</span><span class="n">-retrieved</span> <span class="p">.\</span><span class="n">retrieval-lab</span><span class="p">\</span><span class="n">runs</span><span class="p">\*</span><span class="n">-foundry</span><span class="p">-*\</span><span class="n">retrieved</span><span class="p">.</span><span class="n">json</span> <span class="p">`</span>
     <span class="p">-</span><span class="n">-output</span> <span class="p">.\</span><span class="n">retrieval-lab</span><span class="p">\</span><span class="n">qrels</span><span class="p">\</span><span class="n">foundry_iq</span><span class="p">\</span><span class="n">candidate-pool</span><span class="p">.</span><span class="n">json</span>
 
-<span class="n">python</span> <span class="s2">&quot;$tools\pool_candidates.py&quot;</span> <span class="p">`</span>
+<span class="n">python</span> <span class="s2">"$tools\pool_candidates.py"</span> <span class="p">`</span>
     <span class="p">-</span><span class="n">-retrieved</span> <span class="p">.\</span><span class="n">retrieval-lab</span><span class="p">\</span><span class="n">runs</span><span class="p">\*</span><span class="n">-ai-search</span><span class="p">-*\</span><span class="n">retrieved</span><span class="p">.</span><span class="n">json</span> <span class="p">`</span>
     <span class="p">-</span><span class="n">-output</span> <span class="p">.\</span><span class="n">retrieval-lab</span><span class="p">\</span><span class="n">qrels</span><span class="p">\</span><span class="n">ai_search</span><span class="p">\</span><span class="n">candidate-pool</span><span class="p">.</span><span class="n">json</span>
 </code></pre></div>
 <p>Label every pooled candidate, including irrelevant ones, and save the results
 as <code>qrels/&lt;backend&gt;/v1.json</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;fuel-pressure&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="nt">"fuel-pressure"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;document_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;exact identifier emitted by that backend adapter&gt;&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;query_relevance_label&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span>
+<span class="w">      </span><span class="nt">"document_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;exact identifier emitted by that backend adapter&gt;"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"query_relevance_label"</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">]</span>
 <span class="p">}</span>
@@ -2077,17 +2077,17 @@ qrels. Do not fall back to <code>references[].id</code>.</p>
 <p>Run the Microsoft Foundry
 <a href="https://learn.microsoft.com/azure/foundry/concepts/evaluation-evaluators/rag-evaluators#document-retrieval">Document Retrieval evaluator</a>
 once per backend:</p>
-<div class="highlight"><pre><span></span><code><span class="n">python</span> <span class="s2">&quot;$tools\evaluate_retrieval.py&quot;</span> <span class="p">`</span>
-    <span class="p">-</span><span class="n">-retrieved</span> <span class="s2">&quot;$foundryBaseline\retrieved.json&quot;</span> <span class="p">`</span>
+<div class="highlight"><pre><span></span><code><span class="n">python</span> <span class="s2">"$tools\evaluate_retrieval.py"</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-retrieved</span> <span class="s2">"$foundryBaseline\retrieved.json"</span> <span class="p">`</span>
     <span class="p">-</span><span class="n">-qrels</span> <span class="p">.\</span><span class="n">retrieval-lab</span><span class="p">\</span><span class="n">qrels</span><span class="p">\</span><span class="n">foundry_iq</span><span class="p">\</span><span class="n">v1</span><span class="p">.</span><span class="n">json</span> <span class="p">`</span>
-    <span class="p">-</span><span class="n">-timings</span> <span class="s2">&quot;$foundryBaseline\timings.json&quot;</span> <span class="p">`</span>
-    <span class="p">-</span><span class="n">-output</span> <span class="s2">&quot;$foundryBaseline\metrics.json&quot;</span>
+    <span class="p">-</span><span class="n">-timings</span> <span class="s2">"$foundryBaseline\timings.json"</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-output</span> <span class="s2">"$foundryBaseline\metrics.json"</span>
 
-<span class="n">python</span> <span class="s2">&quot;$tools\evaluate_retrieval.py&quot;</span> <span class="p">`</span>
-    <span class="p">-</span><span class="n">-retrieved</span> <span class="s2">&quot;$searchBaseline\retrieved.json&quot;</span> <span class="p">`</span>
+<span class="n">python</span> <span class="s2">"$tools\evaluate_retrieval.py"</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-retrieved</span> <span class="s2">"$searchBaseline\retrieved.json"</span> <span class="p">`</span>
     <span class="p">-</span><span class="n">-qrels</span> <span class="p">.\</span><span class="n">retrieval-lab</span><span class="p">\</span><span class="n">qrels</span><span class="p">\</span><span class="n">ai_search</span><span class="p">\</span><span class="n">v1</span><span class="p">.</span><span class="n">json</span> <span class="p">`</span>
-    <span class="p">-</span><span class="n">-timings</span> <span class="s2">&quot;$searchBaseline\timings.json&quot;</span> <span class="p">`</span>
-    <span class="p">-</span><span class="n">-output</span> <span class="s2">&quot;$searchBaseline\metrics.json&quot;</span>
+    <span class="p">-</span><span class="n">-timings</span> <span class="s2">"$searchBaseline\timings.json"</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-output</span> <span class="s2">"$searchBaseline\metrics.json"</span>
 </code></pre></div>
 <p>Track at least:</p>
 <table>
@@ -2172,25 +2172,25 @@ tuning questions, and restore the baseline before changing a different lever.</p
 </tbody>
 </table>
 <p>Example direct-search sweep:</p>
-<div class="highlight"><pre><span></span><code><span class="nv">$stamp</span> <span class="p">=</span> <span class="nb">Get-Date</span> <span class="n">-Format</span> <span class="s1">&#39;yyyyMMdd-HHmmss&#39;</span>
-<span class="n">python</span> <span class="s2">&quot;$tools\retrieve.py&quot;</span> <span class="p">`</span>
+<div class="highlight"><pre><span></span><code><span class="nv">$stamp</span> <span class="p">=</span> <span class="nb">Get-Date</span> <span class="n">-Format</span> <span class="s1">'yyyyMMdd-HHmmss'</span>
+<span class="n">python</span> <span class="s2">"$tools\retrieve.py"</span> <span class="p">`</span>
     <span class="p">-</span><span class="n">-backend</span> <span class="n">ai_search</span> <span class="p">`</span>
     <span class="p">-</span><span class="n">-questions</span> <span class="p">.\</span><span class="n">retrieval-lab</span><span class="p">\</span><span class="n">questions</span><span class="p">.</span><span class="n">jsonl</span> <span class="p">`</span>
     <span class="p">-</span><span class="n">-split</span> <span class="n">tune</span> <span class="p">`</span>
     <span class="p">-</span><span class="n">-approach</span> <span class="n">hybrid</span> <span class="p">`</span>
     <span class="p">-</span><span class="n">-top-k</span> <span class="n">5</span> <span class="p">`</span>
     <span class="p">-</span><span class="n">-no-semantic</span> <span class="p">`</span>
-    <span class="p">-</span><span class="n">-out</span> <span class="s2">&quot;$runs\$stamp-ai-search-hybrid-k5-no-semantic&quot;</span>
+    <span class="p">-</span><span class="n">-out</span> <span class="s2">"$runs\$stamp-ai-search-hybrid-k5-no-semantic"</span>
 
-<span class="nv">$stamp</span> <span class="p">=</span> <span class="nb">Get-Date</span> <span class="n">-Format</span> <span class="s1">&#39;yyyyMMdd-HHmmss&#39;</span>
-<span class="n">python</span> <span class="s2">&quot;$tools\retrieve.py&quot;</span> <span class="p">`</span>
+<span class="nv">$stamp</span> <span class="p">=</span> <span class="nb">Get-Date</span> <span class="n">-Format</span> <span class="s1">'yyyyMMdd-HHmmss'</span>
+<span class="n">python</span> <span class="s2">"$tools\retrieve.py"</span> <span class="p">`</span>
     <span class="p">-</span><span class="n">-backend</span> <span class="n">ai_search</span> <span class="p">`</span>
     <span class="p">-</span><span class="n">-questions</span> <span class="p">.\</span><span class="n">retrieval-lab</span><span class="p">\</span><span class="n">questions</span><span class="p">.</span><span class="n">jsonl</span> <span class="p">`</span>
     <span class="p">-</span><span class="n">-split</span> <span class="n">tune</span> <span class="p">`</span>
     <span class="p">-</span><span class="n">-approach</span> <span class="n">hybrid</span> <span class="p">`</span>
     <span class="p">-</span><span class="n">-top-k</span> <span class="n">5</span> <span class="p">`</span>
     <span class="p">-</span><span class="n">-semantic</span> <span class="p">`</span>
-    <span class="p">-</span><span class="n">-out</span> <span class="s2">&quot;$runs\$stamp-ai-search-hybrid-k5-semantic&quot;</span>
+    <span class="p">-</span><span class="n">-out</span> <span class="s2">"$runs\$stamp-ai-search-hybrid-k5-semantic"</span>
 </code></pre></div>
 <p>Only the semantic-ranker switch changes between these runs. Do not enable it
 for vector-only search.</p>
@@ -2224,7 +2224,7 @@ reuse tuning-set averages as held-out evidence.</p>
 <p>Write the winner to the same active App Configuration label you identified in
 Step 2. In most deployments this is <code>gpt-rag</code>; a higher-precedence
 service-specific override must be changed or removed instead.</p>
-<div class="highlight"><pre><span></span><code><span class="nv">$targetLabel</span> <span class="p">=</span> <span class="s1">&#39;gpt-rag&#39;</span>
+<div class="highlight"><pre><span></span><code><span class="nv">$targetLabel</span> <span class="p">=</span> <span class="s1">'gpt-rag'</span>
 
 <span class="n">az</span> <span class="n">appconfig</span> <span class="n">kv</span> <span class="nb">set </span><span class="p">`</span>
     <span class="p">-</span><span class="n">-name</span> <span class="nv">$script:AppConfigName</span> <span class="p">`</span>
@@ -2250,11 +2250,11 @@ revision:</p>
 <span class="nv">$revision</span> <span class="p">=</span> <span class="n">az</span> <span class="n">containerapp</span> <span class="n">revision</span> <span class="n">list</span> <span class="p">`</span>
     <span class="p">-</span><span class="n">-name</span> <span class="nv">$env:ORCHESTRATOR_APP</span> <span class="p">`</span>
     <span class="p">-</span><span class="n">-resource-group</span> <span class="nv">$env:RESOURCE_GROUP</span> <span class="p">`</span>
-    <span class="p">-</span><span class="n">-query</span> <span class="s2">&quot;[?properties.active].name | [0]&quot;</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-query</span> <span class="s2">"[?properties.active].name | [0]"</span> <span class="p">`</span>
     <span class="p">-</span><span class="n">-output</span> <span class="n">tsv</span>
 
 <span class="k">if</span> <span class="p">(</span><span class="o">-not</span> <span class="nv">$revision</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">throw</span> <span class="s2">&quot;No active orchestrator revision was found.&quot;</span>
+    <span class="k">throw</span> <span class="s2">"No active orchestrator revision was found."</span>
 <span class="p">}</span>
 
 <span class="n">az</span> <span class="n">containerapp</span> <span class="n">revision</span> <span class="n">restart</span> <span class="p">`</span>

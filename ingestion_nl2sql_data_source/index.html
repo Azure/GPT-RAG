@@ -1830,12 +1830,12 @@
 </ul>
 <p><strong>Example</strong></p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;table&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sales_order&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Table containing sales order data.&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;datasource&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;wwi-sales-data&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;columns&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;OrderID&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Unique identifier for each sales order.&quot;</span><span class="w"> </span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;OrderDate&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Date when the sales order was placed.&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="nt">"table"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sales_order"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Table containing sales order data."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"datasource"</span><span class="p">:</span><span class="w"> </span><span class="s2">"wwi-sales-data"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"columns"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"OrderID"</span><span class="p">,</span><span class="w"> </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Unique identifier for each sales order."</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"OrderDate"</span><span class="p">,</span><span class="w"> </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Date when the sales order was placed."</span><span class="w"> </span><span class="p">}</span>
 <span class="w">  </span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -1849,10 +1849,10 @@
 </ul>
 <p><strong>Example</strong></p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;datasource&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;adventureworks&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;question&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;What are the top 5 most expensive products currently available for sale?&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;query&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SELECT TOP 5 ProductID, Name, ListPrice FROM SalesLT.Product WHERE SellEndDate IS NULL ORDER BY ListPrice DESC&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;reasoning&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Retrieves top 5 products by ListPrice that are currently for sale.&quot;</span>
+<span class="w">  </span><span class="nt">"datasource"</span><span class="p">:</span><span class="w"> </span><span class="s2">"adventureworks"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"question"</span><span class="p">:</span><span class="w"> </span><span class="s2">"What are the top 5 most expensive products currently available for sale?"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"query"</span><span class="p">:</span><span class="w"> </span><span class="s2">"SELECT TOP 5 ProductID, Name, ListPrice FROM SalesLT.Product WHERE SellEndDate IS NULL ORDER BY ListPrice DESC"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"reasoning"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Retrieves top 5 products by ListPrice that are currently for sale."</span>
 <span class="p">}</span>
 </code></pre></div>
 <h4 id="measure-metadata">Measure Metadata</h4>
@@ -1867,12 +1867,12 @@
 </ul>
 <p><strong>Example</strong></p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;datasource&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ecommerce&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Total Revenue (%)&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Calculates percentage of total revenue for the selected period.&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;external&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;data_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CURRENCY&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;source_model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Executive Sales Dashboard&quot;</span>
+<span class="w">  </span><span class="nt">"datasource"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Ecommerce"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Total Revenue (%)"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Calculates percentage of total revenue for the selected period."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"external"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"data_type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"CURRENCY"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"source_model"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Executive Sales Dashboard"</span>
 <span class="p">}</span>
 </code></pre></div>
 <blockquote>
@@ -1898,34 +1898,34 @@
 <BR><i>Sample Datasource Configuration</i></p>
 <h3 id="semantic-model-example">Semantic Model Example</h3>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;wwi-sales-aggregated-data&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Aggregated sales data for insights such as sales by employee or city.&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;semantic_model&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;organization&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;myorg&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;dataset&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;your_dataset_or_semantic_model_name&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;tenant_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;your_sp_tenant_id&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;client_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;your_sp_client_id&quot;</span>
+<span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"wwi-sales-aggregated-data"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Aggregated sales data for insights such as sales by employee or city."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"semantic_model"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"organization"</span><span class="p">:</span><span class="w"> </span><span class="s2">"myorg"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"dataset"</span><span class="p">:</span><span class="w"> </span><span class="s2">"your_dataset_or_semantic_model_name"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"tenant_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"your_sp_tenant_id"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"client_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"your_sp_client_id"</span>
 <span class="p">}</span>
 </code></pre></div>
 <h3 id="sql-endpoint-example">SQL Endpoint Example</h3>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;wwi-sales-star-schema&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Star schema with sales data and dimension tables.&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sql_endpoint&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;organization&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;myorg&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;server&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;your_sql_endpoint.fabric.microsoft.com&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;database&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;your_lakehouse_name&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;tenant_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;your_sp_tenant_id&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;client_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;your_sp_client_id&quot;</span>
+<span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"wwi-sales-star-schema"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Star schema with sales data and dimension tables."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sql_endpoint"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"organization"</span><span class="p">:</span><span class="w"> </span><span class="s2">"myorg"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"server"</span><span class="p">:</span><span class="w"> </span><span class="s2">"your_sql_endpoint.fabric.microsoft.com"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"database"</span><span class="p">:</span><span class="w"> </span><span class="s2">"your_lakehouse_name"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"tenant_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"your_sp_tenant_id"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"client_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"your_sp_client_id"</span>
 <span class="p">}</span>
 </code></pre></div>
 <h3 id="sql-database-example">SQL Database Example</h3>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;adventureworks&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AdventureWorksLT database with customers, orders, and products.&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sql_database&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;database&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;adventureworkslt&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;server&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sqlservername.database.windows.net&quot;</span>
+<span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"adventureworks"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"AdventureWorksLT database with customers, orders, and products."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sql_database"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"database"</span><span class="p">:</span><span class="w"> </span><span class="s2">"adventureworkslt"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"server"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sqlservername.database.windows.net"</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>For data sources that require secrets—such as those accessed via a Service Principal or SQL Server using SQL authentication—passwords are stored in Azure Key Vault following the naming convention {datasource_id}-secret.</p>

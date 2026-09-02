@@ -1800,10 +1800,10 @@ compatible with legacy names.</p>
 <p>You can override each token independently while staying in <code>caf</code> mode. This is
 useful when your organization already publishes CAF token values that GPT-RAG
 should adopt.</p>
-<div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">CAF_WORKLOAD_NAME</span>    <span class="s2">&quot;genai&quot;</span>
-<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">CAF_ENVIRONMENT_NAME</span> <span class="s2">&quot;prod&quot;</span>
-<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">CAF_REGION_NAME</span>      <span class="s2">&quot;aue&quot;</span>
-<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">CAF_INSTANCE</span>         <span class="s2">&quot;001&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">CAF_WORKLOAD_NAME</span>    <span class="s2">"genai"</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">CAF_ENVIRONMENT_NAME</span> <span class="s2">"prod"</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">CAF_REGION_NAME</span>      <span class="s2">"aue"</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">CAF_INSTANCE</span>         <span class="s2">"001"</span>
 <span class="n">azd</span> <span class="n">provision</span>
 </code></pre></div>
 <p>With the values above, a Cosmos DB account is named <code>cosmos-genai-prod-aue-001</code>.</p>

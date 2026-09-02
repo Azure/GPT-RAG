@@ -1544,18 +1544,18 @@
 <p>Before you run <code>azd provision</code>, set the model in the <a href="https://github.com/Azure/GPT-RAG/blob/main/infra/main.parameters.json"><code>infra/main.parameters.json</code></a> file (this file is used by the infrastructure provisioning step).</p>
 <p>In <code>infra/main.parameters.json</code>, update the <code>model</code> section.</p>
 <p>Example (default)</p>
-<div class="highlight"><pre><span></span><code><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;format&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;OpenAI&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;gpt-4o&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-11-20&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nt">"model"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"format"</span><span class="p">:</span><span class="w"> </span><span class="s2">"OpenAI"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"gpt-4o"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2024-11-20"</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>Example (Grok)</p>
 <p>Change <code>format</code>, <code>name</code>, and <code>version</code> to match the model you selected in the catalog.</p>
-<div class="highlight"><pre><span></span><code><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;format&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;xAI&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;grok-4-fast-non-reasoning&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nt">"model"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"format"</span><span class="p">:</span><span class="w"> </span><span class="s2">"xAI"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"grok-4-fast-non-reasoning"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1"</span>
 <span class="p">}</span>
 </code></pre></div>
 <p><strong>Models tested</strong></p>

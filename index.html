@@ -1594,34 +1594,19 @@
 
 <p><img src="media/logo.png" alt="Enterprise RAG Logo" width="80" align="left"/></p>
 <h1 id="gpt-rag-solution-accelerator">GPT-RAG Solution Accelerator</h1>
-<p>GPT-RAG is an enterprise-grade accelerator for building conversational AI assistants on Azure, powered by intelligent agents that understand questions, find the right information, and deliver clear, accurate answers using trusted enterprise data.</p>
+<p>GPT-RAG is an enterprise-grade accelerator for building agentic AI assistants on <strong>Microsoft Foundry</strong>. Agents built with the <strong>Microsoft Agent Framework</strong> interpret the question, retrieve the right evidence through <strong>Foundry IQ</strong>, the default retrieval backend since v3.0.2, and return grounded, traceable answers over trusted enterprise data.</p>
+<p>Foundry IQ gives the orchestrator one Knowledge Base endpoint that fans out across Blob, existing Azure AI Search indexes, Work IQ, Fabric, SharePoint, OneLake, Web and MCP servers, with permission trimming built in. Azure AI Search direct remains fully supported as the compatibility and rollback path. See <a href="howto_grounding_overview/">Grounding sources overview</a>.</p>
 <p>Designed with Zero-Trust security and Infrastructure as Code (IaC) principles from the ground up, GPT-RAG accelerates production deployments while ensuring consistency, governance, and operational excellence. It supports text, image, and voice scenarios, enabling organizations to rapidly create rich multimodal experiences.</p>
 <p><a class="md-button--pill" href="https://github.com/azure/gpt-rag/releases/latest">Latest Stable Release v3.7.0 <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5.5 7A1.5 1.5 0 0 1 4 5.5 1.5 1.5 0 0 1 5.5 4 1.5 1.5 0 0 1 7 5.5 1.5 1.5 0 0 1 5.5 7m15.91 4.58-9-9C12.05 2.22 11.55 2 11 2H4c-1.11 0-2 .89-2 2v7c0 .55.22 1.05.59 1.41l8.99 9c.37.36.87.59 1.42.59s1.05-.23 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.56-.23-1.06-.59-1.42"/></svg></span></a></p>
 <h2 id="architecture-at-a-glance">Architecture at a glance</h2>
 <p>GPT-RAG can start as a Basic deployment and expand into Zero Trust, public
-ingress, existing-platform integration, or optional AI capabilities. The
-approved target makes Microsoft Foundry hosted/no-panel the fresh-deployment
-chat runtime and retains the Container Apps orchestrator as an explicit
-fallback. See the <a href="architecture/">Architecture</a> page for the mode contract
-and required-vs-configurable deployment table.</p>
-<div class="admonition warning">
-<p class="admonition-title">Exact matrix pinned; runtime validation and release remain blocked</p>
-<p>The umbrella integration pins UI <code>v2.6.0</code>, orchestrator <code>v4.0.0</code>, ingestion
-<code>v2.7.0</code>, and AILZ <code>v2.5.0</code>. Explicit hosted-panel topology selection is
-supported, but continuity, user-history, owner-binding validation, and
-operator-surface gates remain deployment-published <code>false</code>. The latest
-runtime attempt activated the agent version but session readiness returned
-HTTP 424, so the integration is not validated or shipped. See the
-<a href="hosted_agent_release_matrix/">hosted-agent integration matrix</a> for
-the exact runtime, identity, RBAC, panel, data, and rollback contracts.</p>
-</div>
-<p><img alt="Chat runtime modes and hosted deployment lifecycle" src="media/architecture_chat_runtime_modes.svg" /></p>
-<p><img alt="Modular architecture layers" src="media/architecture_modular_layers.svg" /></p>
+ingress, existing-platform integration, or optional AI capabilities. Retrieval
+and orchestration run on Microsoft Foundry, with the orchestrator hosted in
+Container Apps. See the <a href="architecture/">Architecture</a> page for the deployment
+modes and the required-vs-configurable table.</p>
 <p><img alt="Zero Trust Architecture" src="media/architecture_zero_trust.png" />
 <em>Full Zero Trust reference architecture. This is the complete network-isolated
-view, not the minimum Basic deployment. The focused SVG above describes the
-component-level hosted design; the matrix page records its umbrella release
-gate.</em></p>
+view, not the minimum Basic deployment.</em></p>
 <h2 id="governance">Governance</h2>
 <p>Before connecting enterprise data or relying on telemetry as evidence, review
 <a href="governance_overview/">Governance and responsible operation</a>. It explains
@@ -1640,7 +1625,7 @@ disabled by default.</p>
 <tbody>
 <tr>
 <td><strong><a href="https://github.com/Azure/gpt-rag-orchestrator">Orchestrator</a></strong></td>
-<td>Manages agentic workflows with Microsoft Agent Framework, Azure AI, and strategy-specific integrations.</td>
+<td>Manages agentic workflows with Microsoft Agent Framework on Microsoft Foundry, Foundry IQ retrieval, and strategy-specific integrations.</td>
 </tr>
 <tr>
 <td><strong><a href="https://github.com/Azure/gpt-rag-ui">Web UI</a></strong></td>

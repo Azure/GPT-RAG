@@ -1809,10 +1809,10 @@ kind, and the standard reference / snippet flags; workspace and lakehouse
 ids are captured in App Configuration for observability and for the
 Fabric RBAC step below, they are not sent again on every retrieve.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;indexedOneLake&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;knowledgeSourceName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;ONELAKE_KNOWLEDGE_SOURCE_NAME&gt;&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;includeReferences&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;includeReferenceSourceData&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">  </span><span class="nt">"kind"</span><span class="p">:</span><span class="w"> </span><span class="s2">"indexedOneLake"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"knowledgeSourceName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;ONELAKE_KNOWLEDGE_SOURCE_NAME&gt;"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"includeReferences"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"includeReferenceSourceData"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>The four keys must all be set for the source to be used at retrieval. If
@@ -1825,15 +1825,15 @@ signed-in user. That identity must be granted <code>Contributor</code> on the ta
 Fabric workspace before enabling the source. Do this once per workspace,
 manually, using a Fabric admin identity:</p>
 <div class="highlight"><pre><span></span><code><span class="c"># Replace with the target workspace id and the Foundry IQ MI object id</span>
-<span class="nv">$workspaceId</span>  <span class="p">=</span> <span class="s2">&quot;&lt;ONELAKE_WORKSPACE_ID&gt;&quot;</span>
-<span class="nv">$principalId</span>  <span class="p">=</span> <span class="s2">&quot;&lt;FOUNDRY_IQ_MANAGED_IDENTITY_OBJECT_ID&gt;&quot;</span>
+<span class="nv">$workspaceId</span>  <span class="p">=</span> <span class="s2">"&lt;ONELAKE_WORKSPACE_ID&gt;"</span>
+<span class="nv">$principalId</span>  <span class="p">=</span> <span class="s2">"&lt;FOUNDRY_IQ_MANAGED_IDENTITY_OBJECT_ID&gt;"</span>
 
 <span class="n">az</span> <span class="n">rest</span> <span class="p">`</span>
   <span class="p">-</span><span class="n">-method</span> <span class="n">POST</span> <span class="p">`</span>
-  <span class="p">-</span><span class="n">-url</span> <span class="s2">&quot;https://api.fabric.microsoft.com/v1/workspaces/$workspaceId/roleAssignments&quot;</span> <span class="p">`</span>
+  <span class="p">-</span><span class="n">-url</span> <span class="s2">"https://api.fabric.microsoft.com/v1/workspaces/$workspaceId/roleAssignments"</span> <span class="p">`</span>
   <span class="p">-</span><span class="n">-body</span> <span class="p">(@{</span>
-    <span class="n">principal</span> <span class="p">=</span> <span class="p">@{</span> <span class="n">id</span> <span class="p">=</span> <span class="nv">$principalId</span><span class="p">;</span> <span class="nb">type </span><span class="p">=</span> <span class="s2">&quot;ServicePrincipal&quot;</span> <span class="p">}</span>
-    <span class="n">role</span>      <span class="p">=</span> <span class="s2">&quot;Contributor&quot;</span>
+    <span class="n">principal</span> <span class="p">=</span> <span class="p">@{</span> <span class="n">id</span> <span class="p">=</span> <span class="nv">$principalId</span><span class="p">;</span> <span class="nb">type </span><span class="p">=</span> <span class="s2">"ServicePrincipal"</span> <span class="p">}</span>
+    <span class="n">role</span>      <span class="p">=</span> <span class="s2">"Contributor"</span>
   <span class="p">}</span> <span class="p">|</span> <span class="nb">ConvertTo-Json</span> <span class="n">-Depth</span> <span class="n">5</span><span class="p">)</span>
 </code></pre></div>
 <p>If this call returns <code>403</code>, the caller lacks Fabric admin rights on the

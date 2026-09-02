@@ -1821,13 +1821,13 @@ bounded, oldest-to-newest history on every request.</p>
 <li>classic non-hosted <code>/responses</code> behavior is unchanged.</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;input&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="p">{</span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;What is the retention period?&quot;</span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;assistant&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;The policy states 30 days.&quot;</span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Who approves an exception?&quot;</span><span class="p">}</span>
+<span class="w">  </span><span class="nt">"input"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">"role"</span><span class="p">:</span><span class="w"> </span><span class="s2">"user"</span><span class="p">,</span><span class="w"> </span><span class="nt">"content"</span><span class="p">:</span><span class="w"> </span><span class="s2">"What is the retention period?"</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">"role"</span><span class="p">:</span><span class="w"> </span><span class="s2">"assistant"</span><span class="p">,</span><span class="w"> </span><span class="nt">"content"</span><span class="p">:</span><span class="w"> </span><span class="s2">"The policy states 30 days."</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">"role"</span><span class="p">:</span><span class="w"> </span><span class="s2">"user"</span><span class="p">,</span><span class="w"> </span><span class="nt">"content"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Who approves an exception?"</span><span class="p">}</span>
 <span class="w">  </span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;stream&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;store&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">  </span><span class="nt">"stream"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"store"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
 <span class="p">}</span>
 </code></pre></div>
 <p><code>POST /invocations</code> remains a distinct compatibility protocol. Its
@@ -2036,7 +2036,7 @@ a working MSAL Authorization Code + PKCE flow.</p>
 For an explicit hosted-panel deployment, select the topology before the first
 provision:</p>
 <div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">DEPLOYMENT_TOPOLOGY</span> <span class="n">hosted-panel</span>
-<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">HOSTED_AGENT_RESOURCE_SCOPE</span> <span class="s2">&quot;api://&lt;application-id&gt;/.default&quot;</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">HOSTED_AGENT_RESOURCE_SCOPE</span> <span class="s2">"api://&lt;application-id&gt;/.default"</span>
 <span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">HOSTED_CONTINUITY_ENABLED</span> <span class="n">false</span>
 <span class="n">azd</span> <span class="n">provision</span>
 <span class="n">pwsh</span> <span class="n">scripts</span><span class="p">/</span><span class="n">prepareHostedDeployment</span><span class="p">.</span><span class="n">ps1</span>

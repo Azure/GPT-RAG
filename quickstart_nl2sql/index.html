@@ -1662,56 +1662,56 @@ Storage Account: st&lt;suffix&gt; (note: no dash in storage account names)
 </code></pre></div>
 <p><strong>Quick way to find suffix:</strong>
 <div class="highlight"><pre><span></span><code><span class="c"># List resource groups</span>
-<span class="n">az</span> <span class="nb">group </span><span class="n">list</span> <span class="p">-</span><span class="n">-query</span> <span class="s2">&quot;[?contains(name,&#39;gpt-rag&#39;)].name&quot;</span> <span class="n">-o</span> <span class="n">table</span>
+<span class="n">az</span> <span class="nb">group </span><span class="n">list</span> <span class="p">-</span><span class="n">-query</span> <span class="s2">"[?contains(name,'gpt-rag')].name"</span> <span class="n">-o</span> <span class="n">table</span>
 
 <span class="c"># List resources in your group</span>
-<span class="n">az</span> <span class="n">resource</span> <span class="n">list</span> <span class="n">-g</span> <span class="p">&lt;</span><span class="n">your-rg</span><span class="p">&gt;</span> <span class="p">-</span><span class="n">-query</span> <span class="s2">&quot;[].name&quot;</span> <span class="n">-o</span> <span class="n">table</span>
+<span class="n">az</span> <span class="n">resource</span> <span class="n">list</span> <span class="n">-g</span> <span class="p">&lt;</span><span class="n">your-rg</span><span class="p">&gt;</span> <span class="p">-</span><span class="n">-query</span> <span class="s2">"[].name"</span> <span class="n">-o</span> <span class="n">table</span>
 </code></pre></div></p>
 <hr />
 <p><strong>Step 3: Store Password in Key Vault (3 min)</strong></p>
 <p><strong>CRITICAL:</strong> Secret name MUST be <code>{datasource-id}-secret</code></p>
 <div class="highlight"><pre><span></span><code><span class="c"># Using the password you created in Step 1</span>
-<span class="c"># If your datasource id will be &quot;adventureworks&quot;</span>
-<span class="c"># Then secret name must be &quot;adventureworks-secret&quot;</span>
+<span class="c"># If your datasource id will be "adventureworks"</span>
+<span class="c"># Then secret name must be "adventureworks-secret"</span>
 
 <span class="n">az</span> <span class="n">keyvault</span> <span class="n">secret</span> <span class="nb">set </span><span class="p">`</span>
-  <span class="p">-</span><span class="n">-vault-name</span> <span class="s2">&quot;kv-&lt;your-suffix&gt;&quot;</span> <span class="p">`</span>
-  <span class="p">-</span><span class="n">-name</span> <span class="s2">&quot;adventureworks-secret&quot;</span> <span class="p">`</span>
-  <span class="p">-</span><span class="n">-value</span> <span class="s2">&quot;&lt;your-sql-password-from-step-1&gt;&quot;</span>
+  <span class="p">-</span><span class="n">-vault-name</span> <span class="s2">"kv-&lt;your-suffix&gt;"</span> <span class="p">`</span>
+  <span class="p">-</span><span class="n">-name</span> <span class="s2">"adventureworks-secret"</span> <span class="p">`</span>
+  <span class="p">-</span><span class="n">-value</span> <span class="s2">"&lt;your-sql-password-from-step-1&gt;"</span>
 </code></pre></div>
 <p><strong>Verify it worked:</strong>
 <div class="highlight"><pre><span></span><code><span class="n">az</span> <span class="n">keyvault</span> <span class="n">secret</span> <span class="n">show</span> <span class="p">`</span>
-  <span class="p">-</span><span class="n">-vault-name</span> <span class="s2">&quot;kv-&lt;your-suffix&gt;&quot;</span> <span class="p">`</span>
-  <span class="p">-</span><span class="n">-name</span> <span class="s2">&quot;adventureworks-secret&quot;</span> <span class="p">`</span>
-  <span class="p">-</span><span class="n">-query</span> <span class="s2">&quot;value&quot;</span> <span class="n">-o</span> <span class="n">tsv</span>
+  <span class="p">-</span><span class="n">-vault-name</span> <span class="s2">"kv-&lt;your-suffix&gt;"</span> <span class="p">`</span>
+  <span class="p">-</span><span class="n">-name</span> <span class="s2">"adventureworks-secret"</span> <span class="p">`</span>
+  <span class="p">-</span><span class="n">-query</span> <span class="s2">"value"</span> <span class="n">-o</span> <span class="n">tsv</span>
 </code></pre></div></p>
 <hr />
 <p><strong>Step 4: Grant Container App Access to Key Vault (2 min)</strong></p>
-<div class="highlight"><pre><span></span><code><span class="c"># Get orchestrator&#39;s managed identity</span>
+<div class="highlight"><pre><span></span><code><span class="c"># Get orchestrator's managed identity</span>
 <span class="nv">$principalId</span> <span class="p">=</span> <span class="n">az</span> <span class="n">containerapp</span> <span class="n">show</span> <span class="p">`</span>
-  <span class="p">-</span><span class="n">-name</span> <span class="s2">&quot;ca-&lt;your-suffix&gt;-orchestrator&quot;</span> <span class="p">`</span>
+  <span class="p">-</span><span class="n">-name</span> <span class="s2">"ca-&lt;your-suffix&gt;-orchestrator"</span> <span class="p">`</span>
   <span class="p">-</span><span class="n">-resource-group</span> <span class="p">&lt;</span><span class="n">your-rg</span><span class="p">&gt;</span> <span class="p">`</span>
-  <span class="p">-</span><span class="n">-query</span> <span class="s2">&quot;identity.principalId&quot;</span> <span class="n">-o</span> <span class="n">tsv</span>
+  <span class="p">-</span><span class="n">-query</span> <span class="s2">"identity.principalId"</span> <span class="n">-o</span> <span class="n">tsv</span>
 
 <span class="c"># Grant access</span>
 <span class="n">az</span> <span class="n">role</span> <span class="n">assignment</span> <span class="n">create</span> <span class="p">`</span>
   <span class="p">-</span><span class="n">-assignee</span> <span class="nv">$principalId</span> <span class="p">`</span>
-  <span class="p">-</span><span class="n">-role</span> <span class="s2">&quot;Key Vault Secrets User&quot;</span> <span class="p">`</span>
-  <span class="p">-</span><span class="n">-scope</span> <span class="s2">&quot;/subscriptions/&lt;sub-id&gt;/resourceGroups/&lt;rg&gt;/providers/Microsoft.KeyVault/vaults/kv-&lt;your-suffix&gt;&quot;</span>
+  <span class="p">-</span><span class="n">-role</span> <span class="s2">"Key Vault Secrets User"</span> <span class="p">`</span>
+  <span class="p">-</span><span class="n">-scope</span> <span class="s2">"/subscriptions/&lt;sub-id&gt;/resourceGroups/&lt;rg&gt;/providers/Microsoft.KeyVault/vaults/kv-&lt;your-suffix&gt;"</span>
 </code></pre></div>
 <hr />
 <p><strong>Step 5: Register Database in Cosmos DB (3 min)</strong></p>
 <p><strong>Azure Portal → Cosmos DB → cosmos-<code>&lt;suffix&gt;</code> → Data Explorer → ragdata database → datasources container → New Item</strong></p>
 <p>Paste this JSON, replacing <code>&lt;your-sql-server-name&gt;</code> with the <strong>server name you created in Step 1</strong> (e.g., <code>sql-gptrag-demo-xyz123</code>):</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;adventureworks&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sql_database&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AdventureWorksLT sample database with products and customers&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;server&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;your-sql-server-name&gt;.database.windows.net&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;database&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;adventureworks-demo&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;uid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sqladmin&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;created_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-11-17&quot;</span>
+<span class="w">    </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"adventureworks"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sql_database"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"AdventureWorksLT sample database with products and customers"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"server"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;your-sql-server-name&gt;.database.windows.net"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"database"</span><span class="p">:</span><span class="w"> </span><span class="s2">"adventureworks-demo"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"uid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sqladmin"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"metadata"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"created_date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-11-17"</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -1759,26 +1759,26 @@ Storage Account: st&lt;suffix&gt; (note: no dash in storage account names)
 <p><strong>Create these files on your local machine:</strong></p>
 <p>Create <code>blob-upload\queries\how_many_products.json</code>:
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;question&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;How many products are in the database?&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;query&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SELECT COUNT(*) as product_count FROM SalesLT.Product&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;reasoning&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Simple count of all products&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;datasource&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;adventureworks&quot;</span>
+<span class="w">    </span><span class="nt">"question"</span><span class="p">:</span><span class="w"> </span><span class="s2">"How many products are in the database?"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"query"</span><span class="p">:</span><span class="w"> </span><span class="s2">"SELECT COUNT(*) as product_count FROM SalesLT.Product"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"reasoning"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Simple count of all products"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"datasource"</span><span class="p">:</span><span class="w"> </span><span class="s2">"adventureworks"</span>
 <span class="p">}</span>
 </code></pre></div></p>
 <p>Create <code>blob-upload\queries\top_expensive_products.json</code>:
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;question&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Show me the top 5 most expensive products&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;query&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SELECT TOP 5 ProductID, Name, ListPrice FROM SalesLT.Product ORDER BY ListPrice DESC&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;reasoning&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Get highest priced products&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;datasource&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;adventureworks&quot;</span>
+<span class="w">    </span><span class="nt">"question"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Show me the top 5 most expensive products"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"query"</span><span class="p">:</span><span class="w"> </span><span class="s2">"SELECT TOP 5 ProductID, Name, ListPrice FROM SalesLT.Product ORDER BY ListPrice DESC"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"reasoning"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Get highest priced products"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"datasource"</span><span class="p">:</span><span class="w"> </span><span class="s2">"adventureworks"</span>
 <span class="p">}</span>
 </code></pre></div></p>
 <p>Create <code>blob-upload\queries\product_categories.json</code>:
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;question&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;What product categories exist?&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;query&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SELECT DISTINCT Name FROM SalesLT.ProductCategory ORDER BY Name&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;reasoning&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;List all unique categories&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;datasource&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;adventureworks&quot;</span>
+<span class="w">    </span><span class="nt">"question"</span><span class="p">:</span><span class="w"> </span><span class="s2">"What product categories exist?"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"query"</span><span class="p">:</span><span class="w"> </span><span class="s2">"SELECT DISTINCT Name FROM SalesLT.ProductCategory ORDER BY Name"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"reasoning"</span><span class="p">:</span><span class="w"> </span><span class="s2">"List all unique categories"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"datasource"</span><span class="p">:</span><span class="w"> </span><span class="s2">"adventureworks"</span>
 <span class="p">}</span>
 </code></pre></div></p>
 <p><strong>C. Create Table Metadata Files</strong></p>
@@ -1808,23 +1808,23 @@ Storage Account: st&lt;suffix&gt; (note: no dash in storage account names)
 <p><strong>Create these files on your local machine:</strong></p>
 <p>Create <code>blob-upload\tables\saleslt_product.json</code>:
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;table&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SalesLT.Product&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Product catalog with names, prices, and descriptions&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;datasource&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;adventureworks&quot;</span>
+<span class="w">    </span><span class="nt">"table"</span><span class="p">:</span><span class="w"> </span><span class="s2">"SalesLT.Product"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Product catalog with names, prices, and descriptions"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"datasource"</span><span class="p">:</span><span class="w"> </span><span class="s2">"adventureworks"</span>
 <span class="p">}</span>
 </code></pre></div></p>
 <p>Create <code>blob-upload\tables\saleslt_productcategory.json</code>:
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;table&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SalesLT.ProductCategory&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Product categories for organizing products&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;datasource&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;adventureworks&quot;</span>
+<span class="w">    </span><span class="nt">"table"</span><span class="p">:</span><span class="w"> </span><span class="s2">"SalesLT.ProductCategory"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Product categories for organizing products"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"datasource"</span><span class="p">:</span><span class="w"> </span><span class="s2">"adventureworks"</span>
 <span class="p">}</span>
 </code></pre></div></p>
 <p>Create <code>blob-upload\tables\saleslt_customer.json</code>:
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;table&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SalesLT.Customer&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Customer information including names and contact details&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;datasource&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;adventureworks&quot;</span>
+<span class="w">    </span><span class="nt">"table"</span><span class="p">:</span><span class="w"> </span><span class="s2">"SalesLT.Customer"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Customer information including names and contact details"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"datasource"</span><span class="p">:</span><span class="w"> </span><span class="s2">"adventureworks"</span>
 <span class="p">}</span>
 </code></pre></div></p>
 <hr />
@@ -1836,7 +1836,7 @@ Storage Account: st&lt;suffix&gt; (note: no dash in storage account names)
 <p><strong>Upload command:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="c"># Upload all files (queries and tables)</span>
 <span class="n">az</span> <span class="n">storage</span> <span class="n">blob</span> <span class="n">upload-batch</span> <span class="p">`</span>
-  <span class="p">-</span><span class="n">-account-name</span> <span class="s2">&quot;st&lt;your-suffix&gt;&quot;</span> <span class="p">`</span>
+  <span class="p">-</span><span class="n">-account-name</span> <span class="s2">"st&lt;your-suffix&gt;"</span> <span class="p">`</span>
   <span class="p">-</span><span class="n">-destination</span> <span class="n">nl2sql</span> <span class="p">`</span>
   <span class="p">-</span><span class="n">-source</span> <span class="n">blob-upload</span> <span class="p">`</span>
   <span class="p">-</span><span class="n">-auth-mode</span> <span class="n">login</span>
@@ -1844,10 +1844,10 @@ Storage Account: st&lt;suffix&gt; (note: no dash in storage account names)
 <p><strong>Verify uploads:</strong>
 <div class="highlight"><pre><span></span><code><span class="c"># List all blobs in nl2sql container</span>
 <span class="n">az</span> <span class="n">storage</span> <span class="n">blob</span> <span class="n">list</span> <span class="p">`</span>
-  <span class="p">-</span><span class="n">-account-name</span> <span class="s2">&quot;st&lt;your-suffix&gt;&quot;</span> <span class="p">`</span>
+  <span class="p">-</span><span class="n">-account-name</span> <span class="s2">"st&lt;your-suffix&gt;"</span> <span class="p">`</span>
   <span class="p">-</span><span class="n">-container-name</span> <span class="n">nl2sql</span> <span class="p">`</span>
   <span class="p">-</span><span class="n">-auth-mode</span> <span class="n">login</span> <span class="p">`</span>
-  <span class="p">-</span><span class="n">-query</span> <span class="s2">&quot;[].name&quot;</span> <span class="n">-o</span> <span class="n">table</span>
+  <span class="p">-</span><span class="n">-query</span> <span class="s2">"[].name"</span> <span class="n">-o</span> <span class="n">table</span>
 </code></pre></div></p>
 <p>You should see:
 <div class="highlight"><pre><span></span><code>queries/how_many_products.json
@@ -1915,32 +1915,32 @@ tables/saleslt_customer.json
 </ul>
 <p><strong>Option 2: Force immediate ingestion by restarting the container:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="n">az</span> <span class="n">containerapp</span> <span class="n">revision</span> <span class="n">restart</span> <span class="p">`</span>
-  <span class="p">-</span><span class="n">-name</span> <span class="s2">&quot;ca-&lt;your-suffix&gt;-dataingest&quot;</span> <span class="p">`</span>
+  <span class="p">-</span><span class="n">-name</span> <span class="s2">"ca-&lt;your-suffix&gt;-dataingest"</span> <span class="p">`</span>
   <span class="p">-</span><span class="n">-resource-group</span> <span class="p">&lt;</span><span class="n">your-rg</span><span class="p">&gt;</span> <span class="p">`</span>
-  <span class="p">-</span><span class="n">-revision</span> <span class="p">$(</span><span class="n">az</span> <span class="n">containerapp</span> <span class="n">revision</span> <span class="n">list</span> <span class="p">-</span><span class="n">-name</span> <span class="s2">&quot;ca-&lt;your-suffix&gt;-dataingest&quot;</span> <span class="p">-</span><span class="n">-resource-group</span> <span class="p">&lt;</span><span class="n">your-rg</span><span class="p">&gt;</span> <span class="p">-</span><span class="n">-query</span> <span class="s2">&quot;[0].name&quot;</span> <span class="n">-o</span> <span class="n">tsv</span><span class="p">)</span>
+  <span class="p">-</span><span class="n">-revision</span> <span class="p">$(</span><span class="n">az</span> <span class="n">containerapp</span> <span class="n">revision</span> <span class="n">list</span> <span class="p">-</span><span class="n">-name</span> <span class="s2">"ca-&lt;your-suffix&gt;-dataingest"</span> <span class="p">-</span><span class="n">-resource-group</span> <span class="p">&lt;</span><span class="n">your-rg</span><span class="p">&gt;</span> <span class="p">-</span><span class="n">-query</span> <span class="s2">"[0].name"</span> <span class="n">-o</span> <span class="n">tsv</span><span class="p">)</span>
 </code></pre></div>
 <p><strong>Verify indexing completed:</strong></p>
 <p>Check the logs in blob storage:
 <div class="highlight"><pre><span></span><code><span class="c"># List ingestion run logs</span>
 <span class="n">az</span> <span class="n">storage</span> <span class="n">blob</span> <span class="n">list</span> <span class="p">`</span>
-  <span class="p">-</span><span class="n">-account-name</span> <span class="s2">&quot;st&lt;your-suffix&gt;&quot;</span> <span class="p">`</span>
+  <span class="p">-</span><span class="n">-account-name</span> <span class="s2">"st&lt;your-suffix&gt;"</span> <span class="p">`</span>
   <span class="p">-</span><span class="n">-container-name</span> <span class="n">jobs</span> <span class="p">`</span>
-  <span class="p">-</span><span class="n">-prefix</span> <span class="s2">&quot;nl2sql-indexer/runs/&quot;</span> <span class="p">`</span>
+  <span class="p">-</span><span class="n">-prefix</span> <span class="s2">"nl2sql-indexer/runs/"</span> <span class="p">`</span>
   <span class="p">-</span><span class="n">-auth-mode</span> <span class="n">login</span> <span class="p">`</span>
-  <span class="p">-</span><span class="n">-query</span> <span class="s2">&quot;[].{name:name, modified:properties.lastModified}&quot;</span> <span class="n">-o</span> <span class="n">table</span>
+  <span class="p">-</span><span class="n">-query</span> <span class="s2">"[].{name:name, modified:properties.lastModified}"</span> <span class="n">-o</span> <span class="n">table</span>
 </code></pre></div></p>
 <p>Download the most recent log:
 <div class="highlight"><pre><span></span><code><span class="c"># Get the latest run log</span>
 <span class="nv">$latestLog</span> <span class="p">=</span> <span class="n">az</span> <span class="n">storage</span> <span class="n">blob</span> <span class="n">list</span> <span class="p">`</span>
-  <span class="p">-</span><span class="n">-account-name</span> <span class="s2">&quot;st&lt;your-suffix&gt;&quot;</span> <span class="p">`</span>
+  <span class="p">-</span><span class="n">-account-name</span> <span class="s2">"st&lt;your-suffix&gt;"</span> <span class="p">`</span>
   <span class="p">-</span><span class="n">-container-name</span> <span class="n">jobs</span> <span class="p">`</span>
-  <span class="p">-</span><span class="n">-prefix</span> <span class="s2">&quot;nl2sql-indexer/runs/&quot;</span> <span class="p">`</span>
+  <span class="p">-</span><span class="n">-prefix</span> <span class="s2">"nl2sql-indexer/runs/"</span> <span class="p">`</span>
   <span class="p">-</span><span class="n">-auth-mode</span> <span class="n">login</span> <span class="p">`</span>
-  <span class="p">-</span><span class="n">-query</span> <span class="s2">&quot;[-1].name&quot;</span> <span class="n">-o</span> <span class="n">tsv</span>
+  <span class="p">-</span><span class="n">-query</span> <span class="s2">"[-1].name"</span> <span class="n">-o</span> <span class="n">tsv</span>
 
 <span class="c"># Download and view it</span>
 <span class="n">az</span> <span class="n">storage</span> <span class="n">blob</span> <span class="n">download</span> <span class="p">`</span>
-  <span class="p">-</span><span class="n">-account-name</span> <span class="s2">&quot;st&lt;your-suffix&gt;&quot;</span> <span class="p">`</span>
+  <span class="p">-</span><span class="n">-account-name</span> <span class="s2">"st&lt;your-suffix&gt;"</span> <span class="p">`</span>
   <span class="p">-</span><span class="n">-container-name</span> <span class="n">jobs</span> <span class="p">`</span>
   <span class="p">-</span><span class="n">-name</span> <span class="nv">$latestLog</span> <span class="p">`</span>
   <span class="p">-</span><span class="o">-file</span> <span class="n">run-log</span><span class="p">.</span><span class="n">json</span> <span class="p">`</span>

@@ -1532,16 +1532,16 @@ Let’s reverse this evolution — with visuals.</p>
 <p>The orchestrator's entry point is in src/main.py: <code>orchestrator_endpoint()</code>.
 The Orchestrator supports multiple pluggable strategies (see table below). In the sections that follow, we use the <strong>Single Agent RAG Strategy</strong> as an illustrative example to walk through the architecture.
 <div class="highlight"><pre><span></span><code>@app.post(
-    &quot;/orchestrator&quot;,
+    "/orchestrator",
     dependencies=[Depends(validate_auth)], 
-    summary=&quot;Ask orchestrator a question&quot;,
-    response_description=&quot;Returns the orchestrator’s response in real time, streamed via SSE.&quot;,
+    summary="Ask orchestrator a question",
+    response_description="Returns the orchestrator’s response in real time, streamed via SSE.",
     responses=ORCHESTRATOR_RESPONSES
 )
 async def orchestrator_endpoint(
     body: OrchestratorRequest,
-    x_api_key: Optional[str] = Header(None, alias=&quot;X-API-KEY&quot;),
-    dapr_api_token: Optional[str] = Header(None, alias=&quot;dapr-api-token&quot;),
+    x_api_key: Optional[str] = Header(None, alias="X-API-KEY"),
+    dapr_api_token: Optional[str] = Header(None, alias="dapr-api-token"),
 ):
 </code></pre></div></p>
 <h2 id="essential-tasks-of-the-orchestrator">Essential Tasks of the Orchestrator</h2>

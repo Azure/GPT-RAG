@@ -1689,7 +1689,7 @@ commands manually or ask your tenant admin.</p>
 <p>Register an Entra application in the target tenant for the SharePoint
    Indexed knowledge source. Note its Application (client) ID; you will
    reference it in step 2.</p>
-<div class="highlight"><pre><span></span><code>az<span class="w"> </span>ad<span class="w"> </span>app<span class="w"> </span>create<span class="w"> </span>--display-name<span class="w"> </span><span class="s2">&quot;gpt-rag-sharepoint-indexed&quot;</span><span class="w"> </span><span class="se">\</span>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>ad<span class="w"> </span>app<span class="w"> </span>create<span class="w"> </span>--display-name<span class="w"> </span><span class="s2">"gpt-rag-sharepoint-indexed"</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--sign-in-audience<span class="w"> </span>AzureADMyOrg
 </code></pre></div>
 </li>
@@ -1702,12 +1702,12 @@ commands manually or ask your tenant admin.</p>
    the subject is the same URL).</p>
 <div class="highlight"><pre><span></span><code>az<span class="w"> </span>ad<span class="w"> </span>app<span class="w"> </span>federated-credential<span class="w"> </span>create<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--id<span class="w"> </span>&lt;app-object-id&gt;<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--parameters<span class="w"> </span><span class="s1">&#39;{</span>
-<span class="s1">    &quot;name&quot;: &quot;gpt-rag-orchestrator-uami&quot;,</span>
-<span class="s1">    &quot;issuer&quot;: &quot;&lt;uami-issuer&gt;&quot;,</span>
-<span class="s1">    &quot;subject&quot;: &quot;&lt;uami-subject&gt;&quot;,</span>
-<span class="s1">    &quot;audiences&quot;: [&quot;api://AzureADTokenExchange&quot;]</span>
-<span class="s1">  }&#39;</span>
+<span class="w">  </span>--parameters<span class="w"> </span><span class="s1">'{</span>
+<span class="s1">    "name": "gpt-rag-orchestrator-uami",</span>
+<span class="s1">    "issuer": "&lt;uami-issuer&gt;",</span>
+<span class="s1">    "subject": "&lt;uami-subject&gt;",</span>
+<span class="s1">    "audiences": ["api://AzureADTokenExchange"]</span>
+<span class="s1">  }'</span>
 </code></pre></div>
 </li>
 <li>
@@ -1739,13 +1739,13 @@ az<span class="w"> </span>ad<span class="w"> </span>app<span class="w"> </span>p
    Microsoft Graph site ID and <code>&lt;app-object-id&gt;</code> with the value from
    step 1.</p>
 <div class="highlight"><pre><span></span><code>az<span class="w"> </span>rest<span class="w"> </span>--method<span class="w"> </span>POST<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--uri<span class="w"> </span><span class="s2">&quot;https://graph.microsoft.com/v1.0/sites/&lt;site-id&gt;/permissions&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--body<span class="w"> </span><span class="s1">&#39;{</span>
-<span class="s1">    &quot;roles&quot;: [&quot;read&quot;],</span>
-<span class="s1">    &quot;grantedToIdentities&quot;: [</span>
-<span class="s1">      { &quot;application&quot;: { &quot;id&quot;: &quot;&lt;app-object-id&gt;&quot;, &quot;displayName&quot;: &quot;gpt-rag-sharepoint-indexed&quot; } }</span>
+<span class="w">  </span>--uri<span class="w"> </span><span class="s2">"https://graph.microsoft.com/v1.0/sites/&lt;site-id&gt;/permissions"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--body<span class="w"> </span><span class="s1">'{</span>
+<span class="s1">    "roles": ["read"],</span>
+<span class="s1">    "grantedToIdentities": [</span>
+<span class="s1">      { "application": { "id": "&lt;app-object-id&gt;", "displayName": "gpt-rag-sharepoint-indexed" } }</span>
 <span class="s1">    ]</span>
-<span class="s1">  }&#39;</span>
+<span class="s1">  }'</span>
 </code></pre></div>
 </li>
 <li>
