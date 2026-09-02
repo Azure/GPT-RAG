@@ -2,7 +2,9 @@
 
 # GPT-RAG Solution Accelerator 
 
-GPT-RAG is an enterprise-grade accelerator for building conversational AI assistants on Azure, powered by intelligent agents that understand questions, find the right information, and deliver clear, accurate answers using trusted enterprise data.
+GPT-RAG is an enterprise-grade accelerator for building agentic AI assistants on **Microsoft Foundry**. Agents built with the **Microsoft Agent Framework** interpret the question, retrieve the right evidence through **Foundry IQ**, the default retrieval backend since v3.0.2, and return grounded, traceable answers over trusted enterprise data.
+
+Foundry IQ gives the orchestrator one Knowledge Base endpoint that fans out across Blob, existing Azure AI Search indexes, Work IQ, Fabric, SharePoint, OneLake, Web and MCP servers, with permission trimming built in. Azure AI Search direct remains fully supported as the compatibility and rollback path. See [Grounding sources overview](howto_grounding_overview.md).
 
 Designed with Zero-Trust security and Infrastructure as Code (IaC) principles from the ground up, GPT-RAG accelerates production deployments while ensuring consistency, governance, and operational excellence. It supports text, image, and voice scenarios, enabling organizations to rapidly create rich multimodal experiences.
 
@@ -14,31 +16,14 @@ Designed with Zero-Trust security and Infrastructure as Code (IaC) principles fr
 ## Architecture at a glance
 
 GPT-RAG can start as a Basic deployment and expand into Zero Trust, public
-ingress, existing-platform integration, or optional AI capabilities. The
-approved target makes Microsoft Foundry hosted/no-panel the fresh-deployment
-chat runtime and retains the Container Apps orchestrator as an explicit
-fallback. See the [Architecture](architecture.md) page for the mode contract
-and required-vs-configurable deployment table.
-
-!!! warning "Exact matrix pinned; runtime validation and release remain blocked"
-    The umbrella integration pins UI `v2.6.0`, orchestrator `v4.0.0`, ingestion
-    `v2.7.0`, and AILZ `v2.5.0`. Explicit hosted-panel topology selection is
-    supported, but continuity, user-history, owner-binding validation, and
-    operator-surface gates remain deployment-published `false`. The latest
-    runtime attempt activated the agent version but session readiness returned
-    HTTP 424, so the integration is not validated or shipped. See the
-    [hosted-agent integration matrix](hosted_agent_release_matrix.md) for
-    the exact runtime, identity, RBAC, panel, data, and rollback contracts.
-
-![Chat runtime modes and hosted deployment lifecycle](media/architecture_chat_runtime_modes.svg)
-
-![Modular architecture layers](media/architecture_modular_layers.svg)
+ingress, existing-platform integration, or optional AI capabilities. Retrieval
+and orchestration run on Microsoft Foundry, with the orchestrator hosted in
+Container Apps. See the [Architecture](architecture.md) page for the deployment
+modes and the required-vs-configurable table.
 
 ![Zero Trust Architecture](media/architecture_zero_trust.png)
 *Full Zero Trust reference architecture. This is the complete network-isolated
-view, not the minimum Basic deployment. The focused SVG above describes the
-component-level hosted design; the matrix page records its umbrella release
-gate.*
+view, not the minimum Basic deployment.*
 
 ## Governance
 
@@ -53,7 +38,7 @@ disabled by default.
 
 | Services                                                          | Description                                                                             |
 | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| **[Orchestrator](https://github.com/Azure/gpt-rag-orchestrator)** | Manages agentic workflows with Microsoft Agent Framework, Azure AI, and strategy-specific integrations. |
+| **[Orchestrator](https://github.com/Azure/gpt-rag-orchestrator)** | Manages agentic workflows with Microsoft Agent Framework on Microsoft Foundry, Foundry IQ retrieval, and strategy-specific integrations. |
 | **[Web UI](https://github.com/Azure/gpt-rag-ui)**                 | User interface for chat interactions, supports streaming and custom themes.             |
 | **[Data Ingestion](https://github.com/Azure/gpt-rag-ingestion)**  | Extracts, chunks, and indexes enterprise data for optimized retrieval.                  |
 | **[MCP Server](https://github.com/Azure/gpt-rag-mcp)**            | Optional Model Context Protocol service for tool hosting and business logic integration. |
