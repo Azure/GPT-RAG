@@ -1680,7 +1680,9 @@ patch, and fix, see the <a href="https://github.com/Azure/GPT-RAG/releases">GitH
   <code>Dockerfile</code> builds the <code>frontend/</code> SPA in the first stage, and three
   dependency regressions broke that build, so every clean deployment of
   <code>v3.8.0</code> failed at the orchestrator image build. UI <code>v2.6.1</code>, ingestion
-  <code>v2.7.1</code>, and AILZ <code>v2.5.1</code> are unchanged. Upgrade if you deployed <code>v3.8.0</code>.</p>
+  <code>v2.7.1</code>, and AILZ <code>v2.5.1</code> are unchanged. Upgrade if you deployed <code>v3.8.0</code>.
+  <strong><code>v3.8.1</code> does not deploy either</strong> — its ingestion pin crashes on boot. Deploy
+  <a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.2"><code>v3.8.2</code></a>.</p>
 </li>
 <li>
 <p><strong>Hosted agent on Microsoft Foundry is the fresh-deployment default (<a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0">GPT-RAG v3.8.0</a>).</strong>
@@ -1694,7 +1696,9 @@ patch, and fix, see the <a href="https://github.com/Azure/GPT-RAG/releases">GitH
   Application Insights, and isolates the hosted agent into its own child azd
   project. Continuity, user-history, owner-binding, and operator evidence gates
   remain deployment-published false/off/503. See the
-  <a href="../hosted_agent_release_matrix/">hosted-agent component release matrix</a>.</p>
+  <a href="../hosted_agent_release_matrix/">hosted-agent component release matrix</a>.
+  <strong>This release does not deploy</strong> — its orchestrator pin fails to build. Deploy
+  <a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.2"><code>v3.8.2</code></a> instead.</p>
 </li>
 </ul>
 <h3 id="august-2026">August 2026</h3>
