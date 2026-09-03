@@ -1663,31 +1663,9 @@ patch, and fix, see the <a href="https://github.com/Azure/GPT-RAG/releases">GitH
 </blockquote>
 <h3 id="september-2026">September 2026</h3>
 <ul>
-<li><strong>Runtime repair (<a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.2">GPT-RAG v3.8.2</a>).</strong>
-  The umbrella repins ingestion <a href="https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.7.2"><code>v2.7.2</code></a>
-  and UI <a href="https://github.com/Azure/gpt-rag-ui/releases/tag/v2.6.2"><code>v2.6.2</code></a>.
-  Ingestion <code>v2.7.1</code> built successfully but crashed on boot: a pin outside the
-  range required by <code>azure-monitor-opentelemetry</code> made pip backtrack to an
-  exporter importing a module path removed in <code>opentelemetry-sdk 1.44</code>, so the
-  container never started. UI <code>v2.6.1</code> dropped citations returned as absolute
-  URLs for the solution's own storage account, on both the legacy and the
-  secured resolution paths. Orchestrator <code>v4.1.1</code> and AILZ <code>v2.5.1</code> are
-  unchanged. Upgrade if you deployed <code>v3.8.0</code> or <code>v3.8.1</code>.</li>
-<li>
-<p><strong>Deployment repair (<a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.1">GPT-RAG v3.8.1</a>).</strong>
-  The umbrella repins orchestrator <a href="https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.1.1"><code>v4.1.1</code></a>,
-  which restores <code>azd deploy</code>. Orchestrator <code>v4.1.0</code> could not be built: its
-  <code>Dockerfile</code> builds the <code>frontend/</code> SPA in the first stage, and three
-  dependency regressions broke that build, so every clean deployment of
-  <code>v3.8.0</code> failed at the orchestrator image build. UI <code>v2.6.1</code>, ingestion
-  <code>v2.7.1</code>, and AILZ <code>v2.5.1</code> are unchanged. Upgrade if you deployed <code>v3.8.0</code>.
-  <strong><code>v3.8.1</code> does not deploy either</strong> — its ingestion pin crashes on boot. Deploy
-  <a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.2"><code>v3.8.2</code></a>.</p>
-</li>
-<li>
-<p><strong>Hosted agent on Microsoft Foundry is the fresh-deployment default (<a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0">GPT-RAG v3.8.0</a>).</strong>
-  The umbrella release pins UI <code>v2.6.1</code>, orchestrator <code>v4.1.0</code>, ingestion
-  <code>v2.7.1</code>, and AILZ <code>v2.5.1</code>, and validates the hosted chat path end to end
+<li><strong>Hosted agent on Microsoft Foundry is the fresh-deployment default (<a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.2">GPT-RAG v3.8.2</a>).</strong>
+  The umbrella release pins UI <code>v2.6.2</code>, orchestrator <code>v4.1.1</code>, ingestion
+  <code>v2.7.2</code>, and AILZ <code>v2.5.1</code>, and validates the hosted chat path end to end
   against a Foundry IQ knowledge base, confirming both the grounded answer and
   its citation. ADR-0001 makes hosted/no-panel the default topology for
   genuinely fresh deployments; classic, hosted/no-panel, and hosted/panel are
@@ -1696,10 +1674,7 @@ patch, and fix, see the <a href="https://github.com/Azure/GPT-RAG/releases">GitH
   Application Insights, and isolates the hosted agent into its own child azd
   project. Continuity, user-history, owner-binding, and operator evidence gates
   remain deployment-published false/off/503. See the
-  <a href="../hosted_agent_release_matrix/">hosted-agent component release matrix</a>.
-  <strong>This release does not deploy</strong> — its orchestrator pin fails to build. Deploy
-  <a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.2"><code>v3.8.2</code></a> instead.</p>
-</li>
+  <a href="../hosted_agent_release_matrix/">hosted-agent component release matrix</a>.</li>
 </ul>
 <h3 id="august-2026">August 2026</h3>
 <ul>
