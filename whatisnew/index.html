@@ -1663,6 +1663,16 @@ patch, and fix, see the <a href="https://github.com/Azure/GPT-RAG/releases">GitH
 </blockquote>
 <h3 id="september-2026">September 2026</h3>
 <ul>
+<li><strong>Runtime repair (<a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.2">GPT-RAG v3.8.2</a>).</strong>
+  The umbrella repins ingestion <a href="https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.7.2"><code>v2.7.2</code></a>
+  and UI <a href="https://github.com/Azure/gpt-rag-ui/releases/tag/v2.6.2"><code>v2.6.2</code></a>.
+  Ingestion <code>v2.7.1</code> built successfully but crashed on boot: a pin outside the
+  range required by <code>azure-monitor-opentelemetry</code> made pip backtrack to an
+  exporter importing a module path removed in <code>opentelemetry-sdk 1.44</code>, so the
+  container never started. UI <code>v2.6.1</code> dropped citations returned as absolute
+  URLs for the solution's own storage account, on both the legacy and the
+  secured resolution paths. Orchestrator <code>v4.1.1</code> and AILZ <code>v2.5.1</code> are
+  unchanged. Upgrade if you deployed <code>v3.8.0</code> or <code>v3.8.1</code>.</li>
 <li>
 <p><strong>Deployment repair (<a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.1">GPT-RAG v3.8.1</a>).</strong>
   The umbrella repins orchestrator <a href="https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.1.1"><code>v4.1.1</code></a>,
