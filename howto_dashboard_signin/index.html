@@ -1662,14 +1662,12 @@
 <h1 id="admin-dashboard-sign-in">Admin Dashboard Sign-in</h1>
 <p>The orchestrator admin dashboard at <code>/dashboard</code> signs the operator in with Microsoft Entra ID. This page explains what an operator needs to configure in Entra and in App Configuration to turn that sign-in on, how to assign the <code>Admin</code> role, what a working sign-in should look like, and how to diagnose the common failures.</p>
 <p>If you are looking for the wider authentication picture (chat UI sign-in, On-Behalf-Of, document-level access control), see <a href="../howto_authentication/">Authentication and Document-Level Security</a>. This page is scoped to the operator dashboard.</p>
-<p>This procedure applies to the orchestrator dashboard in the currently released
-classic Container Apps topology and in the explicit classic fallback. The
+<p>This procedure applies to the orchestrator dashboard in the classic Container
+Apps topology and in the explicit classic fallback. The
 <a href="../hosted_agent_release_matrix/">hosted integration matrix</a> keeps hosted/no-panel
 as the fresh default and supports explicit hosted-panel selection. The
 hosted-panel user-history and operator routes remain off/503 because their
-independent evidence gates are deployment-published <code>false</code>. This describes the
-integrated configuration, not a shipped hosted runtime; session readiness
-currently remains blocked by HTTP 424.</p>
+independent evidence gates are deployment-published <code>false</code>.</p>
 <h2 id="what-this-is">What this is</h2>
 <p>Until this release, the orchestrator dashboard SPA had no real sign-in. The <code>require_admin</code> gate on <code>/api/dashboard/*</code> existed, but the only way to feed it a token was to paste one into browser storage. That is now replaced by a proper Entra ID sign-in flow inside the SPA using MSAL (Authorization Code + PKCE, redirect flow):</p>
 <ol>
@@ -1682,7 +1680,7 @@ currently remains blocked by HTTP 424.</p>
 <p>The chat UI is not affected. Only the orchestrator dashboard uses this new flow.</p>
 <div class="admonition important">
 <p class="admonition-title">The ingestion operator tabs use a different browser client</p>
-<p>The ingestion <code>v2.7.0</code> Overview and Curation tabs do not initialize MSAL,
+<p>The ingestion <code>v2.7.1</code> Overview and Curation tabs do not initialize MSAL,
 acquire an access token, or attach <code>Authorization</code> to their panel requests.
 They display the API's real 401/403/503 response unless an approved
 same-origin reverse-auth proxy adds a delegated operator bearer. Do not

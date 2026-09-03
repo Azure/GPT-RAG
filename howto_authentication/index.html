@@ -1707,13 +1707,12 @@
 <p class="admonition-title">Hosted continuity remains disabled</p>
 <p>Live OQ-OWN evidence supersedes the capability-first contract from
 <a href="https://github.com/Azure/GPT-RAG/pull/630">PR #630</a>. The delegated
-<code>x-ms-user-identity</code> platform pivot merged to <code>develop</code> in
-<a href="https://github.com/Azure/GPT-RAG/pull/633">PR #633</a>. UI <code>v2.6.0</code>,
-orchestrator <code>v4.0.0</code>, ingestion <code>v2.7.0</code>, and AILZ <code>v2.5.0</code> are pinned by
-the umbrella integration. Keep
-<code>HOSTED_CONTINUITY_ENABLED=false</code>; compatible history endpoints return HTTP
-503 until <code>HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true</code>, and the current
-published release continues to use the classic flow.</p>
+<code>x-ms-user-identity</code> platform pivot merged in
+<a href="https://github.com/Azure/GPT-RAG/pull/633">PR #633</a>. UI <code>v2.6.1</code>,
+orchestrator <code>v4.1.0</code>, ingestion <code>v2.7.1</code>, and AILZ <code>v2.5.1</code> are pinned by
+<a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0">GPT-RAG <code>v3.8.0</code></a>.
+Keep <code>HOSTED_CONTINUITY_ENABLED=false</code>; compatible history endpoints return
+HTTP 503 until <code>HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true</code>.</p>
 </div>
 <h2 id="embed-gpt-rag-in-a-portal">Embed GPT-RAG in a portal</h2>
 <p>To add GPT-RAG chat to an existing portal, follow the
@@ -2001,7 +2000,7 @@ defines hosted/no-panel, which omits these administrative surfaces and requires
 topology in the pinned matrix, but its user-history and operator routes remain
 off/503 behind separate deployment-published evidence gates.</p>
 <p>Admin access is enforced through an <strong>Entra ID App Role named <code>Admin</code></strong> added to the same App Registration you created for user sign-in. The token the caller presents to <code>/api/dashboard/*</code> (or the ingestion equivalents) must carry <code>Admin</code> in its <code>roles</code> claim.</p>
-<p>The ingestion <code>v2.7.0</code> metadata-only Overview and Curation APIs use their own
+<p>The ingestion <code>v2.7.1</code> metadata-only Overview and Curation APIs use their own
 explicit <code>PANEL_OPERATOR_APP_ROLE</code> or <code>PANEL_OPERATOR_GROUP_ID</code> gate. Their Vite
 tabs do not acquire a browser token or add an <code>Authorization</code> header, so they
 require an approved reverse-auth proxy to supply the delegated bearer and

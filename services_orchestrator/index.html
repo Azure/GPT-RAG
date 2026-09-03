@@ -723,9 +723,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#hosted-v400-request-contract" class="md-nav__link">
+  <a href="#hosted-v410-request-contract" class="md-nav__link">
     <span class="md-ellipsis">
-      Hosted v4.0.0 request contract
+      Hosted v4.1.0 request contract
     </span>
   </a>
   
@@ -1635,17 +1635,16 @@ built on the Microsoft Agent Framework and Azure AI Foundry Agent Service. It
 coordinates agent-based RAG workflows, where each agent has a defined role, to
 generate accurate, context-aware responses for complex user queries. Current
 GPT-RAG umbrella releases run it as an orchestrator Container App. Orchestrator
-<code>v4.0.0</code> also packages the runtime as a Microsoft Foundry hosted agent, but the
-<a href="../hosted_agent_release_matrix/">exact hosted integration matrix</a> is now pinned
-by the umbrella integration. The separate
+<code>v4.1.0</code> also packages the runtime as a Microsoft Foundry hosted agent, which
+<a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0">GPT-RAG <code>v3.8.0</code></a> makes
+the default for genuinely fresh deployments; see the
+<a href="../hosted_agent_release_matrix/">exact hosted integration matrix</a>. The separate
 <a href="../hosted_continuity_platform_contract/">hosted continuity platform contract</a>
 uses delegated <code>x-ms-user-identity</code> in the platform pivot merged by PR #633, but
 remains disabled pending live evidence and
 <code>HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED</code>. Hosted-panel is explicitly
 selectable, but its user-history and operator surfaces remain off/503 behind
-independent gates. The latest hosted agent version became active, but session
-readiness returned HTTP 424, so the integration is not runtime-validated or
-shipped.
+independent gates.
 <a href="https://github.com/Azure/gpt-rag-orchestrator">GitHub Repository</a>.</p>
 <h2 id="key-features">Key Features</h2>
 <ul>
@@ -1728,8 +1727,8 @@ and require a signed-in user.</p>
 are handled in two places. The model prompt receives only a recent history
 window, while the Cosmos DB conversation document is compacted before
 persistence so it keeps useful recent context without growing indefinitely.
-In the hosted component matrix, UI <code>v2.6.0</code> owns managed-Conversation lifecycle
-and orchestrator <code>v4.0.0</code> is stateless. User-facing list/read/feedback/delete
+In the hosted component matrix, UI <code>v2.6.1</code> owns managed-Conversation lifecycle
+and orchestrator <code>v4.1.0</code> is stateless. User-facing list/read/feedback/delete
 routes exist in the UI component, but umbrella panel gates remain off. The default
 <code>maf_lite</code> strategy and the <code>multimodal</code> strategy also classify each turn as a
 greeting, retrieval-needed question, or no-retrieval follow-up. Transformations
@@ -1802,7 +1801,7 @@ compatible component set is validated, the trusted UI BFF will derive
 distinct from OBO retrieval. The hosted runtime is not an identity-header
 source and receives no key, Conversation or impersonation RBAC, or Cosmos DB in
 hosted/no-panel. Capability/HMAC remains a disabled fallback only.</p>
-<h3 id="hosted-v400-request-contract">Hosted <code>v4.0.0</code> request contract</h3>
+<h3 id="hosted-v410-request-contract">Hosted <code>v4.1.0</code> request contract</h3>
 <p>Hosted <code>POST /responses</code> rejects top-level <code>conversation</code> and
 <code>previous_response_id</code> with HTTP 422. The caller must send the complete bounded,
 oldest-to-newest text history as <code>input</code> for every turn. A plain non-empty string
@@ -1811,7 +1810,7 @@ user message. The runtime constructs no managed-Conversations client and
 performs no create, read, append, or delete operation.</p>
 <p><code>POST /invocations</code> remains a distinct compatibility contract. Its opaque
 <code>conversation_id</code> is only echoed and used for local retrieval scoping; it is not
-managed state or authorization. UI <code>v2.6.0</code> currently replays complete ordered
+managed state or authorization. UI <code>v2.6.1</code> currently replays complete ordered
 messages through this compatibility path. See
 <a href="../hosted_agent_release_matrix/#stateless-hosted-runtime-contract">Stateless hosted runtime contract</a>.</p>
 <h2 id="visual-guide">Visual Guide</h2>

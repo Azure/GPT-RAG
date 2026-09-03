@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#august-2026" class="md-skip">
+        <a href="#september-2026" class="md-skip">
           Skip to content
         </a>
       
@@ -289,6 +289,15 @@
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#september-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      September 2026
+    </span>
+  </a>
+  
+</li>
       
         <li class="md-nav__item">
   <a href="#august-2026" class="md-nav__link">
@@ -1652,21 +1661,31 @@ patch, and fix, see the <a href="https://github.com/Azure/GPT-RAG/releases">GitH
 <blockquote>
 <p>📌 <a href="https://github.com/orgs/Azure/projects/536/views/6">Check out what's coming next</a>  (Azure org only)</p>
 </blockquote>
+<h3 id="september-2026">September 2026</h3>
+<ul>
+<li><strong>Hosted agent on Microsoft Foundry is the fresh-deployment default (<a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0">GPT-RAG v3.8.0</a>).</strong>
+  The umbrella release pins UI <code>v2.6.1</code>, orchestrator <code>v4.1.0</code>, ingestion
+  <code>v2.7.1</code>, and AILZ <code>v2.5.1</code>, and validates the hosted chat path end to end
+  against a Foundry IQ knowledge base, confirming both the grounded answer and
+  its citation. ADR-0001 makes hosted/no-panel the default topology for
+  genuinely fresh deployments; classic, hosted/no-panel, and hosted/panel are
+  explicit topologies resolved by a single shared resolver. The release also
+  adds opt-in GenAI message-content capture so chat turns can be inspected in
+  Application Insights, and isolates the hosted agent into its own child azd
+  project. Continuity, user-history, owner-binding, and operator evidence gates
+  remain deployment-published false/off/503. See the
+  <a href="../hosted_agent_release_matrix/">hosted-agent component release matrix</a>.</li>
+</ul>
 <h3 id="august-2026">August 2026</h3>
 <ul>
-<li><strong>Hosted-agent integration matrix pinned (not yet shipped).</strong> UI
-  <code>v2.6.0</code>, orchestrator <code>v4.0.0</code>, ingestion <code>v2.7.0</code>, and AILZ <code>v2.5.0</code>
-  publish the stateless runtime, delegated owner binding, owner-gated user
-  history/feedback/delete APIs, metadata-only operator APIs, and two-phase
-  hosted handoff contracts. The umbrella integration pins their exact release
-  commits and supports explicitly selected hosted-panel composition with only
-  metadata Cosmos containers. Continuity, user-history, owner-binding, and
-  operator evidence gates remain deployment-published false/off/503. The agent
-  version became active during validation, but session readiness returned HTTP
-  424, so this integration is not runtime-validated or shipped. The ingestion
-  operator tabs also require surrounding
-  infrastructure to supply a delegated bearer because their Vite client does
-  not acquire one. See the
+<li><strong>Hosted-agent integration matrix pinned.</strong> The stateless runtime, delegated
+  owner binding, owner-gated user history/feedback/delete APIs, metadata-only
+  operator APIs, and two-phase hosted handoff contracts were defined and pinned
+  at exact release commits, with explicitly selected hosted-panel composition
+  using only metadata Cosmos containers. The ingestion operator tabs require
+  surrounding infrastructure to supply a delegated bearer because their Vite
+  client does not acquire one. Shipped in
+  <a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0">GPT-RAG v3.8.0</a>; see the
   <a href="../hosted_agent_release_matrix/">hosted-agent component release matrix</a>.</li>
 </ul>
 <h3 id="july-2026">July 2026</h3>

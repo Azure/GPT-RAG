@@ -391,9 +391,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#current-classic-release" class="md-nav__link">
+  <a href="#current-release" class="md-nav__link">
     <span class="md-ellipsis">
-      Current classic release
+      Current release
     </span>
   </a>
   
@@ -1761,17 +1761,15 @@ options, and a before/after table.</p>
 locally after <code>azd provision</code>, and <code>azd deploy</code> deploys the UI, orchestrator, and
 ingestion services in the classic Container Apps topology.</p>
 <h3 id="chat-runtime-modes">Chat runtime modes</h3>
-<div class="admonition warning">
-<p class="admonition-title">Exact matrix pinned; runtime validation and release remain blocked</p>
-<p>UI <code>v2.6.0</code>, orchestrator <code>v4.0.0</code>, ingestion <code>v2.7.0</code>, and AILZ <code>v2.5.0</code>
-are pinned by the umbrella integration at their exact release commits.
-Classic, hosted/no-panel, and explicitly selected hosted-panel are supported
-topologies. The manifest's umbrella tag remains <code>unreleased</code>; use a GPT-RAG
-source or release that contains these pins. Continuity, user-history,
-owner-binding validation, and operator-surface evidence gates remain
-deployment-published <code>false</code>. The agent version became active in the latest
-runtime attempt, but session readiness returned HTTP 424. The integration is
-not runtime-validated or shipped. See the
+<div class="admonition info">
+<p class="admonition-title">Shipped in GPT-RAG v3.8.0</p>
+<p><a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0">GPT-RAG <code>v3.8.0</code></a>
+pins UI <code>v2.6.1</code>, orchestrator <code>v4.1.0</code>, ingestion <code>v2.7.1</code>, and AILZ
+<code>v2.5.1</code> at their exact release commits, and validates the hosted chat path
+end to end. Classic, hosted/no-panel, and explicitly selected hosted-panel
+are supported topologies. Continuity, user-history, owner-binding
+validation, and operator-surface evidence gates remain deployment-published
+<code>false</code>. See the
 <a href="../hosted_agent_release_matrix/">exact integration matrix</a>.</p>
 </div>
 <p>The platform implementation resolves one canonical topology before provisioning
@@ -1833,7 +1831,7 @@ Configuration label <code>gpt-rag</code>:</p>
 </tr>
 <tr>
 <td><code>CHAT_BACKEND</code></td>
-<td>UI <code>v2.6.0</code> treats missing or blank as <code>hosted_agent</code>; an umbrella deployment must publish the resolved sticky value. <code>orchestrator</code> is the explicit fallback. Unknown values fail startup. Environment configuration takes precedence over App Configuration.</td>
+<td>UI <code>v2.6.1</code> treats missing or blank as <code>hosted_agent</code>; an umbrella deployment must publish the resolved sticky value. <code>orchestrator</code> is the explicit fallback. Unknown values fail startup. Environment configuration takes precedence over App Configuration.</td>
 </tr>
 <tr>
 <td><code>ORCHESTRATOR_BASE_URL</code></td>
@@ -1841,7 +1839,7 @@ Configuration label <code>gpt-rag</code>:</p>
 </tr>
 <tr>
 <td><code>HOSTED_AGENT_BASE_URL</code></td>
-<td>Required HTTPS hosted service root. Orchestrator <code>v4.0.0</code> defines stateless <code>POST /responses</code>; UI <code>v2.6.0</code> currently sends complete ordered messages through the distinct <code>POST /invocations</code> compatibility route. Continuity remains off until the live call route satisfies the protocol evidence gate.</td>
+<td>Required HTTPS hosted service root. Orchestrator <code>v4.1.0</code> defines stateless <code>POST /responses</code>; UI <code>v2.6.1</code> currently sends complete ordered messages through the distinct <code>POST /invocations</code> compatibility route. Continuity remains off until the live call route satisfies the protocol evidence gate.</td>
 </tr>
 <tr>
 <td><code>HOSTED_AGENT_RESOURCE_SCOPE</code></td>
@@ -1970,7 +1968,7 @@ the
 <a href="../hosted_continuity_platform_contract/">hosted conversation continuity platform contract</a>
 for the complete trust and rollout boundary.</p>
 <p><code>POST /responses</code> and <code>POST /invocations</code> are distinct protocols, not aliases,
-and their request bodies are not interchangeable. Orchestrator <code>v4.0.0</code>
+and their request bodies are not interchangeable. Orchestrator <code>v4.1.0</code>
 implements a stateless hosted Responses contract: callers send complete ordered
 text history in <code>input</code> on every request. A non-empty string is valid for one
 turn. An array must be non-empty, text-only, ordered oldest to newest, and end
@@ -2063,13 +2061,16 @@ handoff contract. It must declare <code>language: docker</code> and
 <code>azd deploy orchestrator-agent</code>, so the already-prepared immutable image is used
 instead of triggering another ACR build. Do not remove any of these three
 settings from a prebuilt hosted deployment.</p>
-<div class="admonition danger">
-<p class="admonition-title">Current runtime readiness blocker</p>
-<p>The latest implementation validation activated the agent version, but a new
-session readiness request returned HTTP 424. This is not a successful hosted
-runtime validation. Keep continuity and panel evidence gates false/off/503,
-keep the classic rollback available, and do not describe the integrated
-matrix as shipped until readiness and the remaining live checks pass.</p>
+<div class="admonition info">
+<p class="admonition-title">Runtime readiness passes; the remaining evidence gates stay closed</p>
+<p>Readiness has been re-run under <code>NETWORK_ISOLATION=true</code> against the pins
+shipped in <a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0">GPT-RAG <code>v3.8.0</code></a>:
+the hosted agent reaches active state, session readiness succeeds, and a
+grounded answer returns with its citation. That covers item 1 of the
+evidence gate only. Keep continuity and panel evidence gates false/off/503,
+keep the classic rollback available, and do not describe items 2 through 8
+as validated until each one succeeds. See the
+<a href="../hosted_agent_release_matrix/">hosted-agent component release matrix</a>.</p>
 </div>
 <h4 id="explicit-classic-fallback">Explicit classic fallback</h4>
 <p>Fallback is a deployment operation, not a request-time retry:</p>
@@ -2080,13 +2081,14 @@ matrix as shipped until readiness and the remaining live checks pass.</p>
 <p>This restores the orchestrator Container App and publishes
 <code>CHAT_BACKEND=orchestrator</code> without deleting hosted Conversations or existing
 classic panel data.</p>
-<h4 id="current-classic-release">Current classic release</h4>
-<p>GPT-RAG <code>v3.7.0</code> remains the latest published umbrella release at the time this
-matrix was documented. Its classic pin set is UI <code>v2.3.13</code>, orchestrator
-<code>v3.8.0</code>, ingestion <code>v2.5.0</code>, and AI Landing Zone <code>v2.3.0</code>. The exact hosted
-matrix is pinned by the current integration manifest, whose umbrella tag remains
-<code>unreleased</code>; do not mix its topology/configuration contract into the older
-<code>v3.7.0</code> hooks or manifest.</p>
+<h4 id="current-release">Current release</h4>
+<p><a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0">GPT-RAG <code>v3.8.0</code></a> is the
+latest published umbrella release. It pins UI <code>v2.6.1</code>, orchestrator <code>v4.1.0</code>,
+ingestion <code>v2.7.1</code>, and AI Landing Zone <code>v2.5.1</code>, and it makes hosted/no-panel
+the default topology for genuinely fresh deployments. The previous classic-only
+umbrella release was <code>v3.7.0</code>, pinning UI <code>v2.3.13</code>, orchestrator <code>v3.8.0</code>,
+ingestion <code>v2.5.0</code>, and AI Landing Zone <code>v2.3.0</code>; do not mix the <code>v3.8.0</code>
+topology and configuration contract into the older <code>v3.7.0</code> hooks or manifest.</p>
 <h3 id="retrieval-backend">Retrieval backend</h3>
 <p>GPT-RAG can retrieve grounding content directly from Azure AI Search or through a
 Foundry IQ knowledge base. Starting with GPT-RAG v3.0.2 and AI Landing Zone

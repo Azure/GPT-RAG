@@ -1624,21 +1624,20 @@
 
 
 <h1 id="hosted-conversation-continuity-platform-contract">Hosted conversation continuity platform contract</h1>
-<p>GPT-RAG has pivoted hosted conversation ownership to delegated user identity on
-the <code>develop</code> branch.
+<p>GPT-RAG has pivoted hosted conversation ownership to delegated user identity.
 The trusted UI BFF derives <code>x-ms-user-identity</code> from the authenticated
 server-side principal and sends it on the hosted Responses request. This is the
 preferred and default continuity architecture.</p>
 <div class="admonition danger">
-<p class="admonition-title">Exact matrix pinned; continuity evidence gate remains closed</p>
+<p class="admonition-title">Shipped in v3.8.0; continuity evidence gate remains closed</p>
 <p>The OQ-OWN platform pivot merged in
 <a href="https://github.com/Azure/GPT-RAG/pull/633">PR #633</a> at
 <a href="https://github.com/Azure/GPT-RAG/commit/86b17b0af672edefe6842cba0f1a8ff77ab23038"><code>86b17b0</code></a>,
-and the umbrella integration now pins UI <code>v2.6.0</code>, orchestrator <code>v4.0.2</code>,
-ingestion <code>v2.7.0</code>, and AILZ <code>v2.5.1</code> at their exact release commits. See
+and <a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0">GPT-RAG <code>v3.8.0</code></a>
+pins UI <code>v2.6.1</code>, orchestrator <code>v4.1.0</code>, ingestion <code>v2.7.1</code>, and AILZ
+<code>v2.5.1</code> at their exact release commits. See
 <a href="../hosted_agent_release_matrix/#store-false-wire-contract">the hosted-agent component release matrix</a>
-for the <code>/responses</code> <code>store</code> gap, now fixed and pinned but still pending
-live network-isolated re-validation.
+for the <code>/responses</code> <code>store</code> gap, now fixed and pinned.
 Keep <code>HOSTED_CONTINUITY_ENABLED=false</code> until deployment proves the exact
 owner-binding role and protocol contract and records
 <code>HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true</code>, continuity endpoints
@@ -1793,7 +1792,7 @@ controls:</p>
 </table>
 <p>The history bounds limit context supplied through the compatible hosted path.
 They do not define records retention, legal hold, backup, or deletion policy.
-UI <code>v2.6.0</code> falls back locally to 40 items and 8,000 tokens if these values are
+UI <code>v2.6.1</code> falls back locally to 40 items and 8,000 tokens if these values are
 absent. The umbrella integration publishes the reviewed platform values of 100
 and 32,000 rather than relying on UI fallbacks. This publication does not open
 the continuity gate; live protocol, identity, role, and owner-binding evidence
