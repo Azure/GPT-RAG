@@ -5,17 +5,16 @@ built on the Microsoft Agent Framework and Azure AI Foundry Agent Service. It
 coordinates agent-based RAG workflows, where each agent has a defined role, to
 generate accurate, context-aware responses for complex user queries. Current
 GPT-RAG umbrella releases run it as an orchestrator Container App. Orchestrator
-`v4.0.0` also packages the runtime as a Microsoft Foundry hosted agent, but the
-[exact hosted integration matrix](hosted_agent_release_matrix.md) is now pinned
-by the umbrella integration. The separate
+`v4.1.0` also packages the runtime as a Microsoft Foundry hosted agent, which
+[GPT-RAG `v3.8.0`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0) makes
+the default for genuinely fresh deployments; see the
+[exact hosted integration matrix](hosted_agent_release_matrix.md). The separate
 [hosted continuity platform contract](hosted_continuity_platform_contract.md)
 uses delegated `x-ms-user-identity` in the platform pivot merged by PR #633, but
 remains disabled pending live evidence and
 `HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED`. Hosted-panel is explicitly
 selectable, but its user-history and operator surfaces remain off/503 behind
-independent gates. The latest hosted agent version became active, but session
-readiness returned HTTP 424, so the integration is not runtime-validated or
-shipped.
+independent gates.
 [GitHub Repository](https://github.com/Azure/gpt-rag-orchestrator).
 
 ## Key Features
@@ -65,8 +64,8 @@ In the currently released classic Container Apps topology, long-running chats
 are handled in two places. The model prompt receives only a recent history
 window, while the Cosmos DB conversation document is compacted before
 persistence so it keeps useful recent context without growing indefinitely.
-In the hosted component matrix, UI `v2.6.0` owns managed-Conversation lifecycle
-and orchestrator `v4.0.0` is stateless. User-facing list/read/feedback/delete
+In the hosted component matrix, UI `v2.6.1` owns managed-Conversation lifecycle
+and orchestrator `v4.1.0` is stateless. User-facing list/read/feedback/delete
 routes exist in the UI component, but umbrella panel gates remain off. The default
 `maf_lite` strategy and the `multimodal` strategy also classify each turn as a
 greeting, retrieval-needed question, or no-retrieval follow-up. Transformations
@@ -93,7 +92,7 @@ distinct from OBO retrieval. The hosted runtime is not an identity-header
 source and receives no key, Conversation or impersonation RBAC, or Cosmos DB in
 hosted/no-panel. Capability/HMAC remains a disabled fallback only.
 
-### Hosted `v4.0.0` request contract
+### Hosted `v4.1.0` request contract
 
 Hosted `POST /responses` rejects top-level `conversation` and
 `previous_response_id` with HTTP 422. The caller must send the complete bounded,
@@ -104,7 +103,7 @@ performs no create, read, append, or delete operation.
 
 `POST /invocations` remains a distinct compatibility contract. Its opaque
 `conversation_id` is only echoed and used for local retrieval scoping; it is not
-managed state or authorization. UI `v2.6.0` currently replays complete ordered
+managed state or authorization. UI `v2.6.1` currently replays complete ordered
 messages through this compatibility path. See
 [Stateless hosted runtime contract](hosted_agent_release_matrix.md#stateless-hosted-runtime-contract).
 

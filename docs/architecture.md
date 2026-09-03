@@ -7,15 +7,14 @@ deployments retain their persisted topology during upgrade. Network isolation,
 enterprise integration, public ingress, and optional AI capabilities remain
 separate choices.
 
-!!! warning "Exact matrix pinned; runtime validation and release remain blocked"
-    UI `v2.6.0`, orchestrator `v4.0.0`, ingestion `v2.7.0`, and AILZ `v2.5.0`
-    are pinned by the umbrella integration and implement the delegated
-    `x-ms-user-identity` contract. Classic, hosted/no-panel, and explicitly
-    selected hosted-panel are supported topologies. Continuity, user-history,
-    owner-binding validation, and operator-surface gates remain
-    deployment-published `false`, so their routes stay off/503. The agent version
-    became active in the latest runtime attempt, but session readiness returned
-    HTTP 424. The integration is not runtime-validated or shipped. See the
+!!! info "Shipped in GPT-RAG v3.8.0"
+    [GPT-RAG `v3.8.0`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0)
+    pins UI `v2.6.1`, orchestrator `v4.1.0`, ingestion `v2.7.1`, and AILZ
+    `v2.5.1` at their exact release commits, and validates the hosted chat path
+    end to end. Classic, hosted/no-panel, and explicitly selected hosted-panel
+    are supported topologies. Continuity, user-history, owner-binding
+    validation, and operator-surface gates remain deployment-published `false`,
+    so their routes stay off/503. See the
     [hosted-agent integration matrix](hosted_agent_release_matrix.md).
 
 ## Full Zero Trust reference
