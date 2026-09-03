@@ -48,14 +48,18 @@ azd deploy
 Some transient Azure capacity failures are not exposed by reliable pre-create APIs. For example, Cosmos DB can still fail later with regional high-demand `ServiceUnavailable`; the preflight reports this limitation explicitly. Use `GPT_RAG_REGIONAL_PREFLIGHT_SKIP=true` only to bypass GPT-RAG regional checks, or `PREFLIGHT_SKIP=true` to bypass all preflight hooks.
 
 For current published GPT-RAG umbrella releases, the `postProvision` hook runs
-locally after `azd provision`, and `azd deploy` deploys the UI, orchestrator, and
-ingestion services in the classic Container Apps topology.
+locally after `azd provision`, and `azd deploy` publishes the component services
+pinned by `manifest.json`. Genuinely fresh deployments default to the
+hosted/no-panel topology, in which the orchestrator runs as a Foundry hosted
+agent instead of a Container App. The classic Container Apps topology, which
+also deploys the orchestrator Container App, remains supported and is selected
+explicitly through `CHAT_BACKEND=orchestrator`.
 
 ### Chat runtime modes
 
-!!! info "Shipped in GPT-RAG v3.8.1"
-    [GPT-RAG `v3.8.1`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.1)
-    pins UI `v2.6.1`, orchestrator `v4.1.1`, ingestion `v2.7.1`, and AILZ
+!!! info "Shipped in GPT-RAG v3.8.2"
+    [GPT-RAG `v3.8.2`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.2)
+    pins UI `v2.6.2`, orchestrator `v4.1.1`, ingestion `v2.7.2`, and AILZ
     `v2.5.1` at their exact release commits, and validates the hosted chat path
     end to end. Classic, hosted/no-panel, and explicitly selected hosted-panel
     are supported topologies. Continuity, user-history, owner-binding
@@ -86,9 +90,9 @@ Configuration label `gpt-rag`:
 | Setting | Operator contract |
 | --- | --- |
 | `DEPLOYMENT_TOPOLOGY` | Canonical deployment choice: `hosted-no-panel`, `hosted-panel`, or `classic`. Hosted-panel requires explicit selection. |
-| `CHAT_BACKEND` | UI `v2.6.1` treats missing or blank as `hosted_agent`; an umbrella deployment must publish the resolved sticky value. `orchestrator` is the explicit fallback. Unknown values fail startup. Environment configuration takes precedence over App Configuration. |
+| `CHAT_BACKEND` | UI `v2.6.2` treats missing or blank as `hosted_agent`; an umbrella deployment must publish the resolved sticky value. `orchestrator` is the explicit fallback. Unknown values fail startup. Environment configuration takes precedence over App Configuration. |
 | `ORCHESTRATOR_BASE_URL` | Classic service root, used only when `CHAT_BACKEND=orchestrator`. The UI calls the `/orchestrator` route on this endpoint. |
-| `HOSTED_AGENT_BASE_URL` | Required HTTPS hosted service root. Orchestrator `v4.1.1` defines stateless `POST /responses`; UI `v2.6.1` currently sends complete ordered messages through the distinct `POST /invocations` compatibility route. Continuity remains off until the live call route satisfies the protocol evidence gate. |
+| `HOSTED_AGENT_BASE_URL` | Required HTTPS hosted service root. Orchestrator `v4.1.1` defines stateless `POST /responses`; UI `v2.6.2` currently sends complete ordered messages through the distinct `POST /invocations` compatibility route. Continuity remains off until the live call route satisfies the protocol evidence gate. |
 | `HOSTED_AGENT_RESOURCE_SCOPE` | Required explicit non-ARM hosted data-plane Entra scope ending in `/.default`, for example `api://<application-id>/.default`. |
 | `HOSTED_AGENT_AUTH_MODE` | `user_delegated` is the default and required continuity path. Under OQ-OWN, it means the trusted UI BFF derives `x-ms-user-identity`; it does not mean an OBO token is sent to the agent. OBO remains a separate retrieval flow. `service_identity` is an explicit reviewed exception that is incompatible with owner-bound continuity, so continuity stays off/503 in that mode. |
 | `HOSTED_AGENT_SSE_IDLE_TIMEOUT_SECONDS` | Finite positive wait for the next SSE event. The UI default is `60`; an infinite timeout is rejected. |
@@ -332,13 +336,22 @@ classic panel data.
 
 #### Current release
 
-[GPT-RAG `v3.8.1`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.1) is the
-latest published umbrella release. It pins UI `v2.6.1`, orchestrator `v4.1.1`,
-ingestion `v2.7.1`, and AI Landing Zone `v2.5.1`, and it makes hosted/no-panel
+[GPT-RAG `v3.8.2`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.2) is the
+latest published umbrella release. It pins UI `v2.6.2`, orchestrator `v4.1.1`,
+ingestion `v2.7.2`, and AI Landing Zone `v2.5.1`, and it makes hosted/no-panel
 the default topology for genuinely fresh deployments. The previous classic-only
 umbrella release was `v3.7.0`, pinning UI `v2.3.13`, orchestrator `v3.8.0`,
-ingestion `v2.5.0`, and AI Landing Zone `v2.3.0`; do not mix the `v3.8.1`
+ingestion `v2.5.0`, and AI Landing Zone `v2.3.0`; do not mix the `v3.8.2`
 topology and configuration contract into the older `v3.7.0` hooks or manifest.
+
+!!! danger "Do not deploy `v3.8.0` or `v3.8.1`"
+    Both releases are superseded and neither reaches a running deployment.
+    `v3.8.0` pins orchestrator `v4.1.0`, whose `frontend/` SPA build fails in the
+    first `Dockerfile` stage, so the orchestrator image cannot be built.
+    `v3.8.1` repairs that build but still pins ingestion `v2.7.1`, which builds
+    successfully and then crashes on boot on an OpenTelemetry exporter import.
+    `v3.8.2` is the first release in the `v3.8.x` line that deploys end to end.
+    Upgrade if you deployed either.
 
 ### Retrieval backend
 

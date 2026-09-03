@@ -111,11 +111,10 @@ azd deploy
 
 **What this does:**
 
-  1. **Clones 4 service repositories** from GitHub:
-    - `gpt-rag-frontend` - React web interface
+  1. **Clones the service repositories** pinned in `manifest.json`:
+    - `gpt-rag-ui` - Chat web interface
     - `gpt-rag-orchestrator` - Agent orchestration and RAG logic
     - `gpt-rag-ingestion` - Document processing and indexing
-    - `gpt-rag-mcp` - Model Context Protocol integration
 
   2. **Builds Docker images locally**:
     - Creates containers for each service
