@@ -23,6 +23,8 @@ patch, and fix, see the [GitHub releases](https://github.com/Azure/GPT-RAG/relea
   dependency regressions broke that build, so every clean deployment of
   `v3.8.0` failed at the orchestrator image build. UI `v2.6.1`, ingestion
   `v2.7.1`, and AILZ `v2.5.1` are unchanged. Upgrade if you deployed `v3.8.0`.
+  **`v3.8.1` does not deploy either** — its ingestion pin crashes on boot. Deploy
+  [`v3.8.2`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.2).
 
 - **Hosted agent on Microsoft Foundry is the fresh-deployment default ([GPT-RAG v3.8.0](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0)).**
   The umbrella release pins UI `v2.6.1`, orchestrator `v4.1.0`, ingestion
@@ -36,6 +38,8 @@ patch, and fix, see the [GitHub releases](https://github.com/Azure/GPT-RAG/relea
   project. Continuity, user-history, owner-binding, and operator evidence gates
   remain deployment-published false/off/503. See the
   [hosted-agent component release matrix](hosted_agent_release_matrix.md).
+  **This release does not deploy** — its orchestrator pin fails to build. Deploy
+  [`v3.8.2`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.2) instead.
 
 ### August 2026
 
