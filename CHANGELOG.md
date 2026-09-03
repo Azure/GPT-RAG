@@ -4,6 +4,27 @@
 
 ### Added
 
+- **Opt-in GenAI message-content capture for the hosted agent.** Added
+  `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` to the `env:` block of
+  the `orchestrator-agent` service in `hosted-agent/azure.yaml`, wired to a new
+  `HOSTED_AGENT_CAPTURE_MESSAGE_CONTENT` azd variable that defaults to `false`.
+  When enabled, GenAI spans carry `gen_ai.input.messages`,
+  `gen_ai.output.messages`, and `gen_ai.system_instructions`, which is what makes
+  the Foundry portal's per-agent **Conversations** view render turns instead of
+  reporting *"No conversation turns found"*. The orchestrator reads this variable
+  from the process environment before any App Configuration resolution happens,
+  so it cannot be supplied as an App Configuration key and previously had no
+  supported installation path — a hosted-agent version created by `azd deploy`
+  would silently omit it. Operators now opt in per environment with
+  `azd env set HOSTED_AGENT_CAPTURE_MESSAGE_CONTENT true` followed by
+  `azd deploy`; `scripts/preDeploy.ps1` copies the root `.azure` environment into
+  the `hosted-agent` azd project, so the value propagates automatically. The
+  default stays `false` because capturing message content ships user prompts and
+  model answers to Application Insights, which is a data-privacy decision each
+  deployment has to make for itself. Use only this variable, never the legacy
+  `AZURE_TRACING_GEN_AI_CONTENT_RECORDING_ENABLED`: the Azure AI instrumentor
+  treats disagreeing values as a configuration error.
+
 - **Hosted administrative panel platform contract (issue #611, ADR-0004).**
   Published the versioned `contracts/conversations-panel-v1` JSON Schema
   (+ `.sha256` pin) covering the user-facing history/messages/feedback/delete

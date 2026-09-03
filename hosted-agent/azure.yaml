@@ -64,3 +64,23 @@ services:
       # telemetry); disabling it does not affect Application Insights traces, logs, or
       # metrics for GPT-RAG requests.
       APPLICATIONINSIGHTS_STATSBEAT_DISABLED_ALL: "true"
+      # OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT controls whether GenAI spans carry
+      # the actual prompt and completion text (gen_ai.input.messages, gen_ai.output.messages,
+      # gen_ai.system_instructions). It is what makes the Foundry portal's per-agent
+      # "Conversations" view render conversation turns instead of "No conversation turns
+      # found". src/api/hosted_entrypoint.py (_configure_host_observability) reads it straight
+      # from the process environment before any App Configuration resolution happens, so it
+      # cannot be supplied as an App Configuration key -- it has to be a hosted-agent env var,
+      # which means it has to be declared here.
+      #
+      # It defaults to "false" deliberately: capturing message content ships user prompts and
+      # model answers to Application Insights, which is a data-privacy decision each deployment
+      # has to make for itself. Opt in per environment with:
+      #     azd env set HOSTED_AGENT_CAPTURE_MESSAGE_CONTENT true
+      #     azd deploy
+      # Note that environment variables are baked into a hosted-agent *version* and are
+      # immutable once that version exists, so flipping this value always creates a new version
+      # (the image digest can stay the same). Use only this variable, not the legacy
+      # AZURE_TRACING_GEN_AI_CONTENT_RECORDING_ENABLED: when both are set and disagree, the
+      # Azure AI instrumentor treats it as a configuration error.
+      OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT: "${HOSTED_AGENT_CAPTURE_MESSAGE_CONTENT=false}"
