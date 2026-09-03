@@ -6,6 +6,14 @@ patch, and fix, see the [GitHub releases](https://github.com/Azure/GPT-RAG/relea
 
 ### September 2026
 
+- **Deployment repair ([GPT-RAG v3.8.1](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.1)).**
+  The umbrella repins orchestrator [`v4.1.1`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.1.1),
+  which restores `azd deploy`. Orchestrator `v4.1.0` could not be built: its
+  `Dockerfile` builds the `frontend/` SPA in the first stage, and three
+  dependency regressions broke that build, so every clean deployment of
+  `v3.8.0` failed at the orchestrator image build. UI `v2.6.1`, ingestion
+  `v2.7.1`, and AILZ `v2.5.1` are unchanged. Upgrade if you deployed `v3.8.0`.
+
 - **Hosted agent on Microsoft Foundry is the fresh-deployment default ([GPT-RAG v3.8.0](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0)).**
   The umbrella release pins UI `v2.6.1`, orchestrator `v4.1.0`, ingestion
   `v2.7.1`, and AILZ `v2.5.1`, and validates the hosted chat path end to end

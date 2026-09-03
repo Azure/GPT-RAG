@@ -5,12 +5,12 @@ The trusted UI BFF derives `x-ms-user-identity` from the authenticated
 server-side principal and sends it on the hosted Responses request. This is the
 preferred and default continuity architecture.
 
-!!! danger "Shipped in v3.8.0; continuity evidence gate remains closed"
+!!! danger "Shipped in v3.8.1; continuity evidence gate remains closed"
     The OQ-OWN platform pivot merged in
     [PR #633](https://github.com/Azure/GPT-RAG/pull/633) at
     [`86b17b0`](https://github.com/Azure/GPT-RAG/commit/86b17b0af672edefe6842cba0f1a8ff77ab23038),
-    and [GPT-RAG `v3.8.0`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0)
-    pins UI `v2.6.1`, orchestrator `v4.1.0`, ingestion `v2.7.1`, and AILZ
+    and [GPT-RAG `v3.8.1`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.1)
+    pins UI `v2.6.1`, orchestrator `v4.1.1`, ingestion `v2.7.1`, and AILZ
     `v2.5.1` at their exact release commits. See
     [the hosted-agent component release matrix](hosted_agent_release_matrix.md#store-false-wire-contract)
     for the `/responses` `store` gap, now fixed and pinned.

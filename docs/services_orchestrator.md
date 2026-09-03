@@ -5,8 +5,8 @@ built on the Microsoft Agent Framework and Azure AI Foundry Agent Service. It
 coordinates agent-based RAG workflows, where each agent has a defined role, to
 generate accurate, context-aware responses for complex user queries. Current
 GPT-RAG umbrella releases run it as an orchestrator Container App. Orchestrator
-`v4.1.0` also packages the runtime as a Microsoft Foundry hosted agent, which
-[GPT-RAG `v3.8.0`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0) makes
+`v4.1.1` also packages the runtime as a Microsoft Foundry hosted agent, which
+[GPT-RAG `v3.8.1`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.1) makes
 the default for genuinely fresh deployments; see the
 [exact hosted integration matrix](hosted_agent_release_matrix.md). The separate
 [hosted continuity platform contract](hosted_continuity_platform_contract.md)
@@ -65,7 +65,7 @@ are handled in two places. The model prompt receives only a recent history
 window, while the Cosmos DB conversation document is compacted before
 persistence so it keeps useful recent context without growing indefinitely.
 In the hosted component matrix, UI `v2.6.1` owns managed-Conversation lifecycle
-and orchestrator `v4.1.0` is stateless. User-facing list/read/feedback/delete
+and orchestrator `v4.1.1` is stateless. User-facing list/read/feedback/delete
 routes exist in the UI component, but umbrella panel gates remain off. The default
 `maf_lite` strategy and the `multimodal` strategy also classify each turn as a
 greeting, retrieval-needed question, or no-retrieval follow-up. Transformations
@@ -92,7 +92,7 @@ distinct from OBO retrieval. The hosted runtime is not an identity-header
 source and receives no key, Conversation or impersonation RBAC, or Cosmos DB in
 hosted/no-panel. Capability/HMAC remains a disabled fallback only.
 
-### Hosted `v4.1.0` request contract
+### Hosted `v4.1.1` request contract
 
 Hosted `POST /responses` rejects top-level `conversation` and
 `previous_response_id` with HTTP 422. The caller must send the complete bounded,
