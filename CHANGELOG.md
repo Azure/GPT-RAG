@@ -1,5 +1,48 @@
 # Changelog
 
+## [v3.8.3] - 2026-09-03
+
+### Fixed
+
+- **Repinned `gpt-rag-ingestion` from `v2.7.2` to
+  [`v2.7.3`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.7.3),
+  which stops the data-ingestion administrative surface from being mounted in
+  deployments that did not ask for it.** The admin SPA and every admin API
+  route were mounted unconditionally at import time, and the
+  `DEPLOY_ADMINISTRATIVE_PANEL` setting was never read, so the surface was
+  reachable regardless of deployment mode. Mounting is now resolved once from
+  App Configuration inside the ASGI `lifespan` and gated on the resolved mode.
+  Classic deployments are unaffected — the admin surface keeps mounting exactly
+  as before — and hosted deployments without a panel now correctly return 404.
+  Closes [#592](https://github.com/Azure/GPT-RAG/issues/592).
+
+  The same pin also hardens the new `/api/panel/*` API: startup validation now
+  fails closed on missing Entra ID configuration rather than only on missing
+  Cosmos configuration, and neither reading nor writing feedback returns 500
+  because of a single malformed Cosmos document.
+
+  No GPT-RAG configuration, parameter, or infrastructure change is involved.
+  The UI, orchestrator, and AI Landing Zone pins are unchanged from `v3.8.2`.
+
+## Component versions
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.6.2 |
+| gpt-rag-orchestrator | v4.1.1 |
+| gpt-rag-ingestion | v2.7.3 |
+| infra / AI Landing Zone | v2.5.1 |
+
+### Validation
+
+- `unit-tests` green on the pinned ingestion commit: `228 passed, 0 failed`,
+  on both the source branch and the release branch.
+- UI and orchestrator pins are byte-identical to `v3.8.2` and were not
+  revalidated.
+- AI Landing Zone pins verified to agree: `manifest.json` `ailz_tag`,
+  `.gitmodules` `infra.branch`, and the recorded `infra/` submodule gitlink all
+  identify `v2.5.1` / `9cc5859a`.
+
 ## [v3.8.2] - 2026-09-03
 
 ### Fixed
