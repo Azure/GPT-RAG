@@ -1762,9 +1762,9 @@ locally after <code>azd provision</code>, and <code>azd deploy</code> deploys th
 ingestion services in the classic Container Apps topology.</p>
 <h3 id="chat-runtime-modes">Chat runtime modes</h3>
 <div class="admonition info">
-<p class="admonition-title">Shipped in GPT-RAG v3.8.0</p>
-<p><a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0">GPT-RAG <code>v3.8.0</code></a>
-pins UI <code>v2.6.1</code>, orchestrator <code>v4.1.0</code>, ingestion <code>v2.7.1</code>, and AILZ
+<p class="admonition-title">Shipped in GPT-RAG v3.8.1</p>
+<p><a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.1">GPT-RAG <code>v3.8.1</code></a>
+pins UI <code>v2.6.1</code>, orchestrator <code>v4.1.1</code>, ingestion <code>v2.7.1</code>, and AILZ
 <code>v2.5.1</code> at their exact release commits, and validates the hosted chat path
 end to end. Classic, hosted/no-panel, and explicitly selected hosted-panel
 are supported topologies. Continuity, user-history, owner-binding
@@ -1839,7 +1839,7 @@ Configuration label <code>gpt-rag</code>:</p>
 </tr>
 <tr>
 <td><code>HOSTED_AGENT_BASE_URL</code></td>
-<td>Required HTTPS hosted service root. Orchestrator <code>v4.1.0</code> defines stateless <code>POST /responses</code>; UI <code>v2.6.1</code> currently sends complete ordered messages through the distinct <code>POST /invocations</code> compatibility route. Continuity remains off until the live call route satisfies the protocol evidence gate.</td>
+<td>Required HTTPS hosted service root. Orchestrator <code>v4.1.1</code> defines stateless <code>POST /responses</code>; UI <code>v2.6.1</code> currently sends complete ordered messages through the distinct <code>POST /invocations</code> compatibility route. Continuity remains off until the live call route satisfies the protocol evidence gate.</td>
 </tr>
 <tr>
 <td><code>HOSTED_AGENT_RESOURCE_SCOPE</code></td>
@@ -1968,7 +1968,7 @@ the
 <a href="../hosted_continuity_platform_contract/">hosted conversation continuity platform contract</a>
 for the complete trust and rollout boundary.</p>
 <p><code>POST /responses</code> and <code>POST /invocations</code> are distinct protocols, not aliases,
-and their request bodies are not interchangeable. Orchestrator <code>v4.1.0</code>
+and their request bodies are not interchangeable. Orchestrator <code>v4.1.1</code>
 implements a stateless hosted Responses contract: callers send complete ordered
 text history in <code>input</code> on every request. A non-empty string is valid for one
 turn. An array must be non-empty, text-only, ordered oldest to newest, and end
@@ -2082,12 +2082,12 @@ as validated until each one succeeds. See the
 <code>CHAT_BACKEND=orchestrator</code> without deleting hosted Conversations or existing
 classic panel data.</p>
 <h4 id="current-release">Current release</h4>
-<p><a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0">GPT-RAG <code>v3.8.0</code></a> is the
-latest published umbrella release. It pins UI <code>v2.6.1</code>, orchestrator <code>v4.1.0</code>,
+<p><a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.1">GPT-RAG <code>v3.8.1</code></a> is the
+latest published umbrella release. It pins UI <code>v2.6.1</code>, orchestrator <code>v4.1.1</code>,
 ingestion <code>v2.7.1</code>, and AI Landing Zone <code>v2.5.1</code>, and it makes hosted/no-panel
 the default topology for genuinely fresh deployments. The previous classic-only
 umbrella release was <code>v3.7.0</code>, pinning UI <code>v2.3.13</code>, orchestrator <code>v3.8.0</code>,
-ingestion <code>v2.5.0</code>, and AI Landing Zone <code>v2.3.0</code>; do not mix the <code>v3.8.0</code>
+ingestion <code>v2.5.0</code>, and AI Landing Zone <code>v2.3.0</code>; do not mix the <code>v3.8.1</code>
 topology and configuration contract into the older <code>v3.7.0</code> hooks or manifest.</p>
 <h3 id="retrieval-backend">Retrieval backend</h3>
 <p>GPT-RAG can retrieve grounding content directly from Azure AI Search or through a

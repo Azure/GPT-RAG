@@ -1663,7 +1663,17 @@ patch, and fix, see the <a href="https://github.com/Azure/GPT-RAG/releases">GitH
 </blockquote>
 <h3 id="september-2026">September 2026</h3>
 <ul>
-<li><strong>Hosted agent on Microsoft Foundry is the fresh-deployment default (<a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0">GPT-RAG v3.8.0</a>).</strong>
+<li>
+<p><strong>Deployment repair (<a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.1">GPT-RAG v3.8.1</a>).</strong>
+  The umbrella repins orchestrator <a href="https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.1.1"><code>v4.1.1</code></a>,
+  which restores <code>azd deploy</code>. Orchestrator <code>v4.1.0</code> could not be built: its
+  <code>Dockerfile</code> builds the <code>frontend/</code> SPA in the first stage, and three
+  dependency regressions broke that build, so every clean deployment of
+  <code>v3.8.0</code> failed at the orchestrator image build. UI <code>v2.6.1</code>, ingestion
+  <code>v2.7.1</code>, and AILZ <code>v2.5.1</code> are unchanged. Upgrade if you deployed <code>v3.8.0</code>.</p>
+</li>
+<li>
+<p><strong>Hosted agent on Microsoft Foundry is the fresh-deployment default (<a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0">GPT-RAG v3.8.0</a>).</strong>
   The umbrella release pins UI <code>v2.6.1</code>, orchestrator <code>v4.1.0</code>, ingestion
   <code>v2.7.1</code>, and AILZ <code>v2.5.1</code>, and validates the hosted chat path end to end
   against a Foundry IQ knowledge base, confirming both the grounded answer and
@@ -1674,7 +1684,8 @@ patch, and fix, see the <a href="https://github.com/Azure/GPT-RAG/releases">GitH
   Application Insights, and isolates the hosted agent into its own child azd
   project. Continuity, user-history, owner-binding, and operator evidence gates
   remain deployment-published false/off/503. See the
-  <a href="../hosted_agent_release_matrix/">hosted-agent component release matrix</a>.</li>
+  <a href="../hosted_agent_release_matrix/">hosted-agent component release matrix</a>.</p>
+</li>
 </ul>
 <h3 id="august-2026">August 2026</h3>
 <ul>

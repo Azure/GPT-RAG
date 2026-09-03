@@ -1682,13 +1682,13 @@
 
 <h1 id="hosted-agent-integration-matrix">Hosted-agent integration matrix</h1>
 <p>This page records the exact hosted-agent component releases pinned by the
-GPT-RAG umbrella release <a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0"><code>v3.8.0</code></a>
+GPT-RAG umbrella release <a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.1"><code>v3.8.1</code></a>
 and the independent evidence gates that remain fail closed.</p>
 <div class="admonition warning">
-<p class="admonition-title">Pins are shipped in umbrella <code>v3.8.0</code>; evidence gates remain fail closed</p>
+<p class="admonition-title">Pins are shipped in umbrella <code>v3.8.1</code>; evidence gates remain fail closed</p>
 <p>The umbrella <code>manifest.json</code> pins all four exact releases below and explicit
 <code>hosted-panel</code> topology selection is supported. The manifest's umbrella tag
-is <code>v3.8.0</code>; use only a GPT-RAG source or release that contains these pins
+is <code>v3.8.1</code>; use only a GPT-RAG source or release that contains these pins
 rather than combining component tags independently.
 <code>HOSTED_CONTINUITY_ENABLED</code>, <code>PANEL_HISTORY_ENABLED</code>,
 <code>PANEL_HISTORY_OWNER_BINDING_VALIDATED</code>, and
@@ -1703,7 +1703,7 @@ Readiness (item 1 of the evidence gate below) has since been re-run and
 passes under <code>NETWORK_ISOLATION=true</code> against the exact pins below: the
 hosted agent reaches active state, session readiness succeeds, and a
 grounded answer returns with its citation. These pins shipped as umbrella
-release <a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0"><code>v3.8.0</code></a>.
+release <a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.1"><code>v3.8.1</code></a>.
 Evidence-gate items 2 through 8 and the <code>store</code> contract matrix have not
 been re-run; the four flags above remain deployment-published <code>false</code>.</p>
 </div>
@@ -1726,9 +1726,9 @@ been re-run; the four flags above remain deployment-published <code>false</code>
 </tr>
 <tr>
 <td>GPT-RAG orchestrator</td>
-<td><a href="https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.1.0"><code>v4.1.0</code></a></td>
-<td><a href="https://github.com/Azure/gpt-rag-orchestrator/commit/935f8ed990020cc3be777dd4fe1664d7e131a3c8"><code>935f8ed</code></a></td>
-<td>Canonical hosted <code>/responses</code> is stateless and requires caller-supplied ordered input. Fixes the <code>dependencies</code>/<code>connectors</code> circular import that crashed the hosted entrypoint on startup (<a href="https://github.com/Azure/gpt-rag-orchestrator/pull/311">PR #311</a>), released in <code>v4.0.1</code>. Unconditionally forces <code>store: false</code> on every hosted <code>POST /responses</code> call and rejects <code>background: true</code> with HTTP 422 (<a href="https://github.com/Azure/gpt-rag-orchestrator/pull/313">PR #313</a>), released in <code>v4.0.2</code>; see "Store false wire contract" below. <code>v4.1.0</code> inverts request-field validation from a strict allowlist to ignore-and-log with a minimal deny-list: only <code>previous_response_id</code> is rejected with HTTP 422, and every other field the adapter does not act on is dropped and logged. A strict allowlist turned each newly injected Foundry client field into a hosted-agent outage. <code>store</code> and <code>background</code> handling is unchanged. <code>v4.1.0</code> also suppresses spurious <code>opentelemetry.context.detach</code> error records emitted by third-party GenAI instrumentation.</td>
+<td><a href="https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.1.1"><code>v4.1.1</code></a></td>
+<td><a href="https://github.com/Azure/gpt-rag-orchestrator/commit/9b64a5b962067161cb55252c6e0917a2738ba984"><code>9b64a5b</code></a></td>
+<td>Canonical hosted <code>/responses</code> is stateless and requires caller-supplied ordered input. Fixes the <code>dependencies</code>/<code>connectors</code> circular import that crashed the hosted entrypoint on startup (<a href="https://github.com/Azure/gpt-rag-orchestrator/pull/311">PR #311</a>), released in <code>v4.0.1</code>. Unconditionally forces <code>store: false</code> on every hosted <code>POST /responses</code> call and rejects <code>background: true</code> with HTTP 422 (<a href="https://github.com/Azure/gpt-rag-orchestrator/pull/313">PR #313</a>), released in <code>v4.0.2</code>; see "Store false wire contract" below. <code>v4.1.0</code> inverts request-field validation from a strict allowlist to ignore-and-log with a minimal deny-list: only <code>previous_response_id</code> is rejected with HTTP 422, and every other field the adapter does not act on is dropped and logged. A strict allowlist turned each newly injected Foundry client field into a hosted-agent outage. <code>store</code> and <code>background</code> handling is unchanged. <code>v4.1.0</code> also suppresses spurious <code>opentelemetry.context.detach</code> error records emitted by third-party GenAI instrumentation. <code>v4.1.1</code> repairs the <code>frontend/</code> SPA build that the <code>Dockerfile</code> runs in its first stage: <code>v4.1.1</code> could not be built at all, so every clean deployment of umbrella <code>v3.8.1</code> failed at the orchestrator image build. Runtime behaviour is unchanged.</td>
 </tr>
 <tr>
 <td>GPT-RAG ingestion</td>
@@ -1761,7 +1761,7 @@ close their independent live evidence and authorization gates.</p>
 <tbody>
 <tr>
 <td>Umbrella integration manifest</td>
-<td>Pins the exact matrix above. Stamped as <a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0"><code>v3.8.0</code></a>.</td>
+<td>Pins the exact matrix above. Stamped as <a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.1"><code>v3.8.1</code></a>.</td>
 </tr>
 <tr>
 <td>Fresh UI <code>v2.6.1</code> process with no <code>CHAT_BACKEND</code> value</td>
@@ -1807,7 +1807,7 @@ estimated tokens with <code>drop_oldest</code>. UI <code>v2.6.1</code> has stand
 The umbrella publishes the reviewed 100/32,000 values; operators must not
 remove them and then assume the UI fallback values are equivalent.</p>
 <h2 id="stateless-hosted-runtime-contract">Stateless hosted runtime contract</h2>
-<p>Orchestrator <code>v4.1.0</code> performs no managed-Conversations create, read, append, or
+<p>Orchestrator <code>v4.1.1</code> performs no managed-Conversations create, read, append, or
 delete operation in the hosted container. The caller supplies the complete,
 bounded, oldest-to-newest history on every request.</p>
 <p>For canonical <code>POST /responses</code>:</p>
@@ -1865,8 +1865,8 @@ and released as
 <a href="https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.0.2"><code>v4.0.2</code></a>
 (commit
 <a href="https://github.com/Azure/gpt-rag-orchestrator/commit/c653b3ec0a553f55244e197f3be993ad33ffe02f"><code>c653b3e</code></a>,
-722 tests passing upstream). Umbrella release <code>v3.8.0</code> pins the successor
-commit <code>935f8ed</code> (<code>v4.1.0</code>), which leaves <code>store</code> and <code>background</code>
+722 tests passing upstream). Umbrella release <code>v3.8.1</code> pins the successor
+commit <code>9b64a5b</code> (<code>v4.1.1</code>), which leaves <code>store</code> and <code>background</code>
 handling unchanged. <strong>The store contract itself has not been
 re-validated.</strong> A network-isolated run on these pins confirms readiness and
 a grounded answer, but does not exercise the field matrix. Do not describe
@@ -2092,7 +2092,7 @@ before anything else in the process has "warmed up" <code>connectors</code>, unl
 the classic entrypoint) and fixed in
 <a href="https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.0.1">orchestrator <code>v4.0.1</code></a>
 (<a href="https://github.com/Azure/gpt-rag-orchestrator/pull/311">PR #311</a>), whose
-successor <code>v4.1.0</code> is pinned above. Item 1 has since been re-run against a
+successor <code>v4.1.1</code> is pinned above. Item 1 has since been re-run against a
 live, network-isolated deployment on those pins and passes: the agent version
 reaches active state, session readiness succeeds, and a grounded answer
 returns with its citation. Evidence steps 2 through 8 have not been re-run.

@@ -723,9 +723,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#hosted-v410-request-contract" class="md-nav__link">
+  <a href="#hosted-v411-request-contract" class="md-nav__link">
     <span class="md-ellipsis">
-      Hosted v4.1.0 request contract
+      Hosted v4.1.1 request contract
     </span>
   </a>
   
@@ -1635,8 +1635,8 @@ built on the Microsoft Agent Framework and Azure AI Foundry Agent Service. It
 coordinates agent-based RAG workflows, where each agent has a defined role, to
 generate accurate, context-aware responses for complex user queries. Current
 GPT-RAG umbrella releases run it as an orchestrator Container App. Orchestrator
-<code>v4.1.0</code> also packages the runtime as a Microsoft Foundry hosted agent, which
-<a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0">GPT-RAG <code>v3.8.0</code></a> makes
+<code>v4.1.1</code> also packages the runtime as a Microsoft Foundry hosted agent, which
+<a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.1">GPT-RAG <code>v3.8.1</code></a> makes
 the default for genuinely fresh deployments; see the
 <a href="../hosted_agent_release_matrix/">exact hosted integration matrix</a>. The separate
 <a href="../hosted_continuity_platform_contract/">hosted continuity platform contract</a>
@@ -1728,7 +1728,7 @@ are handled in two places. The model prompt receives only a recent history
 window, while the Cosmos DB conversation document is compacted before
 persistence so it keeps useful recent context without growing indefinitely.
 In the hosted component matrix, UI <code>v2.6.1</code> owns managed-Conversation lifecycle
-and orchestrator <code>v4.1.0</code> is stateless. User-facing list/read/feedback/delete
+and orchestrator <code>v4.1.1</code> is stateless. User-facing list/read/feedback/delete
 routes exist in the UI component, but umbrella panel gates remain off. The default
 <code>maf_lite</code> strategy and the <code>multimodal</code> strategy also classify each turn as a
 greeting, retrieval-needed question, or no-retrieval follow-up. Transformations
@@ -1801,7 +1801,7 @@ compatible component set is validated, the trusted UI BFF will derive
 distinct from OBO retrieval. The hosted runtime is not an identity-header
 source and receives no key, Conversation or impersonation RBAC, or Cosmos DB in
 hosted/no-panel. Capability/HMAC remains a disabled fallback only.</p>
-<h3 id="hosted-v410-request-contract">Hosted <code>v4.1.0</code> request contract</h3>
+<h3 id="hosted-v411-request-contract">Hosted <code>v4.1.1</code> request contract</h3>
 <p>Hosted <code>POST /responses</code> rejects top-level <code>conversation</code> and
 <code>previous_response_id</code> with HTTP 422. The caller must send the complete bounded,
 oldest-to-newest text history as <code>input</code> for every turn. A plain non-empty string
