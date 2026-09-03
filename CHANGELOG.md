@@ -1,5 +1,362 @@
 # Changelog
 
+## [v3.8.0] - 2026-09-03
+
+### Added
+
+- **Opt-in GenAI message-content capture for the hosted agent.** Added
+  `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` to the `env:` block of
+  the `orchestrator-agent` service in `hosted-agent/azure.yaml`, wired to a new
+  `HOSTED_AGENT_CAPTURE_MESSAGE_CONTENT` azd variable that defaults to `false`.
+  When enabled, GenAI spans carry `gen_ai.input.messages`,
+  `gen_ai.output.messages`, and `gen_ai.system_instructions`, which is what makes
+  the Foundry portal's per-agent **Conversations** view render turns instead of
+  reporting *"No conversation turns found"*. The orchestrator reads this variable
+  from the process environment before any App Configuration resolution happens,
+  so it cannot be supplied as an App Configuration key and previously had no
+  supported installation path — a hosted-agent version created by `azd deploy`
+  would silently omit it. Operators now opt in per environment with
+  `azd env set HOSTED_AGENT_CAPTURE_MESSAGE_CONTENT true` followed by
+  `azd deploy`; `scripts/preDeploy.ps1` copies the root `.azure` environment into
+  the `hosted-agent` azd project, so the value propagates automatically. The
+  default stays `false` because capturing message content ships user prompts and
+  model answers to Application Insights, which is a data-privacy decision each
+  deployment has to make for itself. Use only this variable, never the legacy
+  `AZURE_TRACING_GEN_AI_CONTENT_RECORDING_ENABLED`: the Azure AI instrumentor
+  treats disagreeing values as a configuration error.
+
+- **Hosted administrative panel platform contract (issue #611, ADR-0004).**
+  Published the versioned `contracts/conversations-panel-v1` JSON Schema
+  (+ `.sha256` pin) covering the user-facing history/messages/feedback/delete
+  surfaces and the operator-facing overview/corpus-curation surfaces, with
+  strict `extra=forbid` semantics, a uniform error matrix, opaque
+  signed/expiring cursors, and `audit-event-v1`-compatible correlation IDs.
+  Added `config.panel.settings` (App Configuration defaults for
+  `PANEL_HISTORY_ENABLED`, `PANEL_HISTORY_OWNER_BINDING_VALIDATED`,
+  `PANEL_CONVERSATION_ENUMERATION_MODE`, `PANEL_CONVERSATIONS_TOKEN_AUDIENCE`,
+  `PANEL_CONVERSATIONS_TENANT_ID`, `PANEL_OWNER_INDEX_DATABASE_CONTAINER`,
+  `PANEL_FEEDBACK_DATABASE_CONTAINER`, `PANEL_CURSOR_TTL_SECONDS`,
+  `PANEL_OVERVIEW_MIN_CARDINALITY` — all published unconditionally and safely
+  inert, matching the already-merged `gpt-rag-ui` panel configuration exactly)
+  and `config.deployment.composition.panel_database_containers`/
+  `resolve_database_containers`, which provision exactly two
+  metadata-only, `/principal_id`-partitioned Cosmos containers (owner index,
+  feedback) for hosted/panel — never the classic
+  `conversations`/`datasources`/`prompts`/`mcp` list, so switching topologies
+  can never mix protected chat content with panel metadata. Added
+  `config.panel.setup`, a new `postProvision` hook (wired into both
+  `scripts/postProvision.ps1` and `.sh`) that assigns **container-scoped**
+  (never account-scope) Cosmos SQL role assignments: Data Contributor for the
+  `gpt-rag-ui` BFF identity and Data Reader for `gpt-rag-ingestion` (operator
+  overview counts only) on the two panel containers — the hosted
+  agent/container identity is never resolved or granted any role. The panel's
+  pagination cursor reuses the UI's existing `CHAINLIT_AUTH_SECRET`
+  (already Key-Vault-backed); no new secret or Key Vault RBAC was introduced.
+  This platform-layer prerequisite remained inert until the coordinated
+  integration matrix below lifted the topology block; the independent
+  history and operator evidence gates remain disabled by default.
+- **Hosted panel operator-surface App Configuration keys (issue #611,
+  ADR-0004, reconciling gpt-rag-ingestion PR #274, merge
+  `5569dd6af3ecb317e1037108cb21859f1b2185a1`).** Added
+  `PANEL_OPERATOR_SURFACES_ENABLED` (forced `false`, mirroring
+  `PANEL_HISTORY_OWNER_BINDING_VALIDATED`'s no-evidence-gate-yet pattern),
+  `PANEL_OPERATOR_APP_ROLE` (`""`), and `PANEL_OPERATOR_GROUP_ID` (`""`) to
+  `config.panel.settings`, matching exactly the App Configuration keys the
+  now-merged `gpt-rag-ingestion` operator overview/corpus-curation surfaces
+  consume — no invented keys, no key set true. `PANEL_OVERVIEW_MIN_CARDINALITY`
+  (`5`), `PANEL_CURSOR_TTL_SECONDS` (`600`), and the panel Cosmos container
+  keys were already published with matching defaults and needed no change.
+  `DATABASE_ACCOUNT_NAME`/`DATABASE_NAME`/`STORAGE_ACCOUNT_NAME` and the
+  reserved per-app `DATA_INGEST_APP_APIKEY` Key Vault reference are already
+  published unconditionally by the AI Landing Zone submodule and are not
+  duplicated here. Added `config/panel/tests/test_operator_contract.py`, an
+  explicit expected-key-set fixture guarding against future drift between
+  this repository's published defaults and what `gpt-rag-ingestion` (PR #274)
+  and `gpt-rag-ui` (PR #99) actually consume. Updated ADR-0004's adoption
+  status: the ingestion operator-surface component work is now done. The
+  coordinated matrix below lifts only the explicit hosted-panel topology
+  block; the separate live evidence and authorization gates remain fail
+  closed.
+- **Deterministic deployment topologies.** Classic, hosted/no-panel, and
+  hosted/panel are deployable topology values. Hosted-panel requires explicit
+  operator selection; `DEPLOY_ADMINISTRATIVE_PANEL` defaults to `false`.
+  Panel history and operator routes remain independently fail closed behind
+  their disabled-by-default evidence and authorization gates.
+- **Hosted-no-panel is now the fresh-deployment default (ADR-0001 revision
+  5).** A genuinely new environment (no existing resource group) provisions
+  `hosted-no-panel` with `CHAT_BACKEND=hosted_agent` and no orchestrator
+  Container App, without requiring any operator opt-in flag. Existing
+  environments are unaffected: a resource group that already exists is
+  "sticky" — its already-persisted App Configuration topology marker (or, for
+  pre-cutover environments with no marker at all, the classic default) is
+  honored as-is. Setting `DEPLOYMENT_TOPOLOGY=classic` explicitly always
+  selects the Container Apps orchestrator topology, in fresh or existing
+  environments; the legacy `DEPLOY_HOSTED_AGENT_ORCHESTRATION=false` flag
+  remains a compatible way to request the same fallback. There is no silent
+  request-time fallback. Genuinely conflicting persisted App Configuration
+  signals fail closed with migration guidance instead of guessing; an explicit
+  `DEPLOYMENT_TOPOLOGY` takes precedence over previously materialized
+  compatibility flags as the operator-controlled migration or rollback action.
+  An explicit classic-to-hosted migration now keeps the orchestrator Container
+  App, Cosmos data, and `CHAT_BACKEND=orchestrator` active through both hosted
+  preparation phases. `azd deploy` switches App Configuration to
+  `CHAT_BACKEND=hosted_agent` and clears the migration marker only after the
+  hosted deployment returns a valid endpoint and an `azd ai agent invoke`
+  smoke request succeeds; classic resources are eligible for removal only on
+  a later explicit provision.
+- **Shared, deterministic topology resolver.** `config/deployment/topology.py`
+  centralizes the fresh-vs-existing/sticky/conflict decision (resource-group
+  existence and contents plus persisted App Configuration settings, when
+  reachable) behind a single pure function
+  (`config.deployment.composition.resolve_topology`) and a small
+  CLI/integration wrapper. An empty resource group pre-created by azd is
+  treated as fresh, so an unrelated process-level App Configuration endpoint
+  cannot influence first provision; groups with deployed resources retain
+  fail-closed persisted-state checks. `scripts/preProvision.ps1` and
+  `scripts/preProvision.sh` resolve and materialize the same
+  `DEPLOYMENT_TOPOLOGY` (and paired legacy flags/`CHAT_BACKEND`) into the azd
+  environment before any later hook or Bicep composition runs.
+  `scripts/preDeploy.ps1`/`.sh` and `scripts/postProvision.ps1` read that
+  materialized decision back via `config.deployment.topology --describe`
+  instead of duplicating the detection logic, so all lifecycle hooks always
+  agree.
+- **Hosted-agent azd service isolation.** An isolated child azd project deploys
+  the orchestrator image through `azure.ai.agent` only in hosted modes. Fresh
+  hosted environments use an explicit two-phase contract: the first
+  `azd provision` sets `prepareHostedAgent=true` and
+  `deployHostedAgent=false`, exposing Foundry, registry, network, and private
+  build prerequisites without accepting an empty or placeholder image digest.
+  `scripts/prepareHostedDeployment.ps1` and `.sh` then clone the exact
+  manifest-pinned orchestrator commit, build it through ACR Tasks, create the
+  hosted-entrypoint derivative through the same build path, resolve the pushed
+  manifest to a canonical lowercase immutable digest, and materialize that
+  digest into the azd environment. A second explicit `azd provision` enables
+  the digest-backed deploy handoff, after which `azd deploy` invokes
+  `azure.ai.agent`. Network-isolated builds validate and use the dedicated
+  VNet-injected ACR Tasks agent pool. An explicit digest remains supported as a
+  no-build override; mutable or malformed values always fail closed. Hosted
+  mode also requires a delegated-user resource scope via explicit
+  `HOSTED_AGENT_RESOURCE_SCOPE` containing a non-empty resource identifier
+  followed by `/.default`.
+- **Mode-aware runtime contract.** App Configuration label `gpt-rag` now owns
+  `CHAT_BACKEND`, deployment topology, classic and hosted endpoints, resource
+  scope, the resolved hosted image digest, and finite SSE timeout settings.
+  PowerShell and shell lifecycle hooks consume the same composition and
+  publication modules.
+
+### Changed
+
+- **Hosted administrative panel integration matrix (issue #611).** Explicit
+  hosted-panel topology selection is now composed with UI `v2.6.0`
+  (`81d6515d8fc365402e958e861b671af037a4cc75`), orchestrator `v4.0.1`
+  (`7e22840ba0e96a5ce237cf2657795768f88e3955`), ingestion `v2.7.0`
+  (`84b927769ef0839110f2d68e3ca471e2260567cf`), and AI Landing Zone
+  `v2.5.0` (`cacf418216ce7381d06263e0dd704a86b8a6f225`). The hosted
+  container remains stateless with zero Conversations RBAC; hosted-panel
+  provisions only the metadata-only owner-index and feedback containers.
+  `PANEL_HISTORY_ENABLED`, `PANEL_HISTORY_OWNER_BINDING_VALIDATED`, and
+  `PANEL_OPERATOR_SURFACES_ENABLED` remain deployment-published `false`, so
+  all user-history and operator surfaces stay fail closed until their
+  independent evidence and authorization gates are explicitly completed.
+  The released ingestion browser/operator path validates delegated bearer
+  tokens, rejects app-only identities, and requires exact configured app-role
+  or group membership.
+- **Hosted continuity ownership is delegated and fail closed.** The trusted UI
+  BFF now derives `x-ms-user-identity` from the authenticated server-side
+  principal, independently of OBO retrieval tokens. Continuity activates only
+  after the live routed Responses protocol is exactly 2.0.0 and the UI BFF has
+  direct, exact agent-scoped Foundry Agent Consumer plus GPT-RAG user-identity
+  impersonation assignments. The hosted container receives neither role nor an
+  ownership key. The HMAC capability contract remains an explicit disabled
+  fallback and delegated mode provisions no capability secret, vault role, or
+  App Configuration reference.
+- **Released AI Landing Zone pin.** The temporary AI Landing Zone `develop`
+  source pin is replaced by released tag `v2.5.0` at exact commit
+  `cacf418216ce7381d06263e0dd704a86b8a6f225`.
+- **AI Landing Zone pin updated to `v2.5.1`
+  (`9cc5859af5c8ab3b31709c9e16e0db11a170a404`).** Patch release: Azure
+  Firewall's `AllowContainerAppsPlatform` Application Rule now also allows the
+  Microsoft Foundry Agent Service's `agent365.svc.cloud.microsoft`
+  observability endpoint for hosted agents under network isolation. Live
+  Azure validation of a network-isolated deployment had shown the capability
+  host and hosted-agent runtime start successfully, but every hosted-agent
+  request then failed because the runtime's own post-startup
+  observability/telemetry call had no firewall allow rule. Strictly additive
+  allow-list change; deployments without `NETWORK_ISOLATION=true` and the
+  Azure Firewall are unaffected. `.gitmodules` and the `infra` submodule
+  gitlink are updated to match. See
+  [AILZ `v2.5.1`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.5.1).
+- **Orchestrator pin updated to `v4.0.2`
+  (`c653b3ec0a553f55244e197f3be993ad33ffe02f`).** Closes the store-false wire
+  contract gap recorded in the hosted-agent integration matrix: the hosted
+  outer `POST /responses` now unconditionally forces `store: false` before
+  the pinned `azure-ai-agentserver-responses==2.0.0b1` host's auto-activated
+  `FoundryStorageProvider` can run, for both streaming and non-streaming
+  requests, regardless of what a caller sends or omits. Previously an omitted
+  or `true` `store` deterministically failed with a platform `storage_error`
+  under network isolation; only an explicit `store: false` succeeded.
+  `background: true` now returns an explicit HTTP 422 instead of the SDK's
+  generic 400, since it requires `store: true` and is no longer a reachable
+  combination once `store` is force-overridden. Released upstream as
+  [gpt-rag-orchestrator PR #313](https://github.com/Azure/gpt-rag-orchestrator/pull/313),
+  shipped in
+  [`v4.0.2`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.0.2)
+  (722 tests passing upstream). Classic (non-hosted, Cosmos-backed)
+  `/responses` and `/invocations` behavior are unaffected; the change is
+  scoped to the hosted entrypoint's `create_response` guard only. **This is a
+  code-level fix pinned into the umbrella manifest; it does not by itself
+  constitute the network-isolated live re-run of the exact `store`
+  unset/`true`/`false` matrix that the hosted-agent integration matrix
+  documentation still requires before the store-false contract can be
+  described as validated.**
+
+### Fixed
+
+- **AI Foundry project endpoint discovery.** Windows post-provisioning now
+  resolves project child resources through the generic ARM resource API,
+  validates an explicit `AI_FOUNDRY_PROJECT_NAME` when supplied, and fails
+  closed unless exactly one project is selected. It no longer silently
+  publishes an invalid `aifoundry-default-project` endpoint when the installed
+  Azure CLI lacks the specialized project-list command.
+
+- **Windows jumpbox deployment imports the repository package reliably.**
+  `preDeploy.ps1` now establishes the repository root on `PYTHONPATH` and
+  invokes deployment modules through `runpy`, avoiding Windows Python
+  installations that omit the current directory from `sys.path`. The shell
+  hook now exports the equivalent repository-root import path.
+- **Hosted-image builds resolve the Azure CLI launcher on Windows.**
+  The ACR Tasks helper resolves both `az` and the Windows `az.cmd` shim before
+  calling `subprocess.run`, uses an absolute Dockerfile path for temporary
+  pinned-source contexts, and fails clearly when Azure CLI is unavailable.
+  Private builds queue without streaming Unicode logs through the Windows
+  console and resolve their immutable output digest from the management-plane
+  ACR run record, so digest materialization does not require public registry
+  data-plane access.
+- **Foundry IQ ingestion honors the Search managed-identity mode.**
+  Blob knowledge sources now bind the Search service's configured
+  user-assigned identity instead of implicitly selecting a nonexistent system
+  identity in UAI-based deployments.
+- **Regional prerequisite checks resolve Azure CLI on Windows.**
+  `util.prereqs` now uses the same explicit Azure CLI executable resolution as
+  deployment configuration, so the `az.cmd` shim no longer fails with
+  `FileNotFoundError` under `subprocess.run`. Its console messages are
+  ASCII-safe for the default Windows code page, and Azure SDK imports are
+  deferred until live checks run, allowing `python -m util.prereqs --help` to
+  work before optional dependencies are installed.
+- **Governance pin regression follows the rollback contract.** The governance
+  test now verifies the preserved `v3.7.0` component combination in
+  `config/deployment/rollback.json` instead of incorrectly requiring the live
+  unreleased manifest to remain frozen on the prior release.
+- **Root-caused and fixed the hosted-agent session-readiness HTTP 424
+  blocker (issue #576).** The previous integration attempt's network-isolated
+  live validation reached agent-version `active` state but every session
+  invoke returned HTTP 424 `session_not_ready`. Root-caused to a circular
+  import in `gpt-rag-orchestrator`: `src/api/hosted_entrypoint.py` imports
+  `dependencies` first (it is intentionally Cosmos-free and never "warms up"
+  `connectors` first, unlike the classic `main.py` entrypoint); `dependencies.py`
+  eagerly imported `connectors.appconfig` at module level, and
+  `connectors/__init__.py` eagerly imports several submodules
+  (`cosmosdb`, `search`, `aifoundry`) that each import `dependencies` back at
+  *their* module level — an import-time cycle that crashed the container's
+  Python process before uvicorn could ever bind a port or serve
+  `GET /readiness`, exactly matching Microsoft Foundry's documented
+  `424 session_not_ready` failure mode ("container started but `/readiness`
+  didn't return HTTP 200 within the timeout"). Reproduced deterministically
+  with a fresh-interpreter import test mirroring the container's startup
+  command (no live Azure deployment required to diagnose or confirm the fix).
+  Fixed upstream in
+  [gpt-rag-orchestrator PR #311](https://github.com/Azure/gpt-rag-orchestrator/pull/311)
+  by deferring `AppConfigClient` construction into `get_config()`, released as
+  [`v4.0.1`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.0.1)
+  (patch, no behavior change beyond the import fix; 720 tests passing). The
+  umbrella pin above is bumped to `v4.0.1` accordingly. **This fixes the
+  specific crash that produced the HTTP 424 symptom; it does not by itself
+  constitute the network-isolated live validation this integration still
+  requires** — see the "Migration and rollback" note below for the current
+  validation status.
+
+- **Hosted agent no longer crashes every live request with HTTP 500 under
+  Foundry's hosted-agent sandbox.** Live network-isolated validation (issue
+  #592) reproduced a deterministic HTTP 500 (`{"detail":"internal server
+  error"}`) on every `/responses` and `/invocations` call against a
+  successfully created, `active` hosted agent. Root-caused via Application
+  Insights exception traces to `azure-monitor-opentelemetry>=1.8`, which
+  `environ.setdefault`s `OTEL_EXPERIMENTAL_RESOURCE_DETECTORS` to
+  `azure_app_service,azure_vm` unless that variable is already present. The
+  Foundry hosted-agent sandbox is neither an Azure VM nor an App Service, so
+  the `azure_vm` detector's IMDS probe
+  (`http://169.254.169.254/metadata/instance/compute`) always fails with
+  connection-refused; that failure was observed to escape
+  `azure-ai-agentserver-core`'s own `try`/`except` around
+  `configure_observability()` and surface later as an unhandled exception
+  during live request handling. `hosted-agent/azure.yaml` now pins
+  `OTEL_EXPERIMENTAL_RESOURCE_DETECTORS: ""` in the hosted agent's `env:`
+  block so `environ.setdefault` never applies it; this is a deployment
+  configuration fix in this repository, not a `gpt-rag-orchestrator` code
+  change. No behavior change for classic-mode telemetry. **Follow-up:** live
+  re-validation with that fix alone still reproduced the same IMDS failure
+  reaching request handling. Traced it to a second, independent source:
+  `azure-monitor-opentelemetry-exporter`'s own "statsbeat" SDK
+  self-monitoring subsystem (`_get_azure_compute_metadata` in
+  `statsbeat/_statsbeat_metrics.py`) probes the same IMDS endpoint to
+  attribute usage metrics to a resource-provider type, and is not gated by
+  `OTEL_EXPERIMENTAL_RESOURCE_DETECTORS`. `hosted-agent/azure.yaml` now also
+  pins `APPLICATIONINSIGHTS_STATSBEAT_DISABLED_ALL: "true"`. Statsbeat is
+  Microsoft's own SDK-usage telemetry, not GPT-RAG application telemetry;
+  disabling it does not affect Application Insights traces, logs, or metrics
+  for GPT-RAG requests.
+
+### Migration and rollback
+
+No existing environment is migrated by this change: an already-provisioned
+resource group is sticky and keeps whatever topology App Configuration
+already records for it (or stays classic if it predates this cutover and has
+no recorded marker), so re-running `azd provision`/`azd deploy` against an
+existing environment is a no-op with respect to topology. Only genuinely new
+environments (no existing resource group and no explicit signal) now default
+to `hosted-no-panel` instead of classic. Operators who want a new environment
+to use the classic Container Apps orchestrator must set
+`DEPLOYMENT_TOPOLOGY=classic` (or the compatible legacy
+`DEPLOY_HOSTED_AGENT_ORCHESTRATION=false`) before provisioning it. Hosted
+deployments use `azd provision`, the platform-specific
+`scripts/prepareHostedDeployment` command, a second `azd provision`, and then
+`azd deploy`. The preparation command automatically creates an immutable image
+from the pinned orchestrator source unless the operator supplies an explicit
+canonical digest override; an explicit hosted-agent data-plane scope remains
+required. The deterministic rollback contract
+in `config/deployment/rollback.json` restores the complete `v3.7.0` classic
+pin set, clears hosted endpoint inputs, resets both mode flags to `false`,
+and restores `CHAT_BACKEND=orchestrator`.
+
+The UI, orchestrator, and latest released AI Landing Zone tag APIs report
+`immutable=false`, but active semantic-version tag rulesets `20396217`,
+`20396972`, and `20396978` prevent deletion and non-fast-forward updates for
+`refs/tags/v*`. AI Landing Zone `v2.4.1` is also protected by exact-tag ruleset
+`20339953`; the temporary PR #130 commit pin is not a release pin. This
+unreleased integration does not publish an umbrella release.
+
+### Validation
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.6.1 |
+| gpt-rag-orchestrator | v4.1.0 |
+| gpt-rag-ingestion | v2.7.1 |
+| infra / AI Landing Zone | v2.5.1 |
+
+- Provisioned and deployed end to end in a validation environment in `westus3`
+  with `NETWORK_ISOLATION=true` and `BUILD_MODE=acr-task`, using
+  `azd provision` followed by `azd deploy`.
+- The orchestrator was deployed as a Microsoft Foundry hosted agent, with
+  retrieval served by a Foundry IQ knowledge base over Blob Storage.
+- Retrieval verified end to end through the Foundry Playground, `azd ai agent
+  invoke`, and the Chainlit front end: the answer returns with an openable
+  citation on every surface.
+- Spurious `Failed to detach context` error records confirmed absent on fresh
+  role instances, measured against a baseline where every serving instance
+  emitted them.
+- Front-end sign-in through Microsoft Entra ID exercised against a dedicated
+  app registration.
 ## [v3.7.0] - 2026-07-21
 
 ### User and operator impact

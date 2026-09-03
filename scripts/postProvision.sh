@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
 # Ensure the temporary venv is always cleaned up, even on early exits.
 # Cleanup failures must never cause the post-provision hook to report failure.
 cleanup() {
@@ -96,6 +99,13 @@ if [[ -z "${APP_CONFIG_ENDPOINT:-}" ]]; then
   exit 1
 fi
 
+echo "⚙️ Publishing GPT-RAG deployment-mode configuration…"
+(
+  cd "$PROJECT_ROOT"
+  python3 -m config.deployment.appconfig
+)
+echo "✅ Deployment-mode configuration published."
+
 ###############################################################################
 # Setup Python environment
 ###############################################################################
@@ -118,7 +128,15 @@ python -m config.governance.setup
 echo "✅ Governance and audit configuration finished."
 
 ###############################################################################
-# 2) AI Foundry Setup
+# 2) Hosted conversation continuity
+###############################################################################
+echo
+echo "🔐 Publishing fail-closed delegated continuity defaults…"
+python -m config.continuity.setup
+echo "✅ Fail-closed delegated continuity defaults published."
+
+###############################################################################
+# 3) AI Foundry Setup
 ###############################################################################
 echo
 echo "📑 AI Foundry Setup…"
@@ -131,7 +149,7 @@ echo "📑 AI Foundry Setup…"
 }
 
 ###############################################################################
-# 3) Container Apps Setup
+# 4) Container Apps Setup
 ###############################################################################
 echo
 echo "🔍 ContainerApp setup…"
@@ -144,7 +162,7 @@ echo "🔍 ContainerApp setup…"
 }
 
 ###############################################################################
-# 4) AI Search Setup
+# 5) AI Search Setup
 ###############################################################################
 echo
 echo "🔍 AI Search setup…"
@@ -154,6 +172,19 @@ echo "🔍 AI Search setup…"
   echo "✅ Search setup script finished."
 } || {
   echo "❗️ Error during Search setup. Skipping it."
+}
+
+###############################################################################
+# 6) Administrative panel Cosmos RBAC (issue #611, ADR-0004)
+###############################################################################
+echo
+echo "🔐 Administrative panel Cosmos RBAC…"
+{
+  echo "🚀 Running config.panel.setup…"
+  python -m config.panel.setup
+  echo "✅ Administrative panel Cosmos RBAC finished (no-op unless DEPLOY_ADMINISTRATIVE_PANEL=true)."
+} || {
+  echo "❗️ Error during administrative panel Cosmos RBAC setup. Skipping it."
 }
 
 ###############################################################################

@@ -90,6 +90,44 @@ class FoundryIqTemplateTests(unittest.TestCase):
         )
         self.assertIsNone(ingestion_parameters["chatCompletionModel"])
 
+    def test_blob_knowledge_source_uses_configured_search_uai(self):
+        settings = render_json_template(
+            "search.settings.j2",
+            {
+                "RESOURCE_TOKEN": "abc123",
+                "SEARCH_SERVICE_QUERY_ENDPOINT": "https://search.search.windows.net",
+                "AI_FOUNDRY_ACCOUNT_NAME": "aif-abc123",
+                "RETRIEVAL_BACKEND": "foundry_iq",
+            },
+        )
+        identity_resource_id = (
+            "/subscriptions/s/resourceGroups/rg/providers/"
+            "Microsoft.ManagedIdentity/userAssignedIdentities/search-uai"
+        )
+        context = {
+            **settings,
+            "SEARCH_SERVICE_UAI_RESOURCE_ID": identity_resource_id,
+            "STORAGE_ACCOUNT_RESOURCE_ID": (
+                "/subscriptions/s/resourceGroups/rg/providers/"
+                "Microsoft.Storage/storageAccounts/st"
+            ),
+            "EMBEDDING_MODEL_INFO": {},
+            "GPT_MODEL_INFO": {},
+        }
+
+        search_definitions = render_json_template("search.j2", context)
+        ingestion_parameters = search_definitions["knowledgeSources"][0][
+            "azureBlobParameters"
+        ]["ingestionParameters"]
+
+        self.assertEqual(
+            ingestion_parameters["identity"],
+            {
+                "@odata.type": "#Microsoft.Azure.Search.DataUserAssignedIdentity",
+                "userAssignedIdentity": identity_resource_id,
+            },
+        )
+
     def test_standard_blob_knowledge_source_includes_supported_chat_model(self):
         settings = render_json_template(
             "search.settings.j2",

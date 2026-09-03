@@ -135,6 +135,44 @@ function Invoke-AzTsv {
     return ($output | Select-Object -First 1).Trim()
 }
 
+function Get-UserAssignedIdentityResourceId {
+    param(
+        [AllowEmptyString()][string]$ResourceId,
+        [Parameter(Mandatory = $true)][string]$Description
+    )
+    if ([string]::IsNullOrWhiteSpace($ResourceId)) {
+        return ''
+    }
+
+    $identityJson = Invoke-NativeCommand {
+        & az resource show --ids $ResourceId --query identity.userAssignedIdentities -o json 2>$null
+    }
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Failed to resolve the user-assigned identity for $Description."
+        exit 1
+    }
+    if ([string]::IsNullOrWhiteSpace($identityJson) -or $identityJson.Trim() -eq 'null') {
+        return ''
+    }
+
+    try {
+        $identityMap = $identityJson | ConvertFrom-Json
+        $identities = @($identityMap.PSObject.Properties)
+    }
+    catch {
+        Write-Error "The user-assigned identity response for $Description was malformed."
+        exit 1
+    }
+    if ($identities.Count -gt 1) {
+        Write-Error "Multiple user-assigned identities are attached to $Description; refusing an ambiguous selection."
+        exit 1
+    }
+    if ($identities.Count -eq 1) {
+        return $identities[0].Name
+    }
+    return ''
+}
+
 function Get-AppConfigResourceName {
     param([Parameter(Mandatory = $true)][string]$Endpoint)
     return (($Endpoint -replace '^https?://', '') -replace '\.azconfig\.io/?$', '')
@@ -230,6 +268,25 @@ function Set-GptRagAppConfiguration {
     $environmentName = Get-OptionalEnvValue 'AZURE_ENV_NAME' (Get-OptionalEnvValue 'ENVIRONMENT_NAME')
     $deploymentName = Get-OptionalEnvValue 'DEPLOYMENT_NAME'
     $release = Get-OptionalEnvValue 'RELEASE'
+    # ADR-0001 rev. 5: read back the deployment topology that scripts/preProvision
+    # already resolved and materialized into the azd environment (mirrored into
+    # process env above), rather than re-deriving the fresh/existing/sticky
+    # decision here. config.deployment.topology --describe performs no Azure CLI
+    # lookups; it is a pure read-back of DEPLOYMENT_TOPOLOGY / the legacy flag
+    # pair, so postProvision always agrees with preProvision's decision.
+    $topologyJson = Invoke-PythonModule -ModuleName 'config.deployment.topology' -Arguments @('--describe')
+    if ($LASTEXITCODE -ne 0 -or -not $topologyJson) {
+        Write-Error "Failed to resolve the GPT-RAG deployment topology. Ensure scripts/preProvision ran successfully before postProvision."
+        exit 1
+    }
+    $topologyInfo = ([string]$topologyJson).Trim() | ConvertFrom-Json
+    # The requested topology remains hosted throughout migration, while the
+    # shared resolver reports a classic effective runtime until both the
+    # immutable image and hosted endpoint exist.
+    $runtimeTopology = [string]$topologyInfo.runtime_topology
+    $hostedMode = $runtimeTopology -ne 'classic'
+    $administrativePanel = $runtimeTopology -eq 'hosted-panel'
+    $cosmosEnabled = (-not $hostedMode) -or $administrativePanel
 
     $appConfigName = Get-AppConfigResourceName -Endpoint $Endpoint
     $nameSuffix = $resourceToken
@@ -239,18 +296,51 @@ function Set-GptRagAppConfiguration {
     # legacy "<prefix>-$nameSuffix" pattern. Discover actual names by listing resources
     # in the RG; fall back to the legacy derivation only when discovery finds nothing.
     function _resolveResource {
-        param([string]$Type, [string]$Fallback, [scriptblock]$Filter = $null)
+        param(
+            [string]$Type,
+            [string]$Fallback,
+            [scriptblock]$Filter = $null,
+            [string]$PreferredName = ''
+        )
         try {
             $json = az resource list -g $resourceGroup --resource-type $Type -o json 2>$null
             if ($LASTEXITCODE -ne 0 -or -not $json) { return $Fallback }
             $items = $json | ConvertFrom-Json
             if ($null -eq $items) { return $Fallback }
             if ($Filter) { $items = @($items | Where-Object $Filter) }
+            if (-not [string]::IsNullOrWhiteSpace($PreferredName)) {
+                $preferredMatches = @(
+                    $items | Where-Object {
+                        $_.name.Equals(
+                            $PreferredName,
+                            [StringComparison]::OrdinalIgnoreCase
+                        )
+                    }
+                )
+                if ($preferredMatches.Count -eq 1) {
+                    return $preferredMatches[0].name
+                }
+                throw "Configured resource '$PreferredName' did not uniquely match type '$Type' in resource group '$resourceGroup'."
+            }
             if ($items.Count -eq 1) { return $items[0].name }
             if ($items.Count -eq 0) { return $Fallback }
+            $locationMatches = @(
+                $items | Where-Object {
+                    $_.location -and $_.location.Equals(
+                        $location,
+                        [StringComparison]::OrdinalIgnoreCase
+                    )
+                }
+            )
+            if ($locationMatches.Count -eq 1) {
+                return $locationMatches[0].name
+            }
             Write-Warning "Multiple '$Type' resources matched; falling back to legacy name '$Fallback'."
             return $Fallback
         } catch {
+            if (-not [string]::IsNullOrWhiteSpace($PreferredName)) {
+                throw
+            }
             return $Fallback
         }
     }
@@ -259,49 +349,102 @@ function Set-GptRagAppConfiguration {
     $storageName = _resolveResource `
         -Type 'Microsoft.Storage/storageAccounts' `
         -Fallback "st$nameSuffix" `
-        -Filter { -not $_.name.StartsWith('staif') }
+        -Filter { -not $_.name.StartsWith('staif') } `
+        -PreferredName (Get-OptionalEnvValue 'AZURE_STORAGE_ACCOUNT_NAME')
     $foundryStorageName = _resolveResource `
         -Type 'Microsoft.Storage/storageAccounts' `
         -Fallback "staif$nameSuffix" `
-        -Filter { $_.name.StartsWith('staif') }
+        -Filter { $_.name.StartsWith('staif') } `
+        -PreferredName (Get-OptionalEnvValue 'AZURE_AI_FOUNDRY_STORAGE_ACCOUNT_NAME')
 
     # Key Vault: main workload vs AI Foundry KV (prefix "kv-ai")
     $keyVaultName = _resolveResource `
         -Type 'Microsoft.KeyVault/vaults' `
         -Fallback "kv-$nameSuffix" `
-        -Filter { -not $_.name.StartsWith('kv-ai') }
+        -Filter { -not $_.name.StartsWith('kv-ai') } `
+        -PreferredName (Get-OptionalEnvValue 'KEY_VAULT_NAME')
 
     # Cosmos: main vs AI Foundry-project cosmos (prefix "cosmos-aif")
-    $cosmosName = _resolveResource `
-        -Type 'Microsoft.DocumentDB/databaseAccounts' `
-        -Fallback "cosmos-$nameSuffix" `
-        -Filter { -not $_.name.StartsWith('cosmos-aif') }
+    $cosmosName = if ($cosmosEnabled) {
+        _resolveResource `
+            -Type 'Microsoft.DocumentDB/databaseAccounts' `
+            -Fallback "cosmos-$nameSuffix" `
+            -Filter { -not $_.name.StartsWith('cosmos-aif') }
+    } else { '' }
 
     # Search: main vs AI Foundry-project search (prefix "srch-aif")
     $searchName = _resolveResource `
         -Type 'Microsoft.Search/searchServices' `
         -Fallback "srch-$nameSuffix" `
-        -Filter { -not $_.name.StartsWith('srch-aif') }
+        -Filter { -not $_.name.StartsWith('srch-aif') } `
+        -PreferredName (Get-OptionalEnvValue 'AZURE_AI_SEARCH_NAME')
 
     # AI Foundry Cognitive account (kind = AIServices) - LZ v2.2.0 deploys a single one
+    $foundryProjectResourceId = Get-OptionalEnvValue 'AZURE_AI_PROJECT_RESOURCE_ID'
+    $preferredFoundryName = Get-OptionalEnvValue 'AZURE_AI_FOUNDRY_NAME'
+    if (
+        -not $preferredFoundryName -and
+        $foundryProjectResourceId -match '/accounts/([^/]+)/projects/'
+    ) {
+        $preferredFoundryName = $matches[1]
+    }
     $foundryName = _resolveResource `
         -Type 'Microsoft.CognitiveServices/accounts' `
-        -Fallback "aif-$nameSuffix"
+        -Fallback "aif-$nameSuffix" `
+        -PreferredName $preferredFoundryName
 
-    # AI Foundry project (child of foundry account) - resolve via CLI
-    $foundryProjectName = 'aifoundry-default-project'
-    try {
-        $projJson = az cognitiveservices account list-projects -g $resourceGroup -n $foundryName -o json 2>$null
-        if ($LASTEXITCODE -eq 0 -and $projJson) {
-            $projs = $projJson | ConvertFrom-Json
-            if ($projs.Count -ge 1) { $foundryProjectName = $projs[0].name }
+    # Resolve the project through generic ARM discovery because the specialized
+    # project-list command is absent from some supported Azure CLI versions.
+    $requestedFoundryProjectName = Get-OptionalEnvValue 'AI_FOUNDRY_PROJECT_NAME'
+    $foundryAccountResourceId = "/subscriptions/$subscriptionId/resourceGroups/$resourceGroup/providers/Microsoft.CognitiveServices/accounts/$foundryName"
+    $projectJson = Invoke-NativeCommand {
+        & az resource list `
+            --subscription $subscriptionId `
+            --resource-group $resourceGroup `
+            --resource-type 'Microsoft.CognitiveServices/accounts/projects' `
+            -o json 2>$null
+    }
+    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($projectJson)) {
+        Write-Error "Failed to discover the AI Foundry project under '$foundryName'."
+        exit 1
+    }
+
+    $foundryProjects = @(
+        $projectJson |
+            ConvertFrom-Json |
+            Where-Object {
+                $_.id.StartsWith(
+                    "$foundryAccountResourceId/projects/",
+                    [StringComparison]::OrdinalIgnoreCase
+                )
+            }
+    )
+    if (-not [string]::IsNullOrWhiteSpace($requestedFoundryProjectName)) {
+        $foundryProjects = @(
+            $foundryProjects |
+                Where-Object {
+                    (Split-Path $_.id -Leaf) -eq $requestedFoundryProjectName
+                }
+        )
+    }
+    if ($foundryProjects.Count -ne 1) {
+        $selectionHint = if ([string]::IsNullOrWhiteSpace($requestedFoundryProjectName)) {
+            'Set AI_FOUNDRY_PROJECT_NAME when the account contains more than one project.'
+        } else {
+            "No unique project matched AI_FOUNDRY_PROJECT_NAME='$requestedFoundryProjectName'."
         }
-    } catch { }
+        Write-Error "Expected exactly one AI Foundry project under '$foundryName', found $($foundryProjects.Count). $selectionHint"
+        exit 1
+    }
+    $foundryProjectName = Split-Path $foundryProjects[0].id -Leaf
 
     # Container Registry / Container Apps Env / Log Analytics / App Insights
     $acrName = _resolveResource `
         -Type 'Microsoft.ContainerRegistry/registries' `
-        -Fallback "cr$nameSuffix"
+        -Fallback "cr$nameSuffix" `
+        -PreferredName (
+            (Get-OptionalEnvValue 'AZURE_CONTAINER_REGISTRY_ENDPOINT') -replace '\..*$', ''
+        )
     $containerEnvName = _resolveResource `
         -Type 'Microsoft.App/managedEnvironments' `
         -Fallback "cae-$nameSuffix"
@@ -319,14 +462,16 @@ function Set-GptRagAppConfiguration {
     $dataIngestAppName = "ca-$nameSuffix-dataingest"
 
     # Cosmos database name - introspect the account to get the actual DB name
-    $databaseName = "cosmos-db$nameSuffix"
-    try {
-        $dbJson = az cosmosdb sql database list -g $resourceGroup -a $cosmosName -o json 2>$null
-        if ($LASTEXITCODE -eq 0 -and $dbJson) {
-            $dbs = $dbJson | ConvertFrom-Json
-            if ($dbs.Count -eq 1) { $databaseName = $dbs[0].name }
-        }
-    } catch { }
+    $databaseName = if ($cosmosEnabled) { "cosmos-db$nameSuffix" } else { '' }
+    if ($cosmosEnabled) {
+        try {
+            $dbJson = az cosmosdb sql database list -g $resourceGroup -a $cosmosName -o json 2>$null
+            if ($LASTEXITCODE -eq 0 -and $dbJson) {
+                $dbs = $dbJson | ConvertFrom-Json
+                if ($dbs.Count -eq 1) { $databaseName = $dbs[0].name }
+            }
+        } catch { }
+    }
 
     Write-Host "🔎 Resolved resource names:"
     Write-Host "   Foundry:          $foundryName / $foundryProjectName"
@@ -341,7 +486,7 @@ function Set-GptRagAppConfiguration {
     $resourceGroupId = "/subscriptions/$subscriptionId/resourceGroups/$resourceGroup"
     $keyVaultResourceId = "$resourceGroupId/providers/Microsoft.KeyVault/vaults/$keyVaultName"
     $storageResourceId = "$resourceGroupId/providers/Microsoft.Storage/storageAccounts/$storageName"
-    $cosmosResourceId = "$resourceGroupId/providers/Microsoft.DocumentDB/databaseAccounts/$cosmosName"
+    $cosmosResourceId = if ($cosmosEnabled) { "$resourceGroupId/providers/Microsoft.DocumentDB/databaseAccounts/$cosmosName" } else { '' }
     $searchResourceId = "$resourceGroupId/providers/Microsoft.Search/searchServices/$searchName"
     $foundryResourceId = "$resourceGroupId/providers/Microsoft.CognitiveServices/accounts/$foundryName"
     $foundryProjectResourceId = "$foundryResourceId/projects/$foundryProjectName"
@@ -350,11 +495,11 @@ function Set-GptRagAppConfiguration {
     $logAnalyticsResourceId = "$resourceGroupId/providers/Microsoft.OperationalInsights/workspaces/$logAnalyticsName"
 
     $frontendFqdn = Invoke-AzTsv -Arguments @('containerapp', 'show', '-g', $resourceGroup, '-n', $frontendAppName, '--query', 'properties.configuration.ingress.fqdn') -Description "$frontendAppName FQDN" -Required
-    $orchestratorFqdn = Invoke-AzTsv -Arguments @('containerapp', 'show', '-g', $resourceGroup, '-n', $orchestratorAppName, '--query', 'properties.configuration.ingress.fqdn') -Description "$orchestratorAppName FQDN" -Required
+    $orchestratorFqdn = if ($hostedMode) { '' } else { Invoke-AzTsv -Arguments @('containerapp', 'show', '-g', $resourceGroup, '-n', $orchestratorAppName, '--query', 'properties.configuration.ingress.fqdn') -Description "$orchestratorAppName FQDN" -Required }
     $dataIngestFqdn = Invoke-AzTsv -Arguments @('containerapp', 'show', '-g', $resourceGroup, '-n', $dataIngestAppName, '--query', 'properties.configuration.ingress.fqdn') -Description "$dataIngestAppName FQDN" -Required
 
     $frontendPrincipalId = Invoke-AzTsv -Arguments @('containerapp', 'show', '-g', $resourceGroup, '-n', $frontendAppName, '--query', 'identity.principalId') -Description "$frontendAppName principal id"
-    $orchestratorPrincipalId = Invoke-AzTsv -Arguments @('containerapp', 'show', '-g', $resourceGroup, '-n', $orchestratorAppName, '--query', 'identity.principalId') -Description "$orchestratorAppName principal id"
+    $orchestratorPrincipalId = if ($hostedMode) { '' } else { Invoke-AzTsv -Arguments @('containerapp', 'show', '-g', $resourceGroup, '-n', $orchestratorAppName, '--query', 'identity.principalId') -Description "$orchestratorAppName principal id" }
     $dataIngestPrincipalId = Invoke-AzTsv -Arguments @('containerapp', 'show', '-g', $resourceGroup, '-n', $dataIngestAppName, '--query', 'identity.principalId') -Description "$dataIngestAppName principal id"
     $containerEnvPrincipalId = Invoke-AzTsv -Arguments @('resource', 'show', '--ids', $containerEnvResourceId, '--query', 'identity.principalId') -Description 'Container Apps Environment principal id'
     $searchPrincipalId = Invoke-AzTsv -Arguments @('resource', 'show', '--ids', $searchResourceId, '--query', 'identity.principalId') -Description 'Search service principal id'
@@ -363,10 +508,14 @@ function Set-GptRagAppConfiguration {
     $appInsightsInstrumentationKey = Invoke-AzTsv -Arguments @('resource', 'show', '--ids', $appInsightsResourceId, '--query', 'properties.InstrumentationKey') -Description 'Application Insights instrumentation key'
 
     $containerApps = @(
-        [ordered]@{ name = $orchestratorAppName; serviceName = 'orchestrator'; canonical_name = 'ORCHESTRATOR_APP'; principalId = $orchestratorPrincipalId; fqdn = $orchestratorFqdn },
         [ordered]@{ name = $frontendAppName; serviceName = 'frontend'; canonical_name = 'FRONTEND_APP'; principalId = $frontendPrincipalId; fqdn = $frontendFqdn },
         [ordered]@{ name = $dataIngestAppName; serviceName = 'dataingest'; canonical_name = 'DATA_INGEST_APP'; principalId = $dataIngestPrincipalId; fqdn = $dataIngestFqdn }
     )
+    if (-not $hostedMode) {
+        $containerApps = @(
+            [ordered]@{ name = $orchestratorAppName; serviceName = 'orchestrator'; canonical_name = 'ORCHESTRATOR_APP'; principalId = $orchestratorPrincipalId; fqdn = $orchestratorFqdn }
+        ) + $containerApps
+    }
 
     $modelDeployments = @(
         [ordered]@{ canonical_name = 'CHAT_DEPLOYMENT_NAME'; capacity = 100; model = [ordered]@{ format = 'OpenAI'; name = 'gpt-5-nano'; version = '2025-08-07' }; name = 'chat'; version = '2025-08-07'; apiVersion = '2025-12-01-preview'; endpoint = "https://$foundryName.openai.azure.com/" },
@@ -415,6 +564,12 @@ function Set-GptRagAppConfiguration {
     }
     else {
         ''
+    }
+    $searchServiceUaiResourceId = Get-OptionalEnvValue 'SEARCH_SERVICE_UAI_RESOURCE_ID'
+    if (-not $searchServiceUaiResourceId) {
+        $searchServiceUaiResourceId = Get-UserAssignedIdentityResourceId `
+            -ResourceId $searchResourceId `
+            -Description 'Azure AI Search'
     }
 
     $settings = [ordered]@{
@@ -515,7 +670,7 @@ function Set-GptRagAppConfiguration {
         CONTAINER_ENV_RESOURCE_ID = $containerEnvResourceId
         AI_FOUNDRY_ACCOUNT_RESOURCE_ID = $foundryResourceId
         AI_FOUNDRY_PROJECT_RESOURCE_ID = $foundryProjectResourceId
-        SEARCH_SERVICE_UAI_RESOURCE_ID = ''
+        SEARCH_SERVICE_UAI_RESOURCE_ID = $searchServiceUaiResourceId
         KNOWLEDGE_BASE_CONNECTION_ID = $knowledgeBaseConnectionId
         SEARCH_SERVICE_RESOURCE_ID = $searchResourceId
         AZURE_SPEECH_RESOURCE_ID = (Get-OptionalEnvValue 'AZURE_SPEECH_RESOURCE_ID')
@@ -543,7 +698,7 @@ function Set-GptRagAppConfiguration {
         DEPLOY_SEARCH_SERVICE = (Get-OptionalEnvValue 'DEPLOY_SEARCH_SERVICE' 'true')
         DEPLOY_SPEECH_SERVICE = (Get-OptionalEnvValue 'DEPLOY_SPEECH_SERVICE' 'false')
         DEPLOY_STORAGE_ACCOUNT = (Get-OptionalEnvValue 'DEPLOY_STORAGE_ACCOUNT' 'true')
-        DEPLOY_COSMOS_DB = (Get-OptionalEnvValue 'DEPLOY_COSMOS_DB' 'true')
+        DEPLOY_COSMOS_DB = "$cosmosEnabled".ToLowerInvariant()
         DEPLOY_CONTAINER_APPS = (Get-OptionalEnvValue 'DEPLOY_CONTAINER_APPS' 'true')
         DEPLOY_CONTAINER_REGISTRY = (Get-OptionalEnvValue 'DEPLOY_CONTAINER_REGISTRY' 'true')
         DEPLOY_CONTAINER_ENV = (Get-OptionalEnvValue 'DEPLOY_CONTAINER_ENV' 'true')
@@ -555,7 +710,7 @@ function Set-GptRagAppConfiguration {
         SEARCH_SERVICE_QUERY_ENDPOINT = "https://$searchName.search.windows.net"
         KNOWLEDGE_BASE_ENDPOINT = $knowledgeBaseEndpoint
         AZURE_SPEECH_ENDPOINT = (Get-OptionalEnvValue 'AZURE_SPEECH_ENDPOINT')
-        COSMOS_DB_ENDPOINT = "https://$cosmosName.documents.azure.com:443/"
+        COSMOS_DB_ENDPOINT = if ($cosmosEnabled) { "https://$cosmosName.documents.azure.com:443/" } else { '' }
 
         SEARCH_CONNECTION_ID = ''
         KNOWLEDGE_BASE_NAME = $effectiveKnowledgeBaseName
@@ -563,19 +718,19 @@ function Set-GptRagAppConfiguration {
         CONTAINER_ENV_PRINCIPAL_ID = $containerEnvPrincipalId
         SEARCH_SERVICE_PRINCIPAL_ID = $searchPrincipalId
 
-        ORCHESTRATOR_APP_ENDPOINT = "https://$orchestratorFqdn"
+        ORCHESTRATOR_APP_ENDPOINT = if ($orchestratorFqdn) { "https://$orchestratorFqdn" } else { '' }
         FRONTEND_APP_ENDPOINT = "https://$frontendFqdn"
         DATA_INGEST_APP_ENDPOINT = "https://$dataIngestFqdn"
-        ORCHESTRATOR_APP_NAME = $orchestratorAppName
+        ORCHESTRATOR_APP_NAME = if ($hostedMode) { '' } else { $orchestratorAppName }
         FRONTEND_APP_NAME = $frontendAppName
         DATA_INGEST_APP_NAME = $dataIngestAppName
 
         CHAT_DEPLOYMENT_NAME = 'chat'
         EMBEDDING_DEPLOYMENT_NAME = 'text-embedding'
-        CONVERSATIONS_DATABASE_CONTAINER = 'conversations'
-        DATASOURCES_DATABASE_CONTAINER = 'datasources'
-        PROMPTS_CONTAINER = 'prompts'
-        MCP_CONTAINER = 'mcp'
+        CONVERSATIONS_DATABASE_CONTAINER = if ($cosmosEnabled) { 'conversations' } else { '' }
+        DATASOURCES_DATABASE_CONTAINER = if ($cosmosEnabled) { 'datasources' } else { '' }
+        PROMPTS_CONTAINER = if ($cosmosEnabled) { 'prompts' } else { '' }
+        MCP_CONTAINER = if ($cosmosEnabled) { 'mcp' } else { '' }
         DOCUMENTS_IMAGES_STORAGE_CONTAINER = 'documents-images'
         DOCUMENTS_STORAGE_CONTAINER = 'documents'
         CONVERSATION_CACHE_STORAGE_CONTAINER = 'conversation-cache'
@@ -589,6 +744,9 @@ function Set-GptRagAppConfiguration {
     foreach ($key in $settings.Keys) {
         $value = $settings[$key]
         $flatSettings[$key] = if ($null -eq $value) { '' } else { "$value" }
+    }
+    foreach ($key in $flatSettings.Keys) {
+        Set-Item -Path "Env:$key" -Value $flatSettings[$key]
     }
 
     $tempFile = Join-Path ([System.IO.Path]::GetTempPath()) "gpt-rag-appconfig-$([Guid]::NewGuid().ToString('N')).json"
@@ -617,6 +775,11 @@ function Set-GptRagAppConfiguration {
 }
 
 Set-GptRagAppConfiguration -Endpoint (Get-RequiredEnvValue 'APP_CONFIG_ENDPOINT') -Label 'gpt-rag'
+Invoke-PythonModule -ModuleName 'config.deployment.appconfig'
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Failed to publish GPT-RAG deployment-mode App Configuration settings."
+    exit $LASTEXITCODE
+}
 
 #-------------------------------------------------------------------------------
 # Setup Python environment
@@ -667,7 +830,20 @@ if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
 }
 
 #-------------------------------------------------------------------------------
-# 2) AI Foundry Setup
+# 2) Hosted conversation continuity
+#-------------------------------------------------------------------------------
+if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
+    Write-Host "`n🔐 Publishing fail-closed delegated continuity defaults..."
+    Write-Host "🚀 Running config.continuity.setup..."
+    Invoke-PythonModule -ModuleName 'config.continuity.setup'
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    Write-Host "✅ Fail-closed delegated continuity defaults published."
+} else {
+    Write-Host "⏭️  Skipping hosted continuity setup (missing APP_CONFIG_ENDPOINT)."
+}
+
+#-------------------------------------------------------------------------------
+# 3) AI Foundry Setup
 #-------------------------------------------------------------------------------
 if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
     Write-Host "`n📑 AI Foundry Setup..."
@@ -680,7 +856,7 @@ if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
 }
 
 #-------------------------------------------------------------------------------
-# 3) Container Apps Setup
+# 4) Container Apps Setup
 #-------------------------------------------------------------------------------
 if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
     Write-Host "`n🔍 ContainerApp setup..."
@@ -693,7 +869,7 @@ if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
 }
 
 #-------------------------------------------------------------------------------
-# 4) AI Search Setup
+# 5) AI Search Setup
 #-------------------------------------------------------------------------------
 if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
     Write-Host "🔍 AI Search setup..."
@@ -703,6 +879,19 @@ if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
     Write-Host "✅ Search setup script finished."
 } else {
     Write-Host "⏭️  Skipping Search setup (missing APP_CONFIG_ENDPOINT)."
+}
+
+#-------------------------------------------------------------------------------
+# 6) Administrative panel Cosmos RBAC (issue #611, ADR-0004)
+#-------------------------------------------------------------------------------
+if (-not $missing.Contains('APP_CONFIG_ENDPOINT')) {
+    Write-Host "`n🔐 Administrative panel Cosmos RBAC..."
+    Write-Host "🚀 Running config.panel.setup..."
+    Invoke-PythonModule -ModuleName 'config.panel.setup'
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    Write-Host "✅ Administrative panel Cosmos RBAC finished (no-op unless DEPLOY_ADMINISTRATIVE_PANEL=true)."
+} else {
+    Write-Host "⏭️  Skipping administrative panel Cosmos RBAC (missing APP_CONFIG_ENDPOINT)."
 }
 
 #-------------------------------------------------------------------------------

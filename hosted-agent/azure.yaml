@@ -1,0 +1,86 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+name: azure-gpt-rag-hosted-agent
+services:
+  orchestrator-agent:
+    host: azure.ai.agent
+    project: .
+    language: docker
+    image: ${AZURE_CONTAINER_REGISTRY_ENDPOINT}/${HOSTED_AGENT_IMAGE=gpt-rag-orchestrator}@${HOSTED_AGENT_IMAGE_VERSION}
+    docker:
+      remoteBuild: true
+    kind: hosted
+    # NOTE: The azure.ai.agent azd extension (v1.0.0-beta.8) reads name, container.resources,
+    # protocols[].version and startupCommand directly from this file to build the Foundry
+    # "Create Agent" REST payload, bypassing azd's core ${VAR=default} interpolation (confirmed
+    # via "template.name not in valid format" and Go-struct type errors when templated). The
+    # `image` field above and the `env:` block below use azd's separate, core/host-agnostic
+    # interpolation engine and resolve correctly, so they stay templated. These agent-definition
+    # fields are hardcoded to composition.py's own defaults (config/deployment/composition.py) so
+    # `azd deploy` from this directory works out of the box; to customize, edit this file directly
+    # instead of `azd env set HOSTED_AGENT_*`, which only affects the separate `azd provision`
+    # (main.parameters.json) path today.
+    name: gpt-rag-orchestrator
+    displayName: GPT-RAG hosted orchestrator
+    description: GPT-RAG orchestration hosted by Microsoft Foundry.
+    startupCommand: uvicorn src.api.hosted_entrypoint:app --host 0.0.0.0 --port 8088
+    container:
+      resources:
+        # Must be quoted strings: the Foundry API's Go struct requires string type
+        # (unquoted numeric YAML like `cpu: 2` fails with a JSON unmarshal type error).
+        cpu: "2"
+        memory: "4Gi"
+    protocols:
+      - protocol: responses
+        version: "2.0.0"
+      - protocol: invocations
+        version: "1.0.0"
+    env:
+      APP_CONFIG_ENDPOINT: ${APP_CONFIG_ENDPOINT}
+      # APPLICATIONINSIGHTS_CONNECTION_STRING intentionally omitted: it is a reserved env var
+      # name for Foundry hosted agents (all FOUNDRY_*/AGENT_* vars, plus this one, are reserved
+      # per the container-image-spec) and the Create Agent API rejects it if present. The
+      # platform auto-injects telemetry wiring for hosted agents.
+      # OTEL_EXPERIMENTAL_RESOURCE_DETECTORS is set to empty to disable
+      # azure-monitor-opentelemetry's default Azure resource detectors ("azure_app_service",
+      # "azure_vm"). azure-monitor-opentelemetry>=1.8 unconditionally enables both via
+      # environ.setdefault(...) unless this variable is already present. The Foundry
+      # hosted-agent sandbox is neither an App Service nor a VM, so the "azure_vm" detector's
+      # IMDS probe (http://169.254.169.254/metadata/instance/compute) always fails with
+      # "Connection refused"; that failure was observed to escape the SDK's own
+      # try/except around configure_observability() and surface later as an unhandled
+      # exception during live request handling (HTTP 500 on every /responses and
+      # /invocations call). Setting this explicitly here -- before the SDK's
+      # environ.setdefault runs -- prevents both detectors from ever being registered.
+      OTEL_EXPERIMENTAL_RESOURCE_DETECTORS: ""
+      # APPLICATIONINSIGHTS_STATSBEAT_DISABLED_ALL disables azure-monitor-opentelemetry-
+      # exporter's separate "statsbeat" SDK self-monitoring subsystem
+      # (azure.monitor.opentelemetry.exporter.statsbeat), which independently probes the
+      # same IMDS compute-metadata endpoint (_get_azure_compute_metadata in
+      # statsbeat/_statsbeat_metrics.py) to attribute usage metrics to a resource-provider
+      # type (App Service / Functions / AKS / VM). This path is separate from, and not
+      # gated by, OTEL_EXPERIMENTAL_RESOURCE_DETECTORS above, and live validation showed
+      # the IMDS failure still reaching request handling with only that first variable
+      # set. Statsbeat is Microsoft's own SDK-usage telemetry (not GPT-RAG application
+      # telemetry); disabling it does not affect Application Insights traces, logs, or
+      # metrics for GPT-RAG requests.
+      APPLICATIONINSIGHTS_STATSBEAT_DISABLED_ALL: "true"
+      # OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT controls whether GenAI spans carry
+      # the actual prompt and completion text (gen_ai.input.messages, gen_ai.output.messages,
+      # gen_ai.system_instructions). It is what makes the Foundry portal's per-agent
+      # "Conversations" view render conversation turns instead of "No conversation turns
+      # found". src/api/hosted_entrypoint.py (_configure_host_observability) reads it straight
+      # from the process environment before any App Configuration resolution happens, so it
+      # cannot be supplied as an App Configuration key -- it has to be a hosted-agent env var,
+      # which means it has to be declared here.
+      #
+      # It defaults to "false" deliberately: capturing message content ships user prompts and
+      # model answers to Application Insights, which is a data-privacy decision each deployment
+      # has to make for itself. Opt in per environment with:
+      #     azd env set HOSTED_AGENT_CAPTURE_MESSAGE_CONTENT true
+      #     azd deploy
+      # Note that environment variables are baked into a hosted-agent *version* and are
+      # immutable once that version exists, so flipping this value always creates a new version
+      # (the image digest can stay the same). Use only this variable, not the legacy
+      # AZURE_TRACING_GEN_AI_CONTENT_RECORDING_ENABLED: when both are set and disagree, the
+      # Azure AI instrumentor treats it as a configuration error.
+      OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT: "${HOSTED_AGENT_CAPTURE_MESSAGE_CONTENT=false}"

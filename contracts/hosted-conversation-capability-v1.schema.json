@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Azure/GPT-RAG/contracts/hosted-conversation-capability-v1.schema.json",
+  "title": "GPT-RAG hosted conversation capability v1",
+  "description": "Disabled fallback owner-bound capability created, retained, and verified exclusively by the UI BFF when HOSTED_CONVERSATION_OWNER_BINDING=capability. The hosted container receives neither this envelope nor the HMAC key.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "oid",
+    "conversation_resource_id",
+    "issued_at",
+    "expiry",
+    "key_id",
+    "signature"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "oid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "description": "Lowercase Microsoft Entra object ID derived by the UI BFF from the authenticated server-side principal."
+    },
+    "conversation_resource_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048,
+      "pattern": "^\\S+$",
+      "description": "Opaque Foundry managed Conversation resource identifier."
+    },
+    "issued_at": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 253402300799,
+      "description": "UTC Unix time in whole seconds when the UI BFF issued the capability."
+    },
+    "expiry": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 253402300799,
+      "description": "UTC Unix time in whole seconds after which the capability must be rejected."
+    },
+    "key_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$",
+      "description": "Non-secret identifier selecting the HMAC key version in the UI BFF Key Vault."
+    },
+    "signature": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{43}$",
+      "description": "Unpadded Base64URL HMAC-SHA256 over the canonical framing. The signature is excluded from the framed payload."
+    }
+  },
+  "x-canonical-framing": {
+    "domain_separator": "GPT-RAG-HOSTED-CONVERSATION-CAPABILITY-V1",
+    "field_order": [
+      "schema_version",
+      "oid",
+      "conversation_resource_id",
+      "issued_at",
+      "expiry",
+      "key_id"
+    ],
+    "algorithm": "Begin with the exact ASCII domain separator followed by one NUL byte. For each field in field_order, append a 4-byte unsigned big-endian length followed by the field value bytes. Encode strings as UTF-8. Encode integers as their shortest base-10 ASCII representation with no sign and no leading zeroes except the value zero. Exclude signature. Sign the resulting bytes with HMAC-SHA256 and encode the digest as unpadded Base64URL.",
+    "verification": "Reject before use if the schema version is unsupported, framing is non-canonical, HMAC comparison is not constant-time, oid does not match the authenticated UI BFF principal, expiry is not greater than issued_at, or the capability is expired."
+  }
+}

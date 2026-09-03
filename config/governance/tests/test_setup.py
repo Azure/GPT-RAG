@@ -251,21 +251,19 @@ class GovernanceSetupTests(TestCase):
             script = (REPO_ROOT / "scripts" / script_name).read_text(encoding="utf-8")
             self.assertIn("config.governance.setup", script)
 
-    def test_future_minor_manifest_pins_validated_component_pair(self):
-        manifest = json.loads(
-            (REPO_ROOT / "manifest.json").read_text(encoding="utf-8")
+    def test_rollback_contract_pins_validated_governance_component_pair(self):
+        rollback = json.loads(
+            (REPO_ROOT / "config" / "deployment" / "rollback.json").read_text(
+                encoding="utf-8"
+            )
         )
-        component_versions = {
-            component["name"]: component["tag"]
-            for component in manifest["components"]
-        }
 
-        self.assertEqual(manifest["tag"], "v3.7.0")
+        self.assertEqual(rollback["umbrella"]["tag"], "v3.7.0")
         self.assertEqual(
-            component_versions["gpt-rag-orchestrator"],
+            rollback["components"]["gpt-rag-orchestrator"],
             "v3.8.0",
         )
         self.assertEqual(
-            component_versions["gpt-rag-ingestion"],
+            rollback["components"]["gpt-rag-ingestion"],
             "v2.5.0",
         )

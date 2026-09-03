@@ -385,7 +385,10 @@
         "folderPath": {% if FOUNDRY_IQ_STORAGE_FOLDER_PATH %}"{{FOUNDRY_IQ_STORAGE_FOLDER_PATH}}"{% else %}null{% endif %},
         "isADLSGen2": {{FOUNDRY_IQ_IS_ADLS_GEN2 | lower}},
         "ingestionParameters": {
-          "identity": null,
+          "identity": {% if SEARCH_SERVICE_UAI_RESOURCE_ID is defined and SEARCH_SERVICE_UAI_RESOURCE_ID %}{
+            "@odata.type": "#Microsoft.Azure.Search.DataUserAssignedIdentity",
+            "userAssignedIdentity": "{{SEARCH_SERVICE_UAI_RESOURCE_ID}}"
+          }{% else %}null{% endif %},
           "disableImageVerbalization": false,
           "chatCompletionModel": {% if is_foundry_iq_standard_blob and is_content_understanding_chat_model_supported %}{
             "kind": "azureOpenAI",

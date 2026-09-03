@@ -89,6 +89,17 @@ $start    = if ($PSScriptRoot) { $PSScriptRoot } else { (Get-Location).Path }
 $repoRoot = Find-RepoRoot $start
 if (-not $repoRoot) { Write-Error "Run this from inside a gpt-rag repo."; exit 1 }
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) { Write-Error "Git not found in PATH."; exit 1 }
+$pathSeparator = [IO.Path]::PathSeparator
+$env:PYTHONPATH = if ($env:PYTHONPATH) { "$repoRoot$pathSeparator$($env:PYTHONPATH)" } else { $repoRoot }
+$env:GPT_RAG_REPO_ROOT = $repoRoot
+
+function Invoke-PythonModule {
+  param(
+    [Parameter(Mandatory = $true)][string]$ModuleName,
+    [string[]]$Arguments = @()
+  )
+  & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['GPT_RAG_REPO_ROOT']); sys.argv = ['$ModuleName'] + sys.argv[1:]; runpy.run_module('$ModuleName', run_name='__main__')" @Arguments
+}
 
 $manifestPath = Join-Path $repoRoot 'manifest.json'
 if (-not (Test-Path -LiteralPath $manifestPath)) { Write-Error "manifest.json not found at $manifestPath"; exit 1 }
@@ -100,14 +111,39 @@ $globalEnv  = Get-AzdEnv -projectPath $repoRoot
 $globalRG   = $globalEnv.AZURE_RESOURCE_GROUP
 $globalSub  = $globalEnv.AZURE_SUBSCRIPTION_ID
 
-# Make azd outputs available to component deploy scripts. In network-isolated
-# deployments the jumpbox intentionally has no Docker, so components need
-# ACR_TASK_AGENT_POOL/NETWORK_ISOLATION to select remote ACR builds.
+# Make azd outputs available to component deploy scripts (and to the topology
+# read-back below). In network-isolated deployments the jumpbox intentionally
+# has no Docker, so components need ACR_TASK_AGENT_POOL/NETWORK_ISOLATION to
+# select remote ACR builds.
 foreach ($prop in $globalEnv.PSObject.Properties) {
   if ($null -ne $prop.Value -and "$($prop.Value)" -ne '') {
     Set-Item -Path "Env:$($prop.Name)" -Value "$($prop.Value)"
   }
 }
+
+# ADR-0001 rev. 5: read back the deployment topology that scripts/preProvision
+# already resolved and materialized into the azd environment (mirrored into
+# process env above). preDeploy must never re-derive the fresh/existing/sticky
+# decision independently -- config.deployment.topology --describe performs no
+# Azure CLI lookups; it is a pure read-back of DEPLOYMENT_TOPOLOGY / the legacy
+# flag pair, so this always agrees with preProvision and postProvision.
+Push-Location $repoRoot
+try {
+  $topologyJson = Invoke-PythonModule -ModuleName 'config.deployment.topology' -Arguments @('--describe')
+  $topologyExitCode = $LASTEXITCODE
+} finally {
+  Pop-Location
+}
+if ($topologyExitCode -ne 0 -or -not $topologyJson) {
+  Write-Error "Failed to resolve the GPT-RAG deployment topology. Ensure scripts/preProvision ran successfully before azd deploy."
+  exit 1
+}
+$topologyInfo = ("$topologyJson").Trim() | ConvertFrom-Json
+$hostedMode = [bool]$topologyInfo.deploy_hosted_agent_orchestration
+$administrativePanel = [bool]$topologyInfo.deploy_administrative_panel
+$deploymentMode = [string]$topologyInfo.topology
+$selectedComponents = @($topologyInfo.components)
+Write-Host "GPT-RAG deployment mode: $deploymentMode" -ForegroundColor Cyan
 
 $networkIsolation = "$($globalEnv.NETWORK_ISOLATION)".ToLowerInvariant() -eq 'true'
 $runningFromJumpbox = "$($env:RUN_FROM_JUMPBOX)".ToLowerInvariant() -eq 'true'
@@ -133,9 +169,132 @@ if (-not (ResourceGroup-Exists -rg $globalRG -subscription $globalSub)) {
 
 $hadErrors = $false
 
+if ($hostedMode) {
+  $hostedProject = Join-Path $repoRoot 'hosted-agent'
+  if (-not (Test-Path -LiteralPath (Join-Path $hostedProject 'azure.yaml'))) {
+    Write-Error "Hosted agent azd project not found at $hostedProject."
+    exit 1
+  }
+  if (
+    "$($globalEnv.HOSTED_AGENT_PREPARED)".ToLowerInvariant() -ne 'true' -or
+    "$($globalEnv.DEPLOY_HOSTED_AGENT)".ToLowerInvariant() -ne 'true'
+  ) {
+    Write-Error @"
+Hosted prerequisites are prepared, but the immutable deploy handoff is not materialized.
+Run:
+  pwsh scripts/prepareHostedDeployment.ps1
+  azd provision
+  azd deploy
+The preparation command builds the manifest-pinned image and stores only its immutable digest.
+"@
+    exit 1
+  }
+  Push-Location $repoRoot
+  try {
+    Invoke-PythonModule -ModuleName 'config.deployment.topology' -Arguments @('--validate-hosted-deploy') | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+      Write-Error "Hosted deployment prerequisites or immutable image digest are invalid."
+      exit $LASTEXITCODE
+    }
+  } finally {
+    Pop-Location
+  }
+
+  $hostedDigest = "$($globalEnv.HOSTED_AGENT_IMAGE_VERSION)".Trim()
+  Write-Host "Hosted-agent deploy handoff ready: $hostedDigest" -ForegroundColor Green
+
+  if (Test-Path -LiteralPath $dotAzure) {
+    Copy-Item $dotAzure $hostedProject -Recurse -Force -Container
+  }
+
+  Push-Location $hostedProject
+  try {
+    & azd env set HOSTED_AGENT_IMAGE_VERSION $hostedDigest --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
+    if ($LASTEXITCODE -ne 0) { Write-Error "Failed to set hosted image digest in the child azd project."; exit $LASTEXITCODE }
+    & azd env set AZD_AGENT_SKIP_ACR true --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
+    if ($LASTEXITCODE -ne 0) { Write-Error "Failed to select the pre-built hosted image deploy path."; exit $LASTEXITCODE }
+    & azd env set FOUNDRY_PROJECT_ENDPOINT "$($globalEnv.AZURE_AI_PROJECT_ENDPOINT)" --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
+    if ($LASTEXITCODE -ne 0) { Write-Error "Failed to set Foundry endpoint in the child azd project."; exit $LASTEXITCODE }
+    & azd env set AZURE_AI_PROJECT_ID "$($globalEnv.AZURE_AI_PROJECT_RESOURCE_ID)" --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
+    if ($LASTEXITCODE -ne 0) { Write-Error "Failed to set Foundry project ID in the child azd project."; exit $LASTEXITCODE }
+    & azd deploy orchestrator-agent --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt
+    if ($LASTEXITCODE -ne 0) {
+      Write-Error "Hosted orchestrator deployment failed."
+      exit $LASTEXITCODE
+    }
+    $smokePayloadPath = Join-Path ([IO.Path]::GetTempPath()) "gpt-rag-hosted-smoke-$([guid]::NewGuid().ToString('N')).json"
+    try {
+      [IO.File]::WriteAllText(
+        $smokePayloadPath,
+        '{"messages":[{"role":"user","content":"Reply with exactly: GPT-RAG hosted smoke OK."}]}',
+        [Text.UTF8Encoding]::new($false)
+      )
+      $smokeOutput = (
+        & azd ai agent invoke --protocol invocations --new-session --timeout 180 --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt --input-file $smokePayloadPath 2>&1 |
+          Out-String
+      )
+      $smokeExitCode = $LASTEXITCODE
+      if (
+        $smokeExitCode -ne 0 -or
+        $smokeOutput -match '"type"\s*:\s*"error"' -or
+        $smokeOutput -notmatch [regex]::Escape('GPT-RAG hosted smoke OK.')
+      ) {
+        Write-Host $smokeOutput
+        Write-Error "Hosted orchestrator smoke request failed; the classic chat path remains active."
+        if ($smokeExitCode -ne 0) { exit $smokeExitCode }
+        exit 1
+      }
+    } finally {
+      Remove-Item -LiteralPath $smokePayloadPath -Force -ErrorAction SilentlyContinue
+    }
+    $hostedEnv = Get-AzdEnv -projectPath $hostedProject
+  } finally {
+    Pop-Location
+  }
+
+  $invocationsEndpoint = "$($hostedEnv.AGENT_ORCHESTRATOR_AGENT_INVOCATIONS_ENDPOINT)"
+  if (-not $invocationsEndpoint) {
+    Write-Error "Hosted deployment did not publish AGENT_ORCHESTRATOR_AGENT_INVOCATIONS_ENDPOINT."
+    exit 1
+  }
+  Push-Location $repoRoot
+  try {
+    $hostedBaseUrlOutput = Invoke-PythonModule -ModuleName 'config.deployment.hosted' -Arguments @('--invocations-endpoint', $invocationsEndpoint)
+    $hostedExitCode = $LASTEXITCODE
+    $hostedBaseUrl = if ($hostedBaseUrlOutput) { "$hostedBaseUrlOutput".Trim() } else { '' }
+    if ($hostedExitCode -ne 0 -or -not $hostedBaseUrl) {
+      Write-Error "Hosted Invocations endpoint is not compatible with the UI endpoint contract."
+      exit 1
+    }
+  } finally {
+    Pop-Location
+  }
+  $env:HOSTED_AGENT_BASE_URL = $hostedBaseUrl
+  $env:HOSTED_AGENT_RESOURCE_SCOPE = "$($globalEnv.HOSTED_AGENT_RESOURCE_SCOPE)"
+
+  $continuityPackages = Join-Path ([IO.Path]::GetTempPath()) "gpt-rag-continuity-$([guid]::NewGuid().ToString('N'))"
+  try {
+    & python -m pip install --quiet --disable-pip-version-check --target $continuityPackages -r (Join-Path $repoRoot 'config/requirements.txt')
+    if ($LASTEXITCODE -ne 0) { throw "Failed to install continuity activation dependencies." }
+    $env:GPT_RAG_CONTINUITY_PACKAGES = $continuityPackages
+    & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['GPT_RAG_REPO_ROOT']); sys.path.insert(0, os.environ['GPT_RAG_CONTINUITY_PACKAGES']); sys.argv = ['config.continuity.setup', '--activate']; runpy.run_module('config.continuity.setup', run_name='__main__')"
+    if ($LASTEXITCODE -ne 0) { throw "Hosted continuity Responses 2.0.0 and exact agent-scope RBAC validation failed closed." }
+  } finally {
+    Remove-Item Env:GPT_RAG_CONTINUITY_PACKAGES -ErrorAction SilentlyContinue
+    if (Test-Path -LiteralPath $continuityPackages) {
+      Remove-Item -LiteralPath $continuityPackages -Recurse -Force -ErrorAction SilentlyContinue
+    }
+  }
+}
+
 foreach ($c in $manifest.components) {
   $name = $c.name
+  if ($name -notin $selectedComponents) {
+    Write-Host "$name is not deployed in $deploymentMode mode." -ForegroundColor Yellow
+    continue
+  }
   $repo = $c.repo
+  $expectedCommit = "$($c.commit)"
   $desiredTag    = if ($c.tag) { $c.tag } else { $manifest.release }
   $desiredBranch = $c.branch  # explicit branch only
 
@@ -143,12 +302,22 @@ foreach ($c in $manifest.components) {
   $refType = $null; $ref = $null
   if ($desiredTag) {
     if (Tag-Exists $repo $desiredTag) { $refType = 'tag'; $ref = $desiredTag }
-    else { Write-Warning ("{0}: tag '{1}' not found. Skipping." -f $name, $desiredTag); continue }
+    else {
+      Write-Warning ("{0}: tag '{1}' not found. Skipping." -f $name, $desiredTag)
+      if ($hostedMode) { $hadErrors = $true }
+      continue
+    }
   } elseif ($desiredBranch) {
     if (Branch-Exists $repo $desiredBranch) { $refType = 'branch'; $ref = $desiredBranch }
-    else { Write-Warning ("{0}: branch '{1}' not found. Skipping." -f $name, $desiredBranch); continue }
+    else {
+      Write-Warning ("{0}: branch '{1}' not found. Skipping." -f $name, $desiredBranch)
+      if ($hostedMode) { $hadErrors = $true }
+      continue
+    }
   } else {
-    Write-Warning ("{0}: neither tag nor branch specified. Skipping." -f $name); continue
+    Write-Warning ("{0}: neither tag nor branch specified. Skipping." -f $name)
+    if ($hostedMode) { $hadErrors = $true }
+    continue
   }
 
   # Target folder (sibling to gpt-rag)
@@ -156,20 +325,43 @@ foreach ($c in $manifest.components) {
   Write-Host ("Deploying {0} ({1}:{2}) -> {3}" -f $name, $refType, $ref, $target) -ForegroundColor Cyan
 
   if (Test-Path -LiteralPath $target) {
-    Write-Host ("  ℹ️  '{0}' already exists at {1}, skipping clone." -f $name, $target) -ForegroundColor Yellow
+    Write-Host ("  ℹ️  '{0}' already exists at {1}, verifying pin." -f $name, $target) -ForegroundColor Yellow
   } else {
     try {
       if ($refType -eq 'branch') {
         git clone --depth 1 --branch $ref --no-progress -q $repo $target 1>$null 2>$null
+        if ($LASTEXITCODE -ne 0) {
+          throw "$name`: git clone failed."
+        }
       } else {
         git clone --depth 1 --no-progress -q $repo $target 1>$null 2>$null
+        if ($LASTEXITCODE -ne 0) {
+          throw "$name`: git clone failed."
+        }
         git -C $target fetch --tags --force --depth 1 --no-progress -q origin $ref 1>$null 2>$null
+        if ($LASTEXITCODE -ne 0) {
+          throw "$name`: git fetch for tag $ref failed."
+        }
         git -C $target -c advice.detachedHead=false checkout -q -f $ref 1>$null 2>$null
+        if ($LASTEXITCODE -ne 0) {
+          throw "$name`: git checkout for tag $ref failed."
+        }
       }
       git config --global --add safe.directory ($target -replace '\\','/') 1>$null 2>$null
     }
     catch {
       Write-Error ("{0}: git operation failed. {1}" -f $name, $_.Exception.Message)
+      $hadErrors = $true
+      continue
+    }
+  }
+
+  if ($expectedCommit) {
+    $actualCommitOutput = & git -C $target rev-parse HEAD 2>$null
+    $revParseExitCode = $LASTEXITCODE
+    $actualCommit = if ($actualCommitOutput) { "$actualCommitOutput".Trim() } else { '' }
+    if ($revParseExitCode -ne 0 -or $actualCommit -ne $expectedCommit) {
+      Write-Error "$name must resolve to $expectedCommit but $target is at $actualCommit. Remove or relocate the stale sibling checkout."
       $hadErrors = $true
       continue
     }
@@ -207,8 +399,51 @@ foreach ($c in $manifest.components) {
     }
   } else {
     Write-Host ("{0}: no scripts\deploy.ps1 found, skipping child deploy." -f $name)
+    if ($hostedMode) { $hadErrors = $true }
   }
 }
 
 if ($hadErrors) { Write-Error "One or more components failed. See logs above."; exit 1 }
+
+if ($hostedMode) {
+  $env:HOSTED_CUTOVER_COMPLETE = 'true'
+  $migratingClassicRuntime = "$($env:PRESERVE_CLASSIC_RUNTIME)".ToLowerInvariant() -eq 'true'
+  Push-Location $repoRoot
+  try {
+    Invoke-PythonModule -ModuleName 'config.deployment.appconfig' -Arguments @('--require-hosted-endpoint')
+    if ($LASTEXITCODE -ne 0) {
+      Write-Error "Failed to publish the hosted-agent endpoint contract."
+      exit $LASTEXITCODE
+    }
+    & azd env set HOSTED_AGENT_BASE_URL $hostedBaseUrl --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+      if ($migratingClassicRuntime) {
+        $env:HOSTED_CUTOVER_COMPLETE = 'false'
+        Invoke-PythonModule -ModuleName 'config.deployment.appconfig' | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+          Write-Error "Hosted endpoint persistence and classic-selector compensation both failed."
+          exit 1
+        }
+      }
+      Write-Error "Hosted cutover endpoint could not be persisted."
+      exit 1
+    }
+    & azd env set HOSTED_CUTOVER_COMPLETE true --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+      if ($migratingClassicRuntime) {
+        $env:HOSTED_CUTOVER_COMPLETE = 'false'
+        Invoke-PythonModule -ModuleName 'config.deployment.appconfig' | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+          Write-Error "Hosted marker persistence and classic-selector compensation both failed."
+          exit 1
+        }
+      }
+      Write-Error "Hosted cutover success marker could not be persisted."
+      exit 1
+    }
+  } finally {
+    Pop-Location
+  }
+}
+
 Write-Host "All components processed." -ForegroundColor Green

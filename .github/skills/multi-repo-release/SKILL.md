@@ -1,6 +1,6 @@
 ---
 name: multi-repo-release
-description: Prepares and validates GPT-RAG umbrella releases across component repositories and the AI Landing Zone. Use for manifest pins, changelog entries, release branches, tags, and GitHub Release notes.
+description: Prepares and validates GPT-RAG umbrella and multi-repository releases. Use whenever work involves release preparation, semantic versions, release branches, manifest or component pins, changelog release entries, tags, GitHub Release notes, or AI Landing Zone release alignment.
 ---
 
 # GPT-RAG multi-repository release
@@ -27,7 +27,7 @@ are authoritative.
 8. Use exactly `vX.Y.Z` for both the tag and GitHub Release title.
 9. Target the release pull request to `main`.
 10. Re-fetch published release notes and verify headings, lists, tables, and the
-   absence of private `gptrag-*` and `rg-gptrag-*` validation names.
+    absence of private `gptrag-*` and `rg-gptrag-*` validation names.
 
 Do not publish a tag, release, package, image, or production deployment without
 explicit human approval. Report incompatible pins, missing validation, or
