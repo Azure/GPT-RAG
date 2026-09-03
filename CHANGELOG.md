@@ -1,5 +1,35 @@
 # Changelog
 
+## [v3.8.1] - 2026-09-03
+
+### Fixed
+
+- **Repinned `gpt-rag-orchestrator` from `v4.1.0` to
+  [`v4.1.1`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.1.1),
+  which restores `azd deploy`.** The orchestrator `Dockerfile` builds its
+  `frontend/` SPA in the first stage, so the frontend build failing fails the
+  whole image. `v4.1.0` could not be built at all — building `v4.0.2` exits
+  `0` while building `v4.1.0` exits `1` — which meant every clean
+  deployment of `v3.8.0` failed at the orchestrator image build.
+
+  Three unrelated dependency bumps had been merged into the orchestrator without
+  any CI job that builds the frontend, and together they broke it: `react` was
+  raised to 19 while `react-dom` stayed on 18 (fatal `ERESOLVE`);
+  `@azure/msal-react` was pinned to `^5.7.0`, a version since **unpublished
+  from npm** that now returns `E404`; and `tailwindcss` was raised from 3 to
+  4 without the required PostCSS and CSS migration. `v4.1.1` fixes all three
+  and adds the missing `frontend build` CI job.
+
+  No GPT-RAG configuration, parameter, or infrastructure change is involved. The
+  UI, ingestion, and AI Landing Zone pins are unchanged from `v3.8.0`.
+
+- **Allowed `release/*` branches to target `main` in
+  `.github/workflows/block-pr-to-main.yml`.** The guard rejected every pull
+  request into `main` unconditionally, including the release pull requests the
+  documented process requires, so each release merge needed an administrator
+  override. It now permits `^release/[0-9]+\.[0-9]+\.[0-9]+$`, matching the
+  equivalent guard already present in the component repositories, and reacts to
+  `edited` events so retargeting a pull request re-evaluates the rule.
 ## [v3.8.0] - 2026-09-03
 
 ### Added

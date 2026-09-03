@@ -1,5 +1,5 @@
 {
-  "tag": "v3.8.0",
+  "tag": "v3.8.1",
   "repo": "https://github.com/azure/gpt-rag.git",
   "ailz_tag": "v2.5.1",
   "ailz_commit": "9cc5859af5c8ab3b31709c9e16e0db11a170a404",
@@ -13,8 +13,8 @@
     {
       "name": "gpt-rag-orchestrator",
       "repo": "https://github.com/azure/gpt-rag-orchestrator.git",
-      "tag": "v4.1.0",
-      "commit": "935f8ed990020cc3be777dd4fe1664d7e131a3c8"
+      "tag": "v4.1.1",
+      "commit": "9b64a5b962067161cb55252c6e0917a2738ba984"
     },
     {
       "name": "gpt-rag-ingestion",
