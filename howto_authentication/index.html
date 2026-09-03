@@ -1071,7 +1071,7 @@
   
   
     <li class="md-nav__item">
-      <a href="https://github.com/Azure/gpt-rag-ui/blob/1ef6f9e88022e3168b8caf9c867f090eb632f562/docs/copilot-embedding.md" class="md-nav__link">
+      <a href="https://github.com/Azure/gpt-rag-ui/blob/main/docs/copilot-embedding.md" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1708,9 +1708,9 @@
 <p>Live OQ-OWN evidence supersedes the capability-first contract from
 <a href="https://github.com/Azure/GPT-RAG/pull/630">PR #630</a>. The delegated
 <code>x-ms-user-identity</code> platform pivot merged in
-<a href="https://github.com/Azure/GPT-RAG/pull/633">PR #633</a>. UI <code>v2.6.1</code>,
-orchestrator <code>v4.1.1</code>, ingestion <code>v2.7.1</code>, and AILZ <code>v2.5.1</code> are pinned by
-<a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.1">GPT-RAG <code>v3.8.1</code></a>.
+<a href="https://github.com/Azure/GPT-RAG/pull/633">PR #633</a>. UI <code>v2.6.2</code>,
+orchestrator <code>v4.1.1</code>, ingestion <code>v2.7.2</code>, and AILZ <code>v2.5.1</code> are pinned by
+<a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.2">GPT-RAG <code>v3.8.2</code></a>.
 Keep <code>HOSTED_CONTINUITY_ENABLED=false</code>; compatible history endpoints return
 HTTP 503 until <code>HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true</code>.</p>
 </div>
@@ -2000,7 +2000,7 @@ defines hosted/no-panel, which omits these administrative surfaces and requires
 topology in the pinned matrix, but its user-history and operator routes remain
 off/503 behind separate deployment-published evidence gates.</p>
 <p>Admin access is enforced through an <strong>Entra ID App Role named <code>Admin</code></strong> added to the same App Registration you created for user sign-in. The token the caller presents to <code>/api/dashboard/*</code> (or the ingestion equivalents) must carry <code>Admin</code> in its <code>roles</code> claim.</p>
-<p>The ingestion <code>v2.7.1</code> metadata-only Overview and Curation APIs use their own
+<p>The ingestion <code>v2.7.2</code> metadata-only Overview and Curation APIs use their own
 explicit <code>PANEL_OPERATOR_APP_ROLE</code> or <code>PANEL_OPERATOR_GROUP_ID</code> gate. Their Vite
 tabs do not acquire a browser token or add an <code>Authorization</code> header, so they
 require an approved reverse-auth proxy to supply the delegated bearer and

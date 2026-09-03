@@ -1002,7 +1002,7 @@
   
   
     <li class="md-nav__item">
-      <a href="https://github.com/Azure/gpt-rag-ui/blob/1ef6f9e88022e3168b8caf9c867f090eb632f562/docs/copilot-embedding.md" class="md-nav__link">
+      <a href="https://github.com/Azure/gpt-rag-ui/blob/main/docs/copilot-embedding.md" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1636,7 +1636,7 @@ coordinates agent-based RAG workflows, where each agent has a defined role, to
 generate accurate, context-aware responses for complex user queries. Current
 GPT-RAG umbrella releases run it as an orchestrator Container App. Orchestrator
 <code>v4.1.1</code> also packages the runtime as a Microsoft Foundry hosted agent, which
-<a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.1">GPT-RAG <code>v3.8.1</code></a> makes
+<a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.2">GPT-RAG <code>v3.8.2</code></a> makes
 the default for genuinely fresh deployments; see the
 <a href="../hosted_agent_release_matrix/">exact hosted integration matrix</a>. The separate
 <a href="../hosted_continuity_platform_contract/">hosted continuity platform contract</a>
@@ -1727,7 +1727,7 @@ and require a signed-in user.</p>
 are handled in two places. The model prompt receives only a recent history
 window, while the Cosmos DB conversation document is compacted before
 persistence so it keeps useful recent context without growing indefinitely.
-In the hosted component matrix, UI <code>v2.6.1</code> owns managed-Conversation lifecycle
+In the hosted component matrix, UI <code>v2.6.2</code> owns managed-Conversation lifecycle
 and orchestrator <code>v4.1.1</code> is stateless. User-facing list/read/feedback/delete
 routes exist in the UI component, but umbrella panel gates remain off. The default
 <code>maf_lite</code> strategy and the <code>multimodal</code> strategy also classify each turn as a
@@ -1810,7 +1810,7 @@ user message. The runtime constructs no managed-Conversations client and
 performs no create, read, append, or delete operation.</p>
 <p><code>POST /invocations</code> remains a distinct compatibility contract. Its opaque
 <code>conversation_id</code> is only echoed and used for local retrieval scoping; it is not
-managed state or authorization. UI <code>v2.6.1</code> currently replays complete ordered
+managed state or authorization. UI <code>v2.6.2</code> currently replays complete ordered
 messages through this compatibility path. See
 <a href="../hosted_agent_release_matrix/#stateless-hosted-runtime-contract">Stateless hosted runtime contract</a>.</p>
 <h2 id="visual-guide">Visual Guide</h2>
