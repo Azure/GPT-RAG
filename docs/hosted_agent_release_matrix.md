@@ -1,13 +1,13 @@
 # Hosted-agent integration matrix
 
 This page records the exact hosted-agent component releases pinned by the
-GPT-RAG umbrella release [`v3.8.0`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0)
+GPT-RAG umbrella release [`v3.8.1`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.1)
 and the independent evidence gates that remain fail closed.
 
-!!! warning "Pins are shipped in umbrella `v3.8.0`; evidence gates remain fail closed"
+!!! warning "Pins are shipped in umbrella `v3.8.1`; evidence gates remain fail closed"
     The umbrella `manifest.json` pins all four exact releases below and explicit
     `hosted-panel` topology selection is supported. The manifest's umbrella tag
-    is `v3.8.0`; use only a GPT-RAG source or release that contains these pins
+    is `v3.8.1`; use only a GPT-RAG source or release that contains these pins
     rather than combining component tags independently.
     `HOSTED_CONTINUITY_ENABLED`, `PANEL_HISTORY_ENABLED`,
     `PANEL_HISTORY_OWNER_BINDING_VALIDATED`, and
@@ -22,7 +22,7 @@ and the independent evidence gates that remain fail closed.
     passes under `NETWORK_ISOLATION=true` against the exact pins below: the
     hosted agent reaches active state, session readiness succeeds, and a
     grounded answer returns with its citation. These pins shipped as umbrella
-    release [`v3.8.0`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0).
+    release [`v3.8.1`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.1).
     Evidence-gate items 2 through 8 and the `store` contract matrix have not
     been re-run; the four flags above remain deployment-published `false`.
 
@@ -31,7 +31,7 @@ and the independent evidence gates that remain fail closed.
 | Component | Release | Reviewed release commit | Relevant contract |
 | --- | --- | --- | --- |
 | GPT-RAG UI | [`v2.6.1`](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.6.1) | [`e1cfac7`](https://github.com/Azure/gpt-rag-ui/commit/e1cfac7075a6c6a4f638cf2d05d345d2c6c230dd) | Hosted/no-panel is the fresh UI default when `CHAT_BACKEND` is absent; continuity and panel surfaces remain opt-in and fail closed. |
-| GPT-RAG orchestrator | [`v4.1.0`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.1.0) | [`935f8ed`](https://github.com/Azure/gpt-rag-orchestrator/commit/935f8ed990020cc3be777dd4fe1664d7e131a3c8) | Canonical hosted `/responses` is stateless and requires caller-supplied ordered input. Fixes the `dependencies`/`connectors` circular import that crashed the hosted entrypoint on startup ([PR #311](https://github.com/Azure/gpt-rag-orchestrator/pull/311)), released in `v4.0.1`. Unconditionally forces `store: false` on every hosted `POST /responses` call and rejects `background: true` with HTTP 422 ([PR #313](https://github.com/Azure/gpt-rag-orchestrator/pull/313)), released in `v4.0.2`; see "Store false wire contract" below. `v4.1.0` inverts request-field validation from a strict allowlist to ignore-and-log with a minimal deny-list: only `previous_response_id` is rejected with HTTP 422, and every other field the adapter does not act on is dropped and logged. A strict allowlist turned each newly injected Foundry client field into a hosted-agent outage. `store` and `background` handling is unchanged. `v4.1.0` also suppresses spurious `opentelemetry.context.detach` error records emitted by third-party GenAI instrumentation. |
+| GPT-RAG orchestrator | [`v4.1.1`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.1.1) | [`9b64a5b`](https://github.com/Azure/gpt-rag-orchestrator/commit/9b64a5b962067161cb55252c6e0917a2738ba984) | Canonical hosted `/responses` is stateless and requires caller-supplied ordered input. Fixes the `dependencies`/`connectors` circular import that crashed the hosted entrypoint on startup ([PR #311](https://github.com/Azure/gpt-rag-orchestrator/pull/311)), released in `v4.0.1`. Unconditionally forces `store: false` on every hosted `POST /responses` call and rejects `background: true` with HTTP 422 ([PR #313](https://github.com/Azure/gpt-rag-orchestrator/pull/313)), released in `v4.0.2`; see "Store false wire contract" below. `v4.1.0` inverts request-field validation from a strict allowlist to ignore-and-log with a minimal deny-list: only `previous_response_id` is rejected with HTTP 422, and every other field the adapter does not act on is dropped and logged. A strict allowlist turned each newly injected Foundry client field into a hosted-agent outage. `store` and `background` handling is unchanged. `v4.1.0` also suppresses spurious `opentelemetry.context.detach` error records emitted by third-party GenAI instrumentation. `v4.1.1` repairs the `frontend/` SPA build that the `Dockerfile` runs in its first stage: `v4.1.1` could not be built at all, so every clean deployment of umbrella `v3.8.1` failed at the orchestrator image build. Runtime behaviour is unchanged. |
 | GPT-RAG ingestion | [`v2.7.1`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.7.1) | [`18e0cec`](https://github.com/Azure/gpt-rag-ingestion/commit/18e0cecf5fcfb8315c38c25541ba23bf7cc347d0) | Metadata-only operator overview and document/corpus curation APIs. |
 | AI Landing Zone | [`v2.5.1`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.5.1) | [`9cc5859`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/commit/9cc5859af5c8ab3b31709c9e16e0db11a170a404) | Two-phase hosted-agent prerequisite/handoff support; both hosted flags default to `false`. Also allows the Foundry Agent Service's `agent365.svc.cloud.microsoft` observability endpoint through Azure Firewall under network isolation (`v2.5.1`, patch). |
 
@@ -46,7 +46,7 @@ close their independent live evidence and authorization gates.
 
 | Surface | Current behavior |
 | --- | --- |
-| Umbrella integration manifest | Pins the exact matrix above. Stamped as [`v3.8.0`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0). |
+| Umbrella integration manifest | Pins the exact matrix above. Stamped as [`v3.8.1`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.1). |
 | Fresh UI `v2.6.1` process with no `CHAT_BACKEND` value | Selects `hosted_agent`; invalid or incomplete hosted configuration fails startup. |
 | Existing umbrella deployment | Its persisted topology is sticky. An unmarked pre-cutover deployment stays `classic`. |
 | `DEPLOYMENT_TOPOLOGY=classic` | Explicit supported fallback; deploys UI, orchestrator, and ingestion Container Apps. |
@@ -65,7 +65,7 @@ remove them and then assume the UI fallback values are equivalent.
 
 ## Stateless hosted runtime contract
 
-Orchestrator `v4.1.0` performs no managed-Conversations create, read, append, or
+Orchestrator `v4.1.1` performs no managed-Conversations create, read, append, or
 delete operation in the hosted container. The caller supplies the complete,
 bounded, oldest-to-newest history on every request.
 
@@ -128,8 +128,8 @@ the UI call route with the protocol and role evidence it validates.
     [`v4.0.2`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.0.2)
     (commit
     [`c653b3e`](https://github.com/Azure/gpt-rag-orchestrator/commit/c653b3ec0a553f55244e197f3be993ad33ffe02f),
-    722 tests passing upstream). Umbrella release `v3.8.0` pins the successor
-    commit `935f8ed` (`v4.1.0`), which leaves `store` and `background`
+    722 tests passing upstream). Umbrella release `v3.8.1` pins the successor
+    commit `9b64a5b` (`v4.1.1`), which leaves `store` and `background`
     handling unchanged. **The store contract itself has not been
     re-validated.** A network-isolated run on these pins confirms readiness and
     a grounded answer, but does not exercise the field matrix. Do not describe
@@ -353,7 +353,7 @@ before anything else in the process has "warmed up" `connectors`, unlike
 the classic entrypoint) and fixed in
 [orchestrator `v4.0.1`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.0.1)
 ([PR #311](https://github.com/Azure/gpt-rag-orchestrator/pull/311)), whose
-successor `v4.1.0` is pinned above. Item 1 has since been re-run against a
+successor `v4.1.1` is pinned above. Item 1 has since been re-run against a
 live, network-isolated deployment on those pins and passes: the agent version
 reaches active state, session readiness succeeds, and a grounded answer
 returns with its citation. Evidence steps 2 through 8 have not been re-run.

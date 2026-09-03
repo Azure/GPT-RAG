@@ -7,9 +7,9 @@ deployments retain their persisted topology during upgrade. Network isolation,
 enterprise integration, public ingress, and optional AI capabilities remain
 separate choices.
 
-!!! info "Shipped in GPT-RAG v3.8.0"
-    [GPT-RAG `v3.8.0`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0)
-    pins UI `v2.6.1`, orchestrator `v4.1.0`, ingestion `v2.7.1`, and AILZ
+!!! info "Shipped in GPT-RAG v3.8.1"
+    [GPT-RAG `v3.8.1`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.1)
+    pins UI `v2.6.1`, orchestrator `v4.1.1`, ingestion `v2.7.1`, and AILZ
     `v2.5.1` at their exact release commits, and validates the hosted chat path
     end to end. Classic, hosted/no-panel, and explicitly selected hosted-panel
     are supported topologies. Continuity, user-history, owner-binding
