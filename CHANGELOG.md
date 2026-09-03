@@ -60,6 +60,10 @@
 
 ## [v3.8.1] - 2026-09-03
 
+> [!CAUTION]
+> This release does not deploy: its ingestion pin crashes on boot. Use
+> [v3.8.2](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.2).
+
 ### Fixed
 
 - **Repinned `gpt-rag-orchestrator` from `v4.1.0` to
@@ -89,6 +93,10 @@
   equivalent guard already present in the component repositories, and reacts to
   `edited` events so retargeting a pull request re-evaluates the rule.
 ## [v3.8.0] - 2026-09-03
+
+> [!CAUTION]
+> This release does not deploy: its orchestrator pin fails to build. Use
+> [v3.8.2](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.2).
 
 ### Added
 
@@ -1561,8 +1569,8 @@ The following component versions were validated together for this release:
 | gpt-rag-orchestrator | v2.8.0 |
 | gpt-rag-ingestion | v2.4.2 |
 | infra (landing zone) | v2.0.14 |
-Validated the updated parameters and landing zone integration with JSON parsing, `az bicep build --file infra\main.bicep`, and `azd provision --preview --no-prompt` in env `gptrag-0604261534`, resource group `rg-gptrag-0604261534`, region `eastus2`. Confirmed `main.parameters.json` sets `dapr.enabled=true` for `orchestrator`, `frontend`, and `dataingest`.
-Validated the updated parameters and landing zone integration with JSON parsing, `az bicep build --file infra\main.bicep`, and `azd provision --preview --no-prompt` in env `gptrag-0604261534`, resource group `rg-gptrag-0604261534`, region `eastus2`. Confirmed `main.parameters.json` sets `dapr.enabled=true` for `orchestrator`, `frontend`, and `dataingest`.
+Validated the updated parameters and landing zone integration with JSON parsing, `az bicep build --file infra\main.bicep`, and `azd provision --preview --no-prompt` in a validation environment, region `eastus2`. Confirmed `main.parameters.json` sets `dapr.enabled=true` for `orchestrator`, `frontend`, and `dataingest`.
+Validated the updated parameters and landing zone integration with JSON parsing, `az bicep build --file infra\main.bicep`, and `azd provision --preview --no-prompt` in a validation environment, region `eastus2`. Confirmed `main.parameters.json` sets `dapr.enabled=true` for `orchestrator`, `frontend`, and `dataingest`.
 
 ## [v2.8.0] - 2026-06-02
 
@@ -1580,7 +1588,7 @@ The following component versions were validated together for this release:
 | gpt-rag-ingestion | v2.4.2 |
 | infra (landing zone) | v2.0.13 |
 
-End-to-end validated on Azure in env `gptrag-0602260836`, resource group `rg-gptrag-0602260836`, region `swedencentral`, with `AGENT_STRATEGY=single_agent_rag`. The orchestrator image built from commit `b0b9ae1` was deployed to Container Apps revision `ca-m53sdv7aincme-orchestrator--0000002` and received 100% traffic. Azure logs confirmed the new Foundry path: `Prompt agent 'gptrag-single-agent-rag-b622680c09' not found; creating once via create_version`, then `Created prompt agent ... (version=1)`, followed by request-time `Index Empty Check Result: False`, `Routing to Azure AI Agents SDK`, and `Streaming from Foundry prompt agent (Responses)`. Two live `/orchestrator` POST requests returned HTTP 200 with no `invalid_payload` run-time reasoning error and no Cosmos DB 403.
+End-to-end validated on Azure in a validation environment, region `swedencentral`, with `AGENT_STRATEGY=single_agent_rag`. The orchestrator image built from commit `b0b9ae1` was deployed to Container Apps revision `ca-m53sdv7aincme-orchestrator--0000002` and received 100% traffic. Azure logs confirmed the new Foundry path: `Prompt agent 'gptrag-single-agent-rag-b622680c09' not found; creating once via create_version`, then `Created prompt agent ... (version=1)`, followed by request-time `Index Empty Check Result: False`, `Routing to Azure AI Agents SDK`, and `Streaming from Foundry prompt agent (Responses)`. Two live `/orchestrator` POST requests returned HTTP 200 with no `invalid_payload` run-time reasoning error and no Cosmos DB 403.
 
 ## [v2.7.14] - 2026-06-01
 
@@ -1597,7 +1605,7 @@ The following component versions were validated together for this release:
 | gpt-rag-ingestion | v2.4.2 |
 | infra (landing zone) | v2.0.12 |
 
-End-to-end validated on Azure in two complementary topologies. The Zero-Trust path (env `gptrag-0601261130`, RG `rg-gptrag-0601261130`, `francecentral`, `NETWORK_ISOLATION=true`, `DEPLOY_JUMPBOX=true`) confirmed the v2.0.12 fix-set on its target surface: `az bicep build --file .\infra\main.bicep` succeeded with only pre-existing warnings, and `azd provision --no-prompt` completed with the Windows jumpbox Custom Script Extension running the bounded `install.ps1` from landing zone `v2.0.12` (no 90-minute CSE timeout, no PowerShell 5.1 parser error, no Git clone watchdog false-fail, no azd first-run prompt block) - exercising the entire landing-zone-side fix-set targeted by this bump. The standard path (env `gptrag-0601261557`, RG `rg-gptrag-0601261557`, `swedencentral`, `NETWORK_ISOLATION=false`) then covered the full GPT-RAG flow end-to-end: `azd provision --no-prompt` completed in 28m59s (preflight 0 fail / 3 warn, all resources Succeeded including AI Foundry, capability host, model deployments, AI Search, knowledge sources and knowledge bases) and `azd deploy --no-prompt` built each component image via ACR remote build and updated all three Container Apps to revision `0000001`. The Container Apps `ca-oubo4ovyeuhjo-frontend`, `ca-oubo4ovyeuhjo-orchestrator`, and `ca-oubo4ovyeuhjo-dataingest` all reported `runningStatus=Running` / `provisioningState=Succeeded` with 1 replica, and HTTP smoke checks returned 200 for the frontend root and dataingest root (the orchestrator returned 404 at `/` because it has no root route; the service is live).
+End-to-end validated on Azure in two complementary topologies. The Zero-Trust path (a validation environment, `francecentral`, `NETWORK_ISOLATION=true`, `DEPLOY_JUMPBOX=true`) confirmed the v2.0.12 fix-set on its target surface: `az bicep build --file .\infra\main.bicep` succeeded with only pre-existing warnings, and `azd provision --no-prompt` completed with the Windows jumpbox Custom Script Extension running the bounded `install.ps1` from landing zone `v2.0.12` (no 90-minute CSE timeout, no PowerShell 5.1 parser error, no Git clone watchdog false-fail, no azd first-run prompt block) - exercising the entire landing-zone-side fix-set targeted by this bump. The standard path (a validation environment, `swedencentral`, `NETWORK_ISOLATION=false`) then covered the full GPT-RAG flow end-to-end: `azd provision --no-prompt` completed in 28m59s (preflight 0 fail / 3 warn, all resources Succeeded including AI Foundry, capability host, model deployments, AI Search, knowledge sources and knowledge bases) and `azd deploy --no-prompt` built each component image via ACR remote build and updated all three Container Apps to revision `0000001`. The Container Apps `ca-oubo4ovyeuhjo-frontend`, `ca-oubo4ovyeuhjo-orchestrator`, and `ca-oubo4ovyeuhjo-dataingest` all reported `runningStatus=Running` / `provisioningState=Succeeded` with 1 replica, and HTTP smoke checks returned 200 for the frontend root and dataingest root (the orchestrator returned 404 at `/` because it has no root route; the service is live).
 
 ## [v2.7.13] - 2026-05-31
 
@@ -1640,7 +1648,7 @@ The following component versions were validated together for this release:
 | gpt-rag-mcp | v0.3.8 |
 | infra (landing zone) | v2.0.4 |
 
-End-to-end validated in `francecentral` with `NETWORK_ISOLATION=false` (env `gptrag-0530260731`, RG `rg-gptrag-0530260731`): full `azd provision` (preflight emitted the regional readiness block from the landing zone v2.0.4 without the v2.0.3 parser error - 3 transient capacity warnings, 0 failures; provisioning completed in 27m05s) + `azd deploy` succeeded. Health endpoints returned HTTP 200: frontend `/`, orchestrator `/docs`, ingestion `/readyz`, and ingestion `/api/version`. Initial run in `swedencentral` proved the preflight fix worked (the script ran past the previously-failing line 950) but provisioning aborted at AI Foundry model deployment due to a regional `text-embedding-3-large` quota exhaustion (independent of this release); the validation was therefore completed in `francecentral`.
+End-to-end validated in `francecentral` with `NETWORK_ISOLATION=false` (a validation environment): full `azd provision` (preflight emitted the regional readiness block from the landing zone v2.0.4 without the v2.0.3 parser error - 3 transient capacity warnings, 0 failures; provisioning completed in 27m05s) + `azd deploy` succeeded. Health endpoints returned HTTP 200: frontend `/`, orchestrator `/docs`, ingestion `/readyz`, and ingestion `/api/version`. Initial run in `swedencentral` proved the preflight fix worked (the script ran past the previously-failing line 950) but provisioning aborted at AI Foundry model deployment due to a regional `text-embedding-3-large` quota exhaustion (independent of this release); the validation was therefore completed in `francecentral`.
 
 
 ## [v2.7.11] - 2026-05-29
