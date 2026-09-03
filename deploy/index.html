@@ -379,6 +379,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Two-phase hosted deployment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#capturing-conversation-content-in-foundry-telemetry" class="md-nav__link">
+    <span class="md-ellipsis">
+      Capturing conversation content in Foundry telemetry
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -2061,6 +2076,32 @@ handoff contract. It must declare <code>language: docker</code> and
 <code>azd deploy orchestrator-agent</code>, so the already-prepared immutable image is used
 instead of triggering another ACR build. Do not remove any of these three
 settings from a prebuilt hosted deployment.</p>
+<h5 id="capturing-conversation-content-in-foundry-telemetry">Capturing conversation content in Foundry telemetry</h5>
+<p>The Foundry portal's per-agent <strong>Conversations</strong> view reports
+<em>"No conversation turns found"</em> unless the agent's GenAI spans carry the prompt
+and completion text. Those spans (<code>invoke_agent</code>) are always emitted, but the
+<code>gen_ai.input.messages</code>, <code>gen_ai.output.messages</code>, and
+<code>gen_ai.system_instructions</code> attributes are only populated when message-content
+capture is enabled. GPT-RAG leaves it <strong>disabled by default</strong>, because capturing
+message content sends user prompts and model answers to Application Insights,
+which is a data-privacy decision each deployment has to make for itself.</p>
+<p>Opt in per environment before deploying the hosted agent:</p>
+<div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">HOSTED_AGENT_CAPTURE_MESSAGE_CONTENT</span> <span class="n">true</span>
+<span class="n">azd</span> <span class="n">deploy</span>
+</code></pre></div>
+<p>The pre-deploy hook copies the root <code>.azure</code> environment into the
+<code>hosted-agent</code> azd project, so a single <code>azd env set</code> at the root is enough. The
+value is published to the hosted agent as
+<code>OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT</code>, declared in the <code>env:</code>
+block of <code>hosted-agent/azure.yaml</code>. It cannot be supplied as an App
+Configuration key: the orchestrator reads it from the process environment before
+any App Configuration resolution happens.</p>
+<p>Hosted-agent environment variables are baked into an agent <strong>version</strong> and are
+immutable once that version exists, so changing this value always creates a new
+version. The image digest is unaffected, so no rebuild occurs. Set only this
+variable, never the legacy <code>AZURE_TRACING_GEN_AI_CONTENT_RECORDING_ENABLED</code>:
+when both are present and disagree, the Azure AI instrumentor treats it as a
+configuration error.</p>
 <div class="admonition info">
 <p class="admonition-title">Runtime readiness passes; the remaining evidence gates stay closed</p>
 <p>Readiness has been re-run under <code>NETWORK_ISOLATION=true</code> against the pins
