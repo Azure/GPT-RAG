@@ -6,6 +6,16 @@ patch, and fix, see the [GitHub releases](https://github.com/Azure/GPT-RAG/relea
 
 ### September 2026
 
+- **Runtime repair ([GPT-RAG v3.8.2](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.2)).**
+  The umbrella repins ingestion [`v2.7.2`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.7.2)
+  and UI [`v2.6.2`](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.6.2).
+  Ingestion `v2.7.1` built successfully but crashed on boot: a pin outside the
+  range required by `azure-monitor-opentelemetry` made pip backtrack to an
+  exporter importing a module path removed in `opentelemetry-sdk 1.44`, so the
+  container never started. UI `v2.6.1` dropped citations returned as absolute
+  URLs for the solution's own storage account, on both the legacy and the
+  secured resolution paths. Orchestrator `v4.1.1` and AILZ `v2.5.1` are
+  unchanged. Upgrade if you deployed `v3.8.0` or `v3.8.1`.
 - **Deployment repair ([GPT-RAG v3.8.1](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.1)).**
   The umbrella repins orchestrator [`v4.1.1`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.1.1),
   which restores `azd deploy`. Orchestrator `v4.1.0` could not be built: its
