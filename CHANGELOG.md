@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [v3.8.0] - 2026-09-03
 
 ### Added
 
@@ -335,6 +335,28 @@ The UI, orchestrator, and latest released AI Landing Zone tag APIs report
 `20339953`; the temporary PR #130 commit pin is not a release pin. This
 unreleased integration does not publish an umbrella release.
 
+### Validation
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.6.1 |
+| gpt-rag-orchestrator | v4.1.0 |
+| gpt-rag-ingestion | v2.7.1 |
+| infra / AI Landing Zone | v2.5.1 |
+
+- Provisioned and deployed end to end in a validation environment in `westus3`
+  with `NETWORK_ISOLATION=true` and `BUILD_MODE=acr-task`, using
+  `azd provision` followed by `azd deploy`.
+- The orchestrator was deployed as a Microsoft Foundry hosted agent, with
+  retrieval served by a Foundry IQ knowledge base over Blob Storage.
+- Retrieval verified end to end through the Foundry Playground, `azd ai agent
+  invoke`, and the Chainlit front end: the answer returns with an openable
+  citation on every surface.
+- Spurious `Failed to detach context` error records confirmed absent on fresh
+  role instances, measured against a baseline where every serving instance
+  emitted them.
+- Front-end sign-in through Microsoft Entra ID exercised against a dedicated
+  app registration.
 ## [v3.7.0] - 2026-07-21
 
 ### User and operator impact

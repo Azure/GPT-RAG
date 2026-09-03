@@ -1,5 +1,5 @@
 {
-  "tag": "unreleased",
+  "tag": "v3.8.0",
   "repo": "https://github.com/azure/gpt-rag.git",
   "ailz_tag": "v2.5.1",
   "ailz_commit": "9cc5859af5c8ab3b31709c9e16e0db11a170a404",
@@ -7,20 +7,20 @@
     {
       "name": "gpt-rag-ui",
       "repo": "https://github.com/azure/gpt-rag-ui.git",
-      "tag": "v2.6.0",
-      "commit": "81d6515d8fc365402e958e861b671af037a4cc75"
+      "tag": "v2.6.1",
+      "commit": "e1cfac7075a6c6a4f638cf2d05d345d2c6c230dd"
     },
     {
       "name": "gpt-rag-orchestrator",
       "repo": "https://github.com/azure/gpt-rag-orchestrator.git",
-      "tag": "v4.0.2",
-      "commit": "c653b3ec0a553f55244e197f3be993ad33ffe02f"
+      "tag": "v4.1.0",
+      "commit": "935f8ed990020cc3be777dd4fe1664d7e131a3c8"
     },
     {
       "name": "gpt-rag-ingestion",
       "repo": "https://github.com/azure/gpt-rag-ingestion.git",
-      "tag": "v2.7.0",
-      "commit": "84b927769ef0839110f2d68e3ca471e2260567cf"
+      "tag": "v2.7.1",
+      "commit": "18e0cecf5fcfb8315c38c25541ba23bf7cc347d0"
     }
   ]
 }
