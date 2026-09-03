@@ -6,29 +6,9 @@ patch, and fix, see the [GitHub releases](https://github.com/Azure/GPT-RAG/relea
 
 ### September 2026
 
-- **Runtime repair ([GPT-RAG v3.8.2](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.2)).**
-  The umbrella repins ingestion [`v2.7.2`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.7.2)
-  and UI [`v2.6.2`](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.6.2).
-  Ingestion `v2.7.1` built successfully but crashed on boot: a pin outside the
-  range required by `azure-monitor-opentelemetry` made pip backtrack to an
-  exporter importing a module path removed in `opentelemetry-sdk 1.44`, so the
-  container never started. UI `v2.6.1` dropped citations returned as absolute
-  URLs for the solution's own storage account, on both the legacy and the
-  secured resolution paths. Orchestrator `v4.1.1` and AILZ `v2.5.1` are
-  unchanged. Upgrade if you deployed `v3.8.0` or `v3.8.1`.
-- **Deployment repair ([GPT-RAG v3.8.1](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.1)).**
-  The umbrella repins orchestrator [`v4.1.1`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.1.1),
-  which restores `azd deploy`. Orchestrator `v4.1.0` could not be built: its
-  `Dockerfile` builds the `frontend/` SPA in the first stage, and three
-  dependency regressions broke that build, so every clean deployment of
-  `v3.8.0` failed at the orchestrator image build. UI `v2.6.1`, ingestion
-  `v2.7.1`, and AILZ `v2.5.1` are unchanged. Upgrade if you deployed `v3.8.0`.
-  **`v3.8.1` does not deploy either** — its ingestion pin crashes on boot. Deploy
-  [`v3.8.2`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.2).
-
-- **Hosted agent on Microsoft Foundry is the fresh-deployment default ([GPT-RAG v3.8.0](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0)).**
-  The umbrella release pins UI `v2.6.1`, orchestrator `v4.1.0`, ingestion
-  `v2.7.1`, and AILZ `v2.5.1`, and validates the hosted chat path end to end
+- **Hosted agent on Microsoft Foundry is the fresh-deployment default ([GPT-RAG v3.8.2](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.2)).**
+  The umbrella release pins UI `v2.6.2`, orchestrator `v4.1.1`, ingestion
+  `v2.7.2`, and AILZ `v2.5.1`, and validates the hosted chat path end to end
   against a Foundry IQ knowledge base, confirming both the grounded answer and
   its citation. ADR-0001 makes hosted/no-panel the default topology for
   genuinely fresh deployments; classic, hosted/no-panel, and hosted/panel are
@@ -38,8 +18,6 @@ patch, and fix, see the [GitHub releases](https://github.com/Azure/GPT-RAG/relea
   project. Continuity, user-history, owner-binding, and operator evidence gates
   remain deployment-published false/off/503. See the
   [hosted-agent component release matrix](hosted_agent_release_matrix.md).
-  **This release does not deploy** — its orchestrator pin fails to build. Deploy
-  [`v3.8.2`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.2) instead.
 
 ### August 2026
 
