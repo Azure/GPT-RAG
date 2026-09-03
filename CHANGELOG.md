@@ -1,5 +1,63 @@
 # Changelog
 
+## [v3.8.2] - 2026-09-03
+
+### Fixed
+
+- **Repinned `gpt-rag-ingestion` from `v2.7.1` to
+  [`v2.7.2`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.7.2),
+  which restores the ingestion container's ability to start.** `v2.7.1` pinned
+  `opentelemetry-instrumentation-httpx==0.65b0`, outside the range required by
+  `azure-monitor-opentelemetry`. pip resolved the conflict by silently
+  backtracking to an eleven-versions-older exporter that imports a symbol
+  removed in `opentelemetry-sdk 1.44`. The image built successfully and the
+  container then crashed on boot with
+  `ImportError: cannot import name 'LogData'`. Because the failure occurred at
+  import time and not at build time, an image build would not have caught it.
+  The pin is now a range aligned with the Azure Monitor distro.
+
+- **Repinned `gpt-rag-ui` from `v2.6.1` to
+  [`v2.6.2`](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.6.2),** which
+  fixes citations that the orchestrator returns as absolute URLs for the
+  solution's own storage account. The legacy path returned them unsigned and
+  the secured path discarded them; both now normalize the URL to a
+  container-relative path first, so per-document authorization still applies.
+
+- **Added a `release/*` exception to the pull-request guard.** The umbrella
+  workflow blocked every pull request to `main` unconditionally, including
+  release branches, contradicting the documented release process. Note that
+  because the workflow uses `pull_request_target`, GitHub runs the copy on the
+  base branch, so the corrected guard only takes effect from the next release
+  onwards.
+
+### Added
+
+- **Continuous integration for `gpt-rag-ingestion` and for the
+  `gpt-rag-orchestrator` frontend.** Neither had a workflow exercising the code
+  that broke. The ingestion repository already contained 12 test files that no
+  workflow ran; the orchestrator SPA was built only inside the Dockerfile. The
+  absence of these two jobs is the direct cause of both defects fixed in this
+  release and in `v3.8.1`.
+
+## Component versions
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.6.2 |
+| gpt-rag-orchestrator | v4.1.1 |
+| gpt-rag-ingestion | v2.7.2 |
+| infra / AI Landing Zone | v2.5.1 |
+
+### Validation
+
+- `unit-tests` green on each pinned component commit: ingestion `168 passed`,
+  UI 410 tests, orchestrator frontend build exit `0` on a Linux runner.
+- Resolved ingestion dependency set verified coherent against the Azure Monitor
+  distro requirements.
+- AI Landing Zone pins verified to agree: `manifest.json` `ailz_tag`,
+  `.gitmodules` `infra.branch`, and the recorded `infra/` submodule gitlink all
+  identify `v2.5.1` / `9cc5859a`.
+
 ## [v3.8.1] - 2026-09-03
 
 ### Fixed
