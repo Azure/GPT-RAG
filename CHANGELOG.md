@@ -14,7 +14,8 @@
   App Configuration inside the ASGI `lifespan` and gated on the resolved mode.
   Classic deployments are unaffected — the admin surface keeps mounting exactly
   as before — and hosted deployments without a panel now correctly return 404.
-  Closes [#592](https://github.com/Azure/GPT-RAG/issues/592).
+  Tracked under [#592](https://github.com/Azure/GPT-RAG/issues/592), the
+  umbrella issue for hosted deployment-mode validation.
 
   The same pin also hardens the new `/api/panel/*` API: startup validation now
   fails closed on missing Entra ID configuration rather than only on missing
