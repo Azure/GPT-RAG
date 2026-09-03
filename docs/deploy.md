@@ -274,6 +274,38 @@ handoff contract. It must declare `language: docker` and
 instead of triggering another ACR build. Do not remove any of these three
 settings from a prebuilt hosted deployment.
 
+##### Capturing conversation content in Foundry telemetry
+
+The Foundry portal's per-agent **Conversations** view reports
+*"No conversation turns found"* unless the agent's GenAI spans carry the prompt
+and completion text. Those spans (`invoke_agent`) are always emitted, but the
+`gen_ai.input.messages`, `gen_ai.output.messages`, and
+`gen_ai.system_instructions` attributes are only populated when message-content
+capture is enabled. GPT-RAG leaves it **disabled by default**, because capturing
+message content sends user prompts and model answers to Application Insights,
+which is a data-privacy decision each deployment has to make for itself.
+
+Opt in per environment before deploying the hosted agent:
+
+```powershell
+azd env set HOSTED_AGENT_CAPTURE_MESSAGE_CONTENT true
+azd deploy
+```
+
+The pre-deploy hook copies the root `.azure` environment into the
+`hosted-agent` azd project, so a single `azd env set` at the root is enough. The
+value is published to the hosted agent as
+`OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT`, declared in the `env:`
+block of `hosted-agent/azure.yaml`. It cannot be supplied as an App
+Configuration key: the orchestrator reads it from the process environment before
+any App Configuration resolution happens.
+
+Hosted-agent environment variables are baked into an agent **version** and are
+immutable once that version exists, so changing this value always creates a new
+version. The image digest is unaffected, so no rebuild occurs. Set only this
+variable, never the legacy `AZURE_TRACING_GEN_AI_CONTENT_RECORDING_ENABLED`:
+when both are present and disagree, the Azure AI instrumentor treats it as a
+configuration error.
 !!! info "Runtime readiness passes; the remaining evidence gates stay closed"
     Readiness has been re-run under `NETWORK_ISOLATION=true` against the pins
     shipped in [GPT-RAG `v3.8.0`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0):
