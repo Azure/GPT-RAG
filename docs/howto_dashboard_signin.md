@@ -4,14 +4,12 @@ The orchestrator admin dashboard at `/dashboard` signs the operator in with Micr
 
 If you are looking for the wider authentication picture (chat UI sign-in, On-Behalf-Of, document-level access control), see [Authentication and Document-Level Security](howto_authentication.md). This page is scoped to the operator dashboard.
 
-This procedure applies to the orchestrator dashboard in the currently released
-classic Container Apps topology and in the explicit classic fallback. The
+This procedure applies to the orchestrator dashboard in the classic Container
+Apps topology and in the explicit classic fallback. The
 [hosted integration matrix](hosted_agent_release_matrix.md) keeps hosted/no-panel
 as the fresh default and supports explicit hosted-panel selection. The
 hosted-panel user-history and operator routes remain off/503 because their
-independent evidence gates are deployment-published `false`. This describes the
-integrated configuration, not a shipped hosted runtime; session readiness
-currently remains blocked by HTTP 424.
+independent evidence gates are deployment-published `false`.
 
 ## What this is
 
@@ -26,7 +24,7 @@ Until this release, the orchestrator dashboard SPA had no real sign-in. The `req
 The chat UI is not affected. Only the orchestrator dashboard uses this new flow.
 
 !!! important "The ingestion operator tabs use a different browser client"
-    The ingestion `v2.7.0` Overview and Curation tabs do not initialize MSAL,
+    The ingestion `v2.7.1` Overview and Curation tabs do not initialize MSAL,
     acquire an access token, or attach `Authorization` to their panel requests.
     They display the API's real 401/403/503 response unless an approved
     same-origin reverse-auth proxy adds a delegated operator bearer. Do not

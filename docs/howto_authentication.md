@@ -7,13 +7,12 @@ This page explains how authentication works in GPT-RAG, from the GPT-RAG UI sign
 !!! warning "Hosted continuity remains disabled"
     Live OQ-OWN evidence supersedes the capability-first contract from
     [PR #630](https://github.com/Azure/GPT-RAG/pull/630). The delegated
-    `x-ms-user-identity` platform pivot merged to `develop` in
-    [PR #633](https://github.com/Azure/GPT-RAG/pull/633). UI `v2.6.0`,
-    orchestrator `v4.0.0`, ingestion `v2.7.0`, and AILZ `v2.5.0` are pinned by
-    the umbrella integration. Keep
-    `HOSTED_CONTINUITY_ENABLED=false`; compatible history endpoints return HTTP
-    503 until `HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true`, and the current
-    published release continues to use the classic flow.
+    `x-ms-user-identity` platform pivot merged in
+    [PR #633](https://github.com/Azure/GPT-RAG/pull/633). UI `v2.6.1`,
+    orchestrator `v4.1.0`, ingestion `v2.7.1`, and AILZ `v2.5.1` are pinned by
+    [GPT-RAG `v3.8.0`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0).
+    Keep `HOSTED_CONTINUITY_ENABLED=false`; compatible history endpoints return
+    HTTP 503 until `HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true`.
 
 ## Embed GPT-RAG in a portal
 
@@ -337,7 +336,7 @@ off/503 behind separate deployment-published evidence gates.
 
 Admin access is enforced through an **Entra ID App Role named `Admin`** added to the same App Registration you created for user sign-in. The token the caller presents to `/api/dashboard/*` (or the ingestion equivalents) must carry `Admin` in its `roles` claim.
 
-The ingestion `v2.7.0` metadata-only Overview and Curation APIs use their own
+The ingestion `v2.7.1` metadata-only Overview and Curation APIs use their own
 explicit `PANEL_OPERATOR_APP_ROLE` or `PANEL_OPERATOR_GROUP_ID` gate. Their Vite
 tabs do not acquire a browser token or add an `Authorization` header, so they
 require an approved reverse-auth proxy to supply the delegated bearer and

@@ -1,20 +1,19 @@
 # Hosted conversation continuity platform contract
 
-GPT-RAG has pivoted hosted conversation ownership to delegated user identity on
-the `develop` branch.
+GPT-RAG has pivoted hosted conversation ownership to delegated user identity.
 The trusted UI BFF derives `x-ms-user-identity` from the authenticated
 server-side principal and sends it on the hosted Responses request. This is the
 preferred and default continuity architecture.
 
-!!! danger "Exact matrix pinned; continuity evidence gate remains closed"
+!!! danger "Shipped in v3.8.0; continuity evidence gate remains closed"
     The OQ-OWN platform pivot merged in
     [PR #633](https://github.com/Azure/GPT-RAG/pull/633) at
     [`86b17b0`](https://github.com/Azure/GPT-RAG/commit/86b17b0af672edefe6842cba0f1a8ff77ab23038),
-    and the umbrella integration now pins UI `v2.6.0`, orchestrator `v4.0.2`,
-    ingestion `v2.7.0`, and AILZ `v2.5.1` at their exact release commits. See
+    and [GPT-RAG `v3.8.0`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0)
+    pins UI `v2.6.1`, orchestrator `v4.1.0`, ingestion `v2.7.1`, and AILZ
+    `v2.5.1` at their exact release commits. See
     [the hosted-agent component release matrix](hosted_agent_release_matrix.md#store-false-wire-contract)
-    for the `/responses` `store` gap, now fixed and pinned but still pending
-    live network-isolated re-validation.
+    for the `/responses` `store` gap, now fixed and pinned.
     Keep `HOSTED_CONTINUITY_ENABLED=false` until deployment proves the exact
     owner-binding role and protocol contract and records
     `HOSTED_CONVERSATION_OWNER_BINDING_VALIDATED=true`, continuity endpoints
@@ -120,7 +119,7 @@ controls:
 
 The history bounds limit context supplied through the compatible hosted path.
 They do not define records retention, legal hold, backup, or deletion policy.
-UI `v2.6.0` falls back locally to 40 items and 8,000 tokens if these values are
+UI `v2.6.1` falls back locally to 40 items and 8,000 tokens if these values are
 absent. The umbrella integration publishes the reviewed platform values of 100
 and 32,000 rather than relying on UI fallbacks. This publication does not open
 the continuity gate; live protocol, identity, role, and owner-binding evidence

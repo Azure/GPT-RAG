@@ -4,21 +4,31 @@ patch, and fix, see the [GitHub releases](https://github.com/Azure/GPT-RAG/relea
 
 > 📌 [Check out what's coming next](https://github.com/orgs/Azure/projects/536/views/6)  (Azure org only)
 
+### September 2026
+
+- **Hosted agent on Microsoft Foundry is the fresh-deployment default ([GPT-RAG v3.8.0](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0)).**
+  The umbrella release pins UI `v2.6.1`, orchestrator `v4.1.0`, ingestion
+  `v2.7.1`, and AILZ `v2.5.1`, and validates the hosted chat path end to end
+  against a Foundry IQ knowledge base, confirming both the grounded answer and
+  its citation. ADR-0001 makes hosted/no-panel the default topology for
+  genuinely fresh deployments; classic, hosted/no-panel, and hosted/panel are
+  explicit topologies resolved by a single shared resolver. The release also
+  adds opt-in GenAI message-content capture so chat turns can be inspected in
+  Application Insights, and isolates the hosted agent into its own child azd
+  project. Continuity, user-history, owner-binding, and operator evidence gates
+  remain deployment-published false/off/503. See the
+  [hosted-agent component release matrix](hosted_agent_release_matrix.md).
+
 ### August 2026
 
-- **Hosted-agent integration matrix pinned (not yet shipped).** UI
-  `v2.6.0`, orchestrator `v4.0.0`, ingestion `v2.7.0`, and AILZ `v2.5.0`
-  publish the stateless runtime, delegated owner binding, owner-gated user
-  history/feedback/delete APIs, metadata-only operator APIs, and two-phase
-  hosted handoff contracts. The umbrella integration pins their exact release
-  commits and supports explicitly selected hosted-panel composition with only
-  metadata Cosmos containers. Continuity, user-history, owner-binding, and
-  operator evidence gates remain deployment-published false/off/503. The agent
-  version became active during validation, but session readiness returned HTTP
-  424, so this integration is not runtime-validated or shipped. The ingestion
-  operator tabs also require surrounding
-  infrastructure to supply a delegated bearer because their Vite client does
-  not acquire one. See the
+- **Hosted-agent integration matrix pinned.** The stateless runtime, delegated
+  owner binding, owner-gated user history/feedback/delete APIs, metadata-only
+  operator APIs, and two-phase hosted handoff contracts were defined and pinned
+  at exact release commits, with explicitly selected hosted-panel composition
+  using only metadata Cosmos containers. The ingestion operator tabs require
+  surrounding infrastructure to supply a delegated bearer because their Vite
+  client does not acquire one. Shipped in
+  [GPT-RAG v3.8.0](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0); see the
   [hosted-agent component release matrix](hosted_agent_release_matrix.md).
 
 ### July 2026

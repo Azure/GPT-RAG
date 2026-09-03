@@ -46,7 +46,7 @@ close their independent live evidence and authorization gates.
 
 | Surface | Current behavior |
 | --- | --- |
-| Umbrella integration manifest | Pins the exact matrix above; its umbrella `tag` remains `unreleased` until release engineering stamps a GPT-RAG release. |
+| Umbrella integration manifest | Pins the exact matrix above. Stamped as [`v3.8.0`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0). |
 | Fresh UI `v2.6.1` process with no `CHAT_BACKEND` value | Selects `hosted_agent`; invalid or incomplete hosted configuration fails startup. |
 | Existing umbrella deployment | Its persisted topology is sticky. An unmarked pre-cutover deployment stays `classic`. |
 | `DEPLOYMENT_TOPOLOGY=classic` | Explicit supported fallback; deploys UI, orchestrator, and ingestion Container Apps. |
