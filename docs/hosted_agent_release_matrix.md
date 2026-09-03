@@ -1,14 +1,14 @@
 # Hosted-agent integration matrix
 
 This page records the exact hosted-agent component releases pinned by the
-GPT-RAG umbrella integration on 2026-08-07 and the independent evidence gates
-that remain fail closed.
+GPT-RAG umbrella release [`v3.8.0`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0)
+and the independent evidence gates that remain fail closed.
 
-!!! warning "Pins are integrated; runtime validation and release remain blocked"
+!!! warning "Pins are shipped in umbrella `v3.8.0`; evidence gates remain fail closed"
     The umbrella `manifest.json` pins all four exact releases below and explicit
     `hosted-panel` topology selection is supported. The manifest's umbrella tag
-    remains `unreleased`; use only a GPT-RAG source or release that contains
-    these pins rather than combining component tags independently.
+    is `v3.8.0`; use only a GPT-RAG source or release that contains these pins
+    rather than combining component tags independently.
     `HOSTED_CONTINUITY_ENABLED`, `PANEL_HISTORY_ENABLED`,
     `PANEL_HISTORY_OWNER_BINDING_VALIDATED`, and
     `PANEL_OPERATOR_SURFACES_ENABLED` remain deployment-published `false`.
@@ -17,20 +17,22 @@ that remain fail closed.
     the hosted agent version become active while session readiness returned
     HTTP 424; that crash was root-caused to a `gpt-rag-orchestrator` circular
     import and fixed in
-    [orchestrator `v4.0.1`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.0.1)
-    (pinned below). Fixing that crash is a code-level correction, not a
-    substitute for the network-isolated live validation matrix below, which
-    has not yet been re-run. Treat the matrix as implemented and
-    crash-fixed configuration, not as a validated or shipped umbrella
-    release.
+    [orchestrator `v4.0.1`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.0.1).
+    Readiness (item 1 of the evidence gate below) has since been re-run and
+    passes under `NETWORK_ISOLATION=true` against the exact pins below: the
+    hosted agent reaches active state, session readiness succeeds, and a
+    grounded answer returns with its citation. These pins shipped as umbrella
+    release [`v3.8.0`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.0).
+    Evidence-gate items 2 through 8 and the `store` contract matrix have not
+    been re-run; the four flags above remain deployment-published `false`.
 
 ## Exact integrated matrix
 
 | Component | Release | Reviewed release commit | Relevant contract |
 | --- | --- | --- | --- |
-| GPT-RAG UI | [`v2.6.0`](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.6.0) | [`81d6515`](https://github.com/Azure/gpt-rag-ui/commit/81d6515d8fc365402e958e861b671af037a4cc75) | Hosted/no-panel is the fresh UI default when `CHAT_BACKEND` is absent; continuity and panel surfaces remain opt-in and fail closed. |
-| GPT-RAG orchestrator | [`v4.0.2`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.0.2) | [`c653b3e`](https://github.com/Azure/gpt-rag-orchestrator/commit/c653b3ec0a553f55244e197f3be993ad33ffe02f) | Canonical hosted `/responses` is stateless and requires caller-supplied ordered input. Fixes the `dependencies`/`connectors` circular import that crashed the hosted entrypoint on startup ([PR #311](https://github.com/Azure/gpt-rag-orchestrator/pull/311)), released in `v4.0.1`. Unconditionally forces `store: false` on every hosted `POST /responses` call and rejects `background: true` with HTTP 422 ([PR #313](https://github.com/Azure/gpt-rag-orchestrator/pull/313)), released in `v4.0.2`; see "Store false wire contract" below — this closes the code gap but the live network-isolated re-run remains pending. |
-| GPT-RAG ingestion | [`v2.7.0`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.7.0) | [`84b9277`](https://github.com/Azure/gpt-rag-ingestion/commit/84b927769ef0839110f2d68e3ca471e2260567cf) | Metadata-only operator overview and document/corpus curation APIs. |
+| GPT-RAG UI | [`v2.6.1`](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.6.1) | [`e1cfac7`](https://github.com/Azure/gpt-rag-ui/commit/e1cfac7075a6c6a4f638cf2d05d345d2c6c230dd) | Hosted/no-panel is the fresh UI default when `CHAT_BACKEND` is absent; continuity and panel surfaces remain opt-in and fail closed. |
+| GPT-RAG orchestrator | [`v4.1.0`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.1.0) | [`935f8ed`](https://github.com/Azure/gpt-rag-orchestrator/commit/935f8ed990020cc3be777dd4fe1664d7e131a3c8) | Canonical hosted `/responses` is stateless and requires caller-supplied ordered input. Fixes the `dependencies`/`connectors` circular import that crashed the hosted entrypoint on startup ([PR #311](https://github.com/Azure/gpt-rag-orchestrator/pull/311)), released in `v4.0.1`. Unconditionally forces `store: false` on every hosted `POST /responses` call and rejects `background: true` with HTTP 422 ([PR #313](https://github.com/Azure/gpt-rag-orchestrator/pull/313)), released in `v4.0.2`; see "Store false wire contract" below. `v4.1.0` inverts request-field validation from a strict allowlist to ignore-and-log with a minimal deny-list: only `previous_response_id` is rejected with HTTP 422, and every other field the adapter does not act on is dropped and logged. A strict allowlist turned each newly injected Foundry client field into a hosted-agent outage. `store` and `background` handling is unchanged. `v4.1.0` also suppresses spurious `opentelemetry.context.detach` error records emitted by third-party GenAI instrumentation. |
+| GPT-RAG ingestion | [`v2.7.1`](https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.7.1) | [`18e0cec`](https://github.com/Azure/gpt-rag-ingestion/commit/18e0cecf5fcfb8315c38c25541ba23bf7cc347d0) | Metadata-only operator overview and document/corpus curation APIs. |
 | AI Landing Zone | [`v2.5.1`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/releases/tag/v2.5.1) | [`9cc5859`](https://github.com/Azure/bicep-ptn-aiml-landing-zone/commit/9cc5859af5c8ab3b31709c9e16e0db11a170a404) | Two-phase hosted-agent prerequisite/handoff support; both hosted flags default to `false`. Also allows the Foundry Agent Service's `agent365.svc.cloud.microsoft` observability endpoint through Azure Firewall under network isolation (`v2.5.1`, patch). |
 
 The matrix implements the component portions of
@@ -45,7 +47,7 @@ close their independent live evidence and authorization gates.
 | Surface | Current behavior |
 | --- | --- |
 | Umbrella integration manifest | Pins the exact matrix above; its umbrella `tag` remains `unreleased` until release engineering stamps a GPT-RAG release. |
-| Fresh UI `v2.6.0` process with no `CHAT_BACKEND` value | Selects `hosted_agent`; invalid or incomplete hosted configuration fails startup. |
+| Fresh UI `v2.6.1` process with no `CHAT_BACKEND` value | Selects `hosted_agent`; invalid or incomplete hosted configuration fails startup. |
 | Existing umbrella deployment | Its persisted topology is sticky. An unmarked pre-cutover deployment stays `classic`. |
 | `DEPLOYMENT_TOPOLOGY=classic` | Explicit supported fallback; deploys UI, orchestrator, and ingestion Container Apps. |
 | `DEPLOYMENT_TOPOLOGY=hosted-no-panel` | Fresh-deployment default. UI and ingestion remain in Container Apps; chat uses the hosted agent; no panel Cosmos containers are selected. |
@@ -56,14 +58,14 @@ close their independent live evidence and authorization gates.
 | AILZ `PREPARE_HOSTED_AGENT` / `deployHostedAgent` | Both default to `false`. `deployHostedAgent=true` requires an immutable `sha256:` image digest. |
 
 The platform contract publishes hosted history limits of 100 items and 32,000
-estimated tokens with `drop_oldest`. UI `v2.6.0` has standalone code defaults of
+estimated tokens with `drop_oldest`. UI `v2.6.1` has standalone code defaults of
 40 items and 8,000 tokens when those App Configuration values are absent.
 The umbrella publishes the reviewed 100/32,000 values; operators must not
 remove them and then assume the UI fallback values are equivalent.
 
 ## Stateless hosted runtime contract
 
-Orchestrator `v4.0.2` performs no managed-Conversations create, read, append, or
+Orchestrator `v4.1.0` performs no managed-Conversations create, read, append, or
 delete operation in the hosted container. The caller supplies the complete,
 bounded, oldest-to-newest history on every request.
 
@@ -94,7 +96,7 @@ For canonical `POST /responses`:
 `POST /invocations` remains a distinct compatibility protocol. Its
 `conversation_id` is only an opaque label for response tagging and
 conversation-scoped retrieval; it does not authorize or select a managed
-Conversation. UI `v2.6.0` currently sends complete ordered messages through
+Conversation. UI `v2.6.1` currently sends complete ordered messages through
 this compatibility route. An integrated umbrella cutover must explicitly align
 the UI call route with the protocol and role evidence it validates.
 
@@ -126,13 +128,16 @@ the UI call route with the protocol and role evidence it validates.
     [`v4.0.2`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.0.2)
     (commit
     [`c653b3e`](https://github.com/Azure/gpt-rag-orchestrator/commit/c653b3ec0a553f55244e197f3be993ad33ffe02f),
-    722 tests passing upstream). This umbrella's `manifest.json` now pins that
-    released commit. **This is a code-level fix and re-pin, not yet a live
-    re-validation.** Do not describe the store contract as validated or safe
-    under network isolation until the exact matrix (`store` unset / `true` /
-    `false`, under `NETWORK_ISOLATION=true`, streaming and non-streaming) is
-    re-run live against this pin and passes. This warning must remain until
-    that re-run is recorded here.
+    722 tests passing upstream). Umbrella release `v3.8.0` pins the successor
+    commit `935f8ed` (`v4.1.0`), which leaves `store` and `background`
+    handling unchanged. **The store contract itself has not been
+    re-validated.** A network-isolated run on these pins confirms readiness and
+    a grounded answer, but does not exercise the field matrix. Do not describe
+    the store contract as validated or safe under network isolation until the
+    exact matrix (`store` unset / `true` / `false`, under
+    `NETWORK_ISOLATION=true`, streaming and non-streaming) is re-run live
+    against this pin and passes. This warning must remain until that re-run is
+    recorded here.
 
 ## Delegated owner binding
 
@@ -154,7 +159,7 @@ retrieval authorization have different audiences and must not be substituted.
 
 ### Protocol and RBAC evidence gate
 
-UI `v2.6.0` accepts an attested Responses protocol version `>= 2.0.0`. The
+UI `v2.6.1` accepts an attested Responses protocol version `>= 2.0.0`. The
 GPT-RAG platform validator is deliberately stricter: it requires the
 live endpoint to route 100% to one agent version declaring exactly one
 Responses `2.0.0` protocol entry.
@@ -198,7 +203,7 @@ remain explicit 5xx failures; they are not converted to not-found.
 
 ## User panel surfaces
 
-UI `v2.6.0` includes owner-gated endpoints for:
+UI `v2.6.1` includes owner-gated endpoints for:
 
 | Endpoint | Behavior |
 | --- | --- |
@@ -214,7 +219,7 @@ surfaces return 503.
 
 ## Operator overview and corpus curation
 
-Ingestion `v2.7.0` includes:
+Ingestion `v2.7.1` includes:
 
 - `GET /panel/overview/metrics`;
 - `GET /panel/corpus-curation/queue`; and
@@ -242,7 +247,7 @@ hosted-panel topology still returns 503 from these routes until the separate
 operator evidence and authorization gate is completed.
 
 !!! important "Released ingestion dashboard browser-auth status"
-    The ingestion `v2.7.0` Vite dashboard does not initialize MSAL, acquire an
+    The ingestion `v2.7.1` Vite dashboard does not initialize MSAL, acquire an
     access token, or add an `Authorization` header for the new operator panel
     requests. Its `panelFetch` uses plain browser `fetch`. The Overview and
     Curation tabs therefore show the backend's real 401/403/503 response unless
@@ -347,13 +352,13 @@ hosted entrypoint (`src/api/hosted_entrypoint.py` imports `dependencies`
 before anything else in the process has "warmed up" `connectors`, unlike
 the classic entrypoint) and fixed in
 [orchestrator `v4.0.1`](https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.0.1)
-([PR #311](https://github.com/Azure/gpt-rag-orchestrator/pull/311)), pinned
-above. Fixing the crash is necessary but not sufficient: item 1 and the
-remaining evidence steps must still be re-run against a live,
-network-isolated deployment before this integration can be described as
-validated. Preserve the fail-closed flags and do not describe this
-integration as runtime-validated or shipped until readiness and the
-remaining evidence steps succeed.
+([PR #311](https://github.com/Azure/gpt-rag-orchestrator/pull/311)), whose
+successor `v4.1.0` is pinned above. Item 1 has since been re-run against a
+live, network-isolated deployment on those pins and passes: the agent version
+reaches active state, session readiness succeeds, and a grounded answer
+returns with its citation. Evidence steps 2 through 8 have not been re-run.
+Preserve the fail-closed flags and do not describe those steps as validated
+until each one succeeds.
 
 The configuration contract uses:
 
@@ -365,7 +370,7 @@ The configuration contract uses:
 | `HOSTED_CONVERSATION_DELEGATED_IDENTITY_HEADER` | `x-ms-user-identity` |
 | `HOSTED_CONVERSATION_DELEGATED_IDENTITY_SOURCE` | `authenticated_ui_bff_principal` |
 | `HOSTED_AGENT_RESPONSES_PROTOCOL_VERSION` | platform contract: exactly `2.0.0` |
-| `HOSTED_AGENT_PROTOCOL_VERSION` | UI `v2.6.0` continuity attestation: `>=2.0.0`; deployments must keep it consistent with the exact platform Responses setting |
+| `HOSTED_AGENT_PROTOCOL_VERSION` | UI `v2.6.1` continuity attestation: `>=2.0.0`; deployments must keep it consistent with the exact platform Responses setting |
 | `HOSTED_CONTINUITY_UNAVAILABLE_STATUS_CODE` | `503` |
 | `HOSTED_HISTORY_MAX_ITEMS` / `HOSTED_HISTORY_MAX_TOKENS` | umbrella defaults `100` / `32000` |
 | `HOSTED_HISTORY_TRUNCATION` | `drop_oldest` |
