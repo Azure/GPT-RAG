@@ -24,7 +24,7 @@ Until this release, the orchestrator dashboard SPA had no real sign-in. The `req
 The chat UI is not affected. Only the orchestrator dashboard uses this new flow.
 
 !!! important "The ingestion operator tabs use a different browser client"
-    The ingestion `v2.7.1` Overview and Curation tabs do not initialize MSAL,
+    The ingestion `v2.7.2` Overview and Curation tabs do not initialize MSAL,
     acquire an access token, or attach `Authorization` to their panel requests.
     They display the API's real 401/403/503 response unless an approved
     same-origin reverse-auth proxy adds a delegated operator bearer. Do not

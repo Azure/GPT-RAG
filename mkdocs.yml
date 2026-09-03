@@ -64,7 +64,7 @@ nav:
     - Azure Direct Models: howto_azure_direct.md
     - Application Gateway: howto_app_gateway.md
     - Auth & Doc Security: howto_authentication.md
-    - Embed chat in a portal: https://github.com/Azure/gpt-rag-ui/blob/1ef6f9e88022e3168b8caf9c867f090eb632f562/docs/copilot-embedding.md
+    - Embed chat in a portal: https://github.com/Azure/gpt-rag-ui/blob/main/docs/copilot-embedding.md
     - Admin Dashboard Sign-in: howto_dashboard_signin.md
     - Grounding sources:
       - Overview (start here): howto_grounding_overview.md

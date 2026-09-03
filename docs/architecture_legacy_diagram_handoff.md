@@ -7,11 +7,11 @@ chat-runtime views.
 
 !!! warning "Release status"
     Draw the hosted/no-panel path as the **supported fresh-deployment default**
-    and label it **shipped in v3.8.1; continuity off/503 pending evidence**.
+    and label it **shipped in v3.8.2; continuity off/503 pending evidence**.
     Label hosted-panel as **supported only when explicitly selected; history and
-    operator APIs off/503 pending evidence**. UI `v2.6.1`, orchestrator
-    `v4.1.1`, ingestion `v2.7.1`, and AILZ `v2.5.1` are pinned by
-    [GPT-RAG `v3.8.1`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.1).
+    operator APIs off/503 pending evidence**. UI `v2.6.2`, orchestrator
+    `v4.1.1`, ingestion `v2.7.2`, and AILZ `v2.5.1` are pinned by
+    [GPT-RAG `v3.8.2`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.2).
 
 ## Shapes and labels
 

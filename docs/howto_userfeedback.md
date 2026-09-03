@@ -5,7 +5,7 @@ assistant responses through the UI. In the currently released classic
 Container Apps topology and the explicit classic fallback, feedback is
 processed by the orchestrator and stored in **Cosmos DB**. The published
 [hosted component matrix](hosted_agent_release_matrix.md) implements separate
-user history, feedback, and delete APIs in UI `v2.6.1`. Hosted-panel is now an
+user history, feedback, and delete APIs in UI `v2.6.2`. Hosted-panel is now an
 explicit supported topology in the pinned umbrella matrix, but
 `PANEL_HISTORY_ENABLED` and `PANEL_HISTORY_OWNER_BINDING_VALIDATED` remain
 deployment-published `false`, so these routes continue to return 503 until
