@@ -1,7 +1,7 @@
 name: Block PRs to main
 
-# This workflow blocks pull requests that target the main branch.
-# Contributors must target the develop branch instead.
+# This workflow blocks pull requests that target the main branch, except for
+# release branches. Contributors must target the develop branch instead.
 # Uses pull_request_target for security (does not check out PR code).
 
 on:
@@ -10,6 +10,7 @@ on:
       - opened
       - reopened
       - synchronize
+      - edited
     branches:
       - main
 
@@ -23,8 +24,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Release branches are the documented path to main, so they are exempt.
+      # See .github/copilot-instructions.md for the full branch policy.
+      - name: Validate source branch
+        id: branch-policy
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          if [[ "$HEAD_REF" =~ ^release/[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "allowed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "allowed=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Post comment on open or reopen
-        if: github.event.action == 'opened' || github.event.action == 'reopened'
+        if: steps.branch-policy.outputs.allowed != 'true' && (github.event.action == 'opened' || github.event.action == 'reopened')
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
         with:
           script: |
@@ -37,6 +51,8 @@ jobs:
             You can do this by:
             1. Clicking **Edit** at the top-right of this PR
             2. Changing the base branch from \`main\` to \`develop\`
+
+            Release pull requests are the exception: a branch named exactly \`release/<MAJOR>.<MINOR>.<PATCH>\` may target \`main\`.
 
             For more information, see our [Contributing Guide](https://azure.github.io/GPT-RAG/contributing/).
 
@@ -51,6 +67,7 @@ jobs:
             });
 
       - name: Fail the workflow
+        if: steps.branch-policy.outputs.allowed != 'true'
         run: |
-          echo "::error::Pull requests to the main branch are not allowed. Please change the base branch to develop."
+          echo "::error::Only release branches named exactly 'release/<MAJOR>.<MINOR>.<PATCH>' may target 'main'. Please change the base branch to develop."
           exit 1
