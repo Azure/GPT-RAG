@@ -386,7 +386,50 @@ The configuration contract uses:
 | `PANEL_CONVERSATION_ENUMERATION_MODE` | `owner_index` |
 | `PANEL_CURSOR_TTL_SECONDS` / `PANEL_OVERVIEW_MIN_CARDINALITY` | `600` / `5` |
 
-Rollback is a deployment/configuration operation, never a request-time retry:
+Rollback is a deployment/configuration operation, never a request-time retry.
+It has two independent forms. Choose the narrowest one that resolves the
+regression: reverting the image version keeps the hosted topology, while
+topology rollback abandons hosted mode entirely.
+
+### Version rollback: stay hosted, serve the previous image
+
+A hosted agent version is immutable and serves 100% of the traffic, with no
+canary and no traffic splitting. Rolling back therefore means switching the
+endpoint back to a digest that was already published and validated. Revert
+only the image identity and leave the topology untouched:
+
+```powershell
+pwsh scripts/prepareHostedDeployment.ps1 --image-version sha256:<previous-digest>
+azd provision
+azd deploy
+```
+
+On POSIX systems, use `scripts/prepareHostedDeployment.sh` with the same
+argument. `--image-version` takes a canonical immutable digest, skips the image
+build entirely, and clears generated-image provenance by writing an empty
+`HOSTED_AGENT_IMAGE_SOURCE_COMMIT` and
+`HOSTED_AGENT_IMAGE_STARTUP_COMMAND_SHA256`. The second provision materializes
+the deploy handoff for the reverted digest.
+
+Clearing that provenance is required, not cosmetic. A *generated* digest is
+validated against the orchestrator commit pinned in `manifest.json`; a mismatch
+fails composition with `DeploymentTopologyError` before any resource changes,
+which is what stops a half-reverted environment from reaching Azure. An
+*operator-supplied* digest carries no generated provenance, so that coherence
+check does not apply and the older image is accepted while `manifest.json`
+keeps pointing at the newer pin. Do not work around the check by hand-editing
+`HOSTED_AGENT_IMAGE_VERSION` while leaving a stale source commit in place.
+
+Because provenance is cleared, the environment no longer records which commit
+produced the running image. Record the digest and its originating release
+outside the environment before switching, so the reverted state stays
+auditable.
+
+To return to the manifest-pinned build, re-run the preparation step without
+`--image-version`. A digest whose source commit no longer matches the manifest
+is rebuilt from the current pin rather than reused.
+
+### Topology rollback: leave hosted mode
 
 1. set `HOSTED_CONTINUITY_ENABLED=false`;
 2. select `DEPLOYMENT_TOPOLOGY=classic` and `CHAT_BACKEND=orchestrator`;
