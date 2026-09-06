@@ -59,8 +59,13 @@ The following commands require the matching component checkpoint containing
 ```powershell
 python -m pip install -r requirements-quality.txt
 $Base = git merge-base HEAD origin/develop
-python .github\scripts\check-quality.py --check all --base-ref $Base --report .artifacts\quality.json
 ```
+
+Use the matching component invocation below: interpreter startup flags are part
+of the protected interface, not interchangeable options. Local reproduction
+assumes a trusted interpreter and installed dependencies; a virtual environment
+is not an operating-system sandbox. CI separates candidate behavioral tests from
+static evaluation using the protected evaluator and dependency configuration.
 
 For a release-target PR, substitute its actual protected target for `develop`.
 The checker creates the report's parent directory and never edits code or policy.
@@ -85,15 +90,23 @@ After restoring the owning repository's runtime/test/quality dependencies,
 produce evidence with its existing runner and checkpoint-specific interface:
 
 ```powershell
-# Orchestrator, at its recorded checkpoint.
+# Orchestrator, from 703e67f94f4f36971bdb388e0eacb920560f9b6e.
 python -m pytest -q --junitxml=.artifacts\pytest.xml
-python .github\scripts\check-quality.py --check all --base-ref $Base --report .artifacts\quality.json --test-results .artifacts\pytest.xml
+python -I -S .github\scripts\check-quality.py --check all --base-ref $Base --report .artifacts\quality.json --test-results .artifacts\pytest.xml
 
-# Ingestion, at its recorded checkpoint.
+# Ingestion, from f47c98f5ca9762a539e7279e681e4a0d75e967f7.
 python -m pytest tests -q --junitxml=.artifacts\pytest.xml -o junit_family=legacy
-python .github\scripts\quality-evidence.py --junit .artifacts\pytest.xml --base-ref $Base --report .artifacts\test-evidence.json
-python .github\scripts\check-quality.py --check all --base-ref $Base --report .artifacts\quality.json --test-evidence .artifacts\test-evidence.json
+python -I .github\scripts\quality-evidence.py --junit .artifacts\pytest.xml --base-ref $Base --report .artifacts\test-evidence.json
+python -I .github\scripts\check-quality.py --check all --base-ref $Base --report .artifacts\quality.json --test-evidence .artifacts\test-evidence.json
 ```
+
+Orchestrator also requires `-I -S` for `aggregate-quality.py`: it skips automatic
+site/startup-hook processing and explicitly discovers installed distribution
+paths. Ingestion also requires `-I` for `quality-gate.py`; installed tooling and
+site initialization remain trusted, so `-I` alone is not a claim that installed
+`.pth` hooks cannot execute. Neither component applies these static-evaluator
+startup requirements to its existing pytest command. The report and test-evidence
+argument names remain component-specific.
 
 These drafts intentionally do **not** satisfy the exit-0 acceptance target:
 inherited lint/broad-handler findings and bootstrap review remain outstanding.
@@ -134,11 +147,21 @@ For example, UI `ae9d0d7d41556e0d8d4c4116fbb17765fbc1210f` passed 460
 unit cases and the image job, but subsequent source-policy, catch-binding and
 namespace-discovery reproductions still required repairs. A passing behavioral
 suite is not proof that all checker mutations are rejected.
-The final UI checkpoint `871106dbe891a1ccde373b4964c5e56a71c4f4cc` closes
+The earlier UI checkpoint `871106dbe891a1ccde373b4964c5e56a71c4f4cc` closes
 those three reproductions and passes 471 unit cases plus the unchanged
 410-case image exercise. The evidence CLI is unchanged and adoption remains
 red. Backend final refs, SDK-aligned results and the explicitly superseded
 ingestion fixture failure are likewise recorded in the follow-up table.
+
+UI history milestone `653660e31daa2de8219bf38a571e8bd97f227a8a` subsequently
+passes 483 unit cases, including twelve new history-boundary regressions, and
+422 offline Linux-image cases in
+[workflow 34049278802](https://github.com/Azure/gpt-rag-ui/actions/runs/34049278802).
+The framework adapter/factory/context now lives in `api.history`; the service
+receives explicit operation context and retains the single user-cache owner.
+Legacy `datalayer` exports still resolve to their canonical implementation.
+Its evidence CLI remains the one above. Typing/architecture pass while the
+aggregate remains red; this is not final quality or full U4 acceptance.
 
 ## 3. Prove rejection and required merge enforcement
 

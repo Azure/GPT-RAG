@@ -18,8 +18,15 @@ Each component must supply `.github/scripts/check-quality.py`, with this
 non-mutating interface:
 
 ```text
-python .github/scripts/check-quality.py --check all --base-ref <commit> --report <file>
+<repository-python-launcher> .github/scripts/check-quality.py --check all --base-ref <commit> --report <file>
 ```
+
+The launcher includes the component's protected interpreter-startup requirements.
+At the resumed backend milestones, orchestrator requires `python -I -S` and
+ingestion requires `python -I`; see [checkpoint commands](../quickstart.md#backend-checkpoint-reproduction).
+This refines interpreter initialization, not the shared argument/result contract.
+Do not remove required flags to make an older invocation run, or confuse static
+source isolation with a sandbox for candidate behavioral tests.
 
 Accepted `--check` values: `all`, `lint`, `typing`, `architecture`, `exceptions`,
 `policy`. The default repository is the current checkout; base-ref must resolve
