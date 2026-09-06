@@ -1,8 +1,11 @@
 # Validation Guide: Python Module Boundaries
 
-This guide separates **existing runnable checks** from **planned acceptance
-commands**. Planning created no runtime implementation or quality tools.
-Execute component commands from that component's checkout, not this umbrella.
+This guide separates **existing runnable checks**, **draft checkpoint commands**
+and **remaining acceptance**. Planning itself created no runtime implementation;
+the [delivery record](tasks.md#delivery-record) now identifies component drafts.
+Their commands are not instructions for released component tags, nor evidence
+of active required checks. Execute them in the matching component checkout,
+not this umbrella.
 
 ## Prerequisites
 
@@ -50,7 +53,7 @@ failure is not silently accepted as a quality-policy exception.
 
 ## 2. Exercise the quality interface after implementation
 
-The following commands become available only when the component introduces
+The following commands require the matching component checkpoint containing
 `requirements-quality.txt`, `.quality` records and `check-quality.py`:
 
 ```powershell
@@ -70,6 +73,34 @@ When diagnosing a failure, invoke one supported `--check` value from
 The wrapper uses the pinned tool's supported command/structured output; it must
 not infer success from a parser exception. No command accepts or rewrites a
 baseline automatically.
+
+### Backend checkpoint reproduction
+
+The orchestrator and ingestion checkpoints in the delivery record exercised
+Python 3.12.9, Ruff 0.16.5, mypy 2.3.1, Import Linter 2.14 and Grimp 3.16.
+See [the recorded version refinement](research.md#implementation-checkpoints);
+do not substitute the unavailable research candidates.
+
+After restoring the owning repository's runtime/test/quality dependencies,
+produce evidence with its existing runner and checkpoint-specific interface:
+
+```powershell
+# Orchestrator, at its recorded checkpoint.
+python -m pytest -q --junitxml=.artifacts\pytest.xml
+python .github\scripts\check-quality.py --check all --base-ref $Base --report .artifacts\quality.json --test-results .artifacts\pytest.xml
+
+# Ingestion, at its recorded checkpoint.
+python -m pytest tests -q --junitxml=.artifacts\pytest.xml -o junit_family=legacy
+python .github\scripts\quality-evidence.py --junit .artifacts\pytest.xml --base-ref $Base --report .artifacts\test-evidence.json
+python .github\scripts\check-quality.py --check all --base-ref $Base --report .artifacts\quality.json --test-evidence .artifacts\test-evidence.json
+```
+
+These drafts intentionally do **not** satisfy the exit-0 acceptance target:
+inherited lint/broad-handler findings and bootstrap review remain outstanding.
+Do not approve exceptions or lower policy to reproduce a green result.
+Passing existing tests or selected architecture/typing checks is not full
+acceptance. Review of exact policy schemas, adversarial cases and public failure
+contracts remains independent of these owner-reported checkpoint results.
 
 ## 3. Prove rejection and required merge enforcement
 
@@ -105,8 +136,8 @@ python -m pip wheel --no-deps --wheel-dir .artifacts\wheel .
 ```
 
 Implement `tests/test_installed_package.py` using unittest and temporary
-directories/subprocesses. This is a planned acceptance test, not a file currently
-available. The test must build/use the wheel and:
+directories/subprocesses. A checkpoint implementation is not evidence that the
+entire acceptance matrix has passed. The test must build/use the wheel and:
 
 1. Create a clean Python 3.12 environment with the existing runtime requirements
    and the **non-editable** wheel. Inspect the wheel's module inventory.

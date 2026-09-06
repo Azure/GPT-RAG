@@ -103,8 +103,8 @@ handlers. Dependency failures preserve public errors and safe diagnostics.
 
 ### Implementation
 
-- [ ] T021 [P] [US2] Break Search/Foundry IQ OBO cycle through a focused same-repository helper in orchestrator/src/connectors/, retaining existing callable behavior and compatibility exports.
-- [ ] T022 [P] [US2] Break api-to-main scheduler cycles through explicit jobs-owned state in ingestion/jobs/, ingestion/api/admin.py, ingestion/api/panel.py and ingestion/main.py without duplicating locks/registries.
+- [X] T021 [P] [US2] Break Search/Foundry IQ OBO cycle through a focused same-repository helper in orchestrator/src/connectors/, retaining existing callable behavior and compatibility exports.
+- [X] T022 [P] [US2] Break api-to-main scheduler cycles through explicit jobs-owned state in ingestion/jobs/, ingestion/api/admin.py, ingestion/api/panel.py and ingestion/main.py without duplicating locks/registries.
 - [ ] T023 [P] [US2] Extract citation/reference rendering from ui/app.py into ui/src/gpt_rag_ui/services/ and make ui/datalayer.py consume that owner without changing grants or source links.
 - [ ] T024 [P] [US2] Implement full-graph/private-surface/exception-ledger enforcement in orchestrator/.github/scripts/check-quality.py and orchestrator/.quality/, narrowing or explicitly justifying existing handlers.
 - [ ] T025 [P] [US2] Implement equivalent graph/exception enforcement in ingestion/.github/scripts/check-quality.py and ingestion/.quality/, preserving the narrowly best-effort audit contract.
@@ -149,10 +149,10 @@ clearly distinguished from successful local evidence.
 
 ### Implementation and delivery evidence
 
-- [ ] T039 [P] [US4] Update orchestrator/AGENTS.md and its PR with scope/exception commands, current SHA, peer compatibility, targeted evidence and recovery.
-- [ ] T040 [P] [US4] Update ingestion/AGENTS.md and its PR with flat-layout ownership, gate commands, scheduler evidence and recovery.
-- [ ] T041 [P] [US4] Update ui/AGENTS.md and its PR with ownership/import/resource inventory, packaging commands and rollback.
-- [ ] T042 [US4] Update site/docs/contributing.md and affected operator examples in a PR targeting docs; do not publish proposed controls as already active.
+- [X] T039 [P] [US4] Update orchestrator/AGENTS.md and its PR with scope/exception commands, current SHA, peer compatibility, targeted evidence and recovery.
+- [X] T040 [P] [US4] Update ingestion/AGENTS.md and its PR with flat-layout ownership, gate commands, scheduler evidence and recovery.
+- [X] T041 [P] [US4] Update ui/AGENTS.md and its PR with ownership/import/resource inventory, packaging commands and rollback.
+- [X] T042 [US4] Update site/docs/contributing.md and affected operator examples in a PR targeting docs; do not publish proposed controls as already active.
 - [ ] T043 [US4] Record all component/docs PRs, exact candidate and preceding compatible SHAs, integration/rollback order, before/after scenario evidence and task status in specs/001-python-module-boundaries/tasks.md and the umbrella PR; explicitly track blocked live integration/recovery and administrative clean/failing-PR merge-eligibility evidence without changing settings or deploying.
 
 ## Phase 7: Polish and PR Handoff
@@ -256,8 +256,8 @@ Maintainer direction was approved on 2026-09-06. The docs inventory at
 `dfa448127a162b86c0836d374b9f2689c61d4ea7` identifies `docs/contributing.md`
 as affected. No existing operator examples use the UI root Python imports or
 installed-package commands; deployment/auth/continuity pages need no edits if
-their contracted operator behavior remains unchanged. Component implementation
-and PR evidence will be recorded here as each repository completes.
+their contracted operator behavior remains unchanged. The following records
+are implementation checkpoints, not final component acceptance.
 
 The umbrella feature inherits the Spec Kit/constitution installation commit
 `507abf887eb42ef35b06647171ba1b6781dad4c6`, previously published on `main` but
@@ -265,13 +265,45 @@ not yet on `develop` when work began. The coordination PR includes that
 prerequisite alongside the design/task artifacts; it does not republish a
 release or change component pins.
 
-| Review surface | PR / status |
-| --- | --- |
-| Umbrella coordination | [#689](https://github.com/Azure/GPT-RAG/pull/689), draft, target `develop` |
-| Contributor site | [#688](https://github.com/Azure/GPT-RAG/pull/688), preliminary draft, target `docs`; exact component commands pending |
-| Orchestrator | Implementation in progress in an isolated component feature branch |
-| Ingestion | Implementation in progress in an isolated component feature branch |
-| UI | Quality/package implementation in progress in an isolated component feature branch |
+| Review surface | PR / status | Checkpoint |
+| --- | --- | --- |
+| Umbrella coordination | [#689](https://github.com/Azure/GPT-RAG/pull/689), draft, target `develop` | Specification, decisions and delivery evidence; no runtime or manifest changes |
+| Contributor site | [#688](https://github.com/Azure/GPT-RAG/pull/688), draft, target `docs`; all three checkpoint interfaces and UI ownership/setup recorded, publication gated | `10ecf1a9a1ea61a5b9e7f733785fd93294bcbbea` |
+| Orchestrator | [Azure/gpt-rag-orchestrator#346](https://github.com/Azure/gpt-rag-orchestrator/pull/346), draft, target `develop` | `ef649eeab6144156b4c90c4422d62f229454dedc`, base `c6d0ccb01a40071f82f30bd17c9fe566b3d0ad18` |
+| Ingestion | [Azure/gpt-rag-ingestion#296](https://github.com/Azure/gpt-rag-ingestion/pull/296), draft, target `develop` | `bbe52923dbaf2b8ce4f6f371e492ad32ae7ffe45`, base `38a395586ee1d440a8e1ca8233413f8c25b3fdc2` |
+| UI | [Azure/gpt-rag-ui#110](https://github.com/Azure/gpt-rag-ui/pull/110), draft, target `develop` | `4959ecaf04ea94ce0d35837c73b43ea3884c5be8`, base `c635bc6696714b543feec24b4a062a8a8f3ff6d0` |
+
+At those component revisions, the owners report:
+
+| Surface | Existing runner / selected results | Explicitly incomplete acceptance |
+| --- | --- | --- |
+| Orchestrator | 840 pytest cases passed, including 83 quality fixtures; 5/78 modules in blocking typing, zero baseline entries; graph 78 modules / 196 edges | 100 BLE001 findings, 154 unapproved broad handlers, empty exception ledger and bootstrap policy failure |
+| Ingestion | 295 pytest cases passed; three modules in blocking typing, zero baseline entries, 354 imported diagnostics visible; graph 53 nodes / 145 edges | 131 Ruff findings, 218 unapproved broad handlers, empty exception ledger and nine bootstrap/protected-policy findings |
+| UI | 436 unittest cases passed, including 17 policy, three compatibility and six installed-package cases; typing/architecture passed, 119 imported diagnostics visible | 20 BLE001 findings, 62 unapproved broad/unsupported handlers, empty exception ledger and bootstrap failure; clean dependencies, expanded installed matrix and Linux container parity pending |
+
+The UI full suite ran at `34273fffb1da549252e82ed0337e3cdd22636042`;
+`4959eca` only restores README line endings and removes two extra EOF blanks.
+The [remote UI workflow](https://github.com/Azure/gpt-rag-ui/actions/runs/34040530051)
+also passed unit tests, typing and architecture at `4959eca`, while lint,
+exceptions, policy and the aggregate failed. The installed environments at that
+checkpoint reuse system-site third-party packages; they do not prove clean
+dependency resolution.
+
+Parent source review of the backend cycle-removal diffs and their regression
+fixtures supports T021/T022: Search retains its public OBO wrappers and scope
+cache behavior; main and API share the jobs-owned scheduler, registry and lock.
+The published contributor/PR handoffs support T039-T042 for these exact
+checkpoints only. They do not close the independent checker, failure, installed
+matrix or activation tasks. T043/T044 must reconcile subsequent fix commits and
+refresh documentation again when their interfaces or outcomes change.
+
+Exact reproduction interfaces and the tested tool-version refinement are in
+[quickstart.md](quickstart.md#backend-checkpoint-reproduction) and
+[research.md](research.md#implementation-checkpoints). Backend checker/workflow
+review and representative public-failure-contract assessment are still pending;
+passing local suites does not certify all Q6 cases. A scoped exception proposal
+is not actual maintainer approval. The site preview must not be published as
+shipped enforcement while these conditions remain unresolved.
 
 Unchecked tasks are intentionally not represented as completed by the existence
 of the coordination PR. Required rules activation, live integration and live

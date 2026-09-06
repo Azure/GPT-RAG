@@ -196,3 +196,27 @@ Initial diagnostic counts, compatible dependency installation, exact final
 candidate SHAs, administrator activation and runtime acceptance are measured
 deliverables of implementation, not unknown feature requirements. Stop rather
 than change the design silently if those measurements contradict a contract.
+
+## Implementation checkpoints
+
+The following implementation evidence refines the Phase 0 tool candidates;
+it does not retroactively claim the research phase installed or tested them.
+
+| Component | Delivery surface / immutable checkpoint | Exercised development toolchain |
+| --- | --- | --- |
+| Orchestrator | [Azure/gpt-rag-orchestrator#346](https://github.com/Azure/gpt-rag-orchestrator/pull/346), `ef649eeab6144156b4c90c4422d62f229454dedc` | Python 3.12.9; Ruff 0.16.5; mypy 2.3.1; Import Linter 2.14; Grimp 3.16 |
+| Ingestion | [Azure/gpt-rag-ingestion#296](https://github.com/Azure/gpt-rag-ingestion/pull/296), `bbe52923dbaf2b8ce4f6f371e492ad32ae7ffe45` | Python 3.12.9; Ruff 0.16.5; mypy 2.3.1; Import Linter 2.14; Grimp 3.16 |
+| UI | [Azure/gpt-rag-ui#110](https://github.com/Azure/gpt-rag-ui/pull/110), `4959ecaf04ea94ce0d35837c73b43ea3884c5be8` | Python 3.12.9; Ruff 0.16.5; mypy 2.3.1; Import Linter 2.14; Grimp 3.16; packaging setuptools 80.9.0 |
+
+The owners could not install the newer Ruff/Import Linter/Grimp research
+candidates from the available package index. The exact alternatives above
+were installed and exercised with the existing runners and mutation fixtures;
+runtime dependency manifests did not change. No checker family or acceptance
+criterion was replaced to accommodate availability.
+
+All checkpoints remain draft. They demonstrate local typing/architecture
+results, not full quality-gate compliance: inherited broad-handler and lint
+findings remain explicit, the exception ledgers are empty, and bootstrap
+policy approval has not been established. Handler failure contracts, strict
+policy/adversarial coverage, administrative activation and live integration/
+recovery remain separately reviewable work.

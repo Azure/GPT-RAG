@@ -34,12 +34,15 @@ Detailed decisions and immutable evidence are in [research.md](research.md).
 container. Preserve existing frontend tooling where present.
 
 **Primary Dependencies**: Existing Chainlit 2.9.4, FastAPI, Pydantic, HTTPX and
-Azure SDKs; orchestrator agent-framework dependencies remain unchanged. Proposed
-development-only candidates: Ruff 0.16.6, mypy 2.3.1, Import Linter 2.15 and
-Grimp 3.17. Their published interpreter support was researched; compatibility
-with each repository's resolved dependencies must be demonstrated in the first
-implementation PR. Pin the tested toolchain and stubs exactly, independently of
-runtime dependencies. UI packaging uses standard setuptools src discovery and
+Azure SDKs; orchestrator agent-framework dependencies remain unchanged.
+All three component implementation checkpoints exercised development-only
+Ruff 0.16.5, mypy 2.3.1, Import Linter 2.14 and Grimp 3.16 on Python 3.12.9.
+The researched Ruff 0.16.6 / Import Linter 2.15 / Grimp 3.17 candidates were
+unavailable from the implementation package index. This tool-version refinement,
+with exact checkpoint evidence in [research.md](research.md#implementation-checkpoints),
+does not relax the quality contract or establish complete gate acceptance.
+Pin the exercised toolchain and stubs exactly, independently of runtime
+dependencies. UI packaging uses standard setuptools src discovery and
 explicit legacy `py-modules`, without replacing `requirements.txt` initially.
 
 **Storage**: No application data change. Versioned quality-policy, scope,

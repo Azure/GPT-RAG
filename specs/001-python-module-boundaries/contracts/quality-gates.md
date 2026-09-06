@@ -6,12 +6,15 @@
 
 **Scope**: orchestrator, ingestion and UI; FR-001 through FR-008, FR-014/015.
 
-This is a planned developer interface. The command and files below do not
-exist yet. It neither changes runtime APIs nor establishes a shared CI product.
+This is the developer-interface acceptance contract. Component draft checkpoints
+now provide implementations; their existence does not establish complete
+acceptance or shipped enforcement. See the [delivery record](../tasks.md#delivery-record)
+for exact revisions and unresolved work. The contract neither changes runtime
+APIs nor establishes a shared CI product.
 
 ## Q1. Command and result interface
 
-Each component supplies `.github/scripts/check-quality.py`, with this proposed
+Each component must supply `.github/scripts/check-quality.py`, with this
 non-mutating interface:
 
 ```text
