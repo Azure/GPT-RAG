@@ -28,7 +28,7 @@ of Azure/GPT-RAG. Unprefixed paths belong to this umbrella branch.
 
 | Design record / contract | Creation and enforcement tasks |
 | --- | --- |
-| RepositoryPolicy and ModuleSurface in `.quality/policy.json` | T002-T004 inventory; T006-T008 parsing; T024-T026 architecture/ownership enforcement |
+| RepositoryPolicy and ModuleSurface in `.quality/policy.json` (orchestrator surfaces in protected `.quality/module-surfaces.json`) | T002-T004 inventory; T006-T008 parsing; T024-T026 architecture/ownership enforcement |
 | TypingScope and TypingBaselineEntry in `.quality/typing-scope.json` and `.quality/typing-baseline.json` | T006-T008 parsing; T009-T014 identity, scope and diagnostic ratchet |
 | ExceptionJustification in `.quality/exceptions.json` | T006-T008 parsing; T018-T020 fixtures; T024-T029 exact-site approval and failure behavior |
 | CheckRun artifacts and quality contract Q1/Q5 | T009-T017 structured outputs, protected evaluator and fail-closed aggregation |
@@ -40,7 +40,7 @@ of Azure/GPT-RAG. Unprefixed paths belong to this umbrella branch.
 **Purpose**: Persist authorization and reconcile source assumptions.
 
 - [X] T001 Record maintainer approval and PR-only authorization in docs/adr/ADR-0005-python-quality-gates-and-ui-package.md and specs/001-python-module-boundaries/plan.md.
-- [ ] T002 [P] Reconcile orchestrator/develop against research refs and inventory source roots, typed/public surfaces and existing workflows in orchestrator/.quality/policy.json.
+- [X] T002 [P] Reconcile orchestrator/develop against research refs and inventory source roots, typed/public surfaces and existing workflows in orchestrator/.quality/policy.json.
 - [X] T003 [P] Reconcile ingestion/develop against research refs and inventory flat roots, typed/public surfaces and scheduler ownership in ingestion/.quality/policy.json.
 - [X] T004 [P] Freeze UI public imports, launch paths, settings, module ownership and resources against current source in ui/.quality/policy.json and ui/tests/test_module_compatibility.py.
 - [X] T005 [P] Inspect site/docs/contributing.md, site/docs/deploy.md and related auth/continuity pages; record affected examples and keep unshipped guidance gated in the documentation PR.
@@ -50,9 +50,9 @@ of Azure/GPT-RAG. Unprefixed paths belong to this umbrella branch.
 **Purpose**: Establish each repository's own tested tooling/records. Foundation
 completion gates that repository's stories, not independent work in peers.
 
-- [ ] T006 [P] Add exact compatible development tool pins and schema-validated policy.json, typing-scope.json, typing-baseline.json and exceptions.json records in orchestrator/requirements-quality.txt, orchestrator/.quality/ and orchestrator/.github/scripts/check-quality.py; reject missing/unknown/invalid records per data-model.md.
+- [X] T006 [P] Add exact compatible development tool pins and schema-validated policy.json, typing-scope.json, typing-baseline.json and exceptions.json records in orchestrator/requirements-quality.txt, orchestrator/.quality/ and orchestrator/.github/scripts/check-quality.py; reject missing/unknown/invalid records per data-model.md.
 - [ ] T007 [P] Add equivalent exact pins and validated four-record parsing in ingestion/requirements-quality.txt, ingestion/.quality/ and ingestion/.github/scripts/check-quality.py, preserving flat-module discovery.
-- [ ] T008 [P] Add equivalent exact pins and validated four-record parsing in ui/requirements-quality.txt, ui/.quality/ and ui/.github/scripts/check-quality.py, preserving stable identities for legacy/package moves.
+- [X] T008 [P] Add equivalent exact pins and validated four-record parsing in ui/requirements-quality.txt, ui/.quality/ and ui/.github/scripts/check-quality.py, preserving stable identities for legacy/package moves.
 
 **Checkpoint**: No blanket ignores, runtime dependency pollution, dynamic source
 imports by checkers, or success-shaped parse-error fallbacks.
@@ -70,18 +70,18 @@ the complete US2 policy and separately authorized administrative activation.
 
 ### Tests
 
-- [ ] T009 [P] [US1] Add Q6 lint/type ratchet, suppression, move identity and tool-error fixtures in orchestrator/tests/test_quality_policy.py; cover missing/skipped/neutral jobs, stale/wrong-SHA artifacts and candidate self-approval attempts before implementing the checker/aggregate.
+- [X] T009 [P] [US1] Add Q6 lint/type ratchet, suppression, move identity and tool-error fixtures in orchestrator/tests/test_quality_policy.py; cover missing/skipped/neutral jobs, stale/wrong-SHA artifacts and candidate self-approval attempts before implementing the checker/aggregate.
 - [ ] T010 [P] [US1] Add equivalent Q6 lint/type, suppression, move, tool-error and job/artifact/policy-integrity fixtures in ingestion/tests/test_quality_policy.py.
-- [ ] T011 [P] [US1] Add equivalent unittest fixtures in ui/tests/test_quality_policy.py, including flat-to-package moves retaining coverage and aggregate/policy tampering rejection.
+- [X] T011 [P] [US1] Add equivalent unittest fixtures in ui/tests/test_quality_policy.py, including flat-to-package moves retaining coverage and aggregate/policy tampering rejection.
 
 ### Implementation
 
-- [ ] T012 [P] [US1] Implement explicit Ruff/mypy settings, protected minimum typing scope, individual-finding baseline and structured reports in orchestrator/pyproject.toml, orchestrator/.quality/ and orchestrator/.github/scripts/check-quality.py.
+- [X] T012 [P] [US1] Implement explicit Ruff/mypy settings, protected minimum typing scope, individual-finding baseline and structured reports in orchestrator/pyproject.toml, orchestrator/.quality/ and orchestrator/.github/scripts/check-quality.py.
 - [ ] T013 [P] [US1] Implement equivalent flat-layout lint/type enforcement in ingestion/pyproject.toml, ingestion/.quality/ and ingestion/.github/scripts/check-quality.py.
-- [ ] T014 [P] [US1] Implement equivalent UI lint/type enforcement and migration-safe scope in ui/pyproject.toml, ui/.quality/ and ui/.github/scripts/check-quality.py.
-- [ ] T015 [P] [US1] Wire the protected-base evaluator, actual same-workflow dependencies and always-evaluated quality-gate into orchestrator/.github/workflows/pr_pipeline.yaml; pin action SHAs, preserve frontend/tests, protect policy/workflow/tool files in orchestrator/.github/CODEOWNERS using verified maintainers, and document separate latest-head review/rules activation without privileged PR execution.
+- [X] T014 [P] [US1] Implement equivalent UI lint/type enforcement and migration-safe scope in ui/pyproject.toml, ui/.quality/ and ui/.github/scripts/check-quality.py.
+- [X] T015 [P] [US1] Wire the protected-base evaluator, actual same-workflow dependencies and always-evaluated quality-gate into orchestrator/.github/workflows/pr_pipeline.yaml; pin action SHAs, preserve frontend/tests, protect policy/workflow/tool files in orchestrator/.github/CODEOWNERS using verified maintainers, and document separate latest-head review/rules activation without privileged PR execution.
 - [ ] T016 [P] [US1] Wire equivalent protected-base quality-gate and policy ownership in ingestion/.github/workflows/tests.yml and ingestion/.github/CODEOWNERS, preserving existing tests/frontend checks and rejecting incomplete job/artifact evidence.
-- [ ] T017 [P] [US1] Wire equivalent protected-base quality-gate and policy ownership in ui/.github/workflows/tests.yml and ui/.github/CODEOWNERS, retaining unittest and reporting incomplete execution as failure.
+- [X] T017 [P] [US1] Wire equivalent protected-base quality-gate and policy ownership in ui/.github/workflows/tests.yml and ui/.github/CODEOWNERS, retaining unittest and reporting incomplete execution as failure.
 
 **Checkpoint**: Workflow evidence is distinct from administrator-required merge
 checks. Gate activation is not claimed merely because YAML exists.
@@ -97,9 +97,9 @@ handlers. Dependency failures preserve public errors and safe diagnostics.
 
 ### Tests
 
-- [ ] T018 [P] [US2] Add Q6 full-graph, cross-root/late/type-only cycle, private-member, legitimate facade/sibling, dynamic-import and broad-handler fixtures in orchestrator/tests/test_quality_policy.py; include aliases, tuples, exception groups, logged/re-raised handlers and stale or unexecuted exception evidence.
+- [X] T018 [P] [US2] Add Q6 full-graph, cross-root/late/type-only cycle, private-member, legitimate facade/sibling, dynamic-import and broad-handler fixtures in orchestrator/tests/test_quality_policy.py; include aliases, tuples, exception groups, logged/re-raised handlers and stale or unexecuted exception evidence.
 - [ ] T019 [P] [US2] Add equivalent flat-root and cross-root fixtures in ingestion/tests/test_quality_policy.py.
-- [ ] T020 [P] [US2] Add equivalent flat/package/adapter and registration fixtures in ui/tests/test_quality_policy.py.
+- [X] T020 [P] [US2] Add equivalent flat/package/adapter and registration fixtures in ui/tests/test_quality_policy.py.
 
 ### Implementation
 
@@ -108,10 +108,10 @@ handlers. Dependency failures preserve public errors and safe diagnostics.
 - [X] T023 [P] [US2] Extract citation/reference rendering from ui/app.py into ui/src/gpt_rag_ui/services/ and make ui/datalayer.py consume that owner without changing grants or source links.
 - [ ] T024 [P] [US2] Implement full-graph/private-surface/exception-ledger enforcement in orchestrator/.github/scripts/check-quality.py and orchestrator/.quality/, narrowing or explicitly justifying existing handlers.
 - [ ] T025 [P] [US2] Implement equivalent graph/exception enforcement in ingestion/.github/scripts/check-quality.py and ingestion/.quality/, preserving the narrowly best-effort audit contract.
-- [ ] T026 [P] [US2] Implement equivalent graph/exception enforcement in ui/.github/scripts/check-quality.py and ui/.quality/, keeping disabled/not-ready and optional notification contracts explicit.
+- [X] T026 [P] [US2] Implement equivalent graph/exception enforcement in ui/.github/scripts/check-quality.py and ui/.quality/, keeping disabled/not-ready and optional notification contracts explicit.
 - [ ] T027 [P] [US2] Prove unchanged OBO/MCP/retrieval and orchestration failure outcomes in orchestrator/tests/test_foundry_iq_mcp.py, orchestrator/tests/test_orchestration_turn.py and existing audit tests.
 - [ ] T028 [P] [US2] Prove scheduler, indexing/deletion/retrieval, config and strict-auth failure outcomes in ingestion/tests/test_admin_jobs_queue.py, ingestion/tests/test_admin_run_now.py and related existing public-boundary tests.
-- [ ] T029 [P] [US2] Prove backend, auth/ownership, download, panel/store and configuration failure outcomes in ui/tests/test_download_security.py, ui/tests/test_panel_routes.py and related existing suites.
+- [X] T029 [P] [US2] Prove backend, auth/ownership, download, panel/store and configuration failure outcomes in ui/tests/test_download_security.py, ui/tests/test_panel_routes.py and related existing suites.
 
 ## Phase 5: US3 - Navigate a Modular Compatible UI (P2)
 
@@ -130,13 +130,13 @@ parity. No result may rely on editable installation or source-path leakage.
 ### Implementation
 
 - [X] T031 [US3] Add setuptools src discovery and explicit legacy-module distribution in ui/pyproject.toml with inert ui/src/gpt_rag_ui/__init__.py; preserve requirements.txt as initial runtime dependency source.
-- [ ] T032 [US3] Move configuration/cache/settings and pure helpers into ui/src/gpt_rag_ui/config/ and ui/src/gpt_rag_ui/util/, retaining one state owner and equivalent precedence/defaults.
-- [ ] T033 [US3] Move identity primitives and backend/storage transports into ui/src/gpt_rag_ui/auth/ and ui/src/gpt_rag_ui/clients/, keeping identity and error behavior unchanged.
-- [ ] T034 [US3] Move history, chat, continuity, feedback, ownership, cursor and download decisions into ui/src/gpt_rag_ui/services/ without business logic in adapters.
-- [ ] T035 [US3] Move framework routes/callbacks and telemetry into ui/src/gpt_rag_ui/api/ and ui/src/gpt_rag_ui/telemetry/ with ordered single registration.
-- [ ] T036 [US3] Implement ui/src/gpt_rag_ui/bootstrap.py and thin ui/main.py, ui/app.py and inventoried legacy adapters; preserve conditional hosted/panel initialization and staged asset roots.
+- [X] T032 [US3] Move configuration/cache/settings and pure helpers into ui/src/gpt_rag_ui/config/ and ui/src/gpt_rag_ui/util/, retaining one state owner and equivalent precedence/defaults.
+- [X] T033 [US3] Move identity primitives and backend/storage transports into ui/src/gpt_rag_ui/auth/ and ui/src/gpt_rag_ui/clients/, keeping identity and error behavior unchanged.
+- [X] T034 [US3] Move history, chat, continuity, feedback, ownership, cursor and download decisions into ui/src/gpt_rag_ui/services/ without business logic in adapters.
+- [X] T035 [US3] Move framework routes/callbacks and telemetry into ui/src/gpt_rag_ui/api/ and ui/src/gpt_rag_ui/telemetry/ with ordered single registration.
+- [X] T036 [US3] Implement ui/src/gpt_rag_ui/bootstrap.py and thin ui/main.py, ui/app.py and inventoried legacy adapters; preserve conditional hosted/panel initialization and staged asset roots.
 - [X] T037 [US3] Wire non-editable package installation into ui/Dockerfile and contributor startup; exercise existing Linux-image startup/resource cases without changing uvicorn main:app, deployment flags or Windows/Linux lifecycle behavior, and record unavailable container execution as pending evidence.
-- [ ] T038 [US3] Move private test seams to canonical owners and prove the entire U4 matrix through ui/tests/ while retaining dedicated legacy compatibility assertions.
+- [X] T038 [US3] Move private test seams to canonical owners and prove the entire U4 matrix through ui/tests/ while retaining dedicated legacy compatibility assertions.
 
 ## Phase 6: US4 - Adopt and Recover Incrementally (P2)
 
@@ -232,6 +232,45 @@ reuse the existing safe terminal-error/audit-failure path, with no new wire or
 audit schema. Other failure boundaries retain their individually established
 contracts. Actual review, settings activation, deployment and publication
 remain outside this PR-only authorization.
+
+#### Resumed implementation accounting
+
+The UI owner delivered the remaining repository-local implementation at
+`ee35c9ffea67902b4dc935e287beb5d4640ce6d6` in
+[Azure/gpt-rag-ui#110](https://github.com/Azure/gpt-rag-ui/pull/110).
+Its PR maps T008/T011/T014/T017/T020/T026/T029/T032-T036/T038 to
+specific source and regression cases. The independent review of the immutable
+`653660e..ee35c9f` follow-up found no significant issues.
+
+[UI CI 34050677391](https://github.com/Azure/gpt-rag-ui/actions/runs/34050677391)
+passed 521 source/installed cases, including 52 quality fixtures and 11 clean
+non-editable acceptance methods, with zero skips; the ephemeral offline Linux
+image passed 455 cases. CI evaluated merge `d76bfc1b3ae878d63dd737b97e3f23301024cbcf`,
+whose tree equals the final head tree. Lint, typing and architecture passed.
+The 28 exact retained-boundary proposals are still **unapproved**, and absent
+protected-policy adoption still fails the aggregate. Checking implementation
+tasks does not approve those records, activate merge protection, prove full
+legacy typing cleanliness, or replace live peer/recovery acceptance.
+
+The orchestrator owner delivered T002/T006/T009/T012/T015/T018 at
+`5883d0a4abdd98146b53d2c4858ccf971d707655` in
+[Azure/gpt-rag-orchestrator#346](https://github.com/Azure/gpt-rag-orchestrator/pull/346).
+This includes the protected 78-record ModuleSurface companion at `61b26e4`,
+isolated tooling at `703e67f`, and the separate MAF correction at
+`f06d0cd7204c63e61ce1b6c80ae768c5f7f0597c`. Independent review of the isolated
+tooling slice found no significant new issues. The owner reports 1,071 passing
+cases and a passing frontend build at this checkpoint. Remaining legacy
+handler dispositions are substantive implementation work: T024 and final
+cross-component T045 remain unchecked.
+
+The parent also handed seven ingestion chunking/runtime-test files back to the
+ingestion owner for integration. After correcting test fixtures, 29 genuine
+failure cases reproduced cancellation suppression, hidden failures, unsafe
+diagnostics, false upload confirmation and resource leaks. The corrected
+46-case chunk/parser selection plus existing ingestion/metadata/Search/audit
+cases passed 147 cases. These are **local handoff results**, not an immutable
+component commit or live source-to-Search acceptance; final integration and
+documentation remain with the component and docs owners.
 
 #### Delivered history boundary
 
