@@ -18,6 +18,15 @@ Updates follow an upsert approach: existing metadata is replaced, new metadata i
 
 A purge job compares index entries with the JSON files in blob storage. Any entry without a matching file is removed, keeping the index consistent with the source.
 
+!!! warning "Unmerged purge failure-handling preview"
+    [Azure/gpt-rag-ingestion#296](https://github.com/Azure/gpt-rag-ingestion/pull/296),
+    at [`3a46472`](https://github.com/Azure/gpt-rag-ingestion/blob/3a46472b19049631fa4427699a79968134a46769/jobs/nl2sql_purger.py),
+    counts only deletions confirmed by Azure AI Search. A failed or incomplete
+    deletion, failed scan (including a later page), or failed document count
+    propagates as a failure rather than publishing a `finished` run summary.
+    This candidate correction does not rename public status, event, or summary
+    fields and is not yet a released-service guarantee.
+
 ## Metadata Structure
 
 NL2SQL and Chat-with-Fabric rely on metadata to give the orchestrator structured information for optimized SQL and DAX queries. The metadata consists of three types:

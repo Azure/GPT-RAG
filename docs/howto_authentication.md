@@ -366,7 +366,7 @@ flowchart LR
   User -->|Bearer token<br/>api://CLIENT_ID/.default| Ing[Ingestion /api/jobs/*/run<br/>and /api/config writes]
   Orch -->|require_admin| RoleCheck{roles claim<br/>contains 'Admin'?}
   Ing -->|require_admin| RoleCheck
-  RoleCheck -->|yes| Allow[200 / 202]
+  RoleCheck -->|yes| Allow[Authorized to attempt operation]
   RoleCheck -->|no| Deny[403 Admin role required]
 ```
 
@@ -472,12 +472,24 @@ The 7 cron expressions (`CRON_RUN_SHAREPOINT_INDEX`, `CRON_RUN_SHAREPOINT_PURGE`
 
 **What `Apply` does, and what it does not do**
 
-The button labeled **Apply** calls `POST /api/dashboard/config/apply` (orchestrator) or `POST /api/config/apply` (ingestion). Both endpoints perform a **soft refresh**:
+The button labeled **Apply** calls `POST /api/dashboard/config/apply` (orchestrator) or `POST /api/config/apply` (ingestion). On a successful call, these endpoints perform a **soft refresh**; passing the authorization gate alone does not guarantee that the operation succeeds:
 
 1. The in-process App Configuration cache is refreshed so subsequent reads in this container instance see the new values immediately.
 2. On the ingestion service, every known cron job is rescheduled in APScheduler using the latest expression in App Configuration. This means a cron change takes effect on the running container without a restart.
 
 The endpoint is intentionally called `/config/apply` and not `/restart` so the response honestly reflects what happens. The Container App revision is **not** recycled. Other replicas of the same service refresh their own cache on their normal cadence; if you want every replica updated immediately, restart the Container App revision in the portal.
+
+!!! warning "Unmerged ingestion failure-handling preview"
+    [Azure/gpt-rag-ingestion#296](https://github.com/Azure/gpt-rag-ingestion/pull/296),
+    at [`3a46472`](https://github.com/Azure/gpt-rag-ingestion/blob/3a46472b19049631fa4427699a79968134a46769/api/admin.py),
+    corrects a genuine schedule-application failure in `POST /api/config/apply`
+    to return HTTP `500`, not a successful Apply response. This is candidate
+    behavior, not a claim about the currently released service.
+    `PUT /api/config` preserves HTTP `200` and the keys in `applied` when the
+    durable writes and schedule handling succeed but the subsequent best-effort
+    local cache refresh fails. That refresh failure alone does not add a key
+    to `failed`. Explicit Reload and Apply are separate operations whose
+    outcomes must still be checked.
 
 ### 6) Operator workflow: verifying the role lands in the token
 
