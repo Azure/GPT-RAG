@@ -1,8 +1,17 @@
-# Tasks: Python Module Boundaries and Compatible UI Packaging
+# Tasks: Enforce Module Boundaries and Modularize the UI
 
 **Input**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md),
 [data-model.md](data-model.md), [quality contract](contracts/quality-gates.md),
-[UI contract](contracts/ui-compatibility.md).
+[UI contract](contracts/ui-compatibility.md), [quickstart.md](quickstart.md).
+
+**Prerequisites**: Read the approved plan, spec, constitution 1.0.0 and the owning
+repository's instructions. Use Python 3.12 and the existing component test runner.
+This task-generation refresh preserves all 46 IDs, repository assignments and
+previously recorded completion markers; it does not certify implementation.
+
+**Organization**: Setup, component-local foundations, four user-story phases in
+spec priority order, then cross-repository handoff. Start pending work with
+`- [ ]`; keep `[X]` only where delivery evidence already exists.
 
 **Authorization**: Maintainer approved implementation through PRs on 2026-09-06.
 Do not merge PRs, publish releases/images, deploy, or change GitHub settings
@@ -16,6 +25,15 @@ checker implementation. Record pre-existing failures separately.
 **Path conventions**: `orchestrator/`, `ingestion/`, `ui/` prefix paths in their
 own repositories, not new umbrella directories. `site/` means the `docs` branch
 of Azure/GPT-RAG. Unprefixed paths belong to this umbrella branch.
+
+| Design record / contract | Creation and enforcement tasks |
+| --- | --- |
+| RepositoryPolicy and ModuleSurface in `.quality/policy.json` | T002-T004 inventory; T006-T008 parsing; T024-T026 architecture/ownership enforcement |
+| TypingScope and TypingBaselineEntry in `.quality/typing-scope.json` and `.quality/typing-baseline.json` | T006-T008 parsing; T009-T014 identity, scope and diagnostic ratchet |
+| ExceptionJustification in `.quality/exceptions.json` | T006-T008 parsing; T018-T020 fixtures; T024-T029 exact-site approval and failure behavior |
+| CheckRun artifacts and quality contract Q1/Q5 | T009-T017 structured outputs, protected evaluator and fail-closed aggregation |
+| UI ownership, imports, resources and matrix U1-U4 | T004 inventory; T023 citation owner; T030-T038 package migration/acceptance |
+| DeliveryEvidence and documentation | T039-T043 component/site PRs, exact refs, recovery and outstanding acceptance |
 
 ## Phase 1: Setup
 
@@ -32,9 +50,9 @@ of Azure/GPT-RAG. Unprefixed paths belong to this umbrella branch.
 **Purpose**: Establish each repository's own tested tooling/records. Foundation
 completion gates that repository's stories, not independent work in peers.
 
-- [ ] T006 [P] Add exact compatible development tool pins and validated policy/scope/debt/exception record parsing in orchestrator/requirements-quality.txt, orchestrator/.quality/ and orchestrator/.github/scripts/check-quality.py.
-- [ ] T007 [P] Add exact compatible development tool pins and validated policy/scope/debt/exception record parsing in ingestion/requirements-quality.txt, ingestion/.quality/ and ingestion/.github/scripts/check-quality.py.
-- [ ] T008 [P] Add exact compatible development tool pins and validated policy/scope/debt/exception record parsing in ui/requirements-quality.txt, ui/.quality/ and ui/.github/scripts/check-quality.py.
+- [ ] T006 [P] Add exact compatible development tool pins and schema-validated policy.json, typing-scope.json, typing-baseline.json and exceptions.json records in orchestrator/requirements-quality.txt, orchestrator/.quality/ and orchestrator/.github/scripts/check-quality.py; reject missing/unknown/invalid records per data-model.md.
+- [ ] T007 [P] Add equivalent exact pins and validated four-record parsing in ingestion/requirements-quality.txt, ingestion/.quality/ and ingestion/.github/scripts/check-quality.py, preserving flat-module discovery.
+- [ ] T008 [P] Add equivalent exact pins and validated four-record parsing in ui/requirements-quality.txt, ui/.quality/ and ui/.github/scripts/check-quality.py, preserving stable identities for legacy/package moves.
 
 **Checkpoint**: No blanket ignores, runtime dependency pollution, dynamic source
 imports by checkers, or success-shaped parse-error fallbacks.
@@ -44,23 +62,26 @@ imports by checkers, or success-shaped parse-error fallbacks.
 **Goal**: Lint and incremental typing report actionable regressions without
 silently accepting new debt or missing execution.
 
-**Independent test**: Clean change passes; new lint/type findings, count-neutral
-debt substitutions, lost coverage and failed/skipped tools cannot pass.
+**Independent test**: In each repository, a clean lint/type change passes;
+new findings, count-neutral debt substitutions, lost coverage, and failed/skipped
+execution cannot pass. Exercise Q6 through the existing runner and test aggregate
+job/artifact integrity. Real merge-eligibility acceptance additionally requires
+the complete US2 policy and separately authorized administrative activation.
 
 ### Tests
 
-- [ ] T009 [P] [US1] Add lint/type ratchet, suppression, move identity and failed-execution fixtures in orchestrator/tests/test_quality_policy.py.
-- [ ] T010 [P] [US1] Add lint/type ratchet, suppression, move identity and failed-execution fixtures in ingestion/tests/test_quality_policy.py.
-- [ ] T011 [P] [US1] Add equivalent unittest fixtures in ui/tests/test_quality_policy.py, including flat-to-package moves retaining coverage.
+- [ ] T009 [P] [US1] Add Q6 lint/type ratchet, suppression, move identity and tool-error fixtures in orchestrator/tests/test_quality_policy.py; cover missing/skipped/neutral jobs, stale/wrong-SHA artifacts and candidate self-approval attempts before implementing the checker/aggregate.
+- [ ] T010 [P] [US1] Add equivalent Q6 lint/type, suppression, move, tool-error and job/artifact/policy-integrity fixtures in ingestion/tests/test_quality_policy.py.
+- [ ] T011 [P] [US1] Add equivalent unittest fixtures in ui/tests/test_quality_policy.py, including flat-to-package moves retaining coverage and aggregate/policy tampering rejection.
 
 ### Implementation
 
 - [ ] T012 [P] [US1] Implement explicit Ruff/mypy settings, protected minimum typing scope, individual-finding baseline and structured reports in orchestrator/pyproject.toml, orchestrator/.quality/ and orchestrator/.github/scripts/check-quality.py.
 - [ ] T013 [P] [US1] Implement equivalent flat-layout lint/type enforcement in ingestion/pyproject.toml, ingestion/.quality/ and ingestion/.github/scripts/check-quality.py.
 - [ ] T014 [P] [US1] Implement equivalent UI lint/type enforcement and migration-safe scope in ui/pyproject.toml, ui/.quality/ and ui/.github/scripts/check-quality.py.
-- [ ] T015 [P] [US1] Wire actual quality/test dependencies and always-evaluated quality-gate into orchestrator/.github/workflows/pr_pipeline.yaml; document separate rules activation without privileged PR execution.
-- [ ] T016 [P] [US1] Wire equivalent quality-gate into ingestion/.github/workflows/tests.yml, preserving existing tests and any required frontend checks.
-- [ ] T017 [P] [US1] Wire equivalent quality-gate into ui/.github/workflows/tests.yml, retaining unittest and reporting incomplete execution as failure.
+- [ ] T015 [P] [US1] Wire the protected-base evaluator, actual same-workflow dependencies and always-evaluated quality-gate into orchestrator/.github/workflows/pr_pipeline.yaml; pin action SHAs, preserve frontend/tests, protect policy/workflow/tool files in orchestrator/.github/CODEOWNERS using verified maintainers, and document separate latest-head review/rules activation without privileged PR execution.
+- [ ] T016 [P] [US1] Wire equivalent protected-base quality-gate and policy ownership in ingestion/.github/workflows/tests.yml and ingestion/.github/CODEOWNERS, preserving existing tests/frontend checks and rejecting incomplete job/artifact evidence.
+- [ ] T017 [P] [US1] Wire equivalent protected-base quality-gate and policy ownership in ui/.github/workflows/tests.yml and ui/.github/CODEOWNERS, retaining unittest and reporting incomplete execution as failure.
 
 **Checkpoint**: Workflow evidence is distinct from administrator-required merge
 checks. Gate activation is not claimed merely because YAML exists.
@@ -71,11 +92,12 @@ checks. Gate activation is not claimed merely because YAML exists.
 broad handlers; retain explicitly contracted failure outcomes.
 
 **Independent test**: Positive public-facade imports pass; all Q6 graph/handler
-mutations fail; dependency failures preserve public errors and safe diagnostics.
+mutations fail, including delayed/type-only imports and Ruff-exempt broad
+handlers. Dependency failures preserve public errors and safe diagnostics.
 
 ### Tests
 
-- [ ] T018 [P] [US2] Add graph completeness, private-member, facade, dynamic-import and broad-handler fixtures in orchestrator/tests/test_quality_policy.py.
+- [ ] T018 [P] [US2] Add Q6 full-graph, cross-root/late/type-only cycle, private-member, legitimate facade/sibling, dynamic-import and broad-handler fixtures in orchestrator/tests/test_quality_policy.py; include aliases, tuples, exception groups, logged/re-raised handlers and stale or unexecuted exception evidence.
 - [ ] T019 [P] [US2] Add equivalent flat-root and cross-root fixtures in ingestion/tests/test_quality_policy.py.
 - [ ] T020 [P] [US2] Add equivalent flat/package/adapter and registration fixtures in ui/tests/test_quality_policy.py.
 
@@ -97,7 +119,9 @@ mutations fail; dependency failures preserve public errors and safe diagnostics.
 startup/public-import adapters; installed and deployed use remains compatible.
 
 **Independent test**: Entire reviewed U4 matrix passes before/after, including
-non-editable wheel installation outside a checkout and both import orders.
+non-editable wheel installation outside a checkout, both import orders,
+single-owner state/callback registration, staged resources and Linux container
+parity. No result may rely on editable installation or source-path leakage.
 
 ### Tests
 
@@ -111,7 +135,7 @@ non-editable wheel installation outside a checkout and both import orders.
 - [ ] T034 [US3] Move history, chat, continuity, feedback, ownership, cursor and download decisions into ui/src/gpt_rag_ui/services/ without business logic in adapters.
 - [ ] T035 [US3] Move framework routes/callbacks and telemetry into ui/src/gpt_rag_ui/api/ and ui/src/gpt_rag_ui/telemetry/ with ordered single registration.
 - [ ] T036 [US3] Implement ui/src/gpt_rag_ui/bootstrap.py and thin ui/main.py, ui/app.py and inventoried legacy adapters; preserve conditional hosted/panel initialization and staged asset roots.
-- [ ] T037 [US3] Wire non-editable package installation into ui/Dockerfile and contributor startup without changing uvicorn main:app, existing deployment flags or Windows/Linux lifecycle behavior.
+- [ ] T037 [US3] Wire non-editable package installation into ui/Dockerfile and contributor startup; exercise existing Linux-image startup/resource cases without changing uvicorn main:app, deployment flags or Windows/Linux lifecycle behavior, and record unavailable container execution as pending evidence.
 - [ ] T038 [US3] Move private test seams to canonical owners and prove the entire U4 matrix through ui/tests/ while retaining dedicated legacy compatibility assertions.
 
 ## Phase 6: US4 - Adopt and Recover Incrementally (P2)
@@ -123,16 +147,22 @@ ref evidence and documentation/recovery instructions; no automatic merge.
 artifact and recovery order are identified, with unavailable live evidence
 clearly distinguished from successful local evidence.
 
+### Implementation and delivery evidence
+
 - [ ] T039 [P] [US4] Update orchestrator/AGENTS.md and its PR with scope/exception commands, current SHA, peer compatibility, targeted evidence and recovery.
 - [ ] T040 [P] [US4] Update ingestion/AGENTS.md and its PR with flat-layout ownership, gate commands, scheduler evidence and recovery.
 - [ ] T041 [P] [US4] Update ui/AGENTS.md and its PR with ownership/import/resource inventory, packaging commands and rollback.
 - [ ] T042 [US4] Update site/docs/contributing.md and affected operator examples in a PR targeting docs; do not publish proposed controls as already active.
-- [ ] T043 [US4] Record all component/docs PR links, exact candidate SHAs, implemented task status, unavailable Azure evidence and the separate required-check administrative action in specs/001-python-module-boundaries/tasks.md and the umbrella PR.
+- [ ] T043 [US4] Record all component/docs PRs, exact candidate and preceding compatible SHAs, integration/rollback order, before/after scenario evidence and task status in specs/001-python-module-boundaries/tasks.md and the umbrella PR; explicitly track blocked live integration/recovery and administrative clean/failing-PR merge-eligibility evidence without changing settings or deploying.
 
 ## Phase 7: Polish and PR Handoff
 
+**Purpose**: Reconcile artifacts with demonstrated outcomes and preserve a
+reviewable PR record. Recording blocked acceptance does not satisfy that
+acceptance criterion.
+
 - [ ] T044 Review specs/001-python-module-boundaries/plan.md and contracts/ against actual implementation; document justified refinements without silently reducing acceptance.
-- [ ] T045 Validate all local links, strict task syntax, modified component suites and applicable existing asset/docs checks in specs/001-python-module-boundaries/quickstart.md and owning tests/.
+- [ ] T045 Validate links/task syntax and run the final existing full component suites, applicable frontend checks, UI package/container cases and existing asset/docs checks from specs/001-python-module-boundaries/quickstart.md in the owning tests/ and workflows; record commands, SHAs, outcomes and unavailable evidence separately.
 - [X] T046 Commit only scoped files and create/update the umbrella feature PR targeting develop, including docs/adr/ADR-0005-python-quality-gates-and-ui-package.md and specs/001-python-module-boundaries/.
 
 ## Dependencies and Execution Order
@@ -149,8 +179,36 @@ number order. T030/T031 can run once the UI inventory is frozen.
 
 US3 proceeds in dependency order after the UI foundation and its graph contract.
 T039/T040/T041 accompany their owning changes, not a later documentation cleanup.
-T042 depends on verified component behavior. T043/T044/T045/T046 finalize the
+T042 depends on verified component behavior. T043/T044/T045 finalize the
 coordinated handoff, with no dependency on unmerged companion runtime changes.
+T046 opened the initial draft coordination PR early; its checked state means
+only that PR exists. T043 owns updating the same PR with final delivery evidence.
+
+### Dependency graph
+
+Arrows denote implementation prerequisites, not new task IDs or permission to
+merge. US1's local code/fixture milestone unblocks US2; do not wait for
+administrative merge-eligibility acceptance before implementing US2.
+
+```text
+T001
+  -> T002 -> T006 -> US1 orchestrator -> US2 orchestrator -> T039
+  -> T003 -> T007 -> US1 ingestion    -> US2 ingestion    -> T040
+  -> T004 -> T008 -> US1 UI          -> US2 UI -> US3 UI  -> T041
+  -> T005 ------------------------------------------------> T042
+
+UI preparation: T004 + T008 -> T030 -> T031 -> T023
+T039 + T040 + T041 + verified component outcomes -> T042
+T039 + T040 + T041 + T042 -> T043 -> T044 -> T045
+T046: draft PR already opened; T043 updates its final evidence
+```
+
+The early US3 preparation tasks T030/T031 unblock US2's citation extraction;
+the rest of US3 follows the established UI graph contract. This is not a cycle
+between entire stories. Within each repository, keep its checker/test edits
+serial: US1 fixtures precede lint/type implementation, which precedes workflow
+wiring; US2 fixtures precede cycle repair/enforcement and public-boundary
+regressions. US3 moves follow T032 -> T033 -> T034 -> T035 -> T036 -> T037 -> T038.
 
 ## Parallel Examples
 
@@ -168,8 +226,8 @@ complete, not permission to edit one component's checker concurrently.
 
 The MVP is US1's runnable lint/type regression feedback plus protected-policy
 design; full "required before merge" acceptance also needs administrator
-activation. US2 makes complete architecture/error enforcement green before
-claiming all quality jobs active. UI source moves follow in validated dependency
+activation and the complete US2 policy. US2 makes architecture/error enforcement
+green before claiming all quality jobs active. UI source moves follow in validated dependency
 slices. Preserve deployability at each commit; publish independent component
 PRs against develop rather than branches requiring an unmerged peer PR.
 
@@ -182,6 +240,15 @@ No task checkbox denotes release or production rollout. GitHub required-check
 activation, live Azure integration and recovery rehearsal remain explicit
 acceptance evidence outside this PR-only authorization if not otherwise
 available. Never mark those outcomes passed based solely on local unit tests.
+
+## Acceptance Coverage
+
+| Story | Requirements / outcomes | Executable evidence |
+| --- | --- | --- |
+| US1 | FR-001-FR-004; SC-001 | T009-T017 and Q6 ratchet/execution/tampering fixtures; T043 records real rule activation and PR eligibility separately |
+| US2 | FR-005-FR-008, FR-012, FR-014; SC-002/SC-003 | T018-T029 and Q3/Q4/Q6; complete graph, exact handler justification and existing public-failure outcomes |
+| US3 | FR-009-FR-012, FR-015; SC-004/SC-005/SC-007 | T004, T023, T030-T038, T041; every U4 row, adapter/source inventory, installed bundle, container and ownership review |
+| US4 | FR-013-FR-015; SC-006 | T039-T043; exact-ref peer compatibility, recovery result or explicit blocked prerequisite, docs impact and PR-only handoff |
 
 ## Delivery Record
 
