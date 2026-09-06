@@ -133,7 +133,7 @@ clearly distinguished from successful local evidence.
 
 - [ ] T044 Review specs/001-python-module-boundaries/plan.md and contracts/ against actual implementation; document justified refinements without silently reducing acceptance.
 - [ ] T045 Validate all local links, strict task syntax, modified component suites and applicable existing asset/docs checks in specs/001-python-module-boundaries/quickstart.md and owning tests/.
-- [ ] T046 Commit only scoped files and create/update the umbrella feature PR targeting develop, including docs/adr/ADR-0005-python-quality-gates-and-ui-package.md and specs/001-python-module-boundaries/.
+- [X] T046 Commit only scoped files and create/update the umbrella feature PR targeting develop, including docs/adr/ADR-0005-python-quality-gates-and-ui-package.md and specs/001-python-module-boundaries/.
 
 ## Dependencies and Execution Order
 
@@ -197,3 +197,15 @@ The umbrella feature inherits the Spec Kit/constitution installation commit
 not yet on `develop` when work began. The coordination PR includes that
 prerequisite alongside the design/task artifacts; it does not republish a
 release or change component pins.
+
+| Review surface | PR / status |
+| --- | --- |
+| Umbrella coordination | [#689](https://github.com/Azure/GPT-RAG/pull/689), draft, target `develop` |
+| Contributor site | [#688](https://github.com/Azure/GPT-RAG/pull/688), preliminary draft, target `docs`; exact component commands pending |
+| Orchestrator | Implementation in progress in an isolated component feature branch |
+| Ingestion | Implementation in progress in an isolated component feature branch |
+| UI | Quality/package implementation in progress in an isolated component feature branch |
+
+Unchecked tasks are intentionally not represented as completed by the existence
+of the coordination PR. Required rules activation, live integration and live
+recovery have not been performed.
