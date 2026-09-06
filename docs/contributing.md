@@ -17,7 +17,7 @@ To maintain project quality, the following items will be considered during the P
 
 > Adhering to these best practices will streamline the review process.
 
-- **Target the `develop` Branch:** Always direct your pull request to the `develop` branch to ensure that changes are properly integrated into the project's development workflow.
+- **Use the Correct Base Branch:** Runtime component changes target `develop`. For this documentation site, create a `feature/*` branch from `docs` and target `docs` in your pull request. Keep documentation and runtime changes in their owning repositories and link dependent pull requests.
  
 - **Keep Pull Requests Small:** Aim to make your pull requests as focused and concise as possible. This makes it easier to review and ensures quicker integration into the codebase.
   
@@ -40,6 +40,28 @@ All project documentation is centralized in MkDocs and hosted at [https://aka.ms
 - **Follow Existing Patterns:** Review existing documentation pages to maintain consistency in style, formatting, and tone.
 
 - **Test Your Changes:** Preview your documentation locally using MkDocs before submitting to ensure proper rendering.
+
+Run these commands from a documentation checkout of `Azure/GPT-RAG`, not a
+runtime component checkout. Use a virtual environment; the documentation
+workflow uses Python 3.11, independently of the runtime components' Python
+version.
+
+```powershell
+python -m pip install -r requirements-docs.txt
+python -m mkdocs build
+python -m mkdocs serve
+```
+
+`build` renders the site locally; `serve` starts a local preview. Neither
+publishes documentation. Do not run `mkdocs gh-deploy` as a preview check:
+merging to `docs` triggers the publishing workflow.
+
+When documenting a coordinated runtime change, keep the documentation PR in
+draft until the component interfaces and commands are confirmed. Record the
+component PRs and merge order in its description. Do not describe proposed
+checks, package layouts, or repository rules as shipped behavior. Review
+deployment, authentication, and continuity examples too; record a no-change
+assessment when their supported behavior is preserved.
 
 ## Code Update Workflow
 
