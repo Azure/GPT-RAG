@@ -41,8 +41,8 @@ of Azure/GPT-RAG. Unprefixed paths belong to this umbrella branch.
 
 - [X] T001 Record maintainer approval and PR-only authorization in docs/adr/ADR-0005-python-quality-gates-and-ui-package.md and specs/001-python-module-boundaries/plan.md.
 - [ ] T002 [P] Reconcile orchestrator/develop against research refs and inventory source roots, typed/public surfaces and existing workflows in orchestrator/.quality/policy.json.
-- [ ] T003 [P] Reconcile ingestion/develop against research refs and inventory flat roots, typed/public surfaces and scheduler ownership in ingestion/.quality/policy.json.
-- [ ] T004 [P] Freeze UI public imports, launch paths, settings, module ownership and resources against current source in ui/.quality/policy.json and ui/tests/test_module_compatibility.py.
+- [X] T003 [P] Reconcile ingestion/develop against research refs and inventory flat roots, typed/public surfaces and scheduler ownership in ingestion/.quality/policy.json.
+- [X] T004 [P] Freeze UI public imports, launch paths, settings, module ownership and resources against current source in ui/.quality/policy.json and ui/tests/test_module_compatibility.py.
 - [X] T005 [P] Inspect site/docs/contributing.md, site/docs/deploy.md and related auth/continuity pages; record affected examples and keep unshipped guidance gated in the documentation PR.
 
 ## Phase 2: Foundational Policy Records
@@ -232,6 +232,38 @@ reuse the existing safe terminal-error/audit-failure path, with no new wire or
 audit schema. Other failure boundaries retain their individually established
 contracts. Actual review, settings activation, deployment and publication
 remain outside this PR-only authorization.
+
+#### Delivered history boundary
+
+UI commit `653660e31daa2de8219bf38a571e8bd97f227a8a` in
+[Azure/gpt-rag-ui#110](https://github.com/Azure/gpt-rag-ui/pull/110)
+implements the previously missing history separation. `api.history` owns the
+Chainlit `BaseDataLayer` adapter, fresh-instance factory, callback registration,
+ambient/request context and authorized conversation selection.
+`services.history.HistoryService` owns user/history operations and the single
+in-memory user cache; each history operation receives `HistoryOperationContext`.
+Existing Chainlit value types remain supported without a duplicate DTO model.
+The root `datalayer` adapter preserves its public class and factory exports.
+Conversation persistence still uses authenticated orchestrator APIs, not direct
+UI database access.
+
+Independent source review compared the committed adapter, service, legacy
+exports, policy mapping and twelve new history regression methods with the prior
+implementation. The completed
+[workflow 34049278802](https://github.com/Azure/gpt-rag-ui/actions/runs/34049278802)
+ran those methods and passed 483 unit cases, including installed-wheel
+acceptance, and 422 offline Linux-image cases. Typing and architecture also
+passed. Lint, exceptions, policy and the aggregate gate remain failed; this
+milestone does not certify the whole quality policy or final U4 acceptance.
+Further component implementation continues.
+
+Inventory tasks T003/T004 are complete independently of those remaining gates.
+The immutable ingestion policy at `3a46472b19049631fa4427699a79968134a46769`
+records 52 modules, their source revision, flat roots, typed/public surfaces and
+scheduler dependency ownership. The UI inventory at
+`871106dbe891a1ccde373b4964c5e56a71c4f4cc` records 79 module/adapter surfaces;
+the history milestone updates the explicit legacy export destinations and
+compatibility assertions without discarding that inventory.
 
 | Story | Safe independent work |
 | --- | --- |
