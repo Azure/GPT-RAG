@@ -79,7 +79,7 @@ contains exact source revisions and tool limitations.
 
 ## Decision
 
-Propose Option A. Use Ruff, one type checker (mypy), Import Linter/Grimp for
+Adopt Option A. Use Ruff, one type checker (mypy), Import Linter/Grimp for
 package contracts and a focused repository-local adapter for flat modules,
 whole-graph cycles, approved broad handlers and baseline integrity.
 
