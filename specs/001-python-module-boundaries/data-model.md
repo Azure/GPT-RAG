@@ -41,6 +41,19 @@ explicit one-to-one record, preserving stable identity and typing protection.
 Splits require reviewed responsibility and diagnostic allocation; they cannot
 copy the same debt allowance to both destinations.
 
+### Orchestrator storage refinement
+
+At `61b26e4c829c4c2ca81b46926a248cd317a87961`, orchestrator stores these
+complete records in `.quality/module-surfaces.json`, under a versioned `entries`
+array. Its `.quality/policy.json` module-name inventory remains the immutable
+adoption set. Separating current ownership/path records from adoption prevents
+an inventory refresh from silently reclassifying newly added code as legacy.
+The companion file belongs to the same protected policy and integrity checks;
+it does not grant independent approval or weaken any ModuleSurface field.
+Stable IDs still bind typing diagnostics, annotation coverage and handler
+ownership across recorded moves. Ingestion and UI retain their embedded
+ModuleSurface records in `.quality/policy.json`.
+
 ## TypingScope
 
 Stored in `.quality/typing-scope.json`. Fields: `schema_version`, `module_ids`,
