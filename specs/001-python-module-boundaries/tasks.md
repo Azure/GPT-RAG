@@ -153,7 +153,7 @@ clearly distinguished from successful local evidence.
 - [X] T040 [P] [US4] Update ingestion/AGENTS.md and its PR with flat-layout ownership, gate commands, scheduler evidence and recovery.
 - [X] T041 [P] [US4] Update ui/AGENTS.md and its PR with ownership/import/resource inventory, packaging commands and rollback.
 - [X] T042 [US4] Update site/docs/contributing.md and affected operator examples in a PR targeting docs; do not publish proposed controls as already active.
-- [ ] T043 [US4] Record all component/docs PRs, exact candidate and preceding compatible SHAs, integration/rollback order, before/after scenario evidence and task status in specs/001-python-module-boundaries/tasks.md and the umbrella PR; explicitly track blocked live integration/recovery and administrative clean/failing-PR merge-eligibility evidence without changing settings or deploying.
+- [X] T043 [US4] Record all component/docs PRs, exact candidate and preceding compatible SHAs, integration/rollback order, before/after scenario evidence and task status in specs/001-python-module-boundaries/tasks.md and the umbrella PR; explicitly track blocked live integration/recovery and administrative clean/failing-PR merge-eligibility evidence without changing settings or deploying.
 
 ## Phase 7: Polish and PR Handoff
 
@@ -161,7 +161,7 @@ clearly distinguished from successful local evidence.
 reviewable PR record. Recording blocked acceptance does not satisfy that
 acceptance criterion.
 
-- [ ] T044 Review specs/001-python-module-boundaries/plan.md and contracts/ against actual implementation; document justified refinements without silently reducing acceptance.
+- [X] T044 Review specs/001-python-module-boundaries/plan.md and contracts/ against actual implementation; document justified refinements without silently reducing acceptance.
 - [ ] T045 Validate links/task syntax and run the final existing full component suites, applicable frontend checks, UI package/container cases and existing asset/docs checks from specs/001-python-module-boundaries/quickstart.md in the owning tests/ and workflows; record commands, SHAs, outcomes and unavailable evidence separately.
 - [X] T046 Commit only scoped files and create/update the umbrella feature PR targeting develop, including docs/adr/ADR-0005-python-quality-gates-and-ui-package.md and specs/001-python-module-boundaries/.
 
@@ -294,8 +294,8 @@ fixtures supports T021/T022: Search retains its public OBO wrappers and scope
 cache behavior; main and API share the jobs-owned scheduler, registry and lock.
 The published contributor/PR handoffs support T039-T042 for these exact
 checkpoints only. They do not close the independent checker, failure, installed
-matrix or activation tasks. T043/T044 must reconcile subsequent fix commits and
-refresh documentation again when their interfaces or outcomes change.
+matrix or activation tasks. The follow-up record below reconciles subsequent
+fix commits and documentation without treating remaining acceptance as passed.
 
 Exact reproduction interfaces and the tested tool-version refinement are in
 [quickstart.md](quickstart.md#backend-checkpoint-reproduction) and
@@ -315,13 +315,16 @@ results above. All PRs remain drafts with their original target branches.
 | Ingestion | `46d08d31e5090045e481f22da699e09f444159dc` | Owner reports 348 pytest cases, explicit index/delete/config/job failure remedies and four audit proposals, none active. Actual CI passed tests/typing/architecture and failed lint/exceptions/policy/aggregate. Five actionable frozen-checkpoint checker findings and representative failure-contract review remain. |
 | Orchestrator tooling | `550a6eedc022c879658964cbac919835c6d3b96d` | All seven accepted original checker findings are independently closed by exact immutable-source replay, including 24 aggregate and 14 malformed-diagnostic cases. Owner reports 185 quality fixtures and 952 full-suite cases; the independent reviewer did not rerun the full suite or filesystem Git fixture. No approvals activated. |
 | Orchestrator failure evidence | `8d0ac0532b06b2fe83a084d5748646c3009c7283` | Actual Linux CI reports 978 tests and eight warnings; frontend, typing and architecture pass. Provider/startup, retrieval and real MAF/turn/SSE outcomes are characterized, not universally accepted. Lint 99, exceptions 164 (153 sites plus 11 proposed records) and bootstrap policy still block the aggregate. |
-| Ingestion tooling | `4b19beed8dd653309f17a7b4001a0b5a117eef34` | Independent replay closes original findings 2-5, including 22 existing fixture cases and 11 malformed-record CLI variants. Finding 1 remains reproducible for implicit builtin names overwritten by unrelated local imports; repair is requested. Owner reports 114 focused fixtures. The separate runtime compatibility follow-up is not part of this commit. |
+| Ingestion tooling | `4b19beed8dd653309f17a7b4001a0b5a117eef34` | Independent replay closes original findings 2-5, including 22 existing fixture cases and 11 malformed-record CLI variants. Finding 1 remains reproducible at this revision for implicit builtin names overwritten by unrelated local imports; its later repair is below. Owner reports 114 focused fixtures. The separate runtime compatibility follow-up is not part of this commit. |
 | Ingestion runtime | `f8c3f8406fac904f2fade9c321fd8bdd924d482d` | Restores PUT post-write refresh compatibility and adds provider, run-level purge/cleanup and real Search SDK-result evidence; eight proposals, zero active. The provider merge-order fixture still needs the later CI correction below. |
-| Ingestion residual repair | `0fdfc46441287f8585c62be87b3250eaddace389` | Contains the implicit-builtin repair awaiting independent replay. Actual CI run `34045353956` reports one new unit failure and 421 passes: a fixture calls a private SDK method using the wrong positional signature for CI's declared App Configuration provider 2.5.0. Owner is repairing the test; this is not an intentionally failing quality-adoption check or passing final suite. |
+| Ingestion residual repair | `0fdfc46441287f8585c62be87b3250eaddace389` | Both implicit-builtin reproductions are independently closed, with matching regression and valid controls. Actual CI run `34045353956` still reports one new unit failure and 421 passes: a fixture calls a private SDK method using the wrong positional signature for CI's declared App Configuration provider 2.5.0. This historical unit failure is corrected below, not counted as intentionally failing adoption. |
+| Ingestion final checkpoint | `3a46472b19049631fa4427699a79968134a46769` | Corrected paged-load/merge fixture uses the existing provider 2.5.0 and Search 11.5.2 pins, asserts no environment fallback, and retains the last-selected value. Actual CI `34046006654` reports 422 tests and 96 warnings; typing/architecture pass. Lint 131, exceptions 210 (202 sites plus eight proposals), policy nine and aggregate remain red; zero active approvals. Earlier local provider 2.1.0/Search 11.7.0b2 results were not pinned-runtime evidence and are superseded. |
 | UI | `043d89b87bd2504a9df1429df35c4ed05b4c2d60` | Clean temporary runtime environment, unchanged requirements plus `pip check`, non-editable wheel, seven installed methods and all 410 existing behavioral cases copied outside the checkout, with no skips and installed-origin assertions. The same-head Linux unit job reports 437 cases. This resolves the initial system-site dependency limitation. |
 | UI | `e9620fce81daa879c0d945113911e58ae4b574e3` | Includes quality/evidence and Linux image wiring from `ab523d84dde80e4c62bdf2c6cd7cdf52f5a50ad0`, followed by parent-owned startup/upload assertions and generated-artifact Docker exclusions. Ten installed methods passed on Windows in 399.345 seconds; same-head Linux CI passed 456 unit cases and 410 image behavioral cases. Quality adoption is still red. |
-| UI tooling | `ae9d0d7d41556e0d8d4c4116fbb17765fbc1210f` | Actual Linux unit job reports 460 cases; container, typing and architecture also pass. Parent subsequently reproduced three remaining checker gaps: qualified suppression on untyped functions, indirect exception bindings/approval reuse, and undiscovered root namespace runtime packages. Repairs are pending. |
-| Contributor site | `fa65c333f6c55ce51c0209cdd81922c8be85acba` | Draft #688 reconciles the clean-install evidence at UI `043d89b`, preserving historical full-suite counts and preview warnings. Final startup/image and checker-interface reconciliation remains pending. |
+| UI tooling | `ae9d0d7d41556e0d8d4c4116fbb17765fbc1210f` | Actual Linux unit job reports 460 cases; container, typing and architecture also pass. Parent subsequently reproduced three checker gaps: qualified suppression on untyped functions, indirect exception bindings/approval reuse, and undiscovered root namespace runtime packages. The following checkpoint repairs them. |
+| UI final checkpoint | `871106dbe891a1ccde373b4964c5e56a71c4f4cc` | Parent independently closes all three original reproductions using frozen source. Owner reports 48 focused quality cases; actual CI `34045788683` passes 471 unit cases, 410 offline image behavioral cases and typing/architecture. Lint 20, unapproved handlers 63 and bootstrap policy one still fail adoption. Runtime, dependency pins and parent-owned acceptance files are unchanged. |
+| Contributor site | `fa65c333f6c55ce51c0209cdd81922c8be85acba` | Historical clean-install documentation at UI `043d89b`, preserving earlier full-suite counts and preview warnings; superseded by the final reconciliation below. |
+| Documentation final checkpoint | `b81befa396f45657990fe2bad14a6e9911100fb7` | Draft #688 updates only `docs/contributing.md`, `docs/howto_authentication.md` and `docs/ingestion_nl2sql_data_source.md`. Exact final component refs, distinct evidence CLIs, startup/image results, failure changes and remaining ownership/adoption limits are reconciled. Existing MkDocs build passes after the final edit; no nav, deployment page, runtime or publication change. |
 
 The [UI image workflow](https://github.com/Azure/gpt-rag-ui/actions/runs/34042563761)
 built the actual Dockerfile without publishing an image and ran it with
@@ -352,11 +355,13 @@ back to the existing component owners with reproductions:
 
 Independent orchestrator replay at `550a6ee` closes its seven accepted original
 findings; the imported-diagnostic suggestion remains withdrawn. Ingestion
-`4b19bee` closes its indirect-catch, move, dynamic-site and schema findings, but
-an unrelated function's `ValueError as Exception` still hides a builtin broad
-catch elsewhere, and `json.loads as __import__` similarly hides a variable
-loader. The owner has the exact two remaining reproductions. Closure of an
-original finding is not a claim that all future checker inputs are certified.
+`4b19bee` closes its indirect-catch, move, dynamic-site and schema findings;
+`0fdfc46` additionally closes both implicit-builtin reproductions involving
+unrelated local `ValueError as Exception` and `json.loads as __import__`
+bindings. UI `871106d` closes its three parent reproductions, including a
+closed-schema valid approval control that must fail after exception rebinding.
+All 15 actionable findings from these bounded reviews are now closed.
+This does not certify all future checker inputs or full feature acceptance.
 
 The additional suggestion to block every imported legacy type diagnostic was
 not accepted: [research](research.md#r2-incremental-typing-without-accepting-new-debt) explicitly retains imported
@@ -395,11 +400,12 @@ it identifies the following distinctions rather than approving broad recovery:
 
 The documentation impact search at `fa65c33` found no documented promise of
 successful deletion after a failed scan or unconfirmed SDK result. Nevertheless,
-the authentication diagram's `200 / 202` authorization label needs to distinguish
-authorization from operational success; its refresh/apply explanation and the
-NL2SQL confirmation/failure note await the final runtime checkpoint. Existing
-public audit events, status fields and counters must remain unchanged. This is
-not a claim that only contributor documentation is affected.
+the authentication diagram's `200 / 202` authorization label needed to distinguish
+authorization from operational success. Documentation `b81befa` now makes that
+distinction, qualifies the successful refresh path and adds explicitly unshipped
+notes for the final ingestion apply/PUT and NL2SQL confirmation/failure outcomes.
+Existing public audit events, status fields and counters remain unchanged.
+This is not a claim that only contributor documentation was affected.
 
 Immutable UI source review at `ae9d0d7` confirms T023: history
 `_messages_to_steps` calls the extracted citation service with explicit
@@ -463,6 +469,12 @@ Artifact restoration does not restore deleted Search data or undo configuration
 already persisted remotely. Those side effects need separate, explicitly
 authorized recovery evidence. Neither artifact restoration, live integration,
 nor recovery of external state has been performed in this PR-only task.
+
+This closes the bounded evidence/reconciliation work in T043/T044, not their
+underlying feature acceptance. There are 15 checked tasks and 31 unchecked
+tasks. T045 remains open for complete acceptance beyond the maintained suites:
+the unresolved ownership/failure work, broader Q6/U4 cases and protected-tool
+execution cannot be certified by the passing runs recorded here.
 
 Unchecked tasks are intentionally not represented as completed by the existence
 of the coordination PR. Required rules activation, live integration and live

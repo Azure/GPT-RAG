@@ -134,6 +134,11 @@ For example, UI `ae9d0d7d41556e0d8d4c4116fbb17765fbc1210f` passed 460
 unit cases and the image job, but subsequent source-policy, catch-binding and
 namespace-discovery reproductions still required repairs. A passing behavioral
 suite is not proof that all checker mutations are rejected.
+The final UI checkpoint `871106dbe891a1ccde373b4964c5e56a71c4f4cc` closes
+those three reproductions and passes 471 unit cases plus the unchanged
+410-case image exercise. The evidence CLI is unchanged and adoption remains
+red. Backend final refs, SDK-aligned results and the explicitly superseded
+ingestion fixture failure are likewise recorded in the follow-up table.
 
 ## 3. Prove rejection and required merge enforcement
 
