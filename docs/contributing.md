@@ -73,6 +73,8 @@ assessment when their supported behavior is preserved.
     The backend checkpoints still fail lint, broad-handler, and bootstrap
     policy checks. Their passing tests and typing/architecture results do not
     establish a green quality gate or required-check activation.
+    The UI package checkpoint is also unmerged; installed-wheel, container,
+    and complete compatibility evidence are still pending.
 
 ### Repository-local setup
 
@@ -177,6 +179,95 @@ dismiss stale approvals, restrict bypass, and prove clean and deliberately
 failing PR outcomes. Repair policy through a reviewed PR rather than
 disabling controls. These steps are pending, not performed by this
 documentation change.
+
+## UI Package Contributor Setup
+
+!!! warning "Unmerged package checkpoint"
+    This section describes UI commit
+    [`ce76b00`](https://github.com/Azure/gpt-rag-ui/commit/ce76b00c0a7013ddb13cd97422f3e3d6ac6f5df8),
+    not the released UI or a completed compatibility matrix. Package
+    installation is a contributor setup change, not an instruction to change
+    deployed startup commands or enable hosted continuity.
+
+### Install and run from the UI checkout
+
+Use an isolated Python 3.12 environment. The checkpoint's
+[`pyproject.toml`](https://github.com/Azure/gpt-rag-ui/blob/ce76b00c0a7013ddb13cd97422f3e3d6ac6f5df8/pyproject.toml)
+uses setuptools to install `src/gpt_rag_ui/` and the explicit legacy adapters.
+`requirements.txt` remains the runtime dependency authority; install it before
+installing the code package:
+
+```powershell
+python -m pip install -r requirements.txt
+python -m pip install --no-deps -e .
+python -m pip install -r requirements-quality.txt
+python -m unittest discover -s tests -v
+```
+
+With the existing application configuration in place, run from the UI checkout
+using the unchanged startup target:
+
+```powershell
+uvicorn main:app --host 0.0.0.0 --port 8080
+```
+
+Editable installation is for contributor use. The checkpoint Dockerfile
+installs the package non-editably with `pip install --no-deps .` after runtime
+requirements and retains the same Uvicorn target and `/app` working directory.
+An editable-source test alone does not prove installed-wheel or container
+compatibility.
+
+### Find the owning implementation
+
+All locations below are under `src/gpt_rag_ui/`. The checkpoint
+[migration inventory](https://github.com/Azure/gpt-rag-ui/blob/ce76b00c0a7013ddb13cd97422f3e3d6ac6f5df8/.quality/migration.json)
+records the legacy-to-canonical module map and public exports.
+
+| Responsibility | Owning location and examples |
+| --- | --- |
+| Startup composition | `bootstrap.py`; root `main.py` hands off asset setup and exposes the ASGI application |
+| HTTP routes and framework registration | `api/`: panel, download and embedding routes, OAuth, history and chat/feedback callbacks |
+| Identity, tokens and sessions | `auth/`: Entra, OAuth, embedding and panel authentication |
+| Service transport | `clients/`: orchestrator, ingestion, hosted agent, managed Conversations, Blob and panel Cosmos |
+| User operations | `services/`: chat, citations, history, conversation/download policy, continuity, feedback and panel operations |
+| Configuration and asset root | `config/`: App Configuration, backend/panel/continuity settings and `resources.py` |
+| Instrumentation | `telemetry/monitoring.py` |
+| Pure shared values | `util/constants.py` |
+
+Implement behavior in its canonical owner, not the root adapters. Preserve
+the inventoried public imports while keeping one configuration/client/state
+owner. Package implementations must not import legacy adapters. Tests that
+patch private collaborators should patch their canonical owner; retain
+separate public-import compatibility tests rather than adding `sys.path`
+modifications or `sys.modules` proxies.
+
+### Assets and checkpoint quality scope
+
+Code installation does not replace the staged application assets: `public/`,
+`.chainlit/`, `chainlit.config.yaml`, `chainlit.md`, and `VERSION`.
+[`config/resources.py`](https://github.com/Azure/gpt-rag-ui/blob/ce76b00c0a7013ddb13cd97422f3e3d6ac6f5df8/src/gpt_rag_ui/config/resources.py)
+resolves the existing `CHAINLIT_APP_ROOT` first, then the source adapter
+directory when it contains `chainlit.config.yaml`, otherwise the working
+directory. Set the asset root before startup when using installed code from
+another directory. Keep assets and writable application paths outside
+`site-packages`; a wheel alone is not a self-contained deployment bundle.
+
+The UI checkpoint uses the same four quality-tool pins listed for the
+backends, but its CLI does not accept their test-evidence flags:
+
+```powershell
+$Base = "<fetched-protected-target-sha>"
+python .github\scripts\check-quality.py --check all --base-ref $Base --report .artifacts\quality.json
+```
+
+The [UI typing scope](https://github.com/Azure/gpt-rag-ui/blob/ce76b00c0a7013ddb13cd97422f3e3d6ac6f5df8/.quality/typing-scope.json)
+retains the stable IDs for `chat_backend`, `panel_config`, and
+`hosted_continuity_config` at their new `config/` locations and includes newly
+introduced package modules and legacy adapters. Consult that complete
+inventory rather than assuming every moved implementation is strictly typed.
+The exception ledger is empty at this checkpoint. Neither that ledger nor
+passing behavior tests establish handler approval, a green full gate, or
+active repository rules.
 
 ## Code Update Workflow
 
