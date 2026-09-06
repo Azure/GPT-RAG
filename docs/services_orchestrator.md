@@ -6,7 +6,7 @@ coordinates agent-based RAG workflows, where each agent has a defined role, to
 generate accurate, context-aware responses for complex user queries. Current
 GPT-RAG umbrella releases run it as an orchestrator Container App. Orchestrator
 `v4.1.1` also packages the runtime as a Microsoft Foundry hosted agent, which
-[GPT-RAG `v3.8.2`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.2) makes
+[GPT-RAG `v3.8.3`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3) makes
 the default for genuinely fresh deployments; see the
 [exact hosted integration matrix](hosted_agent_release_matrix.md). The separate
 [hosted continuity platform contract](hosted_continuity_platform_contract.md)

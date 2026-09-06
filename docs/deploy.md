@@ -57,9 +57,9 @@ explicitly through `CHAT_BACKEND=orchestrator`.
 
 ### Chat runtime modes
 
-!!! info "Shipped in GPT-RAG v3.8.2"
-    [GPT-RAG `v3.8.2`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.2)
-    pins UI `v2.6.2`, orchestrator `v4.1.1`, ingestion `v2.7.2`, and AILZ
+!!! info "Shipped in GPT-RAG v3.8.3"
+    [GPT-RAG `v3.8.3`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3)
+    pins UI `v2.6.2`, orchestrator `v4.1.1`, ingestion `v2.7.3`, and AILZ
     `v2.5.1` at their exact release commits, and validates the hosted chat path
     end to end. Classic, hosted/no-panel, and explicitly selected hosted-panel
     are supported topologies. Continuity, user-history, owner-binding
@@ -336,12 +336,15 @@ classic panel data.
 
 #### Current release
 
-[GPT-RAG `v3.8.2`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.2) is the
+[GPT-RAG `v3.8.3`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3) is the
 latest published umbrella release. It pins UI `v2.6.2`, orchestrator `v4.1.1`,
-ingestion `v2.7.2`, and AI Landing Zone `v2.5.1`, and it makes hosted/no-panel
-the default topology for genuinely fresh deployments. The previous classic-only
+ingestion `v2.7.3`, and AI Landing Zone `v2.5.1`, and it makes hosted/no-panel
+the default topology for genuinely fresh deployments. It repins ingestion only:
+`v2.7.3` stops the data-ingestion administrative surface from being mounted in
+deployments that did not ask for it. UI, orchestrator, and AI Landing Zone are
+unchanged from `v3.8.2`. The previous classic-only
 umbrella release was `v3.7.0`, pinning UI `v2.3.13`, orchestrator `v3.8.0`,
-ingestion `v2.5.0`, and AI Landing Zone `v2.3.0`; do not mix the `v3.8.2`
+ingestion `v2.5.0`, and AI Landing Zone `v2.3.0`; do not mix the `v3.8.3`
 topology and configuration contract into the older `v3.7.0` hooks or manifest.
 
 !!! danger "Do not deploy `v3.8.0` or `v3.8.1`"

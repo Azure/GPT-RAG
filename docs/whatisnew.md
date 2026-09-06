@@ -6,6 +6,19 @@ patch, and fix, see the [GitHub releases](https://github.com/Azure/GPT-RAG/relea
 
 ### September 2026
 
+- **Data-ingestion administrative surface is gated on the deployment mode ([GPT-RAG v3.8.3](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3)).**
+  The umbrella release repins ingestion to `v2.7.3`; UI `v2.6.2`, orchestrator
+  `v4.1.1`, and AILZ `v2.5.1` are unchanged from `v3.8.2`. Ingestion `v2.7.2`
+  mounted the administrative SPA and every administrative route unconditionally
+  at import time and never read `DEPLOY_ADMINISTRATIVE_PANEL`, so the surface
+  was reachable whatever topology the publisher selected. `v2.7.3` resolves the
+  deployment mode once from App Configuration inside the ASGI `lifespan` and
+  gates the mount on it, so a hosted/no-panel deployment now returns 404 instead
+  of serving the surface. Startup also fails closed when Entra ID configuration
+  is absent, not only when Cosmos configuration is. Classic and explicitly
+  selected hosted-panel deployments are unaffected. See
+  [Administrative surface gating](hosted_agent_release_matrix.md#administrative-surface-gating).
+
 - **Hosted agent on Microsoft Foundry is the fresh-deployment default ([GPT-RAG v3.8.2](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.2)).**
   The umbrella release pins UI `v2.6.2`, orchestrator `v4.1.1`, ingestion
   `v2.7.2`, and AILZ `v2.5.1`, and validates the hosted chat path end to end
