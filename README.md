@@ -34,7 +34,13 @@ Head to the documentation site for the complete guides:
 ## Architecture
 
 ![Zero Trust Architecture](media/architecture_zero_trust.png)
-*Zero-Trust Architecture*
+*Zero-Trust Architecture, classic topology*
+
+The diagram above shows the classic topology. A fresh deployment now defaults
+to the hosted topology, where the orchestrator is served by the Foundry Agent
+Service from an immutable image digest, and neither the orchestrator Container
+App nor Cosmos DB is provisioned. See
+[Hosted conversation continuity](#hosted-conversation-continuity) below.
 
 ### Hosted conversation continuity
 
