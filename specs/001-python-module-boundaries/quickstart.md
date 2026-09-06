@@ -102,6 +102,32 @@ Passing existing tests or selected architecture/typing checks is not full
 acceptance. Review of exact policy schemas, adversarial cases and public failure
 contracts remains independent of these owner-reported checkpoint results.
 
+### UI evidence and image checkpoint reproduction
+
+UI `e9620fce81daa879c0d945113911e58ae4b574e3` includes a unittest evidence
+runner and requires a shared execution identity for local evidence consumption.
+The commands below use that checkpoint's interface, not the initial UI draft:
+
+```powershell
+$env:QUALITY_RUN_ID = [guid]::NewGuid().ToString()
+python .github\scripts\run-unittest.py --base-ref $Base --report .artifacts\unittest.json
+python .github\scripts\check-quality.py --check all --base-ref $Base --test-evidence .artifacts\unittest.json --report .artifacts\quality.json
+```
+
+Keep the same `QUALITY_RUN_ID` for the runner and consuming checker. CI supplies
+its run ID and attempt instead. The runner retains the existing unittest suite;
+it does not create a second test framework. Missing, skipped, changed-source or
+wrong-execution evidence must not authorize an exception.
+
+The existing UI workflow also builds the actual Dockerfile and runs
+`tests/container_smoke.py` explicitly in the ephemeral Linux image, offline with
+a read-only tests mount. The helper is intentionally outside `test_*.py`
+discovery. At this checkpoint, actual ready/not-ready Uvicorn listeners,
+installed origins, staged assets and 410 existing behavioral cases passed.
+The full unit job passed 456 cases, including clean-wheel and actual
+startup/upload acceptance. Quality adoption remains incomplete; successful
+image/unit jobs do not imply a passing `quality-gate` or Azure integration.
+
 ## 3. Prove rejection and required merge enforcement
 
 Add planned checker fixtures under existing `tests/`, for example

@@ -125,17 +125,17 @@ parity. No result may rely on editable installation or source-path leakage.
 
 ### Tests
 
-- [ ] T030 [US3] Add non-editable distribution, asset-root, startup-order, canonical-state and old/new import-order acceptance tests in ui/tests/test_installed_package.py and ui/tests/test_module_compatibility.py.
+- [X] T030 [US3] Add non-editable distribution, asset-root, startup-order, canonical-state and old/new import-order acceptance tests in ui/tests/test_installed_package.py and ui/tests/test_module_compatibility.py.
 
 ### Implementation
 
-- [ ] T031 [US3] Add setuptools src discovery and explicit legacy-module distribution in ui/pyproject.toml with inert ui/src/gpt_rag_ui/__init__.py; preserve requirements.txt as initial runtime dependency source.
+- [X] T031 [US3] Add setuptools src discovery and explicit legacy-module distribution in ui/pyproject.toml with inert ui/src/gpt_rag_ui/__init__.py; preserve requirements.txt as initial runtime dependency source.
 - [ ] T032 [US3] Move configuration/cache/settings and pure helpers into ui/src/gpt_rag_ui/config/ and ui/src/gpt_rag_ui/util/, retaining one state owner and equivalent precedence/defaults.
 - [ ] T033 [US3] Move identity primitives and backend/storage transports into ui/src/gpt_rag_ui/auth/ and ui/src/gpt_rag_ui/clients/, keeping identity and error behavior unchanged.
 - [ ] T034 [US3] Move history, chat, continuity, feedback, ownership, cursor and download decisions into ui/src/gpt_rag_ui/services/ without business logic in adapters.
 - [ ] T035 [US3] Move framework routes/callbacks and telemetry into ui/src/gpt_rag_ui/api/ and ui/src/gpt_rag_ui/telemetry/ with ordered single registration.
 - [ ] T036 [US3] Implement ui/src/gpt_rag_ui/bootstrap.py and thin ui/main.py, ui/app.py and inventoried legacy adapters; preserve conditional hosted/panel initialization and staged asset roots.
-- [ ] T037 [US3] Wire non-editable package installation into ui/Dockerfile and contributor startup; exercise existing Linux-image startup/resource cases without changing uvicorn main:app, deployment flags or Windows/Linux lifecycle behavior, and record unavailable container execution as pending evidence.
+- [X] T037 [US3] Wire non-editable package installation into ui/Dockerfile and contributor startup; exercise existing Linux-image startup/resource cases without changing uvicorn main:app, deployment flags or Windows/Linux lifecycle behavior, and record unavailable container execution as pending evidence.
 - [ ] T038 [US3] Move private test seams to canonical owners and prove the entire U4 matrix through ui/tests/ while retaining dedicated legacy compatibility assertions.
 
 ## Phase 6: US4 - Adopt and Recover Incrementally (P2)
@@ -299,11 +299,62 @@ refresh documentation again when their interfaces or outcomes change.
 
 Exact reproduction interfaces and the tested tool-version refinement are in
 [quickstart.md](quickstart.md#backend-checkpoint-reproduction) and
-[research.md](research.md#implementation-checkpoints). Backend checker/workflow
-review and representative public-failure-contract assessment are still pending;
-passing local suites does not certify all Q6 cases. A scoped exception proposal
-is not actual maintainer approval. The site preview must not be published as
-shipped enforcement while these conditions remain unresolved.
+[research.md](research.md#implementation-checkpoints). Passing local suites does
+not certify all Q6 cases. A scoped exception proposal is not actual maintainer
+approval. The site preview must not be published as shipped enforcement while
+these conditions remain unresolved.
+
+### Follow-up checkpoints and review dispositions
+
+These later results supplement, rather than replace, the historical checkpoint
+results above. All PRs remain drafts with their original target branches.
+
+| Surface | Later immutable checkpoint | Evidence and remaining limits |
+| --- | --- | --- |
+| Orchestrator | `29df99d9b1e1393d6b775d9d5362c445a7fdd021` | Owner reports 884 pytest cases, including 117 quality fixtures; ten exact audit proposals, none active. Actual CI passed tests/frontend/typing/architecture and failed lint/exceptions/policy/aggregate. Seven actionable frozen-checkpoint checker findings require follow-up. |
+| Ingestion | `46d08d31e5090045e481f22da699e09f444159dc` | Owner reports 348 pytest cases, explicit index/delete/config/job failure remedies and four audit proposals, none active. Actual CI passed tests/typing/architecture and failed lint/exceptions/policy/aggregate. Five actionable frozen-checkpoint checker findings and representative failure-contract review remain. |
+| UI | `043d89b87bd2504a9df1429df35c4ed05b4c2d60` | Clean temporary runtime environment, unchanged requirements plus `pip check`, non-editable wheel, seven installed methods and all 410 existing behavioral cases copied outside the checkout, with no skips and installed-origin assertions. The same-head Linux unit job reports 437 cases. This resolves the initial system-site dependency limitation. |
+| UI | `e9620fce81daa879c0d945113911e58ae4b574e3` | Includes quality/evidence and Linux image wiring from `ab523d84dde80e4c62bdf2c6cd7cdf52f5a50ad0`, followed by parent-owned startup/upload assertions and generated-artifact Docker exclusions. Ten installed methods passed on Windows in 399.345 seconds; same-head Linux CI passed 456 unit cases and 410 image behavioral cases. Quality adoption is still red. |
+| Contributor site | `fa65c333f6c55ce51c0209cdd81922c8be85acba` | Draft #688 reconciles the clean-install evidence at UI `043d89b`, preserving historical full-suite counts and preview warnings. Final startup/image and checker-interface reconciliation remains pending. |
+
+The [UI image workflow](https://github.com/Azure/gpt-rag-ui/actions/runs/34042563761)
+built the actual Dockerfile without publishing an image and ran it with
+`--network none` and a read-only tests mount. Its helper verified installed
+canonical origins, real `main:app` Uvicorn listeners in ready and disconnected
+not-ready modes, staged VERSION/public content and all 410 existing behavioral
+cases. Missing local Docker Desktop is no longer a global container-evidence
+blocker. This is an ephemeral image exercise, not Azure deployment or live-peer
+integration.
+
+The ten installed methods additionally exercise standalone Entra and Copilot
+startup with authentication configured before Chainlit import, real
+`HTTPSession.persist_file` writes and session cleanup under the staged asset
+root, and invalid Copilot configuration rejected only when activated. Missing
+OAuth preserves the existing distinct responses: root HTTP 503 with Retry-After,
+health HTTP 200 with `X-App-Mode: auth-required`. No application file is written
+under site-packages. These results and the explicit setuptools/wheel inventory
+support T030/T031/T037; they do not close all ownership or full U4 acceptance.
+
+Frozen backend tooling reviews produced these actionable categories, assigned
+back to the existing component owners with reproductions:
+
+| Component | Required review fixes |
+| --- | --- |
+| Orchestrator | Permanent automatic typing coverage across successive PRs; AST `no_type_check` suppressions; lexical alias resolution; private package-initializer ownership; independently verified report identities; unique, evidenced dynamic-import sites; malformed mypy diagnostic rejection |
+| Ingestion | Lexical aliases; indirect exception binding/approval identity; ownership restrictions across cross-area moves; unique dynamic-import sites; closed exact policy-record schemas |
+
+The additional suggestion to block every imported legacy type diagnostic was
+not accepted: [research](research.md#r2-incremental-typing-without-accepting-new-debt) explicitly retains imported
+diagnostics in reports while classifying blocking scope, and Q6/SC-001 require
+in-scope regression enforcement. Reporting uncovered diagnostics is deliberate
+incremental adoption, not permission to lose automatically covered modules.
+
+Architecture review also rejected the interpretation that only audit handlers
+may ever recover. FR-008 remains conditional on the existing public failure
+contract; legitimate boundary translation or cleanup still needs an exact
+necessary, genuinely approved record when broad handling remains. A bounded
+immutable-source assessment of representative backend outcomes is ongoing;
+neither this interpretation nor a proposed record approves runtime behavior.
 
 Unchecked tasks are intentionally not represented as completed by the existence
 of the coordination PR. Required rules activation, live integration and live
