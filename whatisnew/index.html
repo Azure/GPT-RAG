@@ -1663,7 +1663,22 @@ patch, and fix, see the <a href="https://github.com/Azure/GPT-RAG/releases">GitH
 </blockquote>
 <h3 id="september-2026">September 2026</h3>
 <ul>
-<li><strong>Hosted agent on Microsoft Foundry is the fresh-deployment default (<a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.2">GPT-RAG v3.8.2</a>).</strong>
+<li>
+<p><strong>Data-ingestion administrative surface is gated on the deployment mode (<a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3">GPT-RAG v3.8.3</a>).</strong>
+  The umbrella release repins ingestion to <code>v2.7.3</code>; UI <code>v2.6.2</code>, orchestrator
+  <code>v4.1.1</code>, and AILZ <code>v2.5.1</code> are unchanged from <code>v3.8.2</code>. Ingestion <code>v2.7.2</code>
+  mounted the administrative SPA and every administrative route unconditionally
+  at import time and never read <code>DEPLOY_ADMINISTRATIVE_PANEL</code>, so the surface
+  was reachable whatever topology the publisher selected. <code>v2.7.3</code> resolves the
+  deployment mode once from App Configuration inside the ASGI <code>lifespan</code> and
+  gates the mount on it, so a hosted/no-panel deployment now returns 404 instead
+  of serving the surface. Startup also fails closed when Entra ID configuration
+  is absent, not only when Cosmos configuration is. Classic and explicitly
+  selected hosted-panel deployments are unaffected. See
+  <a href="../hosted_agent_release_matrix/#administrative-surface-gating">Administrative surface gating</a>.</p>
+</li>
+<li>
+<p><strong>Hosted agent on Microsoft Foundry is the fresh-deployment default (<a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.2">GPT-RAG v3.8.2</a>).</strong>
   The umbrella release pins UI <code>v2.6.2</code>, orchestrator <code>v4.1.1</code>, ingestion
   <code>v2.7.2</code>, and AILZ <code>v2.5.1</code>, and validates the hosted chat path end to end
   against a Foundry IQ knowledge base, confirming both the grounded answer and
@@ -1674,7 +1689,8 @@ patch, and fix, see the <a href="https://github.com/Azure/GPT-RAG/releases">GitH
   Application Insights, and isolates the hosted agent into its own child azd
   project. Continuity, user-history, owner-binding, and operator evidence gates
   remain deployment-published false/off/503. See the
-  <a href="../hosted_agent_release_matrix/">hosted-agent component release matrix</a>.</li>
+  <a href="../hosted_agent_release_matrix/">hosted-agent component release matrix</a>.</p>
+</li>
 </ul>
 <h3 id="august-2026">August 2026</h3>
 <ul>

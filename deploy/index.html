@@ -1781,9 +1781,9 @@ also deploys the orchestrator Container App, remains supported and is selected
 explicitly through <code>CHAT_BACKEND=orchestrator</code>.</p>
 <h3 id="chat-runtime-modes">Chat runtime modes</h3>
 <div class="admonition info">
-<p class="admonition-title">Shipped in GPT-RAG v3.8.2</p>
-<p><a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.2">GPT-RAG <code>v3.8.2</code></a>
-pins UI <code>v2.6.2</code>, orchestrator <code>v4.1.1</code>, ingestion <code>v2.7.2</code>, and AILZ
+<p class="admonition-title">Shipped in GPT-RAG v3.8.3</p>
+<p><a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3">GPT-RAG <code>v3.8.3</code></a>
+pins UI <code>v2.6.2</code>, orchestrator <code>v4.1.1</code>, ingestion <code>v2.7.3</code>, and AILZ
 <code>v2.5.1</code> at their exact release commits, and validates the hosted chat path
 end to end. Classic, hosted/no-panel, and explicitly selected hosted-panel
 are supported topologies. Continuity, user-history, owner-binding
@@ -2127,12 +2127,15 @@ as validated until each one succeeds. See the
 <code>CHAT_BACKEND=orchestrator</code> without deleting hosted Conversations or existing
 classic panel data.</p>
 <h4 id="current-release">Current release</h4>
-<p><a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.2">GPT-RAG <code>v3.8.2</code></a> is the
+<p><a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3">GPT-RAG <code>v3.8.3</code></a> is the
 latest published umbrella release. It pins UI <code>v2.6.2</code>, orchestrator <code>v4.1.1</code>,
-ingestion <code>v2.7.2</code>, and AI Landing Zone <code>v2.5.1</code>, and it makes hosted/no-panel
-the default topology for genuinely fresh deployments. The previous classic-only
+ingestion <code>v2.7.3</code>, and AI Landing Zone <code>v2.5.1</code>, and it makes hosted/no-panel
+the default topology for genuinely fresh deployments. It repins ingestion only:
+<code>v2.7.3</code> stops the data-ingestion administrative surface from being mounted in
+deployments that did not ask for it. UI, orchestrator, and AI Landing Zone are
+unchanged from <code>v3.8.2</code>. The previous classic-only
 umbrella release was <code>v3.7.0</code>, pinning UI <code>v2.3.13</code>, orchestrator <code>v3.8.0</code>,
-ingestion <code>v2.5.0</code>, and AI Landing Zone <code>v2.3.0</code>; do not mix the <code>v3.8.2</code>
+ingestion <code>v2.5.0</code>, and AI Landing Zone <code>v2.3.0</code>; do not mix the <code>v3.8.3</code>
 topology and configuration contract into the older <code>v3.7.0</code> hooks or manifest.</p>
 <div class="admonition danger">
 <p class="admonition-title">Do not deploy <code>v3.8.0</code> or <code>v3.8.1</code></p>

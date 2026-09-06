@@ -584,6 +584,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#administrative-surface-gating" class="md-nav__link">
+    <span class="md-ellipsis">
+      Administrative surface gating
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#data-confinement" class="md-nav__link">
     <span class="md-ellipsis">
       Data confinement
@@ -1706,7 +1715,7 @@
 
 <h1 id="hosted-agent-integration-matrix">Hosted-agent integration matrix</h1>
 <p>This page records the exact hosted-agent component releases pinned by the
-GPT-RAG umbrella release <a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.2"><code>v3.8.2</code></a>
+GPT-RAG umbrella release <a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3"><code>v3.8.3</code></a>
 and the independent evidence gates that remain fail closed.</p>
 <div class="admonition danger">
 <p class="admonition-title">Do not deploy <code>v3.8.0</code> or <code>v3.8.1</code></p>
@@ -1714,14 +1723,14 @@ and the independent evidence gates that remain fail closed.</p>
 <code>v3.8.0</code> nor <code>v3.8.1</code> reaches a running deployment: <code>v3.8.0</code> pins
 orchestrator <code>v4.1.0</code>, whose <code>frontend/</code> SPA build fails, and <code>v3.8.1</code>
 repairs that build but still pins ingestion <code>v2.7.1</code>, which crashes on boot
-after a successful image build. The matrix below is the <code>v3.8.2</code>
+after a successful image build. The matrix below is the <code>v3.8.3</code>
 combination, which deploys end to end.</p>
 </div>
 <div class="admonition warning">
-<p class="admonition-title">Pins are shipped in umbrella <code>v3.8.2</code>; evidence gates remain fail closed</p>
+<p class="admonition-title">Pins are shipped in umbrella <code>v3.8.3</code>; evidence gates remain fail closed</p>
 <p>The umbrella <code>manifest.json</code> pins all four exact releases below and explicit
 <code>hosted-panel</code> topology selection is supported. The manifest's umbrella tag
-is <code>v3.8.2</code>; use only a GPT-RAG source or release that contains these pins
+is <code>v3.8.3</code>; use only a GPT-RAG source or release that contains these pins
 rather than combining component tags independently.
 <code>HOSTED_CONTINUITY_ENABLED</code>, <code>PANEL_HISTORY_ENABLED</code>,
 <code>PANEL_HISTORY_OWNER_BINDING_VALIDATED</code>, and
@@ -1735,8 +1744,11 @@ import and fixed in
 Readiness (item 1 of the evidence gate below) has since been re-run and
 passes under <code>NETWORK_ISOLATION=true</code> against the exact pins below: the
 hosted agent reaches active state, session readiness succeeds, and a
-grounded answer returns with its citation. These pins shipped as umbrella
-release <a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.2"><code>v3.8.2</code></a>.
+grounded answer returns with its citation. That run was recorded against
+umbrella release <a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.2"><code>v3.8.2</code></a>.
+<a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3"><code>v3.8.3</code></a> repins
+ingestion only; its UI, orchestrator, and AI Landing Zone pins are
+byte-identical, so that readiness evidence carries forward unchanged.
 Evidence-gate items 2 through 8 and the <code>store</code> contract matrix have not
 been re-run; the four flags above remain deployment-published <code>false</code>.</p>
 </div>
@@ -1765,9 +1777,9 @@ been re-run; the four flags above remain deployment-published <code>false</code>
 </tr>
 <tr>
 <td>GPT-RAG ingestion</td>
-<td><a href="https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.7.2"><code>v2.7.2</code></a></td>
-<td><a href="https://github.com/Azure/gpt-rag-ingestion/commit/b9e5ac3b2b36810b8d720398c3b8bbffc5ba7f75"><code>b9e5ac3</code></a></td>
-<td>Metadata-only operator overview and document/corpus curation APIs. Repairs the OpenTelemetry import that crashed <code>v2.7.1</code> at boot after a successful image build.</td>
+<td><a href="https://github.com/Azure/gpt-rag-ingestion/releases/tag/v2.7.3"><code>v2.7.3</code></a></td>
+<td><a href="https://github.com/Azure/gpt-rag-ingestion/commit/38a395586ee1d440a8e1ca8233413f8c25b3fdc2"><code>38a3955</code></a></td>
+<td>Metadata-only operator overview and document/corpus curation APIs. <code>v2.7.2</code> repaired the OpenTelemetry import that crashed <code>v2.7.1</code> at boot after a successful image build, but mounted the administrative surface unconditionally at import time and never read <code>DEPLOY_ADMINISTRATIVE_PANEL</code>. <code>v2.7.3</code> resolves the deployment mode once from App Configuration inside the ASGI <code>lifespan</code> and gates the mount on it, so <code>HOSTED_NO_PANEL</code> now returns 404 instead of exposing the surface; see "Administrative surface gating" below.</td>
 </tr>
 <tr>
 <td>AI Landing Zone</td>
@@ -1794,7 +1806,7 @@ close their independent live evidence and authorization gates.</p>
 <tbody>
 <tr>
 <td>Umbrella integration manifest</td>
-<td>Pins the exact matrix above. Stamped as <a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.2"><code>v3.8.2</code></a>.</td>
+<td>Pins the exact matrix above. Stamped as <a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3"><code>v3.8.3</code></a>.</td>
 </tr>
 <tr>
 <td>Fresh UI <code>v2.6.2</code> process with no <code>CHAT_BACKEND</code> value</td>
@@ -1898,7 +1910,7 @@ and released as
 <a href="https://github.com/Azure/gpt-rag-orchestrator/releases/tag/v4.0.2"><code>v4.0.2</code></a>
 (commit
 <a href="https://github.com/Azure/gpt-rag-orchestrator/commit/c653b3ec0a553f55244e197f3be993ad33ffe02f"><code>c653b3e</code></a>,
-722 tests passing upstream). Umbrella release <code>v3.8.2</code> pins the successor
+722 tests passing upstream). Umbrella release <code>v3.8.3</code> pins the successor
 commit <code>9b64a5b</code> (<code>v4.1.1</code>), which leaves <code>store</code> and <code>background</code>
 handling unchanged. <strong>The store contract itself has not been
 re-validated.</strong> A network-isolated run on these pins confirms readiness and
@@ -2003,12 +2015,24 @@ return 422. Missing/invalid delegated tokens return 401; app-only tokens return
 403. Downstream store failure returns 502. Undeployed or disabled user panel
 surfaces return 503.</p>
 <h2 id="operator-overview-and-corpus-curation">Operator overview and corpus curation</h2>
-<p>Ingestion <code>v2.7.2</code> includes:</p>
+<p>Ingestion <code>v2.7.3</code> includes:</p>
 <ul>
 <li><code>GET /panel/overview/metrics</code>;</li>
 <li><code>GET /panel/corpus-curation/queue</code>; and</li>
 <li><code>POST /panel/corpus-curation/{item_id}/decision</code>.</li>
 </ul>
+<p><code>v2.7.3</code> also adds the <code>/api/panel/*</code> administrative API:</p>
+<ul>
+<li><code>GET /api/panel/status</code>;</li>
+<li><code>GET /api/panel/overview</code>;</li>
+<li><code>GET /api/panel/feedback</code>; and</li>
+<li><code>POST /api/panel/feedback</code>.</li>
+</ul>
+<p>Every <code>/api/panel/*</code> route requires the Entra ID app role <code>Admin</code>. <code>v2.7.3</code> also
+stops <code>GET /api/panel/feedback</code> from returning a permanent HTTP 500 when a
+single malformed Cosmos document is present and from silently discarding
+documents that carry no <code>rating</code>, and stops <code>POST /api/panel/feedback</code> from
+returning HTTP 500 when the Cosmos write raises.</p>
 <p>Overview reads aggregate counts only from the panel owner-index and feedback
 metadata containers. Any bucket below <code>PANEL_OVERVIEW_MIN_CARDINALITY</code> (default
 <code>5</code>) is returned as <code>null</code>, not as a small exact count.</p>
@@ -2029,7 +2053,7 @@ hosted-panel topology still returns 503 from these routes until the separate
 operator evidence and authorization gate is completed.</p>
 <div class="admonition important">
 <p class="admonition-title">Released ingestion dashboard browser-auth status</p>
-<p>The ingestion <code>v2.7.2</code> Vite dashboard does not initialize MSAL, acquire an
+<p>The ingestion <code>v2.7.3</code> Vite dashboard does not initialize MSAL, acquire an
 access token, or add an <code>Authorization</code> header for the new operator panel
 requests. Its <code>panelFetch</code> uses plain browser <code>fetch</code>. The Overview and
 Curation tabs therefore show the backend's real 401/403/503 response unless
@@ -2037,6 +2061,43 @@ an approved same-origin reverse-auth proxy adds the delegated operator
 bearer. This differs from the classic orchestrator dashboard, whose SPA has
 a working MSAL Authorization Code + PKCE flow.</p>
 </div>
+<h2 id="administrative-surface-gating">Administrative surface gating</h2>
+<p>Ingestion <code>v2.7.2</code> mounted the administrative SPA and every administrative route
+unconditionally at import time, and never read <code>DEPLOY_ADMINISTRATIVE_PANEL</code>.
+The surface was therefore reachable regardless of the topology the umbrella
+publisher selected, including hosted/no-panel.</p>
+<p>Ingestion <code>v2.7.3</code> resolves the deployment mode once from Azure App
+Configuration inside the ASGI <code>lifespan</code> and gates the mount on the resolved
+mode:</p>
+<table>
+<thead>
+<tr>
+<th>Deployment mode</th>
+<th>Administrative surface</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CLASSIC</code></td>
+<td>Mounted; unchanged from <code>v2.7.2</code>.</td>
+</tr>
+<tr>
+<td><code>HOSTED_PANEL</code></td>
+<td>Mounted; unchanged from <code>v2.7.2</code>.</td>
+</tr>
+<tr>
+<td><code>HOSTED_NO_PANEL</code></td>
+<td>Not mounted; every administrative route returns 404.</td>
+</tr>
+</tbody>
+</table>
+<p><code>v2.7.3</code> also makes startup fail closed when Entra ID configuration is absent.
+Earlier releases failed startup only on missing Cosmos configuration, so an
+ingestion process could start with the administrative surface mounted and no
+identity provider configured to authorize it.</p>
+<p>Only <code>HOSTED_NO_PANEL</code> changes behaviour. Upgrading a <code>CLASSIC</code> or an explicitly
+selected <code>HOSTED_PANEL</code> deployment from <code>v2.7.2</code> to <code>v2.7.3</code> removes no surface
+that deployment was already serving.</p>
 <h2 id="data-confinement">Data confinement</h2>
 <p>Managed Conversations is the only chat-content store for the hosted design.</p>
 <ul>
