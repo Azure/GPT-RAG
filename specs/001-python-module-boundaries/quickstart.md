@@ -128,6 +128,13 @@ The full unit job passed 456 cases, including clean-wheel and actual
 startup/upload acceptance. Quality adoption remains incomplete; successful
 image/unit jobs do not imply a passing `quality-gate` or Azure integration.
 
+Later same-head results and independently reviewed repairs are recorded in
+[the follow-up table](tasks.md#follow-up-checkpoints-and-review-dispositions).
+For example, UI `ae9d0d7d41556e0d8d4c4116fbb17765fbc1210f` passed 460
+unit cases and the image job, but subsequent source-policy, catch-binding and
+namespace-discovery reproductions still required repairs. A passing behavioral
+suite is not proof that all checker mutations are rejected.
+
 ## 3. Prove rejection and required merge enforcement
 
 Add planned checker fixtures under existing `tests/`, for example
@@ -206,6 +213,13 @@ entire compatibility matrix. Rehearse recovery by replacing the changed
 component artifact with the previous known-good artifact, restoring any later
 manifest combination as a unit. Verify startup/auth and the affected operation
 after recovery. No schema/data migration is expected.
+
+Artifact rollback does not undo previously persisted configuration or deleted
+Search documents. Restoration of those external side effects requires its own
+authorized recovery procedure and evidence; a successful code revert cannot be
+reported as data recovery. Preserve public event names and counters when
+comparing outcomes, and distinguish expected failure characterization from
+acceptance of that behavior.
 
 Live Azure validation requires explicit authorization and an existing suitable
 environment. Network-isolated data-plane access needs the existing permitted

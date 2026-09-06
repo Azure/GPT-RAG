@@ -105,7 +105,7 @@ handlers. Dependency failures preserve public errors and safe diagnostics.
 
 - [X] T021 [P] [US2] Break Search/Foundry IQ OBO cycle through a focused same-repository helper in orchestrator/src/connectors/, retaining existing callable behavior and compatibility exports.
 - [X] T022 [P] [US2] Break api-to-main scheduler cycles through explicit jobs-owned state in ingestion/jobs/, ingestion/api/admin.py, ingestion/api/panel.py and ingestion/main.py without duplicating locks/registries.
-- [ ] T023 [P] [US2] Extract citation/reference rendering from ui/app.py into ui/src/gpt_rag_ui/services/ and make ui/datalayer.py consume that owner without changing grants or source links.
+- [X] T023 [P] [US2] Extract citation/reference rendering from ui/app.py into ui/src/gpt_rag_ui/services/ and make ui/datalayer.py consume that owner without changing grants or source links.
 - [ ] T024 [P] [US2] Implement full-graph/private-surface/exception-ledger enforcement in orchestrator/.github/scripts/check-quality.py and orchestrator/.quality/, narrowing or explicitly justifying existing handlers.
 - [ ] T025 [P] [US2] Implement equivalent graph/exception enforcement in ingestion/.github/scripts/check-quality.py and ingestion/.quality/, preserving the narrowly best-effort audit contract.
 - [ ] T026 [P] [US2] Implement equivalent graph/exception enforcement in ui/.github/scripts/check-quality.py and ui/.quality/, keeping disabled/not-ready and optional notification contracts explicit.
@@ -313,8 +313,14 @@ results above. All PRs remain drafts with their original target branches.
 | --- | --- | --- |
 | Orchestrator | `29df99d9b1e1393d6b775d9d5362c445a7fdd021` | Owner reports 884 pytest cases, including 117 quality fixtures; ten exact audit proposals, none active. Actual CI passed tests/frontend/typing/architecture and failed lint/exceptions/policy/aggregate. Seven actionable frozen-checkpoint checker findings require follow-up. |
 | Ingestion | `46d08d31e5090045e481f22da699e09f444159dc` | Owner reports 348 pytest cases, explicit index/delete/config/job failure remedies and four audit proposals, none active. Actual CI passed tests/typing/architecture and failed lint/exceptions/policy/aggregate. Five actionable frozen-checkpoint checker findings and representative failure-contract review remain. |
+| Orchestrator tooling | `550a6eedc022c879658964cbac919835c6d3b96d` | All seven accepted original checker findings are independently closed by exact immutable-source replay, including 24 aggregate and 14 malformed-diagnostic cases. Owner reports 185 quality fixtures and 952 full-suite cases; the independent reviewer did not rerun the full suite or filesystem Git fixture. No approvals activated. |
+| Orchestrator failure evidence | `8d0ac0532b06b2fe83a084d5748646c3009c7283` | Actual Linux CI reports 978 tests and eight warnings; frontend, typing and architecture pass. Provider/startup, retrieval and real MAF/turn/SSE outcomes are characterized, not universally accepted. Lint 99, exceptions 164 (153 sites plus 11 proposed records) and bootstrap policy still block the aggregate. |
+| Ingestion tooling | `4b19beed8dd653309f17a7b4001a0b5a117eef34` | Independent replay closes original findings 2-5, including 22 existing fixture cases and 11 malformed-record CLI variants. Finding 1 remains reproducible for implicit builtin names overwritten by unrelated local imports; repair is requested. Owner reports 114 focused fixtures. The separate runtime compatibility follow-up is not part of this commit. |
+| Ingestion runtime | `f8c3f8406fac904f2fade9c321fd8bdd924d482d` | Restores PUT post-write refresh compatibility and adds provider, run-level purge/cleanup and real Search SDK-result evidence; eight proposals, zero active. The provider merge-order fixture still needs the later CI correction below. |
+| Ingestion residual repair | `0fdfc46441287f8585c62be87b3250eaddace389` | Contains the implicit-builtin repair awaiting independent replay. Actual CI run `34045353956` reports one new unit failure and 421 passes: a fixture calls a private SDK method using the wrong positional signature for CI's declared App Configuration provider 2.5.0. Owner is repairing the test; this is not an intentionally failing quality-adoption check or passing final suite. |
 | UI | `043d89b87bd2504a9df1429df35c4ed05b4c2d60` | Clean temporary runtime environment, unchanged requirements plus `pip check`, non-editable wheel, seven installed methods and all 410 existing behavioral cases copied outside the checkout, with no skips and installed-origin assertions. The same-head Linux unit job reports 437 cases. This resolves the initial system-site dependency limitation. |
 | UI | `e9620fce81daa879c0d945113911e58ae4b574e3` | Includes quality/evidence and Linux image wiring from `ab523d84dde80e4c62bdf2c6cd7cdf52f5a50ad0`, followed by parent-owned startup/upload assertions and generated-artifact Docker exclusions. Ten installed methods passed on Windows in 399.345 seconds; same-head Linux CI passed 456 unit cases and 410 image behavioral cases. Quality adoption is still red. |
+| UI tooling | `ae9d0d7d41556e0d8d4c4116fbb17765fbc1210f` | Actual Linux unit job reports 460 cases; container, typing and architecture also pass. Parent subsequently reproduced three remaining checker gaps: qualified suppression on untyped functions, indirect exception bindings/approval reuse, and undiscovered root namespace runtime packages. Repairs are pending. |
 | Contributor site | `fa65c333f6c55ce51c0209cdd81922c8be85acba` | Draft #688 reconciles the clean-install evidence at UI `043d89b`, preserving historical full-suite counts and preview warnings. Final startup/image and checker-interface reconciliation remains pending. |
 
 The [UI image workflow](https://github.com/Azure/gpt-rag-ui/actions/runs/34042563761)
@@ -342,6 +348,15 @@ back to the existing component owners with reproductions:
 | --- | --- |
 | Orchestrator | Permanent automatic typing coverage across successive PRs; AST `no_type_check` suppressions; lexical alias resolution; private package-initializer ownership; independently verified report identities; unique, evidenced dynamic-import sites; malformed mypy diagnostic rejection |
 | Ingestion | Lexical aliases; indirect exception binding/approval identity; ownership restrictions across cross-area moves; unique dynamic-import sites; closed exact policy-record schemas |
+| UI | Qualified `typing.no_type_check` on an untyped function containing typed locals; indirect catches and changed binding identity; valid root namespace packages omitted from source discovery |
+
+Independent orchestrator replay at `550a6ee` closes its seven accepted original
+findings; the imported-diagnostic suggestion remains withdrawn. Ingestion
+`4b19bee` closes its indirect-catch, move, dynamic-site and schema findings, but
+an unrelated function's `ValueError as Exception` still hides a builtin broad
+catch elsewhere, and `json.loads as __import__` similarly hides a variable
+loader. The owner has the exact two remaining reproductions. Closure of an
+original finding is not a claim that all future checker inputs are certified.
 
 The additional suggestion to block every imported legacy type diagnostic was
 not accepted: [research](research.md#r2-incremental-typing-without-accepting-new-debt) explicitly retains imported
@@ -352,9 +367,102 @@ incremental adoption, not permission to lose automatically covered modules.
 Architecture review also rejected the interpretation that only audit handlers
 may ever recover. FR-008 remains conditional on the existing public failure
 contract; legitimate boundary translation or cleanup still needs an exact
-necessary, genuinely approved record when broad handling remains. A bounded
-immutable-source assessment of representative backend outcomes is ongoing;
-neither this interpretation nor a proposed record approves runtime behavior.
+necessary, genuinely approved record when broad handling remains. The bounded
+immutable-source assessment of representative backend outcomes is complete;
+it identifies the following distinctions rather than approving broad recovery:
+
+- AppConfig provider failures have different established startup/default and
+  authentication outcomes in the two backends. A mocked high-level config
+  failure is not evidence for the real provider-to-startup path.
+- Context-provider degradation, strict Search connector propagation and
+  explicit anonymous error-result translation are different contracts. MAF
+  `8d0ac05` now tests the real strategy/turn/SSE chain: model failure emits raw
+  synthetic error detail as ordinary response text and in diagnostics, followed
+  by `outcome.produced`/`request.completed`. Cancellation propagates separately
+  with `request.cancelled`. This characterizes an unresolved failure/redaction
+  risk; it neither approves that fallback nor redesigns the streaming contract.
+- Confirmed Search index/delete results and failed purge scans are real
+  operational corrections, not behaviorally identical lint cleanup. Run-level
+  late-failure/cleanup and pinned SDK-result evidence remain necessary.
+- Ingestion `46d08d3` changed successful durable config write followed by failed
+  local refresh from the existing HTTP 200/applied response to HTTP 207.
+  `f8c3f84` restores that exact compatibility outcome with safe diagnostics and
+  only a proposed exception record. Genuine write, apply, reload, scheduling
+  and Search failure corrections remain. Provider reads now preserve
+  KeyError/default handling and selector order while propagating unexpected
+  errors and exhausted Azure retries; constructor fallback paths were not
+  reordered or removed.
+
+The documentation impact search at `fa65c33` found no documented promise of
+successful deletion after a failed scan or unconfirmed SDK result. Nevertheless,
+the authentication diagram's `200 / 202` authorization label needs to distinguish
+authorization from operational success; its refresh/apply explanation and the
+NL2SQL confirmation/failure note await the final runtime checkpoint. Existing
+public audit events, status fields and counters must remain unchanged. This is
+not a claim that only contributor documentation is affected.
+
+Immutable UI source review at `ae9d0d7` confirms T023: history
+`_messages_to_steps` calls the extracted citation service with explicit
+`conversation_id`, `principal_id` and `copilot_session_id`; the citation
+service does not obtain them from Chainlit session state. Existing behavioral
+and image cases retain citation/download outcomes.
+
+The same review confirms a bounded U1 gap, not merely an ambiguous folder
+label. `api.history.register_data_layer` registers the service factory, while
+`services.history.get_data_layer` constructs `OrchestratorDataLayer`.
+That service class still mixes history operations with callback/DTO adaptation,
+ambient `_get_session_metadata` resolution and `update_thread` framework-session
+mutation. Complete the API-owned adapter/session seam while retaining
+service-owned history behavior, single user/request-context ownership and its
+consume-once semantics. Preserve `datalayer.OrchestratorDataLayer` and
+`datalayer.get_data_layer`; update the ownership inventory and compatibility
+tests without introducing a service-to-API forwarding cycle. No new DTO
+hierarchy, singleton factory requirement or Cosmos history implementation is
+implied. T034/T035 and full U1/U4 acceptance remain open.
+
+The orchestrator owner also records an unverified tool-launch isolation
+question: candidate working-directory lookup for Ruff/mypy and source
+`PYTHONPATH` for Import Linter. Shadow-module/startup-hook adversarial execution
+was not exercised by the seven-finding closure review. This is not a proven
+additional exploit or a completed Q1/Q5 isolation claim; broader protected-tool
+execution acceptance remains open.
+
+### Integration and recovery record
+
+The unchanged peer/recovery targets remain orchestrator v4.1.1
+(`9b64a5b962067161cb55252c6e0917a2738ba984`), ingestion v2.7.3
+(`38a395586ee1d440a8e1ca8233413f8c25b3fdc2`) and UI v2.6.2
+(`f59cca919f0bc59631d7bba7f3e223dff3718244`). These are compatibility targets,
+not a claim that the three candidate heads have been exercised together in a
+live environment. No manifest pin or deployment combination has been changed.
+
+Proposed order, conditional on remaining implementation and human approvals:
+
+1. Review the umbrella design and each component's protected-policy bootstrap,
+   exact handler dispositions and evidence. The backend branches remain
+   independent; neither depends on the other's unmerged runtime code.
+2. Complete UI ownership/compatibility and checker work before adopting its
+   package change. Exercise each candidate with unchanged shipped peers, then
+   the exact three-candidate combination, using separately authorized live
+   integration and recovery procedures.
+3. Publish the matching documentation only with the corresponding shipped
+   behavior. Activate required checks/latest-head review and demonstrate clean
+   and failing PR eligibility only through the authorized administrative
+   process; existing YAML and code-owner names do not activate those controls.
+
+For an independently introduced runtime regression, the proposed recovery is
+restoration of that component's preceding artifact, starting with UI if the
+last introduced change was its packaging, then reversing any subsequently
+introduced backend changes. Since peer contracts are unchanged, a component
+rollback must not require an unmerged companion change. Code corrections or
+runtime-only revert PRs retain the quality controls; disabling them is not a
+recovery mechanism. A later coordinated manifest change would require restoring
+its preceding validated combination as a unit.
+
+Artifact restoration does not restore deleted Search data or undo configuration
+already persisted remotely. Those side effects need separate, explicitly
+authorized recovery evidence. Neither artifact restoration, live integration,
+nor recovery of external state has been performed in this PR-only task.
 
 Unchecked tasks are intentionally not represented as completed by the existence
 of the coordination PR. Required rules activation, live integration and live
