@@ -223,6 +223,34 @@ review of policy files on development and release-target paths. Research found
 no effective required-status-check rules on the inspected `develop` branches;
 the work is not complete with workflow files alone.
 
+#### MAF primary-failure correction
+
+Implementation inspection at orchestrator `8d0ac05` resolves the previously
+recorded MAF failure question without introducing a new transport contract.
+Both `MafLiteStrategy.initiate_agent_flow` and
+`MafAgentServiceStrategy.initiate_agent_flow` catch primary failures and yield
+exception details as ordinary assistant text. This prevents the existing
+orchestration failure path from running and falsely emits normal completion.
+
+Remove that interception so the existing `Orchestrator.stream_response`
+failure path emits `outcome.rejected` / `request.failed`, and `stream_turn`
+supplies its existing safe `TurnErrorEvent`. The classic serializer and SSE
+generator already support and deduplicate that terminal error. Preserve their
+wire spelling, status codes, typed models, audit schema and cancellation
+behavior. This corrects an observable failed-operation outcome; it is not a
+claim that the old MAF fallback was an approved compatibility guarantee.
+
+The propagation change must also prevent raw upstream exception details from
+escaping through the enclosing SSE logger or automatic OpenTelemetry exception
+capture/status descriptions. Prove both MAF strategies, failure before and
+after partial output, safe diagnostics and distinct cancellation through the
+existing runners. Keep normal successful history/persistence behavior intact.
+Do not apply a blanket fatal-error rule to separate optional profile, intent
+or context-provider operations; their established contracts require individual
+disposition. Required broad boundaries still need genuine review, not an
+agent-created approval. Document the candidate behavior as unshipped until
+its component is released.
+
 ### 3. Migrate the UI by dependency slice
 
 Introduce package metadata/install support first, with runtime dependencies

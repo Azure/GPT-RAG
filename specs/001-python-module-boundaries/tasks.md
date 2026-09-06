@@ -212,6 +212,27 @@ regressions. US3 moves follow T032 -> T033 -> T034 -> T035 -> T036 -> T037 -> T0
 
 ## Parallel Examples
 
+### Implementation resumed
+
+On 2026-09-06 the maintainer explicitly requested implementation of the remaining
+issue work. The previously frozen PRs below are historical checkpoints, not a
+reason to defer executable tasks. The three component owners resume their
+existing branches and PRs; the UI owner also owns the remaining installed-package
+acceptance changes. No second writer edits a component concurrently.
+
+Complete repository-local code and regression evidence before the next handoff.
+Inventory, policy parsing, mutation fixtures, workflow wiring and package moves
+may be marked complete when their own task criteria are demonstrated; lack of
+administrative activation alone must not leave those implementation tasks
+incorrectly unchecked. Conversely, do not mark handler approval or live
+acceptance complete merely because their limitations were documented.
+
+The MAF primary-failure resolution is recorded in the implementation plan:
+reuse the existing safe terminal-error/audit-failure path, with no new wire or
+audit schema. Other failure boundaries retain their individually established
+contracts. Actual review, settings activation, deployment and publication
+remain outside this PR-only authorization.
+
 | Story | Safe independent work |
 | --- | --- |
 | US1 | Orchestrator T009/T012/T015, ingestion T010/T013/T016 and UI T011/T014/T017 proceed under separate owners |
