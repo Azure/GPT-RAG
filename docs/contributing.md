@@ -70,17 +70,17 @@ assessment when their supported behavior is preserved.
     linked below for [#681](https://github.com/Azure/GPT-RAG/issues/681),
     coordinated in [#689](https://github.com/Azure/GPT-RAG/pull/689).
     They are not instructions for the currently released components.
-    The backend checkpoints still fail lint, broad-handler, and bootstrap
+    All three checkpoints still fail lint, broad-handler, and bootstrap
     policy checks. Their passing tests and typing/architecture results do not
     establish a green quality gate or required-check activation.
-    The UI package checkpoint is also unmerged; installed-wheel, container,
-    and complete compatibility evidence are still pending.
+    The UI's clean-dependency installation, Linux container, and expanded
+    installed compatibility evidence are still pending.
 
 ### Repository-local setup
 
 Work in the relevant component checkout, not the umbrella or documentation
 checkout, using an isolated Python 3.12 environment. Read its `AGENTS.md` and
-the linked PR before running the commands. The recorded backend checkpoints
+the linked PR before running the commands. The recorded checkpoints
 used Python 3.12.9, Ruff 0.16.5, mypy 2.3.1, Import Linter 2.14, and Grimp
 3.16. Install the checked-out `requirements-quality.txt`; do not substitute
 tool versions from the original proposal. These are development dependencies,
@@ -90,6 +90,7 @@ not additions to runtime images.
 | --- | --- |
 | [Azure/gpt-rag-orchestrator#346](https://github.com/Azure/gpt-rag-orchestrator/pull/346), `ef649ee` | [AGENTS.md](https://github.com/Azure/gpt-rag-orchestrator/blob/ef649eeab6144156b4c90c4422d62f229454dedc/AGENTS.md#python-quality-policy-bootstrap-under-review) |
 | [Azure/gpt-rag-ingestion#296](https://github.com/Azure/gpt-rag-ingestion/pull/296), `bbe5292` | [Python quality guide](https://github.com/Azure/gpt-rag-ingestion/blob/bbe52923dbaf2b8ce4f6f371e492ad32ae7ffe45/docs/python-quality.md) |
+| [Azure/gpt-rag-ui#110](https://github.com/Azure/gpt-rag-ui/pull/110), `4959eca` | [Python development guide](https://github.com/Azure/gpt-rag-ui/blob/4959ecaf04ea94ce0d35837c73b43ea3884c5be8/docs/python-development.md) |
 
 Fetch the PR's actual target before running checks. In the examples, replace
 `<fetched-protected-target-sha>` with that target commit, not the candidate
@@ -183,8 +184,8 @@ documentation change.
 ## UI Package Contributor Setup
 
 !!! warning "Unmerged package checkpoint"
-    This section describes UI commit
-    [`ce76b00`](https://github.com/Azure/gpt-rag-ui/commit/ce76b00c0a7013ddb13cd97422f3e3d6ac6f5df8),
+    This section describes [Azure/gpt-rag-ui#110](https://github.com/Azure/gpt-rag-ui/pull/110)
+    at [`4959eca`](https://github.com/Azure/gpt-rag-ui/commit/4959ecaf04ea94ce0d35837c73b43ea3884c5be8),
     not the released UI or a completed compatibility matrix. Package
     installation is a contributor setup change, not an instruction to change
     deployed startup commands or enable hosted continuity.
@@ -192,15 +193,15 @@ documentation change.
 ### Install and run from the UI checkout
 
 Use an isolated Python 3.12 environment. The checkpoint's
-[`pyproject.toml`](https://github.com/Azure/gpt-rag-ui/blob/ce76b00c0a7013ddb13cd97422f3e3d6ac6f5df8/pyproject.toml)
+[`pyproject.toml`](https://github.com/Azure/gpt-rag-ui/blob/4959ecaf04ea94ce0d35837c73b43ea3884c5be8/pyproject.toml)
 uses setuptools to install `src/gpt_rag_ui/` and the explicit legacy adapters.
 `requirements.txt` remains the runtime dependency authority; install it before
 installing the code package:
 
 ```powershell
 python -m pip install -r requirements.txt
-python -m pip install --no-deps -e .
 python -m pip install -r requirements-quality.txt
+python -m pip install --no-deps -e .
 python -m unittest discover -s tests -v
 ```
 
@@ -217,10 +218,17 @@ requirements and retains the same Uvicorn target and `/app` working directory.
 An editable-source test alone does not prove installed-wheel or container
 compatibility.
 
+The component's installed-package tests exercise a real non-editable wheel
+outside the checkout with isolated `python -I` subprocesses. They reuse
+third-party dependencies through a system-site-packages virtual environment;
+this is not clean dependency-resolution evidence. Linux container parity and
+the expanded installed authentication, active-configuration, and writable-upload
+matrix remain pending. See the linked component PR for exact results and limits.
+
 ### Find the owning implementation
 
 All locations below are under `src/gpt_rag_ui/`. The checkpoint
-[migration inventory](https://github.com/Azure/gpt-rag-ui/blob/ce76b00c0a7013ddb13cd97422f3e3d6ac6f5df8/.quality/migration.json)
+[migration inventory](https://github.com/Azure/gpt-rag-ui/blob/4959ecaf04ea94ce0d35837c73b43ea3884c5be8/.quality/migration.json)
 records the legacy-to-canonical module map and public exports.
 
 | Responsibility | Owning location and examples |
@@ -245,7 +253,7 @@ modifications or `sys.modules` proxies.
 
 Code installation does not replace the staged application assets: `public/`,
 `.chainlit/`, `chainlit.config.yaml`, `chainlit.md`, and `VERSION`.
-[`config/resources.py`](https://github.com/Azure/gpt-rag-ui/blob/ce76b00c0a7013ddb13cd97422f3e3d6ac6f5df8/src/gpt_rag_ui/config/resources.py)
+[`config/resources.py`](https://github.com/Azure/gpt-rag-ui/blob/4959ecaf04ea94ce0d35837c73b43ea3884c5be8/src/gpt_rag_ui/config/resources.py)
 resolves the existing `CHAINLIT_APP_ROOT` first, then the source adapter
 directory when it contains `chainlit.config.yaml`, otherwise the working
 directory. Set the asset root before startup when using installed code from
@@ -260,7 +268,7 @@ $Base = "<fetched-protected-target-sha>"
 python .github\scripts\check-quality.py --check all --base-ref $Base --report .artifacts\quality.json
 ```
 
-The [UI typing scope](https://github.com/Azure/gpt-rag-ui/blob/ce76b00c0a7013ddb13cd97422f3e3d6ac6f5df8/.quality/typing-scope.json)
+The [UI typing scope](https://github.com/Azure/gpt-rag-ui/blob/4959ecaf04ea94ce0d35837c73b43ea3884c5be8/.quality/typing-scope.json)
 retains the stable IDs for `chat_backend`, `panel_config`, and
 `hosted_continuity_config` at their new `config/` locations and includes newly
 introduced package modules and legacy adapters. Consult that complete
