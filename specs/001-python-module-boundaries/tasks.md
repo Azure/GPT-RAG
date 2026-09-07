@@ -107,7 +107,7 @@ handlers. Dependency failures preserve public errors and safe diagnostics.
 - [X] T022 [P] [US2] Break api-to-main scheduler cycles through explicit jobs-owned state in ingestion/jobs/, ingestion/api/admin.py, ingestion/api/panel.py and ingestion/main.py without duplicating locks/registries.
 - [X] T023 [P] [US2] Extract citation/reference rendering from ui/app.py into ui/src/gpt_rag_ui/services/ and make ui/datalayer.py consume that owner without changing grants or source links.
 - [ ] T024 [P] [US2] Implement full-graph/private-surface/exception-ledger enforcement in orchestrator/.github/scripts/check-quality.py and orchestrator/.quality/, narrowing or explicitly justifying existing handlers.
-- [ ] T025 [P] [US2] Implement equivalent graph/exception enforcement in ingestion/.github/scripts/check-quality.py and ingestion/.quality/, preserving the narrowly best-effort audit contract.
+- [x] T025 [P] [US2] Implement equivalent graph/exception enforcement in ingestion/.github/scripts/check-quality.py and ingestion/.quality/, preserving the narrowly best-effort audit contract.
 - [X] T026 [P] [US2] Implement equivalent graph/exception enforcement in ui/.github/scripts/check-quality.py and ui/.quality/, keeping disabled/not-ready and optional notification contracts explicit.
 - [ ] T027 [P] [US2] Prove unchanged OBO/MCP/retrieval and orchestration failure outcomes in orchestrator/tests/test_foundry_iq_mcp.py, orchestrator/tests/test_orchestration_turn.py and existing audit tests.
 - [x] T028 [P] [US2] Prove scheduler, indexing/deletion/retrieval, config and strict-auth failure outcomes in ingestion/tests/test_admin_jobs_queue.py, ingestion/tests/test_admin_run_now.py and related existing public-boundary tests.
@@ -290,12 +290,30 @@ passed. It retains 93 unproposed sites and 29 inactive proposals. It does not
 include the subsequent primary NL2SQL/Multimodal flow correction or the
 parent's citation-signing handoff.
 
-The current implementation accounting is **42/46 tasks**. T024/T025 still
-require substantive backend dispositions, T027 still requires the remaining
-primary-strategy outcome evidence, and T045 requires final integrated evidence
-and documentation. Ingestion frontend restore also remains blocked by its
-React/React DOM peer mismatch. None of these remaining items is silently
-reclassified as a human-only approval task.
+Ingestion subsequently completed T025 at
+`0f7b1cea85078c7ee4260a20fe4f66255976cb12`: 916 local Python cases passed
+with 150 warnings; all 65 exact inactive proposals reference passing selectors,
+with zero unproposed sites and zero active approvals. The 200 remaining
+findings are explicitly review/adoption categories: 60 BLE001, 65 unapproved
+handlers, 65 pending exception reviews and 10 protected-policy/bootstrap
+findings. No other lint, typing or architecture findings remain at this
+checkpoint. These records are individually characterized proposals, not a
+blanket approval or successful full quality gate.
+
+The parent repaired the ingestion frontend peer/build blockers and returned
+six files to its owner: compatible React DOM runtime/types, the React JSX type
+import, Vitest configuration typing, and the matching Tailwind 4 PostCSS
+adapter loading the existing theme configuration. Clean `npm ci`, the existing
+frontend test, lint and TypeScript/Vite build passed with Node 22.14.0.
+The local Node 20.14.0 was insufficient for the already-declared Vite 8.
+No global runtime, Docker entrypoint, Python pins or dashboard behavior was
+changed. The owner must still commit the returned frontend and collect final
+same-head CI; local handoff results are not that CI receipt.
+
+The current implementation accounting is **43/46 tasks**. T024 still requires
+remaining orchestrator dispositions, T027 awaits its remaining primary-strategy
+outcome evidence, and T045 requires final integrated evidence and documentation.
+No remaining code work is silently reclassified as human-only approval.
 
 #### Delivered history boundary
 

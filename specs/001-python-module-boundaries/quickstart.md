@@ -117,9 +117,9 @@ contracts remains independent of these owner-reported checkpoint results.
 
 ### UI evidence and image checkpoint reproduction
 
-UI `e9620fce81daa879c0d945113911e58ae4b574e3` includes a unittest evidence
-runner and requires a shared execution identity for local evidence consumption.
-The commands below use that checkpoint's interface, not the initial UI draft:
+UI `ee35c9ffea67902b4dc935e287beb5d4640ce6d6` includes the completed
+repository-local package/history/isolation work and a unittest evidence runner.
+It requires a shared execution identity for local evidence consumption:
 
 ```powershell
 $env:QUALITY_RUN_ID = [guid]::NewGuid().ToString()
@@ -160,8 +160,15 @@ passes 483 unit cases, including twelve new history-boundary regressions, and
 The framework adapter/factory/context now lives in `api.history`; the service
 receives explicit operation context and retains the single user-cache owner.
 Legacy `datalayer` exports still resolve to their canonical implementation.
-Its evidence CLI remains the one above. Typing/architecture pass while the
-aggregate remains red; this is not final quality or full U4 acceptance.
+Its evidence CLI remains the one above. That history milestone is superseded
+for final code evidence by `ee35c9ffea67902b4dc935e287beb5d4640ce6d6`.
+Actual workflow `34050677391` passed 521 source/installed cases with zero skips
+and 455 offline Linux-image cases. Eleven clean non-editable package methods
+cover the installed/startup/resource boundaries. Lint, typing and architecture
+passed; 28 exact inactive boundary proposals and protected-policy bootstrap
+still fail adoption. U1/U4 repository-local implementation is delivered.
+This does not substitute for genuine review, active required checks or live
+identity, peer and recovery acceptance.
 
 ## 3. Prove rejection and required merge enforcement
 
