@@ -269,6 +269,23 @@ multimodal welcome output from model text still held in the multimodal buffer.
 Exercise success, cancellation and explicit tool-result controls as well as
 unexpected failures through the actual orchestration and SSE boundary.
 
+#### Existing identity fallbacks are not newly approved
+
+Characterize the existing `SearchContextProvider.invoking` fallback after an
+OBO callback failure without changing its identity selection in this issue.
+Its exact inactive compatibility proposal must expose the continued query
+without delegated query-source authorization. Do not infer strict OBO
+enforcement from `ALLOW_ANONYMOUS=false` when a caller explicitly overrides
+the callback's anonymous setting. This is negative compatibility evidence,
+not approval of service-identity fallback or permission policy. Any correction
+to that demonstrated identity choice requires a separate grounded decision.
+
+Similarly, preserve and explicitly characterize the existing API-key
+environment fallback on configuration-provider failure. Missing optional
+configuration already has a provider-level default/`allow_none` contract;
+unexpected reads must not be silently relabeled as missing configuration.
+Bound diagnostics without creating new access or approving retained handlers.
+
 ### 3. Migrate the UI by dependency slice
 
 Introduce package metadata/install support first, with runtime dependencies
