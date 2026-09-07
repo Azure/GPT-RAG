@@ -111,10 +111,18 @@ startup requirements to its existing pytest command. The report and test-evidenc
 argument names remain component-specific.
 
 These drafts intentionally do **not** satisfy the exit-0 acceptance target:
-orchestrator handler dispositions and protected review/adoption remain
-outstanding. Ingestion's final `f51f5154a0a63df8c7479c14d0b2ddaff93a7f13`
-has zero unproposed handlers and no ordinary lint findings; its 65 exact
-inactive proposals still fail the unapproved-handler/review gates.
+protected review/adoption remains outstanding, not runtime implementation.
+Orchestrator's final `6b652d8c4d664863a3d02d439b7b77210963320d` has
+98 exact inactive proposals, zero unproposed sites and zero stale fingerprints.
+Its same-head CI `34170936566` passed 1,880 cases plus frontend, typing and
+architecture; the separate agent-assets workflow also passed. Its remaining
+findings are 84 BLE001, 196 exception-policy findings for the 98 unapproved
+handlers and 98 inactive records, and one protected-bootstrap review.
+Ingestion's final `f51f5154a0a63df8c7479c14d0b2ddaff93a7f13` has zero
+unproposed handlers and no ordinary lint findings; its 65 exact inactive
+proposals still fail the unapproved-handler/review gates. Same-head CI
+`34125232907` passed 926 Python cases and the existing frontend test, lint
+and build after clean installation, as well as typing, architecture and assets.
 Do not approve exceptions or lower policy to reproduce a green result.
 Passing existing tests or selected architecture/typing checks is not full
 acceptance. Review of exact policy schemas, adversarial cases and public failure

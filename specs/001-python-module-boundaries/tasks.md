@@ -106,7 +106,7 @@ handlers. Dependency failures preserve public errors and safe diagnostics.
 - [X] T021 [P] [US2] Break Search/Foundry IQ OBO cycle through a focused same-repository helper in orchestrator/src/connectors/, retaining existing callable behavior and compatibility exports.
 - [X] T022 [P] [US2] Break api-to-main scheduler cycles through explicit jobs-owned state in ingestion/jobs/, ingestion/api/admin.py, ingestion/api/panel.py and ingestion/main.py without duplicating locks/registries.
 - [X] T023 [P] [US2] Extract citation/reference rendering from ui/app.py into ui/src/gpt_rag_ui/services/ and make ui/datalayer.py consume that owner without changing grants or source links.
-- [ ] T024 [P] [US2] Implement full-graph/private-surface/exception-ledger enforcement in orchestrator/.github/scripts/check-quality.py and orchestrator/.quality/, narrowing or explicitly justifying existing handlers.
+- [X] T024 [P] [US2] Implement full-graph/private-surface/exception-ledger enforcement in orchestrator/.github/scripts/check-quality.py and orchestrator/.quality/, narrowing or explicitly justifying existing handlers.
 - [x] T025 [P] [US2] Implement equivalent graph/exception enforcement in ingestion/.github/scripts/check-quality.py and ingestion/.quality/, preserving the narrowly best-effort audit contract.
 - [X] T026 [P] [US2] Implement equivalent graph/exception enforcement in ui/.github/scripts/check-quality.py and ui/.quality/, keeping disabled/not-ready and optional notification contracts explicit.
 - [X] T027 [P] [US2] Prove unchanged OBO/MCP/retrieval and orchestration failure outcomes in orchestrator/tests/test_foundry_iq_mcp.py, orchestrator/tests/test_orchestration_turn.py and existing audit tests.
@@ -162,7 +162,7 @@ reviewable PR record. Recording blocked acceptance does not satisfy that
 acceptance criterion.
 
 - [X] T044 Review specs/001-python-module-boundaries/plan.md and contracts/ against actual implementation; document justified refinements without silently reducing acceptance.
-- [ ] T045 Validate links/task syntax and run the final existing full component suites, applicable frontend checks, UI package/container cases and existing asset/docs checks from specs/001-python-module-boundaries/quickstart.md in the owning tests/ and workflows; record commands, SHAs, outcomes and unavailable evidence separately.
+- [X] T045 Validate links/task syntax and run the final existing full component suites, applicable frontend checks, UI package/container cases and existing asset/docs checks from specs/001-python-module-boundaries/quickstart.md in the owning tests/ and workflows; record commands, SHAs, outcomes and unavailable evidence separately.
 - [X] T046 Commit only scoped files and create/update the umbrella feature PR targeting develop, including docs/adr/ADR-0005-python-quality-gates-and-ui-package.md and specs/001-python-module-boundaries/.
 
 ## Dependencies and Execution Order
@@ -332,14 +332,104 @@ The parent also returned a bounded HTTP/startup/dashboard slice to the
 orchestrator owner: 44 new cases plus adjacent existing cases passed 229
 tests locally. It preserves optional warmup, cancellation, auth statuses and
 partial configuration writes while removing unsafe raw diagnostics and
-unexpected configuration-to-default translations. Owner integration and
-same-head final evidence remain pending; this local receipt is not attributed
-to the earlier 2dc commit.
+unexpected configuration-to-default translations. The owner integrated it at
+`b93fb58cdb59dbb30b1db88b39c8843296b7713b`; this local receipt is not
+attributed to the earlier 2dc commit.
 
-The current implementation accounting is **44/46 tasks**. T024 still requires
-remaining orchestrator dispositions, and T045 requires final integrated
-evidence and documentation.
-No remaining code work is silently reclassified as human-only approval.
+The final parent legacy-runtime handoff covers the provider, single-agent
+strategy and orchestration runtime. Fifteen diagnostic regressions failed
+before correction, while 22 compatibility controls passed. The resulting
+37 new cases and adjacent hosted, thread/history, audit and primary-strategy
+cases passed 146 tests with 6 warnings locally. Two redundant wrappers were
+removed; eleven remaining boundaries have individual failure/cancellation
+evidence integrated into the inactive proposal ledger at the final commit
+below. The targeted local result remains distinct from the full CI receipt.
+
+The one-shot invalid-payload retry remains limited to failure before any
+output and preserves input, thread and non-token options. Managed turn writes
+are not retried: ambiguous failure is reconciled only against the exact
+two-message tail, while reconciliation failure preserves the original write
+exception. Hosted execution keeps its separate no-managed-conversation path.
+Optional startup, feedback resolution and detached persistence remain
+distinct from primary streaming failure. Legacy search-context and strategy
+token-setter failures retain their existing continuation behavior with bounded
+diagnostics; this is negative compatibility evidence, not strict OBO
+enforcement or new permission approval.
+
+#### Final orchestrator implementation closure
+
+Orchestrator T024 is delivered at
+`6b652d8c4d664863a3d02d439b7b77210963320d` in
+[Azure/gpt-rag-orchestrator#346](https://github.com/Azure/gpt-rag-orchestrator/pull/346).
+The final inventory contains 98 broad sites with 98 exact inactive proposals,
+zero unproposed sites, zero stale fingerprints and zero active approvals.
+This supersedes the incomplete orchestrator milestones above without erasing
+their historical evidence. The dependency and context-provider integrations
+retain the explicitly documented legacy identity fallbacks, not new permission.
+
+[Same-head CI 34170936566](https://github.com/Azure/gpt-rag-orchestrator/actions/runs/34170936566)
+completed with 1,880 passing cases, 8 warnings and 128.90 seconds on Python
+3.12.14, including 315 quality cases. Frontend, typing, architecture and the
+separate [agent-assets workflow](https://github.com/Azure/gpt-rag-orchestrator/actions/runs/34170936577)
+passed. Parent inspected the five downloaded quality reports, all bound to
+the exact final SHA: lint has 84 BLE001 findings; exceptions has 98 unapproved
+handlers and 98 inactive-record findings; policy has one bootstrap-review
+finding. No other finding category or analysis execution error is present.
+The aggregate remains correctly blocked, not green or activated.
+
+Parent reviewed the final `31348dc..6b652d8` source delta, new Foundry/helper
+regressions and exact ledger fixtures. No significant new logic issue was
+found. Foundry credential failures do not issue an HTTP request; HTTP errors
+retain status without response bodies. Nullable provider construction can
+still produce ordinary ungrounded answers, which is not successful retrieval.
+Intent failure keeps the question fallback; optional image validation strips
+images without discarding the answer. These are bounded, characterized
+compatibility outcomes, not blanket authorization of recovery.
+
+#### Final coordinated delivery
+
+The current implementation accounting is **46/46 tasks**, within the authorized
+PR-only delivery scope. The runtime and documentation implementation is delivered;
+this is not full feature acceptance, green quality adoption or permission to
+merge. The historical pending-work statements below describe earlier milestones.
+
+| Surface | Final immutable candidate | PR / target |
+| --- | --- | --- |
+| Orchestrator | `6b652d8c4d664863a3d02d439b7b77210963320d` | [Azure/gpt-rag-orchestrator#346](https://github.com/Azure/gpt-rag-orchestrator/pull/346) / develop |
+| Ingestion | `f51f5154a0a63df8c7479c14d0b2ddaff93a7f13` | [Azure/gpt-rag-ingestion#296](https://github.com/Azure/gpt-rag-ingestion/pull/296) / develop |
+| UI | `ee35c9ffea67902b4dc935e287beb5d4640ce6d6` | [Azure/gpt-rag-ui#110](https://github.com/Azure/gpt-rag-ui/pull/110) / develop |
+| Documentation | `de1d66d236173c33cac1936a79ed05037baf2d9b` | [#688](https://github.com/Azure/GPT-RAG/pull/688) / docs |
+
+The documentation owner completed one final reconciliation commit after
+`b81befa`: eleven edited pages, covering twelve existing pages across the full
+PR. Contributor setup, current ownership, primary versus typed/optional failure
+outcomes, identity limitations, partial configuration writes, ACL failures and
+purge/persistence evidence are aligned with the final component sources.
+Parent read the entire immutable final documentation delta and found no
+significant discrepancy. No pages, navigation entries or deployment defaults
+were added.
+
+After its last edit, existing `python -m mkdocs build --site-dir
+<session-artifacts>\docs-candidate-site` passed in 28.06 seconds using MkDocs
+1.6.1 / Python 3.12.9. The owner inspected twelve rendered pages and 54 local
+article links/anchors, with zero broken references; only the pre-existing
+navigation INFO remains. The final #688 body was read back at `de1d66d` with
+the same component refs, outcomes and publication restrictions.
+
+Parent ran the existing `.github/scripts/validate-agentic-assets.py`, checked
+the 46 unique stable task IDs and local feature-document links, and verified
+the final scoped diff. Component-specific reproduction commands remain in
+[quickstart.md](quickstart.md), and their full suites/frontend/package/image
+results above come from actual immutable-head workflows, not invented combined
+or live test execution.
+
+The review/adoption gate still requires genuine decisions on the 98/65/28
+inactive proposals and protected-policy bootstrap. Required-check activation,
+controlled positive/negative merge-eligibility exercises, exact-peer live
+integration and recovery remain separately unauthorized and unperformed.
+No manifest change, merge, release/tag/image/package publication, Azure
+deployment or repository-settings activation is included. The previous-artifact
+recovery targets below remain valid, but cannot undo durable writes or deletions.
 
 #### Delivered history boundary
 
