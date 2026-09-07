@@ -109,7 +109,7 @@ handlers. Dependency failures preserve public errors and safe diagnostics.
 - [ ] T024 [P] [US2] Implement full-graph/private-surface/exception-ledger enforcement in orchestrator/.github/scripts/check-quality.py and orchestrator/.quality/, narrowing or explicitly justifying existing handlers.
 - [x] T025 [P] [US2] Implement equivalent graph/exception enforcement in ingestion/.github/scripts/check-quality.py and ingestion/.quality/, preserving the narrowly best-effort audit contract.
 - [X] T026 [P] [US2] Implement equivalent graph/exception enforcement in ui/.github/scripts/check-quality.py and ui/.quality/, keeping disabled/not-ready and optional notification contracts explicit.
-- [ ] T027 [P] [US2] Prove unchanged OBO/MCP/retrieval and orchestration failure outcomes in orchestrator/tests/test_foundry_iq_mcp.py, orchestrator/tests/test_orchestration_turn.py and existing audit tests.
+- [X] T027 [P] [US2] Prove unchanged OBO/MCP/retrieval and orchestration failure outcomes in orchestrator/tests/test_foundry_iq_mcp.py, orchestrator/tests/test_orchestration_turn.py and existing audit tests.
 - [x] T028 [P] [US2] Prove scheduler, indexing/deletion/retrieval, config and strict-auth failure outcomes in ingestion/tests/test_admin_jobs_queue.py, ingestion/tests/test_admin_run_now.py and related existing public-boundary tests.
 - [X] T029 [P] [US2] Prove backend, auth/ownership, download, panel/store and configuration failure outcomes in ui/tests/test_download_security.py, ui/tests/test_panel_routes.py and related existing suites.
 
@@ -307,12 +307,38 @@ adapter loading the existing theme configuration. Clean `npm ci`, the existing
 frontend test, lint and TypeScript/Vite build passed with Node 22.14.0.
 The local Node 20.14.0 was insufficient for the already-declared Vite 8.
 No global runtime, Docker entrypoint, Python pins or dashboard behavior was
-changed. The owner must still commit the returned frontend and collect final
-same-head CI; local handoff results are not that CI receipt.
+changed. The owner integrated the frontend and an existing-workflow frontend
+job at final commit `f51f5154a0a63df8c7479c14d0b2ddaff93a7f13`.
+Same-head CI `34125232907` passed 926 Python cases with 146 warnings in
+26.81 seconds, plus clean npm installation, one frontend test, lint and the
+TypeScript/Vite build on Node 22.23.2. Typing, architecture and the separate
+agent-assets workflow also passed. The 65 proposals remain inactive, with
+zero unproposed handlers; lint/exception/policy/aggregate failures remain
+review/adoption-only. Independent review of backend `9022245..0f7b1c`
+found no significant issues. No ingestion implementation remains pending;
+this is not exception approval, merge protection or live deployment evidence.
 
-The current implementation accounting is **43/46 tasks**. T024 still requires
-remaining orchestrator dispositions, T027 awaits its remaining primary-strategy
-outcome evidence, and T045 requires final integrated evidence and documentation.
+Orchestrator T027 is delivered at
+`2dc69285efa3d6bffb661e05e69797f54e1be45c`. Its real primary-strategy
+regressions cover NL2SQL/Multimodal failure, cancellation, partial welcome
+output, typed SQL-result controls, audit outcome and generic deduplicated SSE;
+the preceding MAF correction remains in the same history. Same-head CI
+`34123751052` passed 1,333 cases with 8 warnings in 46.81 seconds, including
+the existing OBO/MCP/retrieval cases. Frontend, typing and architecture passed;
+other quality gates remain red. This does not dispose of the remaining
+independent handlers in T024.
+
+The parent also returned a bounded HTTP/startup/dashboard slice to the
+orchestrator owner: 44 new cases plus adjacent existing cases passed 229
+tests locally. It preserves optional warmup, cancellation, auth statuses and
+partial configuration writes while removing unsafe raw diagnostics and
+unexpected configuration-to-default translations. Owner integration and
+same-head final evidence remain pending; this local receipt is not attributed
+to the earlier 2dc commit.
+
+The current implementation accounting is **44/46 tasks**. T024 still requires
+remaining orchestrator dispositions, and T045 requires final integrated
+evidence and documentation.
 No remaining code work is silently reclassified as human-only approval.
 
 #### Delivered history boundary

@@ -46,7 +46,9 @@ python -m unittest discover -s tests -p "test_main*.py" -v
 Choose additional existing auth, datalayer, citations, continuity and panel tests
 from the compatibility inventory when their owner moves. Full suites are
 required for final component/integration evidence, not every documentation edit.
-Keep existing frontend jobs; no frontend source change is planned.
+Keep existing frontend jobs. Ingestion's final implementation also repairs
+existing frontend dependency/build blockers and adds a frontend job to its
+existing Tests workflow.
 
 Record exact commands, exit status, SHA and pre-existing failures. A prior
 failure is not silently accepted as a quality-policy exception.
@@ -109,7 +111,10 @@ startup requirements to its existing pytest command. The report and test-evidenc
 argument names remain component-specific.
 
 These drafts intentionally do **not** satisfy the exit-0 acceptance target:
-inherited lint/broad-handler findings and bootstrap review remain outstanding.
+orchestrator handler dispositions and protected review/adoption remain
+outstanding. Ingestion's final `f51f5154a0a63df8c7479c14d0b2ddaff93a7f13`
+has zero unproposed handlers and no ordinary lint findings; its 65 exact
+inactive proposals still fail the unapproved-handler/review gates.
 Do not approve exceptions or lower policy to reproduce a green result.
 Passing existing tests or selected architecture/typing checks is not full
 acceptance. Review of exact policy schemas, adversarial cases and public failure
@@ -135,10 +140,10 @@ wrong-execution evidence must not authorize an exception.
 The existing UI workflow also builds the actual Dockerfile and runs
 `tests/container_smoke.py` explicitly in the ephemeral Linux image, offline with
 a read-only tests mount. The helper is intentionally outside `test_*.py`
-discovery. At this checkpoint, actual ready/not-ready Uvicorn listeners,
-installed origins, staged assets and 410 existing behavioral cases passed.
-The full unit job passed 456 cases, including clean-wheel and actual
-startup/upload acceptance. Quality adoption remains incomplete; successful
+discovery. At this final UI checkpoint, actual ready/not-ready Uvicorn listeners,
+installed origins, staged assets and 455 image cases passed.
+The full unit job passed 521 source/installed cases, including clean-wheel and
+actual synthetic startup/file-persistence acceptance. Quality adoption remains incomplete; successful
 image/unit jobs do not imply a passing `quality-gate` or Azure integration.
 
 Later same-head results and independently reviewed repairs are recorded in
