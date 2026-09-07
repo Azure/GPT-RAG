@@ -51,7 +51,7 @@ of Azure/GPT-RAG. Unprefixed paths belong to this umbrella branch.
 completion gates that repository's stories, not independent work in peers.
 
 - [X] T006 [P] Add exact compatible development tool pins and schema-validated policy.json, typing-scope.json, typing-baseline.json and exceptions.json records in orchestrator/requirements-quality.txt, orchestrator/.quality/ and orchestrator/.github/scripts/check-quality.py; reject missing/unknown/invalid records per data-model.md.
-- [ ] T007 [P] Add equivalent exact pins and validated four-record parsing in ingestion/requirements-quality.txt, ingestion/.quality/ and ingestion/.github/scripts/check-quality.py, preserving flat-module discovery.
+- [x] T007 [P] Add equivalent exact pins and validated four-record parsing in ingestion/requirements-quality.txt, ingestion/.quality/ and ingestion/.github/scripts/check-quality.py, preserving flat-module discovery.
 - [X] T008 [P] Add equivalent exact pins and validated four-record parsing in ui/requirements-quality.txt, ui/.quality/ and ui/.github/scripts/check-quality.py, preserving stable identities for legacy/package moves.
 
 **Checkpoint**: No blanket ignores, runtime dependency pollution, dynamic source
@@ -71,16 +71,16 @@ the complete US2 policy and separately authorized administrative activation.
 ### Tests
 
 - [X] T009 [P] [US1] Add Q6 lint/type ratchet, suppression, move identity and tool-error fixtures in orchestrator/tests/test_quality_policy.py; cover missing/skipped/neutral jobs, stale/wrong-SHA artifacts and candidate self-approval attempts before implementing the checker/aggregate.
-- [ ] T010 [P] [US1] Add equivalent Q6 lint/type, suppression, move, tool-error and job/artifact/policy-integrity fixtures in ingestion/tests/test_quality_policy.py.
+- [x] T010 [P] [US1] Add equivalent Q6 lint/type, suppression, move, tool-error and job/artifact/policy-integrity fixtures in ingestion/tests/test_quality_policy.py.
 - [X] T011 [P] [US1] Add equivalent unittest fixtures in ui/tests/test_quality_policy.py, including flat-to-package moves retaining coverage and aggregate/policy tampering rejection.
 
 ### Implementation
 
 - [X] T012 [P] [US1] Implement explicit Ruff/mypy settings, protected minimum typing scope, individual-finding baseline and structured reports in orchestrator/pyproject.toml, orchestrator/.quality/ and orchestrator/.github/scripts/check-quality.py.
-- [ ] T013 [P] [US1] Implement equivalent flat-layout lint/type enforcement in ingestion/pyproject.toml, ingestion/.quality/ and ingestion/.github/scripts/check-quality.py.
+- [x] T013 [P] [US1] Implement equivalent flat-layout lint/type enforcement in ingestion/pyproject.toml, ingestion/.quality/ and ingestion/.github/scripts/check-quality.py.
 - [X] T014 [P] [US1] Implement equivalent UI lint/type enforcement and migration-safe scope in ui/pyproject.toml, ui/.quality/ and ui/.github/scripts/check-quality.py.
 - [X] T015 [P] [US1] Wire the protected-base evaluator, actual same-workflow dependencies and always-evaluated quality-gate into orchestrator/.github/workflows/pr_pipeline.yaml; pin action SHAs, preserve frontend/tests, protect policy/workflow/tool files in orchestrator/.github/CODEOWNERS using verified maintainers, and document separate latest-head review/rules activation without privileged PR execution.
-- [ ] T016 [P] [US1] Wire equivalent protected-base quality-gate and policy ownership in ingestion/.github/workflows/tests.yml and ingestion/.github/CODEOWNERS, preserving existing tests/frontend checks and rejecting incomplete job/artifact evidence.
+- [x] T016 [P] [US1] Wire equivalent protected-base quality-gate and policy ownership in ingestion/.github/workflows/tests.yml and ingestion/.github/CODEOWNERS, preserving existing tests/frontend checks and rejecting incomplete job/artifact evidence.
 - [X] T017 [P] [US1] Wire equivalent protected-base quality-gate and policy ownership in ui/.github/workflows/tests.yml and ui/.github/CODEOWNERS, retaining unittest and reporting incomplete execution as failure.
 
 **Checkpoint**: Workflow evidence is distinct from administrator-required merge
@@ -98,7 +98,7 @@ handlers. Dependency failures preserve public errors and safe diagnostics.
 ### Tests
 
 - [X] T018 [P] [US2] Add Q6 full-graph, cross-root/late/type-only cycle, private-member, legitimate facade/sibling, dynamic-import and broad-handler fixtures in orchestrator/tests/test_quality_policy.py; include aliases, tuples, exception groups, logged/re-raised handlers and stale or unexecuted exception evidence.
-- [ ] T019 [P] [US2] Add equivalent flat-root and cross-root fixtures in ingestion/tests/test_quality_policy.py.
+- [x] T019 [P] [US2] Add equivalent flat-root and cross-root fixtures in ingestion/tests/test_quality_policy.py.
 - [X] T020 [P] [US2] Add equivalent flat/package/adapter and registration fixtures in ui/tests/test_quality_policy.py.
 
 ### Implementation
@@ -110,7 +110,7 @@ handlers. Dependency failures preserve public errors and safe diagnostics.
 - [ ] T025 [P] [US2] Implement equivalent graph/exception enforcement in ingestion/.github/scripts/check-quality.py and ingestion/.quality/, preserving the narrowly best-effort audit contract.
 - [X] T026 [P] [US2] Implement equivalent graph/exception enforcement in ui/.github/scripts/check-quality.py and ui/.quality/, keeping disabled/not-ready and optional notification contracts explicit.
 - [ ] T027 [P] [US2] Prove unchanged OBO/MCP/retrieval and orchestration failure outcomes in orchestrator/tests/test_foundry_iq_mcp.py, orchestrator/tests/test_orchestration_turn.py and existing audit tests.
-- [ ] T028 [P] [US2] Prove scheduler, indexing/deletion/retrieval, config and strict-auth failure outcomes in ingestion/tests/test_admin_jobs_queue.py, ingestion/tests/test_admin_run_now.py and related existing public-boundary tests.
+- [x] T028 [P] [US2] Prove scheduler, indexing/deletion/retrieval, config and strict-auth failure outcomes in ingestion/tests/test_admin_jobs_queue.py, ingestion/tests/test_admin_run_now.py and related existing public-boundary tests.
 - [X] T029 [P] [US2] Prove backend, auth/ownership, download, panel/store and configuration failure outcomes in ui/tests/test_download_security.py, ui/tests/test_panel_routes.py and related existing suites.
 
 ## Phase 5: US3 - Navigate a Modular Compatible UI (P2)
@@ -263,14 +263,39 @@ cases and a passing frontend build at this checkpoint. Remaining legacy
 handler dispositions are substantive implementation work: T024 and final
 cross-component T045 remain unchecked.
 
-The parent also handed seven ingestion chunking/runtime-test files back to the
-ingestion owner for integration. After correcting test fixtures, 29 genuine
+The ingestion owner delivered T007/T010/T013/T016/T019 and the named public
+failure evidence in T028 in
+[Azure/gpt-rag-ingestion#296](https://github.com/Azure/gpt-rag-ingestion/pull/296).
+The protected evaluator, flat-layout ratchets, adversarial fixtures and
+same-workflow evidence checks are implemented, not activated merge settings.
+The remaining T025 legacy-handler work is separate from those foundations.
+
+The parent handed seven ingestion chunking/runtime-test files back to the
+ingestion owner. After correcting test fixtures, 29 genuine
 failure cases reproduced cancellation suppression, hidden failures, unsafe
 diagnostics, false upload confirmation and resource leaks. The corrected
 46-case chunk/parser selection plus existing ingestion/metadata/Search/audit
-cases passed 147 cases. These are **local handoff results**, not an immutable
-component commit or live source-to-Search acceptance; final integration and
-documentation remain with the component and docs owners.
+cases passed 147 cases. The owner integrated that work at
+`26358cb8f57c982e3c80171bf8dc6b154491388d`; actual CI run `34060288839`
+passed 666 cases with 96 warnings. This is offline component evidence, not
+live source-to-Search acceptance. The subsequent operator/startup checkpoint
+`902224592414cf4000cb5e96caaf6999a4604953` reports 703 local cases and
+35 inactive proposals, with 95 unproposed sites still requiring disposition.
+Its local count must not be attributed to the earlier CI run.
+
+The later orchestrator profile-helper checkpoint
+`b5b04ea5bebf96ff3afda4d12cd3fc0805705a06` passed 1,290 cases with 8
+warnings in Linux CI `34067719459`; frontend, typing, architecture and assets
+passed. It retains 93 unproposed sites and 29 inactive proposals. It does not
+include the subsequent primary NL2SQL/Multimodal flow correction or the
+parent's citation-signing handoff.
+
+The current implementation accounting is **42/46 tasks**. T024/T025 still
+require substantive backend dispositions, T027 still requires the remaining
+primary-strategy outcome evidence, and T045 requires final integrated evidence
+and documentation. Ingestion frontend restore also remains blocked by its
+React/React DOM peer mismatch. None of these remaining items is silently
+reclassified as a human-only approval task.
 
 #### Delivered history boundary
 

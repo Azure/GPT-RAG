@@ -251,6 +251,24 @@ disposition. Required broad boundaries still need genuine review, not an
 agent-created approval. Document the candidate behavior as unshipped until
 its component is released.
 
+#### Remaining primary strategy failures
+
+Inspection at orchestrator `b5b04ea5bebf96ff3afda4d12cd3fc0805705a06`
+identifies the same false-success interception specifically in the outer
+`initiate_agent_flow` handlers of `NL2SQLStrategy` and `MultimodalStrategy`.
+Remove those two outer handlers so thrown primary failures reach the existing
+safe turn/SSE/audit path; do not create a new protocol or mark a failed answer
+as successfully completed history.
+
+This disposition does not change NL2SQL's explicit typed validation and
+execution-result answer branches. Preserve multimodal buffering, image
+deduplication/validation, session welcome and successful history updates.
+Preserve the separately bounded optional profile operations and cancellation.
+Regression evidence must distinguish actual partial NL2SQL output and
+multimodal welcome output from model text still held in the multimodal buffer.
+Exercise success, cancellation and explicit tool-result controls as well as
+unexpected failures through the actual orchestration and SSE boundary.
+
 ### 3. Migrate the UI by dependency slice
 
 Introduce package metadata/install support first, with runtime dependencies
