@@ -525,6 +525,12 @@ empty content is still appended to the result list whether or not its
 `grounding.source.rejected` audit event was emitted; audit evidence describes
 what the orchestrator did, it does not gate what the orchestrator does.
 
+Request-terminal events report the outcome observed at the instrumented
+boundary. If a strategy catches a primary failure and returns ordinary text,
+that boundary can record `outcome.produced` and `request.completed` instead of
+failure. Those events are not independent proof that the strategy's work
+succeeded. See [streaming outcomes and the unmerged MAF correction](services_orchestrator.md#streaming-outcomes).
+
 Audit emission is deliberately best effort:
 
 - sanitization or serialization failure discards the original payload and
@@ -541,6 +547,10 @@ Audit emission is deliberately best effort:
 - the Azure Monitor batch exporter has no application callback for later
   delivery failure, so an asynchronous export failure cannot produce a reliable
   failure event.
+
+This best-effort rule applies to audit side effects, not to a required primary
+operation. It does not authorize converting a failed user operation into a
+successful response or make every unrelated optional operation fatal.
 
 The implementation does not add a separate health event, metric, rate limiter,
 or delivery acknowledgment. Operators must use Azure Monitor ingestion health,

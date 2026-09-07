@@ -185,6 +185,13 @@ Rules to keep straight:
   permission configuration should be treated as an error, not as permission
   to run an unfiltered query.
 
+!!! warning "Unmerged compatibility evidence is not permission approval"
+    The orchestrator quality candidate retains
+    [legacy context-provider identity fallbacks](howto_authentication.md#classic-container-apps-token-flow)
+    under inactive proposals. Its negative evidence is not proof that every
+    strategy enforces the fail-closed requirement above. MCP-specific guards
+    and non-MCP compatibility behavior must not be conflated.
+
 ## Configuration settings
 
 All runtime settings are stored in Azure App Configuration with the `gpt-rag`

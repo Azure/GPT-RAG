@@ -37,6 +37,65 @@ The Orchestrator supports multiple strategies. The active strategy is set via th
 | `mcp` | MCP | Model Context Protocol strategy using Semantic Kernel. Connects to an MCP server for tool orchestration and passes user context via HTTP headers. |
 | `nl2sql` | NL2SQL | Natural language to SQL translation using Microsoft Agent Framework `ChatAgent` with local metadata lookup, SQL validation, and query execution. No Semantic Kernel or Agent Service agent creation is used in this path. |
 
+## Streaming outcomes
+
+An HTTP response starting successfully, or some answer text arriving, does not
+prove that a streamed turn completed successfully. When a failure reaches the
+classic `POST /orchestrator` stream boundary, the existing terminal SSE event is
+`event: error` with `data: An internal server error occurred.`. Earlier partial
+output does not turn that failure into a successful answer. Cancellation is a
+separate outcome, not a generic internal error. This classic wire format does
+not replace the separate [hosted Responses contract](hosted_agent_release_matrix.md#stateless-hosted-runtime-contract).
+
+The [audit failure semantics](governance_audit_contract_v1.md#failure-semantics-and-evidence-gaps)
+describe what reaches the instrumented request boundary; a normal completion
+event is not independent proof that every operation inside a strategy succeeded.
+
+!!! warning "Unmerged primary-failure corrections"
+    At the recorded [Azure/gpt-rag-orchestrator#346](https://github.com/Azure/gpt-rag-orchestrator/pull/346)
+    checkpoint [`f06d0cd`](https://github.com/Azure/gpt-rag-orchestrator/commit/f06d0cd7204c63e61ce1b6c80ae768c5f7f0597c),
+    `maf_lite` and `maf_agent_service` propagate primary failures instead of
+    returning raw exception details as ordinary assistant text. The existing
+    `TurnErrorEvent`, `outcome.rejected` and `request.failed` path now observes
+    those failures before or after partial output, without changing the wire
+    format, schemas or distinct cancellation behavior.
+
+    Checkpoint [`2dc6928`](https://github.com/Azure/gpt-rag-orchestrator/commit/2dc69285efa3d6bffb661e05e69797f54e1be45c)
+    extends this correction to thrown primary failures in `nl2sql` and
+    `multimodal`. NL2SQL's explicit typed validation and execution-result
+    answers remain completed answers, distinct from thrown failures.
+    Multimodal still buffers the model answer for image deduplication and
+    optional validation before emission; its welcome prefix can arrive earlier.
+    Buffered content is not emitted partial output. The added real-chain
+    regressions distinguish these paths, cancellation and successful history
+    from a failed turn, without adding raw error text to completed answer history.
+
+    The SSE boundary logs a constant diagnostic without a traceback. The
+    enclosing orchestration span disables automatic exception events and
+    exception-derived status descriptions, then explicitly records
+    `ERROR` / `internal_error` for primary failure. The checkpoint's real-chain
+    MAF tests cover both strategies' success, early/partial failure, client
+    initialization failure and cancellation, including an in-memory SDK span
+    exporter. This is bounded application-owned evidence, not a guarantee
+    about every third-party span, legacy log or live integration.
+
+    This observable failure-path correction is coordinated in
+    [#689](https://github.com/Azure/GPT-RAG/pull/689) and is not released behavior
+    or full quality/exception approval. Separate optional profile, search,
+    intent and context-provider contracts are not made universally fatal.
+
+!!! warning "Unmerged retained retrieval limitations"
+    At [`6b652d8`](https://github.com/Azure/gpt-rag-orchestrator/commit/6b652d8c4d664863a3d02d439b7b77210963320d),
+    Foundry credential failure prevents that client's retrieve request, and
+    failed HTTP retrieval retains its status without exposing the response
+    body. This is distinct from strategy provider-construction failure:
+    `maf_lite`, `maf_agent_service` and `multimodal` still accept a `None`
+    provider and can produce an ordinary answer without grounding. The
+    candidate characterizes that legacy outcome under inactive proposals;
+    successful answer generation is not proof of successful retrieval.
+    [Retained identity fallbacks](howto_authentication.md#classic-container-apps-token-flow)
+    are not new permission approval or strict OBO enforcement.
+
 ## Retrieval backend
 
 The orchestrator reads `RETRIEVAL_BACKEND` at startup:
@@ -58,6 +117,17 @@ for Microsoft Fabric analytical data, and
 questions off to a curated Fabric virtual analyst. All are off by default
 and require a signed-in user.
 
+!!! warning "Unmerged citation-signing failure clarification"
+    At checkpoint [`ff1bb43`](https://github.com/Azure/gpt-rag-orchestrator/commit/ff1bb43f4fcd0e7d9c9e12efae0d75517b62221c),
+    optional Blob citation signing preserves the original link when configuration
+    or signing fails, including a URL parse failure. An unchanged link is not
+    evidence that it is valid, signed or accessible. This fallback does not make
+    a failed primary retrieval successful. The helper's failure diagnostics omit
+    raw exception details and blob names; cancellation still propagates.
+    Same-account, read-only signing and existing expiry/cache rules are unchanged.
+    This is an unmerged correction with offline evidence, not a live access
+    guarantee or approval of the two proposed exceptions.
+
 ## Conversation History and Retrieval Controls
 
 In the currently released classic Container Apps topology, long-running chats
@@ -71,6 +141,21 @@ routes exist in the UI component, but umbrella panel gates remain off. The defau
 greeting, retrieval-needed question, or no-retrieval follow-up. Transformations
 such as "format that answer as a table" or "translate the previous answer" can
 skip Azure AI Search while still using the recent chat history.
+
+!!! warning "Unmerged retry and persistence evidence"
+    The [`6b652d8`](https://github.com/Azure/gpt-rag-orchestrator/commit/6b652d8c4d664863a3d02d439b7b77210963320d)
+    candidate preserves the one-shot invalid-payload retry only before output,
+    with the original input, thread and `store=False` option. Ambiguous managed
+    writes are reconciled against the exact two-message tail, not retried;
+    this is not an idempotency or rollback guarantee. Hosted requests still
+    perform no managed-Conversation operations.
+
+    Classic detached Cosmos persistence can fail after answer emission.
+    A bounded background-error diagnostic is not a durable-completion receipt.
+    Optional feedback question correlation can fail independently of feedback
+    saving; it does not redefine history ownership or authorize new storage.
+    These retained outcomes remain inactive exception proposals, not guarantees
+    of persistence or recovery.
 
 | App Configuration key | Default | Purpose |
 |-----------------------|---------|---------|

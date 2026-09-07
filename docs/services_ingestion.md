@@ -93,6 +93,50 @@ $env:APP_CONFIG_ENDPOINT = "https://<your-app-config-name>.azconfig.io"
 
 Monitor ingestion job execution and performance using Application Insights. The following query retrieves detailed metrics for completed ingestion runs, including indexing and purging operations.
 
+Interpret run summaries together with per-document errors and item status.
+A `RUN-COMPLETE` marker or nonempty chunk output alone does not prove that every
+document was indexed successfully. Optional figure or caption fallbacks are
+separate from failures of required document processing. Chunking-only results
+also do not establish successful writes to Azure AI Search.
+
+!!! warning "Unmerged chunking failure-handling preview"
+    [Azure/gpt-rag-ingestion#296](https://github.com/Azure/gpt-rag-ingestion/pull/296)
+    checkpoint [`26358cb`](https://github.com/Azure/gpt-rag-ingestion/commit/26358cb8f57c982e3c80171bf8dc6b154491388d)
+    retains per-document failures in the existing `errors` list using generic
+    messages rather than upstream exception details. Cancellation and process
+    interrupts are no longer suppressed by a return in `finally`.
+    Analysis retries are bounded and apply to declared SDK/Requests failures,
+    not arbitrary implementation defects. Cleanup is attempted for owned
+    PDF resources and temporary files on success and failure; cleanup warnings
+    do not prove deletion or turn a failed primary operation into success.
+
+    Successful chunk IDs, order, content, schemas and ACL metadata are
+    unchanged. These corrections apply to GPT-RAG's custom ingestion path,
+    not Foundry IQ's managed `azureBlob` pipeline. The checkpoint has offline
+    chunker/parser and CI evidence, not live source-to-Search integration,
+    released behavior or approval of its proposed exception.
+    See the [multimodal enrichment boundary](howto_multimodality.md#ingestion)
+    for optional figure and caption outcomes.
+
+!!! warning "Unmerged worker and purge outcome corrections"
+    At checkpoint [`0f7b1ce`](https://github.com/Azure/gpt-rag-ingestion/commit/0f7b1cea85078c7ee4260a20fe4f66255976cb12),
+    Blob metadata and SharePoint permission lookup failures produce failed items
+    instead of indexing with empty fallback ACLs. Successful ACL fields and
+    normalization are unchanged; a failed lookup is not a valid empty result.
+    Search writes require matching SDK confirmations. SharePoint purge retains
+    confirmed partial deletion counts, but failed scans, counts or unconfirmed
+    deletions cannot produce a successful `finished` outcome.
+
+    Image purging completes and validates all pages of `relatedImages` before
+    any asynchronous Blob deletion; a failed scan cannot become an empty
+    reference set. Worker-owned child tasks are cancelled and observed on
+    source failure or timeout. Owned resource cleanup is attempted on partial
+    initialization, failure and cancellation, with explicit cleanup diagnostics.
+    These are unmerged corrections, not a snapshot-isolation guarantee for
+    changing sources, live integration evidence or active exception approvals.
+    Code rollback does not restore already deleted data or undo persisted
+    configuration writes. Existing public metric and event names are retained.
+
 **Application Insights Query**
 
 Navigate to your Application Insights resource in the Azure Portal, go to **Logs**, and run the following query:

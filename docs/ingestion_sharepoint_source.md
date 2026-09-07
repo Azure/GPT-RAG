@@ -12,6 +12,14 @@ The SharePoint connector ingests both **generic lists** (structured metadata) an
 
 **Permissions** are handled by calling `get_item_permission_object_ids` using Graph **beta** `/permissions` endpoint to capture explicit Entra user/group IDs for each item. Only GUID-backed identities (users, groups, app registrations, devices) are stored.
 
+!!! warning "Unmerged permission-failure correction"
+    At ingestion checkpoint [`0f7b1ce`](https://github.com/Azure/gpt-rag-ingestion/commit/0f7b1cea85078c7ee4260a20fe4f66255976cb12),
+    a failed permission lookup produces a failed item, not an empty ACL fallback
+    followed by indexing. Existing successful ACL normalization is preserved;
+    this does not require every legitimate permission result to be nonempty.
+    Collection failures are observed, and source failure or timeout cancels
+    and joins owned item tasks without changing the configured concurrency.
+
 For detailed setup instructions, including app registration, permissions, and data source configuration, see the [SharePoint Connector Setup Guide](howto_sharepoint_connector.md).
 
 
@@ -188,10 +196,26 @@ The indexer uses **three tiers of parallelism** to balance speed and service lim
 
 > **Tuning notes**: Increase `AOAI_MAX_CONCURRENCY` only if you confirmed higher TPM quotas. If Graph throttles (429), reduce `INDEXER_MAX_CONCURRENCY`. Document Intelligence chunker performs best-effort retries internally; failed items (e.g., 503 errors) can be retried on next run.
 
+!!! warning "Unmerged analysis retry clarification"
+    The [chunking checkpoint preview](services_ingestion.md#observability)
+    limits analysis retries to declared SDK/Requests failures and preserves
+    cancellation rather than returning a normal chunk result. It does not
+    change the scheduler, timeout settings above, or guarantee that a later
+    run succeeds. This behavior is not yet released.
+
 
 ## Observability
 
 The indexer writes logs to **two destinations**: **Application Insights** (always active) and **Azure Blob Storage** (optional).
+
+For the [unmerged worker and purge checkpoint](services_ingestion.md#observability),
+read item status and run errors alongside summary totals. Only matching positive
+SDK confirmations count as deletions; missing, duplicate or unrelated results
+are not success. Confirmed partial deletions remain counted, but a failed
+count, later page or unconfirmed deletion prevents a successful `finished`
+purge outcome. Cleanup is attempted even after partial initialization or
+diagnostic failure. Existing metric/event names and optional log destinations
+are unchanged; these corrections are not yet released.
 
 **Application Insights**
 

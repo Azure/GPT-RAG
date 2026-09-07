@@ -127,6 +127,17 @@ x-ms-query-source-authorization: Bearer <search_user_access_token>
 
 Document-level access control is enforced by Azure AI Search when the index is configured for document permissions (see `permissionFilterOption` in the index definition) and documents include permission metadata. 
 
+!!! warning "Unmerged candidate is not strict OBO acceptance"
+    Orchestrator checkpoint [`31348dc`](https://github.com/Azure/gpt-rag-orchestrator/commit/31348dcbc418f2cd01f3b3e9b17fd5bf2f1ccd28)
+    retains legacy non-MCP context-provider recovery under inactive compatibility
+    proposals. Its negative evidence shows callbacks can allow anonymous fallback
+    despite a false setting, text/vision providers can continue after delegated
+    token acquisition fails, and multimodal retrieval can retry without that
+    header. Bounded diagnostics do not fix or approve those identity decisions.
+    Do not treat this candidate as strict OBO enforcement or permission to query
+    without the required user context. Correcting these retained paths requires
+    a separate identity-policy decision; MCP-specific guards remain distinct.
+
 !!! note "Foundry IQ retrieval"
     When `RETRIEVAL_BACKEND=foundry_iq`, there are two security paths. Native
     Foundry IQ sources use the `x-ms-query-source-authorization` OBO header only
@@ -490,6 +501,26 @@ The endpoint is intentionally called `/config/apply` and not `/restart` so the r
     local cache refresh fails. That refresh failure alone does not add a key
     to `failed`. Explicit Reload and Apply are separate operations whose
     outcomes must still be checked.
+
+!!! warning "Unmerged orchestrator configuration and authentication clarification"
+    At [`b93fb58`](https://github.com/Azure/gpt-rag-orchestrator/commit/b93fb58cdb59dbb30b1db88b39c8843296b7713b),
+    unexpected configuration-read failures no longer become default dashboard
+    values or an "authentication not configured" decision. The dependency
+    checkpoint [`7541c3e`](https://github.com/Azure/gpt-rag-orchestrator/commit/7541c3e3ea3d5f4075f8e3913650bf22c2f086a5)
+    likewise propagates unexpected required JWT tenant/client read failures.
+    Actual App Configuration missing-key and exhausted-retry fallback behavior
+    remains unchanged. Known authentication `HTTPException` statuses remain;
+    unexpected token-validation failures retain a generic `401`.
+
+    Orchestrator `PUT /api/dashboard/config` still returns `500` for per-key
+    write failures, with the same error shape and the bounded message
+    `Unable to persist setting`. Other keys in that request may already persist.
+    A cache-refresh failure after durable writes also remains `500`, unlike
+    ingestion's refresh-only `200`/`applied` contract above. Neither status nor
+    code rollback undoes durable writes. The existing API-key environment
+    fallback is retained under an inactive proposal, not new identity approval.
+    These are unmerged checkpoints; roles, labels, defaults and SSE schemas
+    are not redefined by this preview.
 
 ### 6) Operator workflow: verifying the role lands in the token
 

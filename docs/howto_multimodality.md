@@ -19,6 +19,22 @@ The feature spans two components:
 
 The multimodal ingestion pipeline goes through four steps: document analysis, figure extraction, caption generation, and chunk attachment. The first two steps differ depending on the analysis backend; the last two are shared.
 
+These steps describe the successful processing path, not a guarantee that every
+figure is extracted, captioned or uploaded. Read failures separately from
+optional enrichment fallbacks; see [ingestion processing outcomes](services_ingestion.md#observability).
+
+!!! warning "Unmerged figure and caption failure-handling preview"
+    In ingestion checkpoint [`26358cb`](https://github.com/Azure/gpt-rag-ingestion/commit/26358cb8f57c982e3c80171bf8dc6b154491388d),
+    an unsuccessful figure upload propagates to the figure boundary instead of
+    returning an empty URL for attachment to a chunk. Expected SDK/Requests
+    figure failures can omit that enrichment; expected caption-service failures
+    retain `"No caption available."`. Unexpected implementation failures are
+    not classified as those optional fallbacks. Expected PDF/ZIP/codec errors
+    may retain images already extracted, without certifying complete extraction.
+    This preserves `relatedImages`, `imageCaptions` and `captionVector` and
+    their successful-path behavior. It is an unmerged, offline-tested correction,
+    not live upload/indexing evidence or parity for the managed Foundry IQ Blob path.
+
 **Analysis backends: Content Understanding vs Document Intelligence**
 
 GPT-RAG supports two Azure AI services for document analysis. The choice is controlled by the `USE_DOCUMENT_INTELLIGENCE` setting in App Configuration (default `false`).
@@ -170,7 +186,7 @@ When multimodal is enabled and a document contains figures, the container app lo
 **Troubleshooting**
 
 **Empty captions ("No caption available.")**
-The vision model deployment does not support image input, or the deployment name is incorrect. Check that `VISION_DEPLOYMENT_NAME` points to a model like `gpt-4o` or `gpt-4o-mini`. If not set, the pipeline falls back to `CHAT_DEPLOYMENT_NAME`, which may not support vision.
+This is a fallback caption, not confirmation of a successful model call. Possible causes include a vision model deployment that does not support image input or an incorrect deployment name; inspect the ingestion diagnostics rather than assuming one cause. Check that `VISION_DEPLOYMENT_NAME` points to a model like `gpt-4o` or `gpt-4o-mini`. If not set, the pipeline falls back to `CHAT_DEPLOYMENT_NAME`, which may not support vision.
 
 **Figures not appearing in search results**
 Check that `MULTIMODAL` is set to `true` in App Configuration with the `gpt-rag` label. Also verify the document was re-indexed after enabling multimodal (existing documents need to be re-processed).
@@ -210,6 +226,25 @@ The multimodal orchestrator strategy (`MultimodalStrategy`) is a specialized RAG
 
 The result is an answer that cites document sources, embeds relevant figures inline next to the text they illustrate, and avoids decorative or off-topic images.
 
+!!! warning "Unmerged primary-flow failure correction"
+    Orchestrator checkpoint [`2dc6928`](https://github.com/Azure/gpt-rag-orchestrator/commit/2dc69285efa3d6bffb661e05e69797f54e1be45c)
+    preserves answer buffering, image deduplication/validation and the optional
+    early welcome prefix. Thrown primary failures now reach the existing
+    [failed-turn and classic SSE error boundary](services_orchestrator.md#streaming-outcomes)
+    instead of becoming ordinary raw-error answers. A welcome prefix is not
+    completion, and buffered model text is not yet emitted output. This is
+    unmerged behavior; optional profile outcomes and cancellation remain distinct.
+
+    At [`6b652d8`](https://github.com/Azure/gpt-rag-orchestrator/commit/6b652d8c4d664863a3d02d439b7b77210963320d),
+    failed intent classification still defaults to `question`, not a
+    retrieval-skipping intent. Failed optional post-response image validation
+    strips images while preserving answer text; cancellation propagates.
+    Conversely, failed provider construction can still produce an answer
+    without grounding, as documented in the
+    [retained retrieval limitations](services_orchestrator.md#streaming-outcomes).
+    These are characterized compatibility outcomes, not successful retrieval
+    or new approval of the corresponding inactive proposals.
+
 <div class="no-wrap">
 ```
 User Question
@@ -238,6 +273,14 @@ Final Answer (text with inline ![Figure](path) references)
 </div>
 
 **User profile memory**: the strategy also maintains a per-user profile stored in Cosmos DB. The `UserProfileMemory` plugin extracts facts about the user from conversations (e.g., preferences, context) and injects them as context in subsequent sessions. This enables personalized answers across sessions.
+
+!!! warning "Unmerged profile evidence remains bounded"
+    Checkpoint [`58c97b6`](https://github.com/Azure/gpt-rag-orchestrator/commit/58c97b6a81d02a5b641ce3d24a3e16fbe34b98e8)
+    preserves optional profile-worker outcomes with bounded diagnostics, not
+    guaranteed extraction or persistence. Its direct-adapter characterization
+    records a `chat_options`/`options` and `ChatResponse.value` interoperability
+    gap; it does not claim that end-to-end extraction works or authorize
+    additional profile writes.
 
 **Conversation history**: the strategy sends the last N messages (configurable via `CHAT_HISTORY_MAX_MESSAGES`) to the model for multi-turn context. Image markdown from previous assistant messages is stripped to prevent stale figure references from leaking into the current context.
 

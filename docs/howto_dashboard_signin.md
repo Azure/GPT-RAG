@@ -170,6 +170,14 @@ Two rules to keep in mind:
 - Setting only `OAUTH_AZURE_AD_TENANT_ID` without `OAUTH_AZURE_AD_CLIENT_ID` is intentionally rejected. `/api/dashboard/auth-config` returns `500` in that case rather than pretending auth is off; the SPA surfaces the misconfiguration instead of silently loading unauthenticated.
 - To go back to unauthenticated mode, unset `OAUTH_AZURE_AD_TENANT_ID`. See [Turning sign-in back off](#turning-sign-in-back-off).
 
+!!! warning "Unmerged configuration-failure clarification"
+    The [orchestrator candidate notes](howto_authentication.md#5-configuration-tab-what-it-can-change-and-what-apply-actually-does)
+    distinguish a genuinely absent setting from an unexpected provider failure.
+    Do not interpret a configuration-read failure as proof that auth is off,
+    or a failed dashboard Save as proof that no key was persisted. The candidate
+    retains the existing role gate and defaults; it does not change this sign-in
+    setup or enable the separately gated hosted-panel surfaces.
+
 The unauthenticated `GET /api/dashboard/auth-config` response looks like this when auth is on:
 
 ```json

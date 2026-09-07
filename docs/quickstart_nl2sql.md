@@ -527,6 +527,15 @@ Get-Content run-log.json | ConvertFrom-Json | ConvertTo-Json -Depth 10
   - Shows SQL query that was executed
   - Cites the datasource
 
+!!! warning "Unmerged primary-flow failure correction"
+    In orchestrator checkpoint [`2dc6928`](https://github.com/Azure/gpt-rag-orchestrator/commit/2dc69285efa3d6bffb661e05e69797f54e1be45c),
+    thrown primary failures reach the existing
+    [failed-turn and classic SSE error boundary](services_orchestrator.md#streaming-outcomes),
+    not an ordinary answer containing the exception. Explicit typed SQL
+    validation and execution-result answers retain their existing completed
+    response contract. Neither an initial HTTP response nor partial answer text
+    proves completion. This correction is unmerged, not the released quickstart.
+
 ---
 
 **Congratulations!** You've set up an automated NL2SQL ingestion pipeline.
