@@ -1,5 +1,68 @@
 # Tasks: Enforce Module Boundaries and Modularize the UI
 
+## Current delivery — reviewed P6 persistence only (2026-09-08)
+
+P6 closes **`nl2sql-schema-unavailable-compatibility`** and
+**`nl2sql-sql-result-translation`** functionally, not by exception approval.
+This section supersedes current-status claims below; the entire prior P2/P1
+receipt and all original 46 task IDs/markers remain historical and unchanged.
+No expanded review round or other work package is included.
+
+| Surface | Existing draft PR / target | Immutable P6 source |
+| --- | --- | --- |
+| Orchestrator | Azure/gpt-rag-orchestrator#346 / develop | `03e908d23d770c16c8ea8a94a5c268c561afa2b2` |
+| Shared docs | Azure/GPT-RAG#688 / docs | `c41777505e5ff2678fc41c04b5f89dc8374cb9c3` |
+
+### Delivered scope
+
+- Optional serialized `SchemaInfo.error` distinguishes unavailable schemas
+  (constant missing-table reason or provider/validation exception class) from
+  valid empty columns. The maintained collector sends unavailable and usable
+  schemas separately to SQL generation; no new terminal failure policy.
+- SQL execution attempts cursor then connection cleanup for resources returned
+  to the caller. Ordinary close failures do not prevent the other close or
+  replace primary typed results or propagating cancellation. Explicit typed
+  validation/execution-result answers remain ordinary completed answers.
+  **Not worker-thread cancellation redesign or a guarantee for resources never
+  returned by acquisition.**
+- Orchestrator changes are only `.quality/exceptions.json`, `AGENTS.md`,
+  `src/plugins/nl2sql/{nl2sql_types.py,plugin.py}`,
+  `src/strategies/nl2sql_strategy.py`, and
+  `tests/{test_nl2sql_plugin_boundaries.py,test_primary_strategy_failure_boundaries.py,test_quality_policy.py}`.
+  AGENTS replaces the stale no-error-field limitation precisely.
+- Shared docs change only `docs/quickstart_nl2sql.md` and
+  `docs/services_orchestrator.md`, with unmerged notes pinned to the new
+  orchestrator SHA. No shipped behavior, manifest, deployment or peer package
+  changes; rollback is the preceding orchestrator artifact, without data migration.
+
+### Evidence and limitations
+
+- Scoped review handoff: **no findings**. Existing
+  `.artifacts/p6-sql-pytest.xml` confirms **187 passed**, zero failures/errors/
+  skips, 6.768s, across NL2SQL plugin/validation/strategy, SQL connections,
+  primary strategy boundaries, audit lifecycle and orchestration turn tests.
+  The reviewed handoff also reports **454 quality-related passes before the
+  last case**; that is historical evidence, not a fresh full-suite receipt.
+- Fresh `.venv/Scripts/python.exe -m pytest -q tests/test_quality_policy.py -k nl2sql`:
+  **8 passed, 308 deselected, 9.63s**. Exact source bindings pass for all eight
+  NL2SQL proposals. The two rebound fingerprints and new cleanup fingerprint
+  match `.artifacts/p6-sql-quality.json` exactly.
+- That report uses **candidate base/head `c9a74f9e8bc500c183f54e2f7540146770503452`**,
+  not the protected adoption base. Typing/architecture pass; lint/exceptions/
+  policy report violations. **Not adoption evidence, approval, or new-head CI.**
+- `python -m mkdocs build --strict`: **passed, 13.56s**. Existing non-nav
+  visual-guide message is informational. Working-tree and staged diff checks
+  pass. No unnecessary full tests or dependency installations.
+- Original reconciliation: **191 = 143 keep recommendations + 18 functionally
+  closed + 30 open** (including partials). Current ledgers: **196 =
+  orchestrator 99 + ingestion 67 + UI 30**; all proposed, zero active/approved.
+  New subordinate companion: `nl2sql-sql-cleanup-preserves-primary-outcome`.
+  Original review hashes and historical delivery evidence remain unchanged.
+- H6 and identity/durability decisions remain unresolved; no other package,
+  merge, publication, settings, approval or live Azure validation. Append-only
+  immutable handoff comments go to #346/#688/#689 via `gh api`; the unavailable
+  PR-body update tool leaves body refresh to the parent/owner.
+
 ## Current delivery — reviewed P2 persistence only (2026-09-08)
 
 P2's five reviewed IDs are persisted without new runtime scope. **Four original
