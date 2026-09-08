@@ -64,7 +64,7 @@ All 236 archived files remained unchanged after the suite; no excluded tests;
 178 quality-policy tests included. Candidate and baseline share the exact
 failure `tests/test_appconfig_failures.py::test_constructor_preserves_selectors_and_sdk_last_selected_value`.
 Installed `azure-appconfiguration-provider` 2.1.0 differs from declared
->=2.5.0; baseline and candidate App Configuration implementation/test bytes
+==2.5.0; baseline and candidate App Configuration implementation/test bytes
 are identical. This is a residual local-environment failure, not a P1 pass
 or a replacement for the historical successful ingestion CI.
 

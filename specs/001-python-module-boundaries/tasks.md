@@ -17,7 +17,7 @@ Local evidence: orchestrator **1,943 passed / 4 expected skips**, plus the
 five-case INFO-capture regression passed after exact-warning assertions;
 ingestion **935 passed / 1 known pre-existing App Configuration failure**
 (unmodified git-archive baseline **925 passed / same one failure**, installed
-provider 2.1.0 versus declared >=2.5.0); UI **525 passed**. All current ledger
+provider 2.1.0 versus declared ==2.5.0); UI **525 passed**. All current ledger
 bindings match passing named tests: **98/67/30**, with 433 unique orchestrator
 selectors. Quality adoption remains red. These are local precommit working-tree
 receipts, not replacement immutable-head CI evidence. See
