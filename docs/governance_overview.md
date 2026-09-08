@@ -91,6 +91,12 @@ upstream systems can create evidence gaps. Events are asserted by the producing
 GPT-RAG process. They are not independently attested, cryptographically signed,
 tamper-evident, or nonrepudiable.
 
+The [unmerged audit failure-isolation correction](governance_audit_contract_v1.md)
+distinguishes ordinary best-effort emission failures from cancellation and
+process-control exceptions. It preserves an already-failing tool's primary
+outcome without making a successful tool immune to a new cancellation.
+This does not strengthen telemetry into a durable audit record.
+
 ## Shared responsibility
 
 One organization may perform more than one role. Assign each responsibility

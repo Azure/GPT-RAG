@@ -552,6 +552,17 @@ This best-effort rule applies to audit side effects, not to a required primary
 operation. It does not authorize converting a failed user operation into a
 successful response or make every unrelated optional operation fatal.
 
+!!! warning "Unmerged audit failure-isolation correction"
+    In [Azure/gpt-rag-orchestrator#346](https://github.com/Azure/gpt-rag-orchestrator/pull/346),
+    checkpoint [`463999c`](https://github.com/Azure/gpt-rag-orchestrator/commit/463999c1ba314d55a50ab2aa646544b9eb7adac4),
+    ordinary emission failures remain bounded and best effort. Cancellation
+    and process-control exceptions from the primary exporter, minimal failure
+    event, or warning sink normally propagate. Only a tool boundary immediately
+    re-raising its own primary failure, timeout, or cancellation explicitly
+    preserves that primary outcome across secondary emission failures.
+    An unrelated caller's recovery handler does not enable this preservation.
+    No audit schema, delivery guarantee, configuration key, or release pin changes.
+
 The implementation does not add a separate health event, metric, rate limiter,
 or delivery acknowledgment. Operators must use Azure Monitor ingestion health,
 application logs, and expected-volume checks to identify gaps.

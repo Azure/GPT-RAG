@@ -1,5 +1,22 @@
 This page covers common issues, debugging tools, and how to inspect logs in GPT-RAG.
 
+!!! warning "Unmerged bridge teardown correction"
+    [Azure/gpt-rag-ui#110](https://github.com/Azure/gpt-rag-ui/pull/110),
+    checkpoint [`b8318dc`](https://github.com/Azure/gpt-rag-ui/commit/b8318dccdc3ac67c8e30abc85e5dbe2968af554a),
+    invalidates bridge socket associations before the transport disconnect
+    callback. Messages and racing admissions through those associations are
+    denied even while Engine.IO is still closing the transport.
+
+    If namespace enumeration, socket lookup, or manager cleanup fails, the
+    unresolved Socket.IO binding stays inactive and counts against socket
+    capacity until successful cleanup reconciles it. Independent namespace
+    cleanup continues where possible. Releasing the separate Engine.IO
+    reservation does not prove physical transport termination or free an
+    unresolved Socket.IO binding. Repeated cleanup failures can therefore
+    exhaust available capacity; automatic reclamation is not guaranteed.
+    These are candidate behavior notes, not a released or browser/TCP
+    termination guarantee.
+
 !!! warning "Unmerged P2 upload and download corrections"
     UI [`f2ac90c`](https://github.com/Azure/gpt-rag-ui/commit/f2ac90cc7c236cc3e677f147bcc107367f2fd821)
     adds uploaded filenames to session bookkeeping only after confirmed batch
