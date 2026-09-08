@@ -1,5 +1,67 @@
 # Tasks: Enforce Module Boundaries and Modularize the UI
 
+## Current delivery - consolidated P7/P8 (2026-09-08)
+
+**Seven original findings resolved; the issue is not complete.** This section
+supersedes current-status prose below without changing the 46 historical tasks.
+One combined review covered both component diffs. It found no new source defect;
+the UI ledger's stale unbinding/capacity claims were corrected before committing.
+
+| Surface | Draft PR / target | Immutable source |
+| --- | --- | --- |
+| Orchestrator | Azure/gpt-rag-orchestrator#346 / develop | `463999c1ba314d55a50ab2aa646544b9eb7adac4` |
+| UI | Azure/gpt-rag-ui#110 / develop | `b8318dccdc3ac67c8e30abc85e5dbe2968af554a` |
+| Shared docs | Azure/GPT-RAG#688 / docs | `144360ec3c52656694752d032fb4f3607fcc07c9` |
+
+P7 resolves `audit-export-primary-isolation`, `audit-failure-event-export`,
+and `audit-final-warning-sink`. Ordinary audit errors remain best effort.
+Process-control exceptions normally propagate; only a tool boundary immediately
+re-raising its own primary failure/timeout/cancellation explicitly preserves it.
+The preservation flag is per call, not inferred from ambient exception state.
+`audit-tool-failure-propagation` was rebound to its changed caller, not newly
+approved. No schema or configuration changes.
+
+P8 resolves `ui-boundary-14/15/16/17` using the allowed invalidated-association
+alternative, not by claiming physical shutdown. Installed Engine.IO invokes the
+callback before closing completes. Bound sockets are invalidated before that
+callback; messages and racing admissions are denied. Failed cleanup retains
+inactive, capacity-counted Socket.IO bindings until successful reconciliation.
+Independent namespace cleanup can continue; Engine.IO reservation release is
+distinct from Socket.IO unbinding. No automatic reclamation, browser/TCP close
+or stronger framework cancellation guarantee is asserted.
+
+Evidence: P7 targeted audit/Foundry callers **240 passed**; P8 security **83**,
+embed auth **16**, main policy **9 passed**. Independent combined review reran
+six P7 and nine P8/P1 cases and a 100-cycle real-Engine.IO normal-close probe
+at capacity one without retained registry state. These are focused local
+receipts, not full-suite or new-head CI/adoption evidence. All exceptions remain
+proposed; protected policy checks are still blockers. Source diff checks and
+remote component heads match. UI push encountered a transient GitHub 500;
+ordinary retry succeeded without rewriting history.
+
+**Inventory: 191 = 143 keep recommendations + 25 resolved + 23 open.**
+Current proposals remain **196 (99/67/30), zero active/approved**. P3 (7), P4 (7),
+P5 (3), P9 (5) and P2/H6 (1) remain; none was silently deferred.
+Documentation is consolidated in the audit contract, governance overview and
+troubleshooting pages, marked unmerged. Components can roll back independently
+to `03e908d` / `f2ac90c`; no new peer dependency or data migration. A source
+rollback is not transport-state reconciliation or durable-data recovery.
+
+Execution now batches coherent changes/review/documentation/PR updates, runs
+focused tests during iteration and reserves full suites for integration
+checkpoints, parallelizes independent repositories, and reports milestones
+rather than repeated intermediate progress.
+
+Scope assessment read the actual #681 and protected pre-681 orchestrator base
+`c6d0ccb01a40071f82f30bd17c9fe566b3d0ad18`. Profile adapter mismatch and
+`user_id/default_user` selection, detached conversation writes, unchecked
+write-result success logging, and text-only managed-write confirmation already
+existed there. Minimal truthful-result and safe-identity corrections remain
+required; full memory reactivation/key migration, durable queues and distributed
+idempotency are separable follow-up candidates. **No package, acceptance
+criterion, exception, H1-H7 behavior or protection setting was approved or
+removed by this assessment.** Live acceptance, adoption and merges still remain.
+
 ## Current delivery — reviewed P6 persistence only (2026-09-08)
 
 P6 closes **`nl2sql-schema-unavailable-compatibility`** and
