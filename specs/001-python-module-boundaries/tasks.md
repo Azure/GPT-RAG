@@ -1,5 +1,92 @@
 # Tasks: Enforce Module Boundaries and Modularize the UI
 
+## Current delivery - persistence, UI and ingestion follow-up (2026-09-08)
+
+**This batch is delivered; #681 is not complete.** This section supersedes
+current-status prose below while preserving the 46 historical task IDs.
+
+| Surface | Draft PR / target | Immutable source |
+| --- | --- | --- |
+| Orchestrator | Azure/gpt-rag-orchestrator#346 / develop | `6f89c399f046a79f2f15e4d709c47864f33f7f8f` |
+| Ingestion | Azure/gpt-rag-ingestion#296 / develop | `ce5c2c86dd902b23487bdb98fa26d3f94691fef2` |
+| UI | Azure/gpt-rag-ui#110 / develop | `8872cfc92c70180e2e07a6cc2842942c020c767b` |
+| Shared docs | Azure/GPT-RAG#688 / docs | `1f8555aa986577d42233a119ce257a7d6bcfc0a9` |
+
+P5 captures independent write snapshots before scheduling, retains task
+ownership, orders updates after confirmed creation, and never logs a `None`
+write as completed persistence. Managed ambiguous writes require the actual
+submitted assistant item ID plus adjacent matching roles/text, not old repeated
+text. Malformed reconciliation remains unconfirmed; no write retry.
+Classic SSE remains best effort: no global pending-task bound, shutdown drain,
+cross-request serialization or durable queue. H5 remains pending.
+
+UI false/raised ingestion outcomes display a reference-bearing failure notice
+without false file-received/processed-success bookkeeping. H6 question
+continuation is unchanged. OpenAPI failures are uncached so later generation
+can recover; H3 response policy is unchanged. Actual failed owner-index upsert
+evidence confirms absent listing and opaque 404 read/feedback/delete before
+managed content access. H4 continuation/repair policy is unchanged.
+
+Ingestion uses the same wildcard label selectors and precedence for endpoint
+and connection-string configuration loads. Credential/source order and
+environment opt-in remain unchanged (H1). Legacy feedback overview failures
+are characterized, not redesigned: zero or partial counts still lack an
+unavailability signal (H2). No response schema or authorization changes.
+
+### Review and evidence
+
+One combined three-repository review found a P5 cleanup defect: a failing
+diagnostic sink could replace the primary stream error/cancellation and skip
+audit-context cleanup. Eight regression cases failed before correction.
+Ordinary diagnostic failure now preserves the primary outcome; independent
+`finally` cleanup resets audit context even when a new process-control exception
+propagates. The new diagnostic boundary is proposed, not self-approved.
+
+Fresh final-source evidence: orchestrator **138** P5/caller/audit lifecycle
+passes and **96** selected exact-ledger/schema passes (222 deselected);
+all **101** handler bindings match proposed records. UI **45** focused
+hook/router/upload cases plus **one** isolated installed-startup recovery case.
+That installed wheel predates the later H4 diagnostic-only edit; H4 has
+source-level route evidence. Ingestion **38** complete scoped tests passed with
+declared AppConfig 1.8.1/provider 2.5.0 in an isolated overlay after ambient
+provider 2.1.0 failures were reproduced. No ambient environment modification.
+Earlier P5 199/102 and ingestion 218 receipts remain historical, not final-byte
+full-suite results. Strict documentation build passed.
+
+Protected-base checks still block adoption: orchestrator lint 78, exceptions
+202, policy 1; ingestion 59 BLE001, 67 pending proposals, 67 unapproved handlers,
+9 protected-policy changes and 1 bootstrap; UI four existing BLE001,
+30 unapproved handlers and a bootstrap-review blocker. Typing and architecture
+pass in all three local reports. No check was disabled or policy weakened.
+All four remote PR heads match the table and remain OPEN/draft. Full CI for
+these new heads has started; these local receipts do not assert it is green.
+
+### Accounting and remaining work
+
+**191 = 143 keep recommendations + 27 resolved + 21 open.**
+Two managed P5 findings are functionally closed, not approved. Classic
+`legacy-detached-conversation-persistence` is now partial/open pending H5.
+UI/ingestion behavioral records remain open despite their bounded corrections.
+Current ledgers contain **198 proposals (101/67/30), zero active**: two new
+subordinate P5 cleanup proposals join the five earlier P1/P6 companions.
+37 original records differ from the original source snapshots, 154 are
+unchanged; all original IDs/categories/package assignments are preserved.
+The existing `stream-failed-audit-before-propagation` keep was rebound because
+its enclosing try changed, without approval or reclassification.
+
+Remaining: P3 identity/context (7), P4 profile (7), P5/H5 (1), P9 decisions (5),
+and P2/H6 (1). H1-H7 are not approved. Bounded P4 follow-up has started
+separately; no P4 source or closure is part of this immutable receipt.
+Exact maintainer approvals, protected-policy adoption, authorized administrator
+settings, live integration/recovery and final review/merge still remain.
+No criterion was silently removed.
+
+Documentation is source-pinned in the orchestrator, ingestion and
+troubleshooting pages and explicitly marked unmerged. Components can roll back
+independently to `463999c`, `34a6043` and `b8318dc`; no new peer dependency or data
+migration. Code rollback cannot undo writes or establish durable recovery.
+No merge, release, deployment, settings change or exception activation.
+
 ## Current delivery - consolidated P7/P8 (2026-09-08)
 
 **Seven original findings resolved; the issue is not complete.** This section
