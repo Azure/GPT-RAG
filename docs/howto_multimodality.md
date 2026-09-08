@@ -286,6 +286,15 @@ Final Answer (text with inline ![Figure](path) references)
     gap; it does not claim that end-to-end extraction works or authorize
     additional profile writes.
 
+    The unmerged P1 follow-up in orchestrator
+    `133eb7097d42a0c1ddf9f9397029abeeebd3a5d7` makes `flush()` observe and clear pending
+    extraction tasks even when they have already completed. A completed task
+    failure receives a bounded warning; optional cleanup still flushes before
+    attempting profile save. If memory is absent, multimodal cleanup returns
+    without saving or reporting a cleanup failure. Cancellation during flush
+    propagates and prevents that save. This does not fix the adapter gap or
+    guarantee profile persistence.
+
 **Conversation history**: the strategy sends the last N messages (configurable via `CHAT_HISTORY_MAX_MESSAGES`) to the model for multi-turn context. Image markdown from previous assistant messages is stripped to prevent stale figure references from leaking into the current context.
 
 **Configuration** — the multimodal strategy is activated by setting `AGENT_STRATEGY` to `multimodal` in Azure App Configuration (with the `gpt-rag` label). All other settings below also go in App Configuration with the same label.

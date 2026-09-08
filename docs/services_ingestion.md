@@ -137,6 +137,23 @@ also do not establish successful writes to Azure AI Search.
     Code rollback does not restore already deleted data or undo persisted
     configuration writes. Existing public metric and event names are retained.
 
+!!! warning "Unmerged P1 finalization corrections"
+    Candidate ingestion commit: `926a08d6b1ad75254fed4447a3e72e17c0bf8703`.
+
+    Retrieval query failures retain their sanitized `502` response, and query
+    cancellation propagates, even if Search cleanup fails. Without a prior
+    query failure, cleanup failure still propagates. Blob terminal-summary
+    failures cannot replace an established run failure or cancellation;
+    summary failure after an otherwise completed pipeline still propagates.
+    Summary persistence and resource cleanup remain attempts, not guarantees,
+    with bounded failure diagnostics.
+
+    NL2SQL child cancellation propagates through the run/audit wrapper rather
+    than becoming a `finished` run with an ordinary failed-document count.
+    Ordinary document errors retain their per-record behavior. These unmerged
+    changes do not alter public event schemas or make optional audit export
+    authoritative for primary-operation success.
+
 **Application Insights Query**
 
 Navigate to your Application Insights resource in the Azure Portal, go to **Logs**, and run the following query:
@@ -186,4 +203,3 @@ This query returns the following metrics for each ingestion run:
 | `chunksFailedDelete` | Chunks that failed deletion |
 | `searchPages` | Number of search result pages processed |
 | `durationSeconds` | Total execution time in seconds |
-

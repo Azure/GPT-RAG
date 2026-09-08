@@ -28,6 +28,17 @@ By default, **basic feedback** (thumbs up/down) is enabled, while **detailed rat
 
 ## Feedback Types
 
+!!! warning "Unmerged P1 classic feedback correction"
+    Candidate UI commit: `48d87b2fb2fb9a158d02f204cfbcc3941fb6126e`.
+
+    The UI selects the submission notification from the backend outcome before
+    attempting to remove the feedback form. A form-removal failure is logged
+    separately: it does not turn an acknowledged submission into failure,
+    turn backend failure into success, or repeat the write. The form may
+    remain visible. Cancellation still propagates; neither form removal nor
+    toast delivery is guaranteed. This is not a change to hosted-panel gates
+    or a new persistence guarantee.
+
 When enabled, users can provide **star ratings** and text comments for richer feedback that captures both satisfaction and reasoning.
 
 ![User feedback with rating](media/user_feedback_with_rating.png)
