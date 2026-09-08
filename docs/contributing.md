@@ -235,9 +235,14 @@ rather than copying exception records between components.
 The recorded backend checkpoints bind retained broad handlers to individual
 proposals and named failure evidence. That code-delivery milestone does not
 approve the handlers or activate the policy. In particular, orchestrator
-characterization retains [identity fallbacks](howto_authentication.md#classic-container-apps-token-flow),
-nullable retrieval-provider construction and detached persistence without
-claiming strict OBO enforcement, successful grounding or durable completion.
+characterization retains [identity fallbacks](howto_authentication.md#classic-container-apps-token-flow)
+and detached persistence without claiming strict OBO enforcement or durable
+completion. The scoped orchestrator follow-up replaces configured nullable
+retrieval failure with the
+[existing safe failed-turn contract](services_orchestrator.md#streaming-outcomes),
+while preserving explicit retrieval opt-outs and legitimate empty results.
+Updated fingerprints and real strategy-to-SSE evidence remain proposed,
+not active approvals.
 Review those outcomes individually; zero unproposed sites is not zero risk.
 
 ### Adoption is separate from workflow availability

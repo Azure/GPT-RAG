@@ -84,15 +84,32 @@ event is not independent proof that every operation inside a strategy succeeded.
     or full quality/exception approval. Separate optional profile, search,
     intent and context-provider contracts are not made universally fatal.
 
-!!! warning "Unmerged retained retrieval limitations"
-    At [`6b652d8`](https://github.com/Azure/gpt-rag-orchestrator/commit/6b652d8c4d664863a3d02d439b7b77210963320d),
-    Foundry credential failure prevents that client's retrieve request, and
-    failed HTTP retrieval retains its status without exposing the response
-    body. This is distinct from strategy provider-construction failure:
-    `maf_lite`, `maf_agent_service` and `multimodal` still accept a `None`
-    provider and can produce an ordinary answer without grounding. The
-    candidate characterizes that legacy outcome under inactive proposals;
-    successful answer generation is not proof of successful retrieval.
+!!! warning "Unmerged required-retrieval failure correction"
+    The scoped follow-up to orchestrator
+    [#346](https://github.com/Azure/gpt-rag-orchestrator/pull/346), at
+    [`2f0f860`](https://github.com/Azure/gpt-rag-orchestrator/commit/2f0f860c652916edd020e08f969e211f52a221f6),
+    changes configured retrieval failures in `maf_lite`, `maf_agent_service`
+    and `multimodal`: provider construction and Search/Foundry retrieval
+    failures interrupt the turn rather than producing an ordinary ungrounded
+    answer. The composite context provider propagates required retrieval
+    failures even when optional sibling context is available. The existing
+    failed-turn audit and generic classic SSE error contract apply; raw
+    provider errors are not returned as answer text. Cancellation remains
+    cancellation.
+
+    Successful retrieval with zero matches is still a normal result. These
+    strategies retain their existing no-provider path when
+    `SEARCH_SERVICE_QUERY_ENDPOINT` or `SEARCH_RAG_INDEX_NAME` is absent;
+    this includes the existing construction guard on the Foundry backend.
+    Lite and multimodal greeting/no-retrieval intents skip both provider
+    initialization and retrieval. No new degraded-mode flag is introduced,
+    and `SEARCH_RETRIEVAL_ENABLED` is not newly applied to these strategies.
+    Optional memory, image enrichment and keyword fallback remain separate
+    contracts. This follow-up remains unmerged, not released behavior
+    or activation of any exception approval.
+
+    Foundry credential failure still prevents that client's retrieve request,
+    and failed HTTP retrieval does not expose its response body.
     [Retained identity fallbacks](howto_authentication.md#classic-container-apps-token-flow)
     are not new permission approval or strict OBO enforcement.
 

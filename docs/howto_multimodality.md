@@ -239,11 +239,15 @@ The result is an answer that cites document sources, embeds relevant figures inl
     failed intent classification still defaults to `question`, not a
     retrieval-skipping intent. Failed optional post-response image validation
     strips images while preserving answer text; cancellation propagates.
-    Conversely, failed provider construction can still produce an answer
-    without grounding, as documented in the
-    [retained retrieval limitations](services_orchestrator.md#streaming-outcomes).
-    These are characterized compatibility outcomes, not successful retrieval
-    or new approval of the corresponding inactive proposals.
+    The scoped follow-up to that checkpoint instead interrupts on configured
+    provider construction or retrieval failure, including a failed existing
+    Search retry, through the
+    [required-retrieval failure contract](services_orchestrator.md#streaming-outcomes).
+    Zero matches, absent endpoint/index configuration and explicit
+    greeting/no-retrieval intents remain supported; optional image failures
+    do not become required retrieval failures. This follow-up remains
+    unmerged, not released behavior or approval of the retained
+    delegated-header retry.
 
 <div class="no-wrap">
 ```
