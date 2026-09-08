@@ -536,6 +536,23 @@ Get-Content run-log.json | ConvertFrom-Json | ConvertTo-Json -Depth 10
     response contract. Neither an initial HTTP response nor partial answer text
     proves completion. This correction is unmerged, not the released quickstart.
 
+!!! warning "Unmerged schema availability and SQL cleanup correction"
+    The P6 follow-up in [orchestrator #346](https://github.com/Azure/gpt-rag-orchestrator/pull/346),
+    checkpoint [`03e908d`](https://github.com/Azure/gpt-rag-orchestrator/commit/03e908d23d770c16c8ea8a94a5c268c561afa2b2),
+    adds an optional `SchemaInfo.error`: a constant missing-table reason or a
+    bounded exception class for provider/validation failures. The schema collector
+    supplies unavailable schemas separately from usable schemas to SQL generation;
+    valid empty columns remain usable. This does not impose a new terminal
+    failure policy.
+
+    SQL execution attempts to close the returned cursor and connection, in that
+    order, including on execution failure or cancellation. Ordinary close failures
+    do not prevent the other close attempt or replace the primary typed result or
+    propagating cancellation. Explicit validation/execution-result answers remain
+    ordinary completed answers. This covers resources returned to the caller,
+    not worker-thread cancellation redesign or resources never returned by
+    acquisition. The change is unmerged, not released behavior or exception approval.
+
 ---
 
 **Congratulations!** You've set up an automated NL2SQL ingestion pipeline.

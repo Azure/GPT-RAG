@@ -64,6 +64,16 @@ event is not independent proof that every operation inside a strategy succeeded.
     extends this correction to thrown primary failures in `nl2sql` and
     `multimodal`. NL2SQL's explicit typed validation and execution-result
     answers remain completed answers, distinct from thrown failures.
+    The unmerged P6 follow-up
+    [`03e908d`](https://github.com/Azure/gpt-rag-orchestrator/commit/03e908d23d770c16c8ea8a94a5c268c561afa2b2)
+    preserves these ordinary answers while adding optional schema errors:
+    unavailable schemas are supplied separately from usable schemas, including
+    valid empty columns. SQL cursor/connection cleanup attempts both returned
+    resources without letting ordinary close failures replace the primary typed
+    result or propagating cancellation. This is not worker-thread cancellation
+    redesign or a guarantee for resources never returned by acquisition.
+    See the [NL2SQL quickstart](quickstart_nl2sql.md) for the scoped, unmerged
+    behavior; no exception approval or new terminal policy is implied.
     Multimodal still buffers the model answer for image deduplication and
     optional validation before emission; its welcome prefix can arrive earlier.
     Buffered content is not emitted partial output. The added real-chain
