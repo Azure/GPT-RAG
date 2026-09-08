@@ -1,5 +1,37 @@
 # Tasks: Enforce Module Boundaries and Modularize the UI
 
+## Post-delivery exception review and approved follow-up
+
+The 46-task delivery below is historical implementation accounting, **not
+merge readiness**. The subsequent individual review of all 191 proposals found
+143 keep recommendations (not approvals), 32 correction recommendations
+(including inaccurate proposal scopes), nine behavioral decisions and seven
+evidence gaps. Technical follow-up remains; this supersedes any earlier claim
+that only administrative adoption is outstanding.
+
+On 2026-09-08 the user approved interrupting a turn when its required retrieval
+fails instead of returning an ordinary ungrounded answer. Orchestrator
+`2f0f860c652916edd020e08f969e211f52a221f6` implements this for configured
+provider initialization and Search/Foundry execution through the real
+strategy/composite-provider/failed-turn path. Legitimate zero matches, existing
+absent endpoint/index guards and lite/multimodal no-retrieval intents remain.
+No new fallback flag or identity-policy approval is introduced.
+
+Regression-first evidence reproduced the previous success-shaped fallback.
+Local full pytest reports 1,936 passed and four explicitly inapplicable
+Agent Service intent-opt-out skips; the narrow selection has 212 passed and
+four skips and was independently rerun during review. Typing and architecture
+pass; the full quality result still fails for unapproved policy/exception
+records. All 98 records remain proposed. These are local working-tree receipts,
+not a claim that a new immutable-head CI run passed.
+
+Documentation `19788e7f9a58c5a1edbed8c5e5a8832b96a0988d` pins this correction
+in three existing pages; final strict MkDocs build passed in 6.95 seconds.
+Scoped source/call-chain and documentation review found no significant issue.
+Both follow-ups are committed and pushed to their existing draft branches.
+Other review recommendations and decisions remain open. No merge, publication,
+deployment, repository-rule activation or blanket exception approval occurred.
+
 **Input**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md),
 [data-model.md](data-model.md), [quality contract](contracts/quality-gates.md),
 [UI contract](contracts/ui-compatibility.md), [quickstart.md](quickstart.md).
