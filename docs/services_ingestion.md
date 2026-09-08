@@ -91,6 +91,25 @@ $env:APP_CONFIG_ENDPOINT = "https://<your-app-config-name>.azconfig.io"
 
 ## Observability
 
+!!! warning "Unmerged configuration fallback and overview follow-up"
+    [Azure/gpt-rag-ingestion#296](https://github.com/Azure/gpt-rag-ingestion/pull/296)
+    at [`ce5c2c8`](https://github.com/Azure/gpt-rag-ingestion/commit/ce5c2c86dd902b23487bdb98fa26d3f94691fef2)
+    aligns the existing connection-string configuration fallback with the
+    endpoint path: both select wildcard keys for `gpt-rag-ingestion`,
+    `gpt-rag`, then no label, with the last selected value winning.
+    Key Vault credentials, source order, environment override opt-in and
+    propagation of connection-string load failures are unchanged. This does
+    not approve the fallback policy or its proposed handler (H1).
+
+    The legacy `/api/panel/overview` still returns HTTP 200 with zero feedback
+    counts when feedback cannot be read, or partial counts if aggregation
+    fails after processing rows. Jobs/files remain available and a server
+    warning is emitted, but the response has no feedback-unavailability
+    signal. Do not interpret those counts as a confirmed complete summary.
+    This documented limitation remains pending H2, not an accepted fallback.
+    It is distinct from `/panel/overview/metrics`, whose null counts represent
+    privacy suppression. No response schema or authorization is changed.
+
 !!! warning "Unmerged P2 unblock error correction"
     Ingestion [`34a6043`](https://github.com/Azure/gpt-rag-ingestion/commit/34a6043ea3b6c563e528aad69c0ae70e3be32ff4)
     distinguishes a confirmed missing file log (`ResourceNotFoundError`, HTTP

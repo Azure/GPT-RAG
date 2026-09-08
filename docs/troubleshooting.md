@@ -17,12 +17,15 @@ This page covers common issues, debugging tools, and how to inspect logs in GPT-
     These are candidate behavior notes, not a released or browser/TCP
     termination guarantee.
 
-!!! warning "Unmerged P2 upload and download corrections"
-    UI [`f2ac90c`](https://github.com/Azure/gpt-rag-ui/commit/f2ac90cc7c236cc3e677f147bcc107367f2fd821)
+!!! warning "Unmerged upload, OpenAPI and panel failure corrections"
+    The follow-up in [Azure/gpt-rag-ui#110](https://github.com/Azure/gpt-rag-ui/pull/110)
+    at [`8872cfc`](https://github.com/Azure/gpt-rag-ui/commit/8872cfc92c70180e2e07a6cc2842942c020c767b)
     adds uploaded filenames to session bookkeeping only after confirmed batch
     ingestion. A false result or exception preserves previously confirmed names;
     the boolean client contract cannot confirm individual files in a partial
-    batch. **A nonempty question still continues after failed attachments.**
+    batch. Both failure outcomes display a failure notice with the question
+    reference, not "Files received" or processed-success confirmation.
+    **A nonempty question still continues after failed attachments.**
     Whether to stop that question remains the pending H6 decision, not approval
     of the current continuation. Do not treat an answer as confirmation that
     the new attachments were ingested.
@@ -35,6 +38,20 @@ This page covers common issues, debugging tools, and how to inspect logs in GPT-
     synchronous downloader acquisition, after authorization checks. Conversation
     resolution and late stream iteration are outside that catch; the P2 scope
     clarification adds no runtime handler or transport-termination guarantee.
+
+    OpenAPI generation failures retain the existing metadata-only response
+    with no paths, but that fallback is no longer cached. Later requests retry
+    generation; only a successful schema is cached. An empty-path response is
+    not proof that the application has no routes. Whether to retain this
+    fallback response remains the pending H3 decision.
+
+    If the optional panel owner-index write fails after a managed conversation
+    is created, the existing turn continues and logs the limitation. Without
+    that row the conversation is absent from panel listing, and panel
+    read/feedback/delete return opaque 404 responses before accessing managed
+    content. Continuing the chat does not retry the creation hook. There is no
+    automatic repair, backfill or authorization bypass; accepting this
+    availability trade-off remains the pending H4 decision.
     These are unmerged notes for
     [#110](https://github.com/Azure/gpt-rag-ui/pull/110), not released guarantees.
 

@@ -172,9 +172,9 @@ skip Azure AI Search while still using the recent chat history.
 !!! warning "Unmerged retry and persistence evidence"
     The [`6b652d8`](https://github.com/Azure/gpt-rag-orchestrator/commit/6b652d8c4d664863a3d02d439b7b77210963320d)
     candidate preserves the one-shot invalid-payload retry only before output,
-    with the original input, thread and `store=False` option. Ambiguous managed
-    writes are reconciled against the exact two-message tail, not retried;
-    this is not an idempotency or rollback guarantee. Hosted requests still
+    with the original input, thread and `store=False` option. That checkpoint
+    used text-only two-message reconciliation for ambiguous managed writes,
+    superseded by the P5 correction below. Hosted requests still
     perform no managed-Conversation operations.
 
     The P2 follow-up [`c9a74f9`](https://github.com/Azure/gpt-rag-orchestrator/commit/c9a74f9e8bc500c183f54e2f7540146770503452)
@@ -186,8 +186,31 @@ skip Azure AI Search while still using the recent chat history.
     only `max_tokens`; input, thread and all other options remain unchanged.
     Controlled managed/hosted caller tests are not live provider acceptance.
 
-    Classic detached Cosmos persistence can fail after answer emission.
-    A bounded background-error diagnostic is not a durable-completion receipt.
+    The P5 follow-up at
+    [`6f89c39`](https://github.com/Azure/gpt-rag-orchestrator/commit/6f89c399f046a79f2f15e4d709c47864f33f7f8f)
+    in [Azure/gpt-rag-orchestrator#346](https://github.com/Azure/gpt-rag-orchestrator/pull/346)
+    confirms an ambiguous write only if the latest assistant item has the
+    **actual ID submitted by that invocation**, as well as matching adjacent
+    user/assistant roles and text. Old identical text, missing or rewritten
+    IDs, concurrent tails and malformed lookup results remain unconfirmed.
+    The write is not retried; unconfirmed reconciliation preserves the
+    original write error. This is conservative SDK-backed evidence, not a
+    live-service ID-retention, idempotency or rollback guarantee.
+
+    Classic Cosmos writes now capture an independent snapshot before scheduling
+    and retain task ownership until completion. A new conversation's update
+    waits for its create result; failed, cancelled or unconfirmed creation
+    cannot race the dependent update. A `None` write result is not logged as
+    completed persistence. Final snapshot/scheduling failures and ordinary
+    diagnostic-sink failures preserve the primary stream outcome; audit-context
+    cleanup runs independently, including when new process-control exceptions
+    propagate.
+
+    Persistence is still detached and can fail after answer emission. There
+    is no cross-request serialization, global pending-task bound, shutdown
+    drain or durable queue. A completed SSE response or bounded diagnostic is
+    not a durable-completion receipt; H5 remains an unresolved durability
+    decision, not approval of the retained best-effort policy.
     Optional feedback question correlation can fail independently of feedback
     saving; it does not redefine history ownership or authorize new storage.
     These retained outcomes remain inactive exception proposals, not guarantees
