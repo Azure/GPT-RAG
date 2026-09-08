@@ -1,5 +1,101 @@
 # Tasks: Enforce Module Boundaries and Modularize the UI
 
+## Current delivery — reviewed P2 persistence only (2026-09-08)
+
+P2's five reviewed IDs are persisted without new runtime scope. **Four original
+findings close functionally, not by exception approval; `ui-boundary-23` remains
+partial/open pending H6.** This section supersedes current-status claims below;
+all original 46 task IDs/markers, prior hashes and historical receipts remain.
+
+| Surface | Existing draft PR / target | P2 source |
+| --- | --- | --- |
+| Orchestrator | Azure/gpt-rag-orchestrator#346 / develop | `c9a74f9e8bc500c183f54e2f7540146770503452` |
+| Ingestion | Azure/gpt-rag-ingestion#296 / develop | `34a6043ea3b6c563e528aad69c0ae70e3be32ff4` |
+| UI | Azure/gpt-rag-ui#110 / develop | `f2ac90cc7c236cc3e677f147bcc107367f2fd821` |
+| Docs | Azure/GPT-RAG#688 / docs | `9b0e98e78b89987022885897b825545124f0d1c0` |
+
+### Delivered behavior and files
+
+- **`agent-provider-pre-output-option-retry`: functionally closed.**
+  Retry requires supplied `max_tokens` and a field-scoped invalid-payload
+  rejection of that option or `max_output_tokens`. Ambiguous/other-option
+  failures, absent token options, cancellation and any prior chunk (including
+  metadata) do not replay. At most one retry removes only `max_tokens`; original
+  input/thread/remaining options, including `store=False`, remain unchanged.
+  Files: `.quality/exceptions.json`, `src/strategies/agent_provider_v2.py`,
+  `tests/test_legacy_runtime_boundary_dispositions.py`,
+  `tests/test_single_agent_rag_v2_thread_conversation.py`.
+- **`unblock-log-read-failure`: functionally closed.** Only typed
+  `ResourceNotFoundError` maps to 404; other read/download failures and invalid
+  JSON/non-object logs produce sanitized 500 errors without upload or cache
+  invalidation. Files: `.quality/exceptions.json`, `api/admin.py`,
+  `tests/test_operator_failure_boundaries.py`.
+- **`ui-boundary-01`: functionally closed by scope/evidence correction only.**
+  Existing secure-download catch covers synchronous downloader acquisition,
+  not conversation resolution or lazy stream iteration. No new runtime handler
+  or transport-termination guarantee.
+- **`ui-boundary-20`: functionally closed.** Standalone download errors use
+  generic text and static diagnostics; typed not-found alone maps to 404,
+  including no message-based `BlobNotFound` classification.
+- **`ui-boundary-23`: partial/open.** Upload bookkeeping adds names only after
+  confirmed batch ingestion; false/raised outcomes preserve earlier names.
+  The boolean contract cannot confirm partial per-file success. **Existing
+  nonempty-question continuation after failed attachments is unchanged;
+  H6 remains a user decision.** UI files: `.quality/exceptions.json`,
+  `src/gpt_rag_ui/bootstrap.py`, `src/gpt_rag_ui/services/chat.py`,
+  `tests/test_boundary_failures.py`, `tests/test_download_security.py`,
+  `tests/test_installed_package.py`.
+- Shared docs update existing `docs/services_orchestrator.md`,
+  `docs/services_ingestion.md` and `docs/troubleshooting.md` with concise
+  unmerged semantics and immutable component links. No duplicate product docs.
+
+### Evidence and limits
+
+Existing reviewed receipts remain: ingestion **35 passed**, regression-first
+**9 failed**; orchestrator **62 passed**, plus strengthened **19 passed**;
+UI **24 passed**. The earlier combined installed-test command exited nonzero
+and is not a clean receipt despite its passing standalone case.
+
+Fresh focused working-tree checks before committing (Python 3.12.9):
+
+- Orchestrator `.venv/Scripts/python.exe -m pytest -q
+  tests/test_legacy_runtime_boundary_dispositions.py
+  tests/test_single_agent_rag_v2_thread_conversation.py`: **62 passed**, 5.05s.
+  Ambient Python first failed collection (two SDK import errors); the existing
+  isolated environment resolves this. No dependency/source workaround.
+- Ingestion `python -m pytest -q tests/test_operator_failure_boundaries.py`:
+  **35 passed**, 1.58s.
+- UI `python -m unittest discover -s tests -p test_boundary_failures.py -v`
+  and the same command with `test_download_security.py`: **10 + 14 passed**.
+- Independently, `python -m unittest discover -s tests -p
+  test_installed_package.py -k
+  test_installed_startup_preserves_documented_failure_boundaries -v`:
+  **1 passed, exit 0**, 347.663s, fresh non-editable wheel installation.
+  An initial dotted `tests.test_installed_package` invocation failed import;
+  repository discovery is the valid command. It is not the earlier combined
+  red receipt.
+- Final docs `python -m mkdocs build --strict`: **passed**, 23.98s. Existing
+  non-nav `orchestrator_visual_guide.md` is informational, not a build failure.
+- Scoped `git diff --check` / staged checks passed. Exact ledger comparison
+  confirms only these five proposed records changed; no IDs added or removed.
+
+Original accounting is now **191 = 143 keep recommendations + 16 functional
+closures + 32 open**: 17 fixes, 3 partial fixes, 5 decisions, 7 evidence gaps.
+Four P1 cleanup companions remain separate: **195 current ledger records =
+98 orchestrator / 67 ingestion / 30 UI; zero approvals**.
+
+These are local receipts, not new immutable-head CI, live provider acceptance,
+Azure durability or transport-termination evidence. Quality adoption remains
+red; prior full-suite/environment limitations are not erased. P3–P9 remain
+unimplemented here, and P2 H6 is not resolved. No manifest, wire-schema,
+authorization-policy, settings, merge, release, deployment or publication change.
+Components are independent bounded corrections, with coordinated docs/tracking;
+no new peer-version requirement or manifest pin is introduced. Review components
+through their existing PRs before any separately authorized integration; retain
+docs as unmerged until shipping. Revert each P2 component commit independently
+and its corresponding doc notice for code rollback; this cannot undo durable
+writes/deletions or make unconfirmed uploads confirmed.
+
 ## Current delivery — P1 cleanup/cancellation only (2026-09-08)
 
 P1's seven original findings are **functionally closed, not approved**.
