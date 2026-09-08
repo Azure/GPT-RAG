@@ -1,5 +1,26 @@
 This page covers common issues, debugging tools, and how to inspect logs in GPT-RAG.
 
+!!! warning "Unmerged P2 upload and download corrections"
+    UI [`f2ac90c`](https://github.com/Azure/gpt-rag-ui/commit/f2ac90cc7c236cc3e677f147bcc107367f2fd821)
+    adds uploaded filenames to session bookkeeping only after confirmed batch
+    ingestion. A false result or exception preserves previously confirmed names;
+    the boolean client contract cannot confirm individual files in a partial
+    batch. **A nonempty question still continues after failed attachments.**
+    Whether to stop that question remains the pending H6 decision, not approval
+    of the current continuation. Do not treat an answer as confirmation that
+    the new attachments were ingested.
+
+    Standalone download failures now use fixed generic text: typed
+    `ResourceNotFoundError` returns 404; other failures return 500 even if their
+    message contains `BlobNotFound`. Dependency details and file paths are
+    omitted from this failure diagnostic. This does not change Copilot access.
+    The secure grant route's existing generic 500/no-store catch covers only
+    synchronous downloader acquisition, after authorization checks. Conversation
+    resolution and late stream iteration are outside that catch; the P2 scope
+    clarification adds no runtime handler or transport-termination guarantee.
+    These are unmerged notes for
+    [#110](https://github.com/Azure/gpt-rag-ui/pull/110), not released guarantees.
+
 
 **Showing Response Time Statistics in the Chat UI**
 

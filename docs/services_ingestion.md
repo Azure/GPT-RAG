@@ -91,6 +91,17 @@ $env:APP_CONFIG_ENDPOINT = "https://<your-app-config-name>.azconfig.io"
 
 ## Observability
 
+!!! warning "Unmerged P2 unblock error correction"
+    Ingestion [`34a6043`](https://github.com/Azure/gpt-rag-ingestion/commit/34a6043ea3b6c563e528aad69c0ae70e3be32ff4)
+    distinguishes a confirmed missing file log (`ResourceNotFoundError`, HTTP
+    404) from other download/read failures (generic HTTP 500). Invalid JSON or
+    a non-object log returns a separate generic integrity 500. These failures
+    neither upload a replacement log nor invalidate the files cache. A 500 is
+    not evidence that the file is absent or unblocked; inspect service health
+    or log integrity before retrying. Existing authorization and successful
+    unblock writes remain unchanged. This is an offline-tested candidate in
+    [#296](https://github.com/Azure/gpt-rag-ingestion/pull/296), not released behavior.
+
 Monitor ingestion job execution and performance using Application Insights. The following query retrieves detailed metrics for completed ingestion runs, including indexing and purging operations.
 
 Interpret run summaries together with per-document errors and item status.

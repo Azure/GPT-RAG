@@ -167,6 +167,15 @@ skip Azure AI Search while still using the recent chat history.
     this is not an idempotency or rollback guarantee. Hosted requests still
     perform no managed-Conversation operations.
 
+    The P2 follow-up [`c9a74f9`](https://github.com/Azure/gpt-rag-orchestrator/commit/c9a74f9e8bc500c183f54e2f7540146770503452)
+    narrows that retry: `max_tokens` must be supplied and the invalid-payload
+    diagnostic must specifically reject `max_tokens` or its wire name
+    `max_output_tokens` as "Not allowed when agent is specified". Ambiguous
+    diagnostics, other-option rejections and any emitted chunk (including
+    metadata-only output) propagate without replay. At most one retry removes
+    only `max_tokens`; input, thread and all other options remain unchanged.
+    Controlled managed/hosted caller tests are not live provider acceptance.
+
     Classic detached Cosmos persistence can fail after answer emission.
     A bounded background-error diagnostic is not a durable-completion receipt.
     Optional feedback question correlation can fail independently of feedback
