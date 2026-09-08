@@ -1,5 +1,47 @@
 # Tasks: Enforce Module Boundaries and Modularize the UI
 
+## Current delivery — P1 cleanup/cancellation only (2026-09-08)
+
+P1's seven original findings are **functionally closed, not approved**.
+Orchestrator `133eb7097d42a0c1ddf9f9397029abeeebd3a5d7` observes completed
+profile tasks, preserves caller cancellation and skips cleanup without memory.
+Ingestion `926a08d6b1ad75254fed4447a3e72e17c0bf8703` preserves primary
+query/run errors across cleanup/summary failures and propagates NL2SQL child
+cancellation through run/audit handling. UI
+`48d87b2fb2fb9a158d02f204cfbcc3941fb6126e` separates feedback submission from
+form cleanup and preserves disconnect failure across a secondary close failure.
+Docs `1f2d815768f084de674cf3c66e71c761c903fdae` pins these unmerged candidates;
+final `python -m mkdocs build --strict` passed (5.28s). Existing PRs remain draft.
+
+Local evidence: orchestrator **1,943 passed / 4 expected skips**, plus the
+five-case INFO-capture regression passed after exact-warning assertions;
+ingestion **935 passed / 1 known pre-existing App Configuration failure**
+(unmodified git-archive baseline **925 passed / same one failure**, installed
+provider 2.1.0 versus declared >=2.5.0); UI **525 passed**. All current ledger
+bindings match passing named tests: **98/67/30**, with 433 unique orchestrator
+selectors. Quality adoption remains red. These are local precommit working-tree
+receipts, not replacement immutable-head CI evidence. See
+[P1 handoff](../../.artifacts/p1-delivery.md) for exact receipts and limitations.
+
+Original inventory remains **191 = 143 keep recommendations + 12 functional
+closures + 36 open** (22 fixes, 2 partial fixes, 5 decisions, 7 evidence gaps).
+The 12 closures comprise the previous five plus P1's seven. Four new proposed
+cleanup companions (two ingestion, two UI) are tracked separately:
+**195 current ledger records = 98/67/30; zero approvals**.
+
+**Explicitly remaining, not implemented here:** P2 truthful outcomes/public
+errors/retry (5); P3 request context/OBO (7, including 2 partial); P4 profile
+identity/adapter/persistence (7); P5 conversation durability/reconciliation
+(3); P6 SQL schema/resources (2, left for parent); P7 audit BaseException
+evidence (3); P8 actual transport termination evidence (4); P9 behavioral
+decisions (5). Keep recommendations also require separate exact-policy review.
+No manifest, deployment, identity-policy, release, settings, exception approval
+or merge change. Code rollback cannot undo durable writes/deletions.
+
+All 46 task IDs and their prior completion markers below remain historical.
+The prior delivery/CI sections are retained, superseded for current P1 status
+by this section, not rewritten as evidence for the new heads.
+
 ## Post-delivery exception review and approved follow-up
 
 The 46-task delivery below is historical implementation accounting, **not
