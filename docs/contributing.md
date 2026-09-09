@@ -118,7 +118,7 @@ Clean reference runs now demonstrate green evaluation against the adopted
 | --- | --- |
 | [UI #112](https://github.com/Azure/gpt-rag-ui/pull/112) | Restored head `69492e4a965263362e6d17b7c3b7a8779047dd7e`, [run 34354232272](https://github.com/Azure/gpt-rag-ui/actions/runs/34354232272) succeeded; tree identical to initial reference `f4cf2d2`. Closed **unmerged**. |
 | [Ingestion #308](https://github.com/Azure/gpt-rag-ingestion/pull/308) | Initial reference `c415272` against adopted base `18c18431`, [run 34352952858](https://github.com/Azure/gpt-rag-ingestion/actions/runs/34352952858): all eight jobs passed. Restored head `03cb8a218e47a3e3cee3f6621e3a186bf9cf596e`, [run 34354094883](https://github.com/Azure/gpt-rag-ingestion/actions/runs/34354094883) succeeded with an identical tree. Closed **unmerged**. |
-| [Orchestrator #359](https://github.com/Azure/gpt-rag-orchestrator/pull/359) | Initial head `6a7ad2c5127875666403279a31874fac670374d0` against actual adopted base `c6339ee5738c0a0bb890b43f204f2d4ba1025157`, [run 34353356772](https://github.com/Azure/gpt-rag-orchestrator/actions/runs/34353356772): all eight jobs passed. Negative-control/restoration receipt remains pending. |
+| [Orchestrator #359](https://github.com/Azure/gpt-rag-orchestrator/pull/359) | Initial head `6a7ad2c5127875666403279a31874fac670374d0` against actual adopted base `c6339ee5738c0a0bb890b43f204f2d4ba1025157`, [run 34353356772](https://github.com/Azure/gpt-rag-orchestrator/actions/runs/34353356772): all eight jobs passed. Fixture-only revert `707231a228f9c3b1cd281e4b7e16169fb1149147`, restoration [run 34381235501](https://github.com/Azure/gpt-rag-orchestrator/actions/runs/34381235501): all eight jobs passed, with CLA also green. Restored tree `a938d1105f03a758e15e2f4ab1875a3b458a9d98` is identical to the initial reference. Closed **unmerged**. |
 
 Deliberate negative controls tested suppression growth without breaking
 functional tests:
@@ -135,13 +135,22 @@ functional tests:
   `quality-gate`. This is **not evidence that F401 itself was enforced**.
   Functional tests passed; the coordinator recorded the PR as `BLOCKED` under
   ruleset `22640997`.
-- **Orchestrator:** the negative control is owned by the component coordinator;
-  its result, blocked-state evidence, restored clean head/run and final PR
-  disposition remain pending. The initial green run and active settings do not
-  substitute for that receipt.
+- **Orchestrator:** head `e9a8c1584032c3381a72cbfa1a96aba270832fb9`,
+  [run 34380617414](https://github.com/Azure/gpt-rag-orchestrator/actions/runs/34380617414)
+  failed lint with Ruff `RUF100` for unused `noqa: F821` at
+  `src/connectors/types.py:1`. Policy failed with
+  `New or broadened suppression requires protected policy review`, and the
+  aggregate `quality-gate` failed; all other jobs passed. Evaluation used
+  adopted base `c6339ee5738c0a0bb890b43f204f2d4ba1025157` with
+  `bootstrap=false` throughout initial, negative and restored reference phases,
+  not the bootstrap exception.
+  The coordinator recorded `BLOCKED` **and** `REVIEW_REQUIRED` under the active
+  rules: this is not evidence of a block caused exclusively by CI. Only the
+  fixture was reverted; the restored green run and unmerged closure are
+  recorded above.
 
-The UI and ingestion fixtures were reverted before their reference PRs were
-closed; neither fixture was merged. Green checks alone do not satisfy required
+All three fixtures were reverted before their reference PRs were closed;
+none of the fixtures was merged. Green checks alone do not satisfy required
 reviews or authorize a merge. Active rules also cover `main`, where the adopted
 policy is not yet present: future release PRs fail closed until a normal release
 includes that policy. This adoption does not change `main`, tags or release pins,
@@ -149,8 +158,8 @@ and is not a reason to bypass or weaken those rules.
 
 This evidence supports development-policy adoption and the specific controls
 tested, not live identity/ACL validation, cross-component compatibility, durable
-recovery or production readiness. No live validation target has been supplied
-for this work, and no production deployment is authorized. Those validation
+recovery or production readiness. No live validation target or test principals
+have been supplied for this work, and no production deployment is authorized. Those validation
 gaps remain open; offline functional, container and policy tests do not close them.
 
 The older source pins, test counts and CI outcomes below and in linked service
@@ -362,9 +371,11 @@ enforcement, obtain evidence that authorized administrators require
 the quality gate and existing checks, enforce latest-head code-owner review,
 dismiss stale approvals, restrict bypass, and prove clean and deliberately
 failing PR outcomes. Repair policy through a reviewed PR rather than
-disabling controls. The active settings and reference results are recorded above;
-only orchestrator's negative-control/restoration receipt remains pending in
-that enforcement evidence. This documentation change performs none of those actions.
+disabling controls. All three components now have recorded adoption, active
+settings, clean references, negative controls, green restorations and unmerged
+reference-PR closures. This completes that bounded development-policy evidence,
+not the live validation gaps described above. This documentation change performs
+none of those administrative or runtime actions.
 
 ## UI Package Contributor Setup
 
