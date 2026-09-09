@@ -1,6 +1,6 @@
 # ADR-0006: Preserve retrieval authorization, disable unsupported profile collection, and retain best-effort classic history
 
-**Status:** Implemented in candidate ea61bc7; independent adoption review and live acceptance pending<br>
+**Status:** Adopted on develop at c6339ee5 under explicit initial administrative approval; live acceptance pending<br>
 **Date:** 2026-09-09<br>
 **Owners:** GPT-RAG platform and orchestrator implementation/review teams
 
@@ -20,6 +20,16 @@ classic SSE history without queues or migration. Those are agent-selected
 decisions under the user's delegation, not separate explicit user selections.
 This is not independent maintainer approval or permission to bypass policy,
 activate unreviewed exceptions, merge, change settings, deploy, or release.
+
+Subsequently, the maintainer explicitly approved initial administrative adoption
+and required-check activation in
+[the authorization receipt](https://github.com/Azure/GPT-RAG/issues/681#issuecomment-5601804634).
+Orchestrator adoption merged in Azure/gpt-rag-orchestrator#346 at
+`c6339ee5738c0a0bb890b43f204f2d4ba1025157`. Genuine protected-base reference
+CI `34353356772` passed; ruleset `22663326` now enforces required checks.
+This later authorization does not constitute an independent review or live
+authorization/recovery evidence. See the [current adoption receipt](../../specs/001-python-module-boundaries/tasks.md#authorized-initial-adoption---2026-09-09)
+for coordinated component and negative-control status. Released pins are unchanged.
 
 Operators need predictable failure semantics; users must not receive another
 principal's documents or profile because a dependency failed. Priorities:

@@ -1,5 +1,81 @@
 # Tasks: Enforce Module Boundaries and Modularize the UI
 
+## Authorized initial adoption - 2026-09-09
+
+The maintainer explicitly approved the 189 justified existing exceptions,
+initial administrative adoption, adoption merges and activation of required
+checks, excluding production deployment. The authorization is recorded at
+https://github.com/Azure/GPT-RAG/issues/681#issuecomment-5601804634.
+It supersedes the unanswered authorization requests recorded below. It is
+administrative approval, not an independent GitHub review or a fabricated
+green bootstrap result.
+
+Activation and adoption have completed in the three components: 92 orchestrator,
+67 ingestion and 30 UI exceptions are active under the recorded authorization.
+Each adopted head preserves the justified handlers and behavioral evidence;
+functional checks passed and the initial bootstrap exception is recorded below.
+Real reference PRs against the adopted base passed before additive required-check
+rules were enabled. Negative controls and restoration are recorded separately.
+Existing protections remain intact. Live acceptance evidence is not inferred
+from administrative permission or unit tests.
+
+At the maintainer's request, all review requests to `gxjorge` were removed,
+and automated waiting for that review was disabled. No further requests to
+other reviewers are authorized by this adoption.
+
+Verified initial adoption merges:
+
+| Component | Activation head | Develop merge | Initial CI |
+| --- | --- | --- | --- |
+| Orchestrator | `360065cb194f33e631fdf34c0e1c1eeb11935da3` | `c6339ee5738c0a0bb890b43f204f2d4ba1025157` | `34352193611`: tests/frontend/lint/typing/architecture/exceptions pass; bootstrap policy and aggregate fail |
+| Ingestion | `54397563c51b8fbfad138a3c4763a3c7e12ac6ce` | `18c18431fa8a83d4bcc1362f60bf1c6092ed865a` | `34351954943`: functional/frontend/lint/typing/architecture/exceptions pass; bootstrap policy and aggregate fail |
+| UI | `bbf65dea49bd188cf40bfdc718fe002b240e6a40` | `151c0b2d3d783e835e9565fde8dcc818c8f9f4b1` | `34352005742`: unit/container/typing/architecture pass; initial protected-base-dependent gates fail |
+
+These bootstrap failures were explicitly accepted under the initial
+administrative authorization, not reported as green. The following genuine
+reference runs use those adopted merge commits as their protected bases, not HEAD:
+
+| Component | Reference PR | Clean head | Successful reference run | Active ruleset |
+| --- | --- | --- | --- | --- |
+| Orchestrator | Azure/gpt-rag-orchestrator#359 | `6a7ad2c5127875666403279a31874fac670374d0` | `34353356772` | `22663326` |
+| Ingestion | Azure/gpt-rag-ingestion#308 | `c41527204ef876ae4410c77045df2e7085e11b1d` | `34352952858` | `22640997` |
+| UI | Azure/gpt-rag-ui#112 | `f4cf2d21209ebf69b0cf7f53e5e84313e34303e7` | `34352974880` | `22641145` |
+
+All three rulesets are active on `develop` and `main`, have no bypass actors,
+and require strict GitHub Actions app `15368` checks. Required contexts are
+`quality-gate` / `tests` / `frontend build` for orchestrator;
+`quality-gate` / `unit-tests` / `frontend-checks` for ingestion; and
+`quality-gate` / `unit-tests` / `container-tests` for UI. Each adds deletion and
+non-fast-forward protection, one approving review, code-owner review, stale
+approval dismissal, last-push approval and resolved review threads. Previously
+existing rules are retained. No feature was merged to `main`; future release
+PRs must include the adopted policy through the normal release flow.
+
+### Controlled negative checks and restoration
+
+| Component | Negative head / failing run | Observed failure | Restored head / passing run |
+| --- | --- | --- | --- |
+| Ingestion | `c11e995e69a7c579308da48ae964d4e342af5ef6` / `34353567295` | RUF100 unused noqa, policy new-suppression and quality-gate fail; functional checks pass | `03cb8a218e47a3e3cee3f6621e3a186bf9cf596e` / `34354094883` |
+| UI | `344ee17da79c52df38204928021d2da16373afd0` / `34353672894` | RUF100 unused noqa, policy suppression-growth and quality-gate fail; functional checks pass | `69492e4a965263362e6d17b7c3b7a8779047dd7e` / `34354232272` |
+
+Both PRs were BLOCKED with the required gate failing. Review requirements
+also independently block merges, so BLOCKED alone is not attributed solely to
+the negative fixture. Only each fixture was reverted; restored trees match
+the original clean reference trees. Both reference PRs are closed unmerged.
+Ingestion's proof exercises RUF100 and suppression growth, not F401 (which is
+not selected). Orchestrator's negative control and restoration remain in
+progress; its reference CI and actual rules have already been verified.
+
+### Remaining acceptance
+
+Parent #689 and canonical documentation #688 still require final evidence
+updates and disposition. Live ACL, coordinated-component and recovery
+acceptance have not been performed: no authorized nonproduction target and
+test-principal setup has been supplied. The unanswered environment question
+does not waive these criteria. No production deployment, release, tag or
+manifest change was performed. #681 remains open; historical pending-approval
+and inactive-policy statements below describe earlier checkpoints only.
+
 ## Adoption preparation - 2026-09-09
 
 Parallel readiness reviews examined all 189 current proposals; none was
