@@ -55,16 +55,21 @@ PRs must include the adopted policy through the normal release flow.
 
 | Component | Negative head / failing run | Observed failure | Restored head / passing run |
 | --- | --- | --- | --- |
+| Orchestrator | `e9a8c1584032c3381a72cbfa1a96aba270832fb9` / `34380617414` | RUF100 unused noqa, policy suppression and quality-gate fail; functional checks pass | `707231a228f9c3b1cd281e4b7e16169fb1149147` / `34381235501` |
 | Ingestion | `c11e995e69a7c579308da48ae964d4e342af5ef6` / `34353567295` | RUF100 unused noqa, policy new-suppression and quality-gate fail; functional checks pass | `03cb8a218e47a3e3cee3f6621e3a186bf9cf596e` / `34354094883` |
 | UI | `344ee17da79c52df38204928021d2da16373afd0` / `34353672894` | RUF100 unused noqa, policy suppression-growth and quality-gate fail; functional checks pass | `69492e4a965263362e6d17b7c3b7a8779047dd7e` / `34354232272` |
 
-Both PRs were BLOCKED with the required gate failing. Review requirements
+All three PRs were BLOCKED with the required gate failing. Review requirements
 also independently block merges, so BLOCKED alone is not attributed solely to
 the negative fixture. Only each fixture was reverted; restored trees match
-the original clean reference trees. Both reference PRs are closed unmerged.
+the original clean reference trees. All three reference PRs are closed unmerged.
 Ingestion's proof exercises RUF100 and suppression growth, not F401 (which is
-not selected). Orchestrator's negative control and restoration remain in
-progress; its reference CI and actual rules have already been verified.
+not selected). Orchestrator's completed
+[receipt](https://github.com/Azure/gpt-rag-orchestrator/pull/359#issuecomment-5605868380)
+records all eight restored jobs passing, the actual adopted base with
+`bootstrap=false`, and identical reference/restored tree
+`a938d1105f03a758e15e2f4ab1875a3b458a9d98`. Required checks are active;
+no knowingly failing fixture was merged.
 
 ### Remaining acceptance
 
