@@ -1,5 +1,42 @@
 # Tasks: Enforce Module Boundaries and Modularize the UI
 
+## Adoption preparation - 2026-09-09
+
+Parallel readiness reviews examined all 189 current proposals; none was
+activated. Orchestrator `cb6e2f3a34f0123aeb39ceaaf0c0063078318ac6` corrects
+two obsolete H5 rationales and 28 display locators, retaining all 92 exact
+handler identities and evidence selectors. Ingestion
+`0ae3759356935830c532ce3f2c48d3753b01da73` corrects only obsolete feedback-test
+prose; all 67 proposals and runtime remain unchanged.
+
+UI `57d054cb889be99d3faa48713d13dfc1f5ddca94` fixes an adoption defect:
+Ruff BLE001 now honors only exact protected-base active handler records with
+verified behavioral evidence. It does not allow candidate self-approval,
+other diagnostics or unmatched handlers. The 53 policy tests include 13 new
+regression cases. All 30 runtime proposals remain unchanged.
+
+The authenticated account has administrator permission. Q5 permits a recorded
+administrative exception for initial adoption, but the focused requests for
+exact exception activation and bootstrap-red acceptance received an unavailable
+user response, not approval. No activation, merge or settings change occurred.
+Independent review and administrative acceptance must not be fabricated.
+
+A policy-file-only extraction is not a coherent bootstrap: the inventories,
+typing scope and evidence reference runtime modules absent from develop.
+The initial coherent adoption therefore requires explicit approval of its
+runtime/policy combination and bootstrap-red state. After adoption, a clean
+reference PR against the actual adopted base must pass before additive required
+checks and negative merge-eligibility controls establish enforcement. Existing
+protections must be retained. Live acceptance requires separately authorized
+environment access and distinct owner/non-owner principals.
+
+Final-head runs are complete: orchestrator `34343153421`, ingestion
+`34342868354`, UI `34343550332`. Each passes functional tests/builds, typing
+and architecture; each fails lint, exceptions, policy and quality-gate.
+The UI fix does not waive proposed records or bootstrap restrictions.
+This preparation supersedes earlier candidate heads but does not establish
+issue acceptance. Runtime and source-pinned product documentation are unchanged.
+
 ## Reconciliation receipt — 2026-09-09 (final functional reconciliation)
 
 **All original functional implementation dispositions are done; #681 is not
