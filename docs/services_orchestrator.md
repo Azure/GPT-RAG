@@ -1,5 +1,11 @@
 # 🎯 Orchestrator
 
+!!! note "Develop adoption, not a release"
+    [Adoption status and approval scope](contributing.md#develop-adoption-status)
+    supersede the historical “unmerged” and pending-exception labels below.
+    Source pins remain implementation evidence; released manifest pins are unchanged.
+    Required-check activation and reference-green evidence are not yet confirmed.
+
 The Orchestrator is the core engine of GPT-RAG, an agentic orchestration layer
 built on the Microsoft Agent Framework and Azure AI Foundry Agent Service. It
 coordinates agent-based RAG workflows, where each agent has a defined role, to
@@ -306,8 +312,9 @@ skip Azure AI Search while still using the recent chat history.
     history. A stronger guarantee needs separate design and approval.
     Optional feedback question correlation can fail independently of feedback
     saving; it does not redefine history ownership or authorize new storage.
-    These retained outcomes remain inactive exception proposals, not guarantees
-    of persistence or recovery.
+    These retained outcomes were inactive exception proposals at the recorded
+    checkpoint. Initial administrative acceptance is now recorded in the
+    adoption status above; it does not guarantee persistence or recovery.
 
 | App Configuration key | Default | Purpose |
 |-----------------------|---------|---------|

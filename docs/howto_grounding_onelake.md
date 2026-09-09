@@ -1,5 +1,11 @@
 # Foundry IQ: OneLake (Microsoft Fabric lakehouse)
 
+!!! note "Develop adoption, not a release"
+    [Adoption status and approval scope](contributing.md#develop-adoption-status)
+    supersede the historical “unmerged” and pending-exception labels below.
+    Source pins remain implementation evidence; released manifest pins are unchanged.
+    Required-check activation and reference-green evidence are not yet confirmed.
+
 !!! note "Unmerged request-level authorization policy"
     This source's app-only ingestion/access model is not changed by orchestrator
     `ea61bc7`. Its [source-pinned provider policy](services_orchestrator.md#candidate-retrieval-authorization)

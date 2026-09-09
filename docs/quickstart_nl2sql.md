@@ -1,5 +1,11 @@
 # NL2SQL Quick Start Guide
 
+!!! note "Develop adoption, not a release"
+    [Adoption status and approval scope](contributing.md#develop-adoption-status)
+    supersede the historical “unmerged” and pending-exception labels below.
+    Source pins remain implementation evidence; released manifest pins are unchanged.
+    Required-check activation and reference-green evidence are not yet confirmed.
+
 Get public access natural language querying of your Azure SQL Database working in **30 minutes** using **automated blob storage ingestion**.
 
 > This quickstart enables a public access solution which is for testing purposes only!

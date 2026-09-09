@@ -1,5 +1,11 @@
 # Audit Contract v1
 
+!!! note "Develop adoption, not a release"
+    [Adoption status and approval scope](contributing.md#develop-adoption-status)
+    supersede the historical “unmerged” and pending-exception labels below.
+    Source pins remain implementation evidence; released manifest pins are unchanged.
+    Required-check activation and reference-green evidence are not yet confirmed.
+
 Use this page to understand the GPT-RAG audit event contract, estimate its
 telemetry volume, and prepare operational queries.
 

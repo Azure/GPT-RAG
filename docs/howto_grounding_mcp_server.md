@@ -1,5 +1,11 @@
 # Foundry IQ: Generic MCP server knowledge sources
 
+!!! note "Develop adoption, not a release"
+    [Adoption status and approval scope](contributing.md#develop-adoption-status)
+    supersede the historical “unmerged” and pending-exception labels below.
+    Source pins remain implementation evidence; released manifest pins are unchanged.
+    Required-check activation and reference-green evidence are not yet confirmed.
+
 !!! warning "Unmerged candidate: OBO headers require user authorization"
     At orchestrator `ea61bc7`, [source-pinned provider policy](services_orchestrator.md#candidate-retrieval-authorization)
     treats configured MCP query headers with `valueFrom.kind: obo` as user-only.

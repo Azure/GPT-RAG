@@ -1,5 +1,11 @@
 # Foundry IQ prerequisites
 
+!!! note "Develop adoption, not a release"
+    [Adoption status and approval scope](contributing.md#develop-adoption-status)
+    supersede the historical “unmerged” and pending-exception labels below.
+    Source pins remain implementation evidence; released manifest pins are unchanged.
+    Required-check activation and reference-green evidence are not yet confirmed.
+
 This is the shared baseline for every Foundry IQ knowledge source in GPT-RAG.
 Read this once before you enable your first Foundry IQ knowledge source. Each
 per-source how-to page lists only its own extra prerequisites on top of what

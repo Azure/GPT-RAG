@@ -1,5 +1,11 @@
 # NL2SQL / Fabric Metadata Data Source
 
+!!! note "Develop adoption, not a release"
+    [Adoption status and approval scope](contributing.md#develop-adoption-status)
+    supersede the historical “unmerged” and pending-exception labels below.
+    Source pins remain implementation evidence; released manifest pins are unchanged.
+    Required-check activation and reference-green evidence are not yet confirmed.
+
 The **NL2SQL ingestion process** loads structured metadata from **blob storage**—including tables, measures, and sample queries—into Azure AI Search. This metadata provides the orchestrator with the necessary context to generate accurate SQL and DAX queries.
 
 Each JSON file defines the metadata for one entity (a table, measure, or query).

@@ -65,18 +65,63 @@ assessment when their supported behavior is preserved.
 
 ## Python Quality Checks
 
-!!! warning "Draft contributor preview, not an activated merge policy"
+### Develop adoption status
+
+As of 2026-09-09, the following quality/package changes are adopted on the
+component **`develop` branches**, not released through the umbrella
+[`main` manifest](https://github.com/Azure/GPT-RAG/blob/main/manifest.json).
+Released component pins remain unchanged by this adoption.
+
+| Component | Adoption PR | Adopted merge commit |
+| --- | --- | --- |
+| UI | [#110](https://github.com/Azure/gpt-rag-ui/pull/110) | [`151c0b2d3d783e835e9565fde8dcc818c8f9f4b1`](https://github.com/Azure/gpt-rag-ui/commit/151c0b2d3d783e835e9565fde8dcc818c8f9f4b1) |
+| Ingestion | [#296](https://github.com/Azure/gpt-rag-ingestion/pull/296) | [`18c18431fa8a83d4bcc1362f60bf1c6092ed865a`](https://github.com/Azure/gpt-rag-ingestion/commit/18c18431fa8a83d4bcc1362f60bf1c6092ed865a) |
+| Orchestrator | [#346](https://github.com/Azure/gpt-rag-orchestrator/pull/346) | [`c6339ee5738c0a0bb890b43f204f2d4ba1025157`](https://github.com/Azure/gpt-rag-orchestrator/commit/c6339ee5738c0a0bb890b43f204f2d4ba1025157) |
+
+The [explicit initial administrative approval](https://github.com/Azure/GPT-RAG/issues/681#issuecomment-5601804634)
+accepts 189 individually justified existing exceptions: 92 orchestrator,
+67 ingestion, and 30 UI. All 189 records are active in the adopted `develop`
+ledgers under that actual administrative approval; this is not approval of
+future exceptions. It authorizes initial adoption merges and required-check
+activation, **not production deployment**. This is administrative bootstrap
+acceptance, **not independent GitHub review** and not proof of green checks.
+
+Orchestrator's activation head
+[`360065cb194f33e631fdf34c0e1c1eeb11935da3`](https://github.com/Azure/gpt-rag-orchestrator/commit/360065cb194f33e631fdf34c0e1c1eeb11935da3)
+is included in the adopted merge above. Initial
+[CI run 34352193611](https://github.com/Azure/gpt-rag-orchestrator/actions/runs/34352193611)
+records 2,332 passing tests and 4 skips; frontend build, lint, typing,
+architecture and exceptions pass. Only bootstrap policy and the aggregate
+`quality-gate` fail. Initial adoption was administratively authorized despite
+those bootstrap failures; the run remains failed, not a green reference.
+
+Required-check settings are not yet active at this adoption checkpoint.
+Reference PR validation is in progress in all three component repositories.
+Exact protected-branch settings, completed clean-reference and failing
+negative-control results, and subsequent rules activation still await
+coordination confirmation. Authorization and merged workflow files alone do not establish
+enforcement. Live identity/ACL validation, cross-component compatibility,
+durable recovery and production readiness are not implied.
+
+The older source pins, test counts and CI outcomes below and in linked service
+guides remain implementation evidence at their recorded revisions. Their
+“unmerged”, “inactive proposal” and pending-bootstrap descriptions are historical:
+the adoption record above supersedes those status claims, not their bounded
+behavioral evidence. No historical red CI run is reclassified as green.
+Use the adopted merge commits for current contributor policy; use the released
+manifest for deployed-version guidance.
+
+!!! warning "Historical contributor checkpoints, not proof of activated merge policy"
     The commands in this section apply only to the implementation checkpoints
     linked below for [#681](https://github.com/Azure/GPT-RAG/issues/681),
     coordinated in [#689](https://github.com/Azure/GPT-RAG/pull/689).
     They are not instructions for the currently released components.
-    No activated, green merge policy is established. Proposed exceptions and
-    bootstrap policy review remain unresolved. Passing tests or
+    No activated, green merge policy is established by these checkpoints.
+    Initial administrative exception acceptance is now recorded above. Passing tests or
     individual typing/architecture results do not establish a green quality
     gate or required-check activation.
-    The UI package, history and failure-boundary code delivery is accepted for
-    this unmerged checkpoint. It does not complete cross-component integration,
-    live validation, recovery or administrative acceptance.
+    The UI package, history and failure-boundary code is now adopted on `develop`.
+    This does not complete cross-component integration, live validation or recovery.
 
 ### Repository-local setup
 
@@ -89,7 +134,7 @@ Install the checked-out `requirements-quality.txt`; do not substitute
 tool versions from the original proposal. These are development dependencies,
 not additions to runtime images.
 
-| Component checkpoint | Contributor source at the recorded revision |
+| Historical component checkpoint (not the adopted head) | Contributor source at the recorded revision |
 | --- | --- |
 | [Azure/gpt-rag-orchestrator#346](https://github.com/Azure/gpt-rag-orchestrator/pull/346), `6b652d8` | [AGENTS.md](https://github.com/Azure/gpt-rag-orchestrator/blob/6b652d8c4d664863a3d02d439b7b77210963320d/AGENTS.md#python-quality-policy-bootstrap-under-review) |
 | [Azure/gpt-rag-ingestion#296](https://github.com/Azure/gpt-rag-ingestion/pull/296), `f51f515` | [Python quality guide](https://github.com/Azure/gpt-rag-ingestion/blob/f51f5154a0a63df8c7479c14d0b2ddaff93a7f13/docs/python-quality.md) |
@@ -181,8 +226,9 @@ establish that isolation either.
 The recorded backend milestones add isolated tool startup and source-analysis
 paths, reject executable plugins/custom contracts, and keep candidate dependency
 installation in the separate behavioral CI job. Static CI jobs install runtime
-dependencies from the protected checkout; first-adoption candidate tooling still
-runs only under the blocked bootstrap path. This is static source-analysis
+dependencies from the protected checkout; at these historical checkpoints,
+first-adoption candidate tooling ran only under the blocked bootstrap path.
+This is static source-analysis
 isolation, not an OS sandbox or protection against a compromised interpreter
 or installed tool. Keep the repository-specific startup flags and reviewed
 runner; do not bypass a failed check by dropping isolation, and do not treat an
@@ -219,11 +265,13 @@ checker, workflows, tool pins, and policy need explicit maintainer review.
 Do not edit records to make a failing candidate approve itself, generate
 baselines automatically in CI, or exempt entire files from review.
 
-The backend `.quality/exceptions.json` ledgers contain proposed records, not
-active approvals: [orchestrator has ninety-eight](https://github.com/Azure/gpt-rag-orchestrator/blob/6b652d8c4d664863a3d02d439b7b77210963320d/.quality/exceptions.json)
-and [ingestion has sixty-five](https://github.com/Azure/gpt-rag-ingestion/blob/f51f5154a0a63df8c7479c14d0b2ddaff93a7f13/.quality/exceptions.json).
-Neither checkpoint has an active exception; proposals do not waive lint or
-broad-handler findings. A proposed exception must identify the exact source
+The historical backend `.quality/exceptions.json` ledgers contained proposed records:
+[orchestrator had ninety-eight](https://github.com/Azure/gpt-rag-orchestrator/blob/6b652d8c4d664863a3d02d439b7b77210963320d/.quality/exceptions.json)
+and [ingestion had sixty-five](https://github.com/Azure/gpt-rag-ingestion/blob/f51f5154a0a63df8c7479c14d0b2ddaff93a7f13/.quality/exceptions.json).
+Neither checkpoint had an active exception. These are not the adopted ledger
+counts; the initial administrative acceptance above supersedes their pending
+status. New proposals do not waive lint or broad-handler findings.
+A proposed exception must identify the exact source
 site and try/handler fingerprint, its necessity, expected failure outcome,
 safe diagnostic path, review reference, and passing named failure tests.
 Logging or re-raising alone is not an exemption. Preserve explicitly
@@ -247,31 +295,33 @@ The scoped orchestrator follow-up replaces configured nullable
 retrieval failure with the
 [existing safe failed-turn contract](services_orchestrator.md#streaming-outcomes),
 while preserving explicit retrieval opt-outs and legitimate empty results.
-Updated fingerprints and real strategy-to-SSE evidence remain proposed,
-not active approvals.
+At those checkpoints, updated fingerprints and real strategy-to-SSE evidence
+were proposals, not active approvals; see the subsequent administrative acceptance above.
 Review those outcomes individually; zero unproposed sites is not zero risk.
 
 ### Adoption is separate from workflow availability
 
-The component drafts introduce an always-evaluated `quality-gate` alongside
-their existing tests. Ordinary policy approval deliberately fails at bootstrap
-because the protected base has no evaluator yet. A workflow file, candidate
+The adopted component PRs introduce an always-evaluated `quality-gate` alongside
+their existing tests. At the historical checkpoints, ordinary policy approval
+deliberately failed at bootstrap because the protected base had no evaluator.
+A workflow file, candidate
 approval string, or uploaded report cannot activate repository protection.
 
-Before claiming enforcement, maintainers must resolve the remaining findings
-and review the bootstrap. Separately authorized administrators must require
+Initial administrative bootstrap approval is recorded above. Before claiming
+enforcement, obtain evidence that authorized administrators require
 the quality gate and existing checks, enforce latest-head code-owner review,
 dismiss stale approvals, restrict bypass, and prove clean and deliberately
 failing PR outcomes. Repair policy through a reviewed PR rather than
-disabling controls. These steps are pending, not performed by this
-documentation change.
+disabling controls. Confirmation of those settings and reference/negative-control
+results remains pending; this documentation change performs none of those actions.
 
 ## UI Package Contributor Setup
 
-!!! warning "Unmerged package checkpoint"
+!!! warning "Historical package checkpoint, now adopted on develop"
     This section describes [Azure/gpt-rag-ui#110](https://github.com/Azure/gpt-rag-ui/pull/110)
     at [`ee35c9f`](https://github.com/Azure/gpt-rag-ui/commit/ee35c9ffea67902b4dc935e287beb5d4640ce6d6),
-    not the released UI. Accepted installed-package evidence is separate from
+    not the released UI or final adopted head (see the adoption table above).
+    Accepted installed-package evidence is separate from
     cross-component and live deployment acceptance. Package
     installation is a contributor setup change, not an instruction to change
     deployed startup commands or enable hosted continuity.
@@ -315,7 +365,7 @@ installed-module origin assertions, synthetic Entra/Copilot startup and invalid
 configuration cases, and Chainlit `HTTPSession` file persistence and cleanup
 under the staged asset root, plus standalone download/OpenAPI failure outcomes.
 
-The later unmerged UI
+The later pre-adoption UI checkpoint
 [`aef9546`](https://github.com/Azure/gpt-rag-ui/commit/aef9546879333c8615b7adb3917f299a665f4ecc)
 adjusts failure tests and runtime outcomes: OpenAPI generation failure returns
 uncached HTTP 500 with no metadata fallback; failed attachment ingestion stops
@@ -343,12 +393,13 @@ origins. This supersedes the earlier clean-environment and Linux-evidence gaps;
 an unavailable local Docker engine is not a global acceptance blocker.
 These synthetic installed/container results are not live Azure or identity
 integration, production recovery, cross-component compatibility acceptance, approved
-exceptions, or activated repository protection. The full quality gate remains red.
+exceptions, or activated repository protection. That historical full quality gate was red.
 
-Final-source [CI run 34307187745](https://github.com/Azure/gpt-rag-ui/actions/runs/34307187745)
+Pre-adoption source [CI run 34307187745](https://github.com/Azure/gpt-rag-ui/actions/runs/34307187745)
 at `aef9546` passes unit and container tests, but lint, policy, exceptions,
 and the aggregate quality gate fail. Passing behavioral evidence does not
-approve proposed exceptions or complete quality bootstrap.
+approve exceptions or prove post-adoption enforcement; administrative acceptance
+is separately recorded above.
 
 ### Find the owning implementation
 
@@ -370,7 +421,7 @@ and implementation rather than treating the initial map as the final layout.
 | Instrumentation | `telemetry/monitoring.py` |
 | Pure shared values | `util/constants.py` |
 
-At this unmerged milestone, `api/history.py` owns `OrchestratorDataLayer`,
+At this recorded implementation milestone, `api/history.py` owns `OrchestratorDataLayer`,
 the `BaseDataLayer` callbacks, the fresh-instance `get_data_layer` factory,
 idempotent registration, ambient session access, consume-once request metadata,
 and selected-conversation updates. `services/history.py` owns `HistoryService`,

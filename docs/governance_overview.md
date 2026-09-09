@@ -1,5 +1,11 @@
 # Governance and responsible operation
 
+!!! note "Develop adoption, not a release"
+    [Adoption status and approval scope](contributing.md#develop-adoption-status)
+    supersede the historical “unmerged” and pending-exception labels below.
+    Source pins remain implementation evidence; released manifest pins are unchanged.
+    Required-check activation and reference-green evidence are not yet confirmed.
+
 Use this guide to decide what data GPT-RAG may process, who owns each
 control, and what evidence an operator should preserve for security reviews
 and incident investigations.

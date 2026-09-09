@@ -1,5 +1,11 @@
 # Foundry IQ: Documents
 
+!!! note "Develop adoption, not a release"
+    [Adoption status and approval scope](contributing.md#develop-adoption-status)
+    supersede the historical “unmerged” and pending-exception labels below.
+    Source pins remain implementation evidence; released manifest pins are unchanged.
+    Required-check activation and reference-green evidence are not yet confirmed.
+
 > Complete the [Foundry IQ prerequisites](howto_grounding_foundry_iq_prereqs.md)
 > first. This page adds only the settings specific to the default Blob
 > Documents path and the custom `searchIndex` path.

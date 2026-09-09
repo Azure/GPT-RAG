@@ -1,5 +1,11 @@
 # Ground answers on SharePoint (remote, Copilot Retrieval API)
 
+!!! note "Develop adoption, not a release"
+    [Adoption status and approval scope](contributing.md#develop-adoption-status)
+    supersede the historical “unmerged” and pending-exception labels below.
+    Source pins remain implementation evidence; released manifest pins are unchanged.
+    Required-check activation and reference-green evidence are not yet confirmed.
+
 This how-to describes the **SharePoint remote** grounding option in GPT-RAG.
 It is the fifth Foundry IQ knowledge source kind, alongside `searchIndex`,
 `workIQ`, `fabricOntology`, and `fabricDataAgent`.

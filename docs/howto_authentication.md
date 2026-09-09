@@ -1,5 +1,11 @@
 # Authentication and Document-Level Security
 
+!!! note "Develop adoption, not a release"
+    [Adoption status and approval scope](contributing.md#develop-adoption-status)
+    supersede the historical “unmerged” and pending-exception labels below.
+    Source pins remain implementation evidence; released manifest pins are unchanged.
+    Required-check activation and reference-green evidence are not yet confirmed.
+
 This page explains how authentication works in GPT-RAG, from the GPT-RAG UI sign-in to querying Azure AI Search with document-level access control enabled (POSIX-like ACL / RBAC scopes). The classic runtime forwards a user token to the orchestrator, which produces the correct user-context token for Azure AI Search. The published hosted component matrix defines a stricter UI BFF ownership boundary described below.
 
 > In OAuth mode, the orchestrator receives a user access token (for the orchestrator API) and then performs an On-Behalf-Of (OBO) exchange to obtain a separate token for Azure AI Search. The two tokens have different audiences and are not interchangeable.
@@ -550,8 +556,9 @@ The endpoint is intentionally called `/config/apply` and not `/restart` so the r
     A cache-refresh failure after durable writes also remains `500`, unlike
     ingestion's refresh-only `200`/`applied` contract above. Neither status nor
     code rollback undoes durable writes. The existing API-key environment
-    fallback is retained under an inactive proposal, not new identity approval.
-    These are unmerged checkpoints; roles, labels, defaults and SSE schemas
+    fallback was retained under an inactive proposal at this checkpoint;
+    subsequent initial administrative acceptance is not new identity approval.
+    These are historical checkpoints; roles, labels, defaults and SSE schemas
     are not redefined by this preview.
 
 ### 6) Operator workflow: verifying the role lands in the token

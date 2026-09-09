@@ -1,5 +1,11 @@
 # Foundry IQ: Fabric ontology (Microsoft Fabric)
 
+!!! note "Develop adoption, not a release"
+    [Adoption status and approval scope](contributing.md#develop-adoption-status)
+    supersede the historical “unmerged” and pending-exception labels below.
+    Source pins remain implementation evidence; released manifest pins are unchanged.
+    Required-check activation and reference-green evidence are not yet confirmed.
+
 The `fabricOntology` Foundry IQ knowledge source grounds answers on data in a
 Microsoft Fabric ontology: semantic models, lakehouses, warehouses, and KQL
 databases exposed through that ontology. It runs next to your document

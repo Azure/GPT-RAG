@@ -1,5 +1,11 @@
 # Foundry IQ: Work IQ (Microsoft 365)
 
+!!! note "Develop adoption, not a release"
+    [Adoption status and approval scope](contributing.md#develop-adoption-status)
+    supersede the historical “unmerged” and pending-exception labels below.
+    Source pins remain implementation evidence; released manifest pins are unchanged.
+    Required-check activation and reference-green evidence are not yet confirmed.
+
 !!! warning "Unmerged candidate: required-user retrieval"
     At orchestrator `ea61bc7`, [source-pinned provider policy](services_orchestrator.md#candidate-retrieval-authorization)
     makes requests with Work IQ enabled user-required, including mixed sources

@@ -1,5 +1,11 @@
 This page covers common issues, debugging tools, and how to inspect logs in GPT-RAG.
 
+!!! note "Develop adoption, not a release"
+    [Adoption status and approval scope](contributing.md#develop-adoption-status)
+    supersede the historical “unmerged” and pending-exception labels below.
+    Source pins remain implementation evidence; released manifest pins are unchanged.
+    Required-check activation and reference-green evidence are not yet confirmed.
+
 !!! warning "Unmerged orchestrator candidate: recovery and compatibility"
     The following guidance is pinned to orchestrator
     [`ea61bc7cd7b2ac21c957bee5db959337fedd8760`](https://github.com/Azure/gpt-rag-orchestrator/commit/ea61bc7cd7b2ac21c957bee5db959337fedd8760),

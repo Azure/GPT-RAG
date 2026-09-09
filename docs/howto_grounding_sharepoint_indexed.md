@@ -1,5 +1,11 @@
 # Foundry IQ: SharePoint Indexed (preview)
 
+!!! note "Develop adoption, not a release"
+    [Adoption status and approval scope](contributing.md#develop-adoption-status)
+    supersede the historical “unmerged” and pending-exception labels below.
+    Source pins remain implementation evidence; released manifest pins are unchanged.
+    Required-check activation and reference-green evidence are not yet confirmed.
+
 !!! note "Unmerged request policy does not add indexed-source ACLs"
     Orchestrator `ea61bc7` leaves this source's app-only model unchanged.
     Its [source-pinned provider policy](services_orchestrator.md#candidate-retrieval-authorization)
