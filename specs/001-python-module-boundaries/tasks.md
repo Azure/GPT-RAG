@@ -1,5 +1,89 @@
 # Tasks: Enforce Module Boundaries and Modularize the UI
 
+## Current delivery - bounded profile and request-context corrections (2026-09-09)
+
+**This bounded batch is delivered; #681 is not complete.** Orchestrator
+Azure/gpt-rag-orchestrator#346 contains runtime
+`80d8fb212088dfea2249d53593b9e1dca2f37967` and test-only follow-up
+`25f1986bfcf3a2b5f6057942a17fe7763e41c934`, targeting develop.
+Documentation Azure/GPT-RAG#688 contains
+`ec0e911ed527916117aa6e0b156fa40687ed4c42`, targeting docs.
+Both remain draft and unmerged.
+
+The single-agent bound Search tool now propagates failed request-context
+application instead of searching with stale/unapplied context. Four regression
+cases failed before the rethrow correction. Actual agent-tool/turn/HTTP cases
+cover failure after partial output and cancellation; existing successful
+conversation scoping and disabled retrieval remain unchanged. Token selection,
+anonymous mode, OBO/service fallback and broader request isolation are not
+changed or newly approved.
+
+The three profile-capable strategies reject absent, non-string, blank and
+shared `default_user` keys (including padded placeholders), skip optional
+profile processing and continue ordinary chat without cached profile context
+or welcome. Existing other keys remain verbatim. Hosted memory stays disabled;
+multimodal does not become hosted-eligible. Two unconditional save timing logs
+were removed; actual callers preserve confirmed/None/failed write distinctions.
+
+This guard does **not** authenticate legacy keys. Maintained classic
+orchestration supplies `principal_id`, not `conversation.user_id`; no identity
+substitution, migration or extraction reactivation was made. Real-adapter
+evidence confirms the existing options/result mismatch remains. All seven P4
+findings therefore remain partial/open, not silently deferred or approved.
+
+One combined scoped review found no significant issues. Final bounded evidence:
+**365 caller/strategy tests**, **102 ledger/schema/evidence tests** (216
+deselected), all **101 exact proposed handler bindings**, and strict docs build.
+Protected-base typing/architecture pass; lint77, exceptions202 and policy1
+still block adoption. No checker or policy was weakened.
+
+Full CI at `80d8fb2` found four inconsistent optional-context test fixtures
+(2127 passed, 4 failed, 4 skipped). Those fixtures disabled memory but expected
+cached memory hooks to execute. Test-only `25f1986` explicitly enables memory
+and supplies a key in the loaded conversation fixture. Its targeted suite
+passed **220**, with **4 skipped**. Final-head CI run `34296565494` now passed
+**2131**, with **4 skipped**; frontend, typing and architecture also passed.
+Lint, exceptions, policy and the aggregate quality gate remain red. These are
+fresh results for `25f1986`, not inherited from the earlier P5 receipt.
+
+**191 = 143 keep recommendations + 28 resolved + 20 open.** Only the original
+`legacy-single-search-context-continuation` finding closes in this batch.
+Remaining: P3 six, P4 seven partial, classic persistence/H5 one, P9 five and
+UI upload-continuation/H6 one. There remain **198 proposals (101/67/30), zero
+active**. Ten orchestrator ledger entries changed: seven original P4 records,
+two existing original cleanup records and one P3. No new records. Overall
+46 original records differ from their snapshots, 145 remain unchanged. Original
+IDs/categories/package assignments and all 46 task IDs are preserved.
+
+H1-H7, trusted profile identity and collection repair/disposition, exact
+exception/policy approvals, protected adoption, live integration/recovery and
+final review/merge remain. Runtime rollback is to `a4010ad`, coordinated with
+docs; it restores the old unsafe fallback and is not a data repair. No schema
+migration, new peer dependency, merge, deployment or release.
+
+## Integration checkpoint - persistence follow-up CI (2026-09-09)
+
+**Functional CI passed at the pinned component heads; quality adoption remains
+blocked.** This checkpoint supersedes the earlier "CI started" receipt below,
+not its source-level behavior or pending decisions.
+
+Orchestrator runtime commit `6f89c39` initially had 2 failed legacy history
+timing assertions, 2054 passes and 4 skips in run `34292636509`. Test-only
+commit `a4010adf943ba3648dc73e1433e344676baba7e1` observes and drains each
+test's detached writes before asserting awaited create calls. It changes no
+runtime durability behavior or exception record. The targeted history/P5
+suite passed 67 cases; full run `34293505842` passed **2056**, with **4 skipped**.
+Frontend build, typing and architecture also passed.
+
+Ingestion `ce5c2c8`, run `34292631115`: **951 unit tests** and frontend,
+typing and architecture passed. UI `8872cfc`, run `34292602772`: **534 unit
+tests** and **468 container tests** passed, as did typing and architecture.
+In all three repositories, lint, exceptions, policy and the aggregate quality
+gate still fail. No approval, protection, deployment or merge is implied.
+
+These results cover only those committed sources. Subsequent bounded P3/P4
+work is separate and cannot inherit this full-suite receipt.
+
 ## Current delivery - persistence, UI and ingestion follow-up (2026-09-08)
 
 **This batch is delivered; #681 is not complete.** This section supersedes
