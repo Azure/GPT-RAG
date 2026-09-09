@@ -309,6 +309,21 @@ installed-module origin assertions, synthetic Entra/Copilot startup and invalid
 configuration cases, and Chainlit `HTTPSession` file persistence and cleanup
 under the staged asset root, plus standalone download/OpenAPI failure outcomes.
 
+The later unmerged UI
+[`e993c89`](https://github.com/Azure/gpt-rag-ui/commit/e993c89e00c296edb5384219d200d50937311713)
+adjusts failure tests and runtime outcomes: OpenAPI generation failure returns
+uncached HTTP 500 with no metadata fallback; failed attachment ingestion stops
+the accompanying question with reattach/resubmit guidance while preserving
+confirmed bookkeeping; failed panel owner indexing retains ordinary chat but
+denies panel access and logs required repair without automatic recovery.
+See [operator guidance](troubleshooting.md). Ingestion
+[`eb42bbb`](https://github.com/Azure/gpt-rag-ingestion/commit/eb42bbb155613ba570f891b67366967387735e32)
+adds configured-fallback diagnostics with the existing environment opt-in and
+legacy overview `feedback.available`; see
+[source order and recovery](services_ingestion.md#observability).
+These source-specific behavioral tests do not approve proposed exception
+records, establish new CI results, or change the shipped manifest.
+
 [CI run 34050677391](https://github.com/Azure/gpt-rag-ui/actions/runs/34050677391)
 passed 521 unittest cases and a separate Linux container job with 455 behavioral
 cases and no skips, retaining the 12 history-boundary cases from the earlier

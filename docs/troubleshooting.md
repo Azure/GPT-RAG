@@ -19,16 +19,17 @@ This page covers common issues, debugging tools, and how to inspect logs in GPT-
 
 !!! warning "Unmerged upload, OpenAPI and panel failure corrections"
     The follow-up in [Azure/gpt-rag-ui#110](https://github.com/Azure/gpt-rag-ui/pull/110)
-    at [`8872cfc`](https://github.com/Azure/gpt-rag-ui/commit/8872cfc92c70180e2e07a6cc2842942c020c767b)
+    at [`e993c89`](https://github.com/Azure/gpt-rag-ui/commit/e993c89e00c296edb5384219d200d50937311713)
     adds uploaded filenames to session bookkeeping only after confirmed batch
     ingestion. A false result or exception preserves previously confirmed names;
     the boolean client contract cannot confirm individual files in a partial
     batch. Both failure outcomes display a failure notice with the question
     reference, not "Files received" or processed-success confirmation.
-    **A nonempty question still continues after failed attachments.**
-    Whether to stop that question remains the pending H6 decision, not approval
-    of the current continuation. Do not treat an answer as confirmation that
-    the new attachments were ingested.
+    **A false result or exception stops the accompanying question before it is
+    sent to the chat backend.** Reattach the files and resubmit the question.
+    If the failure persists, share the displayed question reference with
+    application support. Confirmed successful ingestion still updates the
+    bookkeeping and allows the question to continue (H6).
 
     Standalone download failures now use fixed generic text: typed
     `ResourceNotFoundError` returns 404; other failures return 500 even if their
@@ -39,21 +40,36 @@ This page covers common issues, debugging tools, and how to inspect logs in GPT-
     resolution and late stream iteration are outside that catch; the P2 scope
     clarification adds no runtime handler or transport-termination guarantee.
 
-    OpenAPI generation failures retain the existing metadata-only response
-    with no paths, but that fallback is no longer cached. Later requests retry
-    generation; only a successful schema is cached. An empty-path response is
-    not proof that the application has no routes. Whether to retain this
-    fallback response remains the pending H3 decision.
+    OpenAPI generation failure makes `/openapi.json` return HTTP 500, not a
+    metadata-only or empty-path schema (H3). The failure is logged and no schema
+    is cached. Investigate the generation error in server logs, repair its
+    cause, and retry the request; only successful generation is cached.
 
     If the optional panel owner-index write fails after a managed conversation
-    is created, the existing turn continues and logs the limitation. Without
+    is created, ordinary chat continues and a safe log explicitly says that
+    the write was not confirmed, owner-index repair is required, and no
+    automatic repair was attempted (H4). Without
     that row the conversation is absent from panel listing, and panel
     read/feedback/delete return opaque 404 responses before accessing managed
     content. Continuing the chat does not retry the creation hook. There is no
-    automatic repair, backfill or authorization bypass; accepting this
-    availability trade-off remains the pending H4 decision.
+    automatic repair, backfill or authorization bypass. Escalate to the
+    operator to investigate the failed write and arrange an authorized
+    owner-index repair; do not disable ownership checks or assume another
+    chat turn restores panel access.
     These are unmerged notes for
-    [#110](https://github.com/Azure/gpt-rag-ui/pull/110), not released guarantees.
+    [#110](https://github.com/Azure/gpt-rag-ui/pull/110), not released guarantees
+    or a change to the shipped manifest.
+
+!!! warning "Unmerged ingestion configuration and feedback availability"
+    Ingestion [`eb42bbb`](https://github.com/Azure/gpt-rag-ingestion/commit/eb42bbb155613ba570f891b67366967387735e32)
+    makes configured fallback diagnostics explicit and adds
+    `feedback.available` to the legacy `/api/panel/overview`. Failed feedback
+    reads return zero placeholders with `available=false`, not a complete
+    zero-feedback observation; jobs/files remain available. The separate
+    frontend `/panel/overview/metrics` is unchanged. See
+    [ingestion configuration and overview recovery](services_ingestion.md#observability)
+    for source order, the existing environment opt-in, and recovery steps.
+    This is candidate behavior, not a shipped manifest update.
 
 
 **Showing Response Time Statistics in the Chat UI**

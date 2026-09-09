@@ -21,6 +21,17 @@ removes the managed Conversation first and then metadata, returning an explicit
 `oid`-bound and expiring; tampered, expired, or cross-user cursors return 422.
 These routes return 503 while panel/history gates are off.
 
+!!! warning "Unmerged UI owner-index failure outcome"
+    UI [`e993c89`](https://github.com/Azure/gpt-rag-ui/commit/e993c89e00c296edb5384219d200d50937311713)
+    retains ordinary chat when the creation-time panel owner-index write fails.
+    Without the row, listing omits the conversation and panel read, feedback
+    and delete fail closed with opaque 404 responses. A safe log states that
+    the write was not confirmed and owner-index repair is required; no
+    automatic repair is attempted. Continuing chat does not rerun that hook.
+    Ask the operator to investigate and arrange authorized index repair,
+    without bypassing ownership checks. See [recovery guidance](troubleshooting.md).
+    This candidate does not change the shipped manifest or enable panel gates.
+
 ![Feedback stored in Cosmos DB](media/feedback_stored_in_cosmos_db.png)
 <br>*User feedback stored in Cosmos DB*
 

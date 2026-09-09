@@ -230,6 +230,25 @@ surfaces return 503.
 
 ## Operator overview and corpus curation
 
+!!! warning "Unmerged source-specific panel failure outcomes"
+    UI [`e993c89`](https://github.com/Azure/gpt-rag-ui/commit/e993c89e00c296edb5384219d200d50937311713)
+    retains ordinary chat after a failed creation-time owner-index write, but
+    the missing row hides the conversation from listing and denies panel
+    read/feedback/delete with opaque 404 responses. Its safe log requires
+    owner-index repair and confirms no automatic repair was attempted.
+    Continuing chat does not recover the row; arrange authorized operator
+    repair without bypassing ownership checks. See [troubleshooting](troubleshooting.md).
+
+    Ingestion [`eb42bbb`](https://github.com/Azure/gpt-rag-ingestion/commit/eb42bbb155613ba570f891b67366967387735e32)
+    adds `feedback.available` only to legacy `/api/panel/overview`. Complete
+    reads, including actual zero feedback, return `true`; feedback failures
+    return `false` with integer zero placeholders, discarding partial counts
+    while retaining jobs/files. Check availability, restore feedback access or
+    data integrity, and retry before treating counts as observations. The
+    separate frontend `/panel/overview/metrics` remains unchanged. See
+    [ingestion recovery](services_ingestion.md#observability).
+    Neither unmerged change updates this shipped matrix or enables its gates.
+
 Ingestion `v2.7.3` includes:
 
 - `GET /panel/overview/metrics`;
@@ -249,7 +268,7 @@ single malformed Cosmos document is present and from silently discarding
 documents that carry no `rating`, and stops `POST /api/panel/feedback` from
 returning HTTP 500 when the Cosmos write raises.
 
-Overview reads aggregate counts only from the panel owner-index and feedback
+`/panel/overview/metrics` reads aggregate counts only from the panel owner-index and feedback
 metadata containers. Any bucket below `PANEL_OVERVIEW_MIN_CARDINALITY` (default
 `5`) is returned as `null`, not as a small exact count.
 

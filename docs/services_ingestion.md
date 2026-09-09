@@ -93,22 +93,37 @@ $env:APP_CONFIG_ENDPOINT = "https://<your-app-config-name>.azconfig.io"
 
 !!! warning "Unmerged configuration fallback and overview follow-up"
     [Azure/gpt-rag-ingestion#296](https://github.com/Azure/gpt-rag-ingestion/pull/296)
-    at [`ce5c2c8`](https://github.com/Azure/gpt-rag-ingestion/commit/ce5c2c86dd902b23487bdb98fa26d3f94691fef2)
-    aligns the existing connection-string configuration fallback with the
-    endpoint path: both select wildcard keys for `gpt-rag-ingestion`,
+    at [`eb42bbb`](https://github.com/Azure/gpt-rag-ingestion/commit/eb42bbb155613ba570f891b67366967387735e32)
+    makes configured fallback diagnostics explicit (H1). `APP_CONFIG_ENDPOINT`
+    remains required. Endpoint loading uses managed identity then Azure CLI
+    credentials; only an explicitly configured
+    `AZURE_APPCONFIG_CONNECTION_STRING` is tried next. Both provider paths
+    select wildcard keys for `gpt-rag-ingestion`,
     `gpt-rag`, then no label, with the last selected value winning.
-    Key Vault credentials, source order, environment override opt-in and
-    propagation of connection-string load failures are unchanged. This does
-    not approve the fallback policy or its proposed handler (H1).
+    Key Vault credentials, selectors and source order remain unchanged.
+    With no connection string, environment-only recovery requires the existing
+    `allow_environment_variables` opt-in. Its nonempty-string semantics are
+    unchanged: even `"false"` or `"0"` enables it; unset or empty disables it.
+    Successful fallback emits a safe source diagnostic without configuration
+    values or exception payloads. With no enabled fallback the endpoint error
+    propagates; a connection-string load failure also propagates, rather than
+    proceeding to environment reads. Missing required settings still fail.
+    Investigate the endpoint, credential access and configured source health;
+    restore that source or deliberately configure an allowed fallback and
+    retry startup. Do not enable environment overrides merely to mask failure.
 
-    The legacy `/api/panel/overview` still returns HTTP 200 with zero feedback
-    counts when feedback cannot be read, or partial counts if aggregation
-    fails after processing rows. Jobs/files remain available and a server
-    warning is emitted, but the response has no feedback-unavailability
-    signal. Do not interpret those counts as a confirmed complete summary.
-    This documented limitation remains pending H2, not an accepted fallback.
-    It is distinct from `/panel/overview/metrics`, whose null counts represent
-    privacy suppression. No response schema or authorization is changed.
+    The legacy `/api/panel/overview` adds `feedback.available` (H2).
+    A complete feedback read sets it to `true`, including a genuine zero
+    result. Feedback read or aggregation failure still returns HTTP 200 with
+    jobs/files, but sets it to `false` and resets `totalRecords`, `upCount`
+    and `downCount` to integer zero placeholders, discarding partial counts.
+    Consumers must check availability before interpreting those integers.
+    Inspect the safe server warning, restore feedback-store access or repair
+    malformed feedback data, then retry; only `available=true` establishes a
+    complete summary. The separate frontend `/panel/overview/metrics` and its
+    privacy-suppressed null counts are unchanged, as is authorization.
+    These are unmerged source-specific outcomes, not handler approvals,
+    released behavior or changes to the shipped manifest.
 
 !!! warning "Unmerged P2 unblock error correction"
     Ingestion [`34a6043`](https://github.com/Azure/gpt-rag-ingestion/commit/34a6043ea3b6c563e528aad69c0ae70e3be32ff4)
