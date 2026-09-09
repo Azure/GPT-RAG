@@ -1,11 +1,15 @@
 # Validation Guide: Python Module Boundaries
 
-This guide separates **existing runnable checks**, **draft checkpoint commands**
-and **remaining acceptance**. Planning itself created no runtime implementation;
-the [delivery record](tasks.md#delivery-record) now identifies component drafts.
-Their commands are not instructions for released component tags, nor evidence
-of active required checks. Execute them in the matching component checkout,
-not this umbrella.
+This guide separates **existing runnable checks**, **historical checkpoint commands**
+and **remaining acceptance**. The three component implementations have now been
+adopted into `develop` under explicit initial administrative authorization.
+Required checks are active in all three repositories; the
+[current adoption receipt](tasks.md#authorized-initial-adoption---2026-09-09)
+records exact merge SHAs, genuine reference runs, rulesets and negative controls.
+Later references to candidate or draft checkpoints are historical, not the
+current adoption status. Commands here are not instructions for unchanged
+released component tags or proof of live integrated acceptance. Execute them
+in the matching component checkout, not this umbrella.
 
 ## Prerequisites
 
