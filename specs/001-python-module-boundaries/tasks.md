@@ -1,5 +1,78 @@
 # Tasks: Enforce Module Boundaries and Modularize the UI
 
+## Reconciliation receipt — 2026-09-09 (final functional reconciliation)
+
+**All original functional implementation dispositions are done; #681 is not
+complete. 191 = 143 keep recommendations + 48 functional closures + 0
+technical open.** All **189 proposals (92/67/30) remain unapproved and inactive**.
+This final receipt supersedes the snapshot below; prior receipts are history.
+
+Verified clean component worktrees and matching OPEN draft PR heads to develop:
+- Orchestrator: `ea61bc7cd7b2ac21c957bee5db959337fedd8760`.
+- Ingestion: `876c4272374868c15c4f4c3d67f93e1f3dd84e85`
+  (runtime `eb42bbb155613ba570f891b67366967387735e32`).
+- UI: `aef9546879333c8615b7adb3917f299a665f4ecc`.
+- Canonical docs: `bc75d12584ef967d6a38a6f0dcbc176428b00a25` on #688;
+  final UI source pins and retry guidance are included. Strict MkDocs passed.
+
+The last original functional finding, `ui-boundary-23`, closes on committed
+new-ID rollback and real two-attempt tests: all reattached files are ingested
+before the retry question, for false/exception failures and fresh/existing
+conversations; existing ownership remains enforced. Independent agent review
+reported no significant issues (handoff evidence, not maintainer approval).
+H1–H7 are delegated agent selections, not separate human approvals; H0 unchanged.
+
+Final CI is **completed, FAIL overall in all three repositories**:
+orchestrator run `34300904165` tests/frontend/typing/architecture pass;
+ingestion run `34299688281` unit/frontend/typing/architecture pass;
+UI run `34307187745` unit/container/typing/architecture pass.
+Each fails lint, exceptions, policy and aggregate quality-gate.
+Local handoff: orchestrator 2332 passed/4 skipped; ingestion 956 passed.
+Earlier UI local run: 536 tests, 2 failures/1 error; repairs and focused tests
+followed, and final CI test success supersedes that result without erasing it.
+
+Actual develop audit: **no effective required status checks in any of the four
+repos**, classic protection disabled/check contexts empty. Parent/UI have
+one-review PR rules plus deletion/non-fast-forward protection; ingestion only
+deletion protection; orchestrator has no effective branch rules. No settings
+were enabled. Required quality gates, independent maintainer/exact proposal
+approval, protected-base bootstrap, effective required checks, live ACL,
+cross-component/recovery acceptance and final review/merge remain blocked.
+
+`fleet-ui-retry`, `fleet-ingestion-final` and `stage-two-remaining` are
+**done for functional implementation ONLY**, not quality/adoption/acceptance.
+All 191 original IDs/categories/review hashes and 46 task IDs are preserved.
+Session JSON contains final ledger hashes and evidence. ADR-0006 records the
+selected retrieval/profile/history decisions and their acceptance limits.
+No exception approval, protection change, merge, deployment or release occurred.
+
+### Prior reconciliation snapshot — UI retry pending (superseded)
+
+Pinned receipts: orchestrator `ea61bc7` (`25f1986..ea61bc7`), ingestion
+runtime `eb42bbb` / README `876c427`, UI **snapshot, not final** `e993c89`,
+canonical docs `9fbb827`. **191 = 143 keep recommendations + 47 functional
+dispositions closed + 1 partial (`ui-boundary-23`).** Of the previous 20 open,
+19 close: required retrieval policy fails closed while intentional service-only
+remains; automatic profiles are suspended without deleting data; classic history
+is explicitly best effort; configuration, feedback and two UI decisions have
+bounded outcomes. These are agent-selected under explicit user delegation,
+not separate human selections or independent approvals.
+
+Current ledgers: **189 proposals (92/67/30), zero active**. Nine original
+orchestrator handlers retired, not missing evidence; all 191 originals,
+categories, immutable review hashes and 46 task IDs remain. UI stops a failed
+upload's question, but a newly allocated conversation ID survives the first
+failure and can drop attachments on retry. Keep that finding partial until
+the coordinator pins the fix, verifies complete retry payloads and obtains review.
+
+Focused validation: **351 orchestrator + 43 ingestion passed**. Full reconciliation and command
+receipts: session `files/exception-review-reconciled.json` (`current_delivery`)
+and `files/issue-681-stage-1.md`. Live acceptance/integration/recovery, policy
+bootstrapping, independent exact approvals and protected adoption remain missing.
+Coordinator must refresh UI head/hashes/tests/review/totals and finalize ADR.
+No parent commit/push, deployment or release. Earlier sections are history,
+superseded by this receipt where they describe the prior 20-open snapshot.
+
 ## Current delivery - bounded profile and request-context corrections (2026-09-09)
 
 **This bounded batch is delivered; #681 is not complete.** Orchestrator
