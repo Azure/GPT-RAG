@@ -19,6 +19,24 @@ independent gates.
 
 ## Key Features
 
+!!! warning "Unmerged candidate: operator compatibility and recovery"
+    The candidate guidance on this page is pinned to orchestrator
+    [`ea61bc7cd7b2ac21c957bee5db959337fedd8760`](https://github.com/Azure/gpt-rag-orchestrator/commit/ea61bc7cd7b2ac21c957bee5db959337fedd8760)
+    in [PR #346](https://github.com/Azure/gpt-rag-orchestrator/pull/346), including
+    the [`25f1986..ea61bc7` diff](https://github.com/Azure/gpt-rag-orchestrator/compare/25f1986...ea61bc7)
+    implementing [parent ADR-0006](https://github.com/Azure/GPT-RAG/blob/feature/python-module-boundaries/docs/adr/ADR-0006-orchestrator-retrieval-profile-and-history-failure-policy.md).
+    It is **unmerged, not shipped** and does not change release pins or deployment gates.
+    Required-user retrieval that previously continued without delegated authorization
+    now fails; automatic profile access and collection are entirely suspended.
+    Ordinary conversation history remains best effort, not durable on SSE completion.
+    Before adoption, validate the exact UI/ingestion/infrastructure combination.
+    Recover by fixing token forwarding, consent and source configuration, not by
+    stripping authorization or enabling anonymous access. Prefer a forward fix or
+    operationally disable affected retrieval routes; rollback to `25f1986` restores
+    permissive paths and is not a safe security remedy. No data migration or
+    deletion is performed. See [retrieval policy](#candidate-retrieval-authorization)
+    and [API-key recovery](howto_authentication.md#legacy-api-key-recovery-h1).
+
 - **Strategy-Based Architecture:** Pluggable orchestration strategies selected via Azure App Configuration (`AGENT_STRATEGY`).
 - **Context Retrieval:** Intelligent retrieval from Azure AI Search or Foundry IQ with citation support and conservative retrieval-needed triage for local MAF strategies.
 - **Microsoft Agent Framework:** Built on the Microsoft Agent Framework.
@@ -31,38 +49,72 @@ The Orchestrator supports multiple strategies. The active strategy is set via th
 
 | Key | Strategy | Description |
 |-----|----------|-------------|
-| `maf_lite` | MAF Lite **(default)** | Microsoft Agent Framework with direct Azure OpenAI model access. Lightweight, no Agent Service dependency. Includes user profile memory and optional agentic search. |
-| `maf_agent_service` | MAF + Agent Service | Microsoft Agent Framework with Azure AI Foundry Agent Service for server-side thread management and tool orchestration. Includes user profile memory and optional agentic search. |
+| `maf_lite` | MAF Lite **(default)** | Microsoft Agent Framework with direct Azure OpenAI model access. Lightweight, no Agent Service dependency. Conversation context and optional agentic search; candidate automatic profiles are suspended (below). |
+| `maf_agent_service` | MAF + Agent Service | Microsoft Agent Framework with Azure AI Foundry Agent Service for server-side thread management and tool orchestration. Conversation context and optional agentic search; candidate automatic profiles are suspended (below). |
 | `single_agent_rag` | Single Agent RAG | Uses Azure AI Agents SDK with Agent Service for agentic RAG. Supports dynamic routing, streaming via event handlers, and pre-warming for low-latency first responses. |
 | `mcp` | MCP | Model Context Protocol strategy using Semantic Kernel. Connects to an MCP server for tool orchestration and passes user context via HTTP headers. |
 | `nl2sql` | NL2SQL | Natural language to SQL translation using Microsoft Agent Framework `ChatAgent` with local metadata lookup, SQL validation, and query execution. No Semantic Kernel or Agent Service agent creation is used in this path. |
 
 ## Optional profile memory
 
-!!! warning "Unmerged profile eligibility correction"
-    In orchestrator checkpoint
-    [`80d8fb2`](https://github.com/Azure/gpt-rag-orchestrator/commit/80d8fb212088dfea2249d53593b9e1dca2f37967),
-    `maf_lite`, `maf_agent_service` and `multimodal` skip optional profile
-    loading, extraction and saving when the conversation has no `user_id`,
-    a non-string/blank value, or the shared `default_user` placeholder
-    (including surrounding whitespace). Ordinary chat continues without a
-    profile welcome or cached profile context. Hosted memory remains disabled;
-    this does not add multimodal to hosted runtime eligibility.
+!!! warning "Unmerged: automatic profiles completely suspended"
+    At `ea61bc7` (pinned above), `maf_lite`, `maf_agent_service` and `multimodal`
+    perform no automatic profile Cosmos reads/writes, extraction model calls,
+    extraction tasks or profile mutations, even for syntactically valid legacy
+    keys. Cached profile context is cleared; no profile welcome or personalization
+    is supplied. Hosted profile memory remains disabled and multimodal hosted
+    eligibility is unchanged. This supersedes the earlier `80d8fb2` negative-key
+    eligibility check and earlier extraction-worker/adapter guidance.
 
-    Other existing keys are preserved verbatim, not normalized or migrated.
-    This negative eligibility check does **not** authenticate arbitrary legacy
-    keys. The maintained classic orchestrator supplies `principal_id`, not
-    `conversation["user_id"]`, and this change deliberately does not substitute
-    one for the other. A verified profile identity mapping remains unresolved.
+    Legacy owner keys have no verified trusted identity binding. Neither a
+    request-body identity nor substitution of classic `principal_id` for
+    `user_id` establishes ownership. Existing records are left untouched:
+    **no rekeying, migration, backfill or data deletion**. Do not repair the old
+    extraction adapter or insert keys to reactivate collection. Restoration
+    requires a separately reviewed, proven owner binding and privacy decision.
+    Perfect model-returned profile JSON is irrelevant: the extraction model is
+    not called. Ordinary chat/model calls and recent conversation context continue.
 
-    Save helpers distinguish confirmed, unconfirmed (`None`) and failed writes;
-    the unconditional `post_flow_profile_save` timing message is removed.
-    The current extraction `chat_options`/`options` and `ChatResponse.value`
-    mismatch remains: a normal answer or model-returned profile JSON does not
-    establish a profile update. This correction does not reactivate collection,
-    promise durable memory, or approve the remaining profile exceptions.
-    It is coordinated in [#346](https://github.com/Azure/gpt-rag-orchestrator/pull/346),
-    not released behavior.
+    MAF and multimodal prompt templates in this candidate, plus MAF
+    fallback prompts, explicitly prohibit claims to learn, save or recall a
+    persistent profile. Review operator-customized prompts for conflicting
+    personalization promises. This is suspension, not a persistence fix.
+
+## Candidate retrieval authorization
+
+At the unmerged `ea61bc7` pin, the maintained MAF Lite, MAF Agent Service and
+multimodal provider factories explicitly select the following internal modes.
+These are not new App Configuration settings:
+
+| Mode | Selection and behavior |
+| --- | --- |
+| `user_required` | A nonblank request assertion, `ALLOW_ANONYMOUS=false`, or a user-only source requires delegated authorization. Missing callback, missing/blank token, failed OBO or rejected retrieval fails the turn, with no application-identity fallback or alternate unfiltered query. |
+| `service_only` | No user assertion, `ALLOW_ANONYMOUS=true`, and no source requiring a user. Existing service-identity access remains, within the source's app-only permissions; it does not impersonate a user. |
+
+Search, multimodal Search and Foundry IQ providers default to `user_required`
+when constructed directly; custom callers must explicitly classify legitimate
+service-only access. Foundry IQ additionally requires a user for enabled Work IQ,
+Fabric ontology, Fabric Data Agent, SharePoint remote, and configured MCP
+query headers whose `valueFrom.kind` is `obo`. Mixed-source retrieval must not
+silently drop a user-only member and answer from local documents. This applies
+to MCP and non-MCP provider paths. `ALLOW_ANONYMOUS=true` is not a bypass for
+requests carrying a user assertion or user-only sources.
+
+The multimodal retry that removed `x-ms-query-source-authorization` after a
+failed search is removed. Token/context setter failures propagate rather than
+continuing with stale context; provider callbacks capture the request token.
+Successful zero-match retrieval and existing no-provider/no-retrieval-intent
+paths remain distinct from failure. Existing authenticated 401/403 boundaries
+and generic classic SSE error framing remain; after streaming starts, partial
+output is not success and cancellation stays cancellation.
+
+**No application fallback is enabled:** equivalent per-source ACL enforcement
+and explicit user disclosure have not been proven. Token scopes, forwarded
+headers, conversation filters and mocked tests do not prove live document ACLs.
+Before deployment, test authorized and unauthorized principals against every
+source, including protected text, citations and images. Restore trusted token
+forwarding, audiences, consent and permission metadata/configuration; do not
+weaken `ALLOW_ANONYMOUS`, strip headers or switch identities as recovery.
 
 ## Streaming outcomes
 
@@ -147,8 +199,8 @@ event is not independent proof that every operation inside a strategy succeeded.
 
     Foundry credential failure still prevents that client's retrieve request,
     and failed HTTP retrieval does not expose its response body.
-    [Retained identity fallbacks](howto_authentication.md#classic-container-apps-token-flow)
-    are not new permission approval or strict OBO enforcement.
+    The later [candidate retrieval policy](#candidate-retrieval-authorization)
+    supersedes the retained identity fallbacks at this earlier checkpoint.
 
 !!! warning "Unmerged single-agent request-context correction"
     At [`80d8fb2`](https://github.com/Azure/gpt-rag-orchestrator/commit/80d8fb212088dfea2249d53593b9e1dca2f37967),
@@ -157,8 +209,8 @@ event is not independent proof that every operation inside a strategy succeeded.
     context. The existing failed-turn/SSE error contract applies even after
     partial output; cancellation remains cancellation. Successful conversation
     scoping and disabled-retrieval behavior are unchanged. Token selection,
-    `ALLOW_ANONYMOUS` and OBO/service-identity fallbacks are not changed or
-    approved by this correction.
+    `ALLOW_ANONYMOUS` and OBO/service-identity fallbacks were not changed by
+    that checkpoint; see the later, scoped [candidate policy](#candidate-retrieval-authorization).
 
 ## Retrieval backend
 
@@ -246,8 +298,12 @@ skip Azure AI Search while still using the recent chat history.
     Persistence is still detached and can fail after answer emission. There
     is no cross-request serialization, global pending-task bound, shutdown
     drain or durable queue. A completed SSE response or bounded diagnostic is
-    not a durable-completion receipt; H5 remains an unresolved durability
-    decision, not approval of the retained best-effort policy.
+    not a durable-completion receipt. Parent ADR-0006 selects retention of this
+    best-effort policy; `25f1986..ea61bc7` does not add durability machinery.
+    Process loss can lose pending writes and concurrent writes can race.
+    Restore Cosmos connectivity/permissions for future writes and monitor
+    unconfirmed persistence; there is no automatic replay or recovery of lost
+    history. A stronger guarantee needs separate design and approval.
     Optional feedback question correlation can fail independently of feedback
     saving; it does not redefine history ownership or authorize new storage.
     These retained outcomes remain inactive exception proposals, not guarantees

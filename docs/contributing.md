@@ -235,9 +235,15 @@ rather than copying exception records between components.
 The recorded backend checkpoints bind retained broad handlers to individual
 proposals and named failure evidence. That code-delivery milestone does not
 approve the handlers or activate the policy. In particular, orchestrator
-characterization retains [identity fallbacks](howto_authentication.md#classic-container-apps-token-flow)
-and detached persistence without claiming strict OBO enforcement or durable
-completion. The scoped orchestrator follow-up replaces configured nullable
+earlier characterization retained identity fallbacks and detached persistence.
+The unmerged `ea61bc7` [source-pinned ADR-0006 implementation](services_orchestrator.md#candidate-retrieval-authorization)
+supersedes the MAF/multimodal identity fallbacks with required-user fail-closed
+retrieval, retains eligible service-only access, suspends all automatic profile
+access/extraction, and leaves ordinary history best effort. Live ACL proof and
+durable completion are not claimed. The separately delegated
+[H1 API-key recovery choice](howto_authentication.md#legacy-api-key-recovery-h1)
+retains existing environment fallback, not new runtime code or ingestion's opt-in.
+The scoped orchestrator follow-up replaces configured nullable
 retrieval failure with the
 [existing safe failed-turn contract](services_orchestrator.md#streaming-outcomes),
 while preserving explicit retrieval opt-outs and legitimate empty results.

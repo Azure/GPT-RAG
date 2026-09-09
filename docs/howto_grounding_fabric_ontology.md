@@ -116,10 +116,21 @@ When the source is enabled and a signed-in user asks a question:
    into the standard reference shape and hands them to the LLM alongside
    document references.
 
-Local Foundry IQ document sources always serve the request. If the OBO
+In the earlier connector behavior, local document sources can still serve
+the request. If the OBO
 token is missing (for example, a background job), the Fabric ontology
 source is skipped with a warning and only local sources contribute.
 Managed identity is never used to reach this source, by design.
+
+!!! warning "Unmerged compatibility change: no silent local-only answer"
+    Orchestrator `ea61bc7` [provider policy and source pin](services_orchestrator.md#candidate-retrieval-authorization)
+    supersedes that missing-token behavior for maintained MAF/multimodal
+    providers. An enabled Fabric ontology source makes the whole mixed request
+    user-required, even with `ALLOW_ANONYMOUS=true`. Missing/failed OBO rejects
+    retrieval; no app-identity fallback is enabled. Restore signed-in token
+    forwarding, audience, consent and Fabric permissions, or operationally
+    disable the affected route. Token scopes alone do not prove live per-user
+    ACL enforcement. This is unmerged, not shipped behavior.
 
 ## Data egress caveat
 
@@ -138,6 +149,8 @@ unaffected.
   knowledge source skipped" warning; that usually points at a missing OBO
   token, an empty knowledge source name, or an empty workspace / ontology
   id.
+  At the unmerged pin above, missing required OBO fails the turn rather than
+  producing a successful local-only answer; inspect authorization first.
 - **`403` or empty results from Fabric.** Verify the signed-in user has
   access to the Fabric workspace and the ontology item. Fabric enforces
   per-user permissions, so an OBO token for a user without ontology access

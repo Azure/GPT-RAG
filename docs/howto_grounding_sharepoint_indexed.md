@@ -1,5 +1,15 @@
 # Foundry IQ: SharePoint Indexed (preview)
 
+!!! note "Unmerged request policy does not add indexed-source ACLs"
+    Orchestrator `ea61bc7` leaves this source's app-only model unchanged.
+    Its [source-pinned provider policy](services_orchestrator.md#candidate-retrieval-authorization)
+    requires user authorization for an assertion, `ALLOW_ANONYMOUS=false`,
+    or a mixed knowledge base containing a user-only source such as SharePoint
+    remote. Missing/failed OBO cannot silently drop that member. Eligible
+    service-only requests remain, not as fallback after user rejection.
+    Scopes and request preflight do not add or prove per-user ACL enforcement
+    for SharePoint Indexed. This is unmerged, not shipped behavior.
+
 SharePoint Indexed is a Foundry IQ Knowledge Source that grounds answers on
 content from a specific SharePoint site, served from a pre-built Azure AI
 Search index. It runs next to your document Knowledge Source on the same

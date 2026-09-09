@@ -52,17 +52,20 @@ The active strategy is set via the `AGENT_STRATEGY` key in Azure App Configurati
 
 | Key | Strategy | Back-End | Description |
 |-----|----------|----------|-------------|
-| `maf_lite` | MAF Lite **(default)** | Direct Azure OpenAI | Microsoft Agent Framework with direct model access. Lightweight — no Agent Service dependency. Includes user profile memory and optional agentic search. |
-| `maf_agent_service` | MAF + Agent Service | Agent Service V2 | Microsoft Agent Framework with Azure AI Foundry Agent Service for server-side thread management. Includes user profile memory and optional agentic search. |
+| `maf_lite` | MAF Lite **(default)** | Direct Azure OpenAI | Microsoft Agent Framework with direct model access. Lightweight — no Agent Service dependency. Conversation context and optional agentic search; candidate automatic profiles are suspended. |
+| `maf_agent_service` | MAF + Agent Service | Agent Service V2 | Microsoft Agent Framework with Azure AI Foundry Agent Service for server-side thread management. Conversation context and optional agentic search; candidate automatic profiles are suspended. |
 | `single_agent_rag` | Single Agent RAG | Agent Service V2 | Azure AI Agents SDK with streaming event handlers, dynamic routing, and pre-warming for low-latency first responses. |
 | `mcp` | MCP | MCP Server | Model Context Protocol strategy using Semantic Kernel. Connects to an MCP server and passes user context via HTTP headers. |
 | `nl2sql` | NL2SQL | Direct Azure OpenAI + local tools | Microsoft Agent Framework `ChatAgent` flow for triage, SQL generation, and answer synthesis, with local metadata lookup, SQL validation, and execution. |
 
 ## Single Agent Strategy (Deep Dive)
 
-Profile support in the strategy table is optional, not a guarantee of
-personalization. See the source-pinned, unmerged
-[profile eligibility and extraction limitations](services_orchestrator.md#optional-profile-memory).
+At the explicitly unmerged orchestrator `ea61bc7` candidate, automatic profile
+access, extraction and personalization are completely suspended, not merely
+optional. Existing records are not migrated or deleted. See the
+[source pin and profile policy](services_orchestrator.md#optional-profile-memory),
+[required-user/service-only provider modes](services_orchestrator.md#candidate-retrieval-authorization)
+and [unchanged best-effort history guarantee](services_orchestrator.md#conversation-history-and-retrieval-controls).
 For the single-agent flow below, also see the
 [request-context failure contract](services_orchestrator.md#streaming-outcomes).
 
@@ -146,7 +149,11 @@ The strategy object `SingleAgentRAGStrategy`
 
 - finally calls the project_client.agents.runs.stream() which triggers the RAG pipeline inside of the Microsoft Foundry realm.
 
-Note that `Thread` objects keep the entire **history of conversations**. There are two levels of history persistence: one in CosmosDB and another in Thread objects.
+In this classic single-agent diagram, `Thread` objects hold service-side
+conversation context separately from the Cosmos DB history. Neither store
+should be read as a guarantee that every streamed turn is durably recorded:
+classic Cosmos writes remain best effort, including at the unmerged `ea61bc7`
+pin, and the prompt history can be windowed.
 
 `Orchestrator` keeps a history (using CosmosDB) identified by `conversation_id` which arrives in the HTTP Request payload.
 One of the attributes stored in the CosmosDB is `thread_id` which points to the `Thread` object which resides inside of the Microsoft Foundry.

@@ -1,5 +1,16 @@
 # Foundry IQ: Generic MCP server knowledge sources
 
+!!! warning "Unmerged candidate: OBO headers require user authorization"
+    At orchestrator `ea61bc7`, [source-pinned provider policy](services_orchestrator.md#candidate-retrieval-authorization)
+    treats configured MCP query headers with `valueFrom.kind: obo` as user-only.
+    Missing/failed OBO rejects mixed retrieval, regardless of
+    `ALLOW_ANONYMOUS=true`; no application fallback is enabled. Existing
+    explicitly selected service-only access remains for eligible app-only
+    sources, not as recovery after user authorization fails. Restore token
+    forwarding, consent and endpoint authorization; neither scope selection nor
+    forwarded headers proves live ACL enforcement. This is unmerged behavior,
+    not a change to the shipped registration schema. knowledge sources
+
 The `mcpServer` Foundry IQ knowledge source lets the Knowledge Base call
 tools exposed by a remote [Model Context Protocol (MCP)](https://modelcontextprotocol.io/)
 server you operate or trust, and blend the results with your other Foundry

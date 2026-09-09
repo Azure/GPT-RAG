@@ -1,5 +1,42 @@
 This page covers common issues, debugging tools, and how to inspect logs in GPT-RAG.
 
+!!! warning "Unmerged orchestrator candidate: recovery and compatibility"
+    The following guidance is pinned to orchestrator
+    [`ea61bc7cd7b2ac21c957bee5db959337fedd8760`](https://github.com/Azure/gpt-rag-orchestrator/commit/ea61bc7cd7b2ac21c957bee5db959337fedd8760),
+    not a shipped release:
+
+    - **Retrieval now fails where it previously answered:** required-user
+      MAF/multimodal retrieval fails closed on missing/failed OBO, including
+      mixed sources. Restore trusted token forwarding, audiences, consent and
+      source permissions. Do not strip the authorization header, enable
+      anonymous mode to bypass a user-only source, or substitute application
+      identity. Eligible service-only requests remain. Scopes do not prove live
+      ACLs; test allowed and denied principals. See
+      [provider policy](services_orchestrator.md#candidate-retrieval-authorization).
+    - **Personalization disappeared:** automatic profile access and extraction
+      are completely suspended for unverifiable owner keys, including
+      valid-looking keys and cached profiles. No extraction model calls or
+      automatic profile storage access occur; records are not deleted or
+      migrated. Do not backfill keys or repair the adapter as a bypass.
+      Restoration needs a proven trusted owner binding and reviewed privacy
+      decision. Ordinary chat/history continues; review custom prompts for
+      persistent-profile promises.
+    - **Answer completed but history is missing:** ordinary classic writes
+      remain best effort. Restore Cosmos access for future writes and inspect
+      unconfirmed-persistence diagnostics. SSE completion is not a durable
+      receipt; there is no automatic replay after process loss. See
+      [history limits](services_orchestrator.md#conversation-history-and-retrieval-controls).
+    - **Old API key still works during configuration failure:** H1 retains
+      the environment `ORCHESTRATOR_APP_APIKEY` fallback. Rotate/remove both
+      configured and environment keys and update callers/deployed revisions;
+      restore App Configuration access. No new auth-path opt-in exists.
+      Missing/mismatched keys still return 401; Dapr and `DISABLE_AUTH`
+      precedence is unchanged. See [H1 recovery](howto_authentication.md#legacy-api-key-recovery-h1).
+
+    Prefer a forward fix or operationally disable affected retrieval routes.
+    Rolling back to `25f1986` reintroduces permissive authorization and profile
+    extraction paths; it is not a safe security remedy or recovery of lost data.
+
 !!! warning "Unmerged bridge teardown correction"
     [Azure/gpt-rag-ui#110](https://github.com/Azure/gpt-rag-ui/pull/110),
     checkpoint [`b8318dc`](https://github.com/Azure/gpt-rag-ui/commit/b8318dccdc3ac67c8e30abc85e5dbe2968af554a),

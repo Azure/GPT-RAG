@@ -122,6 +122,16 @@ configured to forward a delegated token. This is the same plumbing that
 security-trimmed retrieval. Each per-source page lists the specific tenant
 consent, delegated permissions, and licensing you need.
 
+!!! warning "Unmerged candidate: compatibility gate before adoption"
+    Orchestrator `ea61bc7` [source-pinned provider modes](services_orchestrator.md#candidate-retrieval-authorization)
+    require a user for enabled Work IQ, Fabric ontology/Data Agent, SharePoint
+    remote and MCP OBO query headers. Missing/failed OBO rejects the whole
+    mixed retrieval, even when `ALLOW_ANONYMOUS=true`; it does not fall back
+    to local documents or application identity. Service-only mode remains only
+    for eligible requests. Restore token forwarding and source-specific consent
+    and permissions; validate live denied/allowed access before adoption.
+    A configured scope alone is not ACL proof. This is not shipped behavior.
+
 For `mcpServer`, do not confuse the orchestrator's managed identity with an
 OBO token. Managed identity is app-only and gives every user the same MCP
 authorization scope. OBO preserves the signed-in user's identity and only

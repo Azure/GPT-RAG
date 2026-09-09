@@ -127,16 +127,18 @@ x-ms-query-source-authorization: Bearer <search_user_access_token>
 
 Document-level access control is enforced by Azure AI Search when the index is configured for document permissions (see `permissionFilterOption` in the index definition) and documents include permission metadata. 
 
-!!! warning "Unmerged candidate is not strict OBO acceptance"
-    Orchestrator checkpoint [`31348dc`](https://github.com/Azure/gpt-rag-orchestrator/commit/31348dcbc418f2cd01f3b3e9b17fd5bf2f1ccd28)
-    retains legacy non-MCP context-provider recovery under inactive compatibility
-    proposals. Its negative evidence shows callbacks can allow anonymous fallback
-    despite a false setting, text/vision providers can continue after delegated
-    token acquisition fails, and multimodal retrieval can retry without that
-    header. Bounded diagnostics do not fix or approve those identity decisions.
-    Do not treat this candidate as strict OBO enforcement or permission to query
-    without the required user context. Correcting these retained paths requires
-    a separate identity-policy decision; MCP-specific guards remain distinct.
+!!! warning "Unmerged P3: required-user retrieval fails closed"
+    Orchestrator [`ea61bc7cd7b2ac21c957bee5db959337fedd8760`](https://github.com/Azure/gpt-rag-orchestrator/commit/ea61bc7cd7b2ac21c957bee5db959337fedd8760)
+    supersedes the earlier `31348dc` fallback evidence for maintained MAF and
+    multimodal providers, on MCP and non-MCP paths. A user assertion,
+    `ALLOW_ANONYMOUS=false`, or a user-only source selects required-user mode.
+    Missing/failed OBO stops retrieval: no application fallback, no multimodal
+    retry with the authorization header stripped. Legitimate service-only
+    requests remain; anonymous mode does not waive source-specific restrictions.
+    See [mode selection and recovery](services_orchestrator.md#candidate-retrieval-authorization).
+    This is unmerged, not released behavior. Scopes and token/header tests
+    alone do not prove live ACL enforcement; validate each source with allowed
+    and denied principals before deployment.
 
 !!! note "Foundry IQ retrieval"
     When `RETRIEVAL_BACKEND=foundry_iq`, there are two security paths. Native
@@ -158,7 +160,37 @@ Document-level access control is enforced by Azure AI Search when the index is c
     user's delegated token in `x-ms-query-source-authorization`, and the
     remote service (Microsoft 365 or Microsoft Fabric) evaluates
     per-user permissions natively. Managed identity fallback does not
-    apply. Anonymous requests skip these sources.
+    apply. Earlier connector behavior skips sources without a user token;
+    the unmerged `ea61bc7` provider policy instead rejects required-user and
+    mixed-source requests before retrieval. It does not silently answer from
+    local documents. SharePoint remote and MCP OBO query headers also require
+    a user under that policy.
+
+### Legacy API-key recovery (H1)
+
+!!! warning "Compatibility retained: rotate both key sources"
+    At the same unmerged `ea61bc7` source pin, `src/dependencies.py`
+    `validate_auth` retains the existing `ORCHESTRATOR_APP_APIKEY` environment
+    fallback when configuration lookup fails. It logs the safe constant
+    diagnostic `API key configuration unavailable; using environment fallback`,
+    without the key or provider exception. Missing credentials, an absent expected
+    key or a mismatch return **401**. `DISABLE_AUTH` bypass and Dapr-token
+    precedence are unchanged; an invalid supplied Dapr token does not fall
+    through to API-key authentication.
+
+    **A stale environment key can remain valid during configuration failure.**
+    Restore App Configuration access and rotate/remove **both the configured
+    and environment sources**, updating callers and deployed revisions together.
+    Do not assume changing only the configured key revokes the environment key.
+    There is no new environment opt-in for this authentication path; ingestion's
+    environment-fallback opt-in is a different contract.
+
+    H1 is the compatible existing behavior selected by the agent under the
+    user's delegated decision authority, not added runtime code in
+    `25f1986..ea61bc7`. Existing
+    `tests/test_dependency_boundary_dispositions.py` covers fallback match,
+    missing/mismatch, safe diagnostics, cancellation and precedence. This
+    recovery choice is not new authorization or a claim that the candidate shipped.
 
 GPT-RAG uses these field names consistently across ingestion paths:
 
@@ -293,7 +325,7 @@ At a minimum, you only need to set the settings marked as **Required** in the ta
 | `CHAINLIT_URL` | No | No | Public base URL of the UI. Used to build the OAuth redirect/callback URL (and normalized without a trailing slash). |
 | `OAUTH_AZURE_AD_SCOPES` | No | No | Scopes requested during interactive login. If omitted, the UI defaults to the orchestrator API scope plus OpenID Connect scopes. Setting this explicitly helps avoid accidentally getting Microsoft Graph tokens. |
 | `OAUTH_AZURE_AD_ENABLE_SINGLE_TENANT` | No | No | Defaults to `true`. When `true`, the UI enforces single-tenant behavior for the OAuth flow. Set to `false` only for multi-tenant scenarios. |
-| `ALLOW_ANONYMOUS` | No | No | When `true`, the UI runs without OAuth (anonymous mode). Defaults to `true` locally when OAuth is not configured. |
+| `ALLOW_ANONYMOUS` | No | No | UI anonymous-mode setting; defaults to `true` locally without OAuth. The unmerged orchestrator candidate also uses it for retrieval mode selection, never to override a user assertion or user-only source. See [candidate policy](services_orchestrator.md#candidate-retrieval-authorization). |
 
 
 **7) Configure the Azure AI Search index for document-level access control and ensure your documents include permission metadata.**

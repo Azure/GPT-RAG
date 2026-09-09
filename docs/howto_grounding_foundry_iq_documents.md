@@ -185,12 +185,16 @@ Rules to keep straight:
   permission configuration should be treated as an error, not as permission
   to run an unfiltered query.
 
-!!! warning "Unmerged compatibility evidence is not permission approval"
-    The orchestrator quality candidate retains
-    [legacy context-provider identity fallbacks](howto_authentication.md#classic-container-apps-token-flow)
-    under inactive proposals. Its negative evidence is not proof that every
-    strategy enforces the fail-closed requirement above. MCP-specific guards
-    and non-MCP compatibility behavior must not be conflated.
+!!! warning "Unmerged candidate: required-user and mixed-source retrieval"
+    At orchestrator `ea61bc7`, [source-pinned provider policy](services_orchestrator.md#candidate-retrieval-authorization)
+    replaces permissive MAF/multimodal OBO recovery on MCP and non-MCP paths.
+    Required-user requests fail closed; no application fallback is enabled.
+    Service-only access remains for eligible requests. Enabling a user-only
+    source makes a mixed request user-required, not local-documents-only on
+    missing OBO. Restore token forwarding, consent and source permissions rather
+    than weakening authorization. Scopes and header tests are not live ACL proof;
+    validate denied as well as allowed users for each configured security mode.
+    This candidate is unmerged and does not change shipped release pins.
 
 ## Configuration settings
 

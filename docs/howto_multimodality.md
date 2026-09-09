@@ -233,7 +233,8 @@ The result is an answer that cites document sources, embeds relevant figures inl
     [failed-turn and classic SSE error boundary](services_orchestrator.md#streaming-outcomes)
     instead of becoming ordinary raw-error answers. A welcome prefix is not
     completion, and buffered model text is not yet emitted output. This is
-    unmerged behavior; optional profile outcomes and cancellation remain distinct.
+    unmerged behavior; cancellation remains distinct. The later candidate
+    suspends automatic profiles entirely (below).
 
     At [`6b652d8`](https://github.com/Azure/gpt-rag-orchestrator/commit/6b652d8c4d664863a3d02d439b7b77210963320d),
     failed intent classification still defaults to `question`, not a
@@ -276,33 +277,31 @@ Final Answer (text with inline ![Figure](path) references)
 ```
 </div>
 
-**User profile memory**: the strategy supports optional profile context stored in Cosmos DB. Personalization depends on correct identity selection, extraction and confirmed storage; a successful answer does not establish that these succeeded.
+!!! warning "Unmerged candidate: no automatic profiles or stripped-header retry"
+    At orchestrator
+    [`ea61bc7cd7b2ac21c957bee5db959337fedd8760`](https://github.com/Azure/gpt-rag-orchestrator/commit/ea61bc7cd7b2ac21c957bee5db959337fedd8760),
+    automatic profile access, extraction and personalization are completely
+    suspended, including valid-looking legacy keys and cached context. There
+    are zero profile extraction model calls/tasks and zero automatic profile
+    Cosmos reads/writes. This supersedes earlier eligibility and adapter-gap
+    guidance; it does not migrate or delete records. The prompt must not promise
+    to learn, save or recall a persistent profile. See
+    [profile suspension and restoration requirements](services_orchestrator.md#optional-profile-memory).
 
-!!! warning "Unmerged profile evidence remains bounded"
-    Checkpoint [`58c97b6`](https://github.com/Azure/gpt-rag-orchestrator/commit/58c97b6a81d02a5b641ce3d24a3e16fbe34b98e8)
-    preserves optional profile-worker outcomes with bounded diagnostics, not
-    guaranteed extraction or persistence. Its direct-adapter characterization
-    records a `chat_options`/`options` and `ChatResponse.value` interoperability
-    gap; it does not claim that end-to-end extraction works or authorize
-    additional profile writes.
-
-    The unmerged P1 follow-up in orchestrator
-    `133eb7097d42a0c1ddf9f9397029abeeebd3a5d7` makes `flush()` observe and clear pending
-    extraction tasks even when they have already completed. A completed task
-    failure receives a bounded warning; optional cleanup still flushes before
-    attempting profile save. If memory is absent, multimodal cleanup returns
-    without saving or reporting a cleanup failure. Cancellation during flush
-    propagates and prevents that save. This does not fix the adapter gap or
-    guarantee profile persistence.
-
-    The later [`80d8fb2`](https://github.com/Azure/gpt-rag-orchestrator/commit/80d8fb212088dfea2249d53593b9e1dca2f37967)
-    correction skips profile processing for missing, malformed or shared
-    `default_user` keys while allowing ordinary chat. It also removes the
-    unconditional post-flow save timing message. Existing non-placeholder
-    keys are preserved, not authenticated or migrated; the extraction adapter
-    gap remains. See [optional profile eligibility and limits](services_orchestrator.md#optional-profile-memory).
+    Required-user retrieval fails closed; failed OBO or Search is not retried
+    with `x-ms-query-source-authorization` removed. Service-only mode remains
+    for eligible requests, not as fallback after rejection. Recover trusted
+    token forwarding, consent and source permissions rather than stripping
+    headers. [Provider modes and live-proof limits](services_orchestrator.md#candidate-retrieval-authorization)
+    apply to text, citations and images. These are unmerged compatibility
+    changes, not shipped behavior.
 
 **Conversation history**: the strategy sends the last N messages (configurable via `CHAT_HISTORY_MAX_MESSAGES`) to the model for multi-turn context. Image markdown from previous assistant messages is stripped to prevent stale figure references from leaking into the current context.
+
+Profile suspension does not disable ordinary conversation context. Classic
+history writes remain best effort: SSE completion does not guarantee durable
+history, and process loss/concurrent writes remain limits. See
+[history recovery and guarantees](services_orchestrator.md#conversation-history-and-retrieval-controls).
 
 **Configuration** — the multimodal strategy is activated by setting `AGENT_STRATEGY` to `multimodal` in Azure App Configuration (with the `gpt-rag` label). All other settings below also go in App Configuration with the same label.
 
@@ -410,7 +409,12 @@ Image classification and validation add LLM calls per image. Reduce `MULTIMODAL_
 This is a prompt-following issue. The system prompt in `src/prompts/multimodal/main.txt` contains detailed instructions for inline image embedding. If the model consistently ignores them, try a more capable model (e.g., switch from `gpt-4o-mini` to `gpt-4o`), or simplify the prompt instructions.
 
 **User profile not persisting across sessions**
-Profile documents use the Cosmos DB conversations container. Check container access, but do not diagnose every missing update as a storage failure: the [unmerged profile correction](services_orchestrator.md#optional-profile-memory) deliberately skips unusable keys, and the extraction adapter gap remains. The classic request's `principal_id` is not automatically a profile key. Do not backfill or rekey profiles as a workaround without an approved identity/migration decision. For attempted saves, distinguish `Saved user profile`, `write not confirmed`, and bounded failure diagnostics; normal chat completion does not certify persistence.
+At the unmerged `ea61bc7` pin, this is expected: all automatic profile access
+and extraction are suspended to avoid unverifiable owner keys. Existing
+records are untouched, not deleted. Do not backfill, rekey, substitute
+`principal_id`, or repair the adapter to bypass suspension. Restoring profiles
+requires a proven trusted owner binding and separately reviewed privacy decision;
+ordinary Cosmos conversation-history failures are a different issue.
 
 **Intent classifier always returns "question" (search runs on greetings)**
 Check the logs for `intent_classification` entries. If the classifier is failing (timeout or error), it defaults to `question`. Ensure the model endpoint is reachable and the deployment supports low-token completions.
