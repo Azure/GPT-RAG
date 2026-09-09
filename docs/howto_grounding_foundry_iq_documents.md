@@ -4,7 +4,7 @@
     [Adoption status and approval scope](contributing.md#develop-adoption-status)
     supersede the historical “unmerged” and pending-exception labels below.
     Source pins remain implementation evidence; released manifest pins are unchanged.
-    Required-check activation and reference-green evidence are not yet confirmed.
+    See that record for active rules, reference runs and remaining validation gaps.
 
 > Complete the [Foundry IQ prerequisites](howto_grounding_foundry_iq_prereqs.md)
 > first. This page adds only the settings specific to the default Blob

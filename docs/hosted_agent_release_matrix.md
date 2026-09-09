@@ -4,7 +4,7 @@
     [Adoption status and approval scope](contributing.md#develop-adoption-status)
     supersede the historical “unmerged” and pending-exception labels below.
     Source pins remain implementation evidence; released manifest pins are unchanged.
-    Required-check activation and reference-green evidence are not yet confirmed.
+    See that record for active rules, reference runs and remaining validation gaps.
 
 This page records the exact hosted-agent component releases pinned by the
 GPT-RAG umbrella release [`v3.8.3`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3)

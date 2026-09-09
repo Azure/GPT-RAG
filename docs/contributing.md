@@ -95,13 +95,63 @@ architecture and exceptions pass. Only bootstrap policy and the aggregate
 `quality-gate` fail. Initial adoption was administratively authorized despite
 those bootstrap failures; the run remains failed, not a green reference.
 
-Required-check settings are not yet active at this adoption checkpoint.
-Reference PR validation is in progress in all three component repositories.
-Exact protected-branch settings, completed clean-reference and failing
-negative-control results, and subsequent rules activation still await
-coordination confirmation. Authorization and merged workflow files alone do not establish
-enforcement. Live identity/ACL validation, cross-component compatibility,
-durable recovery and production readiness are not implied.
+#### Active rules and reference evidence
+
+The following additive rulesets are active on both `develop` and `main`;
+existing repository rules were retained. Required checks are strict (the branch
+must be up to date), bound to GitHub Actions app `15368`, with no bypass actors.
+Each ruleset requires one approval, code-owner review, dismissal of stale
+approvals, approval of the latest push, and resolved review threads, and blocks
+deletion and non-fast-forward updates. These ongoing review requirements do not
+turn the initial administrative adoption into independent review.
+
+| Component | Active ruleset | Exact required check names |
+| --- | --- | --- |
+| UI | [22641145](https://github.com/Azure/gpt-rag-ui/rules/22641145) | `quality-gate`, `unit-tests`, `container-tests` |
+| Ingestion | [22640997](https://github.com/Azure/gpt-rag-ingestion/rules/22640997) | `quality-gate`, `unit-tests`, `frontend-checks` |
+| Orchestrator | [22663326](https://github.com/Azure/gpt-rag-orchestrator/rules/22663326) | `quality-gate`, `tests`, `frontend build` |
+
+Clean reference runs now demonstrate green evaluation against the adopted
+`develop` policy, rather than the earlier bootstrap base:
+
+| Reference PR | Recorded head and outcome |
+| --- | --- |
+| [UI #112](https://github.com/Azure/gpt-rag-ui/pull/112) | Restored head `69492e4a965263362e6d17b7c3b7a8779047dd7e`, [run 34354232272](https://github.com/Azure/gpt-rag-ui/actions/runs/34354232272) succeeded; tree identical to initial reference `f4cf2d2`. Closed **unmerged**. |
+| [Ingestion #308](https://github.com/Azure/gpt-rag-ingestion/pull/308) | Initial reference `c415272` against adopted base `18c18431`, [run 34352952858](https://github.com/Azure/gpt-rag-ingestion/actions/runs/34352952858): all eight jobs passed. Restored head `03cb8a218e47a3e3cee3f6621e3a186bf9cf596e`, [run 34354094883](https://github.com/Azure/gpt-rag-ingestion/actions/runs/34354094883) succeeded with an identical tree. Closed **unmerged**. |
+| [Orchestrator #359](https://github.com/Azure/gpt-rag-orchestrator/pull/359) | Initial head `6a7ad2c5127875666403279a31874fac670374d0` against actual adopted base `c6339ee5738c0a0bb890b43f204f2d4ba1025157`, [run 34353356772](https://github.com/Azure/gpt-rag-orchestrator/actions/runs/34353356772): all eight jobs passed. Negative-control/restoration receipt remains pending. |
+
+Deliberate negative controls tested suppression growth without breaking
+functional tests:
+
+- **UI:** head `344ee17da79c52df38204928021d2da16373afd0`,
+  [run 34353672894](https://github.com/Azure/gpt-rag-ui/actions/runs/34353672894)
+  failed with Ruff `RUF100` for unnecessary `noqa: F821` at `constants.py:4`,
+  suppression-growth policy failure and failed `quality-gate`. Functional tests
+  passed; the coordinator recorded the PR as `BLOCKED` under ruleset `22641145`.
+- **Ingestion:** head `c11e995e69a7c579308da48ae964d4e342af5ef6`,
+  [run 34353567295](https://github.com/Azure/gpt-rag-ingestion/actions/runs/34353567295)
+  failed with Ruff `RUF100` for unnecessary `noqa: F401` at
+  `utils/deployment_mode.py:34`, new-suppression policy failure and failed
+  `quality-gate`. This is **not evidence that F401 itself was enforced**.
+  Functional tests passed; the coordinator recorded the PR as `BLOCKED` under
+  ruleset `22640997`.
+- **Orchestrator:** the negative control is owned by the component coordinator;
+  its result, blocked-state evidence, restored clean head/run and final PR
+  disposition remain pending. The initial green run and active settings do not
+  substitute for that receipt.
+
+The UI and ingestion fixtures were reverted before their reference PRs were
+closed; neither fixture was merged. Green checks alone do not satisfy required
+reviews or authorize a merge. Active rules also cover `main`, where the adopted
+policy is not yet present: future release PRs fail closed until a normal release
+includes that policy. This adoption does not change `main`, tags or release pins,
+and is not a reason to bypass or weaken those rules.
+
+This evidence supports development-policy adoption and the specific controls
+tested, not live identity/ACL validation, cross-component compatibility, durable
+recovery or production readiness. No live validation target has been supplied
+for this work, and no production deployment is authorized. Those validation
+gaps remain open; offline functional, container and policy tests do not close them.
 
 The older source pins, test counts and CI outcomes below and in linked service
 guides remain implementation evidence at their recorded revisions. Their
@@ -233,7 +283,7 @@ isolation, not an OS sandbox or protection against a compromised interpreter
 or installed tool. Keep the repository-specific startup flags and reviewed
 runner; do not bypass a failed check by dropping isolation, and do not treat an
 internal helper as a new contributor command. The local examples remain
-diagnostics, not approval of the remaining quality or activation work.
+diagnostics, not substitutes for the recorded CI and enforcement evidence above.
 
 ### Typing scope and reviewed exceptions
 
@@ -312,8 +362,9 @@ enforcement, obtain evidence that authorized administrators require
 the quality gate and existing checks, enforce latest-head code-owner review,
 dismiss stale approvals, restrict bypass, and prove clean and deliberately
 failing PR outcomes. Repair policy through a reviewed PR rather than
-disabling controls. Confirmation of those settings and reference/negative-control
-results remains pending; this documentation change performs none of those actions.
+disabling controls. The active settings and reference results are recorded above;
+only orchestrator's negative-control/restoration receipt remains pending in
+that enforcement evidence. This documentation change performs none of those actions.
 
 ## UI Package Contributor Setup
 
@@ -390,7 +441,8 @@ cases and no skips, retaining the 12 history-boundary cases from the earlier
 with `--network none`, exercising a real `uvicorn main:app` listener,
 ready/not-ready local HTTP responses, staged CSS/VERSION, and installed module
 origins. This supersedes the earlier clean-environment and Linux-evidence gaps;
-an unavailable local Docker engine is not a global acceptance blocker.
+an unavailable local Docker engine is not a blocker for that bounded
+installed/container evidence; it does not close live validation gaps.
 These synthetic installed/container results are not live Azure or identity
 integration, production recovery, cross-component compatibility acceptance, approved
 exceptions, or activated repository protection. That historical full quality gate was red.
@@ -495,12 +547,14 @@ inventory rather than assuming every moved implementation is strictly typed.
 Namespace modules also receive coverage; explicit mypy package bases resolve
 their identities without adding runtime `sys.path` workarounds.
 The [exception ledger](https://github.com/Azure/gpt-rag-ui/blob/ee35c9ffea67902b4dc935e287beb5d4640ce6d6/.quality/exceptions.json)
-now contains 28 individually proposed boundaries and zero active approvals,
+at this historical checkpoint contained 28 individually proposed boundaries and zero active approvals,
 not an empty ledger or an inherited blanket waiver. Each proposal identifies
 the exact operation/handler, necessity, observable outcome, diagnostic path and
 executed failure tests. This milestone passes lint, typing and architecture,
-but exceptions, policy and the aggregate still fail. Neither proposed records
-nor passing behavior tests establish handler approval or active repository rules.
+but exceptions, policy and the aggregate failed there. These are not the current
+30 active UI records or current enforcement status; see the adoption record above.
+Neither proposed records nor passing behavior tests alone establish handler
+approval or active repository rules.
 
 ## Code Update Workflow
 

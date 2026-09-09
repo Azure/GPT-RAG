@@ -4,7 +4,7 @@ The **GPT-RAG Data Ingestion** service automates the processing of diverse docum
     [Adoption status and approval scope](contributing.md#develop-adoption-status)
     supersede the historical “unmerged” and pending-exception labels below.
     Source pins remain implementation evidence; released manifest pins are unchanged.
-    Required-check activation and reference-green evidence are not yet confirmed.
+    See that record for active rules, reference runs and remaining validation gaps.
 
 ## Key Features
 

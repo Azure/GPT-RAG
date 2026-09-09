@@ -4,7 +4,7 @@
     [Adoption status and approval scope](contributing.md#develop-adoption-status)
     supersede the historical “unmerged” and pending-exception labels below.
     Source pins remain implementation evidence; released manifest pins are unchanged.
-    Required-check activation and reference-green evidence are not yet confirmed.
+    See that record for active rules, reference runs and remaining validation gaps.
 
 The orchestrator admin dashboard at `/dashboard` signs the operator in with Microsoft Entra ID. This page explains what an operator needs to configure in Entra and in App Configuration to turn that sign-in on, how to assign the `Admin` role, what a working sign-in should look like, and how to diagnose the common failures.
 

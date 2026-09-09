@@ -4,7 +4,7 @@
     [Adoption status and approval scope](contributing.md#develop-adoption-status)
     supersede the historical “unmerged” and pending-exception labels below.
     Source pins remain implementation evidence; released manifest pins are unchanged.
-    Required-check activation and reference-green evidence are not yet confirmed.
+    See that record for active rules, reference runs and remaining validation gaps.
 
 This page explains how authentication works in GPT-RAG, from the GPT-RAG UI sign-in to querying Azure AI Search with document-level access control enabled (POSIX-like ACL / RBAC scopes). The classic runtime forwards a user token to the orchestrator, which produces the correct user-context token for Azure AI Search. The published hosted component matrix defines a stricter UI BFF ownership boundary described below.
 

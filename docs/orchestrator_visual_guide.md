@@ -4,7 +4,7 @@
     [Adoption status and approval scope](contributing.md#develop-adoption-status)
     supersede the historical “unmerged” and pending-exception labels below.
     Source pins remain implementation evidence; released manifest pins are unchanged.
-    Required-check activation and reference-green evidence are not yet confirmed.
+    See that record for active rules, reference runs and remaining validation gaps.
 
 *A picture is worth a thousand words.*  
 Yet many engineers write another thousand words instead of drawing a single useful diagram.  
