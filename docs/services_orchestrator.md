@@ -37,6 +37,33 @@ The Orchestrator supports multiple strategies. The active strategy is set via th
 | `mcp` | MCP | Model Context Protocol strategy using Semantic Kernel. Connects to an MCP server for tool orchestration and passes user context via HTTP headers. |
 | `nl2sql` | NL2SQL | Natural language to SQL translation using Microsoft Agent Framework `ChatAgent` with local metadata lookup, SQL validation, and query execution. No Semantic Kernel or Agent Service agent creation is used in this path. |
 
+## Optional profile memory
+
+!!! warning "Unmerged profile eligibility correction"
+    In orchestrator checkpoint
+    [`80d8fb2`](https://github.com/Azure/gpt-rag-orchestrator/commit/80d8fb212088dfea2249d53593b9e1dca2f37967),
+    `maf_lite`, `maf_agent_service` and `multimodal` skip optional profile
+    loading, extraction and saving when the conversation has no `user_id`,
+    a non-string/blank value, or the shared `default_user` placeholder
+    (including surrounding whitespace). Ordinary chat continues without a
+    profile welcome or cached profile context. Hosted memory remains disabled;
+    this does not add multimodal to hosted runtime eligibility.
+
+    Other existing keys are preserved verbatim, not normalized or migrated.
+    This negative eligibility check does **not** authenticate arbitrary legacy
+    keys. The maintained classic orchestrator supplies `principal_id`, not
+    `conversation["user_id"]`, and this change deliberately does not substitute
+    one for the other. A verified profile identity mapping remains unresolved.
+
+    Save helpers distinguish confirmed, unconfirmed (`None`) and failed writes;
+    the unconditional `post_flow_profile_save` timing message is removed.
+    The current extraction `chat_options`/`options` and `ChatResponse.value`
+    mismatch remains: a normal answer or model-returned profile JSON does not
+    establish a profile update. This correction does not reactivate collection,
+    promise durable memory, or approve the remaining profile exceptions.
+    It is coordinated in [#346](https://github.com/Azure/gpt-rag-orchestrator/pull/346),
+    not released behavior.
+
 ## Streaming outcomes
 
 An HTTP response starting successfully, or some answer text arriving, does not
@@ -122,6 +149,16 @@ event is not independent proof that every operation inside a strategy succeeded.
     and failed HTTP retrieval does not expose its response body.
     [Retained identity fallbacks](howto_authentication.md#classic-container-apps-token-flow)
     are not new permission approval or strict OBO enforcement.
+
+!!! warning "Unmerged single-agent request-context correction"
+    At [`80d8fb2`](https://github.com/Azure/gpt-rag-orchestrator/commit/80d8fb212088dfea2249d53593b9e1dca2f37967),
+    the `single_agent_rag` bound Search tool propagates failure to apply its
+    existing request context instead of searching with stale or unapplied
+    context. The existing failed-turn/SSE error contract applies even after
+    partial output; cancellation remains cancellation. Successful conversation
+    scoping and disabled-retrieval behavior are unchanged. Token selection,
+    `ALLOW_ANONYMOUS` and OBO/service-identity fallbacks are not changed or
+    approved by this correction.
 
 ## Retrieval backend
 

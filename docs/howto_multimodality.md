@@ -276,7 +276,7 @@ Final Answer (text with inline ![Figure](path) references)
 ```
 </div>
 
-**User profile memory**: the strategy also maintains a per-user profile stored in Cosmos DB. The `UserProfileMemory` plugin extracts facts about the user from conversations (e.g., preferences, context) and injects them as context in subsequent sessions. This enables personalized answers across sessions.
+**User profile memory**: the strategy supports optional profile context stored in Cosmos DB. Personalization depends on correct identity selection, extraction and confirmed storage; a successful answer does not establish that these succeeded.
 
 !!! warning "Unmerged profile evidence remains bounded"
     Checkpoint [`58c97b6`](https://github.com/Azure/gpt-rag-orchestrator/commit/58c97b6a81d02a5b641ce3d24a3e16fbe34b98e8)
@@ -294,6 +294,13 @@ Final Answer (text with inline ![Figure](path) references)
     without saving or reporting a cleanup failure. Cancellation during flush
     propagates and prevents that save. This does not fix the adapter gap or
     guarantee profile persistence.
+
+    The later [`80d8fb2`](https://github.com/Azure/gpt-rag-orchestrator/commit/80d8fb212088dfea2249d53593b9e1dca2f37967)
+    correction skips profile processing for missing, malformed or shared
+    `default_user` keys while allowing ordinary chat. It also removes the
+    unconditional post-flow save timing message. Existing non-placeholder
+    keys are preserved, not authenticated or migrated; the extraction adapter
+    gap remains. See [optional profile eligibility and limits](services_orchestrator.md#optional-profile-memory).
 
 **Conversation history**: the strategy sends the last N messages (configurable via `CHAT_HISTORY_MAX_MESSAGES`) to the model for multi-turn context. Image markdown from previous assistant messages is stripped to prevent stale figure references from leaking into the current context.
 
@@ -403,7 +410,7 @@ Image classification and validation add LLM calls per image. Reduce `MULTIMODAL_
 This is a prompt-following issue. The system prompt in `src/prompts/multimodal/main.txt` contains detailed instructions for inline image embedding. If the model consistently ignores them, try a more capable model (e.g., switch from `gpt-4o-mini` to `gpt-4o`), or simplify the prompt instructions.
 
 **User profile not persisting across sessions**
-The profile is stored in the Cosmos DB conversations container. Check that the container exists and that the orchestrator's managed identity has read/write access. Look for `post_flow_cleanup failed` in the logs.
+Profile documents use the Cosmos DB conversations container. Check container access, but do not diagnose every missing update as a storage failure: the [unmerged profile correction](services_orchestrator.md#optional-profile-memory) deliberately skips unusable keys, and the extraction adapter gap remains. The classic request's `principal_id` is not automatically a profile key. Do not backfill or rekey profiles as a workaround without an approved identity/migration decision. For attempted saves, distinguish `Saved user profile`, `write not confirmed`, and bounded failure diagnostics; normal chat completion does not certify persistence.
 
 **Intent classifier always returns "question" (search runs on greetings)**
 Check the logs for `intent_classification` entries. If the classifier is failing (timeout or error), it defaults to `question`. Ensure the model endpoint is reachable and the deployment supports low-token completions.

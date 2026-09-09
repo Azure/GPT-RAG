@@ -60,6 +60,12 @@ The active strategy is set via the `AGENT_STRATEGY` key in Azure App Configurati
 
 ## Single Agent Strategy (Deep Dive)
 
+Profile support in the strategy table is optional, not a guarantee of
+personalization. See the source-pinned, unmerged
+[profile eligibility and extraction limitations](services_orchestrator.md#optional-profile-memory).
+For the single-agent flow below, also see the
+[request-context failure contract](services_orchestrator.md#streaming-outcomes).
+
 This section explores how the Single-Agent RAG Strategy orchestrates the entire request-response lifecycle, from receiving a user's question to delivering a grounded, streamed answer. The diagrams below illustrate the conversation lifecycle, state management, and the interaction between the Orchestrator container app and Microsoft Foundry services.
 
 ![Orchestrator Strategy Setup and Streaming](./media/orchestrator_strategy/orchestrator-strategy.drawio.svg)
