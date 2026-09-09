@@ -231,7 +231,7 @@ surfaces return 503.
 ## Operator overview and corpus curation
 
 !!! warning "Unmerged source-specific panel failure outcomes"
-    UI [`e993c89`](https://github.com/Azure/gpt-rag-ui/commit/e993c89e00c296edb5384219d200d50937311713)
+    UI [`aef9546`](https://github.com/Azure/gpt-rag-ui/commit/aef9546879333c8615b7adb3917f299a665f4ecc)
     retains ordinary chat after a failed creation-time owner-index write, but
     the missing row hides the conversation from listing and denies panel
     read/feedback/delete with opaque 404 responses. Its safe log requires

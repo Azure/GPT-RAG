@@ -56,14 +56,20 @@ This page covers common issues, debugging tools, and how to inspect logs in GPT-
 
 !!! warning "Unmerged upload, OpenAPI and panel failure corrections"
     The follow-up in [Azure/gpt-rag-ui#110](https://github.com/Azure/gpt-rag-ui/pull/110)
-    at [`e993c89`](https://github.com/Azure/gpt-rag-ui/commit/e993c89e00c296edb5384219d200d50937311713)
+    at [`aef9546`](https://github.com/Azure/gpt-rag-ui/commit/aef9546879333c8615b7adb3917f299a665f4ecc)
     adds uploaded filenames to session bookkeeping only after confirmed batch
     ingestion. A false result or exception preserves previously confirmed names;
     the boolean client contract cannot confirm individual files in a partial
     batch. Both failure outcomes display a failure notice with the question
     reference, not "Files received" or processed-success confirmation.
     **A false result or exception stops the accompanying question before it is
-    sent to the chat backend.** Reattach the files and resubmit the question.
+    sent to the chat backend.** Reattach **all files** and resubmit the question;
+    retry is not automatic. If the failed upload allocated a new conversation
+    ID, the UI restores the prior session ID. The manual retry allocates a
+    fresh conversation and reingests all reattached files before sending the
+    question, only after confirmed ingestion. For an existing conversation,
+    its ID is preserved and ownership is checked again; retry does not bypass
+    access denial. This does not guarantee cleanup of partial ingestion.
     If the failure persists, share the displayed question reference with
     application support. Confirmed successful ingestion still updates the
     bookkeeping and allows the question to continue (H6).

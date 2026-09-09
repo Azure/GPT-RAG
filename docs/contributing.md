@@ -316,11 +316,14 @@ configuration cases, and Chainlit `HTTPSession` file persistence and cleanup
 under the staged asset root, plus standalone download/OpenAPI failure outcomes.
 
 The later unmerged UI
-[`e993c89`](https://github.com/Azure/gpt-rag-ui/commit/e993c89e00c296edb5384219d200d50937311713)
+[`aef9546`](https://github.com/Azure/gpt-rag-ui/commit/aef9546879333c8615b7adb3917f299a665f4ecc)
 adjusts failure tests and runtime outcomes: OpenAPI generation failure returns
 uncached HTTP 500 with no metadata fallback; failed attachment ingestion stops
 the accompanying question with reattach/resubmit guidance while preserving
-confirmed bookkeeping; failed panel owner indexing retains ordinary chat but
+confirmed bookkeeping. A failed first upload restores the prior session
+conversation ID; manually reattaching all files and resubmitting ingests them
+under a fresh conversation before sending the question. Existing conversations
+retain their ID and ownership checks. Failed panel owner indexing retains ordinary chat but
 denies panel access and logs required repair without automatic recovery.
 See [operator guidance](troubleshooting.md). Ingestion
 [`eb42bbb`](https://github.com/Azure/gpt-rag-ingestion/commit/eb42bbb155613ba570f891b67366967387735e32)
@@ -330,7 +333,7 @@ legacy overview `feedback.available`; see
 These source-specific behavioral tests do not approve proposed exception
 records, establish new CI results, or change the shipped manifest.
 
-[CI run 34050677391](https://github.com/Azure/gpt-rag-ui/actions/runs/34050677391)
+Historical [CI run 34050677391](https://github.com/Azure/gpt-rag-ui/actions/runs/34050677391)
 passed 521 unittest cases and a separate Linux container job with 455 behavioral
 cases and no skips, retaining the 12 history-boundary cases from the earlier
 `653660e` milestone. The container job uses the existing Dockerfile and runs
@@ -341,6 +344,11 @@ an unavailable local Docker engine is not a global acceptance blocker.
 These synthetic installed/container results are not live Azure or identity
 integration, production recovery, cross-component compatibility acceptance, approved
 exceptions, or activated repository protection. The full quality gate remains red.
+
+Final-source [CI run 34307187745](https://github.com/Azure/gpt-rag-ui/actions/runs/34307187745)
+at `aef9546` passes unit and container tests, but lint, policy, exceptions,
+and the aggregate quality gate fail. Passing behavioral evidence does not
+approve proposed exceptions or complete quality bootstrap.
 
 ### Find the owning implementation
 

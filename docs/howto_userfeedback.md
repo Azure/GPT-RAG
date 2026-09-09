@@ -22,7 +22,7 @@ removes the managed Conversation first and then metadata, returning an explicit
 These routes return 503 while panel/history gates are off.
 
 !!! warning "Unmerged UI owner-index failure outcome"
-    UI [`e993c89`](https://github.com/Azure/gpt-rag-ui/commit/e993c89e00c296edb5384219d200d50937311713)
+    UI [`aef9546`](https://github.com/Azure/gpt-rag-ui/commit/aef9546879333c8615b7adb3917f299a665f4ecc)
     retains ordinary chat when the creation-time panel owner-index write fails.
     Without the row, listing omits the conversation and panel read, feedback
     and delete fail closed with opaque 404 responses. A safe log states that
