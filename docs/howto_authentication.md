@@ -1,5 +1,11 @@
 # Authentication and Document-Level Security
 
+!!! note "Develop adoption, not a release"
+    [Adoption status and approval scope](contributing.md#develop-adoption-status)
+    supersede the historical “unmerged” and pending-exception labels below.
+    Source pins remain implementation evidence; released manifest pins are unchanged.
+    See that record for active rules, reference runs and remaining validation gaps.
+
 This page explains how authentication works in GPT-RAG, from the GPT-RAG UI sign-in to querying Azure AI Search with document-level access control enabled (POSIX-like ACL / RBAC scopes). The classic runtime forwards a user token to the orchestrator, which produces the correct user-context token for Azure AI Search. The published hosted component matrix defines a stricter UI BFF ownership boundary described below.
 
 > In OAuth mode, the orchestrator receives a user access token (for the orchestrator API) and then performs an On-Behalf-Of (OBO) exchange to obtain a separate token for Azure AI Search. The two tokens have different audiences and are not interchangeable.
@@ -127,6 +133,19 @@ x-ms-query-source-authorization: Bearer <search_user_access_token>
 
 Document-level access control is enforced by Azure AI Search when the index is configured for document permissions (see `permissionFilterOption` in the index definition) and documents include permission metadata. 
 
+!!! warning "Unmerged P3: required-user retrieval fails closed"
+    Orchestrator [`ea61bc7cd7b2ac21c957bee5db959337fedd8760`](https://github.com/Azure/gpt-rag-orchestrator/commit/ea61bc7cd7b2ac21c957bee5db959337fedd8760)
+    supersedes the earlier `31348dc` fallback evidence for maintained MAF and
+    multimodal providers, on MCP and non-MCP paths. A user assertion,
+    `ALLOW_ANONYMOUS=false`, or a user-only source selects required-user mode.
+    Missing/failed OBO stops retrieval: no application fallback, no multimodal
+    retry with the authorization header stripped. Legitimate service-only
+    requests remain; anonymous mode does not waive source-specific restrictions.
+    See [mode selection and recovery](services_orchestrator.md#candidate-retrieval-authorization).
+    This is unmerged, not released behavior. Scopes and token/header tests
+    alone do not prove live ACL enforcement; validate each source with allowed
+    and denied principals before deployment.
+
 !!! note "Foundry IQ retrieval"
     When `RETRIEVAL_BACKEND=foundry_iq`, there are two security paths. Native
     Foundry IQ sources use the `x-ms-query-source-authorization` OBO header only
@@ -147,7 +166,37 @@ Document-level access control is enforced by Azure AI Search when the index is c
     user's delegated token in `x-ms-query-source-authorization`, and the
     remote service (Microsoft 365 or Microsoft Fabric) evaluates
     per-user permissions natively. Managed identity fallback does not
-    apply. Anonymous requests skip these sources.
+    apply. Earlier connector behavior skips sources without a user token;
+    the unmerged `ea61bc7` provider policy instead rejects required-user and
+    mixed-source requests before retrieval. It does not silently answer from
+    local documents. SharePoint remote and MCP OBO query headers also require
+    a user under that policy.
+
+### Legacy API-key recovery (H1)
+
+!!! warning "Compatibility retained: rotate both key sources"
+    At the same unmerged `ea61bc7` source pin, `src/dependencies.py`
+    `validate_auth` retains the existing `ORCHESTRATOR_APP_APIKEY` environment
+    fallback when configuration lookup fails. It logs the safe constant
+    diagnostic `API key configuration unavailable; using environment fallback`,
+    without the key or provider exception. Missing credentials, an absent expected
+    key or a mismatch return **401**. `DISABLE_AUTH` bypass and Dapr-token
+    precedence are unchanged; an invalid supplied Dapr token does not fall
+    through to API-key authentication.
+
+    **A stale environment key can remain valid during configuration failure.**
+    Restore App Configuration access and rotate/remove **both the configured
+    and environment sources**, updating callers and deployed revisions together.
+    Do not assume changing only the configured key revokes the environment key.
+    There is no new environment opt-in for this authentication path; ingestion's
+    environment-fallback opt-in is a different contract.
+
+    H1 is the compatible existing behavior selected by the agent under the
+    user's delegated decision authority, not added runtime code in
+    `25f1986..ea61bc7`. Existing
+    `tests/test_dependency_boundary_dispositions.py` covers fallback match,
+    missing/mismatch, safe diagnostics, cancellation and precedence. This
+    recovery choice is not new authorization or a claim that the candidate shipped.
 
 GPT-RAG uses these field names consistently across ingestion paths:
 
@@ -282,7 +331,7 @@ At a minimum, you only need to set the settings marked as **Required** in the ta
 | `CHAINLIT_URL` | No | No | Public base URL of the UI. Used to build the OAuth redirect/callback URL (and normalized without a trailing slash). |
 | `OAUTH_AZURE_AD_SCOPES` | No | No | Scopes requested during interactive login. If omitted, the UI defaults to the orchestrator API scope plus OpenID Connect scopes. Setting this explicitly helps avoid accidentally getting Microsoft Graph tokens. |
 | `OAUTH_AZURE_AD_ENABLE_SINGLE_TENANT` | No | No | Defaults to `true`. When `true`, the UI enforces single-tenant behavior for the OAuth flow. Set to `false` only for multi-tenant scenarios. |
-| `ALLOW_ANONYMOUS` | No | No | When `true`, the UI runs without OAuth (anonymous mode). Defaults to `true` locally when OAuth is not configured. |
+| `ALLOW_ANONYMOUS` | No | No | UI anonymous-mode setting; defaults to `true` locally without OAuth. The unmerged orchestrator candidate also uses it for retrieval mode selection, never to override a user assertion or user-only source. See [candidate policy](services_orchestrator.md#candidate-retrieval-authorization). |
 
 
 **7) Configure the Azure AI Search index for document-level access control and ensure your documents include permission metadata.**
@@ -366,7 +415,7 @@ flowchart LR
   User -->|Bearer token<br/>api://CLIENT_ID/.default| Ing[Ingestion /api/jobs/*/run<br/>and /api/config writes]
   Orch -->|require_admin| RoleCheck{roles claim<br/>contains 'Admin'?}
   Ing -->|require_admin| RoleCheck
-  RoleCheck -->|yes| Allow[200 / 202]
+  RoleCheck -->|yes| Allow[Authorized to attempt operation]
   RoleCheck -->|no| Deny[403 Admin role required]
 ```
 
@@ -472,12 +521,45 @@ The 7 cron expressions (`CRON_RUN_SHAREPOINT_INDEX`, `CRON_RUN_SHAREPOINT_PURGE`
 
 **What `Apply` does, and what it does not do**
 
-The button labeled **Apply** calls `POST /api/dashboard/config/apply` (orchestrator) or `POST /api/config/apply` (ingestion). Both endpoints perform a **soft refresh**:
+The button labeled **Apply** calls `POST /api/dashboard/config/apply` (orchestrator) or `POST /api/config/apply` (ingestion). On a successful call, these endpoints perform a **soft refresh**; passing the authorization gate alone does not guarantee that the operation succeeds:
 
 1. The in-process App Configuration cache is refreshed so subsequent reads in this container instance see the new values immediately.
 2. On the ingestion service, every known cron job is rescheduled in APScheduler using the latest expression in App Configuration. This means a cron change takes effect on the running container without a restart.
 
 The endpoint is intentionally called `/config/apply` and not `/restart` so the response honestly reflects what happens. The Container App revision is **not** recycled. Other replicas of the same service refresh their own cache on their normal cadence; if you want every replica updated immediately, restart the Container App revision in the portal.
+
+!!! warning "Unmerged ingestion failure-handling preview"
+    [Azure/gpt-rag-ingestion#296](https://github.com/Azure/gpt-rag-ingestion/pull/296),
+    at [`3a46472`](https://github.com/Azure/gpt-rag-ingestion/blob/3a46472b19049631fa4427699a79968134a46769/api/admin.py),
+    corrects a genuine schedule-application failure in `POST /api/config/apply`
+    to return HTTP `500`, not a successful Apply response. This is candidate
+    behavior, not a claim about the currently released service.
+    `PUT /api/config` preserves HTTP `200` and the keys in `applied` when the
+    durable writes and schedule handling succeed but the subsequent best-effort
+    local cache refresh fails. That refresh failure alone does not add a key
+    to `failed`. Explicit Reload and Apply are separate operations whose
+    outcomes must still be checked.
+
+!!! warning "Unmerged orchestrator configuration and authentication clarification"
+    At [`b93fb58`](https://github.com/Azure/gpt-rag-orchestrator/commit/b93fb58cdb59dbb30b1db88b39c8843296b7713b),
+    unexpected configuration-read failures no longer become default dashboard
+    values or an "authentication not configured" decision. The dependency
+    checkpoint [`7541c3e`](https://github.com/Azure/gpt-rag-orchestrator/commit/7541c3e3ea3d5f4075f8e3913650bf22c2f086a5)
+    likewise propagates unexpected required JWT tenant/client read failures.
+    Actual App Configuration missing-key and exhausted-retry fallback behavior
+    remains unchanged. Known authentication `HTTPException` statuses remain;
+    unexpected token-validation failures retain a generic `401`.
+
+    Orchestrator `PUT /api/dashboard/config` still returns `500` for per-key
+    write failures, with the same error shape and the bounded message
+    `Unable to persist setting`. Other keys in that request may already persist.
+    A cache-refresh failure after durable writes also remains `500`, unlike
+    ingestion's refresh-only `200`/`applied` contract above. Neither status nor
+    code rollback undoes durable writes. The existing API-key environment
+    fallback was retained under an inactive proposal at this checkpoint;
+    subsequent initial administrative acceptance is not new identity approval.
+    These are historical checkpoints; roles, labels, defaults and SSE schemas
+    are not redefined by this preview.
 
 ### 6) Operator workflow: verifying the role lands in the token
 

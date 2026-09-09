@@ -1,5 +1,11 @@
 # User Feedback Configuration
 
+!!! note "Develop adoption, not a release"
+    [Adoption status and approval scope](contributing.md#develop-adoption-status)
+    supersede the historical “unmerged” and pending-exception labels below.
+    Source pins remain implementation evidence; released manifest pins are unchanged.
+    See that record for active rules, reference runs and remaining validation gaps.
+
 GPT-RAG includes a **User Feedback Loop** feature that lets users evaluate
 assistant responses through the UI. In the currently released classic
 Container Apps topology and the explicit classic fallback, feedback is
@@ -21,12 +27,34 @@ removes the managed Conversation first and then metadata, returning an explicit
 `oid`-bound and expiring; tampered, expired, or cross-user cursors return 422.
 These routes return 503 while panel/history gates are off.
 
+!!! warning "Unmerged UI owner-index failure outcome"
+    UI [`aef9546`](https://github.com/Azure/gpt-rag-ui/commit/aef9546879333c8615b7adb3917f299a665f4ecc)
+    retains ordinary chat when the creation-time panel owner-index write fails.
+    Without the row, listing omits the conversation and panel read, feedback
+    and delete fail closed with opaque 404 responses. A safe log states that
+    the write was not confirmed and owner-index repair is required; no
+    automatic repair is attempted. Continuing chat does not rerun that hook.
+    Ask the operator to investigate and arrange authorized index repair,
+    without bypassing ownership checks. See [recovery guidance](troubleshooting.md).
+    This candidate does not change the shipped manifest or enable panel gates.
+
 ![Feedback stored in Cosmos DB](media/feedback_stored_in_cosmos_db.png)
 <br>*User feedback stored in Cosmos DB*
 
 By default, **basic feedback** (thumbs up/down) is enabled, while **detailed ratings** (star rating and comments) are disabled. Administrators control these options through **Azure App Configuration**.
 
 ## Feedback Types
+
+!!! warning "Unmerged P1 classic feedback correction"
+    Candidate UI commit: `48d87b2fb2fb9a158d02f204cfbcc3941fb6126e`.
+
+    The UI selects the submission notification from the backend outcome before
+    attempting to remove the feedback form. A form-removal failure is logged
+    separately: it does not turn an acknowledged submission into failure,
+    turn backend failure into success, or repeat the write. The form may
+    remain visible. Cancellation still propagates; neither form removal nor
+    toast delivery is guaranteed. This is not a change to hosted-panel gates
+    or a new persistence guarantee.
 
 When enabled, users can provide **star ratings** and text comments for richer feedback that captures both satisfaction and reasoning.
 

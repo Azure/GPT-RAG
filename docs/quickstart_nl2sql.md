@@ -1,5 +1,11 @@
 # NL2SQL Quick Start Guide
 
+!!! note "Develop adoption, not a release"
+    [Adoption status and approval scope](contributing.md#develop-adoption-status)
+    supersede the historical “unmerged” and pending-exception labels below.
+    Source pins remain implementation evidence; released manifest pins are unchanged.
+    See that record for active rules, reference runs and remaining validation gaps.
+
 Get public access natural language querying of your Azure SQL Database working in **30 minutes** using **automated blob storage ingestion**.
 
 > This quickstart enables a public access solution which is for testing purposes only!
@@ -526,6 +532,32 @@ Get-Content run-log.json | ConvertFrom-Json | ConvertTo-Json -Depth 10
   - Natural language answer with data
   - Shows SQL query that was executed
   - Cites the datasource
+
+!!! warning "Unmerged primary-flow failure correction"
+    In orchestrator checkpoint [`2dc6928`](https://github.com/Azure/gpt-rag-orchestrator/commit/2dc69285efa3d6bffb661e05e69797f54e1be45c),
+    thrown primary failures reach the existing
+    [failed-turn and classic SSE error boundary](services_orchestrator.md#streaming-outcomes),
+    not an ordinary answer containing the exception. Explicit typed SQL
+    validation and execution-result answers retain their existing completed
+    response contract. Neither an initial HTTP response nor partial answer text
+    proves completion. This correction is unmerged, not the released quickstart.
+
+!!! warning "Unmerged schema availability and SQL cleanup correction"
+    The P6 follow-up in [orchestrator #346](https://github.com/Azure/gpt-rag-orchestrator/pull/346),
+    checkpoint [`03e908d`](https://github.com/Azure/gpt-rag-orchestrator/commit/03e908d23d770c16c8ea8a94a5c268c561afa2b2),
+    adds an optional `SchemaInfo.error`: a constant missing-table reason or a
+    bounded exception class for provider/validation failures. The schema collector
+    supplies unavailable schemas separately from usable schemas to SQL generation;
+    valid empty columns remain usable. This does not impose a new terminal
+    failure policy.
+
+    SQL execution attempts to close the returned cursor and connection, in that
+    order, including on execution failure or cancellation. Ordinary close failures
+    do not prevent the other close attempt or replace the primary typed result or
+    propagating cancellation. Explicit validation/execution-result answers remain
+    ordinary completed answers. This covers resources returned to the caller,
+    not worker-thread cancellation redesign or resources never returned by
+    acquisition. The change is unmerged, not released behavior or exception approval.
 
 ---
 

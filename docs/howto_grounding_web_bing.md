@@ -1,5 +1,20 @@
 # Foundry IQ: Web (Grounding with Bing)
 
+!!! note "Develop adoption, not a release"
+    [Adoption status and approval scope](contributing.md#develop-adoption-status)
+    supersede the historical “unmerged” and pending-exception labels below.
+    Source pins remain implementation evidence; released manifest pins are unchanged.
+    See that record for active rules, reference runs and remaining validation gaps.
+
+!!! note "Unmerged request-level authorization policy"
+    Web's public-source authentication model is unchanged by orchestrator
+    `ea61bc7`. The [source-pinned provider policy](services_orchestrator.md#candidate-retrieval-authorization)
+    separately requires user authorization for an assertion, strict
+    `ALLOW_ANONYMOUS=false`, or a mixed knowledge base with a user-only source.
+    Missing/failed OBO cannot silently produce a public/local-only answer.
+    Eligible service-only requests remain; no application fallback after user
+    rejection is enabled. This is unmerged guidance, not shipped behavior.
+
 The `web` Foundry IQ knowledge source grounds answers on the public internet
 using Grounding with Bing Search. It runs next to your document knowledge
 source and (optionally) Work IQ, the Fabric ontology source, and the Fabric

@@ -1,5 +1,11 @@
 # Audit Contract v1
 
+!!! note "Develop adoption, not a release"
+    [Adoption status and approval scope](contributing.md#develop-adoption-status)
+    supersede the historical “unmerged” and pending-exception labels below.
+    Source pins remain implementation evidence; released manifest pins are unchanged.
+    See that record for active rules, reference runs and remaining validation gaps.
+
 Use this page to understand the GPT-RAG audit event contract, estimate its
 telemetry volume, and prepare operational queries.
 
@@ -525,6 +531,12 @@ empty content is still appended to the result list whether or not its
 `grounding.source.rejected` audit event was emitted; audit evidence describes
 what the orchestrator did, it does not gate what the orchestrator does.
 
+Request-terminal events report the outcome observed at the instrumented
+boundary. If a strategy catches a primary failure and returns ordinary text,
+that boundary can record `outcome.produced` and `request.completed` instead of
+failure. Those events are not independent proof that the strategy's work
+succeeded. See [streaming outcomes and the unmerged MAF correction](services_orchestrator.md#streaming-outcomes).
+
 Audit emission is deliberately best effort:
 
 - sanitization or serialization failure discards the original payload and
@@ -541,6 +553,21 @@ Audit emission is deliberately best effort:
 - the Azure Monitor batch exporter has no application callback for later
   delivery failure, so an asynchronous export failure cannot produce a reliable
   failure event.
+
+This best-effort rule applies to audit side effects, not to a required primary
+operation. It does not authorize converting a failed user operation into a
+successful response or make every unrelated optional operation fatal.
+
+!!! warning "Unmerged audit failure-isolation correction"
+    In [Azure/gpt-rag-orchestrator#346](https://github.com/Azure/gpt-rag-orchestrator/pull/346),
+    checkpoint [`463999c`](https://github.com/Azure/gpt-rag-orchestrator/commit/463999c1ba314d55a50ab2aa646544b9eb7adac4),
+    ordinary emission failures remain bounded and best effort. Cancellation
+    and process-control exceptions from the primary exporter, minimal failure
+    event, or warning sink normally propagate. Only a tool boundary immediately
+    re-raising its own primary failure, timeout, or cancellation explicitly
+    preserves that primary outcome across secondary emission failures.
+    An unrelated caller's recovery handler does not enable this preservation.
+    No audit schema, delivery guarantee, configuration key, or release pin changes.
 
 The implementation does not add a separate health event, metric, rate limiter,
 or delivery acknowledgment. Operators must use Azure Monitor ingestion health,
