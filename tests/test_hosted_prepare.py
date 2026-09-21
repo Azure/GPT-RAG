@@ -9,6 +9,7 @@ from config.deployment.hosted_prepare import (
     persist_digest,
     prepare_environment,
 )
+from config.deployment.private_network import PrivateNetworkError
 
 
 DIGEST = "sha256:" + ("a" * 64)
@@ -99,23 +100,28 @@ class PrepareEnvironmentTests(unittest.TestCase):
             )
         mock_prepare.assert_not_called()
 
+    @patch("config.deployment.hosted_prepare.check_stage")
     @patch("config.deployment.hosted_prepare.resolve_az_command")
     @patch("config.deployment.hosted_prepare.prepare_hosted_image")
     def test_private_build_uses_provisioned_agent_pool(
         self,
         mock_prepare: MagicMock,
         mock_resolve_az: MagicMock,
+        mock_check: MagicMock,
     ) -> None:
         mock_prepare.return_value = NEW_DIGEST
         mock_resolve_az.return_value = "az"
 
-        prepare_environment(
-            hosted_environment(
-                NETWORK_ISOLATION="true",
-                ACR_TASK_AGENT_POOL="build-pool",
-            ),
-            MANIFEST,
+        environment = hosted_environment(
+            NETWORK_ISOLATION="true",
+            ACR_TASK_AGENT_POOL="build-pool",
         )
+        events: list[str] = []
+        mock_check.side_effect = lambda *_: events.append("probe")
+        mock_prepare.side_effect = lambda **_: events.append("build") or NEW_DIGEST
+        prepare_environment(environment, MANIFEST)
+        mock_check.assert_called_once_with(environment, "hosted-build")
+        self.assertEqual(["probe", "build"], events)
 
         self.assertEqual(
             "build-pool",
@@ -132,6 +138,47 @@ class PrepareEnvironmentTests(unittest.TestCase):
                 MANIFEST,
             )
         mock_prepare.assert_not_called()
+
+    @patch("config.deployment.hosted_prepare.check_stage")
+    @patch("config.deployment.hosted_prepare.prepare_hosted_image")
+    def test_failed_network_prerequisite_never_builds(
+        self, mock_prepare: MagicMock, mock_check: MagicMock,
+    ) -> None:
+        mock_check.side_effect = PrivateNetworkError("private DNS failed")
+        with self.assertRaisesRegex(PrivateNetworkError, "private DNS"):
+            prepare_environment(hosted_environment(
+                NETWORK_ISOLATION="true", ACR_TASK_AGENT_POOL="build-pool",
+                RUN_FROM_JUMPBOX="true",
+            ), MANIFEST)
+        mock_check.assert_called_once()
+        mock_prepare.assert_not_called()
+
+    @patch("config.deployment.hosted_prepare.check_stage")
+    def test_private_immutable_paths_validate_digest_without_probe(
+        self, mock_check: MagicMock,
+    ) -> None:
+        environment = hosted_environment(
+            NETWORK_ISOLATION="true", AZURE_CONTAINER_REGISTRY_ENDPOINT="",
+        )
+        for overrides, command_digest, source in (
+            ({}, DIGEST, None),
+            ({"HOSTED_AGENT_IMAGE_VERSION": DIGEST}, None, None),
+            ({
+                "HOSTED_AGENT_IMAGE_VERSION": DIGEST,
+                "HOSTED_AGENT_IMAGE_SOURCE_COMMIT": SOURCE_COMMIT,
+                "HOSTED_AGENT_IMAGE_STARTUP_COMMAND_SHA256": hosted_startup_command_sha256(environment),
+            }, None, SOURCE_COMMIT),
+        ):
+            with self.subTest(overrides=overrides, command_digest=command_digest):
+                self.assertEqual((DIGEST, source), prepare_environment(
+                    {**environment, **overrides}, MANIFEST, image_version_override=command_digest,
+                ))
+        with self.assertRaises(ValueError):
+            prepare_environment(environment, MANIFEST, image_version_override="latest")
+        self.assertEqual((None, None), prepare_environment(
+            {"DEPLOYMENT_TOPOLOGY": "classic", "NETWORK_ISOLATION": "true"}, MANIFEST,
+        ))
+        mock_check.assert_not_called()
 
     @patch("config.deployment.hosted_prepare.prepare_hosted_image")
     def test_explicit_digest_override_skips_build(

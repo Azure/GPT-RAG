@@ -20,9 +20,17 @@ echo
 # This avoids persisting secrets in the User environment (registry)
 #-------------------------------------------------------------------------------
 
-while IFS='=' read -r key value; do
-  # Skip empty keys or lines without '='
-  [[ -z "$key" ]] && continue
+azd_values="$(azd env get-values)" || {
+  echo "Could not load the selected azd environment; refusing to configure resources." >&2
+  exit 1
+}
+[ -n "$azd_values" ] || { echo "The selected azd environment is empty." >&2; exit 1; }
+while IFS= read -r line; do
+  line="${line%$'\r'}"
+  [[ -z "$line" ]] && continue
+  [[ "$line" =~ ^([A-Za-z_][A-Za-z0-9_]*)=(.*)$ ]] || { echo "Invalid azd environment output." >&2; exit 1; }
+  key="${BASH_REMATCH[1]}"
+  value="${BASH_REMATCH[2]}"
 
   # Trim surrounding double quotes from the value (if present)
   value="${value%\"}"
@@ -30,7 +38,7 @@ while IFS='=' read -r key value; do
 
   # Export into current shell
   export "$key=$value"
-done < <(azd env get-values)
+done <<< "$azd_values"
 
 is_truthy() {
   case "$(echo "${1:-}" | tr '[:upper:]' '[:lower:]')" in
@@ -40,40 +48,16 @@ is_truthy() {
 }
 
 #-------------------------------------------------------------------------------
-# Zero Trust Information
+# Private deployment-host prerequisite (before data-plane configuration)
 #-------------------------------------------------------------------------------
-echo
-if is_truthy "${NETWORK_ISOLATION:-false}"; then
-  echo "🔒 Zero Trust enabled."
-  echo "Access to Azure resources is restricted to the VNet."
-  echo "Ensure you run scripts/postProvision.sh from within the VNet."
-  echo "If you are using a local machine, make sure you have a VPN connection to the VNet."
-  echo "You can also use the Test VM to access the environment and complete the setup."
-
-  if ! is_truthy "${RUN_FROM_JUMPBOX:-false}"; then
-    if [[ "$(echo "${RUN_FROM_JUMPBOX:-}" | tr '[:upper:]' '[:lower:]')" =~ ^(false|0|no|skip)$ ]]; then
-      echo "⏭️ RUN_FROM_JUMPBOX=${RUN_FROM_JUMPBOX}; skipping data-plane post-provisioning."
-      exit 0
-    fi
-    if is_truthy "${AZURE_SKIP_NETWORK_ISOLATION_WARNING:-false}"; then
-      echo "⏭️ AZURE_SKIP_NETWORK_ISOLATION_WARNING=${AZURE_SKIP_NETWORK_ISOLATION_WARNING}; skipping local data-plane post-provisioning."
-      echo "   Re-run from the jumpbox with RUN_FROM_JUMPBOX=true."
-      exit 0
-    fi
-    if [[ -t 0 ]]; then
-      read -p "Are you running this script from inside the VNet or via VPN? [Y/n]: " answer
-      if [[ ! "$(echo "${answer:-n}" | tr '[:upper:]' '[:lower:]')" =~ ^(y|yes)$ ]]; then
-        echo "❌ Please run this script from inside the VNet or with VPN access. Exiting."
-        exit 0
-      fi
-    else
-      echo "⏭️ Non-interactive shell outside the VNet; skipping data-plane post-provisioning."
-      echo "   Re-run from the jumpbox with RUN_FROM_JUMPBOX=true."
-      exit 0
-    fi
-  fi
-else
-  echo "🚧 Provisioning basic architecture."
+network_exit=0
+(cd "$PROJECT_ROOT" && python3 -m config.deployment.private_network --stage post-provision) || network_exit=$?
+if [ "$network_exit" -eq 20 ]; then
+  echo "Post-provision configuration explicitly deferred; application setup is incomplete."
+  exit 0
+elif [ "$network_exit" -ne 0 ]; then
+  echo "Private post-provision prerequisites failed. Connect through VPN/VNet and rerun postProvision; configuration has not started." >&2
+  exit "$network_exit"
 fi
 
 #-------------------------------------------------------------------------------
