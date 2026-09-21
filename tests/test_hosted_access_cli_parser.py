@@ -90,6 +90,18 @@ class HostedAccessCliParserTests(unittest.TestCase):
             with self.subTest(operation=command[:2]):
                 self.assertTrue(self.parse_only(command))
 
+    def test_generated_role_commands_parse_without_graph_resolution(self):
+        azure = AzureFixture()
+        plan = access.discover(ENV, run=azure)
+        access.apply(plan, run=azure, sleep=lambda _: None)
+        commands = [args for args in azure.calls if args[:2] == ["role", "assignment"]]
+        self.assertEqual(9, len(commands))
+        for command in commands:
+            with self.subTest(operation=command[:3]):
+                self.assertIn("--assignee-object-id", command)
+                self.assertNotIn("--assignee", command)
+                self.assertTrue(self.parse_only(command))
+
 
 class HostedAccessCliSerializationTests(unittest.TestCase):
     def test_appconfig_reference_uses_real_cli_json_shape(self):

@@ -382,7 +382,7 @@ def discover(environment: Mapping[str, str], *, run: RunAzure = run_az) -> Acces
 
 def _has_exact(run: RunAzure, plan: AccessPlan, grant: Grant) -> bool:
     rows = run([
-        "role", "assignment", "list", "--assignee", plan.principal_id,
+        "role", "assignment", "list", "--assignee-object-id", plan.principal_id,
         "--scope", grant.scope, "--subscription", plan.subscription,
         "--fill-principal-name", "false", "--fill-role-definition-name", "false",
     ])

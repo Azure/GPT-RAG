@@ -171,6 +171,16 @@ class HostedAccessTests(unittest.TestCase):
         self.assertEqual([], self.azure.writes)
         self.assertTrue(all("secret" not in call[:2] for call in self.azure.calls))
 
+    def test_assignment_inventory_does_not_require_microsoft_graph(self):
+        plan = self.discover()
+        access.inspect_assignments(plan, run=self.azure)
+        reads = [args for args in self.azure.calls if args[:3] == ["role", "assignment", "list"]]
+        self.assertEqual(3, len(reads))
+        for args in reads:
+            self.assertNotIn("--assignee", args)
+            self.assertEqual(PRINCIPAL, args[args.index("--assignee-object-id") + 1])
+            self.assertEqual("false", args[args.index("--fill-principal-name") + 1])
+
     def test_role_allowlist_excludes_search_blob_conversation_elevated(self):
         self.assertEqual({
             "516239f1-63e1-4d78-a4de-a74fb236a071",
