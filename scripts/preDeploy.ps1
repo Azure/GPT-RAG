@@ -226,7 +226,7 @@ The preparation command builds the manifest-pinned image and stores only its imm
     try {
       [IO.File]::WriteAllText(
         $smokePayloadPath,
-        '{"messages":[{"role":"user","content":"Reply with exactly: GPT-RAG hosted smoke OK."}]}',
+        '{"messages":[{"role":"user","content":"Hello!"}]}',
         [Text.UTF8Encoding]::new($false)
       )
       $smokeOutput = (
@@ -234,14 +234,15 @@ The preparation command builds the manifest-pinned image and stores only its imm
           Out-String
       )
       $smokeExitCode = $LASTEXITCODE
-      if (
-        $smokeExitCode -ne 0 -or
-        $smokeOutput -match '"type"\s*:\s*"error"' -or
-        $smokeOutput -notmatch [regex]::Escape('GPT-RAG hosted smoke OK.')
-      ) {
-        Write-Host $smokeOutput
-        Write-Error "Hosted orchestrator smoke request failed; the classic chat path remains active."
-        if ($smokeExitCode -ne 0) { exit $smokeExitCode }
+      if ($smokeExitCode -ne 0) {
+        Write-Error "Hosted greeting smoke request failed; cutover remains blocked. If bootstrap just granted roles, allow RBAC propagation and retry."
+        exit $smokeExitCode
+      }
+      # A greeting exercises config/model access, not document authorization.
+      # Parse the terminal Responses event; do not match a model-authored phrase.
+      $smokeOutput | & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['GPT_RAG_REPO_ROOT']); sys.argv = ['config.deployment.hosted'] + sys.argv[1:]; runpy.run_module('config.deployment.hosted', run_name='__main__')" --validate-smoke
+      if ($LASTEXITCODE -ne 0) {
+        Write-Error "Hosted greeting did not complete successfully; cutover remains blocked. Review runtime access and RBAC propagation before retrying."
         exit 1
       }
     } finally {
