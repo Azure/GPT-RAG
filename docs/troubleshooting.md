@@ -120,6 +120,48 @@ This page covers common issues, debugging tools, and how to inspect logs in GPT-
     for source order, the existing environment opt-in, and recovery steps.
     This is candidate behavior, not a shipped manifest update.
 
+## Hosted runtime access bootstrap
+
+The [unpublished bootstrap fix](deploy.md#hosted-runtime-bootstrap-permissions)
+targets the deployed agent's actual `instance_identity.principal_id`, not the
+deployment operator or Foundry project identity. Its read-only plan and explicit
+apply are limited to application dependencies; the published `v3.8.3` component
+matrix is unchanged.
+
+| Observation | Response |
+| --- | --- |
+| Agent version is active, but the first request cannot load configuration | Check the instance identity's App Configuration Data Reader assignment at the exact store. Readiness alone does not exercise this dependency. |
+| Configuration loading still fails after that grant | Check whether `AUDIT_HMAC_KEY` is a Key Vault reference and inspect its exact secret scope. Reading App Configuration does not authorize secret access. Bootstrap covers only the configured audit reference, not arbitrary secrets; never fetch or print secret values to diagnose a grant. |
+| Configuration provider reports `TimeoutError` | It can wrap exhausted initialization retries, including authorization failures. Correlate the failing dependency with the planned scopes and existing assignments; do not infer a network failure solely from elapsed time or add broad roles. |
+| Model request returns 401/403 | Check the declared model endpoint, token audience, and instance identity's Cognitive Services OpenAI User assignment at the exact model account. Do not enable API keys as recovery. |
+| Search or knowledge-base retrieval returns 403 | Application bootstrap deliberately grants no Search or Blob access. Review the retrieval identity, query role, and source-document permissions separately; never disable permission filters or add elevated read to make a smoke request pass. |
+| Operator cannot create a planned assignment | Have an authorized access administrator pre-create the exact grant, or use an operator with `Microsoft.Authorization/roleAssignments/write` at that scope. Rerun bootstrap; never grant Owner or Contributor to the runtime. |
+| Identity or dependency scope cannot be resolved unambiguously | Stop and correct deployment metadata. Do not substitute the project or operator identity, create a new identity, or widen the assignment scope. |
+| A read-only plan exits `0` while grants are missing | Inspect `grants[].exact_unconditional_assignment`; a valid plan is not an apply. `data_plane_readiness: not-tested` is not a successful data-plane probe. Use explicit `--apply` only with authorization for the planned grants. |
+| An exact principal/role/scope assignment has a condition | All bootstrap writes are blocked. Have an authorized access administrator review the conflict; do not add an unconditional assignment to bypass the condition. |
+| Exact assignments are visible in Azure Resource Manager, but requests still fail | Visibility does not prove data-plane propagation. Wait, rerun the idempotent bootstrap, then perform a separately approved bounded smoke test in a fresh hosted session. Keep UI cutover blocked and do not rebuild the image to repair permissions. |
+| Direct child deployment completes without a greeting | The child post-deploy hook is RBAC-only and does not invoke the model. Root deployment waits for child success, then sends `Hello!` through `POST /invocations` in a new session. Direct child success is not smoke evidence. |
+| Greeting returns an error, a non-completed outcome, or no assistant text | The shared validator requires a completed response with non-empty assistant text and rejects error, failed, incomplete, or cancelled outcomes. An exact reply marker is not required. Failure stops UI cutover. |
+| Private endpoint or DNS connectivity is unavailable | Diagnose the existing network path separately. Bootstrap makes no network changes; a role assignment cannot repair connectivity. |
+
+Plans and failure messages must not contain tokens, secret values, or raw
+provider error bodies. A failed partial apply retains valid earlier grants so a
+repeat run can reuse them; it does not authorize smoke/cutover to continue.
+
+For recovery, use the repository-root
+[plan/apply examples](deploy.md#plan-and-recover-hosted-access) with the hosted
+child azd context. Default planning and explicit apply do not invoke a smoke
+request. Offline serializer compatibility with orchestrator `v4.1.1` does not
+prove a fresh automated live deployment/bootstrap/smoke flow; that flow has not
+been performed for this unpublished candidate.
+
+A successful greeting establishes model/configuration operation only. Positive
+synthetic retrieval under service identity neither proves end-user document
+isolation nor authorizes protected real documents or default Search/Blob grants.
+User-authorization evidence requires separate permission-aware retrieval checks,
+including denied access for users without document permission. See
+[application identity versus document identity](howto_authentication.md#hosted-application-identity-versus-document-identity).
+
 
 **Showing Response Time Statistics in the Chat UI**
 

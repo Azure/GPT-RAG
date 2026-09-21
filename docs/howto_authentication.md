@@ -50,13 +50,36 @@ the individual hosted-agent scope, of Foundry Agent Consumer and the exact
 GPT-RAG custom role **GPT-RAG Hosted Agent User Identity Impersonation**
 (`bef66abe-a495-530a-be1d-5d882fecff03`) containing only
 `Microsoft.CognitiveServices/accounts/AIServices/agents/endpoints/UserIdentityImpersonation/action`.
-The hosted runtime receives no key, Conversation or impersonation RBAC, or
-Cosmos DB in hosted/no-panel. Capability/HMAC remains a disabled
-fallback and is not provisioned or required on the primary path. See the
+The hosted runtime receives no Conversation-capability key, Conversation or
+impersonation RBAC, or Cosmos DB in hosted/no-panel. Capability/HMAC remains a
+disabled fallback and is not provisioned or required on the primary path. See the
 [hosted-agent release matrix](hosted_agent_release_matrix.md#delegated-owner-binding)
 for exact component behavior and the
 [hosted conversation continuity platform contract](hosted_continuity_platform_contract.md)
 for the owner-validation, protocol, role, and lifecycle requirements.
+
+### Hosted application identity versus document identity
+
+The [unpublished hosted bootstrap fix](deploy.md#hosted-runtime-bootstrap-permissions)
+targets the deployed agent's own `instance_identity.principal_id` for
+configuration reads, model inference, and the exact audit HMAC secret only when
+a Key Vault reference is configured. Audit signing is separate from the disabled
+Conversation-capability/HMAC fallback. The current `v3.8.3` release matrix and
+its continuity and panel evidence gates remain unchanged.
+
+These application permissions are not a signed-in user's permissions and do
+not establish OBO, Conversation ownership, or document-level authorization.
+Bootstrap never grants Search, Blob, managed Conversation, or impersonation
+roles. Keep the caller identity supplied to permission-aware retrieval separate
+from the service identity used to call Azure APIs.
+
+A service-identity-only synthetic test is an explicit, environment-specific
+authorization decision, not evidence that different end users are isolated.
+An approved container-level grant covers future files in that container as
+well as existing files; do not introduce protected real documents on the basis
+of that test or make its grants a default. A greeting only tests model and
+configuration access. Validate end-user document permissions separately,
+including requests that must be denied.
 
 ### Classic Container Apps token flow
 
