@@ -200,21 +200,22 @@ if [[ "$hosted_mode" =~ ^(1|true|t|yes|y)$ ]]; then
     azd deploy orchestrator-agent --environment "$environment_name" --no-prompt
   ) || { red "Hosted orchestrator deployment failed."; exit 1; }
   smoke_payload="$(mktemp)"
-  printf '%s\n' '{"messages":[{"role":"user","content":"Reply with exactly: GPT-RAG hosted smoke OK."}]}' >"$smoke_payload"
+  printf '%s\n' '{"messages":[{"role":"user","content":"Hello!"}]}' >"$smoke_payload"
   if ! smoke_output="$(
     cd "$hosted_project"
     azd ai agent invoke --protocol invocations --new-session --timeout 180 --environment "$environment_name" --no-prompt --input-file "$smoke_payload" 2>&1
   )"; then
     rm -f "$smoke_payload"
-    printf '%s\n' "$smoke_output"
-    red "Hosted orchestrator smoke request failed; the classic chat path remains active."
+    red "Hosted greeting smoke request failed; cutover remains blocked. If bootstrap just granted roles, allow RBAC propagation and retry."
     exit 1
   fi
   rm -f "$smoke_payload"
-  if printf '%s\n' "$smoke_output" | grep -Eq '"type"[[:space:]]*:[[:space:]]*"error"' ||
-     ! printf '%s\n' "$smoke_output" | grep -Fq 'GPT-RAG hosted smoke OK.'; then
-    printf '%s\n' "$smoke_output"
-    red "Hosted orchestrator smoke response did not complete successfully; the classic chat path remains active."
+  # A greeting exercises config/model access, not document authorization.
+  # Parse the terminal Responses event; do not match a model-authored phrase.
+  if ! printf '%s\n' "$smoke_output" | (
+    cd "$repo_root" && python3 -m config.deployment.hosted --validate-smoke
+  ); then
+    red "Hosted greeting did not complete successfully; cutover remains blocked. Review runtime access and RBAC propagation before retrying."
     exit 1
   fi
 

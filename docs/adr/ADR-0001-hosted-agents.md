@@ -423,8 +423,14 @@ the reusable landing zone:
   restores `CHAT_BACKEND=orchestrator`.
 
 No files inside the landing-zone submodule are changed by this implementation.
-The integration is limited to the exact `v2.4.1` tag/gitlink and its published
-parameter/output contract.
+The integration was limited to the exact `v2.4.1` tag/gitlink and its published
+parameter/output contract at the time revision 4 was implemented.
+
+> **Landing-zone pin in effect.** The versions named in this section record the
+> revision-4 implementation boundary and are deliberately not rewritten per
+> release. For the pin actually in effect, read `manifest.json` (`ailz_tag`,
+> `ailz_commit`) together with `.gitmodules` (`infra.branch`); those three must
+> identify the same validated landing-zone release commit.
 
 ### Hosted conversation ownership
 

@@ -21,7 +21,7 @@ class IntegrationPinTests(unittest.TestCase):
         manifest = json.loads((ROOT / "manifest.json").read_text(encoding="utf-8"))
         components = {item["name"]: item for item in manifest["components"]}
 
-        self.assertEqual("unreleased", manifest["tag"])
+        self.assertEqual("v3.8.4", manifest["tag"])
         self.assertEqual(
             "v2.5.1",
             manifest["ailz_tag"],
@@ -31,21 +31,21 @@ class IntegrationPinTests(unittest.TestCase):
             manifest["ailz_commit"],
         )
         self.assertEqual(
-            ("v4.0.2", "c653b3ec0a553f55244e197f3be993ad33ffe02f"),
+            ("v4.1.1", "9b64a5b962067161cb55252c6e0917a2738ba984"),
             (
                 components["gpt-rag-orchestrator"]["tag"],
                 components["gpt-rag-orchestrator"]["commit"],
             ),
         )
         self.assertEqual(
-            ("v2.7.0", "84b927769ef0839110f2d68e3ca471e2260567cf"),
+            ("v2.7.3", "38a395586ee1d440a8e1ca8233413f8c25b3fdc2"),
             (
                 components["gpt-rag-ingestion"]["tag"],
                 components["gpt-rag-ingestion"]["commit"],
             ),
         )
         self.assertEqual(
-            ("v2.6.0", "81d6515d8fc365402e958e861b671af037a4cc75"),
+            ("v2.6.2", "f59cca919f0bc59631d7bba7f3e223dff3718244"),
             (
                 components["gpt-rag-ui"]["tag"],
                 components["gpt-rag-ui"]["commit"],
@@ -60,16 +60,28 @@ class IntegrationPinTests(unittest.TestCase):
         )
 
         completed = subprocess.run(
-            ["git", "-C", "infra", "rev-parse", "HEAD"],
+            ["git", "ls-files", "--stage", "--", "infra"],
             cwd=ROOT,
             check=True,
             capture_output=True,
             text=True,
         )
-        self.assertIn(
-            "9cc5859af5c8ab3b31709c9e16e0db11a170a404",
+        self.assertEqual(
+            "160000 9cc5859af5c8ab3b31709c9e16e0db11a170a404 0\tinfra",
             completed.stdout.strip(),
         )
+        if (ROOT / "infra" / ".git").exists():
+            checkout = subprocess.run(
+                ["git", "-C", "infra", "rev-parse", "HEAD"],
+                cwd=ROOT,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(
+                "9cc5859af5c8ab3b31709c9e16e0db11a170a404",
+                checkout.stdout.strip(),
+            )
 
     def test_zip_fallback_materializes_exact_landing_zone_commit(self) -> None:
         scripts = ROOT / "scripts"
@@ -354,21 +366,10 @@ class LifecycleParityTests(unittest.TestCase):
                 content,
                 relative_path,
             )
-            self.assertIn("GPT-RAG hosted smoke OK.", content, relative_path)
-            self.assertIn('"type"', content, relative_path)
-            self.assertIn('"error"', content, relative_path)
-        self.assertIn(
-            "$smokeOutput -notmatch",
-            (ROOT / "scripts" / "preDeploy.ps1").read_text(
-                encoding="utf-8-sig"
-            ),
-        )
-        self.assertIn(
-            "grep -Fq 'GPT-RAG hosted smoke OK.'",
-            (ROOT / "scripts" / "preDeploy.sh").read_text(
-                encoding="utf-8-sig"
-            ),
-        )
+            self.assertIn('"content":"Hello!"', content, relative_path)
+            self.assertIn("--protocol invocations --new-session", content, relative_path)
+            self.assertIn("--validate-smoke", content, relative_path)
+            self.assertNotIn("GPT-RAG hosted smoke OK.", content, relative_path)
         for relative_path in (
             "scripts/preDeploy.ps1",
             "scripts/preDeploy.sh",

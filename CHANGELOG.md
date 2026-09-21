@@ -1,5 +1,93 @@
 # Changelog
 
+## [v3.8.4] - 2026-09-21
+
+### Changed
+
+- **Automated minimum hosted runtime permissions after agent creation**
+  ([#697](https://github.com/Azure/GPT-RAG/pull/697)). The child deployment's
+  PowerShell and POSIX postdeploy hooks explicitly apply an idempotent,
+  allowlisted RBAC plan to the deployed agent's actual instance identity.
+  The standalone command defaults to read-only planning; writes require
+  explicit `--apply`. Grants are limited to App Configuration Data Reader on
+  the exact configuration store, Cognitive Services OpenAI User on the exact
+  model account, and, when configured, Key Vault Secrets User on the exact
+  `AUDIT_HMAC_KEY` reference. No secret values are read. Conditional assignment
+  conflicts fail closed rather than being bypassed.
+- **Fail-closed root deployment greeting before UI cutover.** After the child
+  hook succeeds, root deployment requires a completed response with non-empty
+  assistant text from a stateless `Hello!` request in a new hosted session.
+  Error, failed, incomplete, cancelled, or empty responses block cutover;
+  an exact reply marker is no longer required. Direct child deployment remains
+  RBAC-only and does not invoke the model. Bootstrap grants no Search, Storage
+  Blob, Conversation, impersonation, Owner, or Contributor roles and does not
+  change networking or authorization evidence gates.
+- **Azure CLI compatibility for bootstrap discovery.** Account metadata is
+  read through raw ARM API `2025-06-01`, avoiding typed SDK deserialization of
+  unrelated newer fields. App Configuration Key Vault reference discovery
+  accepts the CLI's `contentType` JSON field; role operations use object IDs
+  without Microsoft Graph name resolution.
+- **Verified concrete version resolution for Foundry's `@latest` route**
+  ([#698](https://github.com/Azure/GPT-RAG/pull/698)). Resolve only this exact
+  alias through `live.versions.latest`, require matching agent name and hosted
+  kind, then retain numeric version validation and a separate concrete-version
+  GET. Unknown aliases and inconsistent metadata continue to fail closed.
+- **Documentation and engineering coordination only**
+  ([#684](https://github.com/Azure/GPT-RAG/pull/684),
+  [#687](https://github.com/Azure/GPT-RAG/pull/687),
+  [#689](https://github.com/Azure/GPT-RAG/pull/689)). Clarified the classic
+  architecture diagram and historical landing-zone decision, and recorded
+  quality-gate and UI package migration plans. Coordinated operator guidance
+  is on the `docs` branch via
+  [#696](https://github.com/Azure/GPT-RAG/pull/696) and
+  [#688](https://github.com/Azure/GPT-RAG/pull/688). These planning artifacts do
+  not release component modularization or change the runtime component pins.
+- **Pinned GitHub Actions maintenance**
+  ([#690](https://github.com/Azure/GPT-RAG/pull/690)). Updated workflow action
+  SHAs for `actions/github-script` v9.0.0, `actions/checkout` v7.0.1,
+  `azure/login` v3.0.2, `actions/setup-python` v7.0.0, and
+  `github/gh-aw-actions/setup` v0.88.0. These are CI action updates, not runtime
+  dependency upgrades or deployment-topology changes.
+
+### Validation
+
+The component combination is unchanged from `v3.8.3`; this patch changes the
+umbrella deployment hooks and their offline contracts, not component releases.
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.6.2 |
+| gpt-rag-orchestrator | v4.1.1 |
+| gpt-rag-ingestion | v2.7.3 |
+| infra / AI Landing Zone | v2.5.1 |
+
+- Python 3.12 offline suite:
+  `python -B -m pytest -q tests config -p no:cacheprovider --tb=short`:
+  **438 passed, 297 subtests passed, 4 optional CLI cases skipped**. The focused
+  release-pin, access-module, paired-hook, and greeting suite passed
+  **107 tests and 204 subtests**. Azure boundaries were mocked.
+- All **4** optional CLI parser/serialization cases passed separately using
+  the already-installed Azure CLI Python with socket and command-handler
+  guards. **6** bounded replay tests passed using the unmodified terminal
+  serializer functions from the pinned orchestrator `v4.1.1`, with network
+  and subprocess execution blocked. This is terminal wire-format evidence,
+  not a complete runtime or retrieval-path validation.
+- `python -B .github/scripts/validate-agentic-assets.py` passed:
+  **3 agents and 14 skills**, plus scoped instructions.
+- Guarded read-only live discovery using the exact bootstrap source now in
+  this candidate succeeded with **16 read-only CLI calls**, resolving a
+  concrete hosted version and finding all **3** minimum grants already
+  present as exact, unconditional assignments. Those grants were applied
+  manually beforehand; this did not execute automatic apply, read secret
+  values, or invoke a model. `data_plane_readiness` remained `not-tested`.
+- Component tags resolve to their unchanged manifest commits. AI Landing Zone
+  `ailz_tag`, `ailz_commit`, `.gitmodules` `infra.branch`, and the `infra/`
+  gitlink agree on `v2.5.1` / `9cc5859a`.
+- No fresh automated Azure deployment/bootstrap/greeting flow, end-user
+  document-level authorization, scanning, or cold-start validation was
+  performed for this release. Prior manual tests with an unreleased
+  homologation runtime are not compatibility evidence for this pinned matrix.
+
 ## [v3.8.3] - 2026-09-03
 
 ### Fixed
@@ -14,7 +102,8 @@
   App Configuration inside the ASGI `lifespan` and gated on the resolved mode.
   Classic deployments are unaffected — the admin surface keeps mounting exactly
   as before — and hosted deployments without a panel now correctly return 404.
-  Closes [#592](https://github.com/Azure/GPT-RAG/issues/592).
+  Tracked under [#592](https://github.com/Azure/GPT-RAG/issues/592), the
+  umbrella issue for hosted deployment-mode validation.
 
   The same pin also hardens the new `/api/panel/*` API: startup validation now
   fails closed on missing Entra ID configuration rather than only on missing
