@@ -574,6 +574,14 @@ Network-isolated deployments use a two-host flow:
 
 Do not run `azd deploy` from the workstation when `NETWORK_ISOLATION=true`. The deploy hook blocks that path because private resources and the private ACR build pool are reachable only from inside the VNet.
 
+If you cannot sign in to the administration VM, follow the
+[P2S VPN how-to](howto_private_vpn.md) to prepare private access from a managed
+local Windows machine. This is connectivity and deployment preparation, not a
+certified local-only installation: the shipped `v3.8.4` pre-deploy hook still
+requires `RUN_FROM_JUMPBOX=true`. Read the
+[deployment-host requirement](howto_private_vpn.md#8-continue-the-gpt-rag-installation)
+before creating resources; do not set that flag on a local machine as a bypass.
+
 ### Network Isolation runbook
 
 Use this runbook for a clean network-isolated deployment:

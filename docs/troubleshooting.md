@@ -142,7 +142,7 @@ apply are limited to application dependencies; the bootstrap patch retains the
 | Exact assignments are visible in Azure Resource Manager, but requests still fail | Visibility does not prove data-plane propagation. Wait, rerun the idempotent bootstrap, then perform a separately approved bounded smoke test in a fresh hosted session. Keep UI cutover blocked and do not rebuild the image to repair permissions. |
 | Direct child deployment completes without a greeting | The child post-deploy hook is RBAC-only and does not invoke the model. Root deployment waits for child success, then sends `Hello!` through `POST /invocations` in a new session. Direct child success is not smoke evidence. |
 | Greeting returns an error, a non-completed outcome, or no assistant text | The shared validator requires a completed response with non-empty assistant text and rejects error, failed, incomplete, or cancelled outcomes. An exact reply marker is not required. Failure stops UI cutover. |
-| Private endpoint or DNS connectivity is unavailable | Diagnose the existing network path separately. Bootstrap makes no network changes; a role assignment cannot repair connectivity. |
+| Private endpoint or DNS connectivity is unavailable | Diagnose the existing network path separately. Bootstrap makes no network changes; a role assignment cannot repair connectivity. For a managed local Windows machine, see the [P2S VPN how-to and layer-by-layer checks](howto_private_vpn.md#10-check-the-result-and-operate-safely). |
 
 Plans and failure messages must not contain tokens, secret values, or raw
 provider error bodies. A failed partial apply retains valid earlier grants so a
