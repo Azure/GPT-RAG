@@ -23,7 +23,7 @@ selectable, but its user-history and operator surfaces remain off/503 behind
 independent gates.
 [GitHub Repository](https://github.com/Azure/gpt-rag-orchestrator).
 
-The [unpublished hosted runtime bootstrap fix](deploy.md#hosted-runtime-bootstrap-permissions)
+The [hosted runtime bootstrap fix](deploy.md#hosted-runtime-bootstrap-permissions)
 targets the actual deployed instance identity after agent creation: read-only
 App Configuration access, inference on the selected model account, and read
 access to the exact audit HMAC secret only if its reference is configured. It

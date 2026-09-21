@@ -7,8 +7,12 @@
     See that record for active rules, reference runs and remaining validation gaps.
 
 This page records the exact hosted-agent component releases pinned by the
-GPT-RAG umbrella release [`v3.8.3`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3)
-and the independent evidence gates that remain fail closed.
+GPT-RAG umbrella release `v3.8.4` and the preceding
+[`v3.8.3`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3) combination.
+The component release commits are unchanged; `v3.8.4` adds the scoped
+[hosted runtime bootstrap](deploy.md#hosted-runtime-bootstrap-permissions).
+It does not establish a fresh automated live deployment/bootstrap-apply/smoke
+validation, and the independent evidence gates remain fail closed.
 
 !!! danger "Do not deploy `v3.8.0` or `v3.8.1`"
     Earlier revisions of this page pinned the matrix to `v3.8.1`. Neither
@@ -18,10 +22,10 @@ and the independent evidence gates that remain fail closed.
     after a successful image build. The matrix below is the `v3.8.3`
     combination, which deploys end to end.
 
-!!! warning "Pins are shipped in umbrella `v3.8.3`; evidence gates remain fail closed"
-    The umbrella `manifest.json` pins all four exact releases below and explicit
-    `hosted-panel` topology selection is supported. The manifest's umbrella tag
-    is `v3.8.3`; use only a GPT-RAG source or release that contains these pins
+!!! warning "Historical `v3.8.3` evidence; gates remain fail closed"
+    The `v3.8.3` umbrella `manifest.json` pins all four exact releases below and
+    explicit `hosted-panel` topology selection is supported. Use only a
+    GPT-RAG source or release that contains these pins
     rather than combining component tags independently.
     `HOSTED_CONTINUITY_ENABLED`, `PANEL_HISTORY_ENABLED`,
     `PANEL_HISTORY_OWNER_BINDING_VALIDATED`, and
@@ -45,6 +49,14 @@ and the independent evidence gates that remain fail closed.
 
 ## Exact integrated matrix
 
+| Umbrella release | UI | Orchestrator | Ingestion | AI Landing Zone | Change |
+| --- | --- | --- | --- | --- | --- |
+| `v3.8.4` | `v2.6.2` | `v4.1.1` | `v2.7.3` | `v2.5.1` | Scoped hosted-runtime bootstrap; no component repins or new live readiness claim. |
+| [`v3.8.3`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3) | `v2.6.2` | `v4.1.1` | `v2.7.3` | `v2.5.1` | Ingestion administrative-surface gating; historical release retained. |
+
+Both umbrella rows use the same reviewed component release commits below.
+`v3.8.4` does not introduce a new runtime or AI Landing Zone release.
+
 | Component | Release | Reviewed release commit | Relevant contract |
 | --- | --- | --- | --- |
 | GPT-RAG UI | [`v2.6.2`](https://github.com/Azure/gpt-rag-ui/releases/tag/v2.6.2) | [`f59cca9`](https://github.com/Azure/gpt-rag-ui/commit/f59cca919f0bc59631d7bba7f3e223dff3718244) | Hosted/no-panel is the fresh UI default when `CHAT_BACKEND` is absent; continuity and panel surfaces remain opt-in and fail closed. |
@@ -63,7 +75,7 @@ close their independent live evidence and authorization gates.
 
 | Surface | Current behavior |
 | --- | --- |
-| Umbrella integration manifest | Pins the exact matrix above. Stamped as [`v3.8.3`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3). |
+| Umbrella integration manifest | Stamped as `v3.8.4`; retains the exact component release commits from [`v3.8.3`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3) listed above. |
 | Fresh UI `v2.6.2` process with no `CHAT_BACKEND` value | Selects `hosted_agent`; invalid or incomplete hosted configuration fails startup. |
 | Existing umbrella deployment | Its persisted topology is sticky. An unmarked pre-cutover deployment stays `classic`. |
 | `DEPLOYMENT_TOPOLOGY=classic` | Explicit supported fallback; deploys UI, orchestrator, and ingestion Container Apps. |
