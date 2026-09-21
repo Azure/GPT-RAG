@@ -1,5 +1,67 @@
 # Changelog
 
+## [v3.8.4] - 2026-09-21
+
+### Changed
+
+- **Automated minimum hosted runtime permissions after agent creation**
+  ([#697](https://github.com/Azure/GPT-RAG/pull/697)). The child deployment's
+  PowerShell and POSIX postdeploy hooks explicitly apply an idempotent,
+  allowlisted RBAC plan to the deployed agent's actual instance identity.
+  The standalone command defaults to read-only planning; writes require
+  explicit `--apply`. Grants are limited to App Configuration Data Reader on
+  the exact configuration store, Cognitive Services OpenAI User on the exact
+  model account, and, when configured, Key Vault Secrets User on the exact
+  `AUDIT_HMAC_KEY` reference. No secret values are read. Conditional assignment
+  conflicts fail closed rather than being bypassed.
+- **Fail-closed root deployment greeting before UI cutover.** After the child
+  hook succeeds, root deployment requires a completed response with non-empty
+  assistant text from a stateless `Hello!` request in a new hosted session.
+  Error, failed, incomplete, cancelled, or empty responses block cutover;
+  an exact reply marker is no longer required. Direct child deployment remains
+  RBAC-only and does not invoke the model. Bootstrap grants no Search, Storage
+  Blob, Conversation, impersonation, Owner, or Contributor roles and does not
+  change networking or authorization evidence gates.
+- **Azure CLI compatibility for bootstrap discovery.** Account metadata is
+  read through raw ARM API `2025-06-01`, avoiding typed SDK deserialization of
+  unrelated newer fields. App Configuration Key Vault reference discovery
+  accepts the CLI's `contentType` JSON field; role operations use object IDs
+  without Microsoft Graph name resolution.
+- **Documentation and engineering coordination only**
+  ([#684](https://github.com/Azure/GPT-RAG/pull/684),
+  [#687](https://github.com/Azure/GPT-RAG/pull/687),
+  [#689](https://github.com/Azure/GPT-RAG/pull/689)). Clarified the classic
+  architecture diagram and historical landing-zone decision, and recorded
+  quality-gate and UI package migration plans. Coordinated operator guidance
+  is on the `docs` branch via
+  [#696](https://github.com/Azure/GPT-RAG/pull/696) and
+  [#688](https://github.com/Azure/GPT-RAG/pull/688). These planning artifacts do
+  not release component modularization or change the runtime component pins.
+
+### Validation
+
+The component combination is unchanged from `v3.8.3`; this patch changes the
+umbrella deployment hooks and their offline contracts, not component releases.
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.6.2 |
+| gpt-rag-orchestrator | v4.1.1 |
+| gpt-rag-ingestion | v2.7.3 |
+| infra / AI Landing Zone | v2.5.1 |
+
+- Local validation covers release pins, minimum runtime access, both hook
+  implementations, fail-closed greeting parsing, and repository agent assets.
+  Azure boundaries are mocked; installed-CLI parser and serialization tests
+  use socket and command-handler guards.
+- Component tags resolve to their unchanged manifest commits. AI Landing Zone
+  `ailz_tag`, `ailz_commit`, `.gitmodules` `infra.branch`, and the `infra/`
+  gitlink agree on `v2.5.1` / `9cc5859a`.
+- No fresh automated Azure deployment/bootstrap/greeting flow, end-user
+  document-level authorization, scanning, or cold-start validation was
+  performed for this release. Prior manual tests with an unreleased
+  homologation runtime are not compatibility evidence for this pinned matrix.
+
 ## [v3.8.3] - 2026-09-03
 
 ### Fixed
