@@ -181,6 +181,72 @@ class HostedAccessTests(unittest.TestCase):
             self.assertEqual(PRINCIPAL, args[args.index("--assignee-object-id") + 1])
             self.assertEqual("false", args[args.index("--fill-principal-name") + 1])
 
+    def test_latest_routing_resolves_and_verifies_concrete_hosted_version(self):
+        self.azure.live["agent_endpoint"]["version_selector"]["version_selection_rules"][0].update(
+            type="FixedRatio", agent_version="@latest"
+        )
+        self.azure.live["versions"] = {"latest": self.azure.version.copy()}
+        plan = self.discover()
+        self.assertEqual("7", plan.agent_version)
+        self.assertEqual(PRINCIPAL, plan.principal_id)
+        self.assertEqual(3, len(plan.grants))
+        version_reads = [
+            args[args.index("--url") + 1] for args in self.azure.calls
+            if args[0] == "rest" and "/versions/" in args[args.index("--url") + 1]
+        ]
+        self.assertEqual([f"{ENDPOINT}/agents/gpt-rag-orchestrator/versions/7?api-version=v1"], version_reads)
+        self.assertEqual([], self.azure.writes)
+
+    def test_latest_routing_requires_complete_bound_metadata(self):
+        invalid_latest = [
+            None, [], {},
+            dict(self.azure.version, name="other-agent"),
+            dict(self.azure.version, definition={"kind": "prompt"}),
+            dict(self.azure.version, definition=None),
+        ]
+        invalid_latest.extend(
+            dict(self.azure.version, version=value)
+            for value in (None, 7, True, "", "0", "@latest", "../7", "7?other=1")
+        )
+        for latest in invalid_latest:
+            with self.subTest(latest=latest):
+                self.azure = AzureFixture()
+                self.azure.live["agent_endpoint"]["version_selector"]["version_selection_rules"][0]["agent_version"] = "@latest"
+                self.azure.live["versions"] = {"latest": latest}
+                self.fails_discovery()
+                self.assertFalse(any("/versions/" in str(args) for args in self.azure.calls))
+
+    def test_latest_routing_requires_versions_container(self):
+        for versions in (None, [], {}, {"other": self.azure.version}):
+            with self.subTest(versions=versions):
+                self.azure = AzureFixture()
+                self.azure.live["agent_endpoint"]["version_selector"]["version_selection_rules"][0]["agent_version"] = "@latest"
+                self.azure.live["versions"] = versions
+                self.fails_discovery()
+
+    def test_latest_routing_still_checks_concrete_response(self):
+        for key, value in (
+            ("name", "other-agent"), ("version", "8"), ("definition", {"kind": "prompt"}),
+        ):
+            with self.subTest(key=key):
+                self.azure = AzureFixture()
+                self.azure.live["agent_endpoint"]["version_selector"]["version_selection_rules"][0]["agent_version"] = "@latest"
+                self.azure.live["versions"] = {"latest": self.azure.version.copy()}
+                self.azure.version[key] = value
+                self.fails_discovery()
+
+    def test_unknown_version_aliases_never_fall_back_to_latest(self):
+        for alias in ("latest", "@Latest", "@previous", "0", "../7", "7?other=1"):
+            with self.subTest(alias=alias):
+                self.azure = AzureFixture()
+                self.azure.live["agent_endpoint"]["version_selector"]["version_selection_rules"][0]["agent_version"] = alias
+                self.azure.live["versions"] = {"latest": self.azure.version.copy()}
+                self.fails_discovery()
+
+    def test_numeric_route_does_not_use_latest_metadata(self):
+        self.azure.live["versions"] = {"latest": dict(self.azure.version, version="8")}
+        self.assertEqual("7", self.discover().agent_version)
+
     def test_role_allowlist_excludes_search_blob_conversation_elevated(self):
         self.assertEqual({
             "516239f1-63e1-4d78-a4de-a74fb236a071",
