@@ -1,0 +1,2823 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Official project documentation">
+      
+      
+        <meta name="author" content="Paulo Lacerda">
+      
+      
+      
+        <link rel="prev" href="../howto_app_gateway/">
+      
+      
+        <link rel="next" href="../howto_authentication/">
+      
+      
+      <link rel="icon" href="../favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.34">
+    
+    
+      
+        <title>Private access over P2S VPN - GPT-RAG</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.35f28582.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../styles.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#how-to-set-up-private-gpt-rag-access-from-your-local-windows-machine" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="GPT-RAG" class="md-header__button md-logo" aria-label="GPT-RAG" data-md-component="logo">
+      
+  <img src="../media/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            GPT-RAG
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Private access over P2S VPN
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/azure/gpt-rag" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="GPT-RAG" class="md-nav__button md-logo" aria-label="GPT-RAG" data-md-component="logo">
+      
+  <img src="../media/logo.png" alt="logo">
+
+    </a>
+    GPT-RAG
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/azure/gpt-rag" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../whatisnew/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    What's New
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../release_267_270_walkthrough/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Release Walkthrough
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deploy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Deployment Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Quick Start Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Quick Start Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart_simple_rag/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Simple RAG
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart_nl2sql/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    NL2SQL
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Architecture
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Architecture
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hosted_agent_release_matrix/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hosted-agent integration matrix
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hosted_continuity_platform_contract/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hosted continuity platform contract
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture_legacy_diagram_handoff/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Legacy diagram update handoff
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Governance
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Governance
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../governance_overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview and responsibilities
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../governance_audit_contract_v1/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Audit Contract v1
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Services
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Services
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_orchestrator/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Orchestrator
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_8_2" id="__nav_8_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Ingestion
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_2">
+            <span class="md-nav__icon md-icon"></span>
+            Ingestion
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_ingestion/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_blob_data_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Blob
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_sharepoint_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Sharepoint
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion_nl2sql_data_source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    NL2SQL
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    How-to Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            How-to Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_azure_direct/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Azure Direct Models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_app_gateway/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Application Gateway
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Private access over P2S VPN
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Private access over P2S VPN
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#why-use-a-vpn" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why use a VPN?
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-before-you-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Before you start
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Before you start">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#run-the-examples-one-section-at-a-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      Run the examples one section at a time
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-get-the-latest-stable-gpt-rag-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Get the latest stable GPT-RAG release
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-plan-non-overlapping-network-ranges" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Plan non-overlapping network ranges
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-create-the-vnet-and-p2s-vpn" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Create the VNet and P2S VPN
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Create the VNet and P2S VPN">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create-the-resource-group-and-network" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create the resource group and network
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-the-vpn-gateway" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create the VPN gateway
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#enable-entra-authenticated-p2s" class="md-nav__link">
+    <span class="md-ellipsis">
+      Enable Entra-authenticated P2S
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-configure-private-dns-and-connect" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Configure private DNS and connect
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Configure private DNS and connect">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create-the-dns-inbound-subnet-and-resolver" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create the DNS inbound subnet and resolver
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#download-and-edit-the-vpn-profile" class="md-nav__link">
+    <span class="md-ellipsis">
+      Download and edit the VPN profile
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-point-gpt-rag-at-the-existing-vnet" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. Point GPT-RAG at the existing VNet
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-provision-infrastructure-and-verify-connectivity" class="md-nav__link">
+    <span class="md-ellipsis">
+      7. Provision infrastructure and verify connectivity
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Provision infrastructure and verify connectivity">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#check-the-return-route-to-vpn-clients" class="md-nav__link">
+    <span class="md-ellipsis">
+      Check the return route to VPN clients
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-dns-and-private-service-access" class="md-nav__link">
+    <span class="md-ellipsis">
+      Test DNS and private service access
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-continue-the-gpt-rag-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      8. Continue the GPT-RAG installation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Continue the GPT-RAG installation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configure-services-over-the-vpn" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configure services over the VPN
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#check-the-deployment-host-before-building-or-deploying" class="md-nav__link">
+    <span class="md-ellipsis">
+      Check the deployment host before building or deploying
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-understand-which-permissions-gpt-rag-grants-automatically" class="md-nav__link">
+    <span class="md-ellipsis">
+      9. Understand which permissions GPT-RAG grants automatically
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Understand which permissions GPT-RAG grants automatically">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#search-and-blob-permissions-are-separate" class="md-nav__link">
+    <span class="md-ellipsis">
+      Search and Blob permissions are separate
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Search and Blob permissions are separate">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#optional-commands-for-an-approved-synthetic-content-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      Optional commands for an approved synthetic-content test
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-check-the-result-and-operate-safely" class="md-nav__link">
+    <span class="md-ellipsis">
+      10. Check the result and operate safely
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      References
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_authentication/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Auth & Doc Security
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/Azure/gpt-rag-ui/blob/main/docs/copilot-embedding.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Embed chat in a portal
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_dashboard_signin/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Admin Dashboard Sign-in
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_9_7" id="__nav_9_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Grounding sources
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_7">
+            <span class="md-nav__icon md-icon"></span>
+            Grounding sources
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview (start here)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_7_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_9_7_2" id="__nav_9_7_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Approach A: Foundry IQ
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_7_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_7_2">
+            <span class="md-nav__icon md-icon"></span>
+            Approach A: Foundry IQ
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_foundry_iq_prereqs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Prerequisites
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_foundry_iq_documents/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Documents
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_work_iq/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Work IQ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_fabric_ontology/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Fabric ontology
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_fabric_data_agent/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Fabric Data Agent
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_sharepoint_remote/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    SharePoint remote
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_sharepoint_indexed/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    SharePoint indexed
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_onelake/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    OneLake
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_web_bing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Web grounding
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_mcp_server/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Generic MCP server
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_7_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_9_7_3" id="__nav_9_7_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Approach B: AI Search direct
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_7_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_7_3">
+            <span class="md-nav__icon md-icon"></span>
+            Approach B: AI Search direct
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_grounding_ai_search_direct/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_sharepoint_connector/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    SharePoint connector
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_multimodality/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Multimodality
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_userfeedback/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    User Feedback
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_retrieval_optimization/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Retrieval Optimization
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../howto_resource_naming/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Resource Naming (CAF)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../team/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Meet the Team
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ai_transparency_notes/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    AI Transparency Notes
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="how-to-set-up-private-gpt-rag-access-from-your-local-windows-machine">How-to: Set up private GPT-RAG access from your local Windows machine</h1>
+<h2 id="why-use-a-vpn">Why use a VPN?</h2>
+<p>A network-isolated GPT-RAG deployment exposes its services through private
+endpoints. Your local machine needs a private network connection to configure
+those services and test the application.</p>
+<p>The deployment guide normally uses an administration VM, also called a jumpbox,
+for this work. If you cannot sign in to that VM, or your organization requires
+you to work from a managed local machine, a <strong>Point-to-Site (P2S) VPN</strong> provides
+a connection from that machine to the Azure virtual network.</p>
+<p>This guide explains how to set up that connection, configure private DNS, and
+prepare the latest stable GPT-RAG release to use the same network. You continue
+to sign in with your own Azure account. The VPN does not bypass Conditional
+Access, grant Azure permissions, or give the agent access to documents.</p>
+<blockquote>
+<p><strong>Scope.</strong> This guide covers private connectivity
+and deployment preparation. Check the <a href="#8-continue-the-gpt-rag-installation">deployment-host requirement</a>
+before creating resources: VPN connectivity alone does not remove restrictions
+imposed by the deployment scripts.</p>
+</blockquote>
+<h2 id="1-before-you-start">1. Before you start</h2>
+<p>This procedure assumes <strong>Windows 11, Azure public cloud, and a dedicated VNet</strong>
+for the installation. If your organization already provides private connectivity
+and DNS, use that approved setup instead of creating duplicate infrastructure.
+Shared VNets and hub-and-spoke integration need a separate network review.</p>
+<p>Prepare:</p>
+<ul>
+<li>A managed local Windows machine that meets your organization's access policies.</li>
+<li>Azure VPN Client, Azure CLI, Azure Developer CLI (<code>azd</code>), Git, PowerShell 7.4+,
+  and the Python version required by the GPT-RAG release.</li>
+<li>An approved subscription, tenant, region, and sufficient service/model quotas.</li>
+<li>Deployment permissions and the service data-plane permissions required by
+  the <a href="../deploy/">deployment guide</a>.
+  Creating runtime role assignments also requires an authorized deployment
+  identity; a VPN connection does not provide that permission.</li>
+<li>Approval for VPN Gateway, DNS Private Resolver, and GPT-RAG resource costs.
+  These resources can continue incurring charges after you disconnect.</li>
+</ul>
+<p>The local machine and the Azure build environment both need their respective
+approved outbound access to dependencies. Do not bypass corporate package,
+proxy, or VPN policies.</p>
+<h3 id="run-the-examples-one-section-at-a-time">Run the examples one section at a time</h3>
+<p>Use the same <strong>PowerShell 7.4+ session</strong> so variables remain available. Replace
+placeholders and review each block before running it. Commands marked <strong>Write</strong>
+create or change resources; <strong>Read</strong> commands inspect them. Do not paste the
+whole guide into a terminal or repeat a creation command after a timeout without
+checking the resource state.</p>
+<p>Start with:</p>
+<div class="highlight"><pre><span></span><code><span class="k">if</span> <span class="p">(</span><span class="nv">$PSVersionTable</span><span class="p">.</span><span class="n">PSVersion</span> <span class="o">-lt</span> <span class="no">[version]</span><span class="s1">'7.4'</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">throw</span> <span class="s1">'Use PowerShell 7.4 or later for this guide.'</span>
+<span class="p">}</span>
+<span class="nv">$ErrorActionPreference</span> <span class="p">=</span> <span class="s1">'Stop'</span>
+<span class="nv">$PSNativeCommandUseErrorActionPreference</span> <span class="p">=</span> <span class="nv">$true</span>
+</code></pre></div>
+<p>These process-local settings stop a block when a PowerShell command fails or
+<code>az</code>, <code>azd</code>, or <code>git</code> returns a nonzero exit code. They do not change persistent
+machine settings. If you reopen the terminal, restore these settings and the
+variables before continuing.</p>
+<h2 id="2-get-the-latest-stable-gpt-rag-release">2. Get the latest stable GPT-RAG release</h2>
+<p>Open the <a href="https://github.com/Azure/GPT-RAG/releases/latest">latest stable release</a>
+and copy its tag. Use that release as a complete package; do not select component
+versions individually or replace its manifest entries with development branches.</p>
+<p>In a new working directory:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$release</span> <span class="p">=</span> <span class="s1">'&lt;latest-stable-release-tag&gt;'</span>
+<span class="n">git</span> <span class="n">clone</span> <span class="p">-</span><span class="n">-branch</span> <span class="nv">$release</span> <span class="p">-</span><span class="n">-recurse-submodules</span> <span class="n">https</span><span class="p">://</span><span class="n">github</span><span class="p">.</span><span class="n">com</span><span class="p">/</span><span class="n">Azure</span><span class="p">/</span><span class="n">GPT-RAG</span><span class="p">.</span><span class="n">git</span> <span class="n">gpt-rag</span>
+<span class="k">if</span> <span class="p">(</span><span class="nv">$LASTEXITCODE</span> <span class="o">-ne</span> <span class="n">0</span><span class="p">)</span> <span class="p">{</span> <span class="k">throw</span> <span class="s1">'Could not download the GPT-RAG release.'</span> <span class="p">}</span>
+<span class="nb">Set-Location</span> <span class="p">.\</span><span class="n">gpt-rag</span>
+<span class="nv">$repoRoot</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Get-Location</span><span class="p">).</span><span class="n">Path</span>
+</code></pre></div>
+<p>Sign in with your user account and create a new local <code>azd</code> environment.
+Run each command separately and stop if it fails.</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$tenant</span> <span class="p">=</span> <span class="s1">'&lt;tenant-id&gt;'</span>
+<span class="nv">$subscription</span> <span class="p">=</span> <span class="s1">'&lt;subscription-id&gt;'</span>
+<span class="nv">$region</span> <span class="p">=</span> <span class="s1">'&lt;approved-region&gt;'</span>
+<span class="nv">$environment</span> <span class="p">=</span> <span class="s1">'&lt;new-environment-name&gt;'</span>
+
+<span class="n">az</span> <span class="n">login</span> <span class="p">-</span><span class="n">-tenant</span> <span class="nv">$tenant</span>
+<span class="n">az</span> <span class="n">account</span> <span class="nb">set </span><span class="p">-</span><span class="n">-subscription</span> <span class="nv">$subscription</span>
+<span class="n">az</span> <span class="n">account</span> <span class="n">show</span> <span class="p">-</span><span class="n">-query</span> <span class="s1">'{Subscription:name,Tenant:tenantId}'</span> <span class="p">-</span><span class="n">-output</span> <span class="n">table</span>
+<span class="n">azd</span> <span class="n">auth</span> <span class="n">login</span> <span class="p">-</span><span class="n">-tenant-id</span> <span class="nv">$tenant</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="n">new</span> <span class="nv">$environment</span>
+</code></pre></div>
+<p>Azure CLI and <code>azd</code> have separate authentication contexts. Do not use the VM
+managed-identity login commands on your local machine.</p>
+<h2 id="3-plan-non-overlapping-network-ranges">3. Plan non-overlapping network ranges</h2>
+<p>Check your local routes, including Wi-Fi, virtual adapters, and other VPNs:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">Get-NetRoute</span> <span class="n">-AddressFamily</span> <span class="n">IPv4</span> <span class="p">|</span>
+    <span class="nb">Select-Object</span> <span class="n">DestinationPrefix</span><span class="p">,</span> <span class="n">NextHop</span><span class="p">,</span> <span class="n">InterfaceAlias</span> <span class="p">|</span>
+    <span class="nb">Sort-Object</span> <span class="n">DestinationPrefix</span> <span class="n">-Unique</span>
+</code></pre></div>
+<p>Review the address plan with your network team as well. The local route table
+does not show every corporate or disconnected network.</p>
+<p>The following ranges are <strong>examples</strong>, not required values. Use them only if
+they are available and approved:</p>
+<table>
+<thead>
+<tr>
+<th>Purpose</th>
+<th>Example range</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GPT-RAG VNet</td>
+<td><code>10.80.0.0/20</code></td>
+</tr>
+<tr>
+<td>VPN gateway subnet, named exactly <code>GatewaySubnet</code></td>
+<td><code>10.80.15.0/27</code></td>
+</tr>
+<tr>
+<td>DNS inbound subnet, for example <code>snet-dns-inbound</code></td>
+<td><code>10.80.15.32/28</code></td>
+</tr>
+<tr>
+<td>P2S client address pool</td>
+<td><code>10.81.0.0/24</code></td>
+</tr>
+</tbody>
+</table>
+<p>The client pool is separate from the VNet: it is not a VNet subnet and must not
+overlap the VNet or other connected networks. Reserve enough space for the
+GPT-RAG workload subnets listed in step 6.</p>
+<p>Set the names and approved ranges once. Names below are examples for a <strong>new,
+dedicated resource group</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$resourceGroup</span> <span class="p">=</span> <span class="s1">'rg-gpt-rag-private'</span>
+<span class="nv">$vnetName</span> <span class="p">=</span> <span class="s1">'vnet-gpt-rag-private'</span>
+<span class="nv">$publicIpName</span> <span class="p">=</span> <span class="s1">'pip-gpt-rag-vpn'</span>
+<span class="nv">$gatewayName</span> <span class="p">=</span> <span class="s1">'vpngw-gpt-rag'</span>
+<span class="nv">$resolverName</span> <span class="p">=</span> <span class="s1">'dnspr-gpt-rag'</span>
+<span class="nv">$dnsSubnetName</span> <span class="p">=</span> <span class="s1">'snet-dns-inbound'</span>
+<span class="nv">$inboundName</span> <span class="p">=</span> <span class="s1">'dns-inbound'</span>
+
+<span class="nv">$vnetPrefix</span> <span class="p">=</span> <span class="s1">'10.80.0.0/20'</span>
+<span class="nv">$gatewaySubnetPrefix</span> <span class="p">=</span> <span class="s1">'10.80.15.0/27'</span>
+<span class="nv">$dnsSubnetPrefix</span> <span class="p">=</span> <span class="s1">'10.80.15.32/28'</span>
+<span class="nv">$dnsInboundIp</span> <span class="p">=</span> <span class="s1">'10.80.15.36'</span>
+<span class="nv">$p2sPool</span> <span class="p">=</span> <span class="s1">'10.81.0.0/24'</span>
+</code></pre></div>
+<p>If you choose different ranges, update both these variables and the workload
+subnet parameters in step 6. Keep the VNet, VPN gateway, and resolver in the
+same approved region for this example.</p>
+<h2 id="4-create-the-vnet-and-p2s-vpn">4. Create the VNet and P2S VPN</h2>
+<p>These steps create billable Azure resources. Obtain the required approval first.
+If completing the installation entirely from your local machine is essential,
+read step 8 before creating the gateway.</p>
+<h3 id="create-the-resource-group-and-network">Create the resource group and network</h3>
+<p><strong>Read, then Write if missing:</strong> check the resource group and create it only
+when absent. This fresh-install path stops if the group already contains
+resources. Reusing an existing installation requires a separate review.</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$groupExists</span> <span class="p">=</span> <span class="n">az</span> <span class="nb">group </span><span class="n">exists</span> <span class="p">-</span><span class="n">-subscription</span> <span class="nv">$subscription</span> <span class="p">-</span><span class="n">-name</span> <span class="nv">$resourceGroup</span> <span class="p">-</span><span class="n">-output</span> <span class="n">tsv</span>
+<span class="k">if</span> <span class="p">(</span><span class="nv">$groupExists</span> <span class="o">-eq</span> <span class="s1">'false'</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">az</span> <span class="nb">group </span><span class="n">create</span> <span class="p">-</span><span class="n">-subscription</span> <span class="nv">$subscription</span> <span class="p">-</span><span class="n">-name</span> <span class="nv">$resourceGroup</span> <span class="p">-</span><span class="n">-location</span> <span class="nv">$region</span> <span class="p">-</span><span class="n">-output</span> <span class="n">table</span>
+<span class="p">}</span> <span class="k">elseif</span> <span class="p">(</span><span class="nv">$groupExists</span> <span class="o">-ne</span> <span class="s1">'true'</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">throw</span> <span class="s1">'Could not determine whether the resource group exists.'</span>
+<span class="p">}</span>
+
+<span class="nv">$existingResources</span> <span class="p">=</span> <span class="p">@(</span><span class="n">az</span> <span class="n">resource</span> <span class="n">list</span> <span class="p">-</span><span class="n">-subscription</span> <span class="nv">$subscription</span> <span class="p">-</span><span class="n">-resource-group</span> <span class="nv">$resourceGroup</span> <span class="p">-</span><span class="n">-output</span> <span class="n">json</span> <span class="p">|</span> <span class="nb">ConvertFrom-Json</span><span class="p">)</span>
+<span class="k">if</span> <span class="p">(</span><span class="nv">$existingResources</span><span class="p">.</span><span class="n">Count</span> <span class="o">-gt</span> <span class="n">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nv">$existingResources</span> <span class="p">|</span> <span class="nb">Select-Object</span> <span class="n">name</span><span class="p">,</span> <span class="nb">type</span>
+    <span class="k">throw</span> <span class="s1">'The resource group is not empty. Review it instead of rerunning fresh resource creation.'</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Write:</strong> create the VNet with its reserved <code>GatewaySubnet</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">az</span> <span class="n">network</span> <span class="n">vnet</span> <span class="n">create</span> <span class="p">-</span><span class="n">-subscription</span> <span class="nv">$subscription</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-resource-group</span> <span class="nv">$resourceGroup</span> <span class="p">-</span><span class="n">-name</span> <span class="nv">$vnetName</span> <span class="p">-</span><span class="n">-location</span> <span class="nv">$region</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-address-prefixes</span> <span class="nv">$vnetPrefix</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-subnet-name</span> <span class="n">GatewaySubnet</span> <span class="p">-</span><span class="n">-subnet-prefixes</span> <span class="nv">$gatewaySubnetPrefix</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-output</span> <span class="n">none</span>
+
+<span class="nv">$vnetId</span> <span class="p">=</span> <span class="n">az</span> <span class="n">network</span> <span class="n">vnet</span> <span class="n">show</span> <span class="p">-</span><span class="n">-subscription</span> <span class="nv">$subscription</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-resource-group</span> <span class="nv">$resourceGroup</span> <span class="p">-</span><span class="n">-name</span> <span class="nv">$vnetName</span> <span class="p">-</span><span class="n">-query</span> <span class="n">id</span> <span class="p">-</span><span class="n">-output</span> <span class="n">tsv</span>
+<span class="k">if</span> <span class="p">(</span><span class="o">-not</span> <span class="nv">$vnetId</span><span class="p">)</span> <span class="p">{</span> <span class="k">throw</span> <span class="s1">'The VNet resource ID was not returned.'</span> <span class="p">}</span>
+</code></pre></div>
+<p><strong>Read:</strong> confirm the range, <code>Succeeded</code> state, and no NSG or route table on
+<code>GatewaySubnet</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">az</span> <span class="n">network</span> <span class="n">vnet</span> <span class="n">show</span> <span class="p">-</span><span class="n">-subscription</span> <span class="nv">$subscription</span> <span class="p">-</span><span class="n">-resource-group</span> <span class="nv">$resourceGroup</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-name</span> <span class="nv">$vnetName</span> <span class="p">-</span><span class="n">-query</span> <span class="s1">'{name:name,state:provisioningState,ranges:addressSpace.addressPrefixes}'</span> <span class="p">-</span><span class="n">-output</span> <span class="n">json</span>
+<span class="n">az</span> <span class="n">network</span> <span class="n">vnet</span> <span class="n">subnet</span> <span class="n">show</span> <span class="p">-</span><span class="n">-subscription</span> <span class="nv">$subscription</span> <span class="p">-</span><span class="n">-resource-group</span> <span class="nv">$resourceGroup</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-vnet-name</span> <span class="nv">$vnetName</span> <span class="p">-</span><span class="n">-name</span> <span class="n">GatewaySubnet</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-query</span> <span class="s1">'{prefix:addressPrefix,nsg:networkSecurityGroup.id,routeTable:routeTable.id}'</span> <span class="p">-</span><span class="n">-output</span> <span class="n">json</span>
+</code></pre></div>
+<h3 id="create-the-vpn-gateway">Create the VPN gateway</h3>
+<p><strong>Write:</strong> the example uses an availability-zone-capable region, a zone-redundant
+Standard public IP, and <code>VpnGw1AZ</code>. Confirm SKU/zone availability and costs for
+your region before running it; do not substitute Basic for Entra P2S.</p>
+<div class="highlight"><pre><span></span><code><span class="n">az</span> <span class="n">network</span> <span class="n">public-ip</span> <span class="n">create</span> <span class="p">-</span><span class="n">-subscription</span> <span class="nv">$subscription</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-resource-group</span> <span class="nv">$resourceGroup</span> <span class="p">-</span><span class="n">-name</span> <span class="nv">$publicIpName</span> <span class="p">-</span><span class="n">-location</span> <span class="nv">$region</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-sku</span> <span class="n">Standard</span> <span class="p">-</span><span class="n">-allocation-method</span> <span class="n">Static</span> <span class="p">-</span><span class="n">-version</span> <span class="n">IPv4</span> <span class="p">-</span><span class="n">-zone</span> <span class="n">1</span> <span class="n">2</span> <span class="n">3</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-output</span> <span class="n">none</span>
+
+<span class="n">az</span> <span class="n">network</span> <span class="n">vnet-gateway</span> <span class="n">create</span> <span class="p">-</span><span class="n">-subscription</span> <span class="nv">$subscription</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-resource-group</span> <span class="nv">$resourceGroup</span> <span class="p">-</span><span class="n">-name</span> <span class="nv">$gatewayName</span> <span class="p">-</span><span class="n">-location</span> <span class="nv">$region</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-vnet</span> <span class="nv">$vnetId</span> <span class="p">-</span><span class="n">-public-ip-addresses</span> <span class="nv">$publicIpName</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-gateway-type</span> <span class="n">Vpn</span> <span class="p">-</span><span class="n">-vpn-type</span> <span class="n">RouteBased</span> <span class="p">-</span><span class="n">-sku</span> <span class="n">VpnGw1AZ</span> <span class="p">-</span><span class="n">-no-wait</span>
+</code></pre></div>
+<p><strong>Read:</strong> wait up to one hour, then inspect the result. Gateway creation can
+take tens of minutes. A timeout does not mean the creation was cancelled;
+inspect the existing gateway rather than creating another one.</p>
+<div class="highlight"><pre><span></span><code><span class="n">az</span> <span class="n">network</span> <span class="n">vnet-gateway</span> <span class="n">wait</span> <span class="p">-</span><span class="n">-subscription</span> <span class="nv">$subscription</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-resource-group</span> <span class="nv">$resourceGroup</span> <span class="p">-</span><span class="n">-name</span> <span class="nv">$gatewayName</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-created</span> <span class="p">-</span><span class="n">-interval</span> <span class="n">30</span> <span class="p">-</span><span class="n">-timeout</span> <span class="n">3600</span>
+<span class="n">az</span> <span class="n">network</span> <span class="n">vnet-gateway</span> <span class="n">show</span> <span class="p">-</span><span class="n">-subscription</span> <span class="nv">$subscription</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-resource-group</span> <span class="nv">$resourceGroup</span> <span class="p">-</span><span class="n">-name</span> <span class="nv">$gatewayName</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-query</span> <span class="s1">'{name:name,state:provisioningState,type:gatewayType,vpnType:vpnType,sku:sku.name}'</span> <span class="p">-</span><span class="n">-output</span> <span class="n">json</span>
+</code></pre></div>
+<p>Continue only when the state is <code>Succeeded</code>.</p>
+<h3 id="enable-entra-authenticated-p2s">Enable Entra-authenticated P2S</h3>
+<p>For the Microsoft-registered Azure VPN Client application in Azure public cloud:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tenant</td>
+<td><code>https://login.microsoftonline.com/&lt;tenant-id&gt;</code></td>
+</tr>
+<tr>
+<td>Audience</td>
+<td><code>c632b3df-fb67-4d84-bdcf-b95ad541b5c8</code></td>
+</tr>
+<tr>
+<td>Issuer</td>
+<td><code>https://sts.windows.net/&lt;tenant-id&gt;/</code></td>
+</tr>
+</tbody>
+</table>
+<p>The Audience value is a public Microsoft application identifier, not a secret.
+If your organization uses a custom audience or restricts VPN access to selected
+users/groups, follow that approved configuration. Do not assume that every
+tenant user should be allowed to connect.</p>
+<p><strong>Write:</strong> configure P2S on the gateway you just created:</p>
+<div class="highlight"><pre><span></span><code><span class="n">az</span> <span class="n">network</span> <span class="n">vnet-gateway</span> <span class="n">update</span> <span class="p">-</span><span class="n">-subscription</span> <span class="nv">$subscription</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-resource-group</span> <span class="nv">$resourceGroup</span> <span class="p">-</span><span class="n">-name</span> <span class="nv">$gatewayName</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-address-prefixes</span> <span class="nv">$p2sPool</span> <span class="p">-</span><span class="n">-client-protocol</span> <span class="n">OpenVPN</span> <span class="p">-</span><span class="n">-vpn-auth-type</span> <span class="n">AAD</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-aad-tenant</span> <span class="s2">"https://login.microsoftonline.com/$tenant"</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-aad-audience</span> <span class="s1">'c632b3df-fb67-4d84-bdcf-b95ad541b5c8'</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-aad-issuer</span> <span class="s2">"https://sts.windows.net/$tenant/"</span> <span class="p">-</span><span class="n">-no-wait</span>
+
+<span class="n">az</span> <span class="n">network</span> <span class="n">vnet-gateway</span> <span class="n">wait</span> <span class="p">-</span><span class="n">-subscription</span> <span class="nv">$subscription</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-resource-group</span> <span class="nv">$resourceGroup</span> <span class="p">-</span><span class="n">-name</span> <span class="nv">$gatewayName</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-updated</span> <span class="p">-</span><span class="n">-interval</span> <span class="n">30</span> <span class="p">-</span><span class="n">-timeout</span> <span class="n">1800</span>
+</code></pre></div>
+<p><strong>Read:</strong> check <code>Succeeded</code>, the intended client pool, <code>OpenVPN</code>, <code>AAD</code>, and
+your tenant/audience/issuer:</p>
+<div class="highlight"><pre><span></span><code><span class="n">az</span> <span class="n">network</span> <span class="n">vnet-gateway</span> <span class="n">show</span> <span class="p">-</span><span class="n">-subscription</span> <span class="nv">$subscription</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-resource-group</span> <span class="nv">$resourceGroup</span> <span class="p">-</span><span class="n">-name</span> <span class="nv">$gatewayName</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-query</span> <span class="s1">'{state:provisioningState,pool:vpnClientConfiguration.vpnClientAddressPool.addressPrefixes,protocols:vpnClientConfiguration.vpnClientProtocols,auth:vpnClientConfiguration.vpnAuthenticationTypes,tenant:vpnClientConfiguration.aadTenant,audience:vpnClientConfiguration.aadAudience,issuer:vpnClientConfiguration.aadIssuer}'</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-output</span> <span class="n">json</span>
+</code></pre></div>
+<p>The gateway's public IP accepts VPN connections. It does not require exposing
+Storage, Search, Foundry, or the other GPT-RAG services publicly.</p>
+<p>See <a href="https://learn.microsoft.com/azure/vpn-gateway/point-to-site-entra-gateway">Configure P2S with Microsoft Entra ID</a>
+for the complete gateway and authentication instructions.</p>
+<h2 id="5-configure-private-dns-and-connect">5. Configure private DNS and connect</h2>
+<h3 id="create-the-dns-inbound-subnet-and-resolver">Create the DNS inbound subnet and resolver</h3>
+<p>The DNS resolver commands require the <code>dns-resolver</code> Azure CLI extension.
+<strong>Read:</strong> check whether it is installed:</p>
+<div class="highlight"><pre><span></span><code><span class="n">az</span> <span class="n">extension</span> <span class="n">list</span> <span class="p">-</span><span class="n">-query</span> <span class="s2">"[?name=='dns-resolver'].{name:name,version:version}"</span> <span class="p">-</span><span class="n">-output</span> <span class="n">table</span>
+</code></pre></div>
+<p>If it is missing, and installation is approved on your machine, install it:</p>
+<div class="highlight"><pre><span></span><code><span class="n">az</span> <span class="n">extension</span> <span class="n">add</span> <span class="p">-</span><span class="n">-name</span> <span class="n">dns-resolver</span>
+</code></pre></div>
+<p><strong>Write:</strong> create a dedicated delegated subnet. Do not place other resources
+in it or attach the workload route table:</p>
+<div class="highlight"><pre><span></span><code><span class="n">az</span> <span class="n">network</span> <span class="n">vnet</span> <span class="n">subnet</span> <span class="n">create</span> <span class="p">-</span><span class="n">-subscription</span> <span class="nv">$subscription</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-resource-group</span> <span class="nv">$resourceGroup</span> <span class="p">-</span><span class="n">-vnet-name</span> <span class="nv">$vnetName</span> <span class="p">-</span><span class="n">-name</span> <span class="nv">$dnsSubnetName</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-address-prefixes</span> <span class="nv">$dnsSubnetPrefix</span> <span class="p">-</span><span class="n">-delegations</span> <span class="n">Microsoft</span><span class="p">.</span><span class="n">Network</span><span class="p">/</span><span class="n">dnsResolvers</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-output</span> <span class="n">none</span>
+
+<span class="nv">$dnsSubnetId</span> <span class="p">=</span> <span class="n">az</span> <span class="n">network</span> <span class="n">vnet</span> <span class="n">subnet</span> <span class="n">show</span> <span class="p">-</span><span class="n">-subscription</span> <span class="nv">$subscription</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-resource-group</span> <span class="nv">$resourceGroup</span> <span class="p">-</span><span class="n">-vnet-name</span> <span class="nv">$vnetName</span> <span class="p">-</span><span class="n">-name</span> <span class="nv">$dnsSubnetName</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-query</span> <span class="n">id</span> <span class="p">-</span><span class="n">-output</span> <span class="n">tsv</span>
+<span class="k">if</span> <span class="p">(</span><span class="o">-not</span> <span class="nv">$dnsSubnetId</span><span class="p">)</span> <span class="p">{</span> <span class="k">throw</span> <span class="s1">'The DNS subnet resource ID was not returned.'</span> <span class="p">}</span>
+
+<span class="n">az</span> <span class="n">dns-resolver</span> <span class="n">create</span> <span class="p">-</span><span class="n">-subscription</span> <span class="nv">$subscription</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-resource-group</span> <span class="nv">$resourceGroup</span> <span class="p">-</span><span class="n">-name</span> <span class="nv">$resolverName</span> <span class="p">-</span><span class="n">-location</span> <span class="nv">$region</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-id</span> <span class="nv">$vnetId</span> <span class="p">-</span><span class="n">-if-none</span><span class="o">-match</span> <span class="s1">'*'</span> <span class="p">-</span><span class="n">-output</span> <span class="n">none</span>
+
+<span class="n">az</span> <span class="n">dns-resolver</span> <span class="n">inbound-endpoint</span> <span class="n">create</span> <span class="p">-</span><span class="n">-subscription</span> <span class="nv">$subscription</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-resource-group</span> <span class="nv">$resourceGroup</span> <span class="p">-</span><span class="n">-dns-resolver-name</span> <span class="nv">$resolverName</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-name</span> <span class="nv">$inboundName</span> <span class="p">-</span><span class="n">-location</span> <span class="nv">$region</span> <span class="p">-</span><span class="n">-if-none</span><span class="o">-match</span> <span class="s1">'*'</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-ip-configurations</span> <span class="s2">"[{private-ip-address:$dnsInboundIp,private-ip-allocation-method:Static,id:$dnsSubnetId}]"</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-output</span> <span class="n">none</span>
+</code></pre></div>
+<p>The CLI shorthand above uses a subnet <code>id</code> and a static inbound IP. The example
+<code>10.80.15.36</code> is a usable address in <code>10.80.15.32/28</code>; choose an available,
+non-reserved address if you change that subnet.</p>
+<p><strong>Read:</strong> verify both resources show <code>Succeeded</code> and the returned IP matches
+the one you selected:</p>
+<div class="highlight"><pre><span></span><code><span class="n">az</span> <span class="n">dns-resolver</span> <span class="n">show</span> <span class="p">-</span><span class="n">-subscription</span> <span class="nv">$subscription</span> <span class="p">-</span><span class="n">-resource-group</span> <span class="nv">$resourceGroup</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-name</span> <span class="nv">$resolverName</span> <span class="p">-</span><span class="n">-query</span> <span class="s1">'{state:provisioningState,vnet:virtualNetwork.id}'</span> <span class="p">-</span><span class="n">-output</span> <span class="n">json</span>
+<span class="n">az</span> <span class="n">dns-resolver</span> <span class="n">inbound-endpoint</span> <span class="n">show</span> <span class="p">-</span><span class="n">-subscription</span> <span class="nv">$subscription</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-resource-group</span> <span class="nv">$resourceGroup</span> <span class="p">-</span><span class="n">-dns-resolver-name</span> <span class="nv">$resolverName</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-name</span> <span class="nv">$inboundName</span> <span class="p">-</span><span class="n">-query</span> <span class="s1">'{state:provisioningState,ip:ipConfigurations[0].privateIpAddress,subnet:ipConfigurations[0].subnet.id}'</span> <span class="p">-</span><span class="n">-output</span> <span class="n">json</span>
+</code></pre></div>
+<p>For this simple client-to-Azure DNS flow, you do not need an outbound endpoint
+or forwarding ruleset. An existing corporate DNS design may differ.</p>
+<h3 id="download-and-edit-the-vpn-profile">Download and edit the VPN profile</h3>
+<p>Use the gateway's <strong>Point-to-site configuration &gt; Download VPN client</strong> in
+Azure Portal to obtain the Entra/OpenVPN profile. This is one of the remaining
+interactive steps; do not select a certificate/RADIUS authentication option
+just to generate a different profile with the CLI.</p>
+<p><strong>Local files only:</strong> extract the downloaded ZIP into a new directory:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$vpnZip</span> <span class="p">=</span> <span class="s1">'&lt;full-path-to-downloaded-vpn-profile.zip&gt;'</span>
+<span class="nv">$vpnProfileFolder</span> <span class="p">=</span> <span class="nb">Join-Path</span> <span class="nv">$HOME</span> <span class="s2">"Downloads\gpt-rag-vpn-</span><span class="p">$(</span><span class="no">[guid]</span><span class="p">::</span><span class="n">NewGuid</span><span class="p">().</span><span class="n">ToString</span><span class="p">(</span><span class="s1">'N'</span><span class="p">))</span><span class="s2">"</span>
+<span class="nb">Expand-Archive</span> <span class="n">-LiteralPath</span> <span class="nv">$vpnZip</span> <span class="n">-DestinationPath</span> <span class="nv">$vpnProfileFolder</span>
+<span class="nb">Get-ChildItem</span> <span class="n">-LiteralPath</span> <span class="nv">$vpnProfileFolder</span> <span class="n">-Recurse</span> <span class="n">-Filter</span> <span class="s1">'*.xml'</span> <span class="p">|</span>
+    <span class="nb">Select-Object</span> <span class="n">FullName</span>
+</code></pre></div>
+<p>Select the Entra profile: normally <code>AzureVPN\azurevpnconfig.xml</code>, or
+<code>azurevpnconfig_aad.xml</code> if the package includes multiple authentication
+types. Copy the actual path from the listing:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$profilePath</span> <span class="p">=</span> <span class="s1">'&lt;full-path-to-the-entra-profile.xml&gt;'</span>
+<span class="k">if</span> <span class="p">(</span><span class="nb">Test-Path</span> <span class="n">-LiteralPath</span> <span class="s2">"$profilePath.original"</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">throw</span> <span class="s1">'A profile backup already exists. Preserve it and review before editing again.'</span>
+<span class="p">}</span>
+<span class="nb">Copy-Item</span> <span class="n">-LiteralPath</span> <span class="nv">$profilePath</span> <span class="n">-Destination</span> <span class="s2">"$profilePath.original"</span>
+<span class="n">notepad</span><span class="p">.</span><span class="n">exe</span> <span class="nv">$profilePath</span>
+</code></pre></div>
+<p>The backup deliberately does not overwrite an existing <code>.original</code> file.
+Keep this profile and its backup outside the repository.</p>
+<p>The following is a <strong>profile fragment</strong>, not a complete VPN profile. Replace
+the placeholder IP, preserve the authentication settings, and do not add a
+second <code>clientconfig</code> element. Remove <code>i:nil="true"</code> from that element when
+populating it.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">&lt;clientconfig&gt;</span>
+<span class="w">  </span><span class="nt">&lt;dnsservers&gt;</span>
+<span class="w">    </span><span class="nt">&lt;dnsserver&gt;</span>YOUR-DNS-INBOUND-PRIVATE-IP<span class="nt">&lt;/dnsserver&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/dnsservers&gt;</span>
+<span class="w">  </span><span class="nt">&lt;dnssuffixes&gt;</span>
+<span class="w">    </span><span class="nt">&lt;dnssuffix&gt;</span>.services.ai.azure.com<span class="nt">&lt;/dnssuffix&gt;</span>
+<span class="w">    </span><span class="nt">&lt;dnssuffix&gt;</span>.openai.azure.com<span class="nt">&lt;/dnssuffix&gt;</span>
+<span class="w">    </span><span class="nt">&lt;dnssuffix&gt;</span>.cognitiveservices.azure.com<span class="nt">&lt;/dnssuffix&gt;</span>
+<span class="w">    </span><span class="nt">&lt;dnssuffix&gt;</span>.azconfig.io<span class="nt">&lt;/dnssuffix&gt;</span>
+<span class="w">    </span><span class="nt">&lt;dnssuffix&gt;</span>.vault.azure.net<span class="nt">&lt;/dnssuffix&gt;</span>
+<span class="w">    </span><span class="nt">&lt;dnssuffix&gt;</span>.search.windows.net<span class="nt">&lt;/dnssuffix&gt;</span>
+<span class="w">    </span><span class="nt">&lt;dnssuffix&gt;</span>.blob.core.windows.net<span class="nt">&lt;/dnssuffix&gt;</span>
+<span class="w">    </span><span class="nt">&lt;dnssuffix&gt;</span>.azurecr.io<span class="nt">&lt;/dnssuffix&gt;</span>
+<span class="w">    </span><span class="nt">&lt;dnssuffix&gt;</span>.azurecontainerapps.io<span class="nt">&lt;/dnssuffix&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/dnssuffixes&gt;</span>
+<span class="nt">&lt;/clientconfig&gt;</span>
+</code></pre></div>
+<p>Treat these namespaces as a starting list. Add those actually used by your
+topology, such as Cosmos DB, Azure Monitor, or a custom application domain.
+Review the DNS impact on other corporate resources using those namespaces;
+do not add a broad suffix such as <code>.azure.com</code>.</p>
+<p>With this guide's dedicated-VNet defaults, GPT-RAG provisions its private DNS
+zones and links them to the VNet in step 7. Do not pre-create duplicate service
+zones or links. If your platform team or Azure Policy manages DNS, use the
+<a href="../deploy/#existing-platform-ai-landing-zone-integrated">existing-platform integration settings</a>
+with that team instead of mixing the two ownership models.</p>
+<p>The VPN client profile does not create DNS records. After provisioning, check
+the records needed for ACR data endpoints and the application, not just one
+hostname per service.</p>
+<p>After saving the XML, <strong>validate the file locally</strong> before importing:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$profileXml</span> <span class="p">=</span> <span class="no">[xml]</span><span class="p">(</span><span class="nb">Get-Content</span> <span class="n">-LiteralPath</span> <span class="nv">$profilePath</span> <span class="n">-Raw</span><span class="p">)</span>
+<span class="nv">$clientConfig</span> <span class="p">=</span> <span class="p">@(</span><span class="nv">$profileXml</span><span class="p">.</span><span class="n">SelectNodes</span><span class="p">(</span><span class="s2">"/*/*[local-name()='clientconfig']"</span><span class="p">))</span>
+<span class="k">if</span> <span class="p">(</span><span class="nv">$clientConfig</span><span class="p">.</span><span class="n">Count</span> <span class="o">-ne</span> <span class="n">1</span><span class="p">)</span> <span class="p">{</span> <span class="k">throw</span> <span class="s1">'Expected exactly one clientconfig element.'</span> <span class="p">}</span>
+<span class="nv">$profileDns</span> <span class="p">=</span> <span class="p">@(</span><span class="nv">$clientConfig</span><span class="p">[</span><span class="n">0</span><span class="p">].</span><span class="n">SelectNodes</span><span class="p">(</span><span class="s2">"*[local-name()='dnsservers']/*[local-name()='dnsserver']"</span><span class="p">))</span>
+<span class="k">if</span> <span class="p">(</span><span class="nv">$profileDns</span><span class="p">.</span><span class="n">Count</span> <span class="o">-ne</span> <span class="n">1</span> <span class="o">-or</span> <span class="nv">$profileDns</span><span class="p">[</span><span class="n">0</span><span class="p">].</span><span class="n">InnerText</span> <span class="o">-ne</span> <span class="nv">$dnsInboundIp</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">throw</span> <span class="s1">'The VPN profile must contain the selected DNS inbound IP.'</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>In <strong>Azure VPN Client</strong>, select <strong>+ &gt; Import</strong>, import the edited profile,
+and connect with your Entra account. After any subsequent profile change,
+disconnect, reimport that profile, and reconnect. Do not replace the corporate
+VPN profile or change your Wi-Fi adapter's DNS.</p>
+<p>Complete Entra sign-in interactively. Confirm <strong>Connected</strong>, then <strong>Read</strong>
+the local routes and effective DNS policy:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">Get-NetRoute</span> <span class="n">-AddressFamily</span> <span class="n">IPv4</span> <span class="p">|</span>
+    <span class="nb">Where-Object</span> <span class="n">DestinationPrefix</span> <span class="o">-eq</span> <span class="nv">$vnetPrefix</span> <span class="p">|</span>
+    <span class="nb">Format-Table</span> <span class="n">DestinationPrefix</span><span class="p">,</span> <span class="n">NextHop</span><span class="p">,</span> <span class="n">InterfaceAlias</span>
+<span class="nb">Get-DnsClientNrptPolicy</span> <span class="n">-Effective</span>
+<span class="nb">Resolve-DnsName</span> <span class="n">www</span><span class="p">.</span><span class="n">microsoft</span><span class="p">.</span><span class="n">com</span> <span class="n">-Server</span> <span class="nv">$dnsInboundIp</span> <span class="n">-DnsOnly</span>
+<span class="nb">Resolve-DnsName</span> <span class="n">www</span><span class="p">.</span><span class="n">microsoft</span><span class="p">.</span><span class="n">com</span> <span class="n">-Server</span> <span class="nv">$dnsInboundIp</span> <span class="n">-DnsOnly</span> <span class="n">-TcpOnly</span>
+</code></pre></div>
+<p>Expect the route to use your VPN interface, NRPT rules to reference the selected
+resolver, and both resolver queries to return DNS responses. These public-name
+queries test resolver reachability, not private endpoint access.</p>
+<p>With Entra authentication, Azure VPN Client uses NRPT. Its DNS settings may
+not appear in <code>ipconfig /all</code>. Use the resolver's inbound IP, not the
+Azure-only DNS address <code>168.63.129.16</code>, as the client DNS server.</p>
+<p>Before step 7 creates the services and private endpoint records, their names
+may be unresolved or resolve publicly. Perform the private service DNS checks
+in step 7, after provisioning, rather than treating that earlier result as a
+VPN failure.</p>
+<h2 id="6-point-gpt-rag-at-the-existing-vnet">6. Point GPT-RAG at the existing VNet</h2>
+<p>Return to the GPT-RAG root and retrieve the actual VNet ID again rather than
+typing one. Run each command separately and stop on failure:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">Set-Location</span> <span class="nv">$repoRoot</span>
+<span class="nv">$vnetId</span> <span class="p">=</span> <span class="n">az</span> <span class="n">network</span> <span class="n">vnet</span> <span class="n">show</span> <span class="p">-</span><span class="n">-subscription</span> <span class="nv">$subscription</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-resource-group</span> <span class="nv">$resourceGroup</span> <span class="p">-</span><span class="n">-name</span> <span class="nv">$vnetName</span> <span class="p">-</span><span class="n">-query</span> <span class="n">id</span> <span class="p">-</span><span class="n">-output</span> <span class="n">tsv</span>
+<span class="k">if</span> <span class="p">(</span><span class="o">-not</span> <span class="nv">$vnetId</span><span class="p">)</span> <span class="p">{</span> <span class="k">throw</span> <span class="s1">'The VNet resource ID was not returned.'</span> <span class="p">}</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">AZURE_SUBSCRIPTION_ID</span> <span class="nv">$subscription</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">AZURE_RESOURCE_GROUP</span> <span class="nv">$resourceGroup</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">AZURE_LOCATION</span> <span class="nv">$region</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">NETWORK_ISOLATION</span> <span class="n">true</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">USE_EXISTING_VNET</span> <span class="n">true</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">EXISTING_VNET_RESOURCE_ID</span> <span class="nv">$vnetId</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">DEPLOY_SUBNETS</span> <span class="n">true</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">SIDE_BY_SIDE</span> <span class="n">false</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">DEPLOYMENT_TOPOLOGY</span> <span class="n">hosted-no-panel</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">DEPLOY_ACR_TASK_AGENT_POOL</span> <span class="n">true</span>
+</code></pre></div>
+<p><code>DEPLOY_SUBNETS=true</code> assumes a dedicated VNet with room for the GPT-RAG subnets.
+Do not apply this setting to a shared VNet without reviewing the affected
+resources. Explicit <code>hosted-no-panel</code> selection avoids depending on how an
+environment with pre-existing resources is classified.</p>
+<p>Provisioning supplies <code>ACR_TASK_AGENT_POOL</code> with the created pool's name.
+Do not pre-fill that output to make a missing pool appear configured.</p>
+<p><strong>Local file change only:</strong> the following block backs up the root
+<code>main.parameters.json</code> inside the ignored <code>azd</code> environment directory, then
+updates only its network parameter values. Adapt every workload prefix if you
+changed the example VNet range. It preserves the other parameters and does not
+edit <code>infra</code> or <code>manifest.json</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$networkParameters</span> <span class="p">=</span> <span class="p">@{</span>
+    <span class="n">vnetAddressPrefixes</span> <span class="p">=</span> <span class="p">@(</span><span class="nv">$vnetPrefix</span><span class="p">)</span>
+    <span class="n">agentSubnetPrefix</span> <span class="p">=</span> <span class="s1">'10.80.0.0/24'</span>
+    <span class="n">acaEnvironmentSubnetPrefix</span> <span class="p">=</span> <span class="s1">'10.80.1.0/24'</span>
+    <span class="n">peSubnetPrefix</span> <span class="p">=</span> <span class="s1">'10.80.2.0/26'</span>
+    <span class="n">azureBastionSubnetPrefix</span> <span class="p">=</span> <span class="s1">'10.80.2.64/26'</span>
+    <span class="n">azureFirewallSubnetPrefix</span> <span class="p">=</span> <span class="s1">'10.80.2.128/26'</span>
+    <span class="n">gatewaySubnetPrefix</span> <span class="p">=</span> <span class="s1">'10.80.2.192/26'</span>
+    <span class="n">azureAppGatewaySubnetPrefix</span> <span class="p">=</span> <span class="s1">'10.80.3.0/27'</span>
+    <span class="n">jumpboxSubnetPrefix</span> <span class="p">=</span> <span class="s1">'10.80.3.64/27'</span>
+    <span class="n">devopsBuildAgentsSubnetPrefix</span> <span class="p">=</span> <span class="s1">'10.80.3.96/27'</span>
+<span class="p">}</span>
+<span class="nv">$parameterPath</span> <span class="p">=</span> <span class="nb">Join-Path</span> <span class="nv">$repoRoot</span> <span class="s1">'main.parameters.json'</span>
+<span class="nv">$backupPath</span> <span class="p">=</span> <span class="nb">Join-Path</span> <span class="nv">$repoRoot</span> <span class="s2">".azure\$environment\main.parameters.before-vpn.json"</span>
+<span class="k">if</span> <span class="p">(</span><span class="nb">Test-Path</span> <span class="n">-LiteralPath</span> <span class="nv">$backupPath</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">throw</span> <span class="s1">'A parameter backup already exists. Review it before editing again.'</span>
+<span class="p">}</span>
+<span class="nv">$parameters</span> <span class="p">=</span> <span class="nb">Get-Content</span> <span class="n">-LiteralPath</span> <span class="nv">$parameterPath</span> <span class="n">-Raw</span> <span class="p">|</span> <span class="nb">ConvertFrom-Json</span> <span class="n">-AsHashtable</span>
+<span class="k">if</span> <span class="p">(</span><span class="nv">$parameters</span><span class="p">.</span><span class="n">parameters</span> <span class="o">-isnot</span> <span class="no">[System.Collections.IDictionary]</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">throw</span> <span class="s1">'The root file does not contain a parameters object.'</span>
+<span class="p">}</span>
+<span class="nb">Copy-Item</span> <span class="n">-LiteralPath</span> <span class="nv">$parameterPath</span> <span class="n">-Destination</span> <span class="nv">$backupPath</span>
+<span class="k">foreach</span> <span class="p">(</span><span class="nv">$name</span> <span class="k">in</span> <span class="nv">$networkParameters</span><span class="p">.</span><span class="n">Keys</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nv">$parameters</span><span class="p">.</span><span class="n">parameters</span><span class="p">[</span><span class="nv">$name</span><span class="p">]</span> <span class="p">=</span> <span class="p">@{</span> <span class="n">value</span> <span class="p">=</span> <span class="nv">$networkParameters</span><span class="p">[</span><span class="nv">$name</span><span class="p">]</span> <span class="p">}</span>
+<span class="p">}</span>
+<span class="nv">$parameters</span> <span class="p">|</span> <span class="nb">ConvertTo-Json</span> <span class="n">-Depth</span> <span class="n">100</span> <span class="p">|</span>
+    <span class="nb">Set-Content</span> <span class="n">-LiteralPath</span> <span class="nv">$parameterPath</span> <span class="n">-Encoding</span> <span class="n">utf8NoBOM</span>
+<span class="n">git</span> <span class="nb">diff </span><span class="p">--</span> <span class="n">main</span><span class="p">.</span><span class="n">parameters</span><span class="p">.</span><span class="n">json</span>
+</code></pre></div>
+<p>Review the diff before provisioning. JSON formatting may change, but parameter
+values outside this network list must remain unchanged.</p>
+<p>The infrastructure's <code>gateway-subnet</code> is <strong>not</strong> the VPN's <code>GatewaySubnet</code>.
+Keep their names and address ranges separate.</p>
+<p>These are deployment settings, not component-version changes. Do not edit the
+managed <code>infra</code> source or change the release manifest. Avoiding VM login also
+does not automatically remove VM/Bastion resources from the selected topology.
+Review their supported deployment options and cost separately.</p>
+<h2 id="7-provision-infrastructure-and-verify-connectivity">7. Provision infrastructure and verify connectivity</h2>
+<p>Proceed only after reviewing the deployment-host requirement in step 8, the
+proposed resource costs, and the network plan.</p>
+<p>Separate infrastructure provisioning from data-plane configuration:</p>
+<div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">AZURE_SKIP_NETWORK_ISOLATION_WARNING</span> <span class="n">true</span>
+<span class="n">azd</span> <span class="n">provision</span> <span class="p">-</span><span class="n">-preview</span>
+</code></pre></div>
+<p>Here, <code>AZURE_SKIP_NETWORK_ISOLATION_WARNING=true</code> deliberately defers local
+data-plane post-provisioning. It does <strong>not</strong> skip security requirements or
+prove connectivity. Preview can run hooks and prepare local files.</p>
+<p>Review subnet changes, private endpoints, DNS, NSGs, Firewall, quotas, the
+private ACR build pool, and preservation of the VPN and resolver subnets.
+Stop on unexpected changes or preflight errors; do not bypass them.</p>
+<p>After approval, provision the resources:</p>
+<div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">provision</span>
+</code></pre></div>
+<p>Wait for its final result. An ARM provisioning failure is not the same as
+successfully provisioning infrastructure with data-plane setup deferred.
+Use the separate phases rather than <code>azd up</code>, so you can check connectivity
+between them.</p>
+<p><strong>Read:</strong> inspect only the relevant output values; do not dump all environment
+values into a shared log:</p>
+<div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">env</span> <span class="nb">get-value</span> <span class="n">AZURE_RESOURCE_GROUP</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">get-value</span> <span class="n">APP_CONFIG_ENDPOINT</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">get-value</span> <span class="n">ACR_TASK_AGENT_POOL</span>
+<span class="n">az</span> <span class="n">network</span> <span class="n">vnet</span> <span class="n">subnet</span> <span class="n">list</span> <span class="p">-</span><span class="n">-subscription</span> <span class="nv">$subscription</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-resource-group</span> <span class="nv">$resourceGroup</span> <span class="p">-</span><span class="n">-vnet-name</span> <span class="nv">$vnetName</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-query</span> <span class="s1">'[].{name:name,prefix:addressPrefix,routeTable:routeTable.id}'</span> <span class="p">-</span><span class="n">-output</span> <span class="n">table</span>
+</code></pre></div>
+<p>Expect your selected resource group, a nonempty configuration endpoint, and
+the provisioned private build-pool name. A missing output is a stop condition,
+not a reason to invent its value.</p>
+<h3 id="check-the-return-route-to-vpn-clients">Check the return route to VPN clients</h3>
+<p>The local machine must reach the services, and those services must have a
+return path to the P2S client pool.</p>
+<p>Inspect the actual route tables associated with the GPT-RAG workload subnets.
+Record their routes, subnet associations, and gateway route
+propagation settings. With this guide's default Firewall configuration, the
+deployment creates a workload route table with gateway route propagation
+disabled and a default route through Azure Firewall. Expect to need an explicit
+P2S return route; confirm the actual route table and have the network owner
+review any existing return path before adding one.</p>
+<p>For the single-VNet, route-based VPN scenario in this guide, an approved
+missing return route can be added as follows:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Name</td>
+<td>An unused name, for example <code>return-to-p2s</code></td>
+</tr>
+<tr>
+<td>Destination prefix</td>
+<td>Your actual P2S client pool; <code>10.81.0.0/24</code> in this example</td>
+</tr>
+<tr>
+<td>Next hop type</td>
+<td><strong>Virtual network gateway</strong></td>
+</tr>
+<tr>
+<td>Next hop address</td>
+<td>Not applicable</td>
+</tr>
+</tbody>
+</table>
+<p>Do not overwrite conflicting routes, replace the default Firewall route, or
+attach the workload route table to <code>GatewaySubnet</code> or the DNS inbound subnet.
+The next hop is not the gateway's public IP.</p>
+<p><strong>Read:</strong> pick the relevant workload subnet from the preceding list, then
+retrieve its actual table. Repeat this review if workloads use different
+tables; do not select the first route table in the resource group.</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$workloadSubnet</span> <span class="p">=</span> <span class="s1">'&lt;workload-subnet-name-from-the-list&gt;'</span>
+<span class="nv">$routeTableId</span> <span class="p">=</span> <span class="n">az</span> <span class="n">network</span> <span class="n">vnet</span> <span class="n">subnet</span> <span class="n">show</span> <span class="p">-</span><span class="n">-subscription</span> <span class="nv">$subscription</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-resource-group</span> <span class="nv">$resourceGroup</span> <span class="p">-</span><span class="n">-vnet-name</span> <span class="nv">$vnetName</span> <span class="p">-</span><span class="n">-name</span> <span class="nv">$workloadSubnet</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-query</span> <span class="n">routeTable</span><span class="p">.</span><span class="n">id</span> <span class="p">-</span><span class="n">-output</span> <span class="n">tsv</span>
+<span class="k">if</span> <span class="p">(</span><span class="o">-not</span> <span class="nv">$routeTableId</span><span class="p">)</span> <span class="p">{</span> <span class="k">throw</span> <span class="s1">'No route table is attached. Review the network design.'</span> <span class="p">}</span>
+
+<span class="nv">$routeTable</span> <span class="p">=</span> <span class="n">az</span> <span class="n">network</span> <span class="n">route-table</span> <span class="n">show</span> <span class="p">-</span><span class="n">-ids</span> <span class="nv">$routeTableId</span> <span class="p">-</span><span class="n">-output</span> <span class="n">json</span> <span class="p">|</span> <span class="nb">ConvertFrom-Json</span>
+<span class="nv">$routeTable</span> <span class="p">|</span> <span class="nb">Select-Object</span> <span class="n">name</span><span class="p">,</span> <span class="n">disableBgpRoutePropagation</span>
+<span class="nv">$routeTable</span><span class="p">.</span><span class="n">subnets</span> <span class="p">|</span> <span class="nb">Select-Object</span> <span class="n">id</span>
+<span class="nv">$routeTable</span><span class="p">.</span><span class="n">routes</span> <span class="p">|</span> <span class="nb">Select-Object</span> <span class="n">name</span><span class="p">,</span> <span class="n">addressPrefix</span><span class="p">,</span> <span class="n">nextHopType</span><span class="p">,</span> <span class="n">nextHopIpAddress</span>
+</code></pre></div>
+<p><strong>Write, only for an approved missing route:</strong> the block below refuses to
+replace a conflicting prefix or name and leaves an existing correct route
+unchanged. It never changes propagation, subnet associations, or other routes.</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$routeName</span> <span class="p">=</span> <span class="s1">'return-to-p2s'</span>
+<span class="k">if</span> <span class="p">(@(</span><span class="nv">$routeTable</span><span class="p">.</span><span class="n">subnets</span> <span class="p">|</span> <span class="nb">Where-Object</span> <span class="p">{</span>
+    <span class="nv">$_</span><span class="p">.</span><span class="n">id</span> <span class="o">-like</span> <span class="s1">'*/subnets/GatewaySubnet'</span> <span class="o">-or</span> <span class="nv">$_</span><span class="p">.</span><span class="n">id</span> <span class="o">-like</span> <span class="s2">"*/subnets/$dnsSubnetName"</span>
+<span class="p">}).</span><span class="n">Count</span> <span class="o">-gt</span> <span class="n">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">throw</span> <span class="s1">'This table is attached to a VPN or DNS subnet. Stop for network review.'</span>
+<span class="p">}</span>
+<span class="nv">$poolRoutes</span> <span class="p">=</span> <span class="p">@(</span><span class="nv">$routeTable</span><span class="p">.</span><span class="n">routes</span> <span class="p">|</span> <span class="nb">Where-Object</span> <span class="n">addressPrefix</span> <span class="o">-eq</span> <span class="nv">$p2sPool</span><span class="p">)</span>
+<span class="nv">$nameRoutes</span> <span class="p">=</span> <span class="p">@(</span><span class="nv">$routeTable</span><span class="p">.</span><span class="n">routes</span> <span class="p">|</span> <span class="nb">Where-Object</span> <span class="n">name</span> <span class="o">-eq</span> <span class="nv">$routeName</span><span class="p">)</span>
+<span class="k">if</span> <span class="p">(</span><span class="nv">$poolRoutes</span><span class="p">.</span><span class="n">Count</span> <span class="o">-eq</span> <span class="n">1</span> <span class="o">-and</span> <span class="nv">$poolRoutes</span><span class="p">[</span><span class="n">0</span><span class="p">].</span><span class="n">nextHopType</span> <span class="o">-eq</span> <span class="s1">'VirtualNetworkGateway'</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nb">Write-Host</span> <span class="s1">'The P2S return route already exists; no change needed.'</span>
+<span class="p">}</span> <span class="k">elseif</span> <span class="p">(</span><span class="nv">$poolRoutes</span><span class="p">.</span><span class="n">Count</span> <span class="o">-gt</span> <span class="n">0</span> <span class="o">-or</span> <span class="nv">$nameRoutes</span><span class="p">.</span><span class="n">Count</span> <span class="o">-gt</span> <span class="n">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">throw</span> <span class="s1">'A conflicting route exists. Do not overwrite it.'</span>
+<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="nv">$routeIdParts</span> <span class="p">=</span> <span class="nv">$routeTableId</span> <span class="n">-split</span> <span class="s1">'/'</span>
+    <span class="nv">$routeSubscription</span> <span class="p">=</span> <span class="nv">$routeIdParts</span><span class="p">[</span><span class="n">2</span><span class="p">]</span>
+    <span class="nv">$routeGroup</span> <span class="p">=</span> <span class="nv">$routeIdParts</span><span class="p">[</span><span class="n">4</span><span class="p">]</span>
+    <span class="n">az</span> <span class="n">network</span> <span class="n">route-table</span> <span class="n">route</span> <span class="n">create</span> <span class="p">-</span><span class="n">-subscription</span> <span class="nv">$routeSubscription</span> <span class="p">`</span>
+        <span class="p">-</span><span class="n">-resource-group</span> <span class="nv">$routeGroup</span> <span class="p">-</span><span class="n">-route-table-name</span> <span class="nv">$routeTable</span><span class="p">.</span><span class="n">name</span> <span class="p">`</span>
+        <span class="p">-</span><span class="n">-name</span> <span class="nv">$routeName</span> <span class="p">-</span><span class="n">-address-prefix</span> <span class="nv">$p2sPool</span> <span class="p">`</span>
+        <span class="p">-</span><span class="n">-next-hop-type</span> <span class="n">VirtualNetworkGateway</span> <span class="p">-</span><span class="n">-output</span> <span class="n">none</span>
+<span class="p">}</span>
+
+<span class="n">az</span> <span class="n">network</span> <span class="n">route-table</span> <span class="n">show</span> <span class="p">-</span><span class="n">-ids</span> <span class="nv">$routeTableId</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-query</span> <span class="s1">'{propagationDisabled:disableBgpRoutePropagation,subnets:subnets[].id,routes:routes[].{name:name,prefix:addressPrefix,nextHop:nextHopType,ip:nextHopIpAddress}}'</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-output</span> <span class="n">json</span>
+</code></pre></div>
+<p>Compare the final read with the preceding inventory. Expect the client-pool
+route through <code>VirtualNetworkGateway</code>, with the Firewall default route and
+subnet associations unchanged.</p>
+<p>Test the application and build-pool paths separately from service private
+endpoints. A successful private endpoint connection alone does not prove that
+all workload return paths are correct.</p>
+<p><strong>Recheck this route after every provision</strong>, including the second hosted
+provisioning phase. A manually added route is outside the release's
+infrastructure definition and may not survive reprovisioning.</p>
+<h3 id="test-dns-and-private-service-access">Test DNS and private service access</h3>
+<p>Use each service's original endpoint hostname, obtained from its Azure resource
+or deployment outputs. Do not replace it with an IP address or a <code>privatelink</code>
+hostname in application URLs.</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$serviceFqdn</span> <span class="p">=</span> <span class="s1">'&lt;actual-service-hostname&gt;'</span>
+
+<span class="nb">Resolve-DnsName</span> <span class="nv">$serviceFqdn</span> <span class="n">-Server</span> <span class="nv">$dnsInboundIp</span> <span class="n">-DnsOnly</span>
+<span class="nb">Resolve-DnsName</span> <span class="nv">$serviceFqdn</span> <span class="n">-Server</span> <span class="nv">$dnsInboundIp</span> <span class="n">-DnsOnly</span> <span class="n">-TcpOnly</span>
+<span class="nb">Resolve-DnsName</span> <span class="nv">$serviceFqdn</span>
+<span class="nb">Test-NetConnection</span> <span class="n">-ComputerName</span> <span class="nv">$serviceFqdn</span> <span class="n">-Port</span> <span class="n">443</span>
+</code></pre></div>
+<p>Compare the DNS result with the expected private address. The test <strong>without
+<code>-Server</code></strong> is essential: it checks the DNS path applications normally use.
+Repeat for the services your topology needs, including Foundry, App
+Configuration, Key Vault, Search, Blob, ACR, and the application endpoint when
+available.</p>
+<p>TCP success is not a TLS or authorization test. Also perform an appropriate
+authenticated, read-only HTTPS operation against each required service using
+an authorized identity. Do not disable certificate validation or print tokens
+and secret values. Investigate a 401/403 against both the service's network
+restrictions and its authentication/authorization requirements.</p>
+<p>For example, after infrastructure provisioning, these <strong>Read</strong> commands test
+authenticated App Configuration and Blob access without reading secret values
+or downloading documents:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$appConfigEndpoint</span> <span class="p">=</span> <span class="n">azd</span> <span class="n">env</span> <span class="nb">get-value</span> <span class="n">APP_CONFIG_ENDPOINT</span>
+<span class="n">az</span> <span class="n">appconfig</span> <span class="n">kv</span> <span class="n">list</span> <span class="p">-</span><span class="n">-subscription</span> <span class="nv">$subscription</span> <span class="p">-</span><span class="n">-endpoint</span> <span class="nv">$appConfigEndpoint</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-auth-mode</span> <span class="n">login</span> <span class="p">-</span><span class="n">-key</span> <span class="n">SUBSCRIPTION_ID</span> <span class="p">-</span><span class="n">-label</span> <span class="n">gpt-rag</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-query</span> <span class="s1">'[].{key:key,label:label}'</span> <span class="p">-</span><span class="n">-output</span> <span class="n">json</span>
+
+<span class="nv">$storageAccount</span> <span class="p">=</span> <span class="s1">'&lt;actual-storage-account-name&gt;'</span>
+<span class="nv">$documentsContainer</span> <span class="p">=</span> <span class="s1">'&lt;approved-source-container-name&gt;'</span>
+<span class="n">az</span> <span class="n">storage</span> <span class="n">container</span> <span class="n">exists</span> <span class="p">-</span><span class="n">-account-name</span> <span class="nv">$storageAccount</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-name</span> <span class="nv">$documentsContainer</span> <span class="p">-</span><span class="n">-auth-mode</span> <span class="n">login</span> <span class="p">-</span><span class="n">-query</span> <span class="n">exists</span> <span class="p">-</span><span class="n">-output</span> <span class="n">tsv</span>
+</code></pre></div>
+<p>Before post-provision configuration, the App Configuration key may not exist:
+an authorized empty list is not a configuration failure, but it does not prove
+that setup is complete. The container check must return <code>true</code> for the expected
+container. Both commands use <strong>your user identity</strong>, not the hosted agent's;
+they do not prove the agent has its own permissions.</p>
+<h2 id="8-continue-the-gpt-rag-installation">8. Continue the GPT-RAG installation</h2>
+<h3 id="configure-services-over-the-vpn">Configure services over the VPN</h3>
+<p>The post-provision script supports interactive confirmation of VPN access.
+After the network checks succeed, clear the setting that deferred that step
+and run it from the repository root in an interactive PowerShell window:</p>
+<div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">AZURE_SKIP_NETWORK_ISOLATION_WARNING</span> <span class="n">false</span>
+<span class="k">if</span> <span class="p">(</span><span class="nv">$LASTEXITCODE</span> <span class="o">-ne</span> <span class="n">0</span><span class="p">)</span> <span class="p">{</span> <span class="k">throw</span> <span class="s1">'Could not enable data-plane configuration.'</span> <span class="p">}</span>
+<span class="p">.\</span><span class="n">scripts</span><span class="p">\</span><span class="n">postProvision</span><span class="p">.</span><span class="n">ps1</span>
+</code></pre></div>
+<p>Confirm the VPN/VNet-access prompt only after verifying connectivity.
+This script configures Azure services; it is not a read-only diagnostic.
+If it reports that configuration was skipped, that phase is not complete.</p>
+<h3 id="check-the-deployment-host-before-building-or-deploying">Check the deployment host before building or deploying</h3>
+<p>The published <code>v3.8.4</code> pre-deploy hook still requires <code>RUN_FROM_JUMPBOX=true</code>
+for network-isolated <code>azd deploy</code>. This check does not block the interactive
+post-provision configuration above, but VPN access alone does not satisfy it.
+If deployment must run entirely on your local machine, do not proceed to the
+build/deploy phase until explicit VPN-host support is available. Do not set
+the jumpbox flag on your local machine to work around this restriction.</p>
+<p>For a deployment host supported by your release, follow the
+<a href="../deploy/#two-phase-hosted-deployment">hosted deployment lifecycle</a>.
+The following are <strong>Write/build operations on a supported deployment host
+only</strong>, not a workaround for the local-machine restriction:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">Set-Location</span> <span class="nv">$repoRoot</span>
+<span class="n">azd</span> <span class="n">env</span> <span class="nb">get-value</span> <span class="n">ACR_TASK_AGENT_POOL</span>
+<span class="p">.\</span><span class="n">scripts</span><span class="p">\</span><span class="n">prepareHostedDeployment</span><span class="p">.</span><span class="n">ps1</span>
+<span class="k">if</span> <span class="p">(</span><span class="nv">$LASTEXITCODE</span> <span class="o">-ne</span> <span class="n">0</span><span class="p">)</span> <span class="p">{</span> <span class="k">throw</span> <span class="s1">'Hosted image preparation failed.'</span> <span class="p">}</span>
+<span class="n">azd</span> <span class="n">provision</span>
+</code></pre></div>
+<p>Stop and repeat the route and connectivity checks in step 7 after that
+provision. Only then continue on the supported host:</p>
+<div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">deploy</span>
+</code></pre></div>
+<p>Do not treat this sequence as a validated local-machine-only path while the
+host requirement above remains. Do not copy a command to another host without
+first selecting the same released source and <code>azd</code> environment there.</p>
+<p>Use the VNet-connected ACR build pool for private builds. Your local VPN
+connection does not make shared ACR Tasks able to reach private resources.
+Do not switch to public endpoints to make a failed private build succeed.</p>
+<h2 id="9-understand-which-permissions-gpt-rag-grants-automatically">9. Understand which permissions GPT-RAG grants automatically</h2>
+<p><strong>The hosted runtime permission fix is included starting with GPT-RAG
+<code>v3.8.4</code>.</strong> You do not normally need to add these runtime grants manually
+before deploying. After creating the hosted agent, its post-deploy hook
+discovers the actual <strong>agent instance identity</strong> and applies the following
+minimum roles:</p>
+<table>
+<thead>
+<tr>
+<th>Purpose</th>
+<th>Automatically assigned role</th>
+<th>Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Read application configuration</td>
+<td>App Configuration Data Reader</td>
+<td>The configured App Configuration store</td>
+</tr>
+<tr>
+<td>Call the configured Azure OpenAI models</td>
+<td>Cognitive Services OpenAI User</td>
+<td>The configured model account</td>
+</tr>
+<tr>
+<td>Read the audit-signing secret, when its Key Vault reference is configured</td>
+<td>Key Vault Secrets User</td>
+<td>That individual referenced secret, not the entire vault</td>
+</tr>
+</tbody>
+</table>
+<p>The last grant is conditional: no audit-secret reference means no secret grant
+and no secret creation. Bootstrap inspects reference metadata; it does not
+retrieve or log the secret value.</p>
+<p>These grants belong to <code>instance_identity.principal_id</code> on the deployed agent,
+not to your user account, the Foundry project identity, or a Container App
+identity. The deployment operator needs discovery access and permission to
+create role assignments at those scopes. The VPN provides neither.</p>
+<p>The hook reuses matching unconditional grants on repeat runs. Conflicting
+conditional grants cause a failure instead of being bypassed. Root deployment
+waits for bootstrap and a completed <code>Hello!</code> response before UI cutover.
+Direct child deployment applies the roles but does not run the greeting.
+Role visibility in Azure Resource Manager does not prove data-plane
+propagation; use the documented recovery flow if the greeting fails.</p>
+<p>See <a href="../deploy/#plan-and-recover-hosted-access">Plan and recover hosted access</a>
+for the read-only <code>--plan</code> command and explicit recovery procedure.
+A successful plan can still report missing grants; inspect
+<code>exact_unconditional_assignment</code>. Its <code>data_plane_readiness=not-tested</code> result
+is not an application health check.</p>
+<p><strong>Read, after the hosted agent exists:</strong> from the repository root, select
+the environment and inspect its runtime permission plan. The module reads the
+hosted child project's saved <code>azd</code> environment; it cannot inspect an agent
+that has not been deployed yet.</p>
+<div class="highlight"><pre><span></span><code><span class="nb">Set-Location</span> <span class="nv">$repoRoot</span>
+<span class="nv">$savedPythonPath</span> <span class="p">=</span> <span class="nv">$env:PYTHONPATH</span>
+<span class="nv">$savedAzureEnvName</span> <span class="p">=</span> <span class="nv">$env:AZURE_ENV_NAME</span>
+<span class="k">try</span> <span class="p">{</span>
+    <span class="nv">$env:PYTHONPATH</span> <span class="p">=</span> <span class="nv">$repoRoot</span>
+    <span class="nv">$env:AZURE_ENV_NAME</span> <span class="p">=</span> <span class="nv">$environment</span>
+    <span class="nb">Push-Location</span> <span class="p">(</span><span class="nb">Join-Path</span> <span class="nv">$repoRoot</span> <span class="s1">'hosted-agent'</span><span class="p">)</span>
+    <span class="k">try</span> <span class="p">{</span>
+        <span class="nv">$accessPlan</span> <span class="p">=</span> <span class="n">python</span> <span class="n">-m</span> <span class="n">config</span><span class="p">.</span><span class="n">deployment</span><span class="p">.</span><span class="n">hosted_access</span> <span class="p">-</span><span class="n">-azd-env</span> <span class="p">-</span><span class="n">-plan</span> <span class="p">|</span>
+            <span class="nb">ConvertFrom-Json</span>
+    <span class="p">}</span> <span class="k">finally</span> <span class="p">{</span>
+        <span class="nb">Pop-Location</span>
+    <span class="p">}</span>
+<span class="p">}</span> <span class="k">finally</span> <span class="p">{</span>
+    <span class="nv">$env:PYTHONPATH</span> <span class="p">=</span> <span class="nv">$savedPythonPath</span>
+    <span class="nv">$env:AZURE_ENV_NAME</span> <span class="p">=</span> <span class="nv">$savedAzureEnvName</span>
+<span class="p">}</span>
+<span class="nv">$accessPlan</span> <span class="p">|</span> <span class="nb">Select-Object</span> <span class="n">agent_name</span><span class="p">,</span> <span class="n">agent_version</span><span class="p">,</span> <span class="n">audit</span><span class="p">,</span> <span class="n">data_plane_readiness</span>
+<span class="nv">$accessPlan</span><span class="p">.</span><span class="n">grants</span> <span class="p">|</span> <span class="nb">Select-Object</span> <span class="n">role</span><span class="p">,</span> <span class="n">scope</span><span class="p">,</span> <span class="n">exact_unconditional_assignment</span>
+</code></pre></div>
+<p>Expect two runtime grants, or three when the audit-secret reference is
+configured. Missing grants require investigation of the deployment hook or
+the documented recovery procedure, not broader access. Keep the output private:
+it contains deployment resource identifiers. Do not run manual <code>--apply</code> before
+testing whether a fresh deployment applies these roles automatically.</p>
+<h3 id="search-and-blob-permissions-are-separate">Search and Blob permissions are separate</h3>
+<p><strong>Search and Blob document-access grants are not added by this bootstrap.</strong>
+They authorize access to content, rather than just starting the application.
+Choose and approve the retrieval authorization model before uploading real data.</p>
+<p>For an explicitly approved <strong>service-identity test against a Blob knowledge
+source</strong>, the hosted agent may need:</p>
+<table>
+<thead>
+<tr>
+<th>Purpose</th>
+<th>Role</th>
+<th>Reviewed scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Query the configured Search service</td>
+<td>Search Index Data Reader</td>
+<td>The actual Search service used for retrieval</td>
+</tr>
+<tr>
+<td>Read the approved source documents</td>
+<td>Storage Blob Data Reader</td>
+<td>Only the approved source container</td>
+</tr>
+</tbody>
+</table>
+<p>This is a scoped test pattern, not a universal grant recipe for every grounding
+source. Confirm the consuming identity for your retrieval configuration and
+follow the <a href="../howto_authentication/#hosted-application-identity-versus-document-identity">application/document identity guidance</a>.
+Do not substitute the Foundry project identity or grant broad roles to fix an
+unexplained 403.</p>
+<p>A Search-service grant is not restricted to one test index, and a container
+grant covers future documents placed in that container. In a service-identity
+retrieval flow, application callers can receive content the agent is allowed
+to retrieve; this does <strong>not</strong> prove per-user document authorization or OBO.
+Test allowed and denied users separately before enabling protected content.</p>
+<h4 id="optional-commands-for-an-approved-synthetic-content-test">Optional commands for an approved synthetic-content test</h4>
+<p><strong>Skip this subsection unless document access has been explicitly approved.</strong>
+It is separate from installation and from the automatic-bootstrap test. Use
+the actual agent principal returned by the preceding read-only plan. These
+examples assume the reviewed Search service and Storage account are in the
+dedicated resource group used by this guide.</p>
+<p><strong>Read:</strong> resolve the exact resource scopes and inspect existing assignments.
+Replace the names with the resources actually used for retrieval, not another
+Search service associated with the Foundry project.</p>
+<div class="highlight"><pre><span></span><code><span class="k">if</span> <span class="p">(</span><span class="o">-not</span> <span class="nv">$accessPlan</span><span class="p">.</span><span class="n">principal_id</span> <span class="o">-or</span> <span class="nv">$accessPlan</span><span class="p">.</span><span class="n">classic</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">throw</span> <span class="s1">'A valid hosted access plan is required.'</span>
+<span class="p">}</span>
+<span class="nv">$agentPrincipalId</span> <span class="p">=</span> <span class="nv">$accessPlan</span><span class="p">.</span><span class="n">principal_id</span>
+<span class="nv">$searchService</span> <span class="p">=</span> <span class="s1">'&lt;actual-search-service-used-for-retrieval&gt;'</span>
+<span class="nv">$storageAccount</span> <span class="p">=</span> <span class="s1">'&lt;actual-storage-account-name&gt;'</span>
+<span class="nv">$documentsContainer</span> <span class="p">=</span> <span class="s1">'&lt;approved-synthetic-source-container&gt;'</span>
+<span class="nv">$searchScope</span> <span class="p">=</span> <span class="n">az</span> <span class="n">search</span> <span class="n">service</span> <span class="n">show</span> <span class="p">-</span><span class="n">-subscription</span> <span class="nv">$subscription</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-resource-group</span> <span class="nv">$resourceGroup</span> <span class="p">-</span><span class="n">-name</span> <span class="nv">$searchService</span> <span class="p">-</span><span class="n">-query</span> <span class="n">id</span> <span class="p">-</span><span class="n">-output</span> <span class="n">tsv</span>
+<span class="nv">$containerScope</span> <span class="p">=</span> <span class="n">az</span> <span class="n">storage</span> <span class="n">container-rm</span> <span class="n">show</span> <span class="p">-</span><span class="n">-subscription</span> <span class="nv">$subscription</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-resource-group</span> <span class="nv">$resourceGroup</span> <span class="p">-</span><span class="n">-storage-account</span> <span class="nv">$storageAccount</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-name</span> <span class="nv">$documentsContainer</span> <span class="p">-</span><span class="n">-query</span> <span class="n">id</span> <span class="p">-</span><span class="n">-output</span> <span class="n">tsv</span>
+<span class="k">if</span> <span class="p">(</span><span class="o">-not</span> <span class="nv">$searchScope</span> <span class="o">-or</span> <span class="o">-not</span> <span class="nv">$containerScope</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">throw</span> <span class="s1">'Could not resolve the reviewed Search or container scope.'</span>
+<span class="p">}</span>
+
+<span class="nv">$documentGrants</span> <span class="p">=</span> <span class="p">@(</span>
+    <span class="p">@{</span> <span class="n">scope</span> <span class="p">=</span> <span class="nv">$searchScope</span><span class="p">;</span> <span class="n">role</span> <span class="p">=</span> <span class="s1">'1407120a-92aa-4202-b7e9-c0e197c71c8f'</span> <span class="p">}</span>
+    <span class="p">@{</span> <span class="n">scope</span> <span class="p">=</span> <span class="nv">$containerScope</span><span class="p">;</span> <span class="n">role</span> <span class="p">=</span> <span class="s1">'2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'</span> <span class="p">}</span>
+<span class="p">)</span>
+<span class="k">foreach</span> <span class="p">(</span><span class="nv">$grant</span> <span class="k">in</span> <span class="nv">$documentGrants</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">az</span> <span class="n">role</span> <span class="n">assignment</span> <span class="n">list</span> <span class="p">-</span><span class="n">-subscription</span> <span class="nv">$subscription</span> <span class="p">`</span>
+        <span class="p">-</span><span class="n">-assignee-object-id</span> <span class="nv">$agentPrincipalId</span> <span class="p">-</span><span class="n">-scope</span> <span class="nv">$grant</span><span class="p">.</span><span class="n">scope</span> <span class="p">-</span><span class="n">-include-inherited</span> <span class="p">`</span>
+        <span class="p">-</span><span class="n">-fill-principal-name</span> <span class="n">false</span> <span class="p">-</span><span class="n">-fill-role-definition-name</span> <span class="n">false</span> <span class="p">`</span>
+        <span class="p">-</span><span class="n">-query</span> <span class="s1">'[].{principal:principalId,role:roleDefinitionId,scope:scope,condition:condition,conditionVersion:conditionVersion}'</span> <span class="p">`</span>
+        <span class="p">-</span><span class="n">-output</span> <span class="n">json</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The role IDs identify <strong>Search Index Data Reader</strong> and <strong>Storage Blob Data
+Reader</strong>, respectively. Review inherited and conditional access as well as
+direct grants. Do not create another assignment to bypass a condition, or add
+a redundant grant where approved existing access already suffices.</p>
+<p><strong>Write:</strong> only an authorized access administrator should run the next block
+after reviewing the identity, scopes, existing access, and test content. It
+defaults to refusing the operation. Change the approval switch only for this
+explicitly approved test; do not include this block in unattended installation.</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$documentAccessApproved</span> <span class="p">=</span> <span class="nv">$false</span>
+<span class="k">if</span> <span class="p">(</span><span class="o">-not</span> <span class="nv">$documentAccessApproved</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">throw</span> <span class="s1">'Document access has not been approved. No role assignments were created.'</span>
+<span class="p">}</span>
+<span class="c"># Run only the command for a reviewed, missing grant.</span>
+<span class="n">az</span> <span class="n">role</span> <span class="n">assignment</span> <span class="n">create</span> <span class="p">-</span><span class="n">-subscription</span> <span class="nv">$subscription</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-assignee-object-id</span> <span class="nv">$agentPrincipalId</span> <span class="p">-</span><span class="n">-assignee-principal-type</span> <span class="n">ServicePrincipal</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-role</span> <span class="s1">'1407120a-92aa-4202-b7e9-c0e197c71c8f'</span> <span class="p">-</span><span class="n">-scope</span> <span class="nv">$searchScope</span> <span class="p">-</span><span class="n">-output</span> <span class="n">none</span>
+
+<span class="n">az</span> <span class="n">role</span> <span class="n">assignment</span> <span class="n">create</span> <span class="p">-</span><span class="n">-subscription</span> <span class="nv">$subscription</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-assignee-object-id</span> <span class="nv">$agentPrincipalId</span> <span class="p">-</span><span class="n">-assignee-principal-type</span> <span class="n">ServicePrincipal</span> <span class="p">`</span>
+    <span class="p">-</span><span class="n">-role</span> <span class="s1">'2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'</span> <span class="p">-</span><span class="n">-scope</span> <span class="nv">$containerScope</span> <span class="p">-</span><span class="n">-output</span> <span class="n">none</span>
+</code></pre></div>
+<p>Repeat the preceding <strong>Read</strong> loop to confirm the assignments. Then allow for
+RBAC propagation and test only synthetic content. Do not broaden the scopes
+if access still fails. Track test grants separately for later authorized
+cleanup; do not remove the runtime grants maintained by bootstrap.</p>
+<h2 id="10-check-the-result-and-operate-safely">10. Check the result and operate safely</h2>
+<p>Keep the checks distinct:</p>
+<table>
+<thead>
+<tr>
+<th>Check</th>
+<th>What it establishes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>VPN connected</td>
+<td>The tunnel is established.</td>
+</tr>
+<tr>
+<td>Original service name resolves to the expected private IP</td>
+<td>DNS selects the intended private destination.</td>
+</tr>
+<tr>
+<td>TCP/TLS and an authenticated service read succeed</td>
+<td>The tested path and authorized operation work.</td>
+</tr>
+<tr>
+<td>Agent greeting completes</td>
+<td>The tested configuration/model path works.</td>
+</tr>
+<tr>
+<td>A synthetic document query returns a grounded answer</td>
+<td>That retrieval path works for the tested identity.</td>
+</tr>
+<tr>
+<td>Allowed users succeed and denied users are refused</td>
+<td>The tested document-authorization boundary is enforced.</td>
+</tr>
+</tbody>
+</table>
+<p>Troubleshoot the failing layer rather than granting broader permissions:</p>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Check next</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>VPN connection fails</td>
+<td>Gateway state, profile, Entra audience, user access, and Conditional Access</td>
+</tr>
+<tr>
+<td>DNS works only with explicit <code>-Server</code></td>
+<td>Client profile, effective NRPT policy, DNS cache, and other VPN clients</td>
+</tr>
+<tr>
+<td>A private service resolves publicly</td>
+<td>DNS suffixes, zone links, and private endpoint records</td>
+</tr>
+<tr>
+<td>Private DNS is correct but TCP fails</td>
+<td>Forward/return routes, P2S pool, NSGs, and Firewall</td>
+</tr>
+<tr>
+<td>Access breaks after provisioning</td>
+<td>Return route, subnet associations, DNS, and private endpoint state</td>
+</tr>
+<tr>
+<td>Authenticated requests return 403</td>
+<td>Service network restrictions, token audience, identity, and operation-specific RBAC</td>
+</tr>
+<tr>
+<td>Remote image build fails</td>
+<td>Build-pool connectivity, DNS, and approved outbound dependencies</td>
+</tr>
+<tr>
+<td>Deploy requests <code>RUN_FROM_JUMPBOX</code></td>
+<td>The release's deployment-host requirement, not proof that the VPN is broken</td>
+</tr>
+</tbody>
+</table>
+<p>Disconnect the VPN when it is no longer needed. This does not delete resources
+or stop their charges. Plan cleanup separately with the resource owners; do
+not run an indiscriminate teardown against a shared network.</p>
+<h2 id="references">References</h2>
+<ul>
+<li><a href="../deploy/">GPT-RAG deployment guide</a></li>
+<li><a href="https://github.com/Azure/GPT-RAG/releases/latest">Latest stable GPT-RAG release</a></li>
+<li><a href="https://learn.microsoft.com/azure/vpn-gateway/point-to-site-entra-gateway">Configure P2S with Microsoft Entra ID</a></li>
+<li><a href="https://learn.microsoft.com/azure/vpn-gateway/azure-vpn-client-optional-configurations">Azure VPN Client: optional DNS and routing settings</a></li>
+<li><a href="https://learn.microsoft.com/azure/dns/private-resolver-endpoints-rulesets">Azure DNS Private Resolver endpoints</a></li>
+<li><a href="https://learn.microsoft.com/azure/virtual-network/virtual-networks-udr-overview">Azure virtual network traffic routing</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <div style="
+  background-color: var(--md-primary-fg-color);
+  color: var(--md-primary-bg-color);
+  text-align: center;
+  font-size: 0.95em;
+  padding: 1em 0;
+">
+  © 2025 GPT-RAG — powered by ❤️ and coffee ☕
+</div>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.icon", "content.iconify", "navigation.tracking", "toc.integrate", "content.code.annotate", "navigation.top"], "search": "../assets/javascripts/workers/search.07f07601.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.56dfad97.min.js"></script>
+      
+        <script src="../javascripts/source-facts-refresh.js"></script>
+      
+    
+  </body>
+</html>
