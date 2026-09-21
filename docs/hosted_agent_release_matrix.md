@@ -14,6 +14,16 @@ The component release commits are unchanged; `v3.8.4` adds the scoped
 It does not establish a fresh automated live deployment/bootstrap-apply/smoke
 validation, and the independent evidence gates remain fail closed.
 
+!!! warning "Planned v3.8.5 host checks; not a published matrix"
+    `v3.8.4` remains the latest published umbrella release. The `v3.8.5`
+    candidate changes deployment-host validation, not the reviewed component
+    releases below: private OS DNS/RFC1918 IPv4, TCP 443, and TLS/SNI checks
+    replace the jumpbox declaration gate. Explicit configuration deferral is
+    retained. See the [phase/endpoint contract](deploy.md#private-host-checks-v385-candidate).
+    This candidate does not add runtime or document roles, enable evidence
+    gates, or establish fresh live installation/bootstrap/smoke success.
+    Do not combine candidate files with a stable release.
+
 !!! danger "Do not deploy `v3.8.0` or `v3.8.1`"
     Earlier revisions of this page pinned the matrix to `v3.8.1`. Neither
     `v3.8.0` nor `v3.8.1` reaches a running deployment: `v3.8.0` pins

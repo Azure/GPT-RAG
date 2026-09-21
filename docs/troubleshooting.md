@@ -162,6 +162,33 @@ User-authorization evidence requires separate permission-aware retrieval checks,
 including denied access for users without document permission. See
 [application identity versus document identity](howto_authentication.md#hosted-application-identity-versus-document-identity).
 
+## Private deployment host checks (v3.8.5 candidate)
+
+This section is an **unpublished `v3.8.5` companion draft**. The latest stable
+`v3.8.4` still has its `RUN_FROM_JUMPBOX=true` pre-deploy gate. Do not fake that
+flag on a local machine or mix candidate files into a released checkout.
+
+For the planned host-check release, start with the failing layer rather than
+changing identity or adding roles:
+
+| Observation | Response |
+| --- | --- |
+| Endpoint is missing or invalid | Check the selected root/hosted environment and provisioning outputs. Use the original service hostname, not an IP address or guessed `privatelink` URL. |
+| DNS returns public or mixed private/public results | Check effective OS DNS/NRPT, private zone links, and endpoint records. A lookup forced with `-Server` does not establish the OS path used by the hook. |
+| TCP 443 or TLS/SNI validation fails | Check forward and P2S return routes, Firewall/NSGs, the original hostname, and certificate trust. Do not disable certificate checks, use a proxy bypass, or enable public endpoints. |
+| `RUN_FROM_JUMPBOX=true` does not resolve a failed check | Expected: that flag never bypasses the candidate's connectivity checks. Existing true remains compatible but is not required. |
+| No interactive VPN prompt appears | Expected in the candidate: an unset flag attempts actual checks. Noninteractive execution does not automatically skip configuration. |
+| Post-provision configuration is deferred | Inspect the selected root `.env` key and current process setting without printing secrets. `false`, `0`, `no`, and `skip` explicitly defer; they do not select a local host. A truthy jumpbox setting takes precedence over `AZURE_SKIP_NETWORK_ISOLATION_WARNING=true`. Use the [unset/migration instructions](howto_private_vpn.md#keep-the-host-setting-unset-for-the-candidate-vpn-workflow). |
+| The first provision works, but the second loses private access | Explicitly defer post-provision configuration before that provision, then recheck the manually added P2S route. After approved repair and service checks, clear deferral and rerun configuration before deploying. |
+| Hosted build fails while the local host checks pass | Local ACR access does not prove the remote build pool can reach dependencies. Review the private build pool's DNS and approved egress; shared ACR Tasks do not inherit your VPN. |
+| A prebuilt/reused digest has no hosted-build ACR check | Expected when no hosted image build is needed; later deployment checks still apply. |
+| Configuration or retrieval returns 401/403 after host checks pass | The credential-free probe tests DNS/TCP/TLS, not RBAC, API health, or document permissions. Diagnose the operation and identity separately using the existing runtime-access section above. |
+
+See the [candidate phase/endpoint table](deploy.md#private-host-checks-v385-candidate)
+and the [P2S VPN workflow](howto_private_vpn.md#8-continue-the-gpt-rag-installation).
+Passing these checks is not proof of Azure VNet ownership, all-service access,
+or a fresh live installation/bootstrap/smoke run.
+
 
 **Showing Response Time Statistics in the Chat UI**
 
