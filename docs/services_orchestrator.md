@@ -17,6 +17,13 @@ selectable, but its user-history and operator surfaces remain off/503 behind
 independent gates.
 [GitHub Repository](https://github.com/Azure/gpt-rag-orchestrator).
 
+The [unpublished hosted runtime bootstrap fix](deploy.md#hosted-runtime-bootstrap-permissions)
+targets the actual deployed instance identity after agent creation: read-only
+App Configuration access, inference on the selected model account, and read
+access to the exact audit HMAC secret only if its reference is configured. It
+does not grant document access, delegated identity, managed Conversation access,
+or administrative roles, and it does not change the published component matrix.
+
 ## Key Features
 
 - **Strategy-Based Architecture:** Pluggable orchestration strategies selected via Azure App Configuration (`AGENT_STRATEGY`).
@@ -89,8 +96,11 @@ The hosted limits are inactive while `HOSTED_CONTINUITY_ENABLED=false`. When a
 compatible component set is validated, the trusted UI BFF will derive
 `x-ms-user-identity` for Responses protocol `2.0.0`. That owner header is
 distinct from OBO retrieval. The hosted runtime is not an identity-header
-source and receives no key, Conversation or impersonation RBAC, or Cosmos DB in
-hosted/no-panel. Capability/HMAC remains a disabled fallback only.
+source and receives no Conversation-capability key, Conversation or
+impersonation RBAC, or Cosmos DB in hosted/no-panel. Capability/HMAC remains a
+disabled fallback only. This restriction is distinct from the audit HMAC
+secret used by application audit telemetry; bootstrap can grant read access
+only to that configured audit secret.
 
 ### Hosted `v4.1.1` request contract
 

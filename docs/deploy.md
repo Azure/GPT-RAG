@@ -137,8 +137,8 @@ Both assignments must be direct `ServicePrincipal` assignments scoped to the
 individual hosted agent. Broader, inherited, group-derived, wildcard,
 custom-equivalent, or extra-DataAction access fails validation. **Foundry User**
 and **Project Runtime User** are prohibited substitutes. The hosted runtime is
-not an identity-header source and receives no key, Conversation or impersonation
-RBAC, or Cosmos DB in hosted/no-panel.
+not an identity-header source and receives no Conversation-capability key,
+Conversation or impersonation RBAC, or Cosmos DB in hosted/no-panel.
 
 | Setting or gate | Required posture |
 | --- | --- |
@@ -319,6 +319,140 @@ configuration error.
     keep the classic rollback available, and do not describe items 2 through 8
     as validated until each one succeeds. See the
     [hosted-agent component release matrix](hosted_agent_release_matrix.md).
+
+#### Hosted runtime bootstrap permissions
+
+!!! note "Unpublished bootstrap fix; published matrix unchanged"
+    This section describes the scoped bootstrap fix proposed for candidate
+    `v3.8.4`, not a published release. The current released
+    [integration matrix](hosted_agent_release_matrix.md) remains GPT-RAG
+    `v3.8.3`, UI `v2.6.2`, orchestrator `v4.1.1`, ingestion `v2.7.3`, and
+    AI Landing Zone `v2.5.1`. This fix does not change those component pins,
+    topology defaults, or continuity and panel evidence gates.
+
+An active hosted version and a successful readiness probe do not establish
+access to configuration, secrets, models, or documents. The bootstrap targets
+the actual deployed Foundry agent's `instance_identity.principal_id`, discovered
+after agent creation. The Foundry project identity, deployment operator, and
+Container App identities are not substitutes; bootstrap creates no new identity.
+
+The shared `config/deployment/hosted_access.py` contract separates a read-only
+plan from an explicit apply. Planning discovers the instance identity,
+dependency scopes, and existing assignments without changing resources. Apply
+creates only missing, exact-scoped assignments from the following allowlist:
+
+| Runtime dependency | Bootstrap role | Assignment scope |
+| --- | --- | --- |
+| Solution App Configuration | App Configuration Data Reader | Exact configuration store |
+| Solution Azure OpenAI models | Cognitive Services OpenAI User | Exact model account |
+| Configured `AUDIT_HMAC_KEY` Key Vault reference, when present | Key Vault Secrets User | Exact referenced secret, not the whole vault |
+
+The audit reference is inspected as metadata only: neither plan nor apply
+retrieves or logs the secret value. An absent audit reference means no secret
+grant and no secret creation. Missing or malformed identity, resource mapping,
+or reference metadata must fail without choosing another identity or broadening
+the scope. Audit signing is distinct from disabled Conversation-capability/HMAC
+fallback; bootstrap does not enable that fallback.
+
+The deployment operator needs discovery read access and
+`Microsoft.Authorization/roleAssignments/write` at the planned scopes to create
+missing grants. Alternatively, an authorized access administrator can pre-create
+the exact assignments. Matching unconditional assignments are reused on repeat
+runs. A conditional assignment for an otherwise exact principal/role/scope
+tuple blocks all bootstrap writes; bootstrap does not add another unconditional
+assignment to bypass that condition. Have an authorized access administrator
+review the conflict separately. If a later grant fails during apply, valid
+earlier grants remain in place for idempotent recovery; do not roll them back
+or add broader permissions to bypass the failure.
+
+The child `hosted-agent/azure.yaml` registers
+`services.orchestrator-agent.hooks.postdeploy` with
+`../scripts/bootstrapHostedAccess.ps1` on Windows and
+`../scripts/bootstrapHostedAccess.sh` on POSIX. These hooks explicitly apply the
+allowlisted grants after agent creation, covering direct child deployment as
+well as deployment from the root. The direct child hook is RBAC-only: it does
+not invoke the model or incur a smoke-request inference charge.
+
+Root deployment waits for the child hook to succeed, then sends `Hello!` through
+`POST /invocations` in a new hosted session. The shared smoke validator requires
+a completed response containing non-empty assistant text and rejects error,
+failed, incomplete, or cancelled outcomes. It does not require an exact reply
+marker. Bootstrap failure or a failed greeting stops UI cutover.
+
+**Document access is not included.** Bootstrap grants no Search or Storage Blob
+roles, elevated read, managed Conversation or impersonation access, Owner, or
+Contributor. It makes no network changes and cannot repair private connectivity.
+Keep retrieval permissions and delegated document authorization separate. An
+explicitly approved synthetic service-identity container grant also covers
+future files in that container; it must never become a product default.
+
+##### Plan and recover hosted access
+
+Run these commands from the **repository root** of the implementation containing
+the bootstrap fix, after the agent has been deployed. `--azd-env` reads context
+from the hosted child project's azd environment. To select an environment
+explicitly, first set process-local `AZURE_ENV_NAME` with
+`$env:AZURE_ENV_NAME = "<environment-name>"` in PowerShell or
+`export AZURE_ENV_NAME="<environment-name>"` in POSIX. Otherwise the saved child
+azd environment is used; no persistent environment configuration is needed.
+
+PowerShell restores both the working directory and the previous process-local
+`PYTHONPATH`:
+
+```powershell
+$previousPythonPath = $env:PYTHONPATH
+try {
+    $env:PYTHONPATH = (Get-Location).Path
+    Push-Location hosted-agent -ErrorAction Stop
+    try {
+        python -m config.deployment.hosted_access --azd-env --plan
+    }
+    finally {
+        Pop-Location
+    }
+}
+finally {
+    $env:PYTHONPATH = $previousPythonPath
+}
+```
+
+POSIX keeps the directory and import-path changes inside a subshell:
+
+```bash
+( cd hosted-agent && PYTHONPATH=.. python3 -m config.deployment.hosted_access --azd-env --plan )
+```
+
+Planning is read-only and is the default when neither `--plan` nor `--apply` is
+specified. A valid plan can exit `0` while required grants are missing. Inspect
+`grants[].exact_unconditional_assignment` to see whether each exact grant
+already exists. `data_plane_readiness` is `not-tested`: neither a successful
+plan nor an assignment visible through Azure Resource Manager proves that
+authorization has propagated to the data plane.
+
+After reviewing the plan and obtaining authorization for missing grants, repeat
+the PowerShell block with `--plan` replaced by `--apply`; its inner command is
+`python -m config.deployment.hosted_access --azd-env --apply`. On POSIX:
+
+```bash
+( cd hosted-agent && PYTHONPATH=.. python3 -m config.deployment.hosted_access --azd-env --apply )
+```
+
+If a greeting fails while exact assignments are present, wait for propagation
+and rerun the idempotent bootstrap, then perform a separately approved, bounded
+smoke test in a new hosted session. That smoke request invokes the model and
+may incur inference charges; the recovery CLI does not run it automatically.
+Keep UI cutover blocked until the smoke validator succeeds. Do not rebuild the
+image to repair permissions or reuse a process that cached unavailable
+configuration as evidence that a grant failed.
+
+A greeting exercises model and configuration access only. Successful synthetic
+retrieval under service identity does not establish end-user document-level
+authorization. Serializer compatibility with the released orchestrator
+`v4.1.1` was tested offline; a fresh automated live deployment/bootstrap/smoke
+flow has **not** been performed for this candidate. This is not new live
+readiness evidence or a claim that `v3.8.4` is published. See
+[runtime-access troubleshooting](troubleshooting.md#hosted-runtime-access-bootstrap)
+and the [application/document identity boundary](howto_authentication.md#hosted-application-identity-versus-document-identity).
 
 #### Explicit classic fallback
 
