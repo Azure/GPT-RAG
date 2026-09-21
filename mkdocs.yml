@@ -63,6 +63,7 @@ nav:
   - How-to Guides:
     - Azure Direct Models: howto_azure_direct.md
     - Application Gateway: howto_app_gateway.md
+    - Private access over P2S VPN: howto_private_vpn.md
     - Auth & Doc Security: howto_authentication.md
     - Embed chat in a portal: https://github.com/Azure/gpt-rag-ui/blob/main/docs/copilot-embedding.md
     - Admin Dashboard Sign-in: howto_dashboard_signin.md
