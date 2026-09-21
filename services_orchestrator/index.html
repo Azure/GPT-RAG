@@ -1646,6 +1646,12 @@ remains disabled pending live evidence and
 selectable, but its user-history and operator surfaces remain off/503 behind
 independent gates.
 <a href="https://github.com/Azure/gpt-rag-orchestrator">GitHub Repository</a>.</p>
+<p>The <a href="../deploy/#hosted-runtime-bootstrap-permissions">unpublished hosted runtime bootstrap fix</a>
+targets the actual deployed instance identity after agent creation: read-only
+App Configuration access, inference on the selected model account, and read
+access to the exact audit HMAC secret only if its reference is configured. It
+does not grant document access, delegated identity, managed Conversation access,
+or administrative roles, and it does not change the published component matrix.</p>
 <h2 id="key-features">Key Features</h2>
 <ul>
 <li><strong>Strategy-Based Architecture:</strong> Pluggable orchestration strategies selected via Azure App Configuration (<code>AGENT_STRATEGY</code>).</li>
@@ -1799,8 +1805,11 @@ skip Azure AI Search while still using the recent chat history.</p>
 compatible component set is validated, the trusted UI BFF will derive
 <code>x-ms-user-identity</code> for Responses protocol <code>2.0.0</code>. That owner header is
 distinct from OBO retrieval. The hosted runtime is not an identity-header
-source and receives no key, Conversation or impersonation RBAC, or Cosmos DB in
-hosted/no-panel. Capability/HMAC remains a disabled fallback only.</p>
+source and receives no Conversation-capability key, Conversation or
+impersonation RBAC, or Cosmos DB in hosted/no-panel. Capability/HMAC remains a
+disabled fallback only. This restriction is distinct from the audit HMAC
+secret used by application audit telemetry; bootstrap can grant read access
+only to that configured audit secret.</p>
 <h3 id="hosted-v411-request-contract">Hosted <code>v4.1.1</code> request contract</h3>
 <p>Hosted <code>POST /responses</code> rejects top-level <code>conversation</code> and
 <code>previous_response_id</code> with HTTP 422. The caller must send the complete bounded,

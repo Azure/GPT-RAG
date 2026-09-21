@@ -75,6 +75,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#hosted-runtime-access-bootstrap" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -1423,6 +1428,17 @@
       
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -1432,6 +1448,32 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#hosted-runtime-access-bootstrap" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hosted runtime access bootstrap
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -1526,6 +1568,89 @@
   <h1>Troubleshooting</h1>
 
 <p>This page covers common issues, debugging tools, and how to inspect logs in GPT-RAG.</p>
+<h2 id="hosted-runtime-access-bootstrap">Hosted runtime access bootstrap</h2>
+<p>The <a href="../deploy/#hosted-runtime-bootstrap-permissions">unpublished bootstrap fix</a>
+targets the deployed agent's actual <code>instance_identity.principal_id</code>, not the
+deployment operator or Foundry project identity. Its read-only plan and explicit
+apply are limited to application dependencies; the published <code>v3.8.3</code> component
+matrix is unchanged.</p>
+<table>
+<thead>
+<tr>
+<th>Observation</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Agent version is active, but the first request cannot load configuration</td>
+<td>Check the instance identity's App Configuration Data Reader assignment at the exact store. Readiness alone does not exercise this dependency.</td>
+</tr>
+<tr>
+<td>Configuration loading still fails after that grant</td>
+<td>Check whether <code>AUDIT_HMAC_KEY</code> is a Key Vault reference and inspect its exact secret scope. Reading App Configuration does not authorize secret access. Bootstrap covers only the configured audit reference, not arbitrary secrets; never fetch or print secret values to diagnose a grant.</td>
+</tr>
+<tr>
+<td>Configuration provider reports <code>TimeoutError</code></td>
+<td>It can wrap exhausted initialization retries, including authorization failures. Correlate the failing dependency with the planned scopes and existing assignments; do not infer a network failure solely from elapsed time or add broad roles.</td>
+</tr>
+<tr>
+<td>Model request returns 401/403</td>
+<td>Check the declared model endpoint, token audience, and instance identity's Cognitive Services OpenAI User assignment at the exact model account. Do not enable API keys as recovery.</td>
+</tr>
+<tr>
+<td>Search or knowledge-base retrieval returns 403</td>
+<td>Application bootstrap deliberately grants no Search or Blob access. Review the retrieval identity, query role, and source-document permissions separately; never disable permission filters or add elevated read to make a smoke request pass.</td>
+</tr>
+<tr>
+<td>Operator cannot create a planned assignment</td>
+<td>Have an authorized access administrator pre-create the exact grant, or use an operator with <code>Microsoft.Authorization/roleAssignments/write</code> at that scope. Rerun bootstrap; never grant Owner or Contributor to the runtime.</td>
+</tr>
+<tr>
+<td>Identity or dependency scope cannot be resolved unambiguously</td>
+<td>Stop and correct deployment metadata. Do not substitute the project or operator identity, create a new identity, or widen the assignment scope.</td>
+</tr>
+<tr>
+<td>A read-only plan exits <code>0</code> while grants are missing</td>
+<td>Inspect <code>grants[].exact_unconditional_assignment</code>; a valid plan is not an apply. <code>data_plane_readiness: not-tested</code> is not a successful data-plane probe. Use explicit <code>--apply</code> only with authorization for the planned grants.</td>
+</tr>
+<tr>
+<td>An exact principal/role/scope assignment has a condition</td>
+<td>All bootstrap writes are blocked. Have an authorized access administrator review the conflict; do not add an unconditional assignment to bypass the condition.</td>
+</tr>
+<tr>
+<td>Exact assignments are visible in Azure Resource Manager, but requests still fail</td>
+<td>Visibility does not prove data-plane propagation. Wait, rerun the idempotent bootstrap, then perform a separately approved bounded smoke test in a fresh hosted session. Keep UI cutover blocked and do not rebuild the image to repair permissions.</td>
+</tr>
+<tr>
+<td>Direct child deployment completes without a greeting</td>
+<td>The child post-deploy hook is RBAC-only and does not invoke the model. Root deployment waits for child success, then sends <code>Hello!</code> through <code>POST /invocations</code> in a new session. Direct child success is not smoke evidence.</td>
+</tr>
+<tr>
+<td>Greeting returns an error, a non-completed outcome, or no assistant text</td>
+<td>The shared validator requires a completed response with non-empty assistant text and rejects error, failed, incomplete, or cancelled outcomes. An exact reply marker is not required. Failure stops UI cutover.</td>
+</tr>
+<tr>
+<td>Private endpoint or DNS connectivity is unavailable</td>
+<td>Diagnose the existing network path separately. Bootstrap makes no network changes; a role assignment cannot repair connectivity.</td>
+</tr>
+</tbody>
+</table>
+<p>Plans and failure messages must not contain tokens, secret values, or raw
+provider error bodies. A failed partial apply retains valid earlier grants so a
+repeat run can reuse them; it does not authorize smoke/cutover to continue.</p>
+<p>For recovery, use the repository-root
+<a href="../deploy/#plan-and-recover-hosted-access">plan/apply examples</a> with the hosted
+child azd context. Default planning and explicit apply do not invoke a smoke
+request. Offline serializer compatibility with orchestrator <code>v4.1.1</code> does not
+prove a fresh automated live deployment/bootstrap/smoke flow; that flow has not
+been performed for this unpublished candidate.</p>
+<p>A successful greeting establishes model/configuration operation only. Positive
+synthetic retrieval under service identity neither proves end-user document
+isolation nor authorizes protected real documents or default Search/Blob grants.
+User-authorization evidence requires separate permission-aware retrieval checks,
+including denied access for users without document permission. See
+<a href="../howto_authentication/#hosted-application-identity-versus-document-identity">application identity versus document identity</a>.</p>
 <p><strong>Showing Response Time Statistics in the Chat UI</strong></p>
 <p>The GPT-RAG UI includes a built-in option to display response time after each agent answer. To enable it, set the <code>SHOW_STATISTICS</code> application setting to <code>true</code> in your Container App (or App Configuration). Once enabled, each response in the chat will show timing information, helping you identify slow responses and compare performance across different queries or configurations.</p>
 <p><strong>Enabling Debug Logging</strong></p>
