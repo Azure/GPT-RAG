@@ -331,6 +331,11 @@ def discover(environment: Mapping[str, str], *, run: RunAzure = run_az) -> Acces
     if str(rule.get("type", "")).lower() != "fixedratio" or type(rule.get("traffic_percentage")) is not int or rule["traffic_percentage"] != 100:
         raise AccessError("Expected a fixed 100 percent hosted agent version.")
     version = _string(rule.get("agent_version"))
+    if version == "@latest":
+        latest = _object(_object(live.get("versions")).get("latest"))
+        if latest.get("name") != name or _object(latest.get("definition")).get("kind") != "hosted":
+            raise AccessError("Latest routed version is not the expected hosted agent.")
+        version = _string(latest.get("version"))
     if not re.fullmatch(r"[1-9][0-9]*", version):
         raise AccessError("Invalid routed hosted agent version.")
     deployed = retrieve(f"/versions/{version}")
