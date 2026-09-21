@@ -21,12 +21,46 @@ Access, grant Azure permissions, or give the agent access to documents.
 > before creating resources: VPN connectivity alone does not remove restrictions
 > imposed by the deployment scripts.
 
+!!! warning "Unpublished v3.8.5 companion draft"
+    `v3.8.4` is still the latest published release. Its network-isolated
+    pre-deploy hook requires `RUN_FROM_JUMPBOX=true`; do not set that flag on a
+    local machine to pretend it is a jumpbox. The candidate host-check workflow
+    in steps 7-8 is for the planned `v3.8.5` change, not a feature available in
+    `v3.8.4`. Wait for the published release before using that workflow; do not
+    replace release pins with a development branch or personal commit.
+
 ## 1. Before you start
 
 This procedure assumes **Windows 11, Azure public cloud, and a dedicated VNet**
 for the installation. If your organization already provides private connectivity
 and DNS, use that approved setup instead of creating duplicate infrastructure.
 Shared VNets and hub-and-spoke integration need a separate network review.
+
+### Where each resource goes
+
+To keep this example simple, use **one new, dedicated Azure resource group**
+for both the VPN network and GPT-RAG. You choose its name; this guide uses
+`rg-gpt-rag-private`. A resource group is an Azure container for related
+resources in your subscription. It is not an existing corporate network group,
+a folder on your local machine, or the name of your `azd` environment.
+
+Create the network first, in steps 4 and 5. In step 6, tell `azd` to provision
+GPT-RAG into **that same group** with
+`azd env set AZURE_RESOURCE_GROUP $resourceGroup`. Do not create a second group
+for GPT-RAG or move the VPN resources between steps.
+
+| Resource or setting | Where it goes in this example | When it is created or selected |
+| --- | --- | --- |
+| Resource group, `$resourceGroup` | Your chosen subscription; example `rg-gpt-rag-private` | Step 4, once |
+| VNet and its subnets | Inside `$resourceGroup` | VPN/DNS subnets in steps 4-5; workload subnets in step 7 |
+| VPN Gateway and its public IP | Inside the same `$resourceGroup`; gateway uses `GatewaySubnet` in the VNet | Step 4 |
+| DNS Private Resolver and inbound endpoint | Inside the same `$resourceGroup`; inbound endpoint uses the dedicated DNS subnet | Step 5 |
+| GPT-RAG services and private endpoints | Inside the same `$resourceGroup`, using the existing VNet | Step 7 and the hosted deployment phases in step 8 |
+| `$environment`, for example `gpt-rag-vpn-dev` | Local `azd` configuration under `.azure\<environment-name>\` in your checkout | Step 2; this is not an Azure resource group |
+
+Using one group is a simplification, not an enterprise requirement. Separately
+owned network groups, shared VNets, and hub-and-spoke networking are outside
+this walkthrough. Use a platform-reviewed design for those scenarios.
 
 Prepare:
 
@@ -84,8 +118,40 @@ Set-Location .\gpt-rag
 $repoRoot = (Get-Location).Path
 ```
 
-Sign in with your user account and create a new local `azd` environment.
-Run each command separately and stop if it fails.
+### Find your subscription, tenant, and region
+
+Open the [Azure Portal](https://portal.azure.com/) with your own account. In
+**Subscriptions**, select the approved subscription and copy its
+**Subscription ID**. In **Microsoft Entra ID > Overview**, copy the
+**Tenant ID** for the directory that owns that subscription. If you belong to
+multiple directories, check **Directories + subscriptions** before copying.
+See Microsoft's [subscription and tenant ID instructions](https://learn.microsoft.com/azure/azure-portal/get-subscription-tenant-id).
+
+Choose the region with your administrator before creating anything. The
+Portal's resource creation **Region** selector shows display names, such as
+**East US 2**; the command variable uses the corresponding Azure location name,
+such as `eastus2`. This example is not a capacity or quota guarantee.
+
+| Variable | What to enter | Illustrative value, not your account |
+| --- | --- | --- |
+| `$tenant` | Directory's Tenant ID from the Portal | `00000000-0000-0000-0000-000000000000` |
+| `$subscription` | Approved Subscription ID from the Portal | `11111111-1111-1111-1111-111111111111` |
+| `$region` | Approved Azure location name | `eastus2` |
+| `$environment` | A new local `azd` environment name you choose | `gpt-rag-vpn-dev` |
+
+For example, a populated variable block has the following form. **The two
+GUIDs are fictitious: replace them with your Portal values before running it.**
+Also replace `eastus2` if your approved region differs.
+
+```powershell
+$tenant = '00000000-0000-0000-0000-000000000000'
+$subscription = '11111111-1111-1111-1111-111111111111'
+$region = 'eastus2'
+$environment = 'gpt-rag-vpn-dev'
+```
+
+Use your actual values in the block below, then sign in and create the local
+environment. Run each command separately and stop if it fails.
 
 ```powershell
 $tenant = '<tenant-id>'
@@ -102,6 +168,18 @@ azd env new $environment
 
 Azure CLI and `azd` have separate authentication contexts. Do not use the VM
 managed-identity login commands on your local machine.
+
+The account table must show the intended subscription and tenant.
+`azd env new` selects `$environment` and creates local configuration under
+`.azure\$environment`; it does **not** create the resource group or the VPN.
+Keep that directory out of source control. If resuming the same installation,
+select its existing local environment instead of creating a new one:
+`azd env select $environment`.
+
+**Release boundary:** cloning the current latest stable release does not add
+the planned VPN-host deployment support. Until `v3.8.5` is published, you can
+review and prepare the network, but must not treat the candidate steps below
+as a complete local deployment path for `v3.8.4`.
 
 ## 3. Plan non-overlapping network ranges
 
@@ -131,7 +209,9 @@ overlap the VNet or other connected networks. Reserve enough space for the
 GPT-RAG workload subnets listed in step 6.
 
 Set the names and approved ranges once. Names below are examples for a **new,
-dedicated resource group**:
+dedicated resource group shared by the VPN/DNS network and GPT-RAG**. Keep
+`$resourceGroup` unchanged throughout this walkthrough; `$environment` remains
+the separate local configuration name from step 2:
 
 ```powershell
 $resourceGroup = 'rg-gpt-rag-private'
@@ -161,9 +241,11 @@ read step 8 before creating the gateway.
 
 ### Create the resource group and network
 
-**Read, then Write if missing:** check the resource group and create it only
-when absent. This fresh-install path stops if the group already contains
-resources. Reusing an existing installation requires a separate review.
+**First run only; Read, then Write if missing:** this block checks the
+`$resourceGroup` name from step 3 in `$subscription` from step 2. It creates
+that group in `$region` only when absent, then requires it to be empty before
+starting a fresh network. An existing empty group reserved for this installation
+is also acceptable; an existing corporate or unrelated group is not.
 
 ```powershell
 $groupExists = az group exists --subscription $subscription --name $resourceGroup --output tsv
@@ -179,6 +261,33 @@ if ($existingResources.Count -gt 0) {
     throw 'The resource group is not empty. Review it instead of rerunning fresh resource creation.'
 }
 ```
+
+For a new group, expect the creation command to return its name and location,
+then an empty resource list. Once the VPN or DNS resources exist, the group
+is **expected to be nonempty**. The check above is a first-run safeguard,
+not a recurring prerequisite. Do not delete resources to make it pass, and do
+not choose a new group merely because you are resuming.
+
+### Resume an interrupted setup safely
+
+Restore the same variables and select the same local `azd` environment from
+step 2. **Read only:** inventory the existing group before retrying a step:
+
+```powershell
+az resource list --subscription $subscription --resource-group $resourceGroup `
+    --query '[].{name:name,type:type,location:location}' --output table
+```
+
+Identify the VNet, gateway, public IP, and DNS resources by the names you chose.
+Use the corresponding **Read** commands in steps 4 and 5 to verify their
+settings and provisioning state. A resource still provisioning after a
+timeout may only need its existing wait/status check, not another create.
+Resume from the failed or incomplete step once its prerequisites are verified.
+Do not blindly rerun all creation blocks, overwrite a differing resource,
+delete the group, or restart in a second group. Stop for owner review when the
+existing names, settings, or ownership do not match your intended installation.
+
+### Create the VNet
 
 **Write:** create the VNet with its reserved `GatewaySubnet`:
 
@@ -460,6 +569,12 @@ VPN failure.
 
 ## 6. Point GPT-RAG at the existing VNet
 
+The VPN and DNS resources now occupy `$resourceGroup`. GPT-RAG must use
+**the same group**, not a new group named after `$environment`. The command
+`azd env set AZURE_RESOURCE_GROUP $resourceGroup` below saves this selection
+in the local environment; `azd provision` later creates the GPT-RAG resources
+there. It does not move or recreate the network.
+
 Return to the GPT-RAG root and retrieve the actual VNet ID again rather than
 typing one. Run each command separately and stop on failure:
 
@@ -480,10 +595,61 @@ azd env set DEPLOYMENT_TOPOLOGY hosted-no-panel
 azd env set DEPLOY_ACR_TASK_AGENT_POOL true
 ```
 
+Confirm the saved group before proceeding:
+`azd env get-value AZURE_RESOURCE_GROUP` must return your `$resourceGroup`
+value (for example, `rg-gpt-rag-private`). `EXISTING_VNET_RESOURCE_ID` must
+identify the VNet you just inspected in that group, not another corporate VNet.
+
 `DEPLOY_SUBNETS=true` assumes a dedicated VNet with room for the GPT-RAG subnets.
 Do not apply this setting to a shared VNet without reviewing the affected
 resources. Explicit `hosted-no-panel` selection avoids depending on how an
 environment with pre-existing resources is classified.
+
+### Keep the host setting unset for the candidate VPN workflow
+
+For the planned `v3.8.5` workflow, leave `RUN_FROM_JUMPBOX` **unset**, not
+`false`. **On a fresh installation, simply never set this key and skip the
+removal instructions below.** Existing `true` remains compatible with the
+candidate checks, but is unnecessary and never bypasses them.
+
+**Migration/resume only:** if you reused a jumpbox configuration and want the
+VPN workflow below, remove the entire `RUN_FROM_JUMPBOX=...` line from the
+selected **root checkout's** `.azure\$environment\.env`. Do not replace `false`
+with an empty value. Preserve every unrelated key and secret; do not remove
+the environment directory or edit child, registry, user, or machine settings.
+Open only that local file:
+
+```powershell
+$azdEnvFile = Join-Path $repoRoot ".azure\$environment\.env"
+if (-not (Test-Path -LiteralPath $azdEnvFile)) {
+    throw 'Select the intended local azd environment before editing its settings.'
+}
+notepad.exe $azdEnvFile
+```
+
+After removing that key if present, **save and close the editor**, then check
+without displaying the rest of the file, which can contain sensitive values.
+Clear the same key from this PowerShell process if an earlier session step set it:
+
+```powershell
+if (Select-String -LiteralPath $azdEnvFile -Pattern '^\s*RUN_FROM_JUMPBOX\s*=' -Quiet) {
+    throw 'Remove only RUN_FROM_JUMPBOX from the selected .env file, then save it.'
+}
+if (Test-Path Env:RUN_FROM_JUMPBOX) {
+    Remove-Item Env:RUN_FROM_JUMPBOX
+}
+```
+
+No output and no error means the selected root file check passed and this
+process key is absent. These commands change no global settings.
+`azd env remove` removes an environment, not one key; do not use it here.
+
+Use `AZURE_SKIP_NETWORK_ISOLATION_WARNING` to control the infrastructure-only
+phases below. In the candidate implementation, `RUN_FROM_JUMPBOX=false`, `0`,
+`no`, or `skip` explicitly defers post-provision configuration; it does not
+mean "run from my local machine." A truthy jumpbox value takes precedence over
+the warning/deferral setting, but never bypasses the actual network checks.
+Leaving it unset avoids both ambiguities.
 
 Provisioning supplies `ACR_TASK_AGENT_POOL` with the created pool's name.
 Do not pre-fill that output to make a missing pool appear configured.
@@ -538,6 +704,9 @@ Review their supported deployment options and cost separately.
 
 ## 7. Provision infrastructure and verify connectivity
 
+**Candidate `v3.8.5` workflow:** follow this sequence only with a published
+release containing the host checks described in step 8.
+
 Proceed only after reviewing the deployment-host requirement in step 8, the
 proposed resource costs, and the network plan.
 
@@ -545,12 +714,22 @@ Separate infrastructure provisioning from data-plane configuration:
 
 ```powershell
 azd env set AZURE_SKIP_NETWORK_ISOLATION_WARNING true
+$env:AZURE_SKIP_NETWORK_ISOLATION_WARNING = 'true'
 azd provision --preview
 ```
 
 Here, `AZURE_SKIP_NETWORK_ISOLATION_WARNING=true` deliberately defers local
 data-plane post-provisioning. It does **not** skip security requirements or
-prove connectivity. Preview can run hooks and prepare local files.
+prove connectivity. With `RUN_FROM_JUMPBOX` unset as above, the candidate hook
+reports the explicit deferral instead of trying private service configuration.
+Preview can run hooks and prepare local files.
+
+The two assignments deliberately agree: `azd env set` saves the flag in the
+selected local environment, while `$env:` sets it in this PowerShell process.
+An inherited process warning flag can still defer configuration when the
+selected environment does not contain that key. Set both to `false` when
+resuming configuration, as shown below; do not assume removing a saved key
+also removes an inherited process value.
 
 Review subnet changes, private endpoints, DNS, NSGs, Firewall, quotas, the
 private ACR build pool, and preservation of the VPN and resolver subnets.
@@ -724,52 +903,114 @@ they do not prove the agent has its own permissions.
 
 ### Configure services over the VPN
 
-The post-provision script supports interactive confirmation of VPN access.
-After the network checks succeed, clear the setting that deferred that step
-and run it from the repository root in an interactive PowerShell window:
+**Candidate `v3.8.5` behavior:** the post-provision script checks actual private
+connectivity instead of asking whether you are on the VPN. An unset
+`RUN_FROM_JUMPBOX` no longer causes an interactive prompt or an automatic skip
+in a noninteractive session. After checking the return route and services in
+step 7, clear the explicit deferral and run from the repository root:
 
 ```powershell
 azd env set AZURE_SKIP_NETWORK_ISOLATION_WARNING false
 if ($LASTEXITCODE -ne 0) { throw 'Could not enable data-plane configuration.' }
+$env:AZURE_SKIP_NETWORK_ISOLATION_WARNING = 'false'
 .\scripts\postProvision.ps1
 ```
 
-Confirm the VPN/VNet-access prompt only after verifying connectivity.
+Expect the App Configuration host check to succeed before data-plane
+configuration starts, then wait for the script's successful completion.
 This script configures Azure services; it is not a read-only diagnostic.
-If it reports that configuration was skipped, that phase is not complete.
+If it reports deferral, configuration has **not** run: check both the saved
+and process settings above. The hook can exit successfully after warning that
+configuration is incomplete; a zero exit code does not override that warning.
+If a host check fails, fix DNS/routing/TLS before
+retrying; do not disable validation.
 
 ### Check the deployment host before building or deploying
 
-The published `v3.8.4` pre-deploy hook still requires `RUN_FROM_JUMPBOX=true`
-for network-isolated `azd deploy`. This check does not block the interactive
-post-provision configuration above, but VPN access alone does not satisfy it.
-If deployment must run entirely on your local machine, do not proceed to the
-build/deploy phase until explicit VPN-host support is available. Do not set
-the jumpbox flag on your local machine to work around this restriction.
+The planned `v3.8.5` host checks apply when `NETWORK_ISOLATION=true`. They use
+the operating system's normal DNS resolution, require only RFC1918 private
+IPv4 destinations (`10.0.0.0/8`, `172.16.0.0/12`, or `192.168.0.0/16`), then
+check TCP 443 and normal TLS certificate/hostname validation with SNI for the
+original service hostname. The checks do not send Azure credentials or an
+authenticated application request.
 
-For a deployment host supported by your release, follow the
-[hosted deployment lifecycle](deploy.md#two-phase-hosted-deployment).
-The following are **Write/build operations on a supported deployment host
-only**, not a workaround for the local-machine restriction:
+| Candidate phase | Endpoint checked before that phase's protected operation |
+| --- | --- |
+| Post-provision configuration | `APP_CONFIG_ENDPOINT` |
+| Pre-deploy | `APP_CONFIG_ENDPOINT`; also `AZURE_AI_PROJECT_ENDPOINT` for hosted deployment |
+| Hosted image build | `AZURE_CONTAINER_REGISTRY_ENDPOINT` for the actual registry selected for the build |
+
+Public mode (`NETWORK_ISOLATION=false`) does not run these private-host probes.
+An invalid explicit isolation value, such as `tru`, fails instead of silently
+selecting public mode.
+The selected `azd` environment must be readable and valid; a failed, empty,
+or malformed environment read stops the hook rather than falling back to
+another `.azure` directory.
+Reusing an existing image digest or supplying a prebuilt digest avoids an
+unnecessary hosted-build ACR probe; it does not bypass checks needed by later
+deployment phases. A missing/invalid endpoint, public or mixed DNS result,
+certificate failure, or timeout stops the guarded phase before its writes.
+`RUN_FROM_JUMPBOX=true` is not proof of connectivity and never bypasses these
+checks. The jumpbox and warning flags control only post-provision deferral;
+pre-deploy and hosted-build checks ignore them. There is no instruction to
+skip TLS validation, use a proxy bypass,
+or fall back to public service endpoints.
+
+These checks establish only the tested host-to-endpoint DNS/TCP/TLS path.
+They do not establish RBAC, API health, ownership of the Azure VNet, connectivity
+for every service, the remote build pool's outbound access, or success of a
+fresh GPT-RAG installation. Keep the separate authorized service checks in
+step 7 and the runtime/document authorization checks below.
+
+**Historical `v3.8.4`:** its pre-deploy hook still requires
+`RUN_FROM_JUMPBOX=true`. Do not use that flag locally as a workaround. Wait
+for the published host-check release before following this candidate local
+build/deploy sequence.
+
+### Prepare the hosted image, then provision again
+
+Follow the [hosted deployment lifecycle](deploy.md#two-phase-hosted-deployment).
+The following are **Write/build operations**, not read-only connectivity tests.
+Stay connected to the VPN, keep `RUN_FROM_JUMPBOX` unset, and use the same
+released source, local environment, and resource group throughout:
 
 ```powershell
 Set-Location $repoRoot
 azd env get-value ACR_TASK_AGENT_POOL
 .\scripts\prepareHostedDeployment.ps1
 if ($LASTEXITCODE -ne 0) { throw 'Hosted image preparation failed.' }
+azd env set AZURE_SKIP_NETWORK_ISOLATION_WARNING true
+$env:AZURE_SKIP_NETWORK_ISOLATION_WARNING = 'true'
 azd provision
 ```
 
+The deferral is restored **before the second `azd provision`** because that
+provision can replace a manually added P2S return route. It prevents automatic
+data-plane configuration before you have rechecked the network; it does not
+undo the image preparation or move resources to another group.
+
 Stop and repeat the route and connectivity checks in step 7 after that
-provision. Only then continue on the supported host:
+provision. Once the expected return path and private service access are
+confirmed, clear deferral and rerun configuration before deployment:
+
+```powershell
+azd env set AZURE_SKIP_NETWORK_ISOLATION_WARNING false
+if ($LASTEXITCODE -ne 0) { throw 'Could not re-enable data-plane configuration.' }
+$env:AZURE_SKIP_NETWORK_ISOLATION_WARNING = 'false'
+.\scripts\postProvision.ps1
+if ($LASTEXITCODE -ne 0) { throw 'Post-provision configuration did not complete.' }
+```
+
+Continue only when configuration completes successfully:
 
 ```powershell
 azd deploy
 ```
 
-Do not treat this sequence as a validated local-machine-only path while the
-host requirement above remains. Do not copy a command to another host without
-first selecting the same released source and `azd` environment there.
+Expected outcome: the pre-deploy checks pass and the deployment proceeds to
+its normal service operations. A passed host check alone is not a successful
+deployment. A fresh automated live installation/bootstrap/smoke run has not
+been performed for this candidate; that acceptance remains separate.
 
 Use the VNet-connected ACR build pool for private builds. Your local VPN
 connection does not make shared ACR Tasks able to reach private resources.
@@ -966,7 +1207,9 @@ Troubleshoot the failing layer rather than granting broader permissions:
 | Access breaks after provisioning | Return route, subnet associations, DNS, and private endpoint state |
 | Authenticated requests return 403 | Service network restrictions, token audience, identity, and operation-specific RBAC |
 | Remote image build fails | Build-pool connectivity, DNS, and approved outbound dependencies |
-| Deploy requests `RUN_FROM_JUMPBOX` | The release's deployment-host requirement, not proof that the VPN is broken |
+| Deploy requests `RUN_FROM_JUMPBOX` | Check the selected release: `v3.8.4` has the old gate; planned `v3.8.5` uses actual host checks. Do not fake the flag or mix development files into a release. |
+| Candidate host check rejects public/mixed DNS, TLS, or a timeout | Correct the original endpoint, OS DNS/NRPT, private routes, and certificate trust. A TCP-only test is insufficient; do not disable TLS validation. |
+| Candidate post-provision reports deferral | Keep `RUN_FROM_JUMPBOX` unset and set both the saved and process `AZURE_SKIP_NETWORK_ISOLATION_WARNING` values to `false` only after route/service checks. `RUN_FROM_JUMPBOX=false` is also an explicit defer, not a local-host selector. |
 
 Disconnect the VPN when it is no longer needed. This does not delete resources
 or stop their charges. Plan cleanup separately with the resource owners; do
