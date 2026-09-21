@@ -2143,19 +2143,25 @@ as validated until each one succeeds. See the
 </div>
 <h4 id="hosted-runtime-bootstrap-permissions">Hosted runtime bootstrap permissions</h4>
 <div class="admonition note">
-<p class="admonition-title">Unpublished bootstrap fix; published matrix unchanged</p>
-<p>This section describes the scoped bootstrap fix proposed for candidate
-<code>v3.8.4</code>, not a published release. The current released
-<a href="../hosted_agent_release_matrix/">integration matrix</a> remains GPT-RAG
-<code>v3.8.3</code>, UI <code>v2.6.2</code>, orchestrator <code>v4.1.1</code>, ingestion <code>v2.7.3</code>, and
-AI Landing Zone <code>v2.5.1</code>. This fix does not change those component pins,
-topology defaults, or continuity and panel evidence gates.</p>
+<p class="admonition-title">Hosted bootstrap patch; component pins unchanged</p>
+<p>GPT-RAG <code>v3.8.4</code> adds this scoped deployment bootstrap without repinning
+UI <code>v2.6.2</code>, orchestrator <code>v4.1.1</code>, ingestion <code>v2.7.3</code>, or AI Landing Zone
+<code>v2.5.1</code> from the <code>v3.8.3</code>
+<a href="../hosted_agent_release_matrix/">integration matrix</a>.
+Topology defaults and continuity and panel evidence gates are unchanged.</p>
 </div>
 <p>An active hosted version and a successful readiness probe do not establish
 access to configuration, secrets, models, or documents. The bootstrap targets
 the actual deployed Foundry agent's <code>instance_identity.principal_id</code>, discovered
 after agent creation. The Foundry project identity, deployment operator, and
 Container App identities are not substitutes; bootstrap creates no new identity.</p>
+<p>The deployed agent must have one route receiving 100% of traffic. That route
+may select an explicit numeric version or <code>@latest</code>; bootstrap resolves
+<code>@latest</code> through the returned latest-version metadata and verifies the concrete
+hosted version before planning grants for the agent instance identity. That
+identity comes from the agent root's <code>instance_identity.principal_id</code>, not
+<code>versions.latest</code> or the Foundry project. Malformed or ambiguous bindings fail
+before any role-assignment writes.</p>
 <p>The shared <code>config/deployment/hosted_access.py</code> contract separates a read-only
 plan from an explicit apply. Planning discovers the instance identity,
 dependency scopes, and existing assignments without changing resources. Apply
@@ -2269,9 +2275,12 @@ configuration as evidence that a grant failed.</p>
 <p>A greeting exercises model and configuration access only. Successful synthetic
 retrieval under service identity does not establish end-user document-level
 authorization. Serializer compatibility with the released orchestrator
-<code>v4.1.1</code> was tested offline; a fresh automated live deployment/bootstrap/smoke
-flow has <strong>not</strong> been performed for this candidate. This is not new live
-readiness evidence or a claim that <code>v3.8.4</code> is published. See
+<code>v4.1.1</code> was tested offline. A real read-only plan resolved <code>@latest</code> to concrete
+version <code>1</code>, exited <code>0</code>, and found all three minimal grants already present;
+<code>data_plane_readiness</code> remained <code>not-tested</code>. That plan performed no apply or
+inference. A fresh automated live deployment/bootstrap-apply/smoke flow has
+<strong>not</strong> been performed for this bootstrap change; these checks do not establish
+data-plane readiness. See
 <a href="../troubleshooting/#hosted-runtime-access-bootstrap">runtime-access troubleshooting</a>
 and the <a href="../howto_authentication/#hosted-application-identity-versus-document-identity">application/document identity boundary</a>.</p>
 <h4 id="explicit-classic-fallback">Explicit classic fallback</h4>
@@ -2284,8 +2293,13 @@ and the <a href="../howto_authentication/#hosted-application-identity-versus-doc
 <code>CHAT_BACKEND=orchestrator</code> without deleting hosted Conversations or existing
 classic panel data.</p>
 <h4 id="current-release">Current release</h4>
-<p><a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3">GPT-RAG <code>v3.8.3</code></a> is the
-latest published umbrella release. It pins UI <code>v2.6.2</code>, orchestrator <code>v4.1.1</code>,
+<p>GPT-RAG <code>v3.8.4</code> is the latest published umbrella release. It adds the
+<a href="#hosted-runtime-bootstrap-permissions">hosted runtime bootstrap</a> without
+changing the component pins, topology defaults, or evidence gates from
+<code>v3.8.3</code>. A fresh automated live deployment/bootstrap-apply/smoke flow has not
+been performed for this patch.</p>
+<p>The preceding <a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3">GPT-RAG <code>v3.8.3</code></a>
+pins UI <code>v2.6.2</code>, orchestrator <code>v4.1.1</code>,
 ingestion <code>v2.7.3</code>, and AI Landing Zone <code>v2.5.1</code>, and it makes hosted/no-panel
 the default topology for genuinely fresh deployments. It repins ingestion only:
 <code>v2.7.3</code> stops the data-ingestion administrative surface from being mounted in

@@ -1690,11 +1690,11 @@ for source order, the existing environment opt-in, and recovery steps.
 This is candidate behavior, not a shipped manifest update.</p>
 </div>
 <h2 id="hosted-runtime-access-bootstrap">Hosted runtime access bootstrap</h2>
-<p>The <a href="../deploy/#hosted-runtime-bootstrap-permissions">unpublished bootstrap fix</a>
+<p>The <a href="../deploy/#hosted-runtime-bootstrap-permissions">hosted runtime bootstrap fix</a>
 targets the deployed agent's actual <code>instance_identity.principal_id</code>, not the
 deployment operator or Foundry project identity. Its read-only plan and explicit
-apply are limited to application dependencies; the published <code>v3.8.3</code> component
-matrix is unchanged.</p>
+apply are limited to application dependencies; the bootstrap patch retains the
+<code>v3.8.3</code> component pins.</p>
 <table>
 <thead>
 <tr>
@@ -1765,7 +1765,7 @@ repeat run can reuse them; it does not authorize smoke/cutover to continue.</p>
 child azd context. Default planning and explicit apply do not invoke a smoke
 request. Offline serializer compatibility with orchestrator <code>v4.1.1</code> does not
 prove a fresh automated live deployment/bootstrap/smoke flow; that flow has not
-been performed for this unpublished candidate.</p>
+been performed for this bootstrap change.</p>
 <p>A successful greeting establishes model/configuration operation only. Positive
 synthetic retrieval under service identity neither proves end-user document
 isolation nor authorizes protected real documents or default Search/Blob grants.

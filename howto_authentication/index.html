@@ -1773,12 +1773,12 @@ for exact component behavior and the
 <a href="../hosted_continuity_platform_contract/">hosted conversation continuity platform contract</a>
 for the owner-validation, protocol, role, and lifecycle requirements.</p>
 <h3 id="hosted-application-identity-versus-document-identity">Hosted application identity versus document identity</h3>
-<p>The <a href="../deploy/#hosted-runtime-bootstrap-permissions">unpublished hosted bootstrap fix</a>
+<p>The <a href="../deploy/#hosted-runtime-bootstrap-permissions">hosted bootstrap fix</a>
 targets the deployed agent's own <code>instance_identity.principal_id</code> for
 configuration reads, model inference, and the exact audit HMAC secret only when
 a Key Vault reference is configured. Audit signing is separate from the disabled
-Conversation-capability/HMAC fallback. The current <code>v3.8.3</code> release matrix and
-its continuity and panel evidence gates remain unchanged.</p>
+Conversation-capability/HMAC fallback. The bootstrap patch retains the <code>v3.8.3</code>
+component pins and leaves continuity and panel evidence gates unchanged.</p>
 <p>These application permissions are not a signed-in user's permissions and do
 not establish OBO, Conversation ownership, or document-level authorization.
 Bootstrap never grants Search, Blob, managed Conversation, or impersonation

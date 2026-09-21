@@ -1722,8 +1722,12 @@ Source pins remain implementation evidence; released manifest pins are unchanged
 See that record for active rules, reference runs and remaining validation gaps.</p>
 </div>
 <p>This page records the exact hosted-agent component releases pinned by the
-GPT-RAG umbrella release <a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3"><code>v3.8.3</code></a>
-and the independent evidence gates that remain fail closed.</p>
+GPT-RAG umbrella release <code>v3.8.4</code> and the preceding
+<a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3"><code>v3.8.3</code></a> combination.
+The component release commits are unchanged; <code>v3.8.4</code> adds the scoped
+<a href="../deploy/#hosted-runtime-bootstrap-permissions">hosted runtime bootstrap</a>.
+It does not establish a fresh automated live deployment/bootstrap-apply/smoke
+validation, and the independent evidence gates remain fail closed.</p>
 <div class="admonition danger">
 <p class="admonition-title">Do not deploy <code>v3.8.0</code> or <code>v3.8.1</code></p>
 <p>Earlier revisions of this page pinned the matrix to <code>v3.8.1</code>. Neither
@@ -1734,10 +1738,10 @@ after a successful image build. The matrix below is the <code>v3.8.3</code>
 combination, which deploys end to end.</p>
 </div>
 <div class="admonition warning">
-<p class="admonition-title">Pins are shipped in umbrella <code>v3.8.3</code>; evidence gates remain fail closed</p>
-<p>The umbrella <code>manifest.json</code> pins all four exact releases below and explicit
-<code>hosted-panel</code> topology selection is supported. The manifest's umbrella tag
-is <code>v3.8.3</code>; use only a GPT-RAG source or release that contains these pins
+<p class="admonition-title">Historical <code>v3.8.3</code> evidence; gates remain fail closed</p>
+<p>The <code>v3.8.3</code> umbrella <code>manifest.json</code> pins all four exact releases below and
+explicit <code>hosted-panel</code> topology selection is supported. Use only a
+GPT-RAG source or release that contains these pins
 rather than combining component tags independently.
 <code>HOSTED_CONTINUITY_ENABLED</code>, <code>PANEL_HISTORY_ENABLED</code>,
 <code>PANEL_HISTORY_OWNER_BINDING_VALIDATED</code>, and
@@ -1760,6 +1764,38 @@ Evidence-gate items 2 through 8 and the <code>store</code> contract matrix have 
 been re-run; the four flags above remain deployment-published <code>false</code>.</p>
 </div>
 <h2 id="exact-integrated-matrix">Exact integrated matrix</h2>
+<table>
+<thead>
+<tr>
+<th>Umbrella release</th>
+<th>UI</th>
+<th>Orchestrator</th>
+<th>Ingestion</th>
+<th>AI Landing Zone</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>v3.8.4</code></td>
+<td><code>v2.6.2</code></td>
+<td><code>v4.1.1</code></td>
+<td><code>v2.7.3</code></td>
+<td><code>v2.5.1</code></td>
+<td>Scoped hosted-runtime bootstrap; no component repins or new live readiness claim.</td>
+</tr>
+<tr>
+<td><a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3"><code>v3.8.3</code></a></td>
+<td><code>v2.6.2</code></td>
+<td><code>v4.1.1</code></td>
+<td><code>v2.7.3</code></td>
+<td><code>v2.5.1</code></td>
+<td>Ingestion administrative-surface gating; historical release retained.</td>
+</tr>
+</tbody>
+</table>
+<p>Both umbrella rows use the same reviewed component release commits below.
+<code>v3.8.4</code> does not introduce a new runtime or AI Landing Zone release.</p>
 <table>
 <thead>
 <tr>
@@ -1813,7 +1849,7 @@ close their independent live evidence and authorization gates.</p>
 <tbody>
 <tr>
 <td>Umbrella integration manifest</td>
-<td>Pins the exact matrix above. Stamped as <a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3"><code>v3.8.3</code></a>.</td>
+<td>Stamped as <code>v3.8.4</code>; retains the exact component release commits from <a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3"><code>v3.8.3</code></a> listed above.</td>
 </tr>
 <tr>
 <td>Fresh UI <code>v2.6.2</code> process with no <code>CHAT_BACKEND</code> value</td>
