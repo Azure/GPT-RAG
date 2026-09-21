@@ -60,12 +60,12 @@ for the owner-validation, protocol, role, and lifecycle requirements.
 
 ### Hosted application identity versus document identity
 
-The [unpublished hosted bootstrap fix](deploy.md#hosted-runtime-bootstrap-permissions)
+The [hosted bootstrap fix](deploy.md#hosted-runtime-bootstrap-permissions)
 targets the deployed agent's own `instance_identity.principal_id` for
 configuration reads, model inference, and the exact audit HMAC secret only when
 a Key Vault reference is configured. Audit signing is separate from the disabled
-Conversation-capability/HMAC fallback. The current `v3.8.3` release matrix and
-its continuity and panel evidence gates remain unchanged.
+Conversation-capability/HMAC fallback. The bootstrap patch retains the `v3.8.3`
+component pins and leaves continuity and panel evidence gates unchanged.
 
 These application permissions are not a signed-in user's permissions and do
 not establish OBO, Conversation ownership, or document-level authorization.

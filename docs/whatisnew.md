@@ -6,6 +6,19 @@ patch, and fix, see the [GitHub releases](https://github.com/Azure/GPT-RAG/relea
 
 ### September 2026
 
+- **Hosted runtime bootstrap permissions (GPT-RAG `v3.8.4`).**
+  The scoped umbrella patch gives the deployed hosted instance identity only
+  exact-store App Configuration read access, exact-account model access, and
+  exact-secret read access when an audit HMAC Key Vault reference is configured.
+  Read-only planning and explicit apply support recovery; child post-deploy
+  hooks apply the grants before the root greeting and UI cutover. No Search,
+  Blob, managed Conversation, or administrative roles are added automatically.
+  UI `v2.6.2`, orchestrator `v4.1.1`, ingestion `v2.7.3`, and AI Landing Zone
+  `v2.5.1` remain unchanged from `v3.8.3`, as do topology and continuity/panel
+  evidence gates. A fresh automated live deployment/bootstrap/smoke flow has not
+  been performed for this change. See
+  [bootstrap permissions and recovery](deploy.md#hosted-runtime-bootstrap-permissions).
+
 - **Data-ingestion administrative surface is gated on the deployment mode ([GPT-RAG v3.8.3](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3)).**
   The umbrella release repins ingestion to `v2.7.3`; UI `v2.6.2`, orchestrator
   `v4.1.1`, and AILZ `v2.5.1` are unchanged from `v3.8.2`. Ingestion `v2.7.2`

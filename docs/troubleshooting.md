@@ -122,11 +122,11 @@ This page covers common issues, debugging tools, and how to inspect logs in GPT-
 
 ## Hosted runtime access bootstrap
 
-The [unpublished bootstrap fix](deploy.md#hosted-runtime-bootstrap-permissions)
+The [hosted runtime bootstrap fix](deploy.md#hosted-runtime-bootstrap-permissions)
 targets the deployed agent's actual `instance_identity.principal_id`, not the
 deployment operator or Foundry project identity. Its read-only plan and explicit
-apply are limited to application dependencies; the published `v3.8.3` component
-matrix is unchanged.
+apply are limited to application dependencies; the bootstrap patch retains the
+`v3.8.3` component pins.
 
 | Observation | Response |
 | --- | --- |
@@ -153,7 +153,7 @@ For recovery, use the repository-root
 child azd context. Default planning and explicit apply do not invoke a smoke
 request. Offline serializer compatibility with orchestrator `v4.1.1` does not
 prove a fresh automated live deployment/bootstrap/smoke flow; that flow has not
-been performed for this unpublished candidate.
+been performed for this bootstrap change.
 
 A successful greeting establishes model/configuration operation only. Positive
 synthetic retrieval under service identity neither proves end-user document

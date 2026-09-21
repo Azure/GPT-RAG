@@ -322,19 +322,26 @@ configuration error.
 
 #### Hosted runtime bootstrap permissions
 
-!!! note "Unpublished bootstrap fix; published matrix unchanged"
-    This section describes the scoped bootstrap fix proposed for candidate
-    `v3.8.4`, not a published release. The current released
-    [integration matrix](hosted_agent_release_matrix.md) remains GPT-RAG
-    `v3.8.3`, UI `v2.6.2`, orchestrator `v4.1.1`, ingestion `v2.7.3`, and
-    AI Landing Zone `v2.5.1`. This fix does not change those component pins,
-    topology defaults, or continuity and panel evidence gates.
+!!! note "Hosted bootstrap patch; component pins unchanged"
+    GPT-RAG `v3.8.4` adds this scoped deployment bootstrap without repinning
+    UI `v2.6.2`, orchestrator `v4.1.1`, ingestion `v2.7.3`, or AI Landing Zone
+    `v2.5.1` from the `v3.8.3`
+    [integration matrix](hosted_agent_release_matrix.md).
+    Topology defaults and continuity and panel evidence gates are unchanged.
 
 An active hosted version and a successful readiness probe do not establish
 access to configuration, secrets, models, or documents. The bootstrap targets
 the actual deployed Foundry agent's `instance_identity.principal_id`, discovered
 after agent creation. The Foundry project identity, deployment operator, and
 Container App identities are not substitutes; bootstrap creates no new identity.
+
+The deployed agent must have one route receiving 100% of traffic. That route
+may select an explicit numeric version or `@latest`; bootstrap resolves
+`@latest` through the returned latest-version metadata and verifies the concrete
+hosted version before planning grants for the agent instance identity. That
+identity comes from the agent root's `instance_identity.principal_id`, not
+`versions.latest` or the Foundry project. Malformed or ambiguous bindings fail
+before any role-assignment writes.
 
 The shared `config/deployment/hosted_access.py` contract separates a read-only
 plan from an explicit apply. Planning discovers the instance identity,
@@ -448,9 +455,12 @@ configuration as evidence that a grant failed.
 A greeting exercises model and configuration access only. Successful synthetic
 retrieval under service identity does not establish end-user document-level
 authorization. Serializer compatibility with the released orchestrator
-`v4.1.1` was tested offline; a fresh automated live deployment/bootstrap/smoke
-flow has **not** been performed for this candidate. This is not new live
-readiness evidence or a claim that `v3.8.4` is published. See
+`v4.1.1` was tested offline. A real read-only plan resolved `@latest` to concrete
+version `1`, exited `0`, and found all three minimal grants already present;
+`data_plane_readiness` remained `not-tested`. That plan performed no apply or
+inference. A fresh automated live deployment/bootstrap-apply/smoke flow has
+**not** been performed for this bootstrap change; these checks do not establish
+data-plane readiness. See
 [runtime-access troubleshooting](troubleshooting.md#hosted-runtime-access-bootstrap)
 and the [application/document identity boundary](howto_authentication.md#hosted-application-identity-versus-document-identity).
 
@@ -470,8 +480,14 @@ classic panel data.
 
 #### Current release
 
-[GPT-RAG `v3.8.3`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3) is the
-latest published umbrella release. It pins UI `v2.6.2`, orchestrator `v4.1.1`,
+GPT-RAG `v3.8.4` is the latest published umbrella release. It adds the
+[hosted runtime bootstrap](#hosted-runtime-bootstrap-permissions) without
+changing the component pins, topology defaults, or evidence gates from
+`v3.8.3`. A fresh automated live deployment/bootstrap-apply/smoke flow has not
+been performed for this patch.
+
+The preceding [GPT-RAG `v3.8.3`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3)
+pins UI `v2.6.2`, orchestrator `v4.1.1`,
 ingestion `v2.7.3`, and AI Landing Zone `v2.5.1`, and it makes hosted/no-panel
 the default topology for genuinely fresh deployments. It repins ingestion only:
 `v2.7.3` stops the data-ingestion administrative surface from being mounted in
