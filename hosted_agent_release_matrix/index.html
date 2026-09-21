@@ -1749,6 +1749,17 @@ The component release commits are unchanged; <code>v3.8.4</code> adds the scoped
 <a href="../deploy/#hosted-runtime-bootstrap-permissions">hosted runtime bootstrap</a>.
 It does not establish a fresh automated live deployment/bootstrap-apply/smoke
 validation, and the independent evidence gates remain fail closed.</p>
+<div class="admonition warning">
+<p class="admonition-title">Planned v3.8.5 host checks; not a published matrix</p>
+<p><code>v3.8.4</code> remains the latest published umbrella release. The <code>v3.8.5</code>
+candidate changes deployment-host validation, not the reviewed component
+releases below: private OS DNS/RFC1918 IPv4, TCP 443, and TLS/SNI checks
+replace the jumpbox declaration gate. Explicit configuration deferral is
+retained. See the <a href="../deploy/#private-host-checks-v385-candidate">phase/endpoint contract</a>.
+This candidate does not add runtime or document roles, enable evidence
+gates, or establish fresh live installation/bootstrap/smoke success.
+Do not combine candidate files with a stable release.</p>
+</div>
 <div class="admonition danger">
 <p class="admonition-title">Do not deploy <code>v3.8.0</code> or <code>v3.8.1</code></p>
 <p>Earlier revisions of this page pinned the matrix to <code>v3.8.1</code>. Neither

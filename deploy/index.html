@@ -468,6 +468,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#private-host-checks-v385-candidate" class="md-nav__link">
+    <span class="md-ellipsis">
+      Private host checks (v3.8.5 candidate)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#network-isolation-runbook" class="md-nav__link">
     <span class="md-ellipsis">
       Network Isolation runbook
@@ -2090,6 +2099,11 @@ before the first provision:</p>
 <p>On POSIX systems, use <code>scripts/prepareHostedDeployment.sh</code> for the preparation
 step. For an explicit migration, set
 <code>DEPLOYMENT_TOPOLOGY=hosted-no-panel</code> before the first <code>azd provision</code>.</p>
+<p>For a network-isolated VPN host, the candidate
+<a href="../howto_private_vpn/#8-continue-the-gpt-rag-installation">private-host workflow</a>
+adds explicit post-provision deferral and route/connectivity checks around
+<strong>both</strong> provisions. Do not use the compact sequence above to skip those
+checks or to bypass the published <code>v3.8.4</code> host restriction.</p>
 <p>For the supported hosted-panel topology, use the same two-phase flow with:</p>
 <div class="highlight"><pre><span></span><code><span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">DEPLOYMENT_TOPOLOGY</span> <span class="n">hosted-panel</span>
 <span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">HOSTED_CONTINUITY_ENABLED</span> <span class="n">false</span>
@@ -2319,6 +2333,12 @@ classic panel data.</p>
 changing the component pins, topology defaults, or evidence gates from
 <code>v3.8.3</code>. A fresh automated live deployment/bootstrap-apply/smoke flow has not
 been performed for this patch.</p>
+<p>The <code>v3.8.5</code> private-host-check update is an <strong>unpublished candidate</strong>, not
+part of <code>v3.8.4</code>. It is intended to replace the jumpbox deployment flag gate
+with actual private DNS/TCP/TLS checks while retaining the exact component
+pins below. See the <a href="#private-host-checks-v385-candidate">candidate network-isolation workflow</a>.
+Do not mix candidate files into a stable release or treat host checks as fresh
+installation acceptance.</p>
 <p>The preceding <a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3">GPT-RAG <code>v3.8.3</code></a>
 pins UI <code>v2.6.2</code>, orchestrator <code>v4.1.1</code>,
 ingestion <code>v2.7.3</code>, and AI Landing Zone <code>v2.5.1</code>, and it makes hosted/no-panel
@@ -2421,7 +2441,8 @@ signed-in users:</p>
 
 <h2 id="zero-trust-deployment">Zero Trust Deployment</h2>
 <p>For deployments that <strong>require network isolation</strong>.</p>
-<p>Network-isolated deployments use a two-host flow:</p>
+<p>Provision infrastructure separately from private data-plane configuration
+and service deployment:</p>
 <table>
 <thead>
 <tr>
@@ -2438,33 +2459,100 @@ signed-in users:</p>
 </tr>
 <tr>
 <td>Configure data-plane resources</td>
-<td>Jumpbox or VNet-connected host</td>
+<td>Host with private VNet/VPN connectivity, subject to the release rules below</td>
 <td><code>scripts/postProvision.ps1</code></td>
 </tr>
 <tr>
 <td>Deploy services</td>
-<td>Jumpbox or VNet-connected host</td>
+<td>Host with private VNet/VPN connectivity, subject to the release rules below</td>
 <td><code>azd deploy</code></td>
 </tr>
 </tbody>
 </table>
-<p>Do not run <code>azd deploy</code> from the workstation when <code>NETWORK_ISOLATION=true</code>. The deploy hook blocks that path because private resources and the private ACR build pool are reachable only from inside the VNet.</p>
+<p><strong>Published <code>v3.8.4</code>:</strong> the pre-deploy hook requires
+<code>RUN_FROM_JUMPBOX=true</code> when <code>NETWORK_ISOLATION=true</code>. Do not set that flag
+on a local machine to work around the release's host restriction.</p>
 <p>If you cannot sign in to the administration VM, follow the
 <a href="../howto_private_vpn/">P2S VPN how-to</a> to prepare private access from a managed
-local Windows machine. This is connectivity and deployment preparation, not a
-certified local-only installation: the shipped <code>v3.8.4</code> pre-deploy hook still
-requires <code>RUN_FROM_JUMPBOX=true</code>. Read the
-<a href="../howto_private_vpn/#8-continue-the-gpt-rag-installation">deployment-host requirement</a>
-before creating resources; do not set that flag on a local machine as a bypass.</p>
+local Windows machine. Its simple topology uses one new dedicated resource
+group for VPN/DNS first and GPT-RAG later, not an existing corporate network
+group. Read the <a href="../howto_private_vpn/#8-continue-the-gpt-rag-installation">release boundary and host checks</a>
+before creating resources.</p>
+<h3 id="private-host-checks-v385-candidate">Private host checks (v3.8.5 candidate)</h3>
+<div class="admonition warning">
+<p class="admonition-title">Not yet published</p>
+<p>The following workflow documents the planned <code>v3.8.5</code> behavior.
+<code>v3.8.4</code> remains the current stable release with the gate described above.
+Use a complete published release containing the change before following
+this workflow; do not select a development commit as a substitute.</p>
+</div>
+<p>With <code>NETWORK_ISOLATION=true</code>, the candidate checks the operating system's DNS
+results for RFC1918 private IPv4 destinations, TCP 443, and normal TLS
+certificate/hostname validation with SNI. It checks <code>APP_CONFIG_ENDPOINT</code>
+before post-provision configuration; <code>APP_CONFIG_ENDPOINT</code> plus
+<code>AZURE_AI_PROJECT_ENDPOINT</code> before hosted deployment; and the actual build
+registry's <code>AZURE_CONTAINER_REGISTRY_ENDPOINT</code> before a hosted image build.
+Public mode does not probe. A prebuilt or reused image
+digest avoids an unnecessary hosted-build ACR probe.
+An invalid explicit <code>NETWORK_ISOLATION</code> value is an error, not a switch to
+public mode.</p>
+<p>The checks send no Azure credentials. Invalid/missing endpoints, public or
+mixed DNS results, certificate errors, and timeouts fail the guarded phase
+before its writes. No flag bypass, disabled TLS validation, proxy bypass,
+or public endpoint fallback is part of the workflow.</p>
+<table>
+<thead>
+<tr>
+<th>Candidate setting</th>
+<th>Post-provision behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>RUN_FROM_JUMPBOX</code> unset, warning flag false/unset</td>
+<td>Check connectivity and configure; no VPN confirmation prompt or noninteractive automatic skip</td>
+</tr>
+<tr>
+<td><code>RUN_FROM_JUMPBOX=false</code>, <code>0</code>, <code>no</code>, or <code>skip</code></td>
+<td>Explicitly defer configuration; this is not a local-machine selector</td>
+</tr>
+<tr>
+<td><code>AZURE_SKIP_NETWORK_ISOLATION_WARNING=true</code>, jumpbox flag unset</td>
+<td>Explicitly defer configuration until the operator verifies routes and private access</td>
+</tr>
+<tr>
+<td>Truthy <code>RUN_FROM_JUMPBOX</code></td>
+<td>Takes precedence over the warning flag, but still requires the same host checks; unnecessary for a connected VPN host</td>
+</tr>
+</tbody>
+</table>
+<p>For the VPN sequence, leave the jumpbox key unset and use only the explicit
+warning flag to defer both infrastructure phases. See the
+<a href="../howto_private_vpn/#keep-the-host-setting-unset-for-the-candidate-vpn-workflow">bounded migration/resume note</a>
+if a previous guide set the key; do not delete an <code>azd</code> environment to unset it.
+When resuming configuration, set both the saved <code>azd</code> warning flag and the
+current process <code>AZURE_SKIP_NETWORK_ISOLATION_WARNING</code> to <code>false</code>; an inherited
+process value can still defer when the selected environment has no saved key.
+The VPN guide shows both assignments around each provision/configuration phase.
+These flags affect only post-provision deferral, not pre-deploy or hosted-build
+checks. A deferred post-provision hook warns that configuration is incomplete
+and can exit successfully; that is not a successful configuration phase.
+Failed, empty, or malformed selected-environment reads fail closed rather
+than using a stale <code>.azure</code> directory.</p>
+<p>Host-check success does not prove RBAC, API health, effective Azure VNet
+ownership, access to every service, remote build-pool egress, or success of a
+fresh automated installation. Existing runtime/document permission boundaries
+and continuity/panel evidence gates are unchanged.</p>
 <h3 id="network-isolation-runbook">Network Isolation runbook</h3>
-<p>Use this runbook for a clean network-isolated deployment:</p>
+<p><strong>Candidate <code>v3.8.5</code> sequence, after publication:</strong> for a fresh VPN-host setup,
+use the detailed <a href="../howto_private_vpn/">P2S VPN guide</a>. In outline:</p>
 <ol>
-<li>On your workstation, create or select the azd environment and enable network isolation.</li>
-<li>Still on your workstation, run <code>azd provision</code>. This creates the infrastructure and then stops before local data-plane configuration.</li>
-<li>Connect to the jumpbox through Azure Bastion, or use another machine with VNet/VPN access.</li>
-<li>On the jumpbox, authenticate with the VM managed identity.</li>
-<li>On the jumpbox, run <code>scripts/postProvision.ps1</code> with <code>RUN_FROM_JUMPBOX=true</code>.</li>
-<li>On the jumpbox, run <code>azd deploy</code> with <code>RUN_FROM_JUMPBOX=true</code>. To build the UI, orchestrator, ingestion, and hosted-agent derivative images with the dedicated VNet-connected ACR Tasks agent pool, set <code>ACR_TASK_AGENT_POOL=build-pool</code>.</li>
+<li>Select the released source and local <code>azd</code> environment. Enable network isolation; leave <code>RUN_FROM_JUMPBOX</code> unset.</li>
+<li>Set <code>AZURE_SKIP_NETWORK_ISOLATION_WARNING=true</code> and run the first <code>azd provision</code> in the selected group, explicitly deferring data-plane configuration.</li>
+<li>Connect through approved VNet/VPN access and verify private DNS, the P2S return route, TLS, and authorized service reads.</li>
+<li>Sign in with your own account on the local machine, or the VM managed identity when actually using the jumpbox. Clear the deferral with <code>AZURE_SKIP_NETWORK_ISOLATION_WARNING=false</code>, then run <code>scripts/postProvision.ps1</code>.</li>
+<li>For hosted deployment, prepare the image using the provisioned VNet-connected ACR Tasks pool. Restore deferral to <code>true</code> <strong>before the second <code>azd provision</code></strong>; afterward, recheck any manually added return route and private connectivity.</li>
+<li>Clear deferral to <code>false</code>, rerun post-provision configuration successfully, then run <code>azd deploy</code>. A host-check failure is a stop condition, not a reason to set the jumpbox flag or expose a private service publicly.</li>
 </ol>
 <p><code>BUILD_MODE</code> is normally not required when deploying the UI, orchestrator, or ingestion services. The hosted-agent derivative image can use the same dedicated pool. Shared ACR Tasks cannot reach a private endpoint.</p>
 <h3 id="regional-preflight">Regional preflight</h3>
@@ -2532,11 +2620,18 @@ azd auth login
 <p>Add <code>--tenant</code> for <code>az</code> or <code>--tenant-id</code> for <code>azd</code> if you want a specific tenant.</p>
 </blockquote>
 <p><strong>Provision Infrastructure</strong></p>
-<div class="highlight"><pre><span></span><code>azd env set AZURE_SKIP_NETWORK_ISOLATION_WARNING true   # optional for automation; skips the local post-provision prompt
+<div class="highlight"><pre><span></span><code>azd env set AZURE_SKIP_NETWORK_ISOLATION_WARNING true   # explicitly defers data-plane configuration
 azd provision
 </code></pre></div>
 <p><strong>Post-Provision Configuration</strong></p>
-<p>With <code>NETWORK_ISOLATION=true</code>, data-plane configuration must run from inside the VNet. A workstation should only run <code>azd provision</code>; if it does not have VNet/VPN access, the local post-provision hook will skip data-plane work and tell you to continue from the jumpbox.</p>
+<p>With <code>NETWORK_ISOLATION=true</code>, data-plane configuration needs private VNet/VPN
+access. For the candidate workflow, keep the jumpbox key unset and explicitly
+defer configuration during infrastructure-only phases. Once connectivity is
+verified, set <code>AZURE_SKIP_NETWORK_ISOLATION_WARNING=false</code> and run
+<code>scripts/postProvision.ps1</code>; actual checks replace a declaration or prompt.
+Without explicit deferral, the candidate fails when connectivity is unavailable
+rather than silently skipping a noninteractive run. The published <code>v3.8.4</code>
+still uses its historical confirmation/defer behavior.</p>
 <p>Using the Jumpbox VM</p>
 <p>1) <strong>Reset the VM password</strong> in the Azure Portal (required on first access if not set in deployment parameters):</p>
 <ul>
@@ -2552,6 +2647,11 @@ azd provision
 <p>Add <code>--tenant</code> for <code>az</code> or <code>--tenant-id</code> for <code>azd</code> if you want a specific tenant.</p>
 </blockquote>
 <p>4) <strong>Run the post-provision script:</strong></p>
+<p>The <code>RUN_FROM_JUMPBOX=true</code> example below is for an actual jumpbox and is
+   compatible with the candidate workflow, but never bypasses its checks.
+   It takes precedence over the warning flag, so use the separate
+   <a href="../howto_private_vpn/#8-continue-the-gpt-rag-installation">VPN deferral sequence</a>
+   for a local machine.</p>
 <p>PowerShell:
    <div class="highlight"><pre><span></span><code><span class="nb">cd </span><span class="n">C</span><span class="p">:\</span><span class="n">github</span><span class="p">\</span><span class="n">GPT-RAG</span>
 <span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">RUN_FROM_JUMPBOX</span> <span class="n">true</span>
@@ -2584,7 +2684,11 @@ azd provision
 <p><strong>Note:</strong> For Zero Trust deployments with network isolation, deploy services from the jumpbox or another host with VNet connectivity. If using the jumpbox VM, the repositories are located in the <code>C:\github</code> directory.</p>
 </blockquote>
 <p>Once the GPT-RAG infrastructure is provisioned, you can deploy the services.</p>
-<p>To deploy <strong>all services at once</strong>, navigate to the <code>gpt-rag</code> directory (with azd environment configured) and run:</p>
+<p>To deploy <strong>all services at once</strong> from the actual jumpbox, navigate to the
+<code>gpt-rag</code> directory (with azd environment configured) and run the example below.
+For a local VPN host, use the candidate release's
+<a href="../howto_private_vpn/#8-continue-the-gpt-rag-installation">two-phase sequence</a>
+instead of copying its jumpbox path and flag.</p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd </span><span class="n">C</span><span class="p">:\</span><span class="n">github</span><span class="p">\</span><span class="n">GPT-RAG</span>
 <span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">RUN_FROM_JUMPBOX</span> <span class="n">true</span>
 <span class="n">azd</span> <span class="n">env</span> <span class="nb">set </span><span class="n">NETWORK_ISOLATION</span> <span class="n">true</span>
@@ -2592,7 +2696,12 @@ azd provision
 <span class="n">azd</span> <span class="n">deploy</span>
 </code></pre></div>
 <p>This command deploys the services selected by the active mode. The UI, orchestrator, ingestion, and hosted-agent derivative images can use Azure Container Registry remote builds (<code>az acr build</code>) against the dedicated VNet-connected ACR Tasks agent pool provided by AILZ <code>v2.4.1</code>. Shared ACR Tasks cannot reach a private endpoint.</p>
-<p>The deploy hook uses <code>NETWORK_ISOLATION</code> as the source of truth. When <code>NETWORK_ISOLATION=true</code>, <code>azd deploy</code> fails fast unless it is running from the VNet with <code>RUN_FROM_JUMPBOX=true</code>. The older <code>AZURE_ZERO_TRUST</code> variable is not used.</p>
+<p>The deploy hook uses <code>NETWORK_ISOLATION</code> as the source of truth, not the older
+<code>AZURE_ZERO_TRUST</code> variable. Published <code>v3.8.4</code> requires
+<code>RUN_FROM_JUMPBOX=true</code> for isolated deployment. The planned <code>v3.8.5</code> replaces
+that gate with <a href="#private-host-checks-v385-candidate">private host checks</a>:
+a connected VPN/VNet host does not need the flag, and setting it cannot make
+a failed DNS/TCP/TLS check pass.</p>
 <p>If you prefer to <strong>deploy a single service</strong>, for example, when updating only that service, you can deploy it individually. Below is an example using the orchestrator service. The same approach applies to other services (frontend, dataingest, mcp).</p>
 <h3 id="deploy-individual-services">Deploy Individual Services</h3>
 <p>Make sure you're logged in to Azure:</p>

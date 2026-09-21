@@ -1492,6 +1492,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#private-deployment-host-checks-v385-candidate" class="md-nav__link">
+    <span class="md-ellipsis">
+      Private deployment host checks (v3.8.5 candidate)
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1793,6 +1802,78 @@ isolation nor authorizes protected real documents or default Search/Blob grants.
 User-authorization evidence requires separate permission-aware retrieval checks,
 including denied access for users without document permission. See
 <a href="../howto_authentication/#hosted-application-identity-versus-document-identity">application identity versus document identity</a>.</p>
+<h2 id="private-deployment-host-checks-v385-candidate">Private deployment host checks (v3.8.5 candidate)</h2>
+<p>This section is an <strong>unpublished <code>v3.8.5</code> companion draft</strong>. The latest stable
+<code>v3.8.4</code> still has its <code>RUN_FROM_JUMPBOX=true</code> pre-deploy gate. Do not fake that
+flag on a local machine or mix candidate files into a released checkout.</p>
+<p>For the planned host-check release, start with the failing layer rather than
+changing identity or adding roles:</p>
+<table>
+<thead>
+<tr>
+<th>Observation</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Endpoint is missing or invalid</td>
+<td>Check the selected root/hosted environment and provisioning outputs. Use the original service hostname, not an IP address or guessed <code>privatelink</code> URL.</td>
+</tr>
+<tr>
+<td>Selected <code>azd</code> environment cannot be read or returns empty/malformed data</td>
+<td>Restore/select the intended environment and correct the read failure. The hooks fail closed; they do not choose another <code>.azure</code> directory or silently reuse stale settings.</td>
+</tr>
+<tr>
+<td>Explicit <code>NETWORK_ISOLATION</code> value is invalid</td>
+<td>Correct the intended setting to <code>true</code> or <code>false</code>; a typo fails rather than silently selecting public mode. Do not change a private deployment to public to bypass a failure.</td>
+</tr>
+<tr>
+<td>DNS returns public or mixed private/public results</td>
+<td>Check effective OS DNS/NRPT, private zone links, and endpoint records. A lookup forced with <code>-Server</code> does not establish the OS path used by the hook.</td>
+</tr>
+<tr>
+<td>TCP 443 or TLS/SNI validation fails</td>
+<td>Check forward and P2S return routes, Firewall/NSGs, the original hostname, and certificate trust. Do not disable certificate checks, use a proxy bypass, or enable public endpoints.</td>
+</tr>
+<tr>
+<td><code>RUN_FROM_JUMPBOX=true</code> does not resolve a failed check</td>
+<td>Expected: that flag never bypasses the candidate's connectivity checks. Existing true remains compatible but is not required.</td>
+</tr>
+<tr>
+<td>No interactive VPN prompt appears</td>
+<td>Expected in the candidate: an unset flag attempts actual checks. Noninteractive execution does not automatically skip configuration.</td>
+</tr>
+<tr>
+<td>Post-provision exits successfully with an incomplete/deferral warning</td>
+<td>The hook reports intentional deferral, not completed configuration. Restore connectivity, clear the explicit deferral settings, and rerun configuration; do not treat exit code zero alone as acceptance.</td>
+</tr>
+<tr>
+<td>Post-provision configuration is deferred</td>
+<td>Inspect the selected root <code>.env</code> key and current process setting without printing secrets. Jumpbox values <code>false</code>, <code>0</code>, <code>no</code>, and <code>skip</code> explicitly defer; they do not select a local host. A truthy jumpbox setting takes precedence over <code>AZURE_SKIP_NETWORK_ISOLATION_WARNING=true</code>. When ready to configure, set both the saved and process warning values to <code>false</code>; an inherited process value can still defer when the saved key is absent. Use the <a href="../howto_private_vpn/#keep-the-host-setting-unset-for-the-candidate-vpn-workflow">unset/migration instructions</a>.</td>
+</tr>
+<tr>
+<td>The first provision works, but the second loses private access</td>
+<td>Explicitly defer post-provision configuration before that provision, then recheck the manually added P2S route. After approved repair and service checks, clear deferral and rerun configuration before deploying.</td>
+</tr>
+<tr>
+<td>Hosted build fails while the local host checks pass</td>
+<td>Local ACR access does not prove the remote build pool can reach dependencies. Review the private build pool's DNS and approved egress; shared ACR Tasks do not inherit your VPN.</td>
+</tr>
+<tr>
+<td>A prebuilt/reused digest has no hosted-build ACR check</td>
+<td>Expected when no hosted image build is needed; later deployment checks still apply.</td>
+</tr>
+<tr>
+<td>Configuration or retrieval returns 401/403 after host checks pass</td>
+<td>The credential-free probe tests DNS/TCP/TLS, not RBAC, API health, or document permissions. Diagnose the operation and identity separately using the existing runtime-access section above.</td>
+</tr>
+</tbody>
+</table>
+<p>See the <a href="../deploy/#private-host-checks-v385-candidate">candidate phase/endpoint table</a>
+and the <a href="../howto_private_vpn/#8-continue-the-gpt-rag-installation">P2S VPN workflow</a>.
+Passing these checks is not proof of Azure VNet ownership, all-service access,
+or a fresh live installation/bootstrap/smoke run.</p>
 <p><strong>Showing Response Time Statistics in the Chat UI</strong></p>
 <p>The GPT-RAG UI includes a built-in option to display response time after each agent answer. To enable it, set the <code>SHOW_STATISTICS</code> application setting to <code>true</code> in your Container App (or App Configuration). Once enabled, each response in the chat will show timing information, helping you identify slow responses and compare performance across different queries or configurations.</p>
 <p><strong>Enabling Debug Logging</strong></p>
