@@ -612,6 +612,8 @@ before post-provision configuration; App Configuration plus the configured
 Foundry endpoint before hosted deployment; and the actual ACR endpoint before
 a hosted image build. Public mode does not probe. A prebuilt or reused image
 digest avoids an unnecessary hosted-build ACR probe.
+An invalid explicit `NETWORK_ISOLATION` value is an error, not a switch to
+public mode.
 
 The checks send no Azure credentials. Invalid/missing endpoints, public or
 mixed DNS results, certificate errors, and timeouts fail the guarded phase
@@ -629,6 +631,10 @@ For the VPN sequence, leave the jumpbox key unset and use only the explicit
 warning flag to defer both infrastructure phases. See the
 [bounded migration/resume note](howto_private_vpn.md#keep-the-host-setting-unset-for-the-candidate-vpn-workflow)
 if a previous guide set the key; do not delete an `azd` environment to unset it.
+When resuming configuration, set both the saved `azd` warning flag and the
+current process `AZURE_SKIP_NETWORK_ISOLATION_WARNING` to `false`; an inherited
+process value can still defer when the selected environment has no saved key.
+The VPN guide shows both assignments around each provision/configuration phase.
 
 Host-check success does not prove RBAC, API health, effective Azure VNet
 ownership, access to every service, remote build-pool egress, or success of a

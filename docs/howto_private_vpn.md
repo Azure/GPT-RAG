@@ -714,6 +714,7 @@ Separate infrastructure provisioning from data-plane configuration:
 
 ```powershell
 azd env set AZURE_SKIP_NETWORK_ISOLATION_WARNING true
+$env:AZURE_SKIP_NETWORK_ISOLATION_WARNING = 'true'
 azd provision --preview
 ```
 
@@ -722,6 +723,13 @@ data-plane post-provisioning. It does **not** skip security requirements or
 prove connectivity. With `RUN_FROM_JUMPBOX` unset as above, the candidate hook
 reports the explicit deferral instead of trying private service configuration.
 Preview can run hooks and prepare local files.
+
+The two assignments deliberately agree: `azd env set` saves the flag in the
+selected local environment, while `$env:` sets it in this PowerShell process.
+An inherited process warning flag can still defer configuration when the
+selected environment does not contain that key. Set both to `false` when
+resuming configuration, as shown below; do not assume removing a saved key
+also removes an inherited process value.
 
 Review subnet changes, private endpoints, DNS, NSGs, Firewall, quotas, the
 private ACR build pool, and preservation of the VPN and resolver subnets.
@@ -904,6 +912,7 @@ step 7, clear the explicit deferral and run from the repository root:
 ```powershell
 azd env set AZURE_SKIP_NETWORK_ISOLATION_WARNING false
 if ($LASTEXITCODE -ne 0) { throw 'Could not enable data-plane configuration.' }
+$env:AZURE_SKIP_NETWORK_ISOLATION_WARNING = 'false'
 .\scripts\postProvision.ps1
 ```
 
@@ -930,6 +939,8 @@ authenticated application request.
 | Hosted image build | The actual ACR endpoint selected for the build |
 
 Public mode (`NETWORK_ISOLATION=false`) does not run these private-host probes.
+An invalid explicit isolation value, such as `tru`, fails instead of silently
+selecting public mode.
 Reusing an existing image digest or supplying a prebuilt digest avoids an
 unnecessary hosted-build ACR probe; it does not bypass checks needed by later
 deployment phases. A missing/invalid endpoint, public or mixed DNS result,
@@ -962,6 +973,7 @@ azd env get-value ACR_TASK_AGENT_POOL
 .\scripts\prepareHostedDeployment.ps1
 if ($LASTEXITCODE -ne 0) { throw 'Hosted image preparation failed.' }
 azd env set AZURE_SKIP_NETWORK_ISOLATION_WARNING true
+$env:AZURE_SKIP_NETWORK_ISOLATION_WARNING = 'true'
 azd provision
 ```
 
@@ -977,6 +989,7 @@ confirmed, clear deferral and rerun configuration before deployment:
 ```powershell
 azd env set AZURE_SKIP_NETWORK_ISOLATION_WARNING false
 if ($LASTEXITCODE -ne 0) { throw 'Could not re-enable data-plane configuration.' }
+$env:AZURE_SKIP_NETWORK_ISOLATION_WARNING = 'false'
 .\scripts\postProvision.ps1
 if ($LASTEXITCODE -ne 0) { throw 'Post-provision configuration did not complete.' }
 ```
@@ -1189,7 +1202,7 @@ Troubleshoot the failing layer rather than granting broader permissions:
 | Remote image build fails | Build-pool connectivity, DNS, and approved outbound dependencies |
 | Deploy requests `RUN_FROM_JUMPBOX` | Check the selected release: `v3.8.4` has the old gate; planned `v3.8.5` uses actual host checks. Do not fake the flag or mix development files into a release. |
 | Candidate host check rejects public/mixed DNS, TLS, or a timeout | Correct the original endpoint, OS DNS/NRPT, private routes, and certificate trust. A TCP-only test is insufficient; do not disable TLS validation. |
-| Candidate post-provision reports deferral | Keep `RUN_FROM_JUMPBOX` unset and clear `AZURE_SKIP_NETWORK_ISOLATION_WARNING` only after route/service checks. `RUN_FROM_JUMPBOX=false` is also an explicit defer, not a local-host selector. |
+| Candidate post-provision reports deferral | Keep `RUN_FROM_JUMPBOX` unset and set both the saved and process `AZURE_SKIP_NETWORK_ISOLATION_WARNING` values to `false` only after route/service checks. `RUN_FROM_JUMPBOX=false` is also an explicit defer, not a local-host selector. |
 
 Disconnect the VPN when it is no longer needed. This does not delete resources
 or stop their charges. Plan cleanup separately with the resource owners; do
