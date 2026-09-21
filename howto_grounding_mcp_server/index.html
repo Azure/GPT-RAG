@@ -1706,6 +1706,25 @@
 
 
 <h1 id="foundry-iq-generic-mcp-server-knowledge-sources">Foundry IQ: Generic MCP server knowledge sources</h1>
+<div class="admonition note">
+<p class="admonition-title">Develop adoption, not a release</p>
+<p><a href="../contributing/#develop-adoption-status">Adoption status and approval scope</a>
+supersede the historical “unmerged” and pending-exception labels below.
+Source pins remain implementation evidence; released manifest pins are unchanged.
+See that record for active rules, reference runs and remaining validation gaps.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Unmerged candidate: OBO headers require user authorization</p>
+<p>At orchestrator <code>ea61bc7</code>, <a href="../services_orchestrator/#candidate-retrieval-authorization">source-pinned provider policy</a>
+treats configured MCP query headers with <code>valueFrom.kind: obo</code> as user-only.
+Missing/failed OBO rejects mixed retrieval, regardless of
+<code>ALLOW_ANONYMOUS=true</code>; no application fallback is enabled. Existing
+explicitly selected service-only access remains for eligible app-only
+sources, not as recovery after user authorization fails. Restore token
+forwarding, consent and endpoint authorization; neither scope selection nor
+forwarded headers proves live ACL enforcement. This is unmerged behavior,
+not a change to the shipped registration schema. knowledge sources</p>
+</div>
 <p>The <code>mcpServer</code> Foundry IQ knowledge source lets the Knowledge Base call
 tools exposed by a remote <a href="https://modelcontextprotocol.io/">Model Context Protocol (MCP)</a>
 server you operate or trust, and blend the results with your other Foundry

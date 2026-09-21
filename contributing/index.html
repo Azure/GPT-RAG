@@ -1542,6 +1542,123 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#python-quality-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Python Quality Checks
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Python Quality Checks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#develop-adoption-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      Develop adoption status
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Develop adoption status">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#active-rules-and-reference-evidence" class="md-nav__link">
+    <span class="md-ellipsis">
+      Active rules and reference evidence
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#repository-local-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Repository-local setup
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#execution-trust-is-separate-from-local-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      Execution trust is separate from local results
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#typing-scope-and-reviewed-exceptions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Typing scope and reviewed exceptions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adoption-is-separate-from-workflow-availability" class="md-nav__link">
+    <span class="md-ellipsis">
+      Adoption is separate from workflow availability
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ui-package-contributor-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      UI Package Contributor Setup
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="UI Package Contributor Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#install-and-run-from-the-ui-checkout" class="md-nav__link">
+    <span class="md-ellipsis">
+      Install and run from the UI checkout
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#find-the-owning-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Find the owning implementation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#assets-and-checkpoint-quality-scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      Assets and checkpoint quality scope
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#code-update-workflow" class="md-nav__link">
     <span class="md-ellipsis">
       Code Update Workflow
@@ -1651,7 +1768,7 @@
 </blockquote>
 <ul>
 <li>
-<p><strong>Target the <code>develop</code> Branch:</strong> Always direct your pull request to the <code>develop</code> branch to ensure that changes are properly integrated into the project's development workflow.</p>
+<p><strong>Use the Correct Base Branch:</strong> Runtime component changes target <code>develop</code>. For this documentation site, create a <code>feature/*</code> branch from <code>docs</code> and target <code>docs</code> in your pull request. Keep documentation and runtime changes in their owning repositories and link dependent pull requests.</p>
 </li>
 <li>
 <p><strong>Keep Pull Requests Small:</strong> Aim to make your pull requests as focused and concise as possible. This makes it easier to review and ensures quicker integration into the codebase.</p>
@@ -1685,6 +1802,576 @@
 <p><strong>Test Your Changes:</strong> Preview your documentation locally using MkDocs before submitting to ensure proper rendering.</p>
 </li>
 </ul>
+<p>Run these commands from a documentation checkout of <code>Azure/GPT-RAG</code>, not a
+runtime component checkout. Use a virtual environment; the documentation
+workflow uses Python 3.11, independently of the runtime components' Python
+version.</p>
+<div class="highlight"><pre><span></span><code><span class="n">python</span> <span class="n">-m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">-r</span> <span class="n">requirements-docs</span><span class="p">.</span><span class="n">txt</span>
+<span class="n">python</span> <span class="n">-m</span> <span class="n">mkdocs</span> <span class="n">build</span>
+<span class="n">python</span> <span class="n">-m</span> <span class="n">mkdocs</span> <span class="n">serve</span>
+</code></pre></div>
+<p><code>build</code> renders the site locally; <code>serve</code> starts a local preview. Neither
+publishes documentation. Do not run <code>mkdocs gh-deploy</code> as a preview check:
+merging to <code>docs</code> triggers the publishing workflow.</p>
+<p>When documenting a coordinated runtime change, keep the documentation PR in
+draft until the component interfaces and commands are confirmed. Record the
+component PRs and merge order in its description. Do not describe proposed
+checks, package layouts, or repository rules as shipped behavior. Review
+deployment, authentication, and continuity examples too; record a no-change
+assessment when their supported behavior is preserved.</p>
+<h2 id="python-quality-checks">Python Quality Checks</h2>
+<h3 id="develop-adoption-status">Develop adoption status</h3>
+<p>As of 2026-09-09, the following quality/package changes are adopted on the
+component <strong><code>develop</code> branches</strong>, not released through the umbrella
+<a href="https://github.com/Azure/GPT-RAG/blob/main/manifest.json"><code>main</code> manifest</a>.
+Released component pins remain unchanged by this adoption.</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Adoption PR</th>
+<th>Adopted merge commit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>UI</td>
+<td><a href="https://github.com/Azure/gpt-rag-ui/pull/110">#110</a></td>
+<td><a href="https://github.com/Azure/gpt-rag-ui/commit/151c0b2d3d783e835e9565fde8dcc818c8f9f4b1"><code>151c0b2d3d783e835e9565fde8dcc818c8f9f4b1</code></a></td>
+</tr>
+<tr>
+<td>Ingestion</td>
+<td><a href="https://github.com/Azure/gpt-rag-ingestion/pull/296">#296</a></td>
+<td><a href="https://github.com/Azure/gpt-rag-ingestion/commit/18c18431fa8a83d4bcc1362f60bf1c6092ed865a"><code>18c18431fa8a83d4bcc1362f60bf1c6092ed865a</code></a></td>
+</tr>
+<tr>
+<td>Orchestrator</td>
+<td><a href="https://github.com/Azure/gpt-rag-orchestrator/pull/346">#346</a></td>
+<td><a href="https://github.com/Azure/gpt-rag-orchestrator/commit/c6339ee5738c0a0bb890b43f204f2d4ba1025157"><code>c6339ee5738c0a0bb890b43f204f2d4ba1025157</code></a></td>
+</tr>
+</tbody>
+</table>
+<p>The <a href="https://github.com/Azure/GPT-RAG/issues/681#issuecomment-5601804634">explicit initial administrative approval</a>
+accepts 189 individually justified existing exceptions: 92 orchestrator,
+67 ingestion, and 30 UI. All 189 records are active in the adopted <code>develop</code>
+ledgers under that actual administrative approval; this is not approval of
+future exceptions. It authorizes initial adoption merges and required-check
+activation, <strong>not production deployment</strong>. This is administrative bootstrap
+acceptance, <strong>not independent GitHub review</strong> and not proof of green checks.</p>
+<p>Orchestrator's activation head
+<a href="https://github.com/Azure/gpt-rag-orchestrator/commit/360065cb194f33e631fdf34c0e1c1eeb11935da3"><code>360065cb194f33e631fdf34c0e1c1eeb11935da3</code></a>
+is included in the adopted merge above. Initial
+<a href="https://github.com/Azure/gpt-rag-orchestrator/actions/runs/34352193611">CI run 34352193611</a>
+records 2,332 passing tests and 4 skips; frontend build, lint, typing,
+architecture and exceptions pass. Only bootstrap policy and the aggregate
+<code>quality-gate</code> fail. Initial adoption was administratively authorized despite
+those bootstrap failures; the run remains failed, not a green reference.</p>
+<h4 id="active-rules-and-reference-evidence">Active rules and reference evidence</h4>
+<p>The following additive rulesets are active on both <code>develop</code> and <code>main</code>;
+existing repository rules were retained. Required checks are strict (the branch
+must be up to date), bound to GitHub Actions app <code>15368</code>, with no bypass actors.
+Each ruleset requires one approval, code-owner review, dismissal of stale
+approvals, approval of the latest push, and resolved review threads, and blocks
+deletion and non-fast-forward updates. These ongoing review requirements do not
+turn the initial administrative adoption into independent review.</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Active ruleset</th>
+<th>Exact required check names</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>UI</td>
+<td><a href="https://github.com/Azure/gpt-rag-ui/rules/22641145">22641145</a></td>
+<td><code>quality-gate</code>, <code>unit-tests</code>, <code>container-tests</code></td>
+</tr>
+<tr>
+<td>Ingestion</td>
+<td><a href="https://github.com/Azure/gpt-rag-ingestion/rules/22640997">22640997</a></td>
+<td><code>quality-gate</code>, <code>unit-tests</code>, <code>frontend-checks</code></td>
+</tr>
+<tr>
+<td>Orchestrator</td>
+<td><a href="https://github.com/Azure/gpt-rag-orchestrator/rules/22663326">22663326</a></td>
+<td><code>quality-gate</code>, <code>tests</code>, <code>frontend build</code></td>
+</tr>
+</tbody>
+</table>
+<p>Clean reference runs now demonstrate green evaluation against the adopted
+<code>develop</code> policy, rather than the earlier bootstrap base:</p>
+<table>
+<thead>
+<tr>
+<th>Reference PR</th>
+<th>Recorded head and outcome</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/Azure/gpt-rag-ui/pull/112">UI #112</a></td>
+<td>Restored head <code>69492e4a965263362e6d17b7c3b7a8779047dd7e</code>, <a href="https://github.com/Azure/gpt-rag-ui/actions/runs/34354232272">run 34354232272</a> succeeded; tree identical to initial reference <code>f4cf2d2</code>. Closed <strong>unmerged</strong>.</td>
+</tr>
+<tr>
+<td><a href="https://github.com/Azure/gpt-rag-ingestion/pull/308">Ingestion #308</a></td>
+<td>Initial reference <code>c415272</code> against adopted base <code>18c18431</code>, <a href="https://github.com/Azure/gpt-rag-ingestion/actions/runs/34352952858">run 34352952858</a>: all eight jobs passed. Restored head <code>03cb8a218e47a3e3cee3f6621e3a186bf9cf596e</code>, <a href="https://github.com/Azure/gpt-rag-ingestion/actions/runs/34354094883">run 34354094883</a> succeeded with an identical tree. Closed <strong>unmerged</strong>.</td>
+</tr>
+<tr>
+<td><a href="https://github.com/Azure/gpt-rag-orchestrator/pull/359">Orchestrator #359</a></td>
+<td>Initial head <code>6a7ad2c5127875666403279a31874fac670374d0</code> against actual adopted base <code>c6339ee5738c0a0bb890b43f204f2d4ba1025157</code>, <a href="https://github.com/Azure/gpt-rag-orchestrator/actions/runs/34353356772">run 34353356772</a>: all eight jobs passed. Fixture-only revert <code>707231a228f9c3b1cd281e4b7e16169fb1149147</code>, restoration <a href="https://github.com/Azure/gpt-rag-orchestrator/actions/runs/34381235501">run 34381235501</a>: all eight jobs passed, with CLA also green. Restored tree <code>a938d1105f03a758e15e2f4ab1875a3b458a9d98</code> is identical to the initial reference. Closed <strong>unmerged</strong>.</td>
+</tr>
+</tbody>
+</table>
+<p>Deliberate negative controls tested suppression growth without breaking
+functional tests:</p>
+<ul>
+<li><strong>UI:</strong> head <code>344ee17da79c52df38204928021d2da16373afd0</code>,
+  <a href="https://github.com/Azure/gpt-rag-ui/actions/runs/34353672894">run 34353672894</a>
+  failed with Ruff <code>RUF100</code> for unnecessary <code>noqa: F821</code> at <code>constants.py:4</code>,
+  suppression-growth policy failure and failed <code>quality-gate</code>. Functional tests
+  passed; the coordinator recorded the PR as <code>BLOCKED</code> under ruleset <code>22641145</code>.</li>
+<li><strong>Ingestion:</strong> head <code>c11e995e69a7c579308da48ae964d4e342af5ef6</code>,
+  <a href="https://github.com/Azure/gpt-rag-ingestion/actions/runs/34353567295">run 34353567295</a>
+  failed with Ruff <code>RUF100</code> for unnecessary <code>noqa: F401</code> at
+  <code>utils/deployment_mode.py:34</code>, new-suppression policy failure and failed
+  <code>quality-gate</code>. This is <strong>not evidence that F401 itself was enforced</strong>.
+  Functional tests passed; the coordinator recorded the PR as <code>BLOCKED</code> under
+  ruleset <code>22640997</code>.</li>
+<li><strong>Orchestrator:</strong> head <code>e9a8c1584032c3381a72cbfa1a96aba270832fb9</code>,
+  <a href="https://github.com/Azure/gpt-rag-orchestrator/actions/runs/34380617414">run 34380617414</a>
+  failed lint with Ruff <code>RUF100</code> for unused <code>noqa: F821</code> at
+  <code>src/connectors/types.py:1</code>. Policy failed with
+  <code>New or broadened suppression requires protected policy review</code>, and the
+  aggregate <code>quality-gate</code> failed; all other jobs passed. Evaluation used
+  adopted base <code>c6339ee5738c0a0bb890b43f204f2d4ba1025157</code> with
+  <code>bootstrap=false</code> throughout initial, negative and restored reference phases,
+  not the bootstrap exception.
+  The coordinator recorded <code>BLOCKED</code> <strong>and</strong> <code>REVIEW_REQUIRED</code> under the active
+  rules: this is not evidence of a block caused exclusively by CI. Only the
+  fixture was reverted; the restored green run and unmerged closure are
+  recorded above.</li>
+</ul>
+<p>All three fixtures were reverted before their reference PRs were closed;
+none of the fixtures was merged. Green checks alone do not satisfy required
+reviews or authorize a merge. Active rules also cover <code>main</code>, where the adopted
+policy is not yet present: future release PRs fail closed until a normal release
+includes that policy. This adoption does not change <code>main</code>, tags or release pins,
+and is not a reason to bypass or weaken those rules.</p>
+<p>This evidence supports development-policy adoption and the specific controls
+tested, not live identity/ACL validation, cross-component compatibility, durable
+recovery or production readiness. No live validation target or test principals
+have been supplied for this work, and no production deployment is authorized. Those validation
+gaps remain open; offline functional, container and policy tests do not close them.</p>
+<p>The older source pins, test counts and CI outcomes below and in linked service
+guides remain implementation evidence at their recorded revisions. Their
+“unmerged”, “inactive proposal” and pending-bootstrap descriptions are historical:
+the adoption record above supersedes those status claims, not their bounded
+behavioral evidence. No historical red CI run is reclassified as green.
+Use the adopted merge commits for current contributor policy; use the released
+manifest for deployed-version guidance.</p>
+<div class="admonition warning">
+<p class="admonition-title">Historical contributor checkpoints, not proof of activated merge policy</p>
+<p>The commands in this section apply only to the implementation checkpoints
+linked below for <a href="https://github.com/Azure/GPT-RAG/issues/681">#681</a>,
+coordinated in <a href="https://github.com/Azure/GPT-RAG/pull/689">#689</a>.
+They are not instructions for the currently released components.
+No activated, green merge policy is established by these checkpoints.
+Initial administrative exception acceptance is now recorded above. Passing tests or
+individual typing/architecture results do not establish a green quality
+gate or required-check activation.
+The UI package, history and failure-boundary code is now adopted on <code>develop</code>.
+This does not complete cross-component integration, live validation or recovery.</p>
+</div>
+<h3 id="repository-local-setup">Repository-local setup</h3>
+<p>Work in the relevant component checkout, not the umbrella or documentation
+checkout, using an isolated Python 3.12 environment. Read its <code>AGENTS.md</code> and
+the linked PR before running the commands. Local evidence used Python 3.12.9;
+backend CI also exercised Python 3.12.14. The quality pins are Ruff 0.16.5,
+mypy 2.3.1, Import Linter 2.14, and Grimp 3.16.
+Install the checked-out <code>requirements-quality.txt</code>; do not substitute
+tool versions from the original proposal. These are development dependencies,
+not additions to runtime images.</p>
+<table>
+<thead>
+<tr>
+<th>Historical component checkpoint (not the adopted head)</th>
+<th>Contributor source at the recorded revision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/Azure/gpt-rag-orchestrator/pull/346">Azure/gpt-rag-orchestrator#346</a>, <code>6b652d8</code></td>
+<td><a href="https://github.com/Azure/gpt-rag-orchestrator/blob/6b652d8c4d664863a3d02d439b7b77210963320d/AGENTS.md#python-quality-policy-bootstrap-under-review">AGENTS.md</a></td>
+</tr>
+<tr>
+<td><a href="https://github.com/Azure/gpt-rag-ingestion/pull/296">Azure/gpt-rag-ingestion#296</a>, <code>f51f515</code></td>
+<td><a href="https://github.com/Azure/gpt-rag-ingestion/blob/f51f5154a0a63df8c7479c14d0b2ddaff93a7f13/docs/python-quality.md">Python quality guide</a></td>
+</tr>
+<tr>
+<td><a href="https://github.com/Azure/gpt-rag-ui/pull/110">Azure/gpt-rag-ui#110</a>, <code>ee35c9f</code></td>
+<td><a href="https://github.com/Azure/gpt-rag-ui/blob/ee35c9ffea67902b4dc935e287beb5d4640ce6d6/docs/python-development.md">Python development guide</a></td>
+</tr>
+</tbody>
+</table>
+<p>Fetch the PR's actual target before running checks. In the examples, replace
+<code>&lt;fetched-protected-target-sha&gt;</code> with that target commit, not the candidate
+commit. These component PRs target <code>develop</code>; release work must use its actual
+target instead. Reuse the same base and unchanged candidate for test evidence
+and quality reports.</p>
+<p><strong>Orchestrator</strong></p>
+<div class="highlight"><pre><span></span><code><span class="n">python</span> <span class="n">-m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">-r</span> <span class="n">requirements</span><span class="p">.</span><span class="n">txt</span>
+<span class="n">python</span> <span class="n">-m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">pytest</span> <span class="n">pytest-asyncio</span> <span class="n">pytest-mock</span> <span class="n">jsonschema</span>
+<span class="n">python</span> <span class="n">-m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">-r</span> <span class="n">requirements-quality</span><span class="p">.</span><span class="n">txt</span>
+<span class="nv">$Base</span> <span class="p">=</span> <span class="s2">"&lt;fetched-protected-target-sha&gt;"</span>
+<span class="n">python</span> <span class="n">-m</span> <span class="n">pytest</span> <span class="n">-q</span> <span class="p">-</span><span class="n">-junitxml</span><span class="p">=.</span><span class="n">artifacts</span><span class="p">\</span><span class="n">pytest</span><span class="p">.</span><span class="n">xml</span>
+<span class="n">python</span> <span class="n">-I</span> <span class="n">-S</span> <span class="p">.</span><span class="n">github</span><span class="p">\</span><span class="n">scripts</span><span class="p">\</span><span class="n">check-quality</span><span class="p">.</span><span class="n">py</span> <span class="p">-</span><span class="n">-check</span> <span class="n">all</span> <span class="p">-</span><span class="n">-base-ref</span> <span class="nv">$Base</span> <span class="p">-</span><span class="n">-report</span> <span class="p">.</span><span class="n">artifacts</span><span class="p">\</span><span class="n">quality</span><span class="p">.</span><span class="n">json</span> <span class="p">-</span><span class="n">-test-results</span> <span class="p">.</span><span class="n">artifacts</span><span class="p">\</span><span class="n">pytest</span><span class="p">.</span><span class="n">xml</span>
+</code></pre></div>
+<p><strong>Ingestion</strong></p>
+<div class="highlight"><pre><span></span><code><span class="n">python</span> <span class="n">-m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">-r</span> <span class="n">requirements</span><span class="p">.</span><span class="n">txt</span>
+<span class="n">python</span> <span class="n">-m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">pytest</span> <span class="n">pytest-asyncio</span>
+<span class="n">python</span> <span class="n">-m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">-r</span> <span class="n">requirements-quality</span><span class="p">.</span><span class="n">txt</span>
+<span class="nv">$Base</span> <span class="p">=</span> <span class="s2">"&lt;fetched-protected-target-sha&gt;"</span>
+<span class="n">python</span> <span class="n">-m</span> <span class="n">pytest</span> <span class="n">tests</span> <span class="n">-q</span> <span class="p">-</span><span class="n">-junitxml</span><span class="p">=.</span><span class="n">artifacts</span><span class="p">\</span><span class="n">pytest</span><span class="p">.</span><span class="n">xml</span> <span class="n">-o</span> <span class="n">junit_family</span><span class="p">=</span><span class="n">legacy</span>
+<span class="n">python</span> <span class="n">-I</span> <span class="p">.</span><span class="n">github</span><span class="p">\</span><span class="n">scripts</span><span class="p">\</span><span class="n">quality-evidence</span><span class="p">.</span><span class="n">py</span> <span class="p">-</span><span class="n">-junit</span> <span class="p">.</span><span class="n">artifacts</span><span class="p">\</span><span class="n">pytest</span><span class="p">.</span><span class="n">xml</span> <span class="p">-</span><span class="n">-base-ref</span> <span class="nv">$Base</span> <span class="p">-</span><span class="n">-report</span> <span class="p">.</span><span class="n">artifacts</span><span class="p">\</span><span class="nb">test-evidence</span><span class="p">.</span><span class="n">json</span>
+<span class="n">python</span> <span class="n">-I</span> <span class="p">.</span><span class="n">github</span><span class="p">\</span><span class="n">scripts</span><span class="p">\</span><span class="n">check-quality</span><span class="p">.</span><span class="n">py</span> <span class="p">-</span><span class="n">-check</span> <span class="n">all</span> <span class="p">-</span><span class="n">-base-ref</span> <span class="nv">$Base</span> <span class="p">-</span><span class="n">-test-evidence</span> <span class="p">.</span><span class="n">artifacts</span><span class="p">\</span><span class="nb">test-evidence</span><span class="p">.</span><span class="n">json</span> <span class="p">-</span><span class="n">-report</span> <span class="p">.</span><span class="n">artifacts</span><span class="p">\</span><span class="n">quality</span><span class="p">.</span><span class="n">json</span>
+</code></pre></div>
+<p>These interfaces intentionally differ: orchestrator accepts JUnit through
+<code>--test-results</code>; ingestion first binds JUnit to same-run JSON with
+<code>quality-evidence.py</code>, then consumes it through <code>--test-evidence</code>. Do not
+reuse stale evidence or treat a test name in a policy record as proof that
+the test passed.</p>
+<p>The interpreter startup modes also differ. Orchestrator requires <code>python -I -S</code>
+for its checker and aggregate, exposing installed wheel paths without site
+initialization. Ingestion uses <code>python -I</code> for its checker, evidence binder and
+aggregate; its installed tooling and site environment remain trusted. Do not
+treat <code>-I</code> alone as disabling all installed startup hooks. These flags do not
+change the pytest, UI or application-startup commands shown separately.</p>
+<p>Both backend checkers accept <code>--check all</code>, or one of <code>lint</code>, <code>typing</code>,
+<code>architecture</code>, <code>exceptions</code>, and <code>policy</code> for diagnosis. Exit <code>0</code> means the
+requested checks passed, <code>1</code> means violations, and <code>2</code> means invalid input
+or incomplete execution. A missing report, tool failure, or a passing
+individual check is not a passing full gate. Existing behavior tests and
+frontend jobs remain separate obligations in the component workflows.</p>
+<p><strong>Ingestion operator frontend</strong></p>
+<p>In the recorded ingestion candidate, use Node 22 (at least 22.12 for the
+existing Vite 8 toolchain), not Node 20.14. From its <code>frontend</code> directory, run:</p>
+<div class="highlight"><pre><span></span><code>npm ci
+npm test
+npm run lint
+npm run build
+</code></pre></div>
+<p>Do not bypass peer-dependency validation. The candidate aligns React DOM and
+its types with React 19, uses Tailwind 4's PostCSS adapter with the existing
+theme, and fixes the corresponding JSX/Vitest configuration types. It does not
+redesign the dashboard or change Python runtime pins or Docker base images.
+The new same-workflow <code>frontend-checks</code> job runs these maintained commands;
+the aggregate requires actual success and rejects missing, skipped, cancelled
+or failed frontend execution. A passing Python report alone is insufficient.</p>
+<h3 id="execution-trust-is-separate-from-local-results">Execution trust is separate from local results</h3>
+<p>Installing a candidate's dependencies and running its tests or checker executes
+code from that candidate. A virtual environment separates installed packages;
+it is not a security sandbox. Review unfamiliar PR code before executing it,
+and use a disposable environment without deployment credentials rather than
+an operator session or a production workload identity.</p>
+<p>For acceptance, review the tool execution environment as well as the selected
+policy revision. A checker loaded from the protected base does not, by its
+path alone, prove that its interpreter, imported tools, plugins and configuration
+are independent of the candidate. Pinned versions and bound report hashes do not
+establish that isolation either.</p>
+<p>The recorded backend milestones add isolated tool startup and source-analysis
+paths, reject executable plugins/custom contracts, and keep candidate dependency
+installation in the separate behavioral CI job. Static CI jobs install runtime
+dependencies from the protected checkout; at these historical checkpoints,
+first-adoption candidate tooling ran only under the blocked bootstrap path.
+This is static source-analysis
+isolation, not an OS sandbox or protection against a compromised interpreter
+or installed tool. Keep the repository-specific startup flags and reviewed
+runner; do not bypass a failed check by dropping isolation, and do not treat an
+internal helper as a new contributor command. The local examples remain
+diagnostics, not substitutes for the recorded CI and enforcement evidence above.</p>
+<h3 id="typing-scope-and-reviewed-exceptions">Typing scope and reviewed exceptions</h3>
+<p>The checkpoint <code>.quality/typing-scope.json</code> files describe incremental blocking
+coverage, not whole-repository strict typing:</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Initial blocking files, including new helpers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Orchestrator</td>
+<td><code>src/schemas.py</code>, <code>src/connectors/types.py</code>, <code>src/plugins/retrieval/retrieval_types.py</code>, <code>src/plugins/nl2sql/nl2sql_types.py</code>, <code>src/connectors/obo.py</code></td>
+</tr>
+<tr>
+<td>Ingestion</td>
+<td><code>telemetry/audit_contract.py</code>, <code>telemetry/audit_sanitizer.py</code>, <code>jobs/runtime.py</code></td>
+</tr>
+</tbody>
+</table>
+<p>Newly discovered runtime modules join blocking typing scope. Imported
+diagnostics outside that scope remain visible in reports; they are not
+silently covered by a global missing-import ignore. Both initial
+<code>.quality/typing-baseline.json</code> files are empty. A reviewed legacy baseline
+identifies individual diagnostics and multiplicity, not just an error count.
+Moving a module must preserve its identity and coverage, not erase its debt
+or create a new allowance.</p>
+<p>Orchestrator's <a href="https://github.com/Azure/gpt-rag-orchestrator/blob/6b652d8c4d664863a3d02d439b7b77210963320d/.quality/module-surfaces.json">module surface inventory</a>
+records current paths/import names, ownership, public exports, allowed importers,
+compatibility aliases and typing status. Those current-path records are separate
+from the immutable adoption names in <code>policy.json</code>. Preserve stable identities
+across moves rather than reclassifying covered code as legacy. Editing a surface
+record does not independently approve new access or a larger public API.</p>
+<p>Scope reductions, baseline growth, new suppressions, or changes to the
+checker, workflows, tool pins, and policy need explicit maintainer review.
+Do not edit records to make a failing candidate approve itself, generate
+baselines automatically in CI, or exempt entire files from review.</p>
+<p>The historical backend <code>.quality/exceptions.json</code> ledgers contained proposed records:
+<a href="https://github.com/Azure/gpt-rag-orchestrator/blob/6b652d8c4d664863a3d02d439b7b77210963320d/.quality/exceptions.json">orchestrator had ninety-eight</a>
+and <a href="https://github.com/Azure/gpt-rag-ingestion/blob/f51f5154a0a63df8c7479c14d0b2ddaff93a7f13/.quality/exceptions.json">ingestion had sixty-five</a>.
+Neither checkpoint had an active exception. These are not the adopted ledger
+counts; the initial administrative acceptance above supersedes their pending
+status. New proposals do not waive lint or broad-handler findings.
+A proposed exception must identify the exact source
+site and try/handler fingerprint, its necessity, expected failure outcome,
+safe diagnostic path, review reference, and passing named failure tests.
+Logging or re-raising alone is not an exemption. Preserve explicitly
+best-effort audit side effects without using them to excuse failed primary
+operations. Characterization tests that record legacy failure behavior do not
+make that behavior accepted or approved. Follow the owning repository's schema
+rather than copying exception records between components.</p>
+<p>The recorded backend checkpoints bind retained broad handlers to individual
+proposals and named failure evidence. That code-delivery milestone does not
+approve the handlers or activate the policy. In particular, orchestrator
+earlier characterization retained identity fallbacks and detached persistence.
+The unmerged <code>ea61bc7</code> <a href="../services_orchestrator/#candidate-retrieval-authorization">source-pinned ADR-0006 implementation</a>
+supersedes the MAF/multimodal identity fallbacks with required-user fail-closed
+retrieval, retains eligible service-only access, suspends all automatic profile
+access/extraction, and leaves ordinary history best effort. Live ACL proof and
+durable completion are not claimed. The separately delegated
+<a href="../howto_authentication/#legacy-api-key-recovery-h1">H1 API-key recovery choice</a>
+retains existing environment fallback, not new runtime code or ingestion's opt-in.
+The scoped orchestrator follow-up replaces configured nullable
+retrieval failure with the
+<a href="../services_orchestrator/#streaming-outcomes">existing safe failed-turn contract</a>,
+while preserving explicit retrieval opt-outs and legitimate empty results.
+At those checkpoints, updated fingerprints and real strategy-to-SSE evidence
+were proposals, not active approvals; see the subsequent administrative acceptance above.
+Review those outcomes individually; zero unproposed sites is not zero risk.</p>
+<h3 id="adoption-is-separate-from-workflow-availability">Adoption is separate from workflow availability</h3>
+<p>The adopted component PRs introduce an always-evaluated <code>quality-gate</code> alongside
+their existing tests. At the historical checkpoints, ordinary policy approval
+deliberately failed at bootstrap because the protected base had no evaluator.
+A workflow file, candidate
+approval string, or uploaded report cannot activate repository protection.</p>
+<p>Initial administrative bootstrap approval is recorded above. Before claiming
+enforcement, obtain evidence that authorized administrators require
+the quality gate and existing checks, enforce latest-head code-owner review,
+dismiss stale approvals, restrict bypass, and prove clean and deliberately
+failing PR outcomes. Repair policy through a reviewed PR rather than
+disabling controls. All three components now have recorded adoption, active
+settings, clean references, negative controls, green restorations and unmerged
+reference-PR closures. This completes that bounded development-policy evidence,
+not the live validation gaps described above. This documentation change performs
+none of those administrative or runtime actions.</p>
+<h2 id="ui-package-contributor-setup">UI Package Contributor Setup</h2>
+<div class="admonition warning">
+<p class="admonition-title">Historical package checkpoint, now adopted on develop</p>
+<p>This section describes <a href="https://github.com/Azure/gpt-rag-ui/pull/110">Azure/gpt-rag-ui#110</a>
+at <a href="https://github.com/Azure/gpt-rag-ui/commit/ee35c9ffea67902b4dc935e287beb5d4640ce6d6"><code>ee35c9f</code></a>,
+not the released UI or final adopted head (see the adoption table above).
+Accepted installed-package evidence is separate from
+cross-component and live deployment acceptance. Package
+installation is a contributor setup change, not an instruction to change
+deployed startup commands or enable hosted continuity.</p>
+</div>
+<h3 id="install-and-run-from-the-ui-checkout">Install and run from the UI checkout</h3>
+<p>Use an isolated Python 3.12 environment. The checkpoint's
+<a href="https://github.com/Azure/gpt-rag-ui/blob/ee35c9ffea67902b4dc935e287beb5d4640ce6d6/pyproject.toml"><code>pyproject.toml</code></a>
+uses setuptools to install <code>src/gpt_rag_ui/</code> and the explicit legacy adapters.
+<code>requirements.txt</code> remains the runtime dependency authority; install it before
+installing the code package:</p>
+<div class="highlight"><pre><span></span><code><span class="n">python</span> <span class="n">-m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">-r</span> <span class="n">requirements</span><span class="p">.</span><span class="n">txt</span>
+<span class="n">python</span> <span class="n">-m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">-r</span> <span class="n">requirements-quality</span><span class="p">.</span><span class="n">txt</span>
+<span class="n">python</span> <span class="n">-m</span> <span class="n">pip</span> <span class="n">install</span> <span class="p">-</span><span class="n">-no-deps</span> <span class="n">-e</span> <span class="p">.</span>
+<span class="n">python</span> <span class="n">-m</span> <span class="n">unittest</span> <span class="n">discover</span> <span class="n">-s</span> <span class="n">tests</span> <span class="n">-v</span>
+</code></pre></div>
+<p>With the existing application configuration in place, run from the UI checkout
+using the unchanged startup target:</p>
+<div class="highlight"><pre><span></span><code><span class="n">uvicorn</span> <span class="n">main</span><span class="p">:</span><span class="n">app</span> <span class="p">-</span><span class="n">-host</span> <span class="n">0</span><span class="p">.</span><span class="n">0</span><span class="p">.</span><span class="n">0</span><span class="p">.</span><span class="n">0</span> <span class="p">-</span><span class="n">-port</span> <span class="n">8080</span>
+</code></pre></div>
+<p>Editable installation is for contributor use. The checkpoint Dockerfile
+installs the package non-editably with <code>pip install --no-deps .</code> after runtime
+requirements and retains the same Uvicorn target and <code>/app</code> working directory.
+An editable-source test alone does not prove installed-wheel or container
+compatibility.</p>
+<p>At <code>ee35c9f</code>, the
+<a href="https://github.com/Azure/gpt-rag-ui/blob/ee35c9ffea67902b4dc935e287beb5d4640ce6d6/tests/test_installed_package.py">installed-package tests</a>
+create a clean virtual environment without inherited system packages, install
+the existing <code>requirements.txt</code>, run <code>pip check</code>, and install a real wheel
+non-editably. Isolated <code>python -I</code> subprocesses run outside the checkout;
+only tests, not application source, are copied for the behavioral suite.
+The eleven installed test methods include the copied behavioral suite,
+installed-module origin assertions, synthetic Entra/Copilot startup and invalid
+configuration cases, and Chainlit <code>HTTPSession</code> file persistence and cleanup
+under the staged asset root, plus standalone download/OpenAPI failure outcomes.</p>
+<p>The later pre-adoption UI checkpoint
+<a href="https://github.com/Azure/gpt-rag-ui/commit/aef9546879333c8615b7adb3917f299a665f4ecc"><code>aef9546</code></a>
+adjusts failure tests and runtime outcomes: OpenAPI generation failure returns
+uncached HTTP 500 with no metadata fallback; failed attachment ingestion stops
+the accompanying question with reattach/resubmit guidance while preserving
+confirmed bookkeeping. A failed first upload restores the prior session
+conversation ID; manually reattaching all files and resubmitting ingests them
+under a fresh conversation before sending the question. Existing conversations
+retain their ID and ownership checks. Failed panel owner indexing retains ordinary chat but
+denies panel access and logs required repair without automatic recovery.
+See <a href="../troubleshooting/">operator guidance</a>. Ingestion
+<a href="https://github.com/Azure/gpt-rag-ingestion/commit/eb42bbb155613ba570f891b67366967387735e32"><code>eb42bbb</code></a>
+adds configured-fallback diagnostics with the existing environment opt-in and
+legacy overview <code>feedback.available</code>; see
+<a href="../services_ingestion/#observability">source order and recovery</a>.
+These source-specific behavioral tests do not approve proposed exception
+records, establish new CI results, or change the shipped manifest.</p>
+<p>Historical <a href="https://github.com/Azure/gpt-rag-ui/actions/runs/34050677391">CI run 34050677391</a>
+passed 521 unittest cases and a separate Linux container job with 455 behavioral
+cases and no skips, retaining the 12 history-boundary cases from the earlier
+<code>653660e</code> milestone. The container job uses the existing Dockerfile and runs
+with <code>--network none</code>, exercising a real <code>uvicorn main:app</code> listener,
+ready/not-ready local HTTP responses, staged CSS/VERSION, and installed module
+origins. This supersedes the earlier clean-environment and Linux-evidence gaps;
+an unavailable local Docker engine is not a blocker for that bounded
+installed/container evidence; it does not close live validation gaps.
+These synthetic installed/container results are not live Azure or identity
+integration, production recovery, cross-component compatibility acceptance, approved
+exceptions, or activated repository protection. That historical full quality gate was red.</p>
+<p>Pre-adoption source <a href="https://github.com/Azure/gpt-rag-ui/actions/runs/34307187745">CI run 34307187745</a>
+at <code>aef9546</code> passes unit and container tests, but lint, policy, exceptions,
+and the aggregate quality gate fail. Passing behavioral evidence does not
+approve exceptions or prove post-adoption enforcement; administrative acceptance
+is separately recorded above.</p>
+<h3 id="find-the-owning-implementation">Find the owning implementation</h3>
+<p>All locations below are under <code>src/gpt_rag_ui/</code>. The frozen
+<a href="https://github.com/Azure/gpt-rag-ui/blob/ee35c9ffea67902b4dc935e287beb5d4640ce6d6/.quality/migration.json">migration inventory</a>
+records the initial module map and legacy export surface. For current owners
+after the history split, use the checkpoint
+<a href="https://github.com/Azure/gpt-rag-ui/blob/ee35c9ffea67902b4dc935e287beb5d4640ce6d6/.quality/policy.json">policy inventory</a>
+and implementation rather than treating the initial map as the final layout.</p>
+<table>
+<thead>
+<tr>
+<th>Responsibility</th>
+<th>Owning location and examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Startup composition</td>
+<td><code>bootstrap.py</code>; root <code>main.py</code> hands off asset setup and exposes the ASGI application</td>
+</tr>
+<tr>
+<td>HTTP routes and framework adaptation</td>
+<td><code>api/</code>: panel, download and embedding routes, OAuth, history data-layer/session adapter and chat/feedback callbacks</td>
+</tr>
+<tr>
+<td>Identity, tokens and sessions</td>
+<td><code>auth/</code>: Entra, OAuth, embedding and panel authentication</td>
+</tr>
+<tr>
+<td>Service transport</td>
+<td><code>clients/</code>: orchestrator, ingestion, hosted agent, managed Conversations, Blob and panel Cosmos</td>
+</tr>
+<tr>
+<td>User operations</td>
+<td><code>services/</code>: chat, citations, history, conversation/download policy, continuity, feedback and panel operations</td>
+</tr>
+<tr>
+<td>Configuration and asset root</td>
+<td><code>config/</code>: App Configuration, backend/panel/continuity settings and <code>resources.py</code></td>
+</tr>
+<tr>
+<td>Instrumentation</td>
+<td><code>telemetry/monitoring.py</code></td>
+</tr>
+<tr>
+<td>Pure shared values</td>
+<td><code>util/constants.py</code></td>
+</tr>
+</tbody>
+</table>
+<p>At this recorded implementation milestone, <code>api/history.py</code> owns <code>OrchestratorDataLayer</code>,
+the <code>BaseDataLayer</code> callbacks, the fresh-instance <code>get_data_layer</code> factory,
+idempotent registration, ambient session access, consume-once request metadata,
+and selected-conversation updates. <code>services/history.py</code> owns <code>HistoryService</code>,
+the single in-memory user cache and operations using explicit
+<code>HistoryOperationContext</code>. Ownership is checked before the API selection
+callback and rename-token resolution. The root <code>datalayer</code> adapter preserves
+<code>OrchestratorDataLayer</code> and <code>get_data_layer</code>, now exported from the API owner.</p>
+<p>Citation rendering continues to take explicit <code>conversation_id</code>, <code>principal_id</code>,
+and <code>copilot_session_id</code> values without reading Chainlit context. Existing
+Chainlit data/user types are still reused by the history service. The bounded
+history/session separation does not claim universally framework-free services
+or cross-component compatibility acceptance.</p>
+<p>This history adapter uses authenticated orchestrator conversation APIs, not a
+UI-owned Cosmos client. Separating its framework responsibilities is not a
+storage migration or a change to the selected chat backend. Keep classic
+history and the separately gated hosted continuity contract distinct.</p>
+<p>Implement behavior in its canonical owner, not the root adapters. Preserve
+the inventoried public imports while keeping one configuration/client/state
+owner. Package implementations must not import legacy adapters. Tests that
+patch private collaborators should patch their canonical owner; retain
+separate public-import compatibility tests rather than adding <code>sys.path</code>
+modifications or <code>sys.modules</code> proxies.</p>
+<h3 id="assets-and-checkpoint-quality-scope">Assets and checkpoint quality scope</h3>
+<p>Code installation does not replace the staged application assets: <code>public/</code>,
+<code>.chainlit/</code>, <code>chainlit.config.yaml</code>, <code>chainlit.md</code>, and <code>VERSION</code>.
+<a href="https://github.com/Azure/gpt-rag-ui/blob/ee35c9ffea67902b4dc935e287beb5d4640ce6d6/src/gpt_rag_ui/config/resources.py"><code>config/resources.py</code></a>
+resolves the existing <code>CHAINLIT_APP_ROOT</code> first, then the source adapter
+directory when it contains <code>chainlit.config.yaml</code>, otherwise the working
+directory. Set the asset root before startup when using installed code from
+another directory. Keep assets and writable application paths outside
+<code>site-packages</code>; a wheel alone is not a self-contained deployment bundle.</p>
+<p>The UI checkpoint uses the same four quality-tool pins listed for the
+backends. Its CI static evaluator has a separate virtual environment containing
+protected runtime requirements and tool pins, not the candidate package,
+editable metadata or build backend. Ruff/mypy and the architecture worker use
+isolated execution without importing candidate application code. This differs
+from the contributor environment intentionally used for behavioral tests;
+it does not change the local receipt interface.</p>
+<p>For a local same-run unittest receipt, use
+<a href="https://github.com/Azure/gpt-rag-ui/blob/ee35c9ffea67902b4dc935e287beb5d4640ce6d6/.github/scripts/run-unittest.py"><code>run-unittest.py</code></a>
+and pass that receipt to the UI quality checker:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$Base</span> <span class="p">=</span> <span class="s2">"&lt;fetched-protected-target-sha&gt;"</span>
+<span class="nv">$env:QUALITY_RUN_ID</span> <span class="p">=</span> <span class="no">[guid]</span><span class="p">::</span><span class="n">NewGuid</span><span class="p">().</span><span class="n">ToString</span><span class="p">()</span>
+<span class="n">python</span> <span class="p">.</span><span class="n">github</span><span class="p">\</span><span class="n">scripts</span><span class="p">\</span><span class="n">run-unittest</span><span class="p">.</span><span class="n">py</span> <span class="p">-</span><span class="n">-base-ref</span> <span class="nv">$Base</span> <span class="p">-</span><span class="n">-report</span> <span class="p">.</span><span class="n">artifacts</span><span class="p">\</span><span class="n">unittest</span><span class="p">.</span><span class="n">json</span>
+<span class="n">python</span> <span class="p">.</span><span class="n">github</span><span class="p">\</span><span class="n">scripts</span><span class="p">\</span><span class="n">check-quality</span><span class="p">.</span><span class="n">py</span> <span class="p">-</span><span class="n">-check</span> <span class="n">all</span> <span class="p">-</span><span class="n">-base-ref</span> <span class="nv">$Base</span> <span class="p">-</span><span class="n">-test-evidence</span> <span class="p">.</span><span class="n">artifacts</span><span class="p">\</span><span class="n">unittest</span><span class="p">.</span><span class="n">json</span> <span class="p">-</span><span class="n">-report</span> <span class="p">.</span><span class="n">artifacts</span><span class="p">\</span><span class="n">quality</span><span class="p">.</span><span class="n">json</span>
+</code></pre></div>
+<p>Set <code>QUALITY_RUN_ID</code> once per local run and keep the base, candidate and source
+unchanged across both commands. CI uses its GitHub run ID and attempt instead.
+The runner uses standard unittest discovery; the CI aggregate requires the
+complete <code>test_*.py</code> pattern. Failed, skipped or expected-failure tests cannot
+satisfy referenced passing evidence. The UI receipt is not interchangeable
+with ingestion's JSON or orchestrator's JUnit, even though UI and ingestion
+both use a <code>--test-evidence</code> flag. Receipt integrity hashes are not approval;
+protected evaluation and actual same-run job outcomes are still required.</p>
+<p>The <a href="https://github.com/Azure/gpt-rag-ui/blob/ee35c9ffea67902b4dc935e287beb5d4640ce6d6/.quality/typing-scope.json">UI typing scope</a>
+retains the stable IDs for <code>chat_backend</code>, <code>panel_config</code>, and
+<code>hosted_continuity_config</code> at their new <code>config/</code> locations and includes newly
+introduced package modules and legacy adapters. Consult that complete
+inventory rather than assuming every moved implementation is strictly typed.
+Namespace modules also receive coverage; explicit mypy package bases resolve
+their identities without adding runtime <code>sys.path</code> workarounds.
+The <a href="https://github.com/Azure/gpt-rag-ui/blob/ee35c9ffea67902b4dc935e287beb5d4640ce6d6/.quality/exceptions.json">exception ledger</a>
+at this historical checkpoint contained 28 individually proposed boundaries and zero active approvals,
+not an empty ledger or an inherited blanket waiver. Each proposal identifies
+the exact operation/handler, necessity, observable outcome, diagnostic path and
+executed failure tests. This milestone passes lint, typing and architecture,
+but exceptions, policy and the aggregate failed there. These are not the current
+30 active UI records or current enforcement status; see the adoption record above.
+Neither proposed records nor passing behavior tests alone establish handler
+approval or active repository rules.</p>
 <h2 id="code-update-workflow">Code Update Workflow</h2>
 <p>We use a simplified version of the <a href="https://blog.scottlowe.org/2015/01/27/using-fork-branch-git-workflow/">Fork and Branch Workflow</a> alongside <a href="https://nvie.com/posts/a-successful-git-branching-model/">Git Flow</a> for branching strategy. The <code>main</code> branch always contains deployment-ready code, while the <code>develop</code> branch serves as our integration branch.</p>
 <p>Contributors create feature branches from <code>develop</code> in their forks. Once changes are completed, they submit a pull request to the <code>develop</code> branch in the upstream repository. After review and approval, reviewers merge the changes into <code>develop</code>. Weekly, maintainers group these changes into a pull request from <code>develop</code> to <code>main</code> for final review and merging.</p>

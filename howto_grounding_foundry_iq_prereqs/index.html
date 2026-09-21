@@ -1655,6 +1655,13 @@
 
 
 <h1 id="foundry-iq-prerequisites">Foundry IQ prerequisites</h1>
+<div class="admonition note">
+<p class="admonition-title">Develop adoption, not a release</p>
+<p><a href="../contributing/#develop-adoption-status">Adoption status and approval scope</a>
+supersede the historical “unmerged” and pending-exception labels below.
+Source pins remain implementation evidence; released manifest pins are unchanged.
+See that record for active rules, reference runs and remaining validation gaps.</p>
+</div>
 <p>This is the shared baseline for every Foundry IQ knowledge source in GPT-RAG.
 Read this once before you enable your first Foundry IQ knowledge source. Each
 per-source how-to page lists only its own extra prerequisites on top of what
@@ -1870,6 +1877,17 @@ configured to forward a delegated token. This is the same plumbing that
 <a href="../howto_authentication/">Auth and Doc Security</a> describes for GPT-RAG's own
 security-trimmed retrieval. Each per-source page lists the specific tenant
 consent, delegated permissions, and licensing you need.</p>
+<div class="admonition warning">
+<p class="admonition-title">Unmerged candidate: compatibility gate before adoption</p>
+<p>Orchestrator <code>ea61bc7</code> <a href="../services_orchestrator/#candidate-retrieval-authorization">source-pinned provider modes</a>
+require a user for enabled Work IQ, Fabric ontology/Data Agent, SharePoint
+remote and MCP OBO query headers. Missing/failed OBO rejects the whole
+mixed retrieval, even when <code>ALLOW_ANONYMOUS=true</code>; it does not fall back
+to local documents or application identity. Service-only mode remains only
+for eligible requests. Restore token forwarding and source-specific consent
+and permissions; validate live denied/allowed access before adoption.
+A configured scope alone is not ACL proof. This is not shipped behavior.</p>
+</div>
 <p>For <code>mcpServer</code>, do not confuse the orchestrator's managed identity with an
 OBO token. Managed identity is app-only and gives every user the same MCP
 authorization scope. OBO preserves the signed-in user's identity and only

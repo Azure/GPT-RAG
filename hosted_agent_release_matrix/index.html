@@ -1714,6 +1714,13 @@
 
 
 <h1 id="hosted-agent-integration-matrix">Hosted-agent integration matrix</h1>
+<div class="admonition note">
+<p class="admonition-title">Develop adoption, not a release</p>
+<p><a href="../contributing/#develop-adoption-status">Adoption status and approval scope</a>
+supersede the historical “unmerged” and pending-exception labels below.
+Source pins remain implementation evidence; released manifest pins are unchanged.
+See that record for active rules, reference runs and remaining validation gaps.</p>
+</div>
 <p>This page records the exact hosted-agent component releases pinned by the
 GPT-RAG umbrella release <a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3"><code>v3.8.3</code></a>
 and the independent evidence gates that remain fail closed.</p>
@@ -2015,6 +2022,25 @@ return 422. Missing/invalid delegated tokens return 401; app-only tokens return
 403. Downstream store failure returns 502. Undeployed or disabled user panel
 surfaces return 503.</p>
 <h2 id="operator-overview-and-corpus-curation">Operator overview and corpus curation</h2>
+<div class="admonition warning">
+<p class="admonition-title">Unmerged source-specific panel failure outcomes</p>
+<p>UI <a href="https://github.com/Azure/gpt-rag-ui/commit/aef9546879333c8615b7adb3917f299a665f4ecc"><code>aef9546</code></a>
+retains ordinary chat after a failed creation-time owner-index write, but
+the missing row hides the conversation from listing and denies panel
+read/feedback/delete with opaque 404 responses. Its safe log requires
+owner-index repair and confirms no automatic repair was attempted.
+Continuing chat does not recover the row; arrange authorized operator
+repair without bypassing ownership checks. See <a href="../troubleshooting/">troubleshooting</a>.</p>
+<p>Ingestion <a href="https://github.com/Azure/gpt-rag-ingestion/commit/eb42bbb155613ba570f891b67366967387735e32"><code>eb42bbb</code></a>
+adds <code>feedback.available</code> only to legacy <code>/api/panel/overview</code>. Complete
+reads, including actual zero feedback, return <code>true</code>; feedback failures
+return <code>false</code> with integer zero placeholders, discarding partial counts
+while retaining jobs/files. Check availability, restore feedback access or
+data integrity, and retry before treating counts as observations. The
+separate frontend <code>/panel/overview/metrics</code> remains unchanged. See
+<a href="../services_ingestion/#observability">ingestion recovery</a>.
+Neither unmerged change updates this shipped matrix or enables its gates.</p>
+</div>
 <p>Ingestion <code>v2.7.3</code> includes:</p>
 <ul>
 <li><code>GET /panel/overview/metrics</code>;</li>
@@ -2033,7 +2059,7 @@ stops <code>GET /api/panel/feedback</code> from returning a permanent HTTP 500 w
 single malformed Cosmos document is present and from silently discarding
 documents that carry no <code>rating</code>, and stops <code>POST /api/panel/feedback</code> from
 returning HTTP 500 when the Cosmos write raises.</p>
-<p>Overview reads aggregate counts only from the panel owner-index and feedback
+<p><code>/panel/overview/metrics</code> reads aggregate counts only from the panel owner-index and feedback
 metadata containers. Any bucket below <code>PANEL_OVERVIEW_MIN_CARDINALITY</code> (default
 <code>5</code>) is returned as <code>null</code>, not as a small exact count.</p>
 <p>Corpus curation covers documents already handled by ingestion. The queue uses

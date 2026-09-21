@@ -1531,6 +1531,13 @@
 
 
 <h1 id="nl2sql-quick-start-guide">NL2SQL Quick Start Guide</h1>
+<div class="admonition note">
+<p class="admonition-title">Develop adoption, not a release</p>
+<p><a href="../contributing/#develop-adoption-status">Adoption status and approval scope</a>
+supersede the historical “unmerged” and pending-exception labels below.
+Source pins remain implementation evidence; released manifest pins are unchanged.
+See that record for active rules, reference runs and remaining validation gaps.</p>
+</div>
 <p>Get public access natural language querying of your Azure SQL Database working in <strong>30 minutes</strong> using <strong>automated blob storage ingestion</strong>.</p>
 <blockquote>
 <p>This quickstart enables a public access solution which is for testing purposes only!</p>
@@ -1977,6 +1984,33 @@ tables/saleslt_customer.json
 <li>Shows SQL query that was executed</li>
 <li>Cites the datasource</li>
 </ul>
+<div class="admonition warning">
+<p class="admonition-title">Unmerged primary-flow failure correction</p>
+<p>In orchestrator checkpoint <a href="https://github.com/Azure/gpt-rag-orchestrator/commit/2dc69285efa3d6bffb661e05e69797f54e1be45c"><code>2dc6928</code></a>,
+thrown primary failures reach the existing
+<a href="../services_orchestrator/#streaming-outcomes">failed-turn and classic SSE error boundary</a>,
+not an ordinary answer containing the exception. Explicit typed SQL
+validation and execution-result answers retain their existing completed
+response contract. Neither an initial HTTP response nor partial answer text
+proves completion. This correction is unmerged, not the released quickstart.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Unmerged schema availability and SQL cleanup correction</p>
+<p>The P6 follow-up in <a href="https://github.com/Azure/gpt-rag-orchestrator/pull/346">orchestrator #346</a>,
+checkpoint <a href="https://github.com/Azure/gpt-rag-orchestrator/commit/03e908d23d770c16c8ea8a94a5c268c561afa2b2"><code>03e908d</code></a>,
+adds an optional <code>SchemaInfo.error</code>: a constant missing-table reason or a
+bounded exception class for provider/validation failures. The schema collector
+supplies unavailable schemas separately from usable schemas to SQL generation;
+valid empty columns remain usable. This does not impose a new terminal
+failure policy.</p>
+<p>SQL execution attempts to close the returned cursor and connection, in that
+order, including on execution failure or cancellation. Ordinary close failures
+do not prevent the other close attempt or replace the primary typed result or
+propagating cancellation. Explicit validation/execution-result answers remain
+ordinary completed answers. This covers resources returned to the caller,
+not worker-thread cancellation redesign or resources never returned by
+acquisition. The change is unmerged, not released behavior or exception approval.</p>
+</div>
 <hr />
 <p><strong>Congratulations!</strong> You've set up an automated NL2SQL ingestion pipeline.</p>
 <p><strong>What You Just Enabled 🪄</strong></p>

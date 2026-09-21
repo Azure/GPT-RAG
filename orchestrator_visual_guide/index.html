@@ -1515,6 +1515,13 @@
 
 
 <h1 id="orchestrator-start-your-code-reading-with-visuals">Orchestrator: Start Your Code Reading with Visuals</h1>
+<div class="admonition note">
+<p class="admonition-title">Develop adoption, not a release</p>
+<p><a href="../contributing/#develop-adoption-status">Adoption status and approval scope</a>
+supersede the historical “unmerged” and pending-exception labels below.
+Source pins remain implementation evidence; released manifest pins are unchanged.
+See that record for active rules, reference runs and remaining validation gaps.</p>
+</div>
 <p><em>A picture is worth a thousand words.</em><br />
 Yet many engineers write another thousand words instead of drawing a single useful diagram.<br />
 Let’s reverse this evolution — with visuals.</p>
@@ -1568,13 +1575,13 @@ async def orchestrator_endpoint(
 <td><code>maf_lite</code></td>
 <td>MAF Lite <strong>(default)</strong></td>
 <td>Direct Azure OpenAI</td>
-<td>Microsoft Agent Framework with direct model access. Lightweight — no Agent Service dependency. Includes user profile memory and optional agentic search.</td>
+<td>Microsoft Agent Framework with direct model access. Lightweight — no Agent Service dependency. Conversation context and optional agentic search; candidate automatic profiles are suspended.</td>
 </tr>
 <tr>
 <td><code>maf_agent_service</code></td>
 <td>MAF + Agent Service</td>
 <td>Agent Service V2</td>
-<td>Microsoft Agent Framework with Azure AI Foundry Agent Service for server-side thread management. Includes user profile memory and optional agentic search.</td>
+<td>Microsoft Agent Framework with Azure AI Foundry Agent Service for server-side thread management. Conversation context and optional agentic search; candidate automatic profiles are suspended.</td>
 </tr>
 <tr>
 <td><code>single_agent_rag</code></td>
@@ -1597,6 +1604,14 @@ async def orchestrator_endpoint(
 </tbody>
 </table>
 <h2 id="single-agent-strategy-deep-dive">Single Agent Strategy (Deep Dive)</h2>
+<p>At the explicitly unmerged orchestrator <code>ea61bc7</code> candidate, automatic profile
+access, extraction and personalization are completely suspended, not merely
+optional. Existing records are not migrated or deleted. See the
+<a href="../services_orchestrator/#optional-profile-memory">source pin and profile policy</a>,
+<a href="../services_orchestrator/#candidate-retrieval-authorization">required-user/service-only provider modes</a>
+and <a href="../services_orchestrator/#conversation-history-and-retrieval-controls">unchanged best-effort history guarantee</a>.
+For the single-agent flow below, also see the
+<a href="../services_orchestrator/#streaming-outcomes">request-context failure contract</a>.</p>
 <p>This section explores how the Single-Agent RAG Strategy orchestrates the entire request-response lifecycle, from receiving a user's question to delivering a grounded, streamed answer. The diagrams below illustrate the conversation lifecycle, state management, and the interaction between the Orchestrator container app and Microsoft Foundry services.</p>
 <p><img alt="Orchestrator Strategy Setup and Streaming" src="../media/orchestrator_strategy/orchestrator-strategy.drawio.svg" /></p>
 <p>You will have noticed the use of the Factory Design Pattern (<code>AgentStrategyFactory</code>) for the various Strategies, ensuring that all of them comply with the same <code>BaseAgentStrategy</code> interface.
@@ -1676,7 +1691,11 @@ For the sake of clarity, I have abstracted away the different roles of the <code
 <p>finally calls the project_client.agents.runs.stream() which triggers the RAG pipeline inside of the Microsoft Foundry realm.</p>
 </li>
 </ul>
-<p>Note that <code>Thread</code> objects keep the entire <strong>history of conversations</strong>. There are two levels of history persistence: one in CosmosDB and another in Thread objects.</p>
+<p>In this classic single-agent diagram, <code>Thread</code> objects hold service-side
+conversation context separately from the Cosmos DB history. Neither store
+should be read as a guarantee that every streamed turn is durably recorded:
+classic Cosmos writes remain best effort, including at the unmerged <code>ea61bc7</code>
+pin, and the prompt history can be windowed.</p>
 <p><code>Orchestrator</code> keeps a history (using CosmosDB) identified by <code>conversation_id</code> which arrives in the HTTP Request payload.
 One of the attributes stored in the CosmosDB is <code>thread_id</code> which points to the <code>Thread</code> object which resides inside of the Microsoft Foundry.
 Microsoft Foundry maintains its own internal persistency in the Thread objects.</p>

@@ -1628,6 +1628,23 @@
 
 
 <h1 id="foundry-iq-work-iq-microsoft-365">Foundry IQ: Work IQ (Microsoft 365)</h1>
+<div class="admonition note">
+<p class="admonition-title">Develop adoption, not a release</p>
+<p><a href="../contributing/#develop-adoption-status">Adoption status and approval scope</a>
+supersede the historical “unmerged” and pending-exception labels below.
+Source pins remain implementation evidence; released manifest pins are unchanged.
+See that record for active rules, reference runs and remaining validation gaps.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Unmerged candidate: required-user retrieval</p>
+<p>At orchestrator <code>ea61bc7</code>, <a href="../services_orchestrator/#candidate-retrieval-authorization">source-pinned provider policy</a>
+makes requests with Work IQ enabled user-required, including mixed sources
+and <code>ALLOW_ANONYMOUS=true</code>. Missing/failed OBO fails retrieval rather than
+silently answering from local documents; no application fallback is enabled.
+Restore signed-in token forwarding, audience, consent and Microsoft 365
+access. Scopes/header tests are not live ACL proof. This is unmerged, not
+shipped behavior; source permissions still need live allowed/denied tests.</p>
+</div>
 <p>Work IQ is a Foundry IQ Knowledge Source that grounds answers on the
 signed-in user's Microsoft 365 world: mail, meetings, files, chats, and
 people. It runs next to your document Knowledge Source on the same Knowledge

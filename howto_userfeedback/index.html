@@ -1588,6 +1588,13 @@
 
 
 <h1 id="user-feedback-configuration">User Feedback Configuration</h1>
+<div class="admonition note">
+<p class="admonition-title">Develop adoption, not a release</p>
+<p><a href="../contributing/#develop-adoption-status">Adoption status and approval scope</a>
+supersede the historical “unmerged” and pending-exception labels below.
+Source pins remain implementation evidence; released manifest pins are unchanged.
+See that record for active rules, reference runs and remaining validation gaps.</p>
+</div>
 <p>GPT-RAG includes a <strong>User Feedback Loop</strong> feature that lets users evaluate
 assistant responses through the UI. In the currently released classic
 Container Apps topology and the explicit classic fallback, feedback is
@@ -1607,10 +1614,33 @@ removes the managed Conversation first and then metadata, returning an explicit
 <code>partial</code> result if metadata cleanup fails. Signed pagination cursors are
 <code>oid</code>-bound and expiring; tampered, expired, or cross-user cursors return 422.
 These routes return 503 while panel/history gates are off.</p>
+<div class="admonition warning">
+<p class="admonition-title">Unmerged UI owner-index failure outcome</p>
+<p>UI <a href="https://github.com/Azure/gpt-rag-ui/commit/aef9546879333c8615b7adb3917f299a665f4ecc"><code>aef9546</code></a>
+retains ordinary chat when the creation-time panel owner-index write fails.
+Without the row, listing omits the conversation and panel read, feedback
+and delete fail closed with opaque 404 responses. A safe log states that
+the write was not confirmed and owner-index repair is required; no
+automatic repair is attempted. Continuing chat does not rerun that hook.
+Ask the operator to investigate and arrange authorized index repair,
+without bypassing ownership checks. See <a href="../troubleshooting/">recovery guidance</a>.
+This candidate does not change the shipped manifest or enable panel gates.</p>
+</div>
 <p><img alt="Feedback stored in Cosmos DB" src="../media/feedback_stored_in_cosmos_db.png" />
 <br><em>User feedback stored in Cosmos DB</em></p>
 <p>By default, <strong>basic feedback</strong> (thumbs up/down) is enabled, while <strong>detailed ratings</strong> (star rating and comments) are disabled. Administrators control these options through <strong>Azure App Configuration</strong>.</p>
 <h2 id="feedback-types">Feedback Types</h2>
+<div class="admonition warning">
+<p class="admonition-title">Unmerged P1 classic feedback correction</p>
+<p>Candidate UI commit: <code>48d87b2fb2fb9a158d02f204cfbcc3941fb6126e</code>.</p>
+<p>The UI selects the submission notification from the backend outcome before
+attempting to remove the feedback form. A form-removal failure is logged
+separately: it does not turn an acknowledged submission into failure,
+turn backend failure into success, or repeat the write. The form may
+remain visible. Cancellation still propagates; neither form removal nor
+toast delivery is guaranteed. This is not a change to hosted-panel gates
+or a new persistence guarantee.</p>
+</div>
 <p>When enabled, users can provide <strong>star ratings</strong> and text comments for richer feedback that captures both satisfaction and reasoning.</p>
 <p><img alt="User feedback with rating" src="../media/user_feedback_with_rating.png" />
 <br><em>User providing rating and comment feedback</em></p>

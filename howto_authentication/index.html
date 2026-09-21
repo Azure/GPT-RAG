@@ -963,6 +963,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#legacy-api-key-recovery-h1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Legacy API-key recovery (H1)
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1708,6 +1717,13 @@
 
 
 <h1 id="authentication-and-document-level-security">Authentication and Document-Level Security</h1>
+<div class="admonition note">
+<p class="admonition-title">Develop adoption, not a release</p>
+<p><a href="../contributing/#develop-adoption-status">Adoption status and approval scope</a>
+supersede the historical “unmerged” and pending-exception labels below.
+Source pins remain implementation evidence; released manifest pins are unchanged.
+See that record for active rules, reference runs and remaining validation gaps.</p>
+</div>
 <p>This page explains how authentication works in GPT-RAG, from the GPT-RAG UI sign-in to querying Azure AI Search with document-level access control enabled (POSIX-like ACL / RBAC scopes). The classic runtime forwards a user token to the orchestrator, which produces the correct user-context token for Azure AI Search. The published hosted component matrix defines a stricter UI BFF ownership boundary described below.</p>
 <blockquote>
 <p>In OAuth mode, the orchestrator receives a user access token (for the orchestrator API) and then performs an On-Behalf-Of (OBO) exchange to obtain a separate token for Azure AI Search. The two tokens have different audiences and are not interchangeable.</p>
@@ -1835,6 +1851,20 @@ including requests that must be denied.</p>
 <div class="highlight"><pre><span></span><code>x-ms-query-source-authorization: Bearer &lt;search_user_access_token&gt;
 </code></pre></div>
 <p>Document-level access control is enforced by Azure AI Search when the index is configured for document permissions (see <code>permissionFilterOption</code> in the index definition) and documents include permission metadata. </p>
+<div class="admonition warning">
+<p class="admonition-title">Unmerged P3: required-user retrieval fails closed</p>
+<p>Orchestrator <a href="https://github.com/Azure/gpt-rag-orchestrator/commit/ea61bc7cd7b2ac21c957bee5db959337fedd8760"><code>ea61bc7cd7b2ac21c957bee5db959337fedd8760</code></a>
+supersedes the earlier <code>31348dc</code> fallback evidence for maintained MAF and
+multimodal providers, on MCP and non-MCP paths. A user assertion,
+<code>ALLOW_ANONYMOUS=false</code>, or a user-only source selects required-user mode.
+Missing/failed OBO stops retrieval: no application fallback, no multimodal
+retry with the authorization header stripped. Legitimate service-only
+requests remain; anonymous mode does not waive source-specific restrictions.
+See <a href="../services_orchestrator/#candidate-retrieval-authorization">mode selection and recovery</a>.
+This is unmerged, not released behavior. Scopes and token/header tests
+alone do not prove live ACL enforcement; validate each source with allowed
+and denied principals before deployment.</p>
+</div>
 <div class="admonition note">
 <p class="admonition-title">Foundry IQ retrieval</p>
 <p>When <code>RETRIEVAL_BACKEND=foundry_iq</code>, there are two security paths. Native
@@ -1857,7 +1887,35 @@ token flow described above: the orchestrator forwards the signed-in
 user's delegated token in <code>x-ms-query-source-authorization</code>, and the
 remote service (Microsoft 365 or Microsoft Fabric) evaluates
 per-user permissions natively. Managed identity fallback does not
-apply. Anonymous requests skip these sources.</p>
+apply. Earlier connector behavior skips sources without a user token;
+the unmerged <code>ea61bc7</code> provider policy instead rejects required-user and
+mixed-source requests before retrieval. It does not silently answer from
+local documents. SharePoint remote and MCP OBO query headers also require
+a user under that policy.</p>
+</div>
+<h3 id="legacy-api-key-recovery-h1">Legacy API-key recovery (H1)</h3>
+<div class="admonition warning">
+<p class="admonition-title">Compatibility retained: rotate both key sources</p>
+<p>At the same unmerged <code>ea61bc7</code> source pin, <code>src/dependencies.py</code>
+<code>validate_auth</code> retains the existing <code>ORCHESTRATOR_APP_APIKEY</code> environment
+fallback when configuration lookup fails. It logs the safe constant
+diagnostic <code>API key configuration unavailable; using environment fallback</code>,
+without the key or provider exception. Missing credentials, an absent expected
+key or a mismatch return <strong>401</strong>. <code>DISABLE_AUTH</code> bypass and Dapr-token
+precedence are unchanged; an invalid supplied Dapr token does not fall
+through to API-key authentication.</p>
+<p><strong>A stale environment key can remain valid during configuration failure.</strong>
+Restore App Configuration access and rotate/remove <strong>both the configured
+and environment sources</strong>, updating callers and deployed revisions together.
+Do not assume changing only the configured key revokes the environment key.
+There is no new environment opt-in for this authentication path; ingestion's
+environment-fallback opt-in is a different contract.</p>
+<p>H1 is the compatible existing behavior selected by the agent under the
+user's delegated decision authority, not added runtime code in
+<code>25f1986..ea61bc7</code>. Existing
+<code>tests/test_dependency_boundary_dispositions.py</code> covers fallback match,
+missing/mismatch, safe diagnostics, cancellation and precedence. This
+recovery choice is not new authorization or a claim that the candidate shipped.</p>
 </div>
 <p>GPT-RAG uses these field names consistently across ingestion paths:</p>
 <div class="highlight"><pre><span></span><code>metadata_security_user_ids
@@ -1986,7 +2044,7 @@ az ad app permission admin-consent --id &lt;replace-by-app-client-id&gt;
 <td><code>ALLOW_ANONYMOUS</code></td>
 <td>No</td>
 <td>No</td>
-<td>When <code>true</code>, the UI runs without OAuth (anonymous mode). Defaults to <code>true</code> locally when OAuth is not configured.</td>
+<td>UI anonymous-mode setting; defaults to <code>true</code> locally without OAuth. The unmerged orchestrator candidate also uses it for retrieval mode selection, never to override a user assertion or user-only source. See <a href="../services_orchestrator/#candidate-retrieval-authorization">candidate policy</a>.</td>
 </tr>
 </tbody>
 </table>
@@ -2074,7 +2132,7 @@ dashboard's MSAL flow.</p>
   User --&gt;|Bearer token&lt;br/&gt;api://CLIENT_ID/.default| Ing[Ingestion /api/jobs/*/run&lt;br/&gt;and /api/config writes]
   Orch --&gt;|require_admin| RoleCheck{roles claim&lt;br/&gt;contains 'Admin'?}
   Ing --&gt;|require_admin| RoleCheck
-  RoleCheck --&gt;|yes| Allow[200 / 202]
+  RoleCheck --&gt;|yes| Allow[Authorized to attempt operation]
   RoleCheck --&gt;|no| Deny[403 Admin role required]</code></pre>
 <h3 id="1-add-the-admin-app-role-to-the-app-registration">1) Add the <code>Admin</code> app role to the App Registration</h3>
 <p>You add the role to the same App Registration created in the <strong>Setup</strong> section above. You can do this in the Azure portal or with the Azure CLI.</p>
@@ -2221,12 +2279,46 @@ dashboard's MSAL flow.</p>
 <p><strong>Read-only mode in the ingestion Configuration tab</strong></p>
 <p><code>GET /api/config</code> on the ingestion service is open to any caller, even unauthenticated, so the tab can render without a second round-trip. The response includes a <code>canEdit</code> boolean that is <code>true</code> only when auth is off, or when the caller presents a valid token carrying the <code>Admin</code> role. A non-admin operator sees the current values but the fields and the Save button are disabled. Writes (<code>PUT /api/config</code>), cache reload (<code>POST /api/config/reload</code>), and Apply (<code>POST /api/config/apply</code>) all require <code>Admin</code>. The orchestrator dashboard hides the tab entirely for non-admins instead, since the whole <code>/api/dashboard/*</code> surface is gated.</p>
 <p><strong>What <code>Apply</code> does, and what it does not do</strong></p>
-<p>The button labeled <strong>Apply</strong> calls <code>POST /api/dashboard/config/apply</code> (orchestrator) or <code>POST /api/config/apply</code> (ingestion). Both endpoints perform a <strong>soft refresh</strong>:</p>
+<p>The button labeled <strong>Apply</strong> calls <code>POST /api/dashboard/config/apply</code> (orchestrator) or <code>POST /api/config/apply</code> (ingestion). On a successful call, these endpoints perform a <strong>soft refresh</strong>; passing the authorization gate alone does not guarantee that the operation succeeds:</p>
 <ol>
 <li>The in-process App Configuration cache is refreshed so subsequent reads in this container instance see the new values immediately.</li>
 <li>On the ingestion service, every known cron job is rescheduled in APScheduler using the latest expression in App Configuration. This means a cron change takes effect on the running container without a restart.</li>
 </ol>
 <p>The endpoint is intentionally called <code>/config/apply</code> and not <code>/restart</code> so the response honestly reflects what happens. The Container App revision is <strong>not</strong> recycled. Other replicas of the same service refresh their own cache on their normal cadence; if you want every replica updated immediately, restart the Container App revision in the portal.</p>
+<div class="admonition warning">
+<p class="admonition-title">Unmerged ingestion failure-handling preview</p>
+<p><a href="https://github.com/Azure/gpt-rag-ingestion/pull/296">Azure/gpt-rag-ingestion#296</a>,
+at <a href="https://github.com/Azure/gpt-rag-ingestion/blob/3a46472b19049631fa4427699a79968134a46769/api/admin.py"><code>3a46472</code></a>,
+corrects a genuine schedule-application failure in <code>POST /api/config/apply</code>
+to return HTTP <code>500</code>, not a successful Apply response. This is candidate
+behavior, not a claim about the currently released service.
+<code>PUT /api/config</code> preserves HTTP <code>200</code> and the keys in <code>applied</code> when the
+durable writes and schedule handling succeed but the subsequent best-effort
+local cache refresh fails. That refresh failure alone does not add a key
+to <code>failed</code>. Explicit Reload and Apply are separate operations whose
+outcomes must still be checked.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Unmerged orchestrator configuration and authentication clarification</p>
+<p>At <a href="https://github.com/Azure/gpt-rag-orchestrator/commit/b93fb58cdb59dbb30b1db88b39c8843296b7713b"><code>b93fb58</code></a>,
+unexpected configuration-read failures no longer become default dashboard
+values or an "authentication not configured" decision. The dependency
+checkpoint <a href="https://github.com/Azure/gpt-rag-orchestrator/commit/7541c3e3ea3d5f4075f8e3913650bf22c2f086a5"><code>7541c3e</code></a>
+likewise propagates unexpected required JWT tenant/client read failures.
+Actual App Configuration missing-key and exhausted-retry fallback behavior
+remains unchanged. Known authentication <code>HTTPException</code> statuses remain;
+unexpected token-validation failures retain a generic <code>401</code>.</p>
+<p>Orchestrator <code>PUT /api/dashboard/config</code> still returns <code>500</code> for per-key
+write failures, with the same error shape and the bounded message
+<code>Unable to persist setting</code>. Other keys in that request may already persist.
+A cache-refresh failure after durable writes also remains <code>500</code>, unlike
+ingestion's refresh-only <code>200</code>/<code>applied</code> contract above. Neither status nor
+code rollback undoes durable writes. The existing API-key environment
+fallback was retained under an inactive proposal at this checkpoint;
+subsequent initial administrative acceptance is not new identity approval.
+These are historical checkpoints; roles, labels, defaults and SSE schemas
+are not redefined by this preview.</p>
+</div>
 <h3 id="6-operator-workflow-verifying-the-role-lands-in-the-token">6) Operator workflow: verifying the role lands in the token</h3>
 <p>When access works in Entra but the dashboard still returns 403, the access token sent to the API is almost always missing the <code>roles</code> claim. The fastest way to confirm is to inspect the actual token.</p>
 <ol>

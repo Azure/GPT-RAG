@@ -1660,6 +1660,13 @@
 
 
 <h1 id="admin-dashboard-sign-in">Admin Dashboard Sign-in</h1>
+<div class="admonition note">
+<p class="admonition-title">Develop adoption, not a release</p>
+<p><a href="../contributing/#develop-adoption-status">Adoption status and approval scope</a>
+supersede the historical “unmerged” and pending-exception labels below.
+Source pins remain implementation evidence; released manifest pins are unchanged.
+See that record for active rules, reference runs and remaining validation gaps.</p>
+</div>
 <p>The orchestrator admin dashboard at <code>/dashboard</code> signs the operator in with Microsoft Entra ID. This page explains what an operator needs to configure in Entra and in App Configuration to turn that sign-in on, how to assign the <code>Admin</code> role, what a working sign-in should look like, and how to diagnose the common failures.</p>
 <p>If you are looking for the wider authentication picture (chat UI sign-in, On-Behalf-Of, document-level access control), see <a href="../howto_authentication/">Authentication and Document-Level Security</a>. This page is scoped to the operator dashboard.</p>
 <p>This procedure applies to the orchestrator dashboard in the classic Container
@@ -1857,6 +1864,15 @@ client. See
 <li>Setting only <code>OAUTH_AZURE_AD_TENANT_ID</code> without <code>OAUTH_AZURE_AD_CLIENT_ID</code> is intentionally rejected. <code>/api/dashboard/auth-config</code> returns <code>500</code> in that case rather than pretending auth is off; the SPA surfaces the misconfiguration instead of silently loading unauthenticated.</li>
 <li>To go back to unauthenticated mode, unset <code>OAUTH_AZURE_AD_TENANT_ID</code>. See <a href="#turning-sign-in-back-off">Turning sign-in back off</a>.</li>
 </ul>
+<div class="admonition warning">
+<p class="admonition-title">Unmerged configuration-failure clarification</p>
+<p>The <a href="../howto_authentication/#5-configuration-tab-what-it-can-change-and-what-apply-actually-does">orchestrator candidate notes</a>
+distinguish a genuinely absent setting from an unexpected provider failure.
+Do not interpret a configuration-read failure as proof that auth is off,
+or a failed dashboard Save as proof that no key was persisted. The candidate
+retains the existing role gate and defaults; it does not change this sign-in
+setup or enable the separately gated hosted-panel surfaces.</p>
+</div>
 <p>The unauthenticated <code>GET /api/dashboard/auth-config</code> response looks like this when auth is on:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">"auth_enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>

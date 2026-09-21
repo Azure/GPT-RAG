@@ -1782,6 +1782,13 @@
 
 
 <h1 id="nl2sql-fabric-metadata-data-source">NL2SQL / Fabric Metadata Data Source</h1>
+<div class="admonition note">
+<p class="admonition-title">Develop adoption, not a release</p>
+<p><a href="../contributing/#develop-adoption-status">Adoption status and approval scope</a>
+supersede the historical “unmerged” and pending-exception labels below.
+Source pins remain implementation evidence; released manifest pins are unchanged.
+See that record for active rules, reference runs and remaining validation gaps.</p>
+</div>
 <p>The <strong>NL2SQL ingestion process</strong> loads structured metadata from <strong>blob storage</strong>—including tables, measures, and sample queries—into Azure AI Search. This metadata provides the orchestrator with the necessary context to generate accurate SQL and DAX queries.</p>
 <p>Each JSON file defines the metadata for one entity (a table, measure, or query).</p>
 <h2 id="how-it-works">How It Works</h2>
@@ -1791,6 +1798,16 @@
 <p>Updates follow an upsert approach: existing metadata is replaced, new metadata is added. Change detection uses blob metadata (<code>Last-Modified</code>, <code>ETag</code>), so only modified or missing entries are re-indexed, while unchanged ones are skipped.</p>
 <h3 id="purging">Purging</h3>
 <p>A purge job compares index entries with the JSON files in blob storage. Any entry without a matching file is removed, keeping the index consistent with the source.</p>
+<div class="admonition warning">
+<p class="admonition-title">Unmerged purge failure-handling preview</p>
+<p><a href="https://github.com/Azure/gpt-rag-ingestion/pull/296">Azure/gpt-rag-ingestion#296</a>,
+at <a href="https://github.com/Azure/gpt-rag-ingestion/blob/3a46472b19049631fa4427699a79968134a46769/jobs/nl2sql_purger.py"><code>3a46472</code></a>,
+counts only deletions confirmed by Azure AI Search. A failed or incomplete
+deletion, failed scan (including a later page), or failed document count
+propagates as a failure rather than publishing a <code>finished</code> run summary.
+This candidate correction does not rename public status, event, or summary
+fields and is not yet a released-service guarantee.</p>
+</div>
 <h2 id="metadata-structure">Metadata Structure</h2>
 <p>NL2SQL and Chat-with-Fabric rely on metadata to give the orchestrator structured information for optimized SQL and DAX queries. The metadata consists of three types:</p>
 <ul>

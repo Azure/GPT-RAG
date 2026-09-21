@@ -1637,6 +1637,13 @@
 
 
 <h1 id="foundry-iq-fabric-data-agent-microsoft-fabric">Foundry IQ: Fabric Data Agent (Microsoft Fabric)</h1>
+<div class="admonition note">
+<p class="admonition-title">Develop adoption, not a release</p>
+<p><a href="../contributing/#develop-adoption-status">Adoption status and approval scope</a>
+supersede the historical “unmerged” and pending-exception labels below.
+Source pins remain implementation evidence; released manifest pins are unchanged.
+See that record for active rules, reference runs and remaining validation gaps.</p>
+</div>
 <p>The <code>fabricDataAgent</code> Foundry IQ knowledge source grounds answers on a
 Microsoft Fabric Data Agent. A Fabric Data Agent acts as a virtual analyst:
 it runs queries over Fabric data (semantic models, lakehouses, warehouses,
@@ -1813,10 +1820,22 @@ empty, GPT-RAG skips the source and continues with document grounding
    extract. The orchestrator normalizes both into the standard reference
    shape and hands them to the LLM alongside document references.</li>
 </ol>
-<p>Local Foundry IQ document sources always serve the request. If the OBO
+<p>In the earlier connector behavior, local document sources can still serve
+the request. If the OBO
 token is missing (for example, a background job), the Fabric Data Agent
 source is skipped with a warning and only local sources contribute.
 Managed identity is never used to reach this source, by design.</p>
+<div class="admonition warning">
+<p class="admonition-title">Unmerged compatibility change: no silent local-only answer</p>
+<p>Orchestrator <code>ea61bc7</code> <a href="../services_orchestrator/#candidate-retrieval-authorization">provider policy and source pin</a>
+supersedes that missing-token behavior for maintained MAF/multimodal
+providers. An enabled Fabric Data Agent source makes the whole mixed
+request user-required, even with <code>ALLOW_ANONYMOUS=true</code>. Missing/failed OBO
+rejects retrieval; no app-identity fallback is enabled. Restore signed-in
+token forwarding, audience, consent and Fabric permissions, or operationally
+disable the affected route. Token scopes alone do not prove live per-user
+ACL enforcement. This is unmerged, not shipped behavior.</p>
+</div>
 <h2 id="data-egress-caveat">Data egress caveat</h2>
 <p>Fabric Data Agent forwards the caller OBO token to Microsoft Fabric and
 returns grounded answers plus tabular evidence from Fabric data back to
@@ -1831,7 +1850,9 @@ downstream telemetry and chat history.</p>
   Configuration keys are set. Check the orchestrator logs for a "Fabric
   Data Agent knowledge source skipped" warning; that usually points at a
   missing OBO token, an empty knowledge source name, or an empty
-  workspace / data agent id.</li>
+  workspace / data agent id.
+  At the unmerged pin above, missing required OBO fails the turn rather than
+  producing a successful local-only answer; inspect authorization first.</li>
 <li><strong><code>403</code> or empty results from Fabric.</strong> Verify the signed-in user has
   access to the Fabric workspace and the Data Agent item. Fabric enforces
   per-user permissions, so an OBO token for a user without Data Agent

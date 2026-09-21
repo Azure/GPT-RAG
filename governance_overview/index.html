@@ -1681,6 +1681,13 @@
 
 
 <h1 id="governance-and-responsible-operation">Governance and responsible operation</h1>
+<div class="admonition note">
+<p class="admonition-title">Develop adoption, not a release</p>
+<p><a href="../contributing/#develop-adoption-status">Adoption status and approval scope</a>
+supersede the historical “unmerged” and pending-exception labels below.
+Source pins remain implementation evidence; released manifest pins are unchanged.
+See that record for active rules, reference runs and remaining validation gaps.</p>
+</div>
 <p>Use this guide to decide what data GPT-RAG may process, who owns each
 control, and what evidence an operator should preserve for security reviews
 and incident investigations.</p>
@@ -1761,6 +1768,11 @@ process termination, asynchronous boundaries, disabled instrumentation, and
 upstream systems can create evidence gaps. Events are asserted by the producing
 GPT-RAG process. They are not independently attested, cryptographically signed,
 tamper-evident, or nonrepudiable.</p>
+<p>The <a href="../governance_audit_contract_v1/">unmerged audit failure-isolation correction</a>
+distinguishes ordinary best-effort emission failures from cancellation and
+process-control exceptions. It preserves an already-failing tool's primary
+outcome without making a successful tool immune to a new cancellation.
+This does not strengthen telemetry into a durable audit record.</p>
 <h2 id="shared-responsibility">Shared responsibility</h2>
 <p>One organization may perform more than one role. Assign each responsibility
 explicitly before production use.</p>

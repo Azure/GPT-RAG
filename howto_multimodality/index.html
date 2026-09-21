@@ -1577,6 +1577,13 @@
   <h1>Multimodality</h1>
 
 <p>GPT-RAG supports end-to-end multimodal processing: from document ingestion (extracting figures and generating captions) through orchestration (retrieving and presenting images alongside text to a vision-capable model). This page covers both sides.</p>
+<div class="admonition note">
+<p class="admonition-title">Develop adoption, not a release</p>
+<p><a href="../contributing/#develop-adoption-status">Adoption status and approval scope</a>
+supersede the historical “unmerged” and pending-exception labels below.
+Source pins remain implementation evidence; released manifest pins are unchanged.
+See that record for active rules, reference runs and remaining validation gaps.</p>
+</div>
 <blockquote>
 <p>Multimodal processing is opt-in. When disabled (the default), the ingestion pipeline ignores figures and the orchestrator works with text only.</p>
 <p><strong>Retrieval backend note:</strong> Multimodal captioning parity for the Foundry IQ
@@ -1593,6 +1600,22 @@ returns equivalent visual context.</p>
 <hr />
 <h2 id="ingestion">Ingestion</h2>
 <p>The multimodal ingestion pipeline goes through four steps: document analysis, figure extraction, caption generation, and chunk attachment. The first two steps differ depending on the analysis backend; the last two are shared.</p>
+<p>These steps describe the successful processing path, not a guarantee that every
+figure is extracted, captioned or uploaded. Read failures separately from
+optional enrichment fallbacks; see <a href="../services_ingestion/#observability">ingestion processing outcomes</a>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Unmerged figure and caption failure-handling preview</p>
+<p>In ingestion checkpoint <a href="https://github.com/Azure/gpt-rag-ingestion/commit/26358cb8f57c982e3c80171bf8dc6b154491388d"><code>26358cb</code></a>,
+an unsuccessful figure upload propagates to the figure boundary instead of
+returning an empty URL for attachment to a chunk. Expected SDK/Requests
+figure failures can omit that enrichment; expected caption-service failures
+retain <code>"No caption available."</code>. Unexpected implementation failures are
+not classified as those optional fallbacks. Expected PDF/ZIP/codec errors
+may retain images already extracted, without certifying complete extraction.
+This preserves <code>relatedImages</code>, <code>imageCaptions</code> and <code>captionVector</code> and
+their successful-path behavior. It is an unmerged, offline-tested correction,
+not live upload/indexing evidence or parity for the managed Foundry IQ Blob path.</p>
+</div>
 <p><strong>Analysis backends: Content Understanding vs Document Intelligence</strong></p>
 <p>GPT-RAG supports two Azure AI services for document analysis. The choice is controlled by the <code>USE_DOCUMENT_INTELLIGENCE</code> setting in App Configuration (default <code>false</code>).</p>
 <table>
@@ -1839,7 +1862,7 @@ az<span class="w"> </span>appconfig<span class="w"> </span>kv<span class="w"> </
 </code></pre></div>
 <p><strong>Troubleshooting</strong></p>
 <p><strong>Empty captions ("No caption available.")</strong>
-The vision model deployment does not support image input, or the deployment name is incorrect. Check that <code>VISION_DEPLOYMENT_NAME</code> points to a model like <code>gpt-4o</code> or <code>gpt-4o-mini</code>. If not set, the pipeline falls back to <code>CHAT_DEPLOYMENT_NAME</code>, which may not support vision.</p>
+This is a fallback caption, not confirmation of a successful model call. Possible causes include a vision model deployment that does not support image input or an incorrect deployment name; inspect the ingestion diagnostics rather than assuming one cause. Check that <code>VISION_DEPLOYMENT_NAME</code> points to a model like <code>gpt-4o</code> or <code>gpt-4o-mini</code>. If not set, the pipeline falls back to <code>CHAT_DEPLOYMENT_NAME</code>, which may not support vision.</p>
 <p><strong>Figures not appearing in search results</strong>
 Check that <code>MULTIMODAL</code> is set to <code>true</code> in App Configuration with the <code>gpt-rag</code> label. Also verify the document was re-indexed after enabling multimodal (existing documents need to be re-processed).</p>
 <p><strong>Scanned PDFs produce full-page images instead of cropped figures</strong>
@@ -1877,6 +1900,30 @@ Figures smaller than <code>MINIMUM_FIGURE_AREA_PERCENTAGE</code> of the page are
 <li><strong>Post-response image validation</strong> (optional) — each image the model chose to embed is re-evaluated by the vision model. Images classified as decorative or irrelevant are stripped from the final answer.</li>
 </ol>
 <p>The result is an answer that cites document sources, embeds relevant figures inline next to the text they illustrate, and avoids decorative or off-topic images.</p>
+<div class="admonition warning">
+<p class="admonition-title">Unmerged primary-flow failure correction</p>
+<p>Orchestrator checkpoint <a href="https://github.com/Azure/gpt-rag-orchestrator/commit/2dc69285efa3d6bffb661e05e69797f54e1be45c"><code>2dc6928</code></a>
+preserves answer buffering, image deduplication/validation and the optional
+early welcome prefix. Thrown primary failures now reach the existing
+<a href="../services_orchestrator/#streaming-outcomes">failed-turn and classic SSE error boundary</a>
+instead of becoming ordinary raw-error answers. A welcome prefix is not
+completion, and buffered model text is not yet emitted output. This is
+unmerged behavior; cancellation remains distinct. The later candidate
+suspends automatic profiles entirely (below).</p>
+<p>At <a href="https://github.com/Azure/gpt-rag-orchestrator/commit/6b652d8c4d664863a3d02d439b7b77210963320d"><code>6b652d8</code></a>,
+failed intent classification still defaults to <code>question</code>, not a
+retrieval-skipping intent. Failed optional post-response image validation
+strips images while preserving answer text; cancellation propagates.
+The scoped follow-up to that checkpoint instead interrupts on configured
+provider construction or retrieval failure, including a failed existing
+Search retry, through the
+<a href="../services_orchestrator/#streaming-outcomes">required-retrieval failure contract</a>.
+Zero matches, absent endpoint/index configuration and explicit
+greeting/no-retrieval intents remain supported; optional image failures
+do not become required retrieval failures. This follow-up remains
+unmerged, not released behavior or approval of the retained
+delegated-header retry.</p>
+</div>
 <div class="no-wrap">
 <div class="highlight"><pre><span></span><code>User Question
     │
@@ -1903,8 +1950,30 @@ Final Answer (text with inline ![Figure](path) references)
 </code></pre></div>
 </div>
 
-<p><strong>User profile memory</strong>: the strategy also maintains a per-user profile stored in Cosmos DB. The <code>UserProfileMemory</code> plugin extracts facts about the user from conversations (e.g., preferences, context) and injects them as context in subsequent sessions. This enables personalized answers across sessions.</p>
+<div class="admonition warning">
+<p class="admonition-title">Unmerged candidate: no automatic profiles or stripped-header retry</p>
+<p>At orchestrator
+<a href="https://github.com/Azure/gpt-rag-orchestrator/commit/ea61bc7cd7b2ac21c957bee5db959337fedd8760"><code>ea61bc7cd7b2ac21c957bee5db959337fedd8760</code></a>,
+automatic profile access, extraction and personalization are completely
+suspended, including valid-looking legacy keys and cached context. There
+are zero profile extraction model calls/tasks and zero automatic profile
+Cosmos reads/writes. This supersedes earlier eligibility and adapter-gap
+guidance; it does not migrate or delete records. The prompt must not promise
+to learn, save or recall a persistent profile. See
+<a href="../services_orchestrator/#optional-profile-memory">profile suspension and restoration requirements</a>.</p>
+<p>Required-user retrieval fails closed; failed OBO or Search is not retried
+with <code>x-ms-query-source-authorization</code> removed. Service-only mode remains
+for eligible requests, not as fallback after rejection. Recover trusted
+token forwarding, consent and source permissions rather than stripping
+headers. <a href="../services_orchestrator/#candidate-retrieval-authorization">Provider modes and live-proof limits</a>
+apply to text, citations and images. These are unmerged compatibility
+changes, not shipped behavior.</p>
+</div>
 <p><strong>Conversation history</strong>: the strategy sends the last N messages (configurable via <code>CHAT_HISTORY_MAX_MESSAGES</code>) to the model for multi-turn context. Image markdown from previous assistant messages is stripped to prevent stale figure references from leaking into the current context.</p>
+<p>Profile suspension does not disable ordinary conversation context. Classic
+history writes remain best effort: SSE completion does not guarantee durable
+history, and process loss/concurrent writes remain limits. See
+<a href="../services_orchestrator/#conversation-history-and-retrieval-controls">history recovery and guarantees</a>.</p>
 <p><strong>Configuration</strong> — the multimodal strategy is activated by setting <code>AGENT_STRATEGY</code> to <code>multimodal</code> in Azure App Configuration (with the <code>gpt-rag</code> label). All other settings below also go in App Configuration with the same label.</p>
 <p><em>Selecting the strategy:</em></p>
 <table>
@@ -2095,7 +2164,12 @@ Image classification and validation add LLM calls per image. Reduce <code>MULTIM
 <p><strong>Model ignores images or lists filenames as plain text instead of embedding them</strong>
 This is a prompt-following issue. The system prompt in <code>src/prompts/multimodal/main.txt</code> contains detailed instructions for inline image embedding. If the model consistently ignores them, try a more capable model (e.g., switch from <code>gpt-4o-mini</code> to <code>gpt-4o</code>), or simplify the prompt instructions.</p>
 <p><strong>User profile not persisting across sessions</strong>
-The profile is stored in the Cosmos DB conversations container. Check that the container exists and that the orchestrator's managed identity has read/write access. Look for <code>post_flow_cleanup failed</code> in the logs.</p>
+At the unmerged <code>ea61bc7</code> pin, this is expected: all automatic profile access
+and extraction are suspended to avoid unverifiable owner keys. Existing
+records are untouched, not deleted. Do not backfill, rekey, substitute
+<code>principal_id</code>, or repair the adapter to bypass suspension. Restoring profiles
+requires a proven trusted owner binding and separately reviewed privacy decision;
+ordinary Cosmos conversation-history failures are a different issue.</p>
 <p><strong>Intent classifier always returns "question" (search runs on greetings)</strong>
 Check the logs for <code>intent_classification</code> entries. If the classifier is failing (timeout or error), it defaults to <code>question</code>. Ensure the model endpoint is reachable and the deployment supports low-token completions.</p>
 
