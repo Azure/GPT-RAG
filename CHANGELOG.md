@@ -1,5 +1,55 @@
 # Changelog
 
+## [v3.8.5] - 2026-09-21
+
+### Changed
+
+- **Credential-free private connectivity prerequisites instead of a
+  deploy-only `RUN_FROM_JUMPBOX` declaration gate.** Shared checks use the
+  operating system's DNS resolution, including Windows NRPT, and require
+  every resolved address to be RFC1918 IPv4. Public, loopback, mixed, and
+  IPv6 results fail closed. Checks connect to the resolved IP on TCP 443
+  and perform TLS with normal certificate verification and hostname SNI,
+  using a bounded 20-second budget without HTTP requests, credentials,
+  tokens, or proxy routing.
+- **Prerequisites follow the deployment stage.** Post-provision checks
+  App Configuration; pre-deploy checks App Configuration and, for hosted
+  deployment, Foundry. ACR is checked only when a hosted image build will
+  actually run, not when a prebuilt or reusable immutable digest avoids
+  building. Public deployment paths do not run these private probes.
+- **Actual connectivity replaces host declarations.** An unset
+  `RUN_FROM_JUMPBOX` performs the checks without prompting or automatically
+  skipping in noninteractive execution; `true` cannot bypass them. Explicit
+  `false` retains the warning and deferral only at post-provision, not at
+  subsequent required deployment stages.
+- Runtime component pins, AI Landing Zone pins, and topology defaults are
+  unchanged. The hosted runtime permission bootstrap remains the fix already
+  released in `v3.8.4`; this patch does not broaden its grant allowlist or
+  introduce document-access, native Blob, or infrastructure changes.
+
+### Validation
+
+The component combination is unchanged from `v3.8.4`.
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.6.2 |
+| gpt-rag-orchestrator | v4.1.1 |
+| gpt-rag-ingestion | v2.7.3 |
+| infra / AI Landing Zone | v2.5.1 |
+
+- Local preparation checks release metadata, the full manifest-derived table,
+  unchanged component and infrastructure pins, historical changelog
+  preservation, and privacy. These checks are not feature validation.
+- Final prerequisite and hook validation requires the reviewed feature to
+  be integrated; no final feature test counts are recorded at this stage.
+  The previous release's test counts are not reused as evidence for this
+  change.
+- No fresh automated deployment, role apply, model greeting, document
+  authorization, scanning, or cold-start validation was performed for this
+  candidate. No Azure mutations, image builds, or model calls were made
+  during local release preparation.
+
 ## [v3.8.4] - 2026-09-21
 
 ### Changed
