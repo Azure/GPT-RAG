@@ -920,7 +920,9 @@ Expect the App Configuration host check to succeed before data-plane
 configuration starts, then wait for the script's successful completion.
 This script configures Azure services; it is not a read-only diagnostic.
 If it reports deferral, configuration has **not** run: check both the saved
-and process settings above. If a host check fails, fix DNS/routing/TLS before
+and process settings above. The hook can exit successfully after warning that
+configuration is incomplete; a zero exit code does not override that warning.
+If a host check fails, fix DNS/routing/TLS before
 retrying; do not disable validation.
 
 ### Check the deployment host before building or deploying
@@ -935,18 +937,23 @@ authenticated application request.
 | Candidate phase | Endpoint checked before that phase's protected operation |
 | --- | --- |
 | Post-provision configuration | `APP_CONFIG_ENDPOINT` |
-| Pre-deploy | App Configuration; also the configured Foundry endpoint for hosted deployment |
-| Hosted image build | The actual ACR endpoint selected for the build |
+| Pre-deploy | `APP_CONFIG_ENDPOINT`; also `AZURE_AI_PROJECT_ENDPOINT` for hosted deployment |
+| Hosted image build | `AZURE_CONTAINER_REGISTRY_ENDPOINT` for the actual registry selected for the build |
 
 Public mode (`NETWORK_ISOLATION=false`) does not run these private-host probes.
 An invalid explicit isolation value, such as `tru`, fails instead of silently
 selecting public mode.
+The selected `azd` environment must be readable and valid; a failed, empty,
+or malformed environment read stops the hook rather than falling back to
+another `.azure` directory.
 Reusing an existing image digest or supplying a prebuilt digest avoids an
 unnecessary hosted-build ACR probe; it does not bypass checks needed by later
 deployment phases. A missing/invalid endpoint, public or mixed DNS result,
 certificate failure, or timeout stops the guarded phase before its writes.
 `RUN_FROM_JUMPBOX=true` is not proof of connectivity and never bypasses these
-checks. There is no instruction to skip TLS validation, use a proxy bypass,
+checks. The jumpbox and warning flags control only post-provision deferral;
+pre-deploy and hosted-build checks ignore them. There is no instruction to
+skip TLS validation, use a proxy bypass,
 or fall back to public service endpoints.
 
 These checks establish only the tested host-to-endpoint DNS/TCP/TLS path.

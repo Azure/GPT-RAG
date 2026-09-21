@@ -608,9 +608,10 @@ before creating resources.
 With `NETWORK_ISOLATION=true`, the candidate checks the operating system's DNS
 results for RFC1918 private IPv4 destinations, TCP 443, and normal TLS
 certificate/hostname validation with SNI. It checks `APP_CONFIG_ENDPOINT`
-before post-provision configuration; App Configuration plus the configured
-Foundry endpoint before hosted deployment; and the actual ACR endpoint before
-a hosted image build. Public mode does not probe. A prebuilt or reused image
+before post-provision configuration; `APP_CONFIG_ENDPOINT` plus
+`AZURE_AI_PROJECT_ENDPOINT` before hosted deployment; and the actual build
+registry's `AZURE_CONTAINER_REGISTRY_ENDPOINT` before a hosted image build.
+Public mode does not probe. A prebuilt or reused image
 digest avoids an unnecessary hosted-build ACR probe.
 An invalid explicit `NETWORK_ISOLATION` value is an error, not a switch to
 public mode.
@@ -635,6 +636,11 @@ When resuming configuration, set both the saved `azd` warning flag and the
 current process `AZURE_SKIP_NETWORK_ISOLATION_WARNING` to `false`; an inherited
 process value can still defer when the selected environment has no saved key.
 The VPN guide shows both assignments around each provision/configuration phase.
+These flags affect only post-provision deferral, not pre-deploy or hosted-build
+checks. A deferred post-provision hook warns that configuration is incomplete
+and can exit successfully; that is not a successful configuration phase.
+Failed, empty, or malformed selected-environment reads fail closed rather
+than using a stale `.azure` directory.
 
 Host-check success does not prove RBAC, API health, effective Azure VNet
 ownership, access to every service, remote build-pool egress, or success of a
