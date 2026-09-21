@@ -1,5 +1,21 @@
 # Foundry IQ: OneLake (Microsoft Fabric lakehouse)
 
+!!! note "Develop adoption, not a release"
+    [Adoption status and approval scope](contributing.md#develop-adoption-status)
+    supersede the historical “unmerged” and pending-exception labels below.
+    Source pins remain implementation evidence; released manifest pins are unchanged.
+    See that record for active rules, reference runs and remaining validation gaps.
+
+!!! note "Unmerged request-level authorization policy"
+    This source's app-only ingestion/access model is not changed by orchestrator
+    `ea61bc7`. Its [source-pinned provider policy](services_orchestrator.md#candidate-retrieval-authorization)
+    still requires user authorization when the request carries an assertion,
+    `ALLOW_ANONYMOUS=false`, or the knowledge base includes a user-only source.
+    A mixed request cannot drop a required-user source after missing/failed OBO.
+    Eligible service-only requests remain, not as application fallback after
+    user rejection. A token or scope does not add per-user ACLs to this source.
+    This is unmerged guidance, not shipped behavior.
+
 The `indexedOneLake` Foundry IQ knowledge source grounds answers on files
 stored in a Microsoft Fabric OneLake lakehouse. Foundry IQ owns the
 underlying Azure AI Search index for this source: it crawls the lakehouse,

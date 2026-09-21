@@ -1,5 +1,11 @@
 # Blob Data Source
 
+!!! note "Develop adoption, not a release"
+    [Adoption status and approval scope](contributing.md#develop-adoption-status)
+    supersede the historical “unmerged” and pending-exception labels below.
+    Source pins remain implementation evidence; released manifest pins are unchanged.
+    See that record for active rules, reference runs and remaining validation gaps.
+
 The **Blob Data Source** ingests documents from the **`documents` container** in your Azure Storage Account into Azure AI Search and keeps the index synchronized when files are updated or removed. It is designed for production-scale document processing with incremental updates, smart freshness detection, and automated cleanup.
 
 ## How it Works
@@ -13,6 +19,14 @@ The Blob Data Source operates through **two independent jobs** that can be sched
 **Files are processed in parallel** using a configurable semaphore (`INDEXER_MAX_CONCURRENCY`, default: 4) to balance throughput with service limits. Each file goes through download → security metadata extraction → document chunking → chunk conversion → batch upload. Batch uploads use `INDEXER_BATCH_SIZE` (default: 500) to optimize AI Search API calls while staying within request size limits.
 
 **Supported formats** include PDF, Word (.docx), PowerPoint (.pptx), Excel (.xlsx), text (.txt, .md), images (.jpg, .png, .bmp, .tiff), and HTML. OCR extraction is performed automatically for PDFs and images using Azure Document Intelligence.
+
+!!! warning "Unmerged worker failure-handling preview"
+    In checkpoint [`0f7b1ce`](https://github.com/Azure/gpt-rag-ingestion/commit/0f7b1cea85078c7ee4260a20fe4f66255976cb12),
+    failed Blob metadata acquisition becomes a failed file rather than indexing
+    with empty fallback ACLs. Valid metadata and legacy security-field handling
+    are unchanged. Indexer uploads/deletes require matching SDK confirmations,
+    and exhausted retries remain failures. See [worker outcomes and cleanup](services_ingestion.md#observability);
+    these corrections are unmerged and do not establish live indexing success.
 
 ## Ingestion Flow
 

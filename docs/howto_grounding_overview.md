@@ -1,5 +1,22 @@
 # Grounding sources overview
 
+!!! note "Develop adoption, not a release"
+    [Adoption status and approval scope](contributing.md#develop-adoption-status)
+    supersede the historical “unmerged” and pending-exception labels below.
+    Source pins remain implementation evidence; released manifest pins are unchanged.
+    See that record for active rules, reference runs and remaining validation gaps.
+
+!!! warning "Unmerged candidate: retrieval compatibility and recovery"
+    Orchestrator `ea61bc7` introduces the [source-pinned provider policy](services_orchestrator.md#candidate-retrieval-authorization):
+    required-user retrieval fails closed; eligible service-only access remains.
+    Work IQ, Fabric ontology/Data Agent, SharePoint remote and MCP OBO headers
+    require a user even in mixed-source requests with `ALLOW_ANONYMOUS=true`.
+    Missing/failed OBO no longer permits silent local-only answers or
+    stripped-header retry in these provider paths. No application fallback is
+    enabled without proven equivalent ACLs and user disclosure. Restore trusted
+    identity forwarding and source permissions; scopes alone are not live proof.
+    This candidate is unmerged, not shipped or a manifest update.
+
 This page is the map for everything under **Grounding sources**. Read it
 first, then jump to the page for the approach and source you want.
 

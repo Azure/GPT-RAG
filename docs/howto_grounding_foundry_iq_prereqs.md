@@ -1,5 +1,11 @@
 # Foundry IQ prerequisites
 
+!!! note "Develop adoption, not a release"
+    [Adoption status and approval scope](contributing.md#develop-adoption-status)
+    supersede the historical “unmerged” and pending-exception labels below.
+    Source pins remain implementation evidence; released manifest pins are unchanged.
+    See that record for active rules, reference runs and remaining validation gaps.
+
 This is the shared baseline for every Foundry IQ knowledge source in GPT-RAG.
 Read this once before you enable your first Foundry IQ knowledge source. Each
 per-source how-to page lists only its own extra prerequisites on top of what
@@ -121,6 +127,16 @@ configured to forward a delegated token. This is the same plumbing that
 [Auth and Doc Security](howto_authentication.md) describes for GPT-RAG's own
 security-trimmed retrieval. Each per-source page lists the specific tenant
 consent, delegated permissions, and licensing you need.
+
+!!! warning "Unmerged candidate: compatibility gate before adoption"
+    Orchestrator `ea61bc7` [source-pinned provider modes](services_orchestrator.md#candidate-retrieval-authorization)
+    require a user for enabled Work IQ, Fabric ontology/Data Agent, SharePoint
+    remote and MCP OBO query headers. Missing/failed OBO rejects the whole
+    mixed retrieval, even when `ALLOW_ANONYMOUS=true`; it does not fall back
+    to local documents or application identity. Service-only mode remains only
+    for eligible requests. Restore token forwarding and source-specific consent
+    and permissions; validate live denied/allowed access before adoption.
+    A configured scope alone is not ACL proof. This is not shipped behavior.
 
 For `mcpServer`, do not confuse the orchestrator's managed identity with an
 OBO token. Managed identity is app-only and gives every user the same MCP

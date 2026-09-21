@@ -1,5 +1,11 @@
 # Foundry IQ: Documents
 
+!!! note "Develop adoption, not a release"
+    [Adoption status and approval scope](contributing.md#develop-adoption-status)
+    supersede the historical “unmerged” and pending-exception labels below.
+    Source pins remain implementation evidence; released manifest pins are unchanged.
+    See that record for active rules, reference runs and remaining validation gaps.
+
 > Complete the [Foundry IQ prerequisites](howto_grounding_foundry_iq_prereqs.md)
 > first. This page adds only the settings specific to the default Blob
 > Documents path and the custom `searchIndex` path.
@@ -184,6 +190,17 @@ Rules to keep straight:
 - Security-enabled retrieval must fail closed. Missing token, filter, or
   permission configuration should be treated as an error, not as permission
   to run an unfiltered query.
+
+!!! warning "Unmerged candidate: required-user and mixed-source retrieval"
+    At orchestrator `ea61bc7`, [source-pinned provider policy](services_orchestrator.md#candidate-retrieval-authorization)
+    replaces permissive MAF/multimodal OBO recovery on MCP and non-MCP paths.
+    Required-user requests fail closed; no application fallback is enabled.
+    Service-only access remains for eligible requests. Enabling a user-only
+    source makes a mixed request user-required, not local-documents-only on
+    missing OBO. Restore token forwarding, consent and source permissions rather
+    than weakening authorization. Scopes and header tests are not live ACL proof;
+    validate denied as well as allowed users for each configured security mode.
+    This candidate is unmerged and does not change shipped release pins.
 
 ## Configuration settings
 

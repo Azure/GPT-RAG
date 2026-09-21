@@ -1,5 +1,11 @@
 # NL2SQL / Fabric Metadata Data Source
 
+!!! note "Develop adoption, not a release"
+    [Adoption status and approval scope](contributing.md#develop-adoption-status)
+    supersede the historical “unmerged” and pending-exception labels below.
+    Source pins remain implementation evidence; released manifest pins are unchanged.
+    See that record for active rules, reference runs and remaining validation gaps.
+
 The **NL2SQL ingestion process** loads structured metadata from **blob storage**—including tables, measures, and sample queries—into Azure AI Search. This metadata provides the orchestrator with the necessary context to generate accurate SQL and DAX queries.
 
 Each JSON file defines the metadata for one entity (a table, measure, or query).
@@ -17,6 +23,15 @@ Updates follow an upsert approach: existing metadata is replaced, new metadata i
 ### Purging
 
 A purge job compares index entries with the JSON files in blob storage. Any entry without a matching file is removed, keeping the index consistent with the source.
+
+!!! warning "Unmerged purge failure-handling preview"
+    [Azure/gpt-rag-ingestion#296](https://github.com/Azure/gpt-rag-ingestion/pull/296),
+    at [`3a46472`](https://github.com/Azure/gpt-rag-ingestion/blob/3a46472b19049631fa4427699a79968134a46769/jobs/nl2sql_purger.py),
+    counts only deletions confirmed by Azure AI Search. A failed or incomplete
+    deletion, failed scan (including a later page), or failed document count
+    propagates as a failure rather than publishing a `finished` run summary.
+    This candidate correction does not rename public status, event, or summary
+    fields and is not yet a released-service guarantee.
 
 ## Metadata Structure
 

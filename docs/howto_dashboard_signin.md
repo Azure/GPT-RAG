@@ -1,5 +1,11 @@
 # Admin Dashboard Sign-in
 
+!!! note "Develop adoption, not a release"
+    [Adoption status and approval scope](contributing.md#develop-adoption-status)
+    supersede the historical “unmerged” and pending-exception labels below.
+    Source pins remain implementation evidence; released manifest pins are unchanged.
+    See that record for active rules, reference runs and remaining validation gaps.
+
 The orchestrator admin dashboard at `/dashboard` signs the operator in with Microsoft Entra ID. This page explains what an operator needs to configure in Entra and in App Configuration to turn that sign-in on, how to assign the `Admin` role, what a working sign-in should look like, and how to diagnose the common failures.
 
 If you are looking for the wider authentication picture (chat UI sign-in, On-Behalf-Of, document-level access control), see [Authentication and Document-Level Security](howto_authentication.md). This page is scoped to the operator dashboard.
@@ -169,6 +175,14 @@ Two rules to keep in mind:
 
 - Setting only `OAUTH_AZURE_AD_TENANT_ID` without `OAUTH_AZURE_AD_CLIENT_ID` is intentionally rejected. `/api/dashboard/auth-config` returns `500` in that case rather than pretending auth is off; the SPA surfaces the misconfiguration instead of silently loading unauthenticated.
 - To go back to unauthenticated mode, unset `OAUTH_AZURE_AD_TENANT_ID`. See [Turning sign-in back off](#turning-sign-in-back-off).
+
+!!! warning "Unmerged configuration-failure clarification"
+    The [orchestrator candidate notes](howto_authentication.md#5-configuration-tab-what-it-can-change-and-what-apply-actually-does)
+    distinguish a genuinely absent setting from an unexpected provider failure.
+    Do not interpret a configuration-read failure as proof that auth is off,
+    or a failed dashboard Save as proof that no key was persisted. The candidate
+    retains the existing role gate and defaults; it does not change this sign-in
+    setup or enable the separately gated hosted-panel surfaces.
 
 The unauthenticated `GET /api/dashboard/auth-config` response looks like this when auth is on:
 

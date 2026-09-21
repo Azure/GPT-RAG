@@ -1,5 +1,11 @@
 # Ground answers on SharePoint (remote, Copilot Retrieval API)
 
+!!! note "Develop adoption, not a release"
+    [Adoption status and approval scope](contributing.md#develop-adoption-status)
+    supersede the historical “unmerged” and pending-exception labels below.
+    Source pins remain implementation evidence; released manifest pins are unchanged.
+    See that record for active rules, reference runs and remaining validation gaps.
+
 This how-to describes the **SharePoint remote** grounding option in GPT-RAG.
 It is the fifth Foundry IQ knowledge source kind, alongside `searchIndex`,
 `workIQ`, `fabricOntology`, and `fabricDataAgent`.
@@ -33,9 +39,19 @@ so SharePoint results appear alongside `azureBlob`, `searchIndex`, `workIQ`,
 
 The `remoteSharePoint` source runs under the user's OBO token forwarded via
 `x-ms-query-source-authorization`. The service managed identity is never
-substituted for this source: if no OBO token is available on a request, the
+substituted for this source. In the earlier connector behavior, if no OBO token is available on a request, the
 SharePoint remote entry is skipped and the other configured knowledge
 sources run normally.
+
+!!! warning "Unmerged compatibility change: missing OBO rejects retrieval"
+    Orchestrator `ea61bc7` [provider policy and source pin](services_orchestrator.md#candidate-retrieval-authorization)
+    supersedes that skip behavior for maintained MAF/multimodal providers.
+    Enabling SharePoint remote makes the mixed request user-required even with
+    `ALLOW_ANONYMOUS=true`; missing/failed OBO does not yield a local-only
+    answer or application fallback. Restore trusted token forwarding, audience,
+    consent and SharePoint permissions. Verify live denied/allowed access;
+    scopes and forwarded headers alone do not prove ACL enforcement.
+    This is unmerged, not shipped behavior.
 
 ## Prerequisites
 
@@ -127,9 +143,9 @@ knowledge sources; ordering follows what the retrieve API returns.
   or mistyped name causes the orchestrator to log a warning and skip the
   source.
 - Confirm the front-end is forwarding an OBO token. If the request reaches
-  the orchestrator without a user token, the SharePoint remote entry is
-  skipped by design and a warning is logged. Managed-identity fallback is
-  never used for this kind.
+  the earlier connector without a user token, the entry is skipped with a
+  warning. At the unmerged provider pin above, the whole required-user retrieval
+  fails instead. Managed-identity fallback is never used for this kind.
 - Confirm the calling user actually has SharePoint items that match the
   query. Item-level ACL is enforced by M365; a user with no access to
   matching items will get no SharePoint citations even though the source is
