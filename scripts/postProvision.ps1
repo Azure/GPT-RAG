@@ -10,55 +10,40 @@ Write-Host ""
 # Mirror azd environment variables into process environment
 # This avoids persisting secrets in the User environment (registry)
 #-------------------------------------------------------------------------------
-& azd env get-values | ForEach-Object {
-  if ($_ -match '^([^=]+)=(.*)$') {
+$azdValues = & azd env get-values
+if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace(($azdValues -join "`n"))) {
+    Write-Error "Could not load the selected azd environment; refusing to configure resources."
+    exit 1
+}
+$azdValues | ForEach-Object {
+  if ($_ -match '^\s*([A-Za-z_][A-Za-z0-9_]*)=(.*)$') {
     $k = $matches[1]
     $v = $matches[2] -replace '^"|"$'
     Set-Item -Path Env:$k -Value $v
+  } elseif (-not [string]::IsNullOrWhiteSpace($_)) {
+    Write-Error "Invalid azd environment output; refusing to configure resources."
+    exit 1
   }
 }
 
 #-------------------------------------------------------------------------------
-# Zero Trust Information
+# Private deployment-host prerequisite (before data-plane configuration)
 #-------------------------------------------------------------------------------
 function Test-Truthy {
     param([AllowNull()][string]$Value)
     return -not [string]::IsNullOrWhiteSpace($Value) -and $Value -match '^(1|true|t|yes|y)$'
 }
 
-Write-Host ""
-if (Test-Truthy $env:NETWORK_ISOLATION) {
-    Write-Host "🔒 Zero Trust enabled."
-    Write-Host "Access to Azure resources is restricted to the VNet."
-    Write-Host "Ensure you run scripts/postProvision.ps1 from within the VNet."
-    Write-Host "If you are using a local machine, make sure you have a VPN connection to the VNet."
-    Write-Host "You can also use the Test VM to access the environment and complete the setup."
-
-    $runningFromJumpbox = Test-Truthy $env:RUN_FROM_JUMPBOX
-    if (-not $runningFromJumpbox) {
-        if ($env:RUN_FROM_JUMPBOX -and $env:RUN_FROM_JUMPBOX.ToLower() -match '^(false|0|no|skip)$') {
-            Write-Host "⏭️ RUN_FROM_JUMPBOX=$($env:RUN_FROM_JUMPBOX); skipping data-plane post-provisioning."
-            exit 0
-        }
-        if (Test-Truthy $env:AZURE_SKIP_NETWORK_ISOLATION_WARNING) {
-            Write-Host "⏭️ AZURE_SKIP_NETWORK_ISOLATION_WARNING=$($env:AZURE_SKIP_NETWORK_ISOLATION_WARNING); skipping local data-plane post-provisioning."
-            Write-Host "   Re-run from the jumpbox with RUN_FROM_JUMPBOX=true."
-            exit 0
-        }
-        if ([Environment]::UserInteractive -and -not [Console]::IsInputRedirected) {
-            $answer = Read-Host "Are you running this script from inside the VNet or via VPN? [Y/n]"
-            if ($answer.ToLower() -notmatch '^(y|yes)$') {
-                Write-Host "❌ Please run this script from inside the VNet or with VPN access. Exiting."
-                exit 0
-            }
-        } else {
-            Write-Host "⏭️ Non-interactive shell outside the VNet; skipping data-plane post-provisioning."
-            Write-Host "   Re-run from the jumpbox with RUN_FROM_JUMPBOX=true."
-            exit 0
-        }
-    }
-} else {
-    Write-Host "🚧 Provisioning basic architecture."
+$env:GPT_RAG_REPO_ROOT = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+& python -c "import os, runpy, sys; sys.path.insert(0, os.environ['GPT_RAG_REPO_ROOT']); sys.argv = ['config.deployment.private_network', '--stage', 'post-provision']; runpy.run_module('config.deployment.private_network', run_name='__main__')"
+$networkExitCode = $LASTEXITCODE
+if ($networkExitCode -eq 20) {
+    Write-Warning "Post-provision configuration explicitly deferred; application setup is incomplete."
+    exit 0
+}
+if ($networkExitCode -ne 0) {
+    Write-Error "Private post-provision prerequisites failed. Connect through VPN/VNet and rerun postProvision; configuration has not started." -ErrorAction Continue
+    exit $networkExitCode
 }
 
 #-------------------------------------------------------------------------------

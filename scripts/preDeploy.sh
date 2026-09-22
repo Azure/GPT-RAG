@@ -31,9 +31,14 @@ tag_exists()    { [ -n "$(git ls-remote --tags  "$1" "$2" 2>/dev/null || true)" 
 branch_exists() { [ -n "$(git ls-remote --heads "$1" "$2" 2>/dev/null || true)" ]; }
 
 get_azd_value() {
-  local repo_root="$1" key="$2" val=""
+  local project_root="$1" key="$2" val=""
+  # Root values must come from the same validated snapshot as the probe.
+  if [ "$project_root" = "$repo_root" ]; then
+    printf "%s" "${!key:-}"
+    return 0
+  fi
   if command -v azd >/dev/null 2>&1; then
-    if pushd "$repo_root" >/dev/null 2>&1; then
+    if pushd "$project_root" >/dev/null 2>&1; then
       local lines
       if lines="$(azd env get-values 2>/dev/null)"; then
         val="$(printf "%s\n" "$lines" | tr -d '\r' | awk -F= -v k="$key" '
@@ -44,7 +49,7 @@ get_azd_value() {
   fi
   if [ -z "$val" ]; then
     local env_dir
-    env_dir="$(find "$repo_root/.azure" -type d -maxdepth 1 -mindepth 1 2>/dev/null | head -n1 || true)"
+    env_dir="$(find "$project_root/.azure" -type d -maxdepth 1 -mindepth 1 2>/dev/null | head -n1 || true)"
     if [ -n "$env_dir" ] && [ -f "$env_dir/.env" ]; then
       val="$(tr -d '\r' < "$env_dir/.env" | awk -F= -v k="$key" '
         $1==k { sub(/^[ \t"]+/, "", $2); sub(/[ \t"]+$/, "", $2); gsub(/^"/,"",$2); gsub(/"$/,"",$2); print $2; exit }')"
@@ -97,12 +102,21 @@ dot_azure="$repo_root/.azure"
 # Configuration, resource-group, resource-token, and deploy-handoff values
 # that are not inherited by a clean shell merely because get_azd_value reads
 # them into local variables below.
-while IFS='=' read -r key value; do
-  [[ -z "$key" ]] && continue
+azd_values="$(cd "$repo_root" && azd env get-values)" || {
+  red "Could not load the selected azd environment; refusing to deploy."
+  exit 1
+}
+[ -n "$azd_values" ] || { red "The selected azd environment is empty."; exit 1; }
+while IFS= read -r line; do
+  line="${line%$'\r'}"
+  [[ -z "$line" ]] && continue
+  [[ "$line" =~ ^([A-Za-z_][A-Za-z0-9_]*)=(.*)$ ]] || { red "Invalid azd environment output."; exit 1; }
+  key="${BASH_REMATCH[1]}"
+  value="${BASH_REMATCH[2]}"
   value="${value%\"}"
   value="${value#\"}"
   export "$key=$value"
-done < <(cd "$repo_root" && azd env get-values)
+done <<< "$azd_values"
 
 # ---------- Global env & RG early check ----------
 global_rg="$(get_azd_value "$repo_root" "AZURE_RESOURCE_GROUP")"
@@ -136,10 +150,11 @@ selected_components="$(printf "%s" "$topology_json" | jq -er '.components | if t
 }
 cyan "GPT-RAG deployment mode: $deployment_mode"
 
-if [ "$network_isolation" = "true" ] && [ "$(printf "%s" "${RUN_FROM_JUMPBOX:-}" | tr '[:upper:]' '[:lower:]')" != "true" ]; then
-  red "NETWORK_ISOLATION=true deployments must run from the jumpbox/VNet. Provision from the workstation, then run azd deploy from the jumpbox with RUN_FROM_JUMPBOX=true."
-  exit 4
-fi
+python3 -m config.deployment.private_network --stage pre-deploy || {
+  network_exit=$?
+  red "Private deployment prerequisites failed. Use a VPN/VNet-connected host; RUN_FROM_JUMPBOX is not a connectivity bypass."
+  exit "$network_exit"
+}
 
 if ! docker info >/dev/null 2>&1; then
   if [ "$network_isolation" = "true" ] || [ -n "$acr_task_agent_pool" ]; then

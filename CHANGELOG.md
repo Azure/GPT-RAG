@@ -1,5 +1,84 @@
 # Changelog
 
+## [v3.8.5] - 2026-09-21
+
+### Changed
+
+- **Credential-free private connectivity prerequisites instead of a
+  deploy-only `RUN_FROM_JUMPBOX` declaration gate**
+  ([#703](https://github.com/Azure/GPT-RAG/pull/703)). Shared checks use the
+  operating system's DNS resolution, including Windows NRPT, and require
+  1-16 resolved addresses, all RFC1918 IPv4. Public, loopback, mixed, and
+  IPv6 results fail closed before connecting. Checks pin each resolved IP on TCP 443
+  and perform TLS with normal certificate verification and hostname SNI,
+  using a 10-second DNS timeout within a 20-second per-hostname budget,
+  without HTTP requests, credentials, tokens, or proxy routing.
+- **Prerequisites follow the deployment stage.** Post-provision checks
+  App Configuration; pre-deploy checks App Configuration and, for hosted
+  deployment, Foundry. ACR is checked only when a hosted image build will
+  actually run, not when a prebuilt or reusable immutable digest avoids
+  building. Public deployment paths do not run these private probes.
+- **Actual connectivity replaces host declarations.** An unset
+  `RUN_FROM_JUMPBOX` performs the checks without prompting or automatically
+  skipping in noninteractive execution, unless
+  `AZURE_SKIP_NETWORK_ISOLATION_WARNING=true` explicitly defers
+  post-provision. Explicit `RUN_FROM_JUMPBOX=false|0|no|skip` also defers
+  post-provision, with a warning that configuration remains incomplete.
+  Truthy jumpbox values take precedence over the warning flag but cannot
+  bypass checks. Pre-deploy and actual hosted builds ignore both deferral
+  flags and require successful checks.
+- **Fail closed on invalid selected-environment output.** Hooks reject failed,
+  empty, or malformed `azd env get-values` reads. Root pre-deploy uses one
+  validated snapshot for the check and deployment; explicit empty values clear
+  inherited process values, while absent keys preserve process inheritance.
+- Coordinated deployment, VPN, configuration, and troubleshooting guidance was
+  merged through [#702](https://github.com/Azure/GPT-RAG/pull/702). It retains
+  unpublished-candidate wording until actual release publication.
+- Runtime component pins, AI Landing Zone pins, and topology defaults are
+  unchanged. The hosted runtime permission bootstrap remains the fix already
+  released in `v3.8.4`; this patch does not broaden its grant allowlist or
+  introduce document-access, native Blob, or infrastructure changes.
+
+### Validation
+
+The component combination is unchanged from `v3.8.4`.
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.6.2 |
+| gpt-rag-orchestrator | v4.1.1 |
+| gpt-rag-ingestion | v2.7.3 |
+| infra / AI Landing Zone | v2.5.1 |
+
+- Python 3.12 offline suite:
+  `python -B -m pytest -q tests config -p no:cacheprovider --tb=short`:
+  **472 passed, 480 subtests passed, 4 optional CLI cases skipped**.
+  Focused private-network and release-pin contracts passed
+  **34 tests and 108 subtests**. Network and Azure command boundaries were
+  mocked, including execution of both hook variants with fake CLIs.
+- All **4** optional installed-CLI parser/serialization cases passed separately
+  with their socket and command-handler guards. PowerShell parsing and Bash
+  syntax checks passed for both changed hook pairs. The agent-assets validator
+  passed for **3 agents and 14 skills**, plus scoped instructions.
+- The test harness supplied an empty `core.fsmonitor` override that
+  environment-clearing tests cannot preserve on Windows. After verifying its
+  key and empty value, validation used process-local `GIT_CONFIG_VALUE_2=false`;
+  no repository/global Git configuration or test expectations were changed.
+- Release metadata, manifest-derived tables, unchanged component and
+  infrastructure pins, historical changelog preservation, and privacy checks
+  passed. Final runtime source matches the reviewed feature in
+  [#703](https://github.com/Azure/GPT-RAG/pull/703).
+- A separate source-bound current-host probe rejected non-RFC1918 DNS for
+  three configured endpoints. This is negative-only evidence, not positive
+  VPN/private-TLS readiness or a fresh-install acceptance result.
+- The prerequisites check deployment-host DNS/TCP/TLS only. Endpoint ownership,
+  VNet/route mapping, RBAC, API health, build-pool egress, other service/data
+  endpoints, and runtime-to-service connectivity still need separate evidence.
+- No fresh automated deployment, role apply, model greeting, document
+  authorization, scanning, or cold-start validation was performed for this
+  candidate. No Azure mutations, image builds, or model calls were made
+  during release preparation.
+
 ## [v3.8.4] - 2026-09-21
 
 ### Changed

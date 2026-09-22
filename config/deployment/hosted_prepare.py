@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import os
 import shutil
 import subprocess
@@ -20,6 +21,7 @@ from config.deployment.composition import (
     validate_hosted_prerequisites,
 )
 from config.deployment.hosted_image import prepare_hosted_image
+from config.deployment.private_network import check_stage
 from util.azure_cli import resolve_az_command
 
 
@@ -158,6 +160,7 @@ def prepare_environment(
             "landing zone."
         )
 
+    check_stage(environment, "hosted-build")
     digest = prepare_hosted_image(
         image_version=None,
         registry=registry,
@@ -221,6 +224,7 @@ def persist_digest(
 
 
 def main(argv: list[str] | None = None) -> int:
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--manifest",

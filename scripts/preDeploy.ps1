@@ -38,36 +38,35 @@ function Parse-KeyValueLines([string[]]$lines) {
       $k = $matches[1]; $v = $matches[2]
       $v = $v -replace '^\s*"(.*)"\s*$', '$1'
       $map[$k] = $v
+    } elseif (-not [string]::IsNullOrWhiteSpace($ln)) {
+      Write-Error "Invalid azd environment output; refusing to deploy."
+      exit 1
     }
+  }
+  if ($map.Count -eq 0) {
+    Write-Error "The selected azd environment is empty."
+    exit 1
   }
   return $map
 }
 
 function Get-AzdEnv([string]$projectPath) {
-  $vals = @{}
-  if (Get-Command azd -ErrorAction SilentlyContinue) {
-    try {
-      Push-Location $projectPath
-      $out = & azd env get-values 2>$null
-      Pop-Location
-      if ($LASTEXITCODE -eq 0 -and $out) { $vals = Parse-KeyValueLines $out }
-    } catch { try { Pop-Location } catch {} }
+  if (-not (Get-Command azd -ErrorAction SilentlyContinue)) {
+    Write-Error "azd is required to load the selected environment."
+    exit 1
   }
-  if (-not $vals.ContainsKey('AZURE_RESOURCE_GROUP')) {
-    $azDir = Join-Path $projectPath '.azure'
-    if (Test-Path -LiteralPath $azDir) {
-      $envDirs = Get-ChildItem -LiteralPath $azDir -Directory -ErrorAction SilentlyContinue
-      foreach ($d in $envDirs) {
-        $envFile = Join-Path $d.FullName '.env'
-        if (Test-Path -LiteralPath $envFile) {
-          $txt = Get-Content -LiteralPath $envFile -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
-          $vals = Parse-KeyValueLines ($txt -split "`r?`n")
-          break
-        }
-      }
-    }
+  Push-Location $projectPath
+  try {
+    $out = & azd env get-values
+    $envExitCode = $LASTEXITCODE
+  } finally {
+    Pop-Location
   }
-  return [pscustomobject]$vals
+  if ($envExitCode -ne 0 -or -not $out) {
+    Write-Error "Could not load the selected azd environment; refusing to deploy with stale or arbitrary environment values."
+    exit 1
+  }
+  return [pscustomobject](Parse-KeyValueLines $out)
 }
 
 function ResourceGroup-Exists([string]$rg, [string]$subscription) {
@@ -98,6 +97,10 @@ function Invoke-PythonModule {
     [Parameter(Mandatory = $true)][string]$ModuleName,
     [string[]]$Arguments = @()
   )
+  if (-not (Get-Command python -ErrorAction SilentlyContinue)) {
+    Write-Error "Python is required for deployment prerequisites."
+    exit 1
+  }
   & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['GPT_RAG_REPO_ROOT']); sys.argv = ['$ModuleName'] + sys.argv[1:]; runpy.run_module('$ModuleName', run_name='__main__')" @Arguments
 }
 
@@ -116,7 +119,7 @@ $globalSub  = $globalEnv.AZURE_SUBSCRIPTION_ID
 # has no Docker, so components need ACR_TASK_AGENT_POOL/NETWORK_ISOLATION to
 # select remote ACR builds.
 foreach ($prop in $globalEnv.PSObject.Properties) {
-  if ($null -ne $prop.Value -and "$($prop.Value)" -ne '') {
+  if ($null -ne $prop.Value) {
     Set-Item -Path "Env:$($prop.Name)" -Value "$($prop.Value)"
   }
 }
@@ -146,10 +149,11 @@ $selectedComponents = @($topologyInfo.components)
 Write-Host "GPT-RAG deployment mode: $deploymentMode" -ForegroundColor Cyan
 
 $networkIsolation = "$($globalEnv.NETWORK_ISOLATION)".ToLowerInvariant() -eq 'true'
-$runningFromJumpbox = "$($env:RUN_FROM_JUMPBOX)".ToLowerInvariant() -eq 'true'
-if ($networkIsolation -and -not $runningFromJumpbox) {
-  Write-Error "NETWORK_ISOLATION=true deployments must run from the jumpbox/VNet. Provision from the workstation, then run azd deploy from the jumpbox with RUN_FROM_JUMPBOX=true."
-  exit 4
+Invoke-PythonModule -ModuleName 'config.deployment.private_network' -Arguments @('--stage', 'pre-deploy')
+$networkExitCode = $LASTEXITCODE
+if ($networkExitCode -ne 0) {
+  Write-Error "Private deployment prerequisites failed. Use a VPN/VNet-connected host; RUN_FROM_JUMPBOX is not a connectivity bypass." -ErrorAction Continue
+  exit $networkExitCode
 }
 
 if (-not (Docker-Ready)) {
