@@ -1096,9 +1096,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#keep-the-host-setting-unset-for-the-candidate-vpn-workflow" class="md-nav__link">
+  <a href="#keep-the-host-setting-unset-for-the-vpn-workflow" class="md-nav__link">
     <span class="md-ellipsis">
-      Keep the host setting unset for the candidate VPN workflow
+      Keep the host setting unset for the VPN workflow
     </span>
   </a>
   
@@ -1924,14 +1924,13 @@ and deployment preparation. Check the <a href="#8-continue-the-gpt-rag-installat
 before creating resources: VPN connectivity alone does not remove restrictions
 imposed by the deployment scripts.</p>
 </blockquote>
-<div class="admonition warning">
-<p class="admonition-title">Unpublished v3.8.5 companion draft</p>
-<p><code>v3.8.4</code> is still the latest published release. Its network-isolated
-pre-deploy hook requires <code>RUN_FROM_JUMPBOX=true</code>; do not set that flag on a
-local machine to pretend it is a jumpbox. The candidate host-check workflow
-in steps 7-8 is for the planned <code>v3.8.5</code> change, not a feature available in
-<code>v3.8.4</code>. Wait for the published release before using that workflow; do not
-replace release pins with a development branch or personal commit.</p>
+<div class="admonition note">
+<p class="admonition-title">Release requirement</p>
+<p>GPT-RAG <code>v3.8.5</code> adds the private-host checks used in steps 7-8. Select
+the latest stable release containing those checks as a complete package;
+do not replace release pins with a development branch or personal commit.
+The older <code>v3.8.4</code> pre-deploy hook requires <code>RUN_FROM_JUMPBOX=true</code>.
+Do not set that flag on a local machine to work around the older gate.</p>
 </div>
 <h2 id="1-before-you-start">1. Before you start</h2>
 <p>This procedure assumes <strong>Windows 11, Azure public cloud, and a dedicated VNet</strong>
@@ -2107,10 +2106,9 @@ managed-identity login commands on your local machine.</p>
 Keep that directory out of source control. If resuming the same installation,
 select its existing local environment instead of creating a new one:
 <code>azd env select $environment</code>.</p>
-<p><strong>Release boundary:</strong> cloning the current latest stable release does not add
-the planned VPN-host deployment support. Until <code>v3.8.5</code> is published, you can
-review and prepare the network, but must not treat the candidate steps below
-as a complete local deployment path for <code>v3.8.4</code>.</p>
+<p><strong>Release boundary:</strong> verify the selected stable release includes the
+private-host checks introduced in <code>v3.8.5</code>. Do not use the steps below as a
+local deployment path for <code>v3.8.4</code> or mix newer hook files into that release.</p>
 <h2 id="3-plan-non-overlapping-network-ranges">3. Plan non-overlapping network ranges</h2>
 <p>Check your local routes, including Wi-Fi, virtual adapters, and other VPNs:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">Get-NetRoute</span> <span class="n">-AddressFamily</span> <span class="n">IPv4</span> <span class="p">|</span>
@@ -2473,11 +2471,12 @@ identify the VNet you just inspected in that group, not another corporate VNet.<
 Do not apply this setting to a shared VNet without reviewing the affected
 resources. Explicit <code>hosted-no-panel</code> selection avoids depending on how an
 environment with pre-existing resources is classified.</p>
-<h3 id="keep-the-host-setting-unset-for-the-candidate-vpn-workflow">Keep the host setting unset for the candidate VPN workflow</h3>
-<p>For the planned <code>v3.8.5</code> workflow, leave <code>RUN_FROM_JUMPBOX</code> <strong>unset</strong>, not
+<p><a id="keep-the-host-setting-unset-for-the-candidate-vpn-workflow"></a></p>
+<h3 id="keep-the-host-setting-unset-for-the-vpn-workflow">Keep the host setting unset for the VPN workflow</h3>
+<p>For the <code>v3.8.5</code> workflow, leave <code>RUN_FROM_JUMPBOX</code> <strong>unset</strong>, not
 <code>false</code>. <strong>On a fresh installation, simply never set this key and skip the
 removal instructions below.</strong> Existing <code>true</code> remains compatible with the
-candidate checks, but is unnecessary and never bypasses them.</p>
+host checks, but is unnecessary and never bypasses them.</p>
 <p><strong>Migration/resume only:</strong> if you reused a jumpbox configuration and want the
 VPN workflow below, remove the entire <code>RUN_FROM_JUMPBOX=...</code> line from the
 selected <strong>root checkout's</strong> <code>.azure\$environment\.env</code>. Do not replace <code>false</code>
@@ -2504,7 +2503,7 @@ Clear the same key from this PowerShell process if an earlier session step set i
 process key is absent. These commands change no global settings.
 <code>azd env remove</code> removes an environment, not one key; do not use it here.</p>
 <p>Use <code>AZURE_SKIP_NETWORK_ISOLATION_WARNING</code> to control the infrastructure-only
-phases below. In the candidate implementation, <code>RUN_FROM_JUMPBOX=false</code>, <code>0</code>,
+phases below. In <code>v3.8.5</code>, <code>RUN_FROM_JUMPBOX=false</code>, <code>0</code>,
 <code>no</code>, or <code>skip</code> explicitly defers post-provision configuration; it does not
 mean "run from my local machine." A truthy jumpbox value takes precedence over
 the warning/deferral setting, but never bypasses the actual network checks.
@@ -2554,7 +2553,7 @@ managed <code>infra</code> source or change the release manifest. Avoiding VM lo
 does not automatically remove VM/Bastion resources from the selected topology.
 Review their supported deployment options and cost separately.</p>
 <h2 id="7-provision-infrastructure-and-verify-connectivity">7. Provision infrastructure and verify connectivity</h2>
-<p><strong>Candidate <code>v3.8.5</code> workflow:</strong> follow this sequence only with a published
+<p><strong>Release requirement:</strong> follow this sequence only with a published
 release containing the host checks described in step 8.</p>
 <p>Proceed only after reviewing the deployment-host requirement in step 8, the
 proposed resource costs, and the network plan.</p>
@@ -2565,7 +2564,7 @@ proposed resource costs, and the network plan.</p>
 </code></pre></div>
 <p>Here, <code>AZURE_SKIP_NETWORK_ISOLATION_WARNING=true</code> deliberately defers local
 data-plane post-provisioning. It does <strong>not</strong> skip security requirements or
-prove connectivity. With <code>RUN_FROM_JUMPBOX</code> unset as above, the candidate hook
+prove connectivity. With <code>RUN_FROM_JUMPBOX</code> unset as above, the hook
 reports the explicit deferral instead of trying private service configuration.
 Preview can run hooks and prepare local files.</p>
 <p>The two assignments deliberately agree: <code>azd env set</code> saves the flag in the
@@ -2730,7 +2729,7 @@ container. Both commands use <strong>your user identity</strong>, not the hosted
 they do not prove the agent has its own permissions.</p>
 <h2 id="8-continue-the-gpt-rag-installation">8. Continue the GPT-RAG installation</h2>
 <h3 id="configure-services-over-the-vpn">Configure services over the VPN</h3>
-<p><strong>Candidate <code>v3.8.5</code> behavior:</strong> the post-provision script checks actual private
+<p><strong>Starting with <code>v3.8.5</code>:</strong> the post-provision script checks actual private
 connectivity instead of asking whether you are on the VPN. An unset
 <code>RUN_FROM_JUMPBOX</code> no longer causes an interactive prompt or an automatic skip
 in a noninteractive session. After checking the return route and services in
@@ -2749,7 +2748,7 @@ configuration is incomplete; a zero exit code does not override that warning.
 If a host check fails, fix DNS/routing/TLS before
 retrying; do not disable validation.</p>
 <h3 id="check-the-deployment-host-before-building-or-deploying">Check the deployment host before building or deploying</h3>
-<p>The planned <code>v3.8.5</code> host checks apply when <code>NETWORK_ISOLATION=true</code>. They use
+<p>The <code>v3.8.5</code> host checks apply when <code>NETWORK_ISOLATION=true</code>. They use
 the operating system's normal DNS resolution, require only RFC1918 private
 IPv4 destinations (<code>10.0.0.0/8</code>, <code>172.16.0.0/12</code>, or <code>192.168.0.0/16</code>), then
 check TCP 443 and normal TLS certificate/hostname validation with SNI for the
@@ -2758,7 +2757,7 @@ authenticated application request.</p>
 <table>
 <thead>
 <tr>
-<th>Candidate phase</th>
+<th>Phase</th>
 <th>Endpoint checked before that phase's protected operation</th>
 </tr>
 </thead>
@@ -2798,9 +2797,9 @@ for every service, the remote build pool's outbound access, or success of a
 fresh GPT-RAG installation. Keep the separate authorized service checks in
 step 7 and the runtime/document authorization checks below.</p>
 <p><strong>Historical <code>v3.8.4</code>:</strong> its pre-deploy hook still requires
-<code>RUN_FROM_JUMPBOX=true</code>. Do not use that flag locally as a workaround. Wait
-for the published host-check release before following this candidate local
-build/deploy sequence.</p>
+<code>RUN_FROM_JUMPBOX=true</code>. Do not use that flag locally as a workaround. Use
+a complete published release containing the <code>v3.8.5</code> host checks for this
+local build/deploy sequence.</p>
 <h3 id="prepare-the-hosted-image-then-provision-again">Prepare the hosted image, then provision again</h3>
 <p>Follow the <a href="../deploy/#two-phase-hosted-deployment">hosted deployment lifecycle</a>.
 The following are <strong>Write/build operations</strong>, not read-only connectivity tests.
@@ -2833,7 +2832,7 @@ confirmed, clear deferral and rerun configuration before deployment:</p>
 <p>Expected outcome: the pre-deploy checks pass and the deployment proceeds to
 its normal service operations. A passed host check alone is not a successful
 deployment. A fresh automated live installation/bootstrap/smoke run has not
-been performed for this candidate; that acceptance remains separate.</p>
+been performed for this release; that acceptance remains separate.</p>
 <p>Use the VNet-connected ACR build pool for private builds. Your local VPN
 connection does not make shared ACR Tasks able to reach private resources.
 Do not switch to public endpoints to make a failed private build succeed.</p>
@@ -3090,14 +3089,14 @@ cleanup; do not remove the runtime grants maintained by bootstrap.</p>
 </tr>
 <tr>
 <td>Deploy requests <code>RUN_FROM_JUMPBOX</code></td>
-<td>Check the selected release: <code>v3.8.4</code> has the old gate; planned <code>v3.8.5</code> uses actual host checks. Do not fake the flag or mix development files into a release.</td>
+<td>Check the selected release: <code>v3.8.4</code> has the old gate; <code>v3.8.5</code> uses actual host checks. Do not fake the flag or mix development files into a release.</td>
 </tr>
 <tr>
-<td>Candidate host check rejects public/mixed DNS, TLS, or a timeout</td>
+<td>Host check rejects public/mixed DNS, TLS, or a timeout</td>
 <td>Correct the original endpoint, OS DNS/NRPT, private routes, and certificate trust. A TCP-only test is insufficient; do not disable TLS validation.</td>
 </tr>
 <tr>
-<td>Candidate post-provision reports deferral</td>
+<td>Post-provision reports deferral</td>
 <td>Keep <code>RUN_FROM_JUMPBOX</code> unset and set both the saved and process <code>AZURE_SKIP_NETWORK_ISOLATION_WARNING</code> values to <code>false</code> only after route/service checks. <code>RUN_FROM_JUMPBOX=false</code> is also an explicit defer, not a local-host selector.</td>
 </tr>
 </tbody>

@@ -1493,9 +1493,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#private-deployment-host-checks-v385-candidate" class="md-nav__link">
+  <a href="#private-deployment-host-checks-v385" class="md-nav__link">
     <span class="md-ellipsis">
-      Private deployment host checks (v3.8.5 candidate)
+      Private deployment host checks (v3.8.5)
     </span>
   </a>
   
@@ -1802,12 +1802,13 @@ isolation nor authorizes protected real documents or default Search/Blob grants.
 User-authorization evidence requires separate permission-aware retrieval checks,
 including denied access for users without document permission. See
 <a href="../howto_authentication/#hosted-application-identity-versus-document-identity">application identity versus document identity</a>.</p>
-<h2 id="private-deployment-host-checks-v385-candidate">Private deployment host checks (v3.8.5 candidate)</h2>
-<p>This section is an <strong>unpublished <code>v3.8.5</code> companion draft</strong>. The latest stable
-<code>v3.8.4</code> still has its <code>RUN_FROM_JUMPBOX=true</code> pre-deploy gate. Do not fake that
-flag on a local machine or mix candidate files into a released checkout.</p>
-<p>For the planned host-check release, start with the failing layer rather than
-changing identity or adding roles:</p>
+<p><a id="private-deployment-host-checks-v385-candidate"></a></p>
+<h2 id="private-deployment-host-checks-v385">Private deployment host checks (v3.8.5)</h2>
+<p>Starting with <code>v3.8.5</code>, actual private DNS/TCP/TLS checks replace the
+<code>RUN_FROM_JUMPBOX=true</code> pre-deploy gate. The older <code>v3.8.4</code> still has that gate;
+do not fake the flag on a local machine or mix newer hook files into an older
+released checkout.</p>
+<p>Start with the failing layer rather than changing identity or adding roles:</p>
 <table>
 <thead>
 <tr>
@@ -1838,11 +1839,11 @@ changing identity or adding roles:</p>
 </tr>
 <tr>
 <td><code>RUN_FROM_JUMPBOX=true</code> does not resolve a failed check</td>
-<td>Expected: that flag never bypasses the candidate's connectivity checks. Existing true remains compatible but is not required.</td>
+<td>Expected: that flag never bypasses the connectivity checks. Existing true remains compatible but is not required.</td>
 </tr>
 <tr>
 <td>No interactive VPN prompt appears</td>
-<td>Expected in the candidate: an unset flag attempts actual checks. Noninteractive execution does not automatically skip configuration.</td>
+<td>Expected starting with <code>v3.8.5</code>: an unset flag attempts actual checks. Noninteractive execution does not automatically skip configuration.</td>
 </tr>
 <tr>
 <td>Post-provision exits successfully with an incomplete/deferral warning</td>
@@ -1850,7 +1851,7 @@ changing identity or adding roles:</p>
 </tr>
 <tr>
 <td>Post-provision configuration is deferred</td>
-<td>Inspect the selected root <code>.env</code> key and current process setting without printing secrets. Jumpbox values <code>false</code>, <code>0</code>, <code>no</code>, and <code>skip</code> explicitly defer; they do not select a local host. A truthy jumpbox setting takes precedence over <code>AZURE_SKIP_NETWORK_ISOLATION_WARNING=true</code>. When ready to configure, set both the saved and process warning values to <code>false</code>; an inherited process value can still defer when the saved key is absent. Use the <a href="../howto_private_vpn/#keep-the-host-setting-unset-for-the-candidate-vpn-workflow">unset/migration instructions</a>.</td>
+<td>Inspect the selected root <code>.env</code> key and current process setting without printing secrets. Jumpbox values <code>false</code>, <code>0</code>, <code>no</code>, and <code>skip</code> explicitly defer; they do not select a local host. A truthy jumpbox setting takes precedence over <code>AZURE_SKIP_NETWORK_ISOLATION_WARNING=true</code>. When ready to configure, set both the saved and process warning values to <code>false</code>; an inherited process value can still defer when the saved key is absent. Use the <a href="../howto_private_vpn/#keep-the-host-setting-unset-for-the-vpn-workflow">unset/migration instructions</a>.</td>
 </tr>
 <tr>
 <td>The first provision works, but the second loses private access</td>
@@ -1870,7 +1871,7 @@ changing identity or adding roles:</p>
 </tr>
 </tbody>
 </table>
-<p>See the <a href="../deploy/#private-host-checks-v385-candidate">candidate phase/endpoint table</a>
+<p>See the <a href="../deploy/#private-host-checks-v385">phase/endpoint table</a>
 and the <a href="../howto_private_vpn/#8-continue-the-gpt-rag-installation">P2S VPN workflow</a>.
 Passing these checks is not proof of Azure VNet ownership, all-service access,
 or a fresh live installation/bootstrap/smoke run.</p>

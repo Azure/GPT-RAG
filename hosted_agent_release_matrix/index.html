@@ -1743,23 +1743,19 @@ Source pins remain implementation evidence; released manifest pins are unchanged
 See that record for active rules, reference runs and remaining validation gaps.</p>
 </div>
 <p>This page records the exact hosted-agent component releases pinned by the
-GPT-RAG umbrella release <code>v3.8.4</code> and the preceding
+GPT-RAG umbrella release <code>v3.8.5</code> and the preceding <code>v3.8.4</code> and
 <a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3"><code>v3.8.3</code></a> combination.
 The component release commits are unchanged; <code>v3.8.4</code> adds the scoped
-<a href="../deploy/#hosted-runtime-bootstrap-permissions">hosted runtime bootstrap</a>.
-It does not establish a fresh automated live deployment/bootstrap-apply/smoke
+<a href="../deploy/#hosted-runtime-bootstrap-permissions">hosted runtime bootstrap</a>,
+and <code>v3.8.5</code> adds
+<a href="../deploy/#private-host-checks-v385">private deployment-host checks</a>.
+Neither patch establishes a fresh automated live deployment/bootstrap-apply/smoke
 validation, and the independent evidence gates remain fail closed.</p>
-<div class="admonition warning">
-<p class="admonition-title">Planned v3.8.5 host checks; not a published matrix</p>
-<p><code>v3.8.4</code> remains the latest published umbrella release. The <code>v3.8.5</code>
-candidate changes deployment-host validation, not the reviewed component
-releases below: private OS DNS/RFC1918 IPv4, TCP 443, and TLS/SNI checks
-replace the jumpbox declaration gate. Explicit configuration deferral is
-retained. See the <a href="../deploy/#private-host-checks-v385-candidate">phase/endpoint contract</a>.
-This candidate does not add runtime or document roles, enable evidence
-gates, or establish fresh live installation/bootstrap/smoke success.
-Do not combine candidate files with a stable release.</p>
-</div>
+<p><code>v3.8.5</code> changes deployment-host validation, not the reviewed component
+releases below: private OS DNS/RFC1918 IPv4, TCP 443, and TLS/SNI checks replace
+the jumpbox declaration gate. Explicit configuration deferral is retained.
+This release does not add runtime or document roles, enable evidence gates,
+or establish fresh live installation/bootstrap/smoke success.</p>
 <div class="admonition danger">
 <p class="admonition-title">Do not deploy <code>v3.8.0</code> or <code>v3.8.1</code></p>
 <p>Earlier revisions of this page pinned the matrix to <code>v3.8.1</code>. Neither
@@ -1809,6 +1805,14 @@ been re-run; the four flags above remain deployment-published <code>false</code>
 </thead>
 <tbody>
 <tr>
+<td><a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.5"><code>v3.8.5</code></a></td>
+<td><code>v2.6.2</code></td>
+<td><code>v4.1.1</code></td>
+<td><code>v2.7.3</code></td>
+<td><code>v2.5.1</code></td>
+<td>Private deployment-host DNS/TCP/TLS checks; no component repins or new live installation claim.</td>
+</tr>
+<tr>
 <td><code>v3.8.4</code></td>
 <td><code>v2.6.2</code></td>
 <td><code>v4.1.1</code></td>
@@ -1826,8 +1830,8 @@ been re-run; the four flags above remain deployment-published <code>false</code>
 </tr>
 </tbody>
 </table>
-<p>Both umbrella rows use the same reviewed component release commits below.
-<code>v3.8.4</code> does not introduce a new runtime or AI Landing Zone release.</p>
+<p>All three umbrella rows use the same reviewed component release commits below.
+Neither <code>v3.8.4</code> nor <code>v3.8.5</code> introduces a new runtime or AI Landing Zone release.</p>
 <table>
 <thead>
 <tr>
@@ -1881,7 +1885,7 @@ close their independent live evidence and authorization gates.</p>
 <tbody>
 <tr>
 <td>Umbrella integration manifest</td>
-<td>Stamped as <code>v3.8.4</code>; retains the exact component release commits from <a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3"><code>v3.8.3</code></a> listed above.</td>
+<td>Stamped as <code>v3.8.5</code>; retains the exact component release commits from <code>v3.8.4</code> and <a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3"><code>v3.8.3</code></a> listed above.</td>
 </tr>
 <tr>
 <td>Fresh UI <code>v2.6.2</code> process with no <code>CHAT_BACKEND</code> value</td>

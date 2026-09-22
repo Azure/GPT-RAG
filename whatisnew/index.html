@@ -1685,8 +1685,8 @@ patch, and fix, see the <a href="https://github.com/Azure/GPT-RAG/releases">GitH
 <h3 id="september-2026">September 2026</h3>
 <ul>
 <li>
-<p><strong>Private deployment host checks (planned GPT-RAG <code>v3.8.5</code>; not yet published).</strong>
-  The candidate replaces the <code>RUN_FROM_JUMPBOX</code> deployment gate with
+<p><strong>Private deployment host checks (<a href="https://github.com/Azure/GPT-RAG/releases/tag/v3.8.5">GPT-RAG v3.8.5</a>).</strong>
+  The release replaces the <code>RUN_FROM_JUMPBOX</code> deployment gate with
   credential-free OS DNS, RFC1918 IPv4, TCP 443, and normal TLS/SNI checks for
   the endpoints needed by each phase. A connected VPN/VNet host needs no
   jumpbox declaration, and a truthy flag never bypasses checks. Explicit
@@ -1694,9 +1694,10 @@ patch, and fix, see the <a href="https://github.com/Azure/GPT-RAG/releases">GitH
   The <a href="../howto_private_vpn/">English VPN how-to</a> explains one new resource
   group for VPN/DNS first and GPT-RAG later, safe resume, and route rechecks
   before configuring services. No component repins, runtime role additions,
-  or new fresh-installation acceptance claim are part of this candidate.
-  <code>v3.8.4</code> remains the latest published release. See
-  <a href="../deploy/#private-host-checks-v385-candidate">candidate host-check behavior</a>.</p>
+  or new fresh-installation acceptance claim are part of this release.
+  A fresh automated live installation/bootstrap/smoke run has not been
+  performed for this change. See
+  <a href="../deploy/#private-host-checks-v385">host-check behavior</a>.</p>
 </li>
 <li>
 <p><strong>Hosted runtime bootstrap permissions (GPT-RAG <code>v3.8.4</code>).</strong>
