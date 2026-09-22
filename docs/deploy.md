@@ -235,7 +235,7 @@ On POSIX systems, use `scripts/prepareHostedDeployment.sh` for the preparation
 step. For an explicit migration, set
 `DEPLOYMENT_TOPOLOGY=hosted-no-panel` before the first `azd provision`.
 
-For a network-isolated VPN host, the candidate
+For a network-isolated VPN host, the
 [private-host workflow](howto_private_vpn.md#8-continue-the-gpt-rag-installation)
 adds explicit post-provision deferral and route/connectivity checks around
 **both** provisions. Do not use the compact sequence above to skip those
@@ -486,18 +486,19 @@ classic panel data.
 
 #### Current release
 
-GPT-RAG `v3.8.4` is the latest published umbrella release. It adds the
+GPT-RAG [`v3.8.5`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.5) is the
+latest published umbrella release. It replaces the jumpbox deployment flag
+gate with actual private DNS/TCP/TLS checks while retaining the exact
+component pins, topology defaults, and evidence gates from `v3.8.4`. See the
+[network-isolation workflow](#private-host-checks-v385). Host checks do not
+establish fresh installation acceptance; a fresh automated live
+installation/bootstrap/smoke run has not been performed for this release.
+
+The preceding `v3.8.4` adds the
 [hosted runtime bootstrap](#hosted-runtime-bootstrap-permissions) without
 changing the component pins, topology defaults, or evidence gates from
 `v3.8.3`. A fresh automated live deployment/bootstrap-apply/smoke flow has not
 been performed for this patch.
-
-The `v3.8.5` private-host-check update is an **unpublished candidate**, not
-part of `v3.8.4`. It is intended to replace the jumpbox deployment flag gate
-with actual private DNS/TCP/TLS checks while retaining the exact component
-pins below. See the [candidate network-isolation workflow](#private-host-checks-v385-candidate).
-Do not mix candidate files into a stable release or treat host checks as fresh
-installation acceptance.
 
 The preceding [GPT-RAG `v3.8.3`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3)
 pins UI `v2.6.2`, orchestrator `v4.1.1`,
@@ -586,7 +587,7 @@ and service deployment:
 | Configure data-plane resources | Host with private VNet/VPN connectivity, subject to the release rules below | `scripts/postProvision.ps1` |
 | Deploy services | Host with private VNet/VPN connectivity, subject to the release rules below | `azd deploy` |
 
-**Published `v3.8.4`:** the pre-deploy hook requires
+**Historical `v3.8.4`:** the pre-deploy hook requires
 `RUN_FROM_JUMPBOX=true` when `NETWORK_ISOLATION=true`. Do not set that flag
 on a local machine to work around the release's host restriction.
 
@@ -597,15 +598,15 @@ group for VPN/DNS first and GPT-RAG later, not an existing corporate network
 group. Read the [release boundary and host checks](howto_private_vpn.md#8-continue-the-gpt-rag-installation)
 before creating resources.
 
-### Private host checks (v3.8.5 candidate)
+<a id="private-host-checks-v385-candidate"></a>
 
-!!! warning "Not yet published"
-    The following workflow documents the planned `v3.8.5` behavior.
-    `v3.8.4` remains the current stable release with the gate described above.
-    Use a complete published release containing the change before following
-    this workflow; do not select a development commit as a substitute.
+### Private host checks (v3.8.5)
 
-With `NETWORK_ISOLATION=true`, the candidate checks the operating system's DNS
+Starting with `v3.8.5`, a connected VPN/VNet host does not need a jumpbox
+declaration to deploy. Use a complete published release containing these
+checks, not a development commit or a mixture of release files.
+
+With `NETWORK_ISOLATION=true`, the deployment hook checks the operating system's DNS
 results for RFC1918 private IPv4 destinations, TCP 443, and normal TLS
 certificate/hostname validation with SNI. It checks `APP_CONFIG_ENDPOINT`
 before post-provision configuration; `APP_CONFIG_ENDPOINT` plus
@@ -621,7 +622,7 @@ mixed DNS results, certificate errors, and timeouts fail the guarded phase
 before its writes. No flag bypass, disabled TLS validation, proxy bypass,
 or public endpoint fallback is part of the workflow.
 
-| Candidate setting | Post-provision behavior |
+| Setting | Post-provision behavior |
 | --- | --- |
 | `RUN_FROM_JUMPBOX` unset, warning flag false/unset | Check connectivity and configure; no VPN confirmation prompt or noninteractive automatic skip |
 | `RUN_FROM_JUMPBOX=false`, `0`, `no`, or `skip` | Explicitly defer configuration; this is not a local-machine selector |
@@ -630,7 +631,7 @@ or public endpoint fallback is part of the workflow.
 
 For the VPN sequence, leave the jumpbox key unset and use only the explicit
 warning flag to defer both infrastructure phases. See the
-[bounded migration/resume note](howto_private_vpn.md#keep-the-host-setting-unset-for-the-candidate-vpn-workflow)
+[bounded migration/resume note](howto_private_vpn.md#keep-the-host-setting-unset-for-the-vpn-workflow)
 if a previous guide set the key; do not delete an `azd` environment to unset it.
 When resuming configuration, set both the saved `azd` warning flag and the
 current process `AZURE_SKIP_NETWORK_ISOLATION_WARNING` to `false`; an inherited
@@ -649,7 +650,7 @@ and continuity/panel evidence gates are unchanged.
 
 ### Network Isolation runbook
 
-**Candidate `v3.8.5` sequence, after publication:** for a fresh VPN-host setup,
+**`v3.8.5` sequence:** for a fresh VPN-host setup,
 use the detailed [P2S VPN guide](howto_private_vpn.md). In outline:
 
 1. Select the released source and local `azd` environment. Enable network isolation; leave `RUN_FROM_JUMPBOX` unset.
@@ -737,12 +738,12 @@ azd provision
 **Post-Provision Configuration**
 
 With `NETWORK_ISOLATION=true`, data-plane configuration needs private VNet/VPN
-access. For the candidate workflow, keep the jumpbox key unset and explicitly
+access. For the VPN workflow, keep the jumpbox key unset and explicitly
 defer configuration during infrastructure-only phases. Once connectivity is
 verified, set `AZURE_SKIP_NETWORK_ISOLATION_WARNING=false` and run
 `scripts/postProvision.ps1`; actual checks replace a declaration or prompt.
-Without explicit deferral, the candidate fails when connectivity is unavailable
-rather than silently skipping a noninteractive run. The published `v3.8.4`
+Without explicit deferral, the `v3.8.5` hook fails when connectivity is unavailable
+rather than silently skipping a noninteractive run. The older `v3.8.4`
 still uses its historical confirmation/defer behavior.
 
 Using the Jumpbox VM
@@ -766,7 +767,7 @@ Using the Jumpbox VM
 4) **Run the post-provision script:**
 
    The `RUN_FROM_JUMPBOX=true` example below is for an actual jumpbox and is
-   compatible with the candidate workflow, but never bypasses its checks.
+   compatible with the `v3.8.5` workflow, but never bypasses its checks.
    It takes precedence over the warning flag, so use the separate
    [VPN deferral sequence](howto_private_vpn.md#8-continue-the-gpt-rag-installation)
    for a local machine.
@@ -819,7 +820,7 @@ Once the GPT-RAG infrastructure is provisioned, you can deploy the services.
 
 To deploy **all services at once** from the actual jumpbox, navigate to the
 `gpt-rag` directory (with azd environment configured) and run the example below.
-For a local VPN host, use the candidate release's
+For a local VPN host, use the `v3.8.5`
 [two-phase sequence](howto_private_vpn.md#8-continue-the-gpt-rag-installation)
 instead of copying its jumpbox path and flag.
 
@@ -834,9 +835,9 @@ azd deploy
 This command deploys the services selected by the active mode. The UI, orchestrator, ingestion, and hosted-agent derivative images can use Azure Container Registry remote builds (`az acr build`) against the dedicated VNet-connected ACR Tasks agent pool provided by AILZ `v2.4.1`. Shared ACR Tasks cannot reach a private endpoint.
 
 The deploy hook uses `NETWORK_ISOLATION` as the source of truth, not the older
-`AZURE_ZERO_TRUST` variable. Published `v3.8.4` requires
-`RUN_FROM_JUMPBOX=true` for isolated deployment. The planned `v3.8.5` replaces
-that gate with [private host checks](#private-host-checks-v385-candidate):
+`AZURE_ZERO_TRUST` variable. The older `v3.8.4` requires
+`RUN_FROM_JUMPBOX=true` for isolated deployment. Starting with `v3.8.5`,
+that gate is replaced by [private host checks](#private-host-checks-v385):
 a connected VPN/VNet host does not need the flag, and setting it cannot make
 a failed DNS/TCP/TLS check pass.
 
