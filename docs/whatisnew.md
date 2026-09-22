@@ -6,8 +6,8 @@ patch, and fix, see the [GitHub releases](https://github.com/Azure/GPT-RAG/relea
 
 ### September 2026
 
-- **Private deployment host checks (planned GPT-RAG `v3.8.5`; not yet published).**
-  The candidate replaces the `RUN_FROM_JUMPBOX` deployment gate with
+- **Private deployment host checks ([GPT-RAG v3.8.5](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.5)).**
+  The release replaces the `RUN_FROM_JUMPBOX` deployment gate with
   credential-free OS DNS, RFC1918 IPv4, TCP 443, and normal TLS/SNI checks for
   the endpoints needed by each phase. A connected VPN/VNet host needs no
   jumpbox declaration, and a truthy flag never bypasses checks. Explicit
@@ -15,9 +15,10 @@ patch, and fix, see the [GitHub releases](https://github.com/Azure/GPT-RAG/relea
   The [English VPN how-to](howto_private_vpn.md) explains one new resource
   group for VPN/DNS first and GPT-RAG later, safe resume, and route rechecks
   before configuring services. No component repins, runtime role additions,
-  or new fresh-installation acceptance claim are part of this candidate.
-  `v3.8.4` remains the latest published release. See
-  [candidate host-check behavior](deploy.md#private-host-checks-v385-candidate).
+  or new fresh-installation acceptance claim are part of this release.
+  A fresh automated live installation/bootstrap/smoke run has not been
+  performed for this change. See
+  [host-check behavior](deploy.md#private-host-checks-v385).
 
 - **Hosted runtime bootstrap permissions (GPT-RAG `v3.8.4`).**
   The scoped umbrella patch gives the deployed hosted instance identity only

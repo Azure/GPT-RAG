@@ -7,22 +7,20 @@
     See that record for active rules, reference runs and remaining validation gaps.
 
 This page records the exact hosted-agent component releases pinned by the
-GPT-RAG umbrella release `v3.8.4` and the preceding
+GPT-RAG umbrella release `v3.8.5` and the preceding `v3.8.4` and
 [`v3.8.3`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3) combination.
 The component release commits are unchanged; `v3.8.4` adds the scoped
-[hosted runtime bootstrap](deploy.md#hosted-runtime-bootstrap-permissions).
-It does not establish a fresh automated live deployment/bootstrap-apply/smoke
+[hosted runtime bootstrap](deploy.md#hosted-runtime-bootstrap-permissions),
+and `v3.8.5` adds
+[private deployment-host checks](deploy.md#private-host-checks-v385).
+Neither patch establishes a fresh automated live deployment/bootstrap-apply/smoke
 validation, and the independent evidence gates remain fail closed.
 
-!!! warning "Planned v3.8.5 host checks; not a published matrix"
-    `v3.8.4` remains the latest published umbrella release. The `v3.8.5`
-    candidate changes deployment-host validation, not the reviewed component
-    releases below: private OS DNS/RFC1918 IPv4, TCP 443, and TLS/SNI checks
-    replace the jumpbox declaration gate. Explicit configuration deferral is
-    retained. See the [phase/endpoint contract](deploy.md#private-host-checks-v385-candidate).
-    This candidate does not add runtime or document roles, enable evidence
-    gates, or establish fresh live installation/bootstrap/smoke success.
-    Do not combine candidate files with a stable release.
+`v3.8.5` changes deployment-host validation, not the reviewed component
+releases below: private OS DNS/RFC1918 IPv4, TCP 443, and TLS/SNI checks replace
+the jumpbox declaration gate. Explicit configuration deferral is retained.
+This release does not add runtime or document roles, enable evidence gates,
+or establish fresh live installation/bootstrap/smoke success.
 
 !!! danger "Do not deploy `v3.8.0` or `v3.8.1`"
     Earlier revisions of this page pinned the matrix to `v3.8.1`. Neither
@@ -61,11 +59,12 @@ validation, and the independent evidence gates remain fail closed.
 
 | Umbrella release | UI | Orchestrator | Ingestion | AI Landing Zone | Change |
 | --- | --- | --- | --- | --- | --- |
+| [`v3.8.5`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.5) | `v2.6.2` | `v4.1.1` | `v2.7.3` | `v2.5.1` | Private deployment-host DNS/TCP/TLS checks; no component repins or new live installation claim. |
 | `v3.8.4` | `v2.6.2` | `v4.1.1` | `v2.7.3` | `v2.5.1` | Scoped hosted-runtime bootstrap; no component repins or new live readiness claim. |
 | [`v3.8.3`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3) | `v2.6.2` | `v4.1.1` | `v2.7.3` | `v2.5.1` | Ingestion administrative-surface gating; historical release retained. |
 
-Both umbrella rows use the same reviewed component release commits below.
-`v3.8.4` does not introduce a new runtime or AI Landing Zone release.
+All three umbrella rows use the same reviewed component release commits below.
+Neither `v3.8.4` nor `v3.8.5` introduces a new runtime or AI Landing Zone release.
 
 | Component | Release | Reviewed release commit | Relevant contract |
 | --- | --- | --- | --- |
@@ -85,7 +84,7 @@ close their independent live evidence and authorization gates.
 
 | Surface | Current behavior |
 | --- | --- |
-| Umbrella integration manifest | Stamped as `v3.8.4`; retains the exact component release commits from [`v3.8.3`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3) listed above. |
+| Umbrella integration manifest | Stamped as `v3.8.5`; retains the exact component release commits from `v3.8.4` and [`v3.8.3`](https://github.com/Azure/GPT-RAG/releases/tag/v3.8.3) listed above. |
 | Fresh UI `v2.6.2` process with no `CHAT_BACKEND` value | Selects `hosted_agent`; invalid or incomplete hosted configuration fails startup. |
 | Existing umbrella deployment | Its persisted topology is sticky. An unmarked pre-cutover deployment stays `classic`. |
 | `DEPLOYMENT_TOPOLOGY=classic` | Explicit supported fallback; deploys UI, orchestrator, and ingestion Container Apps. |
