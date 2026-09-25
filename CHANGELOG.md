@@ -1,5 +1,13 @@
 # Changelog
 
+## [v3.8.10] - 2026-09-25
+
+### Fixed
+- `azd deploy` failing on azd 1.34+ because the hosted-agent postdeploy hook path escaped the service project root. The hook now runs through wrappers in `hosted-agent/hooks/`.
+
+### Documentation
+- UI OAuth settings (`OAUTH_AZURE_AD_CLIENT_ID`, `OAUTH_AZURE_AD_TENANT_ID`, `authClientSecret` as a Key Vault reference) belong in App Configuration (label `gpt-rag`). Env vars set by hand on the container app are lost on `azd provision`.
+
 ## [v3.8.9] - 2026-09-25
 
 ### Fixed

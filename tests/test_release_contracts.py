@@ -21,7 +21,7 @@ class IntegrationPinTests(unittest.TestCase):
         manifest = json.loads((ROOT / "manifest.json").read_text(encoding="utf-8"))
         components = {item["name"]: item for item in manifest["components"]}
 
-        self.assertEqual("v3.8.9", manifest["tag"])
+        self.assertEqual("v3.8.10", manifest["tag"])
         self.assertEqual(
             "v2.7.3",
             manifest["ailz_tag"],
