@@ -1,5 +1,13 @@
 # Changelog
 
+## [v3.8.9] - 2026-09-25
+
+### Fixed
+- `azd provision` on existing environments failing on Cosmos DB with `Continuous backup mode cannot be disabled`. AI Landing Zone updated to v2.7.3.
+
+### Changed
+- Dependency updates from Dependabot (#706, #707).
+
 ## [v3.8.8] - 2026-09-25
 
 ### Changed
