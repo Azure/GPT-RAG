@@ -21,7 +21,7 @@ class IntegrationPinTests(unittest.TestCase):
         manifest = json.loads((ROOT / "manifest.json").read_text(encoding="utf-8"))
         components = {item["name"]: item for item in manifest["components"]}
 
-        self.assertEqual("v3.8.5", manifest["tag"])
+        self.assertEqual("v3.8.6", manifest["tag"])
         self.assertEqual(
             "v2.5.1",
             manifest["ailz_tag"],
@@ -38,7 +38,7 @@ class IntegrationPinTests(unittest.TestCase):
             ),
         )
         self.assertEqual(
-            ("v2.7.3", "38a395586ee1d440a8e1ca8233413f8c25b3fdc2"),
+            ("v2.7.4", "75a2ef17779e634f3b3150f682c8669a7f928481"),
             (
                 components["gpt-rag-ingestion"]["tag"],
                 components["gpt-rag-ingestion"]["commit"],
