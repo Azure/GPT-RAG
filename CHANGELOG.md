@@ -1,5 +1,23 @@
 # Changelog
 
+## [v3.8.6] - 2026-09-25
+
+### Fixed
+
+- **Ingestion pinned to `v2.7.4`** (`75a2ef1`). The ingestion frontend build
+  now uses a consistent lockfile, so `npm ci` succeeds in ACR task and local
+  builds. Other runtime pins (UI `v2.6.2`, orchestrator `v4.1.1`) and the
+  AI Landing Zone pin (`v2.5.1`) are unchanged.
+
+### Known issues
+
+- Re-running `azd provision` resets Container Apps images to the landing-zone
+  placeholder; redeploy the components afterwards
+  ([#708](https://github.com/Azure/GPT-RAG/issues/708)).
+- The component deploy path can skip publishing the hosted-agent endpoint to
+  App Configuration; run the pre-deploy publish steps manually
+  ([#709](https://github.com/Azure/GPT-RAG/issues/709)).
+
 ## [v3.8.5] - 2026-09-21
 
 ### Changed

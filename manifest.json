@@ -1,5 +1,5 @@
 {
-  "tag": "v3.8.5",
+  "tag": "v3.8.6",
   "repo": "https://github.com/azure/gpt-rag.git",
   "ailz_tag": "v2.5.1",
   "ailz_commit": "9cc5859af5c8ab3b31709c9e16e0db11a170a404",
@@ -19,8 +19,8 @@
     {
       "name": "gpt-rag-ingestion",
       "repo": "https://github.com/azure/gpt-rag-ingestion.git",
-      "tag": "v2.7.3",
-      "commit": "38a395586ee1d440a8e1ca8233413f8c25b3fdc2"
+      "tag": "v2.7.4",
+      "commit": "75a2ef17779e634f3b3150f682c8669a7f928481"
     }
   ]
 }
