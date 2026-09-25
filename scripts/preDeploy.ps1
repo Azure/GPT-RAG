@@ -277,6 +277,19 @@ The preparation command builds the manifest-pinned image and stores only its imm
   $env:HOSTED_AGENT_BASE_URL = $hostedBaseUrl
   $env:HOSTED_AGENT_RESOURCE_SCOPE = "$($globalEnv.HOSTED_AGENT_RESOURCE_SCOPE)"
 
+  # Publish the endpoint before component deploys (#709): the UI reads
+  # HOSTED_AGENT_BASE_URL at startup, and a later reprovision republishes it
+  # from the azd env. The routing selector still flips only after cutover.
+  & azd env set HOSTED_AGENT_BASE_URL $hostedBaseUrl --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
+  if ($LASTEXITCODE -ne 0) { Write-Error "Hosted endpoint could not be persisted in the azd environment."; exit $LASTEXITCODE }
+  Push-Location $repoRoot
+  try {
+    Invoke-PythonModule -ModuleName 'config.deployment.appconfig' | Out-Null
+    if ($LASTEXITCODE -ne 0) { Write-Error "Failed to publish the hosted-agent endpoint before component deployment."; exit $LASTEXITCODE }
+  } finally {
+    Pop-Location
+  }
+
   $continuityPackages = Join-Path ([IO.Path]::GetTempPath()) "gpt-rag-continuity-$([guid]::NewGuid().ToString('N'))"
   try {
     & python -m pip install --quiet --disable-pip-version-check --target $continuityPackages -r (Join-Path $repoRoot 'config/requirements.txt')

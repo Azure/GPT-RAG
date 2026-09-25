@@ -21,13 +21,13 @@ class IntegrationPinTests(unittest.TestCase):
         manifest = json.loads((ROOT / "manifest.json").read_text(encoding="utf-8"))
         components = {item["name"]: item for item in manifest["components"]}
 
-        self.assertEqual("v3.8.6", manifest["tag"])
+        self.assertEqual("v3.8.7", manifest["tag"])
         self.assertEqual(
-            "v2.5.1",
+            "v2.5.1.1",
             manifest["ailz_tag"],
         )
         self.assertEqual(
-            "9cc5859af5c8ab3b31709c9e16e0db11a170a404",
+            "e960ffa95f5ca2933789975c1cde593f38947388",
             manifest["ailz_commit"],
         )
         self.assertEqual(
@@ -55,7 +55,7 @@ class IntegrationPinTests(unittest.TestCase):
     def test_gitmodule_and_gitlink_match_landing_zone_integration_pin(self) -> None:
         gitmodules = (ROOT / ".gitmodules").read_text(encoding="utf-8")
         self.assertIn(
-            "branch = v2.5.1",
+            "branch = v2.5.1.1",
             gitmodules,
         )
 
@@ -67,7 +67,7 @@ class IntegrationPinTests(unittest.TestCase):
             text=True,
         )
         self.assertEqual(
-            "160000 9cc5859af5c8ab3b31709c9e16e0db11a170a404 0\tinfra",
+            "160000 e960ffa95f5ca2933789975c1cde593f38947388 0\tinfra",
             completed.stdout.strip(),
         )
         if (ROOT / "infra" / ".git").exists():
@@ -79,7 +79,7 @@ class IntegrationPinTests(unittest.TestCase):
                 text=True,
             )
             self.assertEqual(
-                "9cc5859af5c8ab3b31709c9e16e0db11a170a404",
+                "e960ffa95f5ca2933789975c1cde593f38947388",
                 checkout.stdout.strip(),
             )
 
