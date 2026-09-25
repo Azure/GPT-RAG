@@ -279,8 +279,13 @@ class HostedAccessHookTests(unittest.TestCase):
     def test_single_service_hook_no_duplicate_root_bootstrap(self):
         content = (ROOT / "hosted-agent/azure.yaml").read_text(encoding="utf-8")
         self.assertEqual(1, content.count("      postdeploy:"))
-        self.assertIn("          run: ../scripts/bootstrapHostedAccess.ps1", content)
-        self.assertIn("          run: ../scripts/bootstrapHostedAccess.sh", content)
+        self.assertIn("          run: hooks/postdeploy.ps1", content)
+        self.assertIn("          run: hooks/postdeploy.sh", content)
+        # azd rejects hook paths that escape the service project root.
+        self.assertNotIn("run: ../", content)
+        for suffix in ("ps1", "sh"):
+            wrapper = (ROOT / "hosted-agent" / "hooks" / f"postdeploy.{suffix}").read_text(encoding="utf-8")
+            self.assertIn(f"../../scripts/bootstrapHostedAccess.{suffix}", wrapper)
         for suffix in ("ps1", "sh"):
             root = (ROOT / "scripts" / f"preDeploy.{suffix}").read_text(encoding="utf-8-sig")
             self.assertNotIn("hosted_access", root)

@@ -15,11 +15,11 @@ services:
       postdeploy:
         posix:
           shell: sh
-          run: ../scripts/bootstrapHostedAccess.sh
+          run: hooks/postdeploy.sh
           interactive: false
         windows:
           shell: pwsh
-          run: ../scripts/bootstrapHostedAccess.ps1
+          run: hooks/postdeploy.ps1
           interactive: false
     # NOTE: The azure.ai.agent azd extension (v1.0.0-beta.8) reads name, container.resources,
     # protocols[].version and startupCommand directly from this file to build the Foundry
