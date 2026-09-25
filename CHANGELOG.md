@@ -1,5 +1,20 @@
 # Changelog
 
+## [v3.8.7] - 2026-09-25
+
+### Fixed
+
+- **`azd provision` no longer resets Container Apps to the placeholder image**
+  ([#708](https://github.com/Azure/GPT-RAG/issues/708)). Pre-provision now
+  discovers the images already running (by `azd-service-name` tag) and passes
+  them to the landing zone, now pinned to `v2.5.1.1` (`e960ffa`), which keeps
+  the image and its ACR registry binding. Set `RESET_CONTAINER_APP_IMAGES=true`
+  to opt out.
+- **Hosted-agent endpoint is published before component deploys**
+  ([#709](https://github.com/Azure/GPT-RAG/issues/709)). Pre-deploy now stores
+  `HOSTED_AGENT_BASE_URL` in the azd environment and App Configuration as soon
+  as the hosted agent is deployed, so the UI and later re-provisions always see
+  it. Routing still switches only after the full cutover succeeds.
 ## [v3.8.6] - 2026-09-25
 
 ### Fixed

@@ -8,11 +8,16 @@ import hashlib
 import json
 import os
 import re
+import sys
 from enum import Enum
 from pathlib import Path
 from typing import Mapping
 
 from config.continuity.settings import public_settings as continuity_public_settings
+from config.deployment.existing_images import (
+    apply_existing_images,
+    discover_existing_images,
+)
 from config.panel.settings import (
     FEEDBACK_CONTAINER_CONFIG_KEY,
     FEEDBACK_CONTAINER_NAME,
@@ -714,6 +719,7 @@ def compose_file(
     environment: Mapping[str, str],
     *,
     expected_hosted_source_commit: str | None = None,
+    existing_images: Mapping[str, str] | None = None,
 ) -> DeploymentMode:
     source = json.loads(input_path.read_text(encoding="utf-8-sig"))
     composed = compose_parameters(
@@ -721,6 +727,10 @@ def compose_file(
         environment,
         expected_hosted_source_commit=expected_hosted_source_commit,
     )
+    if existing_images:
+        apps = composed["parameters"]["containerAppsList"]["value"]
+        for service in apply_existing_images(apps, existing_images):
+            print(f"Preserving deployed image for {service}.", file=sys.stderr)
     output_path.write_text(
         json.dumps(composed, indent=2) + "\n",
         encoding="utf-8",
@@ -733,13 +743,29 @@ def main() -> int:
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--hosted-source-commit", default=None)
+    parser.add_argument(
+        "--no-preserve-images",
+        action="store_true",
+        help="Do not keep currently deployed Container Apps images (#708).",
+    )
     args = parser.parse_args()
+
+    existing_images: dict[str, str] = {}
+    if not args.no_preserve_images and not is_truthy(
+        os.environ.get("RESET_CONTAINER_APP_IMAGES")
+    ):
+        existing_images = discover_existing_images(
+            os.environ.get("AZURE_RESOURCE_GROUP", ""),
+            os.environ.get("AZURE_SUBSCRIPTION_ID") or None,
+            os.environ.get("AZURE_ENV_NAME") or None,
+        )
 
     mode = compose_file(
         args.input,
         args.output,
         os.environ,
         expected_hosted_source_commit=args.hosted_source_commit,
+        existing_images=existing_images,
     )
     print(mode.value)
     return 0

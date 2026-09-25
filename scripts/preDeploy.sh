@@ -244,6 +244,12 @@ if [[ "$hosted_mode" =~ ^(1|true|t|yes|y)$ ]]; then
   export HOSTED_AGENT_BASE_URL="$hosted_base_url"
   export HOSTED_AGENT_RESOURCE_SCOPE="$hosted_scope"
 
+  # Publish the endpoint before component deploys (#709).
+  azd env set HOSTED_AGENT_BASE_URL "$hosted_base_url" --environment "$environment_name" --no-prompt >/dev/null \
+    || { red "Hosted endpoint could not be persisted in the azd environment."; exit 1; }
+  ( cd "$repo_root" && python3 -m config.deployment.appconfig >/dev/null ) \
+    || { red "Failed to publish the hosted-agent endpoint before component deployment."; exit 1; }
+
   continuity_packages="$(mktemp -d)"
   if ! (
     python3 -m pip install --quiet --disable-pip-version-check --target "$continuity_packages" -r "$repo_root/config/requirements.txt" &&
