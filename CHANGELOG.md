@@ -1,5 +1,11 @@
 # Changelog
 
+## [v3.8.11] - 2026-09-28
+
+### Documentation
+- Every component that loads the `gpt-rag` App Configuration label (UI, orchestrator, hosted-agent identity) needs **Key Vault Secrets User** to resolve Key Vault references such as `authClientSecret`. Without it the orchestrator returns HTTP 500 (#716).
+- Client secret expiry and rotation guidance (#716).
+
 ## [v3.8.10] - 2026-09-25
 
 ### Fixed
