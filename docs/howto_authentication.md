@@ -345,6 +345,16 @@ GPT-RAG authentication settings are configured in **Azure App Configuration**. C
 
 At a minimum, you only need to set the settings marked as **Required** in the table below. The remaining settings are optional and only needed if you want to customize behavior.
 
+> **Key Vault access for every `gpt-rag` label reader.** App Configuration does not resolve Key Vault references on behalf of the application: each component that loads the `gpt-rag` label resolves them with its own identity. After you add a Key Vault reference (for example, `OAUTH_AZURE_AD_CLIENT_SECRET`) under that shared label, grant **Key Vault Secrets User** on the vault to the managed identity of **every** component that reads the label, not just the UI. This includes the UI container app and the orchestrator, including its hosted-agent identity when you use hosted topologies. A component without this role fails at startup or on its first request (for example, the orchestrator returns HTTP 500) because it cannot resolve the reference. Prefer granting the role on the individual secret rather than on the whole vault.
+>
+> ```
+> az role assignment create --assignee-object-id <component-principal-id> --assignee-principal-type ServicePrincipal \
+>   --role "Key Vault Secrets User" \
+>   --scope "<key-vault-resource-id>/secrets/<secret-name>"
+> ```
+>
+> Client secrets also expire. Your tenant's policy may limit their lifetime, sometimes to less than 30 days. Record the expiration date and rotate the secret in Key Vault before it expires. Because the App Configuration reference points to the unversioned secret, rotation does not require changing App Configuration. Restart the UI and orchestrator revisions after rotating so they load the new value.
+
 | Setting | Required | Secret? | What it controls |
 | --- | --- | --- | --- |
 | `OAUTH_AZURE_AD_CLIENT_ID` | Yes (for OAuth) | No | Entra App Registration application (client) ID used by the UI OAuth provider to request tokens for the orchestrator API. |
