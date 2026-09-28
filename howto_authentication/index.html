@@ -2009,6 +2009,14 @@ az ad app permission admin-consent --id &lt;replace-by-app-client-id&gt;
 <p><strong>6) Configure the following app configuration settings used by the authentication flow.</strong></p>
 <p>GPT-RAG authentication settings are configured in <strong>Azure App Configuration</strong>. Create the keys below in App Configuration and apply the <strong>gpt-rag</strong> label. For non-secret settings, store the value as plain text. For secret settings, store the value in <strong>Key Vault</strong> and add the key in App Configuration as a <strong>Key Vault reference</strong> (also under the <strong>gpt-rag</strong> label).</p>
 <p>At a minimum, you only need to set the settings marked as <strong>Required</strong> in the table below. The remaining settings are optional and only needed if you want to customize behavior.</p>
+<blockquote>
+<p><strong>Key Vault access for every <code>gpt-rag</code> label reader.</strong> App Configuration does not resolve Key Vault references on behalf of the application: each component that loads the <code>gpt-rag</code> label resolves them with its own identity. After you add a Key Vault reference (for example, <code>OAUTH_AZURE_AD_CLIENT_SECRET</code>) under that shared label, grant <strong>Key Vault Secrets User</strong> on the vault to the managed identity of <strong>every</strong> component that reads the label, not just the UI. This includes the UI container app and the orchestrator, including its hosted-agent identity when you use hosted topologies. A component without this role fails at startup or on its first request (for example, the orchestrator returns HTTP 500) because it cannot resolve the reference. Prefer granting the role on the individual secret rather than on the whole vault.</p>
+<div class="highlight"><pre><span></span><code>az role assignment create --assignee-object-id &lt;component-principal-id&gt; --assignee-principal-type ServicePrincipal \
+  --role "Key Vault Secrets User" \
+  --scope "&lt;key-vault-resource-id&gt;/secrets/&lt;secret-name&gt;"
+</code></pre></div>
+<p>Client secrets also expire. Your tenant's policy may limit their lifetime, sometimes to less than 30 days. Record the expiration date and rotate the secret in Key Vault before it expires. Because the App Configuration reference points to the unversioned secret, rotation does not require changing App Configuration. Restart the UI and orchestrator revisions after rotating so they load the new value.</p>
+</blockquote>
 <table>
 <thead>
 <tr>
