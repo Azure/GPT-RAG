@@ -1,0 +1,296 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+
+    "environmentName":                     { "value": "${AZURE_ENV_NAME}" },
+    "location":                            { "value": "${AZURE_LOCATION}" },
+    "aiFoundryLocation":                   { "value": "${AZURE_AI_FOUNDRY_LOCATION}" },
+    "psqlLocation":                        { "value": "${AZURE_PSQL_LOCATION}" },
+    "cosmosLocation":                        { "value": "${AZURE_COSMOS_LOCATION}" },
+    "searchServiceLocation":                 { "value": "${AZURE_SEARCH_LOCATION}" },
+    "speechServiceLocation":                 { "value": "${AZURE_SPEECH_LOCATION}" },
+    "deploymentTags":                      { "value": {} },
+    "principalId":                         { "value": "${AZURE_PRINCIPAL_ID}" },
+    "principalType":                       { "value": "${AZURE_PRINCIPAL_TYPE=User}" },
+
+    "networkIsolation":                    { "value": "${NETWORK_ISOLATION}" },
+    "allowedIpRanges":                     { "value": [] },
+    "privateEndpointLocation":             { "value": "${AZURE_PE_LOCATION}" },
+    "privateEndpointResourceGroupName":    { "value": "${AZURE_PE_RESOURCE_GROUP_NAME}" },
+    "useUAI":                              { "value": "${USE_UAI}" },
+    "useCAppAPIKey":                       { "value": "${USE_CAPP_API_KEY}" },    
+    "useZoneRedundancy":                   { "value": "false" },    
+    "enableAgenticRetrieval":              { "value": "${ENABLE_AGENTIC_RETRIEVAL}" },
+    "retrievalBackend":                    { "value": "${RETRIEVAL_BACKEND=foundry_iq}" },
+    "foundryIqPattern":                    { "value": "${FOUNDRY_IQ_PATTERN=azureBlob}" },
+    "foundryIqApiVersion":                 { "value": "${FOUNDRY_IQ_API_VERSION=2026-05-01-preview}" },
+    "foundryIqKnowledgeRetrievalBillingPlan": { "value": "${FOUNDRY_IQ_KNOWLEDGE_RETRIEVAL_BILLING_PLAN=free}" },
+    "knowledgeBaseName":                   { "value": "${KNOWLEDGE_BASE_NAME=knowledge-base}" },
+    "knowledgeBaseConnectionName":         { "value": "${KNOWLEDGE_BASE_CONNECTION_NAME=knowledge-base-connection}" },
+    "foundryIqKnowledgeSourceName":        { "value": "${FOUNDRY_IQ_KNOWLEDGE_SOURCE_NAME=knowledge-base-blob-ks}" },
+    "foundryIqKnowledgeSourceKind":        { "value": "${FOUNDRY_IQ_KNOWLEDGE_SOURCE_KIND=azureBlob}" },
+    "foundryIqStorageContainerName":       { "value": "${FOUNDRY_IQ_STORAGE_CONTAINER_NAME=documents}" },
+    "foundryIqStorageFolderPath":          { "value": "${FOUNDRY_IQ_STORAGE_FOLDER_PATH=}" },
+    "foundryIqIsAdlsGen2":                 { "value": "${FOUNDRY_IQ_IS_ADLS_GEN2=false}" },
+    "foundryIqIngestionPermissionOptionsJson": { "value": "${FOUNDRY_IQ_INGESTION_PERMISSION_OPTIONS=[\"rbacScope\"]}" },
+    "foundryIqSearchIndexName":            { "value": "${FOUNDRY_IQ_SEARCH_INDEX_NAME=gpt-rag-index}" },
+    "foundryIqSemanticConfigurationName":  { "value": "${FOUNDRY_IQ_SEMANTIC_CONFIGURATION_NAME=default}" },
+    "foundryIqSourceDataFields":           { "value": ["id", "title", "filepath", "url", "content"] },
+    "foundryIqSearchFields":               { "value": ["content"] },
+    "foundryIqBaseFilter":                 { "value": "${FOUNDRY_IQ_BASE_FILTER=}" },
+    "foundryIqFilterAddOnEnabled":         { "value": "${FOUNDRY_IQ_FILTER_ADD_ON_ENABLED=false}" },
+    "foundryIqSecurityFieldName":          { "value": "${FOUNDRY_IQ_SECURITY_FIELD_NAME=metadata_security_id}" },
+    "foundryIqMaxOutputDocuments":         { "value": "${FOUNDRY_IQ_MAX_OUTPUT_DOCUMENTS=}" },
+    "foundryIqContentExtractionMode":      { "value": "${FOUNDRY_IQ_CONTENT_EXTRACTION_MODE=standard}" },
+    "foundryIqAiServicesEndpoint":         { "value": "${FOUNDRY_IQ_AI_SERVICES_ENDPOINT=}" },
+
+    "additionalAppConfigurationSettings":  { "value": [] },
+
+    "aiSearchResourceId":                  { "value": null },
+    "aiFoundryStorageAccountResourceId":   { "value": null },
+    "aiFoundryCosmosDBAccountResourceId":  { "value": null },
+    
+    "deployAiFoundry":                      { "value": "true" },
+    "deployAAfAgentSvc":                    { "value": "${DEPLOY_AAF_AGENT_SVC=true}" },
+    "aiFoundryDisableLocalAuth":            { "value": "${AI_FOUNDRY_DISABLE_LOCAL_AUTH=true}" },
+    "deployAiFoundrySubnet":                { "value": "true" },
+    "deployAppConfig":                      { "value": "true" },
+    "appRuntimeConfigurationMode":          { "value": "${APP_RUNTIME_CONFIGURATION_MODE=appConfig}" },
+    "deployAppInsights":                    { "value": "true" },
+    "deployCosmosDb":                       { "value": "${DEPLOY_COSMOS_DB=true}" },
+    "enableCosmosAnalyticalStorage":        { "value": "${ENABLE_COSMOS_ANALYTICAL_STORAGE=false}" },
+    "deployContainerApps":                  { "value": "${DEPLOY_CONTAINER_APPS=true}" },
+    "deployContainerRegistry":              { "value": "${DEPLOY_CONTAINER_REGISTRY=true}" },
+    "deployContainerEnv":                   { "value": "${DEPLOY_CONTAINER_ENV=true}" },
+    "deployNsgs":                           { "value": "${DEPLOY_NSGS=true}" },
+    "deployAzureFirewall":                  { "value": "${DEPLOY_AZURE_FIREWALL}" },
+    "deployAcrTaskAgentPool":               { "value": "${DEPLOY_ACR_TASK_AGENT_POOL=false}" },
+    "additionalAcrTaskBuildFqdns":           { "value": [] },
+    "bastionAllowedSourceIPs":              { "value": [] },
+    "bastionSkuName":                       { "value": "${BASTION_SKU_NAME=Standard}" },
+    "bastionEnableTunneling":               { "value": "${BASTION_ENABLE_TUNNELING=false}" },
+    "enableAcsMediaEgress":                 { "value": "${ENABLE_ACS_MEDIA_EGRESS=false}" },
+    "publicIngress":                        { "value": { "enabled": false } },
+    "deployMcp":                            { "value": "${DEPLOY_MCP=true}" },
+    "deployGroundingWithBing":              { "value": "${DEPLOY_GROUNDING_WITH_BING=false}" },
+    "prepareHostedAgent":                   { "value": "${PREPARE_HOSTED_AGENT=false}" },
+    "deployHostedAgent":                    { "value": "${DEPLOY_HOSTED_AGENT=false}" },
+    "hostedAgent":                          { "value": {
+      "name": "${HOSTED_AGENT_NAME=}",
+      "image": "${HOSTED_AGENT_IMAGE=}",
+      "version": "${HOSTED_AGENT_IMAGE_VERSION=}",
+      "startupCommand": "${HOSTED_AGENT_STARTUP_COMMAND=}",
+      "runtime": {
+        "cpu": "${HOSTED_AGENT_CONTAINER_CPU=1}",
+        "memory": "${HOSTED_AGENT_CONTAINER_MEMORY=1Gi}"
+      },
+      "protocols": [
+        {
+          "protocol": "responses",
+          "version": "${HOSTED_AGENT_RESPONSES_PROTOCOL_VERSION=2.0.0}"
+        }
+      ]
+    } },
+    "hostedAgentContainerRegistryResourceId": { "value": "${HOSTED_AGENT_CONTAINER_REGISTRY_RESOURCE_ID=}" },
+    "hostedAgentContainerRegistryEndpoint":   { "value": "${HOSTED_AGENT_CONTAINER_REGISTRY_ENDPOINT=}" },
+    "hostedAgentContainerRegistryRoleAssignmentMode": { "value": "${HOSTED_AGENT_CONTAINER_REGISTRY_ROLE_ASSIGNMENT_MODE=rbac}" },
+    "deployKeyVault":                       { "value": "${DEPLOY_KEY_VAULT=true}" },
+    "deployVmKeyVault":                     { "value": "${DEPLOY_VM_KEY_VAULT=false}" },
+    "deployLogAnalytics":                   { "value": "${DEPLOY_LOG_ANALYTICS=true}" },
+    "enablePrivateLogAnalytics":            { "value": "${ENABLE_PRIVATE_LOG_ANALYTICS=true}" },
+    "deploySearchService":                  { "value": "${DEPLOY_SEARCH_SERVICE=true}" },
+    "deploySpeechService":                  { "value": "${DEPLOY_SPEECH_SERVICE=false}" },
+    "speechServiceSku":                     { "value": "${SPEECH_SERVICE_SKU=S0}" },
+    "deployStorageAccount":                 { "value": "${DEPLOY_STORAGE_ACCOUNT=true}" },
+    "storageAccountNetworkAclsBypass":      { "value": "AzureServices" },
+    "storageAccountResourceAccessRules":    { "value": [] },
+    "storageAccountAllowSharedKeyAccess":   { "value": true },
+    "greenFieldDeployment":                 { "value": "${GREEN_FIELD_DEPLOYMENT=true}" },
+    "deployJumpbox":                        { "value": "${DEPLOY_JUMPBOX=null}" },
+    "deployBastion":                        { "value": "${DEPLOY_BASTION=null}" },
+    "deployNatGateway":                     { "value": "${DEPLOY_NAT_GATEWAY=null}" },
+    "existingJumpboxResourceId":            { "value": "${EXISTING_JUMPBOX_RESOURCE_ID=}" },
+    "existingBastionResourceId":            { "value": "${EXISTING_BASTION_RESOURCE_ID=}" },
+    "existingNatGatewayResourceId":         { "value": "${EXISTING_NAT_GATEWAY_RESOURCE_ID=}" },
+    "existingLogAnalyticsWorkspaceResourceId":   { "value": "${EXISTING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID=}" },
+    "existingApplicationInsightsResourceId":     { "value": "${EXISTING_APPLICATION_INSIGHTS_RESOURCE_ID=}" },
+    "existingApplicationInsightsConnectionString": { "value": "${EXISTING_APPLICATION_INSIGHTS_CONNECTION_STRING=}" },
+    "allowMixedObservabilityWorkspaces":    { "value": "${ALLOW_MIXED_OBSERVABILITY_WORKSPACES=false}" },
+    "hubIntegrationEgressNextHopIp":             { "value": "${HUB_INTEGRATION_EGRESS_NEXT_HOP_IP=}" },
+    "hubIntegrationExistingRouteTableResourceId":{ "value": "${HUB_INTEGRATION_EXISTING_ROUTE_TABLE_RESOURCE_ID=}" },
+    "hubIntegrationHubVnetResourceId":           { "value": "${HUB_INTEGRATION_HUB_VNET_RESOURCE_ID=}" },
+    "hubIntegrationCreateHubPeering":            { "value": "${HUB_INTEGRATION_CREATE_HUB_PEERING=true}" },
+    "hubIntegrationPeeringAllowGatewayTransit":  { "value": "${HUB_INTEGRATION_PEERING_ALLOW_GATEWAY_TRANSIT=false}" },
+    "hubIntegrationPeeringUseRemoteGateways":    { "value": "${HUB_INTEGRATION_PEERING_USE_REMOTE_GATEWAYS=false}" },
+
+    "existingPrivateDnsZoneCogSvcsResourceId":         { "value": "${EXISTING_PRIVATE_DNS_ZONE_COGSVCS_RESOURCE_ID=}" },
+    "existingPrivateDnsZoneOpenAiResourceId":          { "value": "${EXISTING_PRIVATE_DNS_ZONE_OPENAI_RESOURCE_ID=}" },
+    "existingPrivateDnsZoneAiServicesResourceId":      { "value": "${EXISTING_PRIVATE_DNS_ZONE_AISERVICES_RESOURCE_ID=}" },
+    "existingPrivateDnsZoneSearchResourceId":          { "value": "${EXISTING_PRIVATE_DNS_ZONE_SEARCH_RESOURCE_ID=}" },
+    "existingPrivateDnsZoneCosmosResourceId":          { "value": "${EXISTING_PRIVATE_DNS_ZONE_COSMOS_RESOURCE_ID=}" },
+    "existingPrivateDnsZoneBlobResourceId":            { "value": "${EXISTING_PRIVATE_DNS_ZONE_BLOB_RESOURCE_ID=}" },
+    "existingPrivateDnsZoneKeyVaultResourceId":        { "value": "${EXISTING_PRIVATE_DNS_ZONE_KEYVAULT_RESOURCE_ID=}" },
+    "existingPrivateDnsZoneAppConfigResourceId":       { "value": "${EXISTING_PRIVATE_DNS_ZONE_APPCONFIG_RESOURCE_ID=}" },
+    "existingPrivateDnsZoneContainerAppsResourceId":   { "value": "${EXISTING_PRIVATE_DNS_ZONE_CONTAINERAPPS_RESOURCE_ID=}" },
+    "existingPrivateDnsZoneAcrResourceId":             { "value": "${EXISTING_PRIVATE_DNS_ZONE_ACR_RESOURCE_ID=}" },
+    "existingPrivateDnsZoneAzureMonitorResourceId":    { "value": "${EXISTING_PRIVATE_DNS_ZONE_AZUREMONITOR_RESOURCE_ID=}" },
+    "existingPrivateDnsZoneOmsOpsInsightsResourceId":  { "value": "${EXISTING_PRIVATE_DNS_ZONE_OMSOPSINSIGHTS_RESOURCE_ID=}" },
+    "existingPrivateDnsZoneOdsOpsInsightsResourceId":  { "value": "${EXISTING_PRIVATE_DNS_ZONE_ODSOPSINSIGHTS_RESOURCE_ID=}" },
+    "existingPrivateDnsZoneAzureAutomationResourceId": { "value": "${EXISTING_PRIVATE_DNS_ZONE_AZUREAUTOMATION_RESOURCE_ID=}" },
+    "existingPrivateDnsZoneAppInsightsResourceId":     { "value": "${EXISTING_PRIVATE_DNS_ZONE_APPINSIGHTS_RESOURCE_ID=}" },
+    "dnsZoneLinkSuffix":                               { "value": "${DNS_ZONE_LINK_SUFFIX=}" },
+    "deploymentMode":                                  { "value": "${DEPLOYMENT_MODE=standalone}" },
+    "deployVM":                             { "value": "${DEPLOY_VM=null}" },
+    "deploySoftware":                       { "value": "${DEPLOY_SOFTWARE=true}" },
+    "deployPostgres":                       { "value": "${DEPLOY_POSTGRES=false}" },
+
+    "resourceNamingMode":                   { "value": "${RESOURCE_NAMING_MODE=caf}" },
+    "cafWorkloadName":                      { "value": "${CAF_WORKLOAD_NAME=}" },
+    "cafEnvironmentName":                   { "value": "${CAF_ENVIRONMENT_NAME=}" },
+    "cafRegionName":                        { "value": "${CAF_REGION_NAME=}" },
+    "cafInstance":                          { "value": "${CAF_INSTANCE=001}" },
+
+    "aiFoundryAccountName":                  { "value": null },
+    "aiFoundryProjectName":                  { "value": null },
+    "aiFoundryProjectDisplayName":           { "value": null },
+    "aiFoundryProjectDescription":           { "value": null },    
+    "aiFoundryStorageAccountName":           { "value": null },
+    "aiFoundryStorageSku":                 { "value": "Standard_LRS" },
+    "aiFoundrySearchServiceName":            { "value": null },
+    "aiFoundryCosmosDbName":                 { "value": null },
+    "bingSearchName":                        { "value": null },  
+    "appConfigName":                         { "value": null },
+    "appInsightsName":                       { "value": null },
+    "containerEnvName":                      { "value": null },
+    "containerRegistryName":                 { "value": null },
+    "conversationContainerName":             { "value": null },
+    "dataIngestContainerAppName":            { "value": null },
+    "datasourcesContainerName":              { "value": null },
+    "dbAccountName":                         { "value": null },
+    "dbDatabaseName":                        { "value": null },
+    "frontEndContainerAppName":              { "value": null },
+    "keyVaultName":                          { "value": null },
+    "logAnalyticsWorkspaceName":             { "value": null },
+    "searchServiceName":                     { "value": null },
+    "speechServiceName":                     { "value": null },
+    "solutionStorageAccountName":            { "value": null },
+
+    "vmAdminPassword":                       {"value": "$(secretOrRandomPassword)"},  
+    "vmSize":                                { "value": "${AZURE_VM_SIZE=Standard_D2s_v3}" },
+
+    "useCMK":                                { "value": "false" },
+    "useExistingVNet":                       { "value": "${USE_EXISTING_VNET}" },  
+    "deploySubnets":                         { "value": "${DEPLOY_SUBNETS}" },  
+    "sideBySideDeploy":                      { "value": "${SIDE_BY_SIDE}" }, 
+    "existingVnetResourceId":                { "value": "${EXISTING_VNET_RESOURCE_ID}" },
+    "policyManagedPrivateDns":               { "value": "${POLICY_MANAGED_PRIVATE_DNS=false}" },     
+
+    "modelDeploymentList":{
+      "value": [
+        {
+          "name": "chat",
+          "model": {
+            "format": "OpenAI",
+            "name": "gpt-5-nano",
+            "version": "2025-08-07"
+          },
+          "sku": {
+            "name": "GlobalStandard",
+            "capacity": 40
+          },
+          "canonical_name": "CHAT_DEPLOYMENT_NAME",
+          "apiVersion": "2025-12-01-preview"
+        },
+        {
+          "name": "text-embedding",
+          "model": {
+            "format": "OpenAI",
+            "name": "text-embedding-3-large",
+            "version": "1"
+          },
+          "sku": {
+            "name": "Standard",
+            "capacity": 10
+          },
+          "canonical_name": "EMBEDDING_DEPLOYMENT_NAME",
+          "apiVersion": "2025-12-01-preview"
+        }
+      ]
+    },
+
+    "workloadProfiles" : {
+      "value": [
+        {
+          "name": "Consumption",
+          "workloadProfileType": "Consumption"
+        },
+        {
+          "workloadProfileType": "D4",
+          "name": "main",
+          "minimumCount": 0,
+          "maximumCount": 1
+        }
+      ]
+    },
+
+    "storageAccountContainersList": {
+      "value": [
+        {
+          "name": "documents",
+          "canonical_name": "DOCUMENTS_STORAGE_CONTAINER"
+        }
+      ]
+    },  
+
+    "databaseContainersList": {
+      "value": [
+        {
+          "name": "conversations",
+          "canonical_name": "CONVERSATIONS_DATABASE_CONTAINER",
+          "partitionKey": "/principal_id",
+          "indexingPolicy": {
+            "compositeIndexes": [
+              [
+                { "path": "/isDeleted", "order": "Ascending" },
+                { "path": "/_ts", "order": "Descending" }
+              ],
+              [
+                { "path": "/isDeleted", "order": "Ascending" },
+                { "path": "/name", "order": "Ascending" },
+                { "path": "/_ts", "order": "Descending" }
+              ]
+            ]
+          }
+        }
+      ]
+    },
+
+    "containerAppsList": {
+      "value": [
+        {
+          "name": null,
+          "external" : true,
+          "target_port": 8080,
+          "service_name": "orchestrator",
+          "profile_name": "main",
+          "min_replicas": 1,
+          "max_replicas": 1,
+          "cpu": "1.0",
+          "memory": "2.0Gi",          
+          "canonical_name": "ORCHESTRATOR_APP",
+          "roles": [
+            "AppConfigurationDataReader",
+            "CognitiveServicesUser",
+            "CognitiveServicesOpenAIUser",
+            "AcrPull",
+            "CosmosDBBuiltInDataContributor",
+            "SearchIndexDataReader",
+            "StorageBlobDataReader",
+            "KeyVaultSecretsUser"
+          ]
+        }
+      ]
+    }
+  }
+}
