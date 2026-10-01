@@ -22,7 +22,7 @@ from azure.identity import (
 from azure.keyvault.secrets import SecretClient
 
 
-LABEL = "gpt-rag"
+LABEL = "agent-lz"
 AUDIT_HMAC_CONFIG_KEY = "AUDIT_HMAC_KEY"
 AUDIT_HMAC_SECRET_NAME = "AUDIT-HMAC-KEY"
 KEY_VAULT_REFERENCE_CONTENT_TYPE = (

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import subprocess
 import unittest
@@ -22,13 +23,15 @@ class IntegrationPinTests(unittest.TestCase):
         components = {item["name"]: item for item in manifest["components"]}
 
         self.assertEqual("v3.8.11", manifest["tag"])
+        self.assertNotIn("ailz_tag", manifest)
+        self.assertNotIn("ailz_commit", manifest)
         self.assertEqual(
-            "v2.7.3",
-            manifest["ailz_tag"],
-        )
-        self.assertEqual(
-            "97e2375b89dcda4900d75aac9e7ffb7b20cce165",
-            manifest["ailz_commit"],
+            {
+                "repo": "https://github.com/Azure/bicep-ptn-aiml-landing-zone.git",
+                "tag": "v2.7.3",
+                "commit": "97e2375b89dcda4900d75aac9e7ffb7b20cce165",
+            },
+            manifest["infra"]["source"],
         )
         self.assertEqual(
             ("v4.1.1", "9b64a5b962067161cb55252c6e0917a2738ba984"),
@@ -52,58 +55,30 @@ class IntegrationPinTests(unittest.TestCase):
             ),
         )
 
-    def test_gitmodule_and_gitlink_match_landing_zone_integration_pin(self) -> None:
-        gitmodules = (ROOT / ".gitmodules").read_text(encoding="utf-8")
-        self.assertIn(
-            "branch = v2.7.3",
-            gitmodules,
-        )
-
+    def test_infra_is_in_repository_source_without_submodule_pin(self) -> None:
+        self.assertFalse((ROOT / ".gitmodules").exists())
         completed = subprocess.run(
-            ["git", "ls-files", "--stage", "--", "infra"],
+            ["git", "ls-files", "--stage", "--", "infra/main.bicep", "infra"],
             cwd=ROOT,
             check=True,
             capture_output=True,
             text=True,
         )
-        self.assertEqual(
-            "160000 97e2375b89dcda4900d75aac9e7ffb7b20cce165 0\tinfra",
-            completed.stdout.strip(),
-        )
-        if (ROOT / "infra" / ".git").exists():
-            checkout = subprocess.run(
-                ["git", "-C", "infra", "rev-parse", "HEAD"],
-                cwd=ROOT,
-                check=True,
-                capture_output=True,
-                text=True,
-            )
-            self.assertEqual(
-                "97e2375b89dcda4900d75aac9e7ffb7b20cce165",
-                checkout.stdout.strip(),
-            )
+        modes = {line.split()[0] for line in completed.stdout.splitlines()}
+        self.assertIn("100644", modes)
+        self.assertNotIn("160000", modes)
 
-    def test_zip_fallback_materializes_exact_landing_zone_commit(self) -> None:
+    def test_preprovision_does_not_fetch_or_checkout_infrastructure(self) -> None:
         scripts = ROOT / "scripts"
-        ps1 = (scripts / "preProvision.ps1").read_text(encoding="utf-8-sig")
-        sh = (scripts / "preProvision.sh").read_text(encoding="utf-8-sig")
-
-        self.assertIn(
-            "git -C $infraDir fetch --depth 1 origin $expectedInfraCommit",
-            ps1,
-        )
-        self.assertIn(
-            "checkout --detach $expectedInfraCommit",
-            ps1,
-        )
-        self.assertIn(
-            'git -C "$INFRA_DIR" fetch --depth 1 origin "$EXPECTED_INFRA_COMMIT"',
-            sh,
-        )
-        self.assertIn(
-            'checkout --detach "$EXPECTED_INFRA_COMMIT"',
-            sh,
-        )
+        for name in ("preProvision.ps1", "preProvision.sh"):
+            with self.subTest(script=name):
+                content = (scripts / name).read_text(encoding="utf-8-sig")
+                self.assertNotIn("ailz_commit", content)
+                self.assertNotIn("git submodule", content)
+                self.assertNotIn("fetch --depth 1 origin", content)
+                self.assertNotIn("checkout --detach", content)
+                self.assertNotIn("config.deployment.infra_checkout", content)
+                self.assertIn("infra/main.bicep was not found", content)
 
     def test_preprovision_fails_when_topology_persistence_fails(self) -> None:
         scripts = ROOT / "scripts"
@@ -272,31 +247,44 @@ class LifecycleParityTests(unittest.TestCase):
         self.assertIn("config.panel.setup", ps1)
         self.assertIn("config.panel.setup", sh)
 
-    def test_preprovision_hooks_fetch_and_checkout_exact_manifest_commit(
+    def test_preprovision_hooks_validate_and_bind_definition_before_topology(
         self,
     ) -> None:
         scripts = ROOT / "scripts"
         for name in ("preProvision.ps1", "preProvision.sh"):
             with self.subTest(script=name):
                 content = (scripts / name).read_text(encoding="utf-8-sig")
-                self.assertIn("ailz_commit", content)
-                self.assertIn("fetch --depth 1 origin", content)
-                self.assertIn("checkout --detach", content)
-                self.assertIn("^[0-9a-f]{40}$", content)
-                self.assertNotIn("clone --depth 1 --branch", content)
+                appdefinition = content.index("config.appdefinition")
+                topology = content.index("config.deployment.topology")
+                self.assertLess(appdefinition, topology)
+                self.assertIn("--validate", content)
+                self.assertIn("'--bind'" if name.endswith(".ps1") else "--bind", content)
+                self.assertIn("--env-name", content)
+                self.assertIn("binding failed", content)
 
-    def test_preprovision_hooks_prepare_infra_before_moving_the_pin(self) -> None:
+    def test_postprovision_hooks_plan_placeholders_and_assign_profile_roles(
+        self,
+    ) -> None:
         scripts = ROOT / "scripts"
-        for name in ("preProvision.ps1", "preProvision.sh"):
+        for name in ("postProvision.ps1", "postProvision.sh"):
             with self.subTest(script=name):
                 content = (scripts / name).read_text(encoding="utf-8-sig")
-                prepare = content.index("config.deployment.infra_checkout")
-                submodule_update = content.index("git submodule update")
-                exact_checkout = content.index("checkout --detach")
-                self.assertLess(prepare, submodule_update)
-                self.assertLess(prepare, exact_checkout)
-        shell = (scripts / "preProvision.sh").read_text(encoding="utf-8-sig")
-        self.assertIn("exit $INFRA_CHECKOUT_EXIT", shell)
+                placeholders = content.index("config.deployment.existing_images")
+                roles = content.index("--assign-roles")
+                outputs = content.index("config.deployment.outputs")
+                self.assertLess(placeholders, roles)
+                self.assertLess(roles, outputs)
+                # Components come from config.appdefinition, not shell parsing.
+                self.assertNotIn("--components", content)
+
+    def test_bootstrap_hosted_access_uses_component_project_and_service(self) -> None:
+        scripts = ROOT / "scripts"
+        for name in ("bootstrapHostedAccess.ps1", "bootstrapHostedAccess.sh"):
+            with self.subTest(script=name):
+                content = (scripts / name).read_text(encoding="utf-8-sig")
+                self.assertIn("AGENTLZ_HOSTED_PROJECT", content)
+                self.assertIn("AGENTLZ_HOSTED_SERVICE", content)
+                self.assertIn("orchestrator-agent", content)
 
     def test_postprovision_hooks_delegate_runtime_switch_to_shared_publisher(
         self,
@@ -671,6 +659,40 @@ class LifecycleParityTests(unittest.TestCase):
         self.assertIn(
             'APPLICATIONINSIGHTS_STATSBEAT_DISABLED_ALL: "true"', content
         )
+
+
+class AgentLandingZoneContractIntegrityTests(unittest.TestCase):
+    SCHEMAS = ("app-definition-v1.schema.json", "platform-outputs-v1.schema.json")
+
+    def test_schema_bytes_match_committed_sha256(self) -> None:
+        for name in self.SCHEMAS:
+            with self.subTest(schema=name):
+                schema_path = ROOT / "contracts" / name
+                digest_path = ROOT / "contracts" / f"{name}.sha256"
+                data = schema_path.read_bytes()
+                self.assertNotIn(b"\r\n", data, "schema must be LF-encoded")
+                expected, file_name = digest_path.read_text(
+                    encoding="utf-8"
+                ).split()
+                self.assertEqual(name, file_name)
+                self.assertEqual(expected, hashlib.sha256(data).hexdigest())
+
+    def test_schemas_are_versioned_draft_2020_12_documents(self) -> None:
+        for name in self.SCHEMAS:
+            with self.subTest(schema=name):
+                schema = json.loads((ROOT / "contracts" / name).read_text("utf-8"))
+                self.assertEqual(
+                    "https://json-schema.org/draft/2020-12/schema", schema["$schema"]
+                )
+                self.assertTrue(schema["$id"].endswith("/" + name))
+                self.assertEqual({"const": 1}, schema["properties"]["schemaVersion"])
+                self.assertIn("schemaVersion", schema["required"])
+
+    def test_contracts_readme_registers_new_schemas(self) -> None:
+        readme = (ROOT / "contracts" / "README.md").read_text(encoding="utf-8")
+        for name in self.SCHEMAS:
+            self.assertIn(name, readme)
+        self.assertIn("naming-map.md", readme)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../contracts/app-definition-v1.schema.json",
+  "schemaVersion": 1,
+  "id": "sample-hosted",
+  "displayName": "Sample custom application (Foundry hosted agent)",
+  "components": [
+    {
+      "name": "agent",
+      "kind": "azure.ai.agent",
+      "path": "src",
+      "source": { "commit": "0000000000000000000000000000000000000000" },
+      "profiles": ["model-user"]
+    }
+  ]
+}

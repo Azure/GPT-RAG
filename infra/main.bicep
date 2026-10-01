@@ -658,7 +658,7 @@ param foundryIqIngestionPermissionOptions array = [
 param foundryIqIngestionPermissionOptionsJson string = ''
 
 @description('Deprecated: prefer publishing this via additionalAppConfigurationSettings so the landing zone stays workload-agnostic. Retained for backward compatibility. Existing GPT-RAG Azure AI Search index name to register as a Pattern B Foundry IQ searchIndex knowledge source.')
-param foundryIqSearchIndexName string = 'gpt-rag-index'
+param foundryIqSearchIndexName string = 'agent-lz-index'
 
 @description('Semantic configuration name on the GPT-RAG Azure AI Search index. Required by Azure AI Search agentic retrieval.')
 param foundryIqSemanticConfigurationName string = 'default'
@@ -1043,7 +1043,10 @@ module componentFlagValidation 'modules/validation/component-flags.bicep' = {
 // General Variables
 // ----------------------------------------------------------------------
 
-var _manifest = loadJsonContent('./manifest.json')
+// The repository-root manifest.json is the single release manifest: `components`
+// feed the jumpbox clone list and `infra.source.tag` pins install.ps1 (ADR-0015).
+var _manifest = loadJsonContent('../manifest.json')
+var _infraSourceTag = _manifest.infra.source.tag
 var _azdTags = { 'azd-env-name': environmentName }
 var _modeTags = { deploymentMode: deploymentMode, 'ai-lz-version': 'v2.0.0' }
 var _tags = union(_azdTags, _modeTags, deploymentTags)
@@ -1899,7 +1902,7 @@ module assignCosmosDBCosmosDbBuiltInDataContributorTestVm 'modules/security/cosm
 }
 
 var _fileUris = [
-  'https://raw.githubusercontent.com/Azure/bicep-ptn-aiml-landing-zone/refs/tags/${_manifest.ailz_tag}/install.ps1'
+  'https://raw.githubusercontent.com/Azure/bicep-ptn-aiml-landing-zone/refs/tags/${_infraSourceTag}/install.ps1'
 ]
 
 // Windows CustomScriptExtension has a FIXED 90-minute platform provisioning
@@ -1912,9 +1915,9 @@ var _fileUris = [
 // before the 90-minute cap, skipping OPTIONAL steps (Python, win-acme,
 // component/extra repos) under low budget while keeping CORE steps fatal. See
 // issue #82. NOTE: this script is fetched from the tag pinned in
-// `manifest.json#ailz_tag` (and passed as `-release`), so a fix to install.ps1
-// only takes effect once a new tag containing it is published AND `ailz_tag`
-// is bumped to that tag.
+// `manifest.json#infra.source.tag` (and passed as `-release`), so a fix to
+// install.ps1 only takes effect once a new tag containing it is published AND
+// `infra.source.tag` is bumped to that tag.
 resource cse 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = if (_deployJumpbox && deploySoftware) {
   name: '${_vmName}/cse'
   location: location
@@ -1926,7 +1929,7 @@ resource cse 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = if (_de
     forceUpdateTag: deployment().name
     settings: {
       fileUris: _fileUris
-      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File install.ps1 -release ${_manifest.ailz_tag} -UseUAI ${_useUAI} -ResourceToken ${resourceToken} -AzureTenantId ${subscription().tenantId} -AzureLocation ${location} -AzureSubscriptionId ${subscription().subscriptionId} -AzureResourceGroupName ${resourceGroup().name} -AzdEnvName ${environmentName} -ExtraRepoUrls "${join(_extraRepoUrls, ',')}" -ExtraRepoTags "${join(_extraRepoTags, ',')}" -ExtraRepoNames "${join(_extraRepoNames, ',')}"'
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File install.ps1 -release ${_infraSourceTag} -UseUAI ${_useUAI} -ResourceToken ${resourceToken} -AzureTenantId ${subscription().tenantId} -AzureLocation ${location} -AzureSubscriptionId ${subscription().subscriptionId} -AzureResourceGroupName ${resourceGroup().name} -AzdEnvName ${environmentName} -ExtraRepoUrls "${join(_extraRepoUrls, ',')}" -ExtraRepoTags "${join(_extraRepoTags, ',')}" -ExtraRepoNames "${join(_extraRepoNames, ',')}"'
     }
     protectedSettings: {
       

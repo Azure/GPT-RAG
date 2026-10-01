@@ -1,7 +1,7 @@
 """Public hosted-panel settings shared by deployment publishers.
 
 Mirrors ``config.continuity.settings``: every key here is safe to publish
-unconditionally (App Configuration label ``gpt-rag``) because it is inert
+unconditionally (App Configuration label ``agent-lz``) because it is inert
 unless ``DEPLOY_ADMINISTRATIVE_PANEL`` and ``PANEL_HISTORY_ENABLED`` are both
 ``true`` (see ADR-0004 and the merged ``gpt-rag-ui`` ``panel_config.py``,
 which this module's key names and defaults match exactly -- no duplicate or
@@ -46,7 +46,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 
 
-LABEL = "gpt-rag"
+LABEL = "agent-lz"
 
 # Canonical panel Cosmos container names. Both are partitioned by
 # ``/principal_id`` (matching the classic ``conversations`` container

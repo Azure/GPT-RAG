@@ -22,7 +22,7 @@ from urllib.parse import urlsplit
 from uuid import UUID, uuid5, NAMESPACE_URL
 
 from config.continuity.settings import FOUNDRY_TOKEN_AUDIENCE
-from config.deployment.composition import DeploymentMode, resolve_mode
+from config.deployment.composition import HOSTED_AGENT_NAME_DEFAULT, DeploymentMode, resolve_mode
 from util.azure_cli import resolve_az_command
 
 
@@ -241,14 +241,14 @@ def run_az(arguments: list[str]) -> object:
 def _setting(run: RunAzure, endpoint: str, key: str) -> dict | None:
     rows = run([
         "appconfig", "kv", "list", "--endpoint", endpoint, "--auth-mode", "login",
-        "--key", key, "--label", "gpt-rag",
+        "--key", key, "--label", "agent-lz",
     ])
     if not isinstance(rows, list) or len(rows) > 1:
         raise AccessError("App Configuration metadata was not unique.")
     if not rows:
         return None
     row = _object(rows[0])
-    if row.get("key") != key or row.get("label") != "gpt-rag":
+    if row.get("key") != key or row.get("label") != "agent-lz":
         raise AccessError("App Configuration key/label binding mismatch.")
     return row
 
@@ -256,7 +256,7 @@ def _setting(run: RunAzure, endpoint: str, key: str) -> dict | None:
 def _config_value(run: RunAzure, endpoint: str, key: str) -> str:
     row = _setting(run, endpoint, key)
     if row is None:
-        raise AccessError(f"Required App Configuration key {key} (gpt-rag) is missing.")
+        raise AccessError(f"Required App Configuration key {key} (agent-lz) is missing.")
     return _string(row.get("value"))
 
 
@@ -303,7 +303,7 @@ def discover(environment: Mapping[str, str], *, run: RunAzure = run_az) -> Acces
     _bound_scope(project, PROJECT_PATH, sub, group)
     project_name = project.rsplit("/", 1)[1]
     endpoint = _endpoint(endpoint, ".services.ai.azure.com", rf"/api/projects/{re.escape(project_name)}/?")
-    name = _consistent(environment, ("HOSTED_AGENT_NAME",), agent.get("name", environment.get("HOSTED_AGENT_NAME") or "gpt-rag-orchestrator"))
+    name = _consistent(environment, ("HOSTED_AGENT_NAME",), agent.get("name", environment.get("HOSTED_AGENT_NAME") or HOSTED_AGENT_NAME_DEFAULT))
     if not re.fullmatch(NAME, name):
         raise AccessError("Invalid expected hosted agent name.")
     account_id = project.rsplit("/", 2)[0]

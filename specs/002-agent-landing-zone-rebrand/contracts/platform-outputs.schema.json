@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/agent-lz/contracts/platform-outputs-v1.schema.json",
+  "title": "Agent Landing Zone platform outputs (v1)",
+  "description": "Design draft. Non-secret platform endpoints published after azd provision as AGENTLZ_PLATFORM_OUTPUTS (App Configuration label agent-lz) plus flat keys. Published copy: contracts/platform-outputs-v1.schema.json.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "foundry", "registry", "appConfig", "storage", "keyVault", "identities", "network"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "foundry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["projectEndpoint", "accountName"],
+      "properties": {
+        "projectEndpoint": { "type": "string", "format": "uri" },
+        "accountName": { "type": "string" }
+      }
+    },
+    "registry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["loginServer"],
+      "properties": { "loginServer": { "type": "string" } }
+    },
+    "appConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["endpoint"],
+      "properties": { "endpoint": { "type": "string", "format": "uri" } }
+    },
+    "search": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["endpoint"],
+      "properties": { "endpoint": { "type": "string", "format": "uri" } }
+    },
+    "storage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["blobEndpoint"],
+      "properties": { "blobEndpoint": { "type": "string", "format": "uri" } }
+    },
+    "cosmos": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["endpoint"],
+      "properties": { "endpoint": { "type": "string", "format": "uri" } }
+    },
+    "keyVault": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["uri"],
+      "properties": { "uri": { "type": "string", "format": "uri" } }
+    },
+    "identities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["component", "clientId"],
+        "properties": {
+          "component": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,23}$" },
+          "clientId": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+          }
+        }
+      }
+    },
+    "network": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["isolated"],
+      "properties": { "isolated": { "type": "boolean" } }
+    }
+  }
+}

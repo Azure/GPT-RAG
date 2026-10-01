@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    GPT-RAG regional readiness preflight for azd provision.
+    Agent Landing Zone regional readiness preflight for azd provision.
 
 .DESCRIPTION
     Performs read-only Azure checks before long-running provisioning starts.
@@ -8,7 +8,7 @@
     Capacity signals that Azure cannot guarantee before deployment are WARN.
 
 .PARAMETER ProjectRoot
-    GPT-RAG repository root. Defaults to the parent folder of this script.
+    Agent Landing Zone repository root. Defaults to the parent folder of this script.
 
 .PARAMETER ParameterFile
     Effective main.parameters.json file to evaluate. Defaults to the root
@@ -483,7 +483,7 @@ if ([string]::IsNullOrWhiteSpace($ParameterFile)) {
     $ParameterFile = Join-Path $ProjectRoot 'main.parameters.json'
 }
 
-Write-Host 'GPT-RAG regional preflight'
+Write-Host 'Agent Landing Zone regional preflight'
 Import-AzdEnvironment
 
 if (-not (Test-Path $ParameterFile)) {

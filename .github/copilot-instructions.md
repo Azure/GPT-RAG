@@ -87,12 +87,12 @@ When preparing a release branch:
   body, NOT just the `CHANGELOG.md`) MUST include a `## Component versions`
   section with a Markdown table listing every validated runtime component
   from `manifest.json` `components[]` plus `infra / AI Landing Zone` from
-  `manifest.json` `ailz_tag`. This is required even for a patch release where
+  `manifest.json` `infra.source.tag`. This is required even for a patch release where
   only the landing-zone pin changed and the runtime component versions are
   unchanged — always restate the full validated combination so operators see
   the exact set without cross-referencing other releases.
 - Read the versions directly from `manifest.json` at release time (`tag` for
-  each entry in `components[]`, and `ailz_tag` for the landing zone). Do not
+  each entry in `components[]`, and `infra.source.tag` for the landing zone). Do not
   hand-copy from a previous release.
 - Place the `## Component versions` table immediately after the `## Changed`
   section and before `## Validation`, matching the existing published
@@ -226,11 +226,10 @@ changed deploy flow, a new component version, or a breaking change — the
 matching documentation MUST be updated **in the same change set**, not
 deferred.
 
-- **User-facing docs live in the `gpt-rag-docs` repo** (the `docs` branch of
-  `Azure/gpt-rag`), published with MkDocs Material to
-  https://azure.github.io/GPT-RAG/. Update the relevant page there on the
-  `docs` branch (or a feature branch off it). Register new pages under `nav:`
-  in `mkdocs.yml`.
+- **User-facing docs live in the central AI Landing Zones documentation
+  site** (ADR-0014). Update the relevant page in that site's source
+  repository through a feature branch; the legacy `docs` branch is no longer
+  the product documentation source.
 - **Do not duplicate** product docs into this repo or into service-repo
   READMEs — keep READMEs short and link to the published site instead.
 - **If unsure whether a doc page is affected, check**: search the docs source

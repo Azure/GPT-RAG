@@ -200,7 +200,7 @@ Baseline: Bicep `v2.6.1` at `64195c01b70974fa7256c2f54a0035fb06804139`; Terrafor
 | `foundryIqMaxOutputDocuments` | `input` | `built-in` | `string` | `false` | `literal` | `""` | `[]` |
 | `foundryIqPattern` | `input` | `built-in` | `string` | `false` | `literal` | `"azureBlob"` | `["azureBlob","managed","searchIndex"]` |
 | `foundryIqSearchFields` | `input` | `built-in` | `array` | `false` | `literal` | `["content"]` | `[]` |
-| `foundryIqSearchIndexName` | `input` | `built-in` | `string` | `false` | `literal` | `"gpt-rag-index"` | `[]` |
+| `foundryIqSearchIndexName` | `input` | `built-in` | `string` | `false` | `literal` | `"agent-lz-index"` | `[]` |
 | `foundryIqSecurityFieldName` | `input` | `built-in` | `string` | `false` | `literal` | `"metadata_security_id"` | `[]` |
 | `foundryIqSemanticConfigurationName` | `input` | `built-in` | `string` | `false` | `literal` | `"default"` | `[]` |
 | `foundryIqSourceDataFields` | `input` | `built-in` | `array` | `false` | `literal` | `["id","title","filepath","url","content"]` | `[]` |

@@ -1,0 +1,20 @@
+{
+  "$schema": "../../../contracts/app-definition-v1.schema.json",
+  "schemaVersion": 1,
+  "id": "sample-containerapp",
+  "displayName": "Sample custom application (Container App)",
+  "components": [
+    {
+      "name": "web",
+      "kind": "containerapp",
+      "path": "src",
+      "source": { "commit": "0000000000000000000000000000000000000000" },
+      "profiles": [],
+      "ingress": "external",
+      "resources": { "cpu": 0.5, "memory": "1.0Gi" }
+    }
+  ],
+  "settings": [
+    { "key": "SAMPLE_GREETING", "value": "Hello from the sample application" }
+  ]
+}

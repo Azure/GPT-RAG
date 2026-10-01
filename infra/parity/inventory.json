@@ -1792,7 +1792,7 @@
         "required": false,
         "default": {
           "representation": "literal",
-          "value": "gpt-rag-index"
+          "value": "agent-lz-index"
         },
         "allowedValues": []
       },

@@ -1,5 +1,22 @@
 # Changelog
 
+## [Unreleased]
+
+Staged on `develop`; will be released as `v4.0.0`.
+
+### Changed
+- **Breaking:** GPT-RAG is now Agent Landing Zone. The product, repositories, and user-visible names are renamed.
+- **Breaking:** App Configuration label renamed to `agent-lz`.
+- **Breaking:** Environment variables use the `AGENTLZ_` prefix.
+- Infrastructure is now kept in this repository instead of being pulled from an external template.
+
+### Added
+- Infrastructure-only deployment: run `azd provision`, then `azd deploy` later.
+- Custom application deployment through `app-definition.json` (see `samples/custom-app`).
+
+### Notes
+- New deployments only. Existing GPT-RAG deployments are not upgraded in place; redeploy into a new environment. GPT-RAG release tags stay available.
+
 ## [v3.8.11] - 2026-09-28
 
 ### Documentation

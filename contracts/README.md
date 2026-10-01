@@ -198,3 +198,27 @@ gated on the still-pending live evidence procedures for
 (see ADR-0004's "Adoption and migration" and "Review trigger" sections),
 not on any further GPT-RAG-repository platform-contract change.
 
+
+## App definition v1 (feature 002, Agent Landing Zone)
+
+`app-definition-v1.schema.json` is the structural contract for an
+application's `app-definition.json`. Owner: this repository (umbrella);
+consumed by the umbrella validator and by component repositories that ship an
+app definition. Semantic rules (unique component names, settings key
+collisions, path existence) live outside the schema.
+
+## Platform outputs v1 (feature 002, Agent Landing Zone)
+
+`platform-outputs-v1.schema.json` describes the non-secret platform endpoints
+published after `azd provision`. Owner: this repository (umbrella, producer);
+consumers are the application components that read the published outputs.
+
+Both schemas pin their exact LF-encoded bytes in a sibling
+`<name>.schema.json.sha256` file (`<sha256>  <file name>`). Versioning rules:
+additive optional fields keep v1 and require regenerating the `.sha256` file;
+any change in interpretation, a new required field, or a removed field
+publishes a new `-v2` file alongside v1. Consumers must check `schemaVersion`
+and ignore unknown optional fields only where the schema permits them (both v1
+schemas set `additionalProperties: false` at the top level). Rename rules for
+labels, prefixes, indexes (`agent-lz-*`), and images (`agent-app-*`) live in
+`naming-map.md`.

@@ -718,7 +718,7 @@ stay on `RETRIEVAL_BACKEND=ai_search` until the operator intentionally migrates.
 | `foundryIqStorageFolderPath` / `FOUNDRY_IQ_STORAGE_FOLDER_PATH` | Empty | Optional folder path within the native Blob or ADLS Gen2 container. |
 | `foundryIqIsAdlsGen2` / `FOUNDRY_IQ_IS_ADLS_GEN2` | `false` | Set to `true` when the native source is an ADLS Gen2 account with hierarchical namespace. |
 | `foundryIqIngestionPermissionOptionsJson` / `FOUNDRY_IQ_INGESTION_PERMISSION_OPTIONS` | `["rbacScope"]` | JSON array of permission metadata to ingest for native Foundry IQ sources. |
-| `foundryIqSearchIndexName` / `FOUNDRY_IQ_SEARCH_INDEX_NAME` | `gpt-rag-index` | Existing Azure AI Search index to register for Pattern B. |
+| `foundryIqSearchIndexName` / `FOUNDRY_IQ_SEARCH_INDEX_NAME` | `agent-lz-index` | Existing Azure AI Search index to register for Pattern B. |
 | `foundryIqSemanticConfigurationName` / `FOUNDRY_IQ_SEMANTIC_CONFIGURATION_NAME` | `default` | Semantic configuration on the existing index. |
 | `foundryIqFilterAddOnEnabled` / `FOUNDRY_IQ_FILTER_ADD_ON_ENABLED` | `false` | Enables GPT-RAG query-time security filtering for Pattern B. Leave `false` for native Blob. |
 | `foundryIqSecurityFieldName` / `FOUNDRY_IQ_SECURITY_FIELD_NAME` | `metadata_security_id` | Field used by the orchestrator to build Pattern B filters. |
@@ -750,7 +750,7 @@ identity:
   -SearchEndpoint "https://<search-name>.search.windows.net" `
   -KnowledgeBaseName "<knowledge-base-name>" `
   -KnowledgeSourceName "<knowledge-source-name>" `
-  -SearchIndexName "<gpt-rag-index-name>" `
+  -SearchIndexName "<search-index-name>" `
   -SemanticConfigurationName "<semantic-config-name>" `
   -SearchServiceResourceId "/subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.Search/searchServices/<search-name>" `
   -KnowledgeRetrievalBillingPlan "free"

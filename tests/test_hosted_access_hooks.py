@@ -65,7 +65,7 @@ def run(command, **kwargs):
 from pathlib import Path
 assert sys.argv[1] == "-c"
 assert sys.argv[3:] == ["--azd-env", "--apply"]
-assert Path(os.environ["GPT_RAG_REPO_ROOT"]).joinpath("hosted-agent").resolve() == Path.cwd().resolve()
+assert Path(os.environ["AGENTLZ_REPO_ROOT"]).joinpath("hosted-agent").resolve() == Path.cwd().resolve()
 subprocess.run = run
 # Avoid runpy's pre-import warning; imports above are fixture setup only.
 del sys.modules["config.deployment.hosted_access"]
@@ -77,7 +77,7 @@ exec(code)
 PS_PREFIX = r'''
 $ErrorActionPreference = 'Stop'
 $repoRoot = $env:FAKE_ROOT
-$env:GPT_RAG_REPO_ROOT = $repoRoot
+$env:AGENTLZ_REPO_ROOT = $repoRoot
 $hostedProject = Join-Path $repoRoot 'hosted-agent'
 $hostedDigest = 'sha256:offline'
 $globalEnv = [pscustomobject]@{
@@ -171,7 +171,7 @@ class HostedAccessHookTests(unittest.TestCase):
             if fail == "errorframe":
                 response += sse({"type": "error", "message": "PRIVATE-MARKER"})
             elif fail == "missingcompletion":
-                response = sse({"type": "response.output_text.delta", "delta": "GPT-RAG hosted smoke OK."})
+                response = sse({"type": "response.output_text.delta", "delta": "Agent Landing Zone hosted smoke OK."})
             elif fail == "emptycompletion":
                 response = sse(completion(""))
             (temp / "response.txt").write_text(response, encoding="utf-8")
@@ -292,7 +292,7 @@ class HostedAccessHookTests(unittest.TestCase):
             self.assertNotIn("bootstrapHostedAccess", root)
             self.assertLess(root.index("azd deploy orchestrator-agent"), root.index("azd ai agent invoke"))
             self.assertIn('"content":"Hello!"', root)
-            self.assertNotIn("GPT-RAG hosted smoke OK.", root)
+            self.assertNotIn("Agent Landing Zone hosted smoke OK.", root)
             self.assertIn("--validate-smoke", root)
 
 

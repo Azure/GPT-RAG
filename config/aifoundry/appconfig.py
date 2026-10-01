@@ -7,7 +7,7 @@ from azure.core.exceptions import AzureError
 class AppConfigClient:
     def __init__(self):
         """
-        Bulk-loads all keys labeled 'gpt-rag' into an in-memory dict.
+        Bulk-loads all keys labeled 'agent-lz' into an in-memory dict.
         """
         endpoint = os.getenv("APP_CONFIG_ENDPOINT")
         if not endpoint:
@@ -19,10 +19,10 @@ class AppConfigClient:
         self._settings: Dict[str, str] = {}
 
         try:
-            for setting in client.list_configuration_settings(label_filter="gpt-rag"):
+            for setting in client.list_configuration_settings(label_filter="agent-lz"):
                 self._settings[setting.key] = setting.value
         except AzureError as e:
-            raise RuntimeError(f"Failed to bulk-load 'gpt-rag' settings: {e}")
+            raise RuntimeError(f"Failed to bulk-load 'agent-lz' settings: {e}")
 
     def get(self, key: str, default: Any = None) -> Any:
         """

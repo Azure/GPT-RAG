@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+# Custom hosted-agent project for Agent Landing Zone. The service name matches
+# the component name in app-definition.json. Lifecycle hooks are not allowed;
+# the landing zone pins the image by digest and runs the smoke test.
+name: sample-hosted
+services:
+  agent:
+    host: azure.ai.agent
+    project: ./src
+    language: docker
+    docker:
+      remoteBuild: true
+    kind: hosted
+    name: sample-hosted-agent
+    description: Agent Landing Zone sample hosted agent.
+    startupCommand: python main.py
+    container:
+      resources:
+        cpu: "1"
+        memory: "2Gi"
+    protocols:
+      - protocol: responses
+        version: "2.0.0"
+    env:
+      APP_CONFIG_ENDPOINT: ${APP_CONFIG_ENDPOINT}
+      OTEL_EXPERIMENTAL_RESOURCE_DETECTORS: ""
+      APPLICATIONINSIGHTS_STATSBEAT_DISABLED_ALL: "true"

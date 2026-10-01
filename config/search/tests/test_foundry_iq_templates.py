@@ -1856,7 +1856,7 @@ class PostProvisionMcpSourceGuardTests(unittest.TestCase):
         canonical_output = script.index(
             "-Arguments @('--canonical')"
         )
-        app_config_import = script.index("Set-GptRagAppConfiguration -Endpoint")
+        app_config_import = script.index("Set-AgentLzAppConfiguration -Endpoint")
 
         self.assertLess(flag, preflight)
         self.assertLess(preflight, canonical_output)

@@ -36,7 +36,7 @@ class AzureFixture:
         self.writes = []
         self.assignments = []
         self.live = {
-            "name": "gpt-rag-orchestrator",
+            "name": "agent-app-orchestrator",
             "instance_identity": {"principal_id": PRINCIPAL},
             "agent_endpoint": {
                 "protocol_configuration": {"responses": {}, "unexpected-extension": {}},
@@ -45,9 +45,9 @@ class AzureFixture:
                 ]},
             },
         }
-        self.version = {"name": "gpt-rag-orchestrator", "version": "7", "definition": {"kind": "hosted", "protocol_versions": [{"protocol": "unexpected-extension"}]}}
+        self.version = {"name": "agent-app-orchestrator", "version": "7", "definition": {"kind": "hosted", "protocol_versions": [{"protocol": "unexpected-extension"}]}}
         self.settings = {
-            key: {"key": key, "label": "gpt-rag", "value": value, "contentType": "text/plain"}
+            key: {"key": key, "label": "agent-lz", "value": value, "contentType": "text/plain"}
             for key, value in {
                 "SUBSCRIPTION_ID": SUB, "AZURE_RESOURCE_GROUP": "test-group",
                 "AI_FOUNDRY_ACCOUNT_NAME": "test-model",
@@ -55,7 +55,7 @@ class AzureFixture:
             }.items()
         }
         self.settings["AUDIT_HMAC_KEY"] = {
-            "key": "AUDIT_HMAC_KEY", "label": "gpt-rag",
+            "key": "AUDIT_HMAC_KEY", "label": "agent-lz",
             "contentType": access.KV_REFERENCE + ";charset=utf-8",
             "value": json.dumps({"uri": "https://test-vault.vault.azure.net/secrets/AUDIT-HMAC-KEY/abc123"}),
         }
@@ -194,7 +194,7 @@ class HostedAccessTests(unittest.TestCase):
             args[args.index("--url") + 1] for args in self.azure.calls
             if args[0] == "rest" and "/versions/" in args[args.index("--url") + 1]
         ]
-        self.assertEqual([f"{ENDPOINT}/agents/gpt-rag-orchestrator/versions/7?api-version=v1"], version_reads)
+        self.assertEqual([f"{ENDPOINT}/agents/agent-app-orchestrator/versions/7?api-version=v1"], version_reads)
         self.assertEqual([], self.azure.writes)
 
     def test_latest_routing_requires_complete_bound_metadata(self):
@@ -323,7 +323,7 @@ class HostedAccessTests(unittest.TestCase):
         self.fails_discovery(dict(ENV, HOSTED_AGENT_DEPLOYMENT=json.dumps(handoff)))
 
     def test_null_prerequisite_handoff_uses_default_agent(self):
-        self.assertEqual("gpt-rag-orchestrator", self.discover(dict(ENV, HOSTED_AGENT_DEPLOYMENT='{"agent":null,"foundry":null}')).agent_name)
+        self.assertEqual("agent-app-orchestrator", self.discover(dict(ENV, HOSTED_AGENT_DEPLOYMENT='{"agent":null,"foundry":null}')).agent_name)
 
     def test_malformed_handoff_json(self):
         for value in ("{", "[]", '{"agent":"wrong-type"}'):
