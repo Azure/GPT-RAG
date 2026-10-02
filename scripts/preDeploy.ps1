@@ -1,4 +1,4 @@
-﻿# Works from ...\gpt-rag or any subfolder
+﻿# Works from the Agent Landing Zone repository root or any subfolder
 # PowerShell 7+ recommended
 try { [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false) } catch {}
 $ProgressPreference = 'SilentlyContinue'   # hide PS progress bars
@@ -13,7 +13,7 @@ function Docker-Ready {
 function Find-RepoRoot([string]$start) {
   $p = (Resolve-Path $start).Path
   while ($true) {
-    if ((Split-Path $p -Leaf) -ieq 'gpt-rag' -or (Test-Path (Join-Path $p 'manifest.json'))) { return $p }
+    if ((Test-Path -LiteralPath (Join-Path $p 'manifest.json')) -and (Test-Path -LiteralPath (Join-Path $p 'azure.yaml'))) { return $p }
     $parent = Split-Path -Parent $p
     if ($parent -eq $p -or [string]::IsNullOrEmpty($parent)) { break }
     $p = $parent
@@ -86,11 +86,11 @@ if (-not $psExe) { $psExe = (Get-Command powershell -ErrorAction Stop).Source }
 
 $start    = if ($PSScriptRoot) { $PSScriptRoot } else { (Get-Location).Path }
 $repoRoot = Find-RepoRoot $start
-if (-not $repoRoot) { Write-Error "Run this from inside a gpt-rag repo."; exit 1 }
+if (-not $repoRoot) { Write-Error "Run this from inside the Agent Landing Zone repository (a folder containing manifest.json and azure.yaml)."; exit 1 }
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) { Write-Error "Git not found in PATH."; exit 1 }
 $pathSeparator = [IO.Path]::PathSeparator
 $env:PYTHONPATH = if ($env:PYTHONPATH) { "$repoRoot$pathSeparator$($env:PYTHONPATH)" } else { $repoRoot }
-$env:GPT_RAG_REPO_ROOT = $repoRoot
+$env:AGENTLZ_REPO_ROOT = $repoRoot
 
 function Invoke-PythonModule {
   param(
@@ -101,7 +101,7 @@ function Invoke-PythonModule {
     Write-Error "Python is required for deployment prerequisites."
     exit 1
   }
-  & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['GPT_RAG_REPO_ROOT']); sys.argv = ['$ModuleName'] + sys.argv[1:]; runpy.run_module('$ModuleName', run_name='__main__')" @Arguments
+  & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['AGENTLZ_REPO_ROOT']); sys.argv = ['$ModuleName'] + sys.argv[1:]; runpy.run_module('$ModuleName', run_name='__main__')" @Arguments
 }
 
 $manifestPath = Join-Path $repoRoot 'manifest.json'
@@ -113,6 +113,56 @@ $dotAzure   = Join-Path $repoRoot '.azure'
 $globalEnv  = Get-AzdEnv -projectPath $repoRoot
 $globalRG   = $globalEnv.AZURE_RESOURCE_GROUP
 $globalSub  = $globalEnv.AZURE_SUBSCRIPTION_ID
+
+# Foundation guard (first step, before any Azure change): azd deploy only
+# deploys applications onto a foundation created by azd provision.
+$foundationMissing = (-not $globalRG) -or (-not $globalEnv.APP_CONFIG_ENDPOINT)
+if (-not $foundationMissing -and -not (ResourceGroup-Exists -rg $globalRG -subscription $globalSub)) { $foundationMissing = $true }
+if ($foundationMissing) {
+  Write-Error "The foundation is not provisioned. Run azd provision first."
+  exit 3
+}
+
+# Re-validate the application definition and compare it with the binding.
+$appDefinitionPath = if ($globalEnv.AGENTLZ_APP_DEFINITION) { "$($globalEnv.AGENTLZ_APP_DEFINITION)" } elseif ($env:AGENTLZ_APP_DEFINITION) { $env:AGENTLZ_APP_DEFINITION } else { Join-Path $repoRoot 'app-definition.json' }
+if (-not [IO.Path]::IsPathRooted($appDefinitionPath)) { $appDefinitionPath = Join-Path $repoRoot $appDefinitionPath }
+if (-not (Test-Path -LiteralPath $appDefinitionPath -PathType Leaf)) {
+  Write-Error "AGENTLZ_APP_DEFINITION points to $appDefinitionPath, which does not exist."
+  exit 1
+}
+$boundAppId = "$($globalEnv.AGENTLZ_APP_ID)"
+if (-not $boundAppId) {
+  Write-Error "This environment is not bound to an application. Run azd provision first."
+  exit 1
+}
+$appDefinitionArguments = @('--validate', $appDefinitionPath, '--check-binding', '--azure-dir', $dotAzure)
+if ($globalEnv.AZURE_ENV_NAME) { $appDefinitionArguments += @('--env-name', "$($globalEnv.AZURE_ENV_NAME)") }
+Push-Location $repoRoot
+try {
+  # Exit codes: 1 invalid definition, 2 binding mismatch (message names both ids).
+  Invoke-PythonModule -ModuleName 'config.appdefinition' -Arguments $appDefinitionArguments
+  $appDefinitionExitCode = $LASTEXITCODE
+} finally {
+  Pop-Location
+}
+if ($appDefinitionExitCode -eq 2) { Write-Error "Application definition binding check failed. No changes were made."; exit $appDefinitionExitCode }
+if ($appDefinitionExitCode -ne 0) { Write-Error "Application definition validation failed. No changes were made."; exit $appDefinitionExitCode }
+$appDefinition = Get-Content -LiteralPath $appDefinitionPath -Raw | ConvertFrom-Json
+$appDefinitionDir = Split-Path -Parent (Resolve-Path -LiteralPath $appDefinitionPath).Path
+$definitionComponents = @($appDefinition.components)
+
+function Get-ManifestComponentForDefinition([string]$componentName) {
+  foreach ($mc in $manifest.components) {
+    if ("$($mc.name)" -eq $componentName -or "$($mc.name)".EndsWith("-$componentName")) { return $mc }
+  }
+  return $null
+}
+$definitionManifestNames = @(
+  foreach ($dc in $definitionComponents) {
+    $mc = Get-ManifestComponentForDefinition "$($dc.name)"
+    if ($mc) { "$($mc.name)" }
+  }
+)
 
 # Make azd outputs available to component deploy scripts (and to the topology
 # read-back below). In network-isolated deployments the jumpbox intentionally
@@ -138,7 +188,7 @@ try {
   Pop-Location
 }
 if ($topologyExitCode -ne 0 -or -not $topologyJson) {
-  Write-Error "Failed to resolve the GPT-RAG deployment topology. Ensure scripts/preProvision ran successfully before azd deploy."
+  Write-Error "Failed to resolve the Agent Landing Zone deployment topology. Ensure scripts/preProvision ran successfully before azd deploy."
   exit 1
 }
 $topologyInfo = ("$topologyJson").Trim() | ConvertFrom-Json
@@ -146,7 +196,7 @@ $hostedMode = [bool]$topologyInfo.deploy_hosted_agent_orchestration
 $administrativePanel = [bool]$topologyInfo.deploy_administrative_panel
 $deploymentMode = [string]$topologyInfo.topology
 $selectedComponents = @($topologyInfo.components)
-Write-Host "GPT-RAG deployment mode: $deploymentMode" -ForegroundColor Cyan
+Write-Host "Agent Landing Zone deployment mode: $deploymentMode" -ForegroundColor Cyan
 
 $networkIsolation = "$($globalEnv.NETWORK_ISOLATION)".ToLowerInvariant() -eq 'true'
 Invoke-PythonModule -ModuleName 'config.deployment.private_network' -Arguments @('--stage', 'pre-deploy')
@@ -162,13 +212,6 @@ if (-not (Docker-Ready)) {
   } else {
     Write-Host "Docker daemon is not running; component deploy scripts will fall back to ACR remote builds where supported." -ForegroundColor Yellow
   }
-}
-
-# Global RG check once (fail early)
-if (-not $globalRG) { Write-Error "AZURE_RESOURCE_GROUP not found in env."; exit 2 }
-if (-not (ResourceGroup-Exists -rg $globalRG -subscription $globalSub)) {
-  Write-Error "Resource group '$globalRG'$(if($globalSub){" in subscription '$globalSub'"}). not found."
-  exit 3
 }
 
 $hadErrors = $false
@@ -226,7 +269,7 @@ The preparation command builds the manifest-pinned image and stores only its imm
       Write-Error "Hosted orchestrator deployment failed."
       exit $LASTEXITCODE
     }
-    $smokePayloadPath = Join-Path ([IO.Path]::GetTempPath()) "gpt-rag-hosted-smoke-$([guid]::NewGuid().ToString('N')).json"
+    $smokePayloadPath = Join-Path ([IO.Path]::GetTempPath()) "agentlz-hosted-smoke-$([guid]::NewGuid().ToString('N')).json"
     try {
       [IO.File]::WriteAllText(
         $smokePayloadPath,
@@ -244,7 +287,7 @@ The preparation command builds the manifest-pinned image and stores only its imm
       }
       # A greeting exercises config/model access, not document authorization.
       # Parse the terminal Responses event; do not match a model-authored phrase.
-      $smokeOutput | & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['GPT_RAG_REPO_ROOT']); sys.argv = ['config.deployment.hosted'] + sys.argv[1:]; runpy.run_module('config.deployment.hosted', run_name='__main__')" --validate-smoke
+      $smokeOutput | & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['AGENTLZ_REPO_ROOT']); sys.argv = ['config.deployment.hosted'] + sys.argv[1:]; runpy.run_module('config.deployment.hosted', run_name='__main__')" --validate-smoke
       if ($LASTEXITCODE -ne 0) {
         Write-Error "Hosted greeting did not complete successfully; cutover remains blocked. Review runtime access and RBAC propagation before retrying."
         exit 1
@@ -277,15 +320,28 @@ The preparation command builds the manifest-pinned image and stores only its imm
   $env:HOSTED_AGENT_BASE_URL = $hostedBaseUrl
   $env:HOSTED_AGENT_RESOURCE_SCOPE = "$($globalEnv.HOSTED_AGENT_RESOURCE_SCOPE)"
 
-  $continuityPackages = Join-Path ([IO.Path]::GetTempPath()) "gpt-rag-continuity-$([guid]::NewGuid().ToString('N'))"
+  # Publish the endpoint before component deploys (#709): the UI reads
+  # HOSTED_AGENT_BASE_URL at startup, and a later reprovision republishes it
+  # from the azd env. The routing selector still flips only after cutover.
+  & azd env set HOSTED_AGENT_BASE_URL $hostedBaseUrl --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
+  if ($LASTEXITCODE -ne 0) { Write-Error "Hosted endpoint could not be persisted in the azd environment."; exit $LASTEXITCODE }
+  Push-Location $repoRoot
+  try {
+    Invoke-PythonModule -ModuleName 'config.deployment.appconfig' | Out-Null
+    if ($LASTEXITCODE -ne 0) { Write-Error "Failed to publish the hosted-agent endpoint before component deployment."; exit $LASTEXITCODE }
+  } finally {
+    Pop-Location
+  }
+
+  $continuityPackages = Join-Path ([IO.Path]::GetTempPath()) "agentlz-continuity-$([guid]::NewGuid().ToString('N'))"
   try {
     & python -m pip install --quiet --disable-pip-version-check --target $continuityPackages -r (Join-Path $repoRoot 'config/requirements.txt')
     if ($LASTEXITCODE -ne 0) { throw "Failed to install continuity activation dependencies." }
-    $env:GPT_RAG_CONTINUITY_PACKAGES = $continuityPackages
-    & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['GPT_RAG_REPO_ROOT']); sys.path.insert(0, os.environ['GPT_RAG_CONTINUITY_PACKAGES']); sys.argv = ['config.continuity.setup', '--activate']; runpy.run_module('config.continuity.setup', run_name='__main__')"
+    $env:AGENTLZ_CONTINUITY_PACKAGES = $continuityPackages
+    & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['AGENTLZ_REPO_ROOT']); sys.path.insert(0, os.environ['AGENTLZ_CONTINUITY_PACKAGES']); sys.argv = ['config.continuity.setup', '--activate']; runpy.run_module('config.continuity.setup', run_name='__main__')"
     if ($LASTEXITCODE -ne 0) { throw "Hosted continuity Responses 2.0.0 and exact agent-scope RBAC validation failed closed." }
   } finally {
-    Remove-Item Env:GPT_RAG_CONTINUITY_PACKAGES -ErrorAction SilentlyContinue
+    Remove-Item Env:AGENTLZ_CONTINUITY_PACKAGES -ErrorAction SilentlyContinue
     if (Test-Path -LiteralPath $continuityPackages) {
       Remove-Item -LiteralPath $continuityPackages -Recurse -Force -ErrorAction SilentlyContinue
     }
@@ -296,6 +352,10 @@ foreach ($c in $manifest.components) {
   $name = $c.name
   if ($name -notin $selectedComponents) {
     Write-Host "$name is not deployed in $deploymentMode mode." -ForegroundColor Yellow
+    continue
+  }
+  if ($name -notin $definitionManifestNames) {
+    Write-Host "$name is not part of application '$($appDefinition.id)'." -ForegroundColor Yellow
     continue
   }
   $repo = $c.repo
@@ -325,7 +385,7 @@ foreach ($c in $manifest.components) {
     continue
   }
 
-  # Target folder (sibling to gpt-rag)
+  # Target folder (sibling to the repository root)
   $target = Join-Path $baseDir $name
   Write-Host ("Deploying {0} ({1}:{2}) -> {3}" -f $name, $refType, $ref, $target) -ForegroundColor Cyan
 
@@ -405,6 +465,68 @@ foreach ($c in $manifest.components) {
   } else {
     Write-Host ("{0}: no scripts\deploy.ps1 found, skipping child deploy." -f $name)
     if ($hostedMode) { $hadErrors = $true }
+  }
+}
+
+# Components from the application definition that are not release-managed
+# (manifest.json) components: each folder is its own azd project.
+foreach ($dc in $definitionComponents) {
+  $componentName = "$($dc.name)"
+  if (Get-ManifestComponentForDefinition $componentName) { continue }
+  $componentPath = Join-Path $appDefinitionDir "$($dc.path)"
+  if (-not (Test-Path -LiteralPath (Join-Path $componentPath 'azure.yaml') -PathType Leaf)) {
+    Write-Error "The app folder $componentPath must contain its own azure.yaml."
+    $hadErrors = $true
+    continue
+  }
+  $sourceCommit = "$($dc.source.commit)"
+  $sourceDigest = "$($dc.source.imageDigest)"
+  if ($sourceCommit) {
+    $actualCommit = "$(& git -C $componentPath rev-parse HEAD 2>$null)".Trim()
+    if ($LASTEXITCODE -ne 0 -or $actualCommit -ne $sourceCommit) {
+      Write-Error "$componentName must resolve to $sourceCommit but $componentPath is at '$actualCommit'."
+      $hadErrors = $true
+      continue
+    }
+  }
+  if (Test-Path -LiteralPath $dotAzure) {
+    Copy-Item $dotAzure $componentPath -Recurse -Force -Container
+  }
+  Write-Host ("Deploying {0} ({1}) from {2}" -f $componentName, $dc.kind, $componentPath) -ForegroundColor Cyan
+  Push-Location $componentPath
+  try {
+    if ($sourceDigest) {
+      & azd env set AGENTLZ_IMAGE_DIGEST $sourceDigest --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
+      if ($LASTEXITCODE -ne 0) { Write-Error "${componentName}: failed to pin image digest."; $hadErrors = $true; continue }
+    }
+    if ("$($dc.kind)" -eq 'azure.ai.agent') {
+      # prepareHostedDeployment is not run here: it builds only the manifest-pinned
+      # bundled orchestrator image (HOSTED_AGENT_*). A custom azure.ai.agent
+      # component deploys from its own child azd project, which builds its image,
+      # or pins source.imageDigest through AGENTLZ_IMAGE_DIGEST (T079 limitation).
+      & azd env set FOUNDRY_PROJECT_ENDPOINT "$($globalEnv.AZURE_AI_PROJECT_ENDPOINT)" --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
+      if ($LASTEXITCODE -ne 0) { Write-Error "${componentName}: failed to set the Foundry endpoint."; $hadErrors = $true; continue }
+      & azd env set AZURE_AI_PROJECT_ID "$($globalEnv.AZURE_AI_PROJECT_RESOURCE_ID)" --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
+      if ($LASTEXITCODE -ne 0) { Write-Error "${componentName}: failed to set the Foundry project ID."; $hadErrors = $true; continue }
+      & azd deploy $componentName --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt
+      if ($LASTEXITCODE -ne 0) { Write-Error "${componentName}: hosted agent deployment failed."; $hadErrors = $true; continue }
+      $smokePayloadPath = Join-Path ([IO.Path]::GetTempPath()) "agentlz-agent-smoke-$([guid]::NewGuid().ToString('N')).json"
+      try {
+        [IO.File]::WriteAllText($smokePayloadPath, '{"messages":[{"role":"user","content":"Hello!"}]}', [Text.UTF8Encoding]::new($false))
+        $smokeOutput = (& azd ai agent invoke --protocol invocations --new-session --timeout 180 --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt --input-file $smokePayloadPath 2>&1 | Out-String)
+        if ($LASTEXITCODE -ne 0) { Write-Error "${componentName}: smoke request failed."; $hadErrors = $true; continue }
+        $smokeOutput | & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['AGENTLZ_REPO_ROOT']); sys.argv = ['config.deployment.hosted'] + sys.argv[1:]; runpy.run_module('config.deployment.hosted', run_name='__main__')" --validate-smoke
+        if ($LASTEXITCODE -ne 0) { Write-Error "${componentName}: smoke test did not pass."; $hadErrors = $true; continue }
+      } finally {
+        Remove-Item -LiteralPath $smokePayloadPath -Force -ErrorAction SilentlyContinue
+      }
+    } else {
+      & azd deploy --all --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt
+      if ($LASTEXITCODE -ne 0) { Write-Error "${componentName}: Container App deployment failed."; $hadErrors = $true; continue }
+    }
+    Write-Host "${componentName}: deployed." -ForegroundColor Green
+  } finally {
+    Pop-Location
   }
 }
 

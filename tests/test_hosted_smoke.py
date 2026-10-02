@@ -49,8 +49,8 @@ class HostedSmokeTests(unittest.TestCase):
 
     def test_old_phrase_alone_or_delta_is_not_completion(self):
         for output in (
-            "GPT-RAG hosted smoke OK.",
-            sse({"type": "response.output_text.delta", "delta": "GPT-RAG hosted smoke OK."}),
+            "Agent Landing Zone hosted smoke OK.",
+            sse({"type": "response.output_text.delta", "delta": "Agent Landing Zone hosted smoke OK."}),
             sse({"type": "response.output_text.done", "text": "Hello!"}),
             "data: [DONE]\n\n", "",
         ):

@@ -38,7 +38,7 @@ from config.continuity.settings import (
 from util.azure_cli import resolve_az_command
 
 
-LABEL = "gpt-rag"
+LABEL = "agent-lz"
 CAPABILITY_CONFIG_KEY = "HOSTED_CONVERSATION_CAPABILITY_KEY"
 CAPABILITY_SECRET_NAME = "HOSTED-CONVERSATION-CAPABILITY-KEY"
 KEY_VAULT_REFERENCE_CONTENT_TYPE = (
@@ -1221,7 +1221,7 @@ def configure_frontend_roles(
         or _app_config_value(app_config_client, "FRONTEND_APP_NAME")
         or (f"ca-{resource_token}-frontend" if resource_token else "")
     ).strip()
-    agent_name = (environ.get("HOSTED_AGENT_NAME") or "gpt-rag-orchestrator").strip()
+    agent_name = (environ.get("HOSTED_AGENT_NAME") or "agent-app-orchestrator").strip()
     project_endpoint = (
         environ.get("AI_FOUNDRY_PROJECT_ENDPOINT")
         or _app_config_value(app_config_client, "AI_FOUNDRY_PROJECT_ENDPOINT")
@@ -1325,7 +1325,7 @@ def reconcile_disabled_continuity(
     ).strip()
     if project_resource_id:
         agent_name = (
-            environ.get("HOSTED_AGENT_NAME") or "gpt-rag-orchestrator"
+            environ.get("HOSTED_AGENT_NAME") or "agent-app-orchestrator"
         ).strip()
         agent_scope = hosted_agent_scope(project_resource_id, agent_name)
         for assignment in assignments:

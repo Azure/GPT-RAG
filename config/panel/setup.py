@@ -59,7 +59,7 @@ from dataclasses import dataclass
 from util.azure_cli import resolve_az_command
 
 
-LABEL = "gpt-rag"
+LABEL = "agent-lz"
 
 COSMOS_DATA_CONTRIBUTOR_ROLE_GUID = "00000000-0000-0000-0000-000000000002"
 COSMOS_DATA_READER_ROLE_GUID = "00000000-0000-0000-0000-000000000001"
@@ -312,7 +312,7 @@ def ensure_cosmos_sql_role_assignment(
 def resolve_subscription_id(environment: Mapping[str, str]) -> str:
     """Return the subscription ID, falling back to ``az account show``.
 
-    Mirrors ``scripts/postProvision.ps1``'s ``Set-GptRagAppConfiguration``,
+    Mirrors ``scripts/postProvision.ps1``'s ``Set-AgentLzAppConfiguration``,
     which resolves ``AZURE_SUBSCRIPTION_ID`` the same way when the azd
     environment does not carry it explicitly.
     """

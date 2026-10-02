@@ -1201,5 +1201,109 @@ class HostedEndpointContractTests(unittest.TestCase):
             invocations_base_url("http://agent.example.test/invocations")
 
 
+class AgentLandingZoneTemplateTests(unittest.TestCase):
+    """T016: template metadata uses the Agent Landing Zone identity."""
+
+    def test_template_metadata(self) -> None:
+        import yaml
+
+        content = (ROOT / "azure.yaml").read_text(encoding="utf-8")
+        project = yaml.safe_load(content)
+        self.assertEqual("agent-landing-zone", project["name"])
+        self.assertEqual("agent-landing-zone", project["metadata"]["template"])
+        self.assertIn("https://github.com/Azure/agent-landing-zone", content)
+        self.assertNotIn("azure-gpt-rag", content)
+        hosted = (ROOT / "hosted-agent" / "azure.yaml").read_text(encoding="utf-8")
+        self.assertNotIn("azure-gpt-rag", hosted)
+        self.assertNotIn("GPT_RAG_", hosted)
+        for suffix in ("ps1", "sh"):
+            hook = (ROOT / "hosted-agent" / "hooks" / f"postdeploy.{suffix}").read_text(encoding="utf-8")
+            self.assertNotIn("GPT_RAG_", hook)
+            self.assertIn("AGENTLZ_HOSTED_SERVICE", hook)
+
+
+class AgentLandingZoneAppConfigurationLabelTests(unittest.TestCase):
+    """T017: the umbrella writes only label agent-lz and no GPT_RAG_ keys."""
+
+    def test_composed_parameters_use_agent_lz_label(self) -> None:
+        source = source_parameters()
+        self.assertEqual("agent-lz", source["parameters"]["appConfigLabel"]["value"])
+        for environment in (
+            {"DEPLOY_HOSTED_AGENT_ORCHESTRATION": "false", "DEPLOY_ADMINISTRATIVE_PANEL": "false"},
+            {
+                "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "true",
+                "DEPLOY_ADMINISTRATIVE_PANEL": "false",
+                "HOSTED_AGENT_IMAGE_VERSION": DIGEST,
+                "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
+            },
+        ):
+            with self.subTest(environment=environment):
+                parameters = compose_parameters(source, environment)["parameters"]
+                self.assertEqual("agent-lz", parameters["appConfigLabel"]["value"])
+                for item in parameters["additionalAppConfigurationSettings"]["value"]:
+                    self.assertEqual("agent-lz", item["label"], item["name"])
+                    self.assertFalse(item["name"].startswith("GPT_RAG_"), item["name"])
+
+    @patch("config.deployment.appconfig._run_az", return_value="")
+    def test_published_settings_use_agent_lz_label(self, run_az: object) -> None:
+        appconfig.publish_settings(
+            "https://appcs.example.test",
+            {"AGENTLZ_PLATFORM_OUTPUTS": "{}", "CHAT_BACKEND": "hosted_agent"},
+        )
+        calls = run_az.call_args_list  # type: ignore[attr-defined]
+        self.assertEqual(2, len(calls))
+        for call in calls:
+            arguments = call.args[0]
+            self.assertEqual("agent-lz", arguments[arguments.index("--label") + 1])
+            key = arguments[arguments.index("--key") + 1]
+            self.assertFalse(key.startswith("GPT_RAG_"), key)
+            self.assertNotIn("gpt-rag", arguments)
+
+
+class AppDefinitionDeploymentTests(unittest.TestCase):
+    """T068: the bundled trio and both sample variants validate."""
+
+    def test_bundled_and_sample_definitions_validate(self) -> None:
+        from config.appdefinition import load_definition, validate_definition
+
+        cases = {
+            ROOT / "app-definition.json": True,
+            ROOT / "samples" / "custom-app" / "containerapp": False,
+            ROOT / "samples" / "custom-app" / "hosted": False,
+        }
+        for path, bundled in cases.items():
+            with self.subTest(path=str(path)):
+                definition = load_definition(path, repo_root=ROOT)
+                self.assertEqual(bundled, definition.bundled)
+                validate_definition(definition, ROOT)
+
+    def test_samples_cover_both_hosting_modes(self) -> None:
+        from config.appdefinition import load_definition
+
+        kinds = {
+            component["kind"]
+            for variant in ("containerapp", "hosted")
+            for component in load_definition(
+                ROOT / "samples" / "custom-app" / variant, repo_root=ROOT
+            ).document["components"]
+        }
+        self.assertEqual({"containerapp", "azure.ai.agent"}, kinds)
+
+    def test_trio_matches_selected_components_in_each_mode(self) -> None:
+        from config.appdefinition import effective_components, load_definition
+
+        trio = load_definition(ROOT / "app-definition.json", repo_root=ROOT)
+        classic = effective_components(trio, hosted_orchestration=False)
+        hosted = effective_components(trio, hosted_orchestration=True)
+        self.assertEqual(
+            len(selected_components(DeploymentMode.CLASSIC)),
+            sum(c["kind"] == "containerapp" for c in classic),
+        )
+        self.assertEqual(
+            len(selected_components(DeploymentMode.HOSTED_NO_PANEL)),
+            sum(c["kind"] == "containerapp" for c in hosted),
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

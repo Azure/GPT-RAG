@@ -8,11 +8,16 @@ import hashlib
 import json
 import os
 import re
+import sys
 from enum import Enum
 from pathlib import Path
 from typing import Mapping
 
 from config.continuity.settings import public_settings as continuity_public_settings
+from config.deployment.existing_images import (
+    apply_existing_images,
+    discover_existing_images,
+)
 from config.panel.settings import (
     FEEDBACK_CONTAINER_CONFIG_KEY,
     FEEDBACK_CONTAINER_NAME,
@@ -22,7 +27,9 @@ from config.panel.settings import (
 )
 
 
-APP_CONFIG_LABEL = "gpt-rag"
+APP_CONFIG_LABEL = "agent-lz"
+# Default hosted agent name and image repository (new deployments only, ADR-0018).
+HOSTED_AGENT_NAME_DEFAULT = "agent-app-orchestrator"
 PRESERVE_CLASSIC_RUNTIME = "PRESERVE_CLASSIC_RUNTIME"
 HOSTED_CUTOVER_COMPLETE = "HOSTED_CUTOVER_COMPLETE"
 HOSTED_IMAGE_DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
@@ -383,7 +390,7 @@ def materialized_settings(
 
     Used by ``preProvision`` immediately after resolving the topology, so
     every later hook (``preDeploy``, ``postProvision``) and the App
-    Configuration `gpt-rag` label agree on the same values -- there is a
+    Configuration `agent-lz` label agree on the same values -- there is a
     single resolution, materialized once, not re-derived independently by
     each consumer.
     """
@@ -464,7 +471,7 @@ def panel_database_containers() -> list[dict[str, object]]:
     ``prompts``/``mcp`` list -- so switching topologies never mixes protected
     chat content with panel metadata in one container. Each entry's
     ``canonical_name`` is published verbatim to App Configuration (label
-    ``gpt-rag``) by the generic AILZ database-container-list mechanism,
+    ``agent-lz``) by the generic AILZ database-container-list mechanism,
     matching the exact keys ``gpt-rag-ui``'s merged panel configuration
     already consumes (``PANEL_OWNER_INDEX_DATABASE_CONTAINER``,
     ``PANEL_FEEDBACK_DATABASE_CONTAINER``). Container-scoped Cosmos RBAC for
@@ -492,6 +499,71 @@ def _setting(name: str, value: str) -> dict[str, str]:
         "label": APP_CONFIG_LABEL,
         "contentType": "text/plain",
     }
+
+
+#: Infrastructure roles every custom Container App needs. Data-plane roles
+#: come from the component's profiles via ``config.appdefinition --assign-roles``.
+CUSTOM_CONTAINER_APP_ROLES = ["AcrPull"]
+
+
+def custom_container_apps(
+    environment: Mapping[str, str],
+    existing_apps: list[object],
+    *,
+    hosted_orchestration: bool,
+) -> list[dict[str, object]]:
+    """Return ``containerAppsList`` entries for the selected custom definition.
+
+    The bundled definition is already represented by the static trio in
+    ``main.parameters.json``; only a custom definition (``AGENTLZ_APP_DEFINITION``)
+    contributes entries. Each entry mirrors the trio's shape so infra creates
+    the Container App, its managed identity, and the ``azd-service-name`` tag,
+    with the placeholder image until ``azd deploy`` publishes the real one.
+    """
+    from config.appdefinition.loader import (
+        DEFINITION_ENV,
+        KIND_CONTAINER_APP,
+        component_service_name,
+        effective_components,
+        load_selected_definition,
+    )
+
+    if not (environment.get(DEFINITION_ENV) or "").strip():
+        return []
+    definition = load_selected_definition(environment)
+    if definition.bundled:
+        return []
+    taken = {
+        app.get("service_name") for app in existing_apps if isinstance(app, dict)
+    }
+    entries: list[dict[str, object]] = []
+    for component in effective_components(
+        definition, hosted_orchestration=hosted_orchestration
+    ):
+        if component.get("kind") != KIND_CONTAINER_APP:
+            continue
+        service = component_service_name(definition, component)
+        if not service or service in taken:
+            continue
+        taken.add(service)
+        resources = component.get("resources") or {}
+        entries.append(
+            {
+                "name": None,
+                "external": component.get("ingress", "internal") == "external",
+                "service_name": service,
+                "profile_name": "main",
+                "min_replicas": 1,
+                "max_replicas": 1,
+                "cpu": str(float(resources.get("cpu", 0.5))),
+                "memory": str(resources.get("memory", "1.0Gi")),
+                "canonical_name": re.sub(r"[^A-Z0-9]", "_", service.upper())
+                + "_APP",
+                "dapr": {"enabled": False},
+                "roles": list(CUSTOM_CONTAINER_APP_ROLES),
+            }
+        )
+    return entries
 
 
 def compose_parameters(
@@ -575,11 +647,11 @@ def compose_parameters(
             "value": {
                 "name": (
                     environment.get("HOSTED_AGENT_NAME")
-                    or "gpt-rag-orchestrator"
+                    or HOSTED_AGENT_NAME_DEFAULT
                 ),
                 "image": (
                     environment.get("HOSTED_AGENT_IMAGE")
-                    or "gpt-rag-orchestrator"
+                    or HOSTED_AGENT_NAME_DEFAULT
                 ),
                 "version": digest,
                 "startupCommand": (
@@ -641,6 +713,7 @@ def compose_parameters(
                     for role in app.get("roles", [])
                     if role != "CosmosDBBuiltInDataContributor"
                 ]
+    apps.extend(custom_container_apps(environment, apps, hosted_orchestration=hosted))
     parameters["containerAppsList"] = {"value": apps}
 
     databases_parameter = parameters.get("databaseContainersList")
@@ -714,6 +787,7 @@ def compose_file(
     environment: Mapping[str, str],
     *,
     expected_hosted_source_commit: str | None = None,
+    existing_images: Mapping[str, str] | None = None,
 ) -> DeploymentMode:
     source = json.loads(input_path.read_text(encoding="utf-8-sig"))
     composed = compose_parameters(
@@ -721,6 +795,10 @@ def compose_file(
         environment,
         expected_hosted_source_commit=expected_hosted_source_commit,
     )
+    if existing_images:
+        apps = composed["parameters"]["containerAppsList"]["value"]
+        for service in apply_existing_images(apps, existing_images):
+            print(f"Preserving deployed image for {service}.", file=sys.stderr)
     output_path.write_text(
         json.dumps(composed, indent=2) + "\n",
         encoding="utf-8",
@@ -733,13 +811,29 @@ def main() -> int:
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--hosted-source-commit", default=None)
+    parser.add_argument(
+        "--no-preserve-images",
+        action="store_true",
+        help="Do not keep currently deployed Container Apps images (#708).",
+    )
     args = parser.parse_args()
+
+    existing_images: dict[str, str] = {}
+    if not args.no_preserve_images and not is_truthy(
+        os.environ.get("RESET_CONTAINER_APP_IMAGES")
+    ):
+        existing_images = discover_existing_images(
+            os.environ.get("AZURE_RESOURCE_GROUP", ""),
+            os.environ.get("AZURE_SUBSCRIPTION_ID") or None,
+            os.environ.get("AZURE_ENV_NAME") or None,
+        )
 
     mode = compose_file(
         args.input,
         args.output,
         os.environ,
         expected_hosted_source_commit=args.hosted_source_commit,
+        existing_images=existing_images,
     )
     print(mode.value)
     return 0

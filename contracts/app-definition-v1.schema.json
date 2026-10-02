@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aka.ms/agent-lz/contracts/app-definition-v1.schema.json",
+  "title": "Agent Landing Zone application definition (v1)",
+  "description": "Design draft. Structural contract for app-definition.json. Semantic rules (unique component names, settings key collisions, path existence, source/kind compatibility) live in data-model.md and config/appdefinition/validator.py. Published copy: contracts/app-definition-v1.schema.json.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "id", "components"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": 1 },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{2,39}$",
+      "description": "Stable application id. Bound to the azd environment on first provision (AGENTLZ_APP_ID)."
+    },
+    "displayName": { "type": "string", "maxLength": 80 },
+    "components": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/component" }
+    },
+    "settings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/setting" }
+    }
+  },
+  "$defs": {
+    "component": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "kind", "path", "source"],
+      "properties": {
+        "name": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,23}$" },
+        "kind": { "enum": ["containerapp", "azure.ai.agent"] },
+        "path": {
+          "type": "string",
+          "description": "Relative path to the component source, resolved from the definition file folder.",
+          "pattern": "^(?![\\\\/])(?![A-Za-z]:)(?!.*(^|[\\\\/])\\.\\.([\\\\/]|$)).+$"
+        },
+        "source": { "$ref": "#/$defs/source" },
+        "profiles": {
+          "type": "array",
+          "uniqueItems": true,
+          "description": "Capability profiles added to the implicit 'base' profile.",
+          "items": {
+            "enum": ["model-user", "retrieval-reader", "conversation-store", "blob-delegator", "ingestion-writer"]
+          }
+        },
+        "ingress": { "enum": ["external", "internal"], "default": "internal" },
+        "resources": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "cpu": { "enum": [0.25, 0.5, 0.75, 1.0, 1.5, 2.0], "default": 0.5 },
+            "memory": { "enum": ["0.5Gi", "1.0Gi", "1.5Gi", "2.0Gi", "3.0Gi", "4.0Gi"], "default": "1.0Gi" }
+          }
+        },
+        "settings": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/setting" }
+        }
+      },
+      "if": { "properties": { "kind": { "const": "azure.ai.agent" } } },
+      "then": {
+        "not": {
+          "anyOf": [
+            { "required": ["ingress"] },
+            { "required": ["resources"] }
+          ]
+        }
+      }
+    },
+    "source": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["commit"],
+          "properties": { "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["imageDigest"],
+          "properties": { "imageDigest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" } }
+        }
+      ]
+    },
+    "setting": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key"],
+      "properties": {
+        "key": { "type": "string", "pattern": "^(?!AGENTLZ_)[A-Z][A-Z0-9_]{1,63}$" },
+        "value": { "type": ["string", "number", "boolean"] },
+        "secret": { "const": true, "description": "Value is supplied out of band and stored as a Key Vault reference." }
+      },
+      "not": { "required": ["value", "secret"] }
+    }
+  }
+}

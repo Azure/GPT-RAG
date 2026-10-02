@@ -12,7 +12,7 @@
     "deploymentTags":                      { "value": {} },
     "principalId":                         { "value": "${AZURE_PRINCIPAL_ID}" },
     "principalType":                       { "value": "${AZURE_PRINCIPAL_TYPE=User}" },
-    "appConfigLabel":                      { "value": "gpt-rag" },
+    "appConfigLabel":                      { "value": "agent-lz" },
 
     "networkIsolation":                    { "value": "${NETWORK_ISOLATION}" },
     "allowedIpRanges":                     { "value": [] },
@@ -31,7 +31,7 @@
     "knowledgeBaseName":                   { "value": "${KNOWLEDGE_BASE_NAME=knowledge-base}" },
     "knowledgeBaseConnectionName":         { "value": "${KNOWLEDGE_BASE_CONNECTION_NAME=knowledge-base-connection}" },
     "foundryIqKnowledgeSourceName":        { "value": "${FOUNDRY_IQ_KNOWLEDGE_SOURCE_NAME=knowledge-base-blob-ks}" },
-    "foundryIqSearchIndexName":            { "value": "${FOUNDRY_IQ_SEARCH_INDEX_NAME=gpt-rag-index}" },
+    "foundryIqSearchIndexName":            { "value": "${FOUNDRY_IQ_SEARCH_INDEX_NAME=agent-lz-index}" },
     "foundryIqSemanticConfigurationName":   { "value": "${FOUNDRY_IQ_SEMANTIC_CONFIGURATION_NAME=default}" },
     "foundryIqSourceDataFields":           { "value": ["id", "title", "filepath", "url", "content"] },
     "foundryIqSearchFields":               { "value": ["content"] },
@@ -55,8 +55,8 @@
     "prepareHostedAgent":                   { "value": "${PREPARE_HOSTED_AGENT=false}" },
     "deployHostedAgent":                    { "value": "${DEPLOY_HOSTED_AGENT=false}" },
     "hostedAgent":                          { "value": {
-      "name": "${HOSTED_AGENT_NAME=gpt-rag-orchestrator}",
-      "image": "${HOSTED_AGENT_IMAGE=gpt-rag-orchestrator}",
+      "name": "${HOSTED_AGENT_NAME=agent-app-orchestrator}",
+      "image": "${HOSTED_AGENT_IMAGE=agent-app-orchestrator}",
       "version": "${HOSTED_AGENT_IMAGE_VERSION=}",
       "startupCommand": "${HOSTED_AGENT_STARTUP_COMMAND=uvicorn src.api.hosted_entrypoint:app --host 0.0.0.0 --port 8088}",
       "runtime": {

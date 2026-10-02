@@ -9,13 +9,13 @@ function Invoke-PythonModule {
         [Parameter(Mandatory = $true)][string]$ModuleName,
         [string[]]$Arguments = @()
     )
-    & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['GPT_RAG_REPO_ROOT']); sys.argv = ['$ModuleName'] + sys.argv[1:]; runpy.run_module('$ModuleName', run_name='__main__')" @Arguments
+    & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['AGENTLZ_REPO_ROOT']); sys.argv = ['$ModuleName'] + sys.argv[1:]; runpy.run_module('$ModuleName', run_name='__main__')" @Arguments
 }
 
 #-------------------------------------------------------------------------------
 # Mirror azd environment variables into process environment
 # This avoids persisting secrets in the User environment (registry), and makes
-# any previously-persisted GPT-RAG topology markers (AZURE_RESOURCE_GROUP,
+# any previously-persisted Agent Landing Zone topology markers (AZURE_RESOURCE_GROUP,
 # APP_CONFIG_ENDPOINT, DEPLOYMENT_TOPOLOGY, ...) visible to the topology
 # resolution step below on a second/subsequent 'azd provision' run.
 #-------------------------------------------------------------------------------
@@ -27,104 +27,72 @@ function Invoke-PythonModule {
   }
 }
 
-# Initialize infrastructure submodule
-$projectRoot = Join-Path $PSScriptRoot ".."
+# Locate the repository root by its markers (manifest.json plus azure.yaml),
+# not by folder name, so renamed or relocated checkouts keep working.
+function Find-RepoRoot([string]$start) {
+    $p = (Resolve-Path -LiteralPath $start).Path
+    while ($true) {
+        if ((Test-Path -LiteralPath (Join-Path $p 'manifest.json')) -and (Test-Path -LiteralPath (Join-Path $p 'azure.yaml'))) { return $p }
+        $parent = Split-Path -Parent $p
+        if ([string]::IsNullOrEmpty($parent) -or $parent -eq $p) { return $null }
+        $p = $parent
+    }
+}
+$projectRoot = Find-RepoRoot $PSScriptRoot
+if (-not $projectRoot) {
+    Write-Host "Error: Could not locate the repository root (a folder containing manifest.json and azure.yaml)." -ForegroundColor Red
+    exit 1
+}
+$env:AGENTLZ_REPO_ROOT = $projectRoot
 $infraDir = Join-Path $projectRoot "infra"
 $mainBicep = Join-Path $infraDir "main.bicep"
 $manifestSource = Join-Path $projectRoot "manifest.json"
-if (-not (Test-Path $manifestSource)) {
-    Write-Host "Error: manifest.json is required to resolve the infrastructure release pin." -ForegroundColor Red
-    exit 1
-}
-$expectedInfraCommit = (Get-Content -LiteralPath $manifestSource -Raw | ConvertFrom-Json).ailz_commit
-if (-not $expectedInfraCommit -or $expectedInfraCommit -notmatch '^[0-9a-f]{40}$') {
-    Write-Host "Error: manifest.json must define ailz_commit as a lowercase 40-character Git SHA." -ForegroundColor Red
-    exit 1
-}
 
-# Provisioning owns these generated infra overrides. Restore only those files,
-# then fail closed if any unrelated submodule changes remain.
+#-------------------------------------------------------------------------------
+# Application definition: validate and bind before any Azure change.
+#-------------------------------------------------------------------------------
+$appDefinitionPath = if ($env:AGENTLZ_APP_DEFINITION) { $env:AGENTLZ_APP_DEFINITION } else { Join-Path $projectRoot 'app-definition.json' }
+if (-not [IO.Path]::IsPathRooted($appDefinitionPath)) { $appDefinitionPath = Join-Path $projectRoot $appDefinitionPath }
+if (-not (Test-Path -LiteralPath $appDefinitionPath -PathType Leaf)) {
+    Write-Host "Error: AGENTLZ_APP_DEFINITION points to $appDefinitionPath, which does not exist." -ForegroundColor Red
+    exit 1
+}
+Write-Host "Validating and binding application definition..." -ForegroundColor Cyan
+$appDefinitionArguments = @('--validate', $appDefinitionPath, '--bind', '--azure-dir', (Join-Path $projectRoot '.azure'))
+if ($env:AZURE_ENV_NAME) { $appDefinitionArguments += @('--env-name', $env:AZURE_ENV_NAME) }
 Push-Location $projectRoot
 try {
-    $env:GPT_RAG_REPO_ROOT = (Resolve-Path $projectRoot).Path
-    Invoke-PythonModule -ModuleName 'config.deployment.infra_checkout' -Arguments @(
-        '--infra-dir',
-        $infraDir
-    )
-    $infraCheckoutExitCode = $LASTEXITCODE
+    # Exit codes: 1 invalid definition, 2 binding mismatch (see config/appdefinition/__main__.py).
+    Invoke-PythonModule -ModuleName 'config.appdefinition' -Arguments $appDefinitionArguments
+    $appDefinitionExitCode = $LASTEXITCODE
 } finally {
     Pop-Location
 }
-if ($infraCheckoutExitCode -ne 0) {
-    exit $infraCheckoutExitCode
+if ($appDefinitionExitCode -eq 2) {
+    Write-Host "Error: Application definition binding failed. No Azure changes were made." -ForegroundColor Red
+    exit $appDefinitionExitCode
+}
+if ($appDefinitionExitCode -ne 0) {
+    Write-Host "Error: Application definition validation failed. No Azure changes were made." -ForegroundColor Red
+    exit $appDefinitionExitCode
 }
 
-Write-Host "Initializing infrastructure submodule..." -ForegroundColor Cyan
-git submodule update --init --recursive 2>$null
-
-# Fallback: when the repo was scaffolded via 'azd init' (ZIP download), the git
-# index has no submodule gitlink entries, so 'git submodule update' silently does
-# nothing and infra/ remains empty.  Detect that case and clone the landing-zone
-# repo directly.
-if (-not (Test-Path $mainBicep)) {
-    Write-Host "Submodule content not found. Cloning infra repo directly (azd init scenario)..." -ForegroundColor Cyan
-
-    # Extract the infra repo URL from .gitmodules.
-    $gitmodulesPath = Join-Path $projectRoot ".gitmodules"
-    $infraUrl = $null
-    if (Test-Path $gitmodulesPath) {
-        $urlMatch = Select-String -Path $gitmodulesPath -Pattern 'url\s*=\s*(.+)' | Select-Object -First 1
-        if ($urlMatch) { $infraUrl = $urlMatch.Matches.Groups[1].Value.Trim() }
-    }
-    if (-not $infraUrl) {
-        Write-Host "Error: Could not determine infra repository URL from .gitmodules." -ForegroundColor Red
-        exit 1
-    }
-    Write-Host "  Infra repo: $infraUrl @ $expectedInfraCommit (from manifest.json)" -ForegroundColor Cyan
-
-    # Initialize only the repository metadata. The exact manifest commit is
-    # fetched and checked out by the common path below.
-    if (Test-Path $infraDir) { Remove-Item -Path $infraDir -Recurse -Force }
-    New-Item -ItemType Directory -Path $infraDir -Force | Out-Null
-    git -C $infraDir init --quiet
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "Error: Failed to initialize infra repository ($infraUrl)." -ForegroundColor Red
-        exit 1
-    }
-    git -C $infraDir remote add origin $infraUrl
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "Error: Failed to configure infra repository origin ($infraUrl)." -ForegroundColor Red
-        exit 1
-    }
-}
-
-Write-Host "Fetching exact infrastructure commit $expectedInfraCommit..." -ForegroundColor Cyan
-git -C $infraDir fetch --depth 1 origin $expectedInfraCommit
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "Error: Failed to fetch infra commit $expectedInfraCommit." -ForegroundColor Red
+#-------------------------------------------------------------------------------
+# Infrastructure is repository-owned source under infra/ (no submodule).
+#-------------------------------------------------------------------------------
+if (-not (Test-Path -LiteralPath $manifestSource)) {
+    Write-Host "Error: manifest.json is required to resolve release pins." -ForegroundColor Red
     exit 1
 }
-git -C $infraDir -c advice.detachedHead=false checkout --detach $expectedInfraCommit
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "Error: Failed to check out infra commit $expectedInfraCommit." -ForegroundColor Red
+if (-not (Test-Path -LiteralPath $mainBicep -PathType Leaf)) {
+    Write-Host "Error: infra/main.bicep was not found. The infrastructure is part of this repository; restore infra/ from source control." -ForegroundColor Red
     exit 1
-}
-$actualInfraCommitOutput = & git -C $infraDir rev-parse HEAD 2>$null
-$revParseExitCode = $LASTEXITCODE
-$actualInfraCommit = if ($actualInfraCommitOutput) { "$actualInfraCommitOutput".Trim() } else { '' }
-if ($revParseExitCode -ne 0 -or -not $expectedInfraCommit -or $actualInfraCommit -ne $expectedInfraCommit) {
-    Write-Host "Error: infra must resolve to $expectedInfraCommit but is at $actualInfraCommit." -ForegroundColor Red
-    exit 1
-}
-if (Test-Path $manifestSource) {
-    Write-Host "Applying project manifest.json to infra..." -ForegroundColor Cyan
-    Copy-Item -Path $manifestSource -Destination (Join-Path $infraDir "manifest.json") -Force
 }
 
 $parameterSource = Join-Path $projectRoot "main.parameters.json"
 $parameterDestination = Join-Path $infraDir "main.parameters.json"
 
-# ADR-0001 rev. 5: resolve and materialize the GPT-RAG deployment topology
+# ADR-0001 rev. 5: resolve and materialize the Agent Landing Zone deployment topology
 # (fresh default, sticky existing/persisted-classic, explicit override, or a
 # fail-closed error with migration guidance on conflicting persisted signals)
 # before composing main.parameters.json. Materializing DEPLOYMENT_TOPOLOGY
@@ -132,7 +100,7 @@ $parameterDestination = Join-Path $infraDir "main.parameters.json"
 # environment here is what lets preDeploy/postProvision read back the exact
 # same decision later via 'config.deployment.topology --describe', with no
 # further Azure CLI lookups and no duplicated detection logic.
-Write-Host "Resolving GPT-RAG deployment topology..." -ForegroundColor Cyan
+Write-Host "Resolving Agent Landing Zone deployment topology..." -ForegroundColor Cyan
 Push-Location $projectRoot
 try {
     $topologyOutput = Invoke-PythonModule -ModuleName 'config.deployment.topology'
@@ -141,7 +109,7 @@ try {
     Pop-Location
 }
 if ($topologyExitCode -ne 0) {
-    Write-Host "Error: GPT-RAG deployment topology resolution failed." -ForegroundColor Red
+    Write-Host "Error: Agent Landing Zone deployment topology resolution failed." -ForegroundColor Red
     exit $topologyExitCode
 }
 $azureEnvName = $env:AZURE_ENV_NAME
@@ -162,14 +130,14 @@ foreach ($line in $topologyOutput) {
     }
 }
 
-Write-Host "Composing GPT-RAG deployment mode..." -ForegroundColor Cyan
+Write-Host "Composing Agent Landing Zone deployment mode..." -ForegroundColor Cyan
 Push-Location $projectRoot
 try {
     $hostedSourceCommit = (
         Get-Content -LiteralPath $manifestSource -Raw |
             ConvertFrom-Json
     ).components |
-        Where-Object { $_.name -eq 'gpt-rag-orchestrator' } |
+        Where-Object { $_.name -like '*-orchestrator' } |
         Select-Object -ExpandProperty commit -First 1
     Invoke-PythonModule -ModuleName 'config.deployment.composition' -Arguments @(
         '--input',
@@ -180,7 +148,7 @@ try {
         $hostedSourceCommit
     )
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "Error: GPT-RAG deployment mode composition failed." -ForegroundColor Red
+        Write-Host "Error: Agent Landing Zone deployment mode composition failed." -ForegroundColor Red
         exit $LASTEXITCODE
     }
 } finally {
@@ -193,13 +161,13 @@ function Test-Truthy($value) {
     return $value -match '^(1|true|t)$'
 }
 
-# GPT-RAG regional readiness preflight
+# Agent Landing Zone regional readiness preflight
 $regionalPreflightScript = Join-Path $PSScriptRoot "Invoke-RegionalPreflight.ps1"
-if ((Test-Path $regionalPreflightScript) -and (-not (Test-Truthy $env:PREFLIGHT_SKIP)) -and (-not (Test-Truthy $env:GPT_RAG_REGIONAL_PREFLIGHT_SKIP))) {
-    Write-Host "Running GPT-RAG regional preflight..." -ForegroundColor Cyan
+if ((Test-Path $regionalPreflightScript) -and (-not (Test-Truthy $env:PREFLIGHT_SKIP)) -and (-not (Test-Truthy $env:AGENTLZ_REGIONAL_PREFLIGHT_SKIP))) {
+    Write-Host "Running Agent Landing Zone regional preflight..." -ForegroundColor Cyan
     & pwsh -NoProfile -File $regionalPreflightScript -ProjectRoot $projectRoot -ParameterFile $parameterDestination
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "GPT-RAG regional preflight failed. Fix the reported blockers, or set GPT_RAG_REGIONAL_PREFLIGHT_SKIP=true to bypass only this check." -ForegroundColor Red
+        Write-Host "Agent Landing Zone regional preflight failed. Fix the reported blockers, or set AGENTLZ_REGIONAL_PREFLIGHT_SKIP=true to bypass only this check." -ForegroundColor Red
         exit $LASTEXITCODE
     }
 }

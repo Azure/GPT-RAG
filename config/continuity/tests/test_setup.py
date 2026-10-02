@@ -201,7 +201,7 @@ class ContinuitySetupTests(TestCase):
             agent_scope=(
                 "/subscriptions/sub/resourceGroups/rg/providers/"
                 "Microsoft.CognitiveServices/accounts/aif/projects/project/"
-                "agents/gpt-rag-orchestrator"
+                "agents/agent-app-orchestrator"
             ),
             routed_version="7",
             role_actions={
@@ -625,7 +625,7 @@ class ContinuitySetupTests(TestCase):
         ]
         contract = setup.verify_live_hosted_agent_contract(
             "https://account.services.ai.azure.com/api/projects/project",
-            "gpt-rag-orchestrator",
+            "agent-app-orchestrator",
         )
         self.assertEqual(contract.principal_id, "hosted-principal")
         self.assertEqual(contract.routed_version, "7")
@@ -665,7 +665,7 @@ class ContinuitySetupTests(TestCase):
         with self.assertRaisesRegex(RuntimeError, "2.0.0 exactly"):
             setup.verify_live_hosted_agent_contract(
                 "https://account.services.ai.azure.com/api/projects/project",
-                "gpt-rag-orchestrator",
+                "agent-app-orchestrator",
             )
 
     @patch.object(setup, "_run_az")
@@ -682,7 +682,7 @@ class ContinuitySetupTests(TestCase):
         scope = (
             "/subscriptions/sub/resourceGroups/rg/providers/"
             "Microsoft.CognitiveServices/accounts/aif/projects/project/"
-            "agents/gpt-rag-orchestrator"
+            "agents/agent-app-orchestrator"
         )
         project_scope = scope.rsplit("/agents/", 1)[0]
         assignments = [
@@ -759,7 +759,7 @@ class ContinuitySetupTests(TestCase):
                 (
                     "/subscriptions/sub/resourceGroups/rg/providers/"
                     "Microsoft.CognitiveServices/accounts/aif/projects/project/"
-                    "agents/gpt-rag-orchestrator"
+                    "agents/agent-app-orchestrator"
                 ),
                 (
                     "/subscriptions/sub/resourceGroups/rg/providers/"
@@ -783,7 +783,7 @@ class ContinuitySetupTests(TestCase):
         scope = (
             "/subscriptions/sub/resourceGroups/rg/providers/"
             "Microsoft.CognitiveServices/accounts/aif/projects/project/"
-            "agents/gpt-rag-orchestrator"
+            "agents/agent-app-orchestrator"
         )
         role_assignments.side_effect = [
             [],
@@ -823,7 +823,7 @@ class ContinuitySetupTests(TestCase):
         scope = (
             "/subscriptions/sub/resourceGroups/rg/providers/"
             "Microsoft.CognitiveServices/accounts/aif/projects/project/"
-            "agents/gpt-rag-orchestrator"
+            "agents/agent-app-orchestrator"
         )
         with self.assertRaisesRegex(RuntimeError, "must not share an identity"):
             setup.ensure_frontend_continuity_assignments(
@@ -847,7 +847,7 @@ class ContinuitySetupTests(TestCase):
         scope = (
             "/subscriptions/sub/resourceGroups/rg/providers/"
             "Microsoft.CognitiveServices/accounts/aif/projects/project/"
-            "agents/gpt-rag-orchestrator"
+            "agents/agent-app-orchestrator"
         )
         role_assignments.side_effect = [
             [],

@@ -9,8 +9,9 @@ applyTo: "scripts/**/*.ps1,scripts/**/*.sh,azure.yaml"
   deployment behavior.
 - Preserve `azd` environment reuse when component repositories are cloned and
   deployed.
-- Do not edit generated content under `infra/`; update root overrides or the
-  pinned infrastructure source.
+- `infra/` is repository-owned, foundation-only source; change it through
+  reviewed edits and keep `manifest.json` `infra.source` accurate. Read
+  configuration under App Configuration label `agent-lz`.
 - Quote paths and external input safely. Do not echo secrets or private Azure
   validation environment names.
 - Surface failed prerequisites and provisioning steps; do not continue with a

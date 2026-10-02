@@ -1,5 +1,254 @@
 # Changelog
 
+## [Unreleased]
+
+Staged on `develop`; will be released as `v4.0.0`.
+
+### Changed
+- **Breaking:** GPT-RAG is now Agent Landing Zone. The product, repositories, and user-visible names are renamed.
+- **Breaking:** App Configuration label renamed to `agent-lz`.
+- **Breaking:** Environment variables use the `AGENTLZ_` prefix.
+- Infrastructure is now kept in this repository instead of being pulled from an external template.
+
+### Added
+- Infrastructure-only deployment: run `azd provision`, then `azd deploy` later.
+- Custom application deployment through `app-definition.json` (see `samples/custom-app`).
+
+### Notes
+- New deployments only. Existing GPT-RAG deployments are not upgraded in place; redeploy into a new environment. GPT-RAG release tags stay available.
+
+## [v3.8.11] - 2026-09-28
+
+### Documentation
+- Every component that loads the `gpt-rag` App Configuration label (UI, orchestrator, hosted-agent identity) needs **Key Vault Secrets User** to resolve Key Vault references such as `authClientSecret`. Without it the orchestrator returns HTTP 500 (#716).
+- Client secret expiry and rotation guidance (#716).
+
+## [v3.8.10] - 2026-09-25
+
+### Fixed
+- `azd deploy` failing on azd 1.34+ because the hosted-agent postdeploy hook path escaped the service project root. The hook now runs through wrappers in `hosted-agent/hooks/`.
+
+### Documentation
+- UI OAuth settings (`OAUTH_AZURE_AD_CLIENT_ID`, `OAUTH_AZURE_AD_TENANT_ID`, `authClientSecret` as a Key Vault reference) belong in App Configuration (label `gpt-rag`). Env vars set by hand on the container app are lost on `azd provision`.
+
+## [v3.8.9] - 2026-09-25
+
+### Fixed
+- `azd provision` on existing environments failing on Cosmos DB with `Continuous backup mode cannot be disabled`. AI Landing Zone updated to v2.7.3.
+
+### Changed
+- Dependency updates from Dependabot (#706, #707).
+
+## [v3.8.8] - 2026-09-25
+
+### Changed
+
+- **AI Landing Zone pinned to the latest `v2.7.2`** (`892bbdb`), which carries the
+  v2.5.x-v2.7.1 fixes plus the #708 image-preservation fix. Replaces the
+  temporary `v2.5.1.1` hotfix pin used by v3.8.7, which was withdrawn.
+  New landing-zone parameters use their defaults; no configuration changes
+  are required.
+
+## [v3.8.7] - 2026-09-25
+
+### Fixed
+
+- **`azd provision` no longer resets Container Apps to the placeholder image**
+  ([#708](https://github.com/Azure/GPT-RAG/issues/708)). Pre-provision now
+  discovers the images already running (by `azd-service-name` tag) and passes
+  them to the landing zone (pin superseded by v3.8.8), which keeps
+  the image and its ACR registry binding. Set `RESET_CONTAINER_APP_IMAGES=true`
+  to opt out.
+- **Hosted-agent endpoint is published before component deploys**
+  ([#709](https://github.com/Azure/GPT-RAG/issues/709)). Pre-deploy now stores
+  `HOSTED_AGENT_BASE_URL` in the azd environment and App Configuration as soon
+  as the hosted agent is deployed, so the UI and later re-provisions always see
+  it. Routing still switches only after the full cutover succeeds.
+## [v3.8.6] - 2026-09-25
+
+### Fixed
+
+- **Ingestion pinned to `v2.7.4`** (`75a2ef1`). The ingestion frontend build
+  now uses a consistent lockfile, so `npm ci` succeeds in ACR task and local
+  builds. Other runtime pins (UI `v2.6.2`, orchestrator `v4.1.1`) and the
+  AI Landing Zone pin (`v2.5.1`) are unchanged.
+
+### Known issues
+
+- Re-running `azd provision` resets Container Apps images to the landing-zone
+  placeholder; redeploy the components afterwards
+  ([#708](https://github.com/Azure/GPT-RAG/issues/708)).
+- The component deploy path can skip publishing the hosted-agent endpoint to
+  App Configuration; run the pre-deploy publish steps manually
+  ([#709](https://github.com/Azure/GPT-RAG/issues/709)).
+
+## [v3.8.5] - 2026-09-21
+
+### Changed
+
+- **Credential-free private connectivity prerequisites instead of a
+  deploy-only `RUN_FROM_JUMPBOX` declaration gate**
+  ([#703](https://github.com/Azure/GPT-RAG/pull/703)). Shared checks use the
+  operating system's DNS resolution, including Windows NRPT, and require
+  1-16 resolved addresses, all RFC1918 IPv4. Public, loopback, mixed, and
+  IPv6 results fail closed before connecting. Checks pin each resolved IP on TCP 443
+  and perform TLS with normal certificate verification and hostname SNI,
+  using a 10-second DNS timeout within a 20-second per-hostname budget,
+  without HTTP requests, credentials, tokens, or proxy routing.
+- **Prerequisites follow the deployment stage.** Post-provision checks
+  App Configuration; pre-deploy checks App Configuration and, for hosted
+  deployment, Foundry. ACR is checked only when a hosted image build will
+  actually run, not when a prebuilt or reusable immutable digest avoids
+  building. Public deployment paths do not run these private probes.
+- **Actual connectivity replaces host declarations.** An unset
+  `RUN_FROM_JUMPBOX` performs the checks without prompting or automatically
+  skipping in noninteractive execution, unless
+  `AZURE_SKIP_NETWORK_ISOLATION_WARNING=true` explicitly defers
+  post-provision. Explicit `RUN_FROM_JUMPBOX=false|0|no|skip` also defers
+  post-provision, with a warning that configuration remains incomplete.
+  Truthy jumpbox values take precedence over the warning flag but cannot
+  bypass checks. Pre-deploy and actual hosted builds ignore both deferral
+  flags and require successful checks.
+- **Fail closed on invalid selected-environment output.** Hooks reject failed,
+  empty, or malformed `azd env get-values` reads. Root pre-deploy uses one
+  validated snapshot for the check and deployment; explicit empty values clear
+  inherited process values, while absent keys preserve process inheritance.
+- Coordinated deployment, VPN, configuration, and troubleshooting guidance was
+  merged through [#702](https://github.com/Azure/GPT-RAG/pull/702). It retains
+  unpublished-candidate wording until actual release publication.
+- Runtime component pins, AI Landing Zone pins, and topology defaults are
+  unchanged. The hosted runtime permission bootstrap remains the fix already
+  released in `v3.8.4`; this patch does not broaden its grant allowlist or
+  introduce document-access, native Blob, or infrastructure changes.
+
+### Validation
+
+The component combination is unchanged from `v3.8.4`.
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.6.2 |
+| gpt-rag-orchestrator | v4.1.1 |
+| gpt-rag-ingestion | v2.7.3 |
+| infra / AI Landing Zone | v2.5.1 |
+
+- Python 3.12 offline suite:
+  `python -B -m pytest -q tests config -p no:cacheprovider --tb=short`:
+  **472 passed, 480 subtests passed, 4 optional CLI cases skipped**.
+  Focused private-network and release-pin contracts passed
+  **34 tests and 108 subtests**. Network and Azure command boundaries were
+  mocked, including execution of both hook variants with fake CLIs.
+- All **4** optional installed-CLI parser/serialization cases passed separately
+  with their socket and command-handler guards. PowerShell parsing and Bash
+  syntax checks passed for both changed hook pairs. The agent-assets validator
+  passed for **3 agents and 14 skills**, plus scoped instructions.
+- The test harness supplied an empty `core.fsmonitor` override that
+  environment-clearing tests cannot preserve on Windows. After verifying its
+  key and empty value, validation used process-local `GIT_CONFIG_VALUE_2=false`;
+  no repository/global Git configuration or test expectations were changed.
+- Release metadata, manifest-derived tables, unchanged component and
+  infrastructure pins, historical changelog preservation, and privacy checks
+  passed. Final runtime source matches the reviewed feature in
+  [#703](https://github.com/Azure/GPT-RAG/pull/703).
+- A separate source-bound current-host probe rejected non-RFC1918 DNS for
+  three configured endpoints. This is negative-only evidence, not positive
+  VPN/private-TLS readiness or a fresh-install acceptance result.
+- The prerequisites check deployment-host DNS/TCP/TLS only. Endpoint ownership,
+  VNet/route mapping, RBAC, API health, build-pool egress, other service/data
+  endpoints, and runtime-to-service connectivity still need separate evidence.
+- No fresh automated deployment, role apply, model greeting, document
+  authorization, scanning, or cold-start validation was performed for this
+  candidate. No Azure mutations, image builds, or model calls were made
+  during release preparation.
+
+## [v3.8.4] - 2026-09-21
+
+### Changed
+
+- **Automated minimum hosted runtime permissions after agent creation**
+  ([#697](https://github.com/Azure/GPT-RAG/pull/697)). The child deployment's
+  PowerShell and POSIX postdeploy hooks explicitly apply an idempotent,
+  allowlisted RBAC plan to the deployed agent's actual instance identity.
+  The standalone command defaults to read-only planning; writes require
+  explicit `--apply`. Grants are limited to App Configuration Data Reader on
+  the exact configuration store, Cognitive Services OpenAI User on the exact
+  model account, and, when configured, Key Vault Secrets User on the exact
+  `AUDIT_HMAC_KEY` reference. No secret values are read. Conditional assignment
+  conflicts fail closed rather than being bypassed.
+- **Fail-closed root deployment greeting before UI cutover.** After the child
+  hook succeeds, root deployment requires a completed response with non-empty
+  assistant text from a stateless `Hello!` request in a new hosted session.
+  Error, failed, incomplete, cancelled, or empty responses block cutover;
+  an exact reply marker is no longer required. Direct child deployment remains
+  RBAC-only and does not invoke the model. Bootstrap grants no Search, Storage
+  Blob, Conversation, impersonation, Owner, or Contributor roles and does not
+  change networking or authorization evidence gates.
+- **Azure CLI compatibility for bootstrap discovery.** Account metadata is
+  read through raw ARM API `2025-06-01`, avoiding typed SDK deserialization of
+  unrelated newer fields. App Configuration Key Vault reference discovery
+  accepts the CLI's `contentType` JSON field; role operations use object IDs
+  without Microsoft Graph name resolution.
+- **Verified concrete version resolution for Foundry's `@latest` route**
+  ([#698](https://github.com/Azure/GPT-RAG/pull/698)). Resolve only this exact
+  alias through `live.versions.latest`, require matching agent name and hosted
+  kind, then retain numeric version validation and a separate concrete-version
+  GET. Unknown aliases and inconsistent metadata continue to fail closed.
+- **Documentation and engineering coordination only**
+  ([#684](https://github.com/Azure/GPT-RAG/pull/684),
+  [#687](https://github.com/Azure/GPT-RAG/pull/687),
+  [#689](https://github.com/Azure/GPT-RAG/pull/689)). Clarified the classic
+  architecture diagram and historical landing-zone decision, and recorded
+  quality-gate and UI package migration plans. Coordinated operator guidance
+  is on the `docs` branch via
+  [#696](https://github.com/Azure/GPT-RAG/pull/696) and
+  [#688](https://github.com/Azure/GPT-RAG/pull/688). These planning artifacts do
+  not release component modularization or change the runtime component pins.
+- **Pinned GitHub Actions maintenance**
+  ([#690](https://github.com/Azure/GPT-RAG/pull/690)). Updated workflow action
+  SHAs for `actions/github-script` v9.0.0, `actions/checkout` v7.0.1,
+  `azure/login` v3.0.2, `actions/setup-python` v7.0.0, and
+  `github/gh-aw-actions/setup` v0.88.0. These are CI action updates, not runtime
+  dependency upgrades or deployment-topology changes.
+
+### Validation
+
+The component combination is unchanged from `v3.8.3`; this patch changes the
+umbrella deployment hooks and their offline contracts, not component releases.
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v2.6.2 |
+| gpt-rag-orchestrator | v4.1.1 |
+| gpt-rag-ingestion | v2.7.3 |
+| infra / AI Landing Zone | v2.5.1 |
+
+- Python 3.12 offline suite:
+  `python -B -m pytest -q tests config -p no:cacheprovider --tb=short`:
+  **438 passed, 297 subtests passed, 4 optional CLI cases skipped**. The focused
+  release-pin, access-module, paired-hook, and greeting suite passed
+  **107 tests and 204 subtests**. Azure boundaries were mocked.
+- All **4** optional CLI parser/serialization cases passed separately using
+  the already-installed Azure CLI Python with socket and command-handler
+  guards. **6** bounded replay tests passed using the unmodified terminal
+  serializer functions from the pinned orchestrator `v4.1.1`, with network
+  and subprocess execution blocked. This is terminal wire-format evidence,
+  not a complete runtime or retrieval-path validation.
+- `python -B .github/scripts/validate-agentic-assets.py` passed:
+  **3 agents and 14 skills**, plus scoped instructions.
+- Guarded read-only live discovery using the exact bootstrap source now in
+  this candidate succeeded with **16 read-only CLI calls**, resolving a
+  concrete hosted version and finding all **3** minimum grants already
+  present as exact, unconditional assignments. Those grants were applied
+  manually beforehand; this did not execute automatic apply, read secret
+  values, or invoke a model. `data_plane_readiness` remained `not-tested`.
+- Component tags resolve to their unchanged manifest commits. AI Landing Zone
+  `ailz_tag`, `ailz_commit`, `.gitmodules` `infra.branch`, and the `infra/`
+  gitlink agree on `v2.5.1` / `9cc5859a`.
+- No fresh automated Azure deployment/bootstrap/greeting flow, end-user
+  document-level authorization, scanning, or cold-start validation was
+  performed for this release. Prior manual tests with an unreleased
+  homologation runtime are not compatibility evidence for this pinned matrix.
+
 ## [v3.8.3] - 2026-09-03
 
 ### Fixed

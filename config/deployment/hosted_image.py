@@ -9,7 +9,7 @@ declared in ``hosted-agent/azure.yaml`` or ``composition.py``'s
 ``hostedAgent.startupCommand`` parameter -- that field only affects the local
 ``azd ai agent run`` developer flow, not real container deploys. Because of
 this, whatever ``CMD``/``ENTRYPOINT`` is baked into the published
-``gpt-rag-orchestrator`` image is what a Foundry hosted agent will actually
+``agent-app-orchestrator`` image is what a Foundry hosted agent will actually
 run, and today that image's ``CMD`` is always the classic Container-App
 entrypoint (``uvicorn main:app --host 0.0.0.0 --port 8080``), not the hosted
 entrypoint (``uvicorn src.api.hosted_entrypoint:app --host 0.0.0.0 --port
@@ -41,7 +41,7 @@ HOSTED_STARTUP_COMMAND_DEFAULT = (
     "uvicorn src.api.hosted_entrypoint:app --host 0.0.0.0 --port 8088"
 )
 HOSTED_PORT_DEFAULT = 8088
-BASE_IMAGE_NAME_DEFAULT = "azure-gpt-rag/orchestrator"
+BASE_IMAGE_NAME_DEFAULT = "agent-landing-zone/orchestrator"
 DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 COMMIT_PATTERN = re.compile(r"^[0-9a-fA-F]{40}$")
 ACR_BUILD_TIMEOUT_SECONDS = 8 * 60 * 60
@@ -487,9 +487,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--base-image-ref",
         default=None,
-        help="Digest-pinned base image, e.g. myregistry.azurecr.io/gpt-rag-orchestrator@sha256:...",
+        help="Digest-pinned base image, e.g. myregistry.azurecr.io/agent-app-orchestrator@sha256:...",
     )
-    parser.add_argument("--image-name", default="gpt-rag-orchestrator")
+    parser.add_argument("--image-name", default="agent-app-orchestrator")
     parser.add_argument("--image-tag", default=None, help="Tag for the derivative image")
     parser.add_argument(
         "--image-version",

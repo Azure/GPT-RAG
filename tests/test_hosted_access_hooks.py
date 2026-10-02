@@ -65,7 +65,7 @@ def run(command, **kwargs):
 from pathlib import Path
 assert sys.argv[1] == "-c"
 assert sys.argv[3:] == ["--azd-env", "--apply"]
-assert Path(os.environ["GPT_RAG_REPO_ROOT"]).joinpath("hosted-agent").resolve() == Path.cwd().resolve()
+assert Path(os.environ["AGENTLZ_REPO_ROOT"]).joinpath("hosted-agent").resolve() == Path.cwd().resolve()
 subprocess.run = run
 # Avoid runpy's pre-import warning; imports above are fixture setup only.
 del sys.modules["config.deployment.hosted_access"]
@@ -77,7 +77,7 @@ exec(code)
 PS_PREFIX = r'''
 $ErrorActionPreference = 'Stop'
 $repoRoot = $env:FAKE_ROOT
-$env:GPT_RAG_REPO_ROOT = $repoRoot
+$env:AGENTLZ_REPO_ROOT = $repoRoot
 $hostedProject = Join-Path $repoRoot 'hosted-agent'
 $hostedDigest = 'sha256:offline'
 $globalEnv = [pscustomobject]@{
@@ -171,7 +171,7 @@ class HostedAccessHookTests(unittest.TestCase):
             if fail == "errorframe":
                 response += sse({"type": "error", "message": "PRIVATE-MARKER"})
             elif fail == "missingcompletion":
-                response = sse({"type": "response.output_text.delta", "delta": "GPT-RAG hosted smoke OK."})
+                response = sse({"type": "response.output_text.delta", "delta": "Agent Landing Zone hosted smoke OK."})
             elif fail == "emptycompletion":
                 response = sse(completion(""))
             (temp / "response.txt").write_text(response, encoding="utf-8")
@@ -279,15 +279,20 @@ class HostedAccessHookTests(unittest.TestCase):
     def test_single_service_hook_no_duplicate_root_bootstrap(self):
         content = (ROOT / "hosted-agent/azure.yaml").read_text(encoding="utf-8")
         self.assertEqual(1, content.count("      postdeploy:"))
-        self.assertIn("          run: ../scripts/bootstrapHostedAccess.ps1", content)
-        self.assertIn("          run: ../scripts/bootstrapHostedAccess.sh", content)
+        self.assertIn("          run: hooks/postdeploy.ps1", content)
+        self.assertIn("          run: hooks/postdeploy.sh", content)
+        # azd rejects hook paths that escape the service project root.
+        self.assertNotIn("run: ../", content)
+        for suffix in ("ps1", "sh"):
+            wrapper = (ROOT / "hosted-agent" / "hooks" / f"postdeploy.{suffix}").read_text(encoding="utf-8")
+            self.assertIn(f"../../scripts/bootstrapHostedAccess.{suffix}", wrapper)
         for suffix in ("ps1", "sh"):
             root = (ROOT / "scripts" / f"preDeploy.{suffix}").read_text(encoding="utf-8-sig")
             self.assertNotIn("hosted_access", root)
             self.assertNotIn("bootstrapHostedAccess", root)
             self.assertLess(root.index("azd deploy orchestrator-agent"), root.index("azd ai agent invoke"))
             self.assertIn('"content":"Hello!"', root)
-            self.assertNotIn("GPT-RAG hosted smoke OK.", root)
+            self.assertNotIn("Agent Landing Zone hosted smoke OK.", root)
             self.assertIn("--validate-smoke", root)
 
 

@@ -1,6 +1,29 @@
 # Shared GPT-RAG contracts
 
-## Audit event v1
+## Audit event v2 (current)
+
+`audit-event-v2.schema.json` and
+`audit-event-v2.application-insights.schema.json` are the current audit
+contract. Version 2 renames the Application Insights event prefix from
+`gptrag.audit.*` to `agentlz.audit.*`, sets `schema_version` to `2`, and expects
+`service_name` values from the renamed `agent-app-*` components (see
+[naming-map.md](naming-map.md)). Field names, enums, and semantics are
+otherwise unchanged from v1.
+
+`audit-event-v2.sha256` pins the exact LF-encoded bytes:
+
+- Logical schema: `884dfa2441d3313c8ec46a099f60ce86e7abb6cdf88bb5b5da720463edbf5e97`
+- Application Insights wire schema: `48416073768c0710b9a1f58640d4e822745f28b3a17b3712a2fe4cd9326c9c07`
+
+During the R14 transition, readers accept both v1 and v2 events (both
+prefixes, dispatched on `schema_version`); producers switch to v2 when they
+ship their renamed releases.
+
+## Audit event v1 (deprecated)
+
+Deprecated by v2; retained unchanged as history. Removal follows the R14
+transition in [naming-map.md](naming-map.md), once all pinned components emit
+v2 only.
 
 These schemas are the shared GPT-RAG audit contract consumed by orchestrator
 v3.8.0 and ingestion v2.5.0.
@@ -198,3 +221,27 @@ gated on the still-pending live evidence procedures for
 (see ADR-0004's "Adoption and migration" and "Review trigger" sections),
 not on any further GPT-RAG-repository platform-contract change.
 
+
+## App definition v1 (feature 002, Agent Landing Zone)
+
+`app-definition-v1.schema.json` is the structural contract for an
+application's `app-definition.json`. Owner: this repository (umbrella);
+consumed by the umbrella validator and by component repositories that ship an
+app definition. Semantic rules (unique component names, settings key
+collisions, path existence) live outside the schema.
+
+## Platform outputs v1 (feature 002, Agent Landing Zone)
+
+`platform-outputs-v1.schema.json` describes the non-secret platform endpoints
+published after `azd provision`. Owner: this repository (umbrella, producer);
+consumers are the application components that read the published outputs.
+
+Both schemas pin their exact LF-encoded bytes in a sibling
+`<name>.schema.json.sha256` file (`<sha256>  <file name>`). Versioning rules:
+additive optional fields keep v1 and require regenerating the `.sha256` file;
+any change in interpretation, a new required field, or a removed field
+publishes a new `-v2` file alongside v1. Consumers must check `schemaVersion`
+and ignore unknown optional fields only where the schema permits them (both v1
+schemas set `additionalProperties: false` at the top level). Rename rules for
+labels, prefixes, indexes (`agent-lz-*`), and images (`agent-app-*`) live in
+`naming-map.md`.

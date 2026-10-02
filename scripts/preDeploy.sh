@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Cross-platform bash (Linux/macOS) parent deployer for gpt-rag
+# Cross-platform bash (Linux/macOS) parent deployer for Agent Landing Zone
 # Runs child scripts/deploy.sh in each component directory.
 
 set -uo pipefail
@@ -17,7 +17,7 @@ find_repo_root() {
   local p
   if ! p="$(cd "$start" 2>/dev/null && pwd -P)"; then return 1; fi
   while :; do
-    if [ "$(basename "$p")" = "gpt-rag" ] || [ -f "$p/manifest.json" ]; then
+    if [ -f "$p/manifest.json" ] && [ -f "$p/azure.yaml" ]; then
       printf "%s" "$p"; return 0
     fi
     local parent; parent="$(dirname "$p")"
@@ -86,9 +86,10 @@ else
   start_dir="$(pwd -P)"
 fi
 
-repo_root="$(find_repo_root "$start_dir")" || { red "Run this from inside a gpt-rag repo."; exit 1; }
+repo_root="$(find_repo_root "$start_dir")" || { red "Run this from inside the Agent Landing Zone repository (a folder containing manifest.json and azure.yaml)."; exit 1; }
 command -v git >/dev/null 2>&1 || { red "Git not found in PATH."; exit 1; }
 export PYTHONPATH="$repo_root${PYTHONPATH:+:$PYTHONPATH}"
+export AGENTLZ_REPO_ROOT="$repo_root"
 
 manifest_path="$repo_root/manifest.json"
 [ -f "$manifest_path" ] || { red "manifest.json not found at $manifest_path"; exit 1; }
@@ -123,6 +124,53 @@ global_rg="$(get_azd_value "$repo_root" "AZURE_RESOURCE_GROUP")"
 global_sub="$(get_azd_value "$repo_root" "AZURE_SUBSCRIPTION_ID")"
 network_isolation="$(get_azd_value "$repo_root" "NETWORK_ISOLATION" | tr '[:upper:]' '[:lower:]')"
 acr_task_agent_pool="$(get_azd_value "$repo_root" "ACR_TASK_AGENT_POOL")"
+
+# Foundation guard (first step, before any Azure change): azd deploy only
+# deploys applications onto a foundation created by azd provision.
+if [ -z "$global_rg" ] || [ -z "${APP_CONFIG_ENDPOINT:-}" ] || ! rg_exists "$global_rg" "${global_sub:-}"; then
+  red "The foundation is not provisioned. Run azd provision first."
+  exit 3
+fi
+
+# Re-validate the application definition and compare it with the binding.
+app_definition_path="${AGENTLZ_APP_DEFINITION:-$repo_root/app-definition.json}"
+case "$app_definition_path" in
+  /*) ;;
+  *) app_definition_path="$repo_root/$app_definition_path" ;;
+esac
+[ -f "$app_definition_path" ] || { red "AGENTLZ_APP_DEFINITION points to $app_definition_path, which does not exist."; exit 1; }
+command -v python3 >/dev/null 2>&1 || { red "python3 is required to validate the application definition."; exit 1; }
+if [ -z "${AGENTLZ_APP_ID:-}" ]; then
+  red "This environment is not bound to an application. Run azd provision first."
+  exit 1
+fi
+appdef_args=(--validate "$app_definition_path" --check-binding --azure-dir "$dot_azure")
+[ -n "${AZURE_ENV_NAME:-}" ] && appdef_args+=(--env-name "$AZURE_ENV_NAME")
+# Exit codes: 1 invalid definition, 2 binding mismatch (message names both ids).
+(cd "$repo_root" && python3 -m config.appdefinition "${appdef_args[@]}")
+appdef_exit=$?
+if [ "$appdef_exit" -eq 2 ]; then
+  red "Application definition binding check failed. No changes were made."
+  exit 2
+fi
+if [ "$appdef_exit" -ne 0 ]; then
+  red "Application definition validation failed. No changes were made."
+  exit 1
+fi
+app_definition_dir="$(cd "$(dirname "$app_definition_path")" && pwd -P)"
+definition_id="$(jq -er '.id' "$app_definition_path")" || { red "Application definition has no id."; exit 1; }
+
+# Echo the manifest component name that a definition component maps to.
+manifest_component_for() {
+  jq -r --arg n "$1" '[.components[].name | select(. == $n or endswith("-" + $n))][0] // empty' "$manifest_path"
+}
+definition_manifest_names=" "
+while IFS= read -r dname; do
+  [ -z "$dname" ] && continue
+  mname="$(manifest_component_for "$dname")"
+  [ -n "$mname" ] && definition_manifest_names="$definition_manifest_names$mname "
+done < <(jq -r '.components[].name' "$app_definition_path")
+
 # ADR-0001 rev. 5: read back the deployment topology that scripts/preProvision
 # already resolved and materialized into the azd environment. preDeploy must
 # never re-derive the fresh/existing/sticky decision independently --
@@ -136,9 +184,9 @@ deploy_panel_value="$(get_azd_value "$repo_root" "DEPLOY_ADMINISTRATIVE_PANEL")"
 [ -n "$deploy_hosted_value" ] && export DEPLOY_HOSTED_AGENT_ORCHESTRATION="$deploy_hosted_value"
 [ -n "$deploy_panel_value" ] && export DEPLOY_ADMINISTRATIVE_PANEL="$deploy_panel_value"
 
-command -v python3 >/dev/null 2>&1 || { red "python3 is required to resolve the GPT-RAG deployment topology."; exit 1; }
+command -v python3 >/dev/null 2>&1 || { red "python3 is required to resolve the Agent Landing Zone deployment topology."; exit 1; }
 topology_json="$(cd "$repo_root" && python3 -m config.deployment.topology --describe)" || {
-  red "Failed to resolve the GPT-RAG deployment topology. Ensure scripts/preProvision ran successfully before azd deploy."
+  red "Failed to resolve the Agent Landing Zone deployment topology. Ensure scripts/preProvision ran successfully before azd deploy."
   exit 1
 }
 hosted_mode="$(printf "%s" "$topology_json" | jq -er '.deploy_hosted_agent_orchestration | if type == "boolean" then tostring else error("invalid hosted mode") end')" &&
@@ -148,7 +196,7 @@ selected_components="$(printf "%s" "$topology_json" | jq -er '.components | if t
   red "Resolved topology JSON is incomplete or invalid; refusing to select a deployment path."
   exit 1
 }
-cyan "GPT-RAG deployment mode: $deployment_mode"
+cyan "Agent Landing Zone deployment mode: $deployment_mode"
 
 python3 -m config.deployment.private_network --stage pre-deploy || {
   network_exit=$?
@@ -164,13 +212,6 @@ if ! docker info >/dev/null 2>&1; then
   fi
 fi
 
-[ -n "$global_rg" ] || { red "AZURE_RESOURCE_GROUP not found in env."; exit 2; }
-if ! rg_exists "$global_rg" "${global_sub:-}"; then
-  if [ -n "${global_sub:-}" ]; then red "Resource group '$global_rg' in subscription '$global_sub'. not found."
-  else red "Resource group '$global_rg'. not found."
-  fi
-  exit 3
-fi
 
 had_errors=0
 release_default="$(jq -r '.release // empty' "$manifest_path")"
@@ -244,6 +285,12 @@ if [[ "$hosted_mode" =~ ^(1|true|t|yes|y)$ ]]; then
   export HOSTED_AGENT_BASE_URL="$hosted_base_url"
   export HOSTED_AGENT_RESOURCE_SCOPE="$hosted_scope"
 
+  # Publish the endpoint before component deploys (#709).
+  azd env set HOSTED_AGENT_BASE_URL "$hosted_base_url" --environment "$environment_name" --no-prompt >/dev/null \
+    || { red "Hosted endpoint could not be persisted in the azd environment."; exit 1; }
+  ( cd "$repo_root" && python3 -m config.deployment.appconfig >/dev/null ) \
+    || { red "Failed to publish the hosted-agent endpoint before component deployment."; exit 1; }
+
   continuity_packages="$(mktemp -d)"
   if ! (
     python3 -m pip install --quiet --disable-pip-version-check --target "$continuity_packages" -r "$repo_root/config/requirements.txt" &&
@@ -262,6 +309,10 @@ while IFS= read -r comp; do
   name="$(printf "%s" "$comp" | jq -r '.name')"
   if [[ " $selected_components " != *" $name "* ]]; then
     yellow "$name is not deployed in $deployment_mode mode."
+    continue
+  fi
+  if [[ "$definition_manifest_names" != *" $name "* ]]; then
+    yellow "$name is not part of application '$definition_id'."
     continue
   fi
   repo="$(printf "%s" "$comp" | jq -r '.repo')"
@@ -355,6 +406,63 @@ while IFS= read -r comp; do
     [ "$hosted_mode" = "true" ] && had_errors=1
   fi
 done < <(jq -c '.components[]' "$manifest_path")
+# Components from the application definition that are not release-managed
+# (manifest.json) components: each folder is its own azd project.
+while IFS= read -r dcomp; do
+  [ -z "$dcomp" ] && continue
+  c_name="$(printf "%s" "$dcomp" | jq -r '.name')"
+  [ -n "$(manifest_component_for "$c_name")" ] && continue
+  c_kind="$(printf "%s" "$dcomp" | jq -r '.kind')"
+  c_path="$app_definition_dir/$(printf "%s" "$dcomp" | jq -r '.path')"
+  c_commit="$(printf "%s" "$dcomp" | jq -r '.source.commit // empty')"
+  c_digest="$(printf "%s" "$dcomp" | jq -r '.source.imageDigest // empty')"
+  if [ ! -f "$c_path/azure.yaml" ]; then
+    red "The app folder $c_path must contain its own azure.yaml."
+    had_errors=1; continue
+  fi
+  if [ -n "$c_commit" ]; then
+    actual_commit="$(git -C "$c_path" rev-parse HEAD 2>/dev/null || true)"
+    if [ "$actual_commit" != "$c_commit" ]; then
+      red "$c_name must resolve to $c_commit but $c_path is at '$actual_commit'."
+      had_errors=1; continue
+    fi
+  fi
+  copy_dot_azure "$dot_azure" "$c_path"
+  cyan "Deploying $c_name ($c_kind) from $c_path"
+  env_name="${AZURE_ENV_NAME:-}"
+  if [ -n "$c_digest" ]; then
+    (cd "$c_path" && azd env set AGENTLZ_IMAGE_DIGEST "$c_digest" --environment "$env_name" --no-prompt >/dev/null) || {
+      red "$c_name: failed to pin image digest."; had_errors=1; continue
+    }
+  fi
+  if [ "$c_kind" = "azure.ai.agent" ]; then
+    # prepareHostedDeployment is not run here: it builds only the manifest-pinned
+    # bundled orchestrator image (HOSTED_AGENT_*). A custom azure.ai.agent
+    # component deploys from its own child azd project, which builds its image,
+    # or pins source.imageDigest through AGENTLZ_IMAGE_DIGEST (T079 limitation).
+    (
+      cd "$c_path" &&
+      azd env set FOUNDRY_PROJECT_ENDPOINT "${AZURE_AI_PROJECT_ENDPOINT:-}" --environment "$env_name" --no-prompt >/dev/null &&
+      azd env set AZURE_AI_PROJECT_ID "${AZURE_AI_PROJECT_RESOURCE_ID:-}" --environment "$env_name" --no-prompt >/dev/null &&
+      azd deploy "$c_name" --environment "$env_name" --no-prompt
+    ) || { red "$c_name: hosted agent deployment failed."; had_errors=1; continue; }
+    agent_smoke_payload="$(mktemp "${TMPDIR:-/tmp}/agentlz-agent-smoke-XXXXXX")"
+    printf '%s\n' '{"messages":[{"role":"user","content":"Hello!"}]}' >"$agent_smoke_payload"
+    if ! agent_smoke_output="$(cd "$c_path" && azd ai agent invoke --protocol invocations --new-session --timeout 180 --environment "$env_name" --no-prompt --input-file "$agent_smoke_payload" 2>&1)"; then
+      rm -f "$agent_smoke_payload"
+      red "$c_name: smoke request failed."; had_errors=1; continue
+    fi
+    rm -f "$agent_smoke_payload"
+    if ! printf '%s\n' "$agent_smoke_output" | (cd "$repo_root" && python3 -m config.deployment.hosted --validate-smoke); then
+      red "$c_name: smoke test did not pass."; had_errors=1; continue
+    fi
+  else
+    (cd "$c_path" && azd deploy --all --environment "$env_name" --no-prompt) || {
+      red "$c_name: Container App deployment failed."; had_errors=1; continue
+    }
+  fi
+  green "$c_name: deployed."
+done < <(jq -c '.components[]' "$app_definition_path")
 
 if [ "$had_errors" -ne 0 ]; then
   red "One or more components failed. See logs above."
