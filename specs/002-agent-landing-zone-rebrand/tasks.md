@@ -73,7 +73,7 @@ hosted orchestrator modes, and sees only the Agent Landing Zone name.
 - [X] T018 [P] [US1] Read both label `agent-lz` and `gpt-rag` (new first) and both `AGENTLZ_*` and `GPT_RAG_*` names for one release; replace UI wordmark, page title, and favicon text with "Agent Landing Zone" in the agent-app-ui repo (src config loader and frontend branding files)
 - [X] T019 [P] [US1] Read both labels and both prefixes for one release; rename telemetry prefix to `agentlz.`; keep classic and hosted modes working in the agent-app-orchestrator repo (config loader and telemetry module)
 - [X] T020 [P] [US1] Read both labels and both prefixes for one release; rename telemetry prefix to `agentlz.` in the agent-app-ingestion repo (config loader and telemetry module)
-- [ ] T021 [US1] Cut component releases ui `v3.0.0`, orchestrator `v5.0.0`, ingestion `v3.0.0` (pre-release tags for the preview) after Paulo's approval, in each component repo
+- [X] T021 [US1] Cut component releases ui `v3.0.0`, orchestrator `v5.0.0`, ingestion `v3.0.0` (pre-release tags for the preview) after Paulo's approval, in each component repo
 
 ### Umbrella implementation
 

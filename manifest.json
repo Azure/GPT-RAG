@@ -12,20 +12,20 @@
     {
       "name": "gpt-rag-ui",
       "repo": "https://github.com/azure/gpt-rag-ui.git",
-      "tag": "v2.6.2",
-      "commit": "f59cca919f0bc59631d7bba7f3e223dff3718244"
+      "tag": "v3.0.0-preview.1",
+      "commit": "302c3fcc356ed9ec706d822c20e114a62a0f385d"
     },
     {
       "name": "gpt-rag-orchestrator",
       "repo": "https://github.com/azure/gpt-rag-orchestrator.git",
-      "tag": "v4.1.2",
-      "commit": "36085af334eaf4d1cb92afb526687cb8d8a74f01"
+      "tag": "v5.0.0-preview.1",
+      "commit": "7cfdef88ce0d5d09ea78657773da8ddcd2d00c0a"
     },
     {
       "name": "gpt-rag-ingestion",
       "repo": "https://github.com/azure/gpt-rag-ingestion.git",
-      "tag": "v2.7.4",
-      "commit": "75a2ef17779e634f3b3150f682c8669a7f928481"
+      "tag": "v3.0.0-preview.1",
+      "commit": "302c3fcc356ed9ec706d822c20e114a62a0f385d"
     }
   ]
 }
