@@ -16,7 +16,7 @@
       "name": "orchestrator",
       "kind": "containerapp",
       "path": "orchestrator",
-      "source": { "commit": "9b64a5b962067161cb55252c6e0917a2738ba984" },
+      "source": { "commit": "36085af334eaf4d1cb92afb526687cb8d8a74f01" },
       "profiles": ["model-user", "retrieval-reader", "conversation-store"],
       "ingress": "external"
     },

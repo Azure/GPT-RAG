@@ -18,8 +18,8 @@
     {
       "name": "gpt-rag-orchestrator",
       "repo": "https://github.com/azure/gpt-rag-orchestrator.git",
-      "tag": "v4.1.1",
-      "commit": "9b64a5b962067161cb55252c6e0917a2738ba984"
+      "tag": "v4.1.2",
+      "commit": "36085af334eaf4d1cb92afb526687cb8d8a74f01"
     },
     {
       "name": "gpt-rag-ingestion",
