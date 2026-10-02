@@ -1,6 +1,29 @@
 # Shared GPT-RAG contracts
 
-## Audit event v1
+## Audit event v2 (current)
+
+`audit-event-v2.schema.json` and
+`audit-event-v2.application-insights.schema.json` are the current audit
+contract. Version 2 renames the Application Insights event prefix from
+`gptrag.audit.*` to `agentlz.audit.*`, sets `schema_version` to `2`, and expects
+`service_name` values from the renamed `agent-app-*` components (see
+[naming-map.md](naming-map.md)). Field names, enums, and semantics are
+otherwise unchanged from v1.
+
+`audit-event-v2.sha256` pins the exact LF-encoded bytes:
+
+- Logical schema: `884dfa2441d3313c8ec46a099f60ce86e7abb6cdf88bb5b5da720463edbf5e97`
+- Application Insights wire schema: `48416073768c0710b9a1f58640d4e822745f28b3a17b3712a2fe4cd9326c9c07`
+
+During the R14 transition, readers accept both v1 and v2 events (both
+prefixes, dispatched on `schema_version`); producers switch to v2 when they
+ship their renamed releases.
+
+## Audit event v1 (deprecated)
+
+Deprecated by v2; retained unchanged as history. Removal follows the R14
+transition in [naming-map.md](naming-map.md), once all pinned components emit
+v2 only.
 
 These schemas are the shared GPT-RAG audit contract consumed by orchestrator
 v3.8.0 and ingestion v2.5.0.

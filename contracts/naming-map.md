@@ -28,6 +28,8 @@ short links are retargeted rather than replaced (R2).
 | Temporary file and folder prefixes `gpt-rag-` / `gptrag` | `agentlz-` |
 | `azure.yaml` project name `azure-gpt-rag` | `agent-landing-zone` |
 | Telemetry event prefix | `agentlz.` |
+| Audit event names `gptrag.audit.*` (`audit-event-v1`) | `agentlz.audit.*` (`audit-event-v2`, `schema_version` 2) |
+| Audit `service_name` values `gpt-rag-orchestrator` / `gpt-rag-ingestion` | `agent-app-orchestrator` / `agent-app-ingestion` |
 | Repo-root detection by folder name | Detection by the presence of `manifest.json` plus `azure.yaml` |
 
 **Rule:** never use the abbreviation `alz`; it collides with the Azure Landing

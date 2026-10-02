@@ -695,5 +695,75 @@ class AgentLandingZoneContractIntegrityTests(unittest.TestCase):
         self.assertIn("naming-map.md", readme)
 
 
+class AuditEventV2ContractTests(unittest.TestCase):
+    V1 = ("audit-event-v1.schema.json", "audit-event-v1.application-insights.schema.json")
+    V2 = ("audit-event-v2.schema.json", "audit-event-v2.application-insights.schema.json")
+
+    @staticmethod
+    def _pins(name: str) -> dict:
+        pins = {}
+        for line in (ROOT / "contracts" / name).read_text("utf-8").splitlines():
+            digest, file_name = line.split()
+            pins[file_name] = digest
+        return pins
+
+    def test_v2_bytes_match_committed_sha256(self) -> None:
+        pins = self._pins("audit-event-v2.sha256")
+        self.assertEqual(set(self.V2), set(pins))
+        for name in self.V2:
+            with self.subTest(schema=name):
+                data = (ROOT / "contracts" / name).read_bytes()
+                self.assertNotIn(b"\r\n", data, "schema must be LF-encoded")
+                self.assertEqual(pins[name], hashlib.sha256(data).hexdigest())
+
+    def test_v1_is_retained_unchanged(self) -> None:
+        pins = self._pins("audit-event-v1.sha256")
+        self.assertEqual(
+            "825db8ef40a81e2c19e5d80d37c565b6b47fc9a6540e9881d35cc12b8fde5aab",
+            pins[self.V1[0]],
+        )
+        self.assertEqual(
+            "066c8f5408610ab839d5121d06ca5bc59e8797e551d5c47c875c5ba52f7e0588",
+            pins[self.V1[1]],
+        )
+        for name in self.V1:
+            data = (ROOT / "contracts" / name).read_bytes()
+            self.assertEqual(pins[name], hashlib.sha256(data).hexdigest())
+
+    def test_v2_renames_prefix_and_keeps_fields_aligned(self) -> None:
+        v1_logical, v1_wire = (
+            json.loads((ROOT / "contracts" / n).read_text("utf-8")) for n in self.V1
+        )
+        logical, wire = (
+            json.loads((ROOT / "contracts" / n).read_text("utf-8")) for n in self.V2
+        )
+        self.assertEqual({"const": 2}, logical["properties"]["schema_version"])
+        for schema, name in zip((logical, wire), self.V2):
+            self.assertTrue(schema["$id"].endswith("/" + name))
+            self.assertNotIn("gpt", json.dumps(schema).lower())
+        names = wire["properties"]["name"]["enum"]
+        event_types = logical["properties"]["event_type"]["enum"]
+        self.assertEqual(["agentlz.audit." + t for t in event_types], names)
+        self.assertEqual(
+            [n.replace("gptrag.", "agentlz.", 1) for n in v1_wire["properties"]["name"]["enum"]],
+            names,
+        )
+        self.assertEqual(v1_logical["required"], logical["required"])
+        self.assertEqual(set(v1_logical["properties"]), set(logical["properties"]))
+        self.assertEqual(
+            logical["required"], wire["properties"]["properties"]["required"]
+        )
+
+    def test_readme_registers_v2_and_deprecates_v1(self) -> None:
+        readme = (ROOT / "contracts" / "README.md").read_text(encoding="utf-8")
+        pins = self._pins("audit-event-v2.sha256")
+        for name in self.V2:
+            self.assertIn(name, readme)
+            self.assertIn(pins[name], readme)
+        self.assertIn("Audit event v1 (deprecated)", readme)
+        naming = (ROOT / "contracts" / "naming-map.md").read_text(encoding="utf-8")
+        self.assertIn("`agentlz.audit.*`", naming)
+
+
 if __name__ == "__main__":
     unittest.main()
