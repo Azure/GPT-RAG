@@ -25,7 +25,7 @@
       "name": "gpt-rag-ingestion",
       "repo": "https://github.com/azure/gpt-rag-ingestion.git",
       "tag": "v3.0.0-preview.1",
-      "commit": "302c3fcc356ed9ec706d822c20e114a62a0f385d"
+      "commit": "5a41a75789305e81d23f26bd84dd981fe80418a9"
     }
   ]
 }
