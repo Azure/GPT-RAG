@@ -9,6 +9,7 @@ Staged on `develop`; will be released as `v4.0.0`.
 - **Breaking:** App Configuration label renamed to `agent-lz`.
 - **Breaking:** Environment variables use the `AGENTLZ_` prefix.
 - Infrastructure is now kept in this repository instead of being pulled from an external template.
+- Component pins updated to the `preview.2` releases. These read App Configuration settings from both the `agent-lz` and the legacy `gpt-rag` labels.
 
 ### Added
 - Infrastructure-only deployment: run `azd provision`, then `azd deploy` later.

@@ -12,20 +12,20 @@
     {
       "name": "gpt-rag-ui",
       "repo": "https://github.com/Azure/agent-app-ui.git",
-      "tag": "v3.0.0-preview.1",
-      "commit": "302c3fcc356ed9ec706d822c20e114a62a0f385d"
+      "tag": "v3.0.0-preview.2",
+      "commit": "e8d73f998027744aead9b453f6a8b1d214e12f34"
     },
     {
       "name": "gpt-rag-orchestrator",
       "repo": "https://github.com/Azure/agent-app-orchestrator.git",
-      "tag": "v5.0.0-preview.1",
-      "commit": "7cfdef88ce0d5d09ea78657773da8ddcd2d00c0a"
+      "tag": "v5.0.0-preview.2",
+      "commit": "898c6bf1a116586859824d1e5079c30e905a0214"
     },
     {
       "name": "gpt-rag-ingestion",
       "repo": "https://github.com/Azure/agent-app-ingestion.git",
-      "tag": "v3.0.0-preview.1",
-      "commit": "5a41a75789305e81d23f26bd84dd981fe80418a9"
+      "tag": "v3.0.0-preview.2",
+      "commit": "3d1786c2a606b691a6b1bef9ed17f7adbdc18070"
     }
   ]
 }
