@@ -16,3 +16,11 @@ azure-mgmt-cognitiveservices==13.6.0
 requests==2.34.2
 azure-keyvault-secrets==4.11.2
 jinja2==3.1.6
+
+# platform outputs contract validation
+
+jsonschema==4.23.0
+
+# application definitions
+
+PyYAML==6.0.3

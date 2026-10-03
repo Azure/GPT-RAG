@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    GPT-RAG regional readiness preflight for azd provision.
+    Agent Landing Zone regional readiness preflight for azd provision.
 
 .DESCRIPTION
     Performs read-only Azure checks before long-running provisioning starts.
@@ -8,7 +8,7 @@
     Capacity signals that Azure cannot guarantee before deployment are WARN.
 
 .PARAMETER ProjectRoot
-    GPT-RAG repository root. Defaults to the parent folder of this script.
+    Agent Landing Zone repository root. Defaults to the parent folder of this script.
 
 .PARAMETER ParameterFile
     Effective main.parameters.json file to evaluate. Defaults to the root
@@ -483,7 +483,7 @@ if ([string]::IsNullOrWhiteSpace($ParameterFile)) {
     $ParameterFile = Join-Path $ProjectRoot 'main.parameters.json'
 }
 
-Write-Host 'GPT-RAG regional preflight'
+Write-Host 'Agent Landing Zone regional preflight'
 Import-AzdEnvironment
 
 if (-not (Test-Path $ParameterFile)) {
@@ -541,10 +541,14 @@ $deployAppConfig = Get-DeploymentFlag -Parameters $parameters -Name 'deployAppCo
 $deployLogAnalytics = Get-DeploymentFlag -Parameters $parameters -Name 'deployLogAnalytics' -DefaultValue $true
 $deployAppInsights = Get-DeploymentFlag -Parameters $parameters -Name 'deployAppInsights' -DefaultValue $true
 $deployVm = Get-DeploymentFlag -Parameters $parameters -Name 'deployVM' -DefaultValue $true
-$deployJumpbox = Get-DeploymentFlag -Parameters $parameters -Name 'deployJumpbox' -DefaultValue $false
-$deployBastion = Get-DeploymentFlag -Parameters $parameters -Name 'deployBastion' -DefaultValue $false
-$deployNatGateway = Get-DeploymentFlag -Parameters $parameters -Name 'deployNatGateway' -DefaultValue $false
 $networkIsolation = Get-DeploymentFlag -Parameters $parameters -Name 'networkIsolation' -DefaultValue $false
+# Mirror the landing zone gating: jumpbox, Bastion and NAT are only deployed with network isolation unless explicitly set.
+$explicitJumpbox = Get-ParameterValue -Parameters $parameters -Name 'deployJumpbox' -DefaultValue $null
+$deployJumpbox = if ($null -ne $explicitJumpbox) { Test-Truthy $explicitJumpbox } else { $deployVm -and $networkIsolation }
+$explicitBastion = Get-ParameterValue -Parameters $parameters -Name 'deployBastion' -DefaultValue $null
+$deployBastion = if ($null -ne $explicitBastion) { Test-Truthy $explicitBastion } else { $networkIsolation -and $deployJumpbox }
+$explicitNatGateway = Get-ParameterValue -Parameters $parameters -Name 'deployNatGateway' -DefaultValue $null
+$deployNatGateway = if ($null -ne $explicitNatGateway) { Test-Truthy $explicitNatGateway } else { $networkIsolation -and $deployJumpbox }
 $retrievalBackend = Get-ParameterValue -Parameters $parameters -Name 'retrievalBackend' -DefaultValue 'foundry_iq'
 $foundryIqPattern = Get-ParameterValue -Parameters $parameters -Name 'foundryIqPattern' -DefaultValue 'azureBlob'
 $foundryIqContentExtractionMode = Get-ParameterValue -Parameters $parameters -Name 'foundryIqContentExtractionMode' -DefaultValue 'standard'
@@ -560,8 +564,8 @@ if ($deployStorage) { [void]$providerNamespaces.Add('Microsoft.Storage') }
 if ($deployAppConfig) { [void]$providerNamespaces.Add('Microsoft.AppConfiguration') }
 if ($deployLogAnalytics) { [void]$providerNamespaces.Add('Microsoft.OperationalInsights') }
 if ($deployAppInsights) { [void]$providerNamespaces.Add('Microsoft.Insights') }
-if ($networkIsolation -or $deployVm -or $deployJumpbox -or $deployBastion -or $deployNatGateway) { [void]$providerNamespaces.Add('Microsoft.Network') }
-if ($deployVm -or $deployJumpbox) { [void]$providerNamespaces.Add('Microsoft.Compute') }
+if ($networkIsolation -or $deployJumpbox -or $deployBastion -or $deployNatGateway) { [void]$providerNamespaces.Add('Microsoft.Network') }
+if ($deployJumpbox) { [void]$providerNamespaces.Add('Microsoft.Compute') }
 
 foreach ($namespace in $providerNamespaces) {
     Test-ProviderRegistration -Namespace $namespace
@@ -582,18 +586,18 @@ if (-not [string]::IsNullOrWhiteSpace($primaryLocation)) {
     if ($deployAppConfig) { Test-ProviderLocation -Namespace 'Microsoft.AppConfiguration' -ResourceType 'configurationStores' -Location $primaryLocation -DisplayName 'location:app-configuration' }
     if ($deployLogAnalytics) { Test-ProviderLocation -Namespace 'Microsoft.OperationalInsights' -ResourceType 'workspaces' -Location $primaryLocation -DisplayName 'location:log-analytics' }
     if ($deployAppInsights) { Test-ProviderLocation -Namespace 'Microsoft.Insights' -ResourceType 'components' -Location $primaryLocation -DisplayName 'location:application-insights' }
-    if ($networkIsolation -or $deployVm -or $deployJumpbox -or $deployBastion -or $deployNatGateway) {
+    if ($networkIsolation -or $deployJumpbox -or $deployBastion -or $deployNatGateway) {
         Test-ProviderLocation -Namespace 'Microsoft.Network' -ResourceType 'virtualNetworks' -Location $primaryLocation -DisplayName 'location:vnet'
         Test-ProviderLocation -Namespace 'Microsoft.Network' -ResourceType 'privateEndpoints' -Location $privateEndpointLocation -DisplayName 'location:private-endpoints'
     }
 }
 
 if (-not $SkipAzureCliChecks -and -not [string]::IsNullOrWhiteSpace($SubscriptionId) -and -not [string]::IsNullOrWhiteSpace($primaryLocation)) {
-    if ($deployVm -or $deployJumpbox) {
+    if ($deployJumpbox) {
         $vmSize = Get-ParameterValue -Parameters $parameters -Name 'vmSize' -DefaultValue 'Standard_D2s_v3'
         Test-ComputeQuota -Location $primaryLocation -VmSize $vmSize
     }
-    if ($networkIsolation -or $deployVm -or $deployJumpbox -or $deployBastion -or $deployNatGateway) {
+    if ($networkIsolation -or $deployJumpbox -or $deployBastion -or $deployNatGateway) {
         Test-NetworkQuota -Location $primaryLocation
     }
     if ($deployContainerApps) {

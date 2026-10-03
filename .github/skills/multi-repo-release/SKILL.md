@@ -14,10 +14,12 @@ are authoritative.
 2. Update `manifest.json` `tag` to `vX.Y.Z` and verify it matches the release
    branch version, changelog heading, Git tag, and GitHub Release title.
 3. Read every runtime component tag from `manifest.json` `components[]` and the
-   infrastructure tag from `ailz_tag`; never copy a previous version table.
-4. Require the AI Landing Zone pins to agree: `manifest.json` `ailz_tag`, the
-   `.gitmodules` `infra.branch`, and the recorded `infra/` submodule gitlink
-   must identify the same validated release commit.
+   infrastructure provenance from `infra.source` (`repo`, `tag`, `commit`);
+   never copy a previous version table.
+4. `infra/` is repository-owned source (no submodule). Keep `manifest.json`
+   `infra.source` equal to the AI Landing Zone release the in-repository
+   `infra/` was incorporated from, and validate the exact `infra/` tree being
+   released.
 5. Confirm that the exact pinned combination was validated and record the
    relevant commands and Azure deployment mode without private environment or
    resource group names.

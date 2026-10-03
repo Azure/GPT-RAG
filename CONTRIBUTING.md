@@ -6,7 +6,7 @@ Thank you for your interest in contributing to GPT‑RAG. We are actively consol
 
 To ensure you are always following the most accurate and up‑to‑date process, please use our central contributing guide published on the project documentation site:
 
-- **GPT‑RAG Contributing Guide:** https://azure.github.io/GPT-RAG/contributing/
+- **GPT‑RAG Contributing Guide:** https://azure.github.io/agent-landing-zone/contributing/
 
 That page includes:
 

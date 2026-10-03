@@ -7,7 +7,7 @@ This script automates the configuration of Responsible AI (RAI) blocklists and p
 Prerequisites:
 - Export the environment variable APP_CONFIG_ENDPOINT with your Azure App Configuration endpoint, e.g.:
     export APP_CONFIG_ENDPOINT="https://<your-app-config-name>.azconfig.io"
-- The following keys must be present in App Configuration (label: gpt-rag):
+- The following keys must be present in App Configuration (label: agent-lz):
     - SUBSCRIPTION_ID
     - AZURE_RESOURCE_GROUP
     - AI_FOUNDRY_ACCOUNT_NAME
@@ -49,8 +49,8 @@ from .keyvault import KeyVaultClient
 
 # ── Constants ─────────────────────────────────────────
 REQUIRED_ENV_VARS = ["APP_CONFIG_ENDPOINT"]
-BLOCKLIST_NAME = "gptragBlocklist"
-POLICY_NAME = "gptragRAIPolicy"
+BLOCKLIST_NAME = "agentlzBlocklist"
+POLICY_NAME = "agentlzRAIPolicy"
 RAI_POLICIES_JSON_FILE = "config/aifoundry/raipolicies.json"
 RAI_BLOCKLIST_JSON_FILE = "config/aifoundry/raiblocklist.json"
 CANONICAL_DEPLOYMENT_NAME = "CHAT_DEPLOYMENT_NAME"
@@ -76,7 +76,7 @@ def check_env() -> None:
         sys.exit(1)
 
 # ── Azure App Config Helper ───────────────────────────
-def cfg(client: AzureAppConfigurationClient, key: str, label: str = 'gpt-rag', required: bool = True) -> str:
+def cfg(client: AzureAppConfigurationClient, key: str, label: str = 'agent-lz', required: bool = True) -> str:
     """Fetch a single value from App Configuration; exit if missing or empty."""
     try:
         setting = client.get_configuration_setting(key=key, label=label)

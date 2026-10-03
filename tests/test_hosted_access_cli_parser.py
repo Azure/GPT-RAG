@@ -142,7 +142,7 @@ class HostedAccessCliSerializationTests(unittest.TestCase):
                 code = cli.invoke([
                     "appconfig", "kv", "list", "--endpoint", ENV["APP_CONFIG_ENDPOINT"],
                     "--auth-mode", "login", "--key", "AUDIT_HMAC_KEY",
-                    "--label", "gpt-rag", "--output", "json",
+                    "--label", "agent-lz", "--output", "json",
                 ], out_file=output)
         self.assertEqual(0, code)
         handler.assert_called_once()

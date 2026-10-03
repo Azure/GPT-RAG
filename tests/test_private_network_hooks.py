@@ -21,6 +21,13 @@ AZURE_RESOURCE_GROUP="test-group"
 AZURE_SUBSCRIPTION_ID="test-subscription"
 AZURE_LOCATION="westus3"
 RESOURCE_TOKEN="test"
+AGENTLZ_APP_ID="agent-lz-default"
+"""
+MANIFEST = """{"components": [
+  {"name": "gpt-rag-ui", "repo": "https://example.invalid/ui.git", "tag": "v1.0.0", "commit": "1111111111111111111111111111111111111111"},
+  {"name": "gpt-rag-orchestrator", "repo": "https://example.invalid/orchestrator.git", "tag": "v1.0.0", "commit": "2222222222222222222222222222222222222222"},
+  {"name": "gpt-rag-ingestion", "repo": "https://example.invalid/ingestion.git", "tag": "v1.0.0", "commit": "3333333333333333333333333333333333333333"}
+]}
 """
 TOPOLOGY = '{"deploy_hosted_agent_orchestration":false,"deploy_administrative_panel":false,"topology":"classic","components":["gpt-rag-ui","gpt-rag-orchestrator","gpt-rag-ingestion"]}'
 
@@ -50,7 +57,15 @@ function azd {
     Get-Content -LiteralPath (Join-Path $env:FAKE_ROOT 'values.txt')
     $global:LASTEXITCODE = [int]$env:FAKE_AZD_EXIT
 }
-function git { $global:LASTEXITCODE = 0 }
+function git {
+    # Resolving a component ref is the first deployment step after the probe.
+    if ($args[0] -eq 'ls-remote') {
+        Add-Content -LiteralPath $env:FAKE_TRACE -Value 'azure-boundary'
+        $global:LASTEXITCODE = 2
+        return
+    }
+    $global:LASTEXITCODE = 0
+}
 function docker { $global:LASTEXITCODE = 0 }
 function python {
     $call = $args -join ' '
@@ -67,6 +82,7 @@ function python {
         $global:LASTEXITCODE = [int]$env:FAKE_PROBE_EXIT
         return
     }
+    if ($call -match 'config.appdefinition') { $global:LASTEXITCODE = 0; return }
     if ($call -match 'config.deployment.topology') {
         Get-Content -LiteralPath (Join-Path $env:FAKE_ROOT 'topology.json')
         $global:LASTEXITCODE = 0
@@ -75,6 +91,12 @@ function python {
     throw "Unexpected Python operation in hook test: $call"
 }
 function az {
+    # The read-only foundation guard (``az group exists``) is allowed.
+    if ($args[0] -eq 'group' -and $args[1] -eq 'exists') {
+        if ($env:FAKE_RG_MISSING -eq '1') { 'false' } else { 'true' }
+        $global:LASTEXITCODE = 0
+        return
+    }
     Add-Content -LiteralPath $env:FAKE_TRACE -Value 'azure-boundary'
     exit 93
 }
@@ -99,22 +121,47 @@ case "$*" in
     fi
     [ "$NETWORK_ISOLATION" = true ] && [ "$APP_CONFIG_ENDPOINT" = https://config.azconfig.io ] || exit 96
     exit "$FAKE_PROBE_EXIT" ;;
+  *config.appdefinition*) exit 0 ;;
   *config.deployment.topology*) cat "$FAKE_ROOT/topology.json"; exit 0 ;;
   *config.deployment.appconfig*) echo azure-boundary >> "$FAKE_TRACE"; exit 93 ;;
   *) echo "Unexpected Python operation" >&2; exit 94 ;;
 esac
 """,
     "az": """#!/usr/bin/env bash
+# The read-only foundation guard (az group exists) is allowed.
+if [ "$1 $2" = "group exists" ]; then
+  [ "${FAKE_RG_MISSING:-0}" = 1 ] && echo false || echo true
+  exit 0
+fi
 echo azure-boundary >> "$FAKE_TRACE"
 exit 93
 """,
-    "git": "#!/usr/bin/env bash\nexit 0\n",
+    # Resolving a component ref is the first deployment step after the probe.
+    "git": """#!/usr/bin/env bash
+if [ "$1" = ls-remote ]; then echo azure-boundary >> "$FAKE_TRACE"; exit 2; fi
+exit 0
+""",
     "docker": "#!/usr/bin/env bash\nexit 0\n",
-    "jq": """#!/usr/bin/env bash
+    # Answers only the queries preDeploy.sh makes against the fixtures above.
+    "jq": r"""#!/usr/bin/env bash
+field() { sed -n "s/.*\"$1\": *\"\([^\"]*\)\".*/\1/p" | head -n1; }
 case "$*" in
   *deploy_hosted_agent_orchestration*|*deploy_administrative_panel*) echo false ;;
   *'.topology'*) echo classic ;;
-  *'.components'*) echo 'gpt-rag-ui gpt-rag-orchestrator gpt-rag-ingestion' ;;
+  *'.components | '*) echo 'gpt-rag-ui gpt-rag-orchestrator gpt-rag-ingestion' ;;
+  *'.release // empty'*) ;;
+  *'--arg n'*) echo "gpt-rag-$4" ;;
+  *'.components[].name'*) printf 'ui\norchestrator\ningestion\n' ;;
+  *'-c .components[]'*manifest.json)
+    printf '%s\n' '{"name": "gpt-rag-ui", "repo": "https://example.invalid/ui.git", "tag": "v1.0.0"}' \
+      '{"name": "gpt-rag-orchestrator", "repo": "https://example.invalid/orchestrator.git", "tag": "v1.0.0"}' \
+      '{"name": "gpt-rag-ingestion", "repo": "https://example.invalid/ingestion.git", "tag": "v1.0.0"}' ;;
+  *'-c .components[]'*) printf '%s\n' '{"name": "ui"}' '{"name": "orchestrator"}' '{"name": "ingestion"}' ;;
+  *'.id'*) echo agent-lz-default ;;
+  *'.name'*) field name ;;
+  *'.repo'*) field repo ;;
+  *'.tag // empty'*) field tag ;;
+  *'.branch // empty'*|*'.commit // empty'*) ;;
   *) exit 94 ;;
 esac
 """,
@@ -126,14 +173,17 @@ class HookExecutionTests(unittest.TestCase):
         self, shell: str, hook: str, probe_exit: int, *, env_fail: bool = False,
         values: str = VALUES, azd_exit: int = 0, real_probe: bool = False,
         endpoint_fail: bool = False, process_env: dict[str, str] | None = None,
+        rg_missing: bool = False,
     ) -> tuple[subprocess.CompletedProcess[str], list[str]]:
-        with tempfile.TemporaryDirectory(prefix="gptrag-hook-test-") as directory:
-            root = Path(directory) / "gpt-rag"
+        with tempfile.TemporaryDirectory(prefix="agentlz-hook-test-") as directory:
+            root = Path(directory) / "any-checkout-name"
             scripts = root / "scripts"
             scripts.mkdir(parents=True)
             suffix = "ps1" if shell == "powershell" else "sh"
             shutil.copyfile(ROOT / "scripts" / f"{hook}.{suffix}", scripts / f"{hook}.{suffix}")
-            (root / "manifest.json").write_text("{}", encoding="utf-8")
+            (root / "manifest.json").write_text(MANIFEST, encoding="utf-8")
+            (root / "azure.yaml").write_text("name: agent-landing-zone\n", encoding="utf-8")
+            shutil.copyfile(ROOT / "app-definition.json", root / "app-definition.json")
             (root / "values.txt").write_text(values, encoding="utf-8")
             (root / "topology.json").write_text(TOPOLOGY, encoding="utf-8")
             (root / "probe.py").write_text(PROBE_DRIVER, encoding="utf-8")
@@ -148,6 +198,7 @@ class HookExecutionTests(unittest.TestCase):
                 "FAKE_REAL_PROBE": "1" if real_probe else "0",
                 "FAKE_ENDPOINT_FAIL": "1" if endpoint_fail else "0",
                 "FAKE_AZD_EXIT": str(azd_exit),
+                "FAKE_RG_MISSING": "1" if rg_missing else "0",
             })
             env.update(process_env or {})
             if shell == "powershell":
@@ -208,6 +259,19 @@ class HookExecutionTests(unittest.TestCase):
         result, events = self.run_hook(shell, "preDeploy", 20)
         self.assertEqual(20, result.returncode, result.stdout + result.stderr)
         self.assertEqual(["probe"], events)
+        # Foundation guard: azd deploy without a provisioned foundation exits 3
+        # before the probe or any deployment step.
+        for values, rg_missing in (
+            (VALUES, True),
+            (VALUES.replace('APP_CONFIG_ENDPOINT="https://config.azconfig.io"', 'APP_CONFIG_ENDPOINT=""'), False),
+            (VALUES.replace('AZURE_RESOURCE_GROUP="test-group"', 'AZURE_RESOURCE_GROUP=""'), False),
+        ):
+            with self.subTest(shell=shell, guard=values != VALUES or "rg-missing"):
+                result, events = self.run_hook(shell, "preDeploy", 0, values=values, rg_missing=rg_missing)
+                output = result.stdout + result.stderr
+                self.assertEqual(3, result.returncode, output)
+                self.assertEqual([], events, output)
+                self.assertIn("Run azd provision first", output)
 
     def integrated_cases(self, shell: str) -> None:
         for hook in ("postProvision", "preDeploy"):
@@ -236,6 +300,12 @@ class HookExecutionTests(unittest.TestCase):
                         endpoint_fail=endpoint_fail, process_env=process,
                     )
                     output = result.stdout + result.stderr
+                    if hook == "preDeploy" and 'APP_CONFIG_ENDPOINT=""' in extra:
+                        # No App Configuration endpoint means no provisioned
+                        # foundation: the preDeploy guard exits 3 first.
+                        self.assertEqual(3, result.returncode, output)
+                        self.assertEqual([], events, output)
+                        continue
                     self.assertIn("probe", events, output)
                     if expected == "deferred" and hook == "postProvision":
                         self.assertEqual(0, result.returncode, output)

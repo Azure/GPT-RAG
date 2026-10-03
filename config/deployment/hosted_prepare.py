@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Mapping
 
 from config.deployment.composition import (
+    HOSTED_AGENT_NAME_DEFAULT,
     DeploymentMode,
     hosted_startup_command,
     hosted_startup_command_sha256,
@@ -32,6 +33,10 @@ def _required(environment: Mapping[str, str], name: str) -> str:
     return value
 
 
+# Matched by suffix so the pin survives the component repository renames (T059).
+ORCHESTRATOR_SUFFIX = "-orchestrator"
+
+
 def _orchestrator_component(manifest: Mapping[str, object]) -> dict[str, str]:
     components = manifest.get("components")
     if not isinstance(components, list):
@@ -39,7 +44,7 @@ def _orchestrator_component(manifest: Mapping[str, object]) -> dict[str, str]:
     for component in components:
         if (
             isinstance(component, dict)
-            and component.get("name") == "gpt-rag-orchestrator"
+            and str(component.get("name") or "").endswith(ORCHESTRATOR_SUFFIX)
         ):
             repo = str(component.get("repo") or "").strip()
             source_ref = str(
@@ -54,7 +59,7 @@ def _orchestrator_component(manifest: Mapping[str, object]) -> dict[str, str]:
                 "commit": commit,
             }
     raise ValueError(
-        "manifest.json must pin gpt-rag-orchestrator with a repository, "
+        "manifest.json must pin the *-orchestrator component with a repository, "
         "tag or branch, and full commit."
     )
 
@@ -89,7 +94,7 @@ def prepare_environment(
             registry_endpoint="",
             image_name=(
                 environment.get("HOSTED_AGENT_IMAGE")
-                or "gpt-rag-orchestrator"
+                or HOSTED_AGENT_NAME_DEFAULT
             ),
             source_repo="",
             source_ref="",
@@ -114,7 +119,7 @@ def prepare_environment(
             registry_endpoint="",
             image_name=(
                 environment.get("HOSTED_AGENT_IMAGE")
-                or "gpt-rag-orchestrator"
+                or HOSTED_AGENT_NAME_DEFAULT
             ),
             source_repo="",
             source_ref="",
@@ -134,7 +139,7 @@ def prepare_environment(
             registry_endpoint="",
             image_name=(
                 environment.get("HOSTED_AGENT_IMAGE")
-                or "gpt-rag-orchestrator"
+                or HOSTED_AGENT_NAME_DEFAULT
             ),
             source_repo="",
             source_ref="",
@@ -167,7 +172,7 @@ def prepare_environment(
         registry_endpoint=registry_endpoint,
         image_name=(
             environment.get("HOSTED_AGENT_IMAGE")
-            or "gpt-rag-orchestrator"
+            or HOSTED_AGENT_NAME_DEFAULT
         ),
         source_repo=component["repo"],
         source_ref=component["source_ref"],

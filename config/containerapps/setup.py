@@ -6,7 +6,7 @@ with Azure Container Registry (ACR) via its system-assigned or user-assigned ide
 Prerequisites:
 - Export the environment variable APP_CONFIG_ENDPOINT with your Azure App Configuration endpoint, e.g.:
     export APP_CONFIG_ENDPOINT="https://<your-app-config-name>.azconfig.io"
-- The following keys must be present in App Configuration (label: gpt-rag):
+- The following keys must be present in App Configuration (label: agent-lz):
     - SUBSCRIPTION_ID
     - AZURE_RESOURCE_GROUP
     - CONTAINER_REGISTRY_NAME
@@ -130,11 +130,11 @@ def get_credentials():
 
 
 def get_config_value(appconfig, key, required=True, max_retries=3):
-    logging.debug(f"Fetching config value for key='{key}', label='gpt-rag'")
+    logging.debug(f"Fetching config value for key='{key}', label='agent-lz'")
     
     for attempt in range(max_retries):
         try:
-            setting = appconfig.get_configuration_setting(key=key, label="gpt-rag")
+            setting = appconfig.get_configuration_setting(key=key, label="agent-lz")
             value = setting.value
             
             # Mask sensitive values in logs

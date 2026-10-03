@@ -1,26 +1,31 @@
 {
-  "tag": "v3.8.11",
-  "repo": "https://github.com/azure/gpt-rag.git",
-  "ailz_tag": "v2.7.3",
-  "ailz_commit": "97e2375b89dcda4900d75aac9e7ffb7b20cce165",
+  "tag": "v4.0.0",
+  "repo": "https://github.com/Azure/agent-landing-zone.git",
+  "infra": {
+    "source": {
+      "repo": "https://github.com/Azure/bicep-ptn-aiml-landing-zone.git",
+      "tag": "v2.7.3",
+      "commit": "97e2375b89dcda4900d75aac9e7ffb7b20cce165"
+    }
+  },
   "components": [
     {
       "name": "gpt-rag-ui",
-      "repo": "https://github.com/azure/gpt-rag-ui.git",
-      "tag": "v2.6.2",
-      "commit": "f59cca919f0bc59631d7bba7f3e223dff3718244"
+      "repo": "https://github.com/Azure/agent-app-ui.git",
+      "tag": "v3.0.0",
+      "commit": "55c9033d1f33e8bd5fe09d1b4578887cd49beee3"
     },
     {
       "name": "gpt-rag-orchestrator",
-      "repo": "https://github.com/azure/gpt-rag-orchestrator.git",
-      "tag": "v4.1.1",
-      "commit": "9b64a5b962067161cb55252c6e0917a2738ba984"
+      "repo": "https://github.com/Azure/agent-app-orchestrator.git",
+      "tag": "v5.0.0",
+      "commit": "7d19b5218bfe5af1dca9021995c5587a5d7b511b"
     },
     {
       "name": "gpt-rag-ingestion",
-      "repo": "https://github.com/azure/gpt-rag-ingestion.git",
-      "tag": "v2.7.4",
-      "commit": "75a2ef17779e634f3b3150f682c8669a7f928481"
+      "repo": "https://github.com/Azure/agent-app-ingestion.git",
+      "tag": "v3.0.0",
+      "commit": "1a590dca5a58d13010038e8bfb22a7703a7f42b4"
     }
   ]
 }

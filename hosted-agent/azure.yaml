@@ -1,11 +1,14 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
-name: azure-gpt-rag-hosted-agent
+# Child azd project for one azure.ai.agent component of the selected application
+# definition (bundled trio: component `orchestrator`, path `hosted-agent`,
+# service `orchestrator-agent`). The root preDeploy runs `azd deploy <service>` here.
+name: agent-landing-zone-hosted-agent
 services:
   orchestrator-agent:
     host: azure.ai.agent
     project: .
     language: docker
-    image: ${AZURE_CONTAINER_REGISTRY_ENDPOINT}/${HOSTED_AGENT_IMAGE=gpt-rag-orchestrator}@${HOSTED_AGENT_IMAGE_VERSION}
+    image: ${AZURE_CONTAINER_REGISTRY_ENDPOINT}/${HOSTED_AGENT_IMAGE=agent-app-orchestrator}@${HOSTED_AGENT_IMAGE_VERSION}
     docker:
       remoteBuild: true
     kind: hosted
@@ -31,9 +34,9 @@ services:
     # `azd deploy` from this directory works out of the box; to customize, edit this file directly
     # instead of `azd env set HOSTED_AGENT_*`, which only affects the separate `azd provision`
     # (main.parameters.json) path today.
-    name: gpt-rag-orchestrator
-    displayName: GPT-RAG hosted orchestrator
-    description: GPT-RAG orchestration hosted by Microsoft Foundry.
+    name: agent-app-orchestrator
+    displayName: Agent Landing Zone hosted orchestrator
+    description: Agent Landing Zone orchestration hosted by Microsoft Foundry.
     startupCommand: uvicorn src.api.hosted_entrypoint:app --host 0.0.0.0 --port 8088
     container:
       resources:
@@ -72,9 +75,9 @@ services:
       # type (App Service / Functions / AKS / VM). This path is separate from, and not
       # gated by, OTEL_EXPERIMENTAL_RESOURCE_DETECTORS above, and live validation showed
       # the IMDS failure still reaching request handling with only that first variable
-      # set. Statsbeat is Microsoft's own SDK-usage telemetry (not GPT-RAG application
+      # set. Statsbeat is Microsoft's own SDK-usage telemetry (not application
       # telemetry); disabling it does not affect Application Insights traces, logs, or
-      # metrics for GPT-RAG requests.
+      # metrics for application requests.
       APPLICATIONINSIGHTS_STATSBEAT_DISABLED_ALL: "true"
       # OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT controls whether GenAI spans carry
       # the actual prompt and completion text (gen_ai.input.messages, gen_ai.output.messages,

@@ -1,14 +1,61 @@
 from __future__ import annotations
 
+import json
+import re
 import subprocess
 from pathlib import Path
 
 import pytest
 
-from config.deployment.infra_checkout import (
-    InfraCheckoutError,
-    prepare_infra_checkout,
-)
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+INFRA_SOURCE_REPO = "https://github.com/Azure/bicep-ptn-aiml-landing-zone.git"
+
+
+def _manifest() -> dict:
+    return json.loads((REPO_ROOT / "manifest.json").read_text(encoding="utf-8"))
+
+
+def test_manifest_records_infra_source_provenance() -> None:
+    manifest = _manifest()
+    assert "ailz_tag" not in manifest
+    assert "ailz_commit" not in manifest
+    source = manifest["infra"]["source"]
+    assert set(source) == {"repo", "tag", "commit"}
+    assert source["repo"] == INFRA_SOURCE_REPO
+    assert re.fullmatch(r"v\d+\.\d+\.\d+", source["tag"])
+    assert re.fullmatch(r"[0-9a-f]{40}", source["commit"])
+
+
+def test_infra_is_repo_owned_not_a_submodule() -> None:
+    assert not (REPO_ROOT / ".gitmodules").exists()
+    assert not (REPO_ROOT / "infra" / ".git").exists()
+    entries = _git(REPO_ROOT, "ls-files", "--stage", "--", "infra")
+    assert entries, "infra/ must contain tracked files"
+    modes = {line.split()[0] for line in entries.splitlines()}
+    assert "160000" not in modes, "infra must not be recorded as a gitlink"
+    for required in ("main.bicep", "install.ps1"):
+        assert (REPO_ROOT / "infra" / required).is_file()
+
+
+def test_infra_provenance_commit_matches_manifest() -> None:
+    source = _manifest()["infra"]["source"]
+    subjects = _git(
+        REPO_ROOT, "log", "--format=%s", "--", "infra/main.bicep"
+    ).splitlines()
+    expected = (
+        "Incorporate infra from Azure/bicep-ptn-aiml-landing-zone "
+        f"{source['tag']} ({source['commit']})"
+    )
+    shallow = _git(REPO_ROOT, "rev-parse", "--is-shallow-repository") == "true"
+    if not subjects or shallow:
+        pytest.skip("Git history unavailable (shallow or exported checkout)")
+    if expected in subjects:
+        return
+    # Squash merges fold the provenance commit into a PR commit whose body
+    # still records it; accept that as long as the pinned commit is referenced.
+    bodies = _git(REPO_ROOT, "log", "--format=%B", "--", "infra/main.bicep")
+    assert expected in bodies or source["commit"] in bodies
 
 
 def _git(repository: Path, *args: str) -> str:
@@ -21,89 +68,34 @@ def _git(repository: Path, *args: str) -> str:
     return completed.stdout.strip()
 
 
-@pytest.fixture
-def infra_repository(tmp_path: Path) -> tuple[Path, str, str]:
-    repository = tmp_path / "infra"
-    repository.mkdir()
-    _git(repository, "init")
-    _git(repository, "config", "user.name", "GPT-RAG tests")
-    _git(repository, "config", "user.email", "gpt-rag-tests@example.invalid")
+GENERATED_INFRA_PATHS = ("infra/main.parameters.json",)
 
-    for name, content in (
-        ("main.bicep", "base bicep\n"),
-        ("main.parameters.json", '{"source": "base"}\n'),
-        ("manifest.json", '{"source": "base"}\n'),
-        ("operator.txt", "base operator content\n"),
-    ):
-        (repository / name).write_text(content, encoding="utf-8")
-    _git(repository, "add", ".")
-    _git(repository, "commit", "-m", "base")
-    base_commit = _git(repository, "rev-parse", "HEAD")
 
-    (repository / "main.parameters.json").write_text(
-        '{"source": "target"}\n', encoding="utf-8"
+@pytest.mark.parametrize("relative_path", GENERATED_INFRA_PATHS)
+def test_generated_infra_parameters_are_ignored_not_tracked(relative_path: str) -> None:
+    # preProvision composes infra/main.parameters.json on every run; it must
+    # never dirty the tree now that infra/ is tracked source.
+    assert _git(REPO_ROOT, "ls-files", "--", relative_path) == ""
+    completed = subprocess.run(
+        ["git", "-C", str(REPO_ROOT), "check-ignore", "--no-index", "-q", relative_path],
+        check=False,
     )
-    (repository / "manifest.json").write_text(
-        '{"source": "target"}\n', encoding="utf-8"
-    )
-    _git(repository, "add", "main.parameters.json", "manifest.json")
-    _git(repository, "commit", "-m", "target")
-    target_commit = _git(repository, "rev-parse", "HEAD")
-    _git(repository, "checkout", "--detach", base_commit)
-    return repository, base_commit, target_commit
+    assert completed.returncode == 0, f"{relative_path} must be listed in .gitignore"
 
 
-def test_generated_overrides_do_not_block_pin_upgrade(
-    infra_repository: tuple[Path, str, str],
-) -> None:
-    repository, _, target_commit = infra_repository
-    (repository / "main.parameters.json").write_text(
-        '{"generated": "parameters"}\n', encoding="utf-8"
-    )
-    (repository / "manifest.json").write_text(
-        '{"generated": "manifest"}\n', encoding="utf-8"
-    )
-
-    prepare_infra_checkout(repository)
-    _git(repository, "checkout", "--detach", target_commit)
-
-    assert _git(repository, "rev-parse", "HEAD") == target_commit
-    assert _git(repository, "status", "--porcelain") == ""
+def test_preprovision_hooks_do_not_write_tracked_infra_files() -> None:
+    for name in ("preProvision.ps1", "preProvision.sh"):
+        content = (REPO_ROOT / "scripts" / name).read_text(encoding="utf-8-sig")
+        assert "infra_checkout" not in content
+        assert "ailz_" not in content
+        assert "git submodule" not in content
+        # main.bicep loads ../manifest.json; the hooks no longer copy it into infra/.
+        assert '-Destination (Join-Path $infraDir "manifest.json")' not in content
+        assert '"$INFRA_DIR/manifest.json"' not in content
 
 
-def test_unrelated_dirty_content_fails_closed_and_is_preserved(
-    infra_repository: tuple[Path, str, str],
-) -> None:
-    repository, base_commit, _ = infra_repository
-    (repository / "manifest.json").write_text(
-        '{"generated": "manifest"}\n', encoding="utf-8"
-    )
-    operator_content = "operator change that must survive\n"
-    (repository / "operator.txt").write_text(operator_content, encoding="utf-8")
-
-    with pytest.raises(InfraCheckoutError, match="local changes outside"):
-        prepare_infra_checkout(repository)
-
-    assert _git(repository, "rev-parse", "HEAD") == base_commit
-    assert (repository / "operator.txt").read_text(encoding="utf-8") == operator_content
-    assert (repository / "manifest.json").read_text(encoding="utf-8") == (
-        '{"source": "base"}\n'
-    )
-
-
-def test_unremovable_generated_override_has_clear_error(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    repository = tmp_path / "infra"
-    repository.mkdir()
-    _git(repository, "init")
-    override = repository / "manifest.json"
-    override.write_text('{"generated": true}\n', encoding="utf-8")
-
-    def reject_removal(self: Path, missing_ok: bool = False) -> None:
-        raise PermissionError("read-only override")
-
-    monkeypatch.setattr(Path, "unlink", reject_removal)
-
-    with pytest.raises(InfraCheckoutError, match="read-only override"):
-        prepare_infra_checkout(repository)
+def test_main_bicep_reads_root_manifest_and_infra_source_tag() -> None:
+    bicep = (REPO_ROOT / "infra" / "main.bicep").read_text(encoding="utf-8")
+    assert "loadJsonContent('../manifest.json')" in bicep
+    assert "_manifest.infra.source.tag" in bicep
+    assert "_manifest.ailz_tag" not in bicep

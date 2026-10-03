@@ -2,8 +2,8 @@
 
 This file is the stable, repository-wide contract for engineering agents.
 Detailed procedures belong in `.github/skills/`, and file-specific rules belong
-in `.github/instructions/`. Product documentation remains on the `docs` branch
-and at https://azure.github.io/GPT-RAG/.
+in `.github/instructions/`. Product documentation lives in the central AI
+Landing Zones documentation site.
 
 ## Priority
 
@@ -41,14 +41,16 @@ solution:
 
 - `manifest.json` is the authoritative GPT-RAG release manifest and pins the
   runtime component repositories and versions.
-- `.gitmodules` and `manifest.json` pin the AI Landing Zone infrastructure.
+- `manifest.json` `infra.source` (`repo`, `tag`, `commit`) records the AI
+  Landing Zone release that `infra/` was incorporated from.
 - `main.parameters.json` defines the GPT-RAG deployment topology and
   parameters.
 - Runtime application code lives in the component repositories referenced by
   `manifest.json`; do not duplicate it here.
-- `infra/` is populated from the
-  `bicep-ptn-aiml-landing-zone` submodule. Do not edit it by hand because local
-  changes are replaced during provisioning.
+- `infra/` is repository-owned source (ADR-0015). Change it through reviewed
+  changes, keep `infra.source` accurate when re-synchronizing from upstream,
+  and keep it foundation-only; application deployment stays outside it
+  (ADR-0016).
 
 Read current component names and versions from `manifest.json`. Never copy
 version tables into agent instructions because they become stale.
@@ -99,8 +101,9 @@ GPT-RAG product.
 
 - A runtime configuration key is a cross-repository contract. Add or update
   its infrastructure parameter, publish it to Azure App Configuration with
-  label `gpt-rag`, and update every consuming component in the same coordinated
-  change.
+  label `agent-lz`, and update every consuming component in the same coordinated
+  change. During the transition, components read both `agent-lz` and the legacy
+  `gpt-rag` label, preferring `agent-lz`.
 - Prefer managed identity for service-to-service authentication and Key Vault
   references for secrets.
 - Preserve document-level authorization, RBAC, and OBO behavior whenever a
@@ -144,7 +147,8 @@ The existing GPT-RAG-specific rules are mandatory and remain in
 - semantic versioning and changelog format;
 - release-note component version tables sourced from `manifest.json`;
 - sanitization of private Azure validation environment names;
-- user-facing documentation updates on the `docs` branch.
+- user-facing documentation updates in the central AI Landing Zones
+  documentation site.
 
 Use the `multi-repo-release` skill for release work and the
 `documentation-consistency` skill whenever behavior, configuration,

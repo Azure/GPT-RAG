@@ -34,8 +34,8 @@ function Test-Truthy {
     return -not [string]::IsNullOrWhiteSpace($Value) -and $Value -match '^(1|true|t|yes|y)$'
 }
 
-$env:GPT_RAG_REPO_ROOT = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
-& python -c "import os, runpy, sys; sys.path.insert(0, os.environ['GPT_RAG_REPO_ROOT']); sys.argv = ['config.deployment.private_network', '--stage', 'post-provision']; runpy.run_module('config.deployment.private_network', run_name='__main__')"
+$env:AGENTLZ_REPO_ROOT = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+& python -c "import os, runpy, sys; sys.path.insert(0, os.environ['AGENTLZ_REPO_ROOT']); sys.argv = ['config.deployment.private_network', '--stage', 'post-provision']; runpy.run_module('config.deployment.private_network', run_name='__main__')"
 $networkExitCode = $LASTEXITCODE
 if ($networkExitCode -eq 20) {
     Write-Warning "Post-provision configuration explicitly deferred; application setup is incomplete."
@@ -169,14 +169,14 @@ function ConvertTo-FlatJsonString {
 }
 
 #-------------------------------------------------------------------------------
-# Make config.* importable early (moved ahead of Set-GptRagAppConfiguration so
+# Make config.* importable early (moved ahead of Set-AgentLzAppConfiguration so
 # the Foundry IQ MCP pre-flight validation below can run before any App
 # Configuration write/import). No Python package installation is required for
 # that pre-flight check: foundry_iq_mcp_setup.py has no external dependencies.
 #-------------------------------------------------------------------------------
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $env:PYTHONPATH = if ($env:PYTHONPATH) { "$repoRoot;$($env:PYTHONPATH)" } else { $repoRoot }
-$env:GPT_RAG_REPO_ROOT = $repoRoot
+$env:AGENTLZ_REPO_ROOT = $repoRoot
 Set-Location $repoRoot
 
 function Invoke-PythonModule {
@@ -185,7 +185,7 @@ function Invoke-PythonModule {
         [string[]]$Arguments = @()
     )
     Invoke-NativeCommand {
-        & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['GPT_RAG_REPO_ROOT']); sys.argv = ['$ModuleName'] + sys.argv[1:]; runpy.run_module('$ModuleName', run_name='__main__')" @Arguments
+        & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['AGENTLZ_REPO_ROOT']); sys.argv = ['$ModuleName'] + sys.argv[1:]; runpy.run_module('$ModuleName', run_name='__main__')" @Arguments
     }
 }
 
@@ -220,13 +220,13 @@ if ($mcpEnabled) {
     $mcpLogToolArguments = 'false'
 }
 
-function Set-GptRagAppConfiguration {
+function Set-AgentLzAppConfiguration {
     param(
         [Parameter(Mandatory = $true)][string]$Endpoint,
         [Parameter(Mandatory = $true)][string]$Label
     )
 
-    Write-Host "⚙️ Populating GPT-RAG App Configuration settings (label=$Label)..."
+    Write-Host "⚙️ Populating Agent Landing Zone App Configuration settings (label=$Label)..."
     Invoke-NativeCommand { az config set extension.use_dynamic_install=yes_without_prompt 2>$null | Out-Null }
 
     $resourceGroup = Get-RequiredEnvValue 'AZURE_RESOURCE_GROUP'
@@ -245,7 +245,7 @@ function Set-GptRagAppConfiguration {
         $resourceToken = $matches[1]
     }
     if (-not $resourceToken) {
-        Write-Error "RESOURCE_TOKEN could not be resolved; cannot populate GPT-RAG App Configuration deterministically."
+        Write-Error "RESOURCE_TOKEN could not be resolved; cannot populate Agent Landing Zone App Configuration deterministically."
         exit 1
     }
 
@@ -261,7 +261,7 @@ function Set-GptRagAppConfiguration {
     # pair, so postProvision always agrees with preProvision's decision.
     $topologyJson = Invoke-PythonModule -ModuleName 'config.deployment.topology' -Arguments @('--describe')
     if ($LASTEXITCODE -ne 0 -or -not $topologyJson) {
-        Write-Error "Failed to resolve the GPT-RAG deployment topology. Ensure scripts/preProvision ran successfully before postProvision."
+        Write-Error "Failed to resolve the Agent Landing Zone deployment topology. Ensure scripts/preProvision ran successfully before postProvision."
         exit 1
     }
     $topologyInfo = ([string]$topologyJson).Trim() | ConvertFrom-Json
@@ -440,7 +440,7 @@ function Set-GptRagAppConfiguration {
         -Type 'Microsoft.Insights/components' `
         -Fallback "appi-$nameSuffix"
 
-    # Container apps use the RESOURCE_TOKEN suffix from GPT-RAG's own bicep - this is
+    # Container apps use the RESOURCE_TOKEN suffix from Agent Landing Zone's own bicep - this is
     # stable across naming modes.
     $frontendAppName = "ca-$nameSuffix-frontend"
     $orchestratorAppName = "ca-$nameSuffix-orchestrator"
@@ -590,7 +590,7 @@ function Set-GptRagAppConfiguration {
         # match config/search/search.settings.j2 (opt-in via `*_ENABLED=true`
         # plus the required identifiers). Seeding them here so a fresh
         # provision registers the keys with default values under the
-        # gpt-rag label, and operators can flip the flags from the App
+        # agent-lz label, and operators can flip the flags from the App
         # Configuration blade without having to know the exact key names.
         WORK_IQ_ENABLED = (Get-OptionalEnvValue 'WORK_IQ_ENABLED' 'false')
         WORK_IQ_KNOWLEDGE_SOURCE_NAME = (Get-OptionalEnvValue 'WORK_IQ_KNOWLEDGE_SOURCE_NAME' '')
@@ -734,7 +734,7 @@ function Set-GptRagAppConfiguration {
         Set-Item -Path "Env:$key" -Value $flatSettings[$key]
     }
 
-    $tempFile = Join-Path ([System.IO.Path]::GetTempPath()) "gpt-rag-appconfig-$([Guid]::NewGuid().ToString('N')).json"
+    $tempFile = Join-Path ([System.IO.Path]::GetTempPath()) "agentlz-appconfig-$([Guid]::NewGuid().ToString('N')).json"
     try {
         $flatSettings | ConvertTo-Json -Depth 50 | Set-Content -LiteralPath $tempFile -Encoding UTF8
         $importOutput = Invoke-NativeCommand {
@@ -749,20 +749,20 @@ function Set-GptRagAppConfiguration {
                 --yes 2>&1
         }
         if ($LASTEXITCODE -ne 0) {
-            Write-Error "Failed to import GPT-RAG App Configuration settings: $importOutput"
+            Write-Error "Failed to import Agent Landing Zone App Configuration settings: $importOutput"
             exit 1
         }
     } finally {
         Remove-Item -LiteralPath $tempFile -Force -ErrorAction SilentlyContinue
     }
 
-    Write-Host "✅ GPT-RAG App Configuration populated ($($flatSettings.Count) keys)."
+    Write-Host "✅ Agent Landing Zone App Configuration populated ($($flatSettings.Count) keys)."
 }
 
-Set-GptRagAppConfiguration -Endpoint (Get-RequiredEnvValue 'APP_CONFIG_ENDPOINT') -Label 'gpt-rag'
+Set-AgentLzAppConfiguration -Endpoint (Get-RequiredEnvValue 'APP_CONFIG_ENDPOINT') -Label 'agent-lz'
 Invoke-PythonModule -ModuleName 'config.deployment.appconfig'
 if ($LASTEXITCODE -ne 0) {
-    Write-Error "Failed to publish GPT-RAG deployment-mode App Configuration settings."
+    Write-Error "Failed to publish Agent Landing Zone deployment-mode App Configuration settings."
     exit $LASTEXITCODE
 }
 
@@ -800,6 +800,30 @@ Invoke-NativeCommand { & python -m pip install --upgrade pip }
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 Invoke-NativeCommand { & python -m pip install -r config/requirements.txt }
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+#-------------------------------------------------------------------------------
+# Application definition: placeholder plan for containerapp components only
+# (from config.appdefinition effective_components), capability-profile roles,
+# then platform outputs. No application image is built during provision.
+#-------------------------------------------------------------------------------
+Write-Host "📦 Checking placeholder Container Apps for the application definition..."
+Invoke-PythonModule -ModuleName 'config.deployment.existing_images'
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Failed to plan placeholder Container Apps for the application definition."
+    exit $LASTEXITCODE
+}
+Write-Host "🔐 Assigning capability-profile roles to component identities..."
+Invoke-PythonModule -ModuleName 'config.appdefinition' -Arguments @('--assign-roles')
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Failed to assign capability-profile roles to component identities."
+    exit $LASTEXITCODE
+}
+Write-Host "📤 Publishing platform outputs (AGENTLZ_PLATFORM_OUTPUTS)..."
+Invoke-PythonModule -ModuleName 'config.deployment.outputs'
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Failed to publish platform outputs to App Configuration."
+    exit $LASTEXITCODE
+}
 
 #-------------------------------------------------------------------------------
 # 1) Governance and audit configuration

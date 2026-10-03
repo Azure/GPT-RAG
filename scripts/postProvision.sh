@@ -83,7 +83,7 @@ if [[ -z "${APP_CONFIG_ENDPOINT:-}" ]]; then
   exit 1
 fi
 
-echo "⚙️ Publishing GPT-RAG deployment-mode configuration…"
+echo "⚙️ Publishing Agent Landing Zone deployment-mode configuration…"
 (
   cd "$PROJECT_ROOT"
   python3 -m config.deployment.appconfig
@@ -102,6 +102,27 @@ curl -sS https://bootstrap.pypa.io/get-pip.py | python
 echo "⬇️  Installing requirements…"
 pip install --upgrade pip
 pip install -r config/requirements.txt
+
+###############################################################################
+# Application definition: placeholder plan for containerapp components only
+# (from config.appdefinition effective_components), capability-profile roles,
+# then platform outputs. No application image is built during provision.
+###############################################################################
+echo "📦 Checking placeholder Container Apps for the application definition…"
+(cd "$PROJECT_ROOT" && python -m config.deployment.existing_images) || {
+  echo "Failed to plan placeholder Container Apps for the application definition." >&2
+  exit 1
+}
+echo "🔐 Assigning capability-profile roles to component identities…"
+(cd "$PROJECT_ROOT" && python -m config.appdefinition --assign-roles) || {
+  echo "Failed to assign capability-profile roles to component identities." >&2
+  exit 1
+}
+echo "📤 Publishing platform outputs (AGENTLZ_PLATFORM_OUTPUTS)…"
+(cd "$PROJECT_ROOT" && python -m config.deployment.outputs) || {
+  echo "Failed to publish platform outputs to App Configuration." >&2
+  exit 1
+}
 
 ###############################################################################
 # 1) Governance and audit configuration

@@ -1,7 +1,8 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
-name: azure-gpt-rag
+# Agent Landing Zone: https://github.com/Azure/agent-landing-zone
+name: agent-landing-zone
 metadata:
-  template: azure-gpt-rag
+  template: agent-landing-zone
 infra:
   provider: bicep
   path: infra

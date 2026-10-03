@@ -400,7 +400,7 @@ class PrepareHostedImageTests(unittest.TestCase):
             registry="myregistry",
             registry_endpoint="myregistry.azurecr.io",
             image_name="gpt-rag-orchestrator",
-            source_repo="https://github.com/azure/gpt-rag-orchestrator.git",
+            source_repo="https://github.com/Azure/agent-app-orchestrator.git",
             source_ref="v3.10.0",
             source_commit=SOURCE_COMMIT,
         )
@@ -446,7 +446,7 @@ class PrepareHostedImageTests(unittest.TestCase):
             registry="myregistry",
             registry_endpoint="myregistry.azurecr.io",
             image_name="gpt-rag-orchestrator",
-            source_repo="https://github.com/azure/gpt-rag-orchestrator.git",
+            source_repo="https://github.com/Azure/agent-app-orchestrator.git",
             source_ref="v3.10.0",
             source_commit=SOURCE_COMMIT,
             agent_pool="private-pool",

@@ -7,7 +7,7 @@ This script automates the provisioning and configuration of Azure Cognitive Sear
 Prerequisites:
 - Export the environment variable APP_CONFIG_ENDPOINT with your Azure App Configuration endpoint, e.g.:
     export APP_CONFIG_ENDPOINT="https://<your-app-config-name>.azconfig.io"
-- The following keys must be present in App Configuration (label: gpt-rag):
+- The following keys must be present in App Configuration (label: agent-lz):
     - SEARCH_SERVICE_QUERY_ENDPOINT
     - SEARCH_API_VERSION
     - Any other keys referenced in your Jinja2 templates
@@ -52,7 +52,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 # ── Constants ───────────────────────────────────────────────────────────────
 TEMPLATE_NAME = "search.j2"
 VARS_TEMPLATE = "search.settings.j2"
-LABEL_FILTER = "gpt-rag"
+LABEL_FILTER = "agent-lz"
 DEFAULT_KNOWLEDGE_API_VERSION = "2026-05-01-preview"
 
 WORK_IQ_SERVICE_PRINCIPAL_APP_ID = "fdcc1f02-fc51-4226-8753-f668596af7f7"

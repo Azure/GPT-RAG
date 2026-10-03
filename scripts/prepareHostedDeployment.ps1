@@ -12,8 +12,8 @@ $ErrorActionPreference = 'Stop'
 $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 Push-Location $projectRoot
 try {
-    $env:GPT_RAG_REPO_ROOT = $projectRoot
-    & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['GPT_RAG_REPO_ROOT']); sys.argv = ['config.deployment.hosted_prepare'] + sys.argv[1:]; runpy.run_module('config.deployment.hosted_prepare', run_name='__main__')" `
+    $env:AGENTLZ_REPO_ROOT = $projectRoot
+    & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['AGENTLZ_REPO_ROOT']); sys.argv = ['config.deployment.hosted_prepare'] + sys.argv[1:]; runpy.run_module('config.deployment.hosted_prepare', run_name='__main__')" `
         --manifest (Join-Path $projectRoot 'manifest.json') @args
     if ($LASTEXITCODE -ne 0) {
         exit $LASTEXITCODE

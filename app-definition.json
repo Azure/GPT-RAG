@@ -1,0 +1,33 @@
+{
+  "$schema": "./contracts/app-definition-v1.schema.json",
+  "schemaVersion": 1,
+  "id": "agent-lz-default",
+  "displayName": "Agent Landing Zone default application (UI, orchestrator, ingestion)",
+  "components": [
+    {
+      "name": "ui",
+      "kind": "containerapp",
+      "path": "ui",
+      "source": { "commit": "55c9033d1f33e8bd5fe09d1b4578887cd49beee3" },
+      "profiles": ["blob-delegator"],
+      "ingress": "external"
+    },
+    {
+      "name": "orchestrator",
+      "kind": "containerapp",
+      "path": "orchestrator",
+      "source": { "commit": "7d19b5218bfe5af1dca9021995c5587a5d7b511b" },
+      "profiles": ["model-user", "retrieval-reader", "conversation-store"],
+      "ingress": "external"
+    },
+    {
+      "name": "ingestion",
+      "kind": "containerapp",
+      "path": "ingestion",
+      "source": { "commit": "1a590dca5a58d13010038e8bfb22a7703a7f42b4" },
+      "profiles": ["model-user", "conversation-store", "ingestion-writer"],
+      "ingress": "external",
+      "resources": { "cpu": 1.0, "memory": "3.0Gi" }
+    }
+  ]
+}
