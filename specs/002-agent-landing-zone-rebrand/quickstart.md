@@ -90,6 +90,27 @@ Negative check: in a new environment, run `azd deploy` before
 `azd provision`. It must fail before any change, with the "run azd provision
 first" message from [azd-lifecycle.md](./contracts/azd-lifecycle.md).
 
+Evidence (preview.2, a fresh Basic deployment in uksouth,
+`NETWORK_ISOLATION=false`, ACR remote build):
+
+- `azd provision` succeeded. The Container Apps ran placeholder images and
+  no application image was pushed before `azd deploy`.
+- App Configuration label `agent-lz` holds the platform outputs. Components
+  read `agent-lz` first and fall back to `gpt-rag` (R14 dual-read,
+  preview.2 tags).
+- `azd deploy --no-prompt` built and deployed the trio at the manifest pins
+  (ui `v3.0.0-preview.2`, orchestrator `v5.0.0-preview.2`, ingestion
+  `v3.0.0-preview.2`). Smoke test: UI `/` 200, ingestion `/healthz` 200,
+  orchestrator `/docs` 200. The orchestrator has no health route.
+- The negative check is covered by `tests/test_provision_only.py` (T037).
+- Pin rules found during validation: `app-definition.json` `source.commit`
+  must equal the manifest pin, and each sibling component checkout's HEAD
+  must equal its pin, or preDeploy stops before any change.
+- Known environment issue: subscriptions whose policy disables Key Vault
+  public access return 403 to postProvision secret writes when
+  `NETWORK_ISOLATION=false`. Run from an allowed network, or use
+  network isolation.
+
 ## S3 — Documentation and landing page (US3)
 
 1. Open the repository README. It is a short landing page that links to the

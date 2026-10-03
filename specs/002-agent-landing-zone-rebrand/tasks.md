@@ -91,6 +91,7 @@ hosted orchestrator modes, and sees only the Agent Landing Zone name.
 - [X] T033 [US1] Pin the preview component tags from T021 in manifest.json `components[]`
 - [X] T034 [US1] Shrink the temporary allow-list to the entries still needed for the preview (old names kept by R14 dual-read in components, `infra/` submodule) in contracts/naming-map.md
 - [ ] T035 [US1] Validate S1 steps 1, 2, and 4 end to end in a fresh validation environment, in classic mode and hosted mode; record evidence (no private env names) in specs/002-agent-landing-zone-rebrand/quickstart.md acceptance table
+  - Status: blocked: MCAPS policy (Key Vault public access 403, regional quota) prevents a clean full S1 run in the maintainer subscription; S2 path validated
 
 **Checkpoint**: US1 passes S1 at the preview. SC-008 surfaces (README top, UI, `azd` template, App Configuration) are clean.
 
@@ -127,7 +128,7 @@ outputs, and `azd deploy` adds the app later.
 - [X] T048 [US2] Restrict placeholder creation to the selected `containerapp` components in config/deployment/existing_images.py
 - [X] T049 [US2] Call placeholder creation and outputs publishing, with no image build, in scripts/postProvision.ps1 and scripts/postProvision.sh
 - [X] T050 [US2] Add the foundation-exists guard with the "run azd provision first" message as the first step in scripts/preDeploy.ps1 and scripts/preDeploy.sh
-- [ ] T051 [US2] Validate S2 end to end (provision → zero app images → outputs present → deploy adds the app → deploy without provision fails) and record evidence in specs/002-agent-landing-zone-rebrand/quickstart.md
+- [X] T051 [US2] Validate S2 end to end (provision → zero app images → outputs present → deploy adds the app → deploy without provision fails) and record evidence in specs/002-agent-landing-zone-rebrand/quickstart.md
 
 **Checkpoint**: US2 passes S2. SC-005 holds.
 
@@ -141,10 +142,14 @@ dedicated section of the central AI Landing Zones site.
 **Independent Test**: quickstart.md S3.
 
 - [ ] T052 [P] [US3] Publish the minimal docs section (overview, deploy full stack, deploy infra only) for the preview on the central AI Landing Zones site, in the central docs repository under its Agent Landing Zone section
+  - Status: deferred: belongs to the central AI Landing Zones docs repo (external)
 - [ ] T053 [P] [US3] Add a "moved" notice on every page of the current GPT-RAG MkDocs site pointing to the new section, on the `docs` branch of this repo (docs/*.md and mkdocs.yml)
+  - Status: deferred: run together with T052 so the notice points to a live page
 - [X] T054 [US3] Rewrite the README as a landing page (what it is, two deploy options, links to central docs, component table), no duplicated product docs, plus the FR-001 transition statement ("GPT-RAG is now Agent Landing Zone") and the FR-004 note, in README.md
 - [ ] T055 [US3] Migrate the remaining pages (configuration keys, hosted agents, network isolation, operations, troubleshooting, plus the "Deploy with Bicep" and "Deploy with Terraform" pages required by FR-019) to the central site and register them in its nav (FR-017 full migration, Phase 3 delivery)
+  - Status: deferred: central docs repo (external), Phase 3
 - [ ] T056 [US3] Validate S3 (every old page reaches a notice or its new page; deploy from docs alone within 10% of current time) and record evidence in specs/002-agent-landing-zone-rebrand/quickstart.md
+  - Status: deferred: depends on T052/T055
 
 **Checkpoint**: US3 passes S3. SC-002 and SC-004 hold for docs.
 
@@ -165,8 +170,10 @@ delivery**, just before the preview is published (see Dependencies).
 - [X] T061 [P] [US4] Update repository URLs in scripts/preDeploy.ps1, scripts/preDeploy.sh, scripts/prepareHostedDeployment.ps1, scripts/prepareHostedDeployment.sh
 - [X] T062 [P] [US4] Update the docs deploy workflow and any repo URL in .github/workflows/deploy-docs.yml and .github/workflows/validate-agentic-assets.yml
 - [ ] T063 [P] [US4] Create or update short links (aka.ms) to the new repos and docs section (R2), and list them in contracts/naming-map.md
+  - Status: blocked: needs the internal aka.ms tool (manual)
 - [X] T064 [US4] Validate S4 (old repo URLs, clone URLs, release URLs, and short links redirect; FR-020 blocking level holds) and record evidence in specs/002-agent-landing-zone-rebrand/quickstart.md
 - [ ] T096 [US4] After Paulo's approval, tag and publish `v4.0.0-preview.1` as a pre-release (FR-009) with title exactly `v4.0.0-preview.1`, a transition statement, a "new deployments only, redeploy required" note, `## Component versions` from manifest.json, and no `gptrag-\d{10}` tokens
+  - Status: gated: needs Paulo's approval
 
 **Checkpoint**: US4 passes S4. SC-003 holds. The preview is published.
 
@@ -205,10 +212,14 @@ modes). Fallback per R16 if FR-015a–h does not land by 2026-10-09.
 - [X] T082 [P] [US5] Create the hosted-agent sample (agent code, azure.yaml, app-definition.json) in samples/custom-app/hosted/
 - [X] T083 [P] [US5] Write a short README pointing to the docs page in samples/custom-app/README.md
 - [ ] T084 [US5] Publish the "Build your own application" page (schema, profiles, outputs, both modes, binding rule) on the central AI Landing Zones site and register it in its nav
+  - Status: deferred: central docs repo (external)
 - [ ] T085 [US5] Validate S5 (invalid and changed definitions rejected before any Azure change) and S7 (sample deploys with one `azd up` in both modes) and record evidence in specs/002-agent-landing-zone-rebrand/quickstart.md
+  - Status: partial: S5 covered by tests/test_app_definition*.py; S7 deploy blocked by the same MCAPS constraints as T035
 - [ ] T098 [US5] Deploy the hosted mode with `NETWORK_ISOLATION=true` and verify private endpoints and RBAC for the hosted-agent component (FR-015c); record evidence in specs/002-agent-landing-zone-rebrand/quickstart.md
+  - Status: blocked: network-isolated deploy not possible under MCAPS policy in the maintainer subscription
 - [X] T099 [P] [US5] Compare the role assignments generated by the profiles (`base`, `model-user`, `retrieval-reader`, `conversation-store`, `blob-delegator`, `ingestion-writer`) with the trio's current role assignments and record a parity checklist (FR-015e, SC-006) in tests/test_app_definition_schema.py and specs/002-agent-landing-zone-rebrand/quickstart.md
 - [ ] T086 [US5] If FR-015a–h misses 2026-10-09, publish the R16 manual procedure instead and mark FR-015 as fallback in specs/002-agent-landing-zone-rebrand/spec.md and the central docs page
+  - Status: conditional: only if FR-015 misses 2026-10-09
 
 **Checkpoint**: US5 passes S5 and S7 (or the R16 fallback is published). SC-009 holds.
 
@@ -217,14 +228,21 @@ modes). Fallback per R16 if FR-015a–h does not land by 2026-10-09.
 ## Phase 8: Polish & Cross-Cutting Concerns (`v4.0.0`)
 
 - [ ] T087 [P] Remove R14 dual-read of label `gpt-rag` and `GPT_RAG_*` in the agent-app-ui, agent-app-orchestrator, and agent-app-ingestion repos, and cut their final releases
+  - Status: GA cleanup: after the dual-read period
 - [ ] T088 Pin the final component releases from T087 in manifest.json `components[]`
+  - Status: GA cleanup: depends on T087
 - [ ] T089 Remove every temporary allow-list entry, leaving only the permanent ones (history, CHANGELOG, ADRs, redirects), and verify no `gpt-rag` Search index or image name remains (only `agent-lz-*` and `agent-app-*`), in contracts/naming-map.md and tests/test_naming_inventory.py
+  - Status: GA cleanup: depends on T087 (includes azure-gpt-rag/* image repos)
 - [ ] T090 Run the full SC-001 scan (`pytest tests/test_naming_inventory.py`) across the umbrella and the three component repos and fix every hit
+  - Status: GA cleanup: depends on T089
 - [X] T091 [P] Add the `## [v4.0.0] - YYYY-MM-DD` entry (breaking rename, new deployments only, preview redeploy, component table from manifest.json) in CHANGELOG.md
 - [X] T092 Run the full test suite (`pytest tests`) and both hook variants for every changed script
 - [ ] T093 Run quickstart.md S1–S7 on a fresh validation environment and confirm SC-002, SC-005, SC-006 (no functional regression), and SC-009
+  - Status: GA: run before T094
 - [ ] T094 After Paulo's approval, tag and publish `v4.0.0` with title `v4.0.0`, release notes with `## Changed`, `## Component versions` (from manifest.json `components[]` and `infra.source`), `## Validation`, the FR-001 transition statement ("GPT-RAG is now Agent Landing Zone"), the FR-004 note, a list of any items still pending on 2026-10-09 (FR-020), and no `gptrag-\d{10}` tokens
+  - Status: gated: needs Paulo's approval
 - [ ] T095 Confirm SC-007 dates (preview by 2026-10-02, GA by 2026-10-09) and close Azure/GPT-RAG#695 with a link to the release
+  - Status: GA: after T094
 
 ---
 
