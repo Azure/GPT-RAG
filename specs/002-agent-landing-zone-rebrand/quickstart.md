@@ -136,7 +136,7 @@ Evidence after the repository rename (`curl -sI`):
 | `github.com/Azure/gpt-rag-orchestrator` | 301 → `Azure/agent-app-orchestrator` |
 | `github.com/Azure/gpt-rag-ingestion` | 301 → `Azure/agent-app-ingestion` |
 | `azure.github.io/agent-landing-zone/` | 200 |
-| `azure.github.io/GPT-RAG/` | 404 (GitHub Pages does not redirect; known item) |
+| `azure.github.io/GPT-RAG/` | 404 (GitHub Pages does not redirect; `Azure/azure.github.io` is archived, so a redirect page needs an org admin to unarchive it, or use an aka.ms link) |
 
 ## S5 — Validate an application definition (US5)
 
