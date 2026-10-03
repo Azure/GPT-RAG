@@ -50,7 +50,12 @@ def test_infra_provenance_commit_matches_manifest() -> None:
     shallow = _git(REPO_ROOT, "rev-parse", "--is-shallow-repository") == "true"
     if not subjects or shallow:
         pytest.skip("Git history unavailable (shallow or exported checkout)")
-    assert expected in subjects
+    if expected in subjects:
+        return
+    # Squash merges fold the provenance commit into a PR commit whose body
+    # still records it; accept that as long as the pinned commit is referenced.
+    bodies = _git(REPO_ROOT, "log", "--format=%B", "--", "infra/main.bicep")
+    assert expected in bodies or source["commit"] in bodies
 
 
 def _git(repository: Path, *args: str) -> str:

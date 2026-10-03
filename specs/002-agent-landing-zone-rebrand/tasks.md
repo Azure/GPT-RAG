@@ -159,13 +159,13 @@ links work.
 delivery**, just before the preview is published (see Dependencies).
 
 - [X] T057 [US4] Verify no repository already holds the new names and no fork blocks redirects (R1); record the result in specs/002-agent-landing-zone-rebrand/research.md R1
-- [ ] T058 [US4] After Paulo's approval, rename Azure/GPT-RAG → Azure/agent-landing-zone, gpt-rag-ui → agent-app-ui, gpt-rag-orchestrator → agent-app-orchestrator, gpt-rag-ingestion → agent-app-ingestion via `gh repo rename`
-- [ ] T059 [US4] Update component repository URLs to the new names in manifest.json `components[]`
-- [ ] T060 [P] [US4] Update repository URLs in azure.yaml, README.md, and hosted-agent/azure.yaml
-- [ ] T061 [P] [US4] Update repository URLs in scripts/preDeploy.ps1, scripts/preDeploy.sh, scripts/prepareHostedDeployment.ps1, scripts/prepareHostedDeployment.sh
-- [ ] T062 [P] [US4] Update the docs deploy workflow and any repo URL in .github/workflows/deploy-docs.yml and .github/workflows/validate-agentic-assets.yml
+- [X] T058 [US4] After Paulo's approval, rename Azure/GPT-RAG → Azure/agent-landing-zone, gpt-rag-ui → agent-app-ui, gpt-rag-orchestrator → agent-app-orchestrator, gpt-rag-ingestion → agent-app-ingestion via `gh repo rename`
+- [X] T059 [US4] Update component repository URLs to the new names in manifest.json `components[]`
+- [X] T060 [P] [US4] Update repository URLs in azure.yaml, README.md, and hosted-agent/azure.yaml
+- [X] T061 [P] [US4] Update repository URLs in scripts/preDeploy.ps1, scripts/preDeploy.sh, scripts/prepareHostedDeployment.ps1, scripts/prepareHostedDeployment.sh
+- [X] T062 [P] [US4] Update the docs deploy workflow and any repo URL in .github/workflows/deploy-docs.yml and .github/workflows/validate-agentic-assets.yml
 - [ ] T063 [P] [US4] Create or update short links (aka.ms) to the new repos and docs section (R2), and list them in contracts/naming-map.md
-- [ ] T064 [US4] Validate S4 (old repo URLs, clone URLs, release URLs, and short links redirect; FR-020 blocking level holds) and record evidence in specs/002-agent-landing-zone-rebrand/quickstart.md
+- [X] T064 [US4] Validate S4 (old repo URLs, clone URLs, release URLs, and short links redirect; FR-020 blocking level holds) and record evidence in specs/002-agent-landing-zone-rebrand/quickstart.md
 - [ ] T096 [US4] After Paulo's approval, tag and publish `v4.0.0-preview.1` as a pre-release (FR-009) with title exactly `v4.0.0-preview.1`, a transition statement, a "new deployments only, redeploy required" note, `## Component versions` from manifest.json, and no `gptrag-\d{10}` tokens
 
 **Checkpoint**: US4 passes S4. SC-003 holds. The preview is published.

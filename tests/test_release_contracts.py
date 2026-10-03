@@ -34,21 +34,21 @@ class IntegrationPinTests(unittest.TestCase):
             manifest["infra"]["source"],
         )
         self.assertEqual(
-            ("v4.1.2", "36085af334eaf4d1cb92afb526687cb8d8a74f01"),
+            ("v5.0.0-preview.1", "7cfdef88ce0d5d09ea78657773da8ddcd2d00c0a"),
             (
                 components["gpt-rag-orchestrator"]["tag"],
                 components["gpt-rag-orchestrator"]["commit"],
             ),
         )
         self.assertEqual(
-            ("v2.7.4", "75a2ef17779e634f3b3150f682c8669a7f928481"),
+            ("v3.0.0-preview.1", "5a41a75789305e81d23f26bd84dd981fe80418a9"),
             (
                 components["gpt-rag-ingestion"]["tag"],
                 components["gpt-rag-ingestion"]["commit"],
             ),
         )
         self.assertEqual(
-            ("v2.6.2", "f59cca919f0bc59631d7bba7f3e223dff3718244"),
+            ("v3.0.0-preview.1", "302c3fcc356ed9ec706d822c20e114a62a0f385d"),
             (
                 components["gpt-rag-ui"]["tag"],
                 components["gpt-rag-ui"]["commit"],

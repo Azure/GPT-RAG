@@ -22,7 +22,8 @@ MCP_FIXTURE_CONTRACT_VERSION = "v3.7.0"
 
 
 def version_tuple(tag):
-    return tuple(int(part) for part in tag.removeprefix("v").split("."))
+    core = tag.removeprefix("v").split("-", 1)[0]
+    return tuple(int(part) for part in core.split("."))
 
 
 def render_json_template(template_name, context):

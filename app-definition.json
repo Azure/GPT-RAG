@@ -8,7 +8,7 @@
       "name": "ui",
       "kind": "containerapp",
       "path": "ui",
-      "source": { "commit": "f59cca919f0bc59631d7bba7f3e223dff3718244" },
+      "source": { "commit": "302c3fcc356ed9ec706d822c20e114a62a0f385d" },
       "profiles": ["blob-delegator"],
       "ingress": "external"
     },
@@ -16,7 +16,7 @@
       "name": "orchestrator",
       "kind": "containerapp",
       "path": "orchestrator",
-      "source": { "commit": "36085af334eaf4d1cb92afb526687cb8d8a74f01" },
+      "source": { "commit": "7cfdef88ce0d5d09ea78657773da8ddcd2d00c0a" },
       "profiles": ["model-user", "retrieval-reader", "conversation-store"],
       "ingress": "external"
     },
@@ -24,7 +24,7 @@
       "name": "ingestion",
       "kind": "containerapp",
       "path": "ingestion",
-      "source": { "commit": "75a2ef17779e634f3b3150f682c8669a7f928481" },
+      "source": { "commit": "5a41a75789305e81d23f26bd84dd981fe80418a9" },
       "profiles": ["model-user", "conversation-store", "ingestion-writer"],
       "ingress": "external",
       "resources": { "cpu": 1.0, "memory": "3.0Gi" }
