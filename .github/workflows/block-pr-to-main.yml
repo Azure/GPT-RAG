@@ -54,7 +54,7 @@ jobs:
 
             Release pull requests are the exception: a branch named exactly \`release/<MAJOR>.<MINOR>.<PATCH>\` may target \`main\`.
 
-            For more information, see our [Contributing Guide](https://azure.github.io/GPT-RAG/contributing/).
+            For more information, see our [Contributing Guide](https://azure.github.io/agent-landing-zone/contributing/).
 
             ---
             *This is an automated message.*`;

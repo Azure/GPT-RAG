@@ -106,6 +106,17 @@ first" message from [azd-lifecycle.md](./contracts/azd-lifecycle.md).
 3. A link that is not yet migrated is recorded as a known item in the release
    notes. It does not block the release (FR-020).
 
+Evidence after the repository rename (`curl -sI`):
+
+| Legacy URL | Result |
+| --- | --- |
+| `github.com/Azure/GPT-RAG` | 301 → `Azure/agent-landing-zone` |
+| `github.com/Azure/gpt-rag-ui` | 301 → `Azure/agent-app-ui` |
+| `github.com/Azure/gpt-rag-orchestrator` | 301 → `Azure/agent-app-orchestrator` |
+| `github.com/Azure/gpt-rag-ingestion` | 301 → `Azure/agent-app-ingestion` |
+| `azure.github.io/agent-landing-zone/` | 200 |
+| `azure.github.io/GPT-RAG/` | 404 (GitHub Pages does not redirect; known item) |
+
 ## S5 — Validate an application definition (US5)
 
 ```powershell

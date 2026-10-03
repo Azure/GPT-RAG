@@ -20,7 +20,7 @@ MANIFEST = {
     "components": [
         {
             "name": "gpt-rag-orchestrator",
-            "repo": "https://github.com/azure/gpt-rag-orchestrator.git",
+            "repo": "https://github.com/Azure/agent-app-orchestrator.git",
             "tag": "v3.10.0",
             "commit": SOURCE_COMMIT,
         }
