@@ -172,7 +172,7 @@ delivery**, just before the preview is published (see Dependencies).
 - [ ] T063 [P] [US4] Create or update short links (aka.ms) to the new repos and docs section (R2), and list them in contracts/naming-map.md
   - Status: blocked: needs the internal aka.ms tool (manual)
 - [X] T064 [US4] Validate S4 (old repo URLs, clone URLs, release URLs, and short links redirect; FR-020 blocking level holds) and record evidence in specs/002-agent-landing-zone-rebrand/quickstart.md
-- [ ] T096 [US4] After Paulo's approval, tag and publish `v4.0.0-preview.1` as a pre-release (FR-009) with title exactly `v4.0.0-preview.1`, a transition statement, a "new deployments only, redeploy required" note, `## Component versions` from manifest.json, and no `gptrag-\d{10}` tokens
+- [X] T096 [US4] After Paulo's approval, tag and publish `v4.0.0-preview.1` as a pre-release (FR-009) with title exactly `v4.0.0-preview.1`, a transition statement, a "new deployments only, redeploy required" note, `## Component versions` from manifest.json, and no `gptrag-\d{10}` tokens
   - Status: gated: needs Paulo's approval
 
 **Checkpoint**: US4 passes S4. SC-003 holds. The preview is published.
