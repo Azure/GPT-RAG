@@ -1,15 +1,13 @@
 # Changelog
 
-## [Unreleased]
-
-Staged on `develop`; will be released as `v4.0.0`.
+## [v4.0.0] - 2026-10-03
 
 ### Changed
 - **Breaking:** GPT-RAG is now Agent Landing Zone. The product, repositories, and user-visible names are renamed.
 - **Breaking:** App Configuration label renamed to `agent-lz`.
 - **Breaking:** Environment variables use the `AGENTLZ_` prefix.
 - Infrastructure is now kept in this repository instead of being pulled from an external template.
-- Component pins updated to the `preview.2` releases. These read App Configuration settings from both the `agent-lz` and the legacy `gpt-rag` labels.
+- Component pins updated to the GA releases (UI `v3.0.0`, orchestrator `v5.0.0`, ingestion `v3.0.0`). These read App Configuration settings from both the `agent-lz` and the legacy `gpt-rag` labels.
 
 ### Added
 - Infrastructure-only deployment: run `azd provision`, then `azd deploy` later.
@@ -17,6 +15,15 @@ Staged on `develop`; will be released as `v4.0.0`.
 
 ### Notes
 - New deployments only. Existing GPT-RAG deployments are not upgraded in place; redeploy into a new environment. GPT-RAG release tags stay available.
+
+### Validation
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v3.0.0 |
+| gpt-rag-orchestrator | v5.0.0 |
+| gpt-rag-ingestion | v3.0.0 |
+| infra / AI Landing Zone | v2.7.3 |
 
 ## [v3.8.11] - 2026-09-28
 
