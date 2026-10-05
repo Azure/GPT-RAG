@@ -3,7 +3,10 @@
 ## [Unreleased]
 
 ### Fixed
-- Chat returned 401 on a default deployment because the orchestrator requires `X-API-KEY` or `dapr-api-token`, but `useCAppAPIKey` defaulted to `false`, so no credential was provisioned. `USE_CAPP_API_KEY` now defaults to `true`, which provisions per-app API keys in Key Vault and publishes them through App Configuration Key Vault references. Deployments with `DEPLOY_KEY_VAULT=false` or a non-`appConfig` runtime mode must now set `USE_CAPP_API_KEY=false` explicitly; preflight flags this with `CAPP_API_KEY_PREREQUISITES`. Hosted-agent topologies authenticate with Entra ID, so composition forces `useCAppAPIKey=false` there and no key or secret is created (unless `PRESERVE_CLASSIC_RUNTIME=true` keeps the classic orchestrator).
+- Chat returned 401 on a default deployment because the orchestrator required a credential that was never provisioned. The UI now authenticates to the orchestrator without keys, using a managed identity token sent in `X-Service-Authorization` (ADR-0019). In classic mode, post-provision publishes `ORCHESTRATOR_AUTH_AUDIENCE` and `ORCHESTRATOR_ALLOWED_CALLER_IDS` (label `agent-lz`), taken from the UI's user-assigned identity. Both can be overridden through environment variables. Requires the orchestrator and UI releases that include Azure/agent-app-orchestrator#370 and Azure/agent-app-ui#118.
+
+### Changed
+- The orchestrator API key (`USE_CAPP_API_KEY`) is now an opt-in fallback that defaults to `false`. Composition forces it off in hosted-agent topologies, which have no Dapr and use Entra ID, unless `PRESERVE_CLASSIC_RUNTIME=true` keeps the classic orchestrator.
 
 ## [v4.0.0] - 2026-10-03
 

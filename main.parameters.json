@@ -20,7 +20,7 @@
     "privateEndpointResourceGroupName":    { "value": "${AZURE_PE_RESOURCE_GROUP_NAME=}" },
     "deploymentMode":                      { "value": "${DEPLOYMENT_MODE=standalone}" },
     "useUAI":                              { "value": "${USE_UAI}" },
-    "useCAppAPIKey":                       { "value": "${USE_CAPP_API_KEY=true}" },    
+    "useCAppAPIKey":                       { "value": "${USE_CAPP_API_KEY=false}" },    
     "useZoneRedundancy":                   { "value": "false" },    
     "enableAgenticRetrieval":              { "value": "${ENABLE_AGENTIC_RETRIEVAL}" },
     "retrievalBackend":                    { "value": "${RETRIEVAL_BACKEND=foundry_iq}" },

@@ -50,7 +50,7 @@ if ($networkExitCode -ne 0) {
 # Container APP API Keys Warning
 #-------------------------------------------------------------------------------
 Write-Host ""
-if (-not $env:USE_CAPP_API_KEY -or $env:USE_CAPP_API_KEY.ToLower() -eq 'true') {
+if ($env:USE_CAPP_API_KEY -and $env:USE_CAPP_API_KEY.ToLower() -eq 'true') {
     Write-Host "🔑 Using API Key for Container Apps access."
     Write-Host "⚠️ IMPORTANT: Each App API Key was initialized with resourceToken."
     Write-Host "    Please update to a custom API key ASAP."
@@ -641,7 +641,7 @@ function Set-AgentLzAppConfiguration {
         FOUNDRY_IQ_MCP_LOG_TOOL_ARGUMENTS = $mcpLogToolArguments
         NETWORK_ISOLATION = (Get-OptionalEnvValue 'NETWORK_ISOLATION' 'false')
         USE_UAI = (Get-OptionalEnvValue 'USE_UAI' 'false')
-        USE_CAPP_API_KEY = (Get-OptionalEnvValue 'USE_CAPP_API_KEY' 'true')
+        USE_CAPP_API_KEY = (Get-OptionalEnvValue 'USE_CAPP_API_KEY' 'false')
         LOG_LEVEL = 'INFO'
         ENABLE_CONSOLE_LOGGING = 'true'
         RELEASE = $release
