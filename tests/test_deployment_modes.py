@@ -1305,5 +1305,42 @@ class AppDefinitionDeploymentTests(unittest.TestCase):
         )
 
 
+class OrchestratorApiKeyGateTests(unittest.TestCase):
+    HOSTED_ENV = {
+        "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "true",
+        "HOSTED_AGENT_IMAGE_VERSION": DIGEST,
+        "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
+    }
+
+    def _api_key_param(self, env: dict[str, str]) -> object:
+        composed = compose_parameters(source_parameters(), env)
+        return composed["parameters"]["useCAppAPIKey"]
+
+    def test_classic_keeps_api_key_default_enabled(self) -> None:
+        value = self._api_key_param(
+            {
+                "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "false",
+                "DEPLOY_ADMINISTRATIVE_PANEL": "false",
+            }
+        )
+        self.assertEqual(value, {"value": "${USE_CAPP_API_KEY=true}"})
+
+    def test_hosted_modes_do_not_create_api_key(self) -> None:
+        for panel in ("false", "true"):
+            with self.subTest(panel=panel):
+                env = {**self.HOSTED_ENV, "DEPLOY_ADMINISTRATIVE_PANEL": panel}
+                self.assertEqual(self._api_key_param(env), {"value": False})
+
+    def test_preserved_classic_runtime_keeps_api_key(self) -> None:
+        value = self._api_key_param(
+            {
+                "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+                "PRESERVE_CLASSIC_RUNTIME": "true",
+                "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
+            }
+        )
+        self.assertNotEqual(value, {"value": False})
+
+
 if __name__ == "__main__":
     unittest.main()
