@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+- Chat returned 401 on a default deployment because the orchestrator requires `X-API-KEY` or `dapr-api-token`, but `useCAppAPIKey` defaulted to `false`, so no credential was provisioned. `USE_CAPP_API_KEY` now defaults to `true`, which provisions per-app API keys in Key Vault and publishes them through App Configuration Key Vault references. Deployments with `DEPLOY_KEY_VAULT=false` or a non-`appConfig` runtime mode must now set `USE_CAPP_API_KEY=false` explicitly; preflight flags this with `CAPP_API_KEY_PREREQUISITES`.
+
 ## [v4.0.0] - 2026-10-03
 
 ### Changed

@@ -64,7 +64,7 @@ fi
 # Container APP API Keys Warning
 #-------------------------------------------------------------------------------
 echo
-if is_truthy "${USE_CAPP_API_KEY:-false}"; then
+if is_truthy "${USE_CAPP_API_KEY:-true}"; then
   echo "🔑 Using API Key for Container Apps access."
   echo "⚠️ IMPORTANT: Each App API Key was initialized with resourceToken."
   echo "    Please update to a custom API key ASAP."
