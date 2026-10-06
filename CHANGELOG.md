@@ -2,7 +2,11 @@
 
 ## [v4.1.1] - 2026-10-06
 
+### Changed
+- `DEPLOY_ACR_TASK_AGENT_POOL` now defaults to `true`. With `NETWORK_ISOLATION=true` the foundation provisions the in-VNet ACR Task agent pool, so remote image builds work without opening the registry to the public network. Without network isolation no pool is created (#741).
+
 ### Fixed
+- `azd deploy` now fails early, before deploying any application, when `NETWORK_ISOLATION=true` and no ACR Task agent pool exists, with guidance to provision the pool or use `BUILD_MODE=local` from a VNet-connected host (#741).
 - Keyless UI-to-orchestrator auth now works with the default system-assigned frontend identity: post-provision publishes `ORCHESTRATOR_AUTH_AUDIENCE` as the Azure Resource Manager audience when no user-assigned identity or explicit audience exists. Previously the audience was empty and chat returned 401 (ADR-0019).
 
 ### Validation

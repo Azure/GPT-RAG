@@ -204,6 +204,14 @@ python3 -m config.deployment.private_network --stage pre-deploy || {
   exit "$network_exit"
 }
 
+# Under network isolation the registry has no public access, so ACR Task builds
+# only work through the in-VNet agent pool (#741). Fail before touching any app.
+build_mode_override="$(printf '%s' "${BUILD_MODE:-}" | tr '[:upper:]' '[:lower:]')"
+if [ "$network_isolation" = "true" ] && [ -z "$acr_task_agent_pool" ] && [ "$build_mode_override" != "local" ]; then
+  red "NETWORK_ISOLATION=true but no ACR Task agent pool was provisioned (ACR_TASK_AGENT_POOL is empty). Run 'azd env set DEPLOY_ACR_TASK_AGENT_POOL true' and 'azd provision', or set BUILD_MODE=local on a VNet-connected host with Docker."
+  exit 1
+fi
+
 if ! docker info >/dev/null 2>&1; then
   if [ "$network_isolation" = "true" ] || [ -n "$acr_task_agent_pool" ]; then
     yellow "Docker is not available; component deploys will use ACR remote builds."
