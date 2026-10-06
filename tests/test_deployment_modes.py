@@ -1388,8 +1388,16 @@ class KeylessOrchestratorAuthTests(unittest.TestCase):
         settings = appconfig.orchestrator_caller_settings(
             {}, {"principalId": "sys"}
         )
-        self.assertEqual(settings["ORCHESTRATOR_AUTH_AUDIENCE"], "")
+        self.assertEqual(
+            settings["ORCHESTRATOR_AUTH_AUDIENCE"],
+            appconfig.SYSTEM_IDENTITY_FALLBACK_AUDIENCE,
+        )
         self.assertEqual(settings["ORCHESTRATOR_ALLOWED_CALLER_IDS"], "sys")
+
+    def test_caller_settings_no_identity_stays_empty(self) -> None:
+        settings = appconfig.orchestrator_caller_settings({}, {})
+        self.assertEqual(settings["ORCHESTRATOR_AUTH_AUDIENCE"], "")
+        self.assertEqual(settings["ORCHESTRATOR_ALLOWED_CALLER_IDS"], "")
 
     def test_publish_skips_empty_keyless_values(self) -> None:
         with patch.object(appconfig, "_run_az", return_value="") as run:

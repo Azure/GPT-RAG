@@ -82,6 +82,9 @@ def _container_app(
     return result
 
 
+SYSTEM_IDENTITY_FALLBACK_AUDIENCE = "https://management.azure.com"
+
+
 def orchestrator_caller_settings(
     environment: Mapping[str, str],
     frontend: Mapping[str, str],
@@ -90,13 +93,16 @@ def orchestrator_caller_settings(
 
     The UI calls the orchestrator with a token from its user-assigned managed
     identity; the token audience is that identity's client ID and the caller
-    is that identity's principal ID. A system-assigned frontend identity has
-    no resolvable client ID here, so the audience stays empty and keyless
-    service auth is disabled unless configured explicitly.
+    is that identity's principal ID. A frontend with only a system-assigned
+    identity falls back to ``SYSTEM_IDENTITY_FALLBACK_AUDIENCE`` so keyless
+    auth still works; the caller check (``oid`` equals the frontend system
+    principal) is what binds the token to the UI. Prefer a user-assigned
+    identity or an explicit audience for a narrower token.
     """
     audience = (
         (environment.get("ORCHESTRATOR_AUTH_AUDIENCE") or "").strip()
         or frontend.get("uaiClientId", "")
+        or (SYSTEM_IDENTITY_FALLBACK_AUDIENCE if frontend.get("principalId") else "")
     )
     callers = (
         (environment.get("ORCHESTRATOR_ALLOWED_CALLER_IDS") or "").strip()
