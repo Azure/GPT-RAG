@@ -1,4 +1,4 @@
-"""Resolve and materialize the GPT-RAG deployment topology (ADR-0001 rev. 5).
+"""Resolve and materialize the Agent Landing Zone deployment topology (ADR-0001 rev. 5).
 
 This is the single shared CLI/integration point used by both
 ``scripts/preProvision`` implementations (PowerShell and POSIX shell) so the
@@ -182,7 +182,7 @@ def resource_group_has_resources(
 
 
 def read_persisted_settings(endpoint: str | None) -> dict[str, str]:
-    """Read persisted GPT-RAG topology markers, failing closed on access errors.
+    """Read persisted Agent Landing Zone topology markers, failing closed on access errors.
 
     A missing endpoint means the environment predates the App Configuration
     output and is handled as unmarked/classic. Once an endpoint is known,
@@ -355,7 +355,7 @@ def _print_description(mode: DeploymentMode) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(
         description=(
-            "Resolve the GPT-RAG deployment topology (ADR-0001 revision 5)."
+            "Resolve the Agent Landing Zone deployment topology (ADR-0001 revision 5)."
         )
     )
     parser.add_argument(

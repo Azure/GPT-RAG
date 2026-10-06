@@ -14,8 +14,8 @@ exactly one container path (``/dbs/{database}/colls/{container}``) using the
 same built-in Cosmos SQL role GUIDs AILZ already uses
 (``00000000-0000-0000-0000-000000000002`` Data Contributor,
 ``00000000-0000-0000-0000-000000000001`` Data Reader). This keeps the
-AI Landing Zone submodule generic while all GPT-RAG-specific narrowing lives
-here, in a GPT-RAG config/hook, per AGENTS.md.
+AI Landing Zone submodule generic while all application-specific narrowing lives
+here, in an Agent Landing Zone config/hook, per AGENTS.md.
 
 Identity/role matrix (ADR-0004):
 

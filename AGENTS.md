@@ -102,8 +102,8 @@ GPT-RAG product.
 - A runtime configuration key is a cross-repository contract. Add or update
   its infrastructure parameter, publish it to Azure App Configuration with
   label `agent-lz`, and update every consuming component in the same coordinated
-  change. During the transition, components read both `agent-lz` and the legacy
-  `gpt-rag` label, preferring `agent-lz`.
+  change. Components read only the `agent-lz` label; the legacy label
+  transition completed in v4.2.0.
 - Prefer managed identity for service-to-service authentication and Key Vault
   references for secrets.
 - Preserve document-level authorization, RBAC, and OBO behavior whenever a

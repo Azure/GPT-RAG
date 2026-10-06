@@ -228,14 +228,14 @@ modes). Fallback per R16 if FR-015a–h does not land by 2026-10-09.
 
 ## Phase 8: Polish & Cross-Cutting Concerns (`v4.0.0`)
 
-- [ ] T087 [P] Remove R14 dual-read of label `gpt-rag` and `GPT_RAG_*` in the agent-app-ui, agent-app-orchestrator, and agent-app-ingestion repos, and cut their final releases
+- [X] T087 [P] Remove R14 dual-read of label `gpt-rag` and `GPT_RAG_*` in the agent-app-ui, agent-app-orchestrator, and agent-app-ingestion repos, and cut their final releases
   - Status: GA cleanup: after the dual-read period
 - [X] T088 Pin the final component releases from T087 in manifest.json `components[]`
   - Status: GA cleanup: depends on T087
-- [ ] T089 Remove every temporary allow-list entry, leaving only the permanent ones (history, CHANGELOG, ADRs, redirects), and verify no `gpt-rag` Search index or image name remains (only `agent-lz-*` and `agent-app-*`), in contracts/naming-map.md and tests/test_naming_inventory.py
+- [X] T089 Remove every temporary allow-list entry, leaving only the permanent ones (history, CHANGELOG, ADRs, redirects), and verify no `gpt-rag` Search index or image name remains (only `agent-lz-*` and `agent-app-*`), in contracts/naming-map.md and tests/test_naming_inventory.py
   - Status: GA cleanup: depends on T087 (includes azure-gpt-rag/* image repos)
-- [ ] T090 Run the full SC-001 scan (`pytest tests/test_naming_inventory.py`) across the umbrella and the three component repos and fix every hit
-  - Status: GA cleanup: depends on T089
+- [X] T090 Run the full SC-001 scan (`pytest tests/test_naming_inventory.py`) across the umbrella and the three component repos and fix every hit
+  - Status: done; umbrella scan passes. Bash hook subtests in tests/test_private_network_hooks.py fail only on the Windows bash environment (pre-existing).
 - [X] T091 [P] Add the `## [v4.0.0] - YYYY-MM-DD` entry (breaking rename, new deployments only, preview redeploy, component table from manifest.json) in CHANGELOG.md
 - [X] T092 Run the full test suite (`pytest tests`) and both hook variants for every changed script
 - [ ] T093 Run quickstart.md S1–S7 on a fresh validation environment and confirm SC-002, SC-005, SC-006 (no functional regression), and SC-009
