@@ -1,5 +1,19 @@
 # Changelog
 
+## [v4.1.2] - 2026-10-07
+
+### Fixed
+- Fresh deployments failed in preprovision because `app-definition.json` `source.commit` values did not match the component commits pinned in `manifest.json`. The app definition now pins the same commits as the manifest.
+
+### Validation
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v3.1.1 |
+| gpt-rag-orchestrator | v5.1.1 |
+| gpt-rag-ingestion | v3.0.1 |
+| infra / AI Landing Zone | v2.7.3 |
+
 ## [v4.1.1] - 2026-10-06
 
 ### Changed
