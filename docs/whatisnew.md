@@ -1,3 +1,6 @@
+!!! warning "This documentation has moved"
+    GPT-RAG is now **Agent Landing Zone**. The maintained documentation is at [azure.github.io/AI-Landing-Zones/agent-landing-zone](https://azure.github.io/AI-Landing-Zones/agent-landing-zone/). This page is kept for reference only and is no longer updated.
+
 This page highlights the notable features added to GPT-RAG over time. It is a
 feature outline, not a full changelog. For the detailed record of every release,
 patch, and fix, see the [GitHub releases](https://github.com/Azure/GPT-RAG/releases).

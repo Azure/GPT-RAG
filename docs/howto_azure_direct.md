@@ -1,3 +1,6 @@
+!!! warning "This documentation has moved"
+    GPT-RAG is now **Agent Landing Zone**. The maintained documentation is at [azure.github.io/AI-Landing-Zones/agent-landing-zone](https://azure.github.io/AI-Landing-Zones/agent-landing-zone/). This page is kept for reference only and is no longer updated.
+
 # Azure Direct Models
 
 Azure Direct Models are hosted and exposed by Microsoft Foundry. You call them via the Foundry inference APIs using Microsoft Entra ID–based authentication, instead of Azure OpenAI–specific APIs. This page explains how to switch GPT-RAG’s default inference model (currently, `gpt-5-nano`) to a different model.

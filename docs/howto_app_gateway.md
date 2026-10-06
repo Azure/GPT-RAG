@@ -1,3 +1,6 @@
+!!! warning "This documentation has moved"
+    GPT-RAG is now **Agent Landing Zone**. The maintained documentation is at [azure.github.io/AI-Landing-Zones/agent-landing-zone](https://azure.github.io/AI-Landing-Zones/agent-landing-zone/). This page is kept for reference only and is no longer updated.
+
 ## Application Gateway public ingress
 
 GPT-RAG uses the Azure AI Landing Zone Bicep module for network-isolated infrastructure. Application Gateway WAF v2 public ingress is implemented in that landing-zone module, while GPT-RAG exposes the `publicIngress` parameter from the root `main.parameters.json`.
