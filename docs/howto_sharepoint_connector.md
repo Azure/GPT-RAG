@@ -1,3 +1,6 @@
+!!! warning "This documentation has moved"
+    GPT-RAG is now **Agent Landing Zone**. The maintained documentation is at [azure.github.io/AI-Landing-Zones/agent-landing-zone](https://azure.github.io/AI-Landing-Zones/agent-landing-zone/). This page is kept for reference only and is no longer updated.
+
 # SharePoint Setup (Azure AI Search direct)
 
 !!! info "This is the Azure AI Search direct path, not Foundry IQ"

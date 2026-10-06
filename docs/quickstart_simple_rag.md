@@ -1,3 +1,6 @@
+!!! warning "This documentation has moved"
+    GPT-RAG is now **Agent Landing Zone**. The maintained documentation is at [azure.github.io/AI-Landing-Zones/agent-landing-zone](https://azure.github.io/AI-Landing-Zones/agent-landing-zone/). This page is kept for reference only and is no longer updated.
+
 # Simple RAG Quick Start Guide
 
 Get document-based AI question answering working in **60 minutes** using **GPT-RAG's automated deployment**.

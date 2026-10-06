@@ -1,3 +1,6 @@
+!!! warning "This documentation has moved"
+    GPT-RAG is now **Agent Landing Zone**. The maintained documentation is at [azure.github.io/AI-Landing-Zones/agent-landing-zone](https://azure.github.io/AI-Landing-Zones/agent-landing-zone/). This page is kept for reference only and is no longer updated.
+
 The **GPT-RAG Data Ingestion** service automates the processing of diverse document types, such as PDFs, images, spreadsheets, transcripts, and SharePoint files, preparing them for indexing in Azure AI Search. It uses intelligent chunking strategies tailored to each format, generates text and image embeddings, and enables rich, multimodal retrieval experiences for agent-based RAG applications.
 
 !!! note "Develop adoption, not a release"

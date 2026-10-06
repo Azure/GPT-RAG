@@ -1,3 +1,6 @@
+!!! warning "This documentation has moved"
+    GPT-RAG is now **Agent Landing Zone**. The maintained documentation is at [azure.github.io/AI-Landing-Zones/agent-landing-zone](https://azure.github.io/AI-Landing-Zones/agent-landing-zone/). This page is kept for reference only and is no longer updated.
+
 # Hosted conversation continuity platform contract
 
 GPT-RAG has pivoted hosted conversation ownership to delegated user identity.
