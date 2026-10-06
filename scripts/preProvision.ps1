@@ -155,6 +155,23 @@ try {
     Pop-Location
 }
 
+# The composed infra/main.parameters.json is environment-specific; hide local
+# regeneration from git status so the committed seed stays untouched.
+if (Get-Command git -ErrorAction SilentlyContinue) {
+    try {
+        $inWorkTree = (& git -C $projectRoot rev-parse --is-inside-work-tree 2>$null)
+        if ($LASTEXITCODE -eq 0 -and $inWorkTree -eq 'true') {
+            & git -C $projectRoot ls-files --error-unmatch 'infra/main.parameters.json' *> $null
+            if ($LASTEXITCODE -eq 0) {
+                & git -C $projectRoot update-index --skip-worktree 'infra/main.parameters.json' *> $null
+            }
+        }
+    } catch {
+        Write-Host "Note: could not mark infra/main.parameters.json as skip-worktree; it may appear as modified in git status." -ForegroundColor Yellow
+    }
+    $global:LASTEXITCODE = 0
+}
+
 # Helper to match truthy values (1, true, t)
 function Test-Truthy($value) {
     if (-not $value) { return $false }

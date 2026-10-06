@@ -100,5 +100,6 @@ venv.bak/
 .ropeproject
 # infra/main.parameters.json is a tracked seed so azd can initialize the Bicep
 # provider in a fresh clone; scripts/preProvision regenerates it on every
-# provision (a local diff is expected). Optionally run:
-#   git update-index --skip-worktree infra/main.parameters.json
+# provision and marks it skip-worktree so the regenerated file does not show
+# in git status. To commit seed changes, first run:
+#   git update-index --no-skip-worktree infra/main.parameters.json
