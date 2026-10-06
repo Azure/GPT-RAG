@@ -1,12 +1,21 @@
 # Changelog
 
-## [Unreleased]
+## [v4.1.0] - 2026-10-05
 
 ### Fixed
 - Chat returned 401 on a default deployment because the orchestrator required a credential that was never provisioned. The UI now authenticates to the orchestrator without keys, using a managed identity token sent in `X-Service-Authorization` (ADR-0019). In classic mode, post-provision publishes `ORCHESTRATOR_AUTH_AUDIENCE` and `ORCHESTRATOR_ALLOWED_CALLER_IDS` (label `agent-lz`), taken from the UI's user-assigned identity. Both can be overridden through environment variables. Requires the orchestrator and UI releases that include Azure/agent-app-orchestrator#370 and Azure/agent-app-ui#118.
 
 ### Changed
 - The orchestrator API key (`USE_CAPP_API_KEY`) is now an opt-in fallback that defaults to `false`. Composition forces it off in hosted-agent topologies, which have no Dapr and use Entra ID, unless `PRESERVE_CLASSIC_RUNTIME=true` keeps the classic orchestrator.
+
+### Validation
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v3.1.0 |
+| gpt-rag-orchestrator | v5.1.0 |
+| gpt-rag-ingestion | v3.0.0 |
+| infra / AI Landing Zone | v2.7.3 |
 
 ## [v4.0.0] - 2026-10-03
 
