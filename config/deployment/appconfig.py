@@ -1,4 +1,4 @@
-"""Publish mode-specific GPT-RAG runtime references to App Configuration."""
+"""Publish mode-specific Agent Landing Zone runtime references to App Configuration."""
 
 from __future__ import annotations
 

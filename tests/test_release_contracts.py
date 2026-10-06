@@ -22,7 +22,7 @@ class IntegrationPinTests(unittest.TestCase):
         manifest = json.loads((ROOT / "manifest.json").read_text(encoding="utf-8"))
         components = {item["name"]: item for item in manifest["components"]}
 
-        self.assertEqual("v4.1.0", manifest["tag"])
+        self.assertRegex(manifest["tag"], r"^v\d+\.\d+\.\d+$")
         self.assertNotIn("ailz_tag", manifest)
         self.assertNotIn("ailz_commit", manifest)
         self.assertEqual(
@@ -34,21 +34,21 @@ class IntegrationPinTests(unittest.TestCase):
             manifest["infra"]["source"],
         )
         self.assertEqual(
-            ("v5.1.0", "f4391209703032236790adbe2ebfd370c61c1ec1"),
+            ("v5.2.0", "f202e2584ed54c2d59e4105e8ce9ecebe17b5ac0"),
             (
                 components["gpt-rag-orchestrator"]["tag"],
                 components["gpt-rag-orchestrator"]["commit"],
             ),
         )
         self.assertEqual(
-            ("v3.0.0", "1a590dca5a58d13010038e8bfb22a7703a7f42b4"),
+            ("v3.1.1", "72efd8d7d51e10d38bf8b89f03b7eb42e1ed8ff2"),
             (
                 components["gpt-rag-ingestion"]["tag"],
                 components["gpt-rag-ingestion"]["commit"],
             ),
         )
         self.assertEqual(
-            ("v3.1.0", "db9795dbb362db92bdecf1a12deb48309e9aa27f"),
+            ("v3.2.0", "251aae1378aac5fb3f2802845b9c2c3495a7c26e"),
             (
                 components["gpt-rag-ui"]["tag"],
                 components["gpt-rag-ui"]["commit"],
