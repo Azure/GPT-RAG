@@ -154,6 +154,15 @@ if [ $COMPOSE_EXIT -ne 0 ]; then
     exit $COMPOSE_EXIT
 fi
 
+# The composed infra/main.parameters.json is environment-specific; hide local
+# regeneration from git status so the committed seed stays untouched.
+if command -v git >/dev/null 2>&1 &&
+    [ "$(git -C "$PROJECT_ROOT" rev-parse --is-inside-work-tree 2>/dev/null)" = "true" ] &&
+    git -C "$PROJECT_ROOT" ls-files --error-unmatch infra/main.parameters.json >/dev/null 2>&1; then
+    git -C "$PROJECT_ROOT" update-index --skip-worktree infra/main.parameters.json >/dev/null 2>&1 ||
+        echo "${YELLOW}Note: could not mark infra/main.parameters.json as skip-worktree; it may appear as modified in git status.${NC}"
+fi
+
 ###############################################################################
 # Agent Landing Zone regional readiness preflight
 ###############################################################################

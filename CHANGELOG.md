@@ -3,8 +3,8 @@
 ## [Unreleased]
 
 ### Fixed
-- First `azd up` on a fresh clone failed with "missing required inputs" because the Bicep provider reads `infra/main.parameters.json` before the `preprovision` hook generates it. azd initializes the provider before any hook runs, so `infra/main.parameters.json` is now committed as a seed (copy of `main.parameters.json`); `preprovision` still recomposes it on every provision, so a local diff on that file after provisioning is expected (optionally `git update-index --skip-worktree infra/main.parameters.json`).
-
+- First `azd up` on a fresh clone failed with "missing required inputs" because the Bicep provider reads `infra/main.parameters.json` before the `preprovision` hook generates it. azd initializes the provider before any hook runs, so `infra/main.parameters.json` is now committed as a seed (copy of `main.parameters.json`); `preprovision` still recomposes it on every provision, so a local diff on that file after provisioning is expected.
+- The `preprovision` hooks (PowerShell and shell) now automatically mark `infra/main.parameters.json` as skip-worktree in git checkouts, so the regenerated parameters no longer appear in `git status`. Run `git update-index --no-skip-worktree infra/main.parameters.json` to commit intentional seed changes.
 ## [v4.1.2] - 2026-10-07
 
 ### Fixed
