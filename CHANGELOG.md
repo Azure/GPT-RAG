@@ -1,11 +1,20 @@
 # Changelog
 
-## [Unreleased]
+## [v4.2.0] - 2026-10-06
 
 ### Changed
 - Pinned the final component releases: agent-app-ui v3.2.0, agent-app-orchestrator v5.2.0, agent-app-ingestion v3.1.1. Components now read only the `agent-lz` App Configuration label; the legacy `gpt-rag` label read was removed.
 - Reworded remaining GPT-RAG prose in post-provision modules, tests, and workflows to Agent Landing Zone, and narrowed the temporary naming allow-list in `contracts/naming-map.md`.
 - The release-contract test now validates the manifest tag format instead of a fixed version.
+
+### Validation
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v3.2.0 |
+| gpt-rag-orchestrator | v5.2.0 |
+| gpt-rag-ingestion | v3.1.1 |
+| infra / AI Landing Zone | v2.7.3 |
 
 ## [v4.1.3] - 2026-10-06
 
