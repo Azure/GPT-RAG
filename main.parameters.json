@@ -100,7 +100,7 @@
     "deployContainerEnv":                   { "value": "true" },
     "deployNsgs":                           { "value": "true" },
     "deployAzureFirewall":                  { "value": "${DEPLOY_AZURE_FIREWALL=true}" },
-    "deployAcrTaskAgentPool":               { "value": "${DEPLOY_ACR_TASK_AGENT_POOL=false}" },
+    "deployAcrTaskAgentPool":               { "value": "${DEPLOY_ACR_TASK_AGENT_POOL=true}" },
     "additionalAcrTaskBuildFqdns":           { "value": [] },
     "bastionAllowedSourceIPs":              { "value": [] },
     "bastionSkuName":                       { "value": "${BASTION_SKU_NAME=Standard}" },

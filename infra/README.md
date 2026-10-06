@@ -282,7 +282,7 @@ Resume before the next build:
 az acr agentpool update -r <acr> -n <pool> --count 1
 ```
 
-The agent pool can be disabled entirely with `deployAcrTaskAgentPool=false` if builds are handled by a central CI/CD runner that already reaches the registry's private endpoint.
+The agent pool is created by default only when `networkIsolation=true` (`DEPLOY_ACR_TASK_AGENT_POOL` defaults to `true`; without network isolation no pool is created and the shared builder is used). If network isolation is on and no pool exists, `azd deploy` stops before deploying any application. The agent pool can be disabled entirely with `deployAcrTaskAgentPool=false` if builds are handled by a central CI/CD runner that already reaches the registry's private endpoint.
 
 ##### BYO VNet subnet ordering
 
@@ -623,8 +623,8 @@ checks in the image build, scan, signing, and promotion pipeline.
 behavior: Premium SKU, private endpoint and DNS integration, and disabled public
 network access when `networkIsolation=true`. Building or pushing an image in
 that mode must happen from a VNet-connected runner, build agent, or jumpbox.
-Set `DEPLOY_ACR_TASK_AGENT_POOL=true` when using the landing-zone VNet-injected
-ACR Tasks pool; its subnet, firewall, private endpoint, and DNS topology remain
+The landing-zone VNet-injected ACR Tasks pool is provisioned by default in that
+mode (`DEPLOY_ACR_TASK_AGENT_POOL=true`); its subnet, firewall, private endpoint, and DNS topology remain
 independently controlled by the existing registry/isolation/pool flags.
 For an existing ACR, set
 `HOSTED_AGENT_CONTAINER_REGISTRY_ROLE_ASSIGNMENT_MODE=rbac-abac` when its role
