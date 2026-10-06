@@ -1305,5 +1305,105 @@ class AppDefinitionDeploymentTests(unittest.TestCase):
         )
 
 
+class OrchestratorApiKeyGateTests(unittest.TestCase):
+    HOSTED_ENV = {
+        "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "true",
+        "HOSTED_AGENT_IMAGE_VERSION": DIGEST,
+        "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
+    }
+
+    def _api_key_param(self, env: dict[str, str]) -> object:
+        composed = compose_parameters(source_parameters(), env)
+        return composed["parameters"]["useCAppAPIKey"]
+
+    def test_classic_api_key_default_disabled(self) -> None:
+        value = self._api_key_param(
+            {
+                "DEPLOY_HOSTED_AGENT_ORCHESTRATION": "false",
+                "DEPLOY_ADMINISTRATIVE_PANEL": "false",
+            }
+        )
+        self.assertEqual(value, {"value": "${USE_CAPP_API_KEY=false}"})
+
+    def test_hosted_modes_do_not_create_api_key(self) -> None:
+        for panel in ("false", "true"):
+            with self.subTest(panel=panel):
+                env = {**self.HOSTED_ENV, "DEPLOY_ADMINISTRATIVE_PANEL": panel}
+                self.assertEqual(self._api_key_param(env), {"value": False})
+
+    def test_preserved_classic_runtime_keeps_api_key(self) -> None:
+        value = self._api_key_param(
+            {
+                "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
+                "PRESERVE_CLASSIC_RUNTIME": "true",
+                "HOSTED_AGENT_RESOURCE_SCOPE": "api://agent/.default",
+            }
+        )
+        self.assertNotEqual(value, {"value": False})
+
+
+
+class KeylessOrchestratorAuthTests(unittest.TestCase):
+    def test_container_app_extracts_user_assigned_identity(self) -> None:
+        payload = json.dumps(
+            {
+                "fqdn": "ui.example",
+                "principalId": None,
+                "userAssigned": {
+                    "/subs/x/uai": {"clientId": "cid", "principalId": "pid"}
+                },
+            }
+        )
+        with patch.object(appconfig, "_run_az", return_value=payload):
+            app = appconfig._container_app("rg", "ui", required=True)
+        self.assertEqual(app["uaiClientId"], "cid")
+        self.assertEqual(app["uaiPrincipalId"], "pid")
+        self.assertEqual(app["principalId"], "")
+
+    def test_caller_settings_prefer_user_assigned_identity(self) -> None:
+        settings = appconfig.orchestrator_caller_settings(
+            {},
+            {"principalId": "sys", "uaiClientId": "cid", "uaiPrincipalId": "pid"},
+        )
+        self.assertEqual(
+            settings,
+            {
+                "ORCHESTRATOR_AUTH_AUDIENCE": "cid",
+                "ORCHESTRATOR_ALLOWED_CALLER_IDS": "pid",
+            },
+        )
+
+    def test_caller_settings_environment_override(self) -> None:
+        settings = appconfig.orchestrator_caller_settings(
+            {
+                "ORCHESTRATOR_AUTH_AUDIENCE": "api://orch",
+                "ORCHESTRATOR_ALLOWED_CALLER_IDS": "a,b",
+            },
+            {"uaiClientId": "cid", "uaiPrincipalId": "pid"},
+        )
+        self.assertEqual(settings["ORCHESTRATOR_AUTH_AUDIENCE"], "api://orch")
+        self.assertEqual(settings["ORCHESTRATOR_ALLOWED_CALLER_IDS"], "a,b")
+
+    def test_caller_settings_system_assigned_fallback(self) -> None:
+        settings = appconfig.orchestrator_caller_settings(
+            {}, {"principalId": "sys"}
+        )
+        self.assertEqual(settings["ORCHESTRATOR_AUTH_AUDIENCE"], "")
+        self.assertEqual(settings["ORCHESTRATOR_ALLOWED_CALLER_IDS"], "sys")
+
+    def test_publish_skips_empty_keyless_values(self) -> None:
+        with patch.object(appconfig, "_run_az", return_value="") as run:
+            appconfig.publish_settings(
+                "https://cfg",
+                {
+                    "ORCHESTRATOR_AUTH_AUDIENCE": "",
+                    "ORCHESTRATOR_ALLOWED_CALLER_IDS": "pid",
+                    "OTHER": "",
+                },
+            )
+        keys = [c.args[0][c.args[0].index("--key") + 1] for c in run.call_args_list]
+        self.assertEqual(keys, ["ORCHESTRATOR_ALLOWED_CALLER_IDS", "OTHER"])
+
+
 if __name__ == "__main__":
     unittest.main()
