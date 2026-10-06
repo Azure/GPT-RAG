@@ -45,7 +45,11 @@ def _container_app(
     *,
     required: bool,
 ) -> dict[str, str]:
-    query = "{fqdn:properties.configuration.ingress.fqdn,principalId:identity.principalId}"
+    query = (
+        "{fqdn:properties.configuration.ingress.fqdn,"
+        "principalId:identity.principalId,"
+        "userAssigned:identity.userAssignedIdentities}"
+    )
     output = _run_az(
         [
             "containerapp",
@@ -64,9 +68,44 @@ def _container_app(
     if not output:
         return {"fqdn": "", "principalId": ""}
     value = json.loads(output)
-    return {
+    result = {
         "fqdn": value.get("fqdn") or "",
         "principalId": value.get("principalId") or "",
+    }
+    user_assigned = value.get("userAssigned") or {}
+    if isinstance(user_assigned, dict):
+        for identity in user_assigned.values():
+            if isinstance(identity, dict) and identity.get("clientId"):
+                result["uaiClientId"] = identity.get("clientId") or ""
+                result["uaiPrincipalId"] = identity.get("principalId") or ""
+                break
+    return result
+
+
+def orchestrator_caller_settings(
+    environment: Mapping[str, str],
+    frontend: Mapping[str, str],
+) -> dict[str, str]:
+    """Resolve keyless (Entra) orchestrator auth settings (ADR-0019).
+
+    The UI calls the orchestrator with a token from its user-assigned managed
+    identity; the token audience is that identity's client ID and the caller
+    is that identity's principal ID. A system-assigned frontend identity has
+    no resolvable client ID here, so the audience stays empty and keyless
+    service auth is disabled unless configured explicitly.
+    """
+    audience = (
+        (environment.get("ORCHESTRATOR_AUTH_AUDIENCE") or "").strip()
+        or frontend.get("uaiClientId", "")
+    )
+    callers = (
+        (environment.get("ORCHESTRATOR_ALLOWED_CALLER_IDS") or "").strip()
+        or frontend.get("uaiPrincipalId", "")
+        or frontend.get("principalId", "")
+    )
+    return {
+        "ORCHESTRATOR_AUTH_AUDIENCE": audience,
+        "ORCHESTRATOR_ALLOWED_CALLER_IDS": callers,
     }
 
 
@@ -195,15 +234,28 @@ def build_settings(
         "CONTAINER_APPS": json.dumps(
             container_apps, separators=(",", ":")
         ),
+        **(
+            orchestrator_caller_settings(environment, frontend)
+            if runtime_mode is DeploymentMode.CLASSIC
+            else {}
+        ),
         **continuity_public_settings(environment),
     }
 
 
+KEYLESS_AUTH_KEYS = frozenset(
+    {"ORCHESTRATOR_AUTH_AUDIENCE", "ORCHESTRATOR_ALLOWED_CALLER_IDS"}
+)
+
+
 def publish_settings(endpoint: str, settings: Mapping[str, str]) -> None:
+    # Empty keyless-auth values are not published so values set by
+    # infrastructure or an operator are never clobbered.
     ordered_settings = [
         (key, value)
         for key, value in settings.items()
         if key != "CHAT_BACKEND"
+        and not (key in KEYLESS_AUTH_KEYS and not value)
     ]
     if "CHAT_BACKEND" in settings:
         ordered_settings.append(("CHAT_BACKEND", settings["CHAT_BACKEND"]))

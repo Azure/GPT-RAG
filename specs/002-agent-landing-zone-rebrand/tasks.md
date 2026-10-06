@@ -229,7 +229,7 @@ modes). Fallback per R16 if FR-015a–h does not land by 2026-10-09.
 
 - [ ] T087 [P] Remove R14 dual-read of label `gpt-rag` and `GPT_RAG_*` in the agent-app-ui, agent-app-orchestrator, and agent-app-ingestion repos, and cut their final releases
   - Status: GA cleanup: after the dual-read period
-- [ ] T088 Pin the final component releases from T087 in manifest.json `components[]`
+- [X] T088 Pin the final component releases from T087 in manifest.json `components[]`
   - Status: GA cleanup: depends on T087
 - [ ] T089 Remove every temporary allow-list entry, leaving only the permanent ones (history, CHANGELOG, ADRs, redirects), and verify no `gpt-rag` Search index or image name remains (only `agent-lz-*` and `agent-app-*`), in contracts/naming-map.md and tests/test_naming_inventory.py
   - Status: GA cleanup: depends on T087 (includes azure-gpt-rag/* image repos)
@@ -239,9 +239,9 @@ modes). Fallback per R16 if FR-015a–h does not land by 2026-10-09.
 - [X] T092 Run the full test suite (`pytest tests`) and both hook variants for every changed script
 - [ ] T093 Run quickstart.md S1–S7 on a fresh validation environment and confirm SC-002, SC-005, SC-006 (no functional regression), and SC-009
   - Status: GA: run before T094
-- [ ] T094 After Paulo's approval, tag and publish `v4.0.0` with title `v4.0.0`, release notes with `## Changed`, `## Component versions` (from manifest.json `components[]` and `infra.source`), `## Validation`, the FR-001 transition statement ("GPT-RAG is now Agent Landing Zone"), the FR-004 note, a list of any items still pending on 2026-10-09 (FR-020), and no `gptrag-\d{10}` tokens
+- [X] T094 After Paulo's approval, tag and publish `v4.0.0` with title `v4.0.0`, release notes with `## Changed`, `## Component versions` (from manifest.json `components[]` and `infra.source`), `## Validation`, the FR-001 transition statement ("GPT-RAG is now Agent Landing Zone"), the FR-004 note, a list of any items still pending on 2026-10-09 (FR-020), and no `gptrag-\d{10}` tokens
   - Status: gated: needs Paulo's approval
-- [ ] T095 Confirm SC-007 dates (preview by 2026-10-02, GA by 2026-10-09) and close Azure/GPT-RAG#695 with a link to the release
+- [X] T095 Confirm SC-007 dates (preview by 2026-10-02, GA by 2026-10-09) and close Azure/GPT-RAG#695 with a link to the release
   - Status: GA: after T094
 
 ---

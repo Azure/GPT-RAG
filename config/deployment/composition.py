@@ -715,6 +715,11 @@ def compose_parameters(
                 ]
     apps.extend(custom_container_apps(environment, apps, hosted_orchestration=hosted))
     parameters["containerAppsList"] = {"value": apps}
+    if hosted and not preserving_classic_runtime:
+        # The orchestrator API key only protects classic UI-to-orchestrator
+        # calls. Hosted mode authenticates with Entra tokens, so no key is
+        # created in Key Vault or referenced from App Configuration.
+        parameters["useCAppAPIKey"] = {"value": False}
 
     databases_parameter = parameters.get("databaseContainersList")
     existing_containers = (
