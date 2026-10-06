@@ -8,14 +8,15 @@
 ### Fixed
 - `azd deploy` now fails early, before deploying any application, when `NETWORK_ISOLATION=true` and no ACR Task agent pool exists, with guidance to provision the pool or use `BUILD_MODE=local` from a VNet-connected host (#741).
 - Keyless UI-to-orchestrator auth now works with the default system-assigned frontend identity: post-provision publishes `ORCHESTRATOR_AUTH_AUDIENCE` as the Azure Resource Manager audience when no user-assigned identity or explicit audience exists. Previously the audience was empty and chat returned 401 (ADR-0019).
+- Components pinned to the patch releases with the same network-isolation guard: gpt-rag-ui v3.1.1, gpt-rag-orchestrator v5.1.1, gpt-rag-ingestion v3.0.1.
 
 ### Validation
 
 | Component | Version |
 | --- | --- |
-| gpt-rag-ui | v3.1.0 |
-| gpt-rag-orchestrator | v5.1.0 |
-| gpt-rag-ingestion | v3.0.0 |
+| gpt-rag-ui | v3.1.1 |
+| gpt-rag-orchestrator | v5.1.1 |
+| gpt-rag-ingestion | v3.0.1 |
 | infra / AI Landing Zone | v2.7.3 |
 
 ## [v4.1.0] - 2026-10-05
