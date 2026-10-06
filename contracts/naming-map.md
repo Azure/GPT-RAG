@@ -41,10 +41,13 @@ Zones brand. Use `agent-lz` (labels) or `agentlz` / `AGENTLZ_` (identifiers).
    and both environment prefixes (`AGENTLZ_`, then `GPT_RAG_`) for one release.
 2. The umbrella switches to writing only `agent-lz` / `AGENTLZ_`.
 3. `manifest.json` moves its pins to the renamed component releases.
+4. Completed in v4.2.0: components dropped the legacy `gpt-rag` label read
+   (orchestrator v5.2.0, UI v3.2.0, ingestion v3.1.1) and read only `agent-lz`.
 
 **Rollback** runs in reverse: restore the previous manifest pins, then the
-previous umbrella writer, then the previous component releases. Because
-components dual-read, steps 2 and 3 can roll back independently.
+previous umbrella writer, then the previous component releases. Since step 4,
+components read only `agent-lz`, so rolling the umbrella back to a `gpt-rag`
+writer also requires restoring component releases older than step 4.
 
 ## Naming scan (R17)
 
@@ -58,7 +61,6 @@ fails on any match outside the allow-list below.
 - Architecture decision records under `docs/adr/`.
 - The transition statement ("Agent Landing Zone, formerly GPT-RAG").
 - This naming map.
-- Dual-read compatibility code from step 1 above, until it is removed.
 
 **Temporary entries** (permitted in `v4.0.0-preview.1`; the Phase 2 work
 removes them, so the same test enforces the full rename for `v4.0.0`):
@@ -107,16 +109,25 @@ names (ADR-0015); T089 cleans it:
 .specify/**
 AGENTS.md
 README.md
-CONTRIBUTING.md
-azure.yaml
-main.parameters.json
 manifest.json
-config/**
+config/continuity/setup.py
+config/deployment/composition.py
+config/deployment/rollback.json
+config/governance/tests/test_setup.py
+config/panel/settings.py
+config/panel/setup.py
+config/panel/tests/test_operator_contract.py
+config/panel/tests/test_settings.py
+config/panel/tests/test_setup.py
+config/search/sharepoint_indexed_setup.py
+config/search/tests/test_foundry_iq_templates.py
 contracts/*.json
 contracts/README.md
 docs/pull_request_template.md
-hosted-agent/**
 infra/**
-scripts/**
-tests/**
+tests/test_deployment_modes.py
+tests/test_hosted_image.py
+tests/test_hosted_prepare.py
+tests/test_private_network_hooks.py
+tests/test_release_contracts.py
 ```

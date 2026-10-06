@@ -55,10 +55,10 @@ migration and recovery guidance.
 
 A runtime configuration key MUST be treated as a coordinated cross-repository
 contract: its infrastructure parameter, App Configuration publication under label
-`agent-lz`, and every consuming component MUST be updated together. During the
-label transition, components MUST read both `agent-lz` and the legacy `gpt-rag`
-label, preferring `agent-lz`, before the platform switches its publication
-label; rollback runs in reverse order. Cross-repository
+`agent-lz`, and every consuming component MUST be updated together. Components
+read only the `agent-lz` label; the label transition completed in v4.2.0, and
+any future label change MUST again dual-read before the platform switches its
+publication label, with rollback in reverse order. Cross-repository
 changes MUST identify compatible commits or tags, integration order, rollback
 order, and the manifest update binding the validated combination. PowerShell and
 shell implementations of lifecycle hooks MUST remain behaviorally aligned.
