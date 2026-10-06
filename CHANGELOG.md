@@ -1,9 +1,18 @@
 # Changelog
 
-## [Unreleased]
+## [v4.1.1] - 2026-10-06
 
 ### Fixed
 - Keyless UI-to-orchestrator auth now works with the default system-assigned frontend identity: post-provision publishes `ORCHESTRATOR_AUTH_AUDIENCE` as the Azure Resource Manager audience when no user-assigned identity or explicit audience exists. Previously the audience was empty and chat returned 401 (ADR-0019).
+
+### Validation
+
+| Component | Version |
+| --- | --- |
+| gpt-rag-ui | v3.1.0 |
+| gpt-rag-orchestrator | v5.1.0 |
+| gpt-rag-ingestion | v3.0.0 |
+| infra / AI Landing Zone | v2.7.3 |
 
 ## [v4.1.0] - 2026-10-05
 
