@@ -206,6 +206,15 @@ if ($networkExitCode -ne 0) {
   exit $networkExitCode
 }
 
+# Under network isolation the registry has no public access, so ACR Task builds
+# only work through the in-VNet agent pool (#741). Fail before touching any app.
+$buildModeOverride = "$($env:BUILD_MODE)".ToLowerInvariant()
+if ($networkIsolation -and -not $globalEnv.ACR_TASK_AGENT_POOL -and $buildModeOverride -ne 'local') {
+  Write-Error ("NETWORK_ISOLATION=true but no ACR Task agent pool was provisioned (ACR_TASK_AGENT_POOL is empty). " +
+    "Run 'azd env set DEPLOY_ACR_TASK_AGENT_POOL true' and 'azd provision', or set BUILD_MODE=local on a VNet-connected host with Docker.") -ErrorAction Continue
+  exit 1
+}
+
 if (-not (Docker-Ready)) {
   if ($networkIsolation -or $globalEnv.ACR_TASK_AGENT_POOL) {
     Write-Host "Docker is not available; component deploys will use ACR remote builds." -ForegroundColor Yellow
