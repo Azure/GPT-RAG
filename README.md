@@ -57,7 +57,7 @@ Component versions for this release are pinned in [manifest.json](manifest.json)
 
 ## Documentation
 
-The full documentation lives in the Agent Landing Zone section of the [AI Landing Zones documentation site](https://azure.github.io/AI-Landing-Zones/). <!-- TODO: replace with the direct Agent Landing Zone section URL once published. -->
+The full documentation lives in the Agent Landing Zone section of the [AI Landing Zones documentation site](https://azure.github.io/AI-Landing-Zones/agent-landing-zone/).
 
 ## Contributing
 

@@ -137,7 +137,9 @@ Evidence after the repository rename (`curl -sI`):
 | `github.com/Azure/gpt-rag-ingestion` | 301 → `Azure/agent-app-ingestion` |
 | `azure.github.io/agent-landing-zone/` | 200 |
 | `azure.github.io/GPT-RAG/` | 404 (GitHub Pages does not redirect; `Azure/azure.github.io` is archived, so a redirect page needs an org admin to unarchive it, or use an aka.ms link) |
-
+| `aka.ms/gpt-rag` | 200, redirects to `github.com/Azure/agent-landing-zone` |
+| `azure.github.io/AI-Landing-Zones/agent-landing-zone/` | 200 (central docs section, 11 pages, Azure/AI-Landing-Zones#141) |
+| Legacy `docs` branch pages | All 44 pages carry a moved notice pointing to the central section (#756) |
 ## S5 — Validate an application definition (US5)
 
 ```powershell

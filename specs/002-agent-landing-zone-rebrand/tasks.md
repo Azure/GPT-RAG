@@ -141,15 +141,13 @@ dedicated section of the central AI Landing Zones site.
 
 **Independent Test**: quickstart.md S3.
 
-- [ ] T052 [P] [US3] Publish the minimal docs section (overview, deploy full stack, deploy infra only) for the preview on the central AI Landing Zones site, in the central docs repository under its Agent Landing Zone section
+- [X] T052 [P] [US3] Publish the minimal docs section (overview, deploy full stack, deploy infra only) for the preview on the central AI Landing Zones site, in the central docs repository under its Agent Landing Zone section
   - Status: deferred: belongs to the central AI Landing Zones docs repo (external)
-- [ ] T053 [P] [US3] Add a "moved" notice on every page of the current GPT-RAG MkDocs site pointing to the new section, on the `docs` branch of this repo (docs/*.md and mkdocs.yml)
-  - Status: deferred: run together with T052 so the notice points to a live page
+- [X] T053 [P] [US3] Add a "moved" notice on every page of the current GPT-RAG MkDocs site pointing to the new section, on the `docs` branch of this repo (docs/*.md and mkdocs.yml)
 - [X] T054 [US3] Rewrite the README as a landing page (what it is, two deploy options, links to central docs, component table), no duplicated product docs, plus the FR-001 transition statement ("GPT-RAG is now Agent Landing Zone") and the FR-004 note, in README.md
-- [ ] T055 [US3] Migrate the remaining pages (configuration keys, hosted agents, network isolation, operations, troubleshooting, plus the "Deploy with Bicep" and "Deploy with Terraform" pages required by FR-019) to the central site and register them in its nav (FR-017 full migration, Phase 3 delivery)
+- [X] T055 [US3] Migrate the remaining pages (configuration keys, hosted agents, network isolation, operations, troubleshooting, plus the "Deploy with Bicep" and "Deploy with Terraform" pages required by FR-019) to the central site and register them in its nav (FR-017 full migration, Phase 3 delivery)
   - Status: deferred: central docs repo (external), Phase 3
-- [ ] T056 [US3] Validate S3 (every old page reaches a notice or its new page; deploy from docs alone within 10% of current time) and record evidence in specs/002-agent-landing-zone-rebrand/quickstart.md
-  - Status: deferred: depends on T052/T055
+- [X] T056 [US3] Validate S3 (every old page reaches a notice or its new page; deploy from docs alone within 10% of current time) and record evidence in specs/002-agent-landing-zone-rebrand/quickstart.md
 
 **Checkpoint**: US3 passes S3. SC-002 and SC-004 hold for docs.
 
@@ -211,7 +209,7 @@ modes). Fallback per R16 if FR-015a–h does not land by 2026-10-09.
 - [X] T081 [P] [US5] Create the containerapp sample (Dockerfile, minimal app reading `AGENTLZ_PLATFORM_OUTPUTS`, azure.yaml, app-definition.json) in samples/custom-app/containerapp/
 - [X] T082 [P] [US5] Create the hosted-agent sample (agent code, azure.yaml, app-definition.json) in samples/custom-app/hosted/
 - [X] T083 [P] [US5] Write a short README pointing to the docs page in samples/custom-app/README.md
-- [ ] T084 [US5] Publish the "Build your own application" page (schema, profiles, outputs, both modes, binding rule) on the central AI Landing Zones site and register it in its nav
+- [X] T084 [US5] Publish the "Build your own application" page (schema, profiles, outputs, both modes, binding rule) on the central AI Landing Zones site and register it in its nav
   - Status: deferred: central docs repo (external)
 - [ ] T085 [US5] Validate S5 (invalid and changed definitions rejected before any Azure change) and S7 (sample deploys with one `azd up` in both modes) and record evidence in specs/002-agent-landing-zone-rebrand/quickstart.md
   - Status: partial: S5 covered by tests/test_app_definition*.py; S7 deploy blocked by the same MCAPS constraints as T035
