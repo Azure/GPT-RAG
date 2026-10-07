@@ -23,7 +23,8 @@ A clear and concise description of what the problem is. Ex. I'm always frustrate
 
 ## Components
 - **Components (check all that apply):**
-  - [ ] gpt-rag-orchestrator
-  - [ ] gpt-rag-ingestion
-  - [ ] gpt-rag-ui
+  - [ ] agent-app-orchestrator
+  - [ ] agent-app-ingestion
+  - [ ] agent-app-ui
+  - [ ] agent-landing-zone (infra)
   - [ ] gpt-rag-mcp
