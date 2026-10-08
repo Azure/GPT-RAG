@@ -38,7 +38,7 @@ A handful of other quality-of-life additions:
 - **Pre-flight validation** — `scripts/Invoke-PreflightChecks.ps1` runs automatically as an `azd preprovision` hook and catches the usual mistakes (CIDR overlap, undersized subnets, missing BYO resource IDs, conflicting flags, and insufficient AI Foundry OpenAI model quota) before they reach ARM. Bypass with `PREFLIGHT_SKIP=true`.
 - **AI Foundry project naming** — `aiFoundryProjectName`, `aiFoundryProjectDisplayName`, and `aiFoundryProjectDescription` let consumers customize the deployed AI Foundry project instead of using a hardcoded default.
 - **Workload App Configuration passthrough** — `additionalAppConfigurationSettings` lets a solution accelerator publish its own runtime key-values into the App Configuration store without adding template-specific parameters. See [Workload App Configuration passthrough](#workload-app-configuration-passthrough).
-- **Foundry IQ groundwork for GPT-RAG:** set `RETRIEVAL_BACKEND=foundry_iq` to stamp the orchestrator settings for a Foundry IQ knowledge base. See [Foundry IQ for GPT-RAG](#foundry-iq-for-gpt-rag) for parameters, security expectations, billing, and the post-provision script.
+- **Foundry IQ groundwork for Agent Landing Zone:** set `RETRIEVAL_BACKEND=foundry_iq` to stamp the orchestrator settings for a Foundry IQ knowledge base. See [Foundry IQ for Agent Landing Zone](#foundry-iq-for-agent-landing-zone) for parameters, security expectations, billing, and the post-provision script.
 - **Two-phase hosted-agent preparation and deployment** — `prepareHostedAgent` provisions the generic project/registry prerequisites and build handoff before an image exists; `deployHostedAgent` remains the immutable-digest deployment intent and implies preparation. Both flags default to `false` and never remove or change existing Container Apps or data resources. See [Hosted-agent preparation and deployment](#hosted-agent-preparation-and-deployment).
 
 **Pick a runbook to deploy:**
@@ -686,10 +686,10 @@ defaults to `appConfigLabel`), and `contentType` (optional, defaults to
   "passthrough wins on collision" precedence applies.
 
 This is the forward-looking way to configure workload settings such as the
-GPT-RAG Foundry IQ keys below: accelerators publish their own keys through the
+Agent Landing Zone Foundry IQ keys below: accelerators publish their own keys through the
 passthrough instead of the landing zone growing workload-specific parameters.
 
-### Foundry IQ for GPT-RAG
+### Foundry IQ for Agent Landing Zone
 
 > The individual `foundryIq*` knowledge-source parameters below are retained for
 > backward compatibility but are being superseded by the generic
@@ -700,14 +700,14 @@ passthrough instead of the landing zone growing workload-specific parameters.
 > real infrastructure (the AI Foundry knowledge-base connection and shared
 > private links), not just configuration.
 
-The landing zone stamps GPT-RAG runtime settings for a Foundry IQ knowledge
-base. New deployments default to Foundry IQ. Existing GPT-RAG deployments can
+The landing zone stamps Agent Landing Zone runtime settings for a Foundry IQ knowledge
+base. New deployments default to Foundry IQ. Existing deployments can
 stay on `RETRIEVAL_BACKEND=ai_search` until the operator intentionally migrates.
 
 | Parameter / env var | Default | Purpose |
 | --- | --- | --- |
 | `retrievalBackend` / `RETRIEVAL_BACKEND` | `foundry_iq` | Selects direct Azure AI Search or Foundry IQ. Existing deployments can keep `ai_search` until they migrate. |
-| `foundryIqPattern` / `FOUNDRY_IQ_PATTERN` | `azureBlob` | `azureBlob` uses native Foundry IQ Blob or ADLS Gen2 ingestion. `managed` is accepted as a compatibility alias for `azureBlob`. `searchIndex` remains an explicit Pattern B opt-in for existing GPT-RAG Azure AI Search indexes. |
+| `foundryIqPattern` / `FOUNDRY_IQ_PATTERN` | `azureBlob` | `azureBlob` uses native Foundry IQ Blob or ADLS Gen2 ingestion. `managed` is accepted as a compatibility alias for `azureBlob`. `searchIndex` remains an explicit Pattern B opt-in for existing Azure AI Search indexes. |
 | `knowledgeBaseName` / `KNOWLEDGE_BASE_NAME` | `knowledge-base` | Name stamped into `KNOWLEDGE_BASE_NAME`. |
 | `knowledgeBaseConnectionName` / `KNOWLEDGE_BASE_CONNECTION_NAME` | `knowledge-base-connection` | Dedicated AI Foundry Search connection for knowledge-base use. |
 | `foundryIqApiVersion` / `FOUNDRY_IQ_API_VERSION` | `2026-05-01-preview` | Required for per-user permissions and Pattern B `filterAddOn`. |
@@ -720,7 +720,7 @@ stay on `RETRIEVAL_BACKEND=ai_search` until the operator intentionally migrates.
 | `foundryIqIngestionPermissionOptionsJson` / `FOUNDRY_IQ_INGESTION_PERMISSION_OPTIONS` | `["rbacScope"]` | JSON array of permission metadata to ingest for native Foundry IQ sources. |
 | `foundryIqSearchIndexName` / `FOUNDRY_IQ_SEARCH_INDEX_NAME` | `agent-lz-index` | Existing Azure AI Search index to register for Pattern B. |
 | `foundryIqSemanticConfigurationName` / `FOUNDRY_IQ_SEMANTIC_CONFIGURATION_NAME` | `default` | Semantic configuration on the existing index. |
-| `foundryIqFilterAddOnEnabled` / `FOUNDRY_IQ_FILTER_ADD_ON_ENABLED` | `false` | Enables GPT-RAG query-time security filtering for Pattern B. Leave `false` for native Blob. |
+| `foundryIqFilterAddOnEnabled` / `FOUNDRY_IQ_FILTER_ADD_ON_ENABLED` | `false` | Enables query-time security filtering for Pattern B. Leave `false` for native Blob. |
 | `foundryIqSecurityFieldName` / `FOUNDRY_IQ_SECURITY_FIELD_NAME` | `metadata_security_id` | Field used by the orchestrator to build Pattern B filters. |
 | `foundryIqMaxOutputDocuments` / `FOUNDRY_IQ_MAX_OUTPUT_DOCUMENTS` | Empty | Optional cap on documents returned by the knowledge base. |
 | `foundryIqContentExtractionMode` / `FOUNDRY_IQ_CONTENT_EXTRACTION_MODE` | `standard` | Native Blob content extraction mode. `standard` uses the Foundry IQ Content Understanding skill (layout and OCR) so scanned and image-only PDFs are ingested with text. `minimal` skips Content Understanding and only ingests text already present in the source. The setting is immutable on an existing Knowledge Source. |
@@ -731,8 +731,8 @@ stay on `RETRIEVAL_BACKEND=ai_search` until the operator intentionally migrates.
 
 Security expectations:
 
-- Pattern B (`searchIndex`) keeps the existing GPT-RAG index and enforces
-  GPT-RAG security fields through query-time `filterAddOn`.
+- Pattern B (`searchIndex`) keeps the existing Azure AI Search index and enforces
+  document security fields through query-time `filterAddOn`.
 - Native Foundry IQ permissions use `x-ms-query-source-authorization` and require
   a source that ingests permissions, such as ADLS Gen2 ACLs, SharePoint,
   OneLake/Fabric, or Purview labels.
