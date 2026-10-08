@@ -18,7 +18,7 @@ jobs:
       AZURE_ENV_NAME: agentlz-evaluation
       AZURE_RESOURCE_GROUP: rg-agentlz-evaluation
       AZURE_LOCATION: eastus
-      AZURE_PRINCIPAL_ID: f4be7297-7532-4582-b0b5-53e7413879dd
+      AZURE_PRINCIPAL_ID: 5950eb6f-8c8d-4713-ab6c-5e9303f7790e
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
