@@ -37,7 +37,7 @@ jobs:
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Configure fixed GPT-RAG evaluation environment
+      - name: Configure fixed Agent Landing Zone evaluation environment
         shell: bash
         run: |
           set -euo pipefail

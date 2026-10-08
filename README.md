@@ -23,10 +23,8 @@ Secure, enterprise-ready landing zone for deploying AI agent applications on Mic
 [![Docs](https://img.shields.io/badge/docs-AI%20Landing%20Zones-0078D4.svg)](https://azure.github.io/AI-Landing-Zones/)
 [![Azure Developer CLI](https://img.shields.io/badge/azd-compatible-0078D4.svg)](https://learn.microsoft.com/azure/developer/azure-developer-cli/)
 
-**GPT-RAG is now Agent Landing Zone.** It is the former GPT-RAG Solution Accelerator, renamed and matured.
-
 > [!NOTE]
-> Version 4.0.0 supports new deployments only. Existing GPT-RAG deployments are not upgraded in place; to move to Agent Landing Zone, redeploy into a new environment. Existing GPT-RAG environments can keep running on their GPT-RAG release, whose tags stay available.
+> Version 4.0.0 and later support new deployments only. Environments created with releases earlier than 4.0.0 are not upgraded in place; redeploy into a new environment. Earlier release tags remain available.
 
 ## Architecture
 

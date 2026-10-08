@@ -1,4 +1,4 @@
-"""Compose GPT-RAG infrastructure parameters for classic and hosted modes."""
+"""Compose Agent Landing Zone infrastructure parameters for classic and hosted modes."""
 
 from __future__ import annotations
 
@@ -51,7 +51,7 @@ _KNOWN_TOPOLOGY_VALUES = {mode.value for mode in DeploymentMode}
 
 
 class DeploymentTopologyError(ValueError):
-    """Base class for GPT-RAG deployment-topology resolution failures.
+    """Base class for Agent Landing Zone deployment-topology resolution failures.
 
     Raised instead of silently falling back so operators get explicit,
     actionable guidance (see ADR-0001 revision 5) rather than an unexpected
@@ -62,7 +62,7 @@ class DeploymentTopologyError(ValueError):
 class ConflictingTopologySignalsError(DeploymentTopologyError):
     """Raised when explicit or persisted topology signals disagree.
 
-    This is a fail-closed guard: GPT-RAG never guesses which of two
+    This is a fail-closed guard: Agent Landing Zone never guesses which of two
     disagreeing signals "wins". The operator must resolve the conflict (in
     the azd environment and/or in App Configuration) and re-run
     provisioning.
