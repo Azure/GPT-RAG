@@ -140,7 +140,7 @@ decision under `docs/adr/` before implementing broad or high-risk changes.
 
 ## Branching, releases, and documentation
 
-The existing GPT-RAG-specific rules are mandatory and remain in
+The existing repository-specific rules are mandatory and remain in
 `.github/copilot-instructions.md`, including:
 
 - feature and release branch flow;
