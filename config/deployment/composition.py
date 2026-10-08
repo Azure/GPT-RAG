@@ -472,7 +472,7 @@ def panel_database_containers() -> list[dict[str, object]]:
     chat content with panel metadata in one container. Each entry's
     ``canonical_name`` is published verbatim to App Configuration (label
     ``agent-lz``) by the generic AILZ database-container-list mechanism,
-    matching the exact keys ``gpt-rag-ui``'s merged panel configuration
+    matching the exact keys ``agent-app-ui``'s merged panel configuration
     already consumes (``PANEL_OWNER_INDEX_DATABASE_CONTAINER``,
     ``PANEL_FEEDBACK_DATABASE_CONTAINER``). Container-scoped Cosmos RBAC for
     these containers is assigned separately by ``config.panel.setup`` (never

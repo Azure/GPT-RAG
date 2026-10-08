@@ -174,7 +174,7 @@ The panel's opaque pagination cursor is signed with the UI's existing
 holding `KeyVaultSecretsUser`) — no new Key Vault secret, reference, or RBAC
 is introduced for cursor signing.
 
-App Configuration keys (label `gpt-rag`, published unconditionally and
+App Configuration keys (label `agent-lz`, published unconditionally and
 safely inert by `config.panel.settings.public_settings`; matches the merged
 `agent-app-ui` `panel_config.py` exactly — no invented duplicates):
 
