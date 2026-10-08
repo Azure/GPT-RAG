@@ -80,9 +80,9 @@ When preparing a release branch:
 - Do NOT introduce new feature work
 - **GitHub Release titles MUST be exactly the tag name** (for example,
   `v2.8.0`). Never prefix release titles with the product or service name (for
-  example, do not use `GPT-RAG v2.8.0`, `GPT-RAG Orchestrator v2.8.0`, or
-  `gpt-rag-ui v2.8.0`).
-- **MANDATORY for EVERY GPT-RAG umbrella release — no exceptions.** The
+  example, do not use `Agent Landing Zone v2.8.0`, `Agent Landing Zone Orchestrator v2.8.0`, or
+  `agent-app-ui v2.8.0`).
+- **MANDATORY for EVERY Agent Landing Zone umbrella release — no exceptions.** The
   published GitHub Release notes (the `gh release create` / `gh release edit`
   body, NOT just the `CHANGELOG.md`) MUST include a `## Component versions`
   section with a Markdown table listing every validated runtime component
@@ -111,9 +111,9 @@ Required GitHub Release notes skeleton:
 
 | Component | Version |
 | --- | --- |
-| gpt-rag-ui | vX.Y.Z |
-| gpt-rag-orchestrator | vX.Y.Z |
-| gpt-rag-ingestion | vX.Y.Z |
+| agent-app-ui | vX.Y.Z |
+| agent-app-orchestrator | vX.Y.Z |
+| agent-app-ingestion | vX.Y.Z |
 | infra / AI Landing Zone | vX.Y.Z |
 
 ## Validation

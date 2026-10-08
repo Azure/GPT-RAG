@@ -696,7 +696,7 @@ def validate_user_identity_impersonation_role(
         or assignable_scopes != {assignable_scope.rstrip("/").lower()}
     ):
         raise RuntimeError(
-            "The GPT-RAG user-identity impersonation role must have no Actions "
+            "The Agent Landing Zone user-identity impersonation role must have no Actions "
             "and exactly the reviewed UserIdentityImpersonation DataAction."
         )
 
@@ -723,7 +723,7 @@ def ensure_user_identity_impersonation_role(
     if result:
         if len(result) != 1:
             raise RuntimeError(
-                "The GPT-RAG user-identity impersonation role was not found uniquely."
+                "The Agent Landing Zone user-identity impersonation role was not found uniquely."
             )
         validate_user_identity_impersonation_role(result[0], assignable_scope)
         return False
@@ -733,7 +733,7 @@ def ensure_user_identity_impersonation_role(
         "Id": USER_IDENTITY_IMPERSONATION_ROLE_ID,
         "IsCustom": True,
         "Description": (
-            "Allows the GPT-RAG UI BFF to assert a server-derived hosted-agent "
+            "Allows the Agent Landing Zone UI BFF to assert a server-derived hosted-agent "
             "user identity. Assign only at an individual hosted-agent scope."
         ),
         "Actions": [],
@@ -769,7 +769,7 @@ def ensure_user_identity_impersonation_role(
     )
     if len(created) != 1:
         raise RuntimeError(
-            "Failed to verify the GPT-RAG user-identity impersonation role."
+            "Failed to verify the Agent Landing Zone user-identity impersonation role."
         )
     validate_user_identity_impersonation_role(created[0], assignable_scope)
     return True

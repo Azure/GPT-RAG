@@ -1,9 +1,9 @@
 ---
 name: multi-repo-release
-description: Prepares and validates GPT-RAG umbrella and multi-repository releases. Use whenever work involves release preparation, semantic versions, release branches, manifest or component pins, changelog release entries, tags, GitHub Release notes, or AI Landing Zone release alignment.
+description: Prepares and validates Agent Landing Zone umbrella and multi-repository releases. Use whenever work involves release preparation, semantic versions, release branches, manifest or component pins, changelog release entries, tags, GitHub Release notes, or AI Landing Zone release alignment.
 ---
 
-# GPT-RAG multi-repository release
+# Agent Landing Zone multi-repository release
 
 Read `.github/copilot-instructions.md` completely before changing a release
 artifact. Its branching, versioning, changelog, and release-note requirements
