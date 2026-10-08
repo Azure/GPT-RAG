@@ -1,4 +1,4 @@
-# Shared GPT-RAG contracts
+# Shared Agent Landing Zone contracts
 
 ## Audit event v2 (current)
 
@@ -25,7 +25,7 @@ Deprecated by v2; retained unchanged as history. Removal follows the R14
 transition in [naming-map.md](naming-map.md), once all pinned components emit
 v2 only.
 
-These schemas are the shared GPT-RAG audit contract consumed by orchestrator
+These schemas are the shared Agent Landing Zone audit contract consumed by orchestrator
 v3.8.0 and ingestion v2.5.0.
 
 `audit-event-v1.sha256` pins the exact LF-encoded bytes:
@@ -89,8 +89,8 @@ expired signatures, mismatched owners, and non-canonical framing.
 
 `conversations-panel-v1.schema.json` is the shared wire contract for the
 optional hosted administrative panel: user-facing history/feedback/deletion
-(consumed by `gpt-rag-ui`) and operator-facing overview/corpus-curation
-(consumed by `gpt-rag-ingestion`). It has no single top-level instance;
+(consumed by `agent-app-ui`) and operator-facing overview/corpus-curation
+(consumed by `agent-app-ingestion`). It has no single top-level instance;
 every shape lives under `$defs` and is referenced by a JSON Pointer fragment
 (for example `#/$defs/ConversationsListResponse`). Every object shape is
 strict (`additionalProperties: false`); an unknown field is a schema
@@ -103,7 +103,7 @@ in the schema:
 
 - The hosted agent/container never implements or consumes any shape here.
   It is stateless and holds **zero** managed-Conversations RBAC; only the
-  `gpt-rag-ui` BFF (user surfaces) and `gpt-rag-ingestion` admin app
+  `agent-app-ui` BFF (user surfaces) and `agent-app-ingestion` admin app
   (operator surfaces) ever produce or consume these payloads.
 - `MessageItem.content` is read live from Foundry managed Conversations
   (the system of record) after the owner gate passes — it is never
@@ -146,7 +146,7 @@ Panel Cosmos containers (provisioned only when
 | `panel-feedback` | `PANEL_FEEDBACK_DATABASE_CONTAINER` | `/principal_id` | Feedback metadata (rating/category/comment/message reference). |
 
 Both containers use the AI Landing Zone's generic `defaultTtl: -1` (no
-automatic item expiration) — GPT-RAG performs no automatic scheduled
+automatic item expiration) — Agent Landing Zone performs no automatic scheduled
 deletion; retention is operator/owner-initiated hard delete only
 (`DELETE /panel/conversations/{id}`). Hosted/panel provisions *only* these
 two containers, never the classic `conversations`/`datasources`/`prompts`/
@@ -165,9 +165,9 @@ the account root):
 
 | Identity | Role | Scope |
 | --- | --- | --- |
-| `gpt-rag-ui` (frontend, the only component holding the user token) | Cosmos DB Built-in Data Contributor | Both panel containers |
-| `gpt-rag-ingestion` (dataingest, operator overview counts only) | Cosmos DB Built-in Data Reader | Both panel containers |
-| `gpt-rag-orchestrator` (hosted agent/container) | *(none)* | *(none — never resolved or assigned by this script)* |
+| `agent-app-ui` (frontend, the only component holding the user token) | Cosmos DB Built-in Data Contributor | Both panel containers |
+| `agent-app-ingestion` (dataingest, operator overview counts only) | Cosmos DB Built-in Data Reader | Both panel containers |
+| `agent-app-orchestrator` (hosted agent/container) | *(none)* | *(none — never resolved or assigned by this script)* |
 
 The panel's opaque pagination cursor is signed with the UI's existing
 `CHAINLIT_AUTH_SECRET` (already Key-Vault-backed, with `frontend` already
@@ -176,7 +176,7 @@ is introduced for cursor signing.
 
 App Configuration keys (label `gpt-rag`, published unconditionally and
 safely inert by `config.panel.settings.public_settings`; matches the merged
-`gpt-rag-ui` `panel_config.py` exactly — no invented duplicates):
+`agent-app-ui` `panel_config.py` exactly — no invented duplicates):
 
 | Key | Default | Notes |
 | --- | --- | --- |
@@ -195,7 +195,7 @@ Operator-role authorization for the ingestion admin surfaces reuses
 ingestion's existing admin-dashboard bearer/role pattern (the same
 `OAUTH_AZURE_AD_TENANT_ID`/`OAUTH_AZURE_AD_CLIENT_ID` pair `require_admin`
 validates); this repository does not introduce a separate audience/config
-key for token validation. `gpt-rag-ingestion` PR #274 (merge
+key for token validation. `agent-app-ingestion` PR #274 (merge
 `5569dd6af3ecb317e1037108cb21859f1b2185a1`) does define the operator
 authorization *inputs* below (`PANEL_OPERATOR_SURFACES_ENABLED`,
 `PANEL_OPERATOR_APP_ROLE`, `PANEL_OPERATOR_GROUP_ID`), which this repository
@@ -212,14 +212,14 @@ As of this change, hosted-panel topology selection
 (`DEPLOY_ADMINISTRATIVE_PANEL=true`) still fails closed at
 `config.deployment.topology`/`composition`
 (`HostedPanelUnsupportedError`); this is now a **deliberate, separate**
-decision distinct from component readiness -- the `gpt-rag-ingestion`
+decision distinct from component readiness -- the `agent-app-ingestion`
 operator-surface component work this platform contract was blocking on has
 landed (PR #274). Lifting the topology gate and repinning `manifest.json`
 for all changed components together remain their own coordinated follow-up,
 gated on the still-pending live evidence procedures for
 `PANEL_HISTORY_OWNER_BINDING_VALIDATED` and `PANEL_OPERATOR_SURFACES_ENABLED`
 (see ADR-0004's "Adoption and migration" and "Review trigger" sections),
-not on any further GPT-RAG-repository platform-contract change.
+not on any further platform-repository platform-contract change.
 
 
 ## App definition v1 (feature 002, Agent Landing Zone)
