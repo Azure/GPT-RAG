@@ -947,7 +947,7 @@ class FoundryIqMcpTemplateTests(unittest.TestCase):
         orchestrator = next(
             component
             for component in manifest["components"]
-            if component["name"] == "gpt-rag-orchestrator"
+            if component["name"] == "agent-app-orchestrator"
         )
         self.assertGreaterEqual(
             version_tuple(orchestrator["tag"]),
