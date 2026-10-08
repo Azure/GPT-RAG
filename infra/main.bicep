@@ -585,7 +585,7 @@ param deployAAfAgentSvc bool = true
 param aiFoundryDisableLocalAuth bool = true
 
 
-@description('Deprecated. Kept for one release for compatibility with existing GPT-RAG deployments. Use retrievalBackend and the Foundry IQ parameters instead.')
+@description('Deprecated. Kept for one release for compatibility with existing deployments. Use retrievalBackend and the Foundry IQ parameters instead.')
 param enableAgenticRetrieval bool = false
 
 @description('Retrieval backend stamped into application runtime configuration. New deployments default to foundry_iq. Existing deployments can keep ai_search until they explicitly migrate.')
@@ -595,7 +595,7 @@ param enableAgenticRetrieval bool = false
 ])
 param retrievalBackend string = 'foundry_iq'
 
-@description('Deprecated: prefer publishing this via additionalAppConfigurationSettings so the landing zone stays workload-agnostic. Retained for backward compatibility. Foundry IQ knowledge pattern. azureBlob uses native Foundry IQ Blob or ADLS Gen2 ingestion and is the default. searchIndex registers the existing GPT-RAG Azure AI Search index as an opt-in legacy Pattern B knowledge source. managed is accepted as a compatibility alias for azureBlob.')
+@description('Deprecated: prefer publishing this via additionalAppConfigurationSettings so the landing zone stays workload-agnostic. Retained for backward compatibility. Foundry IQ knowledge pattern. azureBlob uses native Foundry IQ Blob or ADLS Gen2 ingestion and is the default. searchIndex registers the existing Agent Landing Zone Azure AI Search index as an opt-in legacy Pattern B knowledge source. managed is accepted as a compatibility alias for azureBlob.')
 @allowed([
   'azureBlob'
   'managed'
@@ -619,7 +619,7 @@ param knowledgeBaseName string = '${environmentName}-knowledge-base'
 @description('Dedicated Azure AI Foundry connection name used by the knowledge base. Do not reuse SEARCH_CONNECTION_ID.')
 param knowledgeBaseConnectionName string = '${environmentName}-knowledge-base-connection'
 
-@description('Deprecated: prefer publishing this via additionalAppConfigurationSettings so the landing zone stays workload-agnostic. Retained for backward compatibility. Foundry IQ knowledge source name. For azureBlob this is the native Blob or ADLS Gen2 source. For searchIndex this is the registered GPT-RAG Azure AI Search index source.')
+@description('Deprecated: prefer publishing this via additionalAppConfigurationSettings so the landing zone stays workload-agnostic. Retained for backward compatibility. Foundry IQ knowledge source name. For azureBlob this is the native Blob or ADLS Gen2 source. For searchIndex this is the registered Agent Landing Zone Azure AI Search index source.')
 param foundryIqKnowledgeSourceName string = '${environmentName}-blob-ks'
 
 @description('Foundry IQ knowledge source kind stamped into runtime configuration. Leave empty to derive it from foundryIqPattern. Set to azureBlob for native Blob/ADLS sources or searchIndex for Pattern B.')
@@ -657,10 +657,10 @@ param foundryIqIngestionPermissionOptions array = [
 @description('JSON array override for native Foundry IQ permission metadata, intended for azd environment substitution from FOUNDRY_IQ_INGESTION_PERMISSION_OPTIONS. Leave empty to use foundryIqIngestionPermissionOptions.')
 param foundryIqIngestionPermissionOptionsJson string = ''
 
-@description('Deprecated: prefer publishing this via additionalAppConfigurationSettings so the landing zone stays workload-agnostic. Retained for backward compatibility. Existing GPT-RAG Azure AI Search index name to register as a Pattern B Foundry IQ searchIndex knowledge source.')
+@description('Deprecated: prefer publishing this via additionalAppConfigurationSettings so the landing zone stays workload-agnostic. Retained for backward compatibility. Existing Agent Landing Zone Azure AI Search index name to register as a Pattern B Foundry IQ searchIndex knowledge source.')
 param foundryIqSearchIndexName string = 'agent-lz-index'
 
-@description('Semantic configuration name on the GPT-RAG Azure AI Search index. Required by Azure AI Search agentic retrieval.')
+@description('Semantic configuration name on the Agent Landing Zone Azure AI Search index. Required by Azure AI Search agentic retrieval.')
 param foundryIqSemanticConfigurationName string = 'default'
 
 @description('Retrievable source data fields exposed from the Pattern B searchIndex knowledge source for citations.')
@@ -680,10 +680,10 @@ param foundryIqSearchFields array = [
 @description('Deprecated: prefer publishing this via additionalAppConfigurationSettings so the landing zone stays workload-agnostic. Retained for backward compatibility. Optional persisted baseFilter for the Pattern B searchIndex knowledge source. Keep security trimming in query-time filterAddOn unless a static tenant/corpus filter is required.')
 param foundryIqBaseFilter string = ''
 
-@description('Deprecated: prefer publishing this via additionalAppConfigurationSettings so the landing zone stays workload-agnostic. Retained for backward compatibility. Enable query-time Pattern B filterAddOn in the GPT-RAG orchestrator. Requires foundryIqApiVersion 2026-05-01-preview.')
+@description('Deprecated: prefer publishing this via additionalAppConfigurationSettings so the landing zone stays workload-agnostic. Retained for backward compatibility. Enable query-time Pattern B filterAddOn in the Agent Landing Zone orchestrator. Requires foundryIqApiVersion 2026-05-01-preview.')
 param foundryIqFilterAddOnEnabled bool = true
 
-@description('Collection field used by GPT-RAG for Pattern B security trimming filterAddOn.')
+@description('Collection field used by the Agent Landing Zone for Pattern B security trimming filterAddOn.')
 param foundryIqSecurityFieldName string = 'metadata_security_id'
 
 @description('Optional maximum documents to return from Foundry IQ retrieval. Empty keeps the orchestrator default.')
@@ -1116,7 +1116,7 @@ var _hasExistingNatGateway  = !empty(existingNatGatewayResourceId ?? '')
 
 // Legacy fallback (v1.x compatibility): when `deployVM` is non-null, it acts
 // as a global default for all three new flags so existing parameter files
-// (e.g. GPT-RAG's manifest-driven overlay) keep working unmodified. Explicit
+// (e.g. the Agent Landing Zone manifest-driven overlay) keep working unmodified. Explicit
 // new flags ALWAYS win — `deployVM` is purely a fallback layer. Slated for
 // removal in v3.0.0; emits a deployment-time warning when consumed.
 var _legacyDeployVMSet      = !(deployVM == null)
@@ -3089,7 +3089,7 @@ module searchService 'br/public:avm/res/search/search-service:0.11.1' = if (depl
             groupId: 'blob'
             #disable-next-line BCP318
             privateLinkResourceId: storageAccount.outputs.resourceId
-            requestMessage: 'Allow AI Search private indexing access to GPT-RAG documents storage.'
+            requestMessage: 'Allow AI Search private indexing access to Agent Landing Zone documents storage.'
           }
         ]
           : [],
