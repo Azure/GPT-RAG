@@ -1,8 +1,8 @@
-# GPT-RAG architecture
+# Agent Landing Zone architecture
 
 ## Purpose and boundaries
 
-GPT-RAG is an Azure solution accelerator, not a monolithic application. This
+Agent Landing Zone is an Azure solution accelerator, not a monolithic application. This
 repository owns platform configuration, deployment composition, shared
 contracts, and release pins. Runtime behavior belongs to the component
 repositories referenced by `manifest.json`.

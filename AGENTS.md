@@ -1,4 +1,4 @@
-# GPT-RAG agent operating contract
+# Agent Landing Zone agent operating contract
 
 This file is the stable, repository-wide contract for engineering agents.
 Detailed procedures belong in `.github/skills/`, and file-specific rules belong
@@ -22,7 +22,7 @@ uncertainty and obtain a human decision.
 
 ## What this repository is
 
-GPT-RAG is an enterprise-grade Retrieval-Augmented Generation solution
+Agent Landing Zone is an enterprise-grade Retrieval-Augmented Generation solution
 accelerator on Azure. It provides architecture and deployment assets for
 secure, scalable, observable AI applications using Azure AI Foundry, Azure
 OpenAI, Azure AI Search, Azure Container Apps, Azure App Configuration, Key
@@ -39,11 +39,11 @@ and deployment modes.
 This repository is the platform and configuration core of a multi-repository
 solution:
 
-- `manifest.json` is the authoritative GPT-RAG release manifest and pins the
+- `manifest.json` is the authoritative Agent Landing Zone release manifest and pins the
   runtime component repositories and versions.
 - `manifest.json` `infra.source` (`repo`, `tag`, `commit`) records the AI
   Landing Zone release that `infra/` was incorporated from.
-- `main.parameters.json` defines the GPT-RAG deployment topology and
+- `main.parameters.json` defines the Agent Landing Zone deployment topology and
   parameters.
 - Runtime application code lives in the component repositories referenced by
   `manifest.json`; do not duplicate it here.
@@ -71,8 +71,8 @@ version tables into agent instructions because they become stale.
 - `.github/instructions/`: path-specific implementation rules.
 
 The engineering agents and skills in `.github/` help evolve and operate the
-GPT-RAG repositories. They are not definitions of agents executed by the
-GPT-RAG product.
+Agent Landing Zone repositories. They are not definitions of agents executed by the
+Agent Landing Zone product.
 
 ## How to work
 
