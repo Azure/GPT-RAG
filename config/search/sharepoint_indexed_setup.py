@@ -28,7 +28,7 @@ from typing import Any
 SHAREPOINT_INDEXED_KIND = "indexedSharePoint"
 SHAREPOINT_INDEXED_PARAMS_KEY = "indexedSharePointParameters"
 SHAREPOINT_INDEXED_ADMIN_CONSENT_DOCS = (
-    "https://aka.ms/gpt-rag/sharepoint-indexed-prereqs"
+    "https://azure.github.io/AI-Landing-Zones/agent-landing-zone/"
 )
 
 

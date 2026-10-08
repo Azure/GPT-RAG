@@ -86,48 +86,43 @@ folders). The scan covers git-tracked files for `gpt-rag`, `GPT-RAG`,
 identifiers use `agent-lz-*` (Search indexes, labels) and `agent-app-*`
 (container images), which the scan never flags.
 
-Permanent entries (historical records, specifications, this map, the scanner):
+Permanent entries (historical records, specifications, versioned contracts,
+legacy-compatibility tests, this map, the scanner):
 
 ```naming-allow-permanent
 CHANGELOG.md
+README.md
 docs/adr/**
 docs/release-notes/**
 **/RELEASE_NOTES*.md
 specs/**
-contracts/naming-map.md
-tests/test_naming_inventory.py
-```
-
-Temporary entries (current pre-rename state; Phase 2 work removes each glob as
-the files are renamed, and the list must be empty for `v4.0.0`). `infra/**`
-covers the AI Landing Zone source incorporated in-repository with its upstream
-names (ADR-0015); T089 cleans it:
-
-```naming-allow-temporary
 .artifacts/**
-.github/**
-.specify/**
-AGENTS.md
-README.md
-manifest.json
-config/continuity/setup.py
-config/deployment/composition.py
-config/deployment/rollback.json
-config/governance/tests/test_setup.py
-config/panel/settings.py
-config/panel/setup.py
-config/panel/tests/test_operator_contract.py
-config/panel/tests/test_settings.py
-config/panel/tests/test_setup.py
-config/search/sharepoint_indexed_setup.py
-config/search/tests/test_foundry_iq_templates.py
+.specify/memory/constitution.md
+.github/copilot-instructions.md
+.github/skills/multi-repo-release/SKILL.md
+contracts/naming-map.md
 contracts/*.json
 contracts/README.md
-docs/pull_request_template.md
-infra/**
+config/deployment/rollback.json
+config/governance/tests/test_setup.py
+config/panel/tests/test_operator_contract.py
+config/panel/tests/test_settings.py
+tests/test_naming_inventory.py
 tests/test_deployment_modes.py
-tests/test_hosted_image.py
-tests/test_hosted_prepare.py
-tests/test_private_network_hooks.py
 tests/test_release_contracts.py
+```
+
+Temporary entries (pending decisions on Azure-side identifiers and
+not-yet-renamed external repositories). `infra/**` covers the AI Landing Zone
+source incorporated in-repository with its upstream names (ADR-0015);
+`config/continuity/setup.py` keeps the existing custom role name; the
+feature request templates reference the `Azure/gpt-rag-mcp` repository; the
+evaluation workflow reuses an existing environment:
+
+```naming-allow-temporary
+infra/**
+config/continuity/setup.py
+.github/ISSUE_TEMPLATE/feature_request.md
+.github/feature_request.md
+.github/workflows/copilot-setup-steps.yml
 ```

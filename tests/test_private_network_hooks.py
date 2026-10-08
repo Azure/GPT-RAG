@@ -24,12 +24,12 @@ RESOURCE_TOKEN="test"
 AGENTLZ_APP_ID="agent-lz-default"
 """
 MANIFEST = """{"components": [
-  {"name": "gpt-rag-ui", "repo": "https://example.invalid/ui.git", "tag": "v1.0.0", "commit": "1111111111111111111111111111111111111111"},
-  {"name": "gpt-rag-orchestrator", "repo": "https://example.invalid/orchestrator.git", "tag": "v1.0.0", "commit": "2222222222222222222222222222222222222222"},
-  {"name": "gpt-rag-ingestion", "repo": "https://example.invalid/ingestion.git", "tag": "v1.0.0", "commit": "3333333333333333333333333333333333333333"}
+  {"name": "agent-app-ui", "repo": "https://example.invalid/ui.git", "tag": "v1.0.0", "commit": "1111111111111111111111111111111111111111"},
+  {"name": "agent-app-orchestrator", "repo": "https://example.invalid/orchestrator.git", "tag": "v1.0.0", "commit": "2222222222222222222222222222222222222222"},
+  {"name": "agent-app-ingestion", "repo": "https://example.invalid/ingestion.git", "tag": "v1.0.0", "commit": "3333333333333333333333333333333333333333"}
 ]}
 """
-TOPOLOGY = '{"deploy_hosted_agent_orchestration":false,"deploy_administrative_panel":false,"topology":"classic","components":["gpt-rag-ui","gpt-rag-orchestrator","gpt-rag-ingestion"]}'
+TOPOLOGY = '{"deploy_hosted_agent_orchestration":false,"deploy_administrative_panel":false,"topology":"classic","components":["agent-app-ui","agent-app-orchestrator","agent-app-ingestion"]}'
 
 # Only the DNS/TLS boundary is replaced for the integrated flag/endpoint cases.
 PROBE_DRIVER = r"""
@@ -148,14 +148,14 @@ field() { sed -n "s/.*\"$1\": *\"\([^\"]*\)\".*/\1/p" | head -n1; }
 case "$*" in
   *deploy_hosted_agent_orchestration*|*deploy_administrative_panel*) echo false ;;
   *'.topology'*) echo classic ;;
-  *'.components | '*) echo 'gpt-rag-ui gpt-rag-orchestrator gpt-rag-ingestion' ;;
+  *'.components | '*) echo 'agent-app-ui agent-app-orchestrator agent-app-ingestion' ;;
   *'.release // empty'*) ;;
-  *'--arg n'*) echo "gpt-rag-$4" ;;
+  *'--arg n'*) echo "agent-app-$4" ;;
   *'.components[].name'*) printf 'ui\norchestrator\ningestion\n' ;;
   *'-c .components[]'*manifest.json)
-    printf '%s\n' '{"name": "gpt-rag-ui", "repo": "https://example.invalid/ui.git", "tag": "v1.0.0"}' \
-      '{"name": "gpt-rag-orchestrator", "repo": "https://example.invalid/orchestrator.git", "tag": "v1.0.0"}' \
-      '{"name": "gpt-rag-ingestion", "repo": "https://example.invalid/ingestion.git", "tag": "v1.0.0"}' ;;
+    printf '%s\n' '{"name": "agent-app-ui", "repo": "https://example.invalid/ui.git", "tag": "v1.0.0"}' \
+      '{"name": "agent-app-orchestrator", "repo": "https://example.invalid/orchestrator.git", "tag": "v1.0.0"}' \
+      '{"name": "agent-app-ingestion", "repo": "https://example.invalid/ingestion.git", "tag": "v1.0.0"}' ;;
   *'-c .components[]'*) printf '%s\n' '{"name": "ui"}' '{"name": "orchestrator"}' '{"name": "ingestion"}' ;;
   *'.id'*) echo agent-lz-default ;;
   *'.name'*) field name ;;

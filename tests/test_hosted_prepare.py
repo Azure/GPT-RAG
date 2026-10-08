@@ -19,7 +19,7 @@ OLD_COMMIT = "1" * 40
 MANIFEST = {
     "components": [
         {
-            "name": "gpt-rag-orchestrator",
+            "name": "agent-app-orchestrator",
             "repo": "https://github.com/Azure/agent-app-orchestrator.git",
             "tag": "v3.10.0",
             "commit": SOURCE_COMMIT,

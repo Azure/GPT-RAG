@@ -449,11 +449,11 @@ def resolve_database_containers(
 def selected_components(mode: DeploymentMode) -> tuple[str, ...]:
     if mode is DeploymentMode.CLASSIC:
         return (
-            "gpt-rag-ui",
-            "gpt-rag-orchestrator",
-            "gpt-rag-ingestion",
+            "agent-app-ui",
+            "agent-app-orchestrator",
+            "agent-app-ingestion",
         )
-    return ("gpt-rag-ui", "gpt-rag-ingestion")
+    return ("agent-app-ui", "agent-app-ingestion")
 
 
 def panel_database_containers() -> list[dict[str, object]]:
