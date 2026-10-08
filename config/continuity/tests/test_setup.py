@@ -593,6 +593,55 @@ class ContinuitySetupTests(TestCase):
         self.assertEqual(definition["AssignableScopes"], [assignable_scope])
 
     @patch.object(setup, "_run_az")
+    def test_legacy_custom_role_is_renamed_in_place(self, run_az):
+        project_scope = (
+            "/subscriptions/sub/resourceGroups/rg/providers/"
+            "Microsoft.CognitiveServices/accounts/aif/projects/project"
+        )
+        assignable_scope = "/subscriptions/sub/resourceGroups/rg"
+
+        def role(name):
+            return {
+                "name": setup.USER_IDENTITY_IMPERSONATION_ROLE_ID,
+                "roleName": name,
+                "roleType": "CustomRole",
+                "assignableScopes": [assignable_scope],
+                "permissions": [
+                    {
+                        "actions": [],
+                        "notActions": [],
+                        "dataActions": [
+                            setup.USER_IDENTITY_IMPERSONATION_DATA_ACTION
+                        ],
+                        "notDataActions": [],
+                    }
+                ],
+            }
+
+        legacy_name = setup.LEGACY_USER_IDENTITY_IMPERSONATION_ROLE_NAMES[0]
+        run_az.side_effect = [
+            json.dumps([role(legacy_name)]),
+            "",
+            json.dumps([role(setup.USER_IDENTITY_IMPERSONATION_ROLE_NAME)]),
+        ]
+
+        self.assertTrue(
+            setup.ensure_user_identity_impersonation_role(project_scope)
+        )
+
+        update_arguments = run_az.call_args_list[1].args[0]
+        self.assertIn("update", update_arguments)
+        definition = json.loads(
+            update_arguments[update_arguments.index("--role-definition") + 1]
+        )
+        self.assertEqual(
+            definition["Name"], setup.USER_IDENTITY_IMPERSONATION_ROLE_NAME
+        )
+        self.assertEqual(
+            definition["Id"], setup.USER_IDENTITY_IMPERSONATION_ROLE_ID
+        )
+
+    @patch.object(setup, "_run_az")
     def test_live_protocol_verifies_routed_responses_2_0_0(self, run_az):
         run_az.side_effect = [
             json.dumps(

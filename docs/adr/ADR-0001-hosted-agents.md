@@ -122,7 +122,7 @@ higher-priority gate.
 | `Azure/bicep-ptn-aiml-landing-zone` | Continue to expose generic hosted-agent, private networking, RBAC, private ACR pull, and dedicated VNet-connected ACR Tasks pool primitives. Complete and release the private-network naming/build fixes required by #597, but do not encode GPT-RAG's product default. |
 | `Azure/GPT-RAG` `docs` branch | In the implementation/release change, replace current opt-in guidance with fresh-deploy, existing-upgrade, migration, cost, rollback, and no-panel-default guidance. Do not claim hosted/panel support before #611. |
 
-`Azure/gpt-rag-mcp` is not on the current default-change critical path. Add it
+`Azure/gpt-rag-mcp` (legacy repository; not renamed under the Agent Landing Zone rebrand) is not on the current default-change critical path. Add it
 only if the validated Toolbox contract requires a runtime change in that
 repository.
 

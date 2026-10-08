@@ -27,4 +27,3 @@ assignees: ""
   - [ ] agent-app-orchestrator
   - [ ] agent-app-ingestion
   - [ ] agent-app-ui
-  - [ ] gpt-rag-mcp

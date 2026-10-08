@@ -108,21 +108,18 @@ config/governance/tests/test_setup.py
 config/panel/tests/test_operator_contract.py
 config/panel/tests/test_settings.py
 tests/test_naming_inventory.py
+config/continuity/setup.py
+config/continuity/tests/test_setup.py
 tests/test_deployment_modes.py
 tests/test_release_contracts.py
 ```
 
-Temporary entries (pending decisions on Azure-side identifiers and
-not-yet-renamed external repositories). `infra/**` covers the AI Landing Zone
-source incorporated in-repository with its upstream names (ADR-0015);
-`config/continuity/setup.py` keeps the existing custom role name; the
-feature request templates reference the `Azure/gpt-rag-mcp` repository; the
-evaluation workflow reuses an existing environment:
+Temporary entries. `infra/**` covers the AI Landing Zone source incorporated
+in-repository with its upstream names (ADR-0015). `config/continuity/setup.py`
+is permanent because it recognizes the legacy custom role name and renames it
+in place. `Azure/gpt-rag-mcp` is a legacy repository, not renamed and no longer
+listed in the issue templates.
 
 ```naming-allow-temporary
 infra/**
-config/continuity/setup.py
-.github/ISSUE_TEMPLATE/feature_request.md
-.github/feature_request.md
-.github/workflows/copilot-setup-steps.yml
 ```

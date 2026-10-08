@@ -51,7 +51,10 @@ FOUNDRY_AGENT_INTERACT_DATA_ACTION = (
 )
 USER_IDENTITY_IMPERSONATION_ROLE_ID = "bef66abe-a495-530a-be1d-5d882fecff03"
 USER_IDENTITY_IMPERSONATION_ROLE_NAME = (
-    "GPT-RAG Hosted Agent User Identity Impersonation"
+    "Agent Landing Zone Hosted Agent User Identity Impersonation"
+)
+LEGACY_USER_IDENTITY_IMPERSONATION_ROLE_NAMES = (
+    "GPT-RAG Hosted Agent User Identity Impersonation",
 )
 USER_IDENTITY_IMPERSONATION_DATA_ACTION = (
     "Microsoft.CognitiveServices/accounts/AIServices/agents/endpoints/"
@@ -672,6 +675,9 @@ def foundry_role_assignable_scope(project_resource_id: str) -> str:
 def validate_user_identity_impersonation_role(
     role_definition: Mapping[str, Any],
     assignable_scope: str,
+    allowed_role_names: tuple[str, ...] = (
+        USER_IDENTITY_IMPERSONATION_ROLE_NAME,
+    ),
 ) -> None:
     permissions = role_definition.get("permissions") or []
     permission = permissions[0] if len(permissions) == 1 else {}
@@ -684,8 +690,7 @@ def validate_user_identity_impersonation_role(
     }
     if (
         role_definition.get("name") != USER_IDENTITY_IMPERSONATION_ROLE_ID
-        or role_definition.get("roleName")
-        != USER_IDENTITY_IMPERSONATION_ROLE_NAME
+        or role_definition.get("roleName") not in allowed_role_names
         or role_definition.get("roleType") != "CustomRole"
         or len(permissions) != 1
         or permission.get("actions")
@@ -725,8 +730,18 @@ def ensure_user_identity_impersonation_role(
             raise RuntimeError(
                 "The Agent Landing Zone user-identity impersonation role was not found uniquely."
             )
-        validate_user_identity_impersonation_role(result[0], assignable_scope)
-        return False
+        existing = result[0]
+        if existing.get("roleName") == USER_IDENTITY_IMPERSONATION_ROLE_NAME:
+            validate_user_identity_impersonation_role(existing, assignable_scope)
+            return False
+        validate_user_identity_impersonation_role(
+            existing,
+            assignable_scope,
+            LEGACY_USER_IDENTITY_IMPERSONATION_ROLE_NAMES,
+        )
+        operation = "update"
+    else:
+        operation = "create"
 
     definition = {
         "Name": USER_IDENTITY_IMPERSONATION_ROLE_NAME,
@@ -746,7 +761,7 @@ def ensure_user_identity_impersonation_role(
         [
             "role",
             "definition",
-            "create",
+            operation,
             "--role-definition",
             json.dumps(definition, separators=(",", ":")),
             "--output",

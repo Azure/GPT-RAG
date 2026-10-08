@@ -15,8 +15,8 @@ jobs:
       contents: read
       id-token: write
     env:
-      AZURE_ENV_NAME: gptrag-evaluation
-      AZURE_RESOURCE_GROUP: rg-gptrag-evaluation
+      AZURE_ENV_NAME: agentlz-evaluation
+      AZURE_RESOURCE_GROUP: rg-agentlz-evaluation
       AZURE_LOCATION: eastus
       AZURE_PRINCIPAL_ID: f4be7297-7532-4582-b0b5-53e7413879dd
     steps:
