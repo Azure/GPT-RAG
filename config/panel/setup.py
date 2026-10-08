@@ -19,16 +19,16 @@ here, in an Agent Landing Zone config/hook, per AGENTS.md.
 
 Identity/role matrix (ADR-0004):
 
-- **gpt-rag-ui (frontend)** -- the only component holding the user token and
+- **agent-app-ui (frontend)** -- the only component holding the user token and
   the exclusive owner of managed-Conversation create/read/append/delete and
   the owner index -- gets **Cosmos DB Built-in Data Contributor**, scoped to
   *only* the two panel containers.
-- **gpt-rag-ingestion (dataingest)** -- the operator overview surface reads
+- **agent-app-ingestion (dataingest)** -- the operator overview surface reads
   aggregate counts over panel metadata only -- gets **Cosmos DB Built-in
   Data Reader**, scoped to the *same* two containers. It never gets write
   access and never gets the classic ``conversations``/``datasources``/
   ``prompts``/``mcp`` containers through this script.
-- **gpt-rag-orchestrator (hosted agent/container)** -- stateless, holds
+- **agent-app-orchestrator (hosted agent/container)** -- stateless, holds
   **zero** managed-Conversations RBAC per ADR-0001/0003/0004 -- gets
   *nothing* here. This script has no code path that resolves or assigns a
   role to the orchestrator/hosted-agent identity.
