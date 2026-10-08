@@ -1,5 +1,22 @@
 # Changelog
 
+## [v4.2.1] - 2026-10-08
+
+### Changed
+- Renamed the hosted agent custom role to "Agent Landing Zone Hosted Agent User Identity Impersonation"; setup updates the role name in existing environments.
+- The evaluation workflow now targets the `agentlz-evaluation` environment, and the Copilot coding agent signs in to Azure through OIDC.
+- Removed the legacy `gpt-rag-mcp` component from the issue templates.
+- README and documentation wording now positions the solution as conversational agent experiences rather than RAG only.
+- Aligned the infra checkout test with the tracked `infra/main.parameters.json` seed.
+
+### Validation
+
+| Component | Version |
+| --- | --- |
+| agent-app-ui | v3.2.0 |
+| agent-app-orchestrator | v5.2.0 |
+| agent-app-ingestion | v3.1.1 |
+| infra / AI Landing Zone | v2.7.3 |
 ## [v4.2.0] - 2026-10-06
 
 ### Changed
