@@ -52,7 +52,7 @@ agent scope:
 
 - Foundry Agent Consumer
   (`eed3b665-ab3a-47b6-8f48-c9382fb1dad6`).
-- GPT-RAG Hosted Agent User Identity Impersonation
+- Agent Landing Zone Hosted Agent User Identity Impersonation (formerly "GPT-RAG Hosted Agent User Identity Impersonation"; setup renames existing definitions in place)
   (`bef66abe-a495-530a-be1d-5d882fecff03`), a custom role with no `Actions`
   and exactly
   `Microsoft.CognitiveServices/accounts/AIServices/agents/endpoints/UserIdentityImpersonation/action`

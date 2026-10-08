@@ -36,22 +36,22 @@ class IntegrationPinTests(unittest.TestCase):
         self.assertEqual(
             ("v5.2.0", "f202e2584ed54c2d59e4105e8ce9ecebe17b5ac0"),
             (
-                components["gpt-rag-orchestrator"]["tag"],
-                components["gpt-rag-orchestrator"]["commit"],
+                components["agent-app-orchestrator"]["tag"],
+                components["agent-app-orchestrator"]["commit"],
             ),
         )
         self.assertEqual(
             ("v3.1.1", "72efd8d7d51e10d38bf8b89f03b7eb42e1ed8ff2"),
             (
-                components["gpt-rag-ingestion"]["tag"],
-                components["gpt-rag-ingestion"]["commit"],
+                components["agent-app-ingestion"]["tag"],
+                components["agent-app-ingestion"]["commit"],
             ),
         )
         self.assertEqual(
             ("v3.2.0", "251aae1378aac5fb3f2802845b9c2c3495a7c26e"),
             (
-                components["gpt-rag-ui"]["tag"],
-                components["gpt-rag-ui"]["commit"],
+                components["agent-app-ui"]["tag"],
+                components["agent-app-ui"]["commit"],
             ),
         )
 
@@ -605,7 +605,7 @@ class LifecycleParityTests(unittest.TestCase):
         # tests/test_deployment_modes.py) instead of being hardcoded per
         # script, so assert each hook filters manifest.json's components list
         # against the topology-provided selection rather than embedding a
-        # duplicate ["gpt-rag-ui", "gpt-rag-orchestrator", "gpt-rag-ingestion"]
+        # duplicate ["agent-app-ui", "agent-app-orchestrator", "agent-app-ingestion"]
         # literal.
         scripts = ROOT / "scripts"
         ps1 = (scripts / "preDeploy.ps1").read_text(encoding="utf-8-sig")

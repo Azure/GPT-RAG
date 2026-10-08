@@ -68,19 +68,16 @@ def _git(repository: Path, *args: str) -> str:
     return completed.stdout.strip()
 
 
-GENERATED_INFRA_PATHS = ("infra/main.parameters.json",)
-
-
-@pytest.mark.parametrize("relative_path", GENERATED_INFRA_PATHS)
-def test_generated_infra_parameters_are_ignored_not_tracked(relative_path: str) -> None:
-    # preProvision composes infra/main.parameters.json on every run; it must
-    # never dirty the tree now that infra/ is tracked source.
-    assert _git(REPO_ROOT, "ls-files", "--", relative_path) == ""
-    completed = subprocess.run(
-        ["git", "-C", str(REPO_ROOT), "check-ignore", "--no-index", "-q", relative_path],
-        check=False,
-    )
-    assert completed.returncode == 0, f"{relative_path} must be listed in .gitignore"
+def test_infra_parameters_seed_is_tracked_and_marked_skip_worktree() -> None:
+    # infra/main.parameters.json is a tracked seed so a fresh clone can run
+    # `azd up`; preProvision regenerates it and marks it skip-worktree so the
+    # composed file never dirties the tree.
+    relative_path = "infra/main.parameters.json"
+    assert _git(REPO_ROOT, "ls-files", "--", relative_path) == relative_path
+    for name in ("preProvision.ps1", "preProvision.sh"):
+        content = (REPO_ROOT / "scripts" / name).read_text(encoding="utf-8-sig")
+        assert "update-index --skip-worktree" in content, name
+        assert relative_path in content, name
 
 
 def test_preprovision_hooks_do_not_write_tracked_infra_files() -> None:

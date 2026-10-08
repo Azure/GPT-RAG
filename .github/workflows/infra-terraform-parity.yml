@@ -124,8 +124,8 @@ jobs:
             head -c 60000 "$RUNNER_TEMP/bicep.diff"
             echo '```'
           } > "$handoff"
-          git config user.name "gpt-rag-parity[bot]"
-          git config user.email "gpt-rag-parity[bot]@users.noreply.github.com"
+          git config user.name "agentlz-parity[bot]"
+          git config user.email "agentlz-parity[bot]@users.noreply.github.com"
           git add "$handoff"
           git commit -q -m "Parity handoff for Bicep ${HEAD_SHA:0:12}"
           git push -q "https://x-access-token:${GH_TOKEN}@github.com/$target.git" "$branch"

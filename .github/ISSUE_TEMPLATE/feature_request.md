@@ -27,4 +27,3 @@ A clear and concise description of what the problem is. Ex. I'm always frustrate
   - [ ] agent-app-ingestion
   - [ ] agent-app-ui
   - [ ] agent-landing-zone (infra)
-  - [ ] gpt-rag-mcp

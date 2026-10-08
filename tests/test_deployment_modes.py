@@ -55,7 +55,7 @@ class DeploymentCompositionTests(unittest.TestCase):
 
         self.assertEqual(DeploymentMode.CLASSIC, resolve_mode(environment))
         self.assertEqual(
-            ("gpt-rag-ui", "gpt-rag-orchestrator", "gpt-rag-ingestion"),
+            ("agent-app-ui", "agent-app-orchestrator", "agent-app-ingestion"),
             selected_components(DeploymentMode.CLASSIC),
         )
         self.assertEqual(
@@ -128,7 +128,7 @@ class DeploymentCompositionTests(unittest.TestCase):
 
         self.assertEqual(DeploymentMode.HOSTED_NO_PANEL, resolve_mode(environment))
         self.assertEqual(
-            ("gpt-rag-ui", "gpt-rag-ingestion"),
+            ("agent-app-ui", "agent-app-ingestion"),
             selected_components(DeploymentMode.HOSTED_NO_PANEL),
         )
         self.assertEqual(
@@ -435,7 +435,7 @@ class DeploymentCompositionTests(unittest.TestCase):
         orchestrator = next(
             component
             for component in manifest["components"]
-            if component["name"] == "gpt-rag-orchestrator"
+            if component["name"] == "agent-app-orchestrator"
         )
         environment = {
             "DEPLOYMENT_TOPOLOGY": "hosted-no-panel",
@@ -581,7 +581,7 @@ class PanelPlatformContractTests(unittest.TestCase):
         self.assertNotIn("CosmosDBBuiltInDataContributor", dataingest["roles"])
 
     def test_dataingest_keeps_existing_blob_role_for_corpus_curation(self) -> None:
-        # gpt-rag-ingestion's corpus-curation decisions (PR #274) are written
+        # agent-app-ingestion's (formerly gpt-rag-ingestion) corpus-curation decisions (PR #274) are written
         # to the existing per-file-log blob control store this identity
         # already owns, via Blob Storage ETag optimistic concurrency -- never
         # Cosmos. This asserts that identity's existing blob RBAC (already
@@ -625,7 +625,7 @@ class PanelPlatformContractTests(unittest.TestCase):
         )
         self.assertEqual(settings["PANEL_CURSOR_TTL_SECONDS"], "600")
         self.assertEqual(settings["PANEL_OVERVIEW_MIN_CARDINALITY"], "5")
-        # gpt-rag-ingestion operator surfaces (PR #274, merge 5569dd6):
+        # agent-app-ingestion (formerly gpt-rag-ingestion) operator surfaces (PR #274, merge 5569dd6):
         # exact key names, safe defaults, feature never set true here.
         self.assertEqual(settings["PANEL_OPERATOR_SURFACES_ENABLED"], "false")
         self.assertEqual(settings["PANEL_OPERATOR_APP_ROLE"], "")

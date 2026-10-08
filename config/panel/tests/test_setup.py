@@ -11,7 +11,7 @@ ENVIRONMENT_BASE = {
     "AZURE_SUBSCRIPTION_ID": "11111111-1111-1111-1111-111111111111",
     "AZURE_RESOURCE_GROUP": "rg-test",
     "DATABASE_ACCOUNT_NAME": "cosmos-test",
-    "DATABASE_NAME": "gpt-rag-db",
+    "DATABASE_NAME": "agentlz-db",
     "RESOURCE_TOKEN": "abc123",
 }
 
