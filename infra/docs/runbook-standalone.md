@@ -115,10 +115,10 @@ azd env set DEPLOY_AAF_AGENT_SVC false
 
 This keeps the AI Foundry account, project, and model deployments, but skips the Agent Service Standard Setup and its associated AI Search, Storage, Cosmos DB, and Key Vault resources. `DEPLOY_SEARCH_SERVICE` remains independent and controls only the workload/RAG Search service.
 
-#### Optional: GPT-RAG Foundry IQ Pattern B
+#### Optional: Agent Landing Zone Foundry IQ Pattern B
 
-Use this only for a GPT-RAG environment that has been validated for Foundry IQ.
-Pattern B registers the existing GPT-RAG Azure AI Search index as a Foundry IQ
+Use this only for an Agent Landing Zone environment that has been validated for Foundry IQ.
+Pattern B registers the existing Agent Landing Zone Azure AI Search index as a Foundry IQ
 `searchIndex` knowledge source.
 
 ```pwsh
