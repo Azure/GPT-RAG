@@ -2,12 +2,14 @@
 
 Runs in ``postProvision`` through ``python -m config.appdefinition
 --assign-roles``. For every ``containerapp`` component of the selected
-definition (``azure.ai.agent`` identities are owned by
-:mod:`config.deployment.hosted_access`), it expands the component profiles with
+definition, it expands the component profiles with
 :func:`~config.appdefinition.profiles.expand_profiles`, resolves the component
 Container App identity by its ``azd-service-name`` tag, resolves each scope to
 the single matching resource in ``AZURE_RESOURCE_GROUP``, and creates only the
 assignments that do not already exist (directly or inherited). Re-runs converge.
+Custom hosted components use the same profile reconciliation after deployment,
+with an instance identity verified by :mod:`config.deployment.hosted_access`.
+The bundled hosted orchestrator retains its feature-owned access bootstrap.
 
 Every Azure call goes through ``az`` (:func:`config.deployment.appconfig._run_az`)
 so unit tests replace one boundary.
@@ -240,6 +242,41 @@ def assign_roles(
 ) -> list[PlannedAssignment]:
     """Create missing profile role assignments; return the ones created."""
     planned = plan_assignments(definition, hosted_orchestration=hosted_orchestration)
+    return _assign_planned(planned, environment, run_az=run_az, role_guids=role_guids)
+
+
+def assign_hosted_roles(
+    component: Mapping[str, Any],
+    principal: str,
+    environment: Mapping[str, str],
+    *,
+    run_az: RunAz | None = None,
+    role_guids: Mapping[str, str] | None = None,
+) -> list[PlannedAssignment]:
+    """Apply the selected component profiles to its verified hosted identity."""
+    from uuid import UUID
+
+    if UUID(principal).int == 0:
+        raise RoleAssignmentError("Hosted runtime principal must be a nonzero GUID.")
+    name = str(component["name"])
+    planned = [
+        PlannedAssignment(name, name, assignment)
+        for assignment in expand_profiles(component.get("profiles") or ())
+    ]
+    return _assign_planned(
+        planned, environment, run_az=run_az, role_guids=role_guids,
+        principals={name: principal},
+    )
+
+
+def _assign_planned(
+    planned: list[PlannedAssignment],
+    environment: Mapping[str, str],
+    *,
+    run_az: RunAz | None,
+    role_guids: Mapping[str, str] | None,
+    principals: Mapping[str, str] | None = None,
+) -> list[PlannedAssignment]:
     if not planned:
         return []
     resource_group = (environment.get("AZURE_RESOURCE_GROUP") or "").strip()
@@ -253,7 +290,7 @@ def assign_roles(
         raise RoleAssignmentError(f"Role {', '.join(unknown)} is not defined in {ROLES_RELATIVE_PATH.as_posix()}.")
     # Resolve every identity and scope before the first write so an ambiguous
     # or missing resource fails with no partial assignment.
-    principals = {
+    principals = principals if principals is not None else {
         service: resolve_principal(service, resource_group, run_az)
         for service in dict.fromkeys(item.service for item in planned)
     }

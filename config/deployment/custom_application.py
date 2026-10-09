@@ -15,6 +15,8 @@ from uuid import uuid4
 import yaml
 
 from config.appdefinition import AppDefinitionError, load_definition, validate_definition
+from config.appdefinition.loader import KIND_HOSTED_AGENT
+from config.appdefinition.roles import assign_hosted_roles
 from config.deployment.composition import is_truthy
 from config.deployment.hosted_image import (
     build_source_image,
@@ -22,6 +24,7 @@ from config.deployment.hosted_image import (
     validate_digest,
 )
 from config.deployment.private_network import check_stage
+from config.deployment.hosted_access import discover_instance
 from util.azure_cli import resolve_az_command
 
 LOGGER = logging.getLogger("config.deployment.custom_application")
@@ -130,6 +133,11 @@ def deploy_service(definition_path: str, name: str, environment: Mapping[str, st
     original = path.read_bytes()
     project = yaml.safe_load(original.decode("utf-8-sig"))
     service = project["services"][name]
+    agent_name = service.get("name")
+    if components[0]["kind"] == KIND_HOSTED_AGENT and (
+        not isinstance(agent_name, str) or not agent_name.strip()
+    ):
+        raise ValueError("Custom hosted service requires an explicit agent name.")
     image = prepare_image(components[0], service, definition.folder, environment)
     try:
         if image:
@@ -146,6 +154,13 @@ def deploy_service(definition_path: str, name: str, environment: Mapping[str, st
     finally:
         if image:
             path.write_bytes(original)
+    if components[0]["kind"] == KIND_HOSTED_AGENT:
+        instance = discover_instance(environment, name=agent_name)
+        assign_hosted_roles(components[0], instance.principal_id, environment)
+        LOGGER.info(
+            "Verified capability-profile assignments for hosted service %s version %s.",
+            name, instance.agent_version,
+        )
     return image
 
 

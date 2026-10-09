@@ -85,6 +85,7 @@ red() { printf '%s\n' "$*"; }
                 "import os, sys, subprocess\n"
                 "from pathlib import Path\n"
                 "from unittest.mock import patch\n"
+                "from types import SimpleNamespace\n"
                 "from config.deployment import custom_application\n"
                 "def run(args, **kwargs):\n"
                 "    if args[0] == 'git':\n"
@@ -95,7 +96,9 @@ red() { printf '%s\n' "$*"; }
                 "    with (Path(os.environ['FAKE_ROOT']) / 'trace').open('a', encoding='utf-8') as f:\n"
                 "        f.write(' '.join(args[1:]) + '\\n')\n"
                 "    return subprocess.CompletedProcess(args, 0)\n"
-                "with patch.object(custom_application.subprocess, 'run', side_effect=run):\n"
+                "with patch.object(custom_application.subprocess, 'run', side_effect=run), \\\n"
+                "     patch.object(custom_application, 'discover_instance', return_value=SimpleNamespace(principal_id='verified', agent_version='1')), \\\n"
+                "     patch.object(custom_application, 'assign_hosted_roles'):\n"
                 "    sys.exit(custom_application.main(sys.argv[1:]))\n", encoding="utf-8")
             env = dict(os.environ, FAKE_ROOT=str(root), FAKE_APP=str(app),
                        FAKE_COMMIT=("2" if mismatch else "1") * 40, REAL_PYTHON=sys.executable,

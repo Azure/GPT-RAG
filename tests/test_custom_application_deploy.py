@@ -155,3 +155,42 @@ def test_deployment_consumes_pin_and_restores_original_yaml(tmp_path, failure):
         else:
             deploy.deploy_service(str(definition_path), "web", ENV)
     assert path.read_bytes() == original
+
+
+@pytest.mark.parametrize("failure", ["none", "deploy", "identity", "roles"])
+def test_hosted_deployment_reconciles_only_verified_runtime_profiles(tmp_path, failure):
+    app = tmp_path / "hosted"
+    shutil.copytree(ROOT / "samples" / "custom-app" / "hosted", app)
+    definition_path = app / "app-definition.json"
+    definition = json.loads(definition_path.read_text())
+    definition["components"][0]["source"] = {"commit": COMMIT}
+    definition_path.write_text(json.dumps(definition))
+    original = (app / "azure.yaml").read_bytes()
+    image = f"private.azurecr.io/agent@{DIGEST}"
+    instance = SimpleNamespace(principal_id="verified-principal", agent_version="7")
+    with patch.object(deploy, "prepare_image", return_value=image), \
+            patch.object(deploy.subprocess, "run") as run, \
+            patch.object(deploy, "discover_instance", return_value=instance) as discover, \
+            patch.object(deploy, "assign_hosted_roles") as roles:
+        if failure == "deploy":
+            run.side_effect = subprocess.CalledProcessError(1, ["azd"])
+        if failure == "identity":
+            discover.side_effect = RuntimeError("identity mismatch")
+        if failure == "roles":
+            roles.side_effect = RuntimeError("assignment denied")
+        if failure == "none":
+            assert deploy.deploy_service(str(definition_path), "agent", ENV) == image
+        else:
+            with pytest.raises((RuntimeError, subprocess.CalledProcessError)):
+                deploy.deploy_service(str(definition_path), "agent", ENV)
+        if failure == "deploy":
+            discover.assert_not_called()
+        else:
+            discover.assert_called_once_with(ENV, name="sample-hosted-agent")
+        if failure in {"deploy", "identity"}:
+            roles.assert_not_called()
+        else:
+            roles.assert_called_once_with(
+                definition["components"][0], instance.principal_id, ENV,
+            )
+    assert (app / "azure.yaml").read_bytes() == original

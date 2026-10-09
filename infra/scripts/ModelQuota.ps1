@@ -9,7 +9,28 @@ function Get-ExistingModelDeployments {
     )
 
     $projectId = $ProjectResourceId
-    if ([string]::IsNullOrWhiteSpace($projectId)) { return @() }
+    if ([string]::IsNullOrWhiteSpace($projectId)) {
+        if ([string]::IsNullOrWhiteSpace($ResourceGroup) -or [string]::IsNullOrWhiteSpace($SubscriptionId)) {
+            return @()
+        }
+        # Older classic/custom foundations emitted no project output.
+        $projects = & $ReadAzureJson @(
+            'resource', 'list', '--resource-group', $ResourceGroup,
+            '--resource-type', 'Microsoft.CognitiveServices/accounts/projects',
+            '--subscription', $SubscriptionId, '--query', '[].{id:id}'
+        )
+        if ($null -eq $projects -or ($projects -is [hashtable] -and $projects.failed)) {
+            & $OnWarning 'Could not discover an existing project; full requested allocation will be checked.' | Out-Null
+            return @()
+        }
+        $candidates = @($projects)
+        if ($candidates.Count -eq 0) { return @() }
+        if ($candidates.Count -ne 1) {
+            & $OnWarning 'Existing project discovery is ambiguous; no allocation credit applied. Set the selected project resource ID.' | Out-Null
+            return @()
+        }
+        $projectId = [string]$candidates[0].id
+    }
     $target = [regex]::Match($projectId, '^/subscriptions/([^/]+)/resourceGroups/([^/]+)/providers/Microsoft\.CognitiveServices/accounts/([^/]+)/projects/[^/]+/?$', 'IgnoreCase')
     if (-not $target.Success -or $target.Groups[1].Value -ne $SubscriptionId -or
         [string]::IsNullOrWhiteSpace($resourceGroup) -or $target.Groups[2].Value -ne $resourceGroup) {

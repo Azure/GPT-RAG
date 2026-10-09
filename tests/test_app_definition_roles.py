@@ -14,6 +14,7 @@ from config.appdefinition.__main__ import main as cli_main
 from config.appdefinition.roles import (
     RoleAssignmentError,
     assign_roles,
+    assign_hosted_roles,
     discover_component_identities,
     load_role_guids,
     plan_assignments,
@@ -85,6 +86,36 @@ def bundled():
 
 
 class RoleAssignmentTests(unittest.TestCase):
+    def test_hosted_runtime_expands_profiles_and_converges_without_container_lookup(self):
+        az = FakeAz()
+        principal = "22222222-2222-4222-8222-222222222222"
+        component = {"name": "agent", "profiles": ["retrieval-reader", "conversation-store"]}
+        env = {"AZURE_RESOURCE_GROUP": RG}
+        created = assign_hosted_roles(component, principal, env, run_az=az)
+        self.assertEqual(
+            {item.role for item in expand_profiles(component["profiles"])},
+            {item.assignment.role for item in created},
+        )
+        self.assertFalse(any(call[:2] == ["containerapp", "list"] for call in az.calls))
+        self.assertTrue(all(principal in call for call in az.creates()))
+        az.calls.clear()
+        self.assertEqual([], assign_hosted_roles(component, principal, env, run_az=az))
+        self.assertEqual([], az.creates())
+
+    def test_hosted_runtime_fails_before_writes_for_invalid_principal_or_ambiguous_scope(self):
+        az = FakeAz()
+        with self.assertRaises(ValueError):
+            assign_hosted_roles({"name": "agent"}, "not-a-guid", {"AZURE_RESOURCE_GROUP": RG}, run_az=az)
+        with self.assertRaises(RoleAssignmentError):
+            assign_hosted_roles({"name": "agent"}, "00000000-0000-0000-0000-000000000000",
+                                {"AZURE_RESOURCE_GROUP": RG}, run_az=az)
+        vaults = [{"name": "kv-a", "id": f"{SUB}/kva"}, {"name": "kv-b", "id": f"{SUB}/kvb"}]
+        with patch.dict(RESOURCES, {"Microsoft.KeyVault/vaults": vaults}):
+            with self.assertRaisesRegex(RoleAssignmentError, "exactly one"):
+                assign_hosted_roles({"name": "agent"}, "22222222-2222-4222-8222-222222222222",
+                                    {"AZURE_RESOURCE_GROUP": RG}, run_az=az)
+        self.assertEqual([], az.creates())
+
     def test_discovers_client_ids_without_role_writes(self) -> None:
         calls = []
 

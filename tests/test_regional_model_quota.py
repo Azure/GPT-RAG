@@ -47,6 +47,10 @@ function Invoke-AzJson {
         if ($fixture.accountFailure) { return @{ failed = $true; error = 'fixture account denied' } }
         return $fixture.account
     }
+    if (($Arguments[0..1] -join ' ') -eq 'resource list') {
+        if ($fixture.PSObject.Properties['projects']) { return $fixture.projects }
+        return @()
+    }
     if (($Arguments[0..3] -join ' ') -eq 'cognitiveservices account deployment list') {
         if ($fixture.deploymentFailure) { return @{ failed = $true; error = 'fixture deployments denied' } }
         return $fixture.deployments
@@ -153,8 +157,24 @@ class RegionalModelQuotaTests(unittest.TestCase):
                 data["usage"][0]["limit"] = 100 + available
                 result, output = self.run_check(data, project="")
                 self.assertEqual(failures, result["failures"], output)
-                self.assertEqual(2, len(result["calls"]))
+                self.assertEqual(3, len(result["calls"]))
                 self.assertIn("verified existing credit 0, additional allocation 100", output)
+
+    def test_old_blank_output_recovers_only_unique_verified_project(self) -> None:
+        data = fixture()
+        data["projects"] = [{"id": ACCOUNT_ID + "/projects/test-project"}]
+        result, output = self.run_check(data, project="")
+        self.assertEqual(0, result["failures"], output)
+        self.assertIn("verified existing credit 100, additional allocation 0", output)
+        for projects in (
+            [*data["projects"], {"id": ACCOUNT_ID + "/projects/other"}],
+            [{"id": ACCOUNT_ID.replace("test-group", "other-group") + "/projects/test-project"}],
+        ):
+            with self.subTest(projects=projects):
+                data["projects"] = projects
+                result, output = self.run_check(data, project="")
+                self.assertEqual(1, result["failures"], output)
+                self.assertIn("verified existing credit 0", output)
 
     def test_only_increment_requires_available_quota(self) -> None:
         for capacity, failures in ((150, 0), (151, 1), (75, 0)):
