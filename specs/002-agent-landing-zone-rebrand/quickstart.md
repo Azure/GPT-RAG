@@ -248,12 +248,20 @@ close the outstanding runtime acceptance scenarios:
   completed, and a separate managed-identity greeting passed the strict terminal
   Responses validator. These are corrective-source results, not pristine release
   acceptance or delegated-user retrieval evidence.
-  The latest UI revision is unhealthy because its default user-delegated mode
-  lacks OAuth client configuration; ingestion panel startup also reports missing
-  OAuth configuration. Old placeholder revisions remain active, so private HTTP
-  200 responses do not establish readiness. Authentication has not been bypassed.
-  Healthy application revisions, user-delegated OBO, grounded answers, citations,
-  and document authorization remain unverified.
+  Initial UI and ingestion startup failed because OAuth configuration was
+  absent. A dedicated single-tenant evaluation registration now exposes the UI's
+  own API scope. Its short-lived credential was delivered encrypted to the
+  private runner, stored only in Key Vault, and referenced in App Configuration
+  with label `agent-lz`; tenant credential-lifetime policy was preserved.
+  A persistent Key Vault-backed Chainlit signing key was also configured.
+  Both intended pinned revisions are now Healthy/RunningAtMaxScale, match
+  latestReadyRevisionName, and receive 100% of traffic; placeholders no longer
+  serve the application. Private probes verified the real UI, enabled Entra
+  provider, correct login redirect, ingestion health, and HTTP 401 on
+  unauthenticated panel data access. Authentication has not been bypassed.
+  Actual user login/consent, user-delegated OBO, grounded answers, citations,
+  and positive document authorization remain unverified. An OAuth resource
+  token diagnostic did not invoke the agent and is not OBO acceptance.
 - The evaluation VPN Gateway was provisioned and protected with `keep=true`
   and a deletion lock. Hub/spoke peerings are Connected with gateway transit.
   Private DNS and managed-identity governance calls succeeded from the actual
