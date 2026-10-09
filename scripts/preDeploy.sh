@@ -452,15 +452,13 @@ while IFS= read -r dcomp; do
     smoke_protocol="$(cd "$repo_root" && python3 -m config.deployment.hosted --service-protocol "$app_definition_dir/azure.yaml" --service-name "$c_name")" || {
       red "$c_name: cannot resolve the greeting protocol."; had_errors=1; continue
     }
-    # prepareHostedDeployment is not run here: it builds only the manifest-pinned
-    # bundled orchestrator image (HOSTED_AGENT_*). A custom azure.ai.agent
-    # component deploys from its own child azd project, which builds its image,
-    # or pins source.imageDigest through AGENTLZ_IMAGE_DIGEST (T079 limitation).
+    # Custom images use the shared immutable/private build path, not the
+    # manifest-pinned orchestrator's derived hosted entrypoint.
     (
       cd "$app_definition_dir" &&
       azd env set FOUNDRY_PROJECT_ENDPOINT "${AZURE_AI_PROJECT_ENDPOINT:-}" --environment "$env_name" --no-prompt >/dev/null &&
       azd env set AZURE_AI_PROJECT_ID "${AZURE_AI_PROJECT_RESOURCE_ID:-}" --environment "$env_name" --no-prompt >/dev/null &&
-      azd deploy "$c_name" --environment "$env_name" --no-prompt
+      python3 -c "import os, runpy, sys; sys.path.insert(0, os.environ['AGENTLZ_REPO_ROOT']); sys.argv = ['config.deployment.custom_application'] + sys.argv[1:]; runpy.run_module('config.deployment.custom_application', run_name='__main__')" --definition "$app_definition_path" --service "$c_name" --environment "$env_name"
     ) || { red "$c_name: hosted agent deployment failed."; had_errors=1; continue; }
     agent_smoke_payload="$(mktemp "${TMPDIR:-/tmp}/agentlz-agent-smoke-XXXXXX")"
     smoke_options=()
@@ -481,7 +479,7 @@ while IFS= read -r dcomp; do
       red "$c_name: smoke test did not pass."; had_errors=1; continue
     fi
   else
-    (cd "$app_definition_dir" && azd deploy "$c_name" --environment "$env_name" --no-prompt) || {
+    (cd "$app_definition_dir" && python3 -c "import os, runpy, sys; sys.path.insert(0, os.environ['AGENTLZ_REPO_ROOT']); sys.argv = ['config.deployment.custom_application'] + sys.argv[1:]; runpy.run_module('config.deployment.custom_application', run_name='__main__')" --definition "$app_definition_path" --service "$c_name" --environment "$env_name") || {
       red "$c_name: Container App deployment failed."; had_errors=1; continue
     }
   fi

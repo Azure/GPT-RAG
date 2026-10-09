@@ -512,15 +512,13 @@ foreach ($dc in $definitionComponents) {
     if ("$($dc.kind)" -eq 'azure.ai.agent') {
       $smokeProtocol = (& python -c "import os, runpy, sys; sys.path.insert(0, os.environ['AGENTLZ_REPO_ROOT']); sys.argv = ['config.deployment.hosted'] + sys.argv[1:]; runpy.run_module('config.deployment.hosted', run_name='__main__')" --service-protocol (Join-Path $appDefinitionDir 'azure.yaml') --service-name $componentName | Out-String).Trim()
       if ($LASTEXITCODE -ne 0) { Write-Error "${componentName}: cannot resolve the greeting protocol."; $hadErrors = $true; continue }
-      # prepareHostedDeployment is not run here: it builds only the manifest-pinned
-      # bundled orchestrator image (HOSTED_AGENT_*). A custom azure.ai.agent
-      # component deploys from its own child azd project, which builds its image,
-      # or pins source.imageDigest through AGENTLZ_IMAGE_DIGEST (T079 limitation).
+      # Custom images use the shared immutable/private build path, not the
+      # manifest-pinned orchestrator's derived hosted entrypoint.
       & azd env set FOUNDRY_PROJECT_ENDPOINT "$($globalEnv.AZURE_AI_PROJECT_ENDPOINT)" --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
       if ($LASTEXITCODE -ne 0) { Write-Error "${componentName}: failed to set the Foundry endpoint."; $hadErrors = $true; continue }
       & azd env set AZURE_AI_PROJECT_ID "$($globalEnv.AZURE_AI_PROJECT_RESOURCE_ID)" --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
       if ($LASTEXITCODE -ne 0) { Write-Error "${componentName}: failed to set the Foundry project ID."; $hadErrors = $true; continue }
-      & azd deploy $componentName --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt
+      & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['AGENTLZ_REPO_ROOT']); sys.argv = ['config.deployment.custom_application'] + sys.argv[1:]; runpy.run_module('config.deployment.custom_application', run_name='__main__')" --definition $appDefinitionPath --service $componentName --environment "$($globalEnv.AZURE_ENV_NAME)"
       if ($LASTEXITCODE -ne 0) { Write-Error "${componentName}: hosted agent deployment failed."; $hadErrors = $true; continue }
       $smokePayloadPath = Join-Path ([IO.Path]::GetTempPath()) "agentlz-agent-smoke-$([guid]::NewGuid().ToString('N')).json"
       try {
@@ -536,7 +534,7 @@ foreach ($dc in $definitionComponents) {
         Remove-Item -LiteralPath $smokePayloadPath -Force -ErrorAction SilentlyContinue
       }
     } else {
-      & azd deploy $componentName --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt
+      & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['AGENTLZ_REPO_ROOT']); sys.argv = ['config.deployment.custom_application'] + sys.argv[1:]; runpy.run_module('config.deployment.custom_application', run_name='__main__')" --definition $appDefinitionPath --service $componentName --environment "$($globalEnv.AZURE_ENV_NAME)"
       if ($LASTEXITCODE -ne 0) { Write-Error "${componentName}: Container App deployment failed."; $hadErrors = $true; continue }
     }
     Write-Host "${componentName}: deployed." -ForegroundColor Green

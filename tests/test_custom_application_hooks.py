@@ -81,6 +81,22 @@ red() { printf '%s\n' "$*"; }
             if smoke_failure:
                 response["status"] = "failed"
             (root / "response").write_text(json.dumps(response), encoding="utf-8")
+            (root / "custom-deploy.py").write_text(
+                "import os, sys, subprocess\n"
+                "from pathlib import Path\n"
+                "from unittest.mock import patch\n"
+                "from config.deployment import custom_application\n"
+                "def run(args, **kwargs):\n"
+                "    if args[0] == 'git':\n"
+                "        return subprocess.CompletedProcess(args, 0, stdout=os.environ['FAKE_COMMIT'])\n"
+                "    folder = Path(kwargs['cwd'])\n"
+                "    assert (folder / 'azure.yaml').is_file()\n"
+                "    assert (folder / '.azure' / 'config.json').is_file()\n"
+                "    with (Path(os.environ['FAKE_ROOT']) / 'trace').open('a', encoding='utf-8') as f:\n"
+                "        f.write(' '.join(args[1:]) + '\\n')\n"
+                "    return subprocess.CompletedProcess(args, 0)\n"
+                "with patch.object(custom_application.subprocess, 'run', side_effect=run):\n"
+                "    sys.exit(custom_application.main(sys.argv[1:]))\n", encoding="utf-8")
             env = dict(os.environ, FAKE_ROOT=str(root), FAKE_APP=str(app),
                        FAKE_COMMIT=("2" if mismatch else "1") * 40, REAL_PYTHON=sys.executable,
                        AGENTLZ_REPO_ROOT=str(ROOT), REAL_REPO=str(ROOT), PYTHONPATH=str(ROOT))
@@ -90,13 +106,18 @@ red() { printf '%s\n' "$*"; }
                 prefix = r"""
 $ErrorActionPreference = 'Continue'
 $appDefinitionDir = $env:FAKE_APP
+$appDefinitionPath = Join-Path $appDefinitionDir 'app-definition.json'
 $dotAzure = Join-Path $env:FAKE_ROOT '.azure'
 $definitionComponents = @((Get-Content (Join-Path $appDefinitionDir 'app-definition.json') -Raw | ConvertFrom-Json).components)
 $globalEnv = [pscustomobject]@{ AZURE_ENV_NAME = 'offline' }
 $hadErrors = $false
 function Get-ManifestComponentForDefinition { return $null }
 function git { $global:LASTEXITCODE = 0; return $env:FAKE_COMMIT }
-function python { $input | & $env:REAL_PYTHON @args }
+function python {
+    if ($args.Count -ge 2 -and "$($args[1])".Contains('config.deployment.custom_application')) {
+        & $env:REAL_PYTHON (Join-Path $env:FAKE_ROOT 'custom-deploy.py') @($args[2..($args.Count - 1)])
+    } else { $input | & $env:REAL_PYTHON @args }
+}
 function azd {
     if (-not (Test-Path 'azure.yaml') -or -not (Test-Path 'src')) { throw 'Wrong project folder' }
     if (-not (Test-Path '.azure/config.json')) { throw 'Missing environment' }
@@ -126,7 +147,12 @@ function azd {
                                 encoding="utf-8", newline="\n")
                 shim.chmod(0o755)
                 python_shim = fake_bin / "python3"
-                python_shim.write_text('#!/usr/bin/env bash\nexec "$REAL_PYTHON" "$@"\n',
+                python_shim.write_text(
+                    '#!/usr/bin/env bash\n'
+                    'if [[ "$*" == *config.deployment.custom_application* ]]; then\n'
+                    '  shift 2\n'
+                    '  exec "$REAL_PYTHON" "$FAKE_ROOT/custom-deploy.py" "$@"\n'
+                    'fi\nexec "$REAL_PYTHON" "$@"\n',
                                        encoding="utf-8", newline="\n")
                 python_shim.chmod(0o755)
                 start = source.index('while IFS= read -r dcomp; do', source.index("# Components"))
