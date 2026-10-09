@@ -296,6 +296,18 @@ close the outstanding runtime acceptance scenarios:
   sample definitions validate, and the focused schema, roles, binding,
   composition, and custom-hook suite passed 43 tests and 28 subtests.
   Those checks do not constitute a successful one-command S7 deployment.
+- Separate Container App and hosted sample evaluations now use 20 new
+  Standard embedding units each in evaluation-only parameter copies. Published
+  defaults are unchanged. Both real preProvision gates and composed previews
+  passed with distinct nonoverlapping spokes and independent application
+  bindings. Initial provisioning failed on each Container Apps private endpoint
+  with provider `InternalServerError`, not a proven naming conflict. Retrying
+  only the exact failed endpoint module, with unchanged exported parameters and
+  a no-deletion what-if, recovered both endpoints to Succeeded/Approved.
+  Reverse VPN gateway-transit peerings and direct runner-to-spoke peerings are
+  Connected. Normal root provisioning has been resumed; full configuration,
+  private DNS resolution, custom image builds, application responses, and
+  repeat deployment are not yet verified.
 - Validation found directory-selection, custom-project working-directory,
   and hosted greeting-protocol defects. The corrective change passes
   598 tests and 591 subtests (4 skipped), but those offline results do not
