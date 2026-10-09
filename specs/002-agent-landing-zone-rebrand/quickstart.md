@@ -241,7 +241,19 @@ close the outstanding runtime acceptance scenarios:
   verified blob CDN, restricted to build-subnet HTTPS. The immutable image
   provenance was synchronized without credentials, and the actual hosted
   handoff preview passed.
-  Private hosted application deployment and authenticated runtime remain pending.
+  The private Owner ARM handoff and full managed post-provision hook passed.
+  Project-scoped Foundry User resolved the runner's agent-authoring denial after
+  propagation. Owner reconciled the three discovered runtime grants without
+  granting the runner role-management permissions. Normal root deployment then
+  completed, and a separate managed-identity greeting passed the strict terminal
+  Responses validator. These are corrective-source results, not pristine release
+  acceptance or delegated-user retrieval evidence.
+  The latest UI revision is unhealthy because its default user-delegated mode
+  lacks OAuth client configuration; ingestion panel startup also reports missing
+  OAuth configuration. Old placeholder revisions remain active, so private HTTP
+  200 responses do not establish readiness. Authentication has not been bypassed.
+  Healthy application revisions, user-delegated OBO, grounded answers, citations,
+  and document authorization remain unverified.
 - The evaluation VPN Gateway was provisioned and protected with `keep=true`
   and a deletion lock. Hub/spoke peerings are Connected with gateway transit.
   Private DNS and managed-identity governance calls succeeded from the actual
