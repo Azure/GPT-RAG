@@ -74,7 +74,7 @@ copy_dot_azure() {
   if command -v rsync >/dev/null 2>&1; then
     rsync -a "$1/" "$2/.azure/" >/dev/null 2>&1 || cp -R "$1" "$2"/ >/dev/null 2>&1
   else
-    cp -R "$1" "$2"/ >/dev/null 2>&1 || true
+    cp -R "$1" "$2"/ >/dev/null 2>&1
   fi
 }
 
@@ -138,6 +138,9 @@ case "$app_definition_path" in
   /*) ;;
   *) app_definition_path="$repo_root/$app_definition_path" ;;
 esac
+if [ -d "$app_definition_path" ]; then
+  app_definition_path="$app_definition_path/app-definition.json"
+fi
 [ -f "$app_definition_path" ] || { red "AGENTLZ_APP_DEFINITION points to $app_definition_path, which does not exist."; exit 1; }
 command -v python3 >/dev/null 2>&1 || { red "python3 is required to validate the application definition."; exit 1; }
 if [ -z "${AGENTLZ_APP_ID:-}" ]; then
@@ -424,8 +427,8 @@ while IFS= read -r dcomp; do
   c_path="$app_definition_dir/$(printf "%s" "$dcomp" | jq -r '.path')"
   c_commit="$(printf "%s" "$dcomp" | jq -r '.source.commit // empty')"
   c_digest="$(printf "%s" "$dcomp" | jq -r '.source.imageDigest // empty')"
-  if [ ! -f "$c_path/azure.yaml" ]; then
-    red "The app folder $c_path must contain its own azure.yaml."
+  if [ ! -f "$app_definition_dir/azure.yaml" ]; then
+    red "The app folder $app_definition_dir must contain its own azure.yaml."
     had_errors=1; continue
   fi
   if [ -n "$c_commit" ]; then
@@ -435,37 +438,50 @@ while IFS= read -r dcomp; do
       had_errors=1; continue
     fi
   fi
-  copy_dot_azure "$dot_azure" "$c_path"
+  copy_dot_azure "$dot_azure" "$app_definition_dir" || {
+    red "$c_name: failed to copy the azd environment."; had_errors=1; continue
+  }
   cyan "Deploying $c_name ($c_kind) from $c_path"
   env_name="${AZURE_ENV_NAME:-}"
   if [ -n "$c_digest" ]; then
-    (cd "$c_path" && azd env set AGENTLZ_IMAGE_DIGEST "$c_digest" --environment "$env_name" --no-prompt >/dev/null) || {
+    (cd "$app_definition_dir" && azd env set AGENTLZ_IMAGE_DIGEST "$c_digest" --environment "$env_name" --no-prompt >/dev/null) || {
       red "$c_name: failed to pin image digest."; had_errors=1; continue
     }
   fi
   if [ "$c_kind" = "azure.ai.agent" ]; then
+    smoke_protocol="$(cd "$repo_root" && python3 -m config.deployment.hosted --service-protocol "$app_definition_dir/azure.yaml" --service-name "$c_name")" || {
+      red "$c_name: cannot resolve the greeting protocol."; had_errors=1; continue
+    }
     # prepareHostedDeployment is not run here: it builds only the manifest-pinned
     # bundled orchestrator image (HOSTED_AGENT_*). A custom azure.ai.agent
     # component deploys from its own child azd project, which builds its image,
     # or pins source.imageDigest through AGENTLZ_IMAGE_DIGEST (T079 limitation).
     (
-      cd "$c_path" &&
+      cd "$app_definition_dir" &&
       azd env set FOUNDRY_PROJECT_ENDPOINT "${AZURE_AI_PROJECT_ENDPOINT:-}" --environment "$env_name" --no-prompt >/dev/null &&
       azd env set AZURE_AI_PROJECT_ID "${AZURE_AI_PROJECT_RESOURCE_ID:-}" --environment "$env_name" --no-prompt >/dev/null &&
       azd deploy "$c_name" --environment "$env_name" --no-prompt
     ) || { red "$c_name: hosted agent deployment failed."; had_errors=1; continue; }
     agent_smoke_payload="$(mktemp "${TMPDIR:-/tmp}/agentlz-agent-smoke-XXXXXX")"
-    printf '%s\n' '{"messages":[{"role":"user","content":"Hello!"}]}' >"$agent_smoke_payload"
-    if ! agent_smoke_output="$(cd "$c_path" && azd ai agent invoke --protocol invocations --new-session --timeout 180 --environment "$env_name" --no-prompt --input-file "$agent_smoke_payload" 2>&1)"; then
+    smoke_options=()
+    smoke_validation=--validate-smoke
+    if [ "$smoke_protocol" = responses ]; then
+      printf '%s\n' '{"input":[{"role":"user","content":"Hello!"}],"stream":true}' >"$agent_smoke_payload"
+      smoke_options=(--output raw)
+      smoke_validation=--validate-responses-smoke
+    else
+      printf '%s\n' '{"messages":[{"role":"user","content":"Hello!"}]}' >"$agent_smoke_payload"
+    fi
+    if ! agent_smoke_output="$(cd "$app_definition_dir" && azd ai agent invoke "$c_name" --protocol "$smoke_protocol" --new-session --timeout 180 --environment "$env_name" --no-prompt --input-file "$agent_smoke_payload" "${smoke_options[@]}" 2>&1)"; then
       rm -f "$agent_smoke_payload"
       red "$c_name: smoke request failed."; had_errors=1; continue
     fi
     rm -f "$agent_smoke_payload"
-    if ! printf '%s\n' "$agent_smoke_output" | (cd "$repo_root" && python3 -m config.deployment.hosted --validate-smoke); then
+    if ! printf '%s\n' "$agent_smoke_output" | (cd "$repo_root" && python3 -m config.deployment.hosted "$smoke_validation"); then
       red "$c_name: smoke test did not pass."; had_errors=1; continue
     fi
   else
-    (cd "$c_path" && azd deploy --all --environment "$env_name" --no-prompt) || {
+    (cd "$app_definition_dir" && azd deploy "$c_name" --environment "$env_name" --no-prompt) || {
       red "$c_name: Container App deployment failed."; had_errors=1; continue
     }
   fi

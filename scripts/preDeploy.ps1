@@ -126,6 +126,7 @@ if ($foundationMissing) {
 # Re-validate the application definition and compare it with the binding.
 $appDefinitionPath = if ($globalEnv.AGENTLZ_APP_DEFINITION) { "$($globalEnv.AGENTLZ_APP_DEFINITION)" } elseif ($env:AGENTLZ_APP_DEFINITION) { $env:AGENTLZ_APP_DEFINITION } else { Join-Path $repoRoot 'app-definition.json' }
 if (-not [IO.Path]::IsPathRooted($appDefinitionPath)) { $appDefinitionPath = Join-Path $repoRoot $appDefinitionPath }
+if (Test-Path -LiteralPath $appDefinitionPath -PathType Container) { $appDefinitionPath = Join-Path $appDefinitionPath 'app-definition.json' }
 if (-not (Test-Path -LiteralPath $appDefinitionPath -PathType Leaf)) {
   Write-Error "AGENTLZ_APP_DEFINITION points to $appDefinitionPath, which does not exist."
   exit 1
@@ -478,13 +479,13 @@ foreach ($c in $manifest.components) {
 }
 
 # Components from the application definition that are not release-managed
-# (manifest.json) components: each folder is its own azd project.
+# (manifest.json) components share the definition folder's azd project.
 foreach ($dc in $definitionComponents) {
   $componentName = "$($dc.name)"
   if (Get-ManifestComponentForDefinition $componentName) { continue }
   $componentPath = Join-Path $appDefinitionDir "$($dc.path)"
-  if (-not (Test-Path -LiteralPath (Join-Path $componentPath 'azure.yaml') -PathType Leaf)) {
-    Write-Error "The app folder $componentPath must contain its own azure.yaml."
+  if (-not (Test-Path -LiteralPath (Join-Path $appDefinitionDir 'azure.yaml') -PathType Leaf)) {
+    Write-Error "The app folder $appDefinitionDir must contain its own azure.yaml."
     $hadErrors = $true
     continue
   }
@@ -499,16 +500,18 @@ foreach ($dc in $definitionComponents) {
     }
   }
   if (Test-Path -LiteralPath $dotAzure) {
-    Copy-Item $dotAzure $componentPath -Recurse -Force -Container
+    Copy-Item $dotAzure $appDefinitionDir -Recurse -Force -Container
   }
   Write-Host ("Deploying {0} ({1}) from {2}" -f $componentName, $dc.kind, $componentPath) -ForegroundColor Cyan
-  Push-Location $componentPath
+  Push-Location $appDefinitionDir
   try {
     if ($sourceDigest) {
       & azd env set AGENTLZ_IMAGE_DIGEST $sourceDigest --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt | Out-Null
       if ($LASTEXITCODE -ne 0) { Write-Error "${componentName}: failed to pin image digest."; $hadErrors = $true; continue }
     }
     if ("$($dc.kind)" -eq 'azure.ai.agent') {
+      $smokeProtocol = (& python -c "import os, runpy, sys; sys.path.insert(0, os.environ['AGENTLZ_REPO_ROOT']); sys.argv = ['config.deployment.hosted'] + sys.argv[1:]; runpy.run_module('config.deployment.hosted', run_name='__main__')" --service-protocol (Join-Path $appDefinitionDir 'azure.yaml') --service-name $componentName | Out-String).Trim()
+      if ($LASTEXITCODE -ne 0) { Write-Error "${componentName}: cannot resolve the greeting protocol."; $hadErrors = $true; continue }
       # prepareHostedDeployment is not run here: it builds only the manifest-pinned
       # bundled orchestrator image (HOSTED_AGENT_*). A custom azure.ai.agent
       # component deploys from its own child azd project, which builds its image,
@@ -521,16 +524,19 @@ foreach ($dc in $definitionComponents) {
       if ($LASTEXITCODE -ne 0) { Write-Error "${componentName}: hosted agent deployment failed."; $hadErrors = $true; continue }
       $smokePayloadPath = Join-Path ([IO.Path]::GetTempPath()) "agentlz-agent-smoke-$([guid]::NewGuid().ToString('N')).json"
       try {
-        [IO.File]::WriteAllText($smokePayloadPath, '{"messages":[{"role":"user","content":"Hello!"}]}', [Text.UTF8Encoding]::new($false))
-        $smokeOutput = (& azd ai agent invoke --protocol invocations --new-session --timeout 180 --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt --input-file $smokePayloadPath 2>&1 | Out-String)
+        $smokePayload = if ($smokeProtocol -eq 'responses') { '{"input":[{"role":"user","content":"Hello!"}],"stream":true}' } else { '{"messages":[{"role":"user","content":"Hello!"}]}' }
+        $smokeOptions = if ($smokeProtocol -eq 'responses') { @('--output', 'raw') } else { @() }
+        $smokeValidation = if ($smokeProtocol -eq 'responses') { '--validate-responses-smoke' } else { '--validate-smoke' }
+        [IO.File]::WriteAllText($smokePayloadPath, $smokePayload, [Text.UTF8Encoding]::new($false))
+        $smokeOutput = (& azd ai agent invoke $componentName --protocol $smokeProtocol --new-session --timeout 180 --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt --input-file $smokePayloadPath @smokeOptions 2>&1 | Out-String)
         if ($LASTEXITCODE -ne 0) { Write-Error "${componentName}: smoke request failed."; $hadErrors = $true; continue }
-        $smokeOutput | & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['AGENTLZ_REPO_ROOT']); sys.argv = ['config.deployment.hosted'] + sys.argv[1:]; runpy.run_module('config.deployment.hosted', run_name='__main__')" --validate-smoke
+        $smokeOutput | & python -c "import os, runpy, sys; sys.path.insert(0, os.environ['AGENTLZ_REPO_ROOT']); sys.argv = ['config.deployment.hosted'] + sys.argv[1:]; runpy.run_module('config.deployment.hosted', run_name='__main__')" $smokeValidation
         if ($LASTEXITCODE -ne 0) { Write-Error "${componentName}: smoke test did not pass."; $hadErrors = $true; continue }
       } finally {
         Remove-Item -LiteralPath $smokePayloadPath -Force -ErrorAction SilentlyContinue
       }
     } else {
-      & azd deploy --all --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt
+      & azd deploy $componentName --environment "$($globalEnv.AZURE_ENV_NAME)" --no-prompt
       if ($LASTEXITCODE -ne 0) { Write-Error "${componentName}: Container App deployment failed."; $hadErrors = $true; continue }
     }
     Write-Host "${componentName}: deployed." -ForegroundColor Green

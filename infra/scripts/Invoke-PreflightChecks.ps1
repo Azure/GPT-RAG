@@ -1187,7 +1187,7 @@ function Get-VmSkuInfo {
         [Parameter(Mandatory)] [string]$VmSize
     )
     if ([string]::IsNullOrWhiteSpace($Location) -or [string]::IsNullOrWhiteSpace($VmSize)) { return $null }
-    $skus = Invoke-AzCliRaw -Arguments @('vm', 'list-skus', '--location', $Location, '--size', $VmSize, '--all', '-o', 'json')
+    $skus = Invoke-AzCliRaw -Arguments @('vm', 'list-skus', '--location', $Location, '--size', $VmSize, '--resource-type', 'virtualMachines', '--all', '-o', 'json')
     if (-not $skus) { return $null }
     $match = @($skus | Where-Object { $_.name -eq $VmSize -and $_.resourceType -eq 'virtualMachines' } | Select-Object -First 1)
     if (-not $match) { return $null }
