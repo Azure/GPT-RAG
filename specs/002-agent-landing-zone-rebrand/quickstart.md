@@ -143,11 +143,13 @@ Evidence after the repository rename (`curl -sI`):
 ## S5 — Validate an application definition (US5)
 
 ```powershell
-python -m config.appdefinition --validate samples/custom-app/app-definition.json
+python -m config.appdefinition --validate samples/custom-app/containerapp
+python -m config.appdefinition --validate samples/custom-app/hosted
 ```
 
 ```sh
-python -m config.appdefinition --validate samples/custom-app/app-definition.json
+python -m config.appdefinition --validate samples/custom-app/containerapp
+python -m config.appdefinition --validate samples/custom-app/hosted
 ```
 
 Expected outcome:
@@ -176,18 +178,20 @@ in `v4.0.0` they are gone, so the same command proves the full rename.
 
 ```powershell
 azd env new <env-name>
-azd env set AGENTLZ_APP_DEFINITION samples/custom-app
+azd env set AGENTLZ_APP_DEFINITION samples/custom-app/containerapp
 azd up
 ```
 
 ```sh
 azd env new <env-name>
-azd env set AGENTLZ_APP_DEFINITION samples/custom-app
+azd env set AGENTLZ_APP_DEFINITION samples/custom-app/containerapp
 azd up
 ```
 
-Run this once with the sample's Container Apps variant and once with its
-hosted-agent variant.
+Replace the all-zero component source pin with the actual checkout HEAD before
+deployment. Run this once with `samples/custom-app/containerapp` and once in a
+separate environment with `samples/custom-app/hosted`. The definition folder
+contains `azure.yaml`; `components[].path` selects its service source folder.
 
 Expected outcome:
 
@@ -201,11 +205,36 @@ Negative checks. Both must fail **before any Azure change**:
 
 - Point `AGENTLZ_APP_DEFINITION` at an invalid definition and run `azd up`.
   The output includes the JSON pointer to the error.
-- On the bound environment, change the definition (or point it at the trio)
+- On the bound environment, select a definition with a different application
+  `id` (for example, point it at the trio)
   and run `azd up`. The output reports a binding mismatch and says to create a
   new azd environment (FR-015g).
 
 Re-running `azd up` with the same definition is idempotent (FR-016).
+
+## Acceptance status (2026-10-09)
+
+UI `v3.2.1` and umbrella `v4.2.2` were published. Their publication does not
+close the outstanding runtime acceptance scenarios:
+
+- Classic foundation resources were provisioned, but post-provision governance
+  failed with Key Vault `ForbiddenByConnection`: public access was disabled
+  and the validation vault had no private endpoint. Application deployment
+  and authenticated grounded answers remain unverified.
+- The first hosted-panel provisioning attempt failed during ARM validation
+  with a connection reset. A retry and a separate network-isolated validation
+  deployment are in progress.
+- The evaluation VPN Gateway was provisioned and protected with `keep=true`
+  and a deletion lock. Peering, private DNS, and end-to-end connectivity are
+  not yet acceptance evidence.
+- Validation found directory-selection, custom-project working-directory,
+  and hosted greeting-protocol defects. The corrective change passes
+  386 tests and 462 subtests (4 skipped), but those offline results do not
+  establish a successful S7 Azure deployment or retroactively validate
+  the published release.
+
+T035, T085, T098, and T093 remain open until their actual runtime outcomes
+are captured. No network policy was disabled to obtain a passing result.
 
 ## Fallback check (R16)
 
