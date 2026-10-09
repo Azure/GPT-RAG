@@ -219,19 +219,31 @@ close the outstanding runtime acceptance scenarios:
 
 - Classic foundation resources were provisioned, but post-provision governance
   failed with Key Vault `ForbiddenByConnection`: public access was disabled
-  and the validation vault had no private endpoint. Application deployment
-  and authenticated grounded answers remain unverified.
-- The first hosted-panel provisioning attempt failed during ARM validation
-  with a connection reset. A retry and a separate network-isolated validation
-  deployment are in progress.
+  and the validation vault had no private endpoint. Governance subsequently
+  passed from the jumpbox over approved recovery private endpoints, using
+  the exact release source and managed identity. Continuity, Container Apps
+  and Search setup also passed. Application deployment is in progress;
+  authenticated grounded answers remain unverified.
+- Hosted-panel foundation, private governance recovery, continuity, Container
+  Apps and Search setup passed. The pinned hosted image was built and resolved
+  to an immutable digest. Re-provisioning its deploy handoff is blocked by a
+  quota preflight that treats an existing model allocation as a new request.
+  The separate network-isolated foundation deployment remains in progress.
 - The evaluation VPN Gateway was provisioned and protected with `keep=true`
-  and a deletion lock. Peering, private DNS, and end-to-end connectivity are
-  not yet acceptance evidence.
+  and a deletion lock. Hub/spoke peerings are Connected with gateway transit.
+  Private DNS and managed-identity governance calls succeeded from the actual
+  jumpbox. No client VPN authentication or hosted private runtime is approved.
 - Validation found directory-selection, custom-project working-directory,
   and hosted greeting-protocol defects. The corrective change passes
-  386 tests and 462 subtests (4 skipped), but those offline results do not
+  584 tests and 558 subtests (4 skipped), but those offline results do not
   establish a successful S7 Azure deployment or retroactively validate
   the published release.
+- Validation also found false-success logging when an Entra-only Foundry
+  account rejects evaluation API keys, and a missing Cosmos database-name
+  handoff for the administrative panel. The corrective branch respects disabled
+  local authentication and reads published database settings before assigning
+  the unchanged container-scoped roles. Its live panel recovery created four
+  narrow grants; these fixes are not in the published release.
 
 T035, T085, T098, and T093 remain open until their actual runtime outcomes
 are captured. No network policy was disabled to obtain a passing result.
