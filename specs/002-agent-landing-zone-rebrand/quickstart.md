@@ -396,6 +396,30 @@ close the outstanding runtime acceptance scenarios:
 - The pinned orchestrator still exposes the legacy `GPT-RAG Orchestrator`
   OpenAPI title. No branding acceptance or new component release is claimed.
 
+The corrective shared custom-image flow in commit `a9214de` subsequently
+built and deployed both samples using the checked-in service YAML rather than
+a manually prepared image overlay. Each build used its existing private ACR
+pool and returned an immutable image. Container digest:
+`sha256:fb33898065127a48eab6e402cab4550b0eab72828899865f3d3e25771b43185a`;
+hosted digest:
+`sha256:ca213b38d82ae24ebbd01ba1f2597cec2c1b94a60f316cab3a684fc67a902243`.
+The helper restored each original YAML; temporary helper staging was removed.
+Evaluation definitions were temporarily pinned to verified guest source
+`aae0a3c` and restored afterwards; missing metadata aliases still required
+explicit evaluation hydration. This is corrective-flow evidence, not pristine
+release or stock root-hook acceptance.
+
+The resulting Container revision `ca-ddzasx67ghev4-web--azd-1791577126`
+was latest-ready. Its actual private response on `10.252.2.11` exactly
+matched the live platform contract, including the real `web` client ID.
+Hosted version 3 was active with the exact new build digest and preserved
+runtime principal `6e447da6-8aca-4f96-af56-e863aa0da041`. Its real private
+Responses invocation on `10.253.2.33` returned the exact project greeting.
+The combined runtime-check marker passed with empty guest stderr.
+No new runtime role grant was needed. The final correction suite passed
+432 tests and 500 subtests, with 4 skips; central guidance `1512486` is in
+Azure/AI-Landing-Zones#148.
+
 T035, T085, T098, and T093 remain open until their actual runtime outcomes
 are captured. No network policy was disabled to obtain a passing result.
 
