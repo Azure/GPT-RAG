@@ -340,8 +340,16 @@ close the outstanding runtime acceptance scenarios:
   `AGENTLZ_PLATFORM_OUTPUTS` with label `agent-lz`, schema version 1 and
   `network.isolated=true`. A TLS-verified local VPN probe also received that
   contract using explicit DNS, not automatic OS resolution. The published
-  identity map is empty despite the deployed app identity; identity-contract
-  acceptance is not claimed.
+  identity map was initially empty despite the deployed app identity.
+  The corrective publisher now discovers the actual Container App client ID.
+  Two consecutive publications returned the same `web` identity in both the
+  JSON document and its flat key; a subsequent private `/` response exactly
+  matched that identity-bearing live contract. The guest temporarily staged
+  the corrected publisher/resolver and restored its original source afterward.
+  Missing endpoint aliases in this evaluation's copied azd metadata were
+  explicitly hydrated from the schema-validated existing App Configuration
+  document, not guessed. This proves the correction against the live resources,
+  not a pristine published-release or stock one-command S7 run.
   The hosted sample initially failed activation because the actual Foundry
   project identity lacked AcrPull. An exact-registry grant recovered version
   2 to active with the built digest. Its actual runtime identity then received
@@ -353,6 +361,18 @@ close the outstanding runtime acceptance scenarios:
   were verified. This proves private managed-identity sample invocation,
   not user-delegated OBO, grounded answers, document authorization, repeated
   provisioning, or the original remote-build sample YAML.
+  Repeating both child overlay deployments preserved their immutable image
+  digests. The Container App's new revision
+  `ca-ddzasx67ghev4-web--azd-1791574208` became latest-ready, and its repeated
+  private response again exactly matched live platform outputs. The hosted
+  deployment reused active `sample-hosted-agent` version 2 and the same runtime
+  identity; its repeated Responses check again returned the exact live project
+  endpoint. All 13 hosted private endpoints were Succeeded/Approved; Foundry
+  public access and local authentication, and ACR public/admin access, remained
+  disabled. These checks prove repeated child deployment, not repeated full
+  root provisioning or the stock one-command S7 flow.
+  The identity correction passed 413 tests and 500 subtests, with 4 skips;
+  the central documentation update `0abad14` is in Azure/AI-Landing-Zones#148.
   The evaluation VPN client reached the existing firewall DNS proxy and
   received the expected private addresses for all three evaluation spokes.
   The updated client profile preserves authentication and split tunneling;

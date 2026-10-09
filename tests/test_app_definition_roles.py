@@ -14,6 +14,7 @@ from config.appdefinition.__main__ import main as cli_main
 from config.appdefinition.roles import (
     RoleAssignmentError,
     assign_roles,
+    discover_component_identities,
     load_role_guids,
     plan_assignments,
 )
@@ -84,6 +85,71 @@ def bundled():
 
 
 class RoleAssignmentTests(unittest.TestCase):
+    def test_discovers_client_ids_without_role_writes(self) -> None:
+        calls = []
+
+        def az(arguments, *, required=True):
+            calls.append(arguments)
+            service = arguments[arguments.index("--query") + 1].split("=='", 1)[1].split("'", 1)[0]
+            return json.dumps([{
+                "name": f"ca-{service}",
+                "identity": {"userAssignedIdentities": {
+                    f"{SUB}/identity-{service}": {"principalId": f"p-{service}", "clientId": f"c-{service}"}
+                }},
+            }])
+
+        actual = discover_component_identities(
+            bundled(), {"AZURE_RESOURCE_GROUP": RG}, hosted_orchestration=True, run_az=az
+        )
+        self.assertEqual({"ui": "c-frontend", "ingestion": "c-dataingest"}, actual)
+        self.assertTrue(all(call[:2] == ["containerapp", "list"] for call in calls))
+
+    def test_client_id_lookup_is_exact_and_missing_identity_fails(self) -> None:
+        definition = load_definition(ROOT / "samples" / "custom-app" / "containerapp")
+        for system in (False, True):
+            with self.subTest(system=system):
+                calls = []
+
+                def az(arguments, *, required=True):
+                    calls.append(arguments)
+                    if arguments[:2] == ["containerapp", "list"]:
+                        identity = {"principalId": "principal"} if system else {
+                            "userAssignedIdentities": {f"{SUB}/uai": {"principalId": "principal"}}
+                        }
+                        return json.dumps([{"name": "ca-web", "identity": identity}])
+                    self.assertEqual(
+                        ["ad", "sp", "show", "--id", "principal", "--query", "appId"] if system else
+                        ["identity", "show", "--ids", f"{SUB}/uai", "--query", "clientId"],
+                        arguments[:-3],
+                    )
+                    return json.dumps("client")
+
+                self.assertEqual({"web": "client"}, discover_component_identities(
+                    definition, {"AZURE_RESOURCE_GROUP": RG}, hosted_orchestration=False, run_az=az
+                ))
+                self.assertEqual(2, len(calls))
+        with self.assertRaisesRegex(RoleAssignmentError, "found 0"):
+            discover_component_identities(
+                definition, {"AZURE_RESOURCE_GROUP": RG}, hosted_orchestration=False,
+                run_az=lambda arguments, **kwargs: "[]",
+            )
+        with self.assertRaisesRegex(RoleAssignmentError, "found 2"):
+            discover_component_identities(
+                definition, {"AZURE_RESOURCE_GROUP": RG}, hosted_orchestration=False,
+                run_az=lambda arguments, **kwargs: json.dumps([{
+                    "name": "ca-web", "identity": {
+                        "principalId": "p1", "userAssignedIdentities": {"uai": {"principalId": "p2"}}
+                    }
+                }]),
+            )
+
+    def test_hosted_only_definition_has_no_provision_time_identities(self) -> None:
+        definition = load_definition(ROOT / "samples" / "custom-app" / "hosted")
+        self.assertEqual({}, discover_component_identities(
+            definition, {}, hosted_orchestration=False,
+            run_az=lambda *args, **kwargs: self.fail("Hosted-only provision must not discover a Container App"),
+        ))
+
     def test_plan_covers_only_containerapp_components_with_base_profile(self) -> None:
         classic = plan_assignments(bundled(), hosted_orchestration=False)
         self.assertEqual({"ui", "orchestrator", "ingestion"}, {item.component for item in classic})

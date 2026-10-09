@@ -137,8 +137,7 @@ def resolve_scope(scope: str, environment: Mapping[str, str], resource_group: st
     return str(items[0]["id"])
 
 
-def resolve_principal(service: str, resource_group: str, run_az: RunAz) -> str:
-    """Return the single managed identity principal of the service's Container App."""
+def _resolve_identity(service: str, resource_group: str, run_az: RunAz) -> tuple[str, str, str]:
     apps = _json(run_az, ["containerapp", "list", "--resource-group", resource_group, "--query",
                           f"[?tags.\"azd-service-name\"=='{service}'].{{name:name,identity:identity}}"])
     apps = [app for app in apps or [] if isinstance(app, dict)]
@@ -148,18 +147,60 @@ def resolve_principal(service: str, resource_group: str, run_az: RunAz) -> str:
             f"{resource_group}; found {len(apps)}. Run azd provision for this application first."
         )
     identity = apps[0].get("identity") or {}
-    principals = [str(identity["principalId"])] if identity.get("principalId") else []
-    principals += [
-        str(value["principalId"])
-        for value in (identity.get("userAssignedIdentities") or {}).values()
+    identities = [(str(identity["principalId"]), "", "")] if identity.get("principalId") else []
+    identities += [
+        (str(value["principalId"]), str(value.get("clientId") or ""), str(resource_id))
+        for resource_id, value in (identity.get("userAssignedIdentities") or {}).items()
         if isinstance(value, dict) and value.get("principalId")
     ]
-    if len(principals) != 1:
+    if len(identities) != 1:
         raise RoleAssignmentError(
             f"Container App {apps[0].get('name')} must have exactly one managed identity to receive "
-            f"profile roles; found {len(principals)}."
+            f"profile roles; found {len(identities)}."
         )
-    return principals[0]
+    return identities[0]
+
+
+def resolve_principal(service: str, resource_group: str, run_az: RunAz) -> str:
+    """Return the single managed identity principal of the service's Container App."""
+    return _resolve_identity(service, resource_group, run_az)[0]
+
+
+def discover_component_identities(
+    definition: AppDefinition,
+    environment: Mapping[str, str],
+    *,
+    hosted_orchestration: bool,
+    run_az: RunAz | None = None,
+) -> dict[str, str]:
+    """Read Container App client IDs for platform outputs, without role writes."""
+    components = [
+        component
+        for component in effective_components(definition, hosted_orchestration=hosted_orchestration)
+        if component.get("kind") == KIND_CONTAINER_APP
+    ]
+    if not components:
+        return {}
+    resource_group = (environment.get("AZURE_RESOURCE_GROUP") or "").strip()
+    if not resource_group:
+        raise RoleAssignmentError("AZURE_RESOURCE_GROUP is required to discover component identities.")
+    if run_az is None:
+        from config.deployment.appconfig import _run_az as run_az
+    identities: dict[str, str] = {}
+    for component in components:
+        service = component_service_name(definition, component)
+        principal, client, resource_id = _resolve_identity(service, resource_group, run_az)
+        if not client:
+            arguments = (
+                ["identity", "show", "--ids", resource_id, "--query", "clientId"]
+                if resource_id else
+                ["ad", "sp", "show", "--id", principal, "--query", "appId"]
+            )
+            client = _json(run_az, arguments)
+        if not isinstance(client, str) or not client.strip():
+            raise RoleAssignmentError(f"Cannot resolve the managed identity client ID for service {service}.")
+        identities[str(component["name"])] = client.strip()
+    return identities
 
 
 def _ensure_rbac(principal: str, role_guid: str, scope_id: str, run_az: RunAz) -> bool:
@@ -232,4 +273,3 @@ def assign_roles(
         if changed:
             created.append(item)
     return created
-
