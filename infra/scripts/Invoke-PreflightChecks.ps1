@@ -79,6 +79,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'ModelQuota.ps1')
 
 # --------------------------------------------------------------------------
 # Emergency bypass
@@ -1187,7 +1188,7 @@ function Get-VmSkuInfo {
         [Parameter(Mandatory)] [string]$VmSize
     )
     if ([string]::IsNullOrWhiteSpace($Location) -or [string]::IsNullOrWhiteSpace($VmSize)) { return $null }
-    $skus = Invoke-AzCliRaw -Arguments @('vm', 'list-skus', '--location', $Location, '--size', $VmSize, '--all', '-o', 'json')
+    $skus = Invoke-AzCliRaw -Arguments @('vm', 'list-skus', '--location', $Location, '--size', $VmSize, '--resource-type', 'virtualMachines', '--all', '-o', 'json')
     if (-not $skus) { return $null }
     $match = @($skus | Where-Object { $_.name -eq $VmSize -and $_.resourceType -eq 'virtualMachines' } | Select-Object -First 1)
     if (-not $match) { return $null }
@@ -1379,7 +1380,10 @@ function Test-ModelQuota {
     $deployments = @($ModelDeployments | Where-Object { $_ -ne $null })
     if ($deployments.Count -eq 0) { return }
 
-    $usage = Invoke-AzCliRaw -Arguments @('cognitiveservices', 'usage', 'list', '--location', $Location, '-o', 'json')
+    $selectedSubscription = if ($SubscriptionId) { $SubscriptionId } else { $env:AZURE_SUBSCRIPTION_ID }
+    $usageArguments = @('cognitiveservices', 'usage', 'list', '--location', $Location, '-o', 'json')
+    if ($selectedSubscription) { $usageArguments += @('--subscription', $selectedSubscription) }
+    $usage = Invoke-AzCliRaw -Arguments $usageArguments
     if (-not $usage) {
         Add-Finding -Severity WARN -Code 'MODEL_QUOTA_LOOKUP' `
             -Message "Could not read Cognitive Services usage/quota for '$Location'." `
@@ -1387,28 +1391,38 @@ function Test-ModelQuota {
         return
     }
 
+    $deployments = @($deployments | Where-Object { $_.model.format -eq 'OpenAI' })
+    if ($deployments.Count -eq 0) { return }
+    $selectedEnvironment = Get-AzdEnvValues
+    $existing = @(Get-ExistingModelDeployments -Location $Location -SubscriptionId $selectedSubscription `
+        -ProjectResourceId $selectedEnvironment['AZURE_AI_PROJECT_RESOURCE_ID'] `
+        -ResourceGroup $selectedEnvironment['AZURE_RESOURCE_GROUP'] -ReadAzureJson {
+        param([string[]]$Arguments)
+        Invoke-AzCliRaw -Arguments ($Arguments + @('-o', 'json'))
+    } -OnWarning {
+        param([string]$Message)
+        Add-Finding -Severity WARN -Code 'MODEL_QUOTA_EXISTING_TARGET' -Message $Message
+    })
+    try {
+        $requests = @(Get-ModelQuotaRequirements -Models $deployments -ExistingDeployments $existing)
+    } catch {
+        Add-Finding -Severity FAIL -Code 'MODEL_QUOTA_INVALID' -Message $_.Exception.Message
+        return
+    }
     $failures = @()
-    foreach ($d in $deployments) {
-        # Only OpenAI-format deployments report quota via usage list
-        $fmt = $null
-        if ($d.PSObject.Properties.Name -contains 'model' -and $d.model) {
-            $fmt = $d.model.format
-        }
-        if ($fmt -ne 'OpenAI') { continue }
-
-        $modelName = [string]$d.model.name
-        $skuName = [string]$d.sku.name
-        $capacity = [double]$d.sku.capacity
-        $quotaName = "OpenAI.$skuName.$modelName"
-
+    foreach ($request in $requests) {
+        $quotaName = $request.QuotaName
         $quota = @($usage | Where-Object { $_.name.value -eq $quotaName } | Select-Object -First 1)
         if (-not $quota) {
             $failures += "No quota entry '$quotaName' in $Location."
             continue
         }
-        $available = [double]$quota.limit - [double]$quota.currentValue
-        if ($available -lt $capacity) {
-            $failures += "$quotaName needs $capacity, $available available (used $($quota.currentValue) / limit $($quota.limit))."
+        $available = [double]$quota[0].limit - [double]$quota[0].currentValue
+        $message = "$quotaName desired $($request.DesiredCapacity), verified existing credit $($request.ExistingCredit), additional allocation $($request.AdditionalCapacity); $available available."
+        if ($request.AdditionalCapacity -gt 0 -and $available -lt $request.AdditionalCapacity) {
+            $failures += $message
+        } else {
+            Add-Finding -Severity PASS -Code 'MODEL_QUOTA_SUFFICIENT' -Message $message
         }
     }
 

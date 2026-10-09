@@ -4081,10 +4081,14 @@ output CONTAINER_APP_INTERNAL_FQDN string = (_deployContainerApps && length(cont
 output DEPLOY_HOSTED_AGENT bool = deployHostedAgent
 @description('True when hosted-agent prerequisites were selected through prepareHostedAgent or deployHostedAgent. This does not indicate that a hosted agent version exists.')
 output HOSTED_AGENT_PREPARED bool = _hostedAgentPrerequisitesEnabled
-output AZURE_AI_PROJECT_RESOURCE_ID string = _hostedAgentPrerequisitesEnabled ? aiFoundryProjectResourceId : ''
-output AZURE_AI_PROJECT_ENDPOINT string = _hostedAgentPrerequisitesEnabled ? aiFoundryProjectEndpoint : ''
-output AZURE_CONTAINER_REGISTRY_RESOURCE_ID string = _hostedAgentPrerequisitesEnabled ? _hostedAgentContainerRegistryResourceId : ''
-output AZURE_CONTAINER_REGISTRY_ENDPOINT string = _hostedAgentPrerequisitesEnabled ? _hostedAgentContainerRegistryEndpoint : ''
+@description('Provisioned Foundry project ID for application deployment, including custom applications in classic topology.')
+output AZURE_AI_PROJECT_RESOURCE_ID string = (deployAiFoundry || _hostedAgentPrerequisitesEnabled) ? aiFoundryProjectResourceId : ''
+@description('Provisioned Foundry project endpoint, independent of bundled hosted-agent selection.')
+output AZURE_AI_PROJECT_ENDPOINT string = (deployAiFoundry || _hostedAgentPrerequisitesEnabled) ? aiFoundryProjectEndpoint : ''
+@description('Provisioned registry ID, or the declared external hosted-agent registry when hosted prerequisites are selected.')
+output AZURE_CONTAINER_REGISTRY_RESOURCE_ID string = (deployContainerRegistry || _hostedAgentPrerequisitesEnabled) ? _hostedAgentContainerRegistryResourceId : ''
+@description('Provisioned registry login server for application builds and immutable image deployment.')
+output AZURE_CONTAINER_REGISTRY_ENDPOINT string = (deployContainerRegistry || _hostedAgentPrerequisitesEnabled) ? _hostedAgentContainerRegistryEndpoint : ''
 #disable-next-line BCP318
 output HOSTED_AGENT_DEPLOYMENT object = {
   enabled: deployHostedAgent

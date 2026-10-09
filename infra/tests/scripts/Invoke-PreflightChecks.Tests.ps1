@@ -25,6 +25,7 @@ $ErrorActionPreference = 'Stop'
 
 $scriptPath = Join-Path -Path (Split-Path -Parent $PSScriptRoot) -ChildPath '..\scripts\Invoke-PreflightChecks.ps1'
 $scriptPath = (Resolve-Path -Path $scriptPath).Path
+. (Join-Path (Split-Path -Parent $scriptPath) 'ModelQuota.ps1')
 $raw = Get-Content -Path $scriptPath -Raw
 $ast = [System.Management.Automation.Language.Parser]::ParseInput($raw, [ref]$null, [ref]$null)
 
@@ -126,6 +127,33 @@ try {
 }
 finally {
     Remove-Item -Path $paramsFile -ErrorAction SilentlyContinue
+}
+
+# --------------------------------------------------------------------------
+Write-Host 'VM SKU lookup is restricted to virtual machines' -ForegroundColor Cyan
+$originalAzCliRaw = ${function:Invoke-AzCliRaw}
+try {
+    function Invoke-AzCliRaw {
+        param([string[]]$Arguments)
+        $script:VmSkuArguments = $Arguments
+        return @([pscustomobject]@{
+            name = 'Standard_D2s_v3'
+            resourceType = 'virtualMachines'
+            capabilities = @([pscustomobject]@{ name = 'vCPUs'; value = '2' })
+            restrictions = @()
+            family = 'standardDSv3Family'
+        })
+    }
+    $sku = Get-VmSkuInfo -Location 'westus3' -VmSize 'Standard_D2s_v3'
+    $typeIndex = [Array]::IndexOf($script:VmSkuArguments, '--resource-type')
+    Assert-True 'SKU request filters virtualMachines server-side' (
+        $typeIndex -ge 0 -and $script:VmSkuArguments[$typeIndex + 1] -eq 'virtualMachines'
+    )
+    Assert-True 'Filtered SKU keeps vCPU and availability facts' (
+        $sku.Name -eq 'Standard_D2s_v3' -and $sku.VCpus -eq 2
+    )
+} finally {
+    ${function:Invoke-AzCliRaw} = $originalAzCliRaw
 }
 
 # --------------------------------------------------------------------------
