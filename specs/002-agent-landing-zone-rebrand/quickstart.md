@@ -331,8 +331,28 @@ close the outstanding runtime acceptance scenarios:
   both builds. Both images were built from the exact corrective source using
   their own private ACR `build-pool`; immutable image digests and an explicit
   guest completion marker were returned with no guest stderr. This separate
-  prebuild is not proof of the stock one-command S7 deployment. Application
-  responses and repeat deployment remain unverified.
+  prebuild is not proof of the stock one-command S7 deployment.
+  Both samples subsequently packaged and deployed using evaluation-only
+  child YAML with immutable `image` and `docker.imagePassthrough: true`.
+  The Container App uses its existing managed identity for private ACR pulls;
+  its latest revision is latest-ready and matches the built digest. Its `/`
+  response, reached through private DNS, exactly matches live
+  `AGENTLZ_PLATFORM_OUTPUTS` with label `agent-lz`, schema version 1 and
+  `network.isolated=true`. A TLS-verified local VPN probe also received that
+  contract using explicit DNS, not automatic OS resolution. The published
+  identity map is empty despite the deployed app identity; identity-contract
+  acceptance is not claimed.
+  The hosted sample initially failed activation because the actual Foundry
+  project identity lacked AcrPull. An exact-registry grant recovered version
+  2 to active with the built digest. Its actual runtime identity then received
+  App Configuration Data Reader only on its configuration store. A real
+  Responses invocation from the managed runner resolved the project into its
+  private spoke and returned a completed assistant response containing the
+  exact project endpoint published in live platform outputs, not `unknown`
+  or `unavailable`. The explicit runtime-check marker and empty guest stderr
+  were verified. This proves private managed-identity sample invocation,
+  not user-delegated OBO, grounded answers, document authorization, repeated
+  provisioning, or the original remote-build sample YAML.
   The evaluation VPN client reached the existing firewall DNS proxy and
   received the expected private addresses for all three evaluation spokes.
   The updated client profile preserves authentication and split tunneling;
