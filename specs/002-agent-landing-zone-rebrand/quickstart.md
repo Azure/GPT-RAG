@@ -222,20 +222,27 @@ close the outstanding runtime acceptance scenarios:
   and the validation vault had no private endpoint. Governance subsequently
   passed from the jumpbox over approved recovery private endpoints, using
   the exact release source and managed identity. Continuity, Container Apps
-  and Search setup also passed. Application deployment is in progress;
-  authenticated grounded answers remain unverified.
+  and Search setup also passed. Application deployment completed, but the
+  latest frontend revision is unhealthy with the same vault connection denial.
+  An HTTP 200 came from the old placeholder, not a healthy application.
+  Authenticated grounded answers and ingestion startup remain unverified.
 - Hosted-panel foundation, private governance recovery, continuity, Container
   Apps and Search setup passed. The pinned hosted image was built and resolved
-  to an immutable digest. Re-provisioning its deploy handoff is blocked by a
-  quota preflight that treats an existing model allocation as a new request.
-  The separate network-isolated foundation deployment remains in progress.
+  to an immutable digest. The release's quota preflight treats an existing
+  allocation as a new request. Its corrective branch now passes both real
+  preflight gates, crediting only verified matching deployments and checking
+  incremental capacity. That does not prove the hosted deploy handoff.
+  The separate network-isolated foundation and full post-provision hook
+  completed from the jumpbox. Owner recovery reconciled the already-declared
+  native Cosmos grants; the temporary management permission was then revoked.
+  Private hosted application deployment and authenticated runtime remain pending.
 - The evaluation VPN Gateway was provisioned and protected with `keep=true`
   and a deletion lock. Hub/spoke peerings are Connected with gateway transit.
   Private DNS and managed-identity governance calls succeeded from the actual
   jumpbox. No client VPN authentication or hosted private runtime is approved.
 - Validation found directory-selection, custom-project working-directory,
   and hosted greeting-protocol defects. The corrective change passes
-  584 tests and 558 subtests (4 skipped), but those offline results do not
+  598 tests and 591 subtests (4 skipped), but those offline results do not
   establish a successful S7 Azure deployment or retroactively validate
   the published release.
 - Validation also found false-success logging when an Entra-only Foundry
@@ -244,6 +251,8 @@ close the outstanding runtime acceptance scenarios:
   local authentication and reads published database settings before assigning
   the unchanged container-scoped roles. Its live panel recovery created four
   narrow grants; these fixes are not in the published release.
+- The pinned orchestrator still exposes the legacy `GPT-RAG Orchestrator`
+  OpenAPI title. No branding acceptance or new component release is claimed.
 
 T035, T085, T098, and T093 remain open until their actual runtime outcomes
 are captured. No network policy was disabled to obtain a passing result.

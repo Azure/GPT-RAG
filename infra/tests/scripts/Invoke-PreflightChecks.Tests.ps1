@@ -25,6 +25,7 @@ $ErrorActionPreference = 'Stop'
 
 $scriptPath = Join-Path -Path (Split-Path -Parent $PSScriptRoot) -ChildPath '..\scripts\Invoke-PreflightChecks.ps1'
 $scriptPath = (Resolve-Path -Path $scriptPath).Path
+. (Join-Path (Split-Path -Parent $scriptPath) 'ModelQuota.ps1')
 $raw = Get-Content -Path $scriptPath -Raw
 $ast = [System.Management.Automation.Language.Parser]::ParseInput($raw, [ref]$null, [ref]$null)
 
