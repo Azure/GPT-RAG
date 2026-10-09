@@ -235,6 +235,12 @@ close the outstanding runtime acceptance scenarios:
   The separate network-isolated foundation and full post-provision hook
   completed from the jumpbox. Owner recovery reconciled the already-declared
   native Cosmos grants; the temporary management permission was then revoked.
+  The private pinned image also built successfully after firewall denies
+  identified the frontend lockfile's Azure Artifacts feeds. The existing
+  application-specific build allow-list now includes those four feeds and their
+  verified blob CDN, restricted to build-subnet HTTPS. The immutable image
+  provenance was synchronized without credentials, and the actual hosted
+  handoff preview passed.
   Private hosted application deployment and authenticated runtime remain pending.
 - The evaluation VPN Gateway was provisioned and protected with `keep=true`
   and a deletion lock. Hub/spoke peerings are Connected with gateway transit.
@@ -245,6 +251,11 @@ close the outstanding runtime acceptance scenarios:
   598 tests and 591 subtests (4 skipped), but those offline results do not
   establish a successful S7 Azure deployment or retroactively validate
   the published release.
+- Read-only checks against the actual private environment binding accepted
+  the exact-release default definition, rejected a valid different application
+  ID with exit 2, and rejected an unsupported capability with exit 1. The
+  environment-file hash was unchanged. These negatives do not establish
+  a successful custom-application deployment or repeated live provisioning.
 - Validation also found false-success logging when an Entra-only Foundry
   account rejects evaluation API keys, and a missing Cosmos database-name
   handoff for the administrative panel. The corrective branch respects disabled
