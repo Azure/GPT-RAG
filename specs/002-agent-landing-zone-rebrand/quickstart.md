@@ -305,9 +305,17 @@ close the outstanding runtime acceptance scenarios:
   only the exact failed endpoint module, with unchanged exported parameters and
   a no-deletion what-if, recovered both endpoints to Succeeded/Approved.
   Reverse VPN gateway-transit peerings and direct runner-to-spoke peerings are
-  Connected. Normal root provisioning has been resumed; full configuration,
-  private DNS resolution, custom image builds, application responses, and
-  repeat deployment are not yet verified.
+  Connected. Both normal root provisioning resumes completed successfully,
+  explicitly deferring private configuration rather than claiming application
+  readiness. Exact new-spoke private A records were added, without replacing
+  existing records, to the evaluation runner's already-linked DNS zones.
+  From the actual jumpbox, both samples' App Configuration, Key Vault, ACR,
+  and Foundry endpoints resolved only into their corresponding private spokes
+  and returned HTTPS responses with TLS verification. These are connectivity
+  probes, not authenticated application acceptance. Resource-scoped runner
+  configuration roles were reconciled without granting Owner or role-management
+  permissions. Full configuration, custom image builds, application responses,
+  and repeat deployment remain unverified.
 - Validation found directory-selection, custom-project working-directory,
   and hosted greeting-protocol defects. The corrective change passes
   598 tests and 591 subtests (4 skipped), but those offline results do not
