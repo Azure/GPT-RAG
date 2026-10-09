@@ -103,21 +103,17 @@ dot_azure="$repo_root/.azure"
 # Configuration, resource-group, resource-token, and deploy-handoff values
 # that are not inherited by a clean shell merely because get_azd_value reads
 # them into local variables below.
-azd_values="$(cd "$repo_root" && azd env get-values)" || {
+azd_values="$(cd "$repo_root" && azd env get-values --output json)" || {
   red "Could not load the selected azd environment; refusing to deploy."
   exit 1
 }
-[ -n "$azd_values" ] || { red "The selected azd environment is empty."; exit 1; }
-while IFS= read -r line; do
-  line="${line%$'\r'}"
-  [[ -z "$line" ]] && continue
-  [[ "$line" =~ ^([A-Za-z_][A-Za-z0-9_]*)=(.*)$ ]] || { red "Invalid azd environment output."; exit 1; }
-  key="${BASH_REMATCH[1]}"
-  value="${BASH_REMATCH[2]}"
-  value="${value%\"}"
-  value="${value#\"}"
+jq -e 'type == "object" and length > 0 and all(to_entries[];
+  (.key | test("^[A-Za-z_][A-Za-z0-9_]*$")) and
+  (.value | type == "string") and (.value | contains("\u0000") | not))' \
+  <<< "$azd_values" >/dev/null || { red "Invalid azd environment JSON, key or value."; exit 1; }
+while IFS= read -r -d '' key && IFS= read -r -d '' value; do
   export "$key=$value"
-done <<< "$azd_values"
+done < <(jq -b -j 'to_entries[] | .key, "\u0000", .value, "\u0000"' <<< "$azd_values")
 
 # ---------- Global env & RG early check ----------
 global_rg="$(get_azd_value "$repo_root" "AZURE_RESOURCE_GROUP")"
