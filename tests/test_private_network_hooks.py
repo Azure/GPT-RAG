@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PWSH = shutil.which("pwsh")
 BASH = shutil.which("bash")
 VALUES = """NETWORK_ISOLATION="true"
+ACR_TASK_AGENT_POOL="test-pool"
 DEPLOYMENT_TOPOLOGY="classic"
 APP_CONFIG_ENDPOINT="https://config.azconfig.io"
 AZURE_RESOURCE_GROUP="test-group"
@@ -272,6 +273,22 @@ class HookExecutionTests(unittest.TestCase):
                 self.assertEqual(3, result.returncode, output)
                 self.assertEqual([], events, output)
                 self.assertIn("Run azd provision first", output)
+
+        for build_mode, allowed in (("acr-task", False), ("local", True)):
+            with self.subTest(shell=shell, build_mode=build_mode, pool_missing=True):
+                values = VALUES.replace('ACR_TASK_AGENT_POOL="test-pool"', 'ACR_TASK_AGENT_POOL=""')
+                result, events = self.run_hook(
+                    shell, "preDeploy", 0, values=values,
+                    process_env={"BUILD_MODE": build_mode},
+                )
+                output = result.stdout + result.stderr
+                self.assertIn("probe", events, output)
+                if allowed:
+                    self.assertIn("azure-boundary", events, output)
+                else:
+                    self.assertEqual(1, result.returncode, output)
+                    self.assertNotIn("azure-boundary", events, output)
+                    self.assertIn("ACR_TASK_AGENT_POOL is empty", output)
 
     def integrated_cases(self, shell: str) -> None:
         for hook in ("postProvision", "preDeploy"):
