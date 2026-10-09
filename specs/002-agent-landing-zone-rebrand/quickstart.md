@@ -30,6 +30,36 @@ environment per scenario and delete it afterwards with `azd down --purge`.
 
 ## Acceptance by release
 
+### Latest corrective-source evidence (2026-10-09)
+
+Both private custom-sample root `azd deploy` executions passed at exact source
+`0ab4665db29fbfac6bc5a41a372c0b64df32b73e`, using the checked-in sample service
+YAML. Evaluation-only source pins were restored after execution. A separate
+guest check verified both complete deployment receipts and the exact checkout
+source; the temporary deployment script was removed.
+
+The hosted hook first failed because its verified runtime identity lacked four
+declared profile grants. The existing evaluation Owner reconciled AcrPull,
+KeyVaultSecretsUser, CognitiveServicesUser and CognitiveServicesOpenAIUser at
+the resource scopes selected by the repository resolver. The runner did not
+receive Owner or role-management privileges. A subsequent reconciliation
+created no grants, and the unchanged deploy retry succeeded.
+
+Independent runtime probes then verified:
+
+- The Container App's latest revision was latest-ready, used an immutable
+  custom-image digest and resolved only to its private spoke. Its HTTPS response
+  exactly matched the live platform contract and actual component identity.
+- Hosted version 7 was active with an immutable custom-image digest. The project
+  endpoint resolved only to its private spoke; a managed-identity Responses
+  invocation returned the exact expected project greeting.
+
+These results do **not** establish source provenance solely from the deployed
+digest, a fresh stock one-command `azd up`, delegated-user OBO, grounded answers,
+citations or positive/negative document authorization. T035, T085, T098 and T093
+remain open until their complete scenario criteria are exercised; successful
+custom samples must not be substituted for the bundled conversational stack.
+
 | Release | Scenarios that must pass |
 | --- | --- |
 | `v4.0.0-preview.1` | S1 (steps 1, 2, 4), S3 (step 1), S4 (steps 1–3), S6; SC-007, SC-008 |
