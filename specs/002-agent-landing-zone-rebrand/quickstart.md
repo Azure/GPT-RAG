@@ -262,10 +262,40 @@ close the outstanding runtime acceptance scenarios:
   Actual user login/consent, user-delegated OBO, grounded answers, citations,
   and positive document authorization remain unverified. An OAuth resource
   token diagnostic did not invoke the agent and is not OBO acceptance.
+  A subsequent negative runtime test acquired a valid Foundry resource token
+  for the dedicated evaluation service principal, which has no project role.
+  The actual hosted invocation returned a structured HTTP 403 authorization
+  rejection. The project endpoint resolved entirely inside the evaluation
+  spoke. All private foundation endpoint connections were Approved/Succeeded;
+  Foundry, ACR, and Key Vault public access remained Disabled, ACR admin
+  authentication remained disabled, and Key Vault RBAC remained enabled.
+  Runtime grants were rechecked at their exact scopes: App Configuration
+  Data Reader on the store, OpenAI User on the model account, and Secrets
+  User only on AUDIT-HMAC-KEY. This is hosted-principal isolation evidence,
+  not delegated-user or document-authorization acceptance, and does not
+  replace deploying the custom hosted sample.
 - The evaluation VPN Gateway was provisioned and protected with `keep=true`
   and a deletion lock. Hub/spoke peerings are Connected with gateway transit.
   Private DNS and managed-identity governance calls succeeded from the actual
-  jumpbox. No client VPN authentication or hosted private runtime is approved.
+  jumpbox. Client VPN authentication and full delegated-user hosted runtime
+  acceptance remain unverified.
+- Classic runtime connectivity cannot be repaired by adding an endpoint to its
+  current Container Apps environment: its `vnetConfiguration` is null and the
+  classic resource group has no virtual network. The existing recovery
+  endpoints make services reachable from the private jumpbox, not from apps
+  in the Azure-managed network. Azure does not support changing that
+  environment's network type after creation
+  ([Azure Container Apps networking](https://learn.microsoft.com/azure/container-apps/networking)).
+  Recovery requires a separate
+  VNet-integrated environment; public Key Vault access was not enabled and
+  existing apps/resources were not deleted or silently replaced.
+- A fresh S7 foundation cannot use the current default Standard embedding
+  allocation unchanged: live westus3 usage is 300 of 350, leaving 50 while
+  the default new deployment requests 100. Existing-allocation credit is
+  valid only for an actual matching deployment, not a fresh account. Both
+  sample definitions validate, and the focused schema, roles, binding,
+  composition, and custom-hook suite passed 43 tests and 28 subtests.
+  Those checks do not constitute a successful one-command S7 deployment.
 - Validation found directory-selection, custom-project working-directory,
   and hosted greeting-protocol defects. The corrective change passes
   598 tests and 591 subtests (4 skipped), but those offline results do not
