@@ -314,8 +314,29 @@ close the outstanding runtime acceptance scenarios:
   and returned HTTPS responses with TLS verification. These are connectivity
   probes, not authenticated application acceptance. Resource-scoped runner
   configuration roles were reconciled without granting Owner or role-management
-  permissions. Full configuration, custom image builds, application responses,
-  and repeat deployment remain unverified.
+  permissions. The Container sample's full root postProvision subsequently
+  passed from the pinned corrective guest source: platform outputs, governance,
+  continuity, Foundry, Container Apps, and Search completed without deferral.
+  The first capability-role attempt correctly rejected the runner's lack of
+  role-management privileges; the parent Owner reconciled only the declared
+  component grants before the successful unchanged hook retry. The hosted
+  sample's full root postProvision also passed from the same pinned source,
+  with explicit guest success markers and no guest stderr for both samples.
+  Private image building then reached the dedicated ACR pool but failed on
+  the Docker Hub base-image pull: `registry-1.docker.io` was absent from the
+  build-subnet HTTPS allowlist. This is a build dependency, not a reason to
+  enable public registry access or bypass the firewall. Extending only the
+  build-subnet rule with the three documented Docker Hub HTTPS endpoints,
+  persisted through evaluation-only `additionalAcrTaskBuildFqdns`, recovered
+  both builds. Both images were built from the exact corrective source using
+  their own private ACR `build-pool`; immutable image digests and an explicit
+  guest completion marker were returned with no guest stderr. This separate
+  prebuild is not proof of the stock one-command S7 deployment. Application
+  responses and repeat deployment remain unverified.
+  The evaluation VPN client reached the existing firewall DNS proxy and
+  received the expected private addresses for all three evaluation spokes.
+  The updated client profile preserves authentication and split tunneling;
+  automatic OS resolution still requires profile reimport and reconnect.
 - Validation found directory-selection, custom-project working-directory,
   and hosted greeting-protocol defects. The corrective change passes
   598 tests and 591 subtests (4 skipped), but those offline results do not
