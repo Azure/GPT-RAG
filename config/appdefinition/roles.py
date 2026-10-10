@@ -64,7 +64,10 @@ SCOPES: dict[str, ScopeSpec] = {
         "Microsoft.ContainerRegistry/registries",
         ("AZURE_CONTAINER_REGISTRY_NAME", "AZURE_CONTAINER_REGISTRY_ENDPOINT"),
     ),
-    SCOPE_KEY_VAULT: ScopeSpec("Microsoft.KeyVault/vaults", ("AZURE_KEY_VAULT_NAME", "KEY_VAULT_URI", "AZURE_KEY_VAULT_ENDPOINT")),
+    SCOPE_KEY_VAULT: ScopeSpec(
+        "Microsoft.KeyVault/vaults",
+        ("AZURE_KEY_VAULT_NAME", "KEY_VAULT_NAME", "KEY_VAULT_URI", "AZURE_KEY_VAULT_ENDPOINT"),
+    ),
     SCOPE_FOUNDRY_ACCOUNT: ScopeSpec(
         "Microsoft.CognitiveServices/accounts", ("AI_FOUNDRY_ACCOUNT_NAME", "AZURE_AI_ACCOUNT_NAME")
     ),

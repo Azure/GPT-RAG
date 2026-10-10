@@ -31,25 +31,6 @@ function Branch-Exists([string]$repo, [string]$branch) {
   return ($LASTEXITCODE -eq 0 -and $o)
 }
 
-function Parse-KeyValueLines([string[]]$lines) {
-  $map = @{}
-  foreach ($ln in $lines) {
-    if ($ln -match '^\s*([A-Za-z_][A-Za-z0-9_]*)=(.*)$') {
-      $k = $matches[1]; $v = $matches[2]
-      $v = $v -replace '^\s*"(.*)"\s*$', '$1'
-      $map[$k] = $v
-    } elseif (-not [string]::IsNullOrWhiteSpace($ln)) {
-      Write-Error "Invalid azd environment output; refusing to deploy."
-      exit 1
-    }
-  }
-  if ($map.Count -eq 0) {
-    Write-Error "The selected azd environment is empty."
-    exit 1
-  }
-  return $map
-}
-
 function Get-AzdEnv([string]$projectPath) {
   if (-not (Get-Command azd -ErrorAction SilentlyContinue)) {
     Write-Error "azd is required to load the selected environment."
@@ -57,7 +38,7 @@ function Get-AzdEnv([string]$projectPath) {
   }
   Push-Location $projectPath
   try {
-    $out = & azd env get-values
+    $out = & azd env get-values --output json
     $envExitCode = $LASTEXITCODE
   } finally {
     Pop-Location
@@ -66,7 +47,23 @@ function Get-AzdEnv([string]$projectPath) {
     Write-Error "Could not load the selected azd environment; refusing to deploy with stale or arbitrary environment values."
     exit 1
   }
-  return [pscustomobject](Parse-KeyValueLines $out)
+  try {
+    $values = ($out -join "`n") | ConvertFrom-Json -ErrorAction Stop
+  } catch {
+    Write-Error "Invalid azd environment JSON; refusing to deploy."
+    exit 1
+  }
+  if ($values -isnot [pscustomobject] -or @($values.PSObject.Properties).Count -eq 0) {
+    Write-Error "The selected azd environment must be a nonempty object."
+    exit 1
+  }
+  foreach ($prop in $values.PSObject.Properties) {
+    if ($prop.Name -notmatch '^[A-Za-z_][A-Za-z0-9_]*$' -or $prop.Value -isnot [string] -or $prop.Value.Contains([char]0)) {
+      Write-Error "Invalid azd environment key or value; refusing to deploy."
+      exit 1
+    }
+  }
+  return $values
 }
 
 function ResourceGroup-Exists([string]$rg, [string]$subscription) {

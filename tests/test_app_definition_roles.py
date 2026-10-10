@@ -18,6 +18,7 @@ from config.appdefinition.roles import (
     discover_component_identities,
     load_role_guids,
     plan_assignments,
+    resolve_scope,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -86,6 +87,23 @@ def bundled():
 
 
 class RoleAssignmentTests(unittest.TestCase):
+    def test_key_vault_scope_uses_foundation_name_without_guessing(self):
+        vaults = [{"name": "kv-app", "id": f"{SUB}/app"}, {"name": "kv-foundry", "id": f"{SUB}/foundry"}]
+        with patch.dict(RESOURCES, {"Microsoft.KeyVault/vaults": vaults}):
+            self.assertEqual(
+                f"{SUB}/app",
+                resolve_scope("keyVault", {"KEY_VAULT_NAME": "kv-app"}, RG, FakeAz()),
+            )
+            self.assertEqual(
+                f"{SUB}/foundry",
+                resolve_scope("keyVault", {
+                    "AZURE_KEY_VAULT_NAME": "kv-foundry", "KEY_VAULT_NAME": "kv-app",
+                }, RG, FakeAz()),
+            )
+            for environment in ({}, {"KEY_VAULT_NAME": "missing"}):
+                with self.subTest(environment=environment), self.assertRaises(RoleAssignmentError):
+                    resolve_scope("keyVault", environment, RG, FakeAz())
+
     def test_hosted_runtime_expands_profiles_and_converges_without_container_lookup(self):
         az = FakeAz()
         principal = "22222222-2222-4222-8222-222222222222"
