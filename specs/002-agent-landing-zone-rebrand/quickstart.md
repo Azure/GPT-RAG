@@ -30,6 +30,66 @@ environment per scenario and delete it afterwards with `azd down --purge`.
 
 ## Acceptance by release
 
+### Integrated-source and private-hosted evidence (2026-10-10)
+
+The acceptance fixes are integrated into `develop`: platform #774 at
+`dd4c8978db94ff56d4dbbdb30c8c9168625b75a3`,
+Azure/agent-app-ui#144 at `ec18a7330982b188d1c1e6da9157230a20865242`,
+and Azure/AI-Landing-Zones#149 at
+`1f7c1d707abe99468c6c42f4a26c39f0443b76a8`. No repository rules were changed.
+The first UI merge-push check still selected the old protected evaluator from
+`github.event.before`; it is not evidence that the newly adopted gate passed.
+The reference Azure/agent-app-ui#145 subsequently passed all nine checks
+against the new protected `develop` base
+`ec18a7330982b188d1c1e6da9157230a20865242` in CI run `38066592411`
+at head `d41aa8da85754a19321f5d5004831754f6d59683` and merged at
+`e93b3d3e0cf36d8e92e8f9d0c6d1c911aa0f715f`. This supplies positive
+new-base gate evidence; the earlier merge-push check does not.
+
+T098's custom hosted isolation and RBAC criteria are now verified:
+
+- Repeated runtime checks confirmed hosted version 7 is active, uses the
+  previously recorded immutable image digest, resolves inside its private
+  spoke, and returns the exact project greeting through the Responses endpoint.
+  The Container App sample also returned its exact live platform contract.
+  These deployments retain corrective source
+  `0ab4665db29fbfac6bc5a41a372c0b64df32b73e`.
+- All 13 private endpoints have successful provisioning and approved
+  connections. Foundry, registry, App Configuration and the canonical vault
+  have public network access disabled. Foundry local authentication and the
+  registry admin account are disabled; the canonical vault uses RBAC.
+  App Configuration local authentication remains enabled as declared by the
+  foundation template; this audit does not claim otherwise.
+- The actual version-7 runtime principal has exactly five grants, including
+  inherited assignments: App Configuration Data Reader on its store, AcrPull
+  on its registry, Key Vault Secrets User on the canonical vault, and
+  Cognitive Services User plus Cognitive Services OpenAI User on its Foundry
+  account. No additional grant or broader scope was found.
+- A dedicated unassigned principal obtained a valid Foundry resource token.
+  Its request to the actual private custom Responses endpoint was rejected
+  with structured HTTP 403 identifying an authorization failure. This is
+  not an expired-token or anonymous-request test.
+
+Local receipts are retained under `.azure/` as
+`s7-custom-runtime-check-20261010.json`,
+`custom-hosted-control-audit.json`, and
+`custom-hosted-rbac-negative-20261010.json`. They contain no credential values.
+The integrated contract suite passed 118 tests and 74 subtests.
+
+The private trio's non-placeholder UI, Entra provider and login redirect,
+ingestion health, and anonymous panel rejection were rechecked successfully.
+The evaluation OAuth credential was renewed through encrypted transport into
+Key Vault with a matching one-day expiry. None of these checks proves user
+login, OBO, grounded answers, citations or document-level authorization.
+
+T035, T085 and T093 remain incomplete. A legitimate delegated-token request
+returned `AADSTS65001` (`consent_required`, `InteractionRequired`).
+The supported VPN profile import was invoked, but automatic Windows DNS still
+resolved the frontend publicly; application of the private DNS rules is not
+verified. Fresh stock one-command sample deployments and the complete
+classic/hosted conversational acceptance must not be inferred from the
+successful private custom deployment, control-plane or health checks.
+
 ### Latest corrective-source evidence (2026-10-09)
 
 Both private custom-sample root `azd deploy` executions passed at exact source
@@ -56,9 +116,10 @@ Independent runtime probes then verified:
 
 These results do **not** establish source provenance solely from the deployed
 digest, a fresh stock one-command `azd up`, delegated-user OBO, grounded answers,
-citations or positive/negative document authorization. T035, T085, T098 and T093
-remain open until their complete scenario criteria are exercised; successful
-custom samples must not be substituted for the bundled conversational stack.
+citations or positive/negative document authorization. At that checkpoint,
+T035, T085, T098 and T093 remained open. The later T098 audit above supersedes
+its isolation/RBAC status; successful custom samples must not be substituted
+for the bundled conversational stack.
 
 | Release | Scenarios that must pass |
 | --- | --- |
