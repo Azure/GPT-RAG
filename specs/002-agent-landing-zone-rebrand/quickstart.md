@@ -39,7 +39,12 @@ and Azure/AI-Landing-Zones#149 at
 `1f7c1d707abe99468c6c42f4a26c39f0443b76a8`. No repository rules were changed.
 The first UI merge-push check still selected the old protected evaluator from
 `github.event.before`; it is not evidence that the newly adopted gate passed.
-A separate reference PR against the new base is being validated.
+The reference Azure/agent-app-ui#145 subsequently passed all nine checks
+against the new protected `develop` base
+`ec18a7330982b188d1c1e6da9157230a20865242` in CI run `38066592411`
+at head `d41aa8da85754a19321f5d5004831754f6d59683` and merged at
+`e93b3d3e0cf36d8e92e8f9d0c6d1c911aa0f715f`. This supplies positive
+new-base gate evidence; the earlier merge-push check does not.
 
 T098's custom hosted isolation and RBAC criteria are now verified:
 
